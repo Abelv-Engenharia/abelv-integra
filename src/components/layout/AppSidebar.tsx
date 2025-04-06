@@ -37,6 +37,10 @@ export function AppSidebar() {
     if (currentPath.startsWith("/hora-seguranca")) return "hora-seguranca";
     if (currentPath.startsWith("/ocorrencias")) return "ocorrencias";
     if (currentPath.startsWith("/medidas-disciplinares")) return "medidas-disciplinares";
+    if (currentPath.startsWith("/tarefas")) return "tarefas";
+    if (currentPath.startsWith("/gestao-rotina")) return "gestao-rotina";
+    if (currentPath.startsWith("/relatorios")) return "relatorios";
+    if (currentPath.startsWith("/admin")) return "admin";
     return null;
   });
 
@@ -304,29 +308,44 @@ export function AppSidebar() {
           <SidebarGroupLabel>Tarefas</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
+              {/* Tarefas menu with collapsible */}
               <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <Link to="/tarefas/dashboard">
-                    <Home className="h-4 w-4" />
-                    <span>Dashboard</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <Link to="/tarefas/minhas-tarefas">
-                    <ClipboardList className="h-4 w-4" />
-                    <span>Minhas Tarefas</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <Link to="/tarefas/cadastro">
-                    <Clipboard className="h-4 w-4" />
-                    <span>Cadastro de Tarefas</span>
-                  </Link>
-                </SidebarMenuButton>
+                <Collapsible open={openMenu === "tarefas"}>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton onClick={() => toggleMenu("tarefas")}>
+                      <ClipboardList className="h-4 w-4" />
+                      <span>Tarefas</span>
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  
+                  <CollapsibleContent asChild>
+                    <SidebarMenuSub>
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                          <Link to="/tarefas/dashboard">
+                            <span>Dashboard</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                      
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                          <Link to="/tarefas/minhas-tarefas">
+                            <span>Minhas Tarefas</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                      
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                          <Link to="/tarefas/cadastro">
+                            <span>Cadastro de Tarefas</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </Collapsible>
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
@@ -336,37 +355,52 @@ export function AppSidebar() {
           <SidebarGroupLabel>Gestão da Rotina</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
+              {/* Gestão da Rotina menu with collapsible */}
               <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <Link to="/gestao-rotina/dssms">
-                    <ShieldCheck className="h-4 w-4" />
-                    <span>DSSMS</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <Link to="/gestao-rotina/rms">
-                    <Shield className="h-4 w-4" />
-                    <span>RMS</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <Link to="/gestao-rotina/ift">
-                    <ClipboardList className="h-4 w-4" />
-                    <span>IFT</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <Link to="/gestao-rotina/ficha-epi">
-                    <ClipboardList className="h-4 w-4" />
-                    <span>Ficha de EPI</span>
-                  </Link>
-                </SidebarMenuButton>
+                <Collapsible open={openMenu === "gestao-rotina"}>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton onClick={() => toggleMenu("gestao-rotina")}>
+                      <ShieldCheck className="h-4 w-4" />
+                      <span>Gestão da Rotina</span>
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  
+                  <CollapsibleContent asChild>
+                    <SidebarMenuSub>
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                          <Link to="/gestao-rotina/dssms">
+                            <span>DSSMS</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                      
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                          <Link to="/gestao-rotina/rms">
+                            <span>RMS</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                      
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                          <Link to="/gestao-rotina/ift">
+                            <span>IFT</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                      
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                          <Link to="/gestao-rotina/ficha-epi">
+                            <span>Ficha de EPI</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </Collapsible>
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
@@ -376,13 +410,28 @@ export function AppSidebar() {
           <SidebarGroupLabel>Relatórios</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
+              {/* Relatórios menu with collapsible */}
               <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <Link to="/relatorios">
-                    <FileText className="h-4 w-4" />
-                    <span>Relatórios</span>
-                  </Link>
-                </SidebarMenuButton>
+                <Collapsible open={openMenu === "relatorios"}>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton onClick={() => toggleMenu("relatorios")}>
+                      <FileText className="h-4 w-4" />
+                      <span>Relatórios</span>
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  
+                  <CollapsibleContent asChild>
+                    <SidebarMenuSub>
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                          <Link to="/relatorios">
+                            <span>Relatórios</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </Collapsible>
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
@@ -392,45 +441,60 @@ export function AppSidebar() {
           <SidebarGroupLabel>Administração</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
+              {/* Administração menu with collapsible */}
               <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <Link to="/admin/usuarios">
-                    <Users className="h-4 w-4" />
-                    <span>Administrar Usuários</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <Link to="/admin/perfis">
-                    <Shield className="h-4 w-4" />
-                    <span>Perfis de Acesso</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <Link to="/admin/funcionarios">
-                    <Users className="h-4 w-4" />
-                    <span>Cadastro de Funcionários</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <Link to="/admin/hht">
-                    <Calendar className="h-4 w-4" />
-                    <span>Registro de HHT</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <Link to="/admin/templates">
-                    <Settings className="h-4 w-4" />
-                    <span>Templates de Importação</span>
-                  </Link>
-                </SidebarMenuButton>
+                <Collapsible open={openMenu === "admin"}>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton onClick={() => toggleMenu("admin")}>
+                      <Settings className="h-4 w-4" />
+                      <span>Administração</span>
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  
+                  <CollapsibleContent asChild>
+                    <SidebarMenuSub>
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                          <Link to="/admin/usuarios">
+                            <span>Administrar Usuários</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                      
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                          <Link to="/admin/perfis">
+                            <span>Perfis de Acesso</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                      
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                          <Link to="/admin/funcionarios">
+                            <span>Cadastro de Funcionários</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                      
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                          <Link to="/admin/hht">
+                            <span>Registro de HHT</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                      
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                          <Link to="/admin/templates">
+                            <span>Templates de Importação</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </Collapsible>
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
