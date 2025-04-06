@@ -1,4 +1,5 @@
 
+import React, { useState } from "react";
 import {
   Calendar,
   Clipboard,
@@ -22,9 +23,28 @@ import {
   SidebarMenuItem,
   SidebarMenuSub,
 } from "@/components/ui/sidebar";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 export function AppSidebar() {
+  const location = useLocation();
+  const currentPath = location.pathname;
+  
+  // Define the main menu sections to track which one is open
+  const [openMenu, setOpenMenu] = useState<string | null>(() => {
+    if (currentPath.startsWith("/desvios")) return "desvios";
+    if (currentPath.startsWith("/treinamentos")) return "treinamentos";
+    if (currentPath.startsWith("/hora-seguranca")) return "hora-seguranca";
+    if (currentPath.startsWith("/ocorrencias")) return "ocorrencias";
+    if (currentPath.startsWith("/medidas-disciplinares")) return "medidas-disciplinares";
+    return null;
+  });
+
+  // Toggle menu open/close state
+  const toggleMenu = (menuName: string) => {
+    setOpenMenu(openMenu === menuName ? null : menuName);
+  };
+
   return (
     <Sidebar>
       <SidebarContent>
@@ -47,204 +67,234 @@ export function AppSidebar() {
             <SidebarMenu>
               {/* Desvios */}
               <SidebarMenuItem>
-                <SidebarMenuButton>
-                  <ShieldAlert className="h-4 w-4" />
-                  <span>Desvios</span>
-                </SidebarMenuButton>
-                
-                <SidebarMenuSub>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild>
-                      <Link to="/desvios/dashboard">
-                        <span>Dashboard de Desvios</span>
-                      </Link>
+                <Collapsible open={openMenu === "desvios"}>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton onClick={() => toggleMenu("desvios")}>
+                      <ShieldAlert className="h-4 w-4" />
+                      <span>Desvios</span>
                     </SidebarMenuButton>
-                  </SidebarMenuItem>
+                  </CollapsibleTrigger>
                   
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild>
-                      <Link to="/desvios/cadastro">
-                        <span>Cadastro de Desvios</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild>
-                      <Link to="/desvios/consulta">
-                        <span>Consulta de Desvios</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild>
-                      <Link to="/desvios/nao-conformidade">
-                        <span>Emissão de Não Conformidade</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                </SidebarMenuSub>
+                  <CollapsibleContent asChild>
+                    <SidebarMenuSub>
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                          <Link to="/desvios/dashboard">
+                            <span>Dashboard de Desvios</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                      
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                          <Link to="/desvios/cadastro">
+                            <span>Cadastro de Desvios</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                      
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                          <Link to="/desvios/consulta">
+                            <span>Consulta de Desvios</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                      
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                          <Link to="/desvios/nao-conformidade">
+                            <span>Emissão de Não Conformidade</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </Collapsible>
               </SidebarMenuItem>
 
               {/* Treinamentos */}
               <SidebarMenuItem>
-                <SidebarMenuButton>
-                  <Calendar className="h-4 w-4" />
-                  <span>Treinamentos</span>
-                </SidebarMenuButton>
-                
-                <SidebarMenuSub>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild>
-                      <Link to="/treinamentos/dashboard">
-                        <span>Dashboard de Treinamentos</span>
-                      </Link>
+                <Collapsible open={openMenu === "treinamentos"}>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton onClick={() => toggleMenu("treinamentos")}>
+                      <Calendar className="h-4 w-4" />
+                      <span>Treinamentos</span>
                     </SidebarMenuButton>
-                  </SidebarMenuItem>
+                  </CollapsibleTrigger>
                   
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild>
-                      <Link to="/treinamentos/normativo">
-                        <span>Treinamento Normativo</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild>
-                      <Link to="/treinamentos/consulta">
-                        <span>Consulta de Treinamento</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild>
-                      <Link to="/treinamentos/execucao">
-                        <span>Execução de Treinamentos</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild>
-                      <Link to="/treinamentos/cracha">
-                        <span>Emissão de Crachá</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                </SidebarMenuSub>
+                  <CollapsibleContent asChild>
+                    <SidebarMenuSub>
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                          <Link to="/treinamentos/dashboard">
+                            <span>Dashboard de Treinamentos</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                      
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                          <Link to="/treinamentos/normativo">
+                            <span>Treinamento Normativo</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                      
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                          <Link to="/treinamentos/consulta">
+                            <span>Consulta de Treinamento</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                      
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                          <Link to="/treinamentos/execucao">
+                            <span>Execução de Treinamentos</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                      
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                          <Link to="/treinamentos/cracha">
+                            <span>Emissão de Crachá</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </Collapsible>
               </SidebarMenuItem>
 
               {/* Hora da Segurança */}
               <SidebarMenuItem>
-                <SidebarMenuButton>
-                  <ShieldCheck className="h-4 w-4" />
-                  <span>Hora da Segurança</span>
-                </SidebarMenuButton>
-                
-                <SidebarMenuSub>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild>
-                      <Link to="/hora-seguranca/dashboard">
-                        <span>Dashboard de Segurança</span>
-                      </Link>
+                <Collapsible open={openMenu === "hora-seguranca"}>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton onClick={() => toggleMenu("hora-seguranca")}>
+                      <ShieldCheck className="h-4 w-4" />
+                      <span>Hora da Segurança</span>
                     </SidebarMenuButton>
-                  </SidebarMenuItem>
+                  </CollapsibleTrigger>
                   
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild>
-                      <Link to="/hora-seguranca/inspecoes">
-                        <span>Cadastro de Inspeções</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild>
-                      <Link to="/hora-seguranca/inspecao-nao-programada">
-                        <span>Registro de Inspeção Não Programada</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild>
-                      <Link to="/hora-seguranca/acompanhamento">
-                        <span>Acompanhamento de Execução</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                </SidebarMenuSub>
+                  <CollapsibleContent asChild>
+                    <SidebarMenuSub>
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                          <Link to="/hora-seguranca/dashboard">
+                            <span>Dashboard de Segurança</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                      
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                          <Link to="/hora-seguranca/inspecoes">
+                            <span>Cadastro de Inspeções</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                      
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                          <Link to="/hora-seguranca/inspecao-nao-programada">
+                            <span>Registro de Inspeção Não Programada</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                      
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                          <Link to="/hora-seguranca/acompanhamento">
+                            <span>Acompanhamento de Execução</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </Collapsible>
               </SidebarMenuItem>
 
               {/* Ocorrências */}
               <SidebarMenuItem>
-                <SidebarMenuButton>
-                  <Shield className="h-4 w-4" />
-                  <span>Ocorrências</span>
-                </SidebarMenuButton>
-                
-                <SidebarMenuSub>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild>
-                      <Link to="/ocorrencias/dashboard">
-                        <span>Dashboard de Ocorrências</span>
-                      </Link>
+                <Collapsible open={openMenu === "ocorrencias"}>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton onClick={() => toggleMenu("ocorrencias")}>
+                      <Shield className="h-4 w-4" />
+                      <span>Ocorrências</span>
                     </SidebarMenuButton>
-                  </SidebarMenuItem>
+                  </CollapsibleTrigger>
                   
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild>
-                      <Link to="/ocorrencias/cadastro">
-                        <span>Cadastro de Ocorrências</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild>
-                      <Link to="/ocorrencias/consulta">
-                        <span>Consulta de Ocorrências</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                </SidebarMenuSub>
+                  <CollapsibleContent asChild>
+                    <SidebarMenuSub>
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                          <Link to="/ocorrencias/dashboard">
+                            <span>Dashboard de Ocorrências</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                      
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                          <Link to="/ocorrencias/cadastro">
+                            <span>Cadastro de Ocorrências</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                      
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                          <Link to="/ocorrencias/consulta">
+                            <span>Consulta de Ocorrências</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </Collapsible>
               </SidebarMenuItem>
 
               {/* Medidas Disciplinares */}
               <SidebarMenuItem>
-                <SidebarMenuButton>
-                  <Clipboard className="h-4 w-4" />
-                  <span>Medidas Disciplinares</span>
-                </SidebarMenuButton>
-                
-                <SidebarMenuSub>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild>
-                      <Link to="/medidas-disciplinares/dashboard">
-                        <span>Dashboard de Medidas</span>
-                      </Link>
+                <Collapsible open={openMenu === "medidas-disciplinares"}>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton onClick={() => toggleMenu("medidas-disciplinares")}>
+                      <Clipboard className="h-4 w-4" />
+                      <span>Medidas Disciplinares</span>
                     </SidebarMenuButton>
-                  </SidebarMenuItem>
+                  </CollapsibleTrigger>
                   
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild>
-                      <Link to="/medidas-disciplinares/cadastro">
-                        <span>Cadastro de Aplicação</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild>
-                      <Link to="/medidas-disciplinares/consulta">
-                        <span>Consulta de Medidas</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                </SidebarMenuSub>
+                  <CollapsibleContent asChild>
+                    <SidebarMenuSub>
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                          <Link to="/medidas-disciplinares/dashboard">
+                            <span>Dashboard de Medidas</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                      
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                          <Link to="/medidas-disciplinares/cadastro">
+                            <span>Cadastro de Aplicação</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                      
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                          <Link to="/medidas-disciplinares/consulta">
+                            <span>Consulta de Medidas</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </Collapsible>
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
