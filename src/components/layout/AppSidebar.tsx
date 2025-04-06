@@ -20,10 +20,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarMenuItemTrigger,
   SidebarMenuSub,
-  SidebarMenuSubContent,
-  SidebarMenuSubTrigger,
 } from "@/components/ui/sidebar";
 import { Link } from "react-router-dom";
 
@@ -48,304 +45,205 @@ export function AppSidebar() {
           <SidebarGroupLabel>Gestão de SMS</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
+              {/* Desvios */}
               <SidebarMenuItem>
-                <SidebarMenuItemTrigger>
+                <SidebarMenuButton>
                   <ShieldAlert className="h-4 w-4" />
                   <span>Desvios</span>
-                </SidebarMenuItemTrigger>
+                </SidebarMenuButton>
+                
                 <SidebarMenuSub>
-                  <SidebarMenuSubTrigger>
-                    <span>Dashboard</span>
-                  </SidebarMenuSubTrigger>
-                  <SidebarMenuSubContent>
-                    <SidebarMenuItem>
-                      <SidebarMenuButton asChild>
-                        <Link to="/desvios/dashboard">
-                          <span>Dashboard de Desvios</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  </SidebarMenuSubContent>
-                </SidebarMenuSub>
-                <SidebarMenuSub>
-                  <SidebarMenuSubTrigger>
-                    <span>Cadastro</span>
-                  </SidebarMenuSubTrigger>
-                  <SidebarMenuSubContent>
-                    <SidebarMenuItem>
-                      <SidebarMenuButton asChild>
-                        <Link to="/desvios/cadastro">
-                          <span>Cadastro de Desvios</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  </SidebarMenuSubContent>
-                </SidebarMenuSub>
-                <SidebarMenuSub>
-                  <SidebarMenuSubTrigger>
-                    <span>Consulta</span>
-                  </SidebarMenuSubTrigger>
-                  <SidebarMenuSubContent>
-                    <SidebarMenuItem>
-                      <SidebarMenuButton asChild>
-                        <Link to="/desvios/consulta">
-                          <span>Consulta de Desvios</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  </SidebarMenuSubContent>
-                </SidebarMenuSub>
-                <SidebarMenuSub>
-                  <SidebarMenuSubTrigger>
-                    <span>Não Conformidade</span>
-                  </SidebarMenuSubTrigger>
-                  <SidebarMenuSubContent>
-                    <SidebarMenuItem>
-                      <SidebarMenuButton asChild>
-                        <Link to="/desvios/nao-conformidade">
-                          <span>Emissão de Não Conformidade</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  </SidebarMenuSubContent>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild>
+                      <Link to="/desvios/dashboard">
+                        <span>Dashboard de Desvios</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild>
+                      <Link to="/desvios/cadastro">
+                        <span>Cadastro de Desvios</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild>
+                      <Link to="/desvios/consulta">
+                        <span>Consulta de Desvios</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild>
+                      <Link to="/desvios/nao-conformidade">
+                        <span>Emissão de Não Conformidade</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
                 </SidebarMenuSub>
               </SidebarMenuItem>
 
+              {/* Treinamentos */}
               <SidebarMenuItem>
-                <SidebarMenuItemTrigger>
+                <SidebarMenuButton>
                   <Calendar className="h-4 w-4" />
                   <span>Treinamentos</span>
-                </SidebarMenuItemTrigger>
+                </SidebarMenuButton>
+                
                 <SidebarMenuSub>
-                  <SidebarMenuSubTrigger>
-                    <span>Dashboard</span>
-                  </SidebarMenuSubTrigger>
-                  <SidebarMenuSubContent>
-                    <SidebarMenuItem>
-                      <SidebarMenuButton asChild>
-                        <Link to="/treinamentos/dashboard">
-                          <span>Dashboard de Treinamentos</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  </SidebarMenuSubContent>
-                </SidebarMenuSub>
-                <SidebarMenuSub>
-                  <SidebarMenuSubTrigger>
-                    <span>Treinamento Normativo</span>
-                  </SidebarMenuSubTrigger>
-                  <SidebarMenuSubContent>
-                    <SidebarMenuItem>
-                      <SidebarMenuButton asChild>
-                        <Link to="/treinamentos/normativo">
-                          <span>Treinamento Normativo</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  </SidebarMenuSubContent>
-                </SidebarMenuSub>
-                <SidebarMenuSub>
-                  <SidebarMenuSubTrigger>
-                    <span>Consulta</span>
-                  </SidebarMenuSubTrigger>
-                  <SidebarMenuSubContent>
-                    <SidebarMenuItem>
-                      <SidebarMenuButton asChild>
-                        <Link to="/treinamentos/consulta">
-                          <span>Consulta de Treinamento</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  </SidebarMenuSubContent>
-                </SidebarMenuSub>
-                <SidebarMenuSub>
-                  <SidebarMenuSubTrigger>
-                    <span>Execução</span>
-                  </SidebarMenuSubTrigger>
-                  <SidebarMenuSubContent>
-                    <SidebarMenuItem>
-                      <SidebarMenuButton asChild>
-                        <Link to="/treinamentos/execucao">
-                          <span>Execução de Treinamentos</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  </SidebarMenuSubContent>
-                </SidebarMenuSub>
-                <SidebarMenuSub>
-                  <SidebarMenuSubTrigger>
-                    <span>Crachá</span>
-                  </SidebarMenuSubTrigger>
-                  <SidebarMenuSubContent>
-                    <SidebarMenuItem>
-                      <SidebarMenuButton asChild>
-                        <Link to="/treinamentos/cracha">
-                          <span>Emissão de Crachá</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  </SidebarMenuSubContent>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild>
+                      <Link to="/treinamentos/dashboard">
+                        <span>Dashboard de Treinamentos</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild>
+                      <Link to="/treinamentos/normativo">
+                        <span>Treinamento Normativo</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild>
+                      <Link to="/treinamentos/consulta">
+                        <span>Consulta de Treinamento</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild>
+                      <Link to="/treinamentos/execucao">
+                        <span>Execução de Treinamentos</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild>
+                      <Link to="/treinamentos/cracha">
+                        <span>Emissão de Crachá</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
                 </SidebarMenuSub>
               </SidebarMenuItem>
 
+              {/* Hora da Segurança */}
               <SidebarMenuItem>
-                <SidebarMenuItemTrigger>
+                <SidebarMenuButton>
                   <ShieldCheck className="h-4 w-4" />
                   <span>Hora da Segurança</span>
-                </SidebarMenuItemTrigger>
+                </SidebarMenuButton>
+                
                 <SidebarMenuSub>
-                  <SidebarMenuSubTrigger>
-                    <span>Dashboard</span>
-                  </SidebarMenuSubTrigger>
-                  <SidebarMenuSubContent>
-                    <SidebarMenuItem>
-                      <SidebarMenuButton asChild>
-                        <Link to="/hora-seguranca/dashboard">
-                          <span>Dashboard de Segurança</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  </SidebarMenuSubContent>
-                </SidebarMenuSub>
-                <SidebarMenuSub>
-                  <SidebarMenuSubTrigger>
-                    <span>Inspeções</span>
-                  </SidebarMenuSubTrigger>
-                  <SidebarMenuSubContent>
-                    <SidebarMenuItem>
-                      <SidebarMenuButton asChild>
-                        <Link to="/hora-seguranca/inspecoes">
-                          <span>Cadastro de Inspeções</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  </SidebarMenuSubContent>
-                </SidebarMenuSub>
-                <SidebarMenuSub>
-                  <SidebarMenuSubTrigger>
-                    <span>Inspeção Não Programada</span>
-                  </SidebarMenuSubTrigger>
-                  <SidebarMenuSubContent>
-                    <SidebarMenuItem>
-                      <SidebarMenuButton asChild>
-                        <Link to="/hora-seguranca/inspecao-nao-programada">
-                          <span>Registro de Inspeção Não Programada</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  </SidebarMenuSubContent>
-                </SidebarMenuSub>
-                <SidebarMenuSub>
-                  <SidebarMenuSubTrigger>
-                    <span>Acompanhamento</span>
-                  </SidebarMenuSubTrigger>
-                  <SidebarMenuSubContent>
-                    <SidebarMenuItem>
-                      <SidebarMenuButton asChild>
-                        <Link to="/hora-seguranca/acompanhamento">
-                          <span>Acompanhamento de Execução</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  </SidebarMenuSubContent>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild>
+                      <Link to="/hora-seguranca/dashboard">
+                        <span>Dashboard de Segurança</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild>
+                      <Link to="/hora-seguranca/inspecoes">
+                        <span>Cadastro de Inspeções</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild>
+                      <Link to="/hora-seguranca/inspecao-nao-programada">
+                        <span>Registro de Inspeção Não Programada</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild>
+                      <Link to="/hora-seguranca/acompanhamento">
+                        <span>Acompanhamento de Execução</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
                 </SidebarMenuSub>
               </SidebarMenuItem>
 
+              {/* Ocorrências */}
               <SidebarMenuItem>
-                <SidebarMenuItemTrigger>
+                <SidebarMenuButton>
                   <Shield className="h-4 w-4" />
                   <span>Ocorrências</span>
-                </SidebarMenuItemTrigger>
+                </SidebarMenuButton>
+                
                 <SidebarMenuSub>
-                  <SidebarMenuSubTrigger>
-                    <span>Dashboard</span>
-                  </SidebarMenuSubTrigger>
-                  <SidebarMenuSubContent>
-                    <SidebarMenuItem>
-                      <SidebarMenuButton asChild>
-                        <Link to="/ocorrencias/dashboard">
-                          <span>Dashboard de Ocorrências</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  </SidebarMenuSubContent>
-                </SidebarMenuSub>
-                <SidebarMenuSub>
-                  <SidebarMenuSubTrigger>
-                    <span>Cadastro</span>
-                  </SidebarMenuSubTrigger>
-                  <SidebarMenuSubContent>
-                    <SidebarMenuItem>
-                      <SidebarMenuButton asChild>
-                        <Link to="/ocorrencias/cadastro">
-                          <span>Cadastro de Ocorrências</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  </SidebarMenuSubContent>
-                </SidebarMenuSub>
-                <SidebarMenuSub>
-                  <SidebarMenuSubTrigger>
-                    <span>Consulta</span>
-                  </SidebarMenuSubTrigger>
-                  <SidebarMenuSubContent>
-                    <SidebarMenuItem>
-                      <SidebarMenuButton asChild>
-                        <Link to="/ocorrencias/consulta">
-                          <span>Consulta de Ocorrências</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  </SidebarMenuSubContent>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild>
+                      <Link to="/ocorrencias/dashboard">
+                        <span>Dashboard de Ocorrências</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild>
+                      <Link to="/ocorrencias/cadastro">
+                        <span>Cadastro de Ocorrências</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild>
+                      <Link to="/ocorrencias/consulta">
+                        <span>Consulta de Ocorrências</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
                 </SidebarMenuSub>
               </SidebarMenuItem>
 
+              {/* Medidas Disciplinares */}
               <SidebarMenuItem>
-                <SidebarMenuItemTrigger>
+                <SidebarMenuButton>
                   <Clipboard className="h-4 w-4" />
                   <span>Medidas Disciplinares</span>
-                </SidebarMenuItemTrigger>
+                </SidebarMenuButton>
+                
                 <SidebarMenuSub>
-                  <SidebarMenuSubTrigger>
-                    <span>Dashboard</span>
-                  </SidebarMenuSubTrigger>
-                  <SidebarMenuSubContent>
-                    <SidebarMenuItem>
-                      <SidebarMenuButton asChild>
-                        <Link to="/medidas-disciplinares/dashboard">
-                          <span>Dashboard de Medidas</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  </SidebarMenuSubContent>
-                </SidebarMenuSub>
-                <SidebarMenuSub>
-                  <SidebarMenuSubTrigger>
-                    <span>Cadastro</span>
-                  </SidebarMenuSubTrigger>
-                  <SidebarMenuSubContent>
-                    <SidebarMenuItem>
-                      <SidebarMenuButton asChild>
-                        <Link to="/medidas-disciplinares/cadastro">
-                          <span>Cadastro de Aplicação</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  </SidebarMenuSubContent>
-                </SidebarMenuSub>
-                <SidebarMenuSub>
-                  <SidebarMenuSubTrigger>
-                    <span>Consulta</span>
-                  </SidebarMenuSubTrigger>
-                  <SidebarMenuSubContent>
-                    <SidebarMenuItem>
-                      <SidebarMenuButton asChild>
-                        <Link to="/medidas-disciplinares/consulta">
-                          <span>Consulta de Medidas</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  </SidebarMenuSubContent>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild>
+                      <Link to="/medidas-disciplinares/dashboard">
+                        <span>Dashboard de Medidas</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild>
+                      <Link to="/medidas-disciplinares/cadastro">
+                        <span>Cadastro de Aplicação</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild>
+                      <Link to="/medidas-disciplinares/consulta">
+                        <span>Consulta de Medidas</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
                 </SidebarMenuSub>
               </SidebarMenuItem>
             </SidebarMenu>
