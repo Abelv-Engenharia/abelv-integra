@@ -8,6 +8,7 @@ import Layout from "./components/layout/Layout";
 import Dashboard from "./pages/Dashboard";
 import PlaceholderPage from "./pages/PlaceholderPage";
 import NotFound from "./pages/NotFound";
+import DesviosForm from "./pages/DesviosForm";
 
 const queryClient = new QueryClient();
 
@@ -23,7 +24,7 @@ const App = () => (
             
             {/* Gestão de SMS routes */}
             <Route path="/desvios/dashboard" element={<PlaceholderPage />} />
-            <Route path="/desvios/cadastro" element={<PlaceholderPage />} />
+            <Route path="/desvios/cadastro" element={<DesviosForm />} />
             <Route path="/desvios/consulta" element={<PlaceholderPage />} />
             <Route path="/desvios/nao-conformidade" element={<PlaceholderPage />} />
             
