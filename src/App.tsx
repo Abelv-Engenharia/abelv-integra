@@ -11,6 +11,7 @@ import NotFound from "./pages/NotFound";
 import DesviosForm from "./pages/DesviosForm";
 import DesviosDashboard from "./pages/DesviosDashboard";
 import DesviosConsulta from "./pages/DesviosConsulta";
+import DesviosNaoConformidade from "./pages/DesviosNaoConformidade";
 
 const queryClient = new QueryClient();
 
@@ -28,7 +29,7 @@ const App = () => (
             <Route path="/desvios/dashboard" element={<DesviosDashboard />} />
             <Route path="/desvios/cadastro" element={<DesviosForm />} />
             <Route path="/desvios/consulta" element={<DesviosConsulta />} />
-            <Route path="/desvios/nao-conformidade" element={<PlaceholderPage />} />
+            <Route path="/desvios/nao-conformidade" element={<DesviosNaoConformidade />} />
             
             {/* Treinamentos routes */}
             <Route path="/treinamentos/dashboard" element={<PlaceholderPage />} />
