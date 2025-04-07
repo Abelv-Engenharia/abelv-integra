@@ -12,6 +12,7 @@ import DesviosForm from "./pages/DesviosForm";
 import DesviosDashboard from "./pages/DesviosDashboard";
 import DesviosConsulta from "./pages/DesviosConsulta";
 import DesviosNaoConformidade from "./pages/DesviosNaoConformidade";
+import AdminTemplates from "./pages/AdminTemplates";
 
 const queryClient = new QueryClient();
 
@@ -73,7 +74,7 @@ const App = () => (
             <Route path="/admin/perfis" element={<PlaceholderPage />} />
             <Route path="/admin/funcionarios" element={<PlaceholderPage />} />
             <Route path="/admin/hht" element={<PlaceholderPage />} />
-            <Route path="/admin/templates" element={<PlaceholderPage />} />
+            <Route path="/admin/templates" element={<AdminTemplates />} />
           </Route>
           
           {/* Fallback route */}
