@@ -146,7 +146,7 @@ const DesviosConsulta = () => {
                   <SelectValue placeholder="Todos os meses" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todos</SelectItem>
+                  <SelectItem value="todos">Todos</SelectItem>
                   <SelectItem value="1">Janeiro</SelectItem>
                   <SelectItem value="2">Fevereiro</SelectItem>
                   <SelectItem value="3">Março</SelectItem>
@@ -175,7 +175,7 @@ const DesviosConsulta = () => {
                   <SelectValue placeholder="Todos os CCAs" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todos</SelectItem>
+                  <SelectItem value="todos">Todos</SelectItem>
                   <SelectItem value="CCA-001">CCA-001</SelectItem>
                   <SelectItem value="CCA-002">CCA-002</SelectItem>
                   <SelectItem value="CCA-003">CCA-003</SelectItem>
@@ -195,7 +195,7 @@ const DesviosConsulta = () => {
                   <SelectValue placeholder="Todas as empresas" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todas</SelectItem>
+                  <SelectItem value="todas">Todas</SelectItem>
                   <SelectItem value="Abelv">Abelv</SelectItem>
                   <SelectItem value="Fornecedor A">Fornecedor A</SelectItem>
                   <SelectItem value="Fornecedor B">Fornecedor B</SelectItem>
@@ -215,7 +215,7 @@ const DesviosConsulta = () => {
                   <SelectValue placeholder="Todos os status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todos</SelectItem>
+                  <SelectItem value="todos">Todos</SelectItem>
                   <SelectItem value="Concluído">Concluído</SelectItem>
                   <SelectItem value="Em andamento">Em andamento</SelectItem>
                   <SelectItem value="Pendente">Pendente</SelectItem>
@@ -235,7 +235,7 @@ const DesviosConsulta = () => {
                   <SelectValue placeholder="Todos os níveis" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todos</SelectItem>
+                  <SelectItem value="todos">Todos</SelectItem>
                   <SelectItem value="Trivial">Trivial</SelectItem>
                   <SelectItem value="Tolerável">Tolerável</SelectItem>
                   <SelectItem value="Moderado">Moderado</SelectItem>
