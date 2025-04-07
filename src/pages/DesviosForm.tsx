@@ -16,6 +16,7 @@ import {
   BarChart4,
   Lightbulb,
   XCircle,
+  ArrowRight,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -48,7 +49,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Toggle, ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { useToast } from "@/hooks/use-toast";
 
 // Define the form schema with Zod
@@ -97,11 +98,11 @@ const formSchema = z.object({
   aplicacao_medida_disciplinar: z.boolean().default(false),
   
   // Classificação de risco
-  exposicao: z.enum(["BAIXA", "MEDIA", "ALTA"]),
-  controle: z.enum(["BAIXO", "MEDIO", "ALTO"]),
-  deteccao: z.enum(["BAIXA", "MEDIA", "ALTA"]),
-  severidade: z.enum(["BAIXA", "MEDIA", "ALTA"]),
-  impacto: z.enum(["BAIXO", "MEDIO", "ALTO"]),
+  exposicao: z.enum(["1", "2", "3"]),
+  controle: z.enum(["0", "1", "2", "3"]),
+  deteccao: z.enum(["1", "2", "3"]),
+  severidade: z.enum(["1", "2", "3", "4", "5"]),
+  impacto: z.enum(["1", "2", "3"]),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -111,33 +112,22 @@ const calculateRiskLevel = (formValues: Partial<FormValues>) => {
     return "Não definido";
   }
   
-  // Criando um sistema de pontuação simples
-  const scoringMap = {
-    BAIXA: 1,
-    BAIXO: 1,
-    MEDIA: 2,
-    MEDIO: 2,
-    ALTA: 3,
-    ALTO: 3
-  };
+  // Converting string values to numbers
+  const exposicaoValue = parseInt(formValues.exposicao);
+  const controleValue = parseInt(formValues.controle);
+  const deteccaoValue = parseInt(formValues.deteccao);
+  const severidadeValue = parseInt(formValues.severidade);
+  const impactoValue = parseInt(formValues.impacto);
   
-  const exposicaoScore = scoringMap[formValues.exposicao];
-  const controleScore = scoringMap[formValues.controle];
-  const deteccaoScore = scoringMap[formValues.deteccao];
-  const severidadeScore = scoringMap[formValues.severidade];
-  const impactoScore = scoringMap[formValues.impacto];
+  // Calculate risk using the new formula
+  const riskValue = ((exposicaoValue + controleValue + deteccaoValue) * (severidadeValue + impactoValue));
   
-  // Calculando a pontuação de probabilidade e efeito
-  const probabilidadeScore = (exposicaoScore + controleScore + deteccaoScore) / 3;
-  const efeitoScore = (severidadeScore + impactoScore) / 2;
-  
-  // Calculando o risco total
-  const riscoTotal = probabilidadeScore * efeitoScore;
-  
-  // Determinando o nível de risco
-  if (riscoTotal <= 2) return "BAIXO";
-  if (riscoTotal <= 6) return "MÉDIO";
-  return "ALTO";
+  // Determine risk level based on the new thresholds
+  if (riskValue <= 10) return "TRIVIAL";
+  if (riskValue <= 21) return "TOLERÁVEL";
+  if (riskValue <= 40) return "MODERADO";
+  if (riskValue <= 56) return "SUBSTANCIAL";
+  return "INTOLERÁVEL";
 };
 
 const calculateActionStatus = (situacao: string | undefined, prazo: Date | undefined) => {
@@ -163,11 +153,11 @@ const DesviosForm = () => {
     mes: format(new Date(), "MMMM", { locale: ptBR }),
     situacao_acao: "PENDENTE",
     aplicacao_medida_disciplinar: false,
-    exposicao: "BAIXA",
-    controle: "BAIXO",
-    deteccao: "BAIXA",
-    severidade: "BAIXA",
-    impacto: "BAIXO",
+    exposicao: "1",
+    controle: "0",
+    deteccao: "1",
+    severidade: "1",
+    impacto: "1",
   };
   
   // Initialize the form
@@ -207,11 +197,26 @@ const DesviosForm = () => {
     form.reset(defaultValues);
   };
   
+  // Function to navigate to the next tab
+  const navigateToNextTab = (currentTab: string) => {
+    const tabOrder = ["identificacao", "informacoes", "acao-corretiva", "classificacao-risco", "sugestao-acao"];
+    const currentIndex = tabOrder.indexOf(currentTab);
+    if (currentIndex < tabOrder.length - 1) {
+      const nextTab = tabOrder[currentIndex + 1];
+      const tabElement = document.querySelector(`[data-state="inactive"][value="${nextTab}"]`) as HTMLElement;
+      if (tabElement) {
+        tabElement.click();
+      }
+    }
+  };
+  
   const getRiskColor = (risk: string) => {
     switch (risk) {
-      case "BAIXO": return "bg-green-100 text-green-800 border-green-300";
-      case "MÉDIO": return "bg-yellow-100 text-yellow-800 border-yellow-300";
-      case "ALTO": return "bg-red-100 text-red-800 border-red-300";
+      case "TRIVIAL": return "bg-green-100 text-green-800 border-green-300";
+      case "TOLERÁVEL": return "bg-blue-100 text-blue-800 border-blue-300";
+      case "MODERADO": return "bg-yellow-100 text-yellow-800 border-yellow-300";
+      case "SUBSTANCIAL": return "bg-orange-100 text-orange-800 border-orange-300";
+      case "INTOLERÁVEL": return "bg-red-100 text-red-800 border-red-300";
       default: return "bg-gray-100 text-gray-800 border-gray-300";
     }
   };
@@ -535,6 +540,13 @@ const DesviosForm = () => {
                         </FormItem>
                       )}
                     />
+                    
+                    <div className="flex justify-end">
+                      <Button type="button" onClick={() => navigateToNextTab("identificacao")}>
+                        Próximo
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
                 </TabsContent>
                 
@@ -647,10 +659,14 @@ const DesviosForm = () => {
                       />
                     </div>
                     
-                    <div className="flex justify-end">
+                    <div className="flex justify-between">
                       <Button type="button" variant="outline" size="sm">
                         <User className="mr-2 h-4 w-4" />
                         Cadastrar Novo Funcionário
+                      </Button>
+                      <Button type="button" onClick={() => navigateToNextTab("informacoes")}>
+                        Próximo
+                        <ArrowRight className="ml-2 h-4 w-4" />
                       </Button>
                     </div>
                   </div>
@@ -791,6 +807,13 @@ const DesviosForm = () => {
                         </FormItem>
                       )}
                     />
+                    
+                    <div className="flex justify-end">
+                      <Button type="button" onClick={() => navigateToNextTab("acao-corretiva")}>
+                        Próximo
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
                 </TabsContent>
                 
@@ -815,26 +838,26 @@ const DesviosForm = () => {
                                 >
                                   <FormItem className="flex items-center space-x-3 space-y-0">
                                     <FormControl>
-                                      <RadioGroupItem value="BAIXA" />
+                                      <RadioGroupItem value="1" />
                                     </FormControl>
                                     <FormLabel className="font-normal">
-                                      Baixa
+                                      1 - Baixa
                                     </FormLabel>
                                   </FormItem>
                                   <FormItem className="flex items-center space-x-3 space-y-0">
                                     <FormControl>
-                                      <RadioGroupItem value="MEDIA" />
+                                      <RadioGroupItem value="2" />
                                     </FormControl>
                                     <FormLabel className="font-normal">
-                                      Média
+                                      2 - Média
                                     </FormLabel>
                                   </FormItem>
                                   <FormItem className="flex items-center space-x-3 space-y-0">
                                     <FormControl>
-                                      <RadioGroupItem value="ALTA" />
+                                      <RadioGroupItem value="3" />
                                     </FormControl>
                                     <FormLabel className="font-normal">
-                                      Alta
+                                      3 - Alta
                                     </FormLabel>
                                   </FormItem>
                                 </RadioGroup>
@@ -858,26 +881,34 @@ const DesviosForm = () => {
                                 >
                                   <FormItem className="flex items-center space-x-3 space-y-0">
                                     <FormControl>
-                                      <RadioGroupItem value="BAIXO" />
+                                      <RadioGroupItem value="0" />
                                     </FormControl>
                                     <FormLabel className="font-normal">
-                                      Baixo
+                                      0 - Excelente
                                     </FormLabel>
                                   </FormItem>
                                   <FormItem className="flex items-center space-x-3 space-y-0">
                                     <FormControl>
-                                      <RadioGroupItem value="MEDIO" />
+                                      <RadioGroupItem value="1" />
                                     </FormControl>
                                     <FormLabel className="font-normal">
-                                      Médio
+                                      1 - Essencial
                                     </FormLabel>
                                   </FormItem>
                                   <FormItem className="flex items-center space-x-3 space-y-0">
                                     <FormControl>
-                                      <RadioGroupItem value="ALTO" />
+                                      <RadioGroupItem value="2" />
                                     </FormControl>
                                     <FormLabel className="font-normal">
-                                      Alto
+                                      2 - Precário
+                                    </FormLabel>
+                                  </FormItem>
+                                  <FormItem className="flex items-center space-x-3 space-y-0">
+                                    <FormControl>
+                                      <RadioGroupItem value="3" />
+                                    </FormControl>
+                                    <FormLabel className="font-normal">
+                                      3 - Inexistente
                                     </FormLabel>
                                   </FormItem>
                                 </RadioGroup>
@@ -901,26 +932,26 @@ const DesviosForm = () => {
                                 >
                                   <FormItem className="flex items-center space-x-3 space-y-0">
                                     <FormControl>
-                                      <RadioGroupItem value="BAIXA" />
+                                      <RadioGroupItem value="1" />
                                     </FormControl>
                                     <FormLabel className="font-normal">
-                                      Baixa
+                                      1 - Fácil
                                     </FormLabel>
                                   </FormItem>
                                   <FormItem className="flex items-center space-x-3 space-y-0">
                                     <FormControl>
-                                      <RadioGroupItem value="MEDIA" />
+                                      <RadioGroupItem value="2" />
                                     </FormControl>
                                     <FormLabel className="font-normal">
-                                      Média
+                                      2 - Moderada
                                     </FormLabel>
                                   </FormItem>
                                   <FormItem className="flex items-center space-x-3 space-y-0">
                                     <FormControl>
-                                      <RadioGroupItem value="ALTA" />
+                                      <RadioGroupItem value="3" />
                                     </FormControl>
                                     <FormLabel className="font-normal">
-                                      Alta
+                                      3 - Difícil
                                     </FormLabel>
                                   </FormItem>
                                 </RadioGroup>
@@ -950,26 +981,42 @@ const DesviosForm = () => {
                                 >
                                   <FormItem className="flex items-center space-x-3 space-y-0">
                                     <FormControl>
-                                      <RadioGroupItem value="BAIXA" />
+                                      <RadioGroupItem value="1" />
                                     </FormControl>
                                     <FormLabel className="font-normal">
-                                      Baixa
+                                      1 - Muito Baixa
                                     </FormLabel>
                                   </FormItem>
                                   <FormItem className="flex items-center space-x-3 space-y-0">
                                     <FormControl>
-                                      <RadioGroupItem value="MEDIA" />
+                                      <RadioGroupItem value="2" />
                                     </FormControl>
                                     <FormLabel className="font-normal">
-                                      Média
+                                      2 - Baixa
                                     </FormLabel>
                                   </FormItem>
                                   <FormItem className="flex items-center space-x-3 space-y-0">
                                     <FormControl>
-                                      <RadioGroupItem value="ALTA" />
+                                      <RadioGroupItem value="3" />
                                     </FormControl>
                                     <FormLabel className="font-normal">
-                                      Alta
+                                      3 - Média
+                                    </FormLabel>
+                                  </FormItem>
+                                  <FormItem className="flex items-center space-x-3 space-y-0">
+                                    <FormControl>
+                                      <RadioGroupItem value="4" />
+                                    </FormControl>
+                                    <FormLabel className="font-normal">
+                                      4 - Alta
+                                    </FormLabel>
+                                  </FormItem>
+                                  <FormItem className="flex items-center space-x-3 space-y-0">
+                                    <FormControl>
+                                      <RadioGroupItem value="5" />
+                                    </FormControl>
+                                    <FormLabel className="font-normal">
+                                      5 - Muito Alta
                                     </FormLabel>
                                   </FormItem>
                                 </RadioGroup>
@@ -993,26 +1040,26 @@ const DesviosForm = () => {
                                 >
                                   <FormItem className="flex items-center space-x-3 space-y-0">
                                     <FormControl>
-                                      <RadioGroupItem value="BAIXO" />
+                                      <RadioGroupItem value="1" />
                                     </FormControl>
                                     <FormLabel className="font-normal">
-                                      Baixo
+                                      1 - Baixo
                                     </FormLabel>
                                   </FormItem>
                                   <FormItem className="flex items-center space-x-3 space-y-0">
                                     <FormControl>
-                                      <RadioGroupItem value="MEDIO" />
+                                      <RadioGroupItem value="2" />
                                     </FormControl>
                                     <FormLabel className="font-normal">
-                                      Médio
+                                      2 - Médio
                                     </FormLabel>
                                   </FormItem>
                                   <FormItem className="flex items-center space-x-3 space-y-0">
                                     <FormControl>
-                                      <RadioGroupItem value="ALTO" />
+                                      <RadioGroupItem value="3" />
                                     </FormControl>
                                     <FormLabel className="font-normal">
-                                      Alto
+                                      3 - Alto
                                     </FormLabel>
                                   </FormItem>
                                 </RadioGroup>
@@ -1036,6 +1083,17 @@ const DesviosForm = () => {
                           {riskLevel}
                         </div>
                       </div>
+                    </div>
+                    
+                    <div className="flex justify-end space-x-4 pt-4">
+                      <Button type="button" variant="outline" onClick={() => form.reset()}>
+                        <XCircle className="mr-2 h-4 w-4" />
+                        Cancelar
+                      </Button>
+                      <Button type="submit">
+                        <Save className="mr-2 h-4 w-4" />
+                        Salvar Registro
+                      </Button>
                     </div>
                   </div>
                 </TabsContent>
@@ -1068,17 +1126,6 @@ const DesviosForm = () => {
                   </div>
                 </TabsContent>
               </Tabs>
-              
-              <div className="flex justify-end space-x-4 pt-4">
-                <Button type="button" variant="outline" onClick={() => form.reset()}>
-                  <XCircle className="mr-2 h-4 w-4" />
-                  Cancelar
-                </Button>
-                <Button type="submit">
-                  <Save className="mr-2 h-4 w-4" />
-                  Salvar Registro
-                </Button>
-              </div>
             </form>
           </Form>
         </CardContent>
@@ -1088,4 +1135,3 @@ const DesviosForm = () => {
 };
 
 export default DesviosForm;
-
