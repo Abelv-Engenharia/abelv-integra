@@ -9,6 +9,8 @@ import Dashboard from "./pages/Dashboard";
 import PlaceholderPage from "./pages/PlaceholderPage";
 import NotFound from "./pages/NotFound";
 import DesviosForm from "./pages/DesviosForm";
+import DesviosDashboard from "./pages/DesviosDashboard";
+import DesviosConsulta from "./pages/DesviosConsulta";
 
 const queryClient = new QueryClient();
 
@@ -23,26 +25,30 @@ const App = () => (
             <Route path="/" element={<Dashboard />} />
             
             {/* Gestão de SMS routes */}
-            <Route path="/desvios/dashboard" element={<PlaceholderPage />} />
+            <Route path="/desvios/dashboard" element={<DesviosDashboard />} />
             <Route path="/desvios/cadastro" element={<DesviosForm />} />
-            <Route path="/desvios/consulta" element={<PlaceholderPage />} />
+            <Route path="/desvios/consulta" element={<DesviosConsulta />} />
             <Route path="/desvios/nao-conformidade" element={<PlaceholderPage />} />
             
+            {/* Treinamentos routes */}
             <Route path="/treinamentos/dashboard" element={<PlaceholderPage />} />
             <Route path="/treinamentos/normativo" element={<PlaceholderPage />} />
             <Route path="/treinamentos/consulta" element={<PlaceholderPage />} />
             <Route path="/treinamentos/execucao" element={<PlaceholderPage />} />
             <Route path="/treinamentos/cracha" element={<PlaceholderPage />} />
             
+            {/* Hora-seguranca routes */}
             <Route path="/hora-seguranca/dashboard" element={<PlaceholderPage />} />
             <Route path="/hora-seguranca/inspecoes" element={<PlaceholderPage />} />
             <Route path="/hora-seguranca/inspecao-nao-programada" element={<PlaceholderPage />} />
             <Route path="/hora-seguranca/acompanhamento" element={<PlaceholderPage />} />
             
+            {/* Ocorrencias routes */}
             <Route path="/ocorrencias/dashboard" element={<PlaceholderPage />} />
             <Route path="/ocorrencias/cadastro" element={<PlaceholderPage />} />
             <Route path="/ocorrencias/consulta" element={<PlaceholderPage />} />
             
+            {/* Medidas-disciplinares routes */}
             <Route path="/medidas-disciplinares/dashboard" element={<PlaceholderPage />} />
             <Route path="/medidas-disciplinares/cadastro" element={<PlaceholderPage />} />
             <Route path="/medidas-disciplinares/consulta" element={<PlaceholderPage />} />
