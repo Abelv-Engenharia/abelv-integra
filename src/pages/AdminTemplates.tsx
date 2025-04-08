@@ -217,14 +217,14 @@ const AdminTemplates = () => {
             <div className="space-y-2">
               <h3 className="font-medium">Códigos para Não Conformidade:</h3>
               <ul className="list-disc pl-6 space-y-1">
-                <li><code>{{DESVIO_ID}}</code> - ID do desvio</li>
-                <li><code>{{DATA}}</code> - Data do desvio</li>
-                <li><code>{{DESCRICAO}}</code> - Descrição do desvio</li>
-                <li><code>{{TIPO}}</code> - Tipo do desvio</li>
-                <li><code>{{RESPONSAVEL}}</code> - Responsável pelo desvio</li>
-                <li><code>{{SETOR}}</code> - Setor onde ocorreu o desvio</li>
-                <li><code>{{STATUS}}</code> - Status atual do desvio</li>
-                <li><code>{{DATA_EMISSAO}}</code> - Data de emissão do documento</li>
+                <li><code>{"{{DESVIO_ID}}"}</code> - ID do desvio</li>
+                <li><code>{"{{DATA}}"}</code> - Data do desvio</li>
+                <li><code>{"{{DESCRICAO}}"}</code> - Descrição do desvio</li>
+                <li><code>{"{{TIPO}}"}</code> - Tipo do desvio</li>
+                <li><code>{"{{RESPONSAVEL}}"}</code> - Responsável pelo desvio</li>
+                <li><code>{"{{SETOR}}"}</code> - Setor onde ocorreu o desvio</li>
+                <li><code>{"{{STATUS}}"}</code> - Status atual do desvio</li>
+                <li><code>{"{{DATA_EMISSAO}}"}</code> - Data de emissão do documento</li>
               </ul>
             </div>
           </CardContent>
