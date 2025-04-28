@@ -17,6 +17,7 @@ import AdminTemplates from "./pages/AdminTemplates";
 import OcorrenciasDashboard from "./pages/ocorrencias/OcorrenciasDashboard";
 import OcorrenciasCadastro from "./pages/ocorrencias/OcorrenciasCadastro";
 import OcorrenciasConsulta from "./pages/ocorrencias/OcorrenciasConsulta";
+import OcorrenciasDetalhes from "./pages/ocorrencias/OcorrenciasDetalhes";
 
 // Treinamentos pages
 import TreinamentosDashboard from "./pages/treinamentos/TreinamentosDashboard";
@@ -66,6 +67,7 @@ const App = () => (
             <Route path="/ocorrencias/dashboard" element={<OcorrenciasDashboard />} />
             <Route path="/ocorrencias/cadastro" element={<OcorrenciasCadastro />} />
             <Route path="/ocorrencias/consulta" element={<OcorrenciasConsulta />} />
+            <Route path="/ocorrencias/detalhes/:id" element={<OcorrenciasDetalhes />} />
             
             {/* Medidas-disciplinares routes */}
             <Route path="/medidas-disciplinares/dashboard" element={<Dashboard />} />

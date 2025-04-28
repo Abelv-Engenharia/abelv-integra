@@ -1,95 +1,191 @@
 
-import React, { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
+import { 
+  Card, 
+  CardContent, 
   CardHeader,
   CardTitle,
+  CardDescription,
+  CardFooter
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ArrowLeft, Edit, RefreshCw } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
-import { toast } from "sonner";
+import { useToast } from "@/hooks/use-toast";
 
-// Mock data for a single occurrence
-const mockOcorrencia = {
-  id: "1",
-  // Identificação
-  data: "2023-05-15",
-  hora: "10:30",
-  mes: "Maio",
-  ano: "2023",
-  cca: "CCA-001",
-  empresa: "Empresa A",
-  disciplina: "Elétrica",
-  engenheiroResponsavel: "João Silva",
-  supervisorResponsavel: "Carlos Pereira",
-  encarregadoResponsavel: "Antonio Oliveira",
-  colaboradoresAcidentados: [
-    { nome: "José da Silva", funcao: "Eletricista", matricula: "12345" }
-  ],
-  tipoOcorrencia: "Acidente com Afastamento",
-  tipoEvento: "Queda de Altura",
-  classificacaoOcorrencia: "Grave",
-  
-  // Informações da Ocorrência
-  houveAfastamento: "Sim",
-  diasPerdidos: 5,
-  diasDebitados: 2,
-  parteCorpoAtingida: "Cabeça",
-  lateralidade: "Não aplicável",
-  agenteCausador: "Escada",
-  situacaoGeradora: "Escorregamento",
-  naturezaLesao: "Fratura",
-  descricaoOcorrencia: "FUNCIONÁRIO ESCORREGOU DA ESCADA DURANTE MANUTENÇÃO ELÉTRICA.",
-  numeroCat: "123456",
-  cid: "S52",
-  catFile: "cat_123456.pdf",
-  
-  // Classificação de Risco
-  exposicao: "3",
-  controle: "2",
-  deteccao: "2",
-  efeitoFalha: "4",
-  impacto: "3",
-  probabilidade: 7,
-  severidade: 7,
-  classificacaoRisco: "INTOLERÁVEL",
-  
-  // Plano de Ação
-  acoesCorretivas: [
-    {
-      id: "1",
-      tratativa: "REALIZAR TREINAMENTO SOBRE TRABALHO EM ALTURA.",
-      dataAdequacao: "2023-06-15",
-      responsavel: "Carlos Pereira",
-      funcao: "Supervisor",
-      situacao: "Em tratativa",
-      status: "Em andamento",
-    },
-    {
-      id: "2",
-      tratativa: "SUBSTITUIR ESCADAS ANTIGAS POR MODELOS ANTIDERRAPANTES.",
-      dataAdequacao: "2023-07-01",
-      responsavel: "Patricia Souza",
-      funcao: "Coordenadora de Segurança",
-      situacao: "Tratado",
-      status: "Concluído",
-    }
-  ],
-  
-  // Fechamento
-  investigacaoRealizada: "Sim",
-  informePreliminarFile: "informe_123.pdf",
-  raiFile: "rai_123.pdf",
-  licoesAprendidas: "Sim",
-  licoesAprendidasFile: "licoes_123.pdf",
-};
+// Mock data with more complete information
+const mockOcorrencias = [
+  {
+    id: "1",
+    data: "2023-05-15",
+    colaborador: "José da Silva",
+    matricula: "123456",
+    empresa: "Empresa A",
+    cca: "CCA-001",
+    disciplina: "Elétrica",
+    tipoOcorrencia: "Acidente com Afastamento",
+    classificacaoRisco: "INTOLERÁVEL",
+    pontuacaoRisco: 64,
+    status: "Em tratativa",
+    descricao: "O colaborador estava realizando manutenção em um painel elétrico quando sofreu um choque elétrico de alta tensão.",
+    acoesImediatas: "Atendimento médico imediato e isolamento da área para verificação.",
+    causaRaiz: "Ausência de procedimento adequado para bloqueio e etiquetagem.",
+    planoAcao: [
+      {
+        id: "1-1",
+        acao: "Revisar procedimento de bloqueio e etiquetagem",
+        responsavel: "Carlos Santos",
+        prazo: "2023-06-15",
+        status: "Concluído"
+      },
+      {
+        id: "1-2",
+        acao: "Realizar treinamento com todos os eletricistas",
+        responsavel: "Mariana Oliveira",
+        prazo: "2023-06-30",
+        status: "Em andamento"
+      },
+      {
+        id: "1-3",
+        acao: "Adquirir novos EPIs para trabalhos em eletricidade",
+        responsavel: "Pedro Almeida",
+        prazo: "2023-07-10",
+        status: "Pendente"
+      }
+    ]
+  },
+  {
+    id: "2",
+    data: "2023-06-22",
+    colaborador: "Paulo Souza",
+    matricula: "789012",
+    empresa: "Empresa B",
+    cca: "CCA-002",
+    disciplina: "Mecânica",
+    tipoOcorrencia: "Acidente sem Afastamento",
+    classificacaoRisco: "MODERADO",
+    pontuacaoRisco: 32,
+    status: "Concluído",
+    descricao: "Durante a manutenção de um equipamento, o colaborador sofreu um corte superficial na mão.",
+    acoesImediatas: "Primeiros socorros e curativo no ambulatório da empresa.",
+    causaRaiz: "Ferramenta inadequada para o serviço.",
+    planoAcao: [
+      {
+        id: "2-1",
+        acao: "Verificar ferramentas disponíveis para o tipo de serviço",
+        responsavel: "Roberto Dias",
+        prazo: "2023-07-05",
+        status: "Concluído"
+      },
+      {
+        id: "2-2",
+        acao: "Substituir ferramentas danificadas",
+        responsavel: "André Lima",
+        prazo: "2023-07-15",
+        status: "Concluído"
+      }
+    ]
+  },
+  {
+    id: "3",
+    data: "2023-07-05",
+    colaborador: "Carla Oliveira",
+    matricula: "345678",
+    empresa: "Empresa C",
+    cca: "CCA-003",
+    disciplina: "Civil",
+    tipoOcorrencia: "Quase Acidente",
+    classificacaoRisco: "TRIVIAL",
+    pontuacaoRisco: 8,
+    status: "Em tratativa",
+    descricao: "Um andaime foi montado incorretamente, mas foi identificado antes de qualquer uso.",
+    acoesImediatas: "Desmontagem imediata do andaime e isolamento da área.",
+    causaRaiz: "Falta de inspeção após montagem do andaime.",
+    planoAcao: [
+      {
+        id: "3-1",
+        acao: "Implementar checklist para montagem de andaimes",
+        responsavel: "Fernanda Costa",
+        prazo: "2023-07-20",
+        status: "Em andamento"
+      },
+      {
+        id: "3-2",
+        acao: "Treinamento de reciclagem para montadores de andaime",
+        responsavel: "Ricardo Gomes",
+        prazo: "2023-08-10",
+        status: "Pendente"
+      }
+    ]
+  },
+  {
+    id: "4",
+    data: "2023-08-11",
+    colaborador: "Rafael Lima",
+    matricula: "901234",
+    empresa: "Empresa A",
+    cca: "CCA-001",
+    disciplina: "Elétrica",
+    tipoOcorrencia: "Acidente sem Afastamento",
+    classificacaoRisco: "SUBSTANCIAL",
+    pontuacaoRisco: 48,
+    status: "Concluído",
+    descricao: "Colaborador sofreu uma queda de mesmo nível ao tropeçar em um cabo elétrico não sinalizado.",
+    acoesImediatas: "Atendimento médico e organização imediata da área.",
+    causaRaiz: "Falta de organização e sinalização na área de trabalho.",
+    planoAcao: [
+      {
+        id: "4-1",
+        acao: "Implementar programa 5S na área elétrica",
+        responsavel: "Julia Santos",
+        prazo: "2023-09-15",
+        status: "Concluído"
+      },
+      {
+        id: "4-2",
+        acao: "Adquirir material para sinalização de cabos",
+        responsavel: "Marcos Vieira",
+        prazo: "2023-09-05",
+        status: "Concluído"
+      }
+    ]
+  },
+  {
+    id: "5",
+    data: "2023-09-28",
+    colaborador: "Mariana Costa",
+    matricula: "567890",
+    empresa: "Empresa D",
+    cca: "CCA-004",
+    disciplina: "Instrumentação",
+    tipoOcorrencia: "Acidente com Afastamento",
+    classificacaoRisco: "TOLERÁVEL",
+    pontuacaoRisco: 18,
+    status: "Em tratativa",
+    descricao: "Colaboradora sofreu uma entorse no tornozelo ao descer uma escada.",
+    acoesImediatas: "Atendimento médico e afastamento para recuperação.",
+    causaRaiz: "Escada com degrau danificado.",
+    planoAcao: [
+      {
+        id: "5-1",
+        acao: "Realizar inspeção em todas as escadas do setor",
+        responsavel: "Renato Silva",
+        prazo: "2023-10-10",
+        status: "Em andamento"
+      },
+      {
+        id: "5-2",
+        acao: "Substituir escadas danificadas",
+        responsavel: "Tatiana Alves",
+        prazo: "2023-10-30",
+        status: "Pendente"
+      }
+    ]
+  }
+];
 
-// Function to get the background and text colors for the risk classification
+// Function to get the background and text colors for each risk classification
 const getRiscoClassColor = (classificacao) => {
   switch (classificacao) {
     case "TRIVIAL":
@@ -110,462 +206,234 @@ const getRiscoClassColor = (classificacao) => {
 const OcorrenciasDetalhes = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [ocorrencia] = useState(mockOcorrencia); // In a real app, fetch by ID
+  const { toast } = useToast();
+  const [ocorrencia, setOcorrencia] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Simulating API call with setTimeout
+    const timer = setTimeout(() => {
+      const found = mockOcorrencias.find(item => item.id === id);
+      if (found) {
+        setOcorrencia(found);
+      }
+      setLoading(false);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [id]);
 
   const handleEdit = () => {
-    navigate(`/ocorrencias/editar/${id}`);
+    toast({
+      title: "Modo de edição",
+      description: "Você está editando esta ocorrência."
+    });
+    // Here we would navigate to an edit page in a real application
+    // For now, just showing a toast message
   };
 
-  const handleUpdatePlanoAcao = () => {
-    toast.success("Plano de ação atualizado com sucesso!");
+  const handleUpdateAction = (actionId) => {
+    toast({
+      title: "Ação atualizada",
+      description: `A ação ${actionId} foi atualizada com sucesso.`
+    });
+    // Here we would update the action status in a real application
   };
 
-  const handleBack = () => {
-    navigate("/ocorrencias/consulta");
-  };
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (!ocorrencia) {
+    return (
+      <div className="space-y-4">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => navigate("/ocorrencias/consulta")}
+        >
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Voltar para Consulta
+        </Button>
+        <Card>
+          <CardContent className="pt-6">
+            <div className="text-center py-8">
+              <h2 className="text-xl font-semibold text-gray-800">Ocorrência não encontrada</h2>
+              <p className="text-muted-foreground mt-2">
+                A ocorrência que você está procurando não existe ou foi removida.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-3xl font-bold tracking-tight">Detalhes da Ocorrência</h2>
-        <div className="space-x-2">
-          <Button variant="outline" onClick={handleBack}>
-            Voltar
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="mb-2"
+            onClick={() => navigate("/ocorrencias/consulta")}
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Voltar para Consulta
           </Button>
-          <Button onClick={handleEdit}>
-            Editar Ocorrência
-          </Button>
+          <h1 className="text-2xl font-bold tracking-tight">Detalhes da Ocorrência</h1>
+          <p className="text-muted-foreground">
+            Visualize os detalhes completos da ocorrência #{ocorrencia.id}
+          </p>
         </div>
+        <Button onClick={handleEdit}>
+          <Edit className="mr-2 h-4 w-4" />
+          Editar Ocorrência
+        </Button>
       </div>
 
-      <Tabs defaultValue="identificacao">
-        <TabsList className="grid grid-cols-5 w-full">
-          <TabsTrigger value="identificacao">Identificação</TabsTrigger>
-          <TabsTrigger value="informacoes">Informações</TabsTrigger>
-          <TabsTrigger value="risco">Classificação de Risco</TabsTrigger>
-          <TabsTrigger value="plano">Plano de Ação</TabsTrigger>
-          <TabsTrigger value="fechamento">Fechamento</TabsTrigger>
-        </TabsList>
-
-        {/* Aba de Identificação */}
-        <TabsContent value="identificacao">
-          <Card>
-            <CardHeader>
-              <CardTitle>Identificação da Ocorrência</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <p className="text-sm font-medium text-gray-500">Data</p>
-                  <p>{new Date(ocorrencia.data).toLocaleDateString()}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-gray-500">Hora</p>
-                  <p>{ocorrencia.hora}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-gray-500">Mês/Ano</p>
-                  <p>{ocorrencia.mes}/{ocorrencia.ano}</p>
-                </div>
+      {/* Informações Gerais */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Informações Gerais</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <h3 className="font-medium text-sm text-muted-foreground mb-1">Data da Ocorrência</h3>
+              <p>{new Date(ocorrencia.data).toLocaleDateString()}</p>
+            </div>
+            <div>
+              <h3 className="font-medium text-sm text-muted-foreground mb-1">Tipo de Ocorrência</h3>
+              <p>{ocorrencia.tipoOcorrencia}</p>
+            </div>
+            <div>
+              <h3 className="font-medium text-sm text-muted-foreground mb-1">Classificação de Risco</h3>
+              <div className="flex items-center">
+                <span className={`px-2 py-1 rounded-full text-xs ${getRiscoClassColor(ocorrencia.classificacaoRisco)} mr-2`}>
+                  {ocorrencia.classificacaoRisco}
+                </span>
+                <span className="text-xs text-muted-foreground">
+                  (Pontuação: {ocorrencia.pontuacaoRisco})
+                </span>
               </div>
+            </div>
+            <div>
+              <h3 className="font-medium text-sm text-muted-foreground mb-1">Status</h3>
+              <span className={`px-2 py-1 rounded-full text-xs ${
+                ocorrencia.status === 'Em tratativa' 
+                  ? 'bg-orange-100 text-orange-800' 
+                  : 'bg-green-100 text-green-800'
+              }`}>
+                {ocorrencia.status}
+              </span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
-              <Separator />
+      {/* Envolvidos */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Informações do Colaborador</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <h3 className="font-medium text-sm text-muted-foreground mb-1">Nome do Colaborador</h3>
+              <p>{ocorrencia.colaborador}</p>
+            </div>
+            <div>
+              <h3 className="font-medium text-sm text-muted-foreground mb-1">Matrícula</h3>
+              <p>{ocorrencia.matricula}</p>
+            </div>
+            <div>
+              <h3 className="font-medium text-sm text-muted-foreground mb-1">Empresa</h3>
+              <p>{ocorrencia.empresa}</p>
+            </div>
+            <div>
+              <h3 className="font-medium text-sm text-muted-foreground mb-1">CCA</h3>
+              <p>{ocorrencia.cca}</p>
+            </div>
+            <div>
+              <h3 className="font-medium text-sm text-muted-foreground mb-1">Disciplina</h3>
+              <p>{ocorrencia.disciplina}</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <p className="text-sm font-medium text-gray-500">CCA</p>
-                  <p>{ocorrencia.cca}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-gray-500">Empresa</p>
-                  <p>{ocorrencia.empresa}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-gray-500">Disciplina</p>
-                  <p>{ocorrencia.disciplina}</p>
-                </div>
-              </div>
+      {/* Descrição */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Detalhes da Ocorrência</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div>
+            <h3 className="font-medium text-sm text-muted-foreground mb-1">Descrição da Ocorrência</h3>
+            <p className="text-sm">{ocorrencia.descricao}</p>
+          </div>
+          
+          <div>
+            <h3 className="font-medium text-sm text-muted-foreground mb-1">Ações Imediatas</h3>
+            <p className="text-sm">{ocorrencia.acoesImediatas}</p>
+          </div>
+          
+          <div>
+            <h3 className="font-medium text-sm text-muted-foreground mb-1">Causa Raiz</h3>
+            <p className="text-sm">{ocorrencia.causaRaiz}</p>
+          </div>
+        </CardContent>
+      </Card>
 
-              <Separator />
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <p className="text-sm font-medium text-gray-500">Engenheiro Responsável</p>
-                  <p>{ocorrencia.engenheiroResponsavel}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-gray-500">Supervisor Responsável</p>
-                  <p>{ocorrencia.supervisorResponsavel}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-gray-500">Encarregado Responsável</p>
-                  <p>{ocorrencia.encarregadoResponsavel}</p>
-                </div>
-              </div>
-
-              <Separator />
-
-              <div>
-                <p className="text-sm font-medium text-gray-500 mb-2">Colaboradores Acidentados</p>
-                {ocorrencia.colaboradoresAcidentados.map((colaborador, index) => (
-                  <div key={index} className="bg-gray-50 p-3 rounded-md mb-2">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div>
-                        <p className="text-sm font-medium text-gray-500">Nome</p>
-                        <p>{colaborador.nome}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-gray-500">Função</p>
-                        <p>{colaborador.funcao}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-gray-500">Matrícula</p>
-                        <p>{colaborador.matricula}</p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <Separator />
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <p className="text-sm font-medium text-gray-500">Tipo da Ocorrência</p>
-                  <p>{ocorrencia.tipoOcorrencia}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-gray-500">Tipo do Evento</p>
-                  <p>{ocorrencia.tipoEvento}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-gray-500">Classificação da Ocorrência</p>
-                  <p>{ocorrencia.classificacaoOcorrencia}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Aba de Informações da Ocorrência */}
-        <TabsContent value="informacoes">
-          <Card>
-            <CardHeader>
-              <CardTitle>Informações da Ocorrência</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <p className="text-sm font-medium text-gray-500">Houve Afastamento</p>
-                  <p>{ocorrencia.houveAfastamento}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-gray-500">Dias Perdidos</p>
-                  <p>{ocorrencia.diasPerdidos}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-gray-500">Dias Debitados</p>
-                  <p>{ocorrencia.diasDebitados}</p>
-                </div>
-              </div>
-
-              <Separator />
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm font-medium text-gray-500">Parte do Corpo Atingida</p>
-                  <p>{ocorrencia.parteCorpoAtingida}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-gray-500">Lateralidade</p>
-                  <p>{ocorrencia.lateralidade}</p>
-                </div>
-              </div>
-
-              <Separator />
-
-              <div>
-                <p className="text-sm font-medium text-gray-500">Agente Causador</p>
-                <p>{ocorrencia.agenteCausador}</p>
-              </div>
-
-              <div>
-                <p className="text-sm font-medium text-gray-500">Situação Geradora</p>
-                <p>{ocorrencia.situacaoGeradora}</p>
-              </div>
-
-              <div>
-                <p className="text-sm font-medium text-gray-500">Natureza da Lesão</p>
-                <p>{ocorrencia.naturezaLesao}</p>
-              </div>
-
-              <div>
-                <p className="text-sm font-medium text-gray-500">Descrição da Ocorrência</p>
-                <p className="bg-gray-50 p-3 rounded-md">{ocorrencia.descricaoOcorrencia}</p>
-              </div>
-
-              <Separator />
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm font-medium text-gray-500">Número da CAT</p>
-                  <p>{ocorrencia.numeroCat}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-gray-500">CID</p>
-                  <p>{ocorrencia.cid}</p>
-                </div>
-              </div>
-
-              <div>
-                <p className="text-sm font-medium text-gray-500">CAT</p>
-                <div className="flex items-center mt-1">
-                  <svg className="h-6 w-6 text-red-500" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                  </svg>
-                  <span className="ml-2">{ocorrencia.catFile}</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Aba de Classificação de Risco */}
-        <TabsContent value="risco">
-          <Card>
-            <CardHeader>
-              <CardTitle>Classificação de Risco</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-4">
-                  <h3 className="font-medium text-lg">Probabilidade</h3>
+      {/* Plano de Ação */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Plano de Ação</CardTitle>
+          <CardDescription>Lista de ações para tratativa da ocorrência</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {ocorrencia.planoAcao.map((acao) => (
+              <div key={acao.id} className="border rounded-lg p-4 bg-muted/10">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                   <div>
-                    <p className="text-sm font-medium text-gray-500">Exposição</p>
-                    <p>{ocorrencia.exposicao === "1" ? "1 - Baixa" : ocorrencia.exposicao === "2" ? "2 - Média" : "3 - Alta"}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">Controle</p>
-                    <p>
-                      {ocorrencia.controle === "0" ? "0 - Excelente" : 
-                       ocorrencia.controle === "1" ? "1 - Essencial" : 
-                       ocorrencia.controle === "2" ? "2 - Precário" : "3 - Inexistente"}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">Detecção</p>
-                    <p>{ocorrencia.deteccao === "1" ? "1 - Fácil" : ocorrencia.deteccao === "2" ? "2 - Moderada" : "3 - Difícil"}</p>
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <h3 className="font-medium text-lg">Severidade</h3>
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">Efeito de Falha</p>
-                    <p>
-                      {ocorrencia.efeitoFalha === "1" ? "1 - Muito baixa" : 
-                       ocorrencia.efeitoFalha === "2" ? "2 - Baixa" : 
-                       ocorrencia.efeitoFalha === "3" ? "3 - Média" : 
-                       ocorrencia.efeitoFalha === "4" ? "4 - Alta" : "5 - Muito Alta"}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">Impacto</p>
-                    <p>{ocorrencia.impacto === "1" ? "1 - Baixo" : ocorrencia.impacto === "2" ? "2 - Médio" : "3 - Alto"}</p>
-                  </div>
-                </div>
-              </div>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Gradação de Risco</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-3 gap-4">
-                    <div className="bg-gray-100 p-4 rounded-md border border-gray-300">
-                      <p className="text-sm font-medium text-gray-800">Probabilidade</p>
-                      <p className="text-2xl font-bold">{ocorrencia.probabilidade}</p>
-                    </div>
-                    
-                    <div className="bg-gray-100 p-4 rounded-md border border-gray-300">
-                      <p className="text-sm font-medium text-gray-800">Severidade</p>
-                      <p className="text-2xl font-bold">{ocorrencia.severidade}</p>
-                    </div>
-                    
-                    <div className={`p-4 rounded-md border ${getRiscoClassColor(ocorrencia.classificacaoRisco)}`}>
-                      <p className="text-sm font-medium">Classificação</p>
-                      <p className="text-2xl font-bold">{ocorrencia.classificacaoRisco}</p>
-                    </div>
-                  </div>
-                  
-                  <div className="mt-6">
-                    <h3 className="font-medium mb-2">Legendas de Classificação</h3>
-                    <div className="grid grid-cols-2 md:grid-cols-5 gap-2 mt-4">
-                      <div className="flex items-center">
-                        <div className="w-4 h-4 bg-[#34C6F4] mr-2" />
-                        <span className="text-sm">TRIVIAL (≤10)</span>
-                      </div>
-                      <div className="flex items-center">
-                        <div className="w-4 h-4 bg-[#92D050] mr-2" />
-                        <span className="text-sm">TOLERÁVEL (≤21)</span>
-                      </div>
-                      <div className="flex items-center">
-                        <div className="w-4 h-4 bg-[#FFE07D] mr-2" />
-                        <span className="text-sm">MODERADO (≤40)</span>
-                      </div>
-                      <div className="flex items-center">
-                        <div className="w-4 h-4 bg-[#FFC000] mr-2" />
-                        <span className="text-sm">SUBSTANCIAL (≤56)</span>
-                      </div>
-                      <div className="flex items-center">
-                        <div className="w-4 h-4 bg-[#D13F3F] mr-2" />
-                        <span className="text-sm">INTOLERÁVEL ({`>`}56)</span>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Aba de Plano de Ação */}
-        <TabsContent value="plano">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex justify-between items-center">
-                <span>Plano de Ação</span>
-                <Button onClick={handleUpdatePlanoAcao}>Atualizar Plano de Ação</Button>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {ocorrencia.acoesCorretivas.map((acao, index) => (
-                <div key={acao.id} className="bg-gray-50 p-4 rounded-md border border-gray-200">
-                  <h3 className="font-medium mb-3">Ação {index + 1}</h3>
-                  <div className="space-y-4">
-                    <div>
-                      <p className="text-sm font-medium text-gray-500">Tratativa Aplicada</p>
-                      <p>{acao.tratativa}</p>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div>
-                        <p className="text-sm font-medium text-gray-500">Data para Adequação</p>
-                        <p>{new Date(acao.dataAdequacao).toLocaleDateString()}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-gray-500">Responsável</p>
-                        <p>{acao.responsavel}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-gray-500">Função</p>
-                        <p>{acao.funcao}</p>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <p className="text-sm font-medium text-gray-500">Situação</p>
-                        <p>{acao.situacao}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-gray-500">Status</p>
-                        <span className={`px-2 py-1 rounded-full text-xs ${
-                          acao.status === 'Em andamento' 
-                            ? 'bg-blue-100 text-blue-800' 
-                            : acao.status === 'Pendente'
-                            ? 'bg-orange-100 text-orange-800' 
-                            : 'bg-green-100 text-green-800'
-                        }`}>
-                          {acao.status}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Aba de Fechamento da Ocorrência */}
-        <TabsContent value="fechamento">
-          <Card>
-            <CardHeader>
-              <CardTitle>Fechamento da Ocorrência</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div>
-                <p className="text-sm font-medium text-gray-500">Status do Plano de Ação</p>
-                <div className="mt-2">
-                  {ocorrencia.acoesCorretivas.map((acao, index) => (
-                    <div key={acao.id} className="flex justify-between items-center py-2 border-b last:border-b-0">
-                      <p>Ação {index + 1}: {acao.tratativa.substring(0, 50)}...</p>
-                      <span className={`px-2 py-1 rounded-full text-xs ${
-                        acao.status === 'Em andamento' 
+                    <h4 className="font-medium text-sm">{acao.acao}</h4>
+                    <div className="flex flex-col xs:flex-row gap-2 xs:gap-4 text-xs text-muted-foreground mt-1">
+                      <span>Responsável: {acao.responsavel}</span>
+                      <span>Prazo: {new Date(acao.prazo).toLocaleDateString()}</span>
+                      <span className={`px-2 py-0.5 rounded-full text-xs inline-block w-fit ${
+                        acao.status === 'Concluído' 
+                          ? 'bg-green-100 text-green-800' 
+                          : acao.status === 'Em andamento' 
                           ? 'bg-blue-100 text-blue-800' 
-                          : acao.status === 'Pendente'
-                          ? 'bg-orange-100 text-orange-800' 
-                          : 'bg-green-100 text-green-800'
+                          : 'bg-orange-100 text-orange-800'
                       }`}>
                         {acao.status}
                       </span>
                     </div>
-                  ))}
+                  </div>
+                  {acao.status !== 'Concluído' && (
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      onClick={() => handleUpdateAction(acao.id)}
+                    >
+                      <RefreshCw className="h-3.5 w-3.5 mr-1" />
+                      Atualizar Status
+                    </Button>
+                  )}
                 </div>
               </div>
-
-              <Separator />
-
-              <div>
-                <p className="text-sm font-medium text-gray-500">Investigação realizada em acordo com o PRO-SMS-08?</p>
-                <p>{ocorrencia.investigacaoRealizada}</p>
-              </div>
-
-              {ocorrencia.investigacaoRealizada === "Sim" && (
-                <>
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">Informe Preliminar</p>
-                    <div className="flex items-center mt-1">
-                      <svg className="h-6 w-6 text-red-500" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                      </svg>
-                      <span className="ml-2">{ocorrencia.informePreliminarFile}</span>
-                    </div>
-                  </div>
-
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">Relatório de Análise e Investigação (RAI)</p>
-                    <div className="flex items-center mt-1">
-                      <svg className="h-6 w-6 text-red-500" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                      </svg>
-                      <span className="ml-2">{ocorrencia.raiFile}</span>
-                    </div>
-                  </div>
-                </>
-              )}
-
-              <div>
-                <p className="text-sm font-medium text-gray-500">Lições Aprendidas Enviada?</p>
-                <p>{ocorrencia.licoesAprendidas}</p>
-              </div>
-
-              {ocorrencia.licoesAprendidas === "Sim" && (
-                <div>
-                  <p className="text-sm font-medium text-gray-500">Lições Aprendidas</p>
-                  <div className="flex items-center mt-1">
-                    <svg className="h-6 w-6 text-red-500" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                    </svg>
-                    <span className="ml-2">{ocorrencia.licoesAprendidasFile}</span>
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };
