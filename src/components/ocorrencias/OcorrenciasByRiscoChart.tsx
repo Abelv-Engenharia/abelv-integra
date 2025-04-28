@@ -4,7 +4,8 @@ import { Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip } from "recha
 const data = [
   { name: "Alto", value: 12, color: "#ef4444" }, // Red
   { name: "Médio", value: 20, color: "#f59e0b" }, // Amber
-  { name: "Baixo", value: 16, color: "#22c55e" } // Green
+  { name: "Baixo", value: 16, color: "#22c55e" }, // Green
+  { name: "Crítico", value: 4, color: "#991b1b" }  // Dark red
 ];
 
 const OcorrenciasByRiscoChart = () => {

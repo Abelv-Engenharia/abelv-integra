@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useFormContext } from "react-hook-form";
 import { 
@@ -27,7 +26,6 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 
-// Mock data
 const ccaOptions = ["CCA-001", "CCA-002", "CCA-003", "CCA-004"];
 const empresaOptions = ["Empresa A", "Empresa B", "Empresa C", "Empresa D"];
 const disciplinaOptions = ["Elétrica", "Mecânica", "Civil", "Instrumentação"];
@@ -49,7 +47,6 @@ const classificacaoOcorrenciaOptions = ["Leve", "Moderada", "Grave", "Fatal"];
 const IdentificacaoForm = () => {
   const { control, setValue, watch } = useFormContext();
   
-  // For collaborator management
   const [colaboradorIndex, setColaboradorIndex] = useState(0);
   const colaboradoresAcidentados = watch("colaboradoresAcidentados") || [];
 
@@ -73,16 +70,14 @@ const IdentificacaoForm = () => {
     }
   };
 
-  // Handle date selection and auto-populate month and year
   const handleDateChange = (date: Date | undefined) => {
     if (date) {
       setValue("data", date);
-      setValue("mes", format(date, "MMMM")); // Month name
-      setValue("ano", format(date, "yyyy")); // Year
+      setValue("mes", format(date, "MMMM"));
+      setValue("ano", format(date, "yyyy"));
     }
   };
 
-  // Handle colaborador selection and auto-populate function and registration
   const handleColaboradorChange = (value: string, index: number) => {
     const colaborador = colaboradoresOptions.find(c => c.nome === value);
     
@@ -98,7 +93,6 @@ const IdentificacaoForm = () => {
 
   return (
     <div className="space-y-6">
-      {/* First row: Date, Time, Month, Year */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <FormField
           control={control}
@@ -132,7 +126,7 @@ const IdentificacaoForm = () => {
                     </Button>
                   </FormControl>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
+                <PopoverContent className="w-auto p-0 z-50" align="start">
                   <Calendar
                     mode="single"
                     selected={field.value || undefined}
@@ -190,7 +184,6 @@ const IdentificacaoForm = () => {
         />
       </div>
       
-      {/* Second row: CCA, Empresa, Disciplina */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <FormField
           control={control}
@@ -262,7 +255,6 @@ const IdentificacaoForm = () => {
         />
       </div>
       
-      {/* Third row: Responsible engineers/supervisors */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <FormField
           control={control}
@@ -334,7 +326,6 @@ const IdentificacaoForm = () => {
         />
       </div>
       
-      {/* Colaborador acidentado section */}
       <div>
         <div className="flex items-center justify-between mb-2">
           <h3 className="font-medium">Colaboradores acidentados</h3>
@@ -435,7 +426,6 @@ const IdentificacaoForm = () => {
         )}
       </div>
       
-      {/* Last row: Event classification */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <FormField
           control={control}

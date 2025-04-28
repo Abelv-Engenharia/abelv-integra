@@ -19,6 +19,15 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Link } from "react-router-dom";
 
 // Define types for form data
+type AcaoPlanoData = {
+  tratativaAplicada: string;
+  dataAdequacao: Date | null;
+  responsavelAcao: string;
+  funcaoResponsavel: string;
+  situacao: string;
+  status: string;
+};
+
 type OcorrenciaFormData = {
   // Identificação
   data: Date | null;
@@ -55,21 +64,21 @@ type OcorrenciaFormData = {
   arquivoCAT: File | null;
   
   // Classificação de Risco
-  severidade: string;
-  probabilidade: string;
+  exposicao: string;
+  controle: string;
+  deteccao: string;
+  efeitoFalha: string;
+  impacto: string;
+  probabilidade: number | null;
+  severidade: number | null;
   classificacaoRisco: string;
   
   // Plano de Ação
-  tratativaAplicada: string;
-  dataAdequacao: Date | null;
-  responsavelAcao: string;
-  funcaoResponsavel: string;
-  situacao: string;
-  status: string;
+  acoes: AcaoPlanoData[];
   
   // Fechamento
   investigacaoRealizada: string;
-  informePreliminar: string;
+  informePreliminar: File | null;
   relatorioAnalise: File | null;
   licoesAprendidasEnviada: string;
   arquivoLicoesAprendidas: File | null;
@@ -80,7 +89,18 @@ const OcorrenciasCadastro = () => {
   const [successDialogOpen, setSuccessDialogOpen] = useState(false);
   
   const { toast } = useToast();
-  const methods = useForm<OcorrenciaFormData>();
+  const methods = useForm<OcorrenciaFormData>({
+    defaultValues: {
+      acoes: [{
+        tratativaAplicada: '',
+        dataAdequacao: null,
+        responsavelAcao: '',
+        funcaoResponsavel: '',
+        situacao: '',
+        status: ''
+      }]
+    }
+  });
 
   const tabs = [
     { id: "identificacao", label: "Identificação" },
@@ -207,7 +227,16 @@ const OcorrenciasCadastro = () => {
               variant="outline" 
               onClick={() => {
                 setSuccessDialogOpen(false);
-                methods.reset();
+                methods.reset({
+                  acoes: [{
+                    tratativaAplicada: '',
+                    dataAdequacao: null,
+                    responsavelAcao: '',
+                    funcaoResponsavel: '',
+                    situacao: '',
+                    status: ''
+                  }]
+                });
                 setActiveTab("identificacao");
               }}
             >

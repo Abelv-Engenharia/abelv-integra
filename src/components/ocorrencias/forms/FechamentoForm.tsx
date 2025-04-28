@@ -9,7 +9,6 @@ import {
   FormMessage
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -26,30 +25,8 @@ const FechamentoForm = () => {
   
   const investigacaoRealizada = watch("investigacaoRealizada");
   const licoesAprendidasEnviada = watch("licoesAprendidasEnviada");
-  const status = watch("status") || "";
+  const acoes = watch("acoes") || [];
   
-  // Mock action plan items for display
-  const planoAcaoItems = [
-    {
-      descricao: "Realizar revisão dos procedimentos de segurança",
-      responsavel: "Carlos Oliveira",
-      dataAdequacao: "20/05/2023",
-      status: "Concluído"
-    },
-    {
-      descricao: "Implementar novas medidas preventivas",
-      responsavel: "Maria Santos",
-      dataAdequacao: "15/06/2023",
-      status: "Em andamento"
-    },
-    {
-      descricao: "Treinar equipe sobre novos procedimentos",
-      responsavel: "João Silva",
-      dataAdequacao: "30/06/2023",
-      status: "Pendente"
-    }
-  ];
-
   return (
     <div className="space-y-6">
       {/* Status do plano de ação */}
@@ -58,32 +35,38 @@ const FechamentoForm = () => {
         <Card>
           <CardContent className="p-0">
             <div className="divide-y">
-              {planoAcaoItems.map((item, index) => (
-                <div key={index} className="p-4">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <p className="font-medium">{item.descricao}</p>
-                      <p className="text-sm text-muted-foreground">
-                        Responsável: {item.responsavel} | Prazo: {item.dataAdequacao}
-                      </p>
-                    </div>
-                    <div>
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        item.status === 'Concluído' 
-                          ? 'bg-green-100 text-green-800' 
-                          : item.status === 'Em andamento'
-                          ? 'bg-blue-100 text-blue-800' 
-                          : 'bg-yellow-100 text-yellow-800'
-                      }`}>
-                        {item.status === 'Concluído' && <Check className="w-3 h-3 mr-1" />}
-                        {item.status === 'Em andamento' && <Clock className="w-3 h-3 mr-1" />}
-                        {item.status === 'Pendente' && <AlertCircle className="w-3 h-3 mr-1" />}
-                        {item.status}
-                      </span>
+              {acoes.length > 0 ? (
+                acoes.map((item, index) => (
+                  <div key={index} className="p-4">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <p className="font-medium">Ação #{index + 1}: {item.tratativaAplicada?.substring(0, 50)}...</p>
+                        <p className="text-sm text-muted-foreground">
+                          Responsável: {item.responsavelAcao} | Prazo: {item.dataAdequacao ? new Date(item.dataAdequacao).toLocaleDateString() : 'N/A'}
+                        </p>
+                      </div>
+                      <div>
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                          item.status === 'Concluído' 
+                            ? 'bg-green-100 text-green-800' 
+                            : item.status === 'Em andamento'
+                            ? 'bg-blue-100 text-blue-800' 
+                            : 'bg-yellow-100 text-yellow-800'
+                        }`}>
+                          {item.status === 'Concluído' && <Check className="w-3 h-3 mr-1" />}
+                          {item.status === 'Em andamento' && <Clock className="w-3 h-3 mr-1" />}
+                          {item.status === 'Pendente' && <AlertCircle className="w-3 h-3 mr-1" />}
+                          {item.status || 'Não definido'}
+                        </span>
+                      </div>
                     </div>
                   </div>
+                ))
+              ) : (
+                <div className="p-4 text-center text-muted-foreground">
+                  Nenhuma ação cadastrada
                 </div>
-              ))}
+              )}
             </div>
           </CardContent>
         </Card>
@@ -96,7 +79,7 @@ const FechamentoForm = () => {
         render={({ field }) => (
           <FormItem>
             <FormLabel>Investigação realizada em acordo com o PRO-SMS-08?</FormLabel>
-            <Select onValueChange={field.onChange} defaultValue={field.value}>
+            <Select onValueChange={field.onChange} value={field.value || ""}>
               <FormControl>
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione" />
@@ -114,22 +97,29 @@ const FechamentoForm = () => {
       
       {investigacaoRealizada === "Sim" && (
         <>
-          <FormField
+          <Controller
             control={control}
             name="informePreliminar"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Informe preliminar</FormLabel>
-                <FormControl>
-                  <Textarea 
-                    rows={4} 
-                    placeholder="Descreva o informe preliminar" 
-                    className="resize-none"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
+            render={({ field: { value, onChange, ...field } }) => (
+              <div className="grid w-full gap-1.5">
+                <Label htmlFor="informe-upload">
+                  Informe preliminar (PDF, máx. 2MB)
+                </Label>
+                <Input
+                  id="informe-upload"
+                  type="file"
+                  accept=".pdf"
+                  {...field}
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file && file.size <= 2 * 1024 * 1024) { // 2MB limit
+                      onChange(file);
+                    } else if (file) {
+                      alert("O arquivo deve ter no máximo 2MB");
+                    }
+                  }}
+                />
+              </div>
             )}
           />
           
@@ -168,7 +158,7 @@ const FechamentoForm = () => {
         render={({ field }) => (
           <FormItem>
             <FormLabel>Lições aprendidas enviada?</FormLabel>
-            <Select onValueChange={field.onChange} defaultValue={field.value}>
+            <Select onValueChange={field.onChange} value={field.value || ""}>
               <FormControl>
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione" />
