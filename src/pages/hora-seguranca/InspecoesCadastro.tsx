@@ -292,25 +292,6 @@ const InspecoesCadastro = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FormField
                       control={form.control}
-                      name="funcao"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Função</FormLabel>
-                          <FormControl>
-                            <Input 
-                              {...field} 
-                              readOnly={!isOutroResponsavel} 
-                              disabled={!isOutroResponsavel}
-                              placeholder={isOutroResponsavel ? "Digite a função do responsável" : ""} 
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
                       name="responsavel"
                       render={({ field }) => (
                         <FormItem>
@@ -332,6 +313,25 @@ const InspecoesCadastro = () => {
                               ))}
                             </SelectContent>
                           </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="funcao"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Função</FormLabel>
+                          <FormControl>
+                            <Input 
+                              {...field} 
+                              readOnly={!isOutroResponsavel} 
+                              disabled={!isOutroResponsavel}
+                              placeholder={isOutroResponsavel ? "Digite a função do responsável" : ""} 
+                            />
+                          </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
