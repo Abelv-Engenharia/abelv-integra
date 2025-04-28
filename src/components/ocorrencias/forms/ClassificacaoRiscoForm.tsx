@@ -56,18 +56,20 @@ const getClassificacaoRisco = (probabilidade: number, severidade: number) => {
   
   const total = probabilidade * severidade;
   
-  if (total <= 3) return "Baixo";
-  if (total <= 9) return "Médio";
-  if (total <= 15) return "Alto";
-  return "Crítico";
+  if (total <= 10) return "TRIVIAL";
+  if (total <= 21) return "TOLERÁVEL";
+  if (total <= 40) return "MODERADO";
+  if (total <= 56) return "SUBSTANCIAL";
+  return "INTOLERÁVEL";
 };
 
 const getClassificacaoColor = (classificacao: string) => {
   switch (classificacao) {
-    case "Baixo": return "bg-green-100 border-green-500 text-green-800";
-    case "Médio": return "bg-yellow-100 border-yellow-500 text-yellow-800";
-    case "Alto": return "bg-orange-100 border-orange-500 text-orange-800";
-    case "Crítico": return "bg-red-100 border-red-500 text-red-800";
+    case "TRIVIAL": return "bg-[#34C6F4] border-[#34C6F4] text-white";
+    case "TOLERÁVEL": return "bg-[#92D050] border-[#92D050] text-white";
+    case "MODERADO": return "bg-[#FFE07D] border-[#FFE07D] text-gray-800";
+    case "SUBSTANCIAL": return "bg-[#FFC000] border-[#FFC000] text-gray-800";
+    case "INTOLERÁVEL": return "bg-[#D13F3F] border-[#D13F3F] text-white";
     default: return "bg-gray-100 border-gray-500 text-gray-800";
   }
 };
@@ -299,58 +301,27 @@ const ClassificacaoRiscoForm = () => {
           </div>
           
           <div className="mt-6">
-            <h3 className="font-medium mb-2">Matriz de Risco</h3>
-            <div className="grid grid-cols-6 gap-0.5 border rounded-md overflow-hidden">
-              <div className="bg-gray-100 p-2 flex items-center justify-center font-bold">P/S</div>
-              <div className="bg-gray-100 p-2 flex items-center justify-center font-bold">1</div>
-              <div className="bg-gray-100 p-2 flex items-center justify-center font-bold">2</div>
-              <div className="bg-gray-100 p-2 flex items-center justify-center font-bold">3</div>
-              <div className="bg-gray-100 p-2 flex items-center justify-center font-bold">4</div>
-              <div className="bg-gray-100 p-2 flex items-center justify-center font-bold">5</div>
-              
-              {[1, 2, 3, 4, 5].map((s) => (
-                <React.Fragment key={s}>
-                  <div className="bg-gray-100 p-2 flex items-center justify-center font-bold">{s}</div>
-                  {[1, 2, 3, 4, 5].map((p) => {
-                    const value = s * p;
-                    let bgColor = "bg-green-100";
-                    
-                    if (value <= 3) bgColor = "bg-green-100";
-                    else if (value <= 9) bgColor = "bg-yellow-100";
-                    else if (value <= 15) bgColor = "bg-orange-100";
-                    else bgColor = "bg-red-100";
-                    
-                    const isSelected = s.toString() === severidadeVal?.toString() && p.toString() === probabilidadeVal?.toString();
-                    
-                    return (
-                      <div 
-                        key={`${s}-${p}`} 
-                        className={`${bgColor} p-2 flex items-center justify-center ${isSelected ? 'ring-2 ring-blue-500' : ''}`}
-                      >
-                        {value}
-                      </div>
-                    );
-                  })}
-                </React.Fragment>
-              ))}
-            </div>
-            
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-4">
+            <h3 className="font-medium mb-2">Legendas de Classificação</h3>
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-2 mt-4">
               <div className="flex items-center">
-                <div className="w-4 h-4 bg-green-100 mr-2" />
-                <span className="text-sm">Baixo (1-3)</span>
+                <div className="w-4 h-4 bg-[#34C6F4] mr-2" />
+                <span className="text-sm">TRIVIAL (≤10)</span>
               </div>
               <div className="flex items-center">
-                <div className="w-4 h-4 bg-yellow-100 mr-2" />
-                <span className="text-sm">Médio (4-9)</span>
+                <div className="w-4 h-4 bg-[#92D050] mr-2" />
+                <span className="text-sm">TOLERÁVEL (≤21)</span>
               </div>
               <div className="flex items-center">
-                <div className="w-4 h-4 bg-orange-100 mr-2" />
-                <span className="text-sm">Alto (10-15)</span>
+                <div className="w-4 h-4 bg-[#FFE07D] mr-2" />
+                <span className="text-sm">MODERADO (≤40)</span>
               </div>
               <div className="flex items-center">
-                <div className="w-4 h-4 bg-red-100 mr-2" />
-                <span className="text-sm">Crítico (16-25)</span>
+                <div className="w-4 h-4 bg-[#FFC000] mr-2" />
+                <span className="text-sm">SUBSTANCIAL (≤56)</span>
+              </div>
+              <div className="flex items-center">
+                <div className="w-4 h-4 bg-[#D13F3F] mr-2" />
+                <span className="text-sm">INTOLERÁVEL (>56)</span>
               </div>
             </div>
           </div>

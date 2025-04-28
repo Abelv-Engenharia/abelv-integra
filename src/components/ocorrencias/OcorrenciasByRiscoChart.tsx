@@ -2,10 +2,11 @@
 import { Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 
 const data = [
-  { name: "Alto", value: 12, color: "#ef4444" }, // Red
-  { name: "Médio", value: 20, color: "#f59e0b" }, // Amber
-  { name: "Baixo", value: 16, color: "#22c55e" }, // Green
-  { name: "Crítico", value: 4, color: "#991b1b" }  // Dark red
+  { name: "TRIVIAL", value: 12, color: "#34C6F4" },
+  { name: "TOLERÁVEL", value: 20, color: "#92D050" },
+  { name: "MODERADO", value: 16, color: "#FFE07D" },
+  { name: "SUBSTANCIAL", value: 8, color: "#FFC000" },
+  { name: "INTOLERÁVEL", value: 4, color: "#D13F3F" }
 ];
 
 const OcorrenciasByRiscoChart = () => {
