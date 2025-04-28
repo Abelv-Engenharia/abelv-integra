@@ -221,7 +221,7 @@ export function AppSidebar() {
                 </Collapsible>
               </SidebarMenuItem>
 
-              {/* Ocorrências */}
+              {/* Ocorrências - NEW MENU */}
               <SidebarMenuItem>
                 <Collapsible open={openMenu === "ocorrencias"}>
                   <CollapsibleTrigger asChild>

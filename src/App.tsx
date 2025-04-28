@@ -13,6 +13,11 @@ import DesviosConsulta from "./pages/DesviosConsulta";
 import DesviosNaoConformidade from "./pages/DesviosNaoConformidade";
 import AdminTemplates from "./pages/AdminTemplates";
 
+// Ocorrências pages
+import OcorrenciasDashboard from "./pages/ocorrencias/OcorrenciasDashboard";
+import OcorrenciasCadastro from "./pages/ocorrencias/OcorrenciasCadastro";
+import OcorrenciasConsulta from "./pages/ocorrencias/OcorrenciasConsulta";
+
 // Treinamentos pages
 import TreinamentosDashboard from "./pages/treinamentos/TreinamentosDashboard";
 import TreinamentosNormativo from "./pages/treinamentos/TreinamentosNormativo";
@@ -58,9 +63,9 @@ const App = () => (
             <Route path="/hora-seguranca/acompanhamento" element={<InspecoesAcompanhamento />} />
             
             {/* Ocorrencias routes */}
-            <Route path="/ocorrencias/dashboard" element={<Dashboard />} />
-            <Route path="/ocorrencias/cadastro" element={<Dashboard />} />
-            <Route path="/ocorrencias/consulta" element={<Dashboard />} />
+            <Route path="/ocorrencias/dashboard" element={<OcorrenciasDashboard />} />
+            <Route path="/ocorrencias/cadastro" element={<OcorrenciasCadastro />} />
+            <Route path="/ocorrencias/consulta" element={<OcorrenciasConsulta />} />
             
             {/* Medidas-disciplinares routes */}
             <Route path="/medidas-disciplinares/dashboard" element={<Dashboard />} />
