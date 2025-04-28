@@ -20,6 +20,12 @@ import TreinamentosExecucao from "./pages/treinamentos/TreinamentosExecucao";
 import TreinamentosCracha from "./pages/treinamentos/TreinamentosCracha";
 import TreinamentosConsulta from "./pages/treinamentos/TreinamentosConsulta";
 
+// Hora da Segurança pages
+import HoraSegurancaDashboard from "./pages/hora-seguranca/HoraSegurancaDashboard";
+import InspecoesCadastro from "./pages/hora-seguranca/InspecoesCadastro";
+import InspecoesNaoProgramadas from "./pages/hora-seguranca/InspecoesNaoProgramadas";
+import InspecoesAcompanhamento from "./pages/hora-seguranca/InspecoesAcompanhamento";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -46,10 +52,10 @@ const App = () => (
             <Route path="/treinamentos/cracha" element={<TreinamentosCracha />} />
             
             {/* Hora-seguranca routes */}
-            <Route path="/hora-seguranca/dashboard" element={<Dashboard />} />
-            <Route path="/hora-seguranca/inspecoes" element={<Dashboard />} />
-            <Route path="/hora-seguranca/inspecao-nao-programada" element={<Dashboard />} />
-            <Route path="/hora-seguranca/acompanhamento" element={<Dashboard />} />
+            <Route path="/hora-seguranca/dashboard" element={<HoraSegurancaDashboard />} />
+            <Route path="/hora-seguranca/inspecoes" element={<InspecoesCadastro />} />
+            <Route path="/hora-seguranca/inspecao-nao-programada" element={<InspecoesNaoProgramadas />} />
+            <Route path="/hora-seguranca/acompanhamento" element={<InspecoesAcompanhamento />} />
             
             {/* Ocorrencias routes */}
             <Route path="/ocorrencias/dashboard" element={<Dashboard />} />
