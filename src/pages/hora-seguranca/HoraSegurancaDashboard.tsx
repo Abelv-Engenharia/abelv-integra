@@ -43,6 +43,7 @@ const HoraSegurancaDashboard = () => {
                   <SelectValue placeholder="Filtrar por CCA" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="todos">Todos</SelectItem>
                   <SelectItem value="CCA001">CCA 001</SelectItem>
                   <SelectItem value="CCA002">CCA 002</SelectItem>
                   <SelectItem value="CCA003">CCA 003</SelectItem>
@@ -54,6 +55,7 @@ const HoraSegurancaDashboard = () => {
                   <SelectValue placeholder="Filtrar por Responsável" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="todos">Todos</SelectItem>
                   <SelectItem value="RESP001">João Silva</SelectItem>
                   <SelectItem value="RESP002">Maria Oliveira</SelectItem>
                   <SelectItem value="RESP003">Carlos Santos</SelectItem>
@@ -65,6 +67,7 @@ const HoraSegurancaDashboard = () => {
                   <SelectValue placeholder="Filtrar por Período" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="todos">Todos</SelectItem>
                   <SelectItem value="7">Últimos 7 dias</SelectItem>
                   <SelectItem value="30">Últimos 30 dias</SelectItem>
                   <SelectItem value="90">Últimos 90 dias</SelectItem>

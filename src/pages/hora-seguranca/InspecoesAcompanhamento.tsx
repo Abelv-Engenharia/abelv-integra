@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -221,7 +222,7 @@ const InspecoesAcompanhamento = () => {
               <SelectValue placeholder="Filtrar por CCA" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Todos</SelectItem>
+              <SelectItem value="todos">Todos</SelectItem>
               <SelectItem value="CCA 001">CCA 001</SelectItem>
               <SelectItem value="CCA 002">CCA 002</SelectItem>
               <SelectItem value="CCA 003">CCA 003</SelectItem>
@@ -233,7 +234,7 @@ const InspecoesAcompanhamento = () => {
               <SelectValue placeholder="Filtrar por Status" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Todos</SelectItem>
+              <SelectItem value="todos">Todos</SelectItem>
               <SelectItem value="A REALIZAR">A Realizar</SelectItem>
               <SelectItem value="REALIZADA">Realizada</SelectItem>
               <SelectItem value="REALIZADA NÃO PROGRAMADA">Realizada Não Programada</SelectItem>
@@ -247,7 +248,7 @@ const InspecoesAcompanhamento = () => {
               <SelectValue placeholder="Filtrar por Responsável" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Todos</SelectItem>
+              <SelectItem value="todos">Todos</SelectItem>
               <SelectItem value="João Silva">João Silva</SelectItem>
               <SelectItem value="Maria Oliveira">Maria Oliveira</SelectItem>
               <SelectItem value="Carlos Santos">Carlos Santos</SelectItem>
