@@ -6,13 +6,19 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Layout from "./components/layout/Layout";
 import Dashboard from "./pages/Dashboard";
-import PlaceholderPage from "./pages/PlaceholderPage";
 import NotFound from "./pages/NotFound";
 import DesviosForm from "./pages/DesviosForm";
 import DesviosDashboard from "./pages/DesviosDashboard";
 import DesviosConsulta from "./pages/DesviosConsulta";
 import DesviosNaoConformidade from "./pages/DesviosNaoConformidade";
 import AdminTemplates from "./pages/AdminTemplates";
+
+// Treinamentos pages
+import TreinamentosDashboard from "./pages/treinamentos/TreinamentosDashboard";
+import TreinamentosNormativo from "./pages/treinamentos/TreinamentosNormativo";
+import TreinamentosExecucao from "./pages/treinamentos/TreinamentosExecucao";
+import TreinamentosCracha from "./pages/treinamentos/TreinamentosCracha";
+import TreinamentosConsulta from "./pages/treinamentos/TreinamentosConsulta";
 
 const queryClient = new QueryClient();
 
@@ -33,47 +39,47 @@ const App = () => (
             <Route path="/desvios/nao-conformidade" element={<DesviosNaoConformidade />} />
             
             {/* Treinamentos routes */}
-            <Route path="/treinamentos/dashboard" element={<PlaceholderPage />} />
-            <Route path="/treinamentos/normativo" element={<PlaceholderPage />} />
-            <Route path="/treinamentos/consulta" element={<PlaceholderPage />} />
-            <Route path="/treinamentos/execucao" element={<PlaceholderPage />} />
-            <Route path="/treinamentos/cracha" element={<PlaceholderPage />} />
+            <Route path="/treinamentos/dashboard" element={<TreinamentosDashboard />} />
+            <Route path="/treinamentos/normativo" element={<TreinamentosNormativo />} />
+            <Route path="/treinamentos/consulta" element={<TreinamentosConsulta />} />
+            <Route path="/treinamentos/execucao" element={<TreinamentosExecucao />} />
+            <Route path="/treinamentos/cracha" element={<TreinamentosCracha />} />
             
             {/* Hora-seguranca routes */}
-            <Route path="/hora-seguranca/dashboard" element={<PlaceholderPage />} />
-            <Route path="/hora-seguranca/inspecoes" element={<PlaceholderPage />} />
-            <Route path="/hora-seguranca/inspecao-nao-programada" element={<PlaceholderPage />} />
-            <Route path="/hora-seguranca/acompanhamento" element={<PlaceholderPage />} />
+            <Route path="/hora-seguranca/dashboard" element={<Dashboard />} />
+            <Route path="/hora-seguranca/inspecoes" element={<Dashboard />} />
+            <Route path="/hora-seguranca/inspecao-nao-programada" element={<Dashboard />} />
+            <Route path="/hora-seguranca/acompanhamento" element={<Dashboard />} />
             
             {/* Ocorrencias routes */}
-            <Route path="/ocorrencias/dashboard" element={<PlaceholderPage />} />
-            <Route path="/ocorrencias/cadastro" element={<PlaceholderPage />} />
-            <Route path="/ocorrencias/consulta" element={<PlaceholderPage />} />
+            <Route path="/ocorrencias/dashboard" element={<Dashboard />} />
+            <Route path="/ocorrencias/cadastro" element={<Dashboard />} />
+            <Route path="/ocorrencias/consulta" element={<Dashboard />} />
             
             {/* Medidas-disciplinares routes */}
-            <Route path="/medidas-disciplinares/dashboard" element={<PlaceholderPage />} />
-            <Route path="/medidas-disciplinares/cadastro" element={<PlaceholderPage />} />
-            <Route path="/medidas-disciplinares/consulta" element={<PlaceholderPage />} />
+            <Route path="/medidas-disciplinares/dashboard" element={<Dashboard />} />
+            <Route path="/medidas-disciplinares/cadastro" element={<Dashboard />} />
+            <Route path="/medidas-disciplinares/consulta" element={<Dashboard />} />
             
             {/* Tarefas routes */}
-            <Route path="/tarefas/dashboard" element={<PlaceholderPage />} />
-            <Route path="/tarefas/minhas-tarefas" element={<PlaceholderPage />} />
-            <Route path="/tarefas/cadastro" element={<PlaceholderPage />} />
+            <Route path="/tarefas/dashboard" element={<Dashboard />} />
+            <Route path="/tarefas/minhas-tarefas" element={<Dashboard />} />
+            <Route path="/tarefas/cadastro" element={<Dashboard />} />
             
             {/* Gestão da Rotina routes */}
-            <Route path="/gestao-rotina/dssms" element={<PlaceholderPage />} />
-            <Route path="/gestao-rotina/rms" element={<PlaceholderPage />} />
-            <Route path="/gestao-rotina/ift" element={<PlaceholderPage />} />
-            <Route path="/gestao-rotina/ficha-epi" element={<PlaceholderPage />} />
+            <Route path="/gestao-rotina/dssms" element={<Dashboard />} />
+            <Route path="/gestao-rotina/rms" element={<Dashboard />} />
+            <Route path="/gestao-rotina/ift" element={<Dashboard />} />
+            <Route path="/gestao-rotina/ficha-epi" element={<Dashboard />} />
             
             {/* Relatórios routes */}
-            <Route path="/relatorios" element={<PlaceholderPage />} />
+            <Route path="/relatorios" element={<Dashboard />} />
             
             {/* Administração routes */}
-            <Route path="/admin/usuarios" element={<PlaceholderPage />} />
-            <Route path="/admin/perfis" element={<PlaceholderPage />} />
-            <Route path="/admin/funcionarios" element={<PlaceholderPage />} />
-            <Route path="/admin/hht" element={<PlaceholderPage />} />
+            <Route path="/admin/usuarios" element={<Dashboard />} />
+            <Route path="/admin/perfis" element={<Dashboard />} />
+            <Route path="/admin/funcionarios" element={<Dashboard />} />
+            <Route path="/admin/hht" element={<Dashboard />} />
             <Route path="/admin/templates" element={<AdminTemplates />} />
           </Route>
           
