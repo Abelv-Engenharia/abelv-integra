@@ -24,8 +24,12 @@ import Index from './pages/Index';
 // Create a client for React Query
 const queryClient = new QueryClient();
 
-// Protected route component
-const ProtectedRoute = ({ element }: { element: React.ReactElement }) => {
+// Fixed Protected route component that properly handles children
+interface ProtectedRouteProps {
+  children: React.ReactNode;
+}
+
+const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const { user, loading } = useAuth();
   
   if (loading) {
@@ -40,7 +44,7 @@ const ProtectedRoute = ({ element }: { element: React.ReactElement }) => {
     return <Navigate to="/login" replace />;
   }
   
-  return element;
+  return <>{children}</>;
 };
 
 const App = () => {
@@ -55,13 +59,11 @@ const App = () => {
             <Route 
               path="/dashboard" 
               element={
-                <ProtectedRoute 
-                  element={
-                    <Layout>
-                      <Dashboard />
-                    </Layout>
-                  } 
-                />
+                <ProtectedRoute>
+                  <Layout>
+                    <Dashboard />
+                  </Layout>
+                </ProtectedRoute>
               } 
             />
             
@@ -69,37 +71,31 @@ const App = () => {
             <Route 
               path="/desvios/dashboard" 
               element={
-                <ProtectedRoute 
-                  element={
-                    <Layout>
-                      <DesviosDashboard />
-                    </Layout>
-                  } 
-                />
+                <ProtectedRoute>
+                  <Layout>
+                    <DesviosDashboard />
+                  </Layout>
+                </ProtectedRoute>
               } 
             />
             <Route 
               path="/desvios/consulta" 
               element={
-                <ProtectedRoute 
-                  element={
-                    <Layout>
-                      <DesviosConsulta />
-                    </Layout>
-                  } 
-                />
+                <ProtectedRoute>
+                  <Layout>
+                    <DesviosConsulta />
+                  </Layout>
+                </ProtectedRoute>
               } 
             />
             <Route 
               path="/desvios/cadastro" 
               element={
-                <ProtectedRoute 
-                  element={
-                    <Layout>
-                      <DesviosForm />
-                    </Layout>
-                  } 
-                />
+                <ProtectedRoute>
+                  <Layout>
+                    <DesviosForm />
+                  </Layout>
+                </ProtectedRoute>
               } 
             />
             
@@ -107,61 +103,51 @@ const App = () => {
             <Route 
               path="/treinamentos/dashboard" 
               element={
-                <ProtectedRoute 
-                  element={
-                    <Layout>
-                      <TreinamentosDashboard />
-                    </Layout>
-                  } 
-                />
+                <ProtectedRoute>
+                  <Layout>
+                    <TreinamentosDashboard />
+                  </Layout>
+                </ProtectedRoute>
               } 
             />
             <Route 
               path="/treinamentos/consulta" 
               element={
-                <ProtectedRoute 
-                  element={
-                    <Layout>
-                      <TreinamentosConsulta />
-                    </Layout>
-                  } 
-                />
+                <ProtectedRoute>
+                  <Layout>
+                    <TreinamentosConsulta />
+                  </Layout>
+                </ProtectedRoute>
               } 
             />
             <Route 
               path="/treinamentos/execucao" 
               element={
-                <ProtectedRoute 
-                  element={
-                    <Layout>
-                      <TreinamentosExecucao />
-                    </Layout>
-                  } 
-                />
+                <ProtectedRoute>
+                  <Layout>
+                    <TreinamentosExecucao />
+                  </Layout>
+                </ProtectedRoute>
               } 
             />
             <Route 
               path="/treinamentos/normativo" 
               element={
-                <ProtectedRoute 
-                  element={
-                    <Layout>
-                      <TreinamentosNormativo />
-                    </Layout>
-                  } 
-                />
+                <ProtectedRoute>
+                  <Layout>
+                    <TreinamentosNormativo />
+                  </Layout>
+                </ProtectedRoute>
               } 
             />
             <Route 
               path="/treinamentos/cracha" 
               element={
-                <ProtectedRoute 
-                  element={
-                    <Layout>
-                      <TreinamentosCracha />
-                    </Layout>
-                  } 
-                />
+                <ProtectedRoute>
+                  <Layout>
+                    <TreinamentosCracha />
+                  </Layout>
+                </ProtectedRoute>
               } 
             />
             
@@ -169,49 +155,41 @@ const App = () => {
             <Route 
               path="/relatorios" 
               element={
-                <ProtectedRoute 
-                  element={
-                    <Layout>
-                      <RelatoriosDashboard />
-                    </Layout>
-                  } 
-                />
+                <ProtectedRoute>
+                  <Layout>
+                    <RelatoriosDashboard />
+                  </Layout>
+                </ProtectedRoute>
               } 
             />
             <Route 
               path="/relatorios/desvios" 
               element={
-                <ProtectedRoute 
-                  element={
-                    <Layout>
-                      <RelatoriosDesvios />
-                    </Layout>
-                  } 
-                />
+                <ProtectedRoute>
+                  <Layout>
+                    <RelatoriosDesvios />
+                  </Layout>
+                </ProtectedRoute>
               } 
             />
             <Route 
               path="/relatorios/treinamentos" 
               element={
-                <ProtectedRoute 
-                  element={
-                    <Layout>
-                      <RelatoriosTreinamentos />
-                    </Layout>
-                  } 
-                />
+                <ProtectedRoute>
+                  <Layout>
+                    <RelatoriosTreinamentos />
+                  </Layout>
+                </ProtectedRoute>
               } 
             />
             <Route 
               path="/relatorios/ocorrencias" 
               element={
-                <ProtectedRoute 
-                  element={
-                    <Layout>
-                      <RelatoriosOcorrencias />
-                    </Layout>
-                  } 
-                />
+                <ProtectedRoute>
+                  <Layout>
+                    <RelatoriosOcorrencias />
+                  </Layout>
+                </ProtectedRoute>
               } 
             />
             

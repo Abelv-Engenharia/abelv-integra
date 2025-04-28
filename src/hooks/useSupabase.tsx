@@ -16,12 +16,14 @@ export const useFuncionarios = () => {
   return useQuery({
     queryKey: ['funcionarios'],
     queryFn: () => funcionariosService.getAll(),
-    onError: (error: any) => {
-      toast({
-        title: 'Erro ao carregar funcionários',
-        description: error.message,
-        variant: 'destructive',
-      });
+    meta: {
+      onError: (error: any) => {
+        toast({
+          title: 'Erro ao carregar funcionários',
+          description: error.message,
+          variant: 'destructive',
+        });
+      }
     }
   });
 };
@@ -33,12 +35,14 @@ export const useFuncionario = (id: string) => {
     queryKey: ['funcionarios', id],
     queryFn: () => funcionariosService.getById(id),
     enabled: !!id,
-    onError: (error: any) => {
-      toast({
-        title: 'Erro ao carregar funcionário',
-        description: error.message,
-        variant: 'destructive',
-      });
+    meta: {
+      onError: (error: any) => {
+        toast({
+          title: 'Erro ao carregar funcionário',
+          description: error.message,
+          variant: 'destructive',
+        });
+      }
     }
   });
 };
@@ -98,12 +102,14 @@ export const useTreinamentos = () => {
   return useQuery({
     queryKey: ['treinamentos'],
     queryFn: () => treinamentosService.getAll(),
-    onError: (error: any) => {
-      toast({
-        title: 'Erro ao carregar treinamentos',
-        description: error.message,
-        variant: 'destructive',
-      });
+    meta: {
+      onError: (error: any) => {
+        toast({
+          title: 'Erro ao carregar treinamentos',
+          description: error.message,
+          variant: 'destructive',
+        });
+      }
     }
   });
 };
@@ -138,12 +144,14 @@ export const useTreinamentosNormativos = () => {
   return useQuery({
     queryKey: ['treinamentos-normativos'],
     queryFn: () => treinamentosNormativosService.getAll(),
-    onError: (error: any) => {
-      toast({
-        title: 'Erro ao carregar treinamentos normativos',
-        description: error.message,
-        variant: 'destructive',
-      });
+    meta: {
+      onError: (error: any) => {
+        toast({
+          title: 'Erro ao carregar treinamentos normativos',
+          description: error.message,
+          variant: 'destructive',
+        });
+      }
     }
   });
 };
@@ -155,12 +163,14 @@ export const useTreinamentosNormativosByFuncionario = (funcionarioId: string) =>
     queryKey: ['treinamentos-normativos', funcionarioId],
     queryFn: () => treinamentosNormativosService.getByFuncionarioId(funcionarioId),
     enabled: !!funcionarioId,
-    onError: (error: any) => {
-      toast({
-        title: 'Erro ao carregar treinamentos normativos',
-        description: error.message,
-        variant: 'destructive',
-      });
+    meta: {
+      onError: (error: any) => {
+        toast({
+          title: 'Erro ao carregar treinamentos normativos',
+          description: error.message,
+          variant: 'destructive',
+        });
+      }
     }
   });
 };
@@ -199,12 +209,14 @@ export const useExecucaoTreinamentos = () => {
   return useQuery({
     queryKey: ['execucao-treinamentos'],
     queryFn: () => execucaoTreinamentosService.getAll(),
-    onError: (error: any) => {
-      toast({
-        title: 'Erro ao carregar execução de treinamentos',
-        description: error.message,
-        variant: 'destructive',
-      });
+    meta: {
+      onError: (error: any) => {
+        toast({
+          title: 'Erro ao carregar execução de treinamentos',
+          description: error.message,
+          variant: 'destructive',
+        });
+      }
     }
   });
 };
