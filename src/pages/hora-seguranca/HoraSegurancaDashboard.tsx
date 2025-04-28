@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -14,6 +13,7 @@ import { InspecaoStatusDonutChart } from "@/components/hora-seguranca/InspecaoSt
 import { InspecoesBarChart } from "@/components/hora-seguranca/InspecoesBarChart";
 import { InspecoesSummaryCards } from "@/components/hora-seguranca/InspecoesSummaryCards";
 import { RecentInspectionsList } from "@/components/hora-seguranca/RecentInspectionsList";
+import { DesviosResponsaveisChart } from "@/components/hora-seguranca/DesviosResponsaveisChart";
 
 const HoraSegurancaDashboard = () => {
   const [tab, setTab] = useState("overview");
@@ -103,31 +103,41 @@ const HoraSegurancaDashboard = () => {
               </Card>
             </div>
 
-            <div className="grid gap-4 md:grid-cols-2">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Inspeções por CCA</CardTitle>
-                  <CardDescription>
-                    Distribuição de inspeções por centro de custo
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="pl-2">
-                  <InspecoesBarChart dataType="cca" />
-                </CardContent>
-              </Card>
+            <Card className="col-span-full">
+              <CardHeader>
+                <CardTitle>Inspeções por CCA</CardTitle>
+                <CardDescription>
+                  Distribuição de inspeções por centro de custo
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="pl-2">
+                <InspecoesBarChart dataType="cca" />
+              </CardContent>
+            </Card>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Inspeções por Responsável</CardTitle>
-                  <CardDescription>
-                    Distribuição de inspeções por responsável
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="pl-2">
-                  <InspecoesBarChart dataType="responsible" />
-                </CardContent>
-              </Card>
-            </div>
+            <Card className="col-span-full">
+              <CardHeader>
+                <CardTitle>Inspeções por Responsável</CardTitle>
+                <CardDescription>
+                  Distribuição de inspeções por responsável
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="pl-2">
+                <InspecoesBarChart dataType="responsible" />
+              </CardContent>
+            </Card>
+
+            <Card className="col-span-full">
+              <CardHeader>
+                <CardTitle>Desvios por Responsável</CardTitle>
+                <CardDescription>
+                  Quantidade de desvios identificados por responsável
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="pl-2">
+                <DesviosResponsaveisChart />
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       </div>

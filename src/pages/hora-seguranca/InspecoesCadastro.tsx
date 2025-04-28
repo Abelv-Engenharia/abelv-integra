@@ -267,7 +267,7 @@ const InspecoesCadastro = () => {
                   control={form.control}
                   name="inspecao"
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem className="col-span-full">
                       <FormLabel>Inspeção programada</FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>

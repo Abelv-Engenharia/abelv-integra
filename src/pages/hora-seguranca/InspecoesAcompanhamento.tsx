@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -270,10 +269,14 @@ const InspecoesAcompanhamento = () => {
                   </Badge>
                 </div>
               </CardHeader>
-              <CardContent className="py-2">
-                <div className="space-y-2 text-sm">
+              <CardContent className="pt-6 flex flex-col space-y-4">
+                <div className="space-y-2">
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Data:</span>
+                    <span className="text-muted-foreground">CCA:</span>
+                    <span className="font-medium">{inspecao.cca}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Data da inspeção:</span>
                     <span className="font-medium">{format(inspecao.dataInspecao, "dd/MM/yyyy")}</span>
                   </div>
                   <div className="flex justify-between">
