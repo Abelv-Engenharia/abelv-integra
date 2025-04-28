@@ -11,6 +11,7 @@ import { CalendarRange, Calendar as CalendarIcon, Download, Filter } from "lucid
 import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "@/hooks/use-toast";
+import { DateRange } from "react-day-picker";
 
 type RelatorioFiltersProps = {
   onFilter: (filters: any) => void;
@@ -26,7 +27,7 @@ type RelatorioFiltersProps = {
 
 export function RelatorioFilters({ onFilter, filterOptions }: RelatorioFiltersProps) {
   const [period, setPeriod] = React.useState<string>("last-30");
-  const [dateRange, setDateRange] = React.useState<{ from: Date | undefined; to: Date | undefined }>({
+  const [dateRange, setDateRange] = React.useState<DateRange>({
     from: undefined,
     to: undefined
   });

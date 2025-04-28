@@ -12,6 +12,7 @@ export interface Treinamento {
   nome: string;
   cargaHoraria?: number;
   validadeDias?: number; // Validade em dias
+  tipo?: string; // Added tipo field
 }
 
 export interface TreinamentoNormativo {
@@ -21,6 +22,7 @@ export interface TreinamentoNormativo {
   tipo: 'Formação' | 'Reciclagem';
   dataRealizacao: Date;
   dataValidade: Date;
+  dataInicio: Date; // Added dataInicio field
   certificadoUrl?: string;
   status: 'Válido' | 'Próximo ao vencimento' | 'Vencido';
   arquivado: boolean; // Para histórico
@@ -49,11 +51,11 @@ export const MOCK_FUNCIONARIOS: Funcionario[] = [
 ];
 
 export const MOCK_TREINAMENTOS: Treinamento[] = [
-  { id: '1', nome: 'NR10 - Segurança em instalações elétricas', cargaHoraria: 40, validadeDias: 730 }, // 2 anos
-  { id: '2', nome: 'NR35 - Trabalho em altura', cargaHoraria: 8, validadeDias: 730 }, // 2 anos
-  { id: '3', nome: 'NR33 - Espaço confinado', cargaHoraria: 16, validadeDias: 365 }, // 1 ano
-  { id: '4', nome: 'Brigada de incêndio', cargaHoraria: 8, validadeDias: 365 }, // 1 ano
-  { id: '5', nome: 'Primeiros socorros', cargaHoraria: 8, validadeDias: 730 } // 2 anos
+  { id: '1', nome: 'NR10 - Segurança em instalações elétricas', cargaHoraria: 40, validadeDias: 730, tipo: 'Normativo' }, // 2 anos
+  { id: '2', nome: 'NR35 - Trabalho em altura', cargaHoraria: 8, validadeDias: 730, tipo: 'Normativo' }, // 2 anos
+  { id: '3', nome: 'NR33 - Espaço confinado', cargaHoraria: 16, validadeDias: 365, tipo: 'Normativo' }, // 1 ano
+  { id: '4', nome: 'Brigada de incêndio', cargaHoraria: 8, validadeDias: 365, tipo: 'Segurança' }, // 1 ano
+  { id: '5', nome: 'Primeiros socorros', cargaHoraria: 8, validadeDias: 730, tipo: 'Segurança' } // 2 anos
 ];
 
 export const MOCK_TREINAMENTOS_NORMATIVOS: TreinamentoNormativo[] = [
@@ -63,6 +65,7 @@ export const MOCK_TREINAMENTOS_NORMATIVOS: TreinamentoNormativo[] = [
     treinamentoId: '1',
     tipo: 'Formação',
     dataRealizacao: new Date('2023-05-15'),
+    dataInicio: new Date('2023-05-10'), // Added
     dataValidade: new Date('2025-05-15'),
     status: 'Válido',
     arquivado: false
@@ -73,6 +76,7 @@ export const MOCK_TREINAMENTOS_NORMATIVOS: TreinamentoNormativo[] = [
     treinamentoId: '2',
     tipo: 'Formação',
     dataRealizacao: new Date('2023-10-10'),
+    dataInicio: new Date('2023-10-05'), // Added
     dataValidade: new Date('2025-10-10'),
     status: 'Válido',
     arquivado: false

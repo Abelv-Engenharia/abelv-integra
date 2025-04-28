@@ -227,7 +227,20 @@ const AdminPerfis = () => {
         id: perfis.length > 0 ? Math.max(...perfis.map(p => p.id)) + 1 : 1,
         nome: data.nome,
         descricao: data.descricao || "",
-        permissoes: data.permissoes
+        permissoes: {
+          desvios: data.permissoes.desvios,
+          treinamentos: data.permissoes.treinamentos,
+          hora_seguranca: data.permissoes.hora_seguranca,
+          ocorrencias: data.permissoes.ocorrencias,
+          medidas_disciplinares: data.permissoes.medidas_disciplinares,
+          tarefas: data.permissoes.tarefas,
+          relatorios: data.permissoes.relatorios,
+          admin_usuarios: data.permissoes.admin_usuarios,
+          admin_perfis: data.permissoes.admin_perfis,
+          admin_funcionarios: data.permissoes.admin_funcionarios,
+          admin_hht: data.permissoes.admin_hht,
+          admin_templates: data.permissoes.admin_templates,
+        }
       };
       
       setPerfis([...perfis, newPerfil]);
@@ -240,7 +253,25 @@ const AdminPerfis = () => {
       // Edit existing profile
       const updatedPerfis = perfis.map(perfil => 
         perfil.id === currentPerfil.id 
-          ? { ...perfil, nome: data.nome, descricao: data.descricao || "", permissoes: data.permissoes }
+          ? { 
+              ...perfil, 
+              nome: data.nome, 
+              descricao: data.descricao || "", 
+              permissoes: {
+                desvios: data.permissoes.desvios,
+                treinamentos: data.permissoes.treinamentos,
+                hora_seguranca: data.permissoes.hora_seguranca,
+                ocorrencias: data.permissoes.ocorrencias,
+                medidas_disciplinares: data.permissoes.medidas_disciplinares,
+                tarefas: data.permissoes.tarefas,
+                relatorios: data.permissoes.relatorios,
+                admin_usuarios: data.permissoes.admin_usuarios,
+                admin_perfis: data.permissoes.admin_perfis,
+                admin_funcionarios: data.permissoes.admin_funcionarios,
+                admin_hht: data.permissoes.admin_hht,
+                admin_templates: data.permissoes.admin_templates,
+              }
+            }
           : perfil
       );
       setPerfis(updatedPerfis);
@@ -300,6 +331,24 @@ const AdminPerfis = () => {
     });
     setIsAddDialogOpen(true);
   };
+
+  // Dynamically generate a list of permission keys to use with FormField
+  const permissionKeys = [
+    "desvios",
+    "treinamentos",
+    "hora_seguranca",
+    "ocorrencias",
+    "medidas_disciplinares",
+    "tarefas",
+    "relatorios",
+    "admin_usuarios",
+    "admin_perfis",
+    "admin_funcionarios",
+    "admin_hht",
+    "admin_templates"
+  ] as const;
+  
+  type PermissionKey = typeof permissionKeys[number];
 
   return (
     <div className="space-y-6">
@@ -447,31 +496,34 @@ const AdminPerfis = () => {
                           <Separator />
                           
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {group.permissions.map((permission) => (
-                              <FormField
-                                key={permission.id}
-                                control={form.control}
-                                name={`permissoes.${permission.id}` as const}
-                                render={({ field }) => (
-                                  <FormItem className="flex flex-row items-center space-x-3 space-y-0 rounded-md border p-4">
-                                    <FormControl>
-                                      <Checkbox 
-                                        checked={field.value} 
-                                        onCheckedChange={field.onChange} 
-                                      />
-                                    </FormControl>
-                                    <div className="space-y-1 leading-none">
-                                      <FormLabel className="cursor-pointer">
-                                        {permission.label}
-                                      </FormLabel>
-                                      <FormDescription>
-                                        Permissão para {permission.label.toLowerCase()}
-                                      </FormDescription>
-                                    </div>
-                                  </FormItem>
-                                )}
-                              />
-                            ))}
+                            {group.permissions.map((permission) => {
+                              const permissionKey = permission.id as PermissionKey;
+                              return (
+                                <FormField
+                                  key={permission.id}
+                                  control={form.control}
+                                  name={`permissoes.${permissionKey}`}
+                                  render={({ field }) => (
+                                    <FormItem className="flex flex-row items-center space-x-3 space-y-0 rounded-md border p-4">
+                                      <FormControl>
+                                        <Checkbox 
+                                          checked={field.value} 
+                                          onCheckedChange={field.onChange} 
+                                        />
+                                      </FormControl>
+                                      <div className="space-y-1 leading-none">
+                                        <FormLabel className="cursor-pointer">
+                                          {permission.label}
+                                        </FormLabel>
+                                        <FormDescription>
+                                          Permissão para {permission.label.toLowerCase()}
+                                        </FormDescription>
+                                      </div>
+                                    </FormItem>
+                                  )}
+                                />
+                              );
+                            })}
                           </div>
                         </div>
                       ))}
