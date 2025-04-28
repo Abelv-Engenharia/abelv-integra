@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { format } from "date-fns";
@@ -33,7 +32,6 @@ import * as z from "zod";
 import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 
-// Mock data
 const ccaOptions = [
   { value: "CCA001", label: "CCA 001" },
   { value: "CCA002", label: "CCA 002" },
@@ -55,7 +53,6 @@ const responsaveisOptions = [
   { value: "outro", label: "Outro (Informar manualmente)" },
 ];
 
-// Schema para validação
 const formSchema = z.object({
   dataInspecao: z.date({
     required_error: "A data da inspeção é obrigatória.",
@@ -90,14 +87,12 @@ const InspecoesCadastro = () => {
   const watchResponsavel = form.watch("responsavel");
   const isOutroResponsavel = watchResponsavel === "outro";
 
-  // Funções para preenchimento automático
   const onDateChange = (date: Date) => {
     form.setValue("dataInspecao", date);
     form.setValue("mes", format(date, "MMMM"));
     form.setValue("ano", format(date, "yyyy"));
   };
 
-  // Função para preenchimento automático da função
   const onResponsavelChange = (value: string) => {
     form.setValue("responsavel", value);
     
@@ -114,7 +109,6 @@ const InspecoesCadastro = () => {
   const onSubmit = (data: z.infer<typeof formSchema>) => {
     console.log("Dados da inspeção programada:", data);
     
-    // Adiciona status padrão "A REALIZAR"
     const inspecaoData = {
       ...data,
       status: "A REALIZAR",
@@ -122,9 +116,6 @@ const InspecoesCadastro = () => {
     
     console.log("Dados completos da inspeção:", inspecaoData);
     
-    // Aqui seria o código para salvar no backend
-    
-    // Mostra toast de sucesso
     toast({
       title: "Sucesso!",
       description: "Inspeção programada cadastrada com sucesso!",
@@ -175,7 +166,6 @@ const InspecoesCadastro = () => {
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 w-full">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {/* Data da Inspeção */}
                   <FormField
                     control={form.control}
                     name="dataInspecao"
@@ -219,7 +209,6 @@ const InspecoesCadastro = () => {
                     )}
                   />
 
-                  {/* Mês - Preenchimento automático */}
                   <FormField
                     control={form.control}
                     name="mes"
@@ -234,7 +223,6 @@ const InspecoesCadastro = () => {
                     )}
                   />
 
-                  {/* Ano - Preenchimento automático */}
                   <FormField
                     control={form.control}
                     name="ano"
@@ -250,7 +238,6 @@ const InspecoesCadastro = () => {
                   />
                 </div>
 
-                {/* CCA - Linha inteira */}
                 <FormField
                   control={form.control}
                   name="cca"
@@ -276,34 +263,51 @@ const InspecoesCadastro = () => {
                   )}
                 />
 
+                <FormField
+                  control={form.control}
+                  name="inspecao"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Inspeção programada</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione o tipo de inspeção" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {inspecaoOptions.map((option) => (
+                            <SelectItem key={option.value} value={option.value}>
+                              {option.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* Inspeção programada */}
                   <FormField
                     control={form.control}
-                    name="inspecao"
+                    name="funcao"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Inspeção programada</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Selecione o tipo de inspeção" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {inspecaoOptions.map((option) => (
-                              <SelectItem key={option.value} value={option.value}>
-                                {option.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        <FormLabel>Função</FormLabel>
+                        <FormControl>
+                          <Input 
+                            {...field} 
+                            readOnly={!isOutroResponsavel} 
+                            disabled={!isOutroResponsavel}
+                            placeholder={isOutroResponsavel ? "Digite a função do responsável" : ""} 
+                          />
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
 
-                  {/* Responsável pela inspeção */}
                   <FormField
                     control={form.control}
                     name="responsavel"
@@ -349,27 +353,9 @@ const InspecoesCadastro = () => {
                   />
                 )}
 
-                {/* Função */}
-                <FormField
-                  control={form.control}
-                  name="funcao"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Função</FormLabel>
-                      <FormControl>
-                        <Input 
-                          {...field} 
-                          readOnly={!isOutroResponsavel} 
-                          disabled={!isOutroResponsavel}
-                          placeholder={isOutroResponsavel ? "Digite a função do responsável" : ""} 
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <Button type="submit" className="w-full">Cadastrar inspeção</Button>
+                <div className="flex justify-end">
+                  <Button type="submit" size="default">Cadastrar inspeção</Button>
+                </div>
               </form>
             </Form>
           </CardContent>

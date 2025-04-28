@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -34,7 +33,6 @@ import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { Shield, ShieldAlert, ShieldCheck, ShieldX } from "lucide-react";
 
-// Mock data
 const inspecaoOptions = [
   { value: "DDS", label: "Diálogo Diário de Segurança (DDS)" },
   { value: "IB", label: "Inspeção de Barricada" },
@@ -43,7 +41,6 @@ const inspecaoOptions = [
   { value: "ISA", label: "Inspeção de Sistema Anti-queda" },
 ];
 
-// Mock data para inspeções
 const mockInspecoes = [
   {
     id: 1,
@@ -95,9 +92,8 @@ const mockInspecoes = [
     status: "CANCELADA",
     desviosIdentificados: 0
   }
-];
+].sort((a, b) => a.dataInspecao.getTime() - b.dataInspecao.getTime());
 
-// Schema para validação do formulário de atualização
 const formSchema = z.object({
   inspecao: z.string({
     required_error: "A inspeção é obrigatória.",
@@ -110,7 +106,6 @@ const formSchema = z.object({
   }),
 });
 
-// Função para renderizar o ícone de acordo com o status
 const getStatusIcon = (status: string) => {
   switch (status) {
     case "REALIZADA":
@@ -128,15 +123,14 @@ const getStatusIcon = (status: string) => {
   }
 };
 
-// Função para renderizar a cor da badge de acordo com o status
 const getStatusBadgeClass = (status: string) => {
   switch (status) {
     case "REALIZADA":
       return "bg-green-500 hover:bg-green-600";
     case "REALIZADA NÃO PROGRAMADA":
-      return "bg-blue-500 hover:bg-blue-600";
+      return "bg-orange-500 hover:bg-orange-600";
     case "A REALIZAR":
-      return "bg-yellow-500 hover:bg-yellow-600";
+      return "bg-blue-500 hover:bg-blue-600";
     case "NÃO REALIZADA":
       return "bg-red-500 hover:bg-red-600";
     case "CANCELADA":
@@ -151,8 +145,10 @@ const InspecoesAcompanhamento = () => {
   const [inspecoes, setInspecoes] = useState(mockInspecoes);
   const [isUpdateDialogOpen, setIsUpdateDialogOpen] = useState(false);
   const [selectedInspecao, setSelectedInspecao] = useState<any>(null);
+  const [filterCCA, setFilterCCA] = useState("");
+  const [filterStatus, setFilterStatus] = useState("");
+  const [filterResponsavel, setFilterResponsavel] = useState("");
 
-  // Form para atualização de inspeção
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -162,7 +158,13 @@ const InspecoesAcompanhamento = () => {
     },
   });
 
-  // Abrir dialog para atualizar status
+  const filteredInspecoes = inspecoes.filter(inspecao => {
+    if (filterCCA && inspecao.cca !== filterCCA) return false;
+    if (filterStatus && inspecao.status !== filterStatus) return false;
+    if (filterResponsavel && inspecao.responsavel !== filterResponsavel) return false;
+    return true;
+  });
+
   const handleUpdateStatus = (inspecao: any) => {
     setSelectedInspecao(inspecao);
     form.reset({
@@ -173,16 +175,13 @@ const InspecoesAcompanhamento = () => {
     setIsUpdateDialogOpen(true);
   };
 
-  // Fechar dialog
   const handleCloseDialog = () => {
     setIsUpdateDialogOpen(false);
     setSelectedInspecao(null);
   };
 
-  // Salvar alterações da inspeção
   const onSubmit = (data: z.infer<typeof formSchema>) => {
     if (selectedInspecao) {
-      // Atualiza o estado local
       const updatedInspecoes = inspecoes.map(insp => {
         if (insp.id === selectedInspecao.id) {
           return {
@@ -197,15 +196,11 @@ const InspecoesAcompanhamento = () => {
       
       setInspecoes(updatedInspecoes);
       
-      // Aqui seria o código para atualizar no backend
-      
-      // Exibe mensagem de sucesso
       toast({
         title: "Sucesso!",
         description: "Status da inspeção atualizado com sucesso.",
       });
       
-      // Fecha o dialog
       handleCloseDialog();
     }
   };
@@ -220,8 +215,48 @@ const InspecoesAcompanhamento = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {inspecoes.map((inspecao) => (
+        <div className="grid gap-4 md:grid-cols-3">
+          <Select value={filterCCA} onValueChange={setFilterCCA}>
+            <SelectTrigger>
+              <SelectValue placeholder="Filtrar por CCA" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">Todos</SelectItem>
+              <SelectItem value="CCA 001">CCA 001</SelectItem>
+              <SelectItem value="CCA 002">CCA 002</SelectItem>
+              <SelectItem value="CCA 003">CCA 003</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Select value={filterStatus} onValueChange={setFilterStatus}>
+            <SelectTrigger>
+              <SelectValue placeholder="Filtrar por Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">Todos</SelectItem>
+              <SelectItem value="A REALIZAR">A Realizar</SelectItem>
+              <SelectItem value="REALIZADA">Realizada</SelectItem>
+              <SelectItem value="REALIZADA NÃO PROGRAMADA">Realizada Não Programada</SelectItem>
+              <SelectItem value="NÃO REALIZADA">Não Realizada</SelectItem>
+              <SelectItem value="CANCELADA">Cancelada</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Select value={filterResponsavel} onValueChange={setFilterResponsavel}>
+            <SelectTrigger>
+              <SelectValue placeholder="Filtrar por Responsável" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">Todos</SelectItem>
+              <SelectItem value="João Silva">João Silva</SelectItem>
+              <SelectItem value="Maria Oliveira">Maria Oliveira</SelectItem>
+              <SelectItem value="Carlos Santos">Carlos Santos</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="flex flex-col space-y-4">
+          {filteredInspecoes.map((inspecao) => (
             <Card key={inspecao.id}>
               <CardHeader className="pb-2">
                 <div className="flex justify-between items-center">
@@ -269,7 +304,6 @@ const InspecoesAcompanhamento = () => {
           ))}
         </div>
 
-        {/* Dialog para atualização de status */}
         <Dialog open={isUpdateDialogOpen} onOpenChange={setIsUpdateDialogOpen}>
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
@@ -278,7 +312,6 @@ const InspecoesAcompanhamento = () => {
             {selectedInspecao && (
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                  {/* Informações não editáveis */}
                   <div className="grid grid-cols-2 gap-4">
                     <FormItem>
                       <FormLabel>CCA</FormLabel>
@@ -295,7 +328,6 @@ const InspecoesAcompanhamento = () => {
                     <Input value={selectedInspecao.responsavel} disabled />
                   </FormItem>
 
-                  {/* Campos editáveis */}
                   <FormField
                     control={form.control}
                     name="inspecao"
