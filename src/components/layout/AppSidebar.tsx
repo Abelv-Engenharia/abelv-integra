@@ -38,7 +38,6 @@ export function AppSidebar() {
     if (currentPath.startsWith("/ocorrencias")) return "ocorrencias";
     if (currentPath.startsWith("/medidas-disciplinares")) return "medidas-disciplinares";
     if (currentPath.startsWith("/tarefas")) return "tarefas";
-    if (currentPath.startsWith("/gestao-rotina")) return "gestao-rotina";
     if (currentPath.startsWith("/relatorios")) return "relatorios";
     if (currentPath.startsWith("/admin")) return "admin";
     return null;
@@ -352,61 +351,6 @@ export function AppSidebar() {
         </SidebarGroup>
 
         <SidebarGroup>
-          <SidebarGroupLabel>Gestão da Rotina</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {/* Gestão da Rotina menu with collapsible */}
-              <SidebarMenuItem>
-                <Collapsible open={openMenu === "gestao-rotina"}>
-                  <CollapsibleTrigger asChild>
-                    <SidebarMenuButton onClick={() => toggleMenu("gestao-rotina")}>
-                      <ShieldCheck className="h-4 w-4" />
-                      <span>Gestão da Rotina</span>
-                    </SidebarMenuButton>
-                  </CollapsibleTrigger>
-                  
-                  <CollapsibleContent asChild>
-                    <SidebarMenuSub>
-                      <SidebarMenuItem>
-                        <SidebarMenuButton asChild>
-                          <Link to="/gestao-rotina/dssms">
-                            <span>DSSMS</span>
-                          </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                      
-                      <SidebarMenuItem>
-                        <SidebarMenuButton asChild>
-                          <Link to="/gestao-rotina/rms">
-                            <span>RMS</span>
-                          </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                      
-                      <SidebarMenuItem>
-                        <SidebarMenuButton asChild>
-                          <Link to="/gestao-rotina/ift">
-                            <span>IFT</span>
-                          </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                      
-                      <SidebarMenuItem>
-                        <SidebarMenuButton asChild>
-                          <Link to="/gestao-rotina/ficha-epi">
-                            <span>Ficha de EPI</span>
-                          </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                    </SidebarMenuSub>
-                  </CollapsibleContent>
-                </Collapsible>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        <SidebarGroup>
           <SidebarGroupLabel>Relatórios</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
@@ -503,3 +447,4 @@ export function AppSidebar() {
     </Sidebar>
   );
 }
+

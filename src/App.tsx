@@ -81,18 +81,12 @@ const App = () => (
             <Route path="/medidas-disciplinares/cadastro" element={<Dashboard />} />
             <Route path="/medidas-disciplinares/consulta" element={<Dashboard />} />
             
-            {/* Tarefas routes - NOVAS ROTAS */}
+            {/* Tarefas routes */}
             <Route path="/tarefas/dashboard" element={<TarefasDashboard />} />
             <Route path="/tarefas/minhas-tarefas" element={<MinhasTarefas />} />
             <Route path="/tarefas/cadastro" element={<CadastroTarefas />} />
             <Route path="/tarefas/detalhes/:id" element={<DetalheTarefa />} />
             <Route path="/tarefas/editar/:id" element={<EditarTarefa />} />
-            
-            {/* Gestão da Rotina routes */}
-            <Route path="/gestao-rotina/dssms" element={<Dashboard />} />
-            <Route path="/gestao-rotina/rms" element={<Dashboard />} />
-            <Route path="/gestao-rotina/ift" element={<Dashboard />} />
-            <Route path="/gestao-rotina/ficha-epi" element={<Dashboard />} />
             
             {/* Relatórios routes */}
             <Route path="/relatorios" element={<Dashboard />} />
