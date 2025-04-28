@@ -51,9 +51,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { useToast } from "@/hooks/use-toast";
 
-// Define the form schema with Zod
 const formSchema = z.object({
-  // Identificação
   data: z.date({
     required_error: "Data é obrigatória",
   }),
@@ -80,7 +78,6 @@ const formSchema = z.object({
   }),
   engenheiro_responsavel: z.string().min(3, "Engenheiro responsável deve ter no mínimo 3 caracteres"),
   
-  // Informações
   descricao: z.string().min(10, "Descrição deve ter no mínimo 10 caracteres"),
   base_legal: z.string().min(3, "Base legal deve ter no mínimo 3 caracteres"),
   supervisor_responsavel: z.string().min(3, "Supervisor responsável deve ter no mínimo 3 caracteres"),
@@ -89,14 +86,12 @@ const formSchema = z.object({
   funcao_colaborador: z.string().optional(),
   matricula_colaborador: z.string().optional(),
   
-  // Ação corretiva
   tratativa_aplicada: z.string().min(10, "Tratativa aplicada deve ter no mínimo 10 caracteres"),
   responsavel_acao: z.string().min(3, "Responsável pela ação deve ter no mínimo 3 caracteres"),
   prazo_correcao: z.date().optional(),
   situacao_acao: z.enum(["PENDENTE", "EM_TRATATIVA", "TRATADO"]),
   aplicacao_medida_disciplinar: z.boolean().default(false),
   
-  // Classificação de risco
   exposicao: z.enum(["1", "2", "3"]),
   controle: z.enum(["0", "1", "2", "3"]),
   deteccao: z.enum(["1", "2", "3"]),
@@ -111,17 +106,14 @@ const calculateRiskLevel = (formValues: Partial<FormValues>) => {
     return "Não definido";
   }
   
-  // Converting string values to numbers
   const exposicaoValue = parseInt(formValues.exposicao);
   const controleValue = parseInt(formValues.controle);
   const deteccaoValue = parseInt(formValues.deteccao);
   const severidadeValue = parseInt(formValues.severidade);
   const impactoValue = parseInt(formValues.impacto);
   
-  // Calculate risk using the new formula
   const riskValue = ((exposicaoValue + controleValue + deteccaoValue) * (severidadeValue + impactoValue));
   
-  // Determine risk level based on the new thresholds
   if (riskValue <= 10) return "TRIVIAL";
   if (riskValue <= 21) return "TOLERÁVEL";
   if (riskValue <= 40) return "MODERADO";
@@ -144,7 +136,6 @@ const calculateActionStatus = (situacao: string | undefined, prazo: Date | undef
 const DesviosForm = () => {
   const { toast } = useToast();
   
-  // Set default values for the form fields
   const defaultValues: Partial<FormValues> = {
     data: new Date(),
     hora: format(new Date(), "HH:mm"),
@@ -159,13 +150,11 @@ const DesviosForm = () => {
     impacto: "1",
   };
   
-  // Initialize the form
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues,
   });
   
-  // Update year and month when date changes
   useEffect(() => {
     const subscription = form.watch((value, { name }) => {
       if (name === 'data' && value.data) {
@@ -178,12 +167,10 @@ const DesviosForm = () => {
     return () => subscription.unsubscribe();
   }, [form]);
   
-  // Get current values for risk calculation
   const formValues = form.watch();
   const riskLevel = calculateRiskLevel(formValues);
   const actionStatus = calculateActionStatus(formValues.situacao_acao, formValues.prazo_correcao);
   
-  // Handle form submission
   const onSubmit = (data: FormValues) => {
     console.log("Form submitted:", data);
     
@@ -192,13 +179,11 @@ const DesviosForm = () => {
       description: "O desvio foi registrado com sucesso!",
     });
     
-    // Reset the form after submission
     form.reset(defaultValues);
   };
   
-  // Function to navigate to the next tab
   const navigateToNextTab = (currentTab: string) => {
-    const tabOrder = ["identificacao", "informacoes", "acao-corretiva", "classificacao-risco", "sugestao-acao"];
+    const tabOrder = ["identificacao", "informacoes", "acao-corretiva", "classificacao-risco"];
     const currentIndex = tabOrder.indexOf(currentTab);
     if (currentIndex < tabOrder.length - 1) {
       const nextTab = tabOrder[currentIndex + 1];
@@ -242,7 +227,7 @@ const DesviosForm = () => {
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <Tabs defaultValue="identificacao" className="w-full">
-                <TabsList className="grid w-full grid-cols-5">
+                <TabsList className="grid w-full grid-cols-4">
                   <TabsTrigger value="identificacao" className="flex items-center gap-2">
                     <ClipboardList className="h-4 w-4" />
                     <span className="hidden md:inline">Identificação</span>
@@ -259,13 +244,8 @@ const DesviosForm = () => {
                     <BarChart4 className="h-4 w-4" />
                     <span className="hidden md:inline">Classificação de Risco</span>
                   </TabsTrigger>
-                  <TabsTrigger value="sugestao-acao" className="flex items-center gap-2">
-                    <Lightbulb className="h-4 w-4" />
-                    <span className="hidden md:inline">Sugestão de Ação</span>
-                  </TabsTrigger>
                 </TabsList>
                 
-                {/* Tab 1: Identificação */}
                 <TabsContent value="identificacao" className="pt-4">
                   <div className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -549,7 +529,6 @@ const DesviosForm = () => {
                   </div>
                 </TabsContent>
                 
-                {/* Tab 2: Informações */}
                 <TabsContent value="informacoes" className="pt-4">
                   <div className="space-y-6">
                     <FormField
@@ -671,7 +650,6 @@ const DesviosForm = () => {
                   </div>
                 </TabsContent>
                 
-                {/* Tab 3: Ação Corretiva */}
                 <TabsContent value="acao-corretiva" className="pt-4">
                   <div className="space-y-6">
                     <FormField
@@ -816,7 +794,6 @@ const DesviosForm = () => {
                   </div>
                 </TabsContent>
                 
-                {/* Tab 4: Classificação de Risco */}
                 <TabsContent value="classificacao-risco" className="pt-4">
                   <div className="space-y-6">
                     <div className="space-y-4">
@@ -961,30 +938,6 @@ const DesviosForm = () => {
                           {riskLevel}
                         </div>
                       </div>
-
-                      {/* Moved from sugestao-acao tab */}
-                      <div className="p-6 border rounded-md">
-                        <h3 className="text-lg font-medium flex items-center mb-4">
-                          <Lightbulb className="mr-2 h-5 w-5 text-yellow-500" />
-                          Sugestão de Ação Baseada em IA
-                        </h3>
-                        
-                        <div className="bg-muted p-4 rounded-md">
-                          <p className="text-muted-foreground italic">
-                            Este recurso utilizará a descrição do desvio e a classificação de risco para sugerir ações corretivas utilizando inteligência artificial.
-                          </p>
-                          
-                          <div className="mt-4 p-4 bg-card rounded-md border">
-                            <p className="font-medium mb-2">Baseado na descrição e nível de risco ({riskLevel}), recomendamos:</p>
-                            <ul className="list-disc pl-5 space-y-2">
-                              <li>Implementar treinamento específico para os colaboradores envolvidos</li>
-                              <li>Revisar procedimentos operacionais relacionados à atividade</li>
-                              <li>Realizar inspeção detalhada dos equipamentos utilizados</li>
-                              <li>Implementar checklist diário de verificação antes do início das atividades</li>
-                            </ul>
-                          </div>
-                        </div>
-                      </div>
                     </div>
                     
                     <div className="flex justify-end space-x-4 pt-4">
@@ -996,34 +949,6 @@ const DesviosForm = () => {
                         <Save className="mr-2 h-4 w-4" />
                         Salvar Registro
                       </Button>
-                    </div>
-                  </div>
-                </TabsContent>
-                
-                {/* Tab 5: Sugestão de Ação */}
-                <TabsContent value="sugestao-acao" className="pt-4">
-                  <div className="space-y-6">
-                    <div className="p-6 border rounded-md">
-                      <h3 className="text-lg font-medium flex items-center mb-4">
-                        <Lightbulb className="mr-2 h-5 w-5 text-yellow-500" />
-                        Sugestão de Ação Baseada em IA
-                      </h3>
-                      
-                      <div className="bg-muted p-4 rounded-md">
-                        <p className="text-muted-foreground italic">
-                          Este recurso utilizará a descrição do desvio e a classificação de risco para sugerir ações corretivas utilizando inteligência artificial.
-                        </p>
-                        
-                        <div className="mt-4 p-4 bg-card rounded-md border">
-                          <p className="font-medium mb-2">Baseado na descrição e nível de risco ({riskLevel}), recomendamos:</p>
-                          <ul className="list-disc pl-5 space-y-2">
-                            <li>Implementar treinamento específico para os colaboradores envolvidos</li>
-                            <li>Revisar procedimentos operacionais relacionados à atividade</li>
-                            <li>Realizar inspeção detalhada dos equipamentos utilizados</li>
-                            <li>Implementar checklist diário de verificação antes do início das atividades</li>
-                          </ul>
-                        </div>
-                      </div>
                     </div>
                   </div>
                 </TabsContent>
