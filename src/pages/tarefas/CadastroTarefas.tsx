@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -38,13 +39,25 @@ const formSchema = z.object({
   recorrenciaAtiva: z.boolean().default(false),
   frequenciaRecorrencia: z.enum(["diaria", "semanal", "mensal", "trimestral", "semestral", "anual"]).optional()
 });
+
 type FormValues = z.infer<typeof formSchema>;
+
+// Mock de CCAs para o dropdown
+const mockCCAs = [
+  { id: "CCA-001", nome: "CCA 001 - Linha de Produção Principal" },
+  { id: "CCA-002", nome: "CCA 002 - Área de Estoque" },
+  { id: "CCA-003", nome: "CCA 003 - Setor de Embalagem" },
+  { id: "CCA-004", nome: "CCA 004 - Laboratório de Qualidade" },
+  { id: "CCA-005", nome: "CCA 005 - Área Administrativa" },
+  { id: "CCA-006", nome: "CCA 006 - Depósito de Materiais" },
+  { id: "CCA-007", nome: "CCA 007 - Estação de Tratamento" },
+];
+
 const CadastroTarefas = () => {
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       tipoCca: "linha-inteira",
-      // Valor padrão para tipoCca
       dataConclusao: new Date(),
       criticidade: "media",
       requerValidacao: false,
@@ -52,12 +65,15 @@ const CadastroTarefas = () => {
       recorrenciaAtiva: false
     }
   });
+  
   const recorrenciaAtiva = form.watch("recorrenciaAtiva");
   const dataAtual = new Date();
+  
   const calcularStatusInicial = () => {
     // No cadastro, sempre começará como programada
     return "programada";
   };
+  
   const onSubmit = (values: FormValues) => {
     // Adicionando os valores automáticos que não fazem mais parte do form
     const dadosCompletos = {
@@ -89,7 +105,9 @@ const CadastroTarefas = () => {
       });
     }, 1000);
   };
-  return <div className="space-y-6">
+  
+  return (
+    <div className="space-y-6">
       <div className="flex flex-col gap-2">
         <h1 className="text-3xl font-bold">Cadastro de Tarefas</h1>
         <p className="text-muted-foreground">
@@ -109,11 +127,39 @@ const CadastroTarefas = () => {
               <Card>
                 <CardContent className="pt-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Campo CCA com tipo de seleção (linha inteira) */}
-                    <FormField control={form.control} name="tipoCca" render={({
-                    field
-                  }) => <FormItem className="col-span-1 md:col-span-2">
-                          <FormLabel>CCA - Campo Seleção</FormLabel>
+                    {/* Campo CCA com novo dropdown */}
+                    <FormField 
+                      control={form.control}
+                      name="cca"
+                      render={({ field }) => (
+                        <FormItem className="col-span-1 md:col-span-2">
+                          <FormLabel>CCA</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Selecione um CCA" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {mockCCAs.map((cca) => (
+                                <SelectItem key={cca.id} value={cca.id}>
+                                  {cca.nome}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    {/* Tipo CCA */}
+                    <FormField 
+                      control={form.control} 
+                      name="tipoCca" 
+                      render={({ field }) => (
+                        <FormItem className="col-span-1 md:col-span-2">
+                          <FormLabel>Tipo de CCA</FormLabel>
                           <Select onValueChange={field.onChange} defaultValue={field.value}>
                             <FormControl>
                               <SelectTrigger>
@@ -128,58 +174,72 @@ const CadastroTarefas = () => {
                             </SelectContent>
                           </Select>
                           <FormMessage />
-                        </FormItem>} />
-                    
-                    {/* Código CCA */}
-                    <FormField control={form.control} name="cca" render={({
-                    field
-                  }) => {}} />
-                    
-                    {/* Data do Cadastro (não editável) e Data para Conclusão na mesma linha */}
-                    <div className="flex space-x-4">
-                      <div className="flex-1">
-                        <FormItem>
-                          <FormLabel>Data do Cadastro</FormLabel>
-                          <FormControl>
-                            <Input type="text" value={format(dataAtual, "dd/MM/yyyy", {
-                            locale: ptBR
-                          })} disabled />
-                          </FormControl>
-                          <FormDescription>
-                            Data gerada automaticamente
-                          </FormDescription>
                         </FormItem>
-                      </div>
+                      )}
+                    />
+                    
+                    {/* Data do Cadastro (não editável) e Data para Conclusão em largura completa */}
+                    <FormItem className="col-span-1 md:col-span-2">
+                      <FormLabel>Data do Cadastro</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="text" 
+                          value={format(dataAtual, "dd/MM/yyyy", { locale: ptBR })} 
+                          disabled 
+                          className="bg-gray-50"
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        Data gerada automaticamente
+                      </FormDescription>
+                    </FormItem>
                       
-                      <div className="flex-1">
-                        <FormField control={form.control} name="dataConclusao" render={({
-                        field
-                      }) => <FormItem className="flex flex-col">
-                              <FormLabel>Data para Conclusão</FormLabel>
-                              <Popover>
-                                <PopoverTrigger asChild>
-                                  <FormControl>
-                                    <Button variant={"outline"} className={cn("w-full pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>
-                                      {field.value ? format(field.value, "dd/MM/yyyy", {
-                                  locale: ptBR
-                                }) : <span>Selecione uma data</span>}
-                                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                    </Button>
-                                  </FormControl>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-auto p-0" align="start">
-                                  <Calendar mode="single" selected={field.value} onSelect={field.onChange} fromDate={new Date()} initialFocus />
-                                </PopoverContent>
-                              </Popover>
-                              <FormMessage />
-                            </FormItem>} />
-                      </div>
-                    </div>
+                    <FormField
+                      control={form.control}
+                      name="dataConclusao"
+                      render={({ field }) => (
+                        <FormItem className="col-span-1 md:col-span-2">
+                          <FormLabel>Data para Conclusão</FormLabel>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <FormControl>
+                                <Button
+                                  variant={"outline"}
+                                  className={cn(
+                                    "w-full pl-3 text-left font-normal",
+                                    !field.value && "text-muted-foreground"
+                                  )}
+                                >
+                                  {field.value ? (
+                                    format(field.value, "dd/MM/yyyy", { locale: ptBR })
+                                  ) : (
+                                    <span>Selecione uma data</span>
+                                  )}
+                                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                </Button>
+                              </FormControl>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0" align="start">
+                              <Calendar
+                                mode="single"
+                                selected={field.value}
+                                onSelect={field.onChange}
+                                fromDate={new Date()}
+                                initialFocus
+                              />
+                            </PopoverContent>
+                          </Popover>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                     
                     {/* Responsável em linha completa */}
-                    <FormField control={form.control} name="responsavelId" render={({
-                    field
-                  }) => <FormItem className="col-span-1 md:col-span-2">
+                    <FormField 
+                      control={form.control} 
+                      name="responsavelId" 
+                      render={({ field }) => (
+                        <FormItem className="col-span-1 md:col-span-2">
                           <FormLabel>Responsável</FormLabel>
                           <Select onValueChange={field.onChange} defaultValue={field.value}>
                             <FormControl>
@@ -188,19 +248,23 @@ const CadastroTarefas = () => {
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              {mockUsuarios.map(usuario => <SelectItem key={usuario.id} value={usuario.id}>
+                              {mockUsuarios.map(usuario => (
+                                <SelectItem key={usuario.id} value={usuario.id}>
                                   {usuario.nome} - {usuario.cargo}
-                                </SelectItem>)}
+                                </SelectItem>
+                              ))}
                             </SelectContent>
                           </Select>
                           <FormMessage />
-                        </FormItem>} />
+                        </FormItem>
+                      )}
+                    />
                     
                     {/* Status da tarefa - Agora é apenas informativo */}
                     <FormItem className="col-span-1 md:col-span-2">
                       <FormLabel>Status da Tarefa</FormLabel>
                       <FormControl>
-                        <Input type="text" value="Programada" disabled />
+                        <Input type="text" value="Programada" disabled className="bg-gray-50" />
                       </FormControl>
                       <FormDescription>
                         Status definido automaticamente como "Programada" no cadastro
@@ -208,15 +272,23 @@ const CadastroTarefas = () => {
                     </FormItem>
                     
                     {/* Descrição da Tarefa */}
-                    <FormField control={form.control} name="descricao" render={({
-                    field
-                  }) => <FormItem className="col-span-1 md:col-span-2">
+                    <FormField 
+                      control={form.control} 
+                      name="descricao" 
+                      render={({ field }) => (
+                        <FormItem className="col-span-1 md:col-span-2">
                           <FormLabel>Descrição da Tarefa</FormLabel>
                           <FormControl>
-                            <Textarea placeholder="Descreva detalhadamente a tarefa a ser realizada" className="resize-none h-32" {...field} />
+                            <Textarea 
+                              placeholder="Descreva detalhadamente a tarefa a ser realizada" 
+                              className="resize-none h-32" 
+                              {...field} 
+                            />
                           </FormControl>
                           <FormMessage />
-                        </FormItem>} />
+                        </FormItem>
+                      )}
+                    />
                   </div>
                 </CardContent>
               </Card>
@@ -226,9 +298,11 @@ const CadastroTarefas = () => {
               <Card>
                 <CardContent className="pt-6">
                   <div className="space-y-6">
-                    <FormField control={form.control} name="recorrenciaAtiva" render={({
-                    field
-                  }) => <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                    <FormField 
+                      control={form.control} 
+                      name="recorrenciaAtiva" 
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                           <div className="space-y-0.5">
                             <FormLabel className="text-base">Recorrência</FormLabel>
                             <FormDescription>
@@ -238,11 +312,16 @@ const CadastroTarefas = () => {
                           <FormControl>
                             <Switch checked={field.value} onCheckedChange={field.onChange} />
                           </FormControl>
-                        </FormItem>} />
+                        </FormItem>
+                      )}
+                    />
                     
-                    {recorrenciaAtiva && <FormField control={form.control} name="frequenciaRecorrencia" render={({
-                    field
-                  }) => <FormItem>
+                    {recorrenciaAtiva && (
+                      <FormField 
+                        control={form.control} 
+                        name="frequenciaRecorrencia" 
+                        render={({ field }) => (
+                          <FormItem>
                             <FormLabel>Frequência da Recorrência</FormLabel>
                             <Select onValueChange={field.onChange} defaultValue={field.value}>
                               <FormControl>
@@ -260,11 +339,16 @@ const CadastroTarefas = () => {
                               </SelectContent>
                             </Select>
                             <FormMessage />
-                          </FormItem>} />}
+                          </FormItem>
+                        )}
+                      />
+                    )}
                     
-                    <FormField control={form.control} name="criticidade" render={({
-                    field
-                  }) => <FormItem>
+                    <FormField 
+                      control={form.control} 
+                      name="criticidade" 
+                      render={({ field }) => (
+                        <FormItem>
                           <FormLabel>Criticidade da Tarefa</FormLabel>
                           <FormControl>
                             <RadioGroup value={field.value} onValueChange={field.onChange} className="grid grid-cols-2 gap-3">
@@ -290,11 +374,15 @@ const CadastroTarefas = () => {
                             A criticidade define a prioridade e importância da tarefa.
                           </FormDescription>
                           <FormMessage />
-                        </FormItem>} />
+                        </FormItem>
+                      )}
+                    />
                     
-                    <FormField control={form.control} name="requerValidacao" render={({
-                    field
-                  }) => <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                    <FormField 
+                      control={form.control} 
+                      name="requerValidacao" 
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                           <div className="space-y-0.5">
                             <FormLabel className="text-base">Validação para Conclusão</FormLabel>
                             <FormDescription>
@@ -304,11 +392,15 @@ const CadastroTarefas = () => {
                           <FormControl>
                             <Switch checked={field.value} onCheckedChange={field.onChange} />
                           </FormControl>
-                        </FormItem>} />
+                        </FormItem>
+                      )}
+                    />
                     
-                    <FormField control={form.control} name="notificarUsuario" render={({
-                    field
-                  }) => <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                    <FormField 
+                      control={form.control} 
+                      name="notificarUsuario" 
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                           <div className="space-y-0.5">
                             <FormLabel className="text-base">Notificar Usuário</FormLabel>
                             <FormDescription>
@@ -318,7 +410,9 @@ const CadastroTarefas = () => {
                           <FormControl>
                             <Switch checked={field.value} onCheckedChange={field.onChange} />
                           </FormControl>
-                        </FormItem>} />
+                        </FormItem>
+                      )}
+                    />
                   </div>
                 </CardContent>
               </Card>
@@ -335,6 +429,8 @@ const CadastroTarefas = () => {
           </div>
         </form>
       </Form>
-    </div>;
+    </div>
+  );
 };
+
 export default CadastroTarefas;

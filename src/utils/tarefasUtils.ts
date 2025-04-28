@@ -50,6 +50,7 @@ export const mockTarefas: Tarefa[] = [
   {
     id: '1',
     cca: '2025-0001',
+    tipoCca: 'linha-inteira',
     dataCadastro: '2025-04-01',
     dataConclusao: '2025-05-10',
     descricao: 'Revisão do procedimento de segurança para trabalhos em altura',
@@ -69,6 +70,7 @@ export const mockTarefas: Tarefa[] = [
   {
     id: '2',
     cca: '2025-0002',
+    tipoCca: 'parcial',
     dataCadastro: '2025-04-02',
     dataConclusao: '2025-05-08',
     descricao: 'Treinamento da equipe técnica nos novos protocolos de segurança',
@@ -84,6 +86,7 @@ export const mockTarefas: Tarefa[] = [
   {
     id: '3',
     cca: '2025-0003',
+    tipoCca: 'equipamento',
     dataCadastro: '2025-04-03',
     dataConclusao: '2025-05-05',
     descricao: 'Atualização do manual de operações e procedimentos da planta',
@@ -100,6 +103,7 @@ export const mockTarefas: Tarefa[] = [
   {
     id: '4',
     cca: '2025-0004',
+    tipoCca: 'especifica',
     dataCadastro: '2025-04-04',
     dataConclusao: '2025-05-15',
     descricao: 'Inspeção dos equipamentos de proteção coletiva da área de produção',
@@ -119,6 +123,7 @@ export const mockTarefas: Tarefa[] = [
   {
     id: '5',
     cca: '2025-0005',
+    tipoCca: 'linha-inteira',
     dataCadastro: '2025-04-05',
     dataConclusao: '2025-05-12',
     descricao: 'Reunião com fornecedores de EPI para avaliar novas tecnologias',
@@ -134,6 +139,7 @@ export const mockTarefas: Tarefa[] = [
   {
     id: '6',
     cca: '2025-0006',
+    tipoCca: 'parcial',
     dataCadastro: '2025-04-06',
     dataConclusao: '2025-05-20',
     descricao: 'Auditoria interna de conformidade com normas de segurança',
@@ -153,6 +159,7 @@ export const mockTarefas: Tarefa[] = [
   {
     id: '7',
     cca: '2025-0007',
+    tipoCca: 'equipamento',
     dataCadastro: '2025-04-07',
     dataConclusao: '2025-05-25',
     descricao: 'Elaboração de relatório mensal de indicadores de segurança',
