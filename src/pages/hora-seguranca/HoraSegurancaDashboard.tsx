@@ -14,6 +14,7 @@ import { InspecoesBarChart } from "@/components/hora-seguranca/InspecoesBarChart
 import { InspecoesSummaryCards } from "@/components/hora-seguranca/InspecoesSummaryCards";
 import { RecentInspectionsList } from "@/components/hora-seguranca/RecentInspectionsList";
 import { DesviosResponsaveisChart } from "@/components/hora-seguranca/DesviosResponsaveisChart";
+import { DesviosTipoInspecaoChart } from "@/components/hora-seguranca/DesviosTipoInspecaoChart";
 
 const HoraSegurancaDashboard = () => {
   const [tab, setTab] = useState("overview");
@@ -77,31 +78,17 @@ const HoraSegurancaDashboard = () => {
 
             <InspecoesSummaryCards />
             
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-              <Card className="col-span-4">
-                <CardHeader>
-                  <CardTitle>Distribuição por Status</CardTitle>
-                  <CardDescription>
-                    Visão geral do status das inspeções
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="pl-2">
-                  <InspecaoStatusDonutChart />
-                </CardContent>
-              </Card>
-              
-              <Card className="col-span-3">
-                <CardHeader>
-                  <CardTitle>Inspeções Recentes</CardTitle>
-                  <CardDescription>
-                    Últimas inspeções registradas
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <RecentInspectionsList />
-                </CardContent>
-              </Card>
-            </div>
+            <Card className="col-span-full">
+              <CardHeader>
+                <CardTitle>Distribuição por Status</CardTitle>
+                <CardDescription>
+                  Visão geral do status das inspeções
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="pl-2">
+                <InspecaoStatusDonutChart />
+              </CardContent>
+            </Card>
 
             <Card className="col-span-full">
               <CardHeader>
@@ -136,6 +123,18 @@ const HoraSegurancaDashboard = () => {
               </CardHeader>
               <CardContent className="pl-2">
                 <DesviosResponsaveisChart />
+              </CardContent>
+            </Card>
+
+            <Card className="col-span-full">
+              <CardHeader>
+                <CardTitle>Desvios por Tipo de Inspeção</CardTitle>
+                <CardDescription>
+                  Quantidade de desvios identificados por tipo de inspeção
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="pl-2">
+                <DesviosTipoInspecaoChart />
               </CardContent>
             </Card>
           </TabsContent>
