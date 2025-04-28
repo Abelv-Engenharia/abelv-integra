@@ -10,8 +10,9 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Eye } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
-// Mock data for the table
+// Updated mock data with the new risk classifications
 const mockData = [
   {
     id: "1",
@@ -19,7 +20,7 @@ const mockData = [
     colaborador: "José da Silva",
     empresa: "Empresa A",
     tipoOcorrencia: "Acidente com Afastamento",
-    classificacaoRisco: "Alto",
+    classificacaoRisco: "INTOLERÁVEL",
     status: "Em tratativa",
   },
   {
@@ -28,7 +29,7 @@ const mockData = [
     colaborador: "Paulo Souza",
     empresa: "Empresa B",
     tipoOcorrencia: "Acidente sem Afastamento",
-    classificacaoRisco: "Médio",
+    classificacaoRisco: "MODERADO",
     status: "Concluído",
   },
   {
@@ -37,7 +38,7 @@ const mockData = [
     colaborador: "Carla Oliveira",
     empresa: "Empresa C",
     tipoOcorrencia: "Quase Acidente",
-    classificacaoRisco: "Baixo",
+    classificacaoRisco: "TRIVIAL",
     status: "Em tratativa",
   },
   {
@@ -46,7 +47,7 @@ const mockData = [
     colaborador: "Rafael Lima",
     empresa: "Empresa A",
     tipoOcorrencia: "Acidente sem Afastamento",
-    classificacaoRisco: "Alto",
+    classificacaoRisco: "SUBSTANCIAL",
     status: "Concluído",
   },
   {
@@ -55,13 +56,36 @@ const mockData = [
     colaborador: "Mariana Costa",
     empresa: "Empresa D",
     tipoOcorrencia: "Acidente com Afastamento",
-    classificacaoRisco: "Alto",
+    classificacaoRisco: "TOLERÁVEL",
     status: "Em tratativa",
   },
 ];
 
+// Function to get the background and text colors for each risk classification
+const getRiscoClassColor = (classificacao) => {
+  switch (classificacao) {
+    case "TRIVIAL":
+      return "bg-[#34C6F4] text-white";
+    case "TOLERÁVEL":
+      return "bg-[#92D050] text-white";
+    case "MODERADO":
+      return "bg-[#FFE07D] text-gray-800";
+    case "SUBSTANCIAL":
+      return "bg-[#FFC000] text-gray-800";
+    case "INTOLERÁVEL":
+      return "bg-[#D13F3F] text-white";
+    default:
+      return "bg-gray-100 text-gray-800";
+  }
+};
+
 const OcorrenciasTable = () => {
   const [data, setData] = useState(mockData);
+  const navigate = useNavigate();
+
+  const handleViewOcorrencia = (id) => {
+    navigate(`/ocorrencias/detalhes/${id}`);
+  };
 
   return (
     <Table>
@@ -84,27 +108,21 @@ const OcorrenciasTable = () => {
             <TableCell>{ocorrencia.empresa}</TableCell>
             <TableCell>{ocorrencia.tipoOcorrencia}</TableCell>
             <TableCell className="hidden md:table-cell">
-              <span className={`px-2 py-1 rounded-full text-xs ${
-                ocorrencia.classificacaoRisco === 'Alto' 
-                  ? 'bg-red-100 text-red-800' 
-                  : ocorrencia.classificacaoRisco === 'Médio'
-                  ? 'bg-yellow-100 text-yellow-800' 
-                  : 'bg-green-100 text-green-800'
-              }`}>
+              <span className={`px-2 py-1 rounded-full text-xs ${getRiscoClassColor(ocorrencia.classificacaoRisco)}`}>
                 {ocorrencia.classificacaoRisco}
               </span>
             </TableCell>
             <TableCell>
               <span className={`px-2 py-1 rounded-full text-xs ${
                 ocorrencia.status === 'Em tratativa' 
-                  ? 'bg-blue-100 text-blue-800' 
+                  ? 'bg-orange-100 text-orange-800' 
                   : 'bg-green-100 text-green-800'
               }`}>
                 {ocorrencia.status}
               </span>
             </TableCell>
             <TableCell className="text-right">
-              <Button variant="ghost" size="icon">
+              <Button variant="ghost" size="icon" onClick={() => handleViewOcorrencia(ocorrencia.id)}>
                 <Eye className="h-4 w-4" />
               </Button>
             </TableCell>

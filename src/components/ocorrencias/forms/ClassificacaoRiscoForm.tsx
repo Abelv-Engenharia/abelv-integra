@@ -321,7 +321,7 @@ const ClassificacaoRiscoForm = () => {
               </div>
               <div className="flex items-center">
                 <div className="w-4 h-4 bg-[#D13F3F] mr-2" />
-                <span className="text-sm">INTOLERÁVEL (>56)</span>
+                <span className="text-sm">INTOLERÁVEL (&gt;56)</span>
               </div>
             </div>
           </div>

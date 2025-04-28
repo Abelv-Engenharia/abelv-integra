@@ -12,8 +12,9 @@ import {
 import { OcorrenciasFiltros } from "@/components/ocorrencias/OcorrenciasFiltros";
 import { Button } from "@/components/ui/button";
 import { Eye, Search } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
-// Mock data for the occurrence list
+// Mock data for the occurrence list with the new risk classifications
 const mockOcorrencias = [
   {
     id: "1",
@@ -22,7 +23,7 @@ const mockOcorrencias = [
     cca: "CCA-001",
     disciplina: "Elétrica",
     tipoOcorrencia: "Acidente com Afastamento",
-    classificacaoRisco: "Alto",
+    classificacaoRisco: "INTOLERÁVEL",
     status: "Em tratativa",
   },
   {
@@ -32,7 +33,7 @@ const mockOcorrencias = [
     cca: "CCA-002",
     disciplina: "Mecânica",
     tipoOcorrencia: "Acidente sem Afastamento",
-    classificacaoRisco: "Médio",
+    classificacaoRisco: "MODERADO",
     status: "Concluído",
   },
   {
@@ -42,7 +43,7 @@ const mockOcorrencias = [
     cca: "CCA-003",
     disciplina: "Civil",
     tipoOcorrencia: "Quase Acidente",
-    classificacaoRisco: "Baixo",
+    classificacaoRisco: "TRIVIAL",
     status: "Em tratativa",
   },
   {
@@ -52,7 +53,7 @@ const mockOcorrencias = [
     cca: "CCA-001",
     disciplina: "Elétrica",
     tipoOcorrencia: "Acidente sem Afastamento",
-    classificacaoRisco: "Alto",
+    classificacaoRisco: "SUBSTANCIAL",
     status: "Concluído",
   },
   {
@@ -62,15 +63,34 @@ const mockOcorrencias = [
     cca: "CCA-004",
     disciplina: "Instrumentação",
     tipoOcorrencia: "Acidente com Afastamento",
-    classificacaoRisco: "Alto",
+    classificacaoRisco: "TOLERÁVEL",
     status: "Em tratativa",
   },
 ];
+
+// Function to get the background and text colors for each risk classification
+const getRiscoClassColor = (classificacao) => {
+  switch (classificacao) {
+    case "TRIVIAL":
+      return "bg-[#34C6F4] text-white";
+    case "TOLERÁVEL":
+      return "bg-[#92D050] text-white";
+    case "MODERADO":
+      return "bg-[#FFE07D] text-gray-800";
+    case "SUBSTANCIAL":
+      return "bg-[#FFC000] text-gray-800";
+    case "INTOLERÁVEL":
+      return "bg-[#D13F3F] text-white";
+    default:
+      return "bg-gray-100 text-gray-800";
+  }
+};
 
 const OcorrenciasConsulta = () => {
   const [filtroAtivo, setFiltroAtivo] = useState(false);
   const [filteredData, setFilteredData] = useState(mockOcorrencias);
   const [searchTerm, setSearchTerm] = useState("");
+  const navigate = useNavigate();
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -89,6 +109,10 @@ const OcorrenciasConsulta = () => {
     );
     
     setFilteredData(filtered);
+  };
+
+  const handleViewOcorrencia = (id: string) => {
+    navigate(`/ocorrencias/detalhes/${id}`);
   };
 
   return (
@@ -150,27 +174,25 @@ const OcorrenciasConsulta = () => {
                     <TableCell>{ocorrencia.disciplina}</TableCell>
                     <TableCell>{ocorrencia.tipoOcorrencia}</TableCell>
                     <TableCell className="hidden md:table-cell">
-                      <span className={`px-2 py-1 rounded-full text-xs ${
-                        ocorrencia.classificacaoRisco === 'Alto' 
-                          ? 'bg-red-100 text-red-800' 
-                          : ocorrencia.classificacaoRisco === 'Médio'
-                          ? 'bg-yellow-100 text-yellow-800' 
-                          : 'bg-green-100 text-green-800'
-                      }`}>
+                      <span className={`px-2 py-1 rounded-full text-xs ${getRiscoClassColor(ocorrencia.classificacaoRisco)}`}>
                         {ocorrencia.classificacaoRisco}
                       </span>
                     </TableCell>
                     <TableCell>
                       <span className={`px-2 py-1 rounded-full text-xs ${
                         ocorrencia.status === 'Em tratativa' 
-                          ? 'bg-blue-100 text-blue-800' 
+                          ? 'bg-orange-100 text-orange-800' 
                           : 'bg-green-100 text-green-800'
                       }`}>
                         {ocorrencia.status}
                       </span>
                     </TableCell>
                     <TableCell>
-                      <Button variant="ghost" size="icon">
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        onClick={() => handleViewOcorrencia(ocorrencia.id)}
+                      >
                         <Eye className="h-4 w-4" />
                       </Button>
                     </TableCell>
