@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -35,7 +34,6 @@ import { toast } from "@/hooks/use-toast";
 import { MOCK_TREINAMENTOS, OPCOES_CCA, OPCOES_PROCESSO_TREINAMENTO, OPCOES_TIPO_TREINAMENTO } from "@/types/treinamentos";
 import { cn } from "@/lib/utils";
 
-// Define form schema
 const formSchema = z.object({
   data: z.date({
     required_error: "A data é obrigatória",
@@ -61,7 +59,6 @@ const formSchema = z.object({
   listaPresenca: z.any().optional(),
 });
 
-// Type definition for form
 type FormValues = z.infer<typeof formSchema>;
 
 const TreinamentosExecucao = () => {
@@ -96,9 +93,8 @@ const TreinamentosExecucao = () => {
   const onSubmit = (data: FormValues) => {
     console.log("Form data:", data);
     
-    // Validate file size if there's a file
     const file = data.listaPresenca?.[0];
-    if (file && file.size > 2 * 1024 * 1024) { // 2MB
+    if (file && file.size > 2 * 1024 * 1024) {
       toast({
         title: "Erro ao salvar",
         description: "O arquivo deve ter no máximo 2MB",
@@ -107,7 +103,6 @@ const TreinamentosExecucao = () => {
       return;
     }
     
-    // Check if manually entered training name is provided when "outro" is selected
     if (data.treinamentoId === "outro" && !data.treinamentoNome) {
       toast({
         title: "Campo obrigatório",
@@ -117,7 +112,6 @@ const TreinamentosExecucao = () => {
       return;
     }
 
-    // Show success message and reset form if needed
     toast({
       title: "Sucesso!",
       description: "Registro realizado com sucesso!",
@@ -127,7 +121,6 @@ const TreinamentosExecucao = () => {
     setIsSubmitSuccess(true);
   };
 
-  // If form was submitted successfully, show success view
   if (isSubmitSuccess) {
     return (
       <div className="flex items-center justify-center h-[calc(100vh-200px)]">
@@ -176,7 +169,7 @@ const TreinamentosExecucao = () => {
         <h1 className="text-3xl font-bold tracking-tight">Registro de Execução de Treinamentos</h1>
       </div>
 
-      <Card className="max-w-4xl mx-auto">
+      <Card className="w-full">
         <CardHeader>
           <CardTitle>Informações do Treinamento</CardTitle>
           <CardDescription>
@@ -186,7 +179,6 @@ const TreinamentosExecucao = () => {
         <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              {/* Date, Month, Year row */}
               <div className="flex flex-col md:flex-row gap-4">
                 <FormField
                   control={form.control}
@@ -246,7 +238,6 @@ const TreinamentosExecucao = () => {
                 </FormItem>
               </div>
 
-              {/* CCA */}
               <FormField
                 control={form.control}
                 name="cca"
@@ -272,7 +263,6 @@ const TreinamentosExecucao = () => {
                 )}
               />
 
-              {/* Processo and Tipo row */}
               <div className="flex flex-col md:flex-row gap-4">
                 <FormField
                   control={form.control}
@@ -325,7 +315,6 @@ const TreinamentosExecucao = () => {
                 />
               </div>
 
-              {/* Treinamento */}
               <FormField
                 control={form.control}
                 name="treinamentoId"
@@ -352,7 +341,6 @@ const TreinamentosExecucao = () => {
                 )}
               />
 
-              {/* Manual training name input */}
               {isOutroTreinamento && (
                 <FormField
                   control={form.control}
@@ -369,7 +357,6 @@ const TreinamentosExecucao = () => {
                 />
               )}
 
-              {/* Carga horária */}
               <FormField
                 control={form.control}
                 name="cargaHoraria"
@@ -388,7 +375,6 @@ const TreinamentosExecucao = () => {
                 )}
               />
 
-              {/* Observações */}
               <FormField
                 control={form.control}
                 name="observacoes"
@@ -406,7 +392,6 @@ const TreinamentosExecucao = () => {
                 )}
               />
 
-              {/* File upload */}
               <FormField
                 control={form.control}
                 name="listaPresenca"
@@ -426,7 +411,6 @@ const TreinamentosExecucao = () => {
                 )}
               />
 
-              {/* Submit button */}
               <div className="flex justify-end">
                 <Button type="submit" className="gap-1">
                   <Save className="h-4 w-4" />

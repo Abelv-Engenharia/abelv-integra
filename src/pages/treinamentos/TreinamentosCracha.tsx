@@ -217,8 +217,8 @@ const TreinamentosCracha = () => {
                     <h3 className="font-bold uppercase">Crachá de Capacitação</h3>
                   </div>
                   
-                  <div className="flex flex-col items-center my-4">
-                    <div className="w-28 h-28 bg-gray-200 rounded-full flex items-center justify-center mb-4">
+                  <div className="flex items-start gap-4 my-4">
+                    <div className="w-28 h-28 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0">
                       {funcionario.foto ? (
                         <img 
                           src={funcionario.foto} 
@@ -230,9 +230,11 @@ const TreinamentosCracha = () => {
                       )}
                     </div>
                     
-                    <h4 className="font-bold text-lg text-center">{funcionario.nome}</h4>
-                    <p className="text-gray-600">{funcionario.funcao}</p>
-                    <p className="text-sm text-gray-500">Matrícula: {funcionario.matricula}</p>
+                    <div className="flex flex-col">
+                      <h4 className="font-bold text-lg">{funcionario.nome}</h4>
+                      <p className="text-gray-600">{funcionario.funcao}</p>
+                      <p className="text-sm text-gray-500">Matrícula: {funcionario.matricula}</p>
+                    </div>
                   </div>
                   
                   <div className="border-t pt-4 mt-2 flex-grow">

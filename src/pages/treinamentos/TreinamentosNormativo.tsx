@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -39,7 +38,6 @@ import {
 import { calcularDataValidade, calcularStatusTreinamento } from "@/utils/treinamentosUtils";
 import { cn } from "@/lib/utils";
 
-// Define form schema
 const formSchema = z.object({
   funcionarioId: z.string({
     required_error: "O funcionário é obrigatório",
@@ -56,7 +54,6 @@ const formSchema = z.object({
   certificado: z.any().optional(),
 });
 
-// Type definition for form
 type FormValues = z.infer<typeof formSchema>;
 
 const TreinamentosNormativo = () => {
@@ -75,7 +72,6 @@ const TreinamentosNormativo = () => {
   const watchTreinamentoId = form.watch("treinamentoId");
   const watchDataRealizacao = form.watch("dataRealizacao");
   
-  // Update selected funcionario when funcionarioId changes
   React.useEffect(() => {
     if (watchFuncionarioId) {
       const funcionario = MOCK_FUNCIONARIOS.find(f => f.id === watchFuncionarioId);
@@ -85,7 +81,6 @@ const TreinamentosNormativo = () => {
     }
   }, [watchFuncionarioId]);
   
-  // Update data validade when treinamento or data realizacao changes
   React.useEffect(() => {
     if (watchTreinamentoId && watchDataRealizacao) {
       const novaDataValidade = calcularDataValidade(watchTreinamentoId, watchDataRealizacao);
@@ -98,9 +93,8 @@ const TreinamentosNormativo = () => {
   const onSubmit = (data: FormValues) => {
     console.log("Form data:", data);
     
-    // Validate file size if there's a file
     const file = data.certificado?.[0];
-    if (file && file.size > 2 * 1024 * 1024) { // 2MB
+    if (file && file.size > 2 * 1024 * 1024) {
       toast({
         title: "Erro ao salvar",
         description: "O arquivo deve ter no máximo 2MB",
@@ -109,7 +103,6 @@ const TreinamentosNormativo = () => {
       return;
     }
     
-    // Create a new treinamento normativo record
     const novoTreinamento = {
       id: `new-${Date.now()}`,
       funcionarioId: data.funcionarioId,
@@ -124,7 +117,6 @@ const TreinamentosNormativo = () => {
     
     console.log("Novo treinamento normativo:", novoTreinamento);
     
-    // Show success message
     toast({
       title: "Sucesso!",
       description: "Registro realizado com sucesso!",
@@ -134,7 +126,6 @@ const TreinamentosNormativo = () => {
     setIsSubmitSuccess(true);
   };
 
-  // If form was submitted successfully, show success view
   if (isSubmitSuccess) {
     return (
       <div className="flex items-center justify-center h-[calc(100vh-200px)]">
@@ -185,7 +176,7 @@ const TreinamentosNormativo = () => {
         <h1 className="text-3xl font-bold tracking-tight">Registro de Treinamentos Normativos</h1>
       </div>
 
-      <Card className="max-w-4xl mx-auto">
+      <Card className="w-full">
         <CardHeader>
           <CardTitle>Informações do Treinamento Normativo</CardTitle>
           <CardDescription>
@@ -195,7 +186,6 @@ const TreinamentosNormativo = () => {
         <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              {/* Funcionario, Função, Matrícula row */}
               <div className="flex flex-col md:flex-row gap-4">
                 <FormField
                   control={form.control}
@@ -239,7 +229,6 @@ const TreinamentosNormativo = () => {
                 </FormItem>
               </div>
 
-              {/* Treinamento */}
               <FormField
                 control={form.control}
                 name="treinamentoId"
@@ -265,7 +254,6 @@ const TreinamentosNormativo = () => {
                 )}
               />
 
-              {/* Tipo de treinamento */}
               <FormField
                 control={form.control}
                 name="tipo"
@@ -288,7 +276,6 @@ const TreinamentosNormativo = () => {
                 )}
               />
 
-              {/* Data de realização */}
               <FormField
                 control={form.control}
                 name="dataRealizacao"
@@ -330,7 +317,6 @@ const TreinamentosNormativo = () => {
                 )}
               />
 
-              {/* Data de validade (calculated) */}
               <FormItem>
                 <FormLabel>Data de validade</FormLabel>
                 <Input
@@ -350,7 +336,6 @@ const TreinamentosNormativo = () => {
                 )}
               </FormItem>
 
-              {/* File upload */}
               <FormField
                 control={form.control}
                 name="certificado"
@@ -370,7 +355,6 @@ const TreinamentosNormativo = () => {
                 )}
               />
 
-              {/* Submit button */}
               <div className="flex justify-end">
                 <Button type="submit" className="gap-1">
                   <Save className="h-4 w-4" />
