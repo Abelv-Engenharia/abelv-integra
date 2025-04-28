@@ -39,6 +39,12 @@ import CadastroTarefas from "./pages/tarefas/CadastroTarefas";
 import DetalheTarefa from "./pages/tarefas/DetalheTarefa";
 import EditarTarefa from "./pages/tarefas/EditarTarefa";
 
+// Relatórios pages
+import RelatoriosDashboard from "./pages/relatorios/RelatoriosDashboard";
+import RelatoriosDesvios from "./pages/relatorios/RelatoriosDesvios";
+import RelatoriosTreinamentos from "./pages/relatorios/RelatoriosTreinamentos";
+import RelatoriosOcorrencias from "./pages/relatorios/RelatoriosOcorrencias";
+
 // Admin pages
 import RegistroHHT from "./pages/admin/RegistroHHT";
 import CadastroFuncionarios from "./pages/admin/CadastroFuncionarios";
@@ -95,7 +101,10 @@ const App = () => (
             <Route path="/tarefas/editar/:id" element={<EditarTarefa />} />
             
             {/* Relatórios routes */}
-            <Route path="/relatorios" element={<Dashboard />} />
+            <Route path="/relatorios" element={<RelatoriosDashboard />} />
+            <Route path="/relatorios/desvios" element={<RelatoriosDesvios />} />
+            <Route path="/relatorios/treinamentos" element={<RelatoriosTreinamentos />} />
+            <Route path="/relatorios/ocorrencias" element={<RelatoriosOcorrencias />} />
             
             {/* Administração routes */}
             <Route path="/admin/usuarios" element={<AdminUsuarios />} />

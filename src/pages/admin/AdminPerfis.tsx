@@ -1,25 +1,12 @@
 
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowLeft, Search, ShieldCheck, Plus, Edit, Trash } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import { useToast } from "@/hooks/use-toast";
-
+import React, { useState } from "react";
 import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { Checkbox } from "@/components/ui/checkbox";
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -28,471 +15,501 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
+  DialogClose,
 } from "@/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { PencilIcon, PlusCircle, Search, Trash2 } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "@/hooks/use-toast";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
-// Form schemas using zod
-const searchFormSchema = z.object({
-  search: z.string().optional(),
+// Define the type for permissions
+type Permissoes = {
+  desvios: boolean;
+  treinamentos: boolean;
+  hora_seguranca: boolean;
+  ocorrencias: boolean;
+  medidas_disciplinares: boolean;
+  tarefas: boolean;
+  relatorios: boolean;
+  admin_usuarios: boolean;
+  admin_perfis: boolean;
+  admin_funcionarios: boolean;
+  admin_hht: boolean;
+  admin_templates: boolean;
+};
+
+// Define the type for profile data
+type PerfilData = {
+  id: number;
+  nome: string;
+  descricao: string;
+  permissoes: Permissoes;
+};
+
+const formSchema = z.object({
+  nome: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
+  descricao: z.string().optional(),
+  permissoes: z.object({
+    desvios: z.boolean().default(false),
+    treinamentos: z.boolean().default(false),
+    hora_seguranca: z.boolean().default(false),
+    ocorrencias: z.boolean().default(false),
+    medidas_disciplinares: z.boolean().default(false),
+    tarefas: z.boolean().default(false),
+    relatorios: z.boolean().default(false),
+    admin_usuarios: z.boolean().default(false),
+    admin_perfis: z.boolean().default(false),
+    admin_funcionarios: z.boolean().default(false),
+    admin_hht: z.boolean().default(false),
+    admin_templates: z.boolean().default(false),
+  })
 });
 
-const perfilFormSchema = z.object({
-  nome: z.string().min(3, "O nome deve ter pelo menos 3 caracteres"),
-  descricao: z.string().min(3, "A descrição deve ter pelo menos 3 caracteres"),
-  permissoes: z.record(z.boolean()).optional(),
-});
-
-type SearchFormValues = z.infer<typeof searchFormSchema>;
-type PerfilFormValues = z.infer<typeof perfilFormSchema>;
-
-// Mock data for profiles
-const mockPerfis = [
-  { 
-    id: 1, 
-    nome: "Administrador", 
-    descricao: "Acesso completo ao sistema", 
+const MOCK_PERFIS: PerfilData[] = [
+  {
+    id: 1,
+    nome: "Administrador",
+    descricao: "Acesso completo a todas as funcionalidades",
     permissoes: {
-      "desvios": true,
-      "treinamentos": true,
-      "hora_seguranca": true,
-      "ocorrencias": true,
-      "medidas_disciplinares": true,
-      "tarefas": true,
-      "relatorios": true,
-      "admin_usuarios": true,
-      "admin_perfis": true,
-      "admin_funcionarios": true,
-      "admin_hht": true,
-      "admin_templates": true,
+      desvios: true,
+      treinamentos: true,
+      hora_seguranca: true,
+      ocorrencias: true,
+      medidas_disciplinares: true,
+      tarefas: true,
+      relatorios: true,
+      admin_usuarios: true,
+      admin_perfis: true,
+      admin_funcionarios: true,
+      admin_hht: true,
+      admin_templates: true,
     }
   },
-  { 
-    id: 2, 
-    nome: "Gestor", 
-    descricao: "Acesso a gestão e relatórios",
+  {
+    id: 2,
+    nome: "Gestor",
+    descricao: "Acesso a gestão de equipes e relatórios",
     permissoes: {
-      "desvios": true,
-      "treinamentos": true,
-      "hora_seguranca": true,
-      "ocorrencias": true,
-      "medidas_disciplinares": false,
-      "tarefas": true,
-      "relatorios": true,
-      "admin_usuarios": false,
-      "admin_perfis": false,
-      "admin_funcionarios": true,
-      "admin_hht": true,
-      "admin_templates": false,
+      desvios: true,
+      treinamentos: true,
+      hora_seguranca: true,
+      ocorrencias: true,
+      medidas_disciplinares: true,
+      tarefas: true,
+      relatorios: true,
+      admin_usuarios: false,
+      admin_perfis: false,
+      admin_funcionarios: true,
+      admin_hht: true,
+      admin_templates: false,
     }
   },
-  { 
-    id: 3, 
-    nome: "Operador", 
-    descricao: "Acesso básico para operação",
+  {
+    id: 3,
+    nome: "Técnico",
+    descricao: "Acesso a registros e consultas",
     permissoes: {
-      "desvios": true,
-      "treinamentos": false,
-      "hora_seguranca": true,
-      "ocorrencias": true,
-      "medidas_disciplinares": false,
-      "tarefas": true,
-      "relatorios": false,
-      "admin_usuarios": false,
-      "admin_perfis": false,
-      "admin_funcionarios": false,
-      "admin_hht": false,
-      "admin_templates": false,
+      desvios: true,
+      treinamentos: true,
+      hora_seguranca: true,
+      ocorrencias: true,
+      medidas_disciplinares: false,
+      tarefas: true,
+      relatorios: true,
+      admin_usuarios: false,
+      admin_perfis: false,
+      admin_funcionarios: false,
+      admin_hht: false,
+      admin_templates: false,
     }
   }
 ];
 
-// Lista de permissões disponíveis
-const permissoesDisponiveis = [
-  { id: "desvios", label: "Desvios" },
-  { id: "treinamentos", label: "Treinamentos" },
-  { id: "hora_seguranca", label: "Hora da Segurança" },
-  { id: "ocorrencias", label: "Ocorrências" },
-  { id: "medidas_disciplinares", label: "Medidas Disciplinares" },
-  { id: "tarefas", label: "Tarefas" },
-  { id: "relatorios", label: "Relatórios" },
-  { id: "admin_usuarios", label: "Administrar Usuários" },
-  { id: "admin_perfis", label: "Perfis de Acesso" },
-  { id: "admin_funcionarios", label: "Cadastro de Funcionários" },
-  { id: "admin_hht", label: "Registro de HHT" },
-  { id: "admin_templates", label: "Templates de Importação" },
+// Permission groups for UI organization
+const permissionGroups = [
+  {
+    name: "Gestão de SMS",
+    permissions: [
+      { id: "desvios", label: "Desvios" },
+      { id: "treinamentos", label: "Treinamentos" },
+      { id: "hora_seguranca", label: "Hora da Segurança" },
+      { id: "ocorrencias", label: "Ocorrências" },
+      { id: "medidas_disciplinares", label: "Medidas Disciplinares" },
+    ]
+  },
+  {
+    name: "Tarefas",
+    permissions: [
+      { id: "tarefas", label: "Tarefas" },
+    ]
+  },
+  {
+    name: "Relatórios",
+    permissions: [
+      { id: "relatorios", label: "Relatórios" },
+    ]
+  },
+  {
+    name: "Administração",
+    permissions: [
+      { id: "admin_usuarios", label: "Usuários" },
+      { id: "admin_perfis", label: "Perfis de Acesso" },
+      { id: "admin_funcionarios", label: "Funcionários" },
+      { id: "admin_hht", label: "Registro HHT" },
+      { id: "admin_templates", label: "Templates" },
+    ]
+  }
 ];
 
 const AdminPerfis = () => {
-  const navigate = useNavigate();
-  const { toast } = useToast();
-  const [perfis, setPerfis] = useState(mockPerfis);
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [perfis, setPerfis] = useState<PerfilData[]>(MOCK_PERFIS);
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [selectedPerfil, setSelectedPerfil] = useState<typeof mockPerfis[0] | null>(null);
+  const [currentPerfil, setCurrentPerfil] = useState<PerfilData | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
 
-  // Initialize search form
-  const searchForm = useForm<SearchFormValues>({
-    resolver: zodResolver(searchFormSchema),
-    defaultValues: {
-      search: "",
-    },
-  });
-
-  // Initialize profile form
-  const perfilForm = useForm<PerfilFormValues>({
-    resolver: zodResolver(perfilFormSchema),
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
     defaultValues: {
       nome: "",
       descricao: "",
-      permissoes: permissoesDisponiveis.reduce((acc, permissao) => {
-        acc[permissao.id] = false;
-        return acc;
-      }, {} as Record<string, boolean>),
-    },
+      permissoes: {
+        desvios: false,
+        treinamentos: false,
+        hora_seguranca: false,
+        ocorrencias: false,
+        medidas_disciplinares: false,
+        tarefas: false,
+        relatorios: false,
+        admin_usuarios: false,
+        admin_perfis: false,
+        admin_funcionarios: false,
+        admin_hht: false,
+        admin_templates: false,
+      }
+    }
   });
 
-  const onSearchSubmit = (data: SearchFormValues) => {
-    if (!data.search) {
-      setPerfis(mockPerfis);
-      return;
-    }
+  const filteredPerfis = perfis.filter(perfil => 
+    perfil.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    perfil.descricao.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
-    const filteredPerfis = mockPerfis.filter(
-      (perfil) => 
-        perfil.nome.toLowerCase().includes(data.search!.toLowerCase()) || 
-        perfil.descricao.toLowerCase().includes(data.search!.toLowerCase())
-    );
-    
-    setPerfis(filteredPerfis);
-  };
-
-  const onPerfilSubmit = (data: PerfilFormValues) => {
-    if (selectedPerfil) {
-      // Edit existing profile
-      const updatedPerfis = perfis.map(perfil => 
-        perfil.id === selectedPerfil.id ? { ...perfil, ...data } : perfil
-      );
-      setPerfis(updatedPerfis);
-
-      toast({
-        title: "Perfil atualizado",
-        description: `${data.nome} foi atualizado com sucesso.`,
-      });
-      
-      setIsEditDialogOpen(false);
-    } else {
-      // Create new profile
-      const newPerfil = {
-        id: perfis.length + 1,
+  const onSubmit = (data: z.infer<typeof formSchema>) => {
+    if (isAddDialogOpen) {
+      // Add new profile
+      const newPerfil: PerfilData = {
+        id: perfis.length > 0 ? Math.max(...perfis.map(p => p.id)) + 1 : 1,
         nome: data.nome,
-        descricao: data.descricao,
-        permissoes: data.permissoes || {},
+        descricao: data.descricao || "",
+        permissoes: data.permissoes
       };
       
       setPerfis([...perfis, newPerfil]);
-      
       toast({
         title: "Perfil criado",
-        description: `${data.nome} foi criado com sucesso.`,
+        description: `O perfil ${data.nome} foi criado com sucesso.`
       });
-      
-      setIsCreateDialogOpen(false);
-    }
-    
-    perfilForm.reset();
-  };
-
-  const handleDeletePerfil = () => {
-    if (selectedPerfil) {
-      const updatedPerfis = perfis.filter(perfil => perfil.id !== selectedPerfil.id);
+      setIsAddDialogOpen(false);
+    } else if (isEditDialogOpen && currentPerfil) {
+      // Edit existing profile
+      const updatedPerfis = perfis.map(perfil => 
+        perfil.id === currentPerfil.id 
+          ? { ...perfil, nome: data.nome, descricao: data.descricao || "", permissoes: data.permissoes }
+          : perfil
+      );
       setPerfis(updatedPerfis);
-      
+      toast({
+        title: "Perfil atualizado",
+        description: `O perfil ${data.nome} foi atualizado com sucesso.`
+      });
+      setIsEditDialogOpen(false);
+    }
+  };
+  
+  const handleDelete = () => {
+    if (currentPerfil) {
+      setPerfis(perfis.filter(perfil => perfil.id !== currentPerfil.id));
       toast({
         title: "Perfil excluído",
-        description: `${selectedPerfil.nome} foi excluído com sucesso.`,
+        description: `O perfil ${currentPerfil.nome} foi excluído com sucesso.`
       });
-      
       setIsDeleteDialogOpen(false);
-      setSelectedPerfil(null);
+      setCurrentPerfil(null);
     }
   };
-
-  const handleEditClick = (perfil: typeof mockPerfis[0]) => {
-    setSelectedPerfil(perfil);
-    perfilForm.reset({
+  
+  const openEditDialog = (perfil: PerfilData) => {
+    setCurrentPerfil(perfil);
+    form.reset({
       nome: perfil.nome,
       descricao: perfil.descricao,
-      permissoes: perfil.permissoes,
+      permissoes: { ...perfil.permissoes }
     });
     setIsEditDialogOpen(true);
   };
-
-  const handleDeleteClick = (perfil: typeof mockPerfis[0]) => {
-    setSelectedPerfil(perfil);
+  
+  const openDeleteDialog = (perfil: PerfilData) => {
+    setCurrentPerfil(perfil);
     setIsDeleteDialogOpen(true);
   };
-
-  const handleCreateClick = () => {
-    perfilForm.reset({
+  
+  const openAddDialog = () => {
+    form.reset({
       nome: "",
       descricao: "",
-      permissoes: permissoesDisponiveis.reduce((acc, permissao) => {
-        acc[permissao.id] = false;
-        return acc;
-      }, {} as Record<string, boolean>),
+      permissoes: {
+        desvios: false,
+        treinamentos: false,
+        hora_seguranca: false,
+        ocorrencias: false,
+        medidas_disciplinares: false,
+        tarefas: false,
+        relatorios: false,
+        admin_usuarios: false,
+        admin_perfis: false,
+        admin_funcionarios: false,
+        admin_hht: false,
+        admin_templates: false,
+      }
     });
-    setSelectedPerfil(null);
-    setIsCreateDialogOpen(true);
+    setIsAddDialogOpen(true);
   };
 
   return (
     <div className="space-y-6">
       <div>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="mb-2"
-          onClick={() => navigate(-1)}
-        >
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Voltar
-        </Button>
-        <h1 className="text-2xl font-bold tracking-tight">Perfis de Acesso</h1>
+        <h2 className="text-3xl font-bold tracking-tight">Perfis de Acesso</h2>
         <p className="text-muted-foreground">
-          Gerencie os perfis de acesso do sistema
+          Gerenciamento de perfis de acesso e permissões.
         </p>
       </div>
-
+      
+      <div className="flex items-center justify-between">
+        <div className="relative w-full max-w-sm">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Buscar perfis..."
+            className="w-full pl-8"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+        <Button onClick={openAddDialog}>
+          <PlusCircle className="mr-2 h-4 w-4" /> Novo Perfil
+        </Button>
+      </div>
+      
       <Card>
-        <CardHeader className="pb-3">
-          <div className="flex items-center justify-between">
-            <CardTitle>Perfis</CardTitle>
-            <Button size="sm" onClick={handleCreateClick}>
-              <Plus className="mr-2 h-4 w-4" />
-              Novo Perfil
-            </Button>
-          </div>
+        <CardHeader>
+          <CardTitle>Perfis de Acesso</CardTitle>
+          <CardDescription>
+            Lista de perfis de acesso e suas permissões
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          <Form {...searchForm}>
-            <form 
-              onSubmit={searchForm.handleSubmit(onSearchSubmit)} 
-              className="flex space-x-2 mb-6"
-            >
-              <FormField
-                control={searchForm.control}
-                name="search"
-                render={({ field }) => (
-                  <FormItem className="flex-1">
-                    <FormControl>
-                      <div className="relative">
-                        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                        <Input
-                          placeholder="Buscar perfis..."
-                          className="pl-8"
-                          {...field}
-                        />
-                      </div>
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-              <Button type="submit">Buscar</Button>
-            </form>
-          </Form>
-
-          <Separator className="my-4" />
-
-          <div className="relative overflow-x-auto rounded-md border">
-            <Table>
-              <TableHeader>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Nome</TableHead>
+                <TableHead>Descrição</TableHead>
+                <TableHead>Permissões</TableHead>
+                <TableHead className="w-[100px]">Ações</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredPerfis.length === 0 ? (
                 <TableRow>
-                  <TableHead>Nome</TableHead>
-                  <TableHead>Descrição</TableHead>
-                  <TableHead className="text-right">Ações</TableHead>
+                  <TableCell colSpan={4} className="h-24 text-center">
+                    Nenhum perfil encontrado.
+                  </TableCell>
                 </TableRow>
-              </TableHeader>
-              <TableBody>
-                {perfis.length > 0 ? (
-                  perfis.map((perfil) => (
-                    <TableRow key={perfil.id}>
-                      <TableCell className="font-medium">
-                        <div className="flex items-center">
-                          <ShieldCheck className="mr-2 h-4 w-4 text-muted-foreground" />
-                          {perfil.nome}
-                        </div>
-                      </TableCell>
-                      <TableCell>{perfil.descricao}</TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
-                          <Button 
-                            size="sm" 
-                            variant="outline" 
-                            onClick={() => handleEditClick(perfil)}
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button 
-                            size="sm" 
-                            variant="outline" 
-                            className="text-destructive hover:bg-destructive hover:text-destructive-foreground"
-                            onClick={() => handleDeleteClick(perfil)}
-                          >
-                            <Trash className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                ) : (
-                  <TableRow>
-                    <TableCell colSpan={3} className="h-24 text-center">
-                      Nenhum perfil encontrado.
+              ) : (
+                filteredPerfis.map((perfil) => (
+                  <TableRow key={perfil.id}>
+                    <TableCell className="font-medium">{perfil.nome}</TableCell>
+                    <TableCell>{perfil.descricao}</TableCell>
+                    <TableCell>
+                      {Object.entries(perfil.permissoes).filter(([_, value]) => value).length} permissões
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex space-x-2">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => openEditDialog(perfil)}
+                        >
+                          <PencilIcon className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => openDeleteDialog(perfil)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </div>
+                ))
+              )}
+            </TableBody>
+          </Table>
         </CardContent>
       </Card>
-
-      {/* Create/Edit Profile Dialog */}
-      {(isCreateDialogOpen || isEditDialogOpen) && (
-        <Dialog 
-          open={isCreateDialogOpen || isEditDialogOpen} 
-          onOpenChange={(open) => {
-            if (!open) {
-              setIsCreateDialogOpen(false);
-              setIsEditDialogOpen(false);
-            }
-          }}
-        >
-          <DialogContent className="sm:max-w-[500px]">
-            <DialogHeader>
-              <DialogTitle>
-                {isCreateDialogOpen ? "Criar Novo Perfil" : "Editar Perfil"}
-              </DialogTitle>
-              <DialogDescription>
-                {isCreateDialogOpen 
-                  ? "Preencha as informações para criar um novo perfil."
-                  : "Atualize as informações do perfil."
-                }
-              </DialogDescription>
-            </DialogHeader>
-            <Form {...perfilForm}>
-              <form onSubmit={perfilForm.handleSubmit(onPerfilSubmit)} className="space-y-4">
-                <FormField
-                  control={perfilForm.control}
-                  name="nome"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Nome</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Nome do perfil" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={perfilForm.control}
-                  name="descricao"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Descrição</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Descrição do perfil" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <div>
-                  <h4 className="text-sm font-medium mb-3">Permissões</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {permissoesDisponiveis.map((permissao) => (
-                      <FormField
-                        key={permissao.id}
-                        control={perfilForm.control}
-                        name={`permissoes.${permissao.id}`}
-                        render={({ field }) => (
-                          <FormItem className="flex flex-row items-center space-x-3 space-y-0">
-                            <FormControl>
-                              <Checkbox
-                                checked={field.value || false}
-                                onCheckedChange={field.onChange}
-                              />
-                            </FormControl>
-                            <FormLabel className="!mt-0">{permissao.label}</FormLabel>
-                          </FormItem>
-                        )}
-                      />
-                    ))}
-                  </div>
-                </div>
-                
-                <DialogFooter>
-                  <Button 
-                    type="button" 
-                    variant="outline" 
-                    onClick={() => {
-                      setIsCreateDialogOpen(false);
-                      setIsEditDialogOpen(false);
-                    }}
-                  >
-                    Cancelar
-                  </Button>
-                  <Button type="submit">
-                    {isCreateDialogOpen ? "Criar Perfil" : "Salvar Alterações"}
-                  </Button>
-                </DialogFooter>
-              </form>
-            </Form>
-          </DialogContent>
-        </Dialog>
-      )}
-
-      {/* Delete Profile Dialog */}
-      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
+      
+      {/* Formulário para adicionar/editar perfil */}
+      <Dialog 
+        open={isAddDialogOpen || isEditDialogOpen} 
+        onOpenChange={(open) => open ? null : (isAddDialogOpen ? setIsAddDialogOpen(false) : setIsEditDialogOpen(false))}
+      >
+        <DialogContent className="max-w-3xl max-h-[80vh] overflow-hidden flex flex-col">
           <DialogHeader>
-            <DialogTitle>Excluir Perfil</DialogTitle>
+            <DialogTitle>
+              {isAddDialogOpen ? "Adicionar novo perfil" : "Editar perfil"}
+            </DialogTitle>
             <DialogDescription>
-              Tem certeza que deseja excluir este perfil? Esta ação não poderá ser desfeita.
+              {isAddDialogOpen
+                ? "Crie um novo perfil de acesso e defina suas permissões."
+                : "Atualize as informações e permissões deste perfil."}
             </DialogDescription>
           </DialogHeader>
-          <div className="flex items-center space-x-4 py-4">
-            <div className="bg-muted p-2 rounded-full">
-              <ShieldCheck className="h-8 w-8" />
-            </div>
-            <div>
-              <p className="font-medium">{selectedPerfil?.nome}</p>
-              <p className="text-sm text-muted-foreground">{selectedPerfil?.descricao}</p>
-            </div>
-          </div>
+          
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 flex-1 overflow-hidden">
+              <Tabs defaultValue="informacoes" className="w-full h-full">
+                <TabsList>
+                  <TabsTrigger value="informacoes">Informações</TabsTrigger>
+                  <TabsTrigger value="permissoes">Permissões</TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="informacoes" className="space-y-4 mt-4">
+                  <FormField
+                    control={form.control}
+                    name="nome"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Nome do Perfil</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="descricao"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Descrição</FormLabel>
+                        <FormControl>
+                          <Textarea {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </TabsContent>
+                
+                <TabsContent value="permissoes" className="space-y-4 mt-4 max-h-[400px]">
+                  <ScrollArea className="h-[400px] pr-4">
+                    <div className="space-y-6">
+                      {permissionGroups.map((group) => (
+                        <div key={group.name} className="space-y-4">
+                          <h3 className="font-medium text-sm">{group.name}</h3>
+                          <Separator />
+                          
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {group.permissions.map((permission) => (
+                              <FormField
+                                key={permission.id}
+                                control={form.control}
+                                name={`permissoes.${permission.id}` as const}
+                                render={({ field }) => (
+                                  <FormItem className="flex flex-row items-center space-x-3 space-y-0 rounded-md border p-4">
+                                    <FormControl>
+                                      <Checkbox 
+                                        checked={field.value} 
+                                        onCheckedChange={field.onChange} 
+                                      />
+                                    </FormControl>
+                                    <div className="space-y-1 leading-none">
+                                      <FormLabel className="cursor-pointer">
+                                        {permission.label}
+                                      </FormLabel>
+                                      <FormDescription>
+                                        Permissão para {permission.label.toLowerCase()}
+                                      </FormDescription>
+                                    </div>
+                                  </FormItem>
+                                )}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                </TabsContent>
+              </Tabs>
+              
+              <DialogFooter>
+                <DialogClose asChild>
+                  <Button variant="outline">Cancelar</Button>
+                </DialogClose>
+                <Button type="submit">
+                  {isAddDialogOpen ? "Criar Perfil" : "Salvar Alterações"}
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Dialog de confirmação para exclusão */}
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirmar exclusão</DialogTitle>
+            <DialogDescription>
+              Tem certeza que deseja excluir o perfil{" "}
+              <span className="font-medium">{currentPerfil?.nome}</span>?
+              Esta ação não pode ser desfeita.
+            </DialogDescription>
+          </DialogHeader>
           <DialogFooter>
-            <Button 
-              type="button" 
-              variant="outline" 
-              onClick={() => setIsDeleteDialogOpen(false)}
-            >
-              Cancelar
-            </Button>
-            <Button 
-              type="button" 
-              variant="destructive"
-              onClick={handleDeletePerfil}
-            >
-              Excluir
+            <DialogClose asChild>
+              <Button variant="outline">Cancelar</Button>
+            </DialogClose>
+            <Button variant="destructive" onClick={handleDelete}>
+              Sim, excluir
             </Button>
           </DialogFooter>
         </DialogContent>
