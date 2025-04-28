@@ -32,6 +32,13 @@ import InspecoesCadastro from "./pages/hora-seguranca/InspecoesCadastro";
 import InspecoesNaoProgramadas from "./pages/hora-seguranca/InspecoesNaoProgramadas";
 import InspecoesAcompanhamento from "./pages/hora-seguranca/InspecoesAcompanhamento";
 
+// Tarefas pages
+import TarefasDashboard from "./pages/tarefas/TarefasDashboard";
+import MinhasTarefas from "./pages/tarefas/MinhasTarefas";
+import CadastroTarefas from "./pages/tarefas/CadastroTarefas";
+import DetalheTarefa from "./pages/tarefas/DetalheTarefa";
+import EditarTarefa from "./pages/tarefas/EditarTarefa";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -74,10 +81,12 @@ const App = () => (
             <Route path="/medidas-disciplinares/cadastro" element={<Dashboard />} />
             <Route path="/medidas-disciplinares/consulta" element={<Dashboard />} />
             
-            {/* Tarefas routes */}
-            <Route path="/tarefas/dashboard" element={<Dashboard />} />
-            <Route path="/tarefas/minhas-tarefas" element={<Dashboard />} />
-            <Route path="/tarefas/cadastro" element={<Dashboard />} />
+            {/* Tarefas routes - NOVAS ROTAS */}
+            <Route path="/tarefas/dashboard" element={<TarefasDashboard />} />
+            <Route path="/tarefas/minhas-tarefas" element={<MinhasTarefas />} />
+            <Route path="/tarefas/cadastro" element={<CadastroTarefas />} />
+            <Route path="/tarefas/detalhes/:id" element={<DetalheTarefa />} />
+            <Route path="/tarefas/editar/:id" element={<EditarTarefa />} />
             
             {/* Gestão da Rotina routes */}
             <Route path="/gestao-rotina/dssms" element={<Dashboard />} />
