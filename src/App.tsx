@@ -41,6 +41,7 @@ import EditarTarefa from "./pages/tarefas/EditarTarefa";
 
 // Admin pages
 import RegistroHHT from "./pages/admin/RegistroHHT";
+import CadastroFuncionarios from "./pages/admin/CadastroFuncionarios";
 
 const queryClient = new QueryClient();
 
@@ -97,7 +98,7 @@ const App = () => (
             {/* Administração routes */}
             <Route path="/admin/usuarios" element={<Dashboard />} />
             <Route path="/admin/perfis" element={<Dashboard />} />
-            <Route path="/admin/funcionarios" element={<Dashboard />} />
+            <Route path="/admin/funcionarios" element={<CadastroFuncionarios />} />
             <Route path="/admin/hht" element={<RegistroHHT />} />
             <Route path="/admin/templates" element={<AdminTemplates />} />
           </Route>
