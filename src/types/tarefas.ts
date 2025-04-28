@@ -3,9 +3,12 @@ export type TarefaStatus = 'programada' | 'concluida' | 'em-andamento' | 'penden
 
 export type TarefaCriticidade = 'baixa' | 'media' | 'alta' | 'critica';
 
+export type TipoCCA = 'linha-inteira' | 'parcial' | 'equipamento' | 'especifica';
+
 export type Tarefa = {
   id: string;
   cca: string;
+  tipoCca: TipoCCA;
   dataCadastro: string;
   dataConclusao: string;
   descricao: string;

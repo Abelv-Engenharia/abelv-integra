@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -16,21 +16,22 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { CalendarIcon, FileUp, Calendar as CalendarIcon2 } from "lucide-react";
+import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { mockUsuarios } from "@/utils/tarefasUtils";
-import StatusTarefaSelector from "@/components/tarefas/StatusTarefaSelector";
 import { toast } from "@/hooks/use-toast";
+import { TipoCCA } from "@/types/tarefas";
 
-// Esquema de validação
+// Esquema de validação atualizado
 const formSchema = z.object({
   cca: z.string().min(1, "Campo obrigatório"),
-  dataCadastro: z.date(),
+  tipoCca: z.enum(["linha-inteira", "parcial", "equipamento", "especifica"], {
+    required_error: "Selecione o tipo de CCA",
+  }),
+  // Removemos a validação de dataCadastro já que agora é automática
   dataConclusao: z.date(),
   descricao: z.string().min(10, "A descrição deve ter pelo menos 10 caracteres"),
   responsavelId: z.string().min(1, "Selecione um responsável"),
-  status: z.enum(["programada", "concluida", "em-andamento", "pendente"]),
-  iniciada: z.boolean().default(false),
   
   // Configurações
   criticidade: z.enum(["baixa", "media", "alta", "critica"]),
@@ -43,15 +44,11 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 const CadastroTarefas = () => {
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      dataCadastro: new Date(),
+      tipoCca: "linha-inteira", // Valor padrão para tipoCca
       dataConclusao: new Date(),
-      status: "programada",
-      iniciada: false,
       criticidade: "media",
       requerValidacao: false,
       notificarUsuario: true,
@@ -60,26 +57,23 @@ const CadastroTarefas = () => {
   });
   
   const recorrenciaAtiva = form.watch("recorrenciaAtiva");
+  const dataAtual = new Date();
   
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (files && files.length > 0) {
-      const file = files[0];
-      if (file.type === "application/pdf") {
-        setSelectedFile(file);
-      } else {
-        toast({
-          title: "Formato inválido",
-          description: "Por favor, selecione apenas arquivos PDF",
-          variant: "destructive",
-        });
-      }
-    }
+  const calcularStatusInicial = () => {
+    // No cadastro, sempre começará como programada
+    return "programada";
   };
   
   const onSubmit = (values: FormValues) => {
-    console.log("Form values:", values);
-    console.log("Selected file:", selectedFile);
+    // Adicionando os valores automáticos que não fazem mais parte do form
+    const dadosCompletos = {
+      ...values,
+      dataCadastro: format(dataAtual, "yyyy-MM-dd"),
+      status: calcularStatusInicial(),
+      iniciada: false, // No cadastro, a tarefa nunca começa iniciada
+    };
+    
+    console.log("Form values:", dadosCompletos);
     
     // Simulação de envio para API
     setTimeout(() => {
@@ -91,18 +85,15 @@ const CadastroTarefas = () => {
       // Reset do formulário
       form.reset({
         cca: "",
-        dataCadastro: new Date(),
+        tipoCca: "linha-inteira",
         dataConclusao: new Date(),
         descricao: "",
         responsavelId: "",
-        status: "programada",
-        iniciada: false,
         criticidade: "media",
         requerValidacao: false,
         notificarUsuario: true,
         recorrenciaAtiva: false,
       });
-      setSelectedFile(null);
     }, 1000);
   };
   
@@ -127,6 +118,32 @@ const CadastroTarefas = () => {
               <Card>
                 <CardContent className="pt-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Campo CCA com tipo de seleção (linha inteira) */}
+                    <FormField
+                      control={form.control}
+                      name="tipoCca"
+                      render={({ field }) => (
+                        <FormItem className="col-span-1 md:col-span-2">
+                          <FormLabel>CCA - Campo Seleção</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Selecione o tipo de CCA" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="linha-inteira">Linha Inteira</SelectItem>
+                              <SelectItem value="parcial">Parcial</SelectItem>
+                              <SelectItem value="equipamento">Equipamento</SelectItem>
+                              <SelectItem value="especifica">Específica</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    {/* Código CCA */}
                     <FormField
                       control={form.control}
                       name="cca"
@@ -141,90 +158,73 @@ const CadastroTarefas = () => {
                       )}
                     />
                     
-                    <FormField
-                      control={form.control}
-                      name="dataCadastro"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-col">
+                    {/* Data do Cadastro (não editável) e Data para Conclusão na mesma linha */}
+                    <div className="flex space-x-4">
+                      <div className="flex-1">
+                        <FormItem>
                           <FormLabel>Data do Cadastro</FormLabel>
-                          <Popover>
-                            <PopoverTrigger asChild>
-                              <FormControl>
-                                <Button
-                                  variant={"outline"}
-                                  className={cn(
-                                    "w-full pl-3 text-left font-normal",
-                                    !field.value && "text-muted-foreground"
-                                  )}
-                                >
-                                  {field.value ? (
-                                    format(field.value, "dd/MM/yyyy", { locale: ptBR })
-                                  ) : (
-                                    <span>Selecione uma data</span>
-                                  )}
-                                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                </Button>
-                              </FormControl>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0" align="start">
-                              <Calendar
-                                mode="single"
-                                selected={field.value}
-                                onSelect={field.onChange}
-                                initialFocus
-                              />
-                            </PopoverContent>
-                          </Popover>
-                          <FormMessage />
+                          <FormControl>
+                            <Input 
+                              type="text" 
+                              value={format(dataAtual, "dd/MM/yyyy", { locale: ptBR })} 
+                              disabled 
+                            />
+                          </FormControl>
+                          <FormDescription>
+                            Data gerada automaticamente
+                          </FormDescription>
                         </FormItem>
-                      )}
-                    />
+                      </div>
+                      
+                      <div className="flex-1">
+                        <FormField
+                          control={form.control}
+                          name="dataConclusao"
+                          render={({ field }) => (
+                            <FormItem className="flex flex-col">
+                              <FormLabel>Data para Conclusão</FormLabel>
+                              <Popover>
+                                <PopoverTrigger asChild>
+                                  <FormControl>
+                                    <Button
+                                      variant={"outline"}
+                                      className={cn(
+                                        "w-full pl-3 text-left font-normal",
+                                        !field.value && "text-muted-foreground"
+                                      )}
+                                    >
+                                      {field.value ? (
+                                        format(field.value, "dd/MM/yyyy", { locale: ptBR })
+                                      ) : (
+                                        <span>Selecione uma data</span>
+                                      )}
+                                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                    </Button>
+                                  </FormControl>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-auto p-0" align="start">
+                                  <Calendar
+                                    mode="single"
+                                    selected={field.value}
+                                    onSelect={field.onChange}
+                                    fromDate={new Date()}
+                                    initialFocus
+                                  />
+                                </PopoverContent>
+                              </Popover>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    </div>
                     
-                    <FormField
-                      control={form.control}
-                      name="dataConclusao"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-col">
-                          <FormLabel>Data para Conclusão</FormLabel>
-                          <Popover>
-                            <PopoverTrigger asChild>
-                              <FormControl>
-                                <Button
-                                  variant={"outline"}
-                                  className={cn(
-                                    "w-full pl-3 text-left font-normal",
-                                    !field.value && "text-muted-foreground"
-                                  )}
-                                >
-                                  {field.value ? (
-                                    format(field.value, "dd/MM/yyyy", { locale: ptBR })
-                                  ) : (
-                                    <span>Selecione uma data</span>
-                                  )}
-                                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                </Button>
-                              </FormControl>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0" align="start">
-                              <Calendar
-                                mode="single"
-                                selected={field.value}
-                                onSelect={field.onChange}
-                                fromDate={new Date()}
-                                initialFocus
-                              />
-                            </PopoverContent>
-                          </Popover>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
+                    {/* Responsável em linha completa */}
                     <FormField
                       control={form.control}
                       name="responsavelId"
                       render={({ field }) => (
-                        <FormItem>
+                        <FormItem className="col-span-1 md:col-span-2">
                           <FormLabel>Responsável</FormLabel>
                           <Select onValueChange={field.onChange} defaultValue={field.value}>
                             <FormControl>
@@ -245,64 +245,22 @@ const CadastroTarefas = () => {
                       )}
                     />
                     
-                    <FormField
-                      control={form.control}
-                      name="status"
-                      render={({ field }) => (
-                        <FormItem className="col-span-1 md:col-span-2">
-                          <FormLabel>Status da Tarefa</FormLabel>
-                          <FormControl>
-                            <StatusTarefaSelector value={field.value} onChange={field.onChange} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                    {/* Status da tarefa - Agora é apenas informativo */}
+                    <FormItem className="col-span-1 md:col-span-2">
+                      <FormLabel>Status da Tarefa</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="text" 
+                          value="Programada" 
+                          disabled 
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        Status definido automaticamente como "Programada" no cadastro
+                      </FormDescription>
+                    </FormItem>
                     
-                    <FormField
-                      control={form.control}
-                      name="iniciada"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                          <div className="space-y-0.5">
-                            <FormLabel className="text-base">Iniciar Execução</FormLabel>
-                            <FormDescription>
-                              Marque esta opção para indicar que a tarefa já começou a ser executada.
-                            </FormDescription>
-                          </div>
-                          <FormControl>
-                            <Switch
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <div className="col-span-1 md:col-span-2">
-                      <FormItem className="border rounded-md p-4">
-                        <FormLabel>Anexo (PDF)</FormLabel>
-                        <div className="mt-2">
-                          <label htmlFor="file-upload" className="cursor-pointer">
-                            <div className="border-2 border-dashed rounded-lg p-6 flex flex-col items-center justify-center">
-                              <FileUp className="h-8 w-8 text-muted-foreground mb-2" />
-                              <span className="text-sm text-muted-foreground">
-                                {selectedFile ? selectedFile.name : "Clique para selecionar um arquivo PDF"}
-                              </span>
-                            </div>
-                            <input
-                              id="file-upload"
-                              type="file"
-                              className="hidden"
-                              accept=".pdf"
-                              onChange={handleFileChange}
-                            />
-                          </label>
-                        </div>
-                      </FormItem>
-                    </div>
-                    
+                    {/* Descrição da Tarefa */}
                     <FormField
                       control={form.control}
                       name="descricao"
