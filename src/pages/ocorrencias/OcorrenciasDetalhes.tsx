@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { 
@@ -13,8 +12,17 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, Edit, RefreshCw } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
+import { 
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
-// Mock data with more complete information
 const mockOcorrencias = [
   {
     id: "1",
@@ -185,7 +193,6 @@ const mockOcorrencias = [
   }
 ];
 
-// Function to get the background and text colors for each risk classification
 const getRiscoClassColor = (classificacao) => {
   switch (classificacao) {
     case "TRIVIAL":
@@ -209,9 +216,10 @@ const OcorrenciasDetalhes = () => {
   const { toast } = useToast();
   const [ocorrencia, setOcorrencia] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [actionToUpdate, setActionToUpdate] = useState(null);
 
   useEffect(() => {
-    // Simulating API call with setTimeout
     const timer = setTimeout(() => {
       const found = mockOcorrencias.find(item => item.id === id);
       if (found) {
@@ -224,20 +232,35 @@ const OcorrenciasDetalhes = () => {
   }, [id]);
 
   const handleEdit = () => {
+    setEditDialogOpen(true);
+  };
+
+  const confirmEdit = () => {
+    navigate(`/ocorrencias/cadastro?id=${id}`);
+    setEditDialogOpen(false);
     toast({
       title: "Modo de edição",
       description: "Você está editando esta ocorrência."
     });
-    // Here we would navigate to an edit page in a real application
-    // For now, just showing a toast message
   };
 
   const handleUpdateAction = (actionId) => {
+    setActionToUpdate(actionId);
     toast({
       title: "Ação atualizada",
       description: `A ação ${actionId} foi atualizada com sucesso.`
     });
-    // Here we would update the action status in a real application
+    
+    setLoading(true);
+    setTimeout(() => {
+      const updatedOcorrencia = {...ocorrencia};
+      const actionIndex = updatedOcorrencia.planoAcao.findIndex(a => a.id === actionId);
+      if (actionIndex !== -1) {
+        updatedOcorrencia.planoAcao[actionIndex].status = 'Concluído';
+      }
+      setOcorrencia(updatedOcorrencia);
+      setLoading(false);
+    }, 500);
   };
 
   if (loading) {
@@ -297,7 +320,6 @@ const OcorrenciasDetalhes = () => {
         </Button>
       </div>
 
-      {/* Informações Gerais */}
       <Card>
         <CardHeader>
           <CardTitle>Informações Gerais</CardTitle>
@@ -337,7 +359,6 @@ const OcorrenciasDetalhes = () => {
         </CardContent>
       </Card>
 
-      {/* Envolvidos */}
       <Card>
         <CardHeader>
           <CardTitle>Informações do Colaborador</CardTitle>
@@ -368,7 +389,6 @@ const OcorrenciasDetalhes = () => {
         </CardContent>
       </Card>
 
-      {/* Descrição */}
       <Card>
         <CardHeader>
           <CardTitle>Detalhes da Ocorrência</CardTitle>
@@ -391,7 +411,6 @@ const OcorrenciasDetalhes = () => {
         </CardContent>
       </Card>
 
-      {/* Plano de Ação */}
       <Card>
         <CardHeader>
           <CardTitle>Plano de Ação</CardTitle>
@@ -434,6 +453,21 @@ const OcorrenciasDetalhes = () => {
           </div>
         </CardContent>
       </Card>
+
+      <AlertDialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Editar Ocorrência</AlertDialogTitle>
+            <AlertDialogDescription>
+              Você está prestes a editar esta ocorrência. Deseja continuar?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmEdit}>Continuar</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
