@@ -1,4 +1,3 @@
-
 import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -828,40 +827,20 @@ const DesviosForm = () => {
                           control={form.control}
                           name="exposicao"
                           render={({ field }) => (
-                            <FormItem className="space-y-3">
+                            <FormItem>
                               <FormLabel>Exposição*</FormLabel>
-                              <FormControl>
-                                <RadioGroup
-                                  onValueChange={field.onChange}
-                                  defaultValue={field.value}
-                                  className="flex flex-col space-y-1"
-                                >
-                                  <FormItem className="flex items-center space-x-3 space-y-0">
-                                    <FormControl>
-                                      <RadioGroupItem value="1" />
-                                    </FormControl>
-                                    <FormLabel className="font-normal">
-                                      1 - Baixa
-                                    </FormLabel>
-                                  </FormItem>
-                                  <FormItem className="flex items-center space-x-3 space-y-0">
-                                    <FormControl>
-                                      <RadioGroupItem value="2" />
-                                    </FormControl>
-                                    <FormLabel className="font-normal">
-                                      2 - Média
-                                    </FormLabel>
-                                  </FormItem>
-                                  <FormItem className="flex items-center space-x-3 space-y-0">
-                                    <FormControl>
-                                      <RadioGroupItem value="3" />
-                                    </FormControl>
-                                    <FormLabel className="font-normal">
-                                      3 - Alta
-                                    </FormLabel>
-                                  </FormItem>
-                                </RadioGroup>
-                              </FormControl>
+                              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Selecione o nível de exposição" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="1">1 - Baixa</SelectItem>
+                                  <SelectItem value="2">2 - Média</SelectItem>
+                                  <SelectItem value="3">3 - Alta</SelectItem>
+                                </SelectContent>
+                              </Select>
                               <FormMessage />
                             </FormItem>
                           )}
@@ -871,48 +850,21 @@ const DesviosForm = () => {
                           control={form.control}
                           name="controle"
                           render={({ field }) => (
-                            <FormItem className="space-y-3">
+                            <FormItem>
                               <FormLabel>Controle*</FormLabel>
-                              <FormControl>
-                                <RadioGroup
-                                  onValueChange={field.onChange}
-                                  defaultValue={field.value}
-                                  className="flex flex-col space-y-1"
-                                >
-                                  <FormItem className="flex items-center space-x-3 space-y-0">
-                                    <FormControl>
-                                      <RadioGroupItem value="0" />
-                                    </FormControl>
-                                    <FormLabel className="font-normal">
-                                      0 - Excelente
-                                    </FormLabel>
-                                  </FormItem>
-                                  <FormItem className="flex items-center space-x-3 space-y-0">
-                                    <FormControl>
-                                      <RadioGroupItem value="1" />
-                                    </FormControl>
-                                    <FormLabel className="font-normal">
-                                      1 - Essencial
-                                    </FormLabel>
-                                  </FormItem>
-                                  <FormItem className="flex items-center space-x-3 space-y-0">
-                                    <FormControl>
-                                      <RadioGroupItem value="2" />
-                                    </FormControl>
-                                    <FormLabel className="font-normal">
-                                      2 - Precário
-                                    </FormLabel>
-                                  </FormItem>
-                                  <FormItem className="flex items-center space-x-3 space-y-0">
-                                    <FormControl>
-                                      <RadioGroupItem value="3" />
-                                    </FormControl>
-                                    <FormLabel className="font-normal">
-                                      3 - Inexistente
-                                    </FormLabel>
-                                  </FormItem>
-                                </RadioGroup>
-                              </FormControl>
+                              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Selecione o nível de controle" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="0">0 - Excelente</SelectItem>
+                                  <SelectItem value="1">1 - Essencial</SelectItem>
+                                  <SelectItem value="2">2 - Precário</SelectItem>
+                                  <SelectItem value="3">3 - Inexistente</SelectItem>
+                                </SelectContent>
+                              </Select>
                               <FormMessage />
                             </FormItem>
                           )}
@@ -922,40 +874,20 @@ const DesviosForm = () => {
                           control={form.control}
                           name="deteccao"
                           render={({ field }) => (
-                            <FormItem className="space-y-3">
+                            <FormItem>
                               <FormLabel>Detecção*</FormLabel>
-                              <FormControl>
-                                <RadioGroup
-                                  onValueChange={field.onChange}
-                                  defaultValue={field.value}
-                                  className="flex flex-col space-y-1"
-                                >
-                                  <FormItem className="flex items-center space-x-3 space-y-0">
-                                    <FormControl>
-                                      <RadioGroupItem value="1" />
-                                    </FormControl>
-                                    <FormLabel className="font-normal">
-                                      1 - Fácil
-                                    </FormLabel>
-                                  </FormItem>
-                                  <FormItem className="flex items-center space-x-3 space-y-0">
-                                    <FormControl>
-                                      <RadioGroupItem value="2" />
-                                    </FormControl>
-                                    <FormLabel className="font-normal">
-                                      2 - Moderada
-                                    </FormLabel>
-                                  </FormItem>
-                                  <FormItem className="flex items-center space-x-3 space-y-0">
-                                    <FormControl>
-                                      <RadioGroupItem value="3" />
-                                    </FormControl>
-                                    <FormLabel className="font-normal">
-                                      3 - Difícil
-                                    </FormLabel>
-                                  </FormItem>
-                                </RadioGroup>
-                              </FormControl>
+                              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Selecione o nível de detecção" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="1">1 - Fácil</SelectItem>
+                                  <SelectItem value="2">2 - Moderada</SelectItem>
+                                  <SelectItem value="3">3 - Difícil</SelectItem>
+                                </SelectContent>
+                              </Select>
                               <FormMessage />
                             </FormItem>
                           )}
@@ -971,56 +903,22 @@ const DesviosForm = () => {
                           control={form.control}
                           name="severidade"
                           render={({ field }) => (
-                            <FormItem className="space-y-3">
+                            <FormItem>
                               <FormLabel>Severidade*</FormLabel>
-                              <FormControl>
-                                <RadioGroup
-                                  onValueChange={field.onChange}
-                                  defaultValue={field.value}
-                                  className="flex flex-col space-y-1"
-                                >
-                                  <FormItem className="flex items-center space-x-3 space-y-0">
-                                    <FormControl>
-                                      <RadioGroupItem value="1" />
-                                    </FormControl>
-                                    <FormLabel className="font-normal">
-                                      1 - Muito Baixa
-                                    </FormLabel>
-                                  </FormItem>
-                                  <FormItem className="flex items-center space-x-3 space-y-0">
-                                    <FormControl>
-                                      <RadioGroupItem value="2" />
-                                    </FormControl>
-                                    <FormLabel className="font-normal">
-                                      2 - Baixa
-                                    </FormLabel>
-                                  </FormItem>
-                                  <FormItem className="flex items-center space-x-3 space-y-0">
-                                    <FormControl>
-                                      <RadioGroupItem value="3" />
-                                    </FormControl>
-                                    <FormLabel className="font-normal">
-                                      3 - Média
-                                    </FormLabel>
-                                  </FormItem>
-                                  <FormItem className="flex items-center space-x-3 space-y-0">
-                                    <FormControl>
-                                      <RadioGroupItem value="4" />
-                                    </FormControl>
-                                    <FormLabel className="font-normal">
-                                      4 - Alta
-                                    </FormLabel>
-                                  </FormItem>
-                                  <FormItem className="flex items-center space-x-3 space-y-0">
-                                    <FormControl>
-                                      <RadioGroupItem value="5" />
-                                    </FormControl>
-                                    <FormLabel className="font-normal">
-                                      5 - Muito Alta
-                                    </FormLabel>
-                                  </FormItem>
-                                </RadioGroup>
-                              </FormControl>
+                              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Selecione o nível de severidade" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="1">1 - Muito Baixa</SelectItem>
+                                  <SelectItem value="2">2 - Baixa</SelectItem>
+                                  <SelectItem value="3">3 - Média</SelectItem>
+                                  <SelectItem value="4">4 - Alta</SelectItem>
+                                  <SelectItem value="5">5 - Muito Alta</SelectItem>
+                                </SelectContent>
+                              </Select>
                               <FormMessage />
                             </FormItem>
                           )}
@@ -1030,40 +928,20 @@ const DesviosForm = () => {
                           control={form.control}
                           name="impacto"
                           render={({ field }) => (
-                            <FormItem className="space-y-3">
+                            <FormItem>
                               <FormLabel>Impacto*</FormLabel>
-                              <FormControl>
-                                <RadioGroup
-                                  onValueChange={field.onChange}
-                                  defaultValue={field.value}
-                                  className="flex flex-col space-y-1"
-                                >
-                                  <FormItem className="flex items-center space-x-3 space-y-0">
-                                    <FormControl>
-                                      <RadioGroupItem value="1" />
-                                    </FormControl>
-                                    <FormLabel className="font-normal">
-                                      1 - Baixo
-                                    </FormLabel>
-                                  </FormItem>
-                                  <FormItem className="flex items-center space-x-3 space-y-0">
-                                    <FormControl>
-                                      <RadioGroupItem value="2" />
-                                    </FormControl>
-                                    <FormLabel className="font-normal">
-                                      2 - Médio
-                                    </FormLabel>
-                                  </FormItem>
-                                  <FormItem className="flex items-center space-x-3 space-y-0">
-                                    <FormControl>
-                                      <RadioGroupItem value="3" />
-                                    </FormControl>
-                                    <FormLabel className="font-normal">
-                                      3 - Alto
-                                    </FormLabel>
-                                  </FormItem>
-                                </RadioGroup>
-                              </FormControl>
+                              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Selecione o nível de impacto" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="1">1 - Baixo</SelectItem>
+                                  <SelectItem value="2">2 - Médio</SelectItem>
+                                  <SelectItem value="3">3 - Alto</SelectItem>
+                                </SelectContent>
+                              </Select>
                               <FormMessage />
                             </FormItem>
                           )}
@@ -1081,6 +959,30 @@ const DesviosForm = () => {
                           getRiskColor(riskLevel)
                         )}>
                           {riskLevel}
+                        </div>
+                      </div>
+
+                      {/* Moved from sugestao-acao tab */}
+                      <div className="p-6 border rounded-md">
+                        <h3 className="text-lg font-medium flex items-center mb-4">
+                          <Lightbulb className="mr-2 h-5 w-5 text-yellow-500" />
+                          Sugestão de Ação Baseada em IA
+                        </h3>
+                        
+                        <div className="bg-muted p-4 rounded-md">
+                          <p className="text-muted-foreground italic">
+                            Este recurso utilizará a descrição do desvio e a classificação de risco para sugerir ações corretivas utilizando inteligência artificial.
+                          </p>
+                          
+                          <div className="mt-4 p-4 bg-card rounded-md border">
+                            <p className="font-medium mb-2">Baseado na descrição e nível de risco ({riskLevel}), recomendamos:</p>
+                            <ul className="list-disc pl-5 space-y-2">
+                              <li>Implementar treinamento específico para os colaboradores envolvidos</li>
+                              <li>Revisar procedimentos operacionais relacionados à atividade</li>
+                              <li>Realizar inspeção detalhada dos equipamentos utilizados</li>
+                              <li>Implementar checklist diário de verificação antes do início das atividades</li>
+                            </ul>
+                          </div>
                         </div>
                       </div>
                     </div>
