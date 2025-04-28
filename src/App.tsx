@@ -39,6 +39,9 @@ import CadastroTarefas from "./pages/tarefas/CadastroTarefas";
 import DetalheTarefa from "./pages/tarefas/DetalheTarefa";
 import EditarTarefa from "./pages/tarefas/EditarTarefa";
 
+// Admin pages
+import RegistroHHT from "./pages/admin/RegistroHHT";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -95,7 +98,7 @@ const App = () => (
             <Route path="/admin/usuarios" element={<Dashboard />} />
             <Route path="/admin/perfis" element={<Dashboard />} />
             <Route path="/admin/funcionarios" element={<Dashboard />} />
-            <Route path="/admin/hht" element={<Dashboard />} />
+            <Route path="/admin/hht" element={<RegistroHHT />} />
             <Route path="/admin/templates" element={<AdminTemplates />} />
           </Route>
           
