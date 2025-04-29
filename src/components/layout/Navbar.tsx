@@ -13,32 +13,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import SystemLogo from "@/components/common/SystemLogo";
-import { useAuth } from "@/contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
-import { toast } from "@/hooks/use-toast";
 
 const Navbar = () => {
-  const { user, profile, signOut } = useAuth();
-  const navigate = useNavigate();
-  
-  const handleLogout = async () => {
-    try {
-      await signOut();
-      toast({
-        title: "Desconectado com sucesso",
-        description: "Você foi desconectado do sistema.",
-      });
-      navigate("/login");
-    } catch (error) {
-      console.error("Erro ao desconectar:", error);
-      toast({
-        title: "Erro ao desconectar",
-        description: "Ocorreu um erro ao tentar desconectar.",
-        variant: "destructive",
-      });
-    }
-  };
-  
   return (
     <div className="border-b">
       <div className="flex h-16 items-center px-4 gap-4">
@@ -84,14 +60,7 @@ const Navbar = () => {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuLabel className="font-normal">
-                <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-medium leading-none">{profile?.nome || user?.email}</p>
-                  <p className="text-xs leading-none text-muted-foreground">
-                    {user?.email}
-                  </p>
-                </div>
-              </DropdownMenuLabel>
+              <DropdownMenuLabel>Minha Conta</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
                 <DropdownMenuItem>
@@ -108,7 +77,7 @@ const Navbar = () => {
                 </DropdownMenuItem>
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleLogout}>
+              <DropdownMenuItem>
                 <LogOut className="mr-2 h-4 w-4" />
                 <span>Sair</span>
               </DropdownMenuItem>

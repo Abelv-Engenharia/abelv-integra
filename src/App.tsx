@@ -3,8 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { AuthProvider } from "@/contexts/AuthContext";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Layout from "./components/layout/Layout";
 import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
@@ -58,79 +57,77 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <TooltipProvider>
-        <div className="app-container">
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Routes>
-              {/* Auth routes */}
-              <Route path="/login" element={<Login />} />
+    <TooltipProvider>
+      <div className="app-container">
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            {/* Auth routes */}
+            <Route path="/login" element={<Login />} />
+            
+            {/* App routes */}
+            <Route element={<Layout />}>
+              <Route path="/" element={<Dashboard />} />
               
-              {/* App routes */}
-              <Route element={<Layout />}>
-                <Route path="/" element={<Dashboard />} />
-                
-                {/* Gestão de SMS routes */}
-                <Route path="/desvios/dashboard" element={<DesviosDashboard />} />
-                <Route path="/desvios/cadastro" element={<DesviosForm />} />
-                <Route path="/desvios/consulta" element={<DesviosConsulta />} />
-                <Route path="/desvios/nao-conformidade" element={<DesviosNaoConformidade />} />
-                
-                {/* Treinamentos routes */}
-                <Route path="/treinamentos/dashboard" element={<TreinamentosDashboard />} />
-                <Route path="/treinamentos/normativo" element={<TreinamentosNormativo />} />
-                <Route path="/treinamentos/consulta" element={<TreinamentosConsulta />} />
-                <Route path="/treinamentos/execucao" element={<TreinamentosExecucao />} />
-                <Route path="/treinamentos/cracha" element={<TreinamentosCracha />} />
-                
-                {/* Hora-seguranca routes */}
-                <Route path="/hora-seguranca/dashboard" element={<HoraSegurancaDashboard />} />
-                <Route path="/hora-seguranca/inspecoes" element={<InspecoesCadastro />} />
-                <Route path="/hora-seguranca/inspecao-nao-programada" element={<InspecoesNaoProgramadas />} />
-                <Route path="/hora-seguranca/acompanhamento" element={<InspecoesAcompanhamento />} />
-                
-                {/* Ocorrencias routes */}
-                <Route path="/ocorrencias/dashboard" element={<OcorrenciasDashboard />} />
-                <Route path="/ocorrencias/cadastro" element={<OcorrenciasCadastro />} />
-                <Route path="/ocorrencias/consulta" element={<OcorrenciasConsulta />} />
-                <Route path="/ocorrencias/detalhes/:id" element={<OcorrenciasDetalhes />} />
-                
-                {/* Medidas-disciplinares routes */}
-                <Route path="/medidas-disciplinares/dashboard" element={<Dashboard />} />
-                <Route path="/medidas-disciplinares/cadastro" element={<Dashboard />} />
-                <Route path="/medidas-disciplinares/consulta" element={<Dashboard />} />
-                
-                {/* Tarefas routes */}
-                <Route path="/tarefas/dashboard" element={<TarefasDashboard />} />
-                <Route path="/tarefas/minhas-tarefas" element={<MinhasTarefas />} />
-                <Route path="/tarefas/cadastro" element={<CadastroTarefas />} />
-                <Route path="/tarefas/detalhes/:id" element={<DetalheTarefa />} />
-                <Route path="/tarefas/editar/:id" element={<EditarTarefa />} />
-                
-                {/* Relatórios routes */}
-                <Route path="/relatorios" element={<RelatoriosDashboard />} />
-                <Route path="/relatorios/desvios" element={<RelatoriosDesvios />} />
-                <Route path="/relatorios/treinamentos" element={<RelatoriosTreinamentos />} />
-                <Route path="/relatorios/ocorrencias" element={<RelatoriosOcorrencias />} />
-                
-                {/* Administração routes */}
-                <Route path="/admin/usuarios" element={<AdminUsuarios />} />
-                <Route path="/admin/perfis" element={<AdminPerfis />} />
-                <Route path="/admin/funcionarios" element={<CadastroFuncionarios />} />
-                <Route path="/admin/hht" element={<RegistroHHT />} />
-                <Route path="/admin/templates" element={<AdminTemplates />} />
-                <Route path="/admin/logo" element={<AdminLogo />} />
-              </Route>
+              {/* Gestão de SMS routes */}
+              <Route path="/desvios/dashboard" element={<DesviosDashboard />} />
+              <Route path="/desvios/cadastro" element={<DesviosForm />} />
+              <Route path="/desvios/consulta" element={<DesviosConsulta />} />
+              <Route path="/desvios/nao-conformidade" element={<DesviosNaoConformidade />} />
               
-              {/* Fallback route */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
-        </div>
-      </TooltipProvider>
-    </AuthProvider>
+              {/* Treinamentos routes */}
+              <Route path="/treinamentos/dashboard" element={<TreinamentosDashboard />} />
+              <Route path="/treinamentos/normativo" element={<TreinamentosNormativo />} />
+              <Route path="/treinamentos/consulta" element={<TreinamentosConsulta />} />
+              <Route path="/treinamentos/execucao" element={<TreinamentosExecucao />} />
+              <Route path="/treinamentos/cracha" element={<TreinamentosCracha />} />
+              
+              {/* Hora-seguranca routes */}
+              <Route path="/hora-seguranca/dashboard" element={<HoraSegurancaDashboard />} />
+              <Route path="/hora-seguranca/inspecoes" element={<InspecoesCadastro />} />
+              <Route path="/hora-seguranca/inspecao-nao-programada" element={<InspecoesNaoProgramadas />} />
+              <Route path="/hora-seguranca/acompanhamento" element={<InspecoesAcompanhamento />} />
+              
+              {/* Ocorrencias routes */}
+              <Route path="/ocorrencias/dashboard" element={<OcorrenciasDashboard />} />
+              <Route path="/ocorrencias/cadastro" element={<OcorrenciasCadastro />} />
+              <Route path="/ocorrencias/consulta" element={<OcorrenciasConsulta />} />
+              <Route path="/ocorrencias/detalhes/:id" element={<OcorrenciasDetalhes />} />
+              
+              {/* Medidas-disciplinares routes */}
+              <Route path="/medidas-disciplinares/dashboard" element={<Dashboard />} />
+              <Route path="/medidas-disciplinares/cadastro" element={<Dashboard />} />
+              <Route path="/medidas-disciplinares/consulta" element={<Dashboard />} />
+              
+              {/* Tarefas routes */}
+              <Route path="/tarefas/dashboard" element={<TarefasDashboard />} />
+              <Route path="/tarefas/minhas-tarefas" element={<MinhasTarefas />} />
+              <Route path="/tarefas/cadastro" element={<CadastroTarefas />} />
+              <Route path="/tarefas/detalhes/:id" element={<DetalheTarefa />} />
+              <Route path="/tarefas/editar/:id" element={<EditarTarefa />} />
+              
+              {/* Relatórios routes */}
+              <Route path="/relatorios" element={<RelatoriosDashboard />} />
+              <Route path="/relatorios/desvios" element={<RelatoriosDesvios />} />
+              <Route path="/relatorios/treinamentos" element={<RelatoriosTreinamentos />} />
+              <Route path="/relatorios/ocorrencias" element={<RelatoriosOcorrencias />} />
+              
+              {/* Administração routes */}
+              <Route path="/admin/usuarios" element={<AdminUsuarios />} />
+              <Route path="/admin/perfis" element={<AdminPerfis />} />
+              <Route path="/admin/funcionarios" element={<CadastroFuncionarios />} />
+              <Route path="/admin/hht" element={<RegistroHHT />} />
+              <Route path="/admin/templates" element={<AdminTemplates />} />
+              <Route path="/admin/logo" element={<AdminLogo />} />
+            </Route>
+            
+            {/* Fallback route */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </div>
+    </TooltipProvider>
   </QueryClientProvider>
 );
 

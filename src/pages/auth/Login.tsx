@@ -6,88 +6,22 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Label } from "@/components/ui/label";
 import { useNavigate } from "react-router-dom";
 import SystemLogo from "@/components/common/SystemLogo";
-import { useAuth } from "@/contexts/AuthContext";
-import { toast } from "@/hooks/use-toast";
-import { Loader2 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { signIn } = useAuth();
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     
-    try {
-      const { error } = await signIn(email, password);
-      
-      if (error) {
-        toast({
-          title: "Erro de autenticação",
-          description: error.message,
-          variant: "destructive",
-        });
-        setLoading(false);
-      } else {
-        toast({
-          title: "Autenticação bem-sucedida",
-          description: "Você foi autenticado com sucesso.",
-        });
-        navigate("/");
-      }
-    } catch (error: any) {
-      toast({
-        title: "Erro de autenticação",
-        description: error?.message || "Falha ao fazer login",
-        variant: "destructive",
-      });
+    // Simulação de login
+    setTimeout(() => {
       setLoading(false);
-    }
-  };
-
-  const handleRegister = async () => {
-    if (!email || !password) {
-      toast({
-        title: "Campos obrigatórios",
-        description: "Por favor, preencha email e senha para se registrar.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setLoading(true);
-    
-    try {
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-      });
-      
-      if (error) {
-        toast({
-          title: "Erro ao criar conta",
-          description: error.message,
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "Conta criada com sucesso",
-          description: "Verifique seu email para confirmar o cadastro.",
-        });
-      }
-    } catch (error: any) {
-      toast({
-        title: "Erro ao criar conta",
-        description: error?.message || "Falha ao registrar",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
+      navigate("/");
+    }, 1500);
   };
 
   return (
@@ -129,29 +63,10 @@ const Login = () => {
               />
             </div>
           </CardContent>
-          <CardFooter className="flex-col space-y-2">
+          <CardFooter>
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Entrando...
-                </>
-              ) : (
-                "Entrar"
-              )}
+              {loading ? "Entrando..." : "Entrar"}
             </Button>
-            <div className="text-center mt-2">
-              <span className="text-sm text-muted-foreground">Não tem uma conta? </span>
-              <Button 
-                type="button" 
-                variant="link" 
-                className="text-sm p-0 h-auto" 
-                onClick={handleRegister}
-                disabled={loading}
-              >
-                Registre-se
-              </Button>
-            </div>
           </CardFooter>
         </form>
       </Card>
