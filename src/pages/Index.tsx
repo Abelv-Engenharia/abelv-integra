@@ -1,27 +1,12 @@
-
-import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
+// Update this page (the content is just a fallback if you fail to update the page)
 
 const Index = () => {
-  const navigate = useNavigate();
-  const { user, loading } = useAuth();
-  
-  useEffect(() => {
-    if (!loading) {
-      // If logged in, redirect to dashboard, otherwise to login
-      if (user) {
-        navigate("/dashboard");
-      } else {
-        navigate("/login");
-      }
-    }
-  }, [user, loading, navigate]);
-  
-  // Show loading spinner while checking auth state
   return (
-    <div className="flex h-screen items-center justify-center">
-      <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-b-transparent"></div>
+    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+      <div className="text-center">
+        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
+        <p className="text-xl text-gray-600">Start building your amazing project here!</p>
+      </div>
     </div>
   );
 };

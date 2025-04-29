@@ -1,201 +1,125 @@
 
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { Toaster } from '@/components/ui/sonner';
-import Layout from '@/components/layout/Layout';
-import Dashboard from '@/pages/Dashboard';
-import DesviosDashboard from '@/pages/DesviosDashboard';
-import DesviosConsulta from '@/pages/DesviosConsulta';
-import DesviosForm from '@/pages/DesviosForm';
-import TreinamentosDashboard from '@/pages/treinamentos/TreinamentosDashboard';
-import TreinamentosConsulta from '@/pages/treinamentos/TreinamentosConsulta';
-import TreinamentosExecucao from '@/pages/treinamentos/TreinamentosExecucao';
-import TreinamentosNormativo from '@/pages/treinamentos/TreinamentosNormativo';
-import TreinamentosCracha from '@/pages/treinamentos/TreinamentosCracha';
-import RelatoriosDashboard from '@/pages/relatorios/RelatoriosDashboard';
-import RelatoriosDesvios from '@/pages/relatorios/RelatoriosDesvios';
-import RelatoriosTreinamentos from '@/pages/relatorios/RelatoriosTreinamentos';
-import RelatoriosOcorrencias from '@/pages/relatorios/RelatoriosOcorrencias';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import NotFound from '@/pages/NotFound';
-import { AuthProvider, useAuth } from '@/contexts/AuthContext';
-import LoginPage from '@/pages/auth/LoginPage';
-import Index from './pages/Index';
+import { Toaster } from "@/components/ui/toaster";
+import { Toaster as Sonner } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Layout from "./components/layout/Layout";
+import Dashboard from "./pages/Dashboard";
+import NotFound from "./pages/NotFound";
+import DesviosForm from "./pages/DesviosForm";
+import DesviosDashboard from "./pages/DesviosDashboard";
+import DesviosConsulta from "./pages/DesviosConsulta";
+import DesviosNaoConformidade from "./pages/DesviosNaoConformidade";
+import AdminTemplates from "./pages/AdminTemplates";
 
-// Create a client for React Query
+// Ocorrências pages
+import OcorrenciasDashboard from "./pages/ocorrencias/OcorrenciasDashboard";
+import OcorrenciasCadastro from "./pages/ocorrencias/OcorrenciasCadastro";
+import OcorrenciasConsulta from "./pages/ocorrencias/OcorrenciasConsulta";
+import OcorrenciasDetalhes from "./pages/ocorrencias/OcorrenciasDetalhes";
+
+// Treinamentos pages
+import TreinamentosDashboard from "./pages/treinamentos/TreinamentosDashboard";
+import TreinamentosNormativo from "./pages/treinamentos/TreinamentosNormativo";
+import TreinamentosExecucao from "./pages/treinamentos/TreinamentosExecucao";
+import TreinamentosCracha from "./pages/treinamentos/TreinamentosCracha";
+import TreinamentosConsulta from "./pages/treinamentos/TreinamentosConsulta";
+
+// Hora da Segurança pages
+import HoraSegurancaDashboard from "./pages/hora-seguranca/HoraSegurancaDashboard";
+import InspecoesCadastro from "./pages/hora-seguranca/InspecoesCadastro";
+import InspecoesNaoProgramadas from "./pages/hora-seguranca/InspecoesNaoProgramadas";
+import InspecoesAcompanhamento from "./pages/hora-seguranca/InspecoesAcompanhamento";
+
+// Tarefas pages
+import TarefasDashboard from "./pages/tarefas/TarefasDashboard";
+import MinhasTarefas from "./pages/tarefas/MinhasTarefas";
+import CadastroTarefas from "./pages/tarefas/CadastroTarefas";
+import DetalheTarefa from "./pages/tarefas/DetalheTarefa";
+import EditarTarefa from "./pages/tarefas/EditarTarefa";
+
+// Relatórios pages
+import RelatoriosDashboard from "./pages/relatorios/RelatoriosDashboard";
+import RelatoriosDesvios from "./pages/relatorios/RelatoriosDesvios";
+import RelatoriosTreinamentos from "./pages/relatorios/RelatoriosTreinamentos";
+import RelatoriosOcorrencias from "./pages/relatorios/RelatoriosOcorrencias";
+
+// Admin pages
+import RegistroHHT from "./pages/admin/RegistroHHT";
+import CadastroFuncionarios from "./pages/admin/CadastroFuncionarios";
+import AdminUsuarios from "./pages/admin/AdminUsuarios";
+import AdminPerfis from "./pages/admin/AdminPerfis";
+
 const queryClient = new QueryClient();
 
-// Fixed ProtectedRoute component to properly handle TypeScript props
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user, loading } = useAuth();
-  
-  if (loading) {
-    return (
-      <div className="flex h-screen items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-b-transparent"></div>
-      </div>
-    );
-  }
-  
-  if (!user) {
-    return <Navigate to="/login" replace />;
-  }
-  
-  return <>{children}</>;
-};
-
-const App = () => {
-  return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <Router>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/login" element={<LoginPage />} />
+const App = () => (
+  <QueryClientProvider client={queryClient}>
+    <TooltipProvider>
+      <Toaster />
+      <Sonner />
+      <BrowserRouter>
+        <Routes>
+          <Route element={<Layout />}>
+            <Route path="/" element={<Dashboard />} />
             
-            <Route 
-              path="/dashboard" 
-              element={
-                <ProtectedRoute>
-                  <Layout>
-                    <Dashboard />
-                  </Layout>
-                </ProtectedRoute>
-              } 
-            />
-            
-            {/* Desvios routes */}
-            <Route 
-              path="/desvios/dashboard" 
-              element={
-                <ProtectedRoute>
-                  <Layout>
-                    <DesviosDashboard />
-                  </Layout>
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/desvios/consulta" 
-              element={
-                <ProtectedRoute>
-                  <Layout>
-                    <DesviosConsulta />
-                  </Layout>
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/desvios/cadastro" 
-              element={
-                <ProtectedRoute>
-                  <Layout>
-                    <DesviosForm />
-                  </Layout>
-                </ProtectedRoute>
-              } 
-            />
+            {/* Gestão de SMS routes */}
+            <Route path="/desvios/dashboard" element={<DesviosDashboard />} />
+            <Route path="/desvios/cadastro" element={<DesviosForm />} />
+            <Route path="/desvios/consulta" element={<DesviosConsulta />} />
+            <Route path="/desvios/nao-conformidade" element={<DesviosNaoConformidade />} />
             
             {/* Treinamentos routes */}
-            <Route 
-              path="/treinamentos/dashboard" 
-              element={
-                <ProtectedRoute>
-                  <Layout>
-                    <TreinamentosDashboard />
-                  </Layout>
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/treinamentos/consulta" 
-              element={
-                <ProtectedRoute>
-                  <Layout>
-                    <TreinamentosConsulta />
-                  </Layout>
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/treinamentos/execucao" 
-              element={
-                <ProtectedRoute>
-                  <Layout>
-                    <TreinamentosExecucao />
-                  </Layout>
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/treinamentos/normativo" 
-              element={
-                <ProtectedRoute>
-                  <Layout>
-                    <TreinamentosNormativo />
-                  </Layout>
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/treinamentos/cracha" 
-              element={
-                <ProtectedRoute>
-                  <Layout>
-                    <TreinamentosCracha />
-                  </Layout>
-                </ProtectedRoute>
-              } 
-            />
+            <Route path="/treinamentos/dashboard" element={<TreinamentosDashboard />} />
+            <Route path="/treinamentos/normativo" element={<TreinamentosNormativo />} />
+            <Route path="/treinamentos/consulta" element={<TreinamentosConsulta />} />
+            <Route path="/treinamentos/execucao" element={<TreinamentosExecucao />} />
+            <Route path="/treinamentos/cracha" element={<TreinamentosCracha />} />
+            
+            {/* Hora-seguranca routes */}
+            <Route path="/hora-seguranca/dashboard" element={<HoraSegurancaDashboard />} />
+            <Route path="/hora-seguranca/inspecoes" element={<InspecoesCadastro />} />
+            <Route path="/hora-seguranca/inspecao-nao-programada" element={<InspecoesNaoProgramadas />} />
+            <Route path="/hora-seguranca/acompanhamento" element={<InspecoesAcompanhamento />} />
+            
+            {/* Ocorrencias routes */}
+            <Route path="/ocorrencias/dashboard" element={<OcorrenciasDashboard />} />
+            <Route path="/ocorrencias/cadastro" element={<OcorrenciasCadastro />} />
+            <Route path="/ocorrencias/consulta" element={<OcorrenciasConsulta />} />
+            <Route path="/ocorrencias/detalhes/:id" element={<OcorrenciasDetalhes />} />
+            
+            {/* Medidas-disciplinares routes */}
+            <Route path="/medidas-disciplinares/dashboard" element={<Dashboard />} />
+            <Route path="/medidas-disciplinares/cadastro" element={<Dashboard />} />
+            <Route path="/medidas-disciplinares/consulta" element={<Dashboard />} />
+            
+            {/* Tarefas routes */}
+            <Route path="/tarefas/dashboard" element={<TarefasDashboard />} />
+            <Route path="/tarefas/minhas-tarefas" element={<MinhasTarefas />} />
+            <Route path="/tarefas/cadastro" element={<CadastroTarefas />} />
+            <Route path="/tarefas/detalhes/:id" element={<DetalheTarefa />} />
+            <Route path="/tarefas/editar/:id" element={<EditarTarefa />} />
             
             {/* Relatórios routes */}
-            <Route 
-              path="/relatorios" 
-              element={
-                <ProtectedRoute>
-                  <Layout>
-                    <RelatoriosDashboard />
-                  </Layout>
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/relatorios/desvios" 
-              element={
-                <ProtectedRoute>
-                  <Layout>
-                    <RelatoriosDesvios />
-                  </Layout>
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/relatorios/treinamentos" 
-              element={
-                <ProtectedRoute>
-                  <Layout>
-                    <RelatoriosTreinamentos />
-                  </Layout>
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/relatorios/ocorrencias" 
-              element={
-                <ProtectedRoute>
-                  <Layout>
-                    <RelatoriosOcorrencias />
-                  </Layout>
-                </ProtectedRoute>
-              } 
-            />
+            <Route path="/relatorios" element={<RelatoriosDashboard />} />
+            <Route path="/relatorios/desvios" element={<RelatoriosDesvios />} />
+            <Route path="/relatorios/treinamentos" element={<RelatoriosTreinamentos />} />
+            <Route path="/relatorios/ocorrencias" element={<RelatoriosOcorrencias />} />
             
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </Router>
-        <Toaster />
-      </AuthProvider>
-    </QueryClientProvider>
-  );
-};
+            {/* Administração routes */}
+            <Route path="/admin/usuarios" element={<AdminUsuarios />} />
+            <Route path="/admin/perfis" element={<AdminPerfis />} />
+            <Route path="/admin/funcionarios" element={<CadastroFuncionarios />} />
+            <Route path="/admin/hht" element={<RegistroHHT />} />
+            <Route path="/admin/templates" element={<AdminTemplates />} />
+          </Route>
+          
+          {/* Fallback route */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </BrowserRouter>
+    </TooltipProvider>
+  </QueryClientProvider>
+);
 
 export default App;
