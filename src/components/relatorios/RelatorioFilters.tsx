@@ -1,167 +1,177 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
-import { CalendarRange, Calendar as CalendarIcon, Download, Filter } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { Separator } from "@/components/ui/separator";
-import { toast } from "@/hooks/use-toast";
+import { CalendarIcon, FilterX } from "lucide-react";
+import { Input } from "@/components/ui/input";
 
-type RelatorioFiltersProps = {
+interface RelatorioFiltersProps {
   onFilter: (filters: any) => void;
-  filterOptions: {
-    periods: { value: string; label: string }[];
-    additionalFilters?: { 
-      id: string; 
-      label: string; 
-      options: { value: string; label: string }[] 
-    }[];
-  };
-};
+}
 
-export function RelatorioFilters({ onFilter, filterOptions }: RelatorioFiltersProps) {
-  const [period, setPeriod] = React.useState<string>("last-30");
-  const [dateRange, setDateRange] = React.useState<{ from: Date | undefined; to: Date | undefined }>({
+const RelatorioFilters = ({ onFilter }: RelatorioFiltersProps) => {
+  const [expanded, setExpanded] = useState(false);
+  const [dateRange, setDateRange] = useState<{ from: Date | undefined; to: Date | undefined }>({
     from: undefined,
     to: undefined
   });
-  const [additionalFilters, setAdditionalFilters] = React.useState<Record<string, string>>({});
+  const [filters, setFilters] = useState({
+    dateRange: { from: undefined, to: undefined },
+    funcionario: "",
+    area: "",
+    status: "",
+    tipo: "",
+  });
 
-  const applyFilters = () => {
-    onFilter({
-      period,
+  const handleResetFilters = () => {
+    setFilters({
+      dateRange: { from: undefined, to: undefined },
+      funcionario: "",
+      area: "",
+      status: "",
+      tipo: "",
+    });
+    setDateRange({ from: undefined, to: undefined });
+  };
+
+  const handleApplyFilters = () => {
+    const filtersToApply = {
+      ...filters,
       dateRange,
-      ...additionalFilters
-    });
+    };
     
-    toast({
-      title: "Filtros aplicados",
-      description: "Os dados foram filtrados conforme selecionado."
-    });
+    onFilter(filtersToApply);
   };
-  
-  const generatePDF = () => {
-    toast({
-      title: "Gerando PDF",
-      description: "O relatório PDF será baixado em instantes."
-    });
-    
-    // In a real app, this would trigger a PDF generation API call
-    setTimeout(() => {
-      toast({
-        title: "PDF gerado com sucesso",
-        description: "O relatório foi gerado e está pronto para download."
-      });
-    }, 1500);
-  };
-  
+
   return (
-    <Card className="mb-6">
-      <CardContent className="pt-6">
-        <div className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="period">Período</Label>
-              <Select value={period} onValueChange={setPeriod}>
-                <SelectTrigger id="period">
-                  <SelectValue placeholder="Selecione um período" />
-                </SelectTrigger>
-                <SelectContent>
-                  {filterOptions.periods.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                  <SelectItem value="custom">Período personalizado</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
-            {period === "custom" && (
-              <div className="space-y-2 col-span-2">
-                <Label>Período personalizado</Label>
+    <Card>
+      <CardContent className={`p-4 ${expanded ? "pb-4" : ""}`}>
+        <div className="flex flex-col sm:flex-row justify-between mb-4">
+          <h3 className="text-lg font-medium mb-2 sm:mb-0">Filtros</h3>
+          <div className="flex items-center space-x-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex items-center"
+              onClick={() => setExpanded(!expanded)}
+            >
+              {expanded ? "Ocultar filtros" : "Expandir filtros"}
+            </Button>
+            {expanded && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="flex items-center"
+                onClick={handleResetFilters}
+              >
+                <FilterX className="mr-1 h-4 w-4" /> Limpar
+              </Button>
+            )}
+          </div>
+        </div>
+
+        {expanded && (
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Período</label>
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
                       variant="outline"
-                      className={cn(
-                        "w-full justify-start text-left font-normal",
-                        !dateRange.from && "text-muted-foreground"
-                      )}
+                      className="w-full justify-start text-left font-normal"
                     >
-                      <CalendarRange className="mr-2 h-4 w-4" />
+                      <CalendarIcon className="mr-2 h-4 w-4" />
                       {dateRange.from ? (
                         dateRange.to ? (
                           <>
-                            {format(dateRange.from, "dd/MM/yyyy")} - {format(dateRange.to, "dd/MM/yyyy")}
+                            {format(dateRange.from, "dd/MM/yyyy")} -{" "}
+                            {format(dateRange.to, "dd/MM/yyyy")}
                           </>
                         ) : (
                           format(dateRange.from, "dd/MM/yyyy")
                         )
                       ) : (
-                        <span>Selecione um período</span>
+                        <span>Selecionar período</span>
                       )}
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
+                  <PopoverContent className="w-auto p-0" align="start">
                     <Calendar
-                      initialFocus
                       mode="range"
-                      defaultMonth={dateRange.from}
-                      selected={dateRange}
-                      onSelect={setDateRange}
-                      numberOfMonths={2}
-                      className={cn("p-3 pointer-events-auto")}
+                      selected={dateRange as any}
+                      onSelect={(selected) => {
+                        setDateRange(selected as any);
+                      }}
+                      initialFocus
                     />
                   </PopoverContent>
                 </Popover>
               </div>
-            )}
-            
-            {filterOptions.additionalFilters?.map((filter) => (
-              <div className="space-y-2" key={filter.id}>
-                <Label htmlFor={filter.id}>{filter.label}</Label>
-                <Select 
-                  onValueChange={(value) => 
-                    setAdditionalFilters({...additionalFilters, [filter.id]: value})
-                  }
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Funcionário</label>
+                <Input
+                  placeholder="Nome do funcionário"
+                  value={filters.funcionario}
+                  onChange={(e) => setFilters({ ...filters, funcionario: e.target.value })}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Status</label>
+                <Select
+                  value={filters.status}
+                  onValueChange={(value) => setFilters({ ...filters, status: value })}
                 >
-                  <SelectTrigger id={filter.id}>
-                    <SelectValue placeholder={`Selecione ${filter.label.toLowerCase()}`} />
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione o status" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="todos">Todos</SelectItem>
-                    {filter.options.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
+                    <SelectItem value="">Todos</SelectItem>
+                    <SelectItem value="Válido">Válido</SelectItem>
+                    <SelectItem value="Próximo ao vencimento">Próximo ao vencimento</SelectItem>
+                    <SelectItem value="Vencido">Vencido</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
-            ))}
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Tipo</label>
+                <Select
+                  value={filters.tipo}
+                  onValueChange={(value) => setFilters({ ...filters, tipo: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione o tipo" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">Todos</SelectItem>
+                    <SelectItem value="Formação">Formação</SelectItem>
+                    <SelectItem value="Reciclagem">Reciclagem</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="flex justify-end">
+              <Button onClick={handleApplyFilters}>Aplicar Filtros</Button>
+            </div>
           </div>
-          
-          <Separator />
-          
-          <div className="flex justify-between">
-            <Button onClick={applyFilters} variant="default">
-              <Filter className="mr-2 h-4 w-4" />
-              Aplicar Filtros
-            </Button>
-            
-            <Button onClick={generatePDF} variant="outline">
-              <Download className="mr-2 h-4 w-4" />
-              Gerar PDF
-            </Button>
-          </div>
-        </div>
+        )}
       </CardContent>
     </Card>
   );
-}
+};
+
+export default RelatorioFilters;
