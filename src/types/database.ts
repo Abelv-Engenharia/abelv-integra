@@ -1,78 +1,70 @@
 
-export type Profile = {
+export interface Profile {
   id: string;
   nome: string;
   email: string;
   avatar_url?: string;
   cargo?: string;
   departamento?: string;
-  created_at: string;
-  updated_at: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
-export type Permissoes = {
-  desvios: boolean;
-  treinamentos: boolean;
-  ocorrencias: boolean;
-  tarefas: boolean;
-  relatorios: boolean;
-  hora_seguranca: boolean;
-  medidas_disciplinares: boolean;
-  admin_usuarios: boolean;
-  admin_perfis: boolean;
-  admin_funcionarios: boolean;
-  admin_hht: boolean;
-  admin_templates: boolean;
-}
-
-export type Perfil = {
+export interface Perfil {
   id: number;
   nome: string;
-  descricao: string | null;
-  permissoes: Permissoes;
+  descricao?: string;
+  permissoes: {
+    desvios: boolean;
+    tarefas: boolean;
+    admin_hht: boolean;
+    relatorios: boolean;
+    ocorrencias: boolean;
+    admin_perfis: boolean;
+    treinamentos: boolean;
+    admin_usuarios: boolean;
+    hora_seguranca: boolean;
+    admin_templates: boolean;
+    admin_funcionarios: boolean;
+    medidas_disciplinares: boolean;
+  };
 }
 
-export type UsuarioPerfil = {
-  id: string;
-  usuario_id: string;
-  perfil_id: number;
-}
-
-export type Funcionario = {
+export interface Funcionario {
   id: string;
   nome: string;
   funcao: string;
   matricula: string;
   foto?: string;
-  ativo: boolean;
-  created_at: string;
-  updated_at: string;
+  ativo?: boolean;
+  created_at?: string;
+  updated_at?: string;
 }
 
-export type Treinamento = {
+export interface Treinamento {
   id: string;
   nome: string;
   carga_horaria?: number;
   validade_dias?: number;
-  created_at: string;
-  updated_at: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
-export type TreinamentoNormativo = {
+export interface TreinamentoNormativo {
   id: string;
   funcionario_id: string;
   treinamento_id: string;
-  tipo: 'Formação' | 'Reciclagem';
+  tipo: string;
   data_realizacao: string;
   data_validade: string;
   certificado_url?: string;
-  status: 'Válido' | 'Próximo ao vencimento' | 'Vencido';
-  arquivado: boolean;
-  created_at: string;
-  updated_at: string;
+  status: string;
+  arquivado?: boolean;
+  created_at?: string;
+  updated_at?: string;
 }
 
-export type ExecucaoTreinamento = {
+export interface ExecucaoTreinamento {
   id: string;
   data: string;
   mes: number;
@@ -85,21 +77,21 @@ export type ExecucaoTreinamento = {
   carga_horaria: number;
   observacoes?: string;
   lista_presenca_url?: string;
-  created_at: string;
-  updated_at: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
-export type Tarefa = {
+export interface Tarefa {
   id: string;
   cca: string;
-  tipo_cca: 'linha-inteira' | 'parcial' | 'equipamento' | 'especifica';
-  data_cadastro: string;
+  tipo_cca: string;
+  data_cadastro?: string;
   data_conclusao?: string;
   descricao: string;
   responsavel_id?: string;
   anexo?: string;
-  status: 'programada' | 'concluida' | 'em-andamento' | 'pendente';
-  iniciada: boolean;
+  status: string;
+  iniciada?: boolean;
   configuracao: {
     recorrencia: {
       ativa: boolean;
@@ -109,52 +101,91 @@ export type Tarefa = {
     requerValidacao: boolean;
     notificarUsuario: boolean;
   };
-  created_at: string;
-  updated_at: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
-export type Ocorrencia = {
+export interface Ocorrencia {
   id: string;
   data: string;
   empresa: string;
   cca: string;
   disciplina: string;
   tipo_ocorrencia: string;
-  classificacao_risco: 'TRIVIAL' | 'TOLERÁVEL' | 'MODERADO' | 'SUBSTANCIAL' | 'INTOLERÁVEL';
-  status: 'Em tratativa' | 'Concluído';
+  classificacao_risco: string;
+  status: string;
   descricao?: string;
   partes_corpo_afetadas?: string[];
   medidas_tomadas?: string;
   responsavel_id?: string;
-  created_at: string;
-  updated_at: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
-export type Desvio = {
+export interface Desvio {
   id: string;
   data: string;
   local: string;
   tipo: string;
   descricao: string;
   acao_imediata?: string;
-  classificacao: 'Baixo' | 'Médio' | 'Alto' | 'Muito Alto';
-  status: 'Aberto' | 'Em andamento' | 'Resolvido' | 'Cancelado';
+  classificacao: string;
+  status: string;
   responsavel_id?: string;
   prazo?: string;
   imagem_url?: string;
-  created_at: string;
-  updated_at: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export type Database = {
-  profiles: Profile;
-  perfis: Perfil;
-  usuario_perfis: UsuarioPerfil;
-  funcionarios: Funcionario;
-  treinamentos: Treinamento;
-  treinamentos_normativos: TreinamentoNormativo;
-  execucao_treinamentos: ExecucaoTreinamento;
-  tarefas: Tarefa;
-  ocorrencias: Ocorrencia;
-  desvios: Desvio;
-}
+  public: {
+    Tables: {
+      profiles: {
+        Row: Profile;
+        Insert: Omit<Profile, 'created_at' | 'updated_at'>;
+        Update: Partial<Omit<Profile, 'id' | 'created_at' | 'updated_at'>>;
+      };
+      perfis: {
+        Row: Perfil;
+        Insert: Omit<Perfil, 'id'>;
+        Update: Partial<Omit<Perfil, 'id'>>;
+      };
+      funcionarios: {
+        Row: Funcionario;
+        Insert: Omit<Funcionario, 'id' | 'created_at' | 'updated_at'>;
+        Update: Partial<Omit<Funcionario, 'id' | 'created_at' | 'updated_at'>>;
+      };
+      treinamentos: {
+        Row: Treinamento;
+        Insert: Omit<Treinamento, 'id' | 'created_at' | 'updated_at'>;
+        Update: Partial<Omit<Treinamento, 'id' | 'created_at' | 'updated_at'>>;
+      };
+      treinamentos_normativos: {
+        Row: TreinamentoNormativo;
+        Insert: Omit<TreinamentoNormativo, 'id' | 'created_at' | 'updated_at'>;
+        Update: Partial<Omit<TreinamentoNormativo, 'id' | 'created_at' | 'updated_at'>>;
+      };
+      execucao_treinamentos: {
+        Row: ExecucaoTreinamento;
+        Insert: Omit<ExecucaoTreinamento, 'id' | 'created_at' | 'updated_at'>;
+        Update: Partial<Omit<ExecucaoTreinamento, 'id' | 'created_at' | 'updated_at'>>;
+      };
+      tarefas: {
+        Row: Tarefa;
+        Insert: Omit<Tarefa, 'id' | 'created_at' | 'updated_at'>;
+        Update: Partial<Omit<Tarefa, 'id' | 'created_at' | 'updated_at'>>;
+      };
+      ocorrencias: {
+        Row: Ocorrencia;
+        Insert: Omit<Ocorrencia, 'id' | 'created_at' | 'updated_at'>;
+        Update: Partial<Omit<Ocorrencia, 'id' | 'created_at' | 'updated_at'>>;
+      };
+      desvios: {
+        Row: Desvio;
+        Insert: Omit<Desvio, 'id' | 'created_at' | 'updated_at'>;
+        Update: Partial<Omit<Desvio, 'id' | 'created_at' | 'updated_at'>>;
+      };
+    };
+  };
+};
