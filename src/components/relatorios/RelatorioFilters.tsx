@@ -1,176 +1,376 @@
 
 import React, { useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
+import { format } from "date-fns";
+import { CalendarIcon, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+} from "@/components/ui/form";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue
+  SelectValue,
 } from "@/components/ui/select";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { format } from "date-fns";
-import { CalendarIcon, FilterX } from "lucide-react";
-import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
+import { 
+  useCCAOptions, 
+  useTipoDesvioOptions, 
+  useClassificacaoDesviosOptions, 
+  useStatusDesviosOptions, 
+  useDisciplinasOptions, 
+  useEmpresasOptions 
+} from "@/hooks/useDropdownOptions";
+
+const filterSchema = z.object({
+  dataInicio: z.date().optional(),
+  dataFim: z.date().optional(),
+  cca: z.string().optional(),
+  empresa: z.string().optional(),
+  disciplina: z.string().optional(),
+  tipo: z.string().optional(),
+  classificacao: z.string().optional(),
+  status: z.string().optional(),
+});
+
+type FilterValues = z.infer<typeof filterSchema>;
 
 interface RelatorioFiltersProps {
-  onFilter: (filters: any) => void;
+  onFilter: (filters: FilterValues) => void;
+  showDisciplinas?: boolean;
+  showTipoDesvio?: boolean;
 }
 
-const RelatorioFilters = ({ onFilter }: RelatorioFiltersProps) => {
-  const [expanded, setExpanded] = useState(false);
-  const [dateRange, setDateRange] = useState<{ from: Date | undefined; to: Date | undefined }>({
-    from: undefined,
-    to: undefined
+const RelatorioFilters = ({ 
+  onFilter, 
+  showDisciplinas = false, 
+  showTipoDesvio = true 
+}: RelatorioFiltersProps) => {
+  const form = useForm<FilterValues>({
+    resolver: zodResolver(filterSchema),
+    defaultValues: {},
   });
-  const [filters, setFilters] = useState({
-    dateRange: { from: undefined, to: undefined },
-    funcionario: "",
-    area: "",
-    status: "",
-    tipo: "",
-  });
+  
+  // Fetch options from Supabase using our new hooks
+  const { options: ccaOptions, isLoading: isLoadingCcas } = useCCAOptions();
+  const { options: empresaOptions, isLoading: isLoadingEmpresas } = useEmpresasOptions();
+  const { options: disciplinaOptions, isLoading: isLoadingDisciplinas } = useDisciplinasOptions();
+  const { options: tipoDesvioOptions, isLoading: isLoadingTiposDesvio } = useTipoDesvioOptions();
+  const { options: classificacaoOptions, isLoading: isLoadingClassificacoes } = useClassificacaoDesviosOptions();
+  const { options: statusOptions, isLoading: isLoadingStatus } = useStatusDesviosOptions();
 
-  const handleResetFilters = () => {
-    setFilters({
-      dateRange: { from: undefined, to: undefined },
-      funcionario: "",
-      area: "",
-      status: "",
-      tipo: "",
-    });
-    setDateRange({ from: undefined, to: undefined });
+  const onSubmit = (data: FilterValues) => {
+    onFilter(data);
   };
 
-  const handleApplyFilters = () => {
-    const filtersToApply = {
-      ...filters,
-      dateRange,
-    };
-    
-    onFilter(filtersToApply);
+  const handleClear = () => {
+    form.reset();
+    onFilter({});
   };
 
   return (
-    <Card>
-      <CardContent className={`p-4 ${expanded ? "pb-4" : ""}`}>
-        <div className="flex flex-col sm:flex-row justify-between mb-4">
-          <h3 className="text-lg font-medium mb-2 sm:mb-0">Filtros</h3>
-          <div className="flex items-center space-x-2">
-            <Button
-              variant="outline"
-              size="sm"
-              className="flex items-center"
-              onClick={() => setExpanded(!expanded)}
-            >
-              {expanded ? "Ocultar filtros" : "Expandir filtros"}
-            </Button>
-            {expanded && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="flex items-center"
-                onClick={handleResetFilters}
-              >
-                <FilterX className="mr-1 h-4 w-4" /> Limpar
-              </Button>
-            )}
-          </div>
-        </div>
+    <div className="bg-white p-5 rounded-lg border shadow-sm mb-6">
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)}>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Data inicio */}
+            <FormField
+              control={form.control}
+              name="dataInicio"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Data início</FormLabel>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <FormControl>
+                        <Button
+                          variant={"outline"}
+                          className={cn(
+                            "w-full pl-3 text-left font-normal",
+                            !field.value && "text-muted-foreground"
+                          )}
+                        >
+                          {field.value ? (
+                            format(field.value, "dd/MM/yyyy")
+                          ) : (
+                            <span>Selecione uma data</span>
+                          )}
+                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                        </Button>
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={field.value}
+                        onSelect={field.onChange}
+                        initialFocus
+                        className={cn("p-3 pointer-events-auto")}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </FormItem>
+              )}
+            />
 
-        {expanded && (
-          <div className="space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Período</label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className="w-full justify-start text-left font-normal"
+            {/* Data fim */}
+            <FormField
+              control={form.control}
+              name="dataFim"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Data fim</FormLabel>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <FormControl>
+                        <Button
+                          variant={"outline"}
+                          className={cn(
+                            "w-full pl-3 text-left font-normal",
+                            !field.value && "text-muted-foreground"
+                          )}
+                        >
+                          {field.value ? (
+                            format(field.value, "dd/MM/yyyy")
+                          ) : (
+                            <span>Selecione uma data</span>
+                          )}
+                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                        </Button>
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={field.value}
+                        onSelect={field.onChange}
+                        initialFocus
+                        className={cn("p-3 pointer-events-auto")}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </FormItem>
+              )}
+            />
+
+            {/* CCA */}
+            <FormField
+              control={form.control}
+              name="cca"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>CCA</FormLabel>
+                  <Select 
+                    onValueChange={field.onChange} 
+                    value={field.value}
+                    disabled={isLoadingCcas}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Todos" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="">Todos</SelectItem>
+                      {ccaOptions.map((option) => (
+                        <SelectItem key={option.value} value={String(option.value)}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FormItem>
+              )}
+            />
+
+            {/* Empresa */}
+            <FormField
+              control={form.control}
+              name="empresa"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Empresa</FormLabel>
+                  <Select 
+                    onValueChange={field.onChange} 
+                    value={field.value}
+                    disabled={isLoadingEmpresas}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Todas" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="">Todas</SelectItem>
+                      {empresaOptions.map((option) => (
+                        <SelectItem key={option.value} value={String(option.value)}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FormItem>
+              )}
+            />
+
+            {/* Disciplina - opcional */}
+            {showDisciplinas && (
+              <FormField
+                control={form.control}
+                name="disciplina"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Disciplina</FormLabel>
+                    <Select 
+                      onValueChange={field.onChange} 
+                      value={field.value}
+                      disabled={isLoadingDisciplinas}
                     >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {dateRange.from ? (
-                        dateRange.to ? (
-                          <>
-                            {format(dateRange.from, "dd/MM/yyyy")} -{" "}
-                            {format(dateRange.to, "dd/MM/yyyy")}
-                          </>
-                        ) : (
-                          format(dateRange.from, "dd/MM/yyyy")
-                        )
-                      ) : (
-                        <span>Selecionar período</span>
-                      )}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="range"
-                      selected={dateRange as any}
-                      onSelect={(selected) => {
-                        setDateRange(selected as any);
-                      }}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Todas" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="">Todas</SelectItem>
+                        {disciplinaOptions.map((option) => (
+                          <SelectItem key={option.value} value={String(option.value)}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FormItem>
+                )}
+              />
+            )}
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Funcionário</label>
-                <Input
-                  placeholder="Nome do funcionário"
-                  value={filters.funcionario}
-                  onChange={(e) => setFilters({ ...filters, funcionario: e.target.value })}
-                />
-              </div>
+            {/* Tipo de Desvio - opcional */}
+            {showTipoDesvio && (
+              <FormField
+                control={form.control}
+                name="tipo"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Tipo de Desvio</FormLabel>
+                    <Select 
+                      onValueChange={field.onChange} 
+                      value={field.value}
+                      disabled={isLoadingTiposDesvio}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Todos" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="">Todos</SelectItem>
+                        {tipoDesvioOptions.map((option) => (
+                          <SelectItem key={option.value} value={String(option.value)}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FormItem>
+                )}
+              />
+            )}
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Status</label>
-                <Select
-                  value={filters.status}
-                  onValueChange={(value) => setFilters({ ...filters, status: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione o status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="">Todos</SelectItem>
-                    <SelectItem value="Válido">Válido</SelectItem>
-                    <SelectItem value="Próximo ao vencimento">Próximo ao vencimento</SelectItem>
-                    <SelectItem value="Vencido">Vencido</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+            {/* Classificação */}
+            <FormField
+              control={form.control}
+              name="classificacao"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Classificação</FormLabel>
+                  <Select 
+                    onValueChange={field.onChange} 
+                    value={field.value}
+                    disabled={isLoadingClassificacoes}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Todas" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="">Todas</SelectItem>
+                      {classificacaoOptions.map((option) => (
+                        <SelectItem 
+                          key={option.value} 
+                          value={String(option.value)}
+                          className={option.color ? `text-${option.color}` : ''}
+                        >
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FormItem>
+              )}
+            />
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Tipo</label>
-                <Select
-                  value={filters.tipo}
-                  onValueChange={(value) => setFilters({ ...filters, tipo: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione o tipo" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="">Todos</SelectItem>
-                    <SelectItem value="Formação">Formação</SelectItem>
-                    <SelectItem value="Reciclagem">Reciclagem</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <div className="flex justify-end">
-              <Button onClick={handleApplyFilters}>Aplicar Filtros</Button>
-            </div>
+            {/* Status */}
+            <FormField
+              control={form.control}
+              name="status"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Status</FormLabel>
+                  <Select 
+                    onValueChange={field.onChange} 
+                    value={field.value}
+                    disabled={isLoadingStatus}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Todos" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="">Todos</SelectItem>
+                      {statusOptions.map((option) => (
+                        <SelectItem 
+                          key={option.value} 
+                          value={String(option.value)}
+                          className={option.color ? `text-${option.color}` : ''}
+                        >
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FormItem>
+              )}
+            />
           </div>
-        )}
-      </CardContent>
-    </Card>
+
+          <div className="flex justify-end mt-4 space-x-2">
+            <Button type="button" variant="outline" onClick={handleClear}>
+              Limpar filtros
+            </Button>
+            <Button type="submit">
+              <Search className="h-4 w-4 mr-2" /> Filtrar
+            </Button>
+          </div>
+        </form>
+      </Form>
+    </div>
   );
 };
 

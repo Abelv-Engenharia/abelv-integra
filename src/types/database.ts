@@ -1,4 +1,5 @@
 
+
 export interface Profile {
   id: string;
   nome: string;
@@ -138,6 +139,97 @@ export interface Desvio {
   updated_at?: string;
 }
 
+// New dropdown option interfaces for database tables
+export interface ClassificacaoRisco {
+  id: number;
+  nome: string;
+  descricao?: string;
+  cor?: string;
+  ordem?: number;
+}
+
+export interface TipoOcorrencia {
+  id: number;
+  nome: string;
+  descricao?: string;
+  ativo: boolean;
+}
+
+export interface StatusTarefa {
+  id: number;
+  nome: string;
+  descricao?: string;
+  cor?: string;
+  ordem?: number;
+}
+
+export interface TipoDesvio {
+  id: number;
+  nome: string;
+  descricao?: string;
+  ativo: boolean;
+}
+
+export interface ClassificacaoDesvio {
+  id: number;
+  nome: string;
+  descricao?: string;
+  cor?: string;
+  ordem?: number;
+}
+
+export interface StatusDesvio {
+  id: number;
+  nome: string;
+  descricao?: string;
+  cor?: string;
+  ordem?: number;
+}
+
+export interface TipoTreinamento {
+  id: number;
+  nome: string;
+  descricao?: string;
+  ativo: boolean;
+}
+
+export interface CCA {
+  id: number;
+  codigo: string;
+  nome: string;
+  tipo?: string;
+  ativo: boolean;
+}
+
+export interface CriticidadeTarefa {
+  id: number;
+  nome: string;
+  descricao?: string;
+  cor?: string;
+  ordem?: number;
+}
+
+export interface Disciplina {
+  id: number;
+  nome: string;
+  descricao?: string;
+  ativo: boolean;
+}
+
+export interface ParteCorpo {
+  id: number;
+  nome: string;
+  descricao?: string;
+  ativo: boolean;
+}
+
+export interface Empresa {
+  id: number;
+  nome: string;
+  cnpj?: string;
+  ativo: boolean;
+}
+
 export type Database = {
   public: {
     Tables: {
@@ -186,6 +278,83 @@ export type Database = {
         Insert: Omit<Desvio, 'id' | 'created_at' | 'updated_at'>;
         Update: Partial<Omit<Desvio, 'id' | 'created_at' | 'updated_at'>>;
       };
+      // New dropdown tables
+      classificacao_riscos: {
+        Row: ClassificacaoRisco;
+        Insert: Omit<ClassificacaoRisco, 'id'>;
+        Update: Partial<Omit<ClassificacaoRisco, 'id'>>;
+      };
+      tipos_ocorrencia: {
+        Row: TipoOcorrencia;
+        Insert: Omit<TipoOcorrencia, 'id'>;
+        Update: Partial<Omit<TipoOcorrencia, 'id'>>;
+      };
+      status_tarefas: {
+        Row: StatusTarefa;
+        Insert: Omit<StatusTarefa, 'id'>;
+        Update: Partial<Omit<StatusTarefa, 'id'>>;
+      };
+      tipos_desvio: {
+        Row: TipoDesvio;
+        Insert: Omit<TipoDesvio, 'id'>;
+        Update: Partial<Omit<TipoDesvio, 'id'>>;
+      };
+      classificacao_desvios: {
+        Row: ClassificacaoDesvio;
+        Insert: Omit<ClassificacaoDesvio, 'id'>;
+        Update: Partial<Omit<ClassificacaoDesvio, 'id'>>;
+      };
+      status_desvios: {
+        Row: StatusDesvio;
+        Insert: Omit<StatusDesvio, 'id'>;
+        Update: Partial<Omit<StatusDesvio, 'id'>>;
+      };
+      tipos_treinamento: {
+        Row: TipoTreinamento;
+        Insert: Omit<TipoTreinamento, 'id'>;
+        Update: Partial<Omit<TipoTreinamento, 'id'>>;
+      };
+      ccas: {
+        Row: CCA;
+        Insert: Omit<CCA, 'id'>;
+        Update: Partial<Omit<CCA, 'id'>>;
+      };
+      criticidade_tarefas: {
+        Row: CriticidadeTarefa;
+        Insert: Omit<CriticidadeTarefa, 'id'>;
+        Update: Partial<Omit<CriticidadeTarefa, 'id'>>;
+      };
+      disciplinas: {
+        Row: Disciplina;
+        Insert: Omit<Disciplina, 'id'>;
+        Update: Partial<Omit<Disciplina, 'id'>>;
+      };
+      partes_corpo: {
+        Row: ParteCorpo;
+        Insert: Omit<ParteCorpo, 'id'>;
+        Update: Partial<Omit<ParteCorpo, 'id'>>;
+      };
+      empresas: {
+        Row: Empresa;
+        Insert: Omit<Empresa, 'id'>;
+        Update: Partial<Omit<Empresa, 'id'>>;
+      };
     };
   };
+};
+
+// Add export for Permissoes to fix the error in AdminPerfis.tsx
+export type Permissoes = {
+  desvios: boolean;
+  tarefas: boolean;
+  admin_hht: boolean;
+  relatorios: boolean;
+  ocorrencias: boolean;
+  admin_perfis: boolean;
+  treinamentos: boolean;
+  admin_usuarios: boolean;
+  hora_seguranca: boolean;
+  admin_templates: boolean;
+  admin_funcionarios: boolean;
+  medidas_disciplinares: boolean;
 };
