@@ -25,7 +25,7 @@ import Index from './pages/Index';
 const queryClient = new QueryClient();
 
 // Fixed ProtectedRoute component to properly handle TypeScript props
-const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
   
   if (loading) {
