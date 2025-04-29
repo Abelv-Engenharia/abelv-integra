@@ -6,6 +6,7 @@ import {
   ClipboardList,
   FileText,
   Home,
+  Image,
   Settings,
   Shield,
   ShieldAlert,
@@ -436,6 +437,15 @@ export function AppSidebar() {
                           </Link>
                         </SidebarMenuButton>
                       </SidebarMenuItem>
+                      
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                          <Link to="/admin/logo">
+                            <Image className="h-4 w-4 mr-2" />
+                            <span>Configurar Logo</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
                     </SidebarMenuSub>
                   </CollapsibleContent>
                 </Collapsible>
@@ -447,4 +457,3 @@ export function AppSidebar() {
     </Sidebar>
   );
 }
-

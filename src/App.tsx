@@ -12,6 +12,8 @@ import DesviosDashboard from "./pages/DesviosDashboard";
 import DesviosConsulta from "./pages/DesviosConsulta";
 import DesviosNaoConformidade from "./pages/DesviosNaoConformidade";
 import AdminTemplates from "./pages/AdminTemplates";
+import AdminLogo from "./pages/admin/AdminLogo";
+import Login from "./pages/auth/Login";
 
 // Ocorrências pages
 import OcorrenciasDashboard from "./pages/ocorrencias/OcorrenciasDashboard";
@@ -61,6 +63,10 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
+            {/* Auth routes */}
+            <Route path="/login" element={<Login />} />
+            
+            {/* App routes */}
             <Route element={<Layout />}>
               <Route path="/" element={<Dashboard />} />
               
@@ -113,6 +119,7 @@ const App = () => (
               <Route path="/admin/funcionarios" element={<CadastroFuncionarios />} />
               <Route path="/admin/hht" element={<RegistroHHT />} />
               <Route path="/admin/templates" element={<AdminTemplates />} />
+              <Route path="/admin/logo" element={<AdminLogo />} />
             </Route>
             
             {/* Fallback route */}

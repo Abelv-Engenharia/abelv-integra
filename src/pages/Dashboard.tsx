@@ -15,6 +15,7 @@ import AreaChart from "@/components/dashboard/AreaChart";
 import BarChart from "@/components/dashboard/BarChart";
 import RecentActivitiesList from "@/components/dashboard/RecentActivitiesList";
 import PendingTasksList from "@/components/dashboard/PendingTasksList";
+import SystemLogo from "@/components/common/SystemLogo";
 
 // Mock data for charts
 const areaChartData = [
@@ -109,7 +110,8 @@ const pendingTasks = [
 const Dashboard = () => {
   return (
     <div className="space-y-6">
-      <div>
+      <div className="flex flex-col items-center mb-8 mt-4">
+        <SystemLogo className="h-16 mb-4" defaultTitle="Gestão de SMS Abelv" />
         <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
         <p className="text-muted-foreground">
           Visão geral de indicadores e métricas do sistema de Gestão de SMS Abelv.

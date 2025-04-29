@@ -12,6 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import SystemLogo from "@/components/common/SystemLogo";
 
 const Navbar = () => {
   return (
@@ -19,8 +20,8 @@ const Navbar = () => {
       <div className="flex h-16 items-center px-4 gap-4">
         <SidebarTrigger />
         
-        <div className="font-semibold text-lg text-abelv-blue flex-1 md:flex-none">
-          Gestão de SMS Abelv
+        <div className="flex-1 md:flex-none">
+          <SystemLogo className="h-8" />
         </div>
         
         <div className="flex-1 hidden md:flex">
