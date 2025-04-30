@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
   Calendar,
@@ -7,27 +7,33 @@ import {
   FileText, 
   Users
 } from "lucide-react";
-import { MOCK_FUNCIONARIOS, MOCK_TREINAMENTOS_NORMATIVOS, MOCK_EXECUCAO_TREINAMENTOS } from "@/types/treinamentos";
-import { calcularStatusTreinamento } from "@/utils/treinamentosUtils";
+import { fetchTreinamentosStats } from "@/services/treinamentosDashboardService";
 
 export const TreinamentosSummaryCards = () => {
-  // Count total trainings executed
-  const totalTreinamentosExecutados = MOCK_EXECUCAO_TREINAMENTOS.length;
-  
-  // Count valid and near expiration trainings
-  const treinamentosStatus = MOCK_TREINAMENTOS_NORMATIVOS.map(t => ({
-    ...t,
-    status: calcularStatusTreinamento(t.dataValidade)
-  }));
-  const treinamentosValidos = treinamentosStatus.filter(t => t.status === "Válido").length;
-  const treinamentosVencendo = treinamentosStatus.filter(t => t.status === "Próximo ao vencimento").length;
-  
-  // Count employees with valid trainings
-  const funcionariosComTreinamentos = new Set(
-    treinamentosStatus
-      .filter(t => t.status === "Válido" || t.status === "Próximo ao vencimento")
-      .map(t => t.funcionarioId)
-  ).size;
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({
+    totalFuncionarios: 0,
+    funcionariosComTreinamentos: 0,
+    totalTreinamentosExecutados: 0,
+    treinamentosValidos: 0,
+    treinamentosVencendo: 0
+  });
+
+  useEffect(() => {
+    const loadStats = async () => {
+      try {
+        setLoading(true);
+        const data = await fetchTreinamentosStats();
+        setStats(data);
+      } catch (error) {
+        console.error("Error loading training stats:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadStats();
+  }, []);
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -37,9 +43,9 @@ export const TreinamentosSummaryCards = () => {
           <Users className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{MOCK_FUNCIONARIOS.length}</div>
+          <div className="text-2xl font-bold">{loading ? "..." : stats.totalFuncionarios}</div>
           <p className="text-xs text-muted-foreground">
-            Funcionários com treinamentos: {funcionariosComTreinamentos}
+            Funcionários com treinamentos: {loading ? "..." : stats.funcionariosComTreinamentos}
           </p>
         </CardContent>
       </Card>
@@ -50,7 +56,7 @@ export const TreinamentosSummaryCards = () => {
           <Calendar className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{totalTreinamentosExecutados}</div>
+          <div className="text-2xl font-bold">{loading ? "..." : stats.totalTreinamentosExecutados}</div>
           <p className="text-xs text-muted-foreground">
             Total de eventos de treinamento
           </p>
@@ -63,7 +69,7 @@ export const TreinamentosSummaryCards = () => {
           <FileCheck className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{treinamentosValidos}</div>
+          <div className="text-2xl font-bold">{loading ? "..." : stats.treinamentosValidos}</div>
           <p className="text-xs text-muted-foreground">
             Certificações dentro da validade
           </p>
@@ -76,7 +82,7 @@ export const TreinamentosSummaryCards = () => {
           <FileText className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{treinamentosVencendo}</div>
+          <div className="text-2xl font-bold">{loading ? "..." : stats.treinamentosVencendo}</div>
           <p className="text-xs text-muted-foreground">
             Vencimento nos próximos 30 dias
           </p>

@@ -1,40 +1,37 @@
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from "recharts";
-import { MOCK_TREINAMENTOS_NORMATIVOS } from "@/types/treinamentos";
-import { calcularStatusTreinamento } from "@/utils/treinamentosUtils";
-
-// Update status of all trainings
-const updateStatus = () => {
-  return MOCK_TREINAMENTOS_NORMATIVOS.map(treinamento => ({
-    ...treinamento,
-    status: calcularStatusTreinamento(treinamento.dataValidade)
-  }));
-};
-
-// Prepare data for the chart
-const prepareChartData = () => {
-  const trainings = updateStatus();
-  
-  const statusCount = trainings.reduce((acc, training) => {
-    if (!acc[training.status]) {
-      acc[training.status] = 0;
-    }
-    acc[training.status] += 1;
-    return acc;
-  }, {} as Record<string, number>);
-  
-  return [
-    { name: "Válido", value: statusCount["Válido"] || 0 },
-    { name: "Próximo ao vencimento", value: statusCount["Próximo ao vencimento"] || 0 },
-    { name: "Vencido", value: statusCount["Vencido"] || 0 }
-  ];
-};
+import { fetchTreinamentosNormativosData } from "@/services/treinamentosDashboardService";
 
 const COLORS = ["#10b981", "#f59e0b", "#ef4444"];
 
 export const TreinamentosNormativosChart = () => {
-  const data = prepareChartData();
+  const [data, setData] = useState<any[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const chartData = await fetchTreinamentosNormativosData();
+        setData(chartData);
+      } catch (error) {
+        console.error("Error loading normative training data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <p className="text-muted-foreground">Carregando dados...</p>
+      </div>
+    );
+  }
 
   return (
     <ResponsiveContainer width="100%" height="100%">
@@ -53,7 +50,15 @@ export const TreinamentosNormativosChart = () => {
             <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
           ))}
         </Pie>
-        <Tooltip formatter={(value) => [`${value} treinamentos`, 'Quantidade']} />
+        <Tooltip 
+          formatter={(value) => [`${value} treinamentos`, 'Quantidade']}
+          contentStyle={{ 
+            backgroundColor: "white",
+            borderRadius: "0.375rem",
+            boxShadow: "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
+            border: "1px solid rgba(229, 231, 235, 1)"
+          }}
+        />
         <Legend />
       </PieChart>
     </ResponsiveContainer>

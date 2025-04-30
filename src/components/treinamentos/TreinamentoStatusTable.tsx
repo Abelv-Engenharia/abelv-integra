@@ -1,36 +1,37 @@
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { 
-  MOCK_FUNCIONARIOS, 
-  MOCK_TREINAMENTOS, 
-  MOCK_TREINAMENTOS_NORMATIVOS, 
-  Funcionario, 
-  TreinamentoNormativo 
-} from "@/types/treinamentos";
-import { 
-  calcularStatusTreinamento, 
-  formatarData, 
-  getStatusColor 
-} from "@/utils/treinamentosUtils";
+import { formatarData, getStatusColor } from "@/utils/treinamentosUtils";
+import { fetchFuncionariosComTreinamentos } from "@/services/treinamentosDashboardService";
 
 export const TreinamentoStatusTable = () => {
-  // Get funcionarios with their trainings
-  const funcionariosComTreinamentos = MOCK_FUNCIONARIOS.map(funcionario => {
-    const treinamentos = MOCK_TREINAMENTOS_NORMATIVOS
-      .filter(t => t.funcionarioId === funcionario.id && !t.arquivado)
-      .map(t => ({
-        ...t,
-        status: calcularStatusTreinamento(t.dataValidade),
-        treinamentoNome: MOCK_TREINAMENTOS.find(tr => tr.id === t.treinamentoId)?.nome || "Desconhecido"
-      }));
+  const [loading, setLoading] = useState<boolean>(true);
+  const [funcionariosComTreinamentos, setFuncionariosComTreinamentos] = useState<any[]>([]);
 
-    return {
-      ...funcionario,
-      treinamentos
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const data = await fetchFuncionariosComTreinamentos();
+        setFuncionariosComTreinamentos(data);
+      } catch (error) {
+        console.error("Error loading training status data:", error);
+      } finally {
+        setLoading(false);
+      }
     };
-  });
+
+    fetchData();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-24">
+        <p className="text-muted-foreground">Carregando dados...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="rounded-md border">
@@ -47,7 +48,7 @@ export const TreinamentoStatusTable = () => {
         </TableHeader>
         <TableBody>
           {funcionariosComTreinamentos.map(funcionario => 
-            funcionario.treinamentos.map((treinamento, idx) => (
+            funcionario.treinamentos.map((treinamento: any, idx: number) => (
               <TableRow key={`${funcionario.id}-${treinamento.id}`}>
                 {idx === 0 ? (
                   <>
@@ -72,7 +73,7 @@ export const TreinamentoStatusTable = () => {
                   </>
                 ) : null}
                 <TableCell>{treinamento.treinamentoNome}</TableCell>
-                <TableCell>{formatarData(treinamento.dataValidade)}</TableCell>
+                <TableCell>{formatarData(new Date(treinamento.data_validade))}</TableCell>
                 <TableCell>
                   <Badge
                     variant={
