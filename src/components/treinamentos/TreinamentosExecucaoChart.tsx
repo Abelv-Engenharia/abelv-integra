@@ -6,6 +6,7 @@ import { fetchTreinamentosExecucaoData } from "@/services/treinamentosDashboardS
 export const TreinamentosExecucaoChart = () => {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -15,6 +16,7 @@ export const TreinamentosExecucaoChart = () => {
         setData(chartData);
       } catch (error) {
         console.error("Error loading training execution data:", error);
+        setError("Erro ao carregar dados de execução de treinamentos");
       } finally {
         setLoading(false);
       }
@@ -27,6 +29,23 @@ export const TreinamentosExecucaoChart = () => {
     return (
       <div className="flex items-center justify-center h-full">
         <p className="text-muted-foreground">Carregando dados...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <p className="text-red-500">{error}</p>
+      </div>
+    );
+  }
+
+  // If no data is available
+  if (data.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <p className="text-muted-foreground">Nenhum dado disponível para exibição</p>
       </div>
     );
   }

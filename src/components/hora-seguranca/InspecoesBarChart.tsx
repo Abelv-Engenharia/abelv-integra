@@ -1,28 +1,62 @@
 
+import { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-
-// Mock data for the bar charts
-const mockDataCCA = [
-  { name: 'CCA 001', realizadas: 12, naoProgramadas: 5, naoRealizadas: 2, canceladas: 1 },
-  { name: 'CCA 002', realizadas: 8, naoProgramadas: 3, naoRealizadas: 3, canceladas: 0 },
-  { name: 'CCA 003', realizadas: 15, naoProgramadas: 2, naoRealizadas: 1, canceladas: 2 },
-];
-
-const mockDataResponsible = [
-  { name: 'João Silva', realizadas: 10, naoProgramadas: 4, naoRealizadas: 1, canceladas: 0 },
-  { name: 'Maria Oliveira', realizadas: 8, naoProgramadas: 2, naoRealizadas: 2, canceladas: 1 },
-  { name: 'Carlos Santos', realizadas: 6, naoProgramadas: 3, naoRealizadas: 1, canceladas: 1 },
-  { name: 'Ana Costa', realizadas: 7, naoProgramadas: 1, naoRealizadas: 2, canceladas: 0 },
-  { name: 'Pedro Souza', realizadas: 4, naoProgramadas: 0, naoRealizadas: 0, canceladas: 1 },
-];
+import { fetchInspecoesChartData } from '@/services/horaSegurancaService';
 
 interface InspecoesBarChartProps {
   dataType: 'cca' | 'responsible';
 }
 
 export function InspecoesBarChart({ dataType }: InspecoesBarChartProps) {
-  const data = dataType === 'cca' ? mockDataCCA : mockDataResponsible;
-  
+  const [data, setData] = useState<any[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setLoading(true);
+        const chartData = await fetchInspecoesChartData();
+        
+        // This is a placeholder as we're using the same data source for both types
+        // In a real implementation, we'd have different queries for CCA vs responsible
+        setData(chartData);
+      } catch (err) {
+        console.error(`Error loading inspection data for ${dataType}:`, err);
+        setError(`Não foi possível carregar os dados de inspeções por ${dataType === 'cca' ? 'CCA' : 'responsável'}`);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, [dataType]);
+
+  if (loading) {
+    return (
+      <div className="h-[400px] w-full flex items-center justify-center">
+        <p className="text-muted-foreground">Carregando dados...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="h-[400px] w-full flex items-center justify-center">
+        <p className="text-red-500">{error}</p>
+      </div>
+    );
+  }
+
+  // If we have no data, show a message
+  if (data.length === 0) {
+    return (
+      <div className="h-[400px] w-full flex items-center justify-center">
+        <p className="text-muted-foreground">Nenhum dado disponível</p>
+      </div>
+    );
+  }
+
   return (
     <div className="h-[400px] w-full">
       <ResponsiveContainer width="100%" height="100%">
@@ -45,10 +79,9 @@ export function InspecoesBarChart({ dataType }: InspecoesBarChartProps) {
           <YAxis />
           <Tooltip />
           <Legend />
-          <Bar dataKey="realizadas" name="Realizadas" fill="#22c55e" />
-          <Bar dataKey="naoProgramadas" name="Não Programadas" fill="#3b82f6" />
-          <Bar dataKey="naoRealizadas" name="Não Realizadas" fill="#ef4444" />
-          <Bar dataKey="canceladas" name="Canceladas" fill="#94a3b8" />
+          <Bar dataKey="Concluída" name="Realizadas" fill="#22c55e" />
+          <Bar dataKey="Pendente" name="Pendentes" fill="#facc15" />
+          <Bar dataKey="Cancelada" name="Canceladas" fill="#94a3b8" />
         </BarChart>
       </ResponsiveContainer>
     </div>

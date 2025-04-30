@@ -1,18 +1,61 @@
 
+import { useState, useEffect } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
-
-// Mock data for the donut chart
-const data = [
-  { name: 'A realizar', value: 15, color: '#facc15' },
-  { name: 'Realizadas não programadas', value: 8, color: '#3b82f6' },
-  { name: 'Realizadas', value: 20, color: '#22c55e' },
-  { name: 'Não realizadas', value: 5, color: '#ef4444' },
-  { name: 'Canceladas', value: 3, color: '#94a3b8' },
-];
-
-const COLORS = data.map(item => item.color);
+import { fetchInspecoesStatusData } from '@/services/horaSegurancaService';
 
 export function InspecaoStatusDonutChart() {
+  const [data, setData] = useState<any[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setLoading(true);
+        const statusData = await fetchInspecoesStatusData();
+        setData(statusData);
+      } catch (err) {
+        console.error("Error loading inspection status data:", err);
+        setError("Não foi possível carregar os dados de status das inspeções");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="h-[300px] w-full flex items-center justify-center">
+        <p className="text-muted-foreground">Carregando dados...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="h-[300px] w-full flex items-center justify-center">
+        <p className="text-red-500">{error}</p>
+      </div>
+    );
+  }
+
+  // If we have no data, show a message
+  if (data.length === 0) {
+    return (
+      <div className="h-[300px] w-full flex items-center justify-center">
+        <p className="text-muted-foreground">Nenhum dado de inspeção disponível</p>
+      </div>
+    );
+  }
+
+  const COLORS = [
+    '#22c55e', // Concluída - green
+    '#facc15', // Pendente - yellow
+    '#94a3b8'  // Cancelada - gray
+  ];
+
   return (
     <div className="h-[300px] w-full">
       <ResponsiveContainer width="100%" height="100%">

@@ -1,20 +1,67 @@
 
+import { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-
-const mockData = [
-  { name: 'João Silva', desvios: 8 },
-  { name: 'Maria Oliveira', desvios: 12 },
-  { name: 'Carlos Santos', desvios: 5 },
-  { name: 'Ana Costa', desvios: 15 },
-  { name: 'Pedro Souza', desvios: 7 },
-];
+import { fetchDesviosByInspectionType } from '@/services/horaSegurancaService';
 
 export function DesviosResponsaveisChart() {
+  const [data, setData] = useState<any[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setLoading(true);
+        // Note: This is using the same data source as DesviosTipoInspecaoChart
+        // In a real implementation, you'd have a specific API for this chart
+        const chartData = await fetchDesviosByInspectionType();
+        setData(chartData);
+      } catch (err) {
+        console.error("Error loading desvios by responsáveis:", err);
+        setError("Não foi possível carregar os dados de desvios por responsável");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="h-[400px] w-full flex items-center justify-center">
+        <p className="text-muted-foreground">Carregando dados...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="h-[400px] w-full flex items-center justify-center">
+        <p className="text-red-500">{error}</p>
+      </div>
+    );
+  }
+
+  // If we have no data, show a message
+  if (data.length === 0) {
+    return (
+      <div className="h-[400px] w-full flex items-center justify-center">
+        <p className="text-muted-foreground">Nenhum desvio registrado</p>
+      </div>
+    );
+  }
+
+  const formattedData = data.map(item => ({
+    name: item.name,
+    desvios: item.value
+  }));
+
   return (
     <div className="h-[400px] w-full">
       <ResponsiveContainer width="100%" height="100%">
         <BarChart
-          data={mockData}
+          data={formattedData}
           margin={{
             top: 20,
             right: 30,
