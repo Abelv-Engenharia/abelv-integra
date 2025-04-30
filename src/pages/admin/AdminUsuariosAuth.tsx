@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, UserPlus, Filter } from "lucide-react";
+import { ArrowLeft, UserPlus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 import { Button } from "@/components/ui/button";
@@ -13,7 +13,8 @@ import { CreateAuthUserDialog } from "@/components/admin/auth/CreateAuthUserDial
 import { ViewAuthUserDialog } from "@/components/admin/auth/ViewAuthUserDialog";
 import { DeleteAuthUserDialog } from "@/components/admin/auth/DeleteAuthUserDialog";
 import { AuthUserStatusSelect } from "@/components/admin/auth/AuthUserStatusSelect";
-import { fetchUsers, fetchProfiles } from "@/services/usuariosService";
+import { fetchUsers } from "@/services/authAdminService";
+import { fetchProfiles } from "@/services/usuariosService";
 import { AuthUser, Profile } from "@/types/users";
 
 const AdminUsuariosAuth = () => {
@@ -42,9 +43,9 @@ const AdminUsuariosAuth = () => {
         setProfiles(profileData);
         
         // Fetch users
-        const { users, total } = await fetchUsers(currentPage, perPage, searchQuery, statusFilter);
-        setUsers(users);
-        setTotalUsers(total);
+        const response = await fetchUsers(currentPage, perPage, searchQuery, statusFilter);
+        setUsers(response.users || []);
+        setTotalUsers(response.total || 0);
       } catch (error) {
         console.error('Erro ao buscar dados:', error);
         toast({
@@ -78,9 +79,9 @@ const AdminUsuariosAuth = () => {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        const { users, total } = await fetchUsers(currentPage, perPage, searchQuery, statusFilter);
-        setUsers(users);
-        setTotalUsers(total);
+        const response = await fetchUsers(currentPage, perPage, searchQuery, statusFilter);
+        setUsers(response.users || []);
+        setTotalUsers(response.total || 0);
       } catch (error) {
         console.error('Erro ao atualizar dados:', error);
         toast({

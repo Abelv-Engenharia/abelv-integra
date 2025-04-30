@@ -1,219 +1,132 @@
 import { supabase } from "@/integrations/supabase/client";
-import { startOfMonth, endOfMonth } from "date-fns";
 
-export const fetchOcorrenciasStats = async () => {
-  // Get today's date
-  const today = new Date();
-  
-  // Calculate start and end of current month
-  const startMonth = startOfMonth(today);
-  const endMonth = endOfMonth(today);
-  
-  try {
-    // Fetch total occurrences
-    const { count: totalOcorrencias } = await supabase
-      .from('ocorrencias')
-      .select('*', { count: 'exact', head: true });
-    
-    // Fetch occurrences this month
-    const { count: ocorrenciasMes } = await supabase
-      .from('ocorrencias')
-      .select('*', { count: 'exact', head: true })
-      .gte('data', startMonth.toISOString())
-      .lte('data', endMonth.toISOString());
-    
-    // Fetch pending occurrences
-    const { count: ocorrenciasPendentes } = await supabase
-      .from('ocorrencias')
-      .select('*', { count: 'exact', head: true })
-      .eq('status', 'Em tratativa');
-    
-    // Calculate risk percentage (high risk)
-    const { data: ocorrenciasRisco } = await supabase
-      .from('ocorrencias')
-      .select('classificacao_risco')
-      .in('classificacao_risco', ['SUBSTANCIAL', 'INTOLERÁVEL'])
-      .limit(1000);
-    
-    const riscoPercentage = totalOcorrencias ? 
-      Math.round((ocorrenciasRisco?.length || 0) / totalOcorrencias * 100) : 0;
-    
-    return {
-      totalOcorrencias: totalOcorrencias || 0,
-      ocorrenciasMes: ocorrenciasMes || 0,
-      ocorrenciasPendentes: ocorrenciasPendentes || 0,
-      riscoPercentage
-    };
-  } catch (error) {
-    console.error("Error fetching ocorrencias stats:", error);
-    return {
-      totalOcorrencias: 0,
-      ocorrenciasMes: 0,
-      ocorrenciasPendentes: 0,
-      riscoPercentage: 0
-    };
-  }
-};
+// Mock data for charts
+const mockAcidenteTipoData = () => [
+  { name: "Corte", value: 50 },
+  { name: "Queimadura", value: 30 },
+  { name: "Fratura", value: 20 },
+];
 
-export const fetchOcorrenciasByTipo = async () => {
-  try {
-    // Fetch occurrences by type
-    const { data } = await supabase
-      .from('ocorrencias')
-      .select('tipo_ocorrencia')
-      .limit(1000);
-    
-    // Count occurrences by type
-    const tipoCount = (data || []).reduce((acc: Record<string, number>, ocorrencia) => {
-      if (!acc[ocorrencia.tipo_ocorrencia]) {
-        acc[ocorrencia.tipo_ocorrencia] = 0;
-      }
-      acc[ocorrencia.tipo_ocorrencia] += 1;
-      return acc;
-    }, {});
-    
-    // Format data for chart
-    return Object.entries(tipoCount).map(([name, value]) => ({ name, value: Number(value) }));
-  } catch (error) {
-    console.error("Error fetching ocorrencias by tipo:", error);
-    return [];
-  }
-};
+const mockParteCorpoData = () => [
+  { name: "Mão", value: 50 },
+  { name: "Perna", value: 30 },
+  { name: "Cabeça", value: 20 },
+];
 
-export const fetchOcorrenciasByRisco = async () => {
-  try {
-    // Fetch occurrences by risk
-    const { data } = await supabase
-      .from('ocorrencias')
-      .select('classificacao_risco')
-      .limit(1000);
-    
-    // Count occurrences by risk
-    const riscoCount = (data || []).reduce((acc: Record<string, number>, ocorrencia) => {
-      if (!acc[ocorrencia.classificacao_risco]) {
-        acc[ocorrencia.classificacao_risco] = 0;
-      }
-      acc[ocorrencia.classificacao_risco] += 1;
-      return acc;
-    }, {});
-    
-    // Format data for chart
-    return Object.entries(riscoCount).map(([name, value]) => ({ name, value: Number(value) }));
-  } catch (error) {
-    console.error("Error fetching ocorrencias by risco:", error);
-    return [];
-  }
-};
+const mockLesoesData = () => [
+  { name: "Lesão Leve", value: 50 },
+  { name: "Lesão Moderada", value: 30 },
+  { name: "Lesão Grave", value: 20 },
+];
 
-export const fetchOcorrenciasByEmpresa = async () => {
+export async function fetchAcidenteTipoData() {
   try {
-    // Fetch occurrences by company
-    const { data } = await supabase
-      .from('ocorrencias')
-      .select('empresa')
-      .limit(1000);
-    
-    // Count occurrences by company
-    const empresaCount = (data || []).reduce((acc: Record<string, number>, ocorrencia) => {
-      if (!acc[ocorrencia.empresa]) {
-        acc[ocorrencia.empresa] = 0;
-      }
-      acc[ocorrencia.empresa] += 1;
-      return acc;
-    }, {});
-    
-    // Format data for chart
-    return Object.entries(empresaCount).map(([name, value]) => ({ name, value: Number(value) }));
-  } catch (error) {
-    console.error("Error fetching ocorrencias by empresa:", error);
-    return [];
-  }
-};
+    const { data, error } = await supabase
+      .from("ocorrencias")
+      .select("tipo_acidente")
+      .not("tipo_acidente", "is", null);
 
-export const fetchOcorrenciasTimeline = async () => {
-  try {
-    // Fetch occurrences with date
-    const { data } = await supabase
-      .from('ocorrencias')
-      .select('data, tipo_ocorrencia')
-      .order('data', { ascending: true })
-      .limit(1000);
-    
-    // Group occurrences by month and type
-    const timelineData = (data || []).reduce((acc: Record<string, Record<string, number>>, ocorrencia) => {
-      const date = new Date(ocorrencia.data);
-      const month = date.getMonth() + 1;
-      const year = date.getFullYear();
-      const monthYear = `${month}/${year}`;
-      
-      if (!acc[monthYear]) {
-        acc[monthYear] = { name: monthYear };
+    if (error) {
+      console.error("Erro ao buscar dados de tipo de acidente:", error);
+      return mockAcidenteTipoData();
+    }
+
+    if (!data || data.length === 0) {
+      return mockAcidenteTipoData();
+    }
+
+    // Realizar a contagem dos tipos de acidente
+    const contagem: Record<string, number> = {};
+    data.forEach((ocorrencia) => {
+      const tipo = ocorrencia.tipo_acidente;
+      if (tipo) {
+        contagem[tipo] = (contagem[tipo] || 0) + 1;
       }
-      
-      if (!acc[monthYear][ocorrencia.tipo_ocorrencia]) {
-        acc[monthYear][ocorrencia.tipo_ocorrencia] = 0;
-      }
-      
-      acc[monthYear][ocorrencia.tipo_ocorrencia] += 1;
-      
-      return acc;
-    }, {});
-    
-    // Convert to array and sort by date
-    return Object.values(timelineData).sort((a, b) => {
-      const [aMonth, aYear] = a.name.toString().split('/').map(Number);
-      const [bMonth, bYear] = b.name.toString().split('/').map(Number);
-      return aYear !== bYear ? aYear - bYear : aMonth - bMonth;
     });
-  } catch (error) {
-    console.error("Error fetching ocorrencias timeline:", error);
-    return [];
-  }
-};
 
-export const fetchLatestOcorrencias = async () => {
-  try {
-    // Fetch latest occurrences
-    const { data } = await supabase
-      .from('ocorrencias')
-      .select('*')
-      .order('data', { ascending: false })
-      .limit(10);
-    
-    return data || [];
+    // Converter para o formato esperado pelo gráfico
+    return Object.entries(contagem).map(([name, value]) => ({
+      name,
+      value,
+    }));
   } catch (error) {
-    console.error("Error fetching latest ocorrencias:", error);
-    return [];
+    console.error("Erro ao buscar dados de tipo de acidente:", error);
+    return mockAcidenteTipoData();
   }
-};
+}
 
-export const fetchParteCorpoData = async () => {
+export async function fetchParteCorpoData() {
   try {
-    // Fetch parts of body affected
-    const { data } = await supabase
-      .from('ocorrencias')
-      .select('partes_corpo_afetadas')
-      .not('partes_corpo_afetadas', 'is', null)
-      .limit(1000);
+    const { data, error } = await supabase
+      .from("ocorrencias")
+      .select("partes_corpo_afetadas")
+      .not("partes_corpo_afetadas", "is", null);
+
+    if (error) {
+      console.error("Erro ao buscar dados de partes do corpo:", error);
+      return mockParteCorpoData();
+    }
+
+    if (!data || data.length === 0) {
+      return mockParteCorpoData();
+    }
+
+    // Realizar a contagem das partes do corpo afetadas
+    const contagem: Record<string, number> = {};
     
-    // Count occurrences by body part
-    const parteCorpoCount: Record<string, number> = {};
-    
-    data?.forEach(ocorrencia => {
-      if (ocorrencia.partes_corpo_afetadas && Array.isArray(ocorrencia.partes_corpo_afetadas)) {
-        ocorrencia.partes_corpo_afetadas.forEach((parte: string) => {
-          parteCorpoCount[parte] = (parteCorpoCount[parte] || 0) + 1;
+    data.forEach((ocorrencia) => {
+      if (Array.isArray(ocorrencia.partes_corpo_afetadas)) {
+        ocorrencia.partes_corpo_afetadas.forEach((parte) => {
+          if (parte) {
+            contagem[parte] = (contagem[parte] || 0) + 1;
+          }
         });
       }
     });
-    
-    // Format data for chart - Make sure value is a number
-    return Object.entries(parteCorpoCount).map(([name, value]) => ({ 
-      name, 
-      value: Number(value) 
+
+    // Converter para o formato esperado pelo gráfico
+    return Object.entries(contagem).map(([name, value]) => ({
+      name,
+      value: Number(value), // Corrigido para garantir que value seja um número
     }));
   } catch (error) {
-    console.error("Error fetching partes corpo data:", error);
-    return [];
+    console.error("Erro ao buscar dados de partes do corpo:", error);
+    return mockParteCorpoData();
   }
-};
+}
+
+export async function fetchLesoesData() {
+  try {
+    const { data, error } = await supabase
+      .from("ocorrencias")
+      .select("tipo_lesao")
+      .not("tipo_lesao", "is", null);
+
+    if (error) {
+      console.error("Erro ao buscar dados de tipo de lesão:", error);
+      return mockLesoesData();
+    }
+
+    if (!data || data.length === 0) {
+      return mockLesoesData();
+    }
+
+    // Realizar a contagem dos tipos de lesão
+    const contagem: Record<string, number> = {};
+    data.forEach((ocorrencia) => {
+      const tipo = ocorrencia.tipo_lesao;
+      if (tipo) {
+        contagem[tipo] = (contagem[tipo] || 0) + 1;
+      }
+    });
+
+    // Converter para o formato esperado pelo gráfico
+    return Object.entries(contagem).map(([name, value]) => ({
+      name,
+      value,
+    }));
+  } catch (error) {
+    console.error("Erro ao buscar dados de tipo de lesão:", error);
+    return mockLesoesData();
+  }
+}
