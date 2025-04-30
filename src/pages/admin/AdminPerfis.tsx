@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+
+import React, { useState, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -42,112 +43,9 @@ import { PencilIcon, PlusCircle, Search, Trash2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { toast } from "@/hooks/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { ScrollArea } from "@/components/ui/scroll-area";
-
-// Define the type for permissions
-type Permissoes = {
-  desvios: boolean;
-  treinamentos: boolean;
-  hora_seguranca: boolean;
-  ocorrencias: boolean;
-  medidas_disciplinares: boolean;
-  tarefas: boolean;
-  relatorios: boolean;
-  admin_usuarios: boolean;
-  admin_perfis: boolean;
-  admin_funcionarios: boolean;
-  admin_hht: boolean;
-  admin_templates: boolean;
-};
-
-// Define the type for profile data
-type PerfilData = {
-  id: number;
-  nome: string;
-  descricao: string;
-  permissoes: Permissoes;
-};
-
-const formSchema = z.object({
-  nome: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
-  descricao: z.string().optional(),
-  permissoes: z.object({
-    desvios: z.boolean().default(false),
-    treinamentos: z.boolean().default(false),
-    hora_seguranca: z.boolean().default(false),
-    ocorrencias: z.boolean().default(false),
-    medidas_disciplinares: z.boolean().default(false),
-    tarefas: z.boolean().default(false),
-    relatorios: z.boolean().default(false),
-    admin_usuarios: z.boolean().default(false),
-    admin_perfis: z.boolean().default(false),
-    admin_funcionarios: z.boolean().default(false),
-    admin_hht: z.boolean().default(false),
-    admin_templates: z.boolean().default(false),
-  })
-});
-
-// Make sure all the permissiones in the mock data are correctly defined as required by the type
-const MOCK_PERFIS: PerfilData[] = [
-  {
-    id: 1,
-    nome: "Administrador",
-    descricao: "Acesso completo a todas as funcionalidades",
-    permissoes: {
-      desvios: true,
-      treinamentos: true,
-      hora_seguranca: true,
-      ocorrencias: true,
-      medidas_disciplinares: true,
-      tarefas: true,
-      relatorios: true,
-      admin_usuarios: true,
-      admin_perfis: true,
-      admin_funcionarios: true,
-      admin_hht: true,
-      admin_templates: true,
-    }
-  },
-  {
-    id: 2,
-    nome: "Gestor",
-    descricao: "Acesso a gestão de equipes e relatórios",
-    permissoes: {
-      desvios: true,
-      treinamentos: true,
-      hora_seguranca: true,
-      ocorrencias: true,
-      medidas_disciplinares: true,
-      tarefas: true,
-      relatorios: true,
-      admin_usuarios: false,
-      admin_perfis: false,
-      admin_funcionarios: true,
-      admin_hht: true,
-      admin_templates: false,
-    }
-  },
-  {
-    id: 3,
-    nome: "Técnico",
-    descricao: "Acesso a registros e consultas",
-    permissoes: {
-      desvios: true,
-      treinamentos: true,
-      hora_seguranca: true,
-      ocorrencias: true,
-      medidas_disciplinares: false,
-      tarefas: true,
-      relatorios: true,
-      admin_usuarios: false,
-      admin_perfis: false,
-      admin_funcionarios: false,
-      admin_hht: false,
-      admin_templates: false,
-    }
-  }
-];
+import { fetchPerfis, createPerfil, updatePerfil, deletePerfil, type Perfil, type Permissoes } from "@/services/perfisService";
 
 // Permission groups for UI organization
 const permissionGroups = [
@@ -185,13 +83,34 @@ const permissionGroups = [
   }
 ];
 
+const formSchema = z.object({
+  nome: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
+  descricao: z.string().optional(),
+  permissoes: z.object({
+    desvios: z.boolean().default(false),
+    treinamentos: z.boolean().default(false),
+    hora_seguranca: z.boolean().default(false),
+    ocorrencias: z.boolean().default(false),
+    medidas_disciplinares: z.boolean().default(false),
+    tarefas: z.boolean().default(false),
+    relatorios: z.boolean().default(false),
+    admin_usuarios: z.boolean().default(false),
+    admin_perfis: z.boolean().default(false),
+    admin_funcionarios: z.boolean().default(false),
+    admin_hht: z.boolean().default(false),
+    admin_templates: z.boolean().default(false),
+  })
+});
+
 const AdminPerfis = () => {
-  const [perfis, setPerfis] = useState<PerfilData[]>(MOCK_PERFIS);
+  const [perfis, setPerfis] = useState<Perfil[]>([]);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [currentPerfil, setCurrentPerfil] = useState<PerfilData | null>(null);
+  const [currentPerfil, setCurrentPerfil] = useState<Perfil | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -215,87 +134,118 @@ const AdminPerfis = () => {
     }
   });
 
+  // Fetch profiles from Supabase
+  useEffect(() => {
+    const loadPerfis = async () => {
+      setIsLoading(true);
+      try {
+        const data = await fetchPerfis();
+        setPerfis(data);
+      } catch (error) {
+        console.error("Erro ao carregar perfis:", error);
+        toast({
+          title: "Erro ao carregar perfis",
+          description: "Não foi possível carregar os perfis de acesso.",
+          variant: "destructive"
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadPerfis();
+  }, [toast]);
+
   const filteredPerfis = perfis.filter(perfil => 
     perfil.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    perfil.descricao.toLowerCase().includes(searchTerm.toLowerCase())
+    (perfil.descricao && perfil.descricao.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
-  const onSubmit = (data: z.infer<typeof formSchema>) => {
-    if (isAddDialogOpen) {
-      // Add new profile
-      const newPerfil: PerfilData = {
-        id: perfis.length > 0 ? Math.max(...perfis.map(p => p.id)) + 1 : 1,
-        nome: data.nome,
-        descricao: data.descricao || "",
-        permissoes: {
-          desvios: data.permissoes.desvios,
-          treinamentos: data.permissoes.treinamentos,
-          hora_seguranca: data.permissoes.hora_seguranca,
-          ocorrencias: data.permissoes.ocorrencias,
-          medidas_disciplinares: data.permissoes.medidas_disciplinares,
-          tarefas: data.permissoes.tarefas,
-          relatorios: data.permissoes.relatorios,
-          admin_usuarios: data.permissoes.admin_usuarios,
-          admin_perfis: data.permissoes.admin_perfis,
-          admin_funcionarios: data.permissoes.admin_funcionarios,
-          admin_hht: data.permissoes.admin_hht,
-          admin_templates: data.permissoes.admin_templates,
+  const onSubmit = async (data: z.infer<typeof formSchema>) => {
+    try {
+      if (isAddDialogOpen) {
+        // Add new profile
+        setIsLoading(true);
+        const newPerfil = await createPerfil({
+          nome: data.nome,
+          descricao: data.descricao || "",
+          permissoes: data.permissoes
+        });
+        
+        if (newPerfil) {
+          setPerfis([...perfis, newPerfil]);
+          toast({
+            title: "Perfil criado",
+            description: `O perfil ${data.nome} foi criado com sucesso.`
+          });
         }
-      };
-      
-      setPerfis([...perfis, newPerfil]);
+        setIsAddDialogOpen(false);
+      } else if (isEditDialogOpen && currentPerfil) {
+        // Edit existing profile
+        setIsLoading(true);
+        const success = await updatePerfil(currentPerfil.id, {
+          nome: data.nome,
+          descricao: data.descricao || "",
+          permissoes: data.permissoes
+        });
+        
+        if (success) {
+          setPerfis(perfis.map(perfil => 
+            perfil.id === currentPerfil.id 
+              ? { 
+                  ...perfil, 
+                  nome: data.nome, 
+                  descricao: data.descricao || "", 
+                  permissoes: data.permissoes
+                }
+              : perfil
+          ));
+          toast({
+            title: "Perfil atualizado",
+            description: `O perfil ${data.nome} foi atualizado com sucesso.`
+          });
+        }
+        setIsEditDialogOpen(false);
+      }
+    } catch (error: any) {
       toast({
-        title: "Perfil criado",
-        description: `O perfil ${data.nome} foi criado com sucesso.`
+        title: "Erro",
+        description: error.message || "Ocorreu um erro ao processar o perfil.",
+        variant: "destructive"
       });
-      setIsAddDialogOpen(false);
-    } else if (isEditDialogOpen && currentPerfil) {
-      // Edit existing profile
-      const updatedPerfis = perfis.map(perfil => 
-        perfil.id === currentPerfil.id 
-          ? { 
-              ...perfil, 
-              nome: data.nome, 
-              descricao: data.descricao || "", 
-              permissoes: {
-                desvios: data.permissoes.desvios,
-                treinamentos: data.permissoes.treinamentos,
-                hora_seguranca: data.permissoes.hora_seguranca,
-                ocorrencias: data.permissoes.ocorrencias,
-                medidas_disciplinares: data.permissoes.medidas_disciplinares,
-                tarefas: data.permissoes.tarefas,
-                relatorios: data.permissoes.relatorios,
-                admin_usuarios: data.permissoes.admin_usuarios,
-                admin_perfis: data.permissoes.admin_perfis,
-                admin_funcionarios: data.permissoes.admin_funcionarios,
-                admin_hht: data.permissoes.admin_hht,
-                admin_templates: data.permissoes.admin_templates,
-              }
-            }
-          : perfil
-      );
-      setPerfis(updatedPerfis);
-      toast({
-        title: "Perfil atualizado",
-        description: `O perfil ${data.nome} foi atualizado com sucesso.`
-      });
-      setIsEditDialogOpen(false);
+    } finally {
+      setIsLoading(false);
     }
   };
   
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (currentPerfil) {
-      setPerfis(perfis.filter(perfil => perfil.id !== currentPerfil.id));
-      toast({
-        title: "Perfil excluído",
-        description: `O perfil ${currentPerfil.nome} foi excluído com sucesso.`
-      });
-      setIsDeleteDialogOpen(false);
-      setCurrentPerfil(null);
+      try {
+        setIsLoading(true);
+        const success = await deletePerfil(currentPerfil.id);
+        
+        if (success) {
+          setPerfis(perfis.filter(perfil => perfil.id !== currentPerfil.id));
+          toast({
+            title: "Perfil excluído",
+            description: `O perfil ${currentPerfil.nome} foi excluído com sucesso.`
+          });
+          setIsDeleteDialogOpen(false);
+          setCurrentPerfil(null);
+        }
+      } catch (error: any) {
+        toast({
+          title: "Erro ao excluir",
+          description: error.message || "Não foi possível excluir o perfil.",
+          variant: "destructive"
+        });
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
   
-  const openEditDialog = (perfil: PerfilData) => {
+  const openEditDialog = (perfil: Perfil) => {
     setCurrentPerfil(perfil);
     form.reset({
       nome: perfil.nome,
@@ -305,7 +255,7 @@ const AdminPerfis = () => {
     setIsEditDialogOpen(true);
   };
   
-  const openDeleteDialog = (perfil: PerfilData) => {
+  const openDeleteDialog = (perfil: Perfil) => {
     setCurrentPerfil(perfil);
     setIsDeleteDialogOpen(true);
   };
@@ -374,7 +324,13 @@ const AdminPerfis = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredPerfis.length === 0 ? (
+              {isLoading ? (
+                <TableRow>
+                  <TableCell colSpan={4} className="h-24 text-center">
+                    Carregando perfis...
+                  </TableCell>
+                </TableRow>
+              ) : filteredPerfis.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={4} className="h-24 text-center">
                     Nenhum perfil encontrado.
@@ -461,7 +417,7 @@ const AdminPerfis = () => {
                       <FormItem>
                         <FormLabel>Descrição</FormLabel>
                         <FormControl>
-                          <Textarea {...field} />
+                          <Textarea {...field} value={field.value || ''} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -516,10 +472,10 @@ const AdminPerfis = () => {
               
               <DialogFooter>
                 <DialogClose asChild>
-                  <Button variant="outline">Cancelar</Button>
+                  <Button variant="outline" type="button" disabled={isLoading}>Cancelar</Button>
                 </DialogClose>
-                <Button type="submit">
-                  {isAddDialogOpen ? "Criar Perfil" : "Salvar Alterações"}
+                <Button type="submit" disabled={isLoading}>
+                  {isLoading ? "Processando..." : isAddDialogOpen ? "Criar Perfil" : "Salvar Alterações"}
                 </Button>
               </DialogFooter>
             </form>
@@ -540,10 +496,10 @@ const AdminPerfis = () => {
           </DialogHeader>
           <DialogFooter>
             <DialogClose asChild>
-              <Button variant="outline">Cancelar</Button>
+              <Button variant="outline" type="button" disabled={isLoading}>Cancelar</Button>
             </DialogClose>
-            <Button variant="destructive" onClick={handleDelete}>
-              Sim, excluir
+            <Button variant="destructive" onClick={handleDelete} disabled={isLoading}>
+              {isLoading ? "Processando..." : "Sim, excluir"}
             </Button>
           </DialogFooter>
         </DialogContent>

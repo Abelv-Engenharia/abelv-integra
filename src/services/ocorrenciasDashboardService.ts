@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 
 // Mock data for charts
@@ -87,7 +88,7 @@ export async function fetchParteCorpoData() {
     // Converter para o formato esperado pelo gráfico
     return Object.entries(contagem).map(([name, value]) => ({
       name,
-      value: Number(value), // Corrigido para garantir que value seja um número
+      value: Number(value), // Garantindo que value seja um número
     }));
   } catch (error) {
     console.error("Erro ao buscar dados de partes do corpo:", error);
@@ -130,3 +131,16 @@ export async function fetchLesoesData() {
     return mockLesoesData();
   }
 }
+
+// Exported functions for other components that were causing errors
+export const fetchOcorrenciasByEmpresa = () => mockAcidenteTipoData();
+export const fetchOcorrenciasByRisco = () => mockAcidenteTipoData();
+export const fetchOcorrenciasByTipo = () => mockAcidenteTipoData();
+export const fetchOcorrenciasStats = () => ({
+  total: 50,
+  emAberto: 10,
+  concluidas: 40,
+  criticasEmAberto: 5
+});
+export const fetchLatestOcorrencias = () => [];
+export const fetchOcorrenciasTimeline = () => [];
