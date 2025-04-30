@@ -4,55 +4,18 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
-// Mock data for latest deviations
-const latestDesvios = [
-  {
-    id: "DEV-2025-0143",
-    date: "07/04/2025",
-    title: "Falta de uso de EPI em trabalho em altura",
-    cca: "CCA-001",
-    company: "Abelv",
-    risk: "Substancial",
-    status: "Pendente",
-  },
-  {
-    id: "DEV-2025-0142",
-    date: "06/04/2025",
-    title: "Equipamento sem inspeção de segurança",
-    cca: "CCA-002",
-    company: "Fornecedor A",
-    risk: "Moderado",
-    status: "Em andamento",
-  },
-  {
-    id: "DEV-2025-0141",
-    date: "05/04/2025",
-    title: "Acesso não autorizado a área restrita",
-    cca: "CCA-001",
-    company: "Abelv",
-    risk: "Tolerável",
-    status: "Concluído",
-  },
-  {
-    id: "DEV-2025-0140",
-    date: "04/04/2025",
-    title: "Procedimento incorreto em operação de equipamento",
-    cca: "CCA-003",
-    company: "Fornecedor B",
-    risk: "Moderado",
-    status: "Pendente",
-  },
-  {
-    id: "DEV-2025-0139",
-    date: "03/04/2025",
-    title: "Falha na sinalização de área de risco",
-    cca: "CCA-002",
-    company: "Abelv",
-    risk: "Tolerável",
-    status: "Concluído",
-  },
-];
+interface Desvio {
+  id: string;
+  date: string;
+  title: string;
+  cca: string;
+  company: string;
+  risk: string;
+  status: string;
+}
 
 const getRiskColor = (risk: string) => {
   switch (risk) {
@@ -86,6 +49,44 @@ const getStatusColor = (status: string) => {
 
 const LatestDesvios = () => {
   const navigate = useNavigate();
+  const [desvios, setDesvios] = useState<Desvio[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchDesvios = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('desvios')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(5);
+
+        if (error) {
+          console.error('Erro ao buscar desvios recentes:', error);
+          setDesvios([]);
+        } else if (data) {
+          // Mapear os dados para o formato esperado pelo componente
+          const formattedDesvios = data.map(item => ({
+            id: item.id,
+            date: new Date(item.data).toLocaleDateString('pt-BR'),
+            title: item.descricao.substring(0, 60) + (item.descricao.length > 60 ? '...' : ''),
+            cca: item.cca || 'Não informado',
+            company: item.empresa || 'Não informado',
+            risk: item.classificacao || 'Não classificado',
+            status: item.status || 'Pendente'
+          }));
+          setDesvios(formattedDesvios);
+        }
+      } catch (error) {
+        console.error('Exceção ao buscar desvios recentes:', error);
+        setDesvios([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDesvios();
+  }, []);
 
   return (
     <Card>
@@ -99,39 +100,51 @@ const LatestDesvios = () => {
         </div>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
-          {latestDesvios.map((desvio) => (
-            <div
-              key={desvio.id}
-              className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 p-3 rounded-lg border"
-            >
-              <div className="flex flex-col gap-1">
-                <div className="flex items-center gap-2">
-                  <AlertTriangle className="h-4 w-4 text-orange-500" />
-                  <span className="font-medium">{desvio.title}</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <span>{desvio.id}</span>
-                  <span>•</span>
-                  <div className="flex items-center gap-1">
-                    <Calendar className="h-3 w-3" />
-                    <span>{desvio.date}</span>
+        {loading ? (
+          <div className="flex justify-center items-center p-4">
+            <p>Carregando desvios recentes...</p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {desvios.length > 0 ? (
+              desvios.map((desvio) => (
+                <div
+                  key={desvio.id}
+                  className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 p-3 rounded-lg border"
+                >
+                  <div className="flex flex-col gap-1">
+                    <div className="flex items-center gap-2">
+                      <AlertTriangle className="h-4 w-4 text-orange-500" />
+                      <span className="font-medium">{desvio.title}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <span>{desvio.id}</span>
+                      <span>•</span>
+                      <div className="flex items-center gap-1">
+                        <Calendar className="h-3 w-3" />
+                        <span>{desvio.date}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap gap-2 mt-2 sm:mt-0">
+                    <Badge variant="outline">{desvio.cca}</Badge>
+                    <Badge variant="outline">{desvio.company}</Badge>
+                    <Badge variant="secondary" className={getRiskColor(desvio.risk)}>
+                      {desvio.risk}
+                    </Badge>
+                    <Badge variant="secondary" className={getStatusColor(desvio.status)}>
+                      {desvio.status}
+                    </Badge>
                   </div>
                 </div>
+              ))
+            ) : (
+              <div className="flex justify-center items-center p-4">
+                <p>Nenhum desvio encontrado.</p>
               </div>
-              <div className="flex flex-wrap gap-2 mt-2 sm:mt-0">
-                <Badge variant="outline">{desvio.cca}</Badge>
-                <Badge variant="outline">{desvio.company}</Badge>
-                <Badge variant="secondary" className={getRiskColor(desvio.risk)}>
-                  {desvio.risk}
-                </Badge>
-                <Badge variant="secondary" className={getStatusColor(desvio.status)}>
-                  {desvio.status}
-                </Badge>
-              </div>
-            </div>
-          ))}
-        </div>
+            )}
+          </div>
+        )}
       </CardContent>
       <CardFooter>
         <Button

@@ -5,38 +5,50 @@ import { useToast } from "@/hooks/use-toast";
 
 export const fetchUsers = async (): Promise<User[]> => {
   try {
-    // For the purpose of this example, we'll use the auth.users table
-    // In a real system, you might need to implement a system of profiles
-    const { data: userData, error: userError } = await supabase.auth.admin.listUsers();
-    
-    if (userError) {
-      console.error('Erro ao buscar usuários:', userError);
+    const { data: profiles, error: profilesError } = await supabase
+      .from('profiles')
+      .select('*');
       
-      // Use mock data if we can't access the auth API
-      return [
-        { id: 1, nome: "João Silva", email: "joao.silva@empresa.com", perfil: "Administrador", status: "Ativo" },
-        { id: 2, nome: "Maria Souza", email: "maria.souza@empresa.com", perfil: "Operador", status: "Ativo" },
-        { id: 3, nome: "Carlos Oliveira", email: "carlos.oliveira@empresa.com", perfil: "Gestor", status: "Inativo" },
-        { id: 4, nome: "Ana Pereira", email: "ana.pereira@empresa.com", perfil: "Operador", status: "Ativo" },
-      ];
+    if (profilesError) {
+      console.error('Erro ao buscar perfis de usuários:', profilesError);
+      return [];
     }
     
-    // Map Supabase data to our User format
-    return userData?.users?.map(user => ({
-      id: user.id,
-      nome: user.user_metadata?.nome || user.email?.split('@')[0] || 'Sem nome',
-      email: user.email || '',
-      perfil: user.user_metadata?.perfil || 'Usuário',
-      status: user.banned ? "Inativo" : "Ativo"
-    })) || [];
+    const { data: userPerfis, error: perfilError } = await supabase
+      .from('usuario_perfis')
+      .select('*');
+      
+    if (perfilError) {
+      console.error('Erro ao buscar relacionamento usuario-perfis:', perfilError);
+      return [];
+    }
+    
+    const { data: perfis, error: perfisListError } = await supabase
+      .from('perfis')
+      .select('*');
+      
+    if (perfisListError) {
+      console.error('Erro ao buscar lista de perfis:', perfisListError);
+      return [];
+    }
+    
+    // Map the data to our User format
+    return profiles.map(profile => {
+      // Find perfil information for this user
+      const userPerfil = userPerfis.find(up => up.usuario_id === profile.id);
+      const perfilInfo = userPerfil ? perfis.find(p => p.id === userPerfil.perfil_id) : null;
+      
+      return {
+        id: profile.id,
+        nome: profile.nome || 'Sem nome',
+        email: profile.email || '',
+        perfil: perfilInfo?.nome || 'Usuário',
+        status: "Ativo" // Assumindo que todos os usuários no banco estão ativos
+      };
+    });
   } catch (error) {
-    console.error('Exception fetching users:', error);
-    return [
-      { id: 1, nome: "João Silva", email: "joao.silva@empresa.com", perfil: "Administrador", status: "Ativo" },
-      { id: 2, nome: "Maria Souza", email: "maria.souza@empresa.com", perfil: "Operador", status: "Ativo" },
-      { id: 3, nome: "Carlos Oliveira", email: "carlos.oliveira@empresa.com", perfil: "Gestor", status: "Inativo" },
-      { id: 4, nome: "Ana Pereira", email: "ana.pereira@empresa.com", perfil: "Operador", status: "Ativo" },
-    ];
+    console.error('Exceção ao buscar usuários:', error);
+    return [];
   }
 };
 
@@ -44,17 +56,19 @@ export const fetchProfiles = async (): Promise<Profile[]> => {
   try {
     const { data, error } = await supabase
       .from('perfis')
-      .select('*')
-      .eq('ativo', true);
+      .select('*');
     
     if (error) {
       console.error('Erro ao buscar perfis:', error);
       return [];
     }
     
-    return data || [];
+    return data.map(perfil => ({
+      id: perfil.id,
+      nome: perfil.nome
+    })) || [];
   } catch (error) {
-    console.error('Exception fetching profiles:', error);
+    console.error('Exceção ao buscar perfis:', error);
     return [];
   }
 };
