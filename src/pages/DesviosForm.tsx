@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -904,4 +905,351 @@ const DesviosForm = () => {
                           control={form.control}
                           name="situacao_acao"
                           render={({ field }) => (
-                            <FormItem
+                            <FormItem>
+                              <FormLabel>Situação da Ação*</FormLabel>
+                              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Selecione a situação" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="PENDENTE">Pendente</SelectItem>
+                                  <SelectItem value="EM_TRATATIVA">Em Tratativa</SelectItem>
+                                  <SelectItem value="TRATADO">Tratado</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                      
+                      <FormField
+                        control={form.control}
+                        name="aplicacao_medida_disciplinar"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                            <div className="space-y-0.5">
+                              <FormLabel className="text-base">Aplicação de Medida Disciplinar</FormLabel>
+                              <FormDescription>
+                                Será aplicada medida disciplinar ao colaborador infrator?
+                              </FormDescription>
+                            </div>
+                            <FormControl>
+                              <Switch
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <div className="flex justify-end">
+                        <Button type="button" onClick={() => navigateToNextTab("acao-corretiva")}>
+                          Próximo
+                          <ArrowRight className="ml-2 h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </TabsContent>
+                  
+                  <TabsContent value="classificacao-risco" className="pt-4">
+                    <div className="space-y-6">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <Card>
+                          <CardContent className="pt-6">
+                            <FormField
+                              control={form.control}
+                              name="exposicao"
+                              render={({ field }) => (
+                                <FormItem className="space-y-3">
+                                  <FormLabel>Exposição*</FormLabel>
+                                  <FormControl>
+                                    <RadioGroup
+                                      onValueChange={field.onChange}
+                                      defaultValue={field.value}
+                                      className="flex flex-col space-y-1"
+                                    >
+                                      <FormItem className="flex items-center space-x-3 space-y-0">
+                                        <FormControl>
+                                          <RadioGroupItem value="1" />
+                                        </FormControl>
+                                        <FormLabel className="font-normal">
+                                          1 - Rara
+                                        </FormLabel>
+                                      </FormItem>
+                                      <FormItem className="flex items-center space-x-3 space-y-0">
+                                        <FormControl>
+                                          <RadioGroupItem value="2" />
+                                        </FormControl>
+                                        <FormLabel className="font-normal">
+                                          2 - Ocasional
+                                        </FormLabel>
+                                      </FormItem>
+                                      <FormItem className="flex items-center space-x-3 space-y-0">
+                                        <FormControl>
+                                          <RadioGroupItem value="3" />
+                                        </FormControl>
+                                        <FormLabel className="font-normal">
+                                          3 - Frequente
+                                        </FormLabel>
+                                      </FormItem>
+                                    </RadioGroup>
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </CardContent>
+                        </Card>
+                        
+                        <Card>
+                          <CardContent className="pt-6">
+                            <FormField
+                              control={form.control}
+                              name="controle"
+                              render={({ field }) => (
+                                <FormItem className="space-y-3">
+                                  <FormLabel>Controles*</FormLabel>
+                                  <FormControl>
+                                    <RadioGroup
+                                      onValueChange={field.onChange}
+                                      defaultValue={field.value}
+                                      className="flex flex-col space-y-1"
+                                    >
+                                      <FormItem className="flex items-center space-x-3 space-y-0">
+                                        <FormControl>
+                                          <RadioGroupItem value="0" />
+                                        </FormControl>
+                                        <FormLabel className="font-normal">
+                                          0 - Adequados
+                                        </FormLabel>
+                                      </FormItem>
+                                      <FormItem className="flex items-center space-x-3 space-y-0">
+                                        <FormControl>
+                                          <RadioGroupItem value="1" />
+                                        </FormControl>
+                                        <FormLabel className="font-normal">
+                                          1 - Moderados
+                                        </FormLabel>
+                                      </FormItem>
+                                      <FormItem className="flex items-center space-x-3 space-y-0">
+                                        <FormControl>
+                                          <RadioGroupItem value="2" />
+                                        </FormControl>
+                                        <FormLabel className="font-normal">
+                                          2 - Inadequados
+                                        </FormLabel>
+                                      </FormItem>
+                                      <FormItem className="flex items-center space-x-3 space-y-0">
+                                        <FormControl>
+                                          <RadioGroupItem value="3" />
+                                        </FormControl>
+                                        <FormLabel className="font-normal">
+                                          3 - Inexistentes
+                                        </FormLabel>
+                                      </FormItem>
+                                    </RadioGroup>
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </CardContent>
+                        </Card>
+                        
+                        <Card>
+                          <CardContent className="pt-6">
+                            <FormField
+                              control={form.control}
+                              name="deteccao"
+                              render={({ field }) => (
+                                <FormItem className="space-y-3">
+                                  <FormLabel>Detecção*</FormLabel>
+                                  <FormControl>
+                                    <RadioGroup
+                                      onValueChange={field.onChange}
+                                      defaultValue={field.value}
+                                      className="flex flex-col space-y-1"
+                                    >
+                                      <FormItem className="flex items-center space-x-3 space-y-0">
+                                        <FormControl>
+                                          <RadioGroupItem value="1" />
+                                        </FormControl>
+                                        <FormLabel className="font-normal">
+                                          1 - Fácil
+                                        </FormLabel>
+                                      </FormItem>
+                                      <FormItem className="flex items-center space-x-3 space-y-0">
+                                        <FormControl>
+                                          <RadioGroupItem value="2" />
+                                        </FormControl>
+                                        <FormLabel className="font-normal">
+                                          2 - Moderada
+                                        </FormLabel>
+                                      </FormItem>
+                                      <FormItem className="flex items-center space-x-3 space-y-0">
+                                        <FormControl>
+                                          <RadioGroupItem value="3" />
+                                        </FormControl>
+                                        <FormLabel className="font-normal">
+                                          3 - Difícil
+                                        </FormLabel>
+                                      </FormItem>
+                                    </RadioGroup>
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </CardContent>
+                        </Card>
+                      </div>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <Card>
+                          <CardContent className="pt-6">
+                            <FormField
+                              control={form.control}
+                              name="severidade"
+                              render={({ field }) => (
+                                <FormItem className="space-y-3">
+                                  <FormLabel>Severidade*</FormLabel>
+                                  <FormControl>
+                                    <RadioGroup
+                                      onValueChange={field.onChange}
+                                      defaultValue={field.value}
+                                      className="flex flex-col space-y-1"
+                                    >
+                                      <FormItem className="flex items-center space-x-3 space-y-0">
+                                        <FormControl>
+                                          <RadioGroupItem value="1" />
+                                        </FormControl>
+                                        <FormLabel className="font-normal">
+                                          1 - Leve (pequenos ferimentos sem afastamento)
+                                        </FormLabel>
+                                      </FormItem>
+                                      <FormItem className="flex items-center space-x-3 space-y-0">
+                                        <FormControl>
+                                          <RadioGroupItem value="2" />
+                                        </FormControl>
+                                        <FormLabel className="font-normal">
+                                          2 - Moderada (lesões com afastamento temporário)
+                                        </FormLabel>
+                                      </FormItem>
+                                      <FormItem className="flex items-center space-x-3 space-y-0">
+                                        <FormControl>
+                                          <RadioGroupItem value="3" />
+                                        </FormControl>
+                                        <FormLabel className="font-normal">
+                                          3 - Crítica (ferimentos graves, incapacidade parcial)
+                                        </FormLabel>
+                                      </FormItem>
+                                      <FormItem className="flex items-center space-x-3 space-y-0">
+                                        <FormControl>
+                                          <RadioGroupItem value="4" />
+                                        </FormControl>
+                                        <FormLabel className="font-normal">
+                                          4 - Catastrófica (incapacidade permanente)
+                                        </FormLabel>
+                                      </FormItem>
+                                      <FormItem className="flex items-center space-x-3 space-y-0">
+                                        <FormControl>
+                                          <RadioGroupItem value="5" />
+                                        </FormControl>
+                                        <FormLabel className="font-normal">
+                                          5 - Fatal (morte)
+                                        </FormLabel>
+                                      </FormItem>
+                                    </RadioGroup>
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </CardContent>
+                        </Card>
+                        
+                        <Card>
+                          <CardContent className="pt-6">
+                            <FormField
+                              control={form.control}
+                              name="impacto"
+                              render={({ field }) => (
+                                <FormItem className="space-y-3">
+                                  <FormLabel>Impacto*</FormLabel>
+                                  <FormControl>
+                                    <RadioGroup
+                                      onValueChange={field.onChange}
+                                      defaultValue={field.value}
+                                      className="flex flex-col space-y-1"
+                                    >
+                                      <FormItem className="flex items-center space-x-3 space-y-0">
+                                        <FormControl>
+                                          <RadioGroupItem value="1" />
+                                        </FormControl>
+                                        <FormLabel className="font-normal">
+                                          1 - Baixo (impacto pequeno/restrito)
+                                        </FormLabel>
+                                      </FormItem>
+                                      <FormItem className="flex items-center space-x-3 space-y-0">
+                                        <FormControl>
+                                          <RadioGroupItem value="2" />
+                                        </FormControl>
+                                        <FormLabel className="font-normal">
+                                          2 - Médio (impacto moderado/local)
+                                        </FormLabel>
+                                      </FormItem>
+                                      <FormItem className="flex items-center space-x-3 space-y-0">
+                                        <FormControl>
+                                          <RadioGroupItem value="3" />
+                                        </FormControl>
+                                        <FormLabel className="font-normal">
+                                          3 - Alto (impacto grave/amplo)
+                                        </FormLabel>
+                                      </FormItem>
+                                    </RadioGroup>
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </CardContent>
+                        </Card>
+                      </div>
+                      
+                      <Card>
+                        <CardContent className="pt-6">
+                          <div className="flex flex-col space-y-3">
+                            <h3 className="text-lg font-medium">Classificação de Risco:</h3>
+                            <div
+                              className={`px-4 py-3 rounded-md border ${getRiskColor(
+                                riskLevel
+                              )}`}
+                            >
+                              <div className="font-semibold">{riskLevel}</div>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                      
+                      <div className="flex justify-end space-x-2">
+                        <Button type="submit" className="gap-1">
+                          <Save className="h-4 w-4" /> Salvar Desvio
+                        </Button>
+                      </div>
+                    </div>
+                  </TabsContent>
+                </Tabs>
+              </form>
+            </Form>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+};
+
+export default DesviosForm;
