@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { startOfMonth, endOfMonth } from "date-fns";
 
@@ -208,8 +207,11 @@ export const fetchParteCorpoData = async () => {
       }
     });
     
-    // Format data for chart
-    return Object.entries(parteCorpoCount).map(([name, value]) => ({ name, value: Number(value) }));
+    // Format data for chart - Make sure value is a number
+    return Object.entries(parteCorpoCount).map(([name, value]) => ({ 
+      name, 
+      value: Number(value) 
+    }));
   } catch (error) {
     console.error("Error fetching partes corpo data:", error);
     return [];

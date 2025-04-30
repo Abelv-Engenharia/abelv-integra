@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { fetchInspecoesChartData } from '@/services/horaSegurancaService';
+import { fetchInspecoesByMonth } from '@/services/horaSegurancaService';
 
 interface InspecoesBarChartProps {
   dataType: 'cca' | 'responsible';
@@ -16,7 +16,7 @@ export function InspecoesBarChart({ dataType }: InspecoesBarChartProps) {
     const loadData = async () => {
       try {
         setLoading(true);
-        const chartData = await fetchInspecoesChartData();
+        const chartData = await fetchInspecoesByMonth();
         
         // This is a placeholder as we're using the same data source for both types
         // In a real implementation, we'd have different queries for CCA vs responsible

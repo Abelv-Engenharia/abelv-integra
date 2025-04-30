@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
-import { fetchInspecoesStatusData } from '@/services/horaSegurancaService';
+import { fetchInspecoesByStatus } from '@/services/horaSegurancaService';
 
 export function InspecaoStatusDonutChart() {
   const [data, setData] = useState<any[]>([]);
@@ -12,7 +12,7 @@ export function InspecaoStatusDonutChart() {
     const loadData = async () => {
       try {
         setLoading(true);
-        const statusData = await fetchInspecoesStatusData();
+        const statusData = await fetchInspecoesByStatus();
         setData(statusData);
       } catch (err) {
         console.error("Error loading inspection status data:", err);

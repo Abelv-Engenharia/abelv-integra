@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Shield, ShieldAlert, ShieldCheck, TrendingUp, Clock, XCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { fetchInspecoesStats } from '@/services/horaSegurancaService';
+import { fetchInspectionsSummary } from '@/services/horaSegurancaService';
 
 export function InspecoesSummaryCards() {
   const [stats, setStats] = useState({
@@ -21,7 +21,7 @@ export function InspecoesSummaryCards() {
     const loadStats = async () => {
       try {
         setLoading(true);
-        const data = await fetchInspecoesStats();
+        const data = await fetchInspectionsSummary();
         
         // Calculate realizadas (assuming they are the difference between total and pending)
         const realizadas = data.totalInspecoes - data.inspecoesPendentes;
@@ -90,10 +90,10 @@ export function InspecoesSummaryCards() {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Aderência HSA</CardTitle>
-          <TrendingUp className={cn("h-4 w-4", adherenceColor)} />
+          <TrendingUp className={cn("h-4 w-4", getAdherenceColor(aderenciaHSA))} />
         </CardHeader>
         <CardContent>
-          <div className={cn("text-2xl font-bold", adherenceColor)}>
+          <div className={cn("text-2xl font-bold", getAdherenceColor(aderenciaHSA))}>
             {aderenciaHSA.toFixed(1)}%
           </div>
           <p className="text-xs text-muted-foreground">
