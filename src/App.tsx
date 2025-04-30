@@ -15,6 +15,11 @@ import AdminTemplates from "./pages/AdminTemplates";
 import AdminLogo from "./pages/admin/AdminLogo";
 import Login from "./pages/auth/Login";
 
+// Account pages
+import Profile from "./pages/account/Profile";
+import Settings from "./pages/account/Settings";
+import Support from "./pages/account/Support";
+
 // Ocorrências pages
 import OcorrenciasDashboard from "./pages/ocorrencias/OcorrenciasDashboard";
 import OcorrenciasCadastro from "./pages/ocorrencias/OcorrenciasCadastro";
@@ -69,6 +74,11 @@ const App = () => (
             {/* App routes */}
             <Route element={<Layout />}>
               <Route path="/" element={<Dashboard />} />
+              
+              {/* Account routes */}
+              <Route path="/account/profile" element={<Profile />} />
+              <Route path="/account/settings" element={<Settings />} />
+              <Route path="/account/support" element={<Support />} />
               
               {/* Gestão de SMS routes */}
               <Route path="/desvios/dashboard" element={<DesviosDashboard />} />

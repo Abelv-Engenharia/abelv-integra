@@ -13,8 +13,23 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import SystemLogo from "@/components/common/SystemLogo";
+import { useNavigate } from "react-router-dom";
+import { toast } from "@/hooks/use-toast";
 
 const Navbar = () => {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    // Simulate logout process
+    toast({
+      title: "Logout realizado com sucesso",
+      description: "Você foi desconectado do sistema"
+    });
+    
+    // Redirect to login page
+    navigate("/login");
+  };
+
   return (
     <div className="border-b">
       <div className="flex h-16 items-center px-4 gap-4">
@@ -63,21 +78,21 @@ const Navbar = () => {
               <DropdownMenuLabel>Minha Conta</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
-                <DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate("/account/profile")}>
                   <User className="mr-2 h-4 w-4" />
                   <span>Perfil</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate("/account/settings")}>
                   <Settings className="mr-2 h-4 w-4" />
                   <span>Configurações</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate("/account/support")}>
                   <LifeBuoy className="mr-2 h-4 w-4" />
                   <span>Suporte</span>
                 </DropdownMenuItem>
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={handleLogout}>
                 <LogOut className="mr-2 h-4 w-4" />
                 <span>Sair</span>
               </DropdownMenuItem>
