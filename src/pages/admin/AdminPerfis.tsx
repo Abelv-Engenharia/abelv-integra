@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import {
   Card,
@@ -89,6 +88,7 @@ const formSchema = z.object({
   })
 });
 
+// Make sure all the permissiones in the mock data are correctly defined as required by the type
 const MOCK_PERFIS: PerfilData[] = [
   {
     id: 1,
@@ -227,7 +227,20 @@ const AdminPerfis = () => {
         id: perfis.length > 0 ? Math.max(...perfis.map(p => p.id)) + 1 : 1,
         nome: data.nome,
         descricao: data.descricao || "",
-        permissoes: data.permissoes
+        permissoes: {
+          desvios: data.permissoes.desvios,
+          treinamentos: data.permissoes.treinamentos,
+          hora_seguranca: data.permissoes.hora_seguranca,
+          ocorrencias: data.permissoes.ocorrencias,
+          medidas_disciplinares: data.permissoes.medidas_disciplinares,
+          tarefas: data.permissoes.tarefas,
+          relatorios: data.permissoes.relatorios,
+          admin_usuarios: data.permissoes.admin_usuarios,
+          admin_perfis: data.permissoes.admin_perfis,
+          admin_funcionarios: data.permissoes.admin_funcionarios,
+          admin_hht: data.permissoes.admin_hht,
+          admin_templates: data.permissoes.admin_templates,
+        }
       };
       
       setPerfis([...perfis, newPerfil]);
@@ -240,7 +253,25 @@ const AdminPerfis = () => {
       // Edit existing profile
       const updatedPerfis = perfis.map(perfil => 
         perfil.id === currentPerfil.id 
-          ? { ...perfil, nome: data.nome, descricao: data.descricao || "", permissoes: data.permissoes }
+          ? { 
+              ...perfil, 
+              nome: data.nome, 
+              descricao: data.descricao || "", 
+              permissoes: {
+                desvios: data.permissoes.desvios,
+                treinamentos: data.permissoes.treinamentos,
+                hora_seguranca: data.permissoes.hora_seguranca,
+                ocorrencias: data.permissoes.ocorrencias,
+                medidas_disciplinares: data.permissoes.medidas_disciplinares,
+                tarefas: data.permissoes.tarefas,
+                relatorios: data.permissoes.relatorios,
+                admin_usuarios: data.permissoes.admin_usuarios,
+                admin_perfis: data.permissoes.admin_perfis,
+                admin_funcionarios: data.permissoes.admin_funcionarios,
+                admin_hht: data.permissoes.admin_hht,
+                admin_templates: data.permissoes.admin_templates,
+              }
+            }
           : perfil
       );
       setPerfis(updatedPerfis);
@@ -451,12 +482,15 @@ const AdminPerfis = () => {
                               <FormField
                                 key={permission.id}
                                 control={form.control}
-                                name={`permissoes.${permission.id}` as const}
+                                name={`permissoes.${permission.id}` as "permissoes.desvios" | "permissoes.treinamentos" | "permissoes.hora_seguranca" | 
+                                      "permissoes.ocorrencias" | "permissoes.medidas_disciplinares" | "permissoes.tarefas" | "permissoes.relatorios" | 
+                                      "permissoes.admin_usuarios" | "permissoes.admin_perfis" | "permissoes.admin_funcionarios" | 
+                                      "permissoes.admin_hht" | "permissoes.admin_templates"}
                                 render={({ field }) => (
                                   <FormItem className="flex flex-row items-center space-x-3 space-y-0 rounded-md border p-4">
                                     <FormControl>
                                       <Checkbox 
-                                        checked={field.value} 
+                                        checked={Boolean(field.value)} 
                                         onCheckedChange={field.onChange} 
                                       />
                                     </FormControl>

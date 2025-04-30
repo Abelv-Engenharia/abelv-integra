@@ -24,8 +24,8 @@ const prepareTreinamentosData = () => {
       id: treinamento.id,
       funcionario: `Funcionário ID ${treinamento.funcionarioId}`,
       nome: treinamentoDetalhes?.nome || "Desconhecido",
-      tipo: treinamentoDetalhes?.tipo || "Desconhecido",
-      dataInicio: treinamento.dataInicio,
+      tipo: treinamentoDetalhes?.categoria || "Desconhecido", // Changed from tipo to categoria
+      dataInicio: new Date(treinamento.dataRealizacao), // Changed from dataInicio to dataRealizacao
       dataValidade: treinamento.dataValidade,
       status,
       cargaHoraria: treinamentoDetalhes?.cargaHoraria || 0
