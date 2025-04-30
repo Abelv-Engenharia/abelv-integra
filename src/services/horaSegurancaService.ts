@@ -1,142 +1,145 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { startOfMonth, endOfMonth } from "date-fns";
 
-export const fetchInspecoesStats = async () => {
-  // Get today's date
-  const today = new Date();
-  
-  // Calculate start and end of current month
-  const startMonth = startOfMonth(today);
-  const endMonth = endOfMonth(today);
-  
+// Fetch inspecoes by status for donut chart
+export const fetchInspecoesByStatus = async () => {
   try {
-    // Fetch total inspections
-    const { count: totalInspecoes } = await supabase
-      .from('inspecoes')
-      .select('*', { count: 'exact', head: true });
-    
-    // Fetch inspections this month
-    const { count: inspecoesMes } = await supabase
-      .from('inspecoes')
-      .select('*', { count: 'exact', head: true })
-      .gte('data', startMonth.toISOString())
-      .lte('data', endMonth.toISOString());
-    
-    // Fetch pending inspections
-    const { count: inspecoesPendentes } = await supabase
-      .from('inspecoes')
-      .select('*', { count: 'exact', head: true })
-      .eq('status', 'Pendente');
-    
-    // Fetch anomalies found
-    const { count: anomaliasEncontradas } = await supabase
-      .from('inspecoes')
-      .select('*', { count: 'exact', head: true })
-      .gt('qtd_anomalias', 0);
-    
-    return {
-      totalInspecoes: totalInspecoes || 0,
-      inspecoesMes: inspecoesMes || 0,
-      inspecoesPendentes: inspecoesPendentes || 0,
-      anomaliasEncontradas: anomaliasEncontradas || 0
-    };
+    const { data, error } = await supabase
+      .from('hora_seguranca')
+      .select('status')
+      .limit(500);
+
+    if (error) throw error;
+
+    // Group by status
+    const counts = (data || []).reduce((acc: Record<string, number>, item) => {
+      const status = item.status || 'Não definido';
+      acc[status] = (acc[status] || 0) + 1;
+      return acc;
+    }, {});
+
+    // Format data for chart
+    return Object.entries(counts).map(([name, value]) => ({ name, value }));
   } catch (error) {
-    console.error("Error fetching inspecoes stats:", error);
-    return {
-      totalInspecoes: 0,
-      inspecoesMes: 0,
-      inspecoesPendentes: 0,
-      anomaliasEncontradas: 0
-    };
+    console.error("Error fetching inspecoes by status:", error);
+    return [];
   }
 };
 
-export const fetchInspecoesChartData = async () => {
+// Fetch inspecoes by month for bar chart
+export const fetchInspecoesByMonth = async () => {
   try {
-    // Fetch inspections with date and status
-    const { data } = await supabase
-      .from('inspecoes')
-      .select('data, status')
-      .order('data', { ascending: false })
-      .limit(100);
-    
-    // Process data for chart
-    const chartData = (data || []).reduce((acc: Record<string, Record<string, number>>, inspecao) => {
-      const date = new Date(inspecao.data);
+    const { data, error } = await supabase
+      .from('hora_seguranca')
+      .select('data, tipo')
+      .order('data', { ascending: true })
+      .limit(500);
+
+    if (error) throw error;
+
+    // Group by month and count
+    const monthlyData = (data || []).reduce((acc: Record<string, any>, item) => {
+      if (!item.data) return acc;
+      
+      const date = new Date(item.data);
       const month = date.getMonth() + 1;
       const year = date.getFullYear();
       const monthYear = `${month}/${year}`;
-      
+
       if (!acc[monthYear]) {
         acc[monthYear] = {
           name: monthYear,
-          Concluída: 0,
-          Pendente: 0,
-          Cancelada: 0
+          programadas: 0,
+          naoProgramadas: 0,
         };
       }
-      
-      if (inspecao.status === 'Concluída') {
-        acc[monthYear].Concluída += 1;
-      } else if (inspecao.status === 'Pendente') {
-        acc[monthYear].Pendente += 1;
-      } else if (inspecao.status === 'Cancelada') {
-        acc[monthYear].Cancelada += 1;
+
+      if (item.tipo === 'Programada') {
+        acc[monthYear].programadas += 1;
+      } else {
+        acc[monthYear].naoProgramadas += 1;
       }
-      
+
       return acc;
     }, {});
-    
+
     // Convert to array and sort by date
-    return Object.values(chartData).sort((a, b) => {
+    return Object.values(monthlyData).sort((a, b) => {
       const [aMonth, aYear] = a.name.split('/').map(Number);
       const [bMonth, bYear] = b.name.split('/').map(Number);
       return aYear !== bYear ? aYear - bYear : aMonth - bMonth;
     });
   } catch (error) {
-    console.error("Error fetching inspecoes chart data:", error);
+    console.error("Error fetching inspecoes by month:", error);
     return [];
   }
 };
 
-export const fetchInspecoesStatusData = async () => {
+// Fetch desvios by inspection type
+export const fetchDesviosByInspectionType = async () => {
   try {
-    // Fetch inspections with status
-    const { data } = await supabase
-      .from('inspecoes')
-      .select('status')
-      .limit(1000);
-    
-    // Count inspections by status
-    const statusCount = (data || []).reduce((acc: Record<string, number>, inspecao) => {
-      if (!acc[inspecao.status]) {
-        acc[inspecao.status] = 0;
-      }
-      acc[inspecao.status] += 1;
+    const { data, error } = await supabase
+      .from('desvios')
+      .select('tipo_inspecao, id')
+      .limit(500);
+
+    if (error) throw error;
+
+    // Count desvios by inspection type
+    const counts = (data || []).reduce((acc: Record<string, number>, item) => {
+      const tipo = item.tipo_inspecao || 'Não definido';
+      acc[tipo] = (acc[tipo] || 0) + 1;
       return acc;
     }, {});
-    
+
     // Format data for chart
-    return [
-      { name: "Concluída", value: statusCount["Concluída"] || 0 },
-      { name: "Pendente", value: statusCount["Pendente"] || 0 },
-      { name: "Cancelada", value: statusCount["Cancelada"] || 0 }
-    ];
+    return Object.entries(counts).map(([name, value]) => ({ name, value: Number(value) }));
   } catch (error) {
-    console.error("Error fetching inspecoes status data:", error);
+    console.error("Error fetching desvios by inspection type:", error);
     return [];
   }
 };
 
+// Fetch desvios by responsavel
+export const fetchDesviosByResponsavel = async () => {
+  try {
+    const { data, error } = await supabase
+      .from('desvios')
+      .select('responsavel, id')
+      .limit(500);
+
+    if (error) throw error;
+
+    // Count desvios by responsavel
+    const counts = (data || []).reduce((acc: Record<string, number>, item) => {
+      const responsavel = item.responsavel || 'Não atribuído';
+      acc[responsavel] = (acc[responsavel] || 0) + 1;
+      return acc;
+    }, {});
+
+    // Format data for chart and sort
+    const chartData = Object.entries(counts)
+      .map(([name, value]) => ({ name, value: Number(value) }))
+      .sort((a, b) => b.value - a.value)
+      .slice(0, 10); // Get top 10 responsáveis
+
+    return chartData;
+  } catch (error) {
+    console.error("Error fetching desvios by responsavel:", error);
+    return [];
+  }
+};
+
+// Fetch recent inspections
 export const fetchRecentInspections = async () => {
   try {
-    // Fetch recent inspections
-    const { data } = await supabase
-      .from('inspecoes')
-      .select('id, data, tipo, local, responsavel, status')
+    const { data, error } = await supabase
+      .from('hora_seguranca')
+      .select('*')
       .order('data', { ascending: false })
       .limit(5);
+
+    if (error) throw error;
     
     return data || [];
   } catch (error) {
@@ -145,28 +148,45 @@ export const fetchRecentInspections = async () => {
   }
 };
 
-export const fetchDesviosByInspectionType = async () => {
+// Fetch inspection stats summary
+export const fetchInspectionsSummary = async () => {
   try {
-    // Fetch desvios by inspection type
-    const { data } = await supabase
-      .from('inspecoes')
-      .select('tipo, qtd_anomalias')
-      .gt('qtd_anomalias', 0)
-      .limit(100);
+    // Get total inspections
+    const { count: totalInspecoes } = await supabase
+      .from('hora_seguranca')
+      .select('*', { count: 'exact', head: true });
     
-    // Group desvios by inspection type
-    const desviosByType = (data || []).reduce((acc: Record<string, number>, inspecao) => {
-      if (!acc[inspecao.tipo]) {
-        acc[inspecao.tipo] = 0;
-      }
-      acc[inspecao.tipo] += inspecao.qtd_anomalias;
-      return acc;
-    }, {});
+    // Get programmed inspections
+    const { count: programadas } = await supabase
+      .from('hora_seguranca')
+      .select('*', { count: 'exact', head: true })
+      .eq('tipo', 'Programada');
     
-    // Format data for chart
-    return Object.entries(desviosByType).map(([name, value]) => ({ name, value }));
+    // Get non-programmed inspections
+    const { count: naoProgramadas } = await supabase
+      .from('hora_seguranca')
+      .select('*', { count: 'exact', head: true })
+      .eq('tipo', 'Não Programada');
+    
+    // Get deviations identified
+    const { count: desviosIdentificados } = await supabase
+      .from('desvios')
+      .select('*', { count: 'exact', head: true })
+      .not('tipo_inspecao', 'is', null);
+    
+    return {
+      totalInspecoes: totalInspecoes || 0,
+      programadas: programadas || 0,
+      naoProgramadas: naoProgramadas || 0,
+      desviosIdentificados: desviosIdentificados || 0
+    };
   } catch (error) {
-    console.error("Error fetching desvios by inspection type:", error);
-    return [];
+    console.error("Error fetching inspections summary:", error);
+    return {
+      totalInspecoes: 0,
+      programadas: 0,
+      naoProgramadas: 0,
+      desviosIdentificados: 0
+    };
   }
 };

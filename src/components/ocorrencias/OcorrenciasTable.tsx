@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Table,
   TableBody,
@@ -11,58 +11,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { Eye } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-
-// Updated mock data with the new risk classifications
-const mockData = [
-  {
-    id: "1",
-    data: "2023-05-15",
-    colaborador: "José da Silva",
-    empresa: "Empresa A",
-    tipoOcorrencia: "Acidente com Afastamento",
-    classificacaoRisco: "INTOLERÁVEL",
-    status: "Em tratativa",
-  },
-  {
-    id: "2",
-    data: "2023-06-22",
-    colaborador: "Paulo Souza",
-    empresa: "Empresa B",
-    tipoOcorrencia: "Acidente sem Afastamento",
-    classificacaoRisco: "MODERADO",
-    status: "Concluído",
-  },
-  {
-    id: "3",
-    data: "2023-07-05",
-    colaborador: "Carla Oliveira",
-    empresa: "Empresa C",
-    tipoOcorrencia: "Quase Acidente",
-    classificacaoRisco: "TRIVIAL",
-    status: "Em tratativa",
-  },
-  {
-    id: "4",
-    data: "2023-08-11",
-    colaborador: "Rafael Lima",
-    empresa: "Empresa A",
-    tipoOcorrencia: "Acidente sem Afastamento",
-    classificacaoRisco: "SUBSTANCIAL",
-    status: "Concluído",
-  },
-  {
-    id: "5",
-    data: "2023-09-28",
-    colaborador: "Mariana Costa",
-    empresa: "Empresa D",
-    tipoOcorrencia: "Acidente com Afastamento",
-    classificacaoRisco: "TOLERÁVEL",
-    status: "Em tratativa",
-  },
-];
+import { fetchLatestOcorrencias } from "@/services/ocorrenciasDashboardService";
 
 // Function to get the background and text colors for each risk classification
-const getRiscoClassColor = (classificacao) => {
+const getRiscoClassColor = (classificacao: string) => {
   switch (classificacao) {
     case "TRIVIAL":
       return "bg-[#34C6F4] text-white";
@@ -80,19 +32,61 @@ const getRiscoClassColor = (classificacao) => {
 };
 
 const OcorrenciasTable = () => {
-  const [data, setData] = useState(mockData);
+  const [data, setData] = useState<any[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
-  const handleViewOcorrencia = (id) => {
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setLoading(true);
+        const ocorrenciasData = await fetchLatestOcorrencias();
+        setData(ocorrenciasData);
+      } catch (err) {
+        console.error("Error loading latest ocorrencias:", err);
+        setError("Erro ao carregar ocorrências recentes");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, []);
+
+  const handleViewOcorrencia = (id: string) => {
     navigate(`/ocorrencias/detalhes/${id}`);
   };
+
+  if (loading) {
+    return (
+      <div className="py-8 text-center">
+        <p className="text-muted-foreground">Carregando dados...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="py-8 text-center">
+        <p className="text-red-500">{error}</p>
+      </div>
+    );
+  }
+
+  if (data.length === 0) {
+    return (
+      <div className="py-8 text-center">
+        <p className="text-muted-foreground">Nenhuma ocorrência encontrada</p>
+      </div>
+    );
+  }
 
   return (
     <Table>
       <TableHeader>
         <TableRow>
           <TableHead>Data</TableHead>
-          <TableHead>Colaborador</TableHead>
           <TableHead>Empresa</TableHead>
           <TableHead>Tipo de Ocorrência</TableHead>
           <TableHead className="hidden md:table-cell">Classificação de Risco</TableHead>
@@ -104,12 +98,11 @@ const OcorrenciasTable = () => {
         {data.map((ocorrencia) => (
           <TableRow key={ocorrencia.id}>
             <TableCell>{new Date(ocorrencia.data).toLocaleDateString()}</TableCell>
-            <TableCell>{ocorrencia.colaborador}</TableCell>
             <TableCell>{ocorrencia.empresa}</TableCell>
-            <TableCell>{ocorrencia.tipoOcorrencia}</TableCell>
+            <TableCell>{ocorrencia.tipo_ocorrencia}</TableCell>
             <TableCell className="hidden md:table-cell">
-              <span className={`px-2 py-1 rounded-full text-xs ${getRiscoClassColor(ocorrencia.classificacaoRisco)}`}>
-                {ocorrencia.classificacaoRisco}
+              <span className={`px-2 py-1 rounded-full text-xs ${getRiscoClassColor(ocorrencia.classificacao_risco)}`}>
+                {ocorrencia.classificacao_risco}
               </span>
             </TableCell>
             <TableCell>

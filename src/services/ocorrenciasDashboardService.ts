@@ -27,13 +27,13 @@ export const fetchOcorrenciasStats = async () => {
     const { count: ocorrenciasPendentes } = await supabase
       .from('ocorrencias')
       .select('*', { count: 'exact', head: true })
-      .eq('status', 'Pendente');
+      .eq('status', 'Em tratativa');
     
     // Calculate risk percentage (high risk)
     const { data: ocorrenciasRisco } = await supabase
       .from('ocorrencias')
       .select('classificacao_risco')
-      .in('classificacao_risco', ['Alto', 'Muito Alto'])
+      .in('classificacao_risco', ['SUBSTANCIAL', 'INTOLERÁVEL'])
       .limit(1000);
     
     const riscoPercentage = totalOcorrencias ? 
@@ -74,7 +74,7 @@ export const fetchOcorrenciasByTipo = async () => {
     }, {});
     
     // Format data for chart
-    return Object.entries(tipoCount).map(([name, value]) => ({ name, value }));
+    return Object.entries(tipoCount).map(([name, value]) => ({ name, value: Number(value) }));
   } catch (error) {
     console.error("Error fetching ocorrencias by tipo:", error);
     return [];
@@ -99,7 +99,7 @@ export const fetchOcorrenciasByRisco = async () => {
     }, {});
     
     // Format data for chart
-    return Object.entries(riscoCount).map(([name, value]) => ({ name, value }));
+    return Object.entries(riscoCount).map(([name, value]) => ({ name, value: Number(value) }));
   } catch (error) {
     console.error("Error fetching ocorrencias by risco:", error);
     return [];
@@ -124,7 +124,7 @@ export const fetchOcorrenciasByEmpresa = async () => {
     }, {});
     
     // Format data for chart
-    return Object.entries(empresaCount).map(([name, value]) => ({ name, value }));
+    return Object.entries(empresaCount).map(([name, value]) => ({ name, value: Number(value) }));
   } catch (error) {
     console.error("Error fetching ocorrencias by empresa:", error);
     return [];
@@ -162,8 +162,8 @@ export const fetchOcorrenciasTimeline = async () => {
     
     // Convert to array and sort by date
     return Object.values(timelineData).sort((a, b) => {
-      const [aMonth, aYear] = a.name.split('/').map(Number);
-      const [bMonth, bYear] = b.name.split('/').map(Number);
+      const [aMonth, aYear] = a.name.toString().split('/').map(Number);
+      const [bMonth, bYear] = b.name.toString().split('/').map(Number);
       return aYear !== bYear ? aYear - bYear : aMonth - bMonth;
     });
   } catch (error) {
@@ -184,6 +184,34 @@ export const fetchLatestOcorrencias = async () => {
     return data || [];
   } catch (error) {
     console.error("Error fetching latest ocorrencias:", error);
+    return [];
+  }
+};
+
+export const fetchParteCorpoData = async () => {
+  try {
+    // Fetch parts of body affected
+    const { data } = await supabase
+      .from('ocorrencias')
+      .select('partes_corpo_afetadas')
+      .not('partes_corpo_afetadas', 'is', null)
+      .limit(1000);
+    
+    // Count occurrences by body part
+    const parteCorpoCount: Record<string, number> = {};
+    
+    data?.forEach(ocorrencia => {
+      if (ocorrencia.partes_corpo_afetadas && Array.isArray(ocorrencia.partes_corpo_afetadas)) {
+        ocorrencia.partes_corpo_afetadas.forEach((parte: string) => {
+          parteCorpoCount[parte] = (parteCorpoCount[parte] || 0) + 1;
+        });
+      }
+    });
+    
+    // Format data for chart
+    return Object.entries(parteCorpoCount).map(([name, value]) => ({ name, value: Number(value) }));
+  } catch (error) {
+    console.error("Error fetching partes corpo data:", error);
     return [];
   }
 };

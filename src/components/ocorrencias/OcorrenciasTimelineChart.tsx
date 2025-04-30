@@ -1,22 +1,54 @@
 
+import { useState, useEffect } from "react";
 import { Area, AreaChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-
-const data = [
-  { name: 'Jan', comAfastamento: 1, semAfastamento: 2, quaseAcidente: 2 },
-  { name: 'Fev', comAfastamento: 0, semAfastamento: 3, quaseAcidente: 1 },
-  { name: 'Mar', comAfastamento: 2, semAfastamento: 1, quaseAcidente: 3 },
-  { name: 'Abr', comAfastamento: 0, semAfastamento: 2, quaseAcidente: 1 },
-  { name: 'Mai', comAfastamento: 1, semAfastamento: 3, quaseAcidente: 0 },
-  { name: 'Jun', comAfastamento: 0, semAfastamento: 1, quaseAcidente: 2 },
-  { name: 'Jul', comAfastamento: 1, semAfastamento: 2, quaseAcidente: 1 },
-  { name: 'Ago', comAfastamento: 0, semAfastamento: 4, quaseAcidente: 2 },
-  { name: 'Set', comAfastamento: 2, semAfastamento: 1, quaseAcidente: 0 },
-  { name: 'Out', comAfastamento: 0, semAfastamento: 2, quaseAcidente: 3 },
-  { name: 'Nov', comAfastamento: 1, semAfastamento: 2, quaseAcidente: 0 },
-  { name: 'Dez', comAfastamento: 0, semAfastamento: 1, quaseAcidente: 1 },
-];
+import { fetchOcorrenciasTimeline } from "@/services/ocorrenciasDashboardService";
 
 const OcorrenciasTimelineChart = () => {
+  const [data, setData] = useState<any[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setLoading(true);
+        const chartData = await fetchOcorrenciasTimeline();
+        setData(chartData);
+      } catch (err) {
+        console.error("Error loading ocorrencias timeline:", err);
+        setError("Erro ao carregar dados da linha do tempo");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="h-[400px] flex items-center justify-center">
+        <p className="text-muted-foreground">Carregando dados...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="h-[400px] flex items-center justify-center">
+        <p className="text-red-500">{error}</p>
+      </div>
+    );
+  }
+
+  if (data.length === 0) {
+    return (
+      <div className="h-[400px] flex items-center justify-center">
+        <p className="text-muted-foreground">Nenhum dado disponível</p>
+      </div>
+    );
+  }
+
   return (
     <div className="h-[400px]">
       <ResponsiveContainer width="100%" height="100%">
@@ -36,9 +68,33 @@ const OcorrenciasTimelineChart = () => {
           <YAxis />
           <Tooltip />
           <Legend />
-          <Area type="monotone" dataKey="comAfastamento" name="Com Afastamento" stackId="1" stroke="#ef4444" fill="#ef4444" fillOpacity={0.6} />
-          <Area type="monotone" dataKey="semAfastamento" name="Sem Afastamento" stackId="1" stroke="#f59e0b" fill="#f59e0b" fillOpacity={0.6} />
-          <Area type="monotone" dataKey="quaseAcidente" name="Quase Acidente" stackId="1" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.6} />
+          <Area 
+            type="monotone" 
+            dataKey="Acidente com Afastamento" 
+            name="Com Afastamento" 
+            stackId="1" 
+            stroke="#ef4444" 
+            fill="#ef4444" 
+            fillOpacity={0.6}
+          />
+          <Area 
+            type="monotone" 
+            dataKey="Acidente sem Afastamento" 
+            name="Sem Afastamento" 
+            stackId="1" 
+            stroke="#f59e0b" 
+            fill="#f59e0b" 
+            fillOpacity={0.6}
+          />
+          <Area 
+            type="monotone" 
+            dataKey="Quase Acidente" 
+            name="Quase Acidente" 
+            stackId="1" 
+            stroke="#3b82f6" 
+            fill="#3b82f6" 
+            fillOpacity={0.6}
+          />
         </AreaChart>
       </ResponsiveContainer>
     </div>

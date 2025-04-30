@@ -1,15 +1,14 @@
 
 import { useState, useEffect } from "react";
 import { Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
-import { fetchOcorrenciasByTipo } from "@/services/ocorrenciasDashboardService";
+import { fetchParteCorpoData } from "@/services/ocorrenciasDashboardService";
 
-const colorMap: Record<string, string> = {
-  "Acidente com Afastamento": "#ef4444", // Red
-  "Acidente sem Afastamento": "#f59e0b", // Yellow
-  "Quase Acidente": "#3b82f6",           // Blue
-};
+const colors = [
+  "#8884d8", "#83a6ed", "#8dd1e1", "#82ca9d", "#a4de6c", 
+  "#d0ed57", "#ffc658", "#ff8042", "#0088FE", "#00C49F"
+];
 
-const OcorrenciasByTipoChart = () => {
+const PartesCorpoChart = () => {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -18,18 +17,11 @@ const OcorrenciasByTipoChart = () => {
     const loadData = async () => {
       try {
         setLoading(true);
-        const chartData = await fetchOcorrenciasByTipo();
-        
-        // Add colors to each data item
-        const dataWithColors = chartData.map(item => ({
-          ...item,
-          color: colorMap[item.name] || "#9ca3af" // Default gray color if no matching color
-        }));
-        
-        setData(dataWithColors);
+        const chartData = await fetchParteCorpoData();
+        setData(chartData);
       } catch (err) {
-        console.error("Error loading ocorrencias by tipo:", err);
-        setError("Erro ao carregar dados por tipo de ocorrência");
+        console.error("Error loading partes corpo data:", err);
+        setError("Erro ao carregar dados de partes do corpo");
       } finally {
         setLoading(false);
       }
@@ -76,7 +68,7 @@ const OcorrenciasByTipoChart = () => {
             label={(entry) => `${entry.name}: ${entry.value}`}
           >
             {data.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={entry.color} />
+              <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
             ))}
           </Pie>
           <Tooltip formatter={(value) => [`${value} ocorrências`, 'Quantidade']} />
@@ -87,4 +79,4 @@ const OcorrenciasByTipoChart = () => {
   );
 };
 
-export default OcorrenciasByTipoChart;
+export default PartesCorpoChart;

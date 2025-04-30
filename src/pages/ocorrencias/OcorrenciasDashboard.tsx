@@ -14,6 +14,7 @@ import OcorrenciasByRiscoChart from "@/components/ocorrencias/OcorrenciasByRisco
 import OcorrenciasTimelineChart from "@/components/ocorrencias/OcorrenciasTimelineChart";
 import OcorrenciasTable from "@/components/ocorrencias/OcorrenciasTable";
 import { OcorrenciasFiltros } from "@/components/ocorrencias/OcorrenciasFiltros";
+import PartesCorpoChart from "@/components/ocorrencias/PartesCorpoChart";
 
 const OcorrenciasDashboard = () => {
   const [filtroAtivo, setFiltroAtivo] = useState(false);
@@ -75,9 +76,7 @@ const OcorrenciasDashboard = () => {
                 <CardTitle>Partes do Corpo Atingidas</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="h-[300px] flex items-center justify-center">
-                  <p className="text-muted-foreground">Gráfico de partes do corpo</p>
-                </div>
+                <PartesCorpoChart />
               </CardContent>
             </Card>
           </div>
