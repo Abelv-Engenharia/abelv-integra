@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -14,7 +13,6 @@ import {
   User,
   Wrench,
   BarChart4,
-  Lightbulb,
   XCircle,
   ArrowRight,
 } from "lucide-react";
@@ -49,61 +47,23 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { useToast } from "@/hooks/use-toast";
-
-// Mock data for dropdowns
-const ccasOptions = [
-  { value: "001", label: "001 - Administração" },
-  { value: "002", label: "002 - Manutenção" },
-  { value: "003", label: "003 - Produção" },
-  { value: "004", label: "004 - Logística" },
-  { value: "005", label: "005 - Segurança" },
-];
-
-const empresasOptions = [
-  { value: "1", label: "Empresa Principal" },
-  { value: "2", label: "Contratada A" },
-  { value: "3", label: "Contratada B" },
-  { value: "4", label: "Contratada C" },
-  { value: "5", label: "Fornecedor X" },
-];
-
-const engenheirosOptions = [
-  { value: "eng1", label: "João Silva", funcao: "Engenheiro Civil" },
-  { value: "eng2", label: "Maria Oliveira", funcao: "Engenheira Mecânica" },
-  { value: "eng3", label: "Carlos Santos", funcao: "Engenheiro Elétrico" },
-  { value: "eng4", label: "Ana Sousa", funcao: "Engenheira de Segurança" },
-];
-
-const baseLegalOptions = [
-  { value: "nr1", label: "NR-1: Disposições Gerais" },
-  { value: "nr10", label: "NR-10: Segurança em Instalações Elétricas" },
-  { value: "nr12", label: "NR-12: Segurança no Trabalho em Máquinas e Equipamentos" },
-  { value: "nr18", label: "NR-18: Condições e Meio Ambiente de Trabalho na Indústria da Construção" },
-  { value: "nr33", label: "NR-33: Segurança e Saúde nos Trabalhos em Espaços Confinados" },
-  { value: "nr35", label: "NR-35: Trabalho em Altura" },
-  { value: "iso45001", label: "ISO 45001: Sistema de Gestão de Segurança e Saúde Ocupacional" },
-];
-
-const supervisoresOptions = [
-  { value: "sup1", label: "Roberto Almeida", funcao: "Supervisor de Produção" },
-  { value: "sup2", label: "Fernanda Lima", funcao: "Supervisora de Segurança" },
-  { value: "sup3", label: "Márcio Gomes", funcao: "Supervisor de Manutenção" },
-];
-
-const encarregadosOptions = [
-  { value: "enc1", label: "Pedro Costa", funcao: "Encarregado de Produção" },
-  { value: "enc2", label: "Juliana Ferreira", funcao: "Encarregada de Segurança" },
-  { value: "enc3", label: "Marcos Ribeiro", funcao: "Encarregado de Manutenção" },
-];
-
-const colaboradoresOptions = [
-  { value: "col1", label: "Lucas Mendes", funcao: "Operador", matricula: "123456" },
-  { value: "col2", label: "Camila Santos", funcao: "Técnica de Segurança", matricula: "234567" },
-  { value: "col3", label: "Rodrigo Lima", funcao: "Mecânico", matricula: "345678" },
-  { value: "col4", label: "Amanda Silva", funcao: "Eletricista", matricula: "456789" },
-];
+import { 
+  fetchCCAs, 
+  fetchEmpresas, 
+  fetchBaseLegalOpcoes, 
+  fetchEngenheiros, 
+  fetchSupervisores, 
+  fetchEncarregados, 
+  fetchFuncionarios,
+  CCA,
+  Empresa,
+  BaseLegalOpcao,
+  Engenheiro,
+  Supervisor,
+  Encarregado,
+  Funcionario
+} from "@/services/desviosService";
 
 const formSchema = z.object({
   data: z.date({
@@ -202,6 +162,53 @@ const calculateActionStatus = (situacao: string | undefined, prazo: Date | undef
 const DesviosForm = () => {
   const { toast } = useToast();
   
+  // State for dropdown options from Supabase
+  const [ccaOptions, setCCAOptions] = useState<CCA[]>([]);
+  const [empresasOptions, setEmpresasOptions] = useState<Empresa[]>([]);
+  const [baseLegalOptions, setBaseLegalOptions] = useState<BaseLegalOpcao[]>([]);
+  const [engenheirosOptions, setEngenheirosOptions] = useState<Engenheiro[]>([]);
+  const [supervisoresOptions, setSupervisoresOptions] = useState<Supervisor[]>([]);
+  const [encarregadosOptions, setEncarregadosOptions] = useState<Encarregado[]>([]);
+  const [colaboradoresOptions, setColaboradoresOptions] = useState<Funcionario[]>([]);
+  const [loading, setLoading] = useState(true);
+  
+  // Fetch data when component mounts
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const [ccas, empresas, baseLegal, engenheiros, supervisores, encarregados, funcionarios] = await Promise.all([
+          fetchCCAs(),
+          fetchEmpresas(),
+          fetchBaseLegalOpcoes(),
+          fetchEngenheiros(),
+          fetchSupervisores(),
+          fetchEncarregados(),
+          fetchFuncionarios()
+        ]);
+        
+        setCCAOptions(ccas);
+        setEmpresasOptions(empresas);
+        setBaseLegalOptions(baseLegal);
+        setEngenheirosOptions(engenheiros);
+        setSupervisoresOptions(supervisores);
+        setEncarregadosOptions(encarregados);
+        setColaboradoresOptions(funcionarios);
+      } catch (error) {
+        console.error("Error fetching form data:", error);
+        toast({
+          title: "Erro ao carregar dados",
+          description: "Não foi possível carregar as opções do formulário",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchData();
+  }, [toast]);
+  
   const defaultValues: Partial<FormValues> = {
     data: new Date(),
     hora: format(new Date(), "HH:mm"),
@@ -232,7 +239,7 @@ const DesviosForm = () => {
       // Autofill function and matricula when colaborador_infrator changes
       if (name === 'colaborador_infrator' && value.colaborador_infrator) {
         const selectedColaborador = colaboradoresOptions.find(
-          col => col.value === value.colaborador_infrator
+          col => col.id === value.colaborador_infrator
         );
         
         if (selectedColaborador) {
@@ -243,7 +250,7 @@ const DesviosForm = () => {
     });
     
     return () => subscription.unsubscribe();
-  }, [form]);
+  }, [form, colaboradoresOptions]);
   
   const formValues = form.watch();
   const riskLevel = calculateRiskLevel(formValues);
@@ -283,6 +290,17 @@ const DesviosForm = () => {
     }
   };
   
+  // Fallback options in case fetching fails
+  const disciplinaOptions = [
+    { value: "civil", label: "Civil" },
+    { value: "mecanica", label: "Mecânica" },
+    { value: "eletrica", label: "Elétrica" },
+    { value: "automacao", label: "Automação" },
+    { value: "instrumentacao", label: "Instrumentação" },
+    { value: "seguranca", label: "Segurança" },
+    { value: "meio_ambiente", label: "Meio Ambiente" },
+  ];
+  
   return (
     <div className="space-y-6">
       <div>
@@ -300,675 +318,75 @@ const DesviosForm = () => {
         </AlertDescription>
       </Alert>
       
-      <Card>
-        <CardContent className="pt-6">
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <Tabs defaultValue="identificacao" className="w-full">
-                <TabsList className="grid w-full grid-cols-4">
-                  <TabsTrigger value="identificacao" className="flex items-center gap-2">
-                    <ClipboardList className="h-4 w-4" />
-                    <span className="hidden md:inline">Identificação</span>
-                  </TabsTrigger>
-                  <TabsTrigger value="informacoes" className="flex items-center gap-2">
-                    <User className="h-4 w-4" />
-                    <span className="hidden md:inline">Informações</span>
-                  </TabsTrigger>
-                  <TabsTrigger value="acao-corretiva" className="flex items-center gap-2">
-                    <Wrench className="h-4 w-4" />
-                    <span className="hidden md:inline">Ação Corretiva</span>
-                  </TabsTrigger>
-                  <TabsTrigger value="classificacao-risco" className="flex items-center gap-2">
-                    <BarChart4 className="h-4 w-4" />
-                    <span className="hidden md:inline">Classificação de Risco</span>
-                  </TabsTrigger>
-                </TabsList>
-                
-                <TabsContent value="identificacao" className="pt-4">
-                  <div className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                      <FormField
-                        control={form.control}
-                        name="data"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Data*</FormLabel>
-                            <Popover>
-                              <PopoverTrigger asChild>
-                                <FormControl>
-                                  <Button
-                                    variant={"outline"}
-                                    className={cn(
-                                      "w-full pl-3 text-left font-normal",
-                                      !field.value && "text-muted-foreground"
-                                    )}
-                                  >
-                                    {field.value ? (
-                                      format(field.value, "dd/MM/yyyy", { locale: ptBR })
-                                    ) : (
-                                      <span>Selecione uma data</span>
-                                    )}
-                                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                  </Button>
-                                </FormControl>
-                              </PopoverTrigger>
-                              <PopoverContent className="w-auto p-0" align="start">
-                                <Calendar
-                                  mode="single"
-                                  selected={field.value}
-                                  onSelect={field.onChange}
-                                  initialFocus
-                                  className="pointer-events-auto"
-                                />
-                              </PopoverContent>
-                            </Popover>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={form.control}
-                        name="hora"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Hora*</FormLabel>
-                            <FormControl>
-                              <Input type="time" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={form.control}
-                        name="ano"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Ano</FormLabel>
-                            <FormControl>
-                              <Input {...field} readOnly />
-                            </FormControl>
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={form.control}
-                        name="mes"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Mês</FormLabel>
-                            <FormControl>
-                              <Input {...field} readOnly />
-                            </FormControl>
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                    
-                    <FormField
-                      control={form.control}
-                      name="cca"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>CCA*</FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Selecione o CCA" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {ccasOptions.map((option) => (
-                                <SelectItem key={option.value} value={option.value}>
-                                  {option.label}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <FormField
-                        control={form.control}
-                        name="tipo_registro"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Tipo de Registro*</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Selecione o tipo de registro" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                <SelectItem value="desvio">Desvio</SelectItem>
-                                <SelectItem value="nao_conformidade">Não Conformidade</SelectItem>
-                                <SelectItem value="ocorrencia">Ocorrência</SelectItem>
-                                <SelectItem value="incidente">Incidente</SelectItem>
-                                <SelectItem value="acidente">Acidente</SelectItem>
-                              </SelectContent>
-                            </Select>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={form.control}
-                        name="processo"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Processo*</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Selecione o processo" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                <SelectItem value="operacional">Operacional</SelectItem>
-                                <SelectItem value="administrativo">Administrativo</SelectItem>
-                                <SelectItem value="seguranca">Segurança</SelectItem>
-                                <SelectItem value="saude">Saúde</SelectItem>
-                                <SelectItem value="meio_ambiente">Meio Ambiente</SelectItem>
-                              </SelectContent>
-                            </Select>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <FormField
-                        control={form.control}
-                        name="evento_identificado"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Evento Identificado*</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Selecione o evento" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                <SelectItem value="comportamento_inseguro">Comportamento Inseguro</SelectItem>
-                                <SelectItem value="condicao_insegura">Condição Insegura</SelectItem>
-                                <SelectItem value="falha_equipamento">Falha de Equipamento</SelectItem>
-                                <SelectItem value="falha_processo">Falha de Processo</SelectItem>
-                                <SelectItem value="falha_comunicacao">Falha de Comunicação</SelectItem>
-                              </SelectContent>
-                            </Select>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={form.control}
-                        name="causa_provavel"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Causa Provável*</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Selecione a causa" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                <SelectItem value="falta_treinamento">Falta de Treinamento</SelectItem>
-                                <SelectItem value="falta_procedimento">Falta de Procedimento</SelectItem>
-                                <SelectItem value="negligencia">Negligência</SelectItem>
-                                <SelectItem value="imprudencia">Imprudência</SelectItem>
-                                <SelectItem value="falha_projeto">Falha de Projeto</SelectItem>
-                                <SelectItem value="falha_manutencao">Falha de Manutenção</SelectItem>
-                              </SelectContent>
-                            </Select>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                    
-                    <FormField
-                      control={form.control}
-                      name="responsavel_inspecao"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Responsável pela Inspeção*</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Nome do responsável" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <FormField
-                        control={form.control}
-                        name="empresa"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Empresa*</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Selecione a empresa" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                {empresasOptions.map((option) => (
-                                  <SelectItem key={option.value} value={option.value}>
-                                    {option.label}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={form.control}
-                        name="disciplina"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Disciplina*</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Selecione a disciplina" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                <SelectItem value="civil">Civil</SelectItem>
-                                <SelectItem value="mecanica">Mecânica</SelectItem>
-                                <SelectItem value="eletrica">Elétrica</SelectItem>
-                                <SelectItem value="automacao">Automação</SelectItem>
-                                <SelectItem value="instrumentacao">Instrumentação</SelectItem>
-                                <SelectItem value="seguranca">Segurança</SelectItem>
-                                <SelectItem value="meio_ambiente">Meio Ambiente</SelectItem>
-                              </SelectContent>
-                            </Select>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                    
-                    <FormField
-                      control={form.control}
-                      name="engenheiro_responsavel"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Engenheiro Responsável*</FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Selecione o engenheiro responsável" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {engenheirosOptions.map((option) => (
-                                <SelectItem key={option.value} value={option.value}>
-                                  {option.label} ({option.funcao})
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <div className="flex justify-end">
-                      <Button type="button" onClick={() => navigateToNextTab("identificacao")}>
-                        Próximo
-                        <ArrowRight className="ml-2 h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </TabsContent>
-                
-                <TabsContent value="informacoes" className="pt-4">
-                  <div className="space-y-6">
-                    <FormField
-                      control={form.control}
-                      name="descricao"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Descrição*</FormLabel>
-                          <FormControl>
-                            <Textarea
-                              placeholder="Descreva detalhadamente o desvio identificado"
-                              className="min-h-[150px]"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={form.control}
-                      name="base_legal"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Base Legal*</FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Selecione a base legal" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {baseLegalOptions.map((option) => (
-                                <SelectItem key={option.value} value={option.value}>
-                                  {option.label}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <FormField
-                        control={form.control}
-                        name="supervisor_responsavel"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Supervisor Responsável*</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Selecione o supervisor" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                {supervisoresOptions.map((option) => (
-                                  <SelectItem key={option.value} value={option.value}>
-                                    {option.label} ({option.funcao})
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={form.control}
-                        name="encarregado_responsavel"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Encarregado Responsável*</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Selecione o encarregado" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                {encarregadosOptions.map((option) => (
-                                  <SelectItem key={option.value} value={option.value}>
-                                    {option.label} ({option.funcao})
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <FormField
-                        control={form.control}
-                        name="colaborador_infrator"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Colaborador Infrator</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Selecione o colaborador" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                {colaboradoresOptions.map((option) => (
-                                  <SelectItem key={option.value} value={option.value}>
-                                    {option.label}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={form.control}
-                        name="funcao_colaborador"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Função</FormLabel>
-                            <FormControl>
-                              <Input {...field} readOnly />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={form.control}
-                        name="matricula_colaborador"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Matrícula</FormLabel>
-                            <FormControl>
-                              <Input {...field} readOnly />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                    
-                    <div className="flex justify-end">
-                      <Button type="button" onClick={() => navigateToNextTab("informacoes")}>
-                        Próximo
-                        <ArrowRight className="ml-2 h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </TabsContent>
-                
-                <TabsContent value="acao-corretiva" className="pt-4">
-                  <div className="space-y-6">
-                    <FormField
-                      control={form.control}
-                      name="tratativa_aplicada"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Tratativa Aplicada*</FormLabel>
-                          <FormControl>
-                            <Textarea
-                              placeholder="Descreva detalhadamente a tratativa aplicada para correção do desvio"
-                              className="min-h-[150px]"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={form.control}
-                      name="responsavel_acao"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Responsável pela Ação*</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Nome do responsável pela ação corretiva" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <FormField
-                        control={form.control}
-                        name="prazo_correcao"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Prazo para Correção*</FormLabel>
-                            <Popover>
-                              <PopoverTrigger asChild>
-                                <FormControl>
-                                  <Button
-                                    variant={"outline"}
-                                    className={cn(
-                                      "w-full pl-3 text-left font-normal",
-                                      !field.value && "text-muted-foreground"
-                                    )}
-                                  >
-                                    {field.value ? (
-                                      format(field.value, "dd/MM/yyyy", { locale: ptBR })
-                                    ) : (
-                                      <span>Selecione uma data</span>
-                                    )}
-                                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                  </Button>
-                                </FormControl>
-                              </PopoverTrigger>
-                              <PopoverContent className="w-auto p-0" align="start">
-                                <Calendar
-                                  mode="single"
-                                  selected={field.value}
-                                  onSelect={field.onChange}
-                                  disabled={(date) => date < new Date()}
-                                  initialFocus
-                                  className="pointer-events-auto"
-                                />
-                              </PopoverContent>
-                            </Popover>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={form.control}
-                        name="situacao_acao"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Situação da Ação*</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Selecione a situação" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                <SelectItem value="PENDENTE">Pendente</SelectItem>
-                                <SelectItem value="EM_TRATATIVA">Em Tratativa</SelectItem>
-                                <SelectItem value="TRATADO">Tratado</SelectItem>
-                              </SelectContent>
-                            </Select>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                    
-                    <div className="p-4 border rounded-md">
-                      <div className="font-semibold mb-2">Status da Ação:</div>
-                      <div className={cn(
-                        "inline-block px-3 py-1 rounded-full text-sm font-medium border",
-                        actionStatus === "CONCLUÍDO" ? "bg-green-100 text-green-800 border-green-300" :
-                        actionStatus === "EM ANDAMENTO" ? "bg-blue-100 text-blue-800 border-blue-300" :
-                        "bg-yellow-100 text-yellow-800 border-yellow-300"
-                      )}>
-                        {actionStatus}
-                      </div>
-                    </div>
-                    
-                    <FormField
-                      control={form.control}
-                      name="aplicacao_medida_disciplinar"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                          <div className="space-y-0.5">
-                            <FormLabel className="text-base">
-                              Aplicação de Medida Disciplinar
-                            </FormLabel>
-                            <FormDescription>
-                              Ative caso seja necessário aplicar uma medida disciplinar
-                            </FormDescription>
-                          </div>
-                          <FormControl>
-                            <Switch
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <div className="flex justify-end">
-                      <Button type="button" onClick={() => navigateToNextTab("acao-corretiva")}>
-                        Próximo
-                        <ArrowRight className="ml-2 h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </TabsContent>
-                
-                <TabsContent value="classificacao-risco" className="pt-4">
-                  <div className="space-y-6">
-                    <div className="space-y-4">
-                      <h3 className="text-lg font-medium">Probabilidade</h3>
-                      
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {loading ? (
+        <Card>
+          <CardContent className="pt-6 flex justify-center items-center h-[200px]">
+            <p>Carregando opções do formulário...</p>
+          </CardContent>
+        </Card>
+      ) : (
+        <Card>
+          <CardContent className="pt-6">
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                <Tabs defaultValue="identificacao" className="w-full">
+                  <TabsList className="grid w-full grid-cols-4">
+                    <TabsTrigger value="identificacao" className="flex items-center gap-2">
+                      <ClipboardList className="h-4 w-4" />
+                      <span className="hidden md:inline">Identificação</span>
+                    </TabsTrigger>
+                    <TabsTrigger value="informacoes" className="flex items-center gap-2">
+                      <User className="h-4 w-4" />
+                      <span className="hidden md:inline">Informações</span>
+                    </TabsTrigger>
+                    <TabsTrigger value="acao-corretiva" className="flex items-center gap-2">
+                      <Wrench className="h-4 w-4" />
+                      <span className="hidden md:inline">Ação Corretiva</span>
+                    </TabsTrigger>
+                    <TabsTrigger value="classificacao-risco" className="flex items-center gap-2">
+                      <BarChart4 className="h-4 w-4" />
+                      <span className="hidden md:inline">Classificação de Risco</span>
+                    </TabsTrigger>
+                  </TabsList>
+                  
+                  <TabsContent value="identificacao" className="pt-4">
+                    <div className="space-y-6">
+                      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                         <FormField
                           control={form.control}
-                          name="exposicao"
+                          name="data"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Exposição*</FormLabel>
-                              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Selecione o nível de exposição" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  <SelectItem value="1">1 - Baixa</SelectItem>
-                                  <SelectItem value="2">2 - Média</SelectItem>
-                                  <SelectItem value="3">3 - Alta</SelectItem>
-                                </SelectContent>
-                              </Select>
+                              <FormLabel>Data*</FormLabel>
+                              <Popover>
+                                <PopoverTrigger asChild>
+                                  <FormControl>
+                                    <Button
+                                      variant={"outline"}
+                                      className={cn(
+                                        "w-full pl-3 text-left font-normal",
+                                        !field.value && "text-muted-foreground"
+                                      )}
+                                    >
+                                      {field.value ? (
+                                        format(field.value, "dd/MM/yyyy", { locale: ptBR })
+                                      ) : (
+                                        <span>Selecione uma data</span>
+                                      )}
+                                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                    </Button>
+                                  </FormControl>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-auto p-0" align="start">
+                                  <Calendar
+                                    mode="single"
+                                    selected={field.value}
+                                    onSelect={field.onChange}
+                                    initialFocus
+                                    className="pointer-events-auto"
+                                  />
+                                </PopoverContent>
+                              </Popover>
                               <FormMessage />
                             </FormItem>
                           )}
@@ -976,23 +394,13 @@ const DesviosForm = () => {
                         
                         <FormField
                           control={form.control}
-                          name="controle"
+                          name="hora"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Controle*</FormLabel>
-                              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Selecione o nível de controle" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  <SelectItem value="0">0 - Excelente</SelectItem>
-                                  <SelectItem value="1">1 - Essencial</SelectItem>
-                                  <SelectItem value="2">2 - Precário</SelectItem>
-                                  <SelectItem value="3">3 - Inexistente</SelectItem>
-                                </SelectContent>
-                              </Select>
+                              <FormLabel>Hora*</FormLabel>
+                              <FormControl>
+                                <Input type="time" {...field} />
+                              </FormControl>
                               <FormMessage />
                             </FormItem>
                           )}
@@ -1000,51 +408,75 @@ const DesviosForm = () => {
                         
                         <FormField
                           control={form.control}
-                          name="deteccao"
+                          name="ano"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Detecção*</FormLabel>
-                              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Selecione o nível de detecção" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  <SelectItem value="1">1 - Fácil</SelectItem>
-                                  <SelectItem value="2">2 - Moderada</SelectItem>
-                                  <SelectItem value="3">3 - Difícil</SelectItem>
-                                </SelectContent>
-                              </Select>
-                              <FormMessage />
+                              <FormLabel>Ano</FormLabel>
+                              <FormControl>
+                                <Input {...field} readOnly />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={form.control}
+                          name="mes"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Mês</FormLabel>
+                              <FormControl>
+                                <Input {...field} readOnly />
+                              </FormControl>
                             </FormItem>
                           )}
                         />
                       </div>
-                    </div>
-                    
-                    <div className="space-y-4">
-                      <h3 className="text-lg font-medium">Efeito de Falha</h3>
+                      
+                      <FormField
+                        control={form.control}
+                        name="cca"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>CCA*</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Selecione o CCA" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                {ccaOptions.map((option) => (
+                                  <SelectItem key={option.id} value={option.codigo}>
+                                    {option.codigo} - {option.nome}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
                       
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <FormField
                           control={form.control}
-                          name="severidade"
+                          name="tipo_registro"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Severidade*</FormLabel>
+                              <FormLabel>Tipo de Registro*</FormLabel>
                               <Select onValueChange={field.onChange} defaultValue={field.value}>
                                 <FormControl>
                                   <SelectTrigger>
-                                    <SelectValue placeholder="Selecione o nível de severidade" />
+                                    <SelectValue placeholder="Selecione o tipo de registro" />
                                   </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
-                                  <SelectItem value="1">1 - Muito Baixa</SelectItem>
-                                  <SelectItem value="2">2 - Baixa</SelectItem>
-                                  <SelectItem value="3">3 - Média</SelectItem>
-                                  <SelectItem value="4">4 - Alta</SelectItem>
-                                  <SelectItem value="5">5 - Muito Alta</SelectItem>
+                                  <SelectItem value="desvio">Desvio</SelectItem>
+                                  <SelectItem value="nao_conformidade">Não Conformidade</SelectItem>
+                                  <SelectItem value="ocorrencia">Ocorrência</SelectItem>
+                                  <SelectItem value="incidente">Incidente</SelectItem>
+                                  <SelectItem value="acidente">Acidente</SelectItem>
                                 </SelectContent>
                               </Select>
                               <FormMessage />
@@ -1054,20 +486,22 @@ const DesviosForm = () => {
                         
                         <FormField
                           control={form.control}
-                          name="impacto"
+                          name="processo"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Impacto*</FormLabel>
+                              <FormLabel>Processo*</FormLabel>
                               <Select onValueChange={field.onChange} defaultValue={field.value}>
                                 <FormControl>
                                   <SelectTrigger>
-                                    <SelectValue placeholder="Selecione o nível de impacto" />
+                                    <SelectValue placeholder="Selecione o processo" />
                                   </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
-                                  <SelectItem value="1">1 - Baixo</SelectItem>
-                                  <SelectItem value="2">2 - Médio</SelectItem>
-                                  <SelectItem value="3">3 - Alto</SelectItem>
+                                  <SelectItem value="operacional">Operacional</SelectItem>
+                                  <SelectItem value="administrativo">Administrativo</SelectItem>
+                                  <SelectItem value="seguranca">Segurança</SelectItem>
+                                  <SelectItem value="saude">Saúde</SelectItem>
+                                  <SelectItem value="meio_ambiente">Meio Ambiente</SelectItem>
                                 </SelectContent>
                               </Select>
                               <FormMessage />
@@ -1075,41 +509,399 @@ const DesviosForm = () => {
                           )}
                         />
                       </div>
-                    </div>
-                    
-                    <div className="space-y-4">
-                      <h3 className="text-lg font-medium">Gradação de Risco</h3>
                       
-                      <div className="p-6 border rounded-md flex flex-col items-center justify-center">
-                        <div className="text-2xl font-bold mb-2">Nível de Risco</div>
-                        <div className={cn(
-                          "text-4xl font-bold px-8 py-4 rounded-md",
-                          getRiskColor(riskLevel)
-                        )}>
-                          {riskLevel}
-                        </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <FormField
+                          control={form.control}
+                          name="evento_identificado"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Evento Identificado*</FormLabel>
+                              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Selecione o evento" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="comportamento_inseguro">Comportamento Inseguro</SelectItem>
+                                  <SelectItem value="condicao_insegura">Condição Insegura</SelectItem>
+                                  <SelectItem value="falha_equipamento">Falha de Equipamento</SelectItem>
+                                  <SelectItem value="falha_processo">Falha de Processo</SelectItem>
+                                  <SelectItem value="falha_comunicacao">Falha de Comunicação</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={form.control}
+                          name="causa_provavel"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Causa Provável*</FormLabel>
+                              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Selecione a causa" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="falta_treinamento">Falta de Treinamento</SelectItem>
+                                  <SelectItem value="falta_procedimento">Falta de Procedimento</SelectItem>
+                                  <SelectItem value="negligencia">Negligência</SelectItem>
+                                  <SelectItem value="imprudencia">Imprudência</SelectItem>
+                                  <SelectItem value="falha_projeto">Falha de Projeto</SelectItem>
+                                  <SelectItem value="falha_manutencao">Falha de Manutenção</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                      
+                      <FormField
+                        control={form.control}
+                        name="responsavel_inspecao"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Responsável pela Inspeção*</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Nome do responsável" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <FormField
+                          control={form.control}
+                          name="empresa"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Empresa*</FormLabel>
+                              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Selecione a empresa" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  {empresasOptions.map((option) => (
+                                    <SelectItem key={option.id} value={option.id.toString()}>
+                                      {option.nome}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={form.control}
+                          name="disciplina"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Disciplina*</FormLabel>
+                              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Selecione a disciplina" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  {disciplinaOptions.map((option) => (
+                                    <SelectItem key={option.value} value={option.value}>
+                                      {option.label}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                      
+                      <FormField
+                        control={form.control}
+                        name="engenheiro_responsavel"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Engenheiro Responsável*</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Selecione o engenheiro responsável" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                {engenheirosOptions.map((option) => (
+                                  <SelectItem key={option.id} value={option.id}>
+                                    {option.nome} ({option.funcao})
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <div className="flex justify-end">
+                        <Button type="button" onClick={() => navigateToNextTab("identificacao")}>
+                          Próximo
+                          <ArrowRight className="ml-2 h-4 w-4" />
+                        </Button>
                       </div>
                     </div>
-                    
-                    <div className="flex justify-end space-x-4 pt-4">
-                      <Button type="button" variant="outline" onClick={() => form.reset()}>
-                        <XCircle className="mr-2 h-4 w-4" />
-                        Cancelar
-                      </Button>
-                      <Button type="submit">
-                        <Save className="mr-2 h-4 w-4" />
-                        Salvar Registro
-                      </Button>
+                  </TabsContent>
+                  
+                  <TabsContent value="informacoes" className="pt-4">
+                    <div className="space-y-6">
+                      <FormField
+                        control={form.control}
+                        name="descricao"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Descrição*</FormLabel>
+                            <FormControl>
+                              <Textarea
+                                placeholder="Descreva detalhadamente o desvio identificado"
+                                className="min-h-[150px]"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={form.control}
+                        name="base_legal"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Base Legal*</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Selecione a base legal" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                {baseLegalOptions.map((option) => (
+                                  <SelectItem key={option.id} value={option.id.toString()}>
+                                    {option.nome}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <FormField
+                          control={form.control}
+                          name="supervisor_responsavel"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Supervisor Responsável*</FormLabel>
+                              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Selecione o supervisor" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  {supervisoresOptions.map((option) => (
+                                    <SelectItem key={option.id} value={option.id}>
+                                      {option.nome} ({option.funcao})
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={form.control}
+                          name="encarregado_responsavel"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Encarregado Responsável*</FormLabel>
+                              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Selecione o encarregado" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  {encarregadosOptions.map((option) => (
+                                    <SelectItem key={option.id} value={option.id}>
+                                      {option.nome} ({option.funcao})
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <FormField
+                          control={form.control}
+                          name="colaborador_infrator"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Colaborador Infrator</FormLabel>
+                              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Selecione o colaborador" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  {colaboradoresOptions.map((option) => (
+                                    <SelectItem key={option.id} value={option.id}>
+                                      {option.nome}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={form.control}
+                          name="funcao_colaborador"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Função</FormLabel>
+                              <FormControl>
+                                <Input {...field} readOnly />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={form.control}
+                          name="matricula_colaborador"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Matrícula</FormLabel>
+                              <FormControl>
+                                <Input {...field} readOnly />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                      
+                      <div className="flex justify-end">
+                        <Button type="button" onClick={() => navigateToNextTab("informacoes")}>
+                          Próximo
+                          <ArrowRight className="ml-2 h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
-                  </div>
-                </TabsContent>
-              </Tabs>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
-    </div>
-  );
-};
-
-export default DesviosForm;
+                  </TabsContent>
+                  
+                  <TabsContent value="acao-corretiva" className="pt-4">
+                    <div className="space-y-6">
+                      <FormField
+                        control={form.control}
+                        name="tratativa_aplicada"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Tratativa Aplicada*</FormLabel>
+                            <FormControl>
+                              <Textarea
+                                placeholder="Descreva detalhadamente a tratativa aplicada para correção do desvio"
+                                className="min-h-[150px]"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={form.control}
+                        name="responsavel_acao"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Responsável pela Ação*</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Nome do responsável pela ação corretiva" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <FormField
+                          control={form.control}
+                          name="prazo_correcao"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Prazo para Correção*</FormLabel>
+                              <Popover>
+                                <PopoverTrigger asChild>
+                                  <FormControl>
+                                    <Button
+                                      variant={"outline"}
+                                      className={cn(
+                                        "w-full pl-3 text-left font-normal",
+                                        !field.value && "text-muted-foreground"
+                                      )}
+                                    >
+                                      {field.value ? (
+                                        format(field.value, "dd/MM/yyyy", { locale: ptBR })
+                                      ) : (
+                                        <span>Selecione uma data</span>
+                                      )}
+                                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                    </Button>
+                                  </FormControl>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-auto p-0" align="start">
+                                  <Calendar
+                                    mode="single"
+                                    selected={field.value}
+                                    onSelect={field.onChange}
+                                    disabled={(date) => date < new Date()}
+                                    initialFocus
+                                    className="pointer-events-auto"
+                                  />
+                                </PopoverContent>
+                              </Popover>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={form.control}
+                          name="situacao_acao"
+                          render={({ field }) => (
+                            <FormItem

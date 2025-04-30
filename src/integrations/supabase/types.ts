@@ -9,6 +9,30 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      base_legal_opcoes: {
+        Row: {
+          ativo: boolean | null
+          codigo: string
+          descricao: string | null
+          id: number
+          nome: string
+        }
+        Insert: {
+          ativo?: boolean | null
+          codigo: string
+          descricao?: string | null
+          id?: number
+          nome: string
+        }
+        Update: {
+          ativo?: boolean | null
+          codigo?: string
+          descricao?: string | null
+          id?: number
+          nome?: string
+        }
+        Relationships: []
+      }
       desvios: {
         Row: {
           acao_imediata: string | null
@@ -64,6 +88,60 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      encarregados: {
+        Row: {
+          ativo: boolean | null
+          email: string | null
+          funcao: string
+          id: string
+          matricula: string | null
+          nome: string
+        }
+        Insert: {
+          ativo?: boolean | null
+          email?: string | null
+          funcao: string
+          id?: string
+          matricula?: string | null
+          nome: string
+        }
+        Update: {
+          ativo?: boolean | null
+          email?: string | null
+          funcao?: string
+          id?: string
+          matricula?: string | null
+          nome?: string
+        }
+        Relationships: []
+      }
+      engenheiros: {
+        Row: {
+          ativo: boolean | null
+          email: string | null
+          funcao: string
+          id: string
+          matricula: string | null
+          nome: string
+        }
+        Insert: {
+          ativo?: boolean | null
+          email?: string | null
+          funcao: string
+          id?: string
+          matricula?: string | null
+          nome: string
+        }
+        Update: {
+          ativo?: boolean | null
+          email?: string | null
+          funcao?: string
+          id?: string
+          matricula?: string | null
+          nome?: string
+        }
+        Relationships: []
       }
       execucao_treinamentos: {
         Row: {
@@ -267,6 +345,33 @@ export type Database = {
           id?: string
           nome?: string
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      supervisores: {
+        Row: {
+          ativo: boolean | null
+          email: string | null
+          funcao: string
+          id: string
+          matricula: string | null
+          nome: string
+        }
+        Insert: {
+          ativo?: boolean | null
+          email?: string | null
+          funcao: string
+          id?: string
+          matricula?: string | null
+          nome: string
+        }
+        Update: {
+          ativo?: boolean | null
+          email?: string | null
+          funcao?: string
+          id?: string
+          matricula?: string | null
+          nome?: string
         }
         Relationships: []
       }

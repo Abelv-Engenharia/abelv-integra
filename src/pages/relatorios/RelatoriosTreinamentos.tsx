@@ -53,6 +53,11 @@ const RelatoriosTreinamentos = () => {
     // In a real app, this would filter the data based on the selected filters
     setIsFiltered(true);
   };
+
+  // Function to determine bar color based on status
+  const getBarColor = (entry: { name: string }) => {
+    return entry.name === "Válido" ? "#28a745" : "#dc3545";
+  };
   
   return (
     <div className="space-y-6">
@@ -149,7 +154,7 @@ const RelatoriosTreinamentos = () => {
                       <Legend />
                       <Bar 
                         dataKey="value" 
-                        fill={(data) => data.name === "Válido" ? "#28a745" : "#dc3545"} 
+                        fill={getBarColor}
                         name="Quantidade"
                       />
                     </BarChart>
