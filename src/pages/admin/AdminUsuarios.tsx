@@ -1,11 +1,12 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft, Search, UserRound, UserPlus, Edit, Trash } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 import {
   Form,
@@ -57,29 +58,104 @@ const userFormSchema = z.object({
 type SearchFormValues = z.infer<typeof searchFormSchema>;
 type UserFormValues = z.infer<typeof userFormSchema>;
 
-// Mock data for users
-const mockUsers = [
-  { id: 1, nome: "João Silva", email: "joao.silva@empresa.com", perfil: "Administrador", status: "Ativo" },
-  { id: 2, nome: "Maria Souza", email: "maria.souza@empresa.com", perfil: "Operador", status: "Ativo" },
-  { id: 3, nome: "Carlos Oliveira", email: "carlos.oliveira@empresa.com", perfil: "Gestor", status: "Inativo" },
-  { id: 4, nome: "Ana Pereira", email: "ana.pereira@empresa.com", perfil: "Operador", status: "Ativo" },
-];
+// Interface para usuários
+interface User {
+  id: number | string;
+  nome: string;
+  email: string;
+  perfil: string;
+  status: string;
+}
 
-// Mock data for profiles
-const mockProfiles = [
-  { id: 1, nome: "Administrador" },
-  { id: 2, nome: "Gestor" },
-  { id: 3, nome: "Operador" },
-];
+// Interface para perfis
+interface Profile {
+  id: number;
+  nome: string;
+}
 
 const AdminUsuarios = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [users, setUsers] = useState(mockUsers);
+  const [users, setUsers] = useState<User[]>([]);
+  const [allUsers, setAllUsers] = useState<User[]>([]);
+  const [profiles, setProfiles] = useState<Profile[]>([]);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<typeof mockUsers[0] | null>(null);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Buscar dados do Supabase
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsLoading(true);
+      try {
+        // Buscar perfis
+        const { data: perfilData, error: perfilError } = await supabase
+          .from('perfis')
+          .select('*')
+          .eq('ativo', true);
+        
+        if (perfilError) {
+          console.error('Erro ao buscar perfis:', perfilError);
+          toast({
+            title: "Erro ao carregar perfis",
+            description: "Não foi possível carregar os perfis. Tente novamente mais tarde.",
+            variant: "destructive",
+          });
+        } else {
+          setProfiles(perfilData || []);
+        }
+
+        // Para o propósito deste exemplo, usaremos a tabela auth.users
+        // Em um sistema real, você precisaria implementar um sistema de perfis próprio
+        const { data: userData, error: userError } = await supabase.auth.admin.listUsers();
+        
+        if (userError) {
+          console.error('Erro ao buscar usuários:', userError);
+          toast({
+            title: "Erro ao carregar usuários",
+            description: "Não foi possível carregar os usuários. Usando dados de exemplo.",
+            variant: "destructive",
+          });
+          
+          // Usar dados mockados caso não consiga acessar a API auth
+          const mockUsers = [
+            { id: 1, nome: "João Silva", email: "joao.silva@empresa.com", perfil: "Administrador", status: "Ativo" },
+            { id: 2, nome: "Maria Souza", email: "maria.souza@empresa.com", perfil: "Operador", status: "Ativo" },
+            { id: 3, nome: "Carlos Oliveira", email: "carlos.oliveira@empresa.com", perfil: "Gestor", status: "Inativo" },
+            { id: 4, nome: "Ana Pereira", email: "ana.pereira@empresa.com", perfil: "Operador", status: "Ativo" },
+          ];
+          
+          setUsers(mockUsers);
+          setAllUsers(mockUsers);
+        } else {
+          // Mapear dados do Supabase para o formato esperado
+          const formattedUsers = userData?.users?.map(user => ({
+            id: user.id,
+            nome: user.user_metadata?.nome || user.email?.split('@')[0] || 'Sem nome',
+            email: user.email || '',
+            perfil: user.user_metadata?.perfil || 'Usuário',
+            status: user.banned ? "Inativo" : "Ativo"
+          })) || [];
+          
+          setUsers(formattedUsers);
+          setAllUsers(formattedUsers);
+        }
+      } catch (error) {
+        console.error('Erro ao buscar dados:', error);
+        toast({
+          title: "Erro ao carregar dados",
+          description: "Ocorreu um erro ao carregar os dados. Tente novamente mais tarde.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [toast]);
 
   // Initialize search form
   const searchForm = useForm<SearchFormValues>({
@@ -101,73 +177,102 @@ const AdminUsuarios = () => {
 
   const onSearchSubmit = (data: SearchFormValues) => {
     if (!data.search) {
-      setUsers(mockUsers);
+      setUsers(allUsers);
       return;
     }
 
-    const filteredUsers = mockUsers.filter(
+    const searchTerm = data.search.toLowerCase();
+    const filteredUsers = allUsers.filter(
       (user) => 
-        user.nome.toLowerCase().includes(data.search!.toLowerCase()) || 
-        user.email.toLowerCase().includes(data.search!.toLowerCase()) ||
-        user.perfil.toLowerCase().includes(data.search!.toLowerCase())
+        user.nome.toLowerCase().includes(searchTerm) || 
+        user.email.toLowerCase().includes(searchTerm) ||
+        user.perfil.toLowerCase().includes(searchTerm)
     );
     
     setUsers(filteredUsers);
   };
 
-  const onUserSubmit = (data: UserFormValues) => {
-    if (selectedUser) {
-      // Edit existing user
-      const updatedUsers = users.map(user => 
-        user.id === selectedUser.id ? { ...user, ...data } : user
-      );
-      setUsers(updatedUsers);
+  const onUserSubmit = async (data: UserFormValues) => {
+    try {
+      if (selectedUser) {
+        // Edit existing user
+        // Nota: Em um sistema real, você precisaria implementar a atualização no Supabase
+        // Este é apenas um exemplo simulado
+        const updatedUsers = users.map(user => 
+          user.id === selectedUser.id ? { ...user, ...data } : user
+        );
+        setUsers(updatedUsers);
+        setAllUsers(allUsers.map(user => 
+          user.id === selectedUser.id ? { ...user, ...data } : user
+        ));
 
+        toast({
+          title: "Usuário atualizado",
+          description: `${data.nome} foi atualizado com sucesso.`,
+        });
+        
+        setIsEditDialogOpen(false);
+      } else {
+        // Create new user (simulado)
+        // Nota: Em um sistema real, você precisaria implementar o cadastro no Supabase
+        const newUser = {
+          id: Date.now().toString(),
+          nome: data.nome,
+          email: data.email,
+          perfil: data.perfil,
+          status: "Ativo"
+        };
+        
+        setUsers([...users, newUser]);
+        setAllUsers([...allUsers, newUser]);
+        
+        toast({
+          title: "Usuário criado",
+          description: `${data.nome} foi criado com sucesso.`,
+        });
+        
+        setIsCreateDialogOpen(false);
+      }
+    } catch (error) {
+      console.error('Erro ao salvar usuário:', error);
       toast({
-        title: "Usuário atualizado",
-        description: `${data.nome} foi atualizado com sucesso.`,
+        title: "Erro ao salvar usuário",
+        description: "Não foi possível salvar as alterações. Tente novamente mais tarde.",
+        variant: "destructive",
       });
-      
-      setIsEditDialogOpen(false);
-    } else {
-      // Create new user
-      const newUser = {
-        id: users.length + 1,
-        nome: data.nome,
-        email: data.email,
-        perfil: data.perfil,
-        status: "Ativo"
-      };
-      
-      setUsers([...users, newUser]);
-      
-      toast({
-        title: "Usuário criado",
-        description: `${data.nome} foi criado com sucesso.`,
-      });
-      
-      setIsCreateDialogOpen(false);
     }
     
     userForm.reset();
   };
 
-  const handleDeleteUser = () => {
+  const handleDeleteUser = async () => {
     if (selectedUser) {
-      const updatedUsers = users.filter(user => user.id !== selectedUser.id);
-      setUsers(updatedUsers);
-      
-      toast({
-        title: "Usuário excluído",
-        description: `${selectedUser.nome} foi excluído com sucesso.`,
-      });
-      
-      setIsDeleteDialogOpen(false);
-      setSelectedUser(null);
+      // Simulação de exclusão
+      // Em um sistema real, você precisaria implementar a exclusão no Supabase
+      try {
+        const updatedUsers = users.filter(user => user.id !== selectedUser.id);
+        setUsers(updatedUsers);
+        setAllUsers(allUsers.filter(user => user.id !== selectedUser.id));
+        
+        toast({
+          title: "Usuário excluído",
+          description: `${selectedUser.nome} foi excluído com sucesso.`,
+        });
+      } catch (error) {
+        console.error('Erro ao excluir usuário:', error);
+        toast({
+          title: "Erro ao excluir usuário",
+          description: "Não foi possível excluir o usuário. Tente novamente mais tarde.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsDeleteDialogOpen(false);
+        setSelectedUser(null);
+      }
     }
   };
 
-  const handleEditClick = (user: typeof mockUsers[0]) => {
+  const handleEditClick = (user: User) => {
     setSelectedUser(user);
     userForm.reset({
       nome: user.nome,
@@ -177,7 +282,7 @@ const AdminUsuarios = () => {
     setIsEditDialogOpen(true);
   };
 
-  const handleDeleteClick = (user: typeof mockUsers[0]) => {
+  const handleDeleteClick = (user: User) => {
     setSelectedUser(user);
     setIsDeleteDialogOpen(true);
   };
@@ -251,60 +356,66 @@ const AdminUsuarios = () => {
           <Separator className="my-4" />
 
           <div className="relative overflow-x-auto rounded-md border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Nome</TableHead>
-                  <TableHead>E-mail</TableHead>
-                  <TableHead>Perfil</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Ações</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {users.length > 0 ? (
-                  users.map((user) => (
-                    <TableRow key={user.id}>
-                      <TableCell className="font-medium">{user.nome}</TableCell>
-                      <TableCell>{user.email}</TableCell>
-                      <TableCell>{user.perfil}</TableCell>
-                      <TableCell>
-                        <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                          user.status === "Ativo" ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"
-                        }`}>
-                          {user.status}
-                        </span>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
-                          <Button 
-                            size="sm" 
-                            variant="outline" 
-                            onClick={() => handleEditClick(user)}
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button 
-                            size="sm" 
-                            variant="outline" 
-                            className="text-destructive hover:bg-destructive hover:text-destructive-foreground"
-                            onClick={() => handleDeleteClick(user)}
-                          >
-                            <Trash className="h-4 w-4" />
-                          </Button>
-                        </div>
+            {isLoading ? (
+              <div className="flex justify-center items-center p-8">
+                <p>Carregando usuários...</p>
+              </div>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Nome</TableHead>
+                    <TableHead>E-mail</TableHead>
+                    <TableHead>Perfil</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Ações</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {users.length > 0 ? (
+                    users.map((user) => (
+                      <TableRow key={user.id.toString()}>
+                        <TableCell className="font-medium">{user.nome}</TableCell>
+                        <TableCell>{user.email}</TableCell>
+                        <TableCell>{user.perfil}</TableCell>
+                        <TableCell>
+                          <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                            user.status === "Ativo" ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"
+                          }`}>
+                            {user.status}
+                          </span>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-2">
+                            <Button 
+                              size="sm" 
+                              variant="outline" 
+                              onClick={() => handleEditClick(user)}
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="outline" 
+                              className="text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                              onClick={() => handleDeleteClick(user)}
+                            >
+                              <Trash className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={5} className="h-24 text-center">
+                        Nenhum usuário encontrado.
                       </TableCell>
                     </TableRow>
-                  ))
-                ) : (
-                  <TableRow>
-                    <TableCell colSpan={5} className="h-24 text-center">
-                      Nenhum usuário encontrado.
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
+                  )}
+                </TableBody>
+              </Table>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -362,7 +473,7 @@ const AdminUsuarios = () => {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {mockProfiles.map((profile) => (
+                        {profiles.map((profile) => (
                           <SelectItem key={profile.id} value={profile.nome}>
                             {profile.nome}
                           </SelectItem>
@@ -441,7 +552,7 @@ const AdminUsuarios = () => {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {mockProfiles.map((profile) => (
+                        {profiles.map((profile) => (
                           <SelectItem key={profile.id} value={profile.nome}>
                             {profile.nome}
                           </SelectItem>

@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 
 export interface CCA {
@@ -89,45 +88,60 @@ export interface Disciplina {
 }
 
 export const fetchCCAs = async (): Promise<CCA[]> => {
-  const { data, error } = await supabase
-    .from('ccas')
-    .select('*')
-    .eq('ativo', true);
-  
-  if (error) {
-    console.error('Error fetching CCAs:', error);
+  try {
+    const { data, error } = await supabase
+      .from('ccas')
+      .select('*')
+      .eq('ativo', true);
+    
+    if (error) {
+      console.error('Error fetching CCAs:', error);
+      return [];
+    }
+    
+    return data || [];
+  } catch (error) {
+    console.error('Exception fetching CCAs:', error);
     return [];
   }
-  
-  return data || [];
 };
 
 export const fetchEmpresas = async (): Promise<Empresa[]> => {
-  const { data, error } = await supabase
-    .from('empresas')
-    .select('*')
-    .eq('ativo', true);
-  
-  if (error) {
-    console.error('Error fetching Empresas:', error);
+  try {
+    const { data, error } = await supabase
+      .from('empresas')
+      .select('*')
+      .eq('ativo', true);
+    
+    if (error) {
+      console.error('Error fetching Empresas:', error);
+      return [];
+    }
+    
+    return data || [];
+  } catch (error) {
+    console.error('Exception fetching Empresas:', error);
     return [];
   }
-  
-  return data || [];
 };
 
 export const fetchBaseLegalOpcoes = async (): Promise<BaseLegalOpcao[]> => {
-  const { data, error } = await supabase
-    .from('base_legal_opcoes')
-    .select('*')
-    .eq('ativo', true);
-  
-  if (error) {
-    console.error('Error fetching Base Legal options:', error);
+  try {
+    const { data, error } = await supabase
+      .from('base_legal_opcoes')
+      .select('*')
+      .eq('ativo', true);
+    
+    if (error) {
+      console.error('Error fetching Base Legal options:', error);
+      return [];
+    }
+    
+    return data || [];
+  } catch (error) {
+    console.error('Exception fetching Base Legal options:', error);
     return [];
   }
-  
-  return data || [];
 };
 
 export const fetchEngenheiros = async (): Promise<Engenheiro[]> => {
