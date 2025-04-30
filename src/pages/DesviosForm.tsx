@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -57,13 +56,23 @@ import {
   fetchSupervisores, 
   fetchEncarregados, 
   fetchFuncionarios,
+  fetchTiposRegistro,
+  fetchProcessos,
+  fetchEventosIdentificados,
+  fetchCausasProvaveis,
+  fetchDisciplinas,
   CCA,
   Empresa,
   BaseLegalOpcao,
   Engenheiro,
   Supervisor,
   Encarregado,
-  Funcionario
+  Funcionario,
+  TipoRegistro,
+  Processo,
+  EventoIdentificado,
+  CausaProvavel,
+  Disciplina
 } from "@/services/desviosService";
 
 const formSchema = z.object({
@@ -126,8 +135,6 @@ const formSchema = z.object({
   impacto: z.enum(["1", "2", "3"]),
 });
 
-type FormValues = z.infer<typeof formSchema>;
-
 const calculateRiskLevel = (formValues: Partial<FormValues>) => {
   if (!formValues.exposicao || !formValues.controle || !formValues.deteccao || !formValues.severidade || !formValues.impacto) {
     return "Não definido";
@@ -160,6 +167,8 @@ const calculateActionStatus = (situacao: string | undefined, prazo: Date | undef
   return "PENDENTE";
 };
 
+type FormValues = z.infer<typeof formSchema>;
+
 const DesviosForm = () => {
   const { toast } = useToast();
   
@@ -171,6 +180,11 @@ const DesviosForm = () => {
   const [supervisoresOptions, setSupervisoresOptions] = useState<Supervisor[]>([]);
   const [encarregadosOptions, setEncarregadosOptions] = useState<Encarregado[]>([]);
   const [colaboradoresOptions, setColaboradoresOptions] = useState<Funcionario[]>([]);
+  const [tiposRegistroOptions, setTiposRegistroOptions] = useState<TipoRegistro[]>([]);
+  const [processosOptions, setProcessosOptions] = useState<Processo[]>([]);
+  const [eventosIdentificadosOptions, setEventosIdentificadosOptions] = useState<EventoIdentificado[]>([]);
+  const [causasProvaveisOptions, setCausasProvaveisOptions] = useState<CausaProvavel[]>([]);
+  const [disciplinasOptions, setDisciplinasOptions] = useState<Disciplina[]>([]);
   const [loading, setLoading] = useState(true);
   
   // Fetch data when component mounts
@@ -178,14 +192,32 @@ const DesviosForm = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const [ccas, empresas, baseLegal, engenheiros, supervisores, encarregados, funcionarios] = await Promise.all([
+        const [
+          ccas, 
+          empresas, 
+          baseLegal, 
+          engenheiros, 
+          supervisores, 
+          encarregados, 
+          funcionarios,
+          tiposRegistro,
+          processos,
+          eventosIdentificados,
+          causasProvaveis,
+          disciplinas
+        ] = await Promise.all([
           fetchCCAs(),
           fetchEmpresas(),
           fetchBaseLegalOpcoes(),
           fetchEngenheiros(),
           fetchSupervisores(),
           fetchEncarregados(),
-          fetchFuncionarios()
+          fetchFuncionarios(),
+          fetchTiposRegistro(),
+          fetchProcessos(),
+          fetchEventosIdentificados(),
+          fetchCausasProvaveis(),
+          fetchDisciplinas()
         ]);
         
         setCCAOptions(ccas);
@@ -195,6 +227,11 @@ const DesviosForm = () => {
         setSupervisoresOptions(supervisores);
         setEncarregadosOptions(encarregados);
         setColaboradoresOptions(funcionarios);
+        setTiposRegistroOptions(tiposRegistro);
+        setProcessosOptions(processos);
+        setEventosIdentificadosOptions(eventosIdentificados);
+        setCausasProvaveisOptions(causasProvaveis);
+        setDisciplinasOptions(disciplinas);
       } catch (error) {
         console.error("Error fetching form data:", error);
         toast({
@@ -473,11 +510,11 @@ const DesviosForm = () => {
                                   </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
-                                  <SelectItem value="desvio">Desvio</SelectItem>
-                                  <SelectItem value="nao_conformidade">Não Conformidade</SelectItem>
-                                  <SelectItem value="ocorrencia">Ocorrência</SelectItem>
-                                  <SelectItem value="incidente">Incidente</SelectItem>
-                                  <SelectItem value="acidente">Acidente</SelectItem>
+                                  {tiposRegistroOptions.map((option) => (
+                                    <SelectItem key={option.id} value={option.codigo}>
+                                      {option.nome}
+                                    </SelectItem>
+                                  ))}
                                 </SelectContent>
                               </Select>
                               <FormMessage />
@@ -498,11 +535,11 @@ const DesviosForm = () => {
                                   </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
-                                  <SelectItem value="operacional">Operacional</SelectItem>
-                                  <SelectItem value="administrativo">Administrativo</SelectItem>
-                                  <SelectItem value="seguranca">Segurança</SelectItem>
-                                  <SelectItem value="saude">Saúde</SelectItem>
-                                  <SelectItem value="meio_ambiente">Meio Ambiente</SelectItem>
+                                  {processosOptions.map((option) => (
+                                    <SelectItem key={option.id} value={option.codigo}>
+                                      {option.nome}
+                                    </SelectItem>
+                                  ))}
                                 </SelectContent>
                               </Select>
                               <FormMessage />
@@ -525,11 +562,11 @@ const DesviosForm = () => {
                                   </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
-                                  <SelectItem value="comportamento_inseguro">Comportamento Inseguro</SelectItem>
-                                  <SelectItem value="condicao_insegura">Condição Insegura</SelectItem>
-                                  <SelectItem value="falha_equipamento">Falha de Equipamento</SelectItem>
-                                  <SelectItem value="falha_processo">Falha de Processo</SelectItem>
-                                  <SelectItem value="falha_comunicacao">Falha de Comunicação</SelectItem>
+                                  {eventosIdentificadosOptions.map((option) => (
+                                    <SelectItem key={option.id} value={option.codigo}>
+                                      {option.nome}
+                                    </SelectItem>
+                                  ))}
                                 </SelectContent>
                               </Select>
                               <FormMessage />
@@ -550,12 +587,11 @@ const DesviosForm = () => {
                                   </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
-                                  <SelectItem value="falta_treinamento">Falta de Treinamento</SelectItem>
-                                  <SelectItem value="falta_procedimento">Falta de Procedimento</SelectItem>
-                                  <SelectItem value="negligencia">Negligência</SelectItem>
-                                  <SelectItem value="imprudencia">Imprudência</SelectItem>
-                                  <SelectItem value="falha_projeto">Falha de Projeto</SelectItem>
-                                  <SelectItem value="falha_manutencao">Falha de Manutenção</SelectItem>
+                                  {causasProvaveisOptions.map((option) => (
+                                    <SelectItem key={option.id} value={option.codigo}>
+                                      {option.nome}
+                                    </SelectItem>
+                                  ))}
                                 </SelectContent>
                               </Select>
                               <FormMessage />
@@ -617,9 +653,9 @@ const DesviosForm = () => {
                                   </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
-                                  {disciplinaOptions.map((option) => (
-                                    <SelectItem key={option.value} value={option.value}>
-                                      {option.label}
+                                  {disciplinasOptions.map((option) => (
+                                    <SelectItem key={option.id} value={option.codigo}>
+                                      {option.nome}
                                     </SelectItem>
                                   ))}
                                 </SelectContent>
@@ -884,372 +920,3 @@ const DesviosForm = () => {
                                       <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                                     </Button>
                                   </FormControl>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-auto p-0" align="start">
-                                  <Calendar
-                                    mode="single"
-                                    selected={field.value}
-                                    onSelect={field.onChange}
-                                    disabled={(date) => date < new Date()}
-                                    initialFocus
-                                    className="pointer-events-auto"
-                                  />
-                                </PopoverContent>
-                              </Popover>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        
-                        <FormField
-                          control={form.control}
-                          name="situacao_acao"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Situação da Ação*</FormLabel>
-                              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Selecione a situação" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  <SelectItem value="PENDENTE">Pendente</SelectItem>
-                                  <SelectItem value="EM_TRATATIVA">Em Tratativa</SelectItem>
-                                  <SelectItem value="TRATADO">Tratado</SelectItem>
-                                </SelectContent>
-                              </Select>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-                      
-                      <FormField
-                        control={form.control}
-                        name="aplicacao_medida_disciplinar"
-                        render={({ field }) => (
-                          <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                            <div className="space-y-0.5">
-                              <FormLabel className="text-base">Aplicação de Medida Disciplinar</FormLabel>
-                              <FormDescription>
-                                Será aplicada medida disciplinar ao colaborador infrator?
-                              </FormDescription>
-                            </div>
-                            <FormControl>
-                              <Switch
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                              />
-                            </FormControl>
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <div className="flex justify-end">
-                        <Button type="button" onClick={() => navigateToNextTab("acao-corretiva")}>
-                          Próximo
-                          <ArrowRight className="ml-2 h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  </TabsContent>
-                  
-                  <TabsContent value="classificacao-risco" className="pt-4">
-                    <div className="space-y-6">
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <Card>
-                          <CardContent className="pt-6">
-                            <FormField
-                              control={form.control}
-                              name="exposicao"
-                              render={({ field }) => (
-                                <FormItem className="space-y-3">
-                                  <FormLabel>Exposição*</FormLabel>
-                                  <FormControl>
-                                    <RadioGroup
-                                      onValueChange={field.onChange}
-                                      defaultValue={field.value}
-                                      className="flex flex-col space-y-1"
-                                    >
-                                      <FormItem className="flex items-center space-x-3 space-y-0">
-                                        <FormControl>
-                                          <RadioGroupItem value="1" />
-                                        </FormControl>
-                                        <FormLabel className="font-normal">
-                                          1 - Rara
-                                        </FormLabel>
-                                      </FormItem>
-                                      <FormItem className="flex items-center space-x-3 space-y-0">
-                                        <FormControl>
-                                          <RadioGroupItem value="2" />
-                                        </FormControl>
-                                        <FormLabel className="font-normal">
-                                          2 - Ocasional
-                                        </FormLabel>
-                                      </FormItem>
-                                      <FormItem className="flex items-center space-x-3 space-y-0">
-                                        <FormControl>
-                                          <RadioGroupItem value="3" />
-                                        </FormControl>
-                                        <FormLabel className="font-normal">
-                                          3 - Frequente
-                                        </FormLabel>
-                                      </FormItem>
-                                    </RadioGroup>
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                          </CardContent>
-                        </Card>
-                        
-                        <Card>
-                          <CardContent className="pt-6">
-                            <FormField
-                              control={form.control}
-                              name="controle"
-                              render={({ field }) => (
-                                <FormItem className="space-y-3">
-                                  <FormLabel>Controles*</FormLabel>
-                                  <FormControl>
-                                    <RadioGroup
-                                      onValueChange={field.onChange}
-                                      defaultValue={field.value}
-                                      className="flex flex-col space-y-1"
-                                    >
-                                      <FormItem className="flex items-center space-x-3 space-y-0">
-                                        <FormControl>
-                                          <RadioGroupItem value="0" />
-                                        </FormControl>
-                                        <FormLabel className="font-normal">
-                                          0 - Adequados
-                                        </FormLabel>
-                                      </FormItem>
-                                      <FormItem className="flex items-center space-x-3 space-y-0">
-                                        <FormControl>
-                                          <RadioGroupItem value="1" />
-                                        </FormControl>
-                                        <FormLabel className="font-normal">
-                                          1 - Moderados
-                                        </FormLabel>
-                                      </FormItem>
-                                      <FormItem className="flex items-center space-x-3 space-y-0">
-                                        <FormControl>
-                                          <RadioGroupItem value="2" />
-                                        </FormControl>
-                                        <FormLabel className="font-normal">
-                                          2 - Inadequados
-                                        </FormLabel>
-                                      </FormItem>
-                                      <FormItem className="flex items-center space-x-3 space-y-0">
-                                        <FormControl>
-                                          <RadioGroupItem value="3" />
-                                        </FormControl>
-                                        <FormLabel className="font-normal">
-                                          3 - Inexistentes
-                                        </FormLabel>
-                                      </FormItem>
-                                    </RadioGroup>
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                          </CardContent>
-                        </Card>
-                        
-                        <Card>
-                          <CardContent className="pt-6">
-                            <FormField
-                              control={form.control}
-                              name="deteccao"
-                              render={({ field }) => (
-                                <FormItem className="space-y-3">
-                                  <FormLabel>Detecção*</FormLabel>
-                                  <FormControl>
-                                    <RadioGroup
-                                      onValueChange={field.onChange}
-                                      defaultValue={field.value}
-                                      className="flex flex-col space-y-1"
-                                    >
-                                      <FormItem className="flex items-center space-x-3 space-y-0">
-                                        <FormControl>
-                                          <RadioGroupItem value="1" />
-                                        </FormControl>
-                                        <FormLabel className="font-normal">
-                                          1 - Fácil
-                                        </FormLabel>
-                                      </FormItem>
-                                      <FormItem className="flex items-center space-x-3 space-y-0">
-                                        <FormControl>
-                                          <RadioGroupItem value="2" />
-                                        </FormControl>
-                                        <FormLabel className="font-normal">
-                                          2 - Moderada
-                                        </FormLabel>
-                                      </FormItem>
-                                      <FormItem className="flex items-center space-x-3 space-y-0">
-                                        <FormControl>
-                                          <RadioGroupItem value="3" />
-                                        </FormControl>
-                                        <FormLabel className="font-normal">
-                                          3 - Difícil
-                                        </FormLabel>
-                                      </FormItem>
-                                    </RadioGroup>
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                          </CardContent>
-                        </Card>
-                      </div>
-                      
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <Card>
-                          <CardContent className="pt-6">
-                            <FormField
-                              control={form.control}
-                              name="severidade"
-                              render={({ field }) => (
-                                <FormItem className="space-y-3">
-                                  <FormLabel>Severidade*</FormLabel>
-                                  <FormControl>
-                                    <RadioGroup
-                                      onValueChange={field.onChange}
-                                      defaultValue={field.value}
-                                      className="flex flex-col space-y-1"
-                                    >
-                                      <FormItem className="flex items-center space-x-3 space-y-0">
-                                        <FormControl>
-                                          <RadioGroupItem value="1" />
-                                        </FormControl>
-                                        <FormLabel className="font-normal">
-                                          1 - Leve (pequenos ferimentos sem afastamento)
-                                        </FormLabel>
-                                      </FormItem>
-                                      <FormItem className="flex items-center space-x-3 space-y-0">
-                                        <FormControl>
-                                          <RadioGroupItem value="2" />
-                                        </FormControl>
-                                        <FormLabel className="font-normal">
-                                          2 - Moderada (lesões com afastamento temporário)
-                                        </FormLabel>
-                                      </FormItem>
-                                      <FormItem className="flex items-center space-x-3 space-y-0">
-                                        <FormControl>
-                                          <RadioGroupItem value="3" />
-                                        </FormControl>
-                                        <FormLabel className="font-normal">
-                                          3 - Crítica (ferimentos graves, incapacidade parcial)
-                                        </FormLabel>
-                                      </FormItem>
-                                      <FormItem className="flex items-center space-x-3 space-y-0">
-                                        <FormControl>
-                                          <RadioGroupItem value="4" />
-                                        </FormControl>
-                                        <FormLabel className="font-normal">
-                                          4 - Catastrófica (incapacidade permanente)
-                                        </FormLabel>
-                                      </FormItem>
-                                      <FormItem className="flex items-center space-x-3 space-y-0">
-                                        <FormControl>
-                                          <RadioGroupItem value="5" />
-                                        </FormControl>
-                                        <FormLabel className="font-normal">
-                                          5 - Fatal (morte)
-                                        </FormLabel>
-                                      </FormItem>
-                                    </RadioGroup>
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                          </CardContent>
-                        </Card>
-                        
-                        <Card>
-                          <CardContent className="pt-6">
-                            <FormField
-                              control={form.control}
-                              name="impacto"
-                              render={({ field }) => (
-                                <FormItem className="space-y-3">
-                                  <FormLabel>Impacto*</FormLabel>
-                                  <FormControl>
-                                    <RadioGroup
-                                      onValueChange={field.onChange}
-                                      defaultValue={field.value}
-                                      className="flex flex-col space-y-1"
-                                    >
-                                      <FormItem className="flex items-center space-x-3 space-y-0">
-                                        <FormControl>
-                                          <RadioGroupItem value="1" />
-                                        </FormControl>
-                                        <FormLabel className="font-normal">
-                                          1 - Baixo (impacto pequeno/restrito)
-                                        </FormLabel>
-                                      </FormItem>
-                                      <FormItem className="flex items-center space-x-3 space-y-0">
-                                        <FormControl>
-                                          <RadioGroupItem value="2" />
-                                        </FormControl>
-                                        <FormLabel className="font-normal">
-                                          2 - Médio (impacto moderado/local)
-                                        </FormLabel>
-                                      </FormItem>
-                                      <FormItem className="flex items-center space-x-3 space-y-0">
-                                        <FormControl>
-                                          <RadioGroupItem value="3" />
-                                        </FormControl>
-                                        <FormLabel className="font-normal">
-                                          3 - Alto (impacto grave/amplo)
-                                        </FormLabel>
-                                      </FormItem>
-                                    </RadioGroup>
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                          </CardContent>
-                        </Card>
-                      </div>
-                      
-                      <Card>
-                        <CardContent className="pt-6">
-                          <div className="flex flex-col space-y-3">
-                            <h3 className="text-lg font-medium">Classificação de Risco:</h3>
-                            <div
-                              className={`px-4 py-3 rounded-md border ${getRiskColor(
-                                riskLevel
-                              )}`}
-                            >
-                              <div className="font-semibold">{riskLevel}</div>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                      
-                      <div className="flex justify-end space-x-2">
-                        <Button type="submit" className="gap-1">
-                          <Save className="h-4 w-4" /> Salvar Desvio
-                        </Button>
-                      </div>
-                    </div>
-                  </TabsContent>
-                </Tabs>
-              </form>
-            </Form>
-          </CardContent>
-        </Card>
-      )}
-    </div>
-  );
-};
-
-export default DesviosForm;

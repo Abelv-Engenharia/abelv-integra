@@ -33,6 +33,30 @@ export type Database = {
         }
         Relationships: []
       }
+      causas_provaveis: {
+        Row: {
+          ativo: boolean | null
+          codigo: string
+          descricao: string | null
+          id: number
+          nome: string
+        }
+        Insert: {
+          ativo?: boolean | null
+          codigo: string
+          descricao?: string | null
+          id?: number
+          nome: string
+        }
+        Update: {
+          ativo?: boolean | null
+          codigo?: string
+          descricao?: string | null
+          id?: number
+          nome?: string
+        }
+        Relationships: []
+      }
       desvios: {
         Row: {
           acao_imediata: string | null
@@ -89,6 +113,30 @@ export type Database = {
           },
         ]
       }
+      disciplinas: {
+        Row: {
+          ativo: boolean | null
+          codigo: string
+          descricao: string | null
+          id: number
+          nome: string
+        }
+        Insert: {
+          ativo?: boolean | null
+          codigo: string
+          descricao?: string | null
+          id?: number
+          nome: string
+        }
+        Update: {
+          ativo?: boolean | null
+          codigo?: string
+          descricao?: string | null
+          id?: number
+          nome?: string
+        }
+        Relationships: []
+      }
       encarregados: {
         Row: {
           ativo: boolean | null
@@ -139,6 +187,30 @@ export type Database = {
           funcao?: string
           id?: string
           matricula?: string | null
+          nome?: string
+        }
+        Relationships: []
+      }
+      eventos_identificados: {
+        Row: {
+          ativo: boolean | null
+          codigo: string
+          descricao: string | null
+          id: number
+          nome: string
+        }
+        Insert: {
+          ativo?: boolean | null
+          codigo: string
+          descricao?: string | null
+          id?: number
+          nome: string
+        }
+        Update: {
+          ativo?: boolean | null
+          codigo?: string
+          descricao?: string | null
+          id?: number
           nome?: string
         }
         Relationships: []
@@ -315,6 +387,30 @@ export type Database = {
         }
         Relationships: []
       }
+      processos: {
+        Row: {
+          ativo: boolean | null
+          codigo: string
+          descricao: string | null
+          id: number
+          nome: string
+        }
+        Insert: {
+          ativo?: boolean | null
+          codigo: string
+          descricao?: string | null
+          id?: number
+          nome: string
+        }
+        Update: {
+          ativo?: boolean | null
+          codigo?: string
+          descricao?: string | null
+          id?: number
+          nome?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -430,6 +526,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      tipos_registro: {
+        Row: {
+          ativo: boolean | null
+          codigo: string
+          descricao: string | null
+          id: number
+          nome: string
+        }
+        Insert: {
+          ativo?: boolean | null
+          codigo: string
+          descricao?: string | null
+          id?: number
+          nome: string
+        }
+        Update: {
+          ativo?: boolean | null
+          codigo?: string
+          descricao?: string | null
+          id?: number
+          nome?: string
+        }
+        Relationships: []
       }
       treinamentos: {
         Row: {
