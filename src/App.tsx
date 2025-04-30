@@ -56,6 +56,7 @@ import RelatoriosOcorrencias from "./pages/relatorios/RelatoriosOcorrencias";
 import RegistroHHT from "./pages/admin/RegistroHHT";
 import CadastroFuncionarios from "./pages/admin/CadastroFuncionarios";
 import AdminUsuarios from "./pages/admin/AdminUsuarios";
+import AdminUsuariosAuth from "./pages/admin/AdminUsuariosAuth";
 import AdminPerfis from "./pages/admin/AdminPerfis";
 
 const queryClient = new QueryClient();
@@ -125,6 +126,7 @@ const App = () => (
               
               {/* Administração routes */}
               <Route path="/admin/usuarios" element={<AdminUsuarios />} />
+              <Route path="/admin/usuarios-auth" element={<AdminUsuariosAuth />} />
               <Route path="/admin/perfis" element={<AdminPerfis />} />
               <Route path="/admin/funcionarios" element={<CadastroFuncionarios />} />
               <Route path="/admin/hht" element={<RegistroHHT />} />
