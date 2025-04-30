@@ -57,6 +57,30 @@ export type Database = {
         }
         Relationships: []
       }
+      ccas: {
+        Row: {
+          ativo: boolean | null
+          codigo: string
+          id: number
+          nome: string
+          tipo: string
+        }
+        Insert: {
+          ativo?: boolean | null
+          codigo: string
+          id?: number
+          nome: string
+          tipo: string
+        }
+        Update: {
+          ativo?: boolean | null
+          codigo?: string
+          id?: number
+          nome?: string
+          tipo?: string
+        }
+        Relationships: []
+      }
       desvios: {
         Row: {
           acao_imediata: string | null
@@ -132,6 +156,27 @@ export type Database = {
           ativo?: boolean | null
           codigo?: string
           descricao?: string | null
+          id?: number
+          nome?: string
+        }
+        Relationships: []
+      }
+      empresas: {
+        Row: {
+          ativo: boolean | null
+          cnpj: string
+          id: number
+          nome: string
+        }
+        Insert: {
+          ativo?: boolean | null
+          cnpj: string
+          id?: number
+          nome: string
+        }
+        Update: {
+          ativo?: boolean | null
+          cnpj?: string
           id?: number
           nome?: string
         }
