@@ -149,7 +149,7 @@ const RelatoriosTreinamentos = () => {
                       <Legend />
                       <Bar 
                         dataKey="value" 
-                        fill={(d) => d.name === "Válido" ? "#28a745" : "#dc3545"} 
+                        fill={(data) => data.name === "Válido" ? "#28a745" : "#dc3545"} 
                         name="Quantidade"
                       />
                     </BarChart>

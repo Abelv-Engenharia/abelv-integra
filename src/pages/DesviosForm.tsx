@@ -1,4 +1,5 @@
-import React, { useEffect } from "react";
+
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -51,6 +52,59 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { useToast } from "@/hooks/use-toast";
 
+// Mock data for dropdowns
+const ccasOptions = [
+  { value: "001", label: "001 - Administração" },
+  { value: "002", label: "002 - Manutenção" },
+  { value: "003", label: "003 - Produção" },
+  { value: "004", label: "004 - Logística" },
+  { value: "005", label: "005 - Segurança" },
+];
+
+const empresasOptions = [
+  { value: "1", label: "Empresa Principal" },
+  { value: "2", label: "Contratada A" },
+  { value: "3", label: "Contratada B" },
+  { value: "4", label: "Contratada C" },
+  { value: "5", label: "Fornecedor X" },
+];
+
+const engenheirosOptions = [
+  { value: "eng1", label: "João Silva", funcao: "Engenheiro Civil" },
+  { value: "eng2", label: "Maria Oliveira", funcao: "Engenheira Mecânica" },
+  { value: "eng3", label: "Carlos Santos", funcao: "Engenheiro Elétrico" },
+  { value: "eng4", label: "Ana Sousa", funcao: "Engenheira de Segurança" },
+];
+
+const baseLegalOptions = [
+  { value: "nr1", label: "NR-1: Disposições Gerais" },
+  { value: "nr10", label: "NR-10: Segurança em Instalações Elétricas" },
+  { value: "nr12", label: "NR-12: Segurança no Trabalho em Máquinas e Equipamentos" },
+  { value: "nr18", label: "NR-18: Condições e Meio Ambiente de Trabalho na Indústria da Construção" },
+  { value: "nr33", label: "NR-33: Segurança e Saúde nos Trabalhos em Espaços Confinados" },
+  { value: "nr35", label: "NR-35: Trabalho em Altura" },
+  { value: "iso45001", label: "ISO 45001: Sistema de Gestão de Segurança e Saúde Ocupacional" },
+];
+
+const supervisoresOptions = [
+  { value: "sup1", label: "Roberto Almeida", funcao: "Supervisor de Produção" },
+  { value: "sup2", label: "Fernanda Lima", funcao: "Supervisora de Segurança" },
+  { value: "sup3", label: "Márcio Gomes", funcao: "Supervisor de Manutenção" },
+];
+
+const encarregadosOptions = [
+  { value: "enc1", label: "Pedro Costa", funcao: "Encarregado de Produção" },
+  { value: "enc2", label: "Juliana Ferreira", funcao: "Encarregada de Segurança" },
+  { value: "enc3", label: "Marcos Ribeiro", funcao: "Encarregado de Manutenção" },
+];
+
+const colaboradoresOptions = [
+  { value: "col1", label: "Lucas Mendes", funcao: "Operador", matricula: "123456" },
+  { value: "col2", label: "Camila Santos", funcao: "Técnica de Segurança", matricula: "234567" },
+  { value: "col3", label: "Rodrigo Lima", funcao: "Mecânico", matricula: "345678" },
+  { value: "col4", label: "Amanda Silva", funcao: "Eletricista", matricula: "456789" },
+];
+
 const formSchema = z.object({
   data: z.date({
     required_error: "Data é obrigatória",
@@ -58,7 +112,9 @@ const formSchema = z.object({
   hora: z.string().regex(/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/, "Formato de hora inválido (HH:MM)"),
   ano: z.string(),
   mes: z.string(),
-  cca: z.string().min(2, "CCA deve ter no mínimo 2 caracteres"),
+  cca: z.string({
+    required_error: "O CCA é obrigatório.",
+  }),
   tipo_registro: z.string({
     required_error: "Selecione o tipo de registro",
   }),
@@ -72,16 +128,26 @@ const formSchema = z.object({
     required_error: "Selecione a causa provável",
   }),
   responsavel_inspecao: z.string().min(3, "Responsável deve ter no mínimo 3 caracteres"),
-  empresa: z.string().min(2, "Empresa deve ter no mínimo 2 caracteres"),
+  empresa: z.string({
+    required_error: "A empresa é obrigatória",
+  }),
   disciplina: z.string({
     required_error: "Selecione a disciplina",
   }),
-  engenheiro_responsavel: z.string().min(3, "Engenheiro responsável deve ter no mínimo 3 caracteres"),
+  engenheiro_responsavel: z.string({
+    required_error: "O engenheiro responsável é obrigatório",
+  }),
   
   descricao: z.string().min(10, "Descrição deve ter no mínimo 10 caracteres"),
-  base_legal: z.string().min(3, "Base legal deve ter no mínimo 3 caracteres"),
-  supervisor_responsavel: z.string().min(3, "Supervisor responsável deve ter no mínimo 3 caracteres"),
-  encarregado_responsavel: z.string().min(3, "Encarregado responsável deve ter no mínimo 3 caracteres"),
+  base_legal: z.string({
+    required_error: "A base legal é obrigatória",
+  }),
+  supervisor_responsavel: z.string({
+    required_error: "O supervisor responsável é obrigatório",
+  }),
+  encarregado_responsavel: z.string({
+    required_error: "O encarregado responsável é obrigatório",
+  }),
   colaborador_infrator: z.string().optional(),
   funcao_colaborador: z.string().optional(),
   matricula_colaborador: z.string().optional(),
@@ -161,6 +227,18 @@ const DesviosForm = () => {
         const date = value.data as Date;
         form.setValue('ano', date.getFullYear().toString());
         form.setValue('mes', format(date, "MMMM", { locale: ptBR }));
+      }
+      
+      // Autofill function and matricula when colaborador_infrator changes
+      if (name === 'colaborador_infrator' && value.colaborador_infrator) {
+        const selectedColaborador = colaboradoresOptions.find(
+          col => col.value === value.colaborador_infrator
+        );
+        
+        if (selectedColaborador) {
+          form.setValue('funcao_colaborador', selectedColaborador.funcao);
+          form.setValue('matricula_colaborador', selectedColaborador.matricula);
+        }
       }
     });
     
@@ -336,9 +414,20 @@ const DesviosForm = () => {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>CCA*</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Centro de Custo Aplicado" {...field} />
-                          </FormControl>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Selecione o CCA" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {ccasOptions.map((option) => (
+                                <SelectItem key={option.value} value={option.value}>
+                                  {option.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -470,9 +559,20 @@ const DesviosForm = () => {
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>Empresa*</FormLabel>
-                            <FormControl>
-                              <Input placeholder="Nome da empresa" {...field} />
-                            </FormControl>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Selecione a empresa" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                {empresasOptions.map((option) => (
+                                  <SelectItem key={option.value} value={option.value}>
+                                    {option.label}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
                             <FormMessage />
                           </FormItem>
                         )}
@@ -512,9 +612,20 @@ const DesviosForm = () => {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Engenheiro Responsável*</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Nome do engenheiro responsável" {...field} />
-                          </FormControl>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Selecione o engenheiro responsável" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {engenheirosOptions.map((option) => (
+                                <SelectItem key={option.value} value={option.value}>
+                                  {option.label} ({option.funcao})
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -555,9 +666,20 @@ const DesviosForm = () => {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Base Legal*</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Ex: NR-10, NR-35, ISO 45001, etc." {...field} />
-                          </FormControl>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Selecione a base legal" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {baseLegalOptions.map((option) => (
+                                <SelectItem key={option.value} value={option.value}>
+                                  {option.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -570,9 +692,20 @@ const DesviosForm = () => {
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>Supervisor Responsável*</FormLabel>
-                            <FormControl>
-                              <Input placeholder="Nome do supervisor" {...field} />
-                            </FormControl>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Selecione o supervisor" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                {supervisoresOptions.map((option) => (
+                                  <SelectItem key={option.value} value={option.value}>
+                                    {option.label} ({option.funcao})
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
                             <FormMessage />
                           </FormItem>
                         )}
@@ -584,9 +717,20 @@ const DesviosForm = () => {
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>Encarregado Responsável*</FormLabel>
-                            <FormControl>
-                              <Input placeholder="Nome do encarregado" {...field} />
-                            </FormControl>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Selecione o encarregado" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                {encarregadosOptions.map((option) => (
+                                  <SelectItem key={option.value} value={option.value}>
+                                    {option.label} ({option.funcao})
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
                             <FormMessage />
                           </FormItem>
                         )}
@@ -600,9 +744,20 @@ const DesviosForm = () => {
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>Colaborador Infrator</FormLabel>
-                            <FormControl>
-                              <Input placeholder="Nome do colaborador" {...field} />
-                            </FormControl>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Selecione o colaborador" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                {colaboradoresOptions.map((option) => (
+                                  <SelectItem key={option.value} value={option.value}>
+                                    {option.label}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
                             <FormMessage />
                           </FormItem>
                         )}
@@ -615,7 +770,7 @@ const DesviosForm = () => {
                           <FormItem>
                             <FormLabel>Função</FormLabel>
                             <FormControl>
-                              <Input placeholder="Função do colaborador" {...field} />
+                              <Input {...field} readOnly />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -629,7 +784,7 @@ const DesviosForm = () => {
                           <FormItem>
                             <FormLabel>Matrícula</FormLabel>
                             <FormControl>
-                              <Input placeholder="Número de matrícula" {...field} />
+                              <Input {...field} readOnly />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -637,11 +792,7 @@ const DesviosForm = () => {
                       />
                     </div>
                     
-                    <div className="flex justify-between">
-                      <Button type="button" variant="outline" size="sm">
-                        <User className="mr-2 h-4 w-4" />
-                        Cadastrar Novo Funcionário
-                      </Button>
+                    <div className="flex justify-end">
                       <Button type="button" onClick={() => navigateToNextTab("informacoes")}>
                         Próximo
                         <ArrowRight className="ml-2 h-4 w-4" />
