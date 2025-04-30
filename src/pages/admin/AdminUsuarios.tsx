@@ -1,77 +1,19 @@
 
 import { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowLeft, Search, UserRound, UserPlus, Edit, Trash } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { ArrowLeft, UserPlus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
 
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-
-// Form schema using zod
-const searchFormSchema = z.object({
-  search: z.string().optional(),
-});
-
-const userFormSchema = z.object({
-  nome: z.string().min(3, "O nome deve ter pelo menos 3 caracteres"),
-  email: z.string().email("Digite um email válido"),
-  perfil: z.string().min(1, "Selecione um perfil"),
-});
-
-type SearchFormValues = z.infer<typeof searchFormSchema>;
-type UserFormValues = z.infer<typeof userFormSchema>;
-
-// Interface para usuários
-interface User {
-  id: number | string;
-  nome: string;
-  email: string;
-  perfil: string;
-  status: string;
-}
-
-// Interface para perfis
-interface Profile {
-  id: number;
-  nome: string;
-}
+import { UserSearchForm } from "@/components/admin/usuarios/UserSearchForm";
+import { UsersTable } from "@/components/admin/usuarios/UsersTable";
+import { CreateUserDialog } from "@/components/admin/usuarios/CreateUserDialog";
+import { EditUserDialog } from "@/components/admin/usuarios/EditUserDialog";
+import { DeleteUserDialog } from "@/components/admin/usuarios/DeleteUserDialog";
+import { fetchProfiles, fetchUsers } from "@/services/usuariosService";
+import { User, Profile, SearchFormValues, UserFormValues } from "@/types/users";
 
 const AdminUsuarios = () => {
   const navigate = useNavigate();
@@ -85,63 +27,19 @@ const AdminUsuarios = () => {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Buscar dados do Supabase
+  // Fetch data from Supabase
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        // Buscar perfis
-        const { data: perfilData, error: perfilError } = await supabase
-          .from('perfis')
-          .select('*')
-          .eq('ativo', true);
+        // Fetch profiles
+        const profileData = await fetchProfiles();
+        setProfiles(profileData);
         
-        if (perfilError) {
-          console.error('Erro ao buscar perfis:', perfilError);
-          toast({
-            title: "Erro ao carregar perfis",
-            description: "Não foi possível carregar os perfis. Tente novamente mais tarde.",
-            variant: "destructive",
-          });
-        } else {
-          setProfiles(perfilData || []);
-        }
-
-        // Para o propósito deste exemplo, usaremos a tabela auth.users
-        // Em um sistema real, você precisaria implementar um sistema de perfis próprio
-        const { data: userData, error: userError } = await supabase.auth.admin.listUsers();
-        
-        if (userError) {
-          console.error('Erro ao buscar usuários:', userError);
-          toast({
-            title: "Erro ao carregar usuários",
-            description: "Não foi possível carregar os usuários. Usando dados de exemplo.",
-            variant: "destructive",
-          });
-          
-          // Usar dados mockados caso não consiga acessar a API auth
-          const mockUsers = [
-            { id: 1, nome: "João Silva", email: "joao.silva@empresa.com", perfil: "Administrador", status: "Ativo" },
-            { id: 2, nome: "Maria Souza", email: "maria.souza@empresa.com", perfil: "Operador", status: "Ativo" },
-            { id: 3, nome: "Carlos Oliveira", email: "carlos.oliveira@empresa.com", perfil: "Gestor", status: "Inativo" },
-            { id: 4, nome: "Ana Pereira", email: "ana.pereira@empresa.com", perfil: "Operador", status: "Ativo" },
-          ];
-          
-          setUsers(mockUsers);
-          setAllUsers(mockUsers);
-        } else {
-          // Mapear dados do Supabase para o formato esperado
-          const formattedUsers = userData?.users?.map(user => ({
-            id: user.id,
-            nome: user.user_metadata?.nome || user.email?.split('@')[0] || 'Sem nome',
-            email: user.email || '',
-            perfil: user.user_metadata?.perfil || 'Usuário',
-            status: user.banned ? "Inativo" : "Ativo"
-          })) || [];
-          
-          setUsers(formattedUsers);
-          setAllUsers(formattedUsers);
-        }
+        // Fetch users
+        const userData = await fetchUsers();
+        setUsers(userData);
+        setAllUsers(userData);
       } catch (error) {
         console.error('Erro ao buscar dados:', error);
         toast({
@@ -156,24 +54,6 @@ const AdminUsuarios = () => {
 
     fetchData();
   }, [toast]);
-
-  // Initialize search form
-  const searchForm = useForm<SearchFormValues>({
-    resolver: zodResolver(searchFormSchema),
-    defaultValues: {
-      search: "",
-    },
-  });
-
-  // Initialize user form
-  const userForm = useForm<UserFormValues>({
-    resolver: zodResolver(userFormSchema),
-    defaultValues: {
-      nome: "",
-      email: "",
-      perfil: "",
-    },
-  });
 
   const onSearchSubmit = (data: SearchFormValues) => {
     if (!data.search) {
@@ -196,8 +76,8 @@ const AdminUsuarios = () => {
     try {
       if (selectedUser) {
         // Edit existing user
-        // Nota: Em um sistema real, você precisaria implementar a atualização no Supabase
-        // Este é apenas um exemplo simulado
+        // Note: In a real system, you would implement the update in Supabase
+        // This is just a simulated example
         const updatedUsers = users.map(user => 
           user.id === selectedUser.id ? { ...user, ...data } : user
         );
@@ -213,8 +93,8 @@ const AdminUsuarios = () => {
         
         setIsEditDialogOpen(false);
       } else {
-        // Create new user (simulado)
-        // Nota: Em um sistema real, você precisaria implementar o cadastro no Supabase
+        // Create new user (simulated)
+        // Note: In a real system, you would implement the registration in Supabase
         const newUser = {
           id: Date.now().toString(),
           nome: data.nome,
@@ -241,14 +121,12 @@ const AdminUsuarios = () => {
         variant: "destructive",
       });
     }
-    
-    userForm.reset();
   };
 
   const handleDeleteUser = async () => {
     if (selectedUser) {
-      // Simulação de exclusão
-      // Em um sistema real, você precisaria implementar a exclusão no Supabase
+      // Simulation of deletion
+      // In a real system, you would implement the deletion in Supabase
       try {
         const updatedUsers = users.filter(user => user.id !== selectedUser.id);
         setUsers(updatedUsers);
@@ -274,11 +152,6 @@ const AdminUsuarios = () => {
 
   const handleEditClick = (user: User) => {
     setSelectedUser(user);
-    userForm.reset({
-      nome: user.nome,
-      email: user.email,
-      perfil: user.perfil,
-    });
     setIsEditDialogOpen(true);
   };
 
@@ -288,11 +161,6 @@ const AdminUsuarios = () => {
   };
 
   const handleCreateClick = () => {
-    userForm.reset({
-      nome: "",
-      email: "",
-      perfil: "",
-    });
     setSelectedUser(null);
     setIsCreateDialogOpen(true);
   };
@@ -326,294 +194,43 @@ const AdminUsuarios = () => {
           </div>
         </CardHeader>
         <CardContent>
-          <Form {...searchForm}>
-            <form 
-              onSubmit={searchForm.handleSubmit(onSearchSubmit)} 
-              className="flex space-x-2 mb-6"
-            >
-              <FormField
-                control={searchForm.control}
-                name="search"
-                render={({ field }) => (
-                  <FormItem className="flex-1">
-                    <FormControl>
-                      <div className="relative">
-                        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                        <Input
-                          placeholder="Buscar usuários..."
-                          className="pl-8"
-                          {...field}
-                        />
-                      </div>
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-              <Button type="submit">Buscar</Button>
-            </form>
-          </Form>
+          <UserSearchForm onSearch={onSearchSubmit} />
 
           <Separator className="my-4" />
 
           <div className="relative overflow-x-auto rounded-md border">
-            {isLoading ? (
-              <div className="flex justify-center items-center p-8">
-                <p>Carregando usuários...</p>
-              </div>
-            ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Nome</TableHead>
-                    <TableHead>E-mail</TableHead>
-                    <TableHead>Perfil</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Ações</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {users.length > 0 ? (
-                    users.map((user) => (
-                      <TableRow key={user.id.toString()}>
-                        <TableCell className="font-medium">{user.nome}</TableCell>
-                        <TableCell>{user.email}</TableCell>
-                        <TableCell>{user.perfil}</TableCell>
-                        <TableCell>
-                          <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                            user.status === "Ativo" ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"
-                          }`}>
-                            {user.status}
-                          </span>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end gap-2">
-                            <Button 
-                              size="sm" 
-                              variant="outline" 
-                              onClick={() => handleEditClick(user)}
-                            >
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            <Button 
-                              size="sm" 
-                              variant="outline" 
-                              className="text-destructive hover:bg-destructive hover:text-destructive-foreground"
-                              onClick={() => handleDeleteClick(user)}
-                            >
-                              <Trash className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  ) : (
-                    <TableRow>
-                      <TableCell colSpan={5} className="h-24 text-center">
-                        Nenhum usuário encontrado.
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            )}
+            <UsersTable
+              users={users}
+              isLoading={isLoading}
+              onEditClick={handleEditClick}
+              onDeleteClick={handleDeleteClick}
+            />
           </div>
         </CardContent>
       </Card>
 
-      {/* Create User Dialog */}
-      <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Criar Novo Usuário</DialogTitle>
-            <DialogDescription>
-              Preencha as informações para criar um novo usuário.
-            </DialogDescription>
-          </DialogHeader>
-          <Form {...userForm}>
-            <form onSubmit={userForm.handleSubmit(onUserSubmit)} className="space-y-4">
-              <FormField
-                control={userForm.control}
-                name="nome"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Nome</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Nome do usuário" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={userForm.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>E-mail</FormLabel>
-                    <FormControl>
-                      <Input placeholder="email@example.com" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={userForm.control}
-                name="perfil"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Perfil de Acesso</FormLabel>
-                    <Select 
-                      onValueChange={field.onChange} 
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione um perfil" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {profiles.map((profile) => (
-                          <SelectItem key={profile.id} value={profile.nome}>
-                            {profile.nome}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <DialogFooter>
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  onClick={() => setIsCreateDialogOpen(false)}
-                >
-                  Cancelar
-                </Button>
-                <Button type="submit">Criar Usuário</Button>
-              </DialogFooter>
-            </form>
-          </Form>
-        </DialogContent>
-      </Dialog>
+      {/* Dialogs */}
+      <CreateUserDialog
+        open={isCreateDialogOpen}
+        onOpenChange={setIsCreateDialogOpen}
+        profiles={profiles}
+        onSubmit={onUserSubmit}
+      />
 
-      {/* Edit User Dialog */}
-      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Editar Usuário</DialogTitle>
-            <DialogDescription>
-              Atualize as informações do usuário.
-            </DialogDescription>
-          </DialogHeader>
-          <Form {...userForm}>
-            <form onSubmit={userForm.handleSubmit(onUserSubmit)} className="space-y-4">
-              <FormField
-                control={userForm.control}
-                name="nome"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Nome</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Nome do usuário" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={userForm.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>E-mail</FormLabel>
-                    <FormControl>
-                      <Input placeholder="email@example.com" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={userForm.control}
-                name="perfil"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Perfil de Acesso</FormLabel>
-                    <Select 
-                      onValueChange={field.onChange} 
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione um perfil" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {profiles.map((profile) => (
-                          <SelectItem key={profile.id} value={profile.nome}>
-                            {profile.nome}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <DialogFooter>
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  onClick={() => setIsEditDialogOpen(false)}
-                >
-                  Cancelar
-                </Button>
-                <Button type="submit">Salvar Alterações</Button>
-              </DialogFooter>
-            </form>
-          </Form>
-        </DialogContent>
-      </Dialog>
+      <EditUserDialog
+        open={isEditDialogOpen}
+        onOpenChange={setIsEditDialogOpen}
+        profiles={profiles}
+        selectedUser={selectedUser}
+        onSubmit={onUserSubmit}
+      />
 
-      {/* Delete User Dialog */}
-      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Excluir Usuário</DialogTitle>
-            <DialogDescription>
-              Tem certeza que deseja excluir este usuário? Esta ação não poderá ser desfeita.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex items-center space-x-4 py-4">
-            <div className="bg-muted p-2 rounded-full">
-              <UserRound className="h-8 w-8" />
-            </div>
-            <div>
-              <p className="font-medium">{selectedUser?.nome}</p>
-              <p className="text-sm text-muted-foreground">{selectedUser?.email}</p>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button 
-              type="button" 
-              variant="outline" 
-              onClick={() => setIsDeleteDialogOpen(false)}
-            >
-              Cancelar
-            </Button>
-            <Button 
-              type="button" 
-              variant="destructive"
-              onClick={handleDeleteUser}
-            >
-              Excluir
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <DeleteUserDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+        selectedUser={selectedUser}
+        onConfirm={handleDeleteUser}
+      />
     </div>
   );
 };
