@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 
 // Mock data for charts
@@ -132,7 +131,7 @@ export async function fetchLesoesData() {
   }
 }
 
-// Exported functions for other components that were causing errors
+// Exported functions for other components
 export const fetchOcorrenciasByEmpresa = () => mockAcidenteTipoData();
 export const fetchOcorrenciasByRisco = () => mockAcidenteTipoData();
 export const fetchOcorrenciasByTipo = () => mockAcidenteTipoData();

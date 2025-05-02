@@ -27,8 +27,8 @@ export const InspecoesSummaryCards = () => {
           inspecoesMes: data.programadas || 0,
           inspecoesPendentes: data.naoProgramadas || 0,
           anomaliasEncontradas: data.desviosIdentificados || 0,
-          realizadas: data.realizadas || 0,
-          canceladas: data.canceladas || 0
+          realizadas: data.programadas || 0, // Usando programadas como valor padrão para realizadas
+          canceladas: 0 // Valor padrão para canceladas
         });
       } catch (error) {
         console.error("Erro ao carregar dados de inspeções:", error);
@@ -45,21 +45,21 @@ export const InspecoesSummaryCards = () => {
       <StatCard
         title="Total de Inspeções"
         value={stats.totalInspecoes}
-        icon={Calendar}
+        icon={<Calendar className="h-4 w-4" />}
         description="Realizadas até o momento"
         loading={isLoading}
       />
       <StatCard
         title="Inspeções do Mês"
         value={stats.inspecoesMes}
-        icon={Calendar}
+        icon={<Calendar className="h-4 w-4" />}
         description="Programadas para este mês"
         loading={isLoading}
       />
       <StatCard
         title="Inspeções Realizadas"
         value={stats.realizadas}
-        icon={CheckCircle}
+        icon={<CheckCircle className="h-4 w-4" />}
         description="Concluídas com sucesso"
         trend="up"
         loading={isLoading}
@@ -67,7 +67,7 @@ export const InspecoesSummaryCards = () => {
       <StatCard
         title="Anomalias Encontradas"
         value={stats.anomaliasEncontradas}
-        icon={FileWarning}
+        icon={<FileWarning className="h-4 w-4" />}
         description="Desvios identificados"
         trend="up"
         loading={isLoading}

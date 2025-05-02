@@ -11,6 +11,7 @@ interface StatCardProps {
   trend?: "up" | "down" | "neutral";
   trendValue?: string;
   className?: string;
+  loading?: boolean;
 }
 
 const StatCard = ({
@@ -21,6 +22,7 @@ const StatCard = ({
   trend,
   trendValue,
   className,
+  loading = false,
 }: StatCardProps) => {
   return (
     <Card className={cn("shadow-sm", className)}>
@@ -31,7 +33,11 @@ const StatCard = ({
         <div className="h-4 w-4 text-muted-foreground">{icon}</div>
       </CardHeader>
       <CardContent>
-        <div className="text-2xl font-bold">{value}</div>
+        {loading ? (
+          <div className="h-6 w-16 bg-muted animate-pulse rounded" />
+        ) : (
+          <div className="text-2xl font-bold">{value}</div>
+        )}
         {(description || trendValue) && (
           <p className="text-xs text-muted-foreground mt-1 flex items-center">
             {trend && (

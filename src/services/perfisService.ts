@@ -39,12 +39,32 @@ export async function fetchPerfis(): Promise<Perfil[]> {
       id: perfil.id,
       nome: perfil.nome,
       descricao: perfil.descricao || "",
-      permissoes: perfil.permissoes as Permissoes
+      permissoes: ensureAllPermissoes(perfil.permissoes)
     }));
   } catch (error) {
     console.error('Exceção ao buscar perfis:', error);
     return [];
   }
+}
+
+// Helper to ensure all permission fields exist with default values
+function ensureAllPermissoes(permissoes: any): Permissoes {
+  const defaultPermissoes: Permissoes = {
+    desvios: false,
+    treinamentos: false,
+    hora_seguranca: false,
+    ocorrencias: false,
+    medidas_disciplinares: false,
+    tarefas: false,
+    relatorios: false,
+    admin_usuarios: false,
+    admin_perfis: false,
+    admin_funcionarios: false,
+    admin_hht: false,
+    admin_templates: false
+  };
+  
+  return { ...defaultPermissoes, ...permissoes };
 }
 
 export async function createPerfil(perfil: Omit<Perfil, 'id'>): Promise<Perfil | null> {
@@ -68,7 +88,7 @@ export async function createPerfil(perfil: Omit<Perfil, 'id'>): Promise<Perfil |
       id: data.id,
       nome: data.nome,
       descricao: data.descricao || "",
-      permissoes: data.permissoes as Permissoes
+      permissoes: ensureAllPermissoes(data.permissoes)
     };
   } catch (error) {
     console.error('Exceção ao criar perfil:', error);

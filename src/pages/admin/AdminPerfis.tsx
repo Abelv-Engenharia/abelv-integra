@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import {
   Card,
@@ -438,10 +437,7 @@ const AdminPerfis = () => {
                               <FormField
                                 key={permission.id}
                                 control={form.control}
-                                name={`permissoes.${permission.id}` as "permissoes.desvios" | "permissoes.treinamentos" | "permissoes.hora_seguranca" | 
-                                      "permissoes.ocorrencias" | "permissoes.medidas_disciplinares" | "permissoes.tarefas" | "permissoes.relatorios" | 
-                                      "permissoes.admin_usuarios" | "permissoes.admin_perfis" | "permissoes.admin_funcionarios" | 
-                                      "permissoes.admin_hht" | "permissoes.admin_templates"}
+                                name={`permissoes.${permission.id}` as const}
                                 render={({ field }) => (
                                   <FormItem className="flex flex-row items-center space-x-3 space-y-0 rounded-md border p-4">
                                     <FormControl>

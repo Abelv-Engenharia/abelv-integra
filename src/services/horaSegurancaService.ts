@@ -174,11 +174,25 @@ export const fetchInspectionsSummary = async () => {
       .select('*', { count: 'exact', head: true })
       .not('tipo_inspecao', 'is', null);
     
+    // Get completed inspections
+    const { count: realizadas } = await supabase
+      .from('hora_seguranca')
+      .select('*', { count: 'exact', head: true })
+      .eq('status', 'Realizada');
+    
+    // Get canceled inspections
+    const { count: canceladas } = await supabase
+      .from('hora_seguranca')
+      .select('*', { count: 'exact', head: true })
+      .eq('status', 'Cancelada');
+    
     return {
       totalInspecoes: totalInspecoes || 0,
       programadas: programadas || 0,
       naoProgramadas: naoProgramadas || 0,
-      desviosIdentificados: desviosIdentificados || 0
+      desviosIdentificados: desviosIdentificados || 0,
+      realizadas: realizadas || 0,
+      canceladas: canceladas || 0
     };
   } catch (error) {
     console.error("Error fetching inspections summary:", error);
@@ -186,7 +200,9 @@ export const fetchInspectionsSummary = async () => {
       totalInspecoes: 0,
       programadas: 0,
       naoProgramadas: 0,
-      desviosIdentificados: 0
+      desviosIdentificados: 0,
+      realizadas: 0,
+      canceladas: 0
     };
   }
 };
