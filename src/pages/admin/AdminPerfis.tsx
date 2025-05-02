@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import {
   Card,
@@ -82,6 +83,7 @@ const permissionGroups = [
   }
 ];
 
+// Define the schema with required permission properties
 const formSchema = z.object({
   nome: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
   descricao: z.string().optional(),
@@ -281,6 +283,12 @@ const AdminPerfis = () => {
     setIsAddDialogOpen(true);
   };
 
+  // Define the typed permission IDs to avoid TypeScript errors
+  type PermissionKey = keyof Permissoes;
+  const getPermissionPath = (permissionId: string): `permissoes.${PermissionKey}` => {
+    return `permissoes.${permissionId as PermissionKey}`;
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -433,31 +441,36 @@ const AdminPerfis = () => {
                           <Separator />
                           
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {group.permissions.map((permission) => (
-                              <FormField
-                                key={permission.id}
-                                control={form.control}
-                                name={`permissoes.${permission.id}` as const}
-                                render={({ field }) => (
-                                  <FormItem className="flex flex-row items-center space-x-3 space-y-0 rounded-md border p-4">
-                                    <FormControl>
-                                      <Checkbox 
-                                        checked={Boolean(field.value)} 
-                                        onCheckedChange={field.onChange} 
-                                      />
-                                    </FormControl>
-                                    <div className="space-y-1 leading-none">
-                                      <FormLabel className="cursor-pointer">
-                                        {permission.label}
-                                      </FormLabel>
-                                      <FormDescription>
-                                        Permissão para {permission.label.toLowerCase()}
-                                      </FormDescription>
-                                    </div>
-                                  </FormItem>
-                                )}
-                              />
-                            ))}
+                            {group.permissions.map((permission) => {
+                              // Use the typed helper function
+                              const fieldPath = getPermissionPath(permission.id);
+                              return (
+                                <FormField
+                                  key={permission.id}
+                                  control={form.control}
+                                  // Cast to ensure TypeScript accepts it
+                                  name={fieldPath as any}
+                                  render={({ field }) => (
+                                    <FormItem className="flex flex-row items-center space-x-3 space-y-0 rounded-md border p-4">
+                                      <FormControl>
+                                        <Checkbox 
+                                          checked={Boolean(field.value)} 
+                                          onCheckedChange={field.onChange} 
+                                        />
+                                      </FormControl>
+                                      <div className="space-y-1 leading-none">
+                                        <FormLabel className="cursor-pointer">
+                                          {permission.label}
+                                        </FormLabel>
+                                        <FormDescription>
+                                          Permissão para {permission.label.toLowerCase()}
+                                        </FormDescription>
+                                      </div>
+                                    </FormItem>
+                                  )}
+                                />
+                              );
+                            })}
                           </div>
                         </div>
                       ))}

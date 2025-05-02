@@ -1,8 +1,16 @@
 
 import { useEffect, useState } from "react";
 import StatCard from "@/components/dashboard/StatCard";
-import { Calendar, CheckCircle, FileWarning, XCircle } from "lucide-react";
+import { Calendar, CheckCircle, FileWarning } from "lucide-react";
 import { fetchInspectionsSummary } from "@/services/horaSegurancaService";
+
+// Define the type for the summary data
+interface InspectionsSummary {
+  totalInspecoes: number;
+  programadas: number;
+  naoProgramadas: number;
+  desviosIdentificados: number;
+}
 
 export const InspecoesSummaryCards = () => {
   const [stats, setStats] = useState({
@@ -19,7 +27,7 @@ export const InspecoesSummaryCards = () => {
     const fetchData = async () => {
       try {
         setIsLoading(true);
-        const data = await fetchInspectionsSummary();
+        const data: InspectionsSummary = await fetchInspectionsSummary();
         
         // Mapear os dados retornados pela API para o formato esperado pelo componente
         setStats({

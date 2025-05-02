@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 
 // Mock data for charts
@@ -131,15 +132,26 @@ export async function fetchLesoesData() {
   }
 }
 
+// Define the return type for fetchOcorrenciasStats to match the expected structure
+export interface OcorrenciasStats {
+  totalOcorrencias: number;
+  ocorrenciasMes: number;
+  ocorrenciasPendentes: number;
+  riscoPercentage: number;
+}
+
 // Exported functions for other components
 export const fetchOcorrenciasByEmpresa = () => mockAcidenteTipoData();
 export const fetchOcorrenciasByRisco = () => mockAcidenteTipoData();
 export const fetchOcorrenciasByTipo = () => mockAcidenteTipoData();
-export const fetchOcorrenciasStats = () => ({
-  total: 50,
-  emAberto: 10,
-  concluidas: 40,
-  criticasEmAberto: 5
-});
+export const fetchOcorrenciasStats = async (): Promise<OcorrenciasStats> => {
+  // Mock data with the correct property names to match the expected interface
+  return {
+    totalOcorrencias: 50,
+    ocorrenciasMes: 40,
+    ocorrenciasPendentes: 10,
+    riscoPercentage: 25
+  };
+};
 export const fetchLatestOcorrencias = () => [];
 export const fetchOcorrenciasTimeline = () => [];
