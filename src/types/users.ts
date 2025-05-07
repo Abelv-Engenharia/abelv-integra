@@ -1,3 +1,4 @@
+
 import { z } from "zod";
 
 export interface User {
@@ -53,7 +54,7 @@ export type SearchFormValues = z.infer<typeof searchFormSchema>;
 export type UserFormValues = z.infer<typeof userFormSchema>;
 export type AuthUserCreateValues = z.infer<typeof authUserCreateSchema>;
 
-// Define the Permissoes interface with required properties
+// Define the Permissoes interface with all required properties
 export interface Permissoes {
   desvios: boolean;
   treinamentos: boolean;
@@ -74,4 +75,47 @@ export interface Perfil {
   nome: string;
   descricao: string;
   permissoes: Permissoes;
+}
+
+// Add JSON type for Supabase compatibility
+export type Json = string | number | boolean | null | { [key: string]: Json } | Json[];
+
+// Define specific interfaces for dashboard services
+export interface InspecoesSummary {
+  totalInspecoes: number;
+  programadas: number;
+  naoProgramadas: number;
+  desviosIdentificados: number;
+}
+
+export interface OcorrenciasByTipo {
+  name: string;
+  value: number;
+}
+
+export interface OcorrenciasByRisco {
+  name: string;
+  value: number;
+}
+
+export interface OcorrenciasByEmpresa {
+  name: string;
+  value: number;
+}
+
+export interface OcorrenciasStats {
+  totalOcorrencias: number;
+  ocorrenciasMes: number;
+  ocorrenciasPendentes: number;
+  riscoPercentage: number;
+}
+
+export interface OcorrenciasTimeline {
+  month: string;
+  ocorrencias: number;
+}
+
+export interface ParteCorpoData {
+  name: string;
+  value: number;
 }

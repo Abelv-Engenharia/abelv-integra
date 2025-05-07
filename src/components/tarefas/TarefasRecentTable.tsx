@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
@@ -81,19 +82,25 @@ const TarefasRecentTable = () => {
           .in('id', responsaveisIds);
         
         // Mapear para o formato esperado pelo componente
-        const formattedTarefas = tarefasData.map(tarefa => ({
-          id: tarefa.id,
-          descricao: tarefa.descricao,
-          responsavel: {
-            id: tarefa.responsavel_id || '',
-            nome: profiles?.find(p => p.id === tarefa.responsavel_id)?.nome || 'Não atribuído'
-          },
-          dataConclusao: tarefa.data_conclusao ? new Date(tarefa.data_conclusao) : new Date(),
-          status: tarefa.status || 'pendente',
-          criticidade: typeof tarefa.configuracao === 'object' && tarefa.configuracao !== null 
-            ? (tarefa.configuracao as any).criticidade || 'media' 
-            : 'media'
-        }));
+        const formattedTarefas = tarefasData.map(tarefa => {
+          // Garantir que configuracao seja tratado corretamente
+          let criticidade = 'media';
+          if (tarefa.configuracao && typeof tarefa.configuracao === 'object') {
+            criticidade = (tarefa.configuracao as any).criticidade || 'media';
+          }
+
+          return {
+            id: tarefa.id,
+            descricao: tarefa.descricao,
+            responsavel: {
+              id: tarefa.responsavel_id || '',
+              nome: profiles?.find(p => p.id === tarefa.responsavel_id)?.nome || 'Não atribuído'
+            },
+            dataConclusao: tarefa.data_conclusao ? new Date(tarefa.data_conclusao) : new Date(),
+            status: tarefa.status || 'pendente',
+            criticidade
+          };
+        });
 
         setTarefas(formattedTarefas);
       } catch (error) {

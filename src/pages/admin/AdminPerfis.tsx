@@ -1,14 +1,13 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
-import { Perfil, Permissoes } from "@/types/users";
+import { Perfil, Permissoes, Json } from "@/types/users";
 import { useToast } from "@/hooks/use-toast";
 
 const AdminPerfis = () => {
@@ -52,12 +51,32 @@ const AdminPerfis = () => {
 
         if (data) {
           // Converter o resultado para o tipo Perfil[], garantindo que todas as propriedades necessárias estejam presentes
-          const perfisMapeados: Perfil[] = data.map(p => ({
-            id: p.id,
-            nome: p.nome,
-            descricao: p.descricao || '',
-            permissoes: p.permissoes as Permissoes
-          }));
+          const perfisMapeados: Perfil[] = data.map(p => {
+            // Converter o campo permissoes para o tipo Permissoes
+            const permissoesObj = p.permissoes as unknown;
+            // Garantir que todas as propriedades estejam presentes
+            const permissoesTipadas: Permissoes = {
+              desvios: ((permissoesObj as any)?.desvios ?? true) as boolean,
+              treinamentos: ((permissoesObj as any)?.treinamentos ?? true) as boolean,
+              ocorrencias: ((permissoesObj as any)?.ocorrencias ?? true) as boolean,
+              tarefas: ((permissoesObj as any)?.tarefas ?? true) as boolean,
+              relatorios: ((permissoesObj as any)?.relatorios ?? true) as boolean,
+              hora_seguranca: ((permissoesObj as any)?.hora_seguranca ?? true) as boolean,
+              medidas_disciplinares: ((permissoesObj as any)?.medidas_disciplinares ?? true) as boolean,
+              admin_usuarios: ((permissoesObj as any)?.admin_usuarios ?? false) as boolean,
+              admin_perfis: ((permissoesObj as any)?.admin_perfis ?? false) as boolean,
+              admin_funcionarios: ((permissoesObj as any)?.admin_funcionarios ?? false) as boolean,
+              admin_hht: ((permissoesObj as any)?.admin_hht ?? false) as boolean,
+              admin_templates: ((permissoesObj as any)?.admin_templates ?? false) as boolean
+            };
+            
+            return {
+              id: p.id,
+              nome: p.nome,
+              descricao: p.descricao || '',
+              permissoes: permissoesTipadas
+            };
+          });
           setPerfis(perfisMapeados);
         }
       } catch (error) {
@@ -107,7 +126,7 @@ const AdminPerfis = () => {
           .update({
             nome,
             descricao,
-            permissoes
+            permissoes: permissoes as unknown as Json
           })
           .eq('id', perfilSelecionado.id);
 
@@ -133,7 +152,7 @@ const AdminPerfis = () => {
           .insert({
             nome,
             descricao,
-            permissoes
+            permissoes: permissoes as unknown as Json
           })
           .select();
 
@@ -150,7 +169,7 @@ const AdminPerfis = () => {
             id: data[0].id,
             nome: data[0].nome,
             descricao: data[0].descricao || '',
-            permissoes: data[0].permissoes as Permissoes
+            permissoes: permissoes
           };
           setPerfis([...perfis, novoPerfil]);
         }

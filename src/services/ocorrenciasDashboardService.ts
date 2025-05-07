@@ -1,28 +1,6 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { format, subMonths, parseISO } from 'date-fns';
-
-export interface DashboardStats {
-  totalOcorrencias: number;
-  ocorrenciasThisMonth: number;
-  pendingActions: number;
-  riskLevel: string;
-}
-
-export interface OcorrenciasByTipo {
-  tipo: string;
-  quantidade: number;
-}
-
-export interface OcorrenciasByRisco {
-  risco: string;
-  quantidade: number;
-}
-
-export interface OcorrenciasByMonth {
-  month: string;
-  ocorrencias: number;
-}
+import { OcorrenciasByRisco, OcorrenciasByTipo, OcorrenciasByEmpresa, OcorrenciasStats, OcorrenciasTimeline, ParteCorpoData } from '@/types/users';
 
 export async function fetchDashboardStats(): Promise<DashboardStats> {
   try {
@@ -79,12 +57,18 @@ export async function fetchDashboardStats(): Promise<DashboardStats> {
   }
 }
 
+export interface DashboardStats {
+  totalOcorrencias: number;
+  ocorrenciasThisMonth: number;
+  pendingActions: number;
+  riskLevel: string;
+}
+
 export async function fetchOcorrenciasByTipo(): Promise<OcorrenciasByTipo[]> {
   try {
     // Usar o campo tipo_ocorrencia em vez de tipo_acidente
     const { data, error } = await supabase
       .from('ocorrencias')
-      .select('tipo_ocorrencia, count')
       .select('tipo_ocorrencia')
       .order('tipo_ocorrencia');
 
@@ -99,8 +83,8 @@ export async function fetchOcorrenciasByTipo(): Promise<OcorrenciasByTipo[]> {
     });
 
     return Object.entries(tiposContagem).map(([tipo, quantidade]) => ({
-      tipo,
-      quantidade
+      name: tipo,
+      value: quantidade
     }));
   } catch (error) {
     console.error('Erro ao buscar ocorrências por tipo:', error);
@@ -126,8 +110,8 @@ export async function fetchOcorrenciasByRisco(): Promise<OcorrenciasByRisco[]> {
     });
 
     return Object.entries(riscosContagem).map(([risco, quantidade]) => ({
-      risco,
-      quantidade
+      name: risco,
+      value: quantidade
     }));
   } catch (error) {
     console.error('Erro ao buscar ocorrências por risco:', error);
@@ -135,7 +119,7 @@ export async function fetchOcorrenciasByRisco(): Promise<OcorrenciasByRisco[]> {
   }
 }
 
-export async function fetchOcorrenciasByMonth(): Promise<OcorrenciasByMonth[]> {
+export async function fetchOcorrenciasByMonth(): Promise<OcorrenciasTimeline[]> {
   try {
     const { data, error } = await supabase
       .from('ocorrencias')
@@ -176,6 +160,59 @@ export async function fetchOcorrenciasByMonth(): Promise<OcorrenciasByMonth[]> {
   } catch (error) {
     console.error('Erro ao buscar ocorrências por mês:', error);
     return [];
+  }
+}
+
+export async function fetchOcorrenciasStats(): Promise<OcorrenciasStats> {
+  try {
+    const { data: allOcorrencias, error: countError } = await supabase
+      .from('ocorrencias')
+      .select('id, data, status, classificacao_risco');
+
+    if (countError) throw countError;
+
+    const today = new Date();
+    const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+    
+    const ocorrenciasMes = allOcorrencias
+      ? allOcorrencias.filter(o => {
+          const ocorrenciaDate = parseISO(o.data);
+          return ocorrenciaDate >= firstDayOfMonth;
+        }).length
+      : 0;
+
+    const ocorrenciasPendentes = allOcorrencias
+      ? allOcorrencias.filter(o => o.status === 'aberta' || o.status === 'em_andamento').length
+      : 0;
+
+    // Calcular nível de risco com base nas ocorrências recentes
+    let riskLevel = 'Baixo';
+    const criticasRecentes = allOcorrencias
+      ? allOcorrencias.filter(o => {
+          const ocorrenciaDate = parseISO(o.data);
+          const threeMonthsAgo = subMonths(today, 3);
+          return ocorrenciaDate >= threeMonthsAgo && (o.classificacao_risco === 'Alta' || o.classificacao_risco === 'Crítica');
+        }).length
+      : 0;
+
+    const riscoPercentage = allOcorrencias && allOcorrencias.length > 0
+      ? Math.round((criticasRecentes / allOcorrencias.length) * 100)
+      : 0;
+
+    return {
+      totalOcorrencias: allOcorrencias ? allOcorrencias.length : 0,
+      ocorrenciasMes,
+      ocorrenciasPendentes,
+      riscoPercentage
+    };
+  } catch (error) {
+    console.error('Erro ao buscar estatísticas de ocorrências:', error);
+    return {
+      totalOcorrencias: 0,
+      ocorrenciasMes: 0,
+      ocorrenciasPendentes: 0,
+      riscoPercentage: 0
+    };
   }
 }
 
@@ -228,5 +265,86 @@ export async function fetchFilteredDashboardStats(year: string, month: string): 
       pendingActions: 0,
       riskLevel: 'Baixo'
     };
+  }
+}
+
+// Adicionar funções que faltavam
+export async function fetchOcorrenciasByEmpresa(): Promise<OcorrenciasByEmpresa[]> {
+  try {
+    const { data, error } = await supabase
+      .from('ocorrencias')
+      .select('empresa')
+      .order('empresa');
+
+    if (error) throw error;
+
+    // Agrupar e contar as ocorrências por empresa
+    const empresasContagem: Record<string, number> = {};
+    
+    data?.forEach(ocorrencia => {
+      const empresa = ocorrencia.empresa || 'Não especificada';
+      empresasContagem[empresa] = (empresasContagem[empresa] || 0) + 1;
+    });
+
+    return Object.entries(empresasContagem).map(([empresa, quantidade]) => ({
+      name: empresa,
+      value: quantidade
+    }));
+  } catch (error) {
+    console.error('Erro ao buscar ocorrências por empresa:', error);
+    return [];
+  }
+}
+
+export async function fetchOcorrenciasTimeline(): Promise<OcorrenciasTimeline[]> {
+  return fetchOcorrenciasByMonth();
+}
+
+export async function fetchParteCorpoData(): Promise<ParteCorpoData[]> {
+  try {
+    const { data, error } = await supabase
+      .from('ocorrencias')
+      .select('partes_corpo_afetadas')
+      .not('partes_corpo_afetadas', 'is', null);
+
+    if (error) throw error;
+
+    // Processar arrays de partes do corpo e contabilizar
+    const partesCorpoContagem: Record<string, number> = {};
+    
+    data?.forEach(ocorrencia => {
+      if (Array.isArray(ocorrencia.partes_corpo_afetadas)) {
+        ocorrencia.partes_corpo_afetadas.forEach((parte: string) => {
+          partesCorpoContagem[parte] = (partesCorpoContagem[parte] || 0) + 1;
+        });
+      }
+    });
+
+    return Object.entries(partesCorpoContagem)
+      .map(([parte, quantidade]) => ({
+        name: parte,
+        value: quantidade
+      }))
+      .sort((a, b) => b.value - a.value);
+  } catch (error) {
+    console.error('Erro ao buscar dados de partes do corpo:', error);
+    return [];
+  }
+}
+
+export async function fetchLatestOcorrencias() {
+  try {
+    const { data, error } = await supabase
+      .from('ocorrencias')
+      .select('*')
+      .order('data', { ascending: false })
+      .limit(10);
+
+    if (error) throw error;
+    
+    return data || [];
+  } catch (error) {
+    console.error('Erro ao buscar ocorrências recentes:', error);
+    return [];
   }
 }

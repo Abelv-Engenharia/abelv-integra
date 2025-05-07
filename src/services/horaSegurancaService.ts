@@ -1,5 +1,6 @@
 
 import { supabase } from "@/integrations/supabase/client";
+import { InspecoesSummary } from "@/types/users";
 
 // Defina interfaces para os tipos de dados
 interface Inspecao {
@@ -10,11 +11,9 @@ interface Inspecao {
   responsavel: string;
 }
 
-interface InspecoesSummary {
-  total: number;
-  pendentes: number;
-  concluidas: number;
-  emAndamento: number;
+interface InspecoesByStatus {
+  name: string;
+  value: number;
 }
 
 interface InspecoesStatsByMonth {
@@ -33,11 +32,6 @@ interface InspecoesByResponsavel {
   quantidade: number;
 }
 
-interface InspecoesByStatus {
-  name: string;
-  value: number;
-}
-
 export async function fetchInspecoesSummary(): Promise<InspecoesSummary> {
   try {
     // Consultar tabela de inspeções - verificando se existe ou criando um mock
@@ -48,30 +42,30 @@ export async function fetchInspecoesSummary(): Promise<InspecoesSummary> {
       console.error("Erro ao buscar sumário de inspeções:", error);
       // Retornar dados simulados se a tabela ou função não existir
       return {
-        total: 0,
-        pendentes: 0,
-        concluidas: 0,
-        emAndamento: 0
+        totalInspecoes: 0,
+        programadas: 0,
+        naoProgramadas: 0,
+        desviosIdentificados: 0
       };
     }
 
     if (!data || !data.length) {
       return {
-        total: 0,
-        pendentes: 0,
-        concluidas: 0,
-        emAndamento: 0
+        totalInspecoes: 0,
+        programadas: 0,
+        naoProgramadas: 0,
+        desviosIdentificados: 0
       };
     }
 
-    return data[0];
+    return data[0] as InspecoesSummary;
   } catch (error) {
     console.error("Exceção ao buscar sumário de inspeções:", error);
     return {
-      total: 0,
-      pendentes: 0,
-      concluidas: 0,
-      emAndamento: 0
+      totalInspecoes: 0,
+      programadas: 0,
+      naoProgramadas: 0,
+      desviosIdentificados: 0
     };
   }
 }
@@ -123,7 +117,7 @@ export async function fetchInspecoesStats() {
       }));
     }
 
-    return data;
+    return data as InspecoesStatsByMonth[];
   } catch (error) {
     console.error("Exceção ao buscar estatísticas de inspeções:", error);
     return Array.from({ length: 12 }, (_, i) => ({
@@ -166,7 +160,7 @@ export async function fetchInspecoesByTipo() {
       }];
     }
 
-    return data;
+    return data as InspecoesByTipo[];
   } catch (error) {
     console.error("Exceção ao buscar inspeções por tipo:", error);
     return [{
@@ -196,7 +190,7 @@ export async function fetchInspecoesByResponsavel() {
       return [];
     }
 
-    return data;
+    return data as InspecoesByResponsavel[];
   } catch (error) {
     console.error("Exceção ao buscar inspeções por responsável:", error);
     return [];
@@ -227,7 +221,7 @@ export async function fetchInspecoesByStatus(): Promise<InspecoesByStatus[]> {
     }
 
     // Transformar os dados para o formato que o componente do gráfico espera
-    return data.map(item => ({
+    return (data as any[]).map(item => ({
       name: item.status,
       value: item.quantidade
     }));
@@ -262,7 +256,7 @@ export async function fetchDesviosByInspectionType() {
       ];
     }
 
-    return data;
+    return data as InspecoesByStatus[];
   } catch (error) {
     console.error("Exceção ao buscar desvios por tipo de inspeção:", error);
     return [
