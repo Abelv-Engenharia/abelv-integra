@@ -1,6 +1,6 @@
 
-import { supabase } from "@/integrations/supabase/client";
-import { InspecoesByStatus } from "./types";
+import { supabase } from '@/integrations/supabase/client';
+import { InspecoesByStatus } from './types';
 
 /**
  * Fetch inspeções by status
@@ -15,15 +15,18 @@ export async function fetchInspecoesByStatus(): Promise<InspecoesByStatus[]> {
     }
 
     // Verificar se há dados
-    if (!data || data.length === 0) {
+    if (!data || !data.length) {
       return [];
     }
-    
-    // Transforma os dados para o formato esperado pelo gráfico
-    return data.map((item: any) => ({
-      name: item.status || 'Sem Status',
-      value: item.quantidade
-    })) as InspecoesByStatus[];
+
+    const statuses = ['Concluída', 'Pendente', 'Cancelada'];
+    return statuses.map(status => {
+      const found = data.find((item: any) => item.name === status);
+      return {
+        name: status,
+        value: found ? found.value : 0
+      };
+    });
   } catch (error) {
     console.error("Exceção ao buscar inspeções por status:", error);
     return [];

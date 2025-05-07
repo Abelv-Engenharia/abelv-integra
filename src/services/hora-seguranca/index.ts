@@ -1,13 +1,12 @@
 
-// Export all services from this central file to maintain backward compatibility
-
-export { fetchInspecoesSummary, fetchInspectionsSummary } from './inspecoesSummaryService';
-export { fetchRecentInspections } from './recentInspectionsService';
-export { fetchInspecoesStats, fetchInspecoesByMonth } from './inspecoesStatsService';
+// Re-export all services
+export { fetchInspecoesByStatus } from './inspecoesByStatusService';
 export { fetchInspecoesByTipo } from './inspecoesByTipoService';
 export { fetchInspecoesByResponsavel } from './inspecoesByResponsavelService';
-export { fetchInspecoesByStatus } from './inspecoesByStatusService';
+export { fetchInspecoesSummary, fetchInspectionsSummary } from './inspecoesSummaryService';
+export { fetchRecentInspections } from './recentInspectionsService';
+export { fetchInspecoesStatsByMonth, fetchInspecoesStats, fetchInspecoesByMonth } from './inspecoesStatsService';
 export { fetchDesviosByInspectionType } from './desviosInspectionService';
 
-// Export all types
-export * from './types';
+// Re-export types
+export type * from './types';

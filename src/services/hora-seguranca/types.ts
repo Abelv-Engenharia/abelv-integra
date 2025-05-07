@@ -1,13 +1,14 @@
 
-import { InspecoesSummary } from "@/types/users";
+export interface InspecoesSummary {
+  totalInspecoes: number;
+  programadas: number;
+  naoProgramadas: number;
+  desviosIdentificados: number;
+}
 
-// Types for inspeções
-export interface Inspecao {
-  id: string;
-  data: string;
-  tipo_inspecao: string;
-  status: string;
-  responsavel: string;
+export interface InspecoesByTipo {
+  name: string;
+  value: number;
 }
 
 export interface InspecoesByStatus {
@@ -15,24 +16,22 @@ export interface InspecoesByStatus {
   value: number;
 }
 
-export interface InspecoesStatsByMonth {
-  mes: number;
-  concluidas: number;
-  programadas: number;
-}
-
-export interface InspecoesByTipo {
-  tipo: string;
-  quantidade: number;
-}
-
 export interface InspecoesByResponsavel {
-  responsavel: string;
-  quantidade: number;
+  name: string;
+  value: number;
 }
 
-// Tipo para desvios por inspeção
-export interface DesviosByInspectionType {
-  inspection_type: string;
-  desvios_count: number;
+export interface InspecoesStats {
+  month: string;
+  Concluída: number;
+  Pendente: number;
+  Cancelada: number;
+}
+
+export interface RecentInspection {
+  id: string;
+  tipo: string;
+  responsavel: string;
+  status: string;
+  data: string;
 }

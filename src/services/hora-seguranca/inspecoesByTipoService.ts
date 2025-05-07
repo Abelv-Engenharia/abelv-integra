@@ -1,6 +1,6 @@
 
-import { supabase } from "@/integrations/supabase/client";
-import { InspecoesByTipo } from "./types";
+import { supabase } from '@/integrations/supabase/client';
+import { InspecoesByTipo } from './types';
 
 /**
  * Fetch inspeções by tipo
@@ -15,7 +15,7 @@ export async function fetchInspecoesByTipo(): Promise<InspecoesByTipo[]> {
     }
 
     // Verificar se há dados
-    if (!data || data.length === 0) {
+    if (!data || !data.length) {
       return [];
     }
 

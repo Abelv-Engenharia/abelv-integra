@@ -10,7 +10,6 @@ import {
   Settings,
   Shield,
   ShieldAlert,
-  ShieldCheck,
   Users,
 } from "lucide-react";
 import {
@@ -35,7 +34,6 @@ export function AppSidebar() {
   const [openMenu, setOpenMenu] = useState<string | null>(() => {
     if (currentPath.startsWith("/desvios")) return "desvios";
     if (currentPath.startsWith("/treinamentos")) return "treinamentos";
-    if (currentPath.startsWith("/hora-seguranca")) return "hora-seguranca";
     if (currentPath.startsWith("/ocorrencias")) return "ocorrencias";
     if (currentPath.startsWith("/medidas-disciplinares")) return "medidas-disciplinares";
     if (currentPath.startsWith("/tarefas")) return "tarefas";
@@ -165,54 +163,6 @@ export function AppSidebar() {
                         <SidebarMenuButton asChild>
                           <Link to="/treinamentos/cracha">
                             <span>Emissão de Crachá</span>
-                          </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                    </SidebarMenuSub>
-                  </CollapsibleContent>
-                </Collapsible>
-              </SidebarMenuItem>
-
-              {/* Hora da Segurança */}
-              <SidebarMenuItem>
-                <Collapsible open={openMenu === "hora-seguranca"}>
-                  <CollapsibleTrigger asChild>
-                    <SidebarMenuButton onClick={() => toggleMenu("hora-seguranca")}>
-                      <ShieldCheck className="h-4 w-4" />
-                      <span>Hora da Segurança</span>
-                    </SidebarMenuButton>
-                  </CollapsibleTrigger>
-                  
-                  <CollapsibleContent asChild>
-                    <SidebarMenuSub>
-                      <SidebarMenuItem>
-                        <SidebarMenuButton asChild>
-                          <Link to="/hora-seguranca/dashboard">
-                            <span>Dashboard de Segurança</span>
-                          </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                      
-                      <SidebarMenuItem>
-                        <SidebarMenuButton asChild>
-                          <Link to="/hora-seguranca/inspecoes">
-                            <span>Cadastro de Inspeções</span>
-                          </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                      
-                      <SidebarMenuItem>
-                        <SidebarMenuButton asChild>
-                          <Link to="/hora-seguranca/inspecao-nao-programada">
-                            <span>Registro de Inspeção Não Programada</span>
-                          </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                      
-                      <SidebarMenuItem>
-                        <SidebarMenuButton asChild>
-                          <Link to="/hora-seguranca/acompanhamento">
-                            <span>Acompanhamento de Execução</span>
                           </Link>
                         </SidebarMenuButton>
                       </SidebarMenuItem>
@@ -457,3 +407,4 @@ export function AppSidebar() {
     </Sidebar>
   );
 }
+

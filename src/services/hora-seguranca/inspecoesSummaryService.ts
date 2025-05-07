@@ -1,9 +1,9 @@
 
-import { supabase } from "@/integrations/supabase/client";
-import { InspecoesSummary } from "@/types/users";
+import { supabase } from '@/integrations/supabase/client';
+import { InspecoesSummary } from './types';
 
 /**
- * Fetch inspeções summary
+ * Fetch inspeções summary data for dashboard
  */
 export async function fetchInspecoesSummary(): Promise<InspecoesSummary> {
   try {
@@ -20,7 +20,7 @@ export async function fetchInspecoesSummary(): Promise<InspecoesSummary> {
     }
 
     // Verificar se há dados
-    if (!data || data.length === 0) {
+    if (!data || !data.length) {
       return {
         totalInspecoes: 0,
         programadas: 0,
@@ -40,3 +40,6 @@ export async function fetchInspecoesSummary(): Promise<InspecoesSummary> {
     };
   }
 }
+
+// Legacy alias for backward compatibility
+export const fetchInspectionsSummary = fetchInspecoesSummary;

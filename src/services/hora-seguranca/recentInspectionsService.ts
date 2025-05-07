@@ -1,22 +1,24 @@
 
-import { supabase } from "@/integrations/supabase/client";
-import { Inspecao } from "./types";
+import { supabase } from '@/integrations/supabase/client';
+import { RecentInspection } from './types';
 
 /**
- * Fetch recent inspections
+ * Fetch recent inspections for dashboard
  */
-export async function fetchRecentInspections(): Promise<Inspecao[]> {
+export async function fetchRecentInspections(): Promise<RecentInspection[]> {
   try {
-    // Verificar se a tabela de inspeções existe
-    const { data, error } = await supabase.rpc('get_recent_inspecoes');
+    const { data, error } = await supabase
+      .from('inspecoes')
+      .select('id, tipo, responsavel, status, data')
+      .order('data', { ascending: false })
+      .limit(5);
 
     if (error) {
       console.error("Erro ao buscar inspeções recentes:", error);
-      // Retornar array vazio se a tabela não existir
       return [];
     }
 
-    return data as Inspecao[] || [];
+    return data as RecentInspection[];
   } catch (error) {
     console.error("Exceção ao buscar inspeções recentes:", error);
     return [];

@@ -1,6 +1,6 @@
 
-import { supabase } from "@/integrations/supabase/client";
-import { InspecoesByResponsavel } from "./types";
+import { supabase } from '@/integrations/supabase/client';
+import { InspecoesByResponsavel } from './types';
 
 /**
  * Fetch inspeções by responsável
@@ -15,7 +15,7 @@ export async function fetchInspecoesByResponsavel(): Promise<InspecoesByResponsa
     }
 
     // Verificar se há dados
-    if (!data || data.length === 0) {
+    if (!data || !data.length) {
       return [];
     }
 
