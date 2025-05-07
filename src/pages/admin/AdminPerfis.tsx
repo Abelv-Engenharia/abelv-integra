@@ -1,371 +1,271 @@
 
-import React, { useState, useEffect } from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-  DialogClose,
-} from "@/components/ui/dialog";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Textarea } from "@/components/ui/textarea";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Separator } from "@/components/ui/separator";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { PencilIcon, PlusCircle, Search, Trash2 } from "lucide-react";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { supabase } from "@/integrations/supabase/client";
+import { Perfil, Permissoes } from "@/types/users";
 import { useToast } from "@/hooks/use-toast";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { fetchPerfis, createPerfil, updatePerfil, deletePerfil, type Perfil, type Permissoes } from "@/services/perfisService";
-
-// Permission groups for UI organization
-const permissionGroups = [
-  {
-    name: "Gestão de SMS",
-    permissions: [
-      { id: "desvios", label: "Desvios" },
-      { id: "treinamentos", label: "Treinamentos" },
-      { id: "hora_seguranca", label: "Hora da Segurança" },
-      { id: "ocorrencias", label: "Ocorrências" },
-      { id: "medidas_disciplinares", label: "Medidas Disciplinares" },
-    ]
-  },
-  {
-    name: "Tarefas",
-    permissions: [
-      { id: "tarefas", label: "Tarefas" },
-    ]
-  },
-  {
-    name: "Relatórios",
-    permissions: [
-      { id: "relatorios", label: "Relatórios" },
-    ]
-  },
-  {
-    name: "Administração",
-    permissions: [
-      { id: "admin_usuarios", label: "Usuários" },
-      { id: "admin_perfis", label: "Perfis de Acesso" },
-      { id: "admin_funcionarios", label: "Funcionários" },
-      { id: "admin_hht", label: "Registro HHT" },
-      { id: "admin_templates", label: "Templates" },
-    ]
-  }
-];
-
-// Define the schema with required permission properties
-const formSchema = z.object({
-  nome: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
-  descricao: z.string().optional(),
-  permissoes: z.object({
-    desvios: z.boolean().default(false),
-    treinamentos: z.boolean().default(false),
-    hora_seguranca: z.boolean().default(false),
-    ocorrencias: z.boolean().default(false),
-    medidas_disciplinares: z.boolean().default(false),
-    tarefas: z.boolean().default(false),
-    relatorios: z.boolean().default(false),
-    admin_usuarios: z.boolean().default(false),
-    admin_perfis: z.boolean().default(false),
-    admin_funcionarios: z.boolean().default(false),
-    admin_hht: z.boolean().default(false),
-    admin_templates: z.boolean().default(false),
-  })
-});
 
 const AdminPerfis = () => {
   const [perfis, setPerfis] = useState<Perfil[]>([]);
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [currentPerfil, setCurrentPerfil] = useState<Perfil | null>(null);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [isLoading, setIsLoading] = useState(true);
+  const [novoPerfil, setNovoPerfil] = useState<boolean>(false);
+  const [nome, setNome] = useState<string>('');
+  const [descricao, setDescricao] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(false);
+  const [buscar, setBuscar] = useState<string>('');
   const { toast } = useToast();
+  
+  // Definir permissões iniciais completas para evitar erros de tipo
+  const permissoesIniciais: Permissoes = {
+    desvios: true,
+    treinamentos: true,
+    ocorrencias: true,
+    tarefas: true,
+    relatorios: true,
+    hora_seguranca: true,
+    medidas_disciplinares: true,
+    admin_usuarios: false,
+    admin_perfis: false,
+    admin_funcionarios: false,
+    admin_hht: false,
+    admin_templates: false
+  };
+  
+  const [permissoes, setPermissoes] = useState<Permissoes>(permissoesIniciais);
+  const [perfilSelecionado, setPerfilSelecionado] = useState<Perfil | null>(null);
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      nome: "",
-      descricao: "",
-      permissoes: {
-        desvios: false,
-        treinamentos: false,
-        hora_seguranca: false,
-        ocorrencias: false,
-        medidas_disciplinares: false,
-        tarefas: false,
-        relatorios: false,
-        admin_usuarios: false,
-        admin_perfis: false,
-        admin_funcionarios: false,
-        admin_hht: false,
-        admin_templates: false,
-      }
-    }
-  });
-
-  // Fetch profiles from Supabase
   useEffect(() => {
-    const loadPerfis = async () => {
-      setIsLoading(true);
+    const fetchPerfis = async () => {
+      setLoading(true);
       try {
-        const data = await fetchPerfis();
-        setPerfis(data);
+        const { data, error } = await supabase
+          .from('perfis')
+          .select('*')
+          .order('nome', { ascending: true });
+
+        if (error) throw error;
+
+        if (data) {
+          // Converter o resultado para o tipo Perfil[], garantindo que todas as propriedades necessárias estejam presentes
+          const perfisMapeados: Perfil[] = data.map(p => ({
+            id: p.id,
+            nome: p.nome,
+            descricao: p.descricao || '',
+            permissoes: p.permissoes as Permissoes
+          }));
+          setPerfis(perfisMapeados);
+        }
       } catch (error) {
-        console.error("Erro ao carregar perfis:", error);
+        console.error('Erro ao carregar perfis:', error);
         toast({
-          title: "Erro ao carregar perfis",
-          description: "Não foi possível carregar os perfis de acesso.",
+          title: "Erro",
+          description: "Não foi possível carregar os perfis",
           variant: "destructive"
         });
       } finally {
-        setIsLoading(false);
+        setLoading(false);
       }
     };
 
-    loadPerfis();
+    fetchPerfis();
   }, [toast]);
 
-  const filteredPerfis = perfis.filter(perfil => 
-    perfil.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (perfil.descricao && perfil.descricao.toLowerCase().includes(searchTerm.toLowerCase()))
+  const perfisFiltrados = perfis.filter(perfil =>
+    perfil.nome.toLowerCase().includes(buscar.toLowerCase()) ||
+    perfil.descricao.toLowerCase().includes(buscar.toLowerCase())
   );
 
-  const onSubmit = async (data: z.infer<typeof formSchema>) => {
-    try {
-      if (isAddDialogOpen) {
-        // Add new profile
-        setIsLoading(true);
-        const newPerfil = await createPerfil({
-          nome: data.nome,
-          descricao: data.descricao || "",
-          permissoes: data.permissoes
-        });
-        
-        if (newPerfil) {
-          setPerfis([...perfis, newPerfil]);
-          toast({
-            title: "Perfil criado",
-            description: `O perfil ${data.nome} foi criado com sucesso.`
-          });
-        }
-        setIsAddDialogOpen(false);
-      } else if (isEditDialogOpen && currentPerfil) {
-        // Edit existing profile
-        setIsLoading(true);
-        const success = await updatePerfil(currentPerfil.id, {
-          nome: data.nome,
-          descricao: data.descricao || "",
-          permissoes: data.permissoes
-        });
-        
-        if (success) {
-          setPerfis(perfis.map(perfil => 
-            perfil.id === currentPerfil.id 
-              ? { 
-                  ...perfil, 
-                  nome: data.nome, 
-                  descricao: data.descricao || "", 
-                  permissoes: data.permissoes
-                }
-              : perfil
-          ));
-          toast({
-            title: "Perfil atualizado",
-            description: `O perfil ${data.nome} foi atualizado com sucesso.`
-          });
-        }
-        setIsEditDialogOpen(false);
-      }
-    } catch (error: any) {
+  const handleNovoPerfil = () => {
+    setNovoPerfil(true);
+    setNome('');
+    setDescricao('');
+    setPermissoes(permissoesIniciais);
+    setPerfilSelecionado(null);
+  };
+
+  const handleSalvar = async () => {
+    if (!nome) {
       toast({
         title: "Erro",
-        description: error.message || "Ocorreu um erro ao processar o perfil.",
+        description: "O nome é obrigatório",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setLoading(true);
+    try {
+      if (perfilSelecionado) {
+        // Atualizar perfil existente
+        const { error } = await supabase
+          .from('perfis')
+          .update({
+            nome,
+            descricao,
+            permissoes
+          })
+          .eq('id', perfilSelecionado.id);
+
+        if (error) throw error;
+
+        toast({
+          title: "Sucesso",
+          description: "Perfil atualizado com sucesso"
+        });
+
+        // Atualizar o estado local
+        setPerfis(prevPerfis =>
+          prevPerfis.map(p =>
+            p.id === perfilSelecionado.id
+              ? { ...p, nome, descricao, permissoes }
+              : p
+          )
+        );
+      } else {
+        // Criar novo perfil
+        const { data, error } = await supabase
+          .from('perfis')
+          .insert({
+            nome,
+            descricao,
+            permissoes
+          })
+          .select();
+
+        if (error) throw error;
+
+        toast({
+          title: "Sucesso",
+          description: "Perfil criado com sucesso"
+        });
+
+        // Adicionar o novo perfil ao estado local
+        if (data) {
+          const novoPerfil: Perfil = {
+            id: data[0].id,
+            nome: data[0].nome,
+            descricao: data[0].descricao || '',
+            permissoes: data[0].permissoes as Permissoes
+          };
+          setPerfis([...perfis, novoPerfil]);
+        }
+      }
+
+      setNovoPerfil(false);
+    } catch (error) {
+      console.error('Erro ao salvar perfil:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível salvar o perfil",
         variant: "destructive"
       });
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
-  
-  const handleDelete = async () => {
-    if (currentPerfil) {
+
+  const handleEditar = (perfil: Perfil) => {
+    setPerfilSelecionado(perfil);
+    setNome(perfil.nome);
+    setDescricao(perfil.descricao);
+    setPermissoes({ ...perfil.permissoes });
+    setNovoPerfil(true);
+  };
+
+  const handleExcluir = async (id: number) => {
+    if (window.confirm('Tem certeza que deseja excluir este perfil?')) {
+      setLoading(true);
       try {
-        setIsLoading(true);
-        const success = await deletePerfil(currentPerfil.id);
-        
-        if (success) {
-          setPerfis(perfis.filter(perfil => perfil.id !== currentPerfil.id));
-          toast({
-            title: "Perfil excluído",
-            description: `O perfil ${currentPerfil.nome} foi excluído com sucesso.`
-          });
-          setIsDeleteDialogOpen(false);
-          setCurrentPerfil(null);
-        }
-      } catch (error: any) {
+        const { error } = await supabase
+          .from('perfis')
+          .delete()
+          .eq('id', id);
+
+        if (error) throw error;
+
         toast({
-          title: "Erro ao excluir",
-          description: error.message || "Não foi possível excluir o perfil.",
+          title: "Sucesso",
+          description: "Perfil excluído com sucesso"
+        });
+
+        // Remover o perfil do estado local
+        setPerfis(perfis.filter(p => p.id !== id));
+      } catch (error) {
+        console.error('Erro ao excluir perfil:', error);
+        toast({
+          title: "Erro",
+          description: "Não foi possível excluir o perfil",
           variant: "destructive"
         });
       } finally {
-        setIsLoading(false);
+        setLoading(false);
       }
     }
   };
-  
-  const openEditDialog = (perfil: Perfil) => {
-    setCurrentPerfil(perfil);
-    form.reset({
-      nome: perfil.nome,
-      descricao: perfil.descricao,
-      permissoes: { ...perfil.permissoes }
-    });
-    setIsEditDialogOpen(true);
-  };
-  
-  const openDeleteDialog = (perfil: Perfil) => {
-    setCurrentPerfil(perfil);
-    setIsDeleteDialogOpen(true);
-  };
-  
-  const openAddDialog = () => {
-    form.reset({
-      nome: "",
-      descricao: "",
-      permissoes: {
-        desvios: false,
-        treinamentos: false,
-        hora_seguranca: false,
-        ocorrencias: false,
-        medidas_disciplinares: false,
-        tarefas: false,
-        relatorios: false,
-        admin_usuarios: false,
-        admin_perfis: false,
-        admin_funcionarios: false,
-        admin_hht: false,
-        admin_templates: false,
-      }
-    });
-    setIsAddDialogOpen(true);
-  };
 
-  // Define the typed permission IDs to avoid TypeScript errors
-  type PermissionKey = keyof Permissoes;
-  const getPermissionPath = (permissionId: string): `permissoes.${PermissionKey}` => {
-    return `permissoes.${permissionId as PermissionKey}`;
+  const handleChangePermissao = (key: keyof Permissoes, value: boolean) => {
+    setPermissoes(prev => ({
+      ...prev,
+      [key]: value
+    }));
   };
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-3xl font-bold tracking-tight">Perfis de Acesso</h2>
-        <p className="text-muted-foreground">
-          Gerenciamento de perfis de acesso e permissões.
-        </p>
-      </div>
-      
-      <div className="flex items-center justify-between">
-        <div className="relative w-full max-w-sm">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Buscar perfis..."
-            className="w-full pl-8"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
-        <Button onClick={openAddDialog}>
-          <PlusCircle className="mr-2 h-4 w-4" /> Novo Perfil
-        </Button>
-      </div>
-      
       <Card>
-        <CardHeader>
-          <CardTitle>Perfis de Acesso</CardTitle>
-          <CardDescription>
-            Lista de perfis de acesso e suas permissões
-          </CardDescription>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div>
+            <CardTitle>Perfis de Acesso</CardTitle>
+            <CardDescription>Gerencie os perfis de acesso dos usuários</CardDescription>
+          </div>
+          <Button onClick={handleNovoPerfil}>Novo Perfil</Button>
         </CardHeader>
         <CardContent>
+          <div className="mb-4">
+            <Input 
+              placeholder="Buscar perfil..." 
+              value={buscar} 
+              onChange={(e) => setBuscar(e.target.value)}
+            />
+          </div>
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Nome</TableHead>
                 <TableHead>Descrição</TableHead>
-                <TableHead>Permissões</TableHead>
-                <TableHead className="w-[100px]">Ações</TableHead>
+                <TableHead>Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {isLoading ? (
+              {loading ? (
                 <TableRow>
-                  <TableCell colSpan={4} className="h-24 text-center">
-                    Carregando perfis...
+                  <TableCell colSpan={3} className="text-center py-8">
+                    Carregando...
                   </TableCell>
                 </TableRow>
-              ) : filteredPerfis.length === 0 ? (
+              ) : perfisFiltrados.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={4} className="h-24 text-center">
+                  <TableCell colSpan={3} className="text-center py-8">
                     Nenhum perfil encontrado.
                   </TableCell>
                 </TableRow>
               ) : (
-                filteredPerfis.map((perfil) => (
+                perfisFiltrados.map((perfil) => (
                   <TableRow key={perfil.id}>
-                    <TableCell className="font-medium">{perfil.nome}</TableCell>
+                    <TableCell>{perfil.nome}</TableCell>
                     <TableCell>{perfil.descricao}</TableCell>
                     <TableCell>
-                      {Object.entries(perfil.permissoes).filter(([_, value]) => value).length} permissões
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex space-x-2">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => openEditDialog(perfil)}
-                        >
-                          <PencilIcon className="h-4 w-4" />
+                      <div className="flex gap-2">
+                        <Button variant="outline" size="sm" onClick={() => handleEditar(perfil)}>
+                          Editar
                         </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => openDeleteDialog(perfil)}
-                        >
-                          <Trash2 className="h-4 w-4" />
+                        <Button variant="destructive" size="sm" onClick={() => handleExcluir(perfil.id)}>
+                          Excluir
                         </Button>
                       </div>
                     </TableCell>
@@ -376,139 +276,187 @@ const AdminPerfis = () => {
           </Table>
         </CardContent>
       </Card>
-      
-      {/* Formulário para adicionar/editar perfil */}
-      <Dialog 
-        open={isAddDialogOpen || isEditDialogOpen} 
-        onOpenChange={(open) => open ? null : (isAddDialogOpen ? setIsAddDialogOpen(false) : setIsEditDialogOpen(false))}
-      >
-        <DialogContent className="max-w-3xl max-h-[80vh] overflow-hidden flex flex-col">
+
+      <Dialog open={novoPerfil} onOpenChange={setNovoPerfil}>
+        <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>
-              {isAddDialogOpen ? "Adicionar novo perfil" : "Editar perfil"}
+              {perfilSelecionado ? `Editar perfil: ${perfilSelecionado.nome}` : "Novo Perfil de Acesso"}
             </DialogTitle>
             <DialogDescription>
-              {isAddDialogOpen
-                ? "Crie um novo perfil de acesso e defina suas permissões."
-                : "Atualize as informações e permissões deste perfil."}
+              {perfilSelecionado ? "Atualize as informações do perfil e suas permissões" : "Crie um novo perfil de acesso e defina suas permissões"}
             </DialogDescription>
           </DialogHeader>
-          
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 flex-1 overflow-hidden">
-              <Tabs defaultValue="informacoes" className="w-full h-full">
-                <TabsList>
-                  <TabsTrigger value="informacoes">Informações</TabsTrigger>
-                  <TabsTrigger value="permissoes">Permissões</TabsTrigger>
-                </TabsList>
-                
-                <TabsContent value="informacoes" className="space-y-4 mt-4">
-                  <FormField
-                    control={form.control}
-                    name="nome"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Nome do Perfil</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={form.control}
-                    name="descricao"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Descrição</FormLabel>
-                        <FormControl>
-                          <Textarea {...field} value={field.value || ''} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </TabsContent>
-                
-                <TabsContent value="permissoes" className="space-y-4 mt-4 max-h-[400px]">
-                  <ScrollArea className="h-[400px] pr-4">
-                    <div className="space-y-6">
-                      {permissionGroups.map((group) => (
-                        <div key={group.name} className="space-y-4">
-                          <h3 className="font-medium text-sm">{group.name}</h3>
-                          <Separator />
-                          
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {group.permissions.map((permission) => {
-                              // Use the typed helper function
-                              const fieldPath = getPermissionPath(permission.id);
-                              return (
-                                <FormField
-                                  key={permission.id}
-                                  control={form.control}
-                                  // Cast to ensure TypeScript accepts it
-                                  name={fieldPath as any}
-                                  render={({ field }) => (
-                                    <FormItem className="flex flex-row items-center space-x-3 space-y-0 rounded-md border p-4">
-                                      <FormControl>
-                                        <Checkbox 
-                                          checked={Boolean(field.value)} 
-                                          onCheckedChange={field.onChange} 
-                                        />
-                                      </FormControl>
-                                      <div className="space-y-1 leading-none">
-                                        <FormLabel className="cursor-pointer">
-                                          {permission.label}
-                                        </FormLabel>
-                                        <FormDescription>
-                                          Permissão para {permission.label.toLowerCase()}
-                                        </FormDescription>
-                                      </div>
-                                    </FormItem>
-                                  )}
-                                />
-                              );
-                            })}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </ScrollArea>
-                </TabsContent>
-              </Tabs>
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="nome">Nome</Label>
+                <Input 
+                  id="nome" 
+                  value={nome} 
+                  onChange={(e) => setNome(e.target.value)} 
+                  placeholder="Nome do perfil" 
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="descricao">Descrição</Label>
+                <Input 
+                  id="descricao" 
+                  value={descricao} 
+                  onChange={(e) => setDescricao(e.target.value)} 
+                  placeholder="Descrição do perfil" 
+                />
+              </div>
+            </div>
+            
+            <div className="space-y-4">
+              <h3 className="text-lg font-medium">Permissões</h3>
               
-              <DialogFooter>
-                <DialogClose asChild>
-                  <Button variant="outline" type="button" disabled={isLoading}>Cancelar</Button>
-                </DialogClose>
-                <Button type="submit" disabled={isLoading}>
-                  {isLoading ? "Processando..." : isAddDialogOpen ? "Criar Perfil" : "Salvar Alterações"}
-                </Button>
-              </DialogFooter>
-            </form>
-          </Form>
-        </DialogContent>
-      </Dialog>
-      
-      {/* Dialog de confirmação para exclusão */}
-      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Confirmar exclusão</DialogTitle>
-            <DialogDescription>
-              Tem certeza que deseja excluir o perfil{" "}
-              <span className="font-medium">{currentPerfil?.nome}</span>?
-              Esta ação não pode ser desfeita.
-            </DialogDescription>
-          </DialogHeader>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox 
+                      id="desvios" 
+                      checked={permissoes.desvios} 
+                      onCheckedChange={(checked) => 
+                        handleChangePermissao('desvios', checked === true)
+                      }
+                    />
+                    <Label htmlFor="desvios">Desvios</Label>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    <Checkbox 
+                      id="treinamentos" 
+                      checked={permissoes.treinamentos} 
+                      onCheckedChange={(checked) => 
+                        handleChangePermissao('treinamentos', checked === true)
+                      }
+                    />
+                    <Label htmlFor="treinamentos">Treinamentos</Label>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    <Checkbox 
+                      id="ocorrencias" 
+                      checked={permissoes.ocorrencias} 
+                      onCheckedChange={(checked) => 
+                        handleChangePermissao('ocorrencias', checked === true)
+                      }
+                    />
+                    <Label htmlFor="ocorrencias">Ocorrências</Label>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    <Checkbox 
+                      id="tarefas" 
+                      checked={permissoes.tarefas} 
+                      onCheckedChange={(checked) => 
+                        handleChangePermissao('tarefas', checked === true)
+                      }
+                    />
+                    <Label htmlFor="tarefas">Tarefas</Label>
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox 
+                      id="relatorios" 
+                      checked={permissoes.relatorios} 
+                      onCheckedChange={(checked) => 
+                        handleChangePermissao('relatorios', checked === true)
+                      }
+                    />
+                    <Label htmlFor="relatorios">Relatórios</Label>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    <Checkbox 
+                      id="hora_seguranca" 
+                      checked={permissoes.hora_seguranca} 
+                      onCheckedChange={(checked) => 
+                        handleChangePermissao('hora_seguranca', checked === true)
+                      }
+                    />
+                    <Label htmlFor="hora_seguranca">Hora de Segurança</Label>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    <Checkbox 
+                      id="medidas_disciplinares" 
+                      checked={permissoes.medidas_disciplinares} 
+                      onCheckedChange={(checked) => 
+                        handleChangePermissao('medidas_disciplinares', checked === true)
+                      }
+                    />
+                    <Label htmlFor="medidas_disciplinares">Medidas Disciplinares</Label>
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox 
+                      id="admin_usuarios" 
+                      checked={permissoes.admin_usuarios} 
+                      onCheckedChange={(checked) => 
+                        handleChangePermissao('admin_usuarios', checked === true)
+                      }
+                    />
+                    <Label htmlFor="admin_usuarios">Admin: Usuários</Label>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    <Checkbox 
+                      id="admin_perfis" 
+                      checked={permissoes.admin_perfis} 
+                      onCheckedChange={(checked) => 
+                        handleChangePermissao('admin_perfis', checked === true)
+                      }
+                    />
+                    <Label htmlFor="admin_perfis">Admin: Perfis</Label>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    <Checkbox 
+                      id="admin_funcionarios" 
+                      checked={permissoes.admin_funcionarios} 
+                      onCheckedChange={(checked) => 
+                        handleChangePermissao('admin_funcionarios', checked === true)
+                      }
+                    />
+                    <Label htmlFor="admin_funcionarios">Admin: Funcionários</Label>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    <Checkbox 
+                      id="admin_hht" 
+                      checked={permissoes.admin_hht} 
+                      onCheckedChange={(checked) => 
+                        handleChangePermissao('admin_hht', checked === true)
+                      }
+                    />
+                    <Label htmlFor="admin_hht">Admin: HHT</Label>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    <Checkbox 
+                      id="admin_templates" 
+                      checked={permissoes.admin_templates} 
+                      onCheckedChange={(checked) => 
+                        handleChangePermissao('admin_templates', checked === true)
+                      }
+                    />
+                    <Label htmlFor="admin_templates">Admin: Templates</Label>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
           <DialogFooter>
-            <DialogClose asChild>
-              <Button variant="outline" type="button" disabled={isLoading}>Cancelar</Button>
-            </DialogClose>
-            <Button variant="destructive" onClick={handleDelete} disabled={isLoading}>
-              {isLoading ? "Processando..." : "Sim, excluir"}
+            <Button variant="outline" onClick={() => setNovoPerfil(false)}>Cancelar</Button>
+            <Button onClick={handleSalvar} disabled={loading}>
+              {loading ? "Salvando..." : "Salvar"}
             </Button>
           </DialogFooter>
         </DialogContent>

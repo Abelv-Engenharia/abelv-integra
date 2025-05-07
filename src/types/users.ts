@@ -1,4 +1,3 @@
-
 import { z } from "zod";
 
 export interface User {
@@ -53,3 +52,26 @@ export const authUserCreateSchema = z.object({
 export type SearchFormValues = z.infer<typeof searchFormSchema>;
 export type UserFormValues = z.infer<typeof userFormSchema>;
 export type AuthUserCreateValues = z.infer<typeof authUserCreateSchema>;
+
+// Define the Permissoes interface with required properties
+export interface Permissoes {
+  desvios: boolean;
+  treinamentos: boolean;
+  ocorrencias: boolean;
+  tarefas: boolean;
+  relatorios: boolean;
+  hora_seguranca: boolean;
+  medidas_disciplinares: boolean;
+  admin_usuarios: boolean;
+  admin_perfis: boolean;
+  admin_funcionarios: boolean;
+  admin_hht: boolean;
+  admin_templates: boolean;
+}
+
+export interface Perfil {
+  id: number;
+  nome: string;
+  descricao: string;
+  permissoes: Permissoes;
+}

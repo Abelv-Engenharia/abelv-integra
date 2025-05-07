@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
@@ -91,7 +90,9 @@ const TarefasRecentTable = () => {
           },
           dataConclusao: tarefa.data_conclusao ? new Date(tarefa.data_conclusao) : new Date(),
           status: tarefa.status || 'pendente',
-          criticidade: tarefa.configuracao?.criticidade || 'media'
+          criticidade: typeof tarefa.configuracao === 'object' && tarefa.configuracao !== null 
+            ? (tarefa.configuracao as any).criticidade || 'media' 
+            : 'media'
         }));
 
         setTarefas(formattedTarefas);

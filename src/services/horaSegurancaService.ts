@@ -10,7 +10,35 @@ interface Inspecao {
   responsavel: string;
 }
 
-export async function fetchInspecoesSummary() {
+interface InspecoesSummary {
+  total: number;
+  pendentes: number;
+  concluidas: number;
+  emAndamento: number;
+}
+
+interface InspecoesStatsByMonth {
+  mes: number;
+  concluidas: number;
+  programadas: number;
+}
+
+interface InspecoesByTipo {
+  tipo: string;
+  quantidade: number;
+}
+
+interface InspecoesByResponsavel {
+  responsavel: string;
+  quantidade: number;
+}
+
+interface InspecoesByStatus {
+  name: string;
+  value: number;
+}
+
+export async function fetchInspecoesSummary(): Promise<InspecoesSummary> {
   try {
     // Consultar tabela de inspeções - verificando se existe ou criando um mock
     const { data, error } = await supabase
@@ -47,6 +75,9 @@ export async function fetchInspecoesSummary() {
     };
   }
 }
+
+// Alias para manter compatibilidade com o nome da função usado nos componentes
+export const fetchInspectionsSummary = fetchInspecoesSummary;
 
 export async function fetchRecentInspections() {
   try {
@@ -102,6 +133,9 @@ export async function fetchInspecoesStats() {
     }));
   }
 }
+
+// Alias para manter compatibilidade com componentes
+export const fetchInspecoesByMonth = fetchInspecoesStats;
 
 export async function fetchInspecoesByTipo() {
   try {
@@ -166,5 +200,74 @@ export async function fetchInspecoesByResponsavel() {
   } catch (error) {
     console.error("Exceção ao buscar inspeções por responsável:", error);
     return [];
+  }
+}
+
+// Nova função para buscar dados de inspeções por status
+export async function fetchInspecoesByStatus(): Promise<InspecoesByStatus[]> {
+  try {
+    const { data, error } = await supabase.rpc('get_inspecoes_by_status');
+
+    if (error) {
+      console.error("Erro ao buscar inspeções por status:", error);
+      // Retornar dados simulados
+      return [
+        { name: "Concluída", value: 0 },
+        { name: "Pendente", value: 0 },
+        { name: "Cancelada", value: 0 }
+      ];
+    }
+
+    if (!data || !data.length) {
+      return [
+        { name: "Concluída", value: 0 },
+        { name: "Pendente", value: 0 },
+        { name: "Cancelada", value: 0 }
+      ];
+    }
+
+    // Transformar os dados para o formato que o componente do gráfico espera
+    return data.map(item => ({
+      name: item.status,
+      value: item.quantidade
+    }));
+  } catch (error) {
+    console.error("Exceção ao buscar inspeções por status:", error);
+    return [
+      { name: "Concluída", value: 0 },
+      { name: "Pendente", value: 0 },
+      { name: "Cancelada", value: 0 }
+    ];
+  }
+}
+
+// Nova função para buscar desvios por tipo de inspeção
+export async function fetchDesviosByInspectionType() {
+  try {
+    const { data, error } = await supabase.rpc('get_desvios_by_inspection_type');
+
+    if (error) {
+      console.error("Erro ao buscar desvios por tipo de inspeção:", error);
+      // Retornar dados simulados
+      return [
+        { name: "Programada", value: 0 },
+        { name: "Não Programada", value: 0 }
+      ];
+    }
+
+    if (!data || !data.length) {
+      return [
+        { name: "Programada", value: 0 },
+        { name: "Não Programada", value: 0 }
+      ];
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Exceção ao buscar desvios por tipo de inspeção:", error);
+    return [
+      { name: "Programada", value: 0 },
+      { name: "Não Programada", value: 0 }
+    ];
   }
 }
