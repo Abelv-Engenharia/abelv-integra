@@ -12,36 +12,18 @@ export async function fetchInspecoesByTipo(): Promise<InspecoesByTipo[]> {
 
     if (error) {
       console.error("Erro ao buscar inspeções por tipo:", error);
-      // Retornar dados simulados se a função não existir
-      return [{
-        tipo: "Não Programada", 
-        quantidade: 0
-      }, {
-        tipo: "Programada", 
-        quantidade: 0
-      }];
+      // Retornar array vazio se a função não existir
+      return [];
     }
 
-    // Se não houver dados, retornar array simulado
-    if (!data || !data.length) {
-      return [{
-        tipo: "Não Programada", 
-        quantidade: 0
-      }, {
-        tipo: "Programada", 
-        quantidade: 0
-      }];
+    // Se não houver dados, retornar array vazio
+    if (!data || data.length === 0) {
+      return [];
     }
 
     return data as InspecoesByTipo[];
   } catch (error) {
     console.error("Exceção ao buscar inspeções por tipo:", error);
-    return [{
-      tipo: "Não Programada", 
-      quantidade: 0
-    }, {
-      tipo: "Programada", 
-      quantidade: 0
-    }];
+    return [];
   }
 }

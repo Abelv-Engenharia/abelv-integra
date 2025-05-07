@@ -30,3 +30,9 @@ export interface InspecoesByResponsavel {
   responsavel: string;
   quantidade: number;
 }
+
+// Tipo para desvios por inspeção
+export interface DesviosByInspectionType {
+  inspection_type: string;
+  desvios_count: number;
+}

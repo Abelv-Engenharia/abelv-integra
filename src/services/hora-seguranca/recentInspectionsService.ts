@@ -16,7 +16,7 @@ export async function fetchRecentInspections(): Promise<Inspecao[]> {
       return [];
     }
 
-    return data || [];
+    return data as Inspecao[] || [];
   } catch (error) {
     console.error("Exceção ao buscar inspeções recentes:", error);
     return [];

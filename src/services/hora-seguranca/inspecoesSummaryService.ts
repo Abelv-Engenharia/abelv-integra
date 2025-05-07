@@ -3,16 +3,16 @@ import { supabase } from "@/integrations/supabase/client";
 import { InspecoesSummary } from "@/types/users";
 
 /**
- * Fetch summary information about inspections
+ * Fetch summary of inspections
  */
 export async function fetchInspecoesSummary(): Promise<InspecoesSummary> {
   try {
-    // Consultar tabela de inspeções - verificando se existe ou criando um mock
+    // Tentar buscar resumo das inspeções
     const { data, error } = await supabase.rpc('get_inspecoes_summary');
 
     if (error) {
-      console.error("Erro ao buscar sumário de inspeções:", error);
-      // Retornar dados simulados se a tabela ou função não existir
+      console.error("Erro ao buscar resumo das inspeções:", error);
+      // Retornar objeto vazio se a função não existir
       return {
         totalInspecoes: 0,
         programadas: 0,
@@ -21,7 +21,8 @@ export async function fetchInspecoesSummary(): Promise<InspecoesSummary> {
       };
     }
 
-    if (!data || !data.length) {
+    // Se não houver dados, retornar objeto vazio
+    if (!data || data.length === 0) {
       return {
         totalInspecoes: 0,
         programadas: 0,
@@ -30,9 +31,10 @@ export async function fetchInspecoesSummary(): Promise<InspecoesSummary> {
       };
     }
 
+    // Retornar os dados
     return data[0] as InspecoesSummary;
   } catch (error) {
-    console.error("Exceção ao buscar sumário de inspeções:", error);
+    console.error("Exceção ao buscar resumo das inspeções:", error);
     return {
       totalInspecoes: 0,
       programadas: 0,
@@ -42,5 +44,9 @@ export async function fetchInspecoesSummary(): Promise<InspecoesSummary> {
   }
 }
 
-// Alias para manter compatibilidade com o nome da função usado nos componentes
-export const fetchInspectionsSummary = fetchInspecoesSummary;
+/**
+ * Alias function for fetchInspecoesSummary
+ */
+export async function fetchInspectionsSummary(): Promise<InspecoesSummary> {
+  return fetchInspecoesSummary();
+}

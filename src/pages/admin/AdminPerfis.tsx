@@ -1,20 +1,17 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
 import { Perfil, Permissoes, Json } from "@/types/users";
 import { useToast } from "@/hooks/use-toast";
+import { PerfisTable } from "@/components/admin/perfis/PerfisTable";
+import { PerfilDialog } from "@/components/admin/perfis/PerfilDialog";
 
 const AdminPerfis = () => {
   const [perfis, setPerfis] = useState<Perfil[]>([]);
   const [novoPerfil, setNovoPerfil] = useState<boolean>(false);
-  const [nome, setNome] = useState<string>('');
-  const [descricao, setDescricao] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
   const [buscar, setBuscar] = useState<string>('');
   const { toast } = useToast();
@@ -35,7 +32,6 @@ const AdminPerfis = () => {
     admin_templates: false
   };
   
-  const [permissoes, setPermissoes] = useState<Permissoes>(permissoesIniciais);
   const [perfilSelecionado, setPerfilSelecionado] = useState<Perfil | null>(null);
 
   useEffect(() => {
@@ -94,20 +90,12 @@ const AdminPerfis = () => {
     fetchPerfis();
   }, [toast]);
 
-  const perfisFiltrados = perfis.filter(perfil =>
-    perfil.nome.toLowerCase().includes(buscar.toLowerCase()) ||
-    perfil.descricao.toLowerCase().includes(buscar.toLowerCase())
-  );
-
   const handleNovoPerfil = () => {
     setNovoPerfil(true);
-    setNome('');
-    setDescricao('');
-    setPermissoes(permissoesIniciais);
     setPerfilSelecionado(null);
   };
 
-  const handleSalvar = async () => {
+  const handleSalvar = async (nome: string, descricao: string, permissoes: Permissoes) => {
     if (!nome) {
       toast({
         title: "Erro",
@@ -190,9 +178,6 @@ const AdminPerfis = () => {
 
   const handleEditar = (perfil: Perfil) => {
     setPerfilSelecionado(perfil);
-    setNome(perfil.nome);
-    setDescricao(perfil.descricao);
-    setPermissoes({ ...perfil.permissoes });
     setNovoPerfil(true);
   };
 
@@ -227,13 +212,6 @@ const AdminPerfis = () => {
     }
   };
 
-  const handleChangePermissao = (key: keyof Permissoes, value: boolean) => {
-    setPermissoes(prev => ({
-      ...prev,
-      [key]: value
-    }));
-  };
-
   return (
     <div className="space-y-6">
       <Card>
@@ -252,234 +230,24 @@ const AdminPerfis = () => {
               onChange={(e) => setBuscar(e.target.value)}
             />
           </div>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Nome</TableHead>
-                <TableHead>Descrição</TableHead>
-                <TableHead>Ações</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {loading ? (
-                <TableRow>
-                  <TableCell colSpan={3} className="text-center py-8">
-                    Carregando...
-                  </TableCell>
-                </TableRow>
-              ) : perfisFiltrados.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={3} className="text-center py-8">
-                    Nenhum perfil encontrado.
-                  </TableCell>
-                </TableRow>
-              ) : (
-                perfisFiltrados.map((perfil) => (
-                  <TableRow key={perfil.id}>
-                    <TableCell>{perfil.nome}</TableCell>
-                    <TableCell>{perfil.descricao}</TableCell>
-                    <TableCell>
-                      <div className="flex gap-2">
-                        <Button variant="outline" size="sm" onClick={() => handleEditar(perfil)}>
-                          Editar
-                        </Button>
-                        <Button variant="destructive" size="sm" onClick={() => handleExcluir(perfil.id)}>
-                          Excluir
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
+          <PerfisTable
+            perfis={perfis}
+            loading={loading}
+            buscar={buscar}
+            onEditar={handleEditar}
+            onExcluir={handleExcluir}
+          />
         </CardContent>
       </Card>
 
-      <Dialog open={novoPerfil} onOpenChange={setNovoPerfil}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>
-              {perfilSelecionado ? `Editar perfil: ${perfilSelecionado.nome}` : "Novo Perfil de Acesso"}
-            </DialogTitle>
-            <DialogDescription>
-              {perfilSelecionado ? "Atualize as informações do perfil e suas permissões" : "Crie um novo perfil de acesso e defina suas permissões"}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="nome">Nome</Label>
-                <Input 
-                  id="nome" 
-                  value={nome} 
-                  onChange={(e) => setNome(e.target.value)} 
-                  placeholder="Nome do perfil" 
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="descricao">Descrição</Label>
-                <Input 
-                  id="descricao" 
-                  value={descricao} 
-                  onChange={(e) => setDescricao(e.target.value)} 
-                  placeholder="Descrição do perfil" 
-                />
-              </div>
-            </div>
-            
-            <div className="space-y-4">
-              <h3 className="text-lg font-medium">Permissões</h3>
-              
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <div className="flex items-center space-x-2">
-                    <Checkbox 
-                      id="desvios" 
-                      checked={permissoes.desvios} 
-                      onCheckedChange={(checked) => 
-                        handleChangePermissao('desvios', checked === true)
-                      }
-                    />
-                    <Label htmlFor="desvios">Desvios</Label>
-                  </div>
-                  
-                  <div className="flex items-center space-x-2">
-                    <Checkbox 
-                      id="treinamentos" 
-                      checked={permissoes.treinamentos} 
-                      onCheckedChange={(checked) => 
-                        handleChangePermissao('treinamentos', checked === true)
-                      }
-                    />
-                    <Label htmlFor="treinamentos">Treinamentos</Label>
-                  </div>
-                  
-                  <div className="flex items-center space-x-2">
-                    <Checkbox 
-                      id="ocorrencias" 
-                      checked={permissoes.ocorrencias} 
-                      onCheckedChange={(checked) => 
-                        handleChangePermissao('ocorrencias', checked === true)
-                      }
-                    />
-                    <Label htmlFor="ocorrencias">Ocorrências</Label>
-                  </div>
-                  
-                  <div className="flex items-center space-x-2">
-                    <Checkbox 
-                      id="tarefas" 
-                      checked={permissoes.tarefas} 
-                      onCheckedChange={(checked) => 
-                        handleChangePermissao('tarefas', checked === true)
-                      }
-                    />
-                    <Label htmlFor="tarefas">Tarefas</Label>
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <div className="flex items-center space-x-2">
-                    <Checkbox 
-                      id="relatorios" 
-                      checked={permissoes.relatorios} 
-                      onCheckedChange={(checked) => 
-                        handleChangePermissao('relatorios', checked === true)
-                      }
-                    />
-                    <Label htmlFor="relatorios">Relatórios</Label>
-                  </div>
-                  
-                  <div className="flex items-center space-x-2">
-                    <Checkbox 
-                      id="hora_seguranca" 
-                      checked={permissoes.hora_seguranca} 
-                      onCheckedChange={(checked) => 
-                        handleChangePermissao('hora_seguranca', checked === true)
-                      }
-                    />
-                    <Label htmlFor="hora_seguranca">Hora de Segurança</Label>
-                  </div>
-                  
-                  <div className="flex items-center space-x-2">
-                    <Checkbox 
-                      id="medidas_disciplinares" 
-                      checked={permissoes.medidas_disciplinares} 
-                      onCheckedChange={(checked) => 
-                        handleChangePermissao('medidas_disciplinares', checked === true)
-                      }
-                    />
-                    <Label htmlFor="medidas_disciplinares">Medidas Disciplinares</Label>
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <div className="flex items-center space-x-2">
-                    <Checkbox 
-                      id="admin_usuarios" 
-                      checked={permissoes.admin_usuarios} 
-                      onCheckedChange={(checked) => 
-                        handleChangePermissao('admin_usuarios', checked === true)
-                      }
-                    />
-                    <Label htmlFor="admin_usuarios">Admin: Usuários</Label>
-                  </div>
-                  
-                  <div className="flex items-center space-x-2">
-                    <Checkbox 
-                      id="admin_perfis" 
-                      checked={permissoes.admin_perfis} 
-                      onCheckedChange={(checked) => 
-                        handleChangePermissao('admin_perfis', checked === true)
-                      }
-                    />
-                    <Label htmlFor="admin_perfis">Admin: Perfis</Label>
-                  </div>
-                  
-                  <div className="flex items-center space-x-2">
-                    <Checkbox 
-                      id="admin_funcionarios" 
-                      checked={permissoes.admin_funcionarios} 
-                      onCheckedChange={(checked) => 
-                        handleChangePermissao('admin_funcionarios', checked === true)
-                      }
-                    />
-                    <Label htmlFor="admin_funcionarios">Admin: Funcionários</Label>
-                  </div>
-                  
-                  <div className="flex items-center space-x-2">
-                    <Checkbox 
-                      id="admin_hht" 
-                      checked={permissoes.admin_hht} 
-                      onCheckedChange={(checked) => 
-                        handleChangePermissao('admin_hht', checked === true)
-                      }
-                    />
-                    <Label htmlFor="admin_hht">Admin: HHT</Label>
-                  </div>
-                  
-                  <div className="flex items-center space-x-2">
-                    <Checkbox 
-                      id="admin_templates" 
-                      checked={permissoes.admin_templates} 
-                      onCheckedChange={(checked) => 
-                        handleChangePermissao('admin_templates', checked === true)
-                      }
-                    />
-                    <Label htmlFor="admin_templates">Admin: Templates</Label>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setNovoPerfil(false)}>Cancelar</Button>
-            <Button onClick={handleSalvar} disabled={loading}>
-              {loading ? "Salvando..." : "Salvar"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <PerfilDialog
+        open={novoPerfil}
+        onOpenChange={setNovoPerfil}
+        perfilSelecionado={perfilSelecionado}
+        loading={loading}
+        permissoesIniciais={permissoesIniciais}
+        onSalvar={handleSalvar}
+      />
     </div>
   );
 };

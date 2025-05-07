@@ -17,7 +17,7 @@ export async function fetchInspecoesByResponsavel(): Promise<InspecoesByResponsa
     }
 
     // Se não houver dados, retornar array vazio
-    if (!data || !data.length) {
+    if (!data || data.length === 0) {
       return [];
     }
 

@@ -1,40 +1,17 @@
 
-// This file is deprecated and exists only for backward compatibility
-// Import and re-export all functions from the new modular structure
+// Export all services from this central file to maintain backward compatibility
 
-import {
-  fetchInspecoesSummary,
-  fetchInspectionsSummary,
-  fetchRecentInspections,
-  fetchInspecoesStats,
-  fetchInspecoesByMonth,
-  fetchInspecoesByTipo,
-  fetchInspecoesByResponsavel,
-  fetchInspecoesByStatus,
-  fetchDesviosByInspectionType,
-  // Types
-  Inspecao,
-  InspecoesByStatus,
-  InspecoesStatsByMonth,
-  InspecoesByTipo,
-  InspecoesByResponsavel,
-} from './hora-seguranca';
+export { fetchInspecoesSummary, fetchInspectionsSummary } from './hora-seguranca/inspecoesSummaryService';
+export { fetchRecentInspections } from './hora-seguranca/recentInspectionsService';
+export { fetchInspecoesStats, fetchInspecoesByMonth } from './hora-seguranca/inspecoesStatsService';
+export { fetchInspecoesByTipo } from './hora-seguranca/inspecoesByTipoService';
+export { fetchInspecoesByResponsavel } from './hora-seguranca/inspecoesByResponsavelService';
+export { fetchInspecoesByStatus } from './hora-seguranca/inspecoesByStatusService';
+export { fetchDesviosByInspectionType } from './hora-seguranca/desviosInspectionService';
 
-// Re-export everything
-export {
-  fetchInspecoesSummary,
-  fetchInspectionsSummary,
-  fetchRecentInspections,
-  fetchInspecoesStats,
-  fetchInspecoesByMonth,
-  fetchInspecoesByTipo,
-  fetchInspecoesByResponsavel,
-  fetchInspecoesByStatus,
-  fetchDesviosByInspectionType,
-  // Types
-  Inspecao,
-  InspecoesByStatus,
-  InspecoesStatsByMonth,
-  InspecoesByTipo,
-  InspecoesByResponsavel,
-};
+// Export all types
+export type { Inspecao } from './hora-seguranca/types';
+export type { InspecoesByStatus } from './hora-seguranca/types';
+export type { InspecoesStatsByMonth } from './hora-seguranca/types';
+export type { InspecoesByTipo } from './hora-seguranca/types';
+export type { InspecoesByResponsavel } from './hora-seguranca/types';

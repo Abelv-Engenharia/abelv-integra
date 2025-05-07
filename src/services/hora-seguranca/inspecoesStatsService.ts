@@ -3,42 +3,35 @@ import { supabase } from "@/integrations/supabase/client";
 import { InspecoesStatsByMonth } from "./types";
 
 /**
- * Fetch statistics about inspections by month
+ * Fetch statistics about inspections
  */
 export async function fetchInspecoesStats(): Promise<InspecoesStatsByMonth[]> {
   try {
-    // Tentar buscar estatísticas por mês
-    const { data, error } = await supabase.rpc('get_inspecoes_stats_by_month');
+    // Tentar buscar estatísticas de inspeções
+    const { data, error } = await supabase.rpc('get_inspecoes_stats');
 
     if (error) {
       console.error("Erro ao buscar estatísticas de inspeções:", error);
-      // Retornar dados simulados se a função não existir
-      return Array.from({ length: 12 }, (_, i) => ({
-        mes: i + 1, 
-        concluidas: 0,
-        programadas: 0
-      }));
+      // Retornar array vazio se a função não existir
+      return [];
     }
 
-    // Se não houver dados, retornar array vazio ou simulado
-    if (!data || !data.length) {
-      return Array.from({ length: 12 }, (_, i) => ({
-        mes: i + 1, 
-        concluidas: 0,
-        programadas: 0
-      }));
+    // Se não houver dados, retornar array vazio
+    if (!data || data.length === 0) {
+      return [];
     }
 
     return data as InspecoesStatsByMonth[];
   } catch (error) {
     console.error("Exceção ao buscar estatísticas de inspeções:", error);
-    return Array.from({ length: 12 }, (_, i) => ({
-      mes: i + 1, 
-      concluidas: 0,
-      programadas: 0
-    }));
+    return [];
   }
 }
 
-// Alias para manter compatibilidade com componentes
-export const fetchInspecoesByMonth = fetchInspecoesStats;
+/**
+ * Fetch inspections by month
+ */
+export async function fetchInspecoesByMonth(): Promise<InspecoesStatsByMonth[]> {
+  // Essa função é um alias para fetchInspecoesStats
+  return fetchInspecoesStats();
+}

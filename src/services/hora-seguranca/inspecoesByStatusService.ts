@@ -7,37 +7,27 @@ import { InspecoesByStatus } from "./types";
  */
 export async function fetchInspecoesByStatus(): Promise<InspecoesByStatus[]> {
   try {
+    // Tentar buscar inspeções por status
     const { data, error } = await supabase.rpc('get_inspecoes_by_status');
 
     if (error) {
       console.error("Erro ao buscar inspeções por status:", error);
-      // Retornar dados simulados
-      return [
-        { name: "Concluída", value: 0 },
-        { name: "Pendente", value: 0 },
-        { name: "Cancelada", value: 0 }
-      ];
+      // Retornar array vazio se a função não existir
+      return [];
     }
 
-    if (!data || !data.length) {
-      return [
-        { name: "Concluída", value: 0 },
-        { name: "Pendente", value: 0 },
-        { name: "Cancelada", value: 0 }
-      ];
+    // Se não houver dados, retornar array vazio
+    if (!data || data.length === 0) {
+      return [];
     }
 
-    // Transformar os dados para o formato que o componente do gráfico espera
-    return data.map(item => ({
+    // Mapear para o formato correto
+    return data.map((item: any) => ({
       name: item.status,
       value: item.quantidade
-    }));
+    })) as InspecoesByStatus[];
   } catch (error) {
     console.error("Exceção ao buscar inspeções por status:", error);
-    return [
-      { name: "Concluída", value: 0 },
-      { name: "Pendente", value: 0 },
-      { name: "Cancelada", value: 0 }
-    ];
+    return [];
   }
 }
