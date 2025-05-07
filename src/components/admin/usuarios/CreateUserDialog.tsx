@@ -26,13 +26,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Profile, UserFormValues, userFormSchema } from "@/types/users";
+import { Profile, AuthUserCreateValues, authUserCreateSchema } from "@/types/users";
 
 interface CreateUserDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   profiles: Profile[];
-  onSubmit: (data: UserFormValues) => void;
+  onSubmit: (data: AuthUserCreateValues) => void;
+  isSubmitting: boolean;
 }
 
 export const CreateUserDialog = ({
@@ -40,23 +41,33 @@ export const CreateUserDialog = ({
   onOpenChange,
   profiles,
   onSubmit,
+  isSubmitting,
 }: CreateUserDialogProps) => {
-  const userForm = useForm<UserFormValues>({
-    resolver: zodResolver(userFormSchema),
+  const userForm = useForm<AuthUserCreateValues>({
+    resolver: zodResolver(authUserCreateSchema),
     defaultValues: {
       nome: "",
       email: "",
+      password: "",
       perfil: "",
     },
   });
   
-  const handleSubmit = (data: UserFormValues) => {
+  const handleSubmit = (data: AuthUserCreateValues) => {
     onSubmit(data);
-    userForm.reset();
+    // Don't reset the form here as we'll only reset after successful submission
+  };
+  
+  // Reset form when dialog is closed
+  const handleOpenChange = (open: boolean) => {
+    if (!open) {
+      userForm.reset();
+    }
+    onOpenChange(open);
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Criar Novo Usuário</DialogTitle>
@@ -94,6 +105,19 @@ export const CreateUserDialog = ({
             />
             <FormField
               control={userForm.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Senha</FormLabel>
+                  <FormControl>
+                    <Input type="password" placeholder="******" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={userForm.control}
               name="perfil"
               render={({ field }) => (
                 <FormItem>
@@ -109,7 +133,7 @@ export const CreateUserDialog = ({
                     </FormControl>
                     <SelectContent>
                       {profiles.map((profile) => (
-                        <SelectItem key={profile.id} value={profile.nome}>
+                        <SelectItem key={profile.id} value={profile.id.toString()}>
                           {profile.nome}
                         </SelectItem>
                       ))}
@@ -124,10 +148,13 @@ export const CreateUserDialog = ({
                 type="button" 
                 variant="outline" 
                 onClick={() => onOpenChange(false)}
+                disabled={isSubmitting}
               >
                 Cancelar
               </Button>
-              <Button type="submit">Criar Usuário</Button>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? 'Criando...' : 'Criar Usuário'}
+              </Button>
             </DialogFooter>
           </form>
         </Form>

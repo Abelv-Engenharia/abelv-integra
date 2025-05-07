@@ -44,6 +44,7 @@ export const userFormSchema = z.object({
 
 // Schema para criação de novo usuário Auth
 export const authUserCreateSchema = z.object({
+  nome: z.string().min(3, "O nome deve ter pelo menos 3 caracteres"),
   email: z.string().email("Digite um email válido"),
   password: z.string().min(6, "A senha deve ter pelo menos 6 caracteres"),
   perfil: z.string().min(1, "Selecione um perfil"),

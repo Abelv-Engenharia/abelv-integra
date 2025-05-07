@@ -12,8 +12,10 @@ import { UsersTable } from "@/components/admin/usuarios/UsersTable";
 import { CreateUserDialog } from "@/components/admin/usuarios/CreateUserDialog";
 import { EditUserDialog } from "@/components/admin/usuarios/EditUserDialog";
 import { DeleteUserDialog } from "@/components/admin/usuarios/DeleteUserDialog";
-import { fetchProfiles, fetchUsers } from "@/services/usuariosService";
-import { User, Profile, SearchFormValues, UserFormValues } from "@/types/users";
+import { fetchProfiles } from "@/services/usuariosService";
+import { createAuthUser, updateUserRole } from "@/services/authAdminService";
+import { User, Profile, SearchFormValues, UserFormValues, AuthUserCreateValues } from "@/types/users";
+import { fetchUsers } from "@/services/authAdminService";
 
 const AdminUsuarios = () => {
   const navigate = useNavigate();
@@ -26,6 +28,7 @@ const AdminUsuarios = () => {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Fetch data from Supabase
   useEffect(() => {
@@ -92,26 +95,6 @@ const AdminUsuarios = () => {
         });
         
         setIsEditDialogOpen(false);
-      } else {
-        // Create new user (simulated)
-        // Note: In a real system, you would implement the registration in Supabase
-        const newUser = {
-          id: Date.now().toString(),
-          nome: data.nome,
-          email: data.email,
-          perfil: data.perfil,
-          status: "Ativo"
-        };
-        
-        setUsers([...users, newUser]);
-        setAllUsers([...allUsers, newUser]);
-        
-        toast({
-          title: "Usuário criado",
-          description: `${data.nome} foi criado com sucesso.`,
-        });
-        
-        setIsCreateDialogOpen(false);
       }
     } catch (error) {
       console.error('Erro ao salvar usuário:', error);
@@ -120,6 +103,50 @@ const AdminUsuarios = () => {
         description: "Não foi possível salvar as alterações. Tente novamente mais tarde.",
         variant: "destructive",
       });
+    }
+  };
+
+  const onAuthUserSubmit = async (data: AuthUserCreateValues) => {
+    try {
+      setIsSubmitting(true);
+      
+      // Step 1: Create the Supabase auth user
+      const { data: authUserData, error } = await createAuthUser(
+        data.email, 
+        data.password, 
+        { nome: data.nome }
+      );
+      
+      if (error) throw error;
+      
+      if (!authUserData?.user?.id) {
+        throw new Error("Falha ao criar usuário: ID não retornado");
+      }
+      
+      // Step 2: Assign the selected profile/role to the user
+      const perfilId = parseInt(data.perfil);
+      await updateUserRole(authUserData.user.id, perfilId);
+      
+      // Step 3: Refresh the users list
+      const userData = await fetchUsers();
+      setUsers(userData);
+      setAllUsers(userData);
+      
+      toast({
+        title: "Usuário criado",
+        description: `${data.nome} foi criado com sucesso.`,
+      });
+      
+      setIsCreateDialogOpen(false);
+    } catch (error: any) {
+      console.error('Erro ao criar usuário:', error);
+      toast({
+        title: "Erro ao criar usuário",
+        description: error.message || "Não foi possível criar o usuário. Tente novamente mais tarde.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -214,7 +241,8 @@ const AdminUsuarios = () => {
         open={isCreateDialogOpen}
         onOpenChange={setIsCreateDialogOpen}
         profiles={profiles}
-        onSubmit={onUserSubmit}
+        onSubmit={onAuthUserSubmit}
+        isSubmitting={isSubmitting}
       />
 
       <EditUserDialog
