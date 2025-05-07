@@ -1,4 +1,5 @@
 
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useToast } from "@/hooks/use-toast";
@@ -32,7 +33,7 @@ import {
   AuthUserCreateValues, 
   authUserCreateSchema 
 } from "@/types/users";
-import { createUser } from "@/services/authAdminService";
+import { createAuthUser, updateUserRole } from "@/services/authAdminService";
 
 interface CreateAuthUserDialogProps {
   open: boolean;
@@ -48,10 +49,12 @@ export const CreateAuthUserDialog = ({
   onSuccess,
 }: CreateAuthUserDialogProps) => {
   const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const form = useForm<AuthUserCreateValues>({
     resolver: zodResolver(authUserCreateSchema),
     defaultValues: {
+      nome: "",
       email: "",
       password: "",
       perfil: "",
@@ -60,7 +63,21 @@ export const CreateAuthUserDialog = ({
   
   const onSubmit = async (data: AuthUserCreateValues) => {
     try {
-      await createUser(data.email, data.password);
+      setIsSubmitting(true);
+      
+      // Step 1: Create the user in Supabase Auth
+      const authResult = await createAuthUser(
+        data.email, 
+        data.password,
+        { nome: data.nome }
+      );
+      
+      if (!authResult?.user?.id) {
+        throw new Error("Falha ao criar usuário");
+      }
+      
+      // Step 2: Assign the role to the user
+      await updateUserRole(authResult.user.id, parseInt(data.perfil));
       
       toast({
         title: "Usuário criado",
@@ -77,6 +94,8 @@ export const CreateAuthUserDialog = ({
         description: error instanceof Error ? error.message : "Ocorreu um erro ao criar o usuário.",
         variant: "destructive",
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -91,6 +110,20 @@ export const CreateAuthUserDialog = ({
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="nome"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Nome</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Nome do usuário" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
             <FormField
               control={form.control}
               name="email"
@@ -145,10 +178,12 @@ export const CreateAuthUserDialog = ({
             />
             
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isSubmitting}>
                 Cancelar
               </Button>
-              <Button type="submit">Criar Usuário</Button>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? 'Criando...' : 'Criar Usuário'}
+              </Button>
             </DialogFooter>
           </form>
         </Form>
