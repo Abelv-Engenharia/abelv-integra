@@ -6,21 +6,32 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Label } from "@/components/ui/label";
 import { useNavigate } from "react-router-dom";
 import SystemLogo from "@/components/common/SystemLogo";
-import { signIn } from "@/services/authService";
+import { signUp } from "@/services/authService";
 import { toast } from "@/hooks/use-toast";
 
-const Login = () => {
+const SignUp = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (password !== confirmPassword) {
+      toast({
+        title: "Erro na senha",
+        description: "As senhas não coincidem",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     setLoading(true);
     
     try {
-      const { data, error } = await signIn(email, password);
+      const { data, error } = await signUp(email, password);
       
       if (error) {
         throw error;
@@ -28,26 +39,24 @@ const Login = () => {
       
       if (data?.user) {
         toast({
-          title: "Login realizado com sucesso",
-          description: "Bem-vindo ao sistema",
+          title: "Conta criada com sucesso",
+          description: "Verifique seu email para confirmar seu cadastro",
         });
-        
-        // Force page reload to ensure a clean state
-        window.location.href = "/";
+        navigate("/login");
       }
     } catch (error: any) {
-      let errorMessage = "Erro ao fazer login";
+      let errorMessage = "Erro ao criar conta";
       
       if (error.message) {
-        if (error.message.includes("Invalid login credentials")) {
-          errorMessage = "Email ou senha incorretos";
+        if (error.message.includes("already registered")) {
+          errorMessage = "Este email já está cadastrado";
         } else {
           errorMessage = error.message;
         }
       }
       
       toast({
-        title: "Erro no login",
+        title: "Erro no cadastro",
         description: errorMessage,
         variant: "destructive"
       });
@@ -61,12 +70,12 @@ const Login = () => {
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-2 flex flex-col items-center">
           <SystemLogo className="h-16 mb-4" defaultTitle="Gestão de SMS Abelv" />
-          <CardTitle className="text-2xl">Login</CardTitle>
+          <CardTitle className="text-2xl">Criar Conta</CardTitle>
           <CardDescription>
-            Faça login para acessar o sistema de Gestão de SMS
+            Cadastre-se para acessar o sistema de Gestão de SMS
           </CardDescription>
         </CardHeader>
-        <form onSubmit={handleLogin}>
+        <form onSubmit={handleSignUp}>
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
@@ -80,34 +89,35 @@ const Login = () => {
               />
             </div>
             <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="password">Senha</Label>
-                <Button 
-                  variant="link" 
-                  className="p-0 text-sm"
-                  type="button"
-                  onClick={() => navigate("/auth/forgot-password")}
-                >
-                  Esqueceu a senha?
-                </Button>
-              </div>
+              <Label htmlFor="password">Senha</Label>
               <Input 
                 id="password" 
                 type="password" 
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                minLength={6}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword">Confirmar Senha</Label>
+              <Input 
+                id="confirmPassword" 
+                type="password" 
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
               />
             </div>
           </CardContent>
           <CardFooter className="flex flex-col space-y-3">
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Entrando..." : "Entrar"}
+              {loading ? "Criando conta..." : "Criar Conta"}
             </Button>
             <div className="text-center text-sm">
-              Não possui uma conta?{" "}
-              <Button variant="link" className="p-0" type="button" onClick={() => navigate("/auth/signup")}>
-                Cadastre-se
+              Já possui uma conta?{" "}
+              <Button variant="link" className="p-0" onClick={() => navigate("/login")}>
+                Faça login
               </Button>
             </div>
           </CardFooter>
@@ -117,4 +127,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default SignUp;

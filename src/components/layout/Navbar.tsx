@@ -15,19 +15,35 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import SystemLogo from "@/components/common/SystemLogo";
 import { useNavigate } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
+import { signOut } from "@/services/authService";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Navbar = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
 
-  const handleLogout = () => {
-    // Simulate logout process
-    toast({
-      title: "Logout realizado com sucesso",
-      description: "Você foi desconectado do sistema"
-    });
-    
-    // Redirect to login page
-    navigate("/login");
+  const handleLogout = async () => {
+    try {
+      const { error } = await signOut();
+      
+      if (error) {
+        throw error;
+      }
+      
+      toast({
+        title: "Logout realizado com sucesso",
+        description: "Você foi desconectado do sistema"
+      });
+      
+      // Force page reload to ensure a clean state
+      window.location.href = "/login";
+    } catch (error: any) {
+      toast({
+        title: "Erro ao fazer logout",
+        description: error.message || "Ocorreu um erro ao fazer logout",
+        variant: "destructive"
+      });
+    }
   };
 
   return (
@@ -81,6 +97,7 @@ const Navbar = () => {
                 <DropdownMenuItem onClick={() => navigate("/account/profile")}>
                   <User className="mr-2 h-4 w-4" />
                   <span>Perfil</span>
+                  {user && <span className="ml-2 text-xs text-muted-foreground">{user.email}</span>}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => navigate("/account/settings")}>
                   <Settings className="mr-2 h-4 w-4" />
