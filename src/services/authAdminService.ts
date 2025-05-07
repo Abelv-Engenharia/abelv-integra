@@ -35,16 +35,18 @@ async function callEdgeFunction(path = "", method = "GET", body = null) {
   }
 
   const response = await fetch(url, options);
-  const data = await response.json();
-
+  
   if (!response.ok) {
-    throw new Error(data.error || "Erro ao chamar a função");
+    const errorData = await response.json().catch(() => null);
+    const errorMessage = errorData?.error || `Error: ${response.status} ${response.statusText}`;
+    console.error("Edge function error:", errorMessage);
+    throw new Error(errorMessage);
   }
-
-  return data;
+  
+  return response.json();
 }
 
-export async function fetchUsers(page = 1, perPage = 100, query = "", status = ""): Promise<User[]> {
+export async function fetchUsers(page = 1, perPage = 100, query = "", status = ""): Promise<any> {
   try {
     const queryParams = new URLSearchParams();
     queryParams.append("page", page.toString());
@@ -78,10 +80,14 @@ export async function fetchUsers(page = 1, perPage = 100, query = "", status = "
         };
       }));
       
-      return users;
+      return {
+        users,
+        total: result.total || users.length,
+        count: users.length
+      };
     }
     
-    return [];
+    return { users: [], total: 0, count: 0 };
   } catch (error) {
     console.error("Erro ao buscar usuários:", error);
     toast({
@@ -89,7 +95,7 @@ export async function fetchUsers(page = 1, perPage = 100, query = "", status = "
       description: "Não foi possível carregar a lista de usuários.",
       variant: "destructive",
     });
-    return [];
+    return { users: [], total: 0, count: 0 };
   }
 }
 
@@ -98,7 +104,15 @@ export async function fetchUserById(userId: string) {
 }
 
 export async function createAuthUser(email: string, password: string, userData = {}) {
-  return callEdgeFunction("create", "POST", { email, password, userData });
+  console.log("Criando usuário:", { email, userData });
+  try {
+    const result = await callEdgeFunction("create", "POST", { email, password, userData });
+    console.log("Usuário criado com sucesso:", result);
+    return result;
+  } catch (error) {
+    console.error("Erro ao criar usuário:", error);
+    throw error;
+  }
 }
 
 export async function updateUser(userId: string, updates: any) {
@@ -114,5 +128,13 @@ export async function getUserRoles(userId: string) {
 }
 
 export async function updateUserRole(userId: string, perfilId: number) {
-  return callEdgeFunction(`${userId}/roles`, "PUT", { perfilId });
+  console.log("Atualizando perfil:", { userId, perfilId });
+  try {
+    const result = await callEdgeFunction(`${userId}/roles`, "PUT", { perfilId });
+    console.log("Perfil atualizado com sucesso:", result);
+    return result;
+  } catch (error) {
+    console.error("Erro ao atualizar perfil:", error);
+    throw error;
+  }
 }

@@ -50,6 +50,7 @@ export const CreateAuthUserDialog = ({
 }: CreateAuthUserDialogProps) => {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   
   const form = useForm<AuthUserCreateValues>({
     resolver: zodResolver(authUserCreateSchema),
@@ -62,8 +63,11 @@ export const CreateAuthUserDialog = ({
   });
   
   const onSubmit = async (data: AuthUserCreateValues) => {
+    setErrorMessage(null);
     try {
       setIsSubmitting(true);
+      
+      console.log("Criando usuário:", data);
       
       // Step 1: Create the user in Supabase Auth
       const authResult = await createAuthUser(
@@ -75,6 +79,8 @@ export const CreateAuthUserDialog = ({
       if (!authResult?.user?.id) {
         throw new Error("Falha ao criar usuário");
       }
+      
+      console.log("Usuário criado, atribuindo perfil:", authResult.user.id, data.perfil);
       
       // Step 2: Assign the role to the user
       await updateUserRole(authResult.user.id, parseInt(data.perfil));
@@ -89,9 +95,26 @@ export const CreateAuthUserDialog = ({
       onSuccess();
     } catch (error) {
       console.error("Erro ao criar usuário:", error);
+      
+      let errorMsg = "Ocorreu um erro ao criar o usuário.";
+      
+      // Extract error message
+      if (error instanceof Error) {
+        errorMsg = error.message;
+        
+        // Check for common error patterns from Supabase
+        if (errorMsg.includes("User already registered")) {
+          errorMsg = "Este email já está registrado no sistema.";
+        } else if (errorMsg.includes("invalid password")) {
+          errorMsg = "A senha não atende aos requisitos mínimos.";
+        }
+      }
+      
+      setErrorMessage(errorMsg);
+      
       toast({
         title: "Erro ao criar usuário",
-        description: error instanceof Error ? error.message : "Ocorreu um erro ao criar o usuário.",
+        description: errorMsg,
         variant: "destructive",
       });
     } finally {
@@ -99,8 +122,17 @@ export const CreateAuthUserDialog = ({
     }
   };
 
+  // Reset form and error state when dialog opens/closes
+  const handleOpenChange = (open: boolean) => {
+    if (!open) {
+      form.reset();
+      setErrorMessage(null);
+    }
+    onOpenChange(open);
+  };
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Criar Novo Usuário</DialogTitle>
@@ -108,6 +140,13 @@ export const CreateAuthUserDialog = ({
             Preencha as informações para criar um novo usuário no sistema.
           </DialogDescription>
         </DialogHeader>
+        
+        {errorMessage && (
+          <div className="bg-destructive/15 text-destructive text-sm p-3 rounded-md mb-4">
+            {errorMessage}
+          </div>
+        )}
+        
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
@@ -178,7 +217,7 @@ export const CreateAuthUserDialog = ({
             />
             
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isSubmitting}>
+              <Button type="button" variant="outline" onClick={() => handleOpenChange(false)} disabled={isSubmitting}>
                 Cancelar
               </Button>
               <Button type="submit" disabled={isSubmitting}>
