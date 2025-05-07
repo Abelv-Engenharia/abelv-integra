@@ -2,7 +2,8 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AlertCircle, AlertTriangle, ArrowDown, FileBarChart, FileCheck, FileClock } from "lucide-react";
-import { fetchOcorrenciasStats, OcorrenciasStats } from "@/services/ocorrenciasDashboardService";
+import { fetchOcorrenciasStats } from "@/services/ocorrenciasDashboardService";
+import type { OcorrenciasStats } from "@/services/ocorrenciasDashboardService";
 
 const OcorrenciasSummaryCards = () => {
   const [loading, setLoading] = useState(true);

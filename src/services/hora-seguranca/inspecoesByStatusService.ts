@@ -3,27 +3,25 @@ import { supabase } from "@/integrations/supabase/client";
 import { InspecoesByStatus } from "./types";
 
 /**
- * Fetch inspections grouped by status
+ * Fetch inspeções by status
  */
 export async function fetchInspecoesByStatus(): Promise<InspecoesByStatus[]> {
   try {
-    // Tentar buscar inspeções por status
     const { data, error } = await supabase.rpc('get_inspecoes_by_status');
 
     if (error) {
       console.error("Erro ao buscar inspeções por status:", error);
-      // Retornar array vazio se a função não existir
       return [];
     }
 
-    // Se não houver dados, retornar array vazio
+    // Verificar se há dados
     if (!data || data.length === 0) {
       return [];
     }
-
-    // Mapear para o formato correto
+    
+    // Transforma os dados para o formato esperado pelo gráfico
     return data.map((item: any) => ({
-      name: item.status,
+      name: item.status || 'Sem Status',
       value: item.quantidade
     })) as InspecoesByStatus[];
   } catch (error) {
