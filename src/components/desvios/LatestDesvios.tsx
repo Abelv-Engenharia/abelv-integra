@@ -1,18 +1,18 @@
 
+import { useState, useEffect } from "react";
 import { AlertTriangle, ArrowRight, Calendar, CircleAlert } from "lucide-react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 interface Desvio {
   id: string;
   date: string;
   title: string;
-  cca: string;
-  company: string;
+  local?: string;
+  tipo?: string;
   risk: string;
   status: string;
 }
@@ -70,8 +70,8 @@ const LatestDesvios = () => {
             id: item.id,
             date: new Date(item.data).toLocaleDateString('pt-BR'),
             title: item.descricao.substring(0, 60) + (item.descricao.length > 60 ? '...' : ''),
-            cca: item.cca || 'Não informado',
-            company: item.empresa || 'Não informado',
+            local: item.local || 'Não informado',
+            tipo: item.tipo || 'Não informado',
             risk: item.classificacao || 'Não classificado',
             status: item.status || 'Pendente'
           }));
@@ -127,8 +127,8 @@ const LatestDesvios = () => {
                     </div>
                   </div>
                   <div className="flex flex-wrap gap-2 mt-2 sm:mt-0">
-                    <Badge variant="outline">{desvio.cca}</Badge>
-                    <Badge variant="outline">{desvio.company}</Badge>
+                    <Badge variant="outline">{desvio.local}</Badge>
+                    <Badge variant="outline">{desvio.tipo}</Badge>
                     <Badge variant="secondary" className={getRiskColor(desvio.risk)}>
                       {desvio.risk}
                     </Badge>

@@ -1,5 +1,4 @@
 
-# This file outlines your project configuration
 project_id = "xexgdtlctyuycohzhmuu"
 [api]
 port = 54321

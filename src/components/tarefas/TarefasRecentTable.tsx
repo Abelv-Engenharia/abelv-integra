@@ -1,54 +1,21 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { supabase } from "@/integrations/supabase/client";
 
-const mockTarefas = [
-  {
-    id: '1',
-    descricao: 'Revisão do procedimento de segurança',
-    responsavel: { id: '1', nome: 'João Silva' },
-    dataConclusao: new Date('2025-05-10'),
-    status: 'pendente',
-    criticidade: 'alta'
-  },
-  {
-    id: '2',
-    descricao: 'Treinamento da equipe técnica',
-    responsavel: { id: '2', nome: 'Maria Santos' },
-    dataConclusao: new Date('2025-05-08'),
-    status: 'em-andamento',
-    criticidade: 'media'
-  },
-  {
-    id: '3',
-    descricao: 'Atualização do manual de operações',
-    responsavel: { id: '3', nome: 'Pedro Costa' },
-    dataConclusao: new Date('2025-05-05'),
-    status: 'concluida',
-    criticidade: 'baixa'
-  },
-  {
-    id: '4',
-    descricao: 'Inspeção dos equipamentos',
-    responsavel: { id: '4', nome: 'Ana Oliveira' },
-    dataConclusao: new Date('2025-05-15'),
-    status: 'programada',
-    criticidade: 'critica'
-  },
-  {
-    id: '5',
-    descricao: 'Reunião com fornecedores de EPI',
-    responsavel: { id: '5', nome: 'Carlos Pereira' },
-    dataConclusao: new Date('2025-05-12'),
-    status: 'pendente',
-    criticidade: 'media'
-  }
-];
+interface Tarefa {
+  id: string;
+  descricao: string;
+  responsavel: { id: string; nome: string };
+  dataConclusao: Date;
+  status: string;
+  criticidade: string;
+}
 
-const getStatusBadge = (status) => {
+const getStatusBadge = (status: string) => {
   const styles = {
     'concluida': 'bg-green-100 text-green-800',
     'em-andamento': 'bg-blue-100 text-blue-800',
@@ -57,13 +24,13 @@ const getStatusBadge = (status) => {
   };
   
   return (
-    <Badge variant="outline" className={styles[status]}>
+    <Badge variant="outline" className={styles[status] || styles['pendente']}>
       {status.replace('-', ' ')}
     </Badge>
   );
 };
 
-const getCriticidadeBadge = (criticidade) => {
+const getCriticidadeBadge = (criticidade: string) => {
   const styles = {
     'critica': 'bg-red-100 text-red-800',
     'alta': 'bg-orange-100 text-orange-800',
@@ -72,13 +39,80 @@ const getCriticidadeBadge = (criticidade) => {
   };
   
   return (
-    <Badge variant="outline" className={styles[criticidade]}>
+    <Badge variant="outline" className={styles[criticidade] || styles['media']}>
       {criticidade}
     </Badge>
   );
 };
 
 const TarefasRecentTable = () => {
+  const [tarefas, setTarefas] = useState<Tarefa[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchTarefas = async () => {
+      try {
+        // Buscar tarefas do Supabase
+        const { data: tarefasData, error } = await supabase
+          .from('tarefas')
+          .select(`
+            id,
+            descricao,
+            status,
+            data_conclusao,
+            configuracao,
+            responsavel_id
+          `)
+          .order('created_at', { ascending: false })
+          .limit(5);
+
+        if (error) {
+          console.error('Erro ao carregar tarefas:', error);
+          return;
+        }
+
+        // Obter informações dos responsáveis
+        const responsaveisIds = tarefasData
+          .filter(t => t.responsavel_id)
+          .map(t => t.responsavel_id);
+        
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('id, nome')
+          .in('id', responsaveisIds);
+        
+        // Mapear para o formato esperado pelo componente
+        const formattedTarefas = tarefasData.map(tarefa => ({
+          id: tarefa.id,
+          descricao: tarefa.descricao,
+          responsavel: {
+            id: tarefa.responsavel_id || '',
+            nome: profiles?.find(p => p.id === tarefa.responsavel_id)?.nome || 'Não atribuído'
+          },
+          dataConclusao: tarefa.data_conclusao ? new Date(tarefa.data_conclusao) : new Date(),
+          status: tarefa.status || 'pendente',
+          criticidade: tarefa.configuracao?.criticidade || 'media'
+        }));
+
+        setTarefas(formattedTarefas);
+      } catch (error) {
+        console.error('Erro ao carregar tarefas:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTarefas();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center p-4">
+        <p>Carregando tarefas...</p>
+      </div>
+    );
+  }
+
   return (
     <Table>
       <TableHeader>
@@ -91,15 +125,23 @@ const TarefasRecentTable = () => {
         </TableRow>
       </TableHeader>
       <TableBody>
-        {mockTarefas.map((tarefa) => (
-          <TableRow key={tarefa.id}>
-            <TableCell className="font-medium">{tarefa.descricao}</TableCell>
-            <TableCell>{tarefa.responsavel.nome}</TableCell>
-            <TableCell>{format(tarefa.dataConclusao, 'dd/MM/yyyy', { locale: ptBR })}</TableCell>
-            <TableCell>{getStatusBadge(tarefa.status)}</TableCell>
-            <TableCell>{getCriticidadeBadge(tarefa.criticidade)}</TableCell>
+        {tarefas.length > 0 ? (
+          tarefas.map((tarefa) => (
+            <TableRow key={tarefa.id}>
+              <TableCell className="font-medium">{tarefa.descricao}</TableCell>
+              <TableCell>{tarefa.responsavel.nome}</TableCell>
+              <TableCell>{format(tarefa.dataConclusao, 'dd/MM/yyyy', { locale: ptBR })}</TableCell>
+              <TableCell>{getStatusBadge(tarefa.status)}</TableCell>
+              <TableCell>{getCriticidadeBadge(tarefa.criticidade)}</TableCell>
+            </TableRow>
+          ))
+        ) : (
+          <TableRow>
+            <TableCell colSpan={5} className="h-24 text-center">
+              Nenhuma tarefa encontrada.
+            </TableCell>
           </TableRow>
-        ))}
+        )}
       </TableBody>
     </Table>
   );

@@ -1,277 +1,290 @@
 
-import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+// Follow this setup guide to integrate the Deno language server with your editor:
+// https://deno.land/manual/getting_started/setup_your_environment
+// This enables autocomplete, go to definition, etc.
 
-// Cria o cliente Supabase com a chave de serviço - não exposta no frontend
-const supabaseAdmin = createClient(
-  Deno.env.get("SUPABASE_URL") || "",
-  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || ""
-);
+import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.4.0';
 
-// Headers CORS para permitir requisições do frontend
 const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
 serve(async (req) => {
-  // Habilitar CORS
-  if (req.method === "OPTIONS") {
-    return new Response(null, {
-      status: 204,
-      headers: corsHeaders,
-    });
+  // Handle CORS preflight requests
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders });
   }
 
   try {
-    // Verificar autenticação do usuário
-    const authHeader = req.headers.get("Authorization");
+    // Verificar autenticação
+    const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
-      return new Response(JSON.stringify({ error: "Não autorizado" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return new Response(
+        JSON.stringify({ error: 'Não autorizado. Necessário token de autenticação.' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
-    const token = authHeader.replace("Bearer ", "");
-    const {
-      data: { user: authenticatedUser },
-      error: authError,
-    } = await supabaseAdmin.auth.getUser(token);
-
-    if (authError || !authenticatedUser) {
-      return new Response(JSON.stringify({ error: "Não autorizado", details: authError }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    // Verificar permissão de administrador
-    const { data: permissoes } = await supabaseAdmin
-      .from("usuario_perfis")
-      .select("perfil_id")
-      .eq("usuario_id", authenticatedUser.id)
-      .single();
-
-    if (!permissoes) {
-      return new Response(JSON.stringify({ error: "Permissão negada" }), {
-        status: 403,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    // Verificar se o perfil tem permissão admin_usuarios
-    const { data: perfil } = await supabaseAdmin
-      .from("perfis")
-      .select("permissoes")
-      .eq("id", permissoes.perfil_id)
-      .single();
-
-    if (!perfil?.permissoes?.admin_usuarios) {
-      return new Response(JSON.stringify({ error: "Permissão negada para administrar usuários" }), {
-        status: 403,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    // Processar a requisição
+    // Cria um cliente Supabase com o token do usuário
+    const supabaseAdmin = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+      {
+        global: {
+          headers: { Authorization: authHeader },
+        },
+      }
+    );
+    
+    // Parse da URL para obter o path e possíveis parâmetros
     const url = new URL(req.url);
-    const pathSegments = url.pathname.split("/");
-    const pathPart = pathSegments[pathSegments.length - 1];
+    const path = url.pathname.split('/').pop();
 
-    console.log("Request method:", req.method);
-    console.log("Request path:", url.pathname);
-    console.log("Path part:", pathPart);
-
-    try {
-      // Listar usuários
-      if (req.method === "GET" && pathPart === "admin-users") {
-        const page = url.searchParams.get("page") ? parseInt(url.searchParams.get("page") || "1") : 1;
-        const perPage = url.searchParams.get("perPage") ? parseInt(url.searchParams.get("perPage") || "10") : 10;
-        const query = url.searchParams.get("query") || "";
-        const status = url.searchParams.get("status") || "";
+    // Processar GET - Lista de usuários ou usuário específico
+    if (req.method === 'GET') {
+      // Parâmetros de paginação e filtragem
+      const page = parseInt(url.searchParams.get('page') || '1');
+      const perPage = parseInt(url.searchParams.get('perPage') || '100');
+      const query = url.searchParams.get('query') || '';
+      const status = url.searchParams.get('status') || '';
+      
+      // Se temos um ID específico na URL, buscar apenas esse usuário
+      if (path && path !== 'admin-users') {
+        const { data: user, error } = await supabaseAdmin.auth.admin.getUserById(path);
         
-        let { data: users, error } = await supabaseAdmin.auth.admin.listUsers({
-          page,
-          perPage,
-        });
-
-        if (error) throw error;
-
-        // Filtrar usuários com os parâmetros passados
-        let filteredUsers = users.users;
-
-        if (query) {
-          filteredUsers = filteredUsers.filter(
-            (user) => 
-              user.email?.toLowerCase().includes(query.toLowerCase()) || 
-              user.id.toLowerCase().includes(query.toLowerCase())
+        if (error) {
+          return new Response(
+            JSON.stringify({ error: `Erro ao buscar usuário: ${error.message}` }),
+            { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
           );
         }
-
-        if (status) {
-          if (status === "confirmed") {
-            filteredUsers = filteredUsers.filter(user => user.email_confirmed_at !== null);
-          } else if (status === "unconfirmed") {
-            filteredUsers = filteredUsers.filter(user => user.email_confirmed_at === null);
-          } else if (status === "blocked") {
-            filteredUsers = filteredUsers.filter(user => user.banned_until !== null);
-          }
-        }
-
-        return new Response(JSON.stringify({ 
-          users: filteredUsers,
-          total: users.users.length, 
-          count: filteredUsers.length 
-        }), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-
-      // Obter usuário específico
-      if (req.method === "GET" && pathPart && pathPart !== "admin-users" && !pathPart.includes("roles")) {
-        const userId = pathPart;
-        const { data: user, error } = await supabaseAdmin.auth.admin.getUserById(userId);
-
-        if (error) throw error;
-
-        return new Response(JSON.stringify(user), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-
-      // Criar novo usuário
-      if (req.method === "POST" && pathPart === "create") {
-        const requestData = await req.json();
-        const { email, password, userData } = requestData;
         
-        console.log("Creating user:", { email, userData });
-        
-        const { data: user, error } = await supabaseAdmin.auth.admin.createUser({
-          email,
-          password,
-          email_confirm: true, // Auto confirmar e-mail
-          user_metadata: userData || {},
-        });
-
-        if (error) {
-          console.error("Error creating user:", error);
-          throw error;
-        }
-
-        console.log("User created successfully:", user);
-        
-        return new Response(JSON.stringify(user), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-
-      // Atualizar usuário
-      if (req.method === "PUT" && pathPart && pathPart !== "admin-users" && !pathPart.includes("roles")) {
-        const userId = pathPart;
-        const updates = await req.json();
-        
-        const { data: user, error } = await supabaseAdmin.auth.admin.updateUserById(
-          userId,
-          updates
+        return new Response(
+          JSON.stringify(user),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
-
-        if (error) throw error;
-
-        return new Response(JSON.stringify(user), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
       }
 
-      // Excluir usuário
-      if (req.method === "DELETE" && pathPart && pathPart !== "admin-users") {
-        const userId = pathPart;
-        const { error } = await supabaseAdmin.auth.admin.deleteUser(userId);
-
-        if (error) throw error;
-
-        return new Response(JSON.stringify({ success: true }), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-
-      // Endpoint para obter roles do usuário
-      if (req.method === "GET" && pathPart === "roles") {
-        const userId = pathSegments[pathSegments.length - 2];
-        
-        const { data, error } = await supabaseAdmin
-          .from("usuario_perfis")
-          .select("perfil_id, perfis(nome, permissoes)")
-          .eq("usuario_id", userId);
-
-        if (error) throw error;
-
-        return new Response(JSON.stringify(data), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+      // Buscamos todos os usuários
+      const { data: users, error } = await supabaseAdmin.auth.admin.listUsers({
+        page, 
+        perPage
+      });
+      
+      if (error) {
+        return new Response(
+          JSON.stringify({ error: `Erro ao listar usuários: ${error.message}` }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
       }
       
-      // Endpoint para atualizar roles do usuário
-      if (req.method === "PUT" && pathPart === "roles") {
-        const userId = pathSegments[pathSegments.length - 2];
+      // Filtrar usuários conforme os parâmetros
+      let filteredUsers = users.users;
+      
+      if (query) {
+        const queryLower = query.toLowerCase();
+        filteredUsers = filteredUsers.filter(user => 
+          user.email?.toLowerCase().includes(queryLower) || 
+          user.user_metadata?.nome?.toLowerCase().includes(queryLower)
+        );
+      }
+      
+      if (status) {
+        if (status === 'Ativo') {
+          filteredUsers = filteredUsers.filter(user => user.email_confirmed_at);
+        } else if (status === 'Pendente') {
+          filteredUsers = filteredUsers.filter(user => !user.email_confirmed_at);
+        }
+      }
+      
+      return new Response(
+        JSON.stringify({
+          users: filteredUsers,
+          total: users.total || filteredUsers.length,
+          count: filteredUsers.length
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    
+    // Criar novo usuário
+    else if (req.method === 'POST' && path === 'create') {
+      const { email, password, userData } = await req.json();
+      
+      // Validações básicas
+      if (!email || !password) {
+        return new Response(
+          JSON.stringify({ error: 'Email e senha são obrigatórios' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      
+      // Criar usuário usando a API admin
+      const { data, error } = await supabaseAdmin.auth.admin.createUser({
+        email,
+        password,
+        email_confirm: true,
+        user_metadata: userData
+      });
+      
+      if (error) {
+        return new Response(
+          JSON.stringify({ error: `Erro ao criar usuário: ${error.message}` }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      
+      return new Response(
+        JSON.stringify(data),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    
+    // Atualizar usuário
+    else if (req.method === 'PUT' && path && path !== 'admin-users') {
+      const updates = await req.json();
+      
+      // Atualizar usuário usando a API admin
+      const { data, error } = await supabaseAdmin.auth.admin.updateUserById(
+        path,
+        updates
+      );
+      
+      if (error) {
+        return new Response(
+          JSON.stringify({ error: `Erro ao atualizar usuário: ${error.message}` }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      
+      return new Response(
+        JSON.stringify(data),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    
+    // Gerenciar perfis/roles de usuários
+    else if (path && path.includes('roles')) {
+      const userId = path.split('/')[0];
+      
+      // GET - Buscar perfis do usuário
+      if (req.method === 'GET') {
+        const { data, error } = await supabaseAdmin
+          .from('usuario_perfis')
+          .select('*, perfis(*)')
+          .eq('usuario_id', userId);
+        
+        if (error) {
+          return new Response(
+            JSON.stringify({ error: `Erro ao buscar perfis do usuário: ${error.message}` }),
+            { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+        
+        return new Response(
+          JSON.stringify(data),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      
+      // PUT - Atualizar perfil do usuário
+      else if (req.method === 'PUT') {
         const { perfilId } = await req.json();
         
-        console.log("Updating user role:", { userId, perfilId });
+        // Verificar se o perfil existe
+        if (!perfilId) {
+          return new Response(
+            JSON.stringify({ error: 'ID do perfil é obrigatório' }),
+            { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
         
-        // Remover roles existentes
-        const { error: deleteError } = await supabaseAdmin
-          .from("usuario_perfis")
-          .delete()
-          .eq("usuario_id", userId);
+        // Verificar se o perfil já está atribuído ao usuário
+        const { data: existingRole, error: checkError } = await supabaseAdmin
+          .from('usuario_perfis')
+          .select('*')
+          .eq('usuario_id', userId);
+        
+        if (checkError) {
+          return new Response(
+            JSON.stringify({ error: `Erro ao verificar perfil do usuário: ${checkError.message}` }),
+            { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+        
+        let result;
+        
+        // Se já existe uma associação, atualizamos
+        if (existingRole && existingRole.length > 0) {
+          const { data, error } = await supabaseAdmin
+            .from('usuario_perfis')
+            .update({ perfil_id: perfilId })
+            .eq('usuario_id', userId)
+            .select('*, perfis(*)');
+            
+          if (error) {
+            return new Response(
+              JSON.stringify({ error: `Erro ao atualizar perfil do usuário: ${error.message}` }),
+              { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+            );
+          }
           
-        if (deleteError) throw deleteError;
-        
-        // Adicionar novo role
-        const { data, error } = await supabaseAdmin
-          .from("usuario_perfis")
-          .insert({
-            usuario_id: userId,
-            perfil_id: perfilId
-          });
+          result = data;
+        } 
+        // Caso contrário, criamos uma nova
+        else {
+          const { data, error } = await supabaseAdmin
+            .from('usuario_perfis')
+            .insert({ usuario_id: userId, perfil_id: perfilId })
+            .select('*, perfis(*)');
+            
+          if (error) {
+            return new Response(
+              JSON.stringify({ error: `Erro ao atribuir perfil ao usuário: ${error.message}` }),
+              { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+            );
+          }
           
-        if (error) throw error;
+          result = data;
+        }
         
-        console.log("User role updated successfully");
-        
-        return new Response(JSON.stringify({ success: true }), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+        return new Response(
+          JSON.stringify(result),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
       }
-
-      // Se não for nenhum dos endpoints acima
-      return new Response(JSON.stringify({ 
-        error: "Endpoint não encontrado",
-        path: url.pathname,
-        pathPart
-      }), {
-        status: 404,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    } catch (error) {
-      console.error("Erro na função edge:", error);
-      
-      return new Response(JSON.stringify({ 
-        error: error.message || "Erro no servidor",
-        details: error.toString()
-      }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
     }
+    
+    // Excluir usuário
+    else if (req.method === 'DELETE' && path && path !== 'admin-users') {
+      const { error } = await supabaseAdmin.auth.admin.deleteUser(path);
+      
+      if (error) {
+        return new Response(
+          JSON.stringify({ error: `Erro ao excluir usuário: ${error.message}` }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      
+      return new Response(
+        JSON.stringify({ success: true }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    
+    // Método não suportado ou rota inválida
+    return new Response(
+      JSON.stringify({ error: 'Método não suportado ou rota inválida' }),
+      { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+    
   } catch (error) {
-    console.error("Erro crítico na função edge:", error);
-    return new Response(JSON.stringify({ 
-      error: "Erro interno do servidor",
-      details: error.toString()
-    }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    console.error('Erro não tratado:', error);
+    return new Response(
+      JSON.stringify({ error: `Erro interno do servidor: ${error.message}` }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
   }
 });

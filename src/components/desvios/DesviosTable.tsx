@@ -36,10 +36,9 @@ interface Desvio {
   id: string;
   data: string;
   title: string;
-  cca: string;
-  company: string;
-  responsavel: string;
-  risk: string;
+  local?: string;
+  tipo?: string;
+  classificacao: string;
   status: string;
   description: string;
 }
@@ -101,10 +100,9 @@ const DesviosTable = () => {
             id: item.id,
             data: new Date(item.data).toLocaleDateString('pt-BR'),
             title: item.descricao.substring(0, 60) + (item.descricao.length > 60 ? '...' : ''),
-            cca: item.cca || 'Não informado',
-            company: item.empresa || 'Não informado',
-            responsavel: item.responsavel || 'Não atribuído',
-            risk: item.classificacao || 'Não classificado',
+            local: item.local || 'Não informado',
+            tipo: item.tipo || 'Não informado',
+            classificacao: item.classificacao || 'Não classificado',
             status: item.status || 'Pendente',
             description: item.descricao
           }));
@@ -182,8 +180,8 @@ const DesviosTable = () => {
                 <TableHead>ID</TableHead>
                 <TableHead>Data</TableHead>
                 <TableHead className="max-w-[250px]">Título</TableHead>
-                <TableHead>CCA</TableHead>
-                <TableHead>Empresa</TableHead>
+                <TableHead>Local</TableHead>
+                <TableHead>Tipo</TableHead>
                 <TableHead>Risco</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="text-right">Ações</TableHead>
@@ -196,11 +194,11 @@ const DesviosTable = () => {
                     <TableCell className="font-medium">{desvio.id}</TableCell>
                     <TableCell>{desvio.data}</TableCell>
                     <TableCell className="max-w-[250px] truncate">{desvio.title}</TableCell>
-                    <TableCell>{desvio.cca}</TableCell>
-                    <TableCell>{desvio.company}</TableCell>
+                    <TableCell>{desvio.local}</TableCell>
+                    <TableCell>{desvio.tipo}</TableCell>
                     <TableCell>
-                      <Badge variant="secondary" className={getRiskColor(desvio.risk)}>
-                        {desvio.risk}
+                      <Badge variant="secondary" className={getRiskColor(desvio.classificacao)}>
+                        {desvio.classificacao}
                       </Badge>
                     </TableCell>
                     <TableCell>
@@ -234,17 +232,17 @@ const DesviosTable = () => {
                                 <h3 className="font-semibold">Informações do Desvio</h3>
                                 <div className="grid grid-cols-2 gap-4">
                                   <div>
-                                    <p className="text-sm font-medium">CCA</p>
-                                    <p className="text-sm text-muted-foreground">{desvio.cca}</p>
+                                    <p className="text-sm font-medium">Local</p>
+                                    <p className="text-sm text-muted-foreground">{desvio.local}</p>
                                   </div>
                                   <div>
-                                    <p className="text-sm font-medium">Empresa</p>
-                                    <p className="text-sm text-muted-foreground">{desvio.company}</p>
+                                    <p className="text-sm font-medium">Tipo</p>
+                                    <p className="text-sm text-muted-foreground">{desvio.tipo}</p>
                                   </div>
                                   <div>
                                     <p className="text-sm font-medium">Nível de Risco</p>
-                                    <Badge variant="secondary" className={getRiskColor(desvio.risk)}>
-                                      {desvio.risk}
+                                    <Badge variant="secondary" className={getRiskColor(desvio.classificacao)}>
+                                      {desvio.classificacao}
                                     </Badge>
                                   </div>
                                   <div>
@@ -252,10 +250,6 @@ const DesviosTable = () => {
                                     <Badge variant="secondary" className={getStatusColor(desvio.status)}>
                                       {desvio.status}
                                     </Badge>
-                                  </div>
-                                  <div className="col-span-2">
-                                    <p className="text-sm font-medium">Responsável</p>
-                                    <p className="text-sm text-muted-foreground">{desvio.responsavel}</p>
                                   </div>
                                 </div>
                               </div>
