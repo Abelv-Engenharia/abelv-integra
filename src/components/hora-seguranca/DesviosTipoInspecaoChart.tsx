@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { fetchDesviosByInspectionType } from '@/services/horaSegurancaService';
+import { fetchDesviosByInspectionType } from '@/services/hora-seguranca';
 
 export function DesviosTipoInspecaoChart() {
   const [data, setData] = useState<any[]>([]);

@@ -1,8 +1,7 @@
-
 import { useEffect, useState } from "react";
 import StatCard from "@/components/dashboard/StatCard";
 import { Calendar, CheckCircle, FileWarning } from "lucide-react";
-import { fetchInspectionsSummary } from "@/services/horaSegurancaService";
+import { fetchInspectionsSummary } from "@/services/hora-seguranca";
 import { InspecoesSummary } from "@/types/users";
 
 export const InspecoesSummaryCards = () => {

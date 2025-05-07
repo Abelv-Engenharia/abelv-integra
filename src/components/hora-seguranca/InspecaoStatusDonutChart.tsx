@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
-import { fetchInspecoesByStatus } from '@/services/horaSegurancaService';
+import { fetchInspecoesByStatus } from '@/services/hora-seguranca';
 
 export function InspecaoStatusDonutChart() {
   const [data, setData] = useState<any[]>([]);

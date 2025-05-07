@@ -1,9 +1,8 @@
-
 import { useState, useEffect } from 'react';
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { Shield, ShieldAlert, ShieldCheck, ShieldX } from "lucide-react";
-import { fetchRecentInspections } from '@/services/horaSegurancaService';
+import { fetchRecentInspections } from '@/services/hora-seguranca';
 
 // Função para renderizar o ícone de acordo com o status
 const getStatusIcon = (status: string) => {

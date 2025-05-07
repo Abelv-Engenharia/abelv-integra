@@ -1,7 +1,6 @@
-
 import { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { fetchInspecoesByMonth } from '@/services/horaSegurancaService';
+import { fetchInspecoesByMonth } from '@/services/hora-seguranca';
 
 interface InspecoesBarChartProps {
   dataType: 'cca' | 'responsible';
