@@ -73,39 +73,209 @@ const TreinamentosCracha = () => {
     });
     
     // Implementação da funcionalidade de impressão
-    const printContent = document.createElement('div');
     if (crachaRef.current) {
-      printContent.innerHTML = crachaRef.current.innerHTML;
-      
-      // Adicionar estilos para impressão
-      const style = document.createElement('style');
-      style.innerHTML = `
-        @page {
-          size: 100mm 160mm;
-          margin: 5mm;
-        }
-        body {
-          font-family: Arial, sans-serif;
-        }
-        .print-container {
-          width: 90mm;
-          height: 150mm;
-          padding: 5mm;
-          border: 1px solid #ddd;
-          border-radius: 5mm;
-        }
-      `;
-      
-      printContent.classList.add('print-container');
-      
       const printWindow = window.open('', '_blank');
       if (printWindow) {
         printWindow.document.open();
-        printWindow.document.write('<html><head><title>Crachá de Capacitação</title>');
-        printWindow.document.write(style.outerHTML);
-        printWindow.document.write('</head><body>');
-        printWindow.document.write(printContent.outerHTML);
-        printWindow.document.write('</body></html>');
+        
+        // Adicionar estilos para impressão que mantêm o layout exato do preview
+        const style = document.createElement('style');
+        style.innerHTML = `
+          @page {
+            size: 100mm 160mm;
+            margin: 0;
+          }
+          body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: white;
+          }
+          .cracha-container {
+            width: 100mm;
+            height: 160mm;
+            box-sizing: border-box;
+            padding: 5mm;
+            margin: 0 auto;
+            page-break-after: always;
+            display: flex;
+            flex-direction: column;
+          }
+          .header {
+            background-color: hsl(222.2, 47.4%, 11.2%);
+            color: white;
+            text-align: center;
+            padding: 10px;
+            border-radius: 4px 4px 0 0;
+            margin-bottom: 15px;
+          }
+          .header h3 {
+            margin: 0;
+            font-size: 16px;
+            font-weight: bold;
+            text-transform: uppercase;
+          }
+          .profile {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+          }
+          .photo {
+            width: 80px;
+            height: 80px;
+            background-color: #f3f4f6;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            overflow: hidden;
+          }
+          .photo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+          }
+          .photo svg {
+            width: 40px;
+            height: 40px;
+            color: #9ca3af;
+          }
+          .info {
+            display: flex;
+            flex-direction: column;
+          }
+          .info h4 {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 0 0 5px 0;
+          }
+          .info p {
+            margin: 0 0 5px 0;
+            font-size: 14px;
+          }
+          .info .matricula {
+            font-size: 12px;
+            color: #6b7280;
+          }
+          .certifications {
+            border-top: 1px solid #e5e7eb;
+            padding-top: 10px;
+            margin-top: 10px;
+            flex-grow: 1;
+          }
+          .certifications h5 {
+            font-size: 14px;
+            text-align: center;
+            margin-top: 0;
+            margin-bottom: 10px;
+            font-weight: 600;
+          }
+          .certifications-table {
+            width: 100%;
+            font-size: 12px;
+            border-collapse: collapse;
+          }
+          .certifications-table thead {
+            border-bottom: 1px solid #e5e7eb;
+          }
+          .certifications-table th {
+            text-align: left;
+            padding: 5px;
+            font-weight: 600;
+          }
+          .certifications-table th:last-child {
+            text-align: right;
+          }
+          .certifications-table td {
+            padding: 5px;
+            border-bottom: 1px solid #e5e7eb;
+          }
+          .certifications-table td:last-child {
+            text-align: right;
+          }
+          .footer {
+            border-top: 1px solid #e5e7eb;
+            margin-top: auto;
+            padding-top: 8px;
+            text-align: center;
+            font-size: 10px;
+            color: #6b7280;
+          }
+          .empty-message {
+            text-align: center;
+            color: #6b7280;
+            font-size: 13px;
+            margin-top: 20px;
+          }
+        `;
+
+        // Criar HTML para impressão usando o design exato do preview
+        printWindow.document.write(`
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <title>Crachá de Capacitação - ${funcionario.nome}</title>
+            ${style.outerHTML}
+          </head>
+          <body>
+            <div class="cracha-container">
+              <div class="header">
+                <h3>Crachá de Capacitação</h3>
+              </div>
+              
+              <div class="profile">
+                <div class="photo">
+                  ${funcionario.foto 
+                    ? `<img src="${funcionario.foto}" alt="${funcionario.nome}" />` 
+                    : `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>`
+                  }
+                </div>
+                
+                <div class="info">
+                  <h4>${funcionario.nome}</h4>
+                  <p>${funcionario.funcao}</p>
+                  <p class="matricula">Matrícula: ${funcionario.matricula}</p>
+                </div>
+              </div>
+              
+              <div class="certifications">
+                <h5>Certificações Válidas</h5>
+                
+                ${treinamentosValidos.length > 0 
+                  ? `<table class="certifications-table">
+                      <thead>
+                        <tr>
+                          <th>Treinamento</th>
+                          <th>Validade</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        ${treinamentosValidos.map(treinamento => {
+                          const treinamentoInfo = MOCK_TREINAMENTOS.find(
+                            t => t.id === treinamento.treinamentoId
+                          );
+                          return `
+                            <tr>
+                              <td>${treinamentoInfo?.nome || 'Treinamento não encontrado'}</td>
+                              <td>${formatarData(treinamento.dataValidade)}</td>
+                            </tr>
+                          `;
+                        }).join('')}
+                      </tbody>
+                    </table>`
+                  : `<p class="empty-message">Sem treinamentos válidos</p>`
+                }
+              </div>
+              
+              <div class="footer">
+                <p>Emitido em ${format(new Date(), "dd/MM/yyyy")}</p>
+              </div>
+            </div>
+          </body>
+          </html>
+        `);
+        
         printWindow.document.close();
         
         // Delay para garantir que o conteúdo foi renderizado antes de imprimir
