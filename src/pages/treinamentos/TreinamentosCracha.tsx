@@ -1,5 +1,5 @@
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Printer, User } from "lucide-react";
@@ -72,8 +72,49 @@ const TreinamentosCracha = () => {
       description: "Enviando crachá para impressão...",
     });
     
-    // Actual print would happen here
-    // window.print();
+    // Implementação da funcionalidade de impressão
+    const printContent = document.createElement('div');
+    if (crachaRef.current) {
+      printContent.innerHTML = crachaRef.current.innerHTML;
+      
+      // Adicionar estilos para impressão
+      const style = document.createElement('style');
+      style.innerHTML = `
+        @page {
+          size: 100mm 160mm;
+          margin: 5mm;
+        }
+        body {
+          font-family: Arial, sans-serif;
+        }
+        .print-container {
+          width: 90mm;
+          height: 150mm;
+          padding: 5mm;
+          border: 1px solid #ddd;
+          border-radius: 5mm;
+        }
+      `;
+      
+      printContent.classList.add('print-container');
+      
+      const printWindow = window.open('', '_blank');
+      if (printWindow) {
+        printWindow.document.open();
+        printWindow.document.write('<html><head><title>Crachá de Capacitação</title>');
+        printWindow.document.write(style.outerHTML);
+        printWindow.document.write('</head><body>');
+        printWindow.document.write(printContent.outerHTML);
+        printWindow.document.write('</body></html>');
+        printWindow.document.close();
+        
+        // Delay para garantir que o conteúdo foi renderizado antes de imprimir
+        setTimeout(() => {
+          printWindow.print();
+          printWindow.close();
+        }, 500);
+      }
+    }
   };
 
   return (
@@ -96,19 +137,34 @@ const TreinamentosCracha = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="max-w-sm">
-            <Select onValueChange={handleFuncionarioChange} value={selectedFuncionarioId}>
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione um funcionário" />
-              </SelectTrigger>
-              <SelectContent>
-                {MOCK_FUNCIONARIOS.map((funcionario) => (
-                  <SelectItem key={funcionario.id} value={funcionario.id}>
-                    {funcionario.nome} - {funcionario.matricula}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="w-full md:w-1/2">
+              <Select onValueChange={handleFuncionarioChange} value={selectedFuncionarioId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione um funcionário" />
+                </SelectTrigger>
+                <SelectContent>
+                  {MOCK_FUNCIONARIOS.map((funcionario) => (
+                    <SelectItem key={funcionario.id} value={funcionario.id}>
+                      {funcionario.nome}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            {funcionario && (
+              <div className="flex flex-1 gap-4">
+                <div className="flex-1">
+                  <p className="text-sm text-gray-500 mb-1">Função</p>
+                  <p className="font-medium border rounded-md px-3 py-2">{funcionario.funcao}</p>
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm text-gray-500 mb-1">Matrícula</p>
+                  <p className="font-medium border rounded-md px-3 py-2">{funcionario.matricula}</p>
+                </div>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
