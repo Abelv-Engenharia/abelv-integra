@@ -1,31 +1,67 @@
 
-export interface InspecoesSummary {
-  totalInspecoes: number;
-  programadas: number;
-  naoProgramadas: number;
-  desviosIdentificados: number;
-}
-
 export interface InspecoesByTipo {
-  name: string;
-  value: number;
+  tipo: string;
+  quantidade: number;
 }
 
-export interface InspecoesByStatus {
-  name: string;
-  value: number;
+export interface RPCInspecoesByTipoResult {
+  tipo: string;
+  quantidade: number;
+}
+
+export interface RPCDesviosByInspectionTypeResult {
+  tipo: string;
+  quantidade: number;
 }
 
 export interface InspecoesByResponsavel {
-  name: string;
-  value: number;
+  responsavel: string;
+  quantidade: number;
+}
+
+export interface RPCInspecoesByResponsavelResult {
+  responsavel: string;
+  quantidade: number;
+}
+
+export interface InspecoesByStatus {
+  status: string;
+  quantidade: number;
+  cor?: string;
+}
+
+export interface RPCInspecoesByStatusResult {
+  status: string;
+  quantidade: number;
 }
 
 export interface InspecoesStats {
-  month: string;
-  Concluída: number;
-  Pendente: number;
-  Cancelada: number;
+  total: number;
+  concluidas: number;
+  emAndamento: number;
+  pendentes: number;
+  percentualConcluidas: number;
+}
+
+export interface RPCInspecoesStatsResult {
+  total: number;
+  concluidas: number;
+  em_andamento: number;
+  pendentes: number;
+}
+
+export interface InspecoesSummary {
+  planejadas: number;
+  realizadas: number;
+  percentual: number;
+  meta: number;
+  diferenca: number;
+}
+
+export interface RPCInspecoesSummaryResult {
+  planejadas: number;
+  realizadas: number;
+  meta: number;
 }
 
 export interface RecentInspection {
@@ -35,11 +71,3 @@ export interface RecentInspection {
   status: string;
   data: string;
 }
-
-// Declare RPC function return types
-export type RPCInspecoesByTipoResult = InspecoesByTipo[];
-export type RPCInspecoesByStatusResult = { name: string, value: number }[];
-export type RPCInspecoesByResponsavelResult = InspecoesByResponsavel[];
-export type RPCInspecoesSummaryResult = InspecoesSummary[];
-export type RPCInspecoesStatsResult = InspecoesStats[];
-export type RPCDesviosByInspectionTypeResult = InspecoesByTipo[];

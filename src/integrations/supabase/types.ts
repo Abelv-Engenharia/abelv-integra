@@ -265,6 +265,7 @@ export type Database = {
           ano: number
           carga_horaria: number
           cca: string
+          cca_id: number | null
           created_at: string | null
           data: string
           id: string
@@ -272,7 +273,9 @@ export type Database = {
           mes: number
           observacoes: string | null
           processo_treinamento: string
+          processo_treinamento_id: string | null
           tipo_treinamento: string
+          tipo_treinamento_id: string | null
           treinamento_id: string | null
           treinamento_nome: string | null
           updated_at: string | null
@@ -281,6 +284,7 @@ export type Database = {
           ano: number
           carga_horaria: number
           cca: string
+          cca_id?: number | null
           created_at?: string | null
           data: string
           id?: string
@@ -288,7 +292,9 @@ export type Database = {
           mes: number
           observacoes?: string | null
           processo_treinamento: string
+          processo_treinamento_id?: string | null
           tipo_treinamento: string
+          tipo_treinamento_id?: string | null
           treinamento_id?: string | null
           treinamento_nome?: string | null
           updated_at?: string | null
@@ -297,6 +303,7 @@ export type Database = {
           ano?: number
           carga_horaria?: number
           cca?: string
+          cca_id?: number | null
           created_at?: string | null
           data?: string
           id?: string
@@ -304,12 +311,35 @@ export type Database = {
           mes?: number
           observacoes?: string | null
           processo_treinamento?: string
+          processo_treinamento_id?: string | null
           tipo_treinamento?: string
+          tipo_treinamento_id?: string | null
           treinamento_id?: string | null
           treinamento_nome?: string | null
           updated_at?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "execucao_treinamentos_cca_id_fkey"
+            columns: ["cca_id"]
+            isOneToOne: false
+            referencedRelation: "ccas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "execucao_treinamentos_processo_treinamento_id_fkey"
+            columns: ["processo_treinamento_id"]
+            isOneToOne: false
+            referencedRelation: "processo_treinamento"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "execucao_treinamentos_tipo_treinamento_id_fkey"
+            columns: ["tipo_treinamento_id"]
+            isOneToOne: false
+            referencedRelation: "tipo_treinamento"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "execucao_treinamentos_treinamento_id_fkey"
             columns: ["treinamento_id"]
@@ -429,6 +459,33 @@ export type Database = {
           id?: number
           nome?: string
           permissoes?: Json
+        }
+        Relationships: []
+      }
+      processo_treinamento: {
+        Row: {
+          ativo: boolean | null
+          codigo: string
+          created_at: string | null
+          id: string
+          nome: string
+          updated_at: string | null
+        }
+        Insert: {
+          ativo?: boolean | null
+          codigo: string
+          created_at?: string | null
+          id?: string
+          nome: string
+          updated_at?: string | null
+        }
+        Update: {
+          ativo?: boolean | null
+          codigo?: string
+          created_at?: string | null
+          id?: string
+          nome?: string
+          updated_at?: string | null
         }
         Relationships: []
       }
@@ -571,6 +628,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      tipo_treinamento: {
+        Row: {
+          ativo: boolean | null
+          codigo: string
+          created_at: string | null
+          id: string
+          nome: string
+          updated_at: string | null
+        }
+        Insert: {
+          ativo?: boolean | null
+          codigo: string
+          created_at?: string | null
+          id?: string
+          nome: string
+          updated_at?: string | null
+        }
+        Update: {
+          ativo?: boolean | null
+          codigo?: string
+          created_at?: string | null
+          id?: string
+          nome?: string
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       tipos_registro: {
         Row: {

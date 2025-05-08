@@ -7,7 +7,7 @@ import { InspecoesByTipo, RPCInspecoesByTipoResult } from './types';
  */
 export async function fetchInspecoesByTipo(): Promise<InspecoesByTipo[]> {
   try {
-    const { data, error } = await supabase.rpc<RPCInspecoesByTipoResult>(
+    const { data, error } = await supabase.rpc<RPCInspecoesByTipoResult, never>(
       'get_inspecoes_by_tipo'
     );
 

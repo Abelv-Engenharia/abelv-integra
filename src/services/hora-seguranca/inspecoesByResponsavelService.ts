@@ -7,7 +7,7 @@ import { InspecoesByResponsavel, RPCInspecoesByResponsavelResult } from './types
  */
 export async function fetchInspecoesByResponsavel(): Promise<InspecoesByResponsavel[]> {
   try {
-    const { data, error } = await supabase.rpc<RPCInspecoesByResponsavelResult>(
+    const { data, error } = await supabase.rpc<RPCInspecoesByResponsavelResult, never>(
       'get_inspecoes_by_responsavel'
     );
 
