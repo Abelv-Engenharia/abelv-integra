@@ -26,8 +26,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { fetchCCAs, CCAOption } from "@/services/treinamentos/ccaService";
-import { createHorasTrabalhadas } from "@/services/hora-seguranca/horasTrabalhadasService";
+import { createHorasTrabalhadas } from "@/services/horaSegurancaService";
 import { Textarea } from "@/components/ui/textarea";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { HHTTable } from "@/components/hora-seguranca/HHTTable";
+import { HHTMonthChart } from "@/components/hora-seguranca/HHTMonthChart";
 
 // Get current year and past 3 years for the year options
 const getCurrentYear = () => {
@@ -84,6 +87,7 @@ const RegistroHHT = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [ccaOptions, setCcaOptions] = useState<CCAOption[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("registro");
 
   // Load CCA options from Supabase
   useEffect(() => {
@@ -149,6 +153,9 @@ const RegistroHHT = () => {
           hoursWorked: "",
           observacoes: "",
         });
+        
+        // Mudar para a aba de visualização após o registro bem-sucedido
+        setActiveTab("visualizar");
       } else {
         toast({
           title: "Erro ao salvar registro",
@@ -186,161 +193,185 @@ const RegistroHHT = () => {
           <ArrowLeft className="mr-2 h-4 w-4" />
           Voltar
         </Button>
-        <h1 className="text-2xl font-bold tracking-tight">Registro de HHT</h1>
+        <h1 className="text-2xl font-bold tracking-tight">Horas-Homem Trabalhadas (HHT)</h1>
         <p className="text-muted-foreground">
-          Registre as horas-homem trabalhadas por centro de custo
+          Registre e visualize as horas-homem trabalhadas por centro de custo
         </p>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Novo Registro de HHT</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="month"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Mês</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecione o mês" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {getMonths().map((month) => (
-                            <SelectItem key={month.value} value={month.value}>
-                              {month.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+      <Tabs defaultValue="registro" value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid grid-cols-2 w-[400px]">
+          <TabsTrigger value="registro">Registrar HHT</TabsTrigger>
+          <TabsTrigger value="visualizar">Visualizar HHT</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="registro" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Novo Registro de HHT</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="month"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Mês</FormLabel>
+                          <Select
+                            onValueChange={field.onChange}
+                            defaultValue={field.value}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Selecione o mês" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {getMonths().map((month) => (
+                                <SelectItem key={month.value} value={month.value}>
+                                  {month.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                <FormField
-                  control={form.control}
-                  name="year"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Ano</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecione o ano" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {getCurrentYear().map((year) => (
-                            <SelectItem key={year} value={year.toString()}>
-                              {year}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
+                    <FormField
+                      control={form.control}
+                      name="year"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Ano</FormLabel>
+                          <Select
+                            onValueChange={field.onChange}
+                            defaultValue={field.value}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Selecione o ano" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {getCurrentYear().map((year) => (
+                                <SelectItem key={year} value={year.toString()}>
+                                  {year}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
 
-              <FormField
-                control={form.control}
-                name="cca"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>CCA</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                      disabled={isLoading}
+                  <FormField
+                    control={form.control}
+                    name="cca"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>CCA</FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                          disabled={isLoading}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder={isLoading ? "Carregando CCAs..." : "Selecione o CCA"} />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {ccaOptions.map((cca) => (
+                              <SelectItem key={cca.id} value={cca.id.toString()}>
+                                {cca.codigo} - {cca.nome}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="hoursWorked"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Horas Trabalhadas</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            placeholder="Digite o número de horas trabalhadas"
+                            step="0.01"
+                            min="0.01"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="observacoes"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Observações (Opcional)</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            placeholder="Observações adicionais sobre o registro"
+                            className="resize-none"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <div className="flex justify-end space-x-2">
+                    <Button
+                      variant="outline"
+                      onClick={() => navigate(-1)}
+                      disabled={isSubmitting}
+                      type="button"
                     >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder={isLoading ? "Carregando CCAs..." : "Selecione o CCA"} />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {ccaOptions.map((cca) => (
-                          <SelectItem key={cca.id} value={cca.id.toString()}>
-                            {cca.codigo} - {cca.nome}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                      Cancelar
+                    </Button>
+                    <Button type="submit" disabled={isSubmitting || isLoading}>
+                      {isSubmitting ? "Salvando..." : "Salvar registro"}
+                    </Button>
+                  </div>
+                </form>
+              </Form>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-              <FormField
-                control={form.control}
-                name="hoursWorked"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Horas Trabalhadas</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        placeholder="Digite o número de horas trabalhadas"
-                        step="0.01"
-                        min="0.01"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="observacoes"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Observações (Opcional)</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="Observações adicionais sobre o registro"
-                        className="resize-none"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <div className="flex justify-end space-x-2">
-                <Button
-                  variant="outline"
-                  onClick={() => navigate(-1)}
-                  disabled={isSubmitting}
-                  type="button"
-                >
-                  Cancelar
-                </Button>
-                <Button type="submit" disabled={isSubmitting || isLoading}>
-                  {isSubmitting ? "Salvando..." : "Salvar registro"}
-                </Button>
-              </div>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
+        <TabsContent value="visualizar" className="space-y-6">
+          <div className="grid gap-6 md:grid-cols-1 lg:grid-cols-1">
+            <HHTMonthChart />
+            
+            <Card>
+              <CardHeader>
+                <CardTitle>Horas Trabalhadas por CCA</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <HHTTable />
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
