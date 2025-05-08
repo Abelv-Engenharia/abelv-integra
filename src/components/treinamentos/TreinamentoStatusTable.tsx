@@ -73,7 +73,7 @@ export const TreinamentoStatusTable = () => {
                   </>
                 ) : null}
                 <TableCell>{treinamento.treinamentoNome}</TableCell>
-                <TableCell>{formatarData(new Date(treinamento.data_validade))}</TableCell>
+                <TableCell>{formatarData(treinamento.data_validade)}</TableCell>
                 <TableCell>
                   <Badge
                     variant={

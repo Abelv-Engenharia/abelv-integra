@@ -40,6 +40,25 @@ export async function criarExecucaoTreinamento(dados: TreinamentoExecucaoInput):
       }
     }
     
+    // Obter os nomes de CCA, processo e tipo
+    const { data: cca } = await supabase
+      .from('ccas')
+      .select('nome')
+      .eq('id', dados.cca_id)
+      .single();
+      
+    const { data: processo } = await supabase
+      .from('processo_treinamento')
+      .select('nome')
+      .eq('id', dados.processo_treinamento_id)
+      .single();
+      
+    const { data: tipo } = await supabase
+      .from('tipo_treinamento')
+      .select('nome')
+      .eq('id', dados.tipo_treinamento_id)
+      .single();
+    
     const { data, error } = await supabase.from('execucao_treinamentos').insert({
       data: format(dados.data, 'yyyy-MM-dd'),
       mes,
@@ -51,7 +70,10 @@ export async function criarExecucaoTreinamento(dados: TreinamentoExecucaoInput):
       treinamento_nome: dados.treinamento_nome,
       carga_horaria: dados.carga_horaria,
       observacoes: dados.observacoes,
-      lista_presenca_url
+      lista_presenca_url,
+      cca: cca?.nome || "",
+      processo_treinamento: processo?.nome || "",
+      tipo_treinamento: tipo?.nome || ""
     }).select('id').single();
     
     if (error) {

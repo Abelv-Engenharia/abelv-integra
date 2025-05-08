@@ -1,14 +1,24 @@
 
-import { TreinamentoNormativo, Treinamento, MOCK_TREINAMENTOS } from "@/types/treinamentos";
-import { addDays, format, isBefore, differenceInDays } from "date-fns";
+import { format, addDays, isBefore, differenceInDays } from "date-fns";
+import { supabase } from "@/integrations/supabase/client";
 
-export const calcularDataValidade = (
+export const calcularDataValidade = async (
   treinamentoId: string,
   dataRealizacao: Date
-): Date => {
-  const treinamento = MOCK_TREINAMENTOS.find(t => t.id === treinamentoId);
-  const validadeDias = treinamento?.validadeDias || 365; // Default to 1 year
-  return addDays(dataRealizacao, validadeDias);
+): Promise<Date> => {
+  try {
+    const { data: treinamento } = await supabase
+      .from('treinamentos')
+      .select('validade_dias')
+      .eq('id', treinamentoId)
+      .single();
+
+    const validadeDias = treinamento?.validade_dias || 365; // Default to 1 year
+    return addDays(dataRealizacao, validadeDias);
+  } catch (error) {
+    console.error("Erro ao buscar validade do treinamento:", error);
+    return addDays(dataRealizacao, 365); // Default to 1 year in case of error
+  }
 };
 
 export const calcularStatusTreinamento = (
@@ -39,22 +49,103 @@ export const getStatusColor = (status: string): string => {
   }
 };
 
-export const formatarData = (data: Date): string => {
-  return format(data, "dd/MM/yyyy");
+export const formatarData = (data: Date | string): string => {
+  if (!data) return "";
+  const dataObj = typeof data === 'string' ? new Date(data) : data;
+  return format(dataObj, "dd/MM/yyyy");
 };
 
-export const getTreinamentosValidos = (
-  treinamentos: TreinamentoNormativo[]
-): TreinamentoNormativo[] => {
-  return treinamentos.filter(t => !t.arquivado && t.status !== "Vencido");
-};
+export async function getNomeTreinamento(id: string): Promise<string> {
+  try {
+    const { data } = await supabase
+      .from('treinamentos')
+      .select('nome')
+      .eq('id', id)
+      .single();
+    
+    return data?.nome || "Treinamento não encontrado";
+  } catch (error) {
+    console.error("Erro ao buscar nome do treinamento:", error);
+    return "Treinamento não encontrado";
+  }
+}
 
-export const getTreinamentosHistorico = (
-  treinamentos: TreinamentoNormativo[]
-): TreinamentoNormativo[] => {
-  return treinamentos.filter(t => t.arquivado);
-};
+// New service to fetch all trainings from Supabase
+export async function fetchTreinamentos() {
+  try {
+    const { data, error } = await supabase
+      .from('treinamentos')
+      .select('*')
+      .order('nome');
 
-export const getNomeTreinamento = (id: string): string => {
-  return MOCK_TREINAMENTOS.find(t => t.id === id)?.nome || "Treinamento não encontrado";
-};
+    if (error) {
+      console.error("Erro ao buscar treinamentos:", error);
+      return [];
+    }
+
+    return data || [];
+  } catch (error) {
+    console.error("Exceção ao buscar treinamentos:", error);
+    return [];
+  }
+}
+
+// New service to fetch funcionários from Supabase
+export async function fetchFuncionarios() {
+  try {
+    const { data, error } = await supabase
+      .from('funcionarios')
+      .select('*')
+      .eq('ativo', true)
+      .order('nome');
+
+    if (error) {
+      console.error("Erro ao buscar funcionários:", error);
+      return [];
+    }
+
+    return data || [];
+  } catch (error) {
+    console.error("Exceção ao buscar funcionários:", error);
+    return [];
+  }
+}
+
+// Service to create a normative training record
+export async function criarTreinamentoNormativo(dados: {
+  funcionarioId: string;
+  treinamentoId: string;
+  tipo: 'Formação' | 'Reciclagem';
+  dataRealizacao: Date;
+  dataValidade: Date;
+  certificadoUrl?: string;
+}) {
+  try {
+    const status = calcularStatusTreinamento(dados.dataValidade);
+    
+    const { data, error } = await supabase
+      .from('treinamentos_normativos')
+      .insert({
+        funcionario_id: dados.funcionarioId,
+        treinamento_id: dados.treinamentoId,
+        tipo: dados.tipo,
+        data_realizacao: format(dados.dataRealizacao, 'yyyy-MM-dd'),
+        data_validade: format(dados.dataValidade, 'yyyy-MM-dd'),
+        certificado_url: dados.certificadoUrl,
+        status,
+        arquivado: false
+      })
+      .select('id')
+      .single();
+
+    if (error) {
+      console.error("Erro ao criar treinamento normativo:", error);
+      return { success: false, error: error.message };
+    }
+
+    return { success: true, id: data?.id };
+  } catch (error) {
+    console.error("Exceção ao criar treinamento normativo:", error);
+    return { success: false, error: "Erro interno ao processar o registro" };
+  }
+}

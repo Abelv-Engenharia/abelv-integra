@@ -1,5 +1,6 @@
 
 import { supabase } from "@/integrations/supabase/client";
+import { formatISO } from "date-fns";
 
 export const fetchTreinamentosStats = async () => {
   // Fetch total number of trainings (normative and execution)
