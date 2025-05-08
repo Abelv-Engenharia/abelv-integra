@@ -58,10 +58,9 @@ export async function criarExecucaoTreinamento(treinamento: Partial<ExecucaoTrei
       treinamento.horas_totais = treinamento.carga_horaria * (efetivo_mod + efetivo_moi);
     }
 
-    // Need to ensure we're inserting an array or object based on what the API expects
     const { data, error } = await supabase
       .from('execucao_treinamentos')
-      .insert([treinamento])
+      .insert(treinamento)
       .select();
 
     if (error) {

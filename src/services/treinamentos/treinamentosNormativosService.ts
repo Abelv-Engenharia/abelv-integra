@@ -54,7 +54,7 @@ export async function criarTreinamentoNormativo(treinamento: Partial<Treinamento
 
     const { data, error } = await supabase
       .from('treinamentos_normativos')
-      .insert([treinamentoToInsert])
+      .insert(treinamentoToInsert)
       .select();
 
     if (error) {
