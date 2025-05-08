@@ -1,3 +1,4 @@
+
 // Basic entity types
 export interface Funcionario {
   id: string;
@@ -11,20 +12,22 @@ export interface Funcionario {
 export interface Treinamento {
   id: string;
   nome: string;
-  cargaHoraria?: number;
-  validadeDias?: number; // Validade em dias
+  carga_horaria?: number;
+  validade_dias?: number; // Validade em dias
 }
 
 export interface TreinamentoNormativo {
   id: string;
-  funcionarioId: string;
-  treinamentoId: string;
+  funcionario_id: string;
+  treinamento_id: string;
   tipo: 'Formação' | 'Reciclagem';
-  dataRealizacao: Date;
-  dataValidade: Date;
-  certificadoUrl?: string;
+  data_realizacao: Date;
+  data_validade: Date;
+  certificado_url?: string;
   status: 'Válido' | 'Próximo ao vencimento' | 'Vencido';
   arquivado: boolean; // Para histórico
+  treinamentoNome?: string;
+  funcionarioNome?: string;
 }
 
 export interface ExecucaoTreinamento {
@@ -34,13 +37,13 @@ export interface ExecucaoTreinamento {
   ano: number;
   cca: string;
   cca_id?: number;
-  processoTreinamento: string;
-  tipoTreinamento: string;
-  treinamentoId?: string;
-  treinamentoNome?: string;
-  cargaHoraria: number;
+  processo_treinamento: string;
+  tipo_treinamento: string;
+  treinamento_id?: string;
+  treinamento_nome?: string;
+  carga_horaria: number;
   observacoes?: string;
-  listaPresencaUrl?: string;
+  lista_presenca_url?: string;
 }
 
 export const OPCOES_CCA = [
@@ -68,3 +71,33 @@ export const OPCOES_TIPO_TREINAMENTO = [
   'EAD',
   'Híbrido'
 ];
+
+// For the InspecoesSummary interface
+export interface InspecoesSummary {
+  totalInspecoes: number;
+  programadas: number;
+  naoProgramadas: number;
+  desviosIdentificados: number;
+  realizadas?: number;
+  canceladas?: number;
+}
+
+export interface InspecoesByTipo {
+  tipo: string;
+  quantidade: number;
+}
+
+export interface InspecoesByStatus {
+  status: string;
+  quantidade: number;
+}
+
+export interface RPCInspecoesByResponsavelResult {
+  responsavel: string;
+  quantidade: number;
+}
+
+export interface RPCDesviosByInspectionTypeResult {
+  tipo: string;
+  quantidade: number;
+}

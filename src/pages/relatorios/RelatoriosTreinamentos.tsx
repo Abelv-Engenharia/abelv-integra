@@ -7,6 +7,7 @@ import { fetchTreinamentosExecucaoData } from "@/services/treinamentosDashboardS
 interface TrainingData {
   name: string;
   value: number;
+  hoursTotal: number;
 }
 
 const RelatoriosTreinamentos = () => {
@@ -22,7 +23,8 @@ const RelatoriosTreinamentos = () => {
         // Transform the data format
         const chartData: TrainingData[] = execucaoData.map(item => ({
           name: item.name,
-          value: item.count
+          value: item.count,
+          hoursTotal: item.hoursTotal
         }));
         
         setData(chartData);
@@ -52,9 +54,9 @@ const RelatoriosTreinamentos = () => {
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="name" />
               <YAxis />
-              <Tooltip />
+              <Tooltip formatter={(value, name) => [value, name === "value" ? "Treinamentos" : "Horas"]} />
               <Legend />
-              <Bar dataKey="value" fill="#8884d8">
+              <Bar dataKey="value" name="Quantidade" fill="#8884d8">
                 {data.map((entry, index) => (
                   <Cell 
                     key={`cell-${index}`} 

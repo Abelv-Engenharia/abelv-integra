@@ -1,6 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { InspecoesByTipo } from './types';
+import { InspecoesByTipo } from '@/types/treinamentos';
 
 /**
  * Fetch inspeções by tipo

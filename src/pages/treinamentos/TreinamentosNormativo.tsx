@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+
+import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { format, addDays } from "date-fns";
+import { format } from "date-fns";
 import { CalendarIcon, Check, Save, ArrowLeft } from "lucide-react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -31,11 +32,10 @@ import {
 import { Link } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
 import { 
-  MOCK_FUNCIONARIOS, 
-  MOCK_TREINAMENTOS,
-  Funcionario
+  Funcionario,
+  Treinamento
 } from "@/types/treinamentos";
-import { calcularDataValidade, calcularStatusTreinamento } from "@/utils/treinamentosUtils";
+import { calcularDataValidade, calcularStatusTreinamento, fetchFuncionarios, fetchTreinamentos, criarTreinamentoNormativo } from "@/utils/treinamentosUtils";
 import { cn } from "@/lib/utils";
 
 const formSchema = z.object({
@@ -60,6 +60,9 @@ const TreinamentosNormativo = () => {
   const [isSubmitSuccess, setIsSubmitSuccess] = useState(false);
   const [selectedFuncionario, setSelectedFuncionario] = useState<Funcionario | null>(null);
   const [dataValidade, setDataValidade] = useState<Date | null>(null);
+  const [funcionarios, setFuncionarios] = useState<Funcionario[]>([]);
+  const [treinamentos, setTreinamentos] = useState<Treinamento[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -68,29 +71,70 @@ const TreinamentosNormativo = () => {
     },
   });
 
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setIsLoading(true);
+        const funcionariosData = await fetchFuncionarios();
+        const treinamentosData = await fetchTreinamentos();
+        
+        setFuncionarios(funcionariosData);
+        setTreinamentos(treinamentosData);
+      } catch (error) {
+        console.error("Erro ao carregar dados:", error);
+        toast({
+          title: "Erro",
+          description: "Não foi possível carregar os dados necessários",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    loadData();
+  }, []);
+
   const watchFuncionarioId = form.watch("funcionarioId");
   const watchTreinamentoId = form.watch("treinamentoId");
   const watchDataRealizacao = form.watch("dataRealizacao");
   
   React.useEffect(() => {
     if (watchFuncionarioId) {
-      const funcionario = MOCK_FUNCIONARIOS.find(f => f.id === watchFuncionarioId);
+      const funcionario = funcionarios.find(f => f.id === watchFuncionarioId);
       setSelectedFuncionario(funcionario || null);
     } else {
       setSelectedFuncionario(null);
     }
-  }, [watchFuncionarioId]);
+  }, [watchFuncionarioId, funcionarios]);
   
   React.useEffect(() => {
-    if (watchTreinamentoId && watchDataRealizacao) {
-      const novaDataValidade = calcularDataValidade(watchTreinamentoId, watchDataRealizacao);
-      setDataValidade(novaDataValidade);
-    } else {
-      setDataValidade(null);
-    }
+    const updateDataValidade = async () => {
+      if (watchTreinamentoId && watchDataRealizacao) {
+        try {
+          const validade = await calcularDataValidade(watchTreinamentoId, watchDataRealizacao);
+          setDataValidade(validade);
+        } catch (error) {
+          console.error("Erro ao calcular data de validade:", error);
+        }
+      } else {
+        setDataValidade(null);
+      }
+    };
+    
+    updateDataValidade();
   }, [watchTreinamentoId, watchDataRealizacao]);
 
-  const onSubmit = (data: FormValues) => {
+  const onSubmit = async (data: FormValues) => {
+    if (!dataValidade) {
+      toast({
+        title: "Erro",
+        description: "Não foi possível calcular a data de validade",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     console.log("Form data:", data);
     
     const file = data.certificado?.[0];
@@ -103,27 +147,45 @@ const TreinamentosNormativo = () => {
       return;
     }
     
-    const novoTreinamento = {
-      id: `new-${Date.now()}`,
-      funcionarioId: data.funcionarioId,
-      treinamentoId: data.treinamentoId,
-      tipo: data.tipo,
-      dataRealizacao: data.dataRealizacao,
-      dataValidade: dataValidade as Date,
-      certificadoUrl: file ? URL.createObjectURL(file) : undefined,
-      status: calcularStatusTreinamento(dataValidade as Date),
-      arquivado: false,
-    };
-    
-    console.log("Novo treinamento normativo:", novoTreinamento);
-    
-    toast({
-      title: "Sucesso!",
-      description: "Registro realizado com sucesso!",
-      variant: "default",
-    });
-    
-    setIsSubmitSuccess(true);
+    try {
+      setIsLoading(true);
+      
+      // Implementar upload do certificado aqui
+      let certificadoUrl = undefined;
+      
+      const result = await criarTreinamentoNormativo({
+        funcionarioId: data.funcionarioId,
+        treinamentoId: data.treinamentoId,
+        tipo: data.tipo,
+        dataRealizacao: data.dataRealizacao,
+        dataValidade: dataValidade,
+        certificadoUrl
+      });
+      
+      if (result.success) {
+        toast({
+          title: "Sucesso!",
+          description: "Registro realizado com sucesso!",
+          variant: "default",
+        });
+        setIsSubmitSuccess(true);
+      } else {
+        toast({
+          title: "Erro ao salvar",
+          description: result.error || "Erro ao salvar o registro",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Erro ao criar treinamento:", error);
+      toast({
+        title: "Erro",
+        description: "Ocorreu um erro ao processar a solicitação",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   if (isSubmitSuccess) {
@@ -184,25 +246,72 @@ const TreinamentosNormativo = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <div className="flex flex-col md:flex-row gap-4">
+          {isLoading ? (
+            <div className="flex justify-center items-center py-8">
+              <p>Carregando dados...</p>
+            </div>
+          ) : (
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                <div className="flex flex-col md:flex-row gap-4">
+                  <FormField
+                    control={form.control}
+                    name="funcionarioId"
+                    render={({ field }) => (
+                      <FormItem className="flex-1">
+                        <FormLabel>Funcionário</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecione o funcionário" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {funcionarios.map((funcionario) => (
+                              <SelectItem key={funcionario.id} value={funcionario.id}>
+                                {funcionario.nome}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormItem className="flex-1">
+                    <FormLabel>Função</FormLabel>
+                    <Input 
+                      value={selectedFuncionario?.funcao || ""} 
+                      disabled 
+                    />
+                  </FormItem>
+                  
+                  <FormItem className="flex-1">
+                    <FormLabel>Matrícula</FormLabel>
+                    <Input 
+                      value={selectedFuncionario?.matricula || ""} 
+                      disabled 
+                    />
+                  </FormItem>
+                </div>
+
                 <FormField
                   control={form.control}
-                  name="funcionarioId"
+                  name="treinamentoId"
                   render={({ field }) => (
-                    <FormItem className="flex-1">
-                      <FormLabel>Funcionário</FormLabel>
+                    <FormItem>
+                      <FormLabel>Treinamento realizado</FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Selecione o funcionário" />
+                            <SelectValue placeholder="Selecione o treinamento" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {MOCK_FUNCIONARIOS.map((funcionario) => (
-                            <SelectItem key={funcionario.id} value={funcionario.id}>
-                              {funcionario.nome}
+                          {treinamentos.map((treinamento) => (
+                            <SelectItem key={treinamento.id} value={treinamento.id}>
+                              {treinamento.nome}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -211,158 +320,117 @@ const TreinamentosNormativo = () => {
                     </FormItem>
                   )}
                 />
-                
-                <FormItem className="flex-1">
-                  <FormLabel>Função</FormLabel>
-                  <Input 
-                    value={selectedFuncionario?.funcao || ""} 
-                    disabled 
-                  />
-                </FormItem>
-                
-                <FormItem className="flex-1">
-                  <FormLabel>Matrícula</FormLabel>
-                  <Input 
-                    value={selectedFuncionario?.matricula || ""} 
-                    disabled 
-                  />
-                </FormItem>
-              </div>
 
-              <FormField
-                control={form.control}
-                name="treinamentoId"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Treinamento realizado</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione o treinamento" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {MOCK_TREINAMENTOS.map((treinamento) => (
-                          <SelectItem key={treinamento.id} value={treinamento.id}>
-                            {treinamento.nome}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="tipo"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Tipo de treinamento</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione o tipo" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="Formação">Formação</SelectItem>
-                        <SelectItem value="Reciclagem">Reciclagem</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="dataRealizacao"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Data da realização</FormLabel>
-                    <Popover>
-                      <PopoverTrigger asChild>
+                <FormField
+                  control={form.control}
+                  name="tipo"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Tipo de treinamento</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
-                          <Button
-                            variant={"outline"}
-                            className={cn(
-                              "w-full pl-3 text-left font-normal",
-                              !field.value && "text-muted-foreground"
-                            )}
-                          >
-                            {field.value ? (
-                              format(field.value, "dd/MM/yyyy")
-                            ) : (
-                              <span>Selecione uma data</span>
-                            )}
-                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                          </Button>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione o tipo" />
+                          </SelectTrigger>
                         </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={field.value}
-                          onSelect={field.onChange}
-                          disabled={(date) => date > new Date()}
-                          initialFocus
-                          className={cn("p-3 pointer-events-auto")}
-                        />
-                      </PopoverContent>
-                    </Popover>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormItem>
-                <FormLabel>Data de validade</FormLabel>
-                <Input
-                  value={dataValidade ? format(dataValidade, "dd/MM/yyyy") : ""}
-                  disabled
+                        <SelectContent>
+                          <SelectItem value="Formação">Formação</SelectItem>
+                          <SelectItem value="Reciclagem">Reciclagem</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
-                {dataValidade && (
-                  <div className="text-xs text-muted-foreground mt-1">
-                    {calcularStatusTreinamento(dataValidade) === "Válido" ? (
-                      <span className="text-green-600">Válido até esta data</span>
-                    ) : calcularStatusTreinamento(dataValidade) === "Próximo ao vencimento" ? (
-                      <span className="text-amber-600">Próximo ao vencimento</span>
-                    ) : (
-                      <span className="text-red-600">Vencido</span>
-                    )}
-                  </div>
-                )}
-              </FormItem>
 
-              <FormField
-                control={form.control}
-                name="certificado"
-                render={({ field: { value, onChange, ...field } }) => (
-                  <FormItem>
-                    <FormLabel>Anexar certificado (PDF, máx. 2MB)</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="file"
-                        accept=".pdf"
-                        onChange={(e) => onChange(e.target.files)}
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                <FormField
+                  control={form.control}
+                  name="dataRealizacao"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Data da realização</FormLabel>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              variant={"outline"}
+                              className={cn(
+                                "w-full pl-3 text-left font-normal",
+                                !field.value && "text-muted-foreground"
+                              )}
+                            >
+                              {field.value ? (
+                                format(field.value, "dd/MM/yyyy")
+                              ) : (
+                                <span>Selecione uma data</span>
+                              )}
+                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={field.value}
+                            onSelect={field.onChange}
+                            disabled={(date) => date > new Date()}
+                            initialFocus
+                            className={cn("p-3 pointer-events-auto")}
+                          />
+                        </PopoverContent>
+                      </Popover>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              <div className="flex justify-end">
-                <Button type="submit" className="gap-1">
-                  <Save className="h-4 w-4" />
-                  Salvar registro
-                </Button>
-              </div>
-            </form>
-          </Form>
+                <FormItem>
+                  <FormLabel>Data de validade</FormLabel>
+                  <Input
+                    value={dataValidade ? format(dataValidade, "dd/MM/yyyy") : ""}
+                    disabled
+                  />
+                  {dataValidade && (
+                    <div className="text-xs text-muted-foreground mt-1">
+                      {calcularStatusTreinamento(dataValidade) === "Válido" ? (
+                        <span className="text-green-600">Válido até esta data</span>
+                      ) : calcularStatusTreinamento(dataValidade) === "Próximo ao vencimento" ? (
+                        <span className="text-amber-600">Próximo ao vencimento</span>
+                      ) : (
+                        <span className="text-red-600">Vencido</span>
+                      )}
+                    </div>
+                  )}
+                </FormItem>
+
+                <FormField
+                  control={form.control}
+                  name="certificado"
+                  render={({ field: { value, onChange, ...field } }) => (
+                    <FormItem>
+                      <FormLabel>Anexar certificado (PDF, máx. 2MB)</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="file"
+                          accept=".pdf"
+                          onChange={(e) => onChange(e.target.files)}
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <div className="flex justify-end">
+                  <Button type="submit" className="gap-1" disabled={isLoading}>
+                    <Save className="h-4 w-4" />
+                    {isLoading ? "Salvando..." : "Salvar registro"}
+                  </Button>
+                </div>
+              </form>
+            </Form>
+          )}
         </CardContent>
       </Card>
     </div>

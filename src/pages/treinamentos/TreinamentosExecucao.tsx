@@ -32,12 +32,13 @@ import {
 } from "@/components/ui/popover";
 import { Link } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
-import { MOCK_TREINAMENTOS } from "@/types/treinamentos";
+import { Treinamento } from "@/types/treinamentos";
 import { cn } from "@/lib/utils";
 import { fetchCCAs, CCAOption } from "@/services/treinamentos/ccaService";
 import { fetchProcessosTreinamento, ProcessoTreinamentoOption } from "@/services/treinamentos/processoTreinamentoService";
 import { fetchTiposTreinamento, TipoTreinamentoOption } from "@/services/treinamentos/tipoTreinamentoService";
 import { criarExecucaoTreinamento } from "@/services/treinamentos/execucaoTreinamentoService";
+import { fetchTreinamentos } from "@/utils/treinamentosUtils";
 
 const formSchema = z.object({
   data: z.date({
@@ -75,6 +76,7 @@ const TreinamentosExecucao = () => {
   const [ccaOptions, setCCAOptions] = useState<CCAOption[]>([]);
   const [processoOptions, setProcessoOptions] = useState<ProcessoTreinamentoOption[]>([]);
   const [tipoOptions, setTipoOptions] = useState<TipoTreinamentoOption[]>([]);
+  const [treinamentosOptions, setTreinamentosOptions] = useState<Treinamento[]>([]);
   
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -93,15 +95,17 @@ const TreinamentosExecucao = () => {
     const loadFormOptions = async () => {
       setIsLoading(true);
       try {
-        const [ccas, processos, tipos] = await Promise.all([
+        const [ccas, processos, tipos, treinamentos] = await Promise.all([
           fetchCCAs(),
           fetchProcessosTreinamento(),
-          fetchTiposTreinamento()
+          fetchTiposTreinamento(),
+          fetchTreinamentos()
         ]);
         
         setCCAOptions(ccas);
         setProcessoOptions(processos);
         setTipoOptions(tipos);
+        setTreinamentosOptions(treinamentos);
       } catch (error) {
         console.error("Erro ao carregar opções do formulário:", error);
         toast({
@@ -124,12 +128,12 @@ const TreinamentosExecucao = () => {
       form.setValue("carga_horaria", 0);
     } else if (treinamentoSelecionado) {
       setIsOutroTreinamento(false);
-      const treinamento = MOCK_TREINAMENTOS.find(t => t.id === treinamentoSelecionado);
-      if (treinamento && treinamento.cargaHoraria) {
-        form.setValue("carga_horaria", treinamento.cargaHoraria);
+      const treinamento = treinamentosOptions.find(t => t.id === treinamentoSelecionado);
+      if (treinamento && treinamento.carga_horaria) {
+        form.setValue("carga_horaria", treinamento.carga_horaria);
       }
     }
-  }, [treinamentoSelecionado, form]);
+  }, [treinamentoSelecionado, form, treinamentosOptions]);
 
   const onSubmit = async (data: FormValues) => {
     console.log("Form data:", data);
@@ -412,7 +416,7 @@ const TreinamentosExecucao = () => {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {MOCK_TREINAMENTOS.map((treinamento) => (
+                          {treinamentosOptions.map((treinamento) => (
                             <SelectItem key={treinamento.id} value={treinamento.id}>
                               {treinamento.nome}
                             </SelectItem>
@@ -451,7 +455,7 @@ const TreinamentosExecucao = () => {
                         <Input
                           type="number"
                           {...field}
-                          disabled={!isOutroTreinamento && !!treinamentoSelecionado}
+                          disabled={!isOutroTreinamento && !!treinamentoSelecionado && treinamentoSelecionado !== "outro"}
                         />
                       </FormControl>
                       <FormMessage />
