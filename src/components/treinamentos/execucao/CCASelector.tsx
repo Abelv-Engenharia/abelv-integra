@@ -16,14 +16,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { UseFormReturn } from "react-hook-form";
-
-interface FormValues {
-  cca_id: number;
-  [key: string]: any;
-}
+import { TreinamentoFormValues } from "@/hooks/useTreinamentoForm";
 
 interface CCASelectorProps {
-  form: UseFormReturn<FormValues>;
+  form: UseFormReturn<TreinamentoFormValues>;
   ccaOptions: CCAOption[];
 }
 

@@ -10,15 +10,10 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { UseFormReturn } from "react-hook-form";
-
-interface FormValues {
-  observacoes?: string;
-  lista_presenca?: any;
-  [key: string]: any;
-}
+import { TreinamentoFormValues } from "@/hooks/useTreinamentoForm";
 
 interface ObservacoesAnexoFieldsProps {
-  form: UseFormReturn<FormValues>;
+  form: UseFormReturn<TreinamentoFormValues>;
 }
 
 const ObservacoesAnexoFields = ({ form }: ObservacoesAnexoFieldsProps) => {

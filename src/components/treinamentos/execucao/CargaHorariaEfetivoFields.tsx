@@ -9,16 +9,10 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { UseFormReturn } from "react-hook-form";
-
-interface FormValues {
-  carga_horaria: number;
-  efetivo_mod: number;
-  efetivo_moi: number;
-  [key: string]: any;
-}
+import { TreinamentoFormValues } from "@/hooks/useTreinamentoForm";
 
 interface CargaHorariaEfetivoFieldsProps {
-  form: UseFormReturn<FormValues>;
+  form: UseFormReturn<TreinamentoFormValues>;
   horasTotais: number;
   isOutroTreinamento: boolean;
   treinamentoSelecionado: string;
@@ -43,6 +37,10 @@ const CargaHorariaEfetivoFields = ({
                 <Input
                   type="number"
                   {...field}
+                  onChange={(e) => {
+                    const value = e.target.value === '' ? '0' : e.target.value;
+                    field.onChange(Number(value));
+                  }}
                   disabled={!isOutroTreinamento && !!treinamentoSelecionado && treinamentoSelecionado !== "outro"}
                 />
               </FormControl>
@@ -70,7 +68,15 @@ const CargaHorariaEfetivoFields = ({
             <FormItem className="flex-1">
               <FormLabel>Efetivo MOD treinado</FormLabel>
               <FormControl>
-                <Input type="number" {...field} min="0" />
+                <Input 
+                  type="number" 
+                  {...field} 
+                  min="0" 
+                  onChange={(e) => {
+                    const value = e.target.value === '' ? '0' : e.target.value;
+                    field.onChange(Number(value));
+                  }}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -84,7 +90,15 @@ const CargaHorariaEfetivoFields = ({
             <FormItem className="flex-1">
               <FormLabel>Efetivo MOI treinado</FormLabel>
               <FormControl>
-                <Input type="number" {...field} min="0" />
+                <Input 
+                  type="number" 
+                  {...field} 
+                  min="0"
+                  onChange={(e) => {
+                    const value = e.target.value === '' ? '0' : e.target.value;
+                    field.onChange(Number(value));
+                  }}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>

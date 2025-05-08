@@ -65,9 +65,14 @@ export function useTreinamentoForm() {
   const efetivoMod = form.watch("efetivo_mod");
   const efetivoMoi = form.watch("efetivo_moi");
   
-  // Calculate total hours
+  // Calculate total hours - fixing the multiplication issue
   useEffect(() => {
-    const total = cargaHoraria * (efetivoMod + efetivoMoi);
+    // Ensure we're using proper number values for calculation
+    const cargaHorariaNum = Number(cargaHoraria) || 0;
+    const efetivoModNum = Number(efetivoMod) || 0;
+    const efetivoMoiNum = Number(efetivoMoi) || 0;
+    
+    const total = cargaHorariaNum * (efetivoModNum + efetivoMoiNum);
     setHorasTotais(total);
   }, [cargaHoraria, efetivoMod, efetivoMoi]);
   
