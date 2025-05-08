@@ -103,9 +103,9 @@ const TreinamentosExecucao = () => {
   const efetivoMod = form.watch("efetivo_mod");
   const efetivoMoi = form.watch("efetivo_moi");
   
-  // Atualiza horas totais
+  // Atualiza horas totais - Fix the calculation
   useEffect(() => {
-    // Fix: Correctly calculate total hours by multiplying carga_horaria by the sum of both efectivos
+    // Correctly calculate total hours by multiplying carga_horaria by the sum of both efetivos
     const total = cargaHoraria * (efetivoMod + efetivoMoi);
     setHorasTotais(total);
   }, [cargaHoraria, efetivoMod, efetivoMoi]);
@@ -180,7 +180,7 @@ const TreinamentosExecucao = () => {
     try {
       setIsLoading(true);
       
-      // Fix: Calculate the total hours explicitly to ensure accuracy
+      // Calculate the total hours explicitly to ensure accuracy
       const calculatedHorasTotais = data.carga_horaria * (data.efetivo_mod + data.efetivo_moi);
       
       const resultado = await criarExecucaoTreinamento({
@@ -193,9 +193,9 @@ const TreinamentosExecucao = () => {
         carga_horaria: data.carga_horaria,
         efetivo_mod: data.efetivo_mod,
         efetivo_moi: data.efetivo_moi,
-        horas_totais: calculatedHorasTotais,
+        horas_totais: calculatedHorasTotais, // Use the calculated value instead of state
         observacoes: data.observacoes,
-        lista_presenca_url: data.lista_presenca?.[0] // Fix: This should be lista_presenca_url instead of lista_presenca
+        lista_presenca_url: data.lista_presenca?.[0] // This should be lista_presenca_url instead of lista_presenca
       });
       
       if (resultado.success) {
