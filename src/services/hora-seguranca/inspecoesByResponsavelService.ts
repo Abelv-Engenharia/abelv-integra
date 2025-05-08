@@ -1,15 +1,13 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { InspecoesByResponsavel, RPCInspecoesByResponsavelResult } from './types';
+import { RPCInspecoesByResponsavelResult } from '@/types/treinamentos';
 
 /**
  * Fetch inspeções by responsável
  */
-export async function fetchInspecoesByResponsavel(): Promise<InspecoesByResponsavel[]> {
+export async function fetchInspecoesByResponsavel(): Promise<RPCInspecoesByResponsavelResult[]> {
   try {
-    const { data, error } = await supabase.rpc<RPCInspecoesByResponsavelResult, never>(
-      'get_inspecoes_by_responsavel'
-    );
+    const { data, error } = await supabase.rpc<RPCInspecoesByResponsavelResult>('get_inspecoes_by_responsavel');
 
     if (error) {
       console.error("Erro ao buscar inspeções por responsável:", error);
@@ -17,11 +15,11 @@ export async function fetchInspecoesByResponsavel(): Promise<InspecoesByResponsa
     }
 
     // Verificar se há dados
-    if (!data || data.length === 0) {
+    if (!data || !data.length) {
       return [];
     }
 
-    return data;
+    return data as RPCInspecoesByResponsavelResult[];
   } catch (error) {
     console.error("Exceção ao buscar inspeções por responsável:", error);
     return [];

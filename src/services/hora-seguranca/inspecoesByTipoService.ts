@@ -7,9 +7,7 @@ import { InspecoesByTipo } from '@/types/treinamentos';
  */
 export async function fetchInspecoesByTipo(): Promise<InspecoesByTipo[]> {
   try {
-    const { data, error } = await supabase.rpc<InspecoesByTipo>(
-      'get_inspecoes_by_tipo'
-    );
+    const { data, error } = await supabase.rpc<InspecoesByTipo>('get_inspecoes_by_tipo');
 
     if (error) {
       console.error("Erro ao buscar inspeções por tipo:", error);
@@ -17,11 +15,11 @@ export async function fetchInspecoesByTipo(): Promise<InspecoesByTipo[]> {
     }
 
     // Verificar se há dados
-    if (!data || data.length === 0) {
+    if (!data || !data.length) {
       return [];
     }
 
-    return data;
+    return data as InspecoesByTipo[];
   } catch (error) {
     console.error("Exceção ao buscar inspeções por tipo:", error);
     return [];

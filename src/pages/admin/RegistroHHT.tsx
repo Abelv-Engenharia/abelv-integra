@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -25,15 +25,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
-// Sample data for CCA options
-const ccaOptions = [
-  { id: "1", name: "CCA 001 - Administração" },
-  { id: "2", name: "CCA 002 - Manutenção" },
-  { id: "3", name: "CCA 003 - Operação" },
-  { id: "4", name: "CCA 004 - Logística" },
-  { id: "5", name: "CCA 005 - Segurança" },
-];
+import { fetchCCAs, CCAOption } from "@/services/treinamentos/ccaService";
 
 // Get current year and past 3 years for the year options
 const getCurrentYear = () => {
@@ -87,6 +79,29 @@ const RegistroHHT = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [ccaOptions, setCcaOptions] = useState<CCAOption[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Load CCA options from Supabase
+  useEffect(() => {
+    const loadCCAs = async () => {
+      try {
+        setIsLoading(true);
+        const data = await fetchCCAs();
+        setCcaOptions(data);
+      } catch (error) {
+        console.error("Error loading CCAs:", error);
+        toast({
+          title: "Erro ao carregar CCAs",
+          description: "Não foi possível carregar a lista de CCAs. Tente novamente mais tarde.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    loadCCAs();
+  }, [toast]);
 
   // Initialize form with default values
   const form = useForm<HHTFormValues>({
@@ -105,12 +120,15 @@ const RegistroHHT = () => {
       // In a real app, this would save data to the backend
       console.log("HHT data to submit:", data);
       
+      // Find the selected CCA to get its full name
+      const selectedCca = ccaOptions.find(cca => cca.id.toString() === data.cca);
+      
       // Simulate API call with timeout
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       toast({
         title: "Registro de HHT salvo com sucesso",
-        description: `${data.hoursWorked} horas registradas para ${getCCANameById(data.cca)} em ${getMonthName(data.month)}/${data.year}`,
+        description: `${data.hoursWorked} horas registradas para ${selectedCca ? `${selectedCca.codigo} - ${selectedCca.nome}` : data.cca} em ${getMonthName(data.month)}/${data.year}`,
       });
       
       // Reset form or navigate back
@@ -125,12 +143,6 @@ const RegistroHHT = () => {
     } finally {
       setIsSubmitting(false);
     }
-  };
-
-  // Helper function to get CCA name by ID
-  const getCCANameById = (id: string) => {
-    const cca = ccaOptions.find(cca => cca.id === id);
-    return cca ? cca.name : id;
   };
 
   // Helper function to get month name by number
@@ -231,16 +243,17 @@ const RegistroHHT = () => {
                     <Select
                       onValueChange={field.onChange}
                       defaultValue={field.value}
+                      disabled={isLoading}
                     >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Selecione o CCA" />
+                          <SelectValue placeholder={isLoading ? "Carregando CCAs..." : "Selecione o CCA"} />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
                         {ccaOptions.map((cca) => (
-                          <SelectItem key={cca.id} value={cca.id}>
-                            {cca.name}
+                          <SelectItem key={cca.id} value={cca.id.toString()}>
+                            {cca.codigo} - {cca.nome}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -277,7 +290,7 @@ const RegistroHHT = () => {
                 >
                   Cancelar
                 </Button>
-                <Button type="submit" disabled={isSubmitting}>
+                <Button type="submit" disabled={isSubmitting || isLoading}>
                   {isSubmitting ? "Salvando..." : "Salvar registro"}
                 </Button>
               </div>

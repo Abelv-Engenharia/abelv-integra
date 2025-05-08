@@ -1,78 +1,95 @@
 
-import { useEffect, useState } from "react";
-import StatCard from "@/components/dashboard/StatCard";
-import { Calendar, CheckCircle, FileWarning } from "lucide-react";
-import { fetchInspectionsSummary } from "@/services/hora-seguranca";
-import { InspecoesSummary } from "@/types/treinamentos"; // Updated import path
+import React, { useEffect, useState } from "react";
+import { fetchInspecoesSummary } from "@/services/hora-seguranca/inspecoesSummaryService";
+import { Activity, Calendar, CheckSquare, FileWarning } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { InspecoesSummary } from "@/types/treinamentos";
 
-export const InspecoesSummaryCards = () => {
-  const [stats, setStats] = useState<InspecoesSummary>({
-    totalInspecoes: 0,
-    programadas: 0,
-    naoProgramadas: 0,
-    desviosIdentificados: 0,
-    realizadas: 0,
-    canceladas: 0
-  });
-  const [isLoading, setIsLoading] = useState(true);
+interface StatCardProps {
+  title: string;
+  value: number;
+  description?: string;
+  icon: React.ReactNode;
+  className?: string;
+}
+
+const StatCard = ({ title, value, description, icon, className }: StatCardProps) => (
+  <Card className={className}>
+    <CardContent className="p-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-sm font-medium text-muted-foreground">{title}</p>
+          <h3 className="text-2xl font-bold">{value}</h3>
+          {description && <p className="text-xs text-muted-foreground mt-1">{description}</p>}
+        </div>
+        <div className="p-2 bg-primary/10 rounded-full text-primary">{icon}</div>
+      </div>
+    </CardContent>
+  </Card>
+);
+
+const InspecoesSummaryCards = () => {
+  const [data, setData] = useState<InspecoesSummary | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchData = async () => {
+    const loadData = async () => {
       try {
-        setIsLoading(true);
-        const data: InspecoesSummary = await fetchInspectionsSummary();
-        
-        // Mapear os dados retornados pela API para o formato esperado pelo componente
-        setStats({
-          totalInspecoes: data.totalInspecoes || 0,
-          programadas: data.programadas || 0,
-          naoProgramadas: data.naoProgramadas || 0,
-          desviosIdentificados: data.desviosIdentificados || 0,
-          realizadas: data.realizadas || 0,
-          canceladas: data.canceladas || 0
-        });
+        setLoading(true);
+        const summary = await fetchInspecoesSummary();
+        setData(summary);
       } catch (error) {
-        console.error("Erro ao carregar dados de inspeções:", error);
+        console.error("Error loading inspeções summary:", error);
       } finally {
-        setIsLoading(false);
+        setLoading(false);
       }
     };
 
-    fetchData();
+    loadData();
   }, []);
 
+  if (loading) {
+    return (
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+        {[...Array(4)].map((_, i) => (
+          <Card key={i} className="animate-pulse">
+            <CardContent className="p-6">
+              <div className="h-16 bg-muted/50 rounded"></div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    );
+  }
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
       <StatCard
         title="Total de Inspeções"
-        value={stats.totalInspecoes}
-        icon={<Calendar className="h-4 w-4" />}
-        description="Realizadas até o momento"
-        loading={isLoading}
+        value={data?.totalInspecoes || 0}
+        icon={<Activity className="h-5 w-5" />}
+        className="border-l-4 border-blue-500"
       />
       <StatCard
-        title="Inspeções do Mês"
-        value={stats.programadas}
-        icon={<Calendar className="h-4 w-4" />}
-        description="Programadas para este mês"
-        loading={isLoading}
+        title="Programadas"
+        value={data?.programadas || 0}
+        icon={<Calendar className="h-5 w-5" />}
+        className="border-l-4 border-green-500"
       />
       <StatCard
-        title="Inspeções Realizadas"
-        value={stats.realizadas}
-        icon={<CheckCircle className="h-4 w-4" />}
-        description="Concluídas com sucesso"
-        trend="up"
-        loading={isLoading}
+        title="Não Programadas"
+        value={data?.naoProgramadas || 0}
+        icon={<CheckSquare className="h-5 w-5" />}
+        className="border-l-4 border-amber-500"
       />
       <StatCard
-        title="Anomalias Encontradas"
-        value={stats.desviosIdentificados}
-        icon={<FileWarning className="h-4 w-4" />}
-        description="Desvios identificados"
-        trend="up"
-        loading={isLoading}
+        title="Desvios Identificados"
+        value={data?.desviosIdentificados || 0}
+        icon={<FileWarning className="h-5 w-5" />}
+        className="border-l-4 border-red-500"
       />
     </div>
   );
 };
+
+export default InspecoesSummaryCards;

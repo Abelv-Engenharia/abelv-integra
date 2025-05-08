@@ -1,33 +1,31 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { InspecoesStats, RPCInspecoesStatsResult } from './types';
+
+interface InspecoesStats {
+  periodo: string;
+  quantidade: number;
+}
 
 /**
- * Fetch inspeções statistics by month
+ * Fetch inspeções stats
  */
-export async function fetchInspecoesStatsByMonth(): Promise<InspecoesStats[]> {
+export async function fetchInspecoesStats(): Promise<InspecoesStats[]> {
   try {
-    const { data, error } = await supabase.rpc<RPCInspecoesStatsResult>(
-      'get_inspecoes_by_month'
-    );
+    const { data, error } = await supabase.rpc<InspecoesStats>('get_inspecoes_stats');
 
     if (error) {
-      console.error("Erro ao buscar estatísticas de inspeções por mês:", error);
+      console.error("Erro ao buscar estatísticas de inspeções:", error);
       return [];
     }
 
     // Verificar se há dados
-    if (!data || data.length === 0) {
+    if (!data || !data.length) {
       return [];
     }
 
-    return data;
+    return data as InspecoesStats[];
   } catch (error) {
-    console.error("Exceção ao buscar estatísticas de inspeções por mês:", error);
+    console.error("Exceção ao buscar estatísticas de inspeções:", error);
     return [];
   }
 }
-
-// Legacy alias for backward compatibility
-export const fetchInspecoesByMonth = fetchInspecoesStatsByMonth;
-export const fetchInspecoesStats = fetchInspecoesStatsByMonth;
