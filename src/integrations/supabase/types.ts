@@ -268,6 +268,9 @@ export type Database = {
           cca_id: number | null
           created_at: string | null
           data: string
+          efetivo_mod: number | null
+          efetivo_moi: number | null
+          horas_totais: number | null
           id: string
           lista_presenca_url: string | null
           mes: number
@@ -287,6 +290,9 @@ export type Database = {
           cca_id?: number | null
           created_at?: string | null
           data: string
+          efetivo_mod?: number | null
+          efetivo_moi?: number | null
+          horas_totais?: number | null
           id?: string
           lista_presenca_url?: string | null
           mes: number
@@ -306,6 +312,9 @@ export type Database = {
           cca_id?: number | null
           created_at?: string | null
           data?: string
+          efetivo_mod?: number | null
+          efetivo_moi?: number | null
+          horas_totais?: number | null
           id?: string
           lista_presenca_url?: string | null
           mes?: number

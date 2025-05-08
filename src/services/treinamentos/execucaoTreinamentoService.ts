@@ -17,7 +17,10 @@ export async function fetchExecucaoTreinamentos(): Promise<ExecucaoTreinamento[]
         carga_horaria,
         cca,
         data,
-        observacoes
+        observacoes,
+        efetivo_mod,
+        efetivo_moi,
+        horas_totais
       `)
       .order('data', { ascending: false });
 
@@ -26,7 +29,10 @@ export async function fetchExecucaoTreinamentos(): Promise<ExecucaoTreinamento[]
       return [];
     }
 
-    return data || [];
+    return data.map(item => ({
+      ...item,
+      data: new Date(item.data)
+    })) || [];
   } catch (error) {
     console.error("Exceção ao buscar execução de treinamentos:", error);
     return [];
@@ -38,6 +44,13 @@ export async function fetchExecucaoTreinamentos(): Promise<ExecucaoTreinamento[]
  */
 export async function criarExecucaoTreinamento(treinamento: Partial<ExecucaoTreinamento>) {
   try {
+    // Extract the month and year from the date for easier querying
+    if (treinamento.data) {
+      const date = new Date(treinamento.data);
+      treinamento.mes = date.getMonth() + 1; // JavaScript months are 0-indexed
+      treinamento.ano = date.getFullYear();
+    }
+
     const { data, error } = await supabase
       .from('execucao_treinamentos')
       .insert([treinamento])
@@ -45,12 +58,12 @@ export async function criarExecucaoTreinamento(treinamento: Partial<ExecucaoTrei
 
     if (error) {
       console.error("Erro ao criar execução de treinamento:", error);
-      throw error;
+      return { success: false, error: error.message };
     }
 
-    return data && data[0];
+    return { success: true, data: data && data[0] };
   } catch (error) {
     console.error("Exceção ao criar execução de treinamento:", error);
-    throw error;
+    return { success: false, error: "Erro ao processar a solicitação" };
   }
 }

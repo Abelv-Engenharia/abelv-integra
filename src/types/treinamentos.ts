@@ -89,6 +89,7 @@ export interface Funcionario {
   matricula: string;
   funcao: string;
   ativo: boolean;
+  foto?: string;
 }
 
 export interface Treinamento {
@@ -109,6 +110,14 @@ export interface ExecucaoTreinamento {
   observacoes?: string;
   mes?: number;
   ano?: number;
+  cca_id?: number;
+  processo_treinamento_id?: string;
+  tipo_treinamento_id?: string;
+  treinamento_id?: string;
+  efetivo_mod?: number;
+  efetivo_moi?: number;
+  horas_totais?: number;
+  lista_presenca_url?: string;
 }
 
 export interface CCAOption {

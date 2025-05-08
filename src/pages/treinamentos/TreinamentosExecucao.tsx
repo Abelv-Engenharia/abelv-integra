@@ -61,6 +61,14 @@ const formSchema = z.object({
     required_error: "A carga horária é obrigatória",
     invalid_type_error: "A carga horária deve ser um número",
   }).min(0, "A carga horária não pode ser negativa"),
+  efetivo_mod: z.coerce.number({
+    required_error: "O efetivo MOD é obrigatório",
+    invalid_type_error: "O efetivo MOD deve ser um número",
+  }).min(0, "O efetivo MOD não pode ser negativo"),
+  efetivo_moi: z.coerce.number({
+    required_error: "O efetivo MOI é obrigatório",
+    invalid_type_error: "O efetivo MOI deve ser um número",
+  }).min(0, "O efetivo MOI não pode ser negativo"),
   observacoes: z.string().optional(),
   lista_presenca: z.any().optional(),
 });
@@ -71,6 +79,7 @@ const TreinamentosExecucao = () => {
   const [isSubmitSuccess, setIsSubmitSuccess] = useState(false);
   const [isOutroTreinamento, setIsOutroTreinamento] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [horasTotais, setHorasTotais] = useState<number>(0);
   
   // Estado para as opções dos selects
   const [ccaOptions, setCCAOptions] = useState<CCAOption[]>([]);
@@ -85,10 +94,21 @@ const TreinamentosExecucao = () => {
       tipo_treinamento_id: "",
       treinamento_id: "",
       carga_horaria: 0,
+      efetivo_mod: 0,
+      efetivo_moi: 0,
     },
   });
 
   const treinamentoSelecionado = form.watch("treinamento_id");
+  const cargaHoraria = form.watch("carga_horaria");
+  const efetivoMod = form.watch("efetivo_mod");
+  const efetivoMoi = form.watch("efetivo_moi");
+  
+  // Atualiza horas totais
+  useEffect(() => {
+    const total = cargaHoraria * (efetivoMod + efetivoMoi);
+    setHorasTotais(total);
+  }, [cargaHoraria, efetivoMod, efetivoMoi]);
   
   // Buscar dados das tabelas
   useEffect(() => {
@@ -168,6 +188,9 @@ const TreinamentosExecucao = () => {
         treinamento_id: data.treinamento_id !== "outro" ? data.treinamento_id : undefined,
         treinamento_nome: data.treinamento_id === "outro" ? data.treinamento_nome : undefined,
         carga_horaria: data.carga_horaria,
+        efetivo_mod: data.efetivo_mod,
+        efetivo_moi: data.efetivo_moi,
+        horas_totais: horasTotais,
         observacoes: data.observacoes,
         lista_presenca: data.lista_presenca?.[0]
       });
@@ -445,23 +468,65 @@ const TreinamentosExecucao = () => {
                   />
                 )}
 
-                <FormField
-                  control={form.control}
-                  name="carga_horaria"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Carga horária (horas)</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          {...field}
-                          disabled={!isOutroTreinamento && !!treinamentoSelecionado && treinamentoSelecionado !== "outro"}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <div className="flex flex-col md:flex-row gap-4 items-end">
+                  <FormField
+                    control={form.control}
+                    name="carga_horaria"
+                    render={({ field }) => (
+                      <FormItem className="flex-1">
+                        <FormLabel>Carga horária (horas)</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            {...field}
+                            disabled={!isOutroTreinamento && !!treinamentoSelecionado && treinamentoSelecionado !== "outro"}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormItem className="flex-1">
+                    <FormLabel>Horas totais do treinamento</FormLabel>
+                    <Input
+                      type="number"
+                      value={horasTotais}
+                      disabled
+                      className="bg-gray-100"
+                    />
+                  </FormItem>
+                </div>
+                
+                <div className="flex flex-col md:flex-row gap-4">
+                  <FormField
+                    control={form.control}
+                    name="efetivo_mod"
+                    render={({ field }) => (
+                      <FormItem className="flex-1">
+                        <FormLabel>Efetivo MOD treinado</FormLabel>
+                        <FormControl>
+                          <Input type="number" {...field} min="0" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="efetivo_moi"
+                    render={({ field }) => (
+                      <FormItem className="flex-1">
+                        <FormLabel>Efetivo MOI treinado</FormLabel>
+                        <FormControl>
+                          <Input type="number" {...field} min="0" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
 
                 <FormField
                   control={form.control}
