@@ -1,13 +1,15 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { InspecoesByStatus } from './types';
+import { InspecoesByStatus, RPCInspecoesByStatusResult } from './types';
 
 /**
  * Fetch inspeções by status
  */
 export async function fetchInspecoesByStatus(): Promise<InspecoesByStatus[]> {
   try {
-    const { data, error } = await supabase.rpc('get_inspecoes_by_status');
+    const { data, error } = await supabase.rpc<RPCInspecoesByStatusResult>(
+      'get_inspecoes_by_status'
+    );
 
     if (error) {
       console.error("Erro ao buscar inspeções por status:", error);
@@ -15,7 +17,7 @@ export async function fetchInspecoesByStatus(): Promise<InspecoesByStatus[]> {
     }
 
     // Verificar se há dados
-    if (!data || !data.length) {
+    if (!data || data.length === 0) {
       return [];
     }
 

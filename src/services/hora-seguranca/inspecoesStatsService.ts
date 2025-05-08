@@ -1,13 +1,15 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { InspecoesStats } from './types';
+import { InspecoesStats, RPCInspecoesStatsResult } from './types';
 
 /**
  * Fetch inspeções statistics by month
  */
 export async function fetchInspecoesStatsByMonth(): Promise<InspecoesStats[]> {
   try {
-    const { data, error } = await supabase.rpc('get_inspecoes_by_month');
+    const { data, error } = await supabase.rpc<RPCInspecoesStatsResult>(
+      'get_inspecoes_by_month'
+    );
 
     if (error) {
       console.error("Erro ao buscar estatísticas de inspeções por mês:", error);
@@ -15,11 +17,11 @@ export async function fetchInspecoesStatsByMonth(): Promise<InspecoesStats[]> {
     }
 
     // Verificar se há dados
-    if (!data || !data.length) {
+    if (!data || data.length === 0) {
       return [];
     }
 
-    return data as InspecoesStats[];
+    return data;
   } catch (error) {
     console.error("Exceção ao buscar estatísticas de inspeções por mês:", error);
     return [];

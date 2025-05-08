@@ -35,3 +35,11 @@ export interface RecentInspection {
   status: string;
   data: string;
 }
+
+// Declare RPC function return types
+export type RPCInspecoesByTipoResult = InspecoesByTipo[];
+export type RPCInspecoesByStatusResult = { name: string, value: number }[];
+export type RPCInspecoesByResponsavelResult = InspecoesByResponsavel[];
+export type RPCInspecoesSummaryResult = InspecoesSummary[];
+export type RPCInspecoesStatsResult = InspecoesStats[];
+export type RPCDesviosByInspectionTypeResult = InspecoesByTipo[];
