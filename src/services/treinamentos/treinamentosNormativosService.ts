@@ -41,9 +41,20 @@ export async function fetchTreinamentosNormativos(): Promise<TreinamentoNormativ
  */
 export async function criarTreinamentoNormativo(treinamento: Partial<TreinamentoNormativo>) {
   try {
+    // Convert Date objects to ISO strings for the database
+    const treinamentoToInsert = {
+      ...treinamento,
+      data_realizacao: treinamento.data_realizacao instanceof Date 
+        ? treinamento.data_realizacao.toISOString().split('T')[0] 
+        : treinamento.data_realizacao,
+      data_validade: treinamento.data_validade instanceof Date 
+        ? treinamento.data_validade.toISOString().split('T')[0] 
+        : treinamento.data_validade
+    };
+
     const { data, error } = await supabase
       .from('treinamentos_normativos')
-      .insert([treinamento])
+      .insert(treinamentoToInsert)
       .select();
 
     if (error) {

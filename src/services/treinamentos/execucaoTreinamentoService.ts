@@ -51,9 +51,16 @@ export async function criarExecucaoTreinamento(treinamento: Partial<ExecucaoTrei
       treinamento.ano = date.getFullYear();
     }
 
+    // Calculate horas_totais client-side to ensure accuracy
+    if (treinamento.carga_horaria && (treinamento.efetivo_mod || treinamento.efetivo_moi)) {
+      const efetivo_mod = treinamento.efetivo_mod || 0;
+      const efetivo_moi = treinamento.efetivo_moi || 0;
+      treinamento.horas_totais = treinamento.carga_horaria * (efetivo_mod + efetivo_moi);
+    }
+
     const { data, error } = await supabase
       .from('execucao_treinamentos')
-      .insert([treinamento])
+      .insert(treinamento)
       .select();
 
     if (error) {

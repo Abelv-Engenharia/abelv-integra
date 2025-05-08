@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -106,6 +105,7 @@ const TreinamentosExecucao = () => {
   
   // Atualiza horas totais
   useEffect(() => {
+    // Fix: Correctly calculate total hours by multiplying carga_horaria by the sum of both efectivos
     const total = cargaHoraria * (efetivoMod + efetivoMoi);
     setHorasTotais(total);
   }, [cargaHoraria, efetivoMod, efetivoMoi]);
@@ -180,6 +180,9 @@ const TreinamentosExecucao = () => {
     try {
       setIsLoading(true);
       
+      // Fix: Calculate the total hours explicitly to ensure accuracy
+      const calculatedHorasTotais = data.carga_horaria * (data.efetivo_mod + data.efetivo_moi);
+      
       const resultado = await criarExecucaoTreinamento({
         data: data.data,
         cca_id: data.cca_id,
@@ -190,9 +193,9 @@ const TreinamentosExecucao = () => {
         carga_horaria: data.carga_horaria,
         efetivo_mod: data.efetivo_mod,
         efetivo_moi: data.efetivo_moi,
-        horas_totais: horasTotais,
+        horas_totais: calculatedHorasTotais,
         observacoes: data.observacoes,
-        lista_presenca: data.lista_presenca?.[0]
+        lista_presenca_url: data.lista_presenca?.[0] // Fix: This should be lista_presenca_url instead of lista_presenca
       });
       
       if (resultado.success) {
