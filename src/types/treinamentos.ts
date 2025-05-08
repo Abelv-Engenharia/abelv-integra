@@ -101,3 +101,29 @@ export interface RPCDesviosByInspectionTypeResult {
   tipo: string;
   quantidade: number;
 }
+
+// HHT (Horas Homem Trabalhadas) types
+export interface HorasTrabalhadas {
+  id?: string;
+  cca_id: number;
+  mes: number;
+  ano: number;
+  horas_trabalhadas: number;
+  observacoes?: string;
+  created_at?: string;
+  updated_at?: string;
+  usuario_id?: string;
+}
+
+export interface HHTByCCA {
+  cca_id: number;
+  codigo: string; 
+  nome: string;
+  total_horas: number;
+}
+
+export interface HHTByMonth {
+  mes: number;
+  ano: number;
+  total_horas: number;
+}

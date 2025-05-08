@@ -1,12 +1,8 @@
 
-// Re-export all services
-export { fetchInspecoesByStatus } from './inspecoesByStatusService';
+// Re-export all functions from hora-seguranca services
+export { fetchInspecoesSummary } from './inspecoesSummaryService';
 export { fetchInspecoesByTipo } from './inspecoesByTipoService';
+export { fetchInspecoesStats } from './inspecoesStatsService';
 export { fetchInspecoesByResponsavel } from './inspecoesByResponsavelService';
-export { fetchInspecoesSummary, fetchInspectionsSummary } from './inspecoesSummaryService';
-export { fetchRecentInspections } from './recentInspectionsService';
-export { fetchInspecoesStatsByMonth, fetchInspecoesStats, fetchInspecoesByMonth } from './inspecoesStatsService';
 export { fetchDesviosByInspectionType } from './desviosInspectionService';
-
-// Re-export types
-export type * from './types';
+export { fetchHHTByMonth, fetchHHTByCCA, createHorasTrabalhadas } from './horasTrabalhadasService';

@@ -26,6 +26,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { fetchCCAs, CCAOption } from "@/services/treinamentos/ccaService";
+import { createHorasTrabalhadas } from "@/services/hora-seguranca/horasTrabalhadasService";
+import { Textarea } from "@/components/ui/textarea";
 
 // Get current year and past 3 years for the year options
 const getCurrentYear = () => {
@@ -71,6 +73,7 @@ const hhtFormSchema = z.object({
       message: "Horas trabalhadas deve ser um número maior que zero",
     }
   ),
+  observacoes: z.string().optional(),
 });
 
 type HHTFormValues = z.infer<typeof hhtFormSchema>;
@@ -111,28 +114,48 @@ const RegistroHHT = () => {
       year: new Date().getFullYear() + "", // Current year
       cca: "",
       hoursWorked: "",
+      observacoes: "",
     },
   });
 
   const onSubmit = async (data: HHTFormValues) => {
     setIsSubmitting(true);
     try {
-      // In a real app, this would save data to the backend
-      console.log("HHT data to submit:", data);
+      // Save data to Supabase
+      const hhtData = {
+        cca_id: parseInt(data.cca),
+        mes: parseInt(data.month),
+        ano: parseInt(data.year),
+        horas_trabalhadas: parseFloat(data.hoursWorked),
+        observacoes: data.observacoes || undefined,
+      };
       
-      // Find the selected CCA to get its full name
-      const selectedCca = ccaOptions.find(cca => cca.id.toString() === data.cca);
+      const result = await createHorasTrabalhadas(hhtData);
       
-      // Simulate API call with timeout
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      toast({
-        title: "Registro de HHT salvo com sucesso",
-        description: `${data.hoursWorked} horas registradas para ${selectedCca ? `${selectedCca.codigo} - ${selectedCca.nome}` : data.cca} em ${getMonthName(data.month)}/${data.year}`,
-      });
-      
-      // Reset form or navigate back
-      form.reset();
+      if (result) {
+        // Find the selected CCA to get its full name
+        const selectedCca = ccaOptions.find(cca => cca.id.toString() === data.cca);
+        
+        toast({
+          title: "Registro de HHT salvo com sucesso",
+          description: `${data.hoursWorked} horas registradas para ${selectedCca ? `${selectedCca.codigo} - ${selectedCca.nome}` : data.cca} em ${getMonthName(data.month)}/${data.year}`,
+        });
+        
+        // Reset form
+        form.reset({
+          month: new Date().getMonth() + 1 + "",
+          year: new Date().getFullYear() + "",
+          cca: "",
+          hoursWorked: "",
+          observacoes: "",
+        });
+      } else {
+        toast({
+          title: "Erro ao salvar registro",
+          description: "Ocorreu um erro ao salvar o registro de HHT. Tente novamente.",
+          variant: "destructive",
+        });
+      }
     } catch (error) {
       console.error("Error submitting HHT data:", error);
       toast({
@@ -273,6 +296,26 @@ const RegistroHHT = () => {
                       <Input
                         type="number"
                         placeholder="Digite o número de horas trabalhadas"
+                        step="0.01"
+                        min="0.01"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="observacoes"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Observações (Opcional)</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Observações adicionais sobre o registro"
+                        className="resize-none"
                         {...field}
                       />
                     </FormControl>

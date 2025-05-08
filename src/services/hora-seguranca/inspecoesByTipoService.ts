@@ -15,7 +15,7 @@ export async function fetchInspecoesByTipo(): Promise<InspecoesByTipo[]> {
     }
 
     // Verificar se há dados
-    if (!data || !data.length) {
+    if (!data || data.length === 0) {
       return [];
     }
 

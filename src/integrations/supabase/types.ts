@@ -382,6 +382,50 @@ export type Database = {
         }
         Relationships: []
       }
+      horas_trabalhadas: {
+        Row: {
+          ano: number
+          cca_id: number
+          created_at: string
+          horas_trabalhadas: number
+          id: string
+          mes: number
+          observacoes: string | null
+          updated_at: string
+          usuario_id: string | null
+        }
+        Insert: {
+          ano: number
+          cca_id: number
+          created_at?: string
+          horas_trabalhadas: number
+          id?: string
+          mes: number
+          observacoes?: string | null
+          updated_at?: string
+          usuario_id?: string | null
+        }
+        Update: {
+          ano?: number
+          cca_id?: number
+          created_at?: string
+          horas_trabalhadas?: number
+          id?: string
+          mes?: number
+          observacoes?: string | null
+          updated_at?: string
+          usuario_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "horas_trabalhadas_cca_id_fkey"
+            columns: ["cca_id"]
+            isOneToOne: false
+            referencedRelation: "ccas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ocorrencias: {
         Row: {
           cca: string
@@ -802,7 +846,23 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_hht_by_cca: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          cca_id: number
+          codigo: string
+          nome: string
+          total_horas: number
+        }[]
+      }
+      get_hht_by_month: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          mes: number
+          ano: number
+          total_horas: number
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
