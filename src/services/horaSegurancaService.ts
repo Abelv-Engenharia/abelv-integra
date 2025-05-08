@@ -1,16 +1,17 @@
 
 // Re-export all from the hora-seguranca module for backward compatibility
 export {
-  fetchInspecoesByStatus,
   fetchInspecoesByTipo,
   fetchInspecoesByResponsavel,
   fetchInspecoesSummary,
-  fetchInspectionsSummary,
-  fetchRecentInspections,
-  fetchInspecoesStatsByMonth,
   fetchInspecoesStats,
+  fetchInspecoesByStatus,
   fetchInspecoesByMonth,
-  fetchDesviosByInspectionType
+  fetchRecentInspections,
+  fetchDesviosByInspectionType,
+  fetchHHTByMonth,
+  fetchHHTByCCA,
+  createHorasTrabalhadas
 } from './hora-seguranca';
 
 export type {

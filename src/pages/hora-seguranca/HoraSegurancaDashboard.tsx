@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -11,7 +12,7 @@ import {
 } from "@/components/ui/select";
 import { InspecaoStatusDonutChart } from "@/components/hora-seguranca/InspecaoStatusDonutChart";
 import { InspecoesBarChart } from "@/components/hora-seguranca/InspecoesBarChart";
-import { InspecoesSummaryCards } from "@/components/hora-seguranca/InspecoesSummaryCards";
+import InspecoesSummaryCards from "@/components/hora-seguranca/InspecoesSummaryCards";
 import { RecentInspectionsList } from "@/components/hora-seguranca/RecentInspectionsList";
 import { DesviosResponsaveisChart } from "@/components/hora-seguranca/DesviosResponsaveisChart";
 import { DesviosTipoInspecaoChart } from "@/components/hora-seguranca/DesviosTipoInspecaoChart";

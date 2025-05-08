@@ -1,9 +1,9 @@
 
 import React, { useEffect, useState } from "react";
-import { fetchInspecoesSummary } from "@/services/hora-seguranca/inspecoesSummaryService";
+import { fetchInspecoesSummary } from "@/services/hora-seguranca";
 import { Activity, Calendar, CheckSquare, FileWarning } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { InspecoesSummary } from "@/types/treinamentos";
+import { InspecoesSummary } from "@/services/hora-seguranca/types";
 
 interface StatCardProps {
   title: string;

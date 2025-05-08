@@ -3,17 +3,12 @@ import { supabase } from '@/integrations/supabase/client';
 import { RecentInspection } from './types';
 
 /**
- * Fetch recent inspections for dashboard
- * 
- * Note: This is a mock implementation since there's no actual 'inspecoes' table in the database.
- * In a real application, this would be replaced with actual data fetching from the appropriate table.
+ * Fetch recent inspections
  */
 export async function fetchRecentInspections(): Promise<RecentInspection[]> {
   try {
-    // Since we're dealing with a table that doesn't exist in the database schema,
-    // we'll return mock data instead of querying the database
-    
-    // Mock data to represent recent inspections
+    // Since we don't have this RPC yet, we'll return mock data for now
+    // TODO: Replace with real RPC call when available
     const mockData: RecentInspection[] = [
       {
         id: '1',

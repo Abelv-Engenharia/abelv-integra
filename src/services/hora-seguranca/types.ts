@@ -25,9 +25,11 @@ export interface RPCInspecoesByResponsavelResult {
 }
 
 export interface InspecoesByStatus {
-  status: string;
-  quantidade: number;
+  status?: string;
+  quantidade?: number;
   cor?: string;
+  name: string;
+  value: number;
 }
 
 export interface RPCInspecoesByStatusResult {
@@ -36,11 +38,8 @@ export interface RPCInspecoesByStatusResult {
 }
 
 export interface InspecoesStats {
-  total: number;
-  concluidas: number;
-  emAndamento: number;
-  pendentes: number;
-  percentualConcluidas: number;
+  periodo: string;
+  quantidade: number;
 }
 
 export interface RPCInspecoesStatsResult {
@@ -51,11 +50,12 @@ export interface RPCInspecoesStatsResult {
 }
 
 export interface InspecoesSummary {
-  planejadas: number;
+  totalInspecoes: number;
+  programadas: number;
+  naoProgramadas: number;
+  desviosIdentificados: number;
   realizadas: number;
-  percentual: number;
-  meta: number;
-  diferenca: number;
+  canceladas: number;
 }
 
 export interface RPCInspecoesSummaryResult {
