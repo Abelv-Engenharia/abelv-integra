@@ -1,97 +1,121 @@
 
-import { supabase } from '@/integrations/supabase/client';
-import { ExecucaoTreinamento } from '@/types/treinamentos';
+import { supabase } from "@/integrations/supabase/client";
 
-/**
- * Fetch execucao treinamentos
- */
-export async function fetchExecucaoTreinamentos(): Promise<ExecucaoTreinamento[]> {
-  try {
-    const { data, error } = await supabase
-      .from('execucao_treinamentos')
-      .select(`
-        id,
-        treinamento_nome,
-        processo_treinamento,
-        tipo_treinamento,
-        carga_horaria,
-        cca,
-        data,
-        observacoes,
-        efetivo_mod,
-        efetivo_moi,
-        horas_totais
-      `)
-      .order('data', { ascending: false });
-
-    if (error) {
-      console.error("Erro ao buscar execução de treinamentos:", error);
-      return [];
-    }
-
-    return data.map(item => ({
-      ...item,
-      data: new Date(item.data)
-    })) || [];
-  } catch (error) {
-    console.error("Exceção ao buscar execução de treinamentos:", error);
-    return [];
-  }
+export interface ExecucaoTreinamento {
+  id?: string;
+  data: Date;
+  mes: number;
+  ano: number;
+  cca: string;
+  processo_treinamento: string;
+  tipo_treinamento: string;
+  treinamento_nome?: string;
+  carga_horaria: number;
+  efetivo_mod: number;
+  efetivo_moi: number;
+  horas_totais: number;
+  observacoes?: string;
+  lista_presenca_url?: string;
+  cca_id?: number;
+  processo_treinamento_id?: string;
+  tipo_treinamento_id?: string;
+  treinamento_id?: string;
 }
 
-/**
- * Create execucao treinamento
- */
-export async function criarExecucaoTreinamento(treinamento: Partial<ExecucaoTreinamento>) {
-  try {
-    // Ensure all required fields are present to prevent TypeScript errors
-    const requiredFields = {
-      carga_horaria: treinamento.carga_horaria || 0,
-      cca: treinamento.cca || '',
-      processo_treinamento: treinamento.processo_treinamento || '',
-      tipo_treinamento: treinamento.tipo_treinamento || '',
-    };
+export const execucaoTreinamentoService = {
+  async create(data: ExecucaoTreinamento) {
+    console.log("Creating execucao with data:", data);
     
-    // Extract the month and year from the date for easier querying
-    let mes = 1;
-    let ano = new Date().getFullYear();
-    
-    if (treinamento.data) {
-      const date = new Date(treinamento.data);
-      mes = date.getMonth() + 1; // JavaScript months are 0-indexed
-      ano = date.getFullYear();
-    }
-
-    // Calculate horas_totais client-side to ensure accuracy
-    const efetivo_mod = Number(treinamento.efetivo_mod) || 0;
-    const efetivo_moi = Number(treinamento.efetivo_moi) || 0;
-    const carga_horaria = Number(treinamento.carga_horaria) || 0;
-    const horas_totais = carga_horaria * (efetivo_mod + efetivo_moi);
-
-    // Prepare the data for insertion
-    const treinamentoData = {
-      ...treinamento,
-      ...requiredFields,
-      mes,
-      ano,
-      horas_totais,
-      efetivo_mod,
-      efetivo_moi
+    const insertData = {
+      data: data.data.toISOString().split('T')[0], // Convert Date to string
+      mes: data.mes,
+      ano: data.ano,
+      cca: data.cca,
+      processo_treinamento: data.processo_treinamento,
+      tipo_treinamento: data.tipo_treinamento,
+      treinamento_nome: data.treinamento_nome,
+      carga_horaria: data.carga_horaria,
+      efetivo_mod: data.efetivo_mod,
+      efetivo_moi: data.efetivo_moi,
+      horas_totais: data.horas_totais,
+      observacoes: data.observacoes,
+      lista_presenca_url: data.lista_presenca_url,
+      cca_id: data.cca_id,
+      processo_treinamento_id: data.processo_treinamento_id,
+      tipo_treinamento_id: data.tipo_treinamento_id,
+      treinamento_id: data.treinamento_id,
     };
 
-    const { data, error } = await supabase
-      .from('execucao_treinamentos')
-      .insert(treinamentoData)
-      .select();
+    const { data: result, error } = await supabase
+      .from("execucao_treinamentos")
+      .insert(insertData)
+      .select()
+      .single();
 
     if (error) {
-      console.error("Erro ao criar execução de treinamento:", error);
-      return { success: false, error: error.message };
+      console.error("Error creating execucao:", error);
+      throw error;
     }
 
-    return { success: true, data: data && data[0] };
-  } catch (error) {
-    console.error("Exceção ao criar execução de treinamento:", error);
-    return { success: false, error: "Erro ao processar a solicitação" };
+    return result;
+  },
+
+  async getAll() {
+    const { data, error } = await supabase
+      .from("execucao_treinamentos")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Error fetching execucoes:", error);
+      throw error;
+    }
+
+    return data || [];
+  },
+
+  async getById(id: string) {
+    const { data, error } = await supabase
+      .from("execucao_treinamentos")
+      .select("*")
+      .eq("id", id)
+      .single();
+
+    if (error) {
+      console.error("Error fetching execucao:", error);
+      throw error;
+    }
+
+    return data;
+  },
+
+  async update(id: string, data: Partial<ExecucaoTreinamento>) {
+    const { data: result, error } = await supabase
+      .from("execucao_treinamentos")
+      .update(data)
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error("Error updating execucao:", error);
+      throw error;
+    }
+
+    return result;
+  },
+
+  async delete(id: string) {
+    const { error } = await supabase
+      .from("execucao_treinamentos")
+      .delete()
+      .eq("id", id);
+
+    if (error) {
+      console.error("Error deleting execucao:", error);
+      throw error;
+    }
+
+    return true;
   }
-}
+};

@@ -1,70 +1,62 @@
 
-import { supabase } from '@/integrations/supabase/client';
-import { TreinamentoNormativo } from '@/types/treinamentos';
+import { supabase } from "@/integrations/supabase/client";
 
-/**
- * Fetch treinamentos normativos
- */
-export async function fetchTreinamentosNormativos(): Promise<TreinamentoNormativo[]> {
-  try {
-    const { data, error } = await supabase
-      .from('treinamentos_normativos')
-      .select(`
-        id,
-        funcionario_id,
-        treinamento_id,
-        data_realizacao,
-        data_validade,
-        tipo,
-        status
-      `)
-      .order('data_validade', { ascending: true });
-
-    if (error) {
-      console.error("Erro ao buscar treinamentos normativos:", error);
-      return [];
-    }
-
-    return data.map(item => ({
-      ...item,
-      data_realizacao: new Date(item.data_realizacao),
-      data_validade: new Date(item.data_validade)
-    })) || [];
-  } catch (error) {
-    console.error("Exceção ao buscar treinamentos normativos:", error);
-    return [];
-  }
+export interface TreinamentoNormativo {
+  id?: string;
+  funcionario_id: string;
+  treinamento_id: string;
+  tipo: string;
+  data_realizacao: string;
+  data_validade: string;
+  status: string;
+  certificado_url?: string;
+  funcionarioNome?: string;
+  treinamentoNome?: string;
 }
 
-/**
- * Create treinamento normativo
- */
-export async function criarTreinamentoNormativo(treinamento: Partial<TreinamentoNormativo>) {
-  try {
-    // Convert Date objects to ISO strings for the database
-    const treinamentoToInsert = {
-      ...treinamento,
-      data_realizacao: treinamento.data_realizacao instanceof Date 
-        ? treinamento.data_realizacao.toISOString().split('T')[0] 
-        : treinamento.data_realizacao,
-      data_validade: treinamento.data_validade instanceof Date 
-        ? treinamento.data_validade.toISOString().split('T')[0] 
-        : treinamento.data_validade
+export const treinamentosNormativosService = {
+  async create(data: TreinamentoNormativo) {
+    console.log("Creating treinamento normativo with data:", data);
+    
+    const insertData = {
+      funcionario_id: data.funcionario_id,
+      treinamento_id: data.treinamento_id,
+      tipo: data.tipo,
+      data_realizacao: data.data_realizacao,
+      data_validade: data.data_validade,
+      status: data.status,
+      certificado_url: data.certificado_url,
     };
 
-    const { data, error } = await supabase
-      .from('treinamentos_normativos')
-      .insert(treinamentoToInsert)
-      .select();
+    const { data: result, error } = await supabase
+      .from("treinamentos_normativos")
+      .insert(insertData)
+      .select()
+      .single();
 
     if (error) {
-      console.error("Erro ao criar treinamento normativo:", error);
-      return { success: false, error: error.message };
+      console.error("Error creating treinamento normativo:", error);
+      throw error;
     }
 
-    return { success: true, data: data && data[0] };
-  } catch (error) {
-    console.error("Exceção ao criar treinamento normativo:", error);
-    return { success: false, error: "Erro ao processar a solicitação" };
+    return result;
+  },
+
+  async getAll() {
+    const { data, error } = await supabase
+      .from("treinamentos_normativos")
+      .select(`
+        *,
+        funcionarios:funcionario_id(nome),
+        treinamentos:treinamento_id(nome)
+      `)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Error fetching treinamentos normativos:", error);
+      throw error;
+    }
+
+    return data || [];
   }
-}
+};
