@@ -13,17 +13,17 @@ import { TreinamentoFormValues } from "@/hooks/useTreinamentoForm";
 
 interface CargaHorariaEfetivoFieldsProps {
   form: UseFormReturn<TreinamentoFormValues>;
-  horasTotais: number;
-  isOutroTreinamento: boolean;
-  treinamentoSelecionado: string;
+  calculateHorasTotais: () => number;
 }
 
 const CargaHorariaEfetivoFields = ({
   form,
-  horasTotais,
-  isOutroTreinamento,
-  treinamentoSelecionado
+  calculateHorasTotais
 }: CargaHorariaEfetivoFieldsProps) => {
+  const horasTotais = calculateHorasTotais();
+  const treinamentoSelecionado = form.watch("treinamento_id");
+  const isOutroTreinamento = treinamentoSelecionado === "outro";
+
   return (
     <>
       <div className="flex flex-col md:flex-row gap-4 items-end">

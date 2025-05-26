@@ -17,24 +17,20 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { UseFormReturn } from "react-hook-form";
-
-interface FormValues {
-  treinamento_id: string;
-  treinamento_nome?: string;
-  [key: string]: any;
-}
+import { TreinamentoFormValues } from "@/hooks/useTreinamentoForm";
 
 interface TreinamentoSelectorProps {
-  form: UseFormReturn<FormValues>;
-  treinamentosOptions: Treinamento[];
-  isOutroTreinamento: boolean;
+  form: UseFormReturn<TreinamentoFormValues>;
+  treinamentoOptions: Treinamento[];
 }
 
 const TreinamentoSelector = ({ 
   form, 
-  treinamentosOptions, 
-  isOutroTreinamento 
+  treinamentoOptions 
 }: TreinamentoSelectorProps) => {
+  const treinamentoSelecionado = form.watch("treinamento_id");
+  const isOutroTreinamento = treinamentoSelecionado === "outro";
+
   return (
     <>
       <FormField
@@ -50,7 +46,7 @@ const TreinamentoSelector = ({
                 </SelectTrigger>
               </FormControl>
               <SelectContent>
-                {treinamentosOptions.map((treinamento) => (
+                {treinamentoOptions.map((treinamento) => (
                   <SelectItem key={treinamento.id} value={treinamento.id}>
                     {treinamento.nome}
                   </SelectItem>

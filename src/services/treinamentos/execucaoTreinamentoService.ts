@@ -2,7 +2,7 @@
 import { supabase } from "@/integrations/supabase/client";
 
 export interface ExecucaoTreinamento {
-  id: string;
+  id?: string;
   data: Date;
   mes: number;
   ano: number;
@@ -23,7 +23,7 @@ export interface ExecucaoTreinamento {
 }
 
 export const execucaoTreinamentoService = {
-  async create(data: ExecucaoTreinamento) {
+  async create(data: Omit<ExecucaoTreinamento, 'id'>) {
     console.log("Creating execucao with data:", data);
     
     const insertData = {
