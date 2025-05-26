@@ -2,7 +2,7 @@
 import { supabase } from "@/integrations/supabase/client";
 
 export interface ExecucaoTreinamento {
-  id?: string;
+  id: string;
   data: Date;
   mes: number;
   ano: number;
@@ -133,9 +133,10 @@ export async function fetchExecucaoTreinamentos(): Promise<ExecucaoTreinamento[]
       return [];
     }
 
-    // Convert string dates back to Date objects for compatibility
+    // Convert string dates back to Date objects for compatibility and ensure id is present
     return (data || []).map(item => ({
       ...item,
+      id: item.id || '',
       data: new Date(item.data)
     }));
   } catch (error) {
