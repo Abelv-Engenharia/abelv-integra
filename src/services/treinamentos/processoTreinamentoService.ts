@@ -30,3 +30,7 @@ export async function fetchProcessosTreinamento(): Promise<ProcessoTreinamentoOp
     return [];
   }
 }
+
+export const processoTreinamentoService = {
+  getAll: fetchProcessosTreinamento
+};

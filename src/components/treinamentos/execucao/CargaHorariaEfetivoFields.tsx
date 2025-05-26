@@ -13,17 +13,15 @@ import { TreinamentoFormValues } from "@/hooks/useTreinamentoForm";
 
 interface CargaHorariaEfetivoFieldsProps {
   form: UseFormReturn<TreinamentoFormValues>;
-  horasTotais: number;
-  isOutroTreinamento: boolean;
-  treinamentoSelecionado: string;
+  calculateHorasTotais: () => number;
 }
 
 const CargaHorariaEfetivoFields = ({
   form,
-  horasTotais,
-  isOutroTreinamento,
-  treinamentoSelecionado
+  calculateHorasTotais
 }: CargaHorariaEfetivoFieldsProps) => {
+  const horasTotais = calculateHorasTotais();
+
   return (
     <>
       <div className="flex flex-col md:flex-row gap-4 items-end">
@@ -41,7 +39,6 @@ const CargaHorariaEfetivoFields = ({
                     const value = e.target.value === '' ? '0' : e.target.value;
                     field.onChange(Number(value));
                   }}
-                  disabled={!isOutroTreinamento && !!treinamentoSelecionado && treinamentoSelecionado !== "outro"}
                 />
               </FormControl>
               <FormMessage />

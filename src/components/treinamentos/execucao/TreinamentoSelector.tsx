@@ -15,70 +15,44 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
 import { UseFormReturn } from "react-hook-form";
-
-interface FormValues {
-  treinamento_id: string;
-  treinamento_nome?: string;
-  [key: string]: any;
-}
+import { TreinamentoFormValues } from "@/hooks/useTreinamentoForm";
 
 interface TreinamentoSelectorProps {
-  form: UseFormReturn<FormValues>;
-  treinamentosOptions: Treinamento[];
-  isOutroTreinamento: boolean;
+  form: UseFormReturn<TreinamentoFormValues>;
+  treinamentoOptions: Treinamento[];
 }
 
 const TreinamentoSelector = ({ 
   form, 
-  treinamentosOptions, 
-  isOutroTreinamento 
+  treinamentoOptions
 }: TreinamentoSelectorProps) => {
   return (
-    <>
-      <FormField
-        control={form.control}
-        name="treinamento_id"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Treinamento realizado</FormLabel>
-            <Select onValueChange={field.onChange} value={field.value}>
-              <FormControl>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o treinamento" />
-                </SelectTrigger>
-              </FormControl>
-              <SelectContent>
-                {treinamentosOptions.map((treinamento) => (
-                  <SelectItem key={treinamento.id} value={treinamento.id}>
-                    {treinamento.nome}
-                  </SelectItem>
-                ))}
-                <SelectItem value="outro">Outro (informar manualmente)</SelectItem>
-              </SelectContent>
-            </Select>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-
-      {isOutroTreinamento && (
-        <FormField
-          control={form.control}
-          name="treinamento_nome"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Nome do treinamento</FormLabel>
-              <FormControl>
-                <Input {...field} placeholder="Informe o nome do treinamento" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+    <FormField
+      control={form.control}
+      name="treinamento_id"
+      render={({ field }) => (
+        <FormItem>
+          <FormLabel>Treinamento realizado</FormLabel>
+          <Select onValueChange={field.onChange} value={field.value}>
+            <FormControl>
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione o treinamento" />
+              </SelectTrigger>
+            </FormControl>
+            <SelectContent>
+              {treinamentoOptions.map((treinamento) => (
+                <SelectItem key={treinamento.id} value={treinamento.id}>
+                  {treinamento.nome}
+                </SelectItem>
+              ))}
+              <SelectItem value="outro">Outro (informar manualmente)</SelectItem>
+            </SelectContent>
+          </Select>
+          <FormMessage />
+        </FormItem>
       )}
-    </>
+    />
   );
 };
 

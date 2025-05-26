@@ -89,10 +89,10 @@ export const execucaoTreinamentoService = {
     return data;
   },
 
-  async update(id: string, data: Partial<ExecucaoTreinamento>) {
+  async update(id: string, updateData: Partial<Omit<ExecucaoTreinamento, 'data'> & { data?: string }>) {
     const { data: result, error } = await supabase
       .from("execucao_treinamentos")
-      .update(data)
+      .update(updateData)
       .eq("id", id)
       .select()
       .single();
