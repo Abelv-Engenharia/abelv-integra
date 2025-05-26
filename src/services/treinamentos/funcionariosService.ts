@@ -30,3 +30,8 @@ export async function fetchFuncionarios(): Promise<Funcionario[]> {
     return [];
   }
 }
+
+// Export service object to match the import pattern
+export const funcionariosService = {
+  getAll: fetchFuncionarios
+};

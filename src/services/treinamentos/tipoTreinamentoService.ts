@@ -30,3 +30,8 @@ export async function fetchTiposTreinamento(): Promise<TipoTreinamentoOption[]> 
     return [];
   }
 }
+
+// Export service object to match the import pattern
+export const tipoTreinamentoService = {
+  getAll: fetchTiposTreinamento
+};

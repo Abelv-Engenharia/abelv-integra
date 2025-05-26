@@ -31,3 +31,8 @@ export async function fetchCCAs(): Promise<CCAOption[]> {
     return [];
   }
 }
+
+// Export service object to match the import pattern
+export const ccaService = {
+  getAll: fetchCCAs
+};

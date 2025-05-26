@@ -28,3 +28,8 @@ export async function fetchTreinamentos(): Promise<Treinamento[]> {
     return [];
   }
 }
+
+// Export service object to match the import pattern
+export const treinamentosService = {
+  getAll: fetchTreinamentos
+};
