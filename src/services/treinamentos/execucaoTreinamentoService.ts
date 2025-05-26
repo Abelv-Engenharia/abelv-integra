@@ -89,10 +89,10 @@ export const execucaoTreinamentoService = {
     return data;
   },
 
-  async update(id: string, data: Partial<ExecucaoTreinamento>) {
+  async update(id: string, updateData: Partial<Omit<ExecucaoTreinamento, 'data'> & { data?: string }>) {
     const { data: result, error } = await supabase
       .from("execucao_treinamentos")
-      .update(data)
+      .update(updateData)
       .eq("id", id)
       .select()
       .single();
@@ -119,3 +119,27 @@ export const execucaoTreinamentoService = {
     return true;
   }
 };
+
+// Export function for backward compatibility with TreinamentosConsulta.tsx
+export async function fetchExecucaoTreinamentos(): Promise<ExecucaoTreinamento[]> {
+  try {
+    const { data, error } = await supabase
+      .from("execucao_treinamentos")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Error fetching execucao treinamentos:", error);
+      return [];
+    }
+
+    // Convert string dates back to Date objects for compatibility
+    return (data || []).map(item => ({
+      ...item,
+      data: new Date(item.data)
+    }));
+  } catch (error) {
+    console.error("Exception fetching execucao treinamentos:", error);
+    return [];
+  }
+}
