@@ -17,7 +17,14 @@ export async function fetchTreinamentosNormativos(): Promise<TreinamentoNormativ
       return [];
     }
 
-    return data || [];
+    // Convert string dates to Date objects
+    const processedData = (data || []).map(item => ({
+      ...item,
+      data_realizacao: new Date(item.data_realizacao),
+      data_validade: new Date(item.data_validade)
+    }));
+
+    return processedData;
   } catch (error) {
     console.error("Exceção ao buscar treinamentos normativos:", error);
     return [];
