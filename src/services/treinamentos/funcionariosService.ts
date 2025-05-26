@@ -3,13 +3,19 @@ import { supabase } from '@/integrations/supabase/client';
 import { Funcionario } from '@/types/treinamentos';
 
 /**
- * Fetch all funcionarios
+ * Fetch funcionários
  */
 export async function fetchFuncionarios(): Promise<Funcionario[]> {
   try {
     const { data, error } = await supabase
       .from('funcionarios')
-      .select('*')
+      .select(`
+        id,
+        nome,
+        matricula,
+        funcao,
+        ativo
+      `)
       .eq('ativo', true)
       .order('nome');
 
@@ -24,7 +30,3 @@ export async function fetchFuncionarios(): Promise<Funcionario[]> {
     return [];
   }
 }
-
-export const funcionariosService = {
-  getAll: fetchFuncionarios
-};

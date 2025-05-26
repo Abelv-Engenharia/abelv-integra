@@ -28,7 +28,3 @@ export async function fetchTreinamentos(): Promise<Treinamento[]> {
     return [];
   }
 }
-
-export const treinamentosService = {
-  getAll: fetchTreinamentos
-};

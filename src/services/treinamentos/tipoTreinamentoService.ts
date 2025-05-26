@@ -30,7 +30,3 @@ export async function fetchTiposTreinamento(): Promise<TipoTreinamentoOption[]> 
     return [];
   }
 }
-
-export const tipoTreinamentoService = {
-  getAll: fetchTiposTreinamento
-};

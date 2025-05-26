@@ -6,6 +6,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
+  Form,
   FormControl,
   FormField,
   FormItem,
@@ -19,10 +20,14 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { UseFormReturn } from "react-hook-form";
-import { TreinamentoFormValues } from "@/hooks/useTreinamentoForm";
+
+interface FormValues {
+  data: Date;
+  [key: string]: any;
+}
 
 interface DateTimeFieldsProps {
-  form: UseFormReturn<TreinamentoFormValues>;
+  form: UseFormReturn<FormValues>;
 }
 
 const DateTimeFields = ({ form }: DateTimeFieldsProps) => {

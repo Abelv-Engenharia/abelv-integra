@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -12,10 +13,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 import { TreinamentoNormativo, ExecucaoTreinamento, Funcionario, Treinamento } from "@/types/treinamentos";
-import { treinamentosNormativosService } from "@/services/treinamentos/treinamentosNormativosService";
-import { execucaoTreinamentoService } from "@/services/treinamentos/execucaoTreinamentoService";
-import { funcionariosService } from "@/services/treinamentos/funcionariosService";
-import { treinamentosService } from "@/services/treinamentos/treinamentosService";
+import { fetchTreinamentosNormativos } from "@/services/treinamentos/treinamentosNormativosService";
+import { fetchExecucaoTreinamentos } from "@/services/treinamentos/execucaoTreinamentoService";
+import { fetchFuncionarios } from "@/services/treinamentos/funcionariosService";
+import { fetchTreinamentos } from "@/services/treinamentos/treinamentosService";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -34,10 +35,10 @@ const TreinamentosConsulta = () => {
         setLoading(true);
         
         const [normativosResult, execucaoResult, funcionariosResult, treinamentosResult] = await Promise.all([
-          treinamentosNormativosService.getAll(),
-          execucaoTreinamentoService.getAll(),
-          funcionariosService.getAll(),
-          treinamentosService.getAll()
+          fetchTreinamentosNormativos(),
+          fetchExecucaoTreinamentos(),
+          fetchFuncionarios(),
+          fetchTreinamentos()
         ]);
         
         // Process and enrich normativo data

@@ -31,7 +31,3 @@ export async function fetchCCAs(): Promise<CCAOption[]> {
     return [];
   }
 }
-
-export const ccaService = {
-  getAll: fetchCCAs
-};
