@@ -14,7 +14,7 @@ export interface DesvioCompleto {
   engenheiro_responsavel_id?: string;
   supervisor_responsavel_id?: string;
   encarregado_responsavel_id?: string;
-  funcionarios_envolvidos?: any[];
+  funcionarios_envolvidos?: any;
   tipo_registro_id?: number;
   processo_id?: number;
   evento_identificado_id?: number;
@@ -31,7 +31,7 @@ export interface DesvioCompleto {
   probabilidade?: number;
   severidade?: number;
   classificacao_risco?: string;
-  acoes?: any[];
+  acoes?: any;
   status?: string;
   responsavel_id?: string;
   prazo_conclusao?: string;
@@ -63,7 +63,11 @@ export const desviosCompletosService = {
         return [];
       }
       
-      return data || [];
+      return (data || []).map(item => ({
+        ...item,
+        funcionarios_envolvidos: Array.isArray(item.funcionarios_envolvidos) ? item.funcionarios_envolvidos : [],
+        acoes: Array.isArray(item.acoes) ? item.acoes : []
+      }));
     } catch (error) {
       console.error('Exceção ao buscar desvios completos:', error);
       return [];
@@ -96,7 +100,11 @@ export const desviosCompletosService = {
         return null;
       }
       
-      return data;
+      return {
+        ...data,
+        funcionarios_envolvidos: Array.isArray(data.funcionarios_envolvidos) ? data.funcionarios_envolvidos : [],
+        acoes: Array.isArray(data.acoes) ? data.acoes : []
+      };
     } catch (error) {
       console.error('Exceção ao buscar desvio por ID:', error);
       return null;
@@ -116,7 +124,11 @@ export const desviosCompletosService = {
         return null;
       }
       
-      return data;
+      return {
+        ...data,
+        funcionarios_envolvidos: Array.isArray(data.funcionarios_envolvidos) ? data.funcionarios_envolvidos : [],
+        acoes: Array.isArray(data.acoes) ? data.acoes : []
+      };
     } catch (error) {
       console.error('Exceção ao criar desvio:', error);
       return null;
@@ -137,7 +149,11 @@ export const desviosCompletosService = {
         return null;
       }
       
-      return data;
+      return {
+        ...data,
+        funcionarios_envolvidos: Array.isArray(data.funcionarios_envolvidos) ? data.funcionarios_envolvidos : [],
+        acoes: Array.isArray(data.acoes) ? data.acoes : []
+      };
     } catch (error) {
       console.error('Exceção ao atualizar desvio:', error);
       return null;
