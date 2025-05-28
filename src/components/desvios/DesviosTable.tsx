@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { Eye, Pencil, Filter, AlertTriangle } from "lucide-react";
+import { Eye, Pencil, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -18,7 +18,6 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-  DialogFooter,
 } from "@/components/ui/dialog";
 import {
   Select,
@@ -28,32 +27,19 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
-
-// Interface para os desvios
-interface Desvio {
-  id: string;
-  data: string;
-  title: string;
-  local?: string;
-  tipo?: string;
-  classificacao: string;
-  status: string;
-  description: string;
-}
+import { desviosCompletosService, DesvioCompleto } from "@/services/desvios/desviosCompletosService";
 
 const getRiskColor = (risk: string) => {
   switch (risk) {
-    case "Trivial":
+    case "TRIVIAL":
       return "bg-green-100 text-green-800 hover:bg-green-200";
-    case "Tolerável":
+    case "TOLERÁVEL":
       return "bg-blue-100 text-blue-800 hover:bg-blue-200";
-    case "Moderado":
+    case "MODERADO":
       return "bg-yellow-100 text-yellow-800 hover:bg-yellow-200";
-    case "Substancial":
+    case "SUBSTANCIAL":
       return "bg-orange-100 text-orange-800 hover:bg-orange-200";
-    case "Intolerável":
+    case "INTOLERÁVEL":
       return "bg-red-100 text-red-800 hover:bg-red-200";
     default:
       return "bg-gray-100 text-gray-800 hover:bg-gray-200";
@@ -62,11 +48,11 @@ const getRiskColor = (risk: string) => {
 
 const getStatusColor = (status: string) => {
   switch (status) {
-    case "Concluído":
+    case "Fechado":
       return "bg-green-100 text-green-800 hover:bg-green-200";
     case "Em andamento":
       return "bg-blue-100 text-blue-800 hover:bg-blue-200";
-    case "Pendente":
+    case "Aberto":
       return "bg-yellow-100 text-yellow-800 hover:bg-yellow-200";
     default:
       return "bg-gray-100 text-gray-800 hover:bg-gray-200";
@@ -75,41 +61,17 @@ const getStatusColor = (status: string) => {
 
 const DesviosTable = () => {
   const { toast } = useToast();
-  const navigate = useNavigate();
-  const [desvios, setDesvios] = useState<Desvio[]>([]);
-  const [selectedDesvio, setSelectedDesvio] = useState<Desvio | null>(null);
+  const [desvios, setDesvios] = useState<DesvioCompleto[]>([]);
+  const [selectedDesvio, setSelectedDesvio] = useState<DesvioCompleto | null>(null);
   const [actionStatus, setActionStatus] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
 
-  // Carregar dados dos desvios do Supabase
   useEffect(() => {
     const fetchDesvios = async () => {
       setIsLoading(true);
       try {
-        const { data, error } = await supabase
-          .from('desvios')
-          .select('*')
-          .order('created_at', { ascending: false });
-          
-        if (error) {
-          console.error('Erro ao buscar desvios:', error);
-          setDesvios([]);
-        } else if (data && data.length > 0) {
-          // Mapear os dados do Supabase para o formato esperado pelo componente
-          const formattedDesvios = data.map(item => ({
-            id: item.id,
-            data: new Date(item.data).toLocaleDateString('pt-BR'),
-            title: item.descricao.substring(0, 60) + (item.descricao.length > 60 ? '...' : ''),
-            local: item.local || 'Não informado',
-            tipo: item.tipo || 'Não informado',
-            classificacao: item.classificacao || 'Não classificado',
-            status: item.status || 'Pendente',
-            description: item.descricao
-          }));
-          setDesvios(formattedDesvios);
-        } else {
-          setDesvios([]);
-        }
+        const data = await desviosCompletosService.getAll();
+        setDesvios(data);
       } catch (error) {
         console.error('Erro ao buscar desvios:', error);
         setDesvios([]);
@@ -129,33 +91,22 @@ const DesviosTable = () => {
     if (!selectedDesvio || !actionStatus) return;
     
     try {
-      // Atualizar o status no Supabase
-      const { error } = await supabase
-        .from('desvios')
-        .update({ status: actionStatus })
-        .eq('id', selectedDesvio.id);
-        
-      if (error) {
-        console.error('Erro ao atualizar status:', error);
-        toast({
-          title: "Erro ao atualizar status",
-          description: "Não foi possível atualizar o status do desvio.",
-          variant: "destructive",
-        });
-        return;
-      }
-      
-      // Atualizar a lista local
-      setDesvios(desvios.map(d => 
-        d.id === selectedDesvio.id 
-          ? { ...d, status: actionStatus } 
-          : d
-      ));
-      
-      toast({
-        title: "Status atualizado",
-        description: `O status do desvio ${selectedDesvio.id} foi alterado para ${actionStatus}.`,
+      const updatedDesvio = await desviosCompletosService.update(selectedDesvio.id!, {
+        status: actionStatus
       });
+      
+      if (updatedDesvio) {
+        setDesvios(desvios.map(d => 
+          d.id === selectedDesvio.id 
+            ? { ...d, status: actionStatus } 
+            : d
+        ));
+        
+        toast({
+          title: "Status atualizado",
+          description: `O status do desvio ${selectedDesvio.id} foi alterado para ${actionStatus}.`,
+        });
+      }
     } catch (error) {
       console.error('Erro ao atualizar status:', error);
       toast({
@@ -164,6 +115,11 @@ const DesviosTable = () => {
         variant: "destructive",
       });
     }
+  };
+
+  const formatDate = (dateString: string) => {
+    if (!dateString) return "";
+    return new Date(dateString).toLocaleDateString("pt-BR");
   };
 
   return (
@@ -179,9 +135,9 @@ const DesviosTable = () => {
               <TableRow>
                 <TableHead>ID</TableHead>
                 <TableHead>Data</TableHead>
-                <TableHead className="max-w-[250px]">Título</TableHead>
+                <TableHead className="max-w-[250px]">Descrição</TableHead>
                 <TableHead>Local</TableHead>
-                <TableHead>Tipo</TableHead>
+                <TableHead>CCA</TableHead>
                 <TableHead>Risco</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="text-right">Ações</TableHead>
@@ -191,19 +147,22 @@ const DesviosTable = () => {
               {desvios.length > 0 ? (
                 desvios.map((desvio) => (
                   <TableRow key={desvio.id}>
-                    <TableCell className="font-medium">{desvio.id}</TableCell>
-                    <TableCell>{desvio.data}</TableCell>
-                    <TableCell className="max-w-[250px] truncate">{desvio.title}</TableCell>
+                    <TableCell className="font-medium">{desvio.id?.slice(0, 8)}...</TableCell>
+                    <TableCell>{formatDate(desvio.data_desvio)}</TableCell>
+                    <TableCell className="max-w-[250px] truncate">
+                      {desvio.descricao_desvio?.substring(0, 60)}
+                      {desvio.descricao_desvio && desvio.descricao_desvio.length > 60 ? '...' : ''}
+                    </TableCell>
                     <TableCell>{desvio.local}</TableCell>
-                    <TableCell>{desvio.tipo}</TableCell>
+                    <TableCell>{(desvio as any).ccas?.nome || 'N/A'}</TableCell>
                     <TableCell>
-                      <Badge variant="secondary" className={getRiskColor(desvio.classificacao)}>
-                        {desvio.classificacao}
+                      <Badge variant="secondary" className={getRiskColor(desvio.classificacao_risco || '')}>
+                        {desvio.classificacao_risco || 'N/A'}
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <Badge variant="secondary" className={getStatusColor(desvio.status)}>
-                        {desvio.status}
+                      <Badge variant="secondary" className={getStatusColor(desvio.status || '')}>
+                        {desvio.status || 'Aberto'}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
@@ -220,11 +179,11 @@ const DesviosTable = () => {
                           </DialogTrigger>
                           <DialogContent className="sm:max-w-[600px]">
                             <DialogHeader>
-                              <DialogTitle>{desvio.title}</DialogTitle>
+                              <DialogTitle>Detalhes do Desvio</DialogTitle>
                               <DialogDescription className="pt-4 flex items-center gap-2">
-                                <span className="text-muted-foreground">ID: {desvio.id}</span>
+                                <span className="text-muted-foreground">ID: {desvio.id?.slice(0, 8)}...</span>
                                 <span>•</span>
-                                <span className="text-muted-foreground">Data: {desvio.data}</span>
+                                <span className="text-muted-foreground">Data: {formatDate(desvio.data_desvio)}</span>
                               </DialogDescription>
                             </DialogHeader>
                             <div className="grid gap-6 py-4">
@@ -236,29 +195,35 @@ const DesviosTable = () => {
                                     <p className="text-sm text-muted-foreground">{desvio.local}</p>
                                   </div>
                                   <div>
-                                    <p className="text-sm font-medium">Tipo</p>
-                                    <p className="text-sm text-muted-foreground">{desvio.tipo}</p>
+                                    <p className="text-sm font-medium">CCA</p>
+                                    <p className="text-sm text-muted-foreground">{(desvio as any).ccas?.nome || 'N/A'}</p>
                                   </div>
                                   <div>
                                     <p className="text-sm font-medium">Nível de Risco</p>
-                                    <Badge variant="secondary" className={getRiskColor(desvio.classificacao)}>
-                                      {desvio.classificacao}
+                                    <Badge variant="secondary" className={getRiskColor(desvio.classificacao_risco || '')}>
+                                      {desvio.classificacao_risco || 'N/A'}
                                     </Badge>
                                   </div>
                                   <div>
-                                    <p className="text-sm font-medium">Status da Ação</p>
-                                    <Badge variant="secondary" className={getStatusColor(desvio.status)}>
-                                      {desvio.status}
+                                    <p className="text-sm font-medium">Status</p>
+                                    <Badge variant="secondary" className={getStatusColor(desvio.status || '')}>
+                                      {desvio.status || 'Aberto'}
                                     </Badge>
                                   </div>
                                 </div>
                               </div>
                               <div className="grid gap-2">
                                 <h3 className="font-semibold">Descrição</h3>
-                                <p className="text-sm text-muted-foreground">{desvio.description}</p>
+                                <p className="text-sm text-muted-foreground">{desvio.descricao_desvio}</p>
                               </div>
+                              {desvio.acao_imediata && (
+                                <div className="grid gap-2">
+                                  <h3 className="font-semibold">Ação Imediata</h3>
+                                  <p className="text-sm text-muted-foreground">{desvio.acao_imediata}</p>
+                                </div>
+                              )}
                               <div className="grid gap-2">
-                                <h3 className="font-semibold">Atualizar Status da Ação</h3>
+                                <h3 className="font-semibold">Atualizar Status</h3>
                                 <div className="flex gap-4 items-end">
                                   <div className="grid gap-1.5 flex-1">
                                     <label htmlFor="status" className="text-sm font-medium">
@@ -272,9 +237,9 @@ const DesviosTable = () => {
                                         <SelectValue placeholder="Selecione o status" />
                                       </SelectTrigger>
                                       <SelectContent>
-                                        <SelectItem value="Pendente">Pendente</SelectItem>
+                                        <SelectItem value="Aberto">Aberto</SelectItem>
                                         <SelectItem value="Em andamento">Em andamento</SelectItem>
-                                        <SelectItem value="Concluído">Concluído</SelectItem>
+                                        <SelectItem value="Fechado">Fechado</SelectItem>
                                       </SelectContent>
                                     </Select>
                                   </div>

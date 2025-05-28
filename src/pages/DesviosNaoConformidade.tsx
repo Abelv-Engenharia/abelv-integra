@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { ArrowLeft, FileText, Mail, Send } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -27,6 +27,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useToast } from "@/hooks/use-toast";
+import { desviosCompletosService, DesvioCompleto } from "@/services/desvios/desviosCompletosService";
 
 // Schema for form validation
 const formSchema = z.object({
@@ -39,45 +40,17 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-// Sample deviation data (in a real app, this would come from an API)
-const mockDesvioData = {
-  "D-001": {
-    id: "D-001",
-    data: "2023-08-15",
-    local: "Setor de Produção",
-    descricao: "Equipamento sem proteção adequada",
-    classificacao: "Condição Insegura",
-    risco: "Substancial",
-    responsavel: "João Silva",
-    empresa: "Abelv",
-    status: "Pendente",
-    prazo: "2023-09-15",
-  },
-  "D-002": {
-    id: "D-002",
-    data: "2023-08-20",
-    local: "Almoxarifado",
-    descricao: "Armazenamento inadequado de produtos químicos",
-    classificacao: "Condição Insegura",
-    risco: "Moderado",
-    responsavel: "Maria Santos",
-    empresa: "Fornecedor A",
-    status: "Em andamento",
-    prazo: "2023-09-10",
-  },
-};
-
 // Template codes for field mapping
 const templateCodes = [
   { code: "{ID}", description: "ID do desvio" },
   { code: "{DATA}", description: "Data do desvio" },
   { code: "{LOCAL}", description: "Local do desvio" },
   { code: "{DESCRICAO}", description: "Descrição do desvio" },
-  { code: "{CLASSIFICACAO}", description: "Classificação do desvio" },
+  { code: "{CCA}", description: "CCA" },
+  { code: "{EMPRESA}", description: "Empresa" },
   { code: "{RISCO}", description: "Nível de risco" },
-  { code: "{RESPONSAVEL}", description: "Responsável pela ação" },
-  { code: "{EMPRESA}", description: "Empresa envolvida" },
-  { code: "{STATUS}", description: "Status da ação" },
+  { code: "{STATUS}", description: "Status do desvio" },
+  { code: "{ACAO_IMEDIATA}", description: "Ação imediata tomada" },
   { code: "{PRAZO}", description: "Prazo para resolução" },
 ];
 
@@ -88,16 +61,18 @@ NÃO CONFORMIDADE - RELATÓRIO
 ID do Desvio: {ID}
 Data de Registro: {DATA}
 Local: {LOCAL}
+CCA: {CCA}
 
 DESCRIÇÃO DA NÃO CONFORMIDADE:
 {DESCRICAO}
 
-Classificação: {CLASSIFICACAO}
-Nível de Risco: {RISCO}
-Responsável: {RESPONSAVEL}
 Empresa: {EMPRESA}
+Nível de Risco: {RISCO}
 Status Atual: {STATUS}
 Prazo para Resolução: {PRAZO}
+
+AÇÃO IMEDIATA TOMADA:
+{ACAO_IMEDIATA}
 
 Este documento representa uma notificação formal de não conformidade 
 identificada em nossas instalações. Solicitamos atenção imediata para 
@@ -111,7 +86,8 @@ const DesviosNaoConformidade = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [previewText, setPreviewText] = useState("");
-  const [loadedDesvio, setLoadedDesvio] = useState<any>(null);
+  const [loadedDesvio, setLoadedDesvio] = useState<DesvioCompleto | null>(null);
+  const [desvios, setDesvios] = useState<DesvioCompleto[]>([]);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -124,20 +100,44 @@ const DesviosNaoConformidade = () => {
     },
   });
 
-  // Function to fetch deviation data by ID (mocked)
-  const fetchDesvioData = (id: string) => {
-    // In a real application, this would be an API call
-    if (mockDesvioData[id]) {
-      setLoadedDesvio(mockDesvioData[id]);
-      toast({
-        title: "Desvio encontrado",
-        description: `Dados do desvio ${id} carregados com sucesso.`,
-      });
-      return mockDesvioData[id];
-    } else {
+  useEffect(() => {
+    const fetchDesvios = async () => {
+      try {
+        const data = await desviosCompletosService.getAll();
+        setDesvios(data);
+      } catch (error) {
+        console.error('Erro ao carregar desvios:', error);
+      }
+    };
+    
+    fetchDesvios();
+  }, []);
+
+  // Function to fetch deviation data by ID
+  const fetchDesvioData = async (id: string) => {
+    try {
+      const desvio = await desviosCompletosService.getById(id);
+      if (desvio) {
+        setLoadedDesvio(desvio);
+        toast({
+          title: "Desvio encontrado",
+          description: `Dados do desvio ${id.slice(0, 8)}... carregados com sucesso.`,
+        });
+        return desvio;
+      } else {
+        toast({
+          title: "Erro",
+          description: `Desvio com ID ${id} não encontrado.`,
+          variant: "destructive",
+        });
+        setLoadedDesvio(null);
+        return null;
+      }
+    } catch (error) {
+      console.error('Erro ao buscar desvio:', error);
       toast({
         title: "Erro",
-        description: `Desvio com ID ${id} não encontrado.`,
+        description: "Erro ao buscar dados do desvio.",
         variant: "destructive",
       });
       setLoadedDesvio(null);
@@ -146,28 +146,28 @@ const DesviosNaoConformidade = () => {
   };
 
   // Function to process template and replace codes with actual data
-  const processTemplate = (template: string, data: any) => {
+  const processTemplate = (template: string, data: DesvioCompleto) => {
     if (!data) return template;
     
     let processed = template;
-    processed = processed.replace(/{ID}/g, data.id || "");
-    processed = processed.replace(/{DATA}/g, data.data || "");
+    processed = processed.replace(/{ID}/g, data.id?.slice(0, 8) + '...' || "");
+    processed = processed.replace(/{DATA}/g, new Date(data.data_desvio).toLocaleDateString("pt-BR") || "");
     processed = processed.replace(/{LOCAL}/g, data.local || "");
-    processed = processed.replace(/{DESCRICAO}/g, data.descricao || "");
-    processed = processed.replace(/{CLASSIFICACAO}/g, data.classificacao || "");
-    processed = processed.replace(/{RISCO}/g, data.risco || "");
-    processed = processed.replace(/{RESPONSAVEL}/g, data.responsavel || "");
-    processed = processed.replace(/{EMPRESA}/g, data.empresa || "");
+    processed = processed.replace(/{DESCRICAO}/g, data.descricao_desvio || "");
+    processed = processed.replace(/{CCA}/g, (data as any).ccas?.nome || "");
+    processed = processed.replace(/{EMPRESA}/g, (data as any).empresas?.nome || "");
+    processed = processed.replace(/{RISCO}/g, data.classificacao_risco || "");
     processed = processed.replace(/{STATUS}/g, data.status || "");
-    processed = processed.replace(/{PRAZO}/g, data.prazo || "");
+    processed = processed.replace(/{ACAO_IMEDIATA}/g, data.acao_imediata || "");
+    processed = processed.replace(/{PRAZO}/g, data.prazo_conclusao ? new Date(data.prazo_conclusao).toLocaleDateString("pt-BR") : "");
     
     return processed;
   };
 
   // Function to generate preview
-  const generatePreview = () => {
+  const generatePreview = async () => {
     const desvioId = form.getValues("desvioId");
-    const desvioData = fetchDesvioData(desvioId);
+    const desvioData = await fetchDesvioData(desvioId);
     
     if (desvioData) {
       const templateText = form.getValues("templateText");
@@ -253,7 +253,7 @@ const DesviosNaoConformidade = () => {
                       <FormLabel>ID do Desvio</FormLabel>
                       <div className="flex gap-2">
                         <FormControl>
-                          <Input placeholder="Ex: D-001" {...field} />
+                          <Input placeholder="Cole o ID completo do desvio" {...field} />
                         </FormControl>
                         <Button 
                           type="button" 
@@ -264,7 +264,7 @@ const DesviosNaoConformidade = () => {
                         </Button>
                       </div>
                       <FormDescription>
-                        Digite o ID do desvio para carregar os dados.
+                        Digite o ID completo do desvio para carregar os dados.
                       </FormDescription>
                       <FormMessage />
                     </FormItem>

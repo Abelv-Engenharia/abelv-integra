@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -25,13 +26,17 @@ const TreinamentosConsulta = () => {
     try {
       setIsLoading(true);
       const data = await execucaoTreinamentoService.getAll();
-      // Garantir que todos os items tenham id
-      const execucoesComId = data.map(item => ({
+      // Converter strings de data para Date e garantir que todos os items tenham id
+      const execucoesProcessadas = data.map(item => ({
         ...item,
-        id: item.id || crypto.randomUUID()
+        id: item.id || crypto.randomUUID(),
+        data: typeof item.data === 'string' ? new Date(item.data) : item.data,
+        efetivo_mod: item.efetivo_mod || 0,
+        efetivo_moi: item.efetivo_moi || 0,
+        horas_totais: item.horas_totais || 0
       }));
-      setExecucoes(execucoesComId);
-      setFilteredExecucoes(execucoesComId);
+      setExecucoes(execucoesProcessadas);
+      setFilteredExecucoes(execucoesProcessadas);
     } catch (error) {
       console.error("Erro ao carregar execuções:", error);
     } finally {

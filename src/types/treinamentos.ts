@@ -10,25 +10,25 @@ export interface Treinamento {
 
 export interface ExecucaoTreinamento {
   id?: string;
-  data: Date;
+  data: Date | string;
   mes: number;
   ano: number;
   cca: string;
-  cca_id?: number;
+  cca_id?: number | null;
   processo_treinamento: string;
-  processo_treinamento_id?: string;
+  processo_treinamento_id?: string | null;
   tipo_treinamento: string;
-  tipo_treinamento_id?: string;
-  treinamento_id?: string;
-  treinamento_nome?: string;
+  tipo_treinamento_id?: string | null;
+  treinamento_id?: string | null;
+  treinamento_nome?: string | null;
   carga_horaria: number;
-  efetivo_mod: number;
-  efetivo_moi: number;
-  horas_totais?: number;
-  observacoes?: string;
-  lista_presenca_url?: string;
-  created_at?: string;
-  updated_at?: string;
+  efetivo_mod: number | null;
+  efetivo_moi: number | null;
+  horas_totais?: number | null;
+  observacoes?: string | null;
+  lista_presenca_url?: string | null;
+  created_at?: string | null;
+  updated_at?: string | null;
 }
 
 export interface CCA {
@@ -69,6 +69,7 @@ export interface TreinamentoNormativo {
   arquivado?: boolean;
   created_at?: string;
   updated_at?: string;
+  treinamentoNome?: string;
 }
 
 export interface Funcionario {
