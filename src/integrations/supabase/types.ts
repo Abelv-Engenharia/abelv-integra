@@ -137,6 +137,199 @@ export type Database = {
           },
         ]
       }
+      desvios_completos: {
+        Row: {
+          acao_imediata: string | null
+          acoes: Json | null
+          base_legal_opcao_id: number | null
+          causa_provavel_id: number | null
+          cca_id: number | null
+          classificacao_risco: string | null
+          controle: number | null
+          created_at: string | null
+          data_desvio: string
+          descricao_desvio: string
+          deteccao: number | null
+          disciplina_id: number | null
+          efeito_falha: number | null
+          empresa_id: number | null
+          encarregado_responsavel_id: string | null
+          engenheiro_responsavel_id: string | null
+          evento_identificado_id: number | null
+          exposicao: number | null
+          funcionarios_envolvidos: Json | null
+          hora_desvio: string | null
+          id: string
+          imagem_url: string | null
+          impacto: number | null
+          local: string
+          prazo_conclusao: string | null
+          probabilidade: number | null
+          processo_id: number | null
+          responsavel_id: string | null
+          severidade: number | null
+          status: string | null
+          supervisor_responsavel_id: string | null
+          tipo_registro_id: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          acao_imediata?: string | null
+          acoes?: Json | null
+          base_legal_opcao_id?: number | null
+          causa_provavel_id?: number | null
+          cca_id?: number | null
+          classificacao_risco?: string | null
+          controle?: number | null
+          created_at?: string | null
+          data_desvio: string
+          descricao_desvio: string
+          deteccao?: number | null
+          disciplina_id?: number | null
+          efeito_falha?: number | null
+          empresa_id?: number | null
+          encarregado_responsavel_id?: string | null
+          engenheiro_responsavel_id?: string | null
+          evento_identificado_id?: number | null
+          exposicao?: number | null
+          funcionarios_envolvidos?: Json | null
+          hora_desvio?: string | null
+          id?: string
+          imagem_url?: string | null
+          impacto?: number | null
+          local: string
+          prazo_conclusao?: string | null
+          probabilidade?: number | null
+          processo_id?: number | null
+          responsavel_id?: string | null
+          severidade?: number | null
+          status?: string | null
+          supervisor_responsavel_id?: string | null
+          tipo_registro_id?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          acao_imediata?: string | null
+          acoes?: Json | null
+          base_legal_opcao_id?: number | null
+          causa_provavel_id?: number | null
+          cca_id?: number | null
+          classificacao_risco?: string | null
+          controle?: number | null
+          created_at?: string | null
+          data_desvio?: string
+          descricao_desvio?: string
+          deteccao?: number | null
+          disciplina_id?: number | null
+          efeito_falha?: number | null
+          empresa_id?: number | null
+          encarregado_responsavel_id?: string | null
+          engenheiro_responsavel_id?: string | null
+          evento_identificado_id?: number | null
+          exposicao?: number | null
+          funcionarios_envolvidos?: Json | null
+          hora_desvio?: string | null
+          id?: string
+          imagem_url?: string | null
+          impacto?: number | null
+          local?: string
+          prazo_conclusao?: string | null
+          probabilidade?: number | null
+          processo_id?: number | null
+          responsavel_id?: string | null
+          severidade?: number | null
+          status?: string | null
+          supervisor_responsavel_id?: string | null
+          tipo_registro_id?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "desvios_completos_base_legal_opcao_id_fkey"
+            columns: ["base_legal_opcao_id"]
+            isOneToOne: false
+            referencedRelation: "base_legal_opcoes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "desvios_completos_causa_provavel_id_fkey"
+            columns: ["causa_provavel_id"]
+            isOneToOne: false
+            referencedRelation: "causas_provaveis"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "desvios_completos_cca_id_fkey"
+            columns: ["cca_id"]
+            isOneToOne: false
+            referencedRelation: "ccas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "desvios_completos_disciplina_id_fkey"
+            columns: ["disciplina_id"]
+            isOneToOne: false
+            referencedRelation: "disciplinas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "desvios_completos_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "desvios_completos_encarregado_responsavel_id_fkey"
+            columns: ["encarregado_responsavel_id"]
+            isOneToOne: false
+            referencedRelation: "encarregados"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "desvios_completos_engenheiro_responsavel_id_fkey"
+            columns: ["engenheiro_responsavel_id"]
+            isOneToOne: false
+            referencedRelation: "engenheiros"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "desvios_completos_evento_identificado_id_fkey"
+            columns: ["evento_identificado_id"]
+            isOneToOne: false
+            referencedRelation: "eventos_identificados"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "desvios_completos_processo_id_fkey"
+            columns: ["processo_id"]
+            isOneToOne: false
+            referencedRelation: "processos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "desvios_completos_responsavel_id_fkey"
+            columns: ["responsavel_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "desvios_completos_supervisor_responsavel_id_fkey"
+            columns: ["supervisor_responsavel_id"]
+            isOneToOne: false
+            referencedRelation: "supervisores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "desvios_completos_tipo_registro_id_fkey"
+            columns: ["tipo_registro_id"]
+            isOneToOne: false
+            referencedRelation: "tipos_registro"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       disciplinas: {
         Row: {
           ativo: boolean | null

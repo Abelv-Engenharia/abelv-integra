@@ -1,127 +1,83 @@
-export interface InspecoesByTipo {
-  tipo: string;
-  quantidade: number;
-}
 
-export interface RPCInspecoesByTipoResult {
-  tipo: string;
-  quantidade: number;
-}
-
-export interface RPCDesviosByInspectionTypeResult {
-  tipo: string;
-  quantidade: number;
-}
-
-export interface InspecoesByResponsavel {
-  responsavel: string;
-  quantidade: number;
-}
-
-export interface RPCInspecoesByResponsavelResult {
-  responsavel: string;
-  quantidade: number;
-}
-
-export interface InspecoesByStatus {
-  status?: string;
-  quantidade?: number;
-  cor?: string;
-  name: string;
-  value: number;
-}
-
-export interface RPCInspecoesByStatusResult {
-  status: string;
-  quantidade: number;
-}
-
-export interface InspecoesStats {
-  periodo: string;
-  quantidade: number;
-}
-
-export interface RPCInspecoesStatsResult {
-  total: number;
-  concluidas: number;
-  em_andamento: number;
-  pendentes: number;
-}
-
-export interface InspecoesSummary {
-  totalInspecoes: number;
-  programadas: number;
-  naoProgramadas: number;
-  desviosIdentificados: number;
-  realizadas: number;
-  canceladas: number;
-}
-
-export interface RPCInspecoesSummaryResult {
-  planejadas: number;
-  realizadas: number;
-  meta: number;
-}
-
-export interface RecentInspection {
+export interface Treinamento {
   id: string;
+  nome: string;
+  carga_horaria?: number;
+  validade_dias?: number;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface ExecucaoTreinamento {
+  id?: string;
+  data: Date;
+  mes: number;
+  ano: number;
+  cca: string;
+  cca_id?: number;
+  processo_treinamento: string;
+  processo_treinamento_id?: string;
+  tipo_treinamento: string;
+  tipo_treinamento_id?: string;
+  treinamento_id?: string;
+  treinamento_nome?: string;
+  carga_horaria: number;
+  efetivo_mod: number;
+  efetivo_moi: number;
+  horas_totais?: number;
+  observacoes?: string;
+  lista_presenca_url?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface CCA {
+  id: number;
+  codigo: string;
+  nome: string;
   tipo: string;
-  responsavel: string;
-  status: string;
-  data: string;
+  ativo?: boolean;
+}
+
+export interface ProcessoTreinamento {
+  id: string;
+  codigo: string;
+  nome: string;
+  ativo?: boolean;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface TipoTreinamento {
+  id: string;
+  codigo: string;
+  nome: string;
+  ativo?: boolean;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface TreinamentoNormativo {
   id: string;
   funcionario_id: string;
   treinamento_id: string;
-  data_realizacao: Date;
-  data_validade: Date;
+  data_realizacao: string;
+  data_validade: string;
   tipo: string;
   status: string;
-  funcionarioNome?: string;
-  treinamentoNome?: string;
+  certificado_url?: string;
+  arquivado?: boolean;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface Funcionario {
   id: string;
   nome: string;
-  matricula: string;
   funcao: string;
-  ativo: boolean;
+  matricula: string;
   foto?: string;
-}
-
-export interface Treinamento {
-  id: string;
-  nome: string;
-  validade_dias?: number;
-  carga_horaria?: number;
-}
-
-export interface ExecucaoTreinamento {
-  id: string;
-  treinamento_nome?: string;
-  processo_treinamento: string;
-  tipo_treinamento: string;
-  carga_horaria: number;
-  cca: string;
-  data: Date;
-  observacoes?: string;
-  mes?: number;
-  ano?: number;
-  cca_id?: number;
-  processo_treinamento_id?: string;
-  tipo_treinamento_id?: string;
-  treinamento_id?: string;
-  efetivo_mod?: number;
-  efetivo_moi?: number;
-  horas_totais?: number;
-  lista_presenca_url?: string;
-}
-
-export interface CCAOption {
-  id: number;
-  codigo: string;
-  nome: string;
+  ativo?: boolean;
+  created_at?: string;
+  updated_at?: string;
 }

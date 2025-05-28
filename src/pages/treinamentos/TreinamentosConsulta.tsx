@@ -1,232 +1,185 @@
-
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
-import { TreinamentoNormativo, ExecucaoTreinamento, Funcionario, Treinamento } from "@/types/treinamentos";
-import { fetchTreinamentosNormativos } from "@/services/treinamentos/treinamentosNormativosService";
-import { fetchExecucaoTreinamentos } from "@/services/treinamentos/execucaoTreinamentoService";
-import { fetchFuncionarios } from "@/services/treinamentos/funcionariosService";
-import { fetchTreinamentos } from "@/services/treinamentos/treinamentosService";
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { Search, Filter, Download } from "lucide-react";
+import { execucaoTreinamentoService } from "@/services/treinamentos/execucaoTreinamentoService";
+import { ExecucaoTreinamento } from "@/types/treinamentos";
 
 const TreinamentosConsulta = () => {
-  const [activeTab, setActiveTab] = useState("normativos");
+  const [execucoes, setExecucoes] = useState<ExecucaoTreinamento[]>([]);
+  const [filteredExecucoes, setFilteredExecucoes] = useState<ExecucaoTreinamento[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [normativosData, setNormativosData] = useState<TreinamentoNormativo[]>([]);
-  const [execucaoData, setExecucaoData] = useState<ExecucaoTreinamento[]>([]);
-  const [funcionarios, setFuncionarios] = useState<Funcionario[]>([]);
-  const [treinamentos, setTreinamentos] = useState<Treinamento[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [filterMes, setFilterMes] = useState("");
+  const [filterAno, setFilterAno] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        
-        const [normativosResult, execucaoResult, funcionariosResult, treinamentosResult] = await Promise.all([
-          fetchTreinamentosNormativos(),
-          fetchExecucaoTreinamentos(),
-          fetchFuncionarios(),
-          fetchTreinamentos()
-        ]);
-        
-        // Process and enrich normativo data
-        const processedNormativos = normativosResult.map(normativo => {
-          const funcionario = funcionariosResult.find(f => f.id === normativo.funcionario_id);
-          const treinamento = treinamentosResult.find(t => t.id === normativo.treinamento_id);
-          
-          return {
-            ...normativo,
-            funcionarioNome: funcionario?.nome || "Desconhecido",
-            treinamentoNome: treinamento?.nome || "Desconhecido"
-          };
-        });
-        
-        setNormativosData(processedNormativos);
-        setExecucaoData(execucaoResult);
-        setFuncionarios(funcionariosResult);
-        setTreinamentos(treinamentosResult);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    fetchData();
+    loadExecucoes();
   }, []);
 
-  // Filter data based on search term
-  const filteredNormativos = normativosData.filter(item => 
-    item.funcionarioNome?.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    item.treinamentoNome?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-  
-  const filteredExecucao = execucaoData.filter(item => 
-    item.treinamento_nome?.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    item.cca.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    item.tipo_treinamento.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  // Format date to readable string
-  const formatDate = (date: Date) => {
+  const loadExecucoes = async () => {
     try {
-      return format(new Date(date), "dd/MM/yyyy", { locale: ptBR });
+      setIsLoading(true);
+      const data = await execucaoTreinamentoService.getAll();
+      // Garantir que todos os items tenham id
+      const execucoesComId = data.map(item => ({
+        ...item,
+        id: item.id || crypto.randomUUID()
+      }));
+      setExecucoes(execucoesComId);
+      setFilteredExecucoes(execucoesComId);
     } catch (error) {
-      return "Data inválida";
+      console.error("Erro ao carregar execuções:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  // Get status color class
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "Válido":
-        return "bg-green-100 text-green-800";
-      case "Próximo ao vencimento":
-        return "bg-amber-100 text-amber-800";
-      case "Vencido":
-        return "bg-red-100 text-red-800";
-      default:
-        return "bg-gray-100 text-gray-800";
+  const filterExecucoes = () => {
+    let results = execucoes.filter((execucao) => {
+      const term = searchTerm.toLowerCase();
+      return (
+        execucao.treinamento_nome?.toLowerCase().includes(term) ||
+        execucao.cca?.toLowerCase().includes(term) ||
+        execucao.processo_treinamento?.toLowerCase().includes(term)
+      );
+    });
+
+    if (filterMes) {
+      results = results.filter((execucao) => execucao.mes.toString() === filterMes);
     }
+
+    if (filterAno) {
+      results = results.filter((execucao) => execucao.ano.toString() === filterAno);
+    }
+
+    setFilteredExecucoes(results);
   };
+
+  useEffect(() => {
+    filterExecucoes();
+  }, [searchTerm, filterMes, filterAno, execucoes]);
+
+  const formatDate = (date: Date | string) => {
+    if (!date) return "";
+    const d = new Date(date);
+    return d.toLocaleDateString("pt-BR");
+  };
+
+  const getStatusBadge = (execucao: ExecucaoTreinamento) => {
+    if (execucao.lista_presenca_url) {
+      return <Badge variant="default">Concluído</Badge>;
+    }
+    return <Badge variant="secondary">Pendente</Badge>;
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="text-lg">Carregando execuções...</div>
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-2">
-        <h1 className="text-3xl font-bold">Consulta de Treinamentos</h1>
-        <p className="text-muted-foreground">
-          Consulte os registros de treinamentos normativos e execuções de treinamentos
-        </p>
-      </div>
+    <div className="container mx-auto py-8">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Search className="h-5 w-5" />
+            Consulta de Execuções de Treinamento
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {/* Filtros */}
+          <div className="flex flex-col md:flex-row gap-4 mb-6">
+            <div className="flex-1">
+              <Input
+                placeholder="Buscar por treinamento, CCA ou processo..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full"
+              />
+            </div>
+            <Select value={filterMes} onValueChange={setFilterMes}>
+              <SelectTrigger className="w-40">
+                <SelectValue placeholder="Mês" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">Todos</SelectItem>
+                {Array.from({ length: 12 }, (_, i) => (
+                  <SelectItem key={i + 1} value={(i + 1).toString()}>
+                    {new Date(2024, i).toLocaleDateString("pt-BR", { month: "long" })}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={filterAno} onValueChange={setFilterAno}>
+              <SelectTrigger className="w-32">
+                <SelectValue placeholder="Ano" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">Todos</SelectItem>
+                <SelectItem value="2024">2024</SelectItem>
+                <SelectItem value="2023">2023</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button variant="outline" size="icon">
+              <Download className="h-4 w-4" />
+            </Button>
+          </div>
 
-      <div className="relative">
-        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-        <Input
-          placeholder="Pesquisar treinamentos..."
-          className="pl-8"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
-      </div>
-
-      <Tabs defaultValue="normativos" onValueChange={setActiveTab} value={activeTab}>
-        <TabsList>
-          <TabsTrigger value="normativos">Treinamentos Normativos</TabsTrigger>
-          <TabsTrigger value="execucao">Execução de Treinamentos</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="normativos" className="mt-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Treinamentos Normativos</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {loading ? (
-                <div className="flex justify-center p-6">
-                  <p>Carregando treinamentos normativos...</p>
-                </div>
-              ) : filteredNormativos.length > 0 ? (
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Funcionário</TableHead>
-                        <TableHead>Treinamento</TableHead>
-                        <TableHead>Tipo</TableHead>
-                        <TableHead>Data Realização</TableHead>
-                        <TableHead>Data Validade</TableHead>
-                        <TableHead>Status</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {filteredNormativos.map((item) => (
-                        <TableRow key={item.id}>
-                          <TableCell>{item.funcionarioNome}</TableCell>
-                          <TableCell>{item.treinamentoNome}</TableCell>
-                          <TableCell>{item.tipo}</TableCell>
-                          <TableCell>{formatDate(item.data_realizacao)}</TableCell>
-                          <TableCell>{formatDate(item.data_validade)}</TableCell>
-                          <TableCell>
-                            <span className={`text-xs px-2 py-1 rounded-full ${getStatusColor(item.status)}`}>
-                              {item.status}
-                            </span>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              ) : (
-                <div className="flex justify-center p-6">
-                  <p className="text-muted-foreground">
-                    Nenhum treinamento normativo encontrado.
-                  </p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="execucao" className="mt-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Execução de Treinamentos</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {loading ? (
-                <div className="flex justify-center p-6">
-                  <p>Carregando execução de treinamentos...</p>
-                </div>
-              ) : filteredExecucao.length > 0 ? (
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Treinamento</TableHead>
-                        <TableHead>Processo</TableHead>
-                        <TableHead>Tipo</TableHead>
-                        <TableHead>Carga Horária</TableHead>
-                        <TableHead>CCA</TableHead>
-                        <TableHead>Data</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {filteredExecucao.map((item) => (
-                        <TableRow key={item.id}>
-                          <TableCell>{item.treinamento_nome || "N/A"}</TableCell>
-                          <TableCell>{item.processo_treinamento}</TableCell>
-                          <TableCell>{item.tipo_treinamento}</TableCell>
-                          <TableCell>{item.carga_horaria} horas</TableCell>
-                          <TableCell>{item.cca}</TableCell>
-                          <TableCell>{formatDate(item.data)}</TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              ) : (
-                <div className="flex justify-center p-6">
-                  <p className="text-muted-foreground">
-                    Nenhuma execução de treinamento encontrada.
-                  </p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+          {/* Tabela */}
+          <div className="rounded-md border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Data</TableHead>
+                  <TableHead>Treinamento</TableHead>
+                  <TableHead>CCA</TableHead>
+                  <TableHead>Processo</TableHead>
+                  <TableHead>Tipo</TableHead>
+                  <TableHead>Carga Horária</TableHead>
+                  <TableHead>Efetivo</TableHead>
+                  <TableHead>Horas Totais</TableHead>
+                  <TableHead>Status</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredExecucoes.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
+                      Nenhuma execução encontrada
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  filteredExecucoes.map((execucao) => (
+                    <TableRow key={execucao.id}>
+                      <TableCell>{formatDate(execucao.data)}</TableCell>
+                      <TableCell className="font-medium">
+                        {execucao.treinamento_nome}
+                      </TableCell>
+                      <TableCell>{execucao.cca}</TableCell>
+                      <TableCell>{execucao.processo_treinamento}</TableCell>
+                      <TableCell>{execucao.tipo_treinamento}</TableCell>
+                      <TableCell>{execucao.carga_horaria}h</TableCell>
+                      <TableCell>
+                        MOD: {execucao.efetivo_mod} / MOI: {execucao.efetivo_moi}
+                      </TableCell>
+                      <TableCell>{execucao.horas_totais}h</TableCell>
+                      <TableCell>{getStatusBadge(execucao)}</TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };
