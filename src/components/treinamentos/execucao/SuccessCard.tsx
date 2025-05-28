@@ -1,51 +1,27 @@
 
 import React from "react";
-import { Check } from "lucide-react";
-import { Link } from "react-router-dom";
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardFooter, 
-  CardHeader, 
-  CardTitle 
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
+import { CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-interface SuccessCardProps {
-  onReset: () => void;
+export interface SuccessCardProps {
+  onNewTraining: () => void;
 }
 
-const SuccessCard = ({ onReset }: SuccessCardProps) => {
+const SuccessCard: React.FC<SuccessCardProps> = ({ onNewTraining }) => {
   return (
-    <div className="flex items-center justify-center h-[calc(100vh-200px)]">
-      <Card className="w-[500px]">
-        <CardHeader>
-          <CardTitle className="text-center text-2xl">Registro Concluído!</CardTitle>
-          <CardDescription className="text-center">
-            O registro de execução de treinamento foi salvo com sucesso.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="flex justify-center">
-          <div className="rounded-full bg-green-100 p-3">
-            <Check className="h-8 w-8 text-green-600" />
-          </div>
-        </CardContent>
-        <CardFooter className="flex justify-center gap-4">
-          <Button 
-            variant="outline" 
-            onClick={onReset}
-          >
-            Registrar novo treinamento
-          </Button>
-          <Button asChild>
-            <Link to="/treinamentos/dashboard">
-              Menu principal
-            </Link>
-          </Button>
-        </CardFooter>
-      </Card>
-    </div>
+    <Card className="mx-auto max-w-md">
+      <CardContent className="pt-6 text-center">
+        <CheckCircle className="mx-auto h-12 w-12 text-green-500 mb-4" />
+        <h3 className="text-lg font-semibold mb-2">Treinamento Cadastrado!</h3>
+        <p className="text-gray-600 mb-4">
+          O treinamento foi registrado com sucesso no sistema.
+        </p>
+        <Button onClick={onNewTraining} className="w-full">
+          Cadastrar Novo Treinamento
+        </Button>
+      </CardContent>
+    </Card>
   );
 };
 
