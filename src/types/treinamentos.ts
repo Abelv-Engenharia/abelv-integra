@@ -96,19 +96,6 @@ export interface TreinamentoFormValues {
   lista_presenca: string;
 }
 
-export interface FormValues {
-  data: string;
-  carga_horaria: number;
-  cca_id: string;
-  efetivo_mod: number;
-  efetivo_moi: number;
-  processo_treinamento_id: string;
-  tipo_treinamento_id: string;
-  treinamento_id: string;
-  observacoes: string;
-  lista_presenca: string;
-}
-
 // Tipos para IDSMS
 export interface IDSMSIndicador {
   id: string;

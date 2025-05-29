@@ -69,6 +69,3 @@ export const useTreinamentoForm = () => {
     calculateHorasTotais,
   };
 };
-
-// Exportar o tipo para uso externo
-export type { TreinamentoFormValues };

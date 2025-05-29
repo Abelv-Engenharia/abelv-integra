@@ -628,6 +628,53 @@ export type Database = {
           },
         ]
       }
+      idsms_indicadores: {
+        Row: {
+          ano: number
+          cca_id: number
+          created_at: string
+          data: string
+          id: string
+          mes: number
+          motivo: string | null
+          resultado: number
+          tipo: string
+          updated_at: string
+        }
+        Insert: {
+          ano: number
+          cca_id: number
+          created_at?: string
+          data: string
+          id?: string
+          mes: number
+          motivo?: string | null
+          resultado: number
+          tipo: string
+          updated_at?: string
+        }
+        Update: {
+          ano?: number
+          cca_id?: number
+          created_at?: string
+          data?: string
+          id?: string
+          mes?: number
+          motivo?: string | null
+          resultado?: number
+          tipo?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "idsms_indicadores_cca_id_fkey"
+            columns: ["cca_id"]
+            isOneToOne: false
+            referencedRelation: "ccas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ocorrencias: {
         Row: {
           cca: string
