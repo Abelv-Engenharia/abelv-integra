@@ -78,7 +78,7 @@ const IndicadorForm: React.FC<IndicadorFormProps> = ({ tipo, titulo, descricao, 
 
   return (
     <div className="container mx-auto py-6 px-4">
-      <div className="max-w-md mx-auto">
+      <div className="w-full max-w-4xl mx-auto">
         <Card>
           <CardHeader>
             <CardTitle className="text-lg">{titulo}</CardTitle>
@@ -88,36 +88,38 @@ const IndicadorForm: React.FC<IndicadorFormProps> = ({ tipo, titulo, descricao, 
           </CardHeader>
           <CardContent>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="data" className="text-sm">Data</Label>
-                <Input
-                  id="data"
-                  type="date"
-                  className="h-9"
-                  {...form.register("data", { required: "Data é obrigatória" })}
-                />
-                {form.formState.errors.data && (
-                  <p className="text-xs text-red-600">{form.formState.errors.data.message}</p>
-                )}
-              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="data" className="text-sm">Data</Label>
+                  <Input
+                    id="data"
+                    type="date"
+                    className="h-9"
+                    {...form.register("data", { required: "Data é obrigatória" })}
+                  />
+                  {form.formState.errors.data && (
+                    <p className="text-xs text-red-600">{form.formState.errors.data.message}</p>
+                  )}
+                </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="cca" className="text-sm">CCA</Label>
-                <Select onValueChange={(value) => form.setValue("cca_id", value)}>
-                  <SelectTrigger className="h-9">
-                    <SelectValue placeholder="Selecione um CCA" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {ccaOptions.map((cca) => (
-                      <SelectItem key={cca.id} value={cca.id.toString()}>
-                        {cca.codigo} - {cca.nome}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {form.formState.errors.cca_id && (
-                  <p className="text-xs text-red-600">CCA é obrigatório</p>
-                )}
+                <div className="space-y-2">
+                  <Label htmlFor="cca" className="text-sm">CCA</Label>
+                  <Select onValueChange={(value) => form.setValue("cca_id", value)}>
+                    <SelectTrigger className="h-9">
+                      <SelectValue placeholder="Selecione um CCA" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {ccaOptions.map((cca) => (
+                        <SelectItem key={cca.id} value={cca.id.toString()}>
+                          {cca.codigo} - {cca.nome}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {form.formState.errors.cca_id && (
+                    <p className="text-xs text-red-600">CCA é obrigatório</p>
+                  )}
+                </div>
               </div>
 
               <div className="space-y-2">
@@ -152,11 +154,11 @@ const IndicadorForm: React.FC<IndicadorFormProps> = ({ tipo, titulo, descricao, 
                 </div>
               )}
 
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col sm:flex-row gap-2">
                 <Button 
                   type="submit" 
                   disabled={isSubmitting}
-                  className="h-9"
+                  className="h-9 flex-1"
                 >
                   {isSubmitting ? "Registrando..." : "Registrar Indicador"}
                 </Button>
@@ -164,7 +166,7 @@ const IndicadorForm: React.FC<IndicadorFormProps> = ({ tipo, titulo, descricao, 
                   type="button" 
                   variant="outline" 
                   onClick={() => form.reset()}
-                  className="h-9"
+                  className="h-9 flex-1 sm:flex-none sm:w-auto"
                 >
                   Limpar
                 </Button>
