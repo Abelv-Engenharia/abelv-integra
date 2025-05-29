@@ -38,6 +38,16 @@ import TreinamentosExecucao from "./pages/treinamentos/TreinamentosExecucao";
 import TreinamentosCracha from "./pages/treinamentos/TreinamentosCracha";
 import TreinamentosConsulta from "./pages/treinamentos/TreinamentosConsulta";
 
+// IDSMS pages
+import IDSMSDashboard from "./pages/idsms/IDSMSDashboard";
+import IIDForm from "./pages/idsms/IIDForm";
+import HSAForm from "./pages/idsms/HSAForm";
+import HTForm from "./pages/idsms/HTForm";
+import IPOMForm from "./pages/idsms/IPOMForm";
+import InspecaoAltaLiderancaForm from "./pages/idsms/InspecaoAltaLiderancaForm";
+import InspecaoGestaoSMSForm from "./pages/idsms/InspecaoGestaoSMSForm";
+import IndiceReativoForm from "./pages/idsms/IndiceReativoForm";
+
 // Hora da Segurança pages
 import HoraSegurancaDashboard from "./pages/hora-seguranca/HoraSegurancaDashboard";
 import InspecoesCadastro from "./pages/hora-seguranca/InspecoesCadastro";
@@ -106,6 +116,16 @@ const App = () => (
                 <Route path="/treinamentos/consulta" element={<TreinamentosConsulta />} />
                 <Route path="/treinamentos/execucao" element={<TreinamentosExecucao />} />
                 <Route path="/treinamentos/cracha" element={<TreinamentosCracha />} />
+                
+                {/* IDSMS routes */}
+                <Route path="/idsms/dashboard" element={<IDSMSDashboard />} />
+                <Route path="/idsms/iid" element={<IIDForm />} />
+                <Route path="/idsms/hsa" element={<HSAForm />} />
+                <Route path="/idsms/ht" element={<HTForm />} />
+                <Route path="/idsms/ipom" element={<IPOMForm />} />
+                <Route path="/idsms/inspecao-alta-lideranca" element={<InspecaoAltaLiderancaForm />} />
+                <Route path="/idsms/inspecao-gestao-sms" element={<InspecaoGestaoSMSForm />} />
+                <Route path="/idsms/indice-reativo" element={<IndiceReativoForm />} />
                 
                 {/* Hora-seguranca routes */}
                 <Route path="/hora-seguranca/dashboard" element={<HoraSegurancaDashboard />} />

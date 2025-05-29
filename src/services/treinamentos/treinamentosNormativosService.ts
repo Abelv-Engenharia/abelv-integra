@@ -20,8 +20,8 @@ export const treinamentosNormativosService = {
       
       return (data || []).map(item => ({
         ...item,
-        data_realizacao: typeof item.data_realizacao === 'string' ? item.data_realizacao : item.data_realizacao.toISOString().split('T')[0],
-        data_validade: typeof item.data_validade === 'string' ? item.data_validade : item.data_validade.toISOString().split('T')[0],
+        data_realizacao: typeof item.data_realizacao === 'string' ? item.data_realizacao : new Date(item.data_realizacao).toISOString().split('T')[0],
+        data_validade: typeof item.data_validade === 'string' ? item.data_validade : new Date(item.data_validade).toISOString().split('T')[0],
         treinamentoNome: item.treinamentos?.nome || 'N/A'
       }));
     } catch (error) {
@@ -45,8 +45,8 @@ export const treinamentosNormativosService = {
       
       return {
         ...data,
-        data_realizacao: typeof data.data_realizacao === 'string' ? data.data_realizacao : data.data_realizacao.toISOString().split('T')[0],
-        data_validade: typeof data.data_validade === 'string' ? data.data_validade : data.data_validade.toISOString().split('T')[0],
+        data_realizacao: typeof data.data_realizacao === 'string' ? data.data_realizacao : new Date(data.data_realizacao).toISOString().split('T')[0],
+        data_validade: typeof data.data_validade === 'string' ? data.data_validade : new Date(data.data_validade).toISOString().split('T')[0],
       };
     } catch (error) {
       console.error('Exceção ao criar treinamento normativo:', error);

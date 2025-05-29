@@ -1,6 +1,6 @@
-
 import React, { useState } from "react";
 import {
+  BarChart3,
   Calendar,
   Clipboard,
   ClipboardList,
@@ -38,6 +38,7 @@ export function AppSidebar() {
     if (currentPath.startsWith("/medidas-disciplinares")) return "medidas-disciplinares";
     if (currentPath.startsWith("/tarefas")) return "tarefas";
     if (currentPath.startsWith("/relatorios")) return "relatorios";
+    if (currentPath.startsWith("/idsms")) return "idsms";
     if (currentPath.startsWith("/admin")) return "admin";
     return null;
   });
@@ -171,7 +172,7 @@ export function AppSidebar() {
                 </Collapsible>
               </SidebarMenuItem>
 
-              {/* Ocorrências - NEW MENU */}
+              {/* Ocorrências */}
               <SidebarMenuItem>
                 <Collapsible open={openMenu === "ocorrencias"}>
                   <CollapsibleTrigger asChild>
@@ -250,6 +251,86 @@ export function AppSidebar() {
                   </CollapsibleContent>
                 </Collapsible>
               </SidebarMenuItem>
+
+              {/* IDSMS - NEW MENU */}
+              <SidebarMenuItem>
+                <Collapsible open={openMenu === "idsms"}>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton onClick={() => toggleMenu("idsms")}>
+                      <BarChart3 className="h-4 w-4" />
+                      <span>IDSMS</span>
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  
+                  <CollapsibleContent asChild>
+                    <SidebarMenuSub>
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                          <Link to="/idsms/dashboard">
+                            <span>Dashboard</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                      
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                          <Link to="/idsms/iid">
+                            <span>IID</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                      
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                          <Link to="/idsms/hsa">
+                            <span>HSA</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                      
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                          <Link to="/idsms/ht">
+                            <span>HT</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                      
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                          <Link to="/idsms/ipom">
+                            <span>IPOM</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                      
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                          <Link to="/idsms/inspecao-alta-lideranca">
+                            <span>Inspeção Alta Liderança</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                      
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                          <Link to="/idsms/inspecao-gestao-sms">
+                            <span>Inspeção Gestão SMS</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                      
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                          <Link to="/idsms/indice-reativo">
+                            <span>Índice Reativo</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </Collapsible>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -258,7 +339,6 @@ export function AppSidebar() {
           <SidebarGroupLabel>Tarefas</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {/* Tarefas menu with collapsible */}
               <SidebarMenuItem>
                 <Collapsible open={openMenu === "tarefas"}>
                   <CollapsibleTrigger asChild>
@@ -305,7 +385,6 @@ export function AppSidebar() {
           <SidebarGroupLabel>Relatórios</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {/* Relatórios menu with collapsible */}
               <SidebarMenuItem>
                 <Collapsible open={openMenu === "relatorios"}>
                   <CollapsibleTrigger asChild>
@@ -336,7 +415,6 @@ export function AppSidebar() {
           <SidebarGroupLabel>Administração</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {/* Administração menu with collapsible */}
               <SidebarMenuItem>
                 <Collapsible open={openMenu === "admin"}>
                   <CollapsibleTrigger asChild>
@@ -407,4 +485,3 @@ export function AppSidebar() {
     </Sidebar>
   );
 }
-

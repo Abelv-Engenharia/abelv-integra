@@ -108,3 +108,38 @@ export interface FormValues {
   observacoes: string;
   lista_presenca: string;
 }
+
+// Tipos para IDSMS
+export interface IDSMSIndicador {
+  id: string;
+  data: string;
+  mes: number;
+  ano: number;
+  cca_id: number;
+  resultado: number;
+  motivo?: string;
+  tipo: 'IID' | 'HSA' | 'HT' | 'IPOM' | 'INSPECAO_ALTA_LIDERANCA' | 'INSPECAO_GESTAO_SMS' | 'INDICE_REATIVO';
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface IDSMSFormValues {
+  data: string;
+  cca_id: string;
+  resultado: number;
+  motivo?: string;
+}
+
+export interface IDSMSDashboardData {
+  cca_id: number;
+  cca_codigo: string;
+  cca_nome: string;
+  iid: number;
+  hsa: number;
+  ht: number;
+  ipom: number;
+  inspecao_alta_lideranca: number;
+  inspecao_gestao_sms: number;
+  indice_reativo: number;
+  idsms_total: number;
+}
