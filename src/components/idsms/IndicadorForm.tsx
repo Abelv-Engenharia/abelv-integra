@@ -77,58 +77,58 @@ const IndicadorForm: React.FC<IndicadorFormProps> = ({ tipo, titulo, descricao, 
   };
 
   return (
-    <div className="container mx-auto py-6">
-      <div className="max-w-2xl mx-auto">
+    <div className="container mx-auto py-6 px-4">
+      <div className="max-w-md mx-auto">
         <Card>
           <CardHeader>
-            <CardTitle>{titulo}</CardTitle>
+            <CardTitle className="text-lg">{titulo}</CardTitle>
             {descricao && (
-              <p className="text-sm text-gray-600">{descricao}</p>
+              <p className="text-xs text-gray-600">{descricao}</p>
             )}
           </CardHeader>
           <CardContent>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="data">Data</Label>
-                  <Input
-                    id="data"
-                    type="date"
-                    {...form.register("data", { required: "Data é obrigatória" })}
-                  />
-                  {form.formState.errors.data && (
-                    <p className="text-sm text-red-600">{form.formState.errors.data.message}</p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="cca">CCA</Label>
-                  <Select onValueChange={(value) => form.setValue("cca_id", value)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione um CCA" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {ccaOptions.map((cca) => (
-                        <SelectItem key={cca.id} value={cca.id.toString()}>
-                          {cca.codigo} - {cca.nome}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {form.formState.errors.cca_id && (
-                    <p className="text-sm text-red-600">CCA é obrigatório</p>
-                  )}
-                </div>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="data" className="text-sm">Data</Label>
+                <Input
+                  id="data"
+                  type="date"
+                  className="h-9"
+                  {...form.register("data", { required: "Data é obrigatória" })}
+                />
+                {form.formState.errors.data && (
+                  <p className="text-xs text-red-600">{form.formState.errors.data.message}</p>
+                )}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="resultado">Resultado (%)</Label>
+                <Label htmlFor="cca" className="text-sm">CCA</Label>
+                <Select onValueChange={(value) => form.setValue("cca_id", value)}>
+                  <SelectTrigger className="h-9">
+                    <SelectValue placeholder="Selecione um CCA" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {ccaOptions.map((cca) => (
+                      <SelectItem key={cca.id} value={cca.id.toString()}>
+                        {cca.codigo} - {cca.nome}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {form.formState.errors.cca_id && (
+                  <p className="text-xs text-red-600">CCA é obrigatório</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="resultado" className="text-sm">Resultado (%)</Label>
                 <Input
                   id="resultado"
                   type="number"
                   min="0"
                   max="100"
                   step="0.1"
+                  className="h-9"
                   {...form.register("resultado", { 
                     required: "Resultado é obrigatório",
                     min: { value: 0, message: "Resultado não pode ser negativo" },
@@ -136,26 +136,27 @@ const IndicadorForm: React.FC<IndicadorFormProps> = ({ tipo, titulo, descricao, 
                   })}
                 />
                 {form.formState.errors.resultado && (
-                  <p className="text-sm text-red-600">{form.formState.errors.resultado.message}</p>
+                  <p className="text-xs text-red-600">{form.formState.errors.resultado.message}</p>
                 )}
               </div>
 
               {showMotivo && (
                 <div className="space-y-2">
-                  <Label htmlFor="motivo">Motivo</Label>
+                  <Label htmlFor="motivo" className="text-sm">Motivo</Label>
                   <Textarea
                     id="motivo"
                     placeholder="Descreva o motivo do índice reativo..."
+                    className="min-h-[60px]"
                     {...form.register("motivo")}
                   />
                 </div>
               )}
 
-              <div className="flex gap-4">
+              <div className="flex flex-col gap-2">
                 <Button 
                   type="submit" 
                   disabled={isSubmitting}
-                  className="flex-1"
+                  className="h-9"
                 >
                   {isSubmitting ? "Registrando..." : "Registrar Indicador"}
                 </Button>
@@ -163,7 +164,7 @@ const IndicadorForm: React.FC<IndicadorFormProps> = ({ tipo, titulo, descricao, 
                   type="button" 
                   variant="outline" 
                   onClick={() => form.reset()}
-                  className="flex-1"
+                  className="h-9"
                 >
                   Limpar
                 </Button>

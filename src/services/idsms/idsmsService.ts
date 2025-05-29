@@ -16,7 +16,7 @@ export const idsmsService = {
         return null;
       }
       
-      return data;
+      return data as IDSMSIndicador;
     } catch (error) {
       console.error('Exceção ao criar indicador IDSMS:', error);
       return null;
@@ -95,7 +95,7 @@ export const idsmsService = {
         }
 
         if (data && data.length > 0) {
-          indicadores.push(data[0]);
+          indicadores.push(data[0] as IDSMSIndicador);
         }
       }
 
