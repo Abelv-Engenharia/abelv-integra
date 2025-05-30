@@ -78,7 +78,7 @@ const IndicadorForm: React.FC<IndicadorFormProps> = ({ tipo, titulo, descricao, 
 
   return (
     <div className="container mx-auto py-6 px-4">
-      <div className="w-full max-w-4xl mx-auto">
+      <div className="w-full">
         <Card>
           <CardHeader>
             <CardTitle className="text-lg">{titulo}</CardTitle>
@@ -128,13 +128,11 @@ const IndicadorForm: React.FC<IndicadorFormProps> = ({ tipo, titulo, descricao, 
                   id="resultado"
                   type="number"
                   min="0"
-                  max="100"
                   step="0.1"
                   className="h-9"
                   {...form.register("resultado", { 
                     required: "Resultado é obrigatório",
-                    min: { value: 0, message: "Resultado não pode ser negativo" },
-                    max: { value: 100, message: "Resultado não pode ser maior que 100%" }
+                    min: { value: 0, message: "Resultado não pode ser negativo" }
                   })}
                 />
                 {form.formState.errors.resultado && (
