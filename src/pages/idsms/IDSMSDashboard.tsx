@@ -13,7 +13,12 @@ const IDSMSDashboard = () => {
     refetchOnWindowFocus: false,
   });
 
-  console.log('Dashboard state:', { dashboardData, isLoading, error });
+  console.log('Dashboard state:', { 
+    dashboardData, 
+    isLoading, 
+    error,
+    dataLength: dashboardData?.length 
+  });
 
   const getIndicatorIcon = (value: number) => {
     if (value > 75) return <TrendingUp className="h-4 w-4 text-green-500" />;
@@ -31,7 +36,10 @@ const IDSMSDashboard = () => {
     return (
       <div className="container mx-auto py-6">
         <h1 className="text-3xl font-bold mb-6">Dashboard IDSMS</h1>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="text-center">
+          <p>Carregando dados do dashboard...</p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
           {[...Array(6)].map((_, i) => (
             <Card key={i} className="animate-pulse">
               <CardHeader>
@@ -54,6 +62,15 @@ const IDSMSDashboard = () => {
 
   if (error) {
     console.error('Erro no dashboard:', error);
+    return (
+      <div className="container mx-auto py-6">
+        <h1 className="text-3xl font-bold mb-6">Dashboard IDSMS</h1>
+        <div className="text-center">
+          <p className="text-red-600 mb-4">Erro ao carregar dados: {error.message}</p>
+          <Button onClick={() => refetch()}>Tentar novamente</Button>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -72,63 +89,81 @@ const IDSMSDashboard = () => {
       </div>
 
       {dashboardData.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {dashboardData.map((cca) => (
-            <Card key={cca.cca_id} className="relative">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg flex items-center justify-between">
-                  <span>{cca.cca_codigo} - {cca.cca_nome}</span>
-                  {getIndicatorIcon(cca.idsms_total)}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="text-center">
-                    <div className={`text-3xl font-bold ${getIndicatorColor(cca.idsms_total)}`}>
-                      {cca.idsms_total.toFixed(1)}%
+        <>
+          <div className="mb-4 text-sm text-gray-600">
+            {dashboardData.length} CCA(s) com dados de indicadores IDSMS
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {dashboardData.map((cca) => (
+              <Card key={cca.cca_id} className="relative">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg flex items-center justify-between">
+                    <span>{cca.cca_codigo} - {cca.cca_nome}</span>
+                    {getIndicatorIcon(cca.idsms_total)}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="text-center">
+                      <div className={`text-3xl font-bold ${getIndicatorColor(cca.idsms_total)}`}>
+                        {cca.idsms_total.toFixed(1)}%
+                      </div>
+                      <div className="text-sm text-gray-500">IDSMS Total</div>
                     </div>
-                    <div className="text-sm text-gray-500">IDSMS Total</div>
-                  </div>
 
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span>Índice de Identificação de Desvios:</span>
-                      <span className="font-medium">{cca.iid.toFixed(1)}%</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Índice de execução da hora da segurança abelv:</span>
-                      <span className="font-medium">{cca.hsa.toFixed(1)}%</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>HT:</span>
-                      <span className="font-medium">{cca.ht.toFixed(1)}%</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Índice de P.O.M:</span>
-                      <span className="font-medium">{cca.ipom.toFixed(1)}%</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Insp. Alta Liderança:</span>
-                      <span className="font-medium">{cca.inspecao_alta_lideranca.toFixed(1)}%</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Insp. Gestão SMS:</span>
-                      <span className="font-medium">{cca.inspecao_gestao_sms.toFixed(1)}%</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Índice Reativo:</span>
-                      <span className="font-medium text-red-600">{cca.indice_reativo.toFixed(1)}%</span>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span>IID:</span>
+                        <span className="font-medium">{cca.iid.toFixed(1)}%</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>HSA:</span>
+                        <span className="font-medium">{cca.hsa.toFixed(1)}%</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>HT:</span>
+                        <span className="font-medium">{cca.ht.toFixed(1)}%</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>IPOM:</span>
+                        <span className="font-medium">{cca.ipom.toFixed(1)}%</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Insp. Alta Liderança:</span>
+                        <span className="font-medium">{cca.inspecao_alta_lideranca.toFixed(1)}%</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Insp. Gestão SMS:</span>
+                        <span className="font-medium">{cca.inspecao_gestao_sms.toFixed(1)}%</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Índice Reativo:</span>
+                        <span className="font-medium text-red-600">{cca.indice_reativo.toFixed(1)}%</span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </>
       ) : (
         <div className="text-center py-12">
           <p className="text-gray-500 mb-4">Nenhum dado encontrado na tabela idsms_indicadores.</p>
-          <p className="text-sm text-gray-400">Registre indicadores usando os formulários IDSMS para visualizar dados no dashboard.</p>
+          <p className="text-sm text-gray-400 mb-4">Registre indicadores usando os formulários IDSMS para visualizar dados no dashboard.</p>
+          <div className="space-y-2 text-xs text-gray-400">
+            <p>Debug: Verifique o console do navegador (F12) para mais detalhes sobre a busca de dados.</p>
+            <Button 
+              onClick={() => {
+                console.log('Forçando atualização do dashboard...');
+                refetch();
+              }} 
+              variant="outline" 
+              size="sm"
+            >
+              Forçar Atualização
+            </Button>
+          </div>
         </div>
       )}
     </div>

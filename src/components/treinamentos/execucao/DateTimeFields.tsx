@@ -20,14 +20,10 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { UseFormReturn } from "react-hook-form";
-
-interface FormValues {
-  data: string;
-  [key: string]: any;
-}
+import { TreinamentoFormValues } from "@/types/treinamentos";
 
 interface DateTimeFieldsProps {
-  form: UseFormReturn<FormValues>;
+  form: UseFormReturn<TreinamentoFormValues>;
 }
 
 const DateTimeFields = ({ form }: DateTimeFieldsProps) => {
