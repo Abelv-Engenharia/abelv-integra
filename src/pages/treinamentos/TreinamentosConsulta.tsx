@@ -26,11 +26,11 @@ const TreinamentosConsulta = () => {
     try {
       setIsLoading(true);
       const data = await execucaoTreinamentoService.getAll();
-      // Converter strings de data para Date e garantir que todos os items tenham id
+      // Process data to ensure all required fields are present and properly typed
       const execucoesProcessadas = data.map(item => ({
         ...item,
         id: item.id || crypto.randomUUID(),
-        data: typeof item.data === 'string' ? new Date(item.data) : item.data,
+        data: item.data, // Keep as string since it comes from the database as string
         efetivo_mod: item.efetivo_mod || 0,
         efetivo_moi: item.efetivo_moi || 0,
         horas_totais: item.horas_totais || 0
@@ -69,7 +69,7 @@ const TreinamentosConsulta = () => {
     filterExecucoes();
   }, [searchTerm, filterMes, filterAno, execucoes]);
 
-  const formatDate = (date: Date | string) => {
+  const formatDate = (date: string) => {
     if (!date) return "";
     const d = new Date(date);
     return d.toLocaleDateString("pt-BR");

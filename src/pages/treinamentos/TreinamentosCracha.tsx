@@ -83,9 +83,9 @@ const TreinamentosCracha = () => {
       
       // Process trainings
       const treinamentosProcessados = await Promise.all(treinamentosData.map(async (t) => {
-        const dataRealizacao = new Date(t.data_realizacao);
-        const dataValidade = new Date(t.data_validade);
-        const status = calcularStatusTreinamento(dataValidade);
+        const dataRealizacao = t.data_realizacao;
+        const dataValidade = t.data_validade;
+        const status = calcularStatusTreinamento(new Date(dataValidade));
         const treinamentoNome = await getNomeTreinamento(t.treinamento_id);
         
         return {
@@ -105,7 +105,7 @@ const TreinamentosCracha = () => {
       // Filter valid or about to expire trainings
       const treinamentosValidos = treinamentosProcessados
         .filter(t => t.status === "Válido" || t.status === "Próximo ao vencimento")
-        .sort((a, b) => a.data_validade.getTime() - b.data_validade.getTime());
+        .sort((a, b) => new Date(a.data_validade).getTime() - new Date(b.data_validade).getTime());
       
       setTreinamentosValidos(treinamentosValidos);
     } catch (error) {

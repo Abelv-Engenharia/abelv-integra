@@ -34,13 +34,16 @@ const TreinamentosExecucao = () => {
     try {
       console.log("Form data:", data);
       
+      // Convert string date to Date object for processing
+      const dataDate = new Date(data.data);
+      
       // Preparar dados para inserção no banco
       const execucaoData = {
-        data: data.data,
-        mes: data.data.getMonth() + 1,
-        ano: data.data.getFullYear(),
-        cca: ccaOptions.find(c => c.id === data.cca_id)?.nome || "",
-        cca_id: data.cca_id,
+        data: data.data, // Keep as string for database
+        mes: dataDate.getMonth() + 1,
+        ano: dataDate.getFullYear(),
+        cca: ccaOptions.find(c => c.id.toString() === data.cca_id)?.nome || "",
+        cca_id: parseInt(data.cca_id),
         processo_treinamento: processoOptions.find(p => p.id === data.processo_treinamento_id)?.nome || "",
         processo_treinamento_id: data.processo_treinamento_id,
         tipo_treinamento: tipoOptions.find(t => t.id === data.tipo_treinamento_id)?.nome || "",

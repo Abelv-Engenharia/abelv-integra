@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 export interface ExecucaoTreinamento {
   id?: string;
-  data: Date;
+  data: string;
   mes: number;
   ano: number;
   cca: string;
@@ -27,7 +27,7 @@ export const execucaoTreinamentoService = {
     console.log("Creating execucao with data:", data);
     
     const insertData = {
-      data: data.data.toISOString().split('T')[0], // Convert Date to string
+      data: data.data, // Already a string
       mes: data.mes,
       ano: data.ano,
       cca: data.cca,
@@ -89,7 +89,7 @@ export const execucaoTreinamentoService = {
     return data;
   },
 
-  async update(id: string, updateData: Partial<Omit<ExecucaoTreinamento, 'data'> & { data?: string }>) {
+  async update(id: string, updateData: Partial<ExecucaoTreinamento>) {
     const { data: result, error } = await supabase
       .from("execucao_treinamentos")
       .update(updateData)
@@ -133,11 +133,11 @@ export async function fetchExecucaoTreinamentos(): Promise<ExecucaoTreinamento[]
       return [];
     }
 
-    // Convert string dates back to Date objects for compatibility and ensure id is present
+    // Return data as is since database stores dates as strings
     return (data || []).map(item => ({
       ...item,
       id: item.id || '',
-      data: new Date(item.data)
+      data: item.data // Keep as string
     }));
   } catch (error) {
     console.error("Exception fetching execucao treinamentos:", error);

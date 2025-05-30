@@ -22,7 +22,7 @@ import { cn } from "@/lib/utils";
 import { UseFormReturn } from "react-hook-form";
 
 interface FormValues {
-  data: Date;
+  data: string;
   [key: string]: any;
 }
 
@@ -31,6 +31,9 @@ interface DateTimeFieldsProps {
 }
 
 const DateTimeFields = ({ form }: DateTimeFieldsProps) => {
+  const watchedDate = form.watch("data");
+  const selectedDate = watchedDate ? new Date(watchedDate) : undefined;
+
   return (
     <div className="flex flex-col md:flex-row gap-4">
       <FormField
@@ -50,7 +53,7 @@ const DateTimeFields = ({ form }: DateTimeFieldsProps) => {
                     )}
                   >
                     {field.value ? (
-                      format(field.value, "dd/MM/yyyy")
+                      format(new Date(field.value), "dd/MM/yyyy")
                     ) : (
                       <span>Selecione uma data</span>
                     )}
@@ -61,8 +64,12 @@ const DateTimeFields = ({ form }: DateTimeFieldsProps) => {
               <PopoverContent className="w-auto p-0" align="start">
                 <Calendar
                   mode="single"
-                  selected={field.value}
-                  onSelect={field.onChange}
+                  selected={selectedDate}
+                  onSelect={(date) => {
+                    if (date) {
+                      field.onChange(format(date, "yyyy-MM-dd"));
+                    }
+                  }}
                   disabled={(date) => date > new Date()}
                   initialFocus
                   className={cn("p-3 pointer-events-auto")}
@@ -77,7 +84,7 @@ const DateTimeFields = ({ form }: DateTimeFieldsProps) => {
       <FormItem className="flex-1">
         <FormLabel>Mês</FormLabel>
         <Input 
-          value={form.watch("data") ? format(form.watch("data"), "MMMM") : ""} 
+          value={selectedDate ? format(selectedDate, "MMMM") : ""} 
           disabled 
         />
       </FormItem>
@@ -85,7 +92,7 @@ const DateTimeFields = ({ form }: DateTimeFieldsProps) => {
       <FormItem className="flex-1">
         <FormLabel>Ano</FormLabel>
         <Input 
-          value={form.watch("data") ? format(form.watch("data"), "yyyy") : ""} 
+          value={selectedDate ? format(selectedDate, "yyyy") : ""} 
           disabled 
         />
       </FormItem>
