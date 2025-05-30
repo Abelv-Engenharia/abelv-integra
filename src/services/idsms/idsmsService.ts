@@ -40,26 +40,15 @@ export const idsmsService = {
 
       console.log('CCAs encontrados:', ccas);
 
-      // Buscar todos os indicadores IDSMS
-      const { data: indicadores, error: indicadoresError } = await supabase
-        .from('idsms_indicadores')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (indicadoresError) {
-        console.error('Erro ao buscar indicadores IDSMS:', indicadoresError);
-        return [];
-      }
-
-      console.log('Indicadores encontrados:', indicadores);
-
       const dashboardData: IDSMSDashboardData[] = [];
 
       for (const cca of ccas || []) {
+        console.log(`Processando CCA: ${cca.codigo} (ID: ${cca.id})`);
+        
         // Buscar os últimos indicadores de cada tipo para este CCA
         const indicadoresPorTipo = await this.getLatestIndicadoresByCCA(cca.id);
         
-        console.log(`Indicadores para CCA ${cca.codigo}:`, indicadoresPorTipo);
+        console.log(`Indicadores encontrados para CCA ${cca.codigo}:`, indicadoresPorTipo);
         
         const iid = indicadoresPorTipo.find(i => i.tipo === 'IID')?.resultado || 0;
         const hsa = indicadoresPorTipo.find(i => i.tipo === 'HSA')?.resultado || 0;
@@ -85,7 +74,7 @@ export const idsmsService = {
           inspecao_alta_lideranca,
           inspecao_gestao_sms,
           indice_reativo,
-          idsms_total: Math.round(idsms_total * 100) / 100 // Arredondar para 2 casas decimais
+          idsms_total: Math.round(idsms_total * 100) / 100
         });
       }
 
@@ -99,10 +88,14 @@ export const idsmsService = {
 
   async getLatestIndicadoresByCCA(ccaId: number): Promise<IDSMSIndicador[]> {
     try {
+      console.log(`Buscando indicadores para CCA ID: ${ccaId}`);
+      
       const tipos = ['IID', 'HSA', 'HT', 'IPOM', 'INSPECAO_ALTA_LIDERANCA', 'INSPECAO_GESTAO_SMS', 'INDICE_REATIVO'];
       const indicadores: IDSMSIndicador[] = [];
 
       for (const tipo of tipos) {
+        console.log(`Buscando indicador do tipo: ${tipo} para CCA ${ccaId}`);
+        
         const { data, error } = await supabase
           .from('idsms_indicadores')
           .select('*')
@@ -116,11 +109,14 @@ export const idsmsService = {
           continue;
         }
 
+        console.log(`Resultado da busca para ${tipo}:`, data);
+
         if (data && data.length > 0) {
           indicadores.push(data[0] as IDSMSIndicador);
         }
       }
 
+      console.log(`Total de indicadores encontrados para CCA ${ccaId}:`, indicadores);
       return indicadores;
     } catch (error) {
       console.error('Exceção ao buscar indicadores por CCA:', error);

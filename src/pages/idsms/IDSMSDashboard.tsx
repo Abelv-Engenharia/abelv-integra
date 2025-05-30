@@ -7,10 +7,13 @@ import { TrendingUp, TrendingDown, Minus, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const IDSMSDashboard = () => {
-  const { data: dashboardData = [], isLoading, refetch } = useQuery({
+  const { data: dashboardData = [], isLoading, refetch, error } = useQuery({
     queryKey: ['idsms-dashboard'],
     queryFn: idsmsService.getDashboardData,
+    refetchOnWindowFocus: false,
   });
+
+  console.log('Dashboard state:', { dashboardData, isLoading, error });
 
   const getIndicatorIcon = (value: number) => {
     if (value > 75) return <TrendingUp className="h-4 w-4 text-green-500" />;
@@ -47,6 +50,10 @@ const IDSMSDashboard = () => {
         </div>
       </div>
     );
+  }
+
+  if (error) {
+    console.error('Erro no dashboard:', error);
   }
 
   return (

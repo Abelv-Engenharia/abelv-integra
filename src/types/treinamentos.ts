@@ -10,7 +10,7 @@ export interface Treinamento {
 
 export interface ExecucaoTreinamento {
   id?: string;
-  data: Date | string;
+  data: string;
   mes: number;
   ano: number;
   cca: string;
