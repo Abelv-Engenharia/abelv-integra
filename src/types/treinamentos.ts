@@ -92,8 +92,10 @@ export interface TreinamentoFormValues {
   processo_treinamento_id: string;
   tipo_treinamento_id: string;
   treinamento_id: string;
+  treinamento_nome?: string;
   observacoes: string;
   lista_presenca: string;
+  lista_presenca_url?: string;
 }
 
 // Tipos para IDSMS

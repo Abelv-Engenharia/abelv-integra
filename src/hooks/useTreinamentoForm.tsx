@@ -23,8 +23,10 @@ export const useTreinamentoForm = () => {
       processo_treinamento_id: "",
       tipo_treinamento_id: "",
       treinamento_id: "",
+      treinamento_nome: "",
       observacoes: "",
       lista_presenca: "",
+      lista_presenca_url: "",
     },
   });
 
