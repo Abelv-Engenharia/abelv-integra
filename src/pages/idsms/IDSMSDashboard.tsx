@@ -74,11 +74,11 @@ const IDSMSDashboard = () => {
 
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
-                    <span>IID:</span>
+                    <span>Índice de Identificação de Desvios:</span>
                     <span className="font-medium">{cca.iid.toFixed(1)}%</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>HSA:</span>
+                    <span>Índice de execução da hora da segurança abelv:</span>
                     <span className="font-medium">{cca.hsa.toFixed(1)}%</span>
                   </div>
                   <div className="flex justify-between">
@@ -86,7 +86,7 @@ const IDSMSDashboard = () => {
                     <span className="font-medium">{cca.ht.toFixed(1)}%</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>IPOM:</span>
+                    <span>Índice de P.O.M:</span>
                     <span className="font-medium">{cca.ipom.toFixed(1)}%</span>
                   </div>
                   <div className="flex justify-between">
