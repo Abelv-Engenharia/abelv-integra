@@ -48,10 +48,13 @@ const getRiskColor = (risk: string) => {
 
 const getStatusColor = (status: string) => {
   switch (status) {
+    case "CONCLUÍDO":
     case "Fechado":
       return "bg-green-100 text-green-800 hover:bg-green-200";
+    case "EM ANDAMENTO":
     case "Em andamento":
       return "bg-blue-100 text-blue-800 hover:bg-blue-200";
+    case "PENDENTE":
     case "Aberto":
       return "bg-yellow-100 text-yellow-800 hover:bg-yellow-200";
     default:
@@ -162,7 +165,7 @@ const DesviosTable = () => {
                     </TableCell>
                     <TableCell>
                       <Badge variant="secondary" className={getStatusColor(desvio.status || '')}>
-                        {desvio.status || 'Aberto'}
+                        {desvio.status || 'PENDENTE'}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
@@ -207,7 +210,7 @@ const DesviosTable = () => {
                                   <div>
                                     <p className="text-sm font-medium">Status</p>
                                     <Badge variant="secondary" className={getStatusColor(desvio.status || '')}>
-                                      {desvio.status || 'Aberto'}
+                                      {desvio.status || 'PENDENTE'}
                                     </Badge>
                                   </div>
                                 </div>
@@ -237,9 +240,9 @@ const DesviosTable = () => {
                                         <SelectValue placeholder="Selecione o status" />
                                       </SelectTrigger>
                                       <SelectContent>
-                                        <SelectItem value="Aberto">Aberto</SelectItem>
-                                        <SelectItem value="Em andamento">Em andamento</SelectItem>
-                                        <SelectItem value="Fechado">Fechado</SelectItem>
+                                        <SelectItem value="PENDENTE">PENDENTE</SelectItem>
+                                        <SelectItem value="EM ANDAMENTO">EM ANDAMENTO</SelectItem>
+                                        <SelectItem value="CONCLUÍDO">CONCLUÍDO</SelectItem>
                                       </SelectContent>
                                     </Select>
                                   </div>
