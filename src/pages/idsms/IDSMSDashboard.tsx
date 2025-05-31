@@ -202,7 +202,7 @@ const IDSMSDashboard = () => {
             
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-gray-600">IDSMS Abelv Engenharia</CardTitle>
+                <CardTitle className="text-sm font-medium text-gray-600">IDSMS Médio</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">

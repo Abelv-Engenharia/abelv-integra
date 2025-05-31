@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { FileText } from "lucide-react";
+import { FileText, BarChart3 } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const RelatoriosDashboard = () => {
@@ -24,6 +24,12 @@ const RelatoriosDashboard = () => {
       icon: <FileText className="h-8 w-8" />,
       link: "/relatorios/ocorrencias",
     },
+    {
+      title: "Relatórios IDSMS",
+      description: "Análise de indicadores IDSMS por período, CCA e tipo de indicador",
+      icon: <BarChart3 className="h-8 w-8" />,
+      link: "/relatorios/idsms",
+    },
   ];
 
   return (
@@ -32,7 +38,7 @@ const RelatoriosDashboard = () => {
         <h2 className="text-3xl font-bold tracking-tight">Relatórios</h2>
       </div>
       
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2">
         {reportCards.map((card, index) => (
           <Link to={card.link} key={index}>
             <Card className="h-full hover:bg-slate-50 transition-colors">
