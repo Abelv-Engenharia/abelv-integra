@@ -6,10 +6,10 @@ export const fetchDesviosByMonthAndRisk = async () => {
   try {
     const currentYear = new Date().getFullYear();
     const { data, error } = await supabase
-      .from('desvios')
-      .select('data, classificacao')
-      .gte('data', `${currentYear}-01-01`)
-      .order('data', { ascending: true });
+      .from('desvios_completos')
+      .select('data_desvio, classificacao_risco')
+      .gte('data_desvio', `${currentYear}-01-01`)
+      .order('data_desvio', { ascending: true });
     
     if (error) {
       console.error('Error fetching desvios by month and risk:', error);
@@ -22,19 +22,19 @@ export const fetchDesviosByMonthAndRisk = async () => {
     // Initialize all months with zero counts for all risk levels
     monthNames.forEach(month => {
       monthData[month] = {
-        "Trivial": 0,
-        "Tolerável": 0,
-        "Moderado": 0,
-        "Substancial": 0,
-        "Intolerável": 0
+        "TRIVIAL": 0,
+        "TOLERÁVEL": 0,
+        "MODERADO": 0,
+        "SUBSTANCIAL": 0,
+        "INTOLERÁVEL": 0
       };
     });
 
     // Count occurrences by month and risk level
     data?.forEach(desvio => {
-      const date = new Date(desvio.data);
+      const date = new Date(desvio.data_desvio);
       const month = monthNames[date.getMonth()];
-      const riskLevel = desvio.classificacao || "Trivial";
+      const riskLevel = desvio.classificacao_risco || "TRIVIAL";
       
       if (monthData[month] && monthNames.includes(month)) {
         monthData[month][riskLevel] = (monthData[month][riskLevel] || 0) + 1;

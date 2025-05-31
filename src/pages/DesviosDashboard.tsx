@@ -6,7 +6,6 @@ import DesviosDashboardHeader from "@/components/desvios/DesviosDashboardHeader"
 import DesviosDashboardFilters from "@/components/desvios/DesviosDashboardFilters";
 import DesviosDashboardStats from "@/components/desvios/DesviosDashboardStats";
 import DesviosChartRows from "@/components/desvios/DesviosChartRows";
-import LatestDesvios from "@/components/desvios/LatestDesvios";
 
 const DesviosDashboard = () => {
   const { toast } = useToast();
@@ -71,7 +70,6 @@ const DesviosDashboard = () => {
       />
       <DesviosDashboardStats loading={loading} stats={dashboardStats} />
       <DesviosChartRows />
-      <LatestDesvios />
     </div>
   );
 };
