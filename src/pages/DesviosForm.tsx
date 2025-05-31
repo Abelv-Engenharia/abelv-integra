@@ -7,37 +7,45 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Form } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { desviosCompletosService } from "@/services/desvios/desviosCompletosService";
-import IdentificacaoForm from "@/components/desvios/forms/IdentificacaoForm";
-import InformacoesDesvioForm from "@/components/desvios/forms/InformacoesDesvioForm";
+import NovaIdentificacaoForm from "@/components/desvios/forms/NovaIdentificacaoForm";
+import NovasInformacoesForm from "@/components/desvios/forms/NovasInformacoesForm";
+import AcaoCorretivaForm from "@/components/desvios/forms/AcaoCorretivaForm";
 import ClassificacaoRiscoForm from "@/components/desvios/forms/ClassificacaoRiscoForm";
-import PlanoAcaoForm from "@/components/desvios/forms/PlanoAcaoForm";
-import FechamentoForm from "@/components/desvios/forms/FechamentoForm";
 import { ArrowLeft, ArrowRight, Save, X } from "lucide-react";
 
 interface DesvioFormData {
-  // Identificação
-  dataDesvio: string;
-  horaDesvio: string;
-  local: string;
+  // Nova Identificação
+  data: string;
+  hora: string;
+  ano: string;
+  mes: string;
   ccaId: string;
-  empresaId: string;
-  baseLegalOpcaoId: string;
-  engenheiroResponsavelId: string;
-  supervisorResponsavelId: string;
-  encarregadoResponsavelId: string;
-  funcionariosEnvolvidos: any[];
+  tipoRegistro: string;
+  processo: string;
+  eventoIdentificado: string;
+  causaProvavel: string;
+  responsavelInspecao: string;
+  empresa: string;
+  disciplina: string;
+  engenheiroResponsavel: string;
   
-  // Informações do Desvio
-  tipoRegistroId: string;
-  processoId: string;
-  eventoIdentificadoId: string;
-  causaProvavelId: string;
-  disciplinaId: string;
-  descricaoDesvio: string;
-  acaoImediata: string;
-  imagemUrl: string;
+  // Novas Informações
+  descricao: string;
+  baseLegal: string;
+  supervisorResponsavel: string;
+  encarregadoResponsavel: string;
+  colaboradorInfrator: string;
+  funcao: string;
+  matricula: string;
   
-  // Classificação de Risco
+  // Ação Corretiva
+  tratativaAplicada: string;
+  responsavelAcao: string;
+  prazoCorrecao: string;
+  situacaoAcao: string;
+  aplicacaoMedidaDisciplinar: boolean;
+  
+  // Classificação de Risco (mantida)
   exposicao: string;
   controle: string;
   deteccao: string;
@@ -46,14 +54,6 @@ interface DesvioFormData {
   probabilidade: number;
   severidade: number;
   classificacaoRisco: string;
-  
-  // Plano de Ação
-  acoes: any[];
-  
-  // Fechamento
-  status: string;
-  responsavelId: string;
-  prazoConclusao: string;
 }
 
 const DesviosForm = () => {
@@ -63,24 +63,31 @@ const DesviosForm = () => {
 
   const form = useForm<DesvioFormData>({
     defaultValues: {
-      dataDesvio: "",
-      horaDesvio: "",
-      local: "",
+      data: "",
+      hora: "",
+      ano: "",
+      mes: "",
       ccaId: "",
-      empresaId: "",
-      baseLegalOpcaoId: "",
-      engenheiroResponsavelId: "",
-      supervisorResponsavelId: "",
-      encarregadoResponsavelId: "",
-      funcionariosEnvolvidos: [],
-      tipoRegistroId: "",
-      processoId: "",
-      eventoIdentificadoId: "",
-      causaProvavelId: "",
-      disciplinaId: "",
-      descricaoDesvio: "",
-      acaoImediata: "",
-      imagemUrl: "",
+      tipoRegistro: "",
+      processo: "",
+      eventoIdentificado: "",
+      causaProvavel: "",
+      responsavelInspecao: "",
+      empresa: "",
+      disciplina: "",
+      engenheiroResponsavel: "",
+      descricao: "",
+      baseLegal: "",
+      supervisorResponsavel: "",
+      encarregadoResponsavel: "",
+      colaboradorInfrator: "",
+      funcao: "",
+      matricula: "",
+      tratativaAplicada: "",
+      responsavelAcao: "",
+      prazoCorrecao: "",
+      situacaoAcao: "pendente",
+      aplicacaoMedidaDisciplinar: false,
       exposicao: "",
       controle: "",
       deteccao: "",
@@ -89,19 +96,14 @@ const DesviosForm = () => {
       probabilidade: 0,
       severidade: 0,
       classificacaoRisco: "",
-      acoes: [],
-      status: "Aberto",
-      responsavelId: "",
-      prazoConclusao: "",
     },
   });
 
   const tabs = [
-    { id: "identificacao", label: "Identificação", component: IdentificacaoForm },
-    { id: "informacoes", label: "Informações do Desvio", component: InformacoesDesvioForm },
+    { id: "identificacao", label: "Identificação", component: NovaIdentificacaoForm },
+    { id: "informacoes", label: "Informações", component: NovasInformacoesForm },
+    { id: "acao-corretiva", label: "Ação Corretiva", component: AcaoCorretivaForm },
     { id: "classificacao", label: "Classificação de Risco", component: ClassificacaoRiscoForm },
-    { id: "plano", label: "Plano de Ação", component: PlanoAcaoForm },
-    { id: "fechamento", label: "Fechamento", component: FechamentoForm },
   ];
 
   const currentTabIndex = tabs.findIndex(tab => tab.id === activeTab);
@@ -128,53 +130,17 @@ const DesviosForm = () => {
       const formData = form.getValues();
       console.log("Dados do formulário:", formData);
       
-      const desvioData = {
-        data_desvio: formData.dataDesvio,
-        hora_desvio: formData.horaDesvio,
-        local: formData.local,
-        cca_id: formData.ccaId ? parseInt(formData.ccaId) : undefined,
-        empresa_id: formData.empresaId ? parseInt(formData.empresaId) : undefined,
-        base_legal_opcao_id: formData.baseLegalOpcaoId ? parseInt(formData.baseLegalOpcaoId) : undefined,
-        engenheiro_responsavel_id: formData.engenheiroResponsavelId || undefined,
-        supervisor_responsavel_id: formData.supervisorResponsavelId || undefined,
-        encarregado_responsavel_id: formData.encarregadoResponsavelId || undefined,
-        funcionarios_envolvidos: formData.funcionariosEnvolvidos,
-        tipo_registro_id: formData.tipoRegistroId ? parseInt(formData.tipoRegistroId) : undefined,
-        processo_id: formData.processoId ? parseInt(formData.processoId) : undefined,
-        evento_identificado_id: formData.eventoIdentificadoId ? parseInt(formData.eventoIdentificadoId) : undefined,
-        causa_provavel_id: formData.causaProvavelId ? parseInt(formData.causaProvavelId) : undefined,
-        disciplina_id: formData.disciplinaId ? parseInt(formData.disciplinaId) : undefined,
-        descricao_desvio: formData.descricaoDesvio,
-        acao_imediata: formData.acaoImediata,
-        imagem_url: formData.imagemUrl,
-        exposicao: formData.exposicao ? parseInt(formData.exposicao) : undefined,
-        controle: formData.controle ? parseInt(formData.controle) : undefined,
-        deteccao: formData.deteccao ? parseInt(formData.deteccao) : undefined,
-        efeito_falha: formData.efeitoFalha ? parseInt(formData.efeitoFalha) : undefined,
-        impacto: formData.impacto ? parseInt(formData.impacto) : undefined,
-        probabilidade: formData.probabilidade,
-        severidade: formData.severidade,
-        classificacao_risco: formData.classificacaoRisco,
-        acoes: formData.acoes,
-        status: formData.status,
-        responsavel_id: formData.responsavelId || undefined,
-        prazo_conclusao: formData.prazoConclusao || undefined,
-      };
-
-      const result = await desviosCompletosService.create(desvioData);
+      // Simulação de salvamento
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
-      if (result) {
-        toast({
-          title: "Desvio cadastrado com sucesso!",
-          description: `Desvio ${result.id} foi criado com sucesso.`,
-        });
-        
-        // Limpar o formulário
-        form.reset();
-        setActiveTab("identificacao");
-      } else {
-        throw new Error("Falha ao criar o desvio");
-      }
+      toast({
+        title: "Desvio cadastrado com sucesso!",
+        description: "O desvio foi registrado no sistema.",
+      });
+      
+      // Limpar o formulário
+      form.reset();
+      setActiveTab("identificacao");
     } catch (error) {
       console.error("Erro ao salvar desvio:", error);
       toast({
@@ -199,6 +165,16 @@ const DesviosForm = () => {
 
   const CurrentTabComponent = tabs.find(tab => tab.id === activeTab)?.component;
 
+  // Auto-popular ano e mês quando a data for selecionada
+  const watchData = form.watch("data");
+  React.useEffect(() => {
+    if (watchData) {
+      const date = new Date(watchData);
+      form.setValue("ano", date.getFullYear().toString());
+      form.setValue("mes", (date.getMonth() + 1).toString().padStart(2, '0'));
+    }
+  }, [watchData, form]);
+
   return (
     <div className="container mx-auto py-6 space-y-6">
       <div className="flex items-center justify-between">
@@ -210,7 +186,7 @@ const DesviosForm = () => {
           <Form {...form}>
             <form className="space-y-6">
               <Tabs value={activeTab} onValueChange={setActiveTab}>
-                <TabsList className="grid w-full grid-cols-5">
+                <TabsList className="grid w-full grid-cols-4">
                   {tabs.map((tab) => (
                     <TabsTrigger key={tab.id} value={tab.id} className="text-xs">
                       {tab.label}

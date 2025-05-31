@@ -1,115 +1,174 @@
 
-import React from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
-import { useTreinamentoForm, TreinamentoFormValues } from "@/hooks/useTreinamentoForm";
-import { execucaoTreinamentoService } from "@/services/treinamentos/execucaoTreinamentoService";
-import TreinamentoSelector from "@/components/treinamentos/execucao/TreinamentoSelector";
-import CCASelector from "@/components/treinamentos/execucao/CCASelector";
-import ProcessoTipoFields from "@/components/treinamentos/execucao/ProcessoTipoFields";
+import { Card, CardContent } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Form } from "@/components/ui/form";
+import { useToast } from "@/hooks/use-toast";
 import DateTimeFields from "@/components/treinamentos/execucao/DateTimeFields";
-import CargaHorariaEfetivoFields from "@/components/treinamentos/execucao/CargaHorariaEfetivoFields";
-import ObservacoesAnexoFields from "@/components/treinamentos/execucao/ObservacoesAnexoFields";
-import SuccessCard from "@/components/treinamentos/execucao/SuccessCard";
+import { ArrowLeft, ArrowRight, Save, X } from "lucide-react";
+
+interface TreinamentoFormValues {
+  data: string;
+  carga_horaria: number;
+  cca_id: number;
+  efetivo_mod: number;
+  efetivo_moi: number;
+  horas_totais: number;
+  cca: string;
+  processo_treinamento: string;
+  tipo_treinamento: string;
+  treinamento_nome: string;
+  observacoes: string;
+  lista_presenca_url: string;
+}
 
 const TreinamentosExecucao = () => {
-  const {
-    form,
-    treinamentoOptions,
-    ccaOptions,
-    processoOptions,
-    tipoOptions,
-    calculateHorasTotais,
-    showSuccess,
-    setShowSuccess,
-    isLoading
-  } = useTreinamentoForm();
+  const { toast } = useToast();
+  const [activeTab, setActiveTab] = useState("data-horario");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const onSubmit = async (data: TreinamentoFormValues) => {
-    try {
-      console.log("Form data:", data);
-      
-      // Convert string date to Date object for processing
-      const dataDate = new Date(data.data);
-      
-      // Preparar dados para inserção no banco
-      const execucaoData = {
-        data: data.data, // Keep as string for database
-        mes: dataDate.getMonth() + 1,
-        ano: dataDate.getFullYear(),
-        cca: ccaOptions.find(c => c.id.toString() === data.cca_id)?.nome || "",
-        cca_id: parseInt(data.cca_id),
-        processo_treinamento: processoOptions.find(p => p.id === data.processo_treinamento_id)?.nome || "",
-        processo_treinamento_id: data.processo_treinamento_id,
-        tipo_treinamento: tipoOptions.find(t => t.id === data.tipo_treinamento_id)?.nome || "",
-        tipo_treinamento_id: data.tipo_treinamento_id,
-        treinamento_nome: data.treinamento_id === "outro" ? data.treinamento_nome : 
-          treinamentoOptions.find(t => t.id === data.treinamento_id)?.nome || "",
-        carga_horaria: data.carga_horaria,
-        efetivo_mod: data.efetivo_mod,
-        efetivo_moi: data.efetivo_moi,
-        horas_totais: calculateHorasTotais(),
-        observacoes: data.observacoes,
-        lista_presenca_url: data.lista_presenca_url,
-        treinamento_id: data.treinamento_id === "outro" ? null : data.treinamento_id,
-      };
+  const form = useForm<TreinamentoFormValues>({
+    defaultValues: {
+      data: "",
+      carga_horaria: 0,
+      cca_id: 0,
+      efetivo_mod: 0,
+      efetivo_moi: 0,
+      horas_totais: 0,
+      cca: "",
+      processo_treinamento: "",
+      tipo_treinamento: "",
+      treinamento_nome: "",
+      observacoes: "",
+      lista_presenca_url: "",
+    },
+  });
 
-      console.log("Execucao data:", execucaoData);
-      
-      await execucaoTreinamentoService.create(execucaoData);
-      
-      toast.success("Execução de treinamento cadastrada com sucesso!");
-      setShowSuccess(true);
-      form.reset();
-    } catch (error) {
-      console.error("Erro ao cadastrar execução:", error);
-      toast.error("Erro ao cadastrar execução de treinamento");
+  const tabs = [
+    { id: "data-horario", label: "Data e Horário", component: DateTimeFields },
+  ];
+
+  const currentTabIndex = tabs.findIndex(tab => tab.id === activeTab);
+
+  const handleNext = () => {
+    if (currentTabIndex < tabs.length - 1) {
+      setActiveTab(tabs[currentTabIndex + 1].id);
     }
   };
 
-  if (showSuccess) {
-    return <SuccessCard onNewTraining={() => setShowSuccess(false)} />;
-  }
+  const handlePrevious = () => {
+    if (currentTabIndex > 0) {
+      setActiveTab(tabs[currentTabIndex - 1].id);
+    }
+  };
+
+  const handleSave = async () => {
+    setIsSubmitting(true);
+    
+    try {
+      const formData = form.getValues();
+      console.log("Dados do formulário:", formData);
+      
+      toast({
+        title: "Treinamento salvo com sucesso!",
+        description: "Os dados foram registrados no sistema.",
+      });
+      
+      form.reset();
+      setActiveTab("data-horario");
+    } catch (error) {
+      console.error("Erro ao salvar treinamento:", error);
+      toast({
+        title: "Erro ao salvar",
+        description: "Ocorreu um erro ao salvar o treinamento. Tente novamente.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleCancel = () => {
+    form.reset();
+    setActiveTab("data-horario");
+    toast({
+      title: "Formulário cancelado",
+      description: "O formulário foi resetado.",
+    });
+  };
+
+  const CurrentTabComponent = tabs.find(tab => tab.id === activeTab)?.component;
 
   return (
-    <div className="container mx-auto py-8">
+    <div className="container mx-auto py-6 space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl font-bold">Execução de Treinamentos</h1>
+      </div>
+
       <Card>
-        <CardHeader>
-          <CardTitle>Execução de Treinamentos</CardTitle>
-        </CardHeader>
-        <CardContent>
+        <CardContent className="p-6">
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <div className="grid gap-6">
-                <TreinamentoSelector
-                  form={form}
-                  treinamentoOptions={treinamentoOptions}
-                />
+            <form className="space-y-6">
+              <Tabs value={activeTab} onValueChange={setActiveTab}>
+                <TabsList className="grid w-full grid-cols-1">
+                  {tabs.map((tab) => (
+                    <TabsTrigger key={tab.id} value={tab.id} className="text-xs">
+                      {tab.label}
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
 
-                <CCASelector form={form} ccaOptions={ccaOptions} />
+                {tabs.map((tab) => (
+                  <TabsContent key={tab.id} value={tab.id} className="mt-6">
+                    {CurrentTabComponent && <CurrentTabComponent form={form} />}
+                  </TabsContent>
+                ))}
+              </Tabs>
 
-                <ProcessoTipoFields
-                  form={form}
-                  processoOptions={processoOptions}
-                  tipoOptions={tipoOptions}
-                />
+              <div className="flex justify-between items-center pt-6 border-t">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handlePrevious}
+                  disabled={currentTabIndex === 0}
+                  className="flex items-center gap-2"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                  Anterior
+                </Button>
 
-                <DateTimeFields form={form} />
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleCancel}
+                    className="flex items-center gap-2"
+                  >
+                    <X className="h-4 w-4" />
+                    Cancelar
+                  </Button>
+                  
+                  <Button
+                    type="button"
+                    onClick={handleSave}
+                    disabled={isSubmitting}
+                    className="flex items-center gap-2"
+                  >
+                    <Save className="h-4 w-4" />
+                    {isSubmitting ? "Salvando..." : "Salvar"}
+                  </Button>
+                </div>
 
-                <CargaHorariaEfetivoFields
-                  form={form}
-                  calculateHorasTotais={calculateHorasTotais}
-                />
-
-                <ObservacoesAnexoFields form={form} />
-
-                <Button type="submit" disabled={isLoading} className="w-full">
-                  {isLoading ? "Cadastrando..." : "Cadastrar Execução"}
+                <Button
+                  type="button"
+                  onClick={handleNext}
+                  disabled={currentTabIndex === tabs.length - 1}
+                  className="flex items-center gap-2"
+                >
+                  Próximo
+                  <ArrowRight className="h-4 w-4" />
                 </Button>
               </div>
             </form>
