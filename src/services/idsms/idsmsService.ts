@@ -27,8 +27,8 @@ export const idsmsService = {
     try {
       console.log('Iniciando busca dos dados do dashboard IDSMS...');
       
-      // Primeiro, vamos verificar se existem dados na tabela idsms_indicadores
-      const { data: allIndicadores, error: indicadoresError } = await supabase
+      // Buscar todos os indicadores
+      const { data: indicadores, error: indicadoresError } = await supabase
         .from('idsms_indicadores')
         .select('*')
         .order('created_at', { ascending: false });
@@ -38,10 +38,9 @@ export const idsmsService = {
         return [];
       }
 
-      console.log('Total de indicadores encontrados:', allIndicadores?.length || 0);
-      console.log('Primeiros 5 indicadores:', allIndicadores?.slice(0, 5));
+      console.log('Total de indicadores encontrados:', indicadores?.length || 0);
 
-      if (!allIndicadores || allIndicadores.length === 0) {
+      if (!indicadores || indicadores.length === 0) {
         console.log('Nenhum indicador encontrado na tabela idsms_indicadores');
         return [];
       }
@@ -66,27 +65,49 @@ export const idsmsService = {
 
       const dashboardData: IDSMSDashboardData[] = [];
 
+      // Agrupar indicadores por CCA
+      const indicadoresPorCCA = indicadores.reduce((acc, indicador) => {
+        if (!acc[indicador.cca_id]) {
+          acc[indicador.cca_id] = [];
+        }
+        acc[indicador.cca_id].push(indicador);
+        return acc;
+      }, {} as Record<number, IDSMSIndicador[]>);
+
       for (const cca of ccas) {
+        const indicadoresDoCCA = indicadoresPorCCA[cca.id] || [];
+        
         console.log(`Processando CCA: ${cca.codigo} (ID: ${cca.id})`);
+        console.log(`Indicadores encontrados para CCA ${cca.codigo}:`, indicadoresDoCCA.length);
         
-        // Buscar os últimos indicadores de cada tipo para este CCA
-        const indicadoresPorTipo = await this.getLatestIndicadoresByCCA(cca.id);
-        
-        console.log(`Indicadores encontrados para CCA ${cca.codigo}:`, indicadoresPorTipo.length);
-        
-        // Se não há indicadores para este CCA, pular
-        if (indicadoresPorTipo.length === 0) {
+        if (indicadoresDoCCA.length === 0) {
           console.log(`Pulando CCA ${cca.codigo} - sem indicadores`);
           continue;
         }
 
-        const iid = indicadoresPorTipo.find(i => i.tipo === 'IID')?.resultado || 0;
-        const hsa = indicadoresPorTipo.find(i => i.tipo === 'HSA')?.resultado || 0;
-        const ht = indicadoresPorTipo.find(i => i.tipo === 'HT')?.resultado || 0;
-        const ipom = indicadoresPorTipo.find(i => i.tipo === 'IPOM')?.resultado || 0;
-        const inspecao_alta_lideranca = indicadoresPorTipo.find(i => i.tipo === 'INSPECAO_ALTA_LIDERANCA')?.resultado || 0;
-        const inspecao_gestao_sms = indicadoresPorTipo.find(i => i.tipo === 'INSPECAO_GESTAO_SMS')?.resultado || 0;
-        const indice_reativo = indicadoresPorTipo.find(i => i.tipo === 'INDICE_REATIVO')?.resultado || 0;
+        // Pegar o indicador mais recente de cada tipo
+        const tipos = ['IID', 'HSA', 'HT', 'IPOM', 'INSPECAO_ALTA_LIDERANCA', 'INSPECAO_GESTAO_SMS', 'INDICE_REATIVO'];
+        const indicadoresRecentes: Record<string, number> = {};
+
+        for (const tipo of tipos) {
+          const indicadorDoTipo = indicadoresDoCCA
+            .filter(ind => ind.tipo === tipo)
+            .sort((a, b) => new Date(b.created_at || '').getTime() - new Date(a.created_at || '').getTime())[0];
+          
+          if (indicadorDoTipo) {
+            indicadoresRecentes[tipo] = Number(indicadorDoTipo.resultado);
+          } else {
+            indicadoresRecentes[tipo] = 0;
+          }
+        }
+
+        const iid = indicadoresRecentes['IID'] || 0;
+        const hsa = indicadoresRecentes['HSA'] || 0;
+        const ht = indicadoresRecentes['HT'] || 0;
+        const ipom = indicadoresRecentes['IPOM'] || 0;
+        const inspecao_alta_lideranca = indicadoresRecentes['INSPECAO_ALTA_LIDERANCA'] || 0;
+        const inspecao_gestao_sms = indicadoresRecentes['INSPECAO_GESTAO_SMS'] || 0;
+        const indice_reativo = indicadoresRecentes['INDICE_REATIVO'] || 0;
 
         // Cálculo do IDSMS = ((IID + HSA + HT + IPOM) / 4) + (INSPECAO_ALTA_LIDERANCA + INSPECAO_GESTAO_SMS) - INDICE_REATIVO
         const idsms_total = ((iid + hsa + ht + ipom) / 4) + (inspecao_alta_lideranca + inspecao_gestao_sms) - indice_reativo;
@@ -112,48 +133,6 @@ export const idsmsService = {
       return dashboardData;
     } catch (error) {
       console.error('Exceção ao buscar dados do dashboard IDSMS:', error);
-      return [];
-    }
-  },
-
-  async getLatestIndicadoresByCCA(ccaId: number): Promise<IDSMSIndicador[]> {
-    try {
-      console.log(`Buscando indicadores para CCA ID: ${ccaId}`);
-      
-      // Buscar todos os indicadores para este CCA, agrupados por tipo
-      const { data, error } = await supabase
-        .from('idsms_indicadores')
-        .select('*')
-        .eq('cca_id', ccaId)
-        .order('data', { ascending: false });
-
-      if (error) {
-        console.error(`Erro ao buscar indicadores para CCA ${ccaId}:`, error);
-        return [];
-      }
-
-      if (!data || data.length === 0) {
-        console.log(`Nenhum indicador encontrado para CCA ${ccaId}`);
-        return [];
-      }
-
-      console.log(`Total de ${data.length} indicadores encontrados para CCA ${ccaId}`);
-
-      // Pegar o indicador mais recente de cada tipo
-      const tipos = ['IID', 'HSA', 'HT', 'IPOM', 'INSPECAO_ALTA_LIDERANCA', 'INSPECAO_GESTAO_SMS', 'INDICE_REATIVO'];
-      const indicadoresRecentes: IDSMSIndicador[] = [];
-
-      for (const tipo of tipos) {
-        const indicadorDoTipo = data.find(ind => ind.tipo === tipo);
-        if (indicadorDoTipo) {
-          indicadoresRecentes.push(indicadorDoTipo as IDSMSIndicador);
-        }
-      }
-
-      console.log(`${indicadoresRecentes.length} tipos diferentes de indicadores encontrados para CCA ${ccaId}`);
-      return indicadoresRecentes;
-    } catch (error) {
-      console.error('Exceção ao buscar indicadores por CCA:', error);
       return [];
     }
   },

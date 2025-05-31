@@ -3,8 +3,9 @@ import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { idsmsService } from "@/services/idsms/idsmsService";
-import { TrendingUp, TrendingDown, Minus, RefreshCw } from "lucide-react";
+import { TrendingUp, TrendingDown, Minus, RefreshCw, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 const IDSMSDashboard = () => {
   const { data: dashboardData = [], isLoading, refetch, error } = useQuery({
@@ -32,29 +33,21 @@ const IDSMSDashboard = () => {
     return "text-yellow-600";
   };
 
+  const getStatusBadge = (value: number) => {
+    if (value > 75) return "bg-green-100 text-green-800";
+    if (value < 50) return "bg-red-100 text-red-800";
+    return "bg-yellow-100 text-yellow-800";
+  };
+
   if (isLoading) {
     return (
       <div className="container mx-auto py-6">
         <h1 className="text-3xl font-bold mb-6">Dashboard IDSMS</h1>
-        <div className="text-center">
-          <p>Carregando dados do dashboard...</p>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
-          {[...Array(6)].map((_, i) => (
-            <Card key={i} className="animate-pulse">
-              <CardHeader>
-                <div className="h-6 bg-gray-200 rounded w-3/4"></div>
-              </CardHeader>
-              <CardContent>
-                <div className="h-8 bg-gray-200 rounded w-1/2 mb-4"></div>
-                <div className="space-y-2">
-                  {[...Array(3)].map((_, j) => (
-                    <div key={j} className="h-4 bg-gray-200 rounded"></div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Carregando dados do dashboard...</p>
+          </div>
         </div>
       </div>
     );
@@ -65,9 +58,15 @@ const IDSMSDashboard = () => {
     return (
       <div className="container mx-auto py-6">
         <h1 className="text-3xl font-bold mb-6">Dashboard IDSMS</h1>
-        <div className="text-center">
-          <p className="text-red-600 mb-4">Erro ao carregar dados: {error.message}</p>
-          <Button onClick={() => refetch()}>Tentar novamente</Button>
+        <div className="flex items-center justify-center min-h-[400px]">
+          <Card className="max-w-md">
+            <CardContent className="p-6 text-center">
+              <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold mb-2">Erro ao carregar dados</h3>
+              <p className="text-gray-600 mb-4">{error.message}</p>
+              <Button onClick={() => refetch()}>Tentar novamente</Button>
+            </CardContent>
+          </Card>
         </div>
       </div>
     );
@@ -90,11 +89,123 @@ const IDSMSDashboard = () => {
 
       {dashboardData.length > 0 ? (
         <>
-          <div className="mb-4 text-sm text-gray-600">
-            {dashboardData.length} CCA(s) com dados de indicadores IDSMS
+          <div className="mb-6 text-sm text-gray-600">
+            Exibindo dados de {dashboardData.length} CCA(s) com indicadores IDSMS registrados
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {dashboardData.map((cca) => (
+
+          {/* Cards resumo */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium text-gray-600">Total de CCAs</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{dashboardData.length}</div>
+                <p className="text-xs text-gray-500">com dados IDSMS</p>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium text-gray-600">IDSMS Médio</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">
+                  {(dashboardData.reduce((sum, item) => sum + item.idsms_total, 0) / dashboardData.length).toFixed(1)}%
+                </div>
+                <p className="text-xs text-gray-500">média geral</p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium text-gray-600">Melhor CCA</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-green-600">
+                  {Math.max(...dashboardData.map(item => item.idsms_total)).toFixed(1)}%
+                </div>
+                <p className="text-xs text-gray-500">maior IDSMS</p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium text-gray-600">CCAs > 75%</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-green-600">
+                  {dashboardData.filter(item => item.idsms_total > 75).length}
+                </div>
+                <p className="text-xs text-gray-500">acima da meta</p>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Tabela detalhada */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Detalhamento por CCA</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>CCA</TableHead>
+                    <TableHead className="text-right">IDSMS Total</TableHead>
+                    <TableHead className="text-right">IID</TableHead>
+                    <TableHead className="text-right">HSA</TableHead>
+                    <TableHead className="text-right">HT</TableHead>
+                    <TableHead className="text-right">IPOM</TableHead>
+                    <TableHead className="text-right">Insp. Alta Lid.</TableHead>
+                    <TableHead className="text-right">Insp. Gestão SMS</TableHead>
+                    <TableHead className="text-right">Índice Reativo</TableHead>
+                    <TableHead>Status</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {dashboardData
+                    .sort((a, b) => b.idsms_total - a.idsms_total)
+                    .map((cca) => (
+                    <TableRow key={cca.cca_id}>
+                      <TableCell className="font-medium">
+                        <div>
+                          <div className="font-semibold">{cca.cca_codigo}</div>
+                          <div className="text-sm text-gray-500">{cca.cca_nome}</div>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <span className={`font-bold text-lg ${getIndicatorColor(cca.idsms_total)}`}>
+                          {cca.idsms_total.toFixed(1)}%
+                        </span>
+                      </TableCell>
+                      <TableCell className="text-right">{cca.iid.toFixed(1)}%</TableCell>
+                      <TableCell className="text-right">{cca.hsa.toFixed(1)}%</TableCell>
+                      <TableCell className="text-right">{cca.ht.toFixed(1)}%</TableCell>
+                      <TableCell className="text-right">{cca.ipom.toFixed(1)}%</TableCell>
+                      <TableCell className="text-right">{cca.inspecao_alta_lideranca.toFixed(1)}%</TableCell>
+                      <TableCell className="text-right">{cca.inspecao_gestao_sms.toFixed(1)}%</TableCell>
+                      <TableCell className="text-right text-red-600">{cca.indice_reativo.toFixed(1)}%</TableCell>
+                      <TableCell>
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusBadge(cca.idsms_total)}`}>
+                          {getIndicatorIcon(cca.idsms_total)}
+                          <span className="ml-1">
+                            {cca.idsms_total > 75 ? 'Excelente' : cca.idsms_total < 50 ? 'Atenção' : 'Regular'}
+                          </span>
+                        </span>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+
+          {/* Cards individuais para visão mobile */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6 lg:hidden">
+            {dashboardData
+              .sort((a, b) => b.idsms_total - a.idsms_total)
+              .map((cca) => (
               <Card key={cca.cca_id} className="relative">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-lg flex items-center justify-between">
@@ -111,7 +222,7 @@ const IDSMSDashboard = () => {
                       <div className="text-sm text-gray-500">IDSMS Total</div>
                     </div>
 
-                    <div className="space-y-2 text-sm">
+                    <div className="grid grid-cols-2 gap-2 text-sm">
                       <div className="flex justify-between">
                         <span>IID:</span>
                         <span className="font-medium">{cca.iid.toFixed(1)}%</span>
@@ -128,15 +239,15 @@ const IDSMSDashboard = () => {
                         <span>IPOM:</span>
                         <span className="font-medium">{cca.ipom.toFixed(1)}%</span>
                       </div>
-                      <div className="flex justify-between">
-                        <span>Insp. Alta Liderança:</span>
+                      <div className="flex justify-between col-span-2">
+                        <span>Insp. Alta Lid.:</span>
                         <span className="font-medium">{cca.inspecao_alta_lideranca.toFixed(1)}%</span>
                       </div>
-                      <div className="flex justify-between">
+                      <div className="flex justify-between col-span-2">
                         <span>Insp. Gestão SMS:</span>
                         <span className="font-medium">{cca.inspecao_gestao_sms.toFixed(1)}%</span>
                       </div>
-                      <div className="flex justify-between">
+                      <div className="flex justify-between col-span-2">
                         <span>Índice Reativo:</span>
                         <span className="font-medium text-red-600">{cca.indice_reativo.toFixed(1)}%</span>
                       </div>
@@ -149,21 +260,29 @@ const IDSMSDashboard = () => {
         </>
       ) : (
         <div className="text-center py-12">
-          <p className="text-gray-500 mb-4">Nenhum dado encontrado na tabela idsms_indicadores.</p>
-          <p className="text-sm text-gray-400 mb-4">Registre indicadores usando os formulários IDSMS para visualizar dados no dashboard.</p>
-          <div className="space-y-2 text-xs text-gray-400">
-            <p>Debug: Verifique o console do navegador (F12) para mais detalhes sobre a busca de dados.</p>
-            <Button 
-              onClick={() => {
-                console.log('Forçando atualização do dashboard...');
-                refetch();
-              }} 
-              variant="outline" 
-              size="sm"
-            >
-              Forçar Atualização
-            </Button>
-          </div>
+          <Card className="max-w-md mx-auto">
+            <CardContent className="p-6 text-center">
+              <AlertCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold mb-2">Nenhum dado encontrado</h3>
+              <p className="text-gray-600 mb-4">
+                Não foram encontrados indicadores IDSMS registrados na base de dados.
+              </p>
+              <p className="text-sm text-gray-500 mb-4">
+                Registre indicadores usando os formulários IDSMS para visualizar dados no dashboard.
+              </p>
+              <Button 
+                onClick={() => {
+                  console.log('Forçando atualização do dashboard...');
+                  refetch();
+                }} 
+                variant="outline" 
+                size="sm"
+              >
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Tentar Novamente
+              </Button>
+            </CardContent>
+          </Card>
         </div>
       )}
     </div>
