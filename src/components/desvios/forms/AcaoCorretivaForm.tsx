@@ -20,7 +20,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 
-const AcaoCorretivaForm = () => {
+interface AcaoCorretivaFormProps {
+  context?: any;
+}
+
+const AcaoCorretivaForm = ({ context }: AcaoCorretivaFormProps) => {
   const { control } = useFormContext();
 
   return (

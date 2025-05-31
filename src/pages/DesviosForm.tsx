@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
@@ -6,6 +7,21 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Form } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { desviosCompletosService } from "@/services/desvios/desviosCompletosService";
+import { useQuery } from "@tanstack/react-query";
+import {
+  fetchCCAs,
+  fetchTiposRegistro,
+  fetchProcessos,
+  fetchEventosIdentificados,
+  fetchCausasProvaveis,
+  fetchEmpresas,
+  fetchDisciplinas,
+  fetchEngenheiros,
+  fetchBaseLegalOpcoes,
+  fetchSupervisores,
+  fetchEncarregados,
+  fetchFuncionarios,
+} from "@/services/desviosService";
 import NovaIdentificacaoForm from "@/components/desvios/forms/NovaIdentificacaoForm";
 import NovasInformacoesForm from "@/components/desvios/forms/NovasInformacoesForm";
 import AcaoCorretivaForm from "@/components/desvios/forms/AcaoCorretivaForm";
@@ -59,6 +75,67 @@ const DesviosForm = () => {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("identificacao");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Fetch data for all select options
+  const { data: ccas = [] } = useQuery({
+    queryKey: ['ccas'],
+    queryFn: fetchCCAs,
+  });
+
+  const { data: tiposRegistro = [] } = useQuery({
+    queryKey: ['tipos-registro'],
+    queryFn: fetchTiposRegistro,
+  });
+
+  const { data: processos = [] } = useQuery({
+    queryKey: ['processos'],
+    queryFn: fetchProcessos,
+  });
+
+  const { data: eventosIdentificados = [] } = useQuery({
+    queryKey: ['eventos-identificados'],
+    queryFn: fetchEventosIdentificados,
+  });
+
+  const { data: causasProvaveis = [] } = useQuery({
+    queryKey: ['causas-provaveis'],
+    queryFn: fetchCausasProvaveis,
+  });
+
+  const { data: empresas = [] } = useQuery({
+    queryKey: ['empresas'],
+    queryFn: fetchEmpresas,
+  });
+
+  const { data: disciplinas = [] } = useQuery({
+    queryKey: ['disciplinas'],
+    queryFn: fetchDisciplinas,
+  });
+
+  const { data: engenheiros = [] } = useQuery({
+    queryKey: ['engenheiros'],
+    queryFn: fetchEngenheiros,
+  });
+
+  const { data: baseLegalOpcoes = [] } = useQuery({
+    queryKey: ['base-legal-opcoes'],
+    queryFn: fetchBaseLegalOpcoes,
+  });
+
+  const { data: supervisores = [] } = useQuery({
+    queryKey: ['supervisores'],
+    queryFn: fetchSupervisores,
+  });
+
+  const { data: encarregados = [] } = useQuery({
+    queryKey: ['encarregados'],
+    queryFn: fetchEncarregados,
+  });
+
+  const { data: funcionarios = [] } = useQuery({
+    queryKey: ['funcionarios'],
+    queryFn: fetchFuncionarios,
+  });
 
   const form = useForm<DesvioFormData>({
     defaultValues: {
@@ -129,17 +206,61 @@ const DesviosForm = () => {
       const formData = form.getValues();
       console.log("Dados do formulário:", formData);
       
-      // Simulação de salvamento
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Prepare data for desvios_completos table
+      const desvioData = {
+        data_desvio: formData.data,
+        hora_desvio: formData.hora,
+        local: formData.responsavelInspecao || "Local não especificado", // Using responsavelInspecao as placeholder for location
+        cca_id: formData.ccaId ? parseInt(formData.ccaId) : null,
+        empresa_id: formData.empresa ? parseInt(formData.empresa) : null,
+        base_legal_opcao_id: formData.baseLegal ? parseInt(formData.baseLegal) : null,
+        engenheiro_responsavel_id: formData.engenheiroResponsavel || null,
+        supervisor_responsavel_id: formData.supervisorResponsavel || null,
+        encarregado_responsavel_id: formData.encarregadoResponsavel || null,
+        funcionarios_envolvidos: formData.colaboradorInfrator ? [{ 
+          id: formData.colaboradorInfrator, 
+          funcao: formData.funcao, 
+          matricula: formData.matricula 
+        }] : [],
+        tipo_registro_id: formData.tipoRegistro ? parseInt(formData.tipoRegistro) : null,
+        processo_id: formData.processo ? parseInt(formData.processo) : null,
+        evento_identificado_id: formData.eventoIdentificado ? parseInt(formData.eventoIdentificado) : null,
+        causa_provavel_id: formData.causaProvavel ? parseInt(formData.causaProvavel) : null,
+        disciplina_id: formData.disciplina ? parseInt(formData.disciplina) : null,
+        descricao_desvio: formData.descricao,
+        acao_imediata: formData.tratativaAplicada,
+        exposicao: formData.exposicao ? parseInt(formData.exposicao) : null,
+        controle: formData.controle ? parseInt(formData.controle) : null,
+        deteccao: formData.deteccao ? parseInt(formData.deteccao) : null,
+        efeito_falha: formData.efeitoFalha ? parseInt(formData.efeitoFalha) : null,
+        impacto: formData.impacto ? parseInt(formData.impacto) : null,
+        probabilidade: formData.probabilidade || null,
+        severidade: formData.severidade || null,
+        classificacao_risco: formData.classificacaoRisco || null,
+        acoes: formData.aplicacaoMedidaDisciplinar ? [{
+          responsavel: formData.responsavelAcao,
+          prazo: formData.prazoCorrecao,
+          situacao: formData.situacaoAcao,
+          medida_disciplinar: formData.aplicacaoMedidaDisciplinar
+        }] : [],
+        status: 'Aberto',
+        prazo_conclusao: formData.prazoCorrecao || null,
+      };
       
-      toast({
-        title: "Desvio cadastrado com sucesso!",
-        description: "O desvio foi registrado no sistema.",
-      });
+      const result = await desviosCompletosService.create(desvioData);
       
-      // Limpar o formulário
-      form.reset();
-      setActiveTab("identificacao");
+      if (result) {
+        toast({
+          title: "Desvio cadastrado com sucesso!",
+          description: "O desvio foi registrado no sistema.",
+        });
+        
+        // Limpar o formulário
+        form.reset();
+        setActiveTab("identificacao");
+      } else {
+        throw new Error("Falha ao criar desvio");
+      }
     } catch (error) {
       console.error("Erro ao salvar desvio:", error);
       toast({
@@ -174,6 +295,33 @@ const DesviosForm = () => {
     }
   }, [watchData, form]);
 
+  // Watch colaboradorInfrator to auto-populate funcao and matricula
+  const watchColaborador = form.watch("colaboradorInfrator");
+  React.useEffect(() => {
+    if (watchColaborador) {
+      const funcionario = funcionarios.find(f => f.id === watchColaborador);
+      if (funcionario) {
+        form.setValue("funcao", funcionario.funcao);
+        form.setValue("matricula", funcionario.matricula);
+      }
+    }
+  }, [watchColaborador, funcionarios, form]);
+
+  const contextValue = {
+    ccas,
+    tiposRegistro,
+    processos,
+    eventosIdentificados,
+    causasProvaveis,
+    empresas,
+    disciplinas,
+    engenheiros,
+    baseLegalOpcoes,
+    supervisores,
+    encarregados,
+    funcionarios,
+  };
+
   return (
     <div className="container mx-auto py-6 space-y-6">
       <div className="flex items-center justify-between">
@@ -195,7 +343,7 @@ const DesviosForm = () => {
 
                 {tabs.map((tab) => (
                   <TabsContent key={tab.id} value={tab.id} className="mt-6">
-                    {CurrentTabComponent && <CurrentTabComponent />}
+                    {CurrentTabComponent && <CurrentTabComponent context={contextValue} />}
                   </TabsContent>
                 ))}
               </Tabs>

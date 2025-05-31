@@ -18,8 +18,32 @@ import {
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-const NovaIdentificacaoForm = () => {
+interface NovaIdentificacaoFormProps {
+  context: {
+    ccas: any[];
+    tiposRegistro: any[];
+    processos: any[];
+    eventosIdentificados: any[];
+    causasProvaveis: any[];
+    empresas: any[];
+    disciplinas: any[];
+    engenheiros: any[];
+  };
+}
+
+const NovaIdentificacaoForm = ({ context }: NovaIdentificacaoFormProps) => {
   const { control } = useFormContext();
+
+  const {
+    ccas,
+    tiposRegistro,
+    processos,
+    eventosIdentificados,
+    causasProvaveis,
+    empresas,
+    disciplinas,
+    engenheiros,
+  } = context;
 
   return (
     <Card>
@@ -98,9 +122,11 @@ const NovaIdentificacaoForm = () => {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="1">CCA 001</SelectItem>
-                  <SelectItem value="2">CCA 002</SelectItem>
-                  <SelectItem value="3">CCA 003</SelectItem>
+                  {ccas.map((cca) => (
+                    <SelectItem key={cca.id} value={cca.id.toString()}>
+                      {cca.codigo} - {cca.nome}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
               <FormMessage />
@@ -122,9 +148,11 @@ const NovaIdentificacaoForm = () => {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="1">Incidente</SelectItem>
-                    <SelectItem value="2">Acidente</SelectItem>
-                    <SelectItem value="3">Quase Acidente</SelectItem>
+                    {tiposRegistro.map((tipo) => (
+                      <SelectItem key={tipo.id} value={tipo.id.toString()}>
+                        {tipo.codigo} - {tipo.nome}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -145,9 +173,11 @@ const NovaIdentificacaoForm = () => {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="1">Processo A</SelectItem>
-                    <SelectItem value="2">Processo B</SelectItem>
-                    <SelectItem value="3">Processo C</SelectItem>
+                    {processos.map((processo) => (
+                      <SelectItem key={processo.id} value={processo.id.toString()}>
+                        {processo.codigo} - {processo.nome}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -170,9 +200,11 @@ const NovaIdentificacaoForm = () => {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="1">Evento 1</SelectItem>
-                    <SelectItem value="2">Evento 2</SelectItem>
-                    <SelectItem value="3">Evento 3</SelectItem>
+                    {eventosIdentificados.map((evento) => (
+                      <SelectItem key={evento.id} value={evento.id.toString()}>
+                        {evento.codigo} - {evento.nome}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -193,9 +225,11 @@ const NovaIdentificacaoForm = () => {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="1">Causa Humana</SelectItem>
-                    <SelectItem value="2">Causa Material</SelectItem>
-                    <SelectItem value="3">Causa Ambiental</SelectItem>
+                    {causasProvaveis.map((causa) => (
+                      <SelectItem key={causa.id} value={causa.id.toString()}>
+                        {causa.codigo} - {causa.nome}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -232,9 +266,11 @@ const NovaIdentificacaoForm = () => {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="1">Empresa A</SelectItem>
-                    <SelectItem value="2">Empresa B</SelectItem>
-                    <SelectItem value="3">Empresa C</SelectItem>
+                    {empresas.map((empresa) => (
+                      <SelectItem key={empresa.id} value={empresa.id.toString()}>
+                        {empresa.nome}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -255,9 +291,11 @@ const NovaIdentificacaoForm = () => {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="1">Segurança do Trabalho</SelectItem>
-                    <SelectItem value="2">Meio Ambiente</SelectItem>
-                    <SelectItem value="3">Qualidade</SelectItem>
+                    {disciplinas.map((disciplina) => (
+                      <SelectItem key={disciplina.id} value={disciplina.id.toString()}>
+                        {disciplina.codigo} - {disciplina.nome}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -279,8 +317,11 @@ const NovaIdentificacaoForm = () => {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="eng1">João Silva</SelectItem>
-                  <SelectItem value="eng2">Maria Santos</SelectItem>
+                  {engenheiros.map((engenheiro) => (
+                    <SelectItem key={engenheiro.id} value={engenheiro.id}>
+                      {engenheiro.nome}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
               <FormMessage />

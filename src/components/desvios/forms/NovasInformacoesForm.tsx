@@ -19,8 +19,24 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-const NovasInformacoesForm = () => {
+interface NovasInformacoesFormProps {
+  context: {
+    baseLegalOpcoes: any[];
+    supervisores: any[];
+    encarregados: any[];
+    funcionarios: any[];
+  };
+}
+
+const NovasInformacoesForm = ({ context }: NovasInformacoesFormProps) => {
   const { control } = useFormContext();
+
+  const {
+    baseLegalOpcoes,
+    supervisores,
+    encarregados,
+    funcionarios,
+  } = context;
 
   return (
     <Card>
@@ -59,9 +75,11 @@ const NovasInformacoesForm = () => {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="1">NR-01</SelectItem>
-                  <SelectItem value="2">NR-06</SelectItem>
-                  <SelectItem value="3">NR-10</SelectItem>
+                  {baseLegalOpcoes.map((opcao) => (
+                    <SelectItem key={opcao.id} value={opcao.id.toString()}>
+                      {opcao.codigo} - {opcao.nome}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
               <FormMessage />
@@ -83,8 +101,11 @@ const NovasInformacoesForm = () => {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="sup1">Carlos Lima</SelectItem>
-                    <SelectItem value="sup2">Ana Costa</SelectItem>
+                    {supervisores.map((supervisor) => (
+                      <SelectItem key={supervisor.id} value={supervisor.id}>
+                        {supervisor.nome}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -105,8 +126,11 @@ const NovasInformacoesForm = () => {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="enc1">Pedro Oliveira</SelectItem>
-                    <SelectItem value="enc2">Lucia Ferreira</SelectItem>
+                    {encarregados.map((encarregado) => (
+                      <SelectItem key={encarregado.id} value={encarregado.id}>
+                        {encarregado.nome}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -129,9 +153,11 @@ const NovasInformacoesForm = () => {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="col1">João Silva</SelectItem>
-                    <SelectItem value="col2">Maria Santos</SelectItem>
-                    <SelectItem value="col3">Carlos Oliveira</SelectItem>
+                    {funcionarios.map((funcionario) => (
+                      <SelectItem key={funcionario.id} value={funcionario.id}>
+                        {funcionario.nome}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
                 <FormMessage />
