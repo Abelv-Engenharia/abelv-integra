@@ -60,6 +60,17 @@ export const fetchDashboardStats = async (): Promise<DashboardStats> => {
       riskLevel = maxRisk || "Baixo";
     }
 
+    console.log('Dashboard Stats:', {
+      totalDesvios: totalDesvios || 0,
+      acoesCompletas: acoesCompletas || 0,
+      acoesAndamento: acoesAndamento || 0,
+      acoesPendentes: acoesPendentes || 0,
+      percentualCompletas,
+      percentualAndamento,
+      percentualPendentes,
+      riskLevel,
+    });
+
     return {
       totalDesvios: totalDesvios || 0,
       acoesCompletas: acoesCompletas || 0,
@@ -145,6 +156,17 @@ export const fetchFilteredDashboardStats = async (year: string, month: string): 
       );
       riskLevel = maxRisk || "Baixo";
     }
+
+    console.log('Filtered Dashboard Stats:', {
+      totalDesvios: totalDesvios || 0,
+      acoesCompletas: acoesCompletas || 0,
+      acoesAndamento: acoesAndamento || 0,
+      acoesPendentes: acoesPendentes || 0,
+      percentualCompletas,
+      percentualAndamento,
+      percentualPendentes,
+      riskLevel,
+    });
 
     return {
       totalDesvios: totalDesvios || 0,
