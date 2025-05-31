@@ -13,8 +13,12 @@ const DesviosDashboard = () => {
   const [month, setMonth] = useState<string>((new Date().getMonth() + 1).toString());
   const [dashboardStats, setDashboardStats] = useState<DashboardStats>({
     totalDesvios: 0,
-    desviosThisMonth: 0,
-    pendingActions: 0,
+    acoesCompletas: 0,
+    acoesAndamento: 0,
+    acoesPendentes: 0,
+    percentualCompletas: 0,
+    percentualAndamento: 0,
+    percentualPendentes: 0,
     riskLevel: "Baixo",
   });
   const [loading, setLoading] = useState(true);
