@@ -5,8 +5,12 @@ import { supabase } from "@/integrations/supabase/client";
 export const fetchDesviosByType = async () => {
   try {
     const { data, error } = await supabase
-      .from('desvios')
-      .select('tipo');
+      .from('desvios_completos')
+      .select(`
+        tipo_registro_id,
+        tipos_registro:tipo_registro_id(codigo, nome)
+      `)
+      .not('tipo_registro_id', 'is', null);
     
     if (error) {
       console.error('Error fetching desvios by type:', error);
@@ -16,7 +20,7 @@ export const fetchDesviosByType = async () => {
     // Count occurrences of each type
     const typeCounts: Record<string, number> = {};
     data?.forEach(desvio => {
-      const tipo = desvio.tipo || "Outros";
+      const tipo = desvio.tipos_registro?.nome || "Outros";
       typeCounts[tipo] = (typeCounts[tipo] || 0) + 1;
     });
 

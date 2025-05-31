@@ -1,4 +1,3 @@
-
 export {
   fetchDashboardStats,
   fetchFilteredDashboardStats
@@ -44,3 +43,7 @@ export {
 export type {
   DashboardStats
 } from './desvios/types';
+
+export {
+  fetchDesviosByProcesso
+} from './desvios/desviosByProcessoService';

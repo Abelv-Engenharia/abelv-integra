@@ -2,10 +2,12 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer } from "recharts";
-import { fetchDesviosByCompany } from "@/services/desviosDashboardService";
+import { PieChart, Pie, Cell, ResponsiveContainer, Legend } from "recharts";
+import { fetchDesviosByProcesso } from "@/services/desviosDashboardService";
 
-const DesviosByCompanyChart = () => {
+const COLORS = ["#06b6d4", "#8b5cf6", "#10b981", "#f59e0b", "#ef4444", "#ec4899", "#3b82f6", "#84cc16"];
+
+const DesviosByProcessoChart = () => {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -13,10 +15,10 @@ const DesviosByCompanyChart = () => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const chartData = await fetchDesviosByCompany();
+        const chartData = await fetchDesviosByProcesso();
         setData(chartData);
       } catch (error) {
-        console.error("Error loading company chart data:", error);
+        console.error("Error loading processo chart data:", error);
       } finally {
         setLoading(false);
       }
@@ -28,14 +30,13 @@ const DesviosByCompanyChart = () => {
   const chartConfig = {
     value: {
       label: "Desvios",
-      color: "#10b981",
     },
   };
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Desvios & OM por Empresa</CardTitle>
+        <CardTitle>Processo</CardTitle>
       </CardHeader>
       <CardContent>
         {loading ? (
@@ -45,12 +46,22 @@ const DesviosByCompanyChart = () => {
         ) : (
           <ChartContainer config={chartConfig} className="h-[300px] w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                <XAxis dataKey="name" />
-                <YAxis />
+              <PieChart>
+                <Pie
+                  data={data}
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={80}
+                  dataKey="value"
+                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                >
+                  {data.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
                 <ChartTooltip content={<ChartTooltipContent />} />
-                <Bar dataKey="value" fill="var(--color-value)" radius={[4, 4, 0, 0]} />
-              </BarChart>
+                <Legend />
+              </PieChart>
             </ResponsiveContainer>
           </ChartContainer>
         )}
@@ -59,4 +70,4 @@ const DesviosByCompanyChart = () => {
   );
 };
 
-export default DesviosByCompanyChart;
+export default DesviosByProcessoChart;
