@@ -1,7 +1,11 @@
 
 export interface DashboardStats {
   totalDesvios: number;
-  desviosThisMonth: number;
-  pendingActions: number;
+  acoesCompletas: number;
+  acoesAndamento: number;
+  acoesPendentes: number;
+  percentualCompletas: number;
+  percentualAndamento: number;
+  percentualPendentes: number;
   riskLevel: string;
 }

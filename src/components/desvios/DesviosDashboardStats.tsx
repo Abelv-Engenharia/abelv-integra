@@ -1,13 +1,17 @@
 
-import { Activity, AlertTriangle, Calendar, Clock } from "lucide-react";
+import { CheckCircle, Clock, AlertTriangle, Activity } from "lucide-react";
 import StatCard from "@/components/dashboard/StatCard";
 
 interface DesviosDashboardStatsProps {
   loading: boolean;
   stats: {
     totalDesvios: number;
-    desviosThisMonth: number;
-    pendingActions: number;
+    acoesCompletas: number;
+    acoesAndamento: number;
+    acoesPendentes: number;
+    percentualCompletas: number;
+    percentualAndamento: number;
+    percentualPendentes: number;
     riskLevel: string;
   };
 }
@@ -18,34 +22,37 @@ const DesviosDashboardStats = ({ loading, stats }: DesviosDashboardStatsProps) =
       <StatCard
         title="Total de Desvios"
         value={loading ? "..." : stats.totalDesvios}
-        icon={<AlertTriangle className="h-4 w-4" />}
+        icon={<Activity className="h-4 w-4" />}
         description="Todos os desvios registrados"
         trend="up"
         trendValue="8%"
       />
       <StatCard
-        title="Desvios no Mês"
-        value={loading ? "..." : stats.desviosThisMonth}
-        icon={<Calendar className="h-4 w-4" />}
-        description={`Desvios deste mês`}
+        title="Ações Concluídas"
+        value={loading ? "..." : `${stats.acoesCompletas} (${stats.percentualCompletas}%)`}
+        icon={<CheckCircle className="h-4 w-4" />}
+        description="Ações finalizadas"
+        trend="up"
+        trendValue={`${stats.percentualCompletas}%`}
+        className="border-l-4 border-green-500"
+      />
+      <StatCard
+        title="Ações em Andamento"
+        value={loading ? "..." : `${stats.acoesAndamento} (${stats.percentualAndamento}%)`}
+        icon={<Clock className="h-4 w-4" />}
+        description="Ações sendo executadas"
         trend="neutral"
-        trendValue="2%"
+        trendValue={`${stats.percentualAndamento}%`}
+        className="border-l-4 border-orange-500"
       />
       <StatCard
         title="Ações Pendentes"
-        value={loading ? "..." : stats.pendingActions}
-        icon={<Clock className="h-4 w-4" />}
-        description="Ações a serem realizadas"
+        value={loading ? "..." : `${stats.acoesPendentes} (${stats.percentualPendentes}%)`}
+        icon={<AlertTriangle className="h-4 w-4" />}
+        description="Ações a serem iniciadas"
         trend="down"
-        trendValue="12%"
-      />
-      <StatCard
-        title="Nível de Risco"
-        value={loading ? "..." : stats.riskLevel}
-        icon={<Activity className="h-4 w-4" />}
-        description="Média de risco dos desvios"
-        trend="up"
-        trendValue="5%"
+        trendValue={`${stats.percentualPendentes}%`}
+        className="border-l-4 border-red-500"
       />
     </div>
   );
