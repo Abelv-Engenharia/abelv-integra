@@ -115,10 +115,10 @@ const DesviosDashboardFilters = ({
               onValueChange={setYear}
             >
               <SelectTrigger id="year">
-                <SelectValue placeholder="Ano" />
+                <SelectValue placeholder="Todos os anos" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Todos</SelectItem>
+                <SelectItem value="todos">Todos</SelectItem>
                 <SelectItem value={(new Date().getFullYear() - 2).toString()}>{new Date().getFullYear() - 2}</SelectItem>
                 <SelectItem value={(new Date().getFullYear() - 1).toString()}>{new Date().getFullYear() - 1}</SelectItem>
                 <SelectItem value={new Date().getFullYear().toString()}>{new Date().getFullYear()}</SelectItem>
@@ -135,10 +135,10 @@ const DesviosDashboardFilters = ({
               onValueChange={setMonth}
             >
               <SelectTrigger id="month">
-                <SelectValue placeholder="Mês" />
+                <SelectValue placeholder="Todos os meses" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Todos</SelectItem>
+                <SelectItem value="todos">Todos</SelectItem>
                 <SelectItem value="1">Janeiro</SelectItem>
                 <SelectItem value="2">Fevereiro</SelectItem>
                 <SelectItem value="3">Março</SelectItem>
@@ -164,10 +164,10 @@ const DesviosDashboardFilters = ({
               onValueChange={setCcaId}
             >
               <SelectTrigger id="cca">
-                <SelectValue placeholder="Selecione CCA" />
+                <SelectValue placeholder="Todos os CCAs" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Todos</SelectItem>
+                <SelectItem value="todos">Todos</SelectItem>
                 {ccas.map((cca) => (
                   <SelectItem key={cca.id} value={cca.id.toString()}>
                     {cca.codigo} - {cca.nome}
@@ -186,10 +186,10 @@ const DesviosDashboardFilters = ({
               onValueChange={setDisciplinaId}
             >
               <SelectTrigger id="disciplina">
-                <SelectValue placeholder="Selecione Disciplina" />
+                <SelectValue placeholder="Todas as disciplinas" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Todas</SelectItem>
+                <SelectItem value="todos">Todas</SelectItem>
                 {disciplinas.map((disciplina) => (
                   <SelectItem key={disciplina.id} value={disciplina.id.toString()}>
                     {disciplina.codigo} - {disciplina.nome}
@@ -208,10 +208,10 @@ const DesviosDashboardFilters = ({
               onValueChange={setEmpresaId}
             >
               <SelectTrigger id="empresa">
-                <SelectValue placeholder="Selecione Empresa" />
+                <SelectValue placeholder="Todas as empresas" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Todas</SelectItem>
+                <SelectItem value="todos">Todas</SelectItem>
                 {empresas.map((empresa) => (
                   <SelectItem key={empresa.id} value={empresa.id.toString()}>
                     {empresa.nome}

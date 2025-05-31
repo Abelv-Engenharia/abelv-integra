@@ -55,11 +55,11 @@ const DesviosDashboard = () => {
     try {
       const filters: FilterParams = {};
       
-      if (year) filters.year = year;
-      if (month) filters.month = month;
-      if (ccaId) filters.ccaId = ccaId;
-      if (disciplinaId) filters.disciplinaId = disciplinaId;
-      if (empresaId) filters.empresaId = empresaId;
+      if (year && year !== "todos") filters.year = year;
+      if (month && month !== "todos") filters.month = month;
+      if (ccaId && ccaId !== "todos") filters.ccaId = ccaId;
+      if (disciplinaId && disciplinaId !== "todos") filters.disciplinaId = disciplinaId;
+      if (empresaId && empresaId !== "todos") filters.empresaId = empresaId;
 
       console.log('Aplicando filtros:', filters);
       
