@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 const IDSMSDashboard = () => {
   const [selectedCCA, setSelectedCCA] = useState<string>("all");
-  const [selectedYear, setSelectedYear] = useState<string>(new Date().getFullYear().toString());
+  const [selectedYear, setSelectedYear] = useState<string>("all");
   const [selectedMonth, setSelectedMonth] = useState<string>("all");
 
   const { data: dashboardData = [], isLoading, refetch, error } = useQuery({
@@ -19,23 +19,27 @@ const IDSMSDashboard = () => {
     refetchOnWindowFocus: false,
   });
 
+  const { data: filterOptions = { ccas: [], anos: [], meses: [] } } = useQuery({
+    queryKey: ['idsms-filter-options'],
+    queryFn: idsmsService.getFilterOptions,
+    refetchOnWindowFocus: false,
+  });
+
   console.log('Dashboard state:', { 
     dashboardData, 
     isLoading, 
     error,
-    dataLength: dashboardData?.length 
+    dataLength: dashboardData?.length,
+    filterOptions
   });
 
   // Filtrar dados baseado nos filtros selecionados
   const filteredData = dashboardData.filter(item => {
-    if (selectedCCA !== "all" && item.cca_codigo !== selectedCCA) return false;
-    // Para filtros de ano e mês, precisaríamos ter esses dados no dashboard
-    // Por agora, mantemos apenas o filtro de CCA
+    if (selectedCCA !== "all" && item.cca_id.toString() !== selectedCCA) return false;
+    // Para filtros de ano e mês, precisaríamos implementar a lógica com base na data dos indicadores
+    // Por agora, mantemos apenas o filtro de CCA funcional
     return true;
   });
-
-  // Obter lista única de CCAs para o filtro
-  const uniqueCCAs = [...new Set(dashboardData.map(item => item.cca_codigo))].sort();
 
   const getIndicatorIcon = (value: number) => {
     if (value > 75) return <TrendingUp className="h-4 w-4 text-green-500" />;
@@ -53,6 +57,21 @@ const IDSMSDashboard = () => {
     if (value > 75) return "bg-green-100 text-green-800";
     if (value < 50) return "bg-red-100 text-red-800";
     return "bg-yellow-100 text-yellow-800";
+  };
+
+  const mesesNomes = {
+    1: 'Janeiro',
+    2: 'Fevereiro', 
+    3: 'Março',
+    4: 'Abril',
+    5: 'Maio',
+    6: 'Junho',
+    7: 'Julho',
+    8: 'Agosto',
+    9: 'Setembro',
+    10: 'Outubro',
+    11: 'Novembro',
+    12: 'Dezembro'
   };
 
   if (isLoading) {
@@ -118,8 +137,10 @@ const IDSMSDashboard = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Todos os CCAs</SelectItem>
-                  {uniqueCCAs.map(cca => (
-                    <SelectItem key={cca} value={cca}>{cca}</SelectItem>
+                  {filterOptions.ccas.map(cca => (
+                    <SelectItem key={cca.id} value={cca.id.toString()}>
+                      {cca.codigo} - {cca.nome}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -132,9 +153,10 @@ const IDSMSDashboard = () => {
                   <SelectValue placeholder="Selecione o ano" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="2024">2024</SelectItem>
-                  <SelectItem value="2023">2023</SelectItem>
-                  <SelectItem value="2022">2022</SelectItem>
+                  <SelectItem value="all">Todos os anos</SelectItem>
+                  {filterOptions.anos.map(ano => (
+                    <SelectItem key={ano} value={ano.toString()}>{ano}</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -147,18 +169,11 @@ const IDSMSDashboard = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Todos os meses</SelectItem>
-                  <SelectItem value="1">Janeiro</SelectItem>
-                  <SelectItem value="2">Fevereiro</SelectItem>
-                  <SelectItem value="3">Março</SelectItem>
-                  <SelectItem value="4">Abril</SelectItem>
-                  <SelectItem value="5">Maio</SelectItem>
-                  <SelectItem value="6">Junho</SelectItem>
-                  <SelectItem value="7">Julho</SelectItem>
-                  <SelectItem value="8">Agosto</SelectItem>
-                  <SelectItem value="9">Setembro</SelectItem>
-                  <SelectItem value="10">Outubro</SelectItem>
-                  <SelectItem value="11">Novembro</SelectItem>
-                  <SelectItem value="12">Dezembro</SelectItem>
+                  {filterOptions.meses.map(mes => (
+                    <SelectItem key={mes} value={mes.toString()}>
+                      {mesesNomes[mes as keyof typeof mesesNomes]}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -170,7 +185,7 @@ const IDSMSDashboard = () => {
         <>
           <div className="mb-6 text-sm text-gray-600">
             Exibindo dados de {filteredData.length} CCA(s) com indicadores IDSMS registrados
-            {selectedCCA !== "all" && ` - Filtrado por CCA: ${selectedCCA}`}
+            {selectedCCA !== "all" && ` - Filtrado por CCA: ${filterOptions.ccas.find(c => c.id.toString() === selectedCCA)?.codigo}`}
           </div>
 
           {/* Cards resumo */}
@@ -346,7 +361,7 @@ const IDSMSDashboard = () => {
               <h3 className="text-lg font-semibold mb-2">Nenhum dado encontrado</h3>
               <p className="text-gray-600 mb-4">
                 {selectedCCA !== "all" 
-                  ? `Não foram encontrados indicadores IDSMS para o CCA ${selectedCCA}.`
+                  ? `Não foram encontrados indicadores IDSMS para o CCA ${filterOptions.ccas.find(c => c.id.toString() === selectedCCA)?.codigo}.`
                   : "Não foram encontrados indicadores IDSMS registrados na base de dados."
                 }
               </p>

@@ -70,7 +70,10 @@ export const idsmsService = {
         if (!acc[indicador.cca_id]) {
           acc[indicador.cca_id] = [];
         }
-        acc[indicador.cca_id].push(indicador);
+        acc[indicador.cca_id].push({
+          ...indicador,
+          tipo: indicador.tipo as IDSMSIndicador['tipo']
+        });
         return acc;
       }, {} as Record<number, IDSMSIndicador[]>);
 
@@ -137,6 +140,76 @@ export const idsmsService = {
     }
   },
 
+  async getFilterOptions(): Promise<{
+    ccas: Array<{ id: number; codigo: string; nome: string }>;
+    anos: number[];
+    meses: number[];
+  }> {
+    try {
+      console.log('Buscando opções de filtro...');
+
+      // Buscar CCAs que possuem indicadores
+      const { data: ccasComIndicadores, error: ccasError } = await supabase
+        .from('idsms_indicadores')
+        .select(`
+          cca_id,
+          ccas!inner(id, codigo, nome)
+        `)
+        .eq('ccas.ativo', true);
+
+      if (ccasError) {
+        console.error('Erro ao buscar CCAs:', ccasError);
+        return { ccas: [], anos: [], meses: [] };
+      }
+
+      // Extrair CCAs únicos
+      const ccasUnicos = ccasComIndicadores.reduce((acc, item) => {
+        const cca = item.ccas as any;
+        if (!acc.find(c => c.id === cca.id)) {
+          acc.push({
+            id: cca.id,
+            codigo: cca.codigo,
+            nome: cca.nome
+          });
+        }
+        return acc;
+      }, [] as Array<{ id: number; codigo: string; nome: string }>);
+
+      // Buscar anos e meses únicos dos indicadores
+      const { data: indicadores, error: indicadoresError } = await supabase
+        .from('idsms_indicadores')
+        .select('ano, mes')
+        .order('ano', { ascending: false })
+        .order('mes', { ascending: false });
+
+      if (indicadoresError) {
+        console.error('Erro ao buscar indicadores para filtro:', indicadoresError);
+        return { ccas: ccasUnicos, anos: [], meses: [] };
+      }
+
+      // Extrair anos únicos
+      const anosUnicos = [...new Set(indicadores.map(item => item.ano))].sort((a, b) => b - a);
+      
+      // Extrair meses únicos
+      const mesesUnicos = [...new Set(indicadores.map(item => item.mes))].sort((a, b) => a - b);
+
+      console.log('Opções de filtro encontradas:', {
+        ccas: ccasUnicos.length,
+        anos: anosUnicos.length,
+        meses: mesesUnicos.length
+      });
+
+      return {
+        ccas: ccasUnicos,
+        anos: anosUnicos,
+        meses: mesesUnicos
+      };
+    } catch (error) {
+      console.error('Exceção ao buscar opções de filtro:', error);
+      return { ccas: [], anos: [], meses: [] };
+    }
+  },
+
   async getAllIndicadores(): Promise<IDSMSIndicador[]> {
     try {
       const { data, error } = await supabase
@@ -149,7 +222,10 @@ export const idsmsService = {
         return [];
       }
 
-      return data as IDSMSIndicador[];
+      return data.map(item => ({
+        ...item,
+        tipo: item.tipo as IDSMSIndicador['tipo']
+      }));
     } catch (error) {
       console.error('Exceção ao buscar todos os indicadores:', error);
       return [];
