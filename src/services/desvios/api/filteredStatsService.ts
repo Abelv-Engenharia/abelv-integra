@@ -1,28 +1,28 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { DashboardStats, FilterParams } from "../types/dashboardTypes";
-import { applyFiltersToQuery } from "../utils/filterUtils";
+import { applyFiltersToQuery, createBaseQuery } from "../utils/filterUtils";
 import { calculatePercentages, calculateRiskLevel } from "../calculations/statsCalculator";
 
 export const fetchFilteredDashboardStats = async (filters: FilterParams): Promise<DashboardStats> => {
   try {
     // Buscar total de desvios filtrados
-    let totalQuery = supabase.from('desvios_completos').select('*', { count: 'exact', head: true });
+    let totalQuery = createBaseQuery();
     totalQuery = applyFiltersToQuery(totalQuery, filters);
     const { count: totalDesvios } = await totalQuery;
 
     // Buscar ações completas filtradas
-    let completasQuery = supabase.from('desvios_completos').select('*', { count: 'exact', head: true }).eq('status', 'Fechado');
+    let completasQuery = createBaseQuery().eq('status', 'Fechado');
     completasQuery = applyFiltersToQuery(completasQuery, filters);
     const { count: acoesCompletas } = await completasQuery;
 
     // Buscar ações em andamento filtradas
-    let andamentoQuery = supabase.from('desvios_completos').select('*', { count: 'exact', head: true }).eq('status', 'Em Andamento');
+    let andamentoQuery = createBaseQuery().eq('status', 'Em Andamento');
     andamentoQuery = applyFiltersToQuery(andamentoQuery, filters);
     const { count: acoesAndamento } = await andamentoQuery;
 
     // Buscar ações pendentes filtradas
-    let pendentesQuery = supabase.from('desvios_completos').select('*', { count: 'exact', head: true }).eq('status', 'Aberto');
+    let pendentesQuery = createBaseQuery().eq('status', 'Aberto');
     pendentesQuery = applyFiltersToQuery(pendentesQuery, filters);
     const { count: acoesPendentes } = await pendentesQuery;
 
