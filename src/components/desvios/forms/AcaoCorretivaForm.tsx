@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useFormContext } from "react-hook-form";
 import {
@@ -24,7 +25,10 @@ interface AcaoCorretivaFormProps {
 }
 
 const AcaoCorretivaForm = ({ context }: AcaoCorretivaFormProps) => {
-  const { control } = useFormContext();
+  const { control, watch } = useFormContext();
+
+  // Watch para mostrar o status calculado automaticamente
+  const situacaoAcao = watch("situacaoAcao");
 
   return (
     <Card>
@@ -86,20 +90,19 @@ const AcaoCorretivaForm = ({ context }: AcaoCorretivaFormProps) => {
 
           <FormField
             control={control}
-            name="situacaoAcao"
+            name="situacao"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Situação da Ação*</FormLabel>
+                <FormLabel>Situação*</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Pendente" />
+                      <SelectValue placeholder="Selecione a situação" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="pendente">Pendente</SelectItem>
-                    <SelectItem value="em_andamento">Em Andamento</SelectItem>
-                    <SelectItem value="concluida">Concluída</SelectItem>
+                    <SelectItem value="EM TRATATIVA">EM TRATATIVA</SelectItem>
+                    <SelectItem value="TRATADO">TRATADO</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -107,6 +110,15 @@ const AcaoCorretivaForm = ({ context }: AcaoCorretivaFormProps) => {
             )}
           />
         </div>
+
+        {situacaoAcao && (
+          <div className="bg-blue-50 p-4 rounded-lg">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium text-blue-900">Status da Ação (Calculado Automaticamente):</span>
+              <span className="text-sm font-bold text-blue-700">{situacaoAcao}</span>
+            </div>
+          </div>
+        )}
 
         <div className="bg-blue-50 p-4 rounded-lg">
           <FormField

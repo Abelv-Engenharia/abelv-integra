@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useToast } from "@/hooks/use-toast";
 import { desviosCompletosService } from "@/services/desvios/desviosCompletosService";
@@ -33,6 +32,7 @@ export interface DesvioFormData {
   tratativaAplicada: string;
   responsavelAcao: string;
   prazoCorrecao: string;
+  situacao: string;
   situacaoAcao: string;
   aplicacaoMedidaDisciplinar: boolean;
   
@@ -78,7 +78,8 @@ export const useDesviosForm = () => {
       tratativaAplicada: "",
       responsavelAcao: "",
       prazoCorrecao: "",
-      situacaoAcao: "pendente",
+      situacao: "",
+      situacaoAcao: "",
       aplicacaoMedidaDisciplinar: false,
       exposicao: "",
       controle: "",
@@ -90,6 +91,40 @@ export const useDesviosForm = () => {
       classificacaoRisco: "",
     },
   });
+
+  // Função para calcular o status da ação automaticamente
+  const calculateStatusAcao = (situacao: string, prazoCorrecao: string): string => {
+    if (situacao === "TRATADO") {
+      return "CONCLUÍDO";
+    }
+    
+    if (situacao === "EM TRATATIVA") {
+      if (prazoCorrecao) {
+        const prazoDate = new Date(prazoCorrecao);
+        const currentDate = new Date();
+        
+        if (prazoDate > currentDate) {
+          return "EM ANDAMENTO";
+        } else {
+          return "PENDENTE";
+        }
+      }
+      return "PENDENTE";
+    }
+    
+    return "";
+  };
+
+  // Watch para recalcular o status quando situação ou prazo mudarem
+  const watchSituacao = form.watch("situacao");
+  const watchPrazoCorrecao = form.watch("prazoCorrecao");
+
+  useEffect(() => {
+    if (watchSituacao) {
+      const novoStatus = calculateStatusAcao(watchSituacao, watchPrazoCorrecao);
+      form.setValue("situacaoAcao", novoStatus);
+    }
+  }, [watchSituacao, watchPrazoCorrecao, form]);
 
   const validateRequiredFields = (): boolean => {
     const formData = form.getValues();
@@ -112,7 +147,7 @@ export const useDesviosForm = () => {
       'tratativaAplicada',
       'responsavelAcao',
       'prazoCorrecao',
-      'situacaoAcao',
+      'situacao',
       'exposicao',
       'controle',
       'deteccao',
@@ -149,7 +184,7 @@ export const useDesviosForm = () => {
         tratativaAplicada: 'Tratativa Aplicada',
         responsavelAcao: 'Responsável pela Ação',
         prazoCorrecao: 'Prazo para Correção',
-        situacaoAcao: 'Situação da Ação',
+        situacao: 'Situação',
         exposicao: 'Exposição',
         controle: 'Controle',
         deteccao: 'Detecção',
@@ -217,7 +252,8 @@ export const useDesviosForm = () => {
         acoes: formData.aplicacaoMedidaDisciplinar ? [{
           responsavel: formData.responsavelAcao.toUpperCase(),
           prazo: formData.prazoCorrecao,
-          situacao: formData.situacaoAcao,
+          situacao: formData.situacao,
+          situacao_acao: formData.situacaoAcao,
           medida_disciplinar: formData.aplicacaoMedidaDisciplinar
         }] : [],
         status: 'Aberto',
