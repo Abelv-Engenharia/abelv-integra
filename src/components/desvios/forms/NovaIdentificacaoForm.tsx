@@ -124,7 +124,7 @@ const NovaIdentificacaoForm = ({ context }: NovaIdentificacaoFormProps) => {
                 <SelectContent>
                   {ccas.map((cca) => (
                     <SelectItem key={cca.id} value={cca.id.toString()}>
-                      {cca.codigo} - {cca.nome}
+                      {cca.nome}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -150,7 +150,7 @@ const NovaIdentificacaoForm = ({ context }: NovaIdentificacaoFormProps) => {
                   <SelectContent>
                     {tiposRegistro.map((tipo) => (
                       <SelectItem key={tipo.id} value={tipo.id.toString()}>
-                        {tipo.codigo} - {tipo.nome}
+                        {tipo.nome}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -175,7 +175,7 @@ const NovaIdentificacaoForm = ({ context }: NovaIdentificacaoFormProps) => {
                   <SelectContent>
                     {processos.map((processo) => (
                       <SelectItem key={processo.id} value={processo.id.toString()}>
-                        {processo.codigo} - {processo.nome}
+                        {processo.nome}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -202,7 +202,7 @@ const NovaIdentificacaoForm = ({ context }: NovaIdentificacaoFormProps) => {
                   <SelectContent>
                     {eventosIdentificados.map((evento) => (
                       <SelectItem key={evento.id} value={evento.id.toString()}>
-                        {evento.codigo} - {evento.nome}
+                        {evento.nome}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -227,7 +227,7 @@ const NovaIdentificacaoForm = ({ context }: NovaIdentificacaoFormProps) => {
                   <SelectContent>
                     {causasProvaveis.map((causa) => (
                       <SelectItem key={causa.id} value={causa.id.toString()}>
-                        {causa.codigo} - {causa.nome}
+                        {causa.nome}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -293,7 +293,7 @@ const NovaIdentificacaoForm = ({ context }: NovaIdentificacaoFormProps) => {
                   <SelectContent>
                     {disciplinas.map((disciplina) => (
                       <SelectItem key={disciplina.id} value={disciplina.id.toString()}>
-                        {disciplina.codigo} - {disciplina.nome}
+                        {disciplina.nome}
                       </SelectItem>
                     ))}
                   </SelectContent>
