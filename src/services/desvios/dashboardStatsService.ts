@@ -106,92 +106,57 @@ export const fetchDashboardStats = async (): Promise<DashboardStats> => {
 
 export const fetchFilteredDashboardStats = async (filters: FilterParams): Promise<DashboardStats> => {
   try {
-    // Construir query base
-    let query = supabase.from('desvios_completos');
+    // Função auxiliar para aplicar filtros
+    const applyFilters = (query: any) => {
+      // Aplicar filtros de data
+      if (filters.year && filters.month) {
+        const startDate = `${filters.year}-${filters.month.padStart(2, '0')}-01`;
+        const endDate = `${filters.year}-${filters.month.padStart(2, '0')}-31`;
+        query = query.gte('data_desvio', startDate).lte('data_desvio', endDate);
+      } else if (filters.year) {
+        const startDate = `${filters.year}-01-01`;
+        const endDate = `${filters.year}-12-31`;
+        query = query.gte('data_desvio', startDate).lte('data_desvio', endDate);
+      } else if (filters.month) {
+        const currentYear = new Date().getFullYear();
+        const startDate = `${currentYear}-${filters.month.padStart(2, '0')}-01`;
+        const endDate = `${currentYear}-${filters.month.padStart(2, '0')}-31`;
+        query = query.gte('data_desvio', startDate).lte('data_desvio', endDate);
+      }
 
-    // Aplicar filtros de data
-    if (filters.year && filters.month) {
-      const startDate = `${filters.year}-${filters.month.padStart(2, '0')}-01`;
-      const endDate = `${filters.year}-${filters.month.padStart(2, '0')}-31`;
-      query = query.gte('data_desvio', startDate).lte('data_desvio', endDate);
-    } else if (filters.year) {
-      const startDate = `${filters.year}-01-01`;
-      const endDate = `${filters.year}-12-31`;
-      query = query.gte('data_desvio', startDate).lte('data_desvio', endDate);
-    } else if (filters.month) {
-      const currentYear = new Date().getFullYear();
-      const startDate = `${currentYear}-${filters.month.padStart(2, '0')}-01`;
-      const endDate = `${currentYear}-${filters.month.padStart(2, '0')}-31`;
-      query = query.gte('data_desvio', startDate).lte('data_desvio', endDate);
-    }
+      // Aplicar filtros de CCA, Disciplina e Empresa
+      if (filters.ccaId) {
+        query = query.eq('cca_id', parseInt(filters.ccaId));
+      }
+      if (filters.disciplinaId) {
+        query = query.eq('disciplina_id', parseInt(filters.disciplinaId));
+      }
+      if (filters.empresaId) {
+        query = query.eq('empresa_id', parseInt(filters.empresaId));
+      }
 
-    // Aplicar filtros de CCA, Disciplina e Empresa
-    if (filters.ccaId) {
-      query = query.eq('cca_id', parseInt(filters.ccaId));
-    }
-    if (filters.disciplinaId) {
-      query = query.eq('disciplina_id', parseInt(filters.disciplinaId));
-    }
-    if (filters.empresaId) {
-      query = query.eq('empresa_id', parseInt(filters.empresaId));
-    }
+      return query;
+    };
 
-    // Buscar total de desvios do período
-    const { count: totalDesvios } = await query
-      .select('*', { count: 'exact', head: true });
+    // Buscar total de desvios filtrados
+    let totalQuery = supabase.from('desvios_completos').select('*', { count: 'exact', head: true });
+    totalQuery = applyFilters(totalQuery);
+    const { count: totalDesvios } = await totalQuery;
 
-    // Reconstruir query para cada status
-    let queryCompletas = supabase.from('desvios_completos').eq('status', 'Fechado');
-    let queryAndamento = supabase.from('desvios_completos').eq('status', 'Em Andamento');
-    let queryPendentes = supabase.from('desvios_completos').eq('status', 'Aberto');
+    // Buscar ações completas filtradas
+    let completasQuery = supabase.from('desvios_completos').select('*', { count: 'exact', head: true }).eq('status', 'Fechado');
+    completasQuery = applyFilters(completasQuery);
+    const { count: acoesCompletas } = await completasQuery;
 
-    // Aplicar os mesmos filtros para cada status
-    if (filters.year && filters.month) {
-      const startDate = `${filters.year}-${filters.month.padStart(2, '0')}-01`;
-      const endDate = `${filters.year}-${filters.month.padStart(2, '0')}-31`;
-      queryCompletas = queryCompletas.gte('data_desvio', startDate).lte('data_desvio', endDate);
-      queryAndamento = queryAndamento.gte('data_desvio', startDate).lte('data_desvio', endDate);
-      queryPendentes = queryPendentes.gte('data_desvio', startDate).lte('data_desvio', endDate);
-    } else if (filters.year) {
-      const startDate = `${filters.year}-01-01`;
-      const endDate = `${filters.year}-12-31`;
-      queryCompletas = queryCompletas.gte('data_desvio', startDate).lte('data_desvio', endDate);
-      queryAndamento = queryAndamento.gte('data_desvio', startDate).lte('data_desvio', endDate);
-      queryPendentes = queryPendentes.gte('data_desvio', startDate).lte('data_desvio', endDate);
-    } else if (filters.month) {
-      const currentYear = new Date().getFullYear();
-      const startDate = `${currentYear}-${filters.month.padStart(2, '0')}-01`;
-      const endDate = `${currentYear}-${filters.month.padStart(2, '0')}-31`;
-      queryCompletas = queryCompletas.gte('data_desvio', startDate).lte('data_desvio', endDate);
-      queryAndamento = queryAndamento.gte('data_desvio', startDate).lte('data_desvio', endDate);
-      queryPendentes = queryPendentes.gte('data_desvio', startDate).lte('data_desvio', endDate);
-    }
+    // Buscar ações em andamento filtradas
+    let andamentoQuery = supabase.from('desvios_completos').select('*', { count: 'exact', head: true }).eq('status', 'Em Andamento');
+    andamentoQuery = applyFilters(andamentoQuery);
+    const { count: acoesAndamento } = await andamentoQuery;
 
-    if (filters.ccaId) {
-      queryCompletas = queryCompletas.eq('cca_id', parseInt(filters.ccaId));
-      queryAndamento = queryAndamento.eq('cca_id', parseInt(filters.ccaId));
-      queryPendentes = queryPendentes.eq('cca_id', parseInt(filters.ccaId));
-    }
-    if (filters.disciplinaId) {
-      queryCompletas = queryCompletas.eq('disciplina_id', parseInt(filters.disciplinaId));
-      queryAndamento = queryAndamento.eq('disciplina_id', parseInt(filters.disciplinaId));
-      queryPendentes = queryPendentes.eq('disciplina_id', parseInt(filters.disciplinaId));
-    }
-    if (filters.empresaId) {
-      queryCompletas = queryCompletas.eq('empresa_id', parseInt(filters.empresaId));
-      queryAndamento = queryAndamento.eq('empresa_id', parseInt(filters.empresaId));
-      queryPendentes = queryPendentes.eq('empresa_id', parseInt(filters.empresaId));
-    }
-
-    // Executar consultas para cada status
-    const { count: acoesCompletas } = await queryCompletas
-      .select('*', { count: 'exact', head: true });
-
-    const { count: acoesAndamento } = await queryAndamento
-      .select('*', { count: 'exact', head: true });
-
-    const { count: acoesPendentes } = await queryPendentes
-      .select('*', { count: 'exact', head: true });
+    // Buscar ações pendentes filtradas
+    let pendentesQuery = supabase.from('desvios_completos').select('*', { count: 'exact', head: true }).eq('status', 'Aberto');
+    pendentesQuery = applyFilters(pendentesQuery);
+    const { count: acoesPendentes } = await pendentesQuery;
 
     // Calcular percentuais
     const total = totalDesvios || 1; // Evitar divisão por zero
@@ -199,36 +164,10 @@ export const fetchFilteredDashboardStats = async (filters: FilterParams): Promis
     const percentualAndamento = Math.round(((acoesAndamento || 0) / total) * 100);
     const percentualPendentes = Math.round(((acoesPendentes || 0) / total) * 100);
 
-    // Calcular nível de risco do período
-    let queryRisk = supabase.from('desvios_completos').select('classificacao_risco').not('classificacao_risco', 'is', null);
-    
-    // Aplicar os mesmos filtros para o risco
-    if (filters.year && filters.month) {
-      const startDate = `${filters.year}-${filters.month.padStart(2, '0')}-01`;
-      const endDate = `${filters.year}-${filters.month.padStart(2, '0')}-31`;
-      queryRisk = queryRisk.gte('data_desvio', startDate).lte('data_desvio', endDate);
-    } else if (filters.year) {
-      const startDate = `${filters.year}-01-01`;
-      const endDate = `${filters.year}-12-31`;
-      queryRisk = queryRisk.gte('data_desvio', startDate).lte('data_desvio', endDate);
-    } else if (filters.month) {
-      const currentYear = new Date().getFullYear();
-      const startDate = `${currentYear}-${filters.month.padStart(2, '0')}-01`;
-      const endDate = `${currentYear}-${filters.month.padStart(2, '0')}-31`;
-      queryRisk = queryRisk.gte('data_desvio', startDate).lte('data_desvio', endDate);
-    }
-
-    if (filters.ccaId) {
-      queryRisk = queryRisk.eq('cca_id', parseInt(filters.ccaId));
-    }
-    if (filters.disciplinaId) {
-      queryRisk = queryRisk.eq('disciplina_id', parseInt(filters.disciplinaId));
-    }
-    if (filters.empresaId) {
-      queryRisk = queryRisk.eq('empresa_id', parseInt(filters.empresaId));
-    }
-
-    const { data: riskData } = await queryRisk;
+    // Calcular nível de risco do período filtrado
+    let riskQuery = supabase.from('desvios_completos').select('classificacao_risco').not('classificacao_risco', 'is', null);
+    riskQuery = applyFilters(riskQuery);
+    const { data: riskData } = await riskQuery;
 
     let riskLevel = "Baixo";
     if (riskData && riskData.length > 0) {
