@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,8 +10,13 @@ import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { idsmsService } from "@/services/idsms/idsmsService";
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import * as XLSX from 'xlsx';
+import { useToast } from "@/hooks/use-toast";
 
 const RelatoriosIDSMS = () => {
+  const { toast } = useToast();
   const [selectedCCA, setSelectedCCA] = useState<string>("all");
   const [selectedYear, setSelectedYear] = useState<string>("all");
   const [selectedMonth, setSelectedMonth] = useState<string>("all");
@@ -44,13 +48,128 @@ const RelatoriosIDSMS = () => {
   });
 
   const handleExportPDF = () => {
-    console.log('Exportando relatório IDSMS para PDF...');
-    // Implementar exportação para PDF
+    try {
+      const doc = new jsPDF();
+      
+      // Título do relatório
+      doc.setFontSize(16);
+      doc.text('Relatório IDSMS', 20, 20);
+      
+      // Informações do filtro
+      doc.setFontSize(10);
+      let yPosition = 35;
+      doc.text(`Data de geração: ${format(new Date(), "dd/MM/yyyy HH:mm", { locale: ptBR })}`, 20, yPosition);
+      yPosition += 7;
+      doc.text(`CCA: ${selectedCCA !== "all" ? filterOptions.ccas.find(c => c.id.toString() === selectedCCA)?.codigo + " - " + filterOptions.ccas.find(c => c.id.toString() === selectedCCA)?.nome : "Todos"}`, 20, yPosition);
+      yPosition += 7;
+      doc.text(`Ano: ${selectedYear !== "all" ? selectedYear : "Todos os anos"}`, 20, yPosition);
+      yPosition += 7;
+      doc.text(`Mês: ${selectedMonth !== "all" ? mesesNomes[parseInt(selectedMonth) as keyof typeof mesesNomes] : "Todos os meses"}`, 20, yPosition);
+      
+      // Resumo
+      yPosition += 15;
+      doc.setFontSize(12);
+      doc.text('Resumo:', 20, yPosition);
+      yPosition += 10;
+      doc.setFontSize(10);
+      doc.text(`Total de CCAs: ${filteredData.length}`, 20, yPosition);
+      yPosition += 7;
+      doc.text(`IDSMS Médio: ${filteredData.length > 0 ? (filteredData.reduce((sum, item) => sum + item.idsms_total, 0) / filteredData.length).toFixed(1) : "0.0"}%`, 20, yPosition);
+      yPosition += 7;
+      doc.text(`Melhor IDSMS: ${filteredData.length > 0 ? Math.max(...filteredData.map(item => item.idsms_total)).toFixed(1) : "0.0"}%`, 20, yPosition);
+      yPosition += 7;
+      doc.text(`CCAs acima de 75%: ${filteredData.filter(item => item.idsms_total > 75).length}`, 20, yPosition);
+      
+      // Tabela de dados
+      if (filteredData.length > 0) {
+        const tableData = filteredData.map(item => [
+          `${item.cca_codigo} - ${item.cca_nome}`,
+          `${item.idsms_total.toFixed(1)}%`,
+          `${item.iid.toFixed(1)}%`,
+          `${item.hsa.toFixed(1)}%`,
+          `${item.ht.toFixed(1)}%`,
+          `${item.ipom.toFixed(1)}%`
+        ]);
+        
+        autoTable(doc, {
+          head: [['CCA', 'IDSMS Total', 'IID', 'HSA', 'HT', 'IPOM']],
+          body: tableData,
+          startY: yPosition + 15,
+          styles: { fontSize: 8 },
+          headStyles: { fillColor: [66, 139, 202] },
+        });
+      }
+      
+      doc.save(`relatorio-idsms-${format(new Date(), "dd-MM-yyyy")}.pdf`);
+      
+      toast({
+        title: "PDF exportado com sucesso!",
+        description: "O relatório foi baixado para seu dispositivo.",
+      });
+    } catch (error) {
+      console.error('Erro ao exportar PDF:', error);
+      toast({
+        title: "Erro ao exportar PDF",
+        description: "Ocorreu um erro durante a exportação.",
+        variant: "destructive"
+      });
+    }
   };
 
   const handleExportExcel = () => {
-    console.log('Exportando relatório IDSMS para Excel...');
-    // Implementar exportação para Excel
+    try {
+      // Criar workbook
+      const wb = XLSX.utils.book_new();
+      
+      // Dados de resumo
+      const resumoData = [
+        ['Relatório IDSMS'],
+        [''],
+        ['Data de geração:', format(new Date(), "dd/MM/yyyy HH:mm", { locale: ptBR })],
+        ['CCA:', selectedCCA !== "all" ? filterOptions.ccas.find(c => c.id.toString() === selectedCCA)?.codigo + " - " + filterOptions.ccas.find(c => c.id.toString() === selectedCCA)?.nome : "Todos"],
+        ['Ano:', selectedYear !== "all" ? selectedYear : "Todos os anos"],
+        ['Mês:', selectedMonth !== "all" ? mesesNomes[parseInt(selectedMonth) as keyof typeof mesesNomes] : "Todos os meses"],
+        [''],
+        ['Resumo:'],
+        ['Total de CCAs:', filteredData.length],
+        ['IDSMS Médio:', filteredData.length > 0 ? (filteredData.reduce((sum, item) => sum + item.idsms_total, 0) / filteredData.length).toFixed(1) + '%' : "0.0%"],
+        ['Melhor IDSMS:', filteredData.length > 0 ? Math.max(...filteredData.map(item => item.idsms_total)).toFixed(1) + '%' : "0.0%"],
+        ['CCAs acima de 75%:', filteredData.filter(item => item.idsms_total > 75).length],
+        [''],
+        ['Dados Detalhados:'],
+        ['CCA', 'IDSMS Total (%)', 'IID (%)', 'HSA (%)', 'HT (%)', 'IPOM (%)']
+      ];
+      
+      // Adicionar dados detalhados
+      filteredData.forEach(item => {
+        resumoData.push([
+          `${item.cca_codigo} - ${item.cca_nome}`,
+          item.idsms_total.toFixed(1),
+          item.iid.toFixed(1),
+          item.hsa.toFixed(1),
+          item.ht.toFixed(1),
+          item.ipom.toFixed(1)
+        ]);
+      });
+      
+      const ws = XLSX.utils.aoa_to_sheet(resumoData);
+      XLSX.utils.book_append_sheet(wb, ws, 'Relatório IDSMS');
+      
+      // Exportar arquivo
+      XLSX.writeFile(wb, `relatorio-idsms-${format(new Date(), "dd-MM-yyyy")}.xlsx`);
+      
+      toast({
+        title: "Excel exportado com sucesso!",
+        description: "O relatório foi baixado para seu dispositivo.",
+      });
+    } catch (error) {
+      console.error('Erro ao exportar Excel:', error);
+      toast({
+        title: "Erro ao exportar Excel",
+        description: "Ocorreu um erro durante a exportação.",
+        variant: "destructive"
+      });
+    }
   };
 
   return (

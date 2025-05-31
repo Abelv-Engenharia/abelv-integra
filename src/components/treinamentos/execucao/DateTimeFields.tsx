@@ -1,97 +1,71 @@
 
 import React from "react";
-import { format } from "date-fns";
-import { CalendarIcon } from "lucide-react";
-import { Calendar } from "@/components/ui/calendar";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
 import { UseFormReturn } from "react-hook-form";
-import { TreinamentoFormValues } from "@/types/treinamentos";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+
+interface TreinamentoFormValues {
+  data: string;
+  carga_horaria: number;
+  cca_id: number;
+  efetivo_mod: number;
+  efetivo_moi: number;
+  horas_totais: number;
+  cca: string;
+  processo_treinamento: string;
+  tipo_treinamento: string;
+  treinamento_nome: string;
+  observacoes: string;
+  lista_presenca_url: string;
+}
 
 interface DateTimeFieldsProps {
   form: UseFormReturn<TreinamentoFormValues>;
 }
 
 const DateTimeFields = ({ form }: DateTimeFieldsProps) => {
-  const watchedDate = form.watch("data");
-  const selectedDate = watchedDate ? new Date(watchedDate) : undefined;
-
   return (
-    <div className="flex flex-col md:flex-row gap-4">
-      <FormField
-        control={form.control}
-        name="data"
-        render={({ field }) => (
-          <FormItem className="flex-1">
-            <FormLabel>Data</FormLabel>
-            <Popover>
-              <PopoverTrigger asChild>
-                <FormControl>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "w-full pl-3 text-left font-normal",
-                      !field.value && "text-muted-foreground"
-                    )}
-                  >
-                    {field.value ? (
-                      format(new Date(field.value), "dd/MM/yyyy")
-                    ) : (
-                      <span>Selecione uma data</span>
-                    )}
-                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                  </Button>
-                </FormControl>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={selectedDate}
-                  onSelect={(date) => {
-                    if (date) {
-                      field.onChange(format(date, "yyyy-MM-dd"));
-                    }
-                  }}
-                  disabled={(date) => date > new Date()}
-                  initialFocus
-                  className={cn("p-3 pointer-events-auto")}
+    <Card>
+      <CardHeader>
+        <CardTitle>Data e Horário</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <FormField
+          control={form.control}
+          name="data"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Data de Execução</FormLabel>
+              <FormControl>
+                <Input type="date" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="carga_horaria"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Carga Horária (horas)</FormLabel>
+              <FormControl>
+                <Input 
+                  type="number" 
+                  min="0" 
+                  step="0.5"
+                  {...field}
+                  onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
                 />
-              </PopoverContent>
-            </Popover>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      
-      <FormItem className="flex-1">
-        <FormLabel>Mês</FormLabel>
-        <Input 
-          value={selectedDate ? format(selectedDate, "MMMM") : ""} 
-          disabled 
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-      </FormItem>
-      
-      <FormItem className="flex-1">
-        <FormLabel>Ano</FormLabel>
-        <Input 
-          value={selectedDate ? format(selectedDate, "yyyy") : ""} 
-          disabled 
-        />
-      </FormItem>
-    </div>
+      </CardContent>
+    </Card>
   );
 };
 
