@@ -112,7 +112,12 @@ export const useDesviosForm = () => {
       'tratativaAplicada',
       'responsavelAcao',
       'prazoCorrecao',
-      'situacaoAcao'
+      'situacaoAcao',
+      'exposicao',
+      'controle',
+      'deteccao',
+      'efeitoFalha',
+      'impacto'
     ];
 
     const missingFields: string[] = [];
@@ -144,7 +149,12 @@ export const useDesviosForm = () => {
         tratativaAplicada: 'Tratativa Aplicada',
         responsavelAcao: 'Responsável pela Ação',
         prazoCorrecao: 'Prazo para Correção',
-        situacaoAcao: 'Situação da Ação'
+        situacaoAcao: 'Situação da Ação',
+        exposicao: 'Exposição',
+        controle: 'Controle',
+        deteccao: 'Detecção',
+        efeitoFalha: 'Efeito de Falha',
+        impacto: 'Impacto'
       };
 
       const missingFieldNames = missingFields.map(field => fieldNames[field] || field);
