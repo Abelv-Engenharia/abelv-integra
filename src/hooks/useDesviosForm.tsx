@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useToast } from "@/hooks/use-toast";
@@ -241,6 +242,7 @@ export const useDesviosForm = () => {
         disciplina_id: formData.disciplina ? parseInt(formData.disciplina) : null,
         descricao_desvio: formData.descricao.toUpperCase(),
         acao_imediata: formData.tratativaAplicada.toUpperCase(),
+        situacao: formData.situacao,
         exposicao: formData.exposicao ? parseInt(formData.exposicao) : null,
         controle: formData.controle ? parseInt(formData.controle) : null,
         deteccao: formData.deteccao ? parseInt(formData.deteccao) : null,

@@ -168,6 +168,7 @@ export type Database = {
           processo_id: number | null
           responsavel_id: string | null
           severidade: number | null
+          situacao: string | null
           status: string | null
           supervisor_responsavel_id: string | null
           tipo_registro_id: number | null
@@ -203,6 +204,7 @@ export type Database = {
           processo_id?: number | null
           responsavel_id?: string | null
           severidade?: number | null
+          situacao?: string | null
           status?: string | null
           supervisor_responsavel_id?: string | null
           tipo_registro_id?: number | null
@@ -238,6 +240,7 @@ export type Database = {
           processo_id?: number | null
           responsavel_id?: string | null
           severidade?: number | null
+          situacao?: string | null
           status?: string | null
           supervisor_responsavel_id?: string | null
           tipo_registro_id?: number | null
