@@ -1,23 +1,25 @@
 
-import DesviosBarChart from "@/components/desvios/DesviosBarChart";
-import DesviosByDisciplineChart from "@/components/desvios/DesviosByDisciplineChart";
-import DesviosClassificationChart from "@/components/desvios/DesviosClassificationChart";
+import DesviosPieChart from "@/components/desvios/DesviosPieChart";
 import DesviosByCompanyChart from "@/components/desvios/DesviosByCompanyChart";
+import DesviosClassificationChart from "@/components/desvios/DesviosClassificationChart";
+import DesviosByDisciplineChart from "@/components/desvios/DesviosByDisciplineChart";
 import DesviosByEventChart from "@/components/desvios/DesviosByEventChart";
+import DesviosByBaseLegalChart from "@/components/desvios/DesviosByBaseLegalChart";
 
 const DesviosChartRows = () => {
   return (
     <>
       <div className="grid gap-4 md:grid-cols-2">
-        <DesviosBarChart />
-        <DesviosByDisciplineChart />
+        <DesviosPieChart />
+        <DesviosByCompanyChart />
       </div>
       <div className="grid gap-4 md:grid-cols-2">
         <DesviosClassificationChart />
-        <DesviosByCompanyChart />
+        <DesviosByDisciplineChart />
       </div>
-      <div className="grid gap-4">
+      <div className="grid gap-4 md:grid-cols-2">
         <DesviosByEventChart />
+        <DesviosByBaseLegalChart />
       </div>
     </>
   );

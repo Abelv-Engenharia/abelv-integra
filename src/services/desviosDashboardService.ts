@@ -36,6 +36,10 @@ export {
   fetchDesviosByClassification
 } from './desvios/desviosByClassificationService';
 
+export {
+  fetchDesviosByBaseLegal
+} from './desvios/desviosByBaseLegalService';
+
 // Re-export types
 export type {
   DashboardStats
