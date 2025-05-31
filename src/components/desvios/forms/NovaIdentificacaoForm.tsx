@@ -124,7 +124,7 @@ const NovaIdentificacaoForm = ({ context }: NovaIdentificacaoFormProps) => {
                 <SelectContent>
                   {ccas.map((cca) => (
                     <SelectItem key={cca.id} value={cca.id.toString()}>
-                      {cca.nome}
+                      {cca.codigo} - {cca.nome}
                     </SelectItem>
                   ))}
                 </SelectContent>
