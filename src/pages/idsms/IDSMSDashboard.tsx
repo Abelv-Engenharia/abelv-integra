@@ -1,13 +1,18 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { idsmsService } from "@/services/idsms/idsmsService";
 import { TrendingUp, TrendingDown, Minus, RefreshCw, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const IDSMSDashboard = () => {
+  const [selectedCCA, setSelectedCCA] = useState<string>("all");
+  const [selectedYear, setSelectedYear] = useState<string>(new Date().getFullYear().toString());
+  const [selectedMonth, setSelectedMonth] = useState<string>("all");
+
   const { data: dashboardData = [], isLoading, refetch, error } = useQuery({
     queryKey: ['idsms-dashboard'],
     queryFn: idsmsService.getDashboardData,
@@ -20,6 +25,17 @@ const IDSMSDashboard = () => {
     error,
     dataLength: dashboardData?.length 
   });
+
+  // Filtrar dados baseado nos filtros selecionados
+  const filteredData = dashboardData.filter(item => {
+    if (selectedCCA !== "all" && item.cca_codigo !== selectedCCA) return false;
+    // Para filtros de ano e mês, precisaríamos ter esses dados no dashboard
+    // Por agora, mantemos apenas o filtro de CCA
+    return true;
+  });
+
+  // Obter lista única de CCAs para o filtro
+  const uniqueCCAs = [...new Set(dashboardData.map(item => item.cca_codigo))].sort();
 
   const getIndicatorIcon = (value: number) => {
     if (value > 75) return <TrendingUp className="h-4 w-4 text-green-500" />;
@@ -87,10 +103,74 @@ const IDSMSDashboard = () => {
         </Button>
       </div>
 
-      {dashboardData.length > 0 ? (
+      {/* Filtros */}
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle className="text-lg">Filtros</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-2">CCA</label>
+              <Select value={selectedCCA} onValueChange={setSelectedCCA}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione um CCA" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos os CCAs</SelectItem>
+                  {uniqueCCAs.map(cca => (
+                    <SelectItem key={cca} value={cca}>{cca}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium mb-2">Ano</label>
+              <Select value={selectedYear} onValueChange={setSelectedYear}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o ano" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="2024">2024</SelectItem>
+                  <SelectItem value="2023">2023</SelectItem>
+                  <SelectItem value="2022">2022</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium mb-2">Mês</label>
+              <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o mês" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos os meses</SelectItem>
+                  <SelectItem value="1">Janeiro</SelectItem>
+                  <SelectItem value="2">Fevereiro</SelectItem>
+                  <SelectItem value="3">Março</SelectItem>
+                  <SelectItem value="4">Abril</SelectItem>
+                  <SelectItem value="5">Maio</SelectItem>
+                  <SelectItem value="6">Junho</SelectItem>
+                  <SelectItem value="7">Julho</SelectItem>
+                  <SelectItem value="8">Agosto</SelectItem>
+                  <SelectItem value="9">Setembro</SelectItem>
+                  <SelectItem value="10">Outubro</SelectItem>
+                  <SelectItem value="11">Novembro</SelectItem>
+                  <SelectItem value="12">Dezembro</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {filteredData.length > 0 ? (
         <>
           <div className="mb-6 text-sm text-gray-600">
-            Exibindo dados de {dashboardData.length} CCA(s) com indicadores IDSMS registrados
+            Exibindo dados de {filteredData.length} CCA(s) com indicadores IDSMS registrados
+            {selectedCCA !== "all" && ` - Filtrado por CCA: ${selectedCCA}`}
           </div>
 
           {/* Cards resumo */}
@@ -100,18 +180,18 @@ const IDSMSDashboard = () => {
                 <CardTitle className="text-sm font-medium text-gray-600">Total de CCAs</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{dashboardData.length}</div>
+                <div className="text-2xl font-bold">{filteredData.length}</div>
                 <p className="text-xs text-gray-500">com dados IDSMS</p>
               </CardContent>
             </Card>
             
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-gray-600">IDSMS Médio</CardTitle>
+                <CardTitle className="text-sm font-medium text-gray-600">IDSMS Abelv Engenharia</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
-                  {(dashboardData.reduce((sum, item) => sum + item.idsms_total, 0) / dashboardData.length).toFixed(1)}%
+                  {(filteredData.reduce((sum, item) => sum + item.idsms_total, 0) / filteredData.length).toFixed(1)}%
                 </div>
                 <p className="text-xs text-gray-500">média geral</p>
               </CardContent>
@@ -123,7 +203,7 @@ const IDSMSDashboard = () => {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-green-600">
-                  {Math.max(...dashboardData.map(item => item.idsms_total)).toFixed(1)}%
+                  {Math.max(...filteredData.map(item => item.idsms_total)).toFixed(1)}%
                 </div>
                 <p className="text-xs text-gray-500">maior IDSMS</p>
               </CardContent>
@@ -131,11 +211,11 @@ const IDSMSDashboard = () => {
 
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-gray-600">CCAs > 75%</CardTitle>
+                <CardTitle className="text-sm font-medium text-gray-600">CCAs &gt; 75%</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-green-600">
-                  {dashboardData.filter(item => item.idsms_total > 75).length}
+                  {filteredData.filter(item => item.idsms_total > 75).length}
                 </div>
                 <p className="text-xs text-gray-500">acima da meta</p>
               </CardContent>
@@ -164,7 +244,7 @@ const IDSMSDashboard = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {dashboardData
+                  {filteredData
                     .sort((a, b) => b.idsms_total - a.idsms_total)
                     .map((cca) => (
                     <TableRow key={cca.cca_id}>
@@ -203,7 +283,7 @@ const IDSMSDashboard = () => {
 
           {/* Cards individuais para visão mobile */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6 lg:hidden">
-            {dashboardData
+            {filteredData
               .sort((a, b) => b.idsms_total - a.idsms_total)
               .map((cca) => (
               <Card key={cca.cca_id} className="relative">
@@ -265,7 +345,10 @@ const IDSMSDashboard = () => {
               <AlertCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-semibold mb-2">Nenhum dado encontrado</h3>
               <p className="text-gray-600 mb-4">
-                Não foram encontrados indicadores IDSMS registrados na base de dados.
+                {selectedCCA !== "all" 
+                  ? `Não foram encontrados indicadores IDSMS para o CCA ${selectedCCA}.`
+                  : "Não foram encontrados indicadores IDSMS registrados na base de dados."
+                }
               </p>
               <p className="text-sm text-gray-500 mb-4">
                 Registre indicadores usando os formulários IDSMS para visualizar dados no dashboard.
