@@ -11,7 +11,6 @@ import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { idsmsService } from "@/services/idsms/idsmsService";
 import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 import { useToast } from "@/hooks/use-toast";
 
@@ -80,23 +79,24 @@ const RelatoriosIDSMS = () => {
       yPosition += 7;
       doc.text(`CCAs acima de 75%: ${filteredData.filter(item => item.idsms_total > 75).length}`, 20, yPosition);
       
-      // Tabela de dados
+      // Dados detalhados (sem tabela, apenas texto)
       if (filteredData.length > 0) {
-        const tableData = filteredData.map(item => [
-          `${item.cca_codigo} - ${item.cca_nome}`,
-          `${item.idsms_total.toFixed(1)}%`,
-          `${item.iid.toFixed(1)}%`,
-          `${item.hsa.toFixed(1)}%`,
-          `${item.ht.toFixed(1)}%`,
-          `${item.ipom.toFixed(1)}%`
-        ]);
+        yPosition += 15;
+        doc.setFontSize(12);
+        doc.text('Dados Detalhados:', 20, yPosition);
+        yPosition += 10;
+        doc.setFontSize(8);
         
-        autoTable(doc, {
-          head: [['CCA', 'IDSMS Total', 'IID', 'HSA', 'HT', 'IPOM']],
-          body: tableData,
-          startY: yPosition + 15,
-          styles: { fontSize: 8 },
-          headStyles: { fillColor: [66, 139, 202] },
+        filteredData.forEach((item, index) => {
+          if (yPosition > 270) { // Nova página se necessário
+            doc.addPage();
+            yPosition = 20;
+          }
+          
+          doc.text(`${index + 1}. ${item.cca_codigo} - ${item.cca_nome}`, 20, yPosition);
+          yPosition += 5;
+          doc.text(`   IDSMS: ${item.idsms_total.toFixed(1)}% | IID: ${item.iid.toFixed(1)}% | HSA: ${item.hsa.toFixed(1)}% | HT: ${item.ht.toFixed(1)}% | IPOM: ${item.ipom.toFixed(1)}%`, 20, yPosition);
+          yPosition += 8;
         });
       }
       
