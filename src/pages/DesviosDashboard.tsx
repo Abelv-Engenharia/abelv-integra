@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { fetchDashboardStats, fetchFilteredDashboardStats, DashboardStats } from "@/services/desviosDashboardService";
+import { fetchDashboardStats, fetchFilteredDashboardStats, DashboardStats } from "@/services/desvios/dashboardStatsService";
 import DesviosDashboardHeader from "@/components/desvios/DesviosDashboardHeader";
 import DesviosDashboardFilters from "@/components/desvios/DesviosDashboardFilters";
 import DesviosDashboardStats from "@/components/desvios/DesviosDashboardStats";
@@ -28,22 +28,31 @@ const DesviosDashboard = () => {
     const loadDashboardStats = async () => {
       setLoading(true);
       try {
+        console.log('Carregando estatísticas do dashboard...');
         const stats = await fetchDashboardStats();
+        console.log('Estatísticas carregadas:', stats);
         setDashboardStats(stats);
       } catch (error) {
         console.error('Erro ao buscar estatísticas do dashboard:', error);
+        toast({
+          title: "Erro ao carregar dados",
+          description: "Ocorreu um erro ao buscar as estatísticas do dashboard.",
+          variant: "destructive"
+        });
       } finally {
         setLoading(false);
       }
     };
 
     loadDashboardStats();
-  }, []);
+  }, [toast]);
 
   const handleFilterChange = async () => {
     setLoading(true);
     try {
+      console.log('Aplicando filtros:', { year, month });
       const filteredStats = await fetchFilteredDashboardStats(year, month);
+      console.log('Estatísticas filtradas:', filteredStats);
       setDashboardStats(filteredStats);
       
       toast({

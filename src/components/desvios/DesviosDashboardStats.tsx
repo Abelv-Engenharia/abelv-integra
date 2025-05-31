@@ -17,15 +17,18 @@ interface DesviosDashboardStatsProps {
 }
 
 const DesviosDashboardStats = ({ loading, stats }: DesviosDashboardStatsProps) => {
+  console.log('DesviosDashboardStats renderizando com:', { loading, stats });
+
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       <StatCard
         title="Total de Desvios"
-        value={loading ? "..." : stats.totalDesvios}
+        value={loading ? "..." : stats.totalDesvios.toString()}
         icon={<Activity className="h-4 w-4" />}
         description="Todos os desvios registrados"
         trend="up"
         trendValue="8%"
+        loading={loading}
       />
       <StatCard
         title="Ações Concluídas"
@@ -35,6 +38,7 @@ const DesviosDashboardStats = ({ loading, stats }: DesviosDashboardStatsProps) =
         trend="up"
         trendValue={`${stats.percentualCompletas}%`}
         className="border-l-4 border-green-500"
+        loading={loading}
       />
       <StatCard
         title="Ações em Andamento"
@@ -44,6 +48,7 @@ const DesviosDashboardStats = ({ loading, stats }: DesviosDashboardStatsProps) =
         trend="neutral"
         trendValue={`${stats.percentualAndamento}%`}
         className="border-l-4 border-orange-500"
+        loading={loading}
       />
       <StatCard
         title="Ações Pendentes"
@@ -53,6 +58,7 @@ const DesviosDashboardStats = ({ loading, stats }: DesviosDashboardStatsProps) =
         trend="down"
         trendValue={`${stats.percentualPendentes}%`}
         className="border-l-4 border-red-500"
+        loading={loading}
       />
     </div>
   );
