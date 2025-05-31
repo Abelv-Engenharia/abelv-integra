@@ -222,7 +222,7 @@ const RelatoriosIDSMS = () => {
 
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600">CCAs > 75%</CardTitle>
+            <CardTitle className="text-sm font-medium text-gray-600">CCAs acima de 75%</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">

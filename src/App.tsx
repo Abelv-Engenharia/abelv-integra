@@ -66,6 +66,7 @@ import RelatoriosDashboard from "./pages/relatorios/RelatoriosDashboard";
 import RelatoriosDesvios from "./pages/relatorios/RelatoriosDesvios";
 import RelatoriosTreinamentos from "./pages/relatorios/RelatoriosTreinamentos";
 import RelatoriosOcorrencias from "./pages/relatorios/RelatoriosOcorrencias";
+import RelatoriosIDSMS from "./pages/relatorios/RelatoriosIDSMS";
 
 // Admin pages
 import RegistroHHT from "./pages/admin/RegistroHHT";
@@ -156,6 +157,7 @@ const App = () => (
                 <Route path="/relatorios/desvios" element={<RelatoriosDesvios />} />
                 <Route path="/relatorios/treinamentos" element={<RelatoriosTreinamentos />} />
                 <Route path="/relatorios/ocorrencias" element={<RelatoriosOcorrencias />} />
+                <Route path="/relatorios/idsms" element={<RelatoriosIDSMS />} />
                 
                 {/* Administração routes */}
                 <Route path="/admin/usuarios" element={<AdminUsuarios />} />
