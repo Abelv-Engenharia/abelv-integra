@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useFormContext } from "react-hook-form";
 import {
@@ -54,7 +53,8 @@ const NovasInformacoesForm = ({ context }: NovasInformacoesFormProps) => {
                 <Textarea 
                   placeholder="Descreva detalhadamente o desvio identificado"
                   className="min-h-[100px]"
-                  {...field} 
+                  {...field}
+                  onChange={(e) => field.onChange(e.target.value.toUpperCase())}
                 />
               </FormControl>
               <FormMessage />

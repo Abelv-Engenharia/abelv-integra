@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useFormContext } from "react-hook-form";
 import {
@@ -43,7 +42,8 @@ const AcaoCorretivaForm = ({ context }: AcaoCorretivaFormProps) => {
                 <Textarea 
                   placeholder="Descreva detalhadamente a tratativa aplicada para correção do desvio"
                   className="min-h-[100px]"
-                  {...field} 
+                  {...field}
+                  onChange={(e) => field.onChange(e.target.value.toUpperCase())}
                 />
               </FormControl>
               <FormMessage />
@@ -58,7 +58,11 @@ const AcaoCorretivaForm = ({ context }: AcaoCorretivaFormProps) => {
             <FormItem>
               <FormLabel>Responsável pela Ação*</FormLabel>
               <FormControl>
-                <Input placeholder="Nome do responsável pela ação corretiva" {...field} />
+                <Input 
+                  placeholder="Nome do responsável pela ação corretiva" 
+                  {...field}
+                  onChange={(e) => field.onChange(e.target.value.toUpperCase())}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>

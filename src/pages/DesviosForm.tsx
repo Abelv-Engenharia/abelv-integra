@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
@@ -26,6 +25,7 @@ import NovaIdentificacaoForm from "@/components/desvios/forms/NovaIdentificacaoF
 import NovasInformacoesForm from "@/components/desvios/forms/NovasInformacoesForm";
 import AcaoCorretivaForm from "@/components/desvios/forms/AcaoCorretivaForm";
 import ClassificacaoRiscoForm from "@/components/desvios/forms/ClassificacaoRiscoForm";
+import FormSuccessDialog from "@/components/desvios/forms/FormSuccessDialog";
 import { ArrowLeft, ArrowRight, Save, X } from "lucide-react";
 
 interface DesvioFormData {
@@ -75,6 +75,7 @@ const DesviosForm = () => {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("identificacao");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
 
   // Fetch data for all select options
   const { data: ccas = [] } = useQuery({
@@ -184,6 +185,76 @@ const DesviosForm = () => {
 
   const currentTabIndex = tabs.findIndex(tab => tab.id === activeTab);
 
+  const validateRequiredFields = (): boolean => {
+    const formData = form.getValues();
+    const requiredFields = [
+      'data',
+      'hora',
+      'ccaId',
+      'tipoRegistro',
+      'processo',
+      'eventoIdentificado',
+      'causaProvavel',
+      'responsavelInspecao',
+      'empresa',
+      'disciplina',
+      'engenheiroResponsavel',
+      'descricao',
+      'baseLegal',
+      'supervisorResponsavel',
+      'encarregadoResponsavel',
+      'tratativaAplicada',
+      'responsavelAcao',
+      'prazoCorrecao',
+      'situacaoAcao'
+    ];
+
+    const missingFields: string[] = [];
+    
+    requiredFields.forEach(field => {
+      const value = formData[field as keyof DesvioFormData];
+      if (!value || (typeof value === 'string' && value.trim() === '')) {
+        missingFields.push(field);
+      }
+    });
+
+    if (missingFields.length > 0) {
+      const fieldNames: Record<string, string> = {
+        data: 'Data',
+        hora: 'Hora',
+        ccaId: 'CCA',
+        tipoRegistro: 'Tipo de Registro',
+        processo: 'Processo',
+        eventoIdentificado: 'Evento Identificado',
+        causaProvavel: 'Causa Provável',
+        responsavelInspecao: 'Responsável pela Inspeção',
+        empresa: 'Empresa',
+        disciplina: 'Disciplina',
+        engenheiroResponsavel: 'Engenheiro Responsável',
+        descricao: 'Descrição',
+        baseLegal: 'Base Legal',
+        supervisorResponsavel: 'Supervisor Responsável',
+        encarregadoResponsavel: 'Encarregado Responsável',
+        tratativaAplicada: 'Tratativa Aplicada',
+        responsavelAcao: 'Responsável pela Ação',
+        prazoCorrecao: 'Prazo para Correção',
+        situacaoAcao: 'Situação da Ação'
+      };
+
+      const missingFieldNames = missingFields.map(field => fieldNames[field] || field);
+      
+      toast({
+        title: "Campos obrigatórios não preenchidos",
+        description: `Por favor, preencha os seguintes campos: ${missingFieldNames.join(', ')}`,
+        variant: "destructive",
+      });
+      
+      return false;
+    }
+
+    return true;
+  };
+
   const handleNext = () => {
     console.log("Botão Próximo clicado");
     if (currentTabIndex < tabs.length - 1) {
@@ -200,6 +271,11 @@ const DesviosForm = () => {
 
   const handleSave = async () => {
     console.log("Botão Salvar clicado");
+    
+    if (!validateRequiredFields()) {
+      return;
+    }
+    
     setIsSubmitting(true);
     
     try {
@@ -210,7 +286,7 @@ const DesviosForm = () => {
       const desvioData = {
         data_desvio: formData.data,
         hora_desvio: formData.hora,
-        local: formData.responsavelInspecao || "Local não especificado", // Using responsavelInspecao as placeholder for location
+        local: formData.responsavelInspecao || "Local não especificado",
         cca_id: formData.ccaId ? parseInt(formData.ccaId) : null,
         empresa_id: formData.empresa ? parseInt(formData.empresa) : null,
         base_legal_opcao_id: formData.baseLegal ? parseInt(formData.baseLegal) : null,
@@ -227,8 +303,8 @@ const DesviosForm = () => {
         evento_identificado_id: formData.eventoIdentificado ? parseInt(formData.eventoIdentificado) : null,
         causa_provavel_id: formData.causaProvavel ? parseInt(formData.causaProvavel) : null,
         disciplina_id: formData.disciplina ? parseInt(formData.disciplina) : null,
-        descricao_desvio: formData.descricao,
-        acao_imediata: formData.tratativaAplicada,
+        descricao_desvio: formData.descricao.toUpperCase(),
+        acao_imediata: formData.tratativaAplicada.toUpperCase(),
         exposicao: formData.exposicao ? parseInt(formData.exposicao) : null,
         controle: formData.controle ? parseInt(formData.controle) : null,
         deteccao: formData.deteccao ? parseInt(formData.deteccao) : null,
@@ -238,7 +314,7 @@ const DesviosForm = () => {
         severidade: formData.severidade || null,
         classificacao_risco: formData.classificacaoRisco || null,
         acoes: formData.aplicacaoMedidaDisciplinar ? [{
-          responsavel: formData.responsavelAcao,
+          responsavel: formData.responsavelAcao.toUpperCase(),
           prazo: formData.prazoCorrecao,
           situacao: formData.situacaoAcao,
           medida_disciplinar: formData.aplicacaoMedidaDisciplinar
@@ -250,14 +326,7 @@ const DesviosForm = () => {
       const result = await desviosCompletosService.create(desvioData);
       
       if (result) {
-        toast({
-          title: "Desvio cadastrado com sucesso!",
-          description: "O desvio foi registrado no sistema.",
-        });
-        
-        // Limpar o formulário
-        form.reset();
-        setActiveTab("identificacao");
+        setShowSuccessDialog(true);
       } else {
         throw new Error("Falha ao criar desvio");
       }
@@ -281,6 +350,11 @@ const DesviosForm = () => {
       title: "Formulário cancelado",
       description: "O formulário foi resetado.",
     });
+  };
+
+  const handleNewRecord = () => {
+    form.reset();
+    setActiveTab("identificacao");
   };
 
   const CurrentTabComponent = tabs.find(tab => tab.id === activeTab)?.component;
@@ -396,6 +470,12 @@ const DesviosForm = () => {
           </Form>
         </CardContent>
       </Card>
+
+      <FormSuccessDialog
+        open={showSuccessDialog}
+        onOpenChange={setShowSuccessDialog}
+        onNewRecord={handleNewRecord}
+      />
     </div>
   );
 };

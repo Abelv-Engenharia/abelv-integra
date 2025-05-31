@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useFormContext } from "react-hook-form";
 import {
@@ -245,7 +244,11 @@ const NovaIdentificacaoForm = ({ context }: NovaIdentificacaoFormProps) => {
             <FormItem>
               <FormLabel>Responsável pela Inspeção*</FormLabel>
               <FormControl>
-                <Input placeholder="Nome do responsável" {...field} />
+                <Input 
+                  placeholder="Nome do responsável" 
+                  {...field}
+                  onChange={(e) => field.onChange(e.target.value.toUpperCase())}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
