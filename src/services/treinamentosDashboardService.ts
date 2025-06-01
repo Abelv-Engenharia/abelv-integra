@@ -67,6 +67,16 @@ export const fetchTreinamentosStats = async () => {
   const percentualHorasInvestidas = totalHHT > 0 ? (totalHorasTreinamento / totalHHT) * 100 : 0;
   const metaAtingida = percentualHorasInvestidas >= 2.5;
 
+  console.log('Debug training stats:', {
+    totalHHT,
+    totalHorasTreinamento,
+    percentualHorasInvestidas,
+    metaHoras,
+    metaAtingida,
+    currentMonth,
+    currentYear
+  });
+
   return {
     totalFuncionarios: totalFuncionarios || 0,
     funcionariosComTreinamentos: uniqueFuncionariosIds.size,

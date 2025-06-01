@@ -28,7 +28,9 @@ export const TreinamentosSummaryCards = () => {
     const loadStats = async () => {
       try {
         setLoading(true);
+        console.log('Loading training stats...');
         const data = await fetchTreinamentosStats();
+        console.log('Loaded training stats:', data);
         setStats(data);
       } catch (error) {
         console.error("Error loading training stats:", error);
