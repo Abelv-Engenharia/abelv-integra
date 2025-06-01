@@ -53,7 +53,7 @@ export const fetchTreinamentosStats = async () => {
 
   const totalHHT = hhtData?.reduce((sum, item) => sum + Number(item.horas_trabalhadas), 0) || 0;
 
-  // Fetch total training hours from execucao_treinamentos for current month/year
+  // Fetch total training hours from execucao_treinamentos for current month/year using horas_totais column
   const { data: horasTreinamento } = await supabase
     .from('execucao_treinamentos')
     .select('horas_totais')
