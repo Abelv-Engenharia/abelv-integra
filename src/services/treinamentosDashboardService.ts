@@ -40,12 +40,44 @@ export const fetchTreinamentosStats = async () => {
   const treinamentosValidos = treinamentosStatus?.filter(t => t.status === 'Válido')?.length || 0;
   const treinamentosVencendo = treinamentosStatus?.filter(t => t.status === 'Próximo ao vencimento')?.length || 0;
 
+  // Fetch HHT (Horas Homem Trabalhadas) for current month/year
+  const currentDate = new Date();
+  const currentMonth = currentDate.getMonth() + 1;
+  const currentYear = currentDate.getFullYear();
+
+  const { data: hhtData } = await supabase
+    .from('horas_trabalhadas')
+    .select('horas_trabalhadas')
+    .eq('mes', currentMonth)
+    .eq('ano', currentYear);
+
+  const totalHHT = hhtData?.reduce((sum, item) => sum + Number(item.horas_trabalhadas), 0) || 0;
+
+  // Fetch total training hours from execucao_treinamentos for current month/year
+  const { data: horasTreinamento } = await supabase
+    .from('execucao_treinamentos')
+    .select('horas_totais')
+    .eq('mes', currentMonth)
+    .eq('ano', currentYear);
+
+  const totalHorasTreinamento = horasTreinamento?.reduce((sum, item) => sum + Number(item.horas_totais || 0), 0) || 0;
+
+  // Calculate percentages and goals
+  const metaHoras = totalHHT * 0.025; // 2.5% meta
+  const percentualHorasInvestidas = totalHHT > 0 ? (totalHorasTreinamento / totalHHT) * 100 : 0;
+  const metaAtingida = percentualHorasInvestidas >= 2.5;
+
   return {
     totalFuncionarios: totalFuncionarios || 0,
     funcionariosComTreinamentos: uniqueFuncionariosIds.size,
     totalTreinamentosExecutados: totalTreinamentosExecutados || 0,
     treinamentosValidos,
-    treinamentosVencendo
+    treinamentosVencendo,
+    totalHHT,
+    totalHorasTreinamento,
+    metaHoras,
+    percentualHorasInvestidas,
+    metaAtingida
   };
 };
 
@@ -142,4 +174,44 @@ export const fetchFuncionariosComTreinamentos = async () => {
   });
 
   return funcionariosComTreinamentos;
+};
+
+export const fetchTreinamentosPorProcesso = async () => {
+  const currentDate = new Date();
+  const currentMonth = currentDate.getMonth() + 1;
+  const currentYear = currentDate.getFullYear();
+
+  // Fetch training data grouped by processo
+  const { data: treinamentosData } = await supabase
+    .from('execucao_treinamentos')
+    .select('processo_treinamento, efetivo_mod, horas_totais')
+    .eq('mes', currentMonth)
+    .eq('ano', currentYear);
+
+  // Group by processo and calculate totals
+  const processoStats = (treinamentosData || []).reduce((acc, item) => {
+    const processo = item.processo_treinamento;
+    if (!acc[processo]) {
+      acc[processo] = {
+        processo,
+        horasMOD: 0,
+        totalHoras: 0
+      };
+    }
+    
+    const horasPorMOD = (item.horas_totais || 0) * (item.efetivo_mod || 0) / ((item.efetivo_mod || 0) + (item.efetivo_moi || 0));
+    acc[processo].horasMOD += horasPorMOD;
+    acc[processo].totalHoras += item.horas_totais || 0;
+    
+    return acc;
+  }, {} as Record<string, { processo: string; horasMOD: number; totalHoras: number }>);
+
+  // Calculate total MOD hours for percentage calculation
+  const totalHorasMOD = Object.values(processoStats).reduce((sum, item) => sum + item.horasMOD, 0);
+
+  // Convert to array with percentages
+  return Object.values(processoStats).map(item => ({
+    ...item,
+    percentualMOD: totalHorasMOD > 0 ? (item.horasMOD / totalHorasMOD) * 100 : 0
+  }));
 };

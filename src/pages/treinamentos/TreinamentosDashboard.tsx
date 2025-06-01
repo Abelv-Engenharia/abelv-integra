@@ -6,6 +6,7 @@ import { TreinamentosExecucaoChart } from "@/components/treinamentos/Treinamento
 import { TreinamentosNormativosChart } from "@/components/treinamentos/TreinamentosNormativosChart";
 import { TreinamentoStatusTable } from "@/components/treinamentos/TreinamentoStatusTable";
 import { TreinamentosSummaryCards } from "@/components/treinamentos/TreinamentosSummaryCards";
+import { TreinamentosPorProcessoTable } from "@/components/treinamentos/TreinamentosPorProcessoTable";
 import { Button } from "@/components/ui/button";
 import { 
   Calendar, 
@@ -43,6 +44,8 @@ const TreinamentosDashboard = () => {
       </div>
 
       <TreinamentosSummaryCards />
+
+      <TreinamentosPorProcessoTable />
 
       <Tabs defaultValue="execucao" className="space-y-4">
         <TabsList>
