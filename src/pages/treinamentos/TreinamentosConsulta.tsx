@@ -14,8 +14,8 @@ const TreinamentosConsulta = () => {
   const [execucoes, setExecucoes] = useState<ExecucaoTreinamento[]>([]);
   const [filteredExecucoes, setFilteredExecucoes] = useState<ExecucaoTreinamento[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [filterMes, setFilterMes] = useState("");
-  const [filterAno, setFilterAno] = useState("");
+  const [filterMes, setFilterMes] = useState("todos");
+  const [filterAno, setFilterAno] = useState("todos");
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -54,11 +54,11 @@ const TreinamentosConsulta = () => {
       );
     });
 
-    if (filterMes) {
+    if (filterMes !== "todos") {
       results = results.filter((execucao) => execucao.mes.toString() === filterMes);
     }
 
-    if (filterAno) {
+    if (filterAno !== "todos") {
       results = results.filter((execucao) => execucao.ano.toString() === filterAno);
     }
 
@@ -115,7 +115,7 @@ const TreinamentosConsulta = () => {
                 <SelectValue placeholder="Mês" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Todos</SelectItem>
+                <SelectItem value="todos">Todos</SelectItem>
                 {Array.from({ length: 12 }, (_, i) => (
                   <SelectItem key={i + 1} value={(i + 1).toString()}>
                     {new Date(2024, i).toLocaleDateString("pt-BR", { month: "long" })}
@@ -128,7 +128,7 @@ const TreinamentosConsulta = () => {
                 <SelectValue placeholder="Ano" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Todos</SelectItem>
+                <SelectItem value="todos">Todos</SelectItem>
                 <SelectItem value="2024">2024</SelectItem>
                 <SelectItem value="2023">2023</SelectItem>
               </SelectContent>
