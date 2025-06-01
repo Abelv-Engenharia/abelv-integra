@@ -6,48 +6,36 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Form } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
+import { useTreinamentoForm } from "@/hooks/useTreinamentoForm";
+import { execucaoTreinamentoService } from "@/services/treinamentos/execucaoTreinamentoService";
 import DateTimeFields from "@/components/treinamentos/execucao/DateTimeFields";
+import CCASelector from "@/components/treinamentos/execucao/CCASelector";
+import ProcessoTipoFields from "@/components/treinamentos/execucao/ProcessoTipoFields";
+import TreinamentoSelector from "@/components/treinamentos/execucao/TreinamentoSelector";
+import CargaHorariaEfetivoFields from "@/components/treinamentos/execucao/CargaHorariaEfetivoFields";
+import ObservacoesAnexoFields from "@/components/treinamentos/execucao/ObservacoesAnexoFields";
 import { ArrowLeft, ArrowRight, Save, X } from "lucide-react";
-
-interface TreinamentoFormValues {
-  data: string;
-  carga_horaria: number;
-  cca_id: number;
-  efetivo_mod: number;
-  efetivo_moi: number;
-  horas_totais: number;
-  cca: string;
-  processo_treinamento: string;
-  tipo_treinamento: string;
-  treinamento_nome: string;
-  observacoes: string;
-  lista_presenca_url: string;
-}
 
 const TreinamentosExecucao = () => {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("data-horario");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const form = useForm<TreinamentoFormValues>({
-    defaultValues: {
-      data: "",
-      carga_horaria: 0,
-      cca_id: 0,
-      efetivo_mod: 0,
-      efetivo_moi: 0,
-      horas_totais: 0,
-      cca: "",
-      processo_treinamento: "",
-      tipo_treinamento: "",
-      treinamento_nome: "",
-      observacoes: "",
-      lista_presenca_url: "",
-    },
-  });
+  const {
+    form,
+    ccaOptions,
+    processoOptions,
+    tipoOptions,
+    treinamentoOptions,
+    calculateHorasTotais
+  } = useTreinamentoForm();
 
   const tabs = [
-    { id: "data-horario", label: "Data e Horário", component: DateTimeFields },
+    { id: "data-horario", label: "Data e CCA" },
+    { id: "processo-tipo", label: "Processo e Tipo" },
+    { id: "treinamento", label: "Treinamento" },
+    { id: "carga-efetivo", label: "Carga Horária e Efetivo" },
+    { id: "observacoes", label: "Observações e Anexos" },
   ];
 
   const currentTabIndex = tabs.findIndex(tab => tab.id === activeTab);
@@ -69,7 +57,37 @@ const TreinamentosExecucao = () => {
     
     try {
       const formData = form.getValues();
-      console.log("Dados do formulário:", formData);
+      const dataExecucao = new Date(formData.data);
+      
+      // Get selected CCA name
+      const selectedCCA = ccaOptions.find(cca => cca.id === Number(formData.cca_id));
+      const selectedProcesso = processoOptions.find(p => p.id === formData.processo_treinamento_id);
+      const selectedTipo = tipoOptions.find(t => t.id === formData.tipo_treinamento_id);
+      const selectedTreinamento = treinamentoOptions.find(t => t.id === formData.treinamento_id);
+
+      const execucaoData = {
+        data: formData.data,
+        mes: dataExecucao.getMonth() + 1,
+        ano: dataExecucao.getFullYear(),
+        cca: selectedCCA ? `${selectedCCA.codigo} - ${selectedCCA.nome}` : '',
+        cca_id: Number(formData.cca_id),
+        processo_treinamento: selectedProcesso?.nome || '',
+        processo_treinamento_id: formData.processo_treinamento_id,
+        tipo_treinamento: selectedTipo?.nome || '',
+        tipo_treinamento_id: formData.tipo_treinamento_id,
+        treinamento_id: formData.treinamento_id === 'outro' ? null : formData.treinamento_id,
+        treinamento_nome: formData.treinamento_id === 'outro' ? formData.treinamento_nome : selectedTreinamento?.nome,
+        carga_horaria: formData.carga_horaria,
+        efetivo_mod: formData.efetivo_mod,
+        efetivo_moi: formData.efetivo_moi,
+        horas_totais: calculateHorasTotais(),
+        observacoes: formData.observacoes,
+        lista_presenca_url: formData.lista_presenca_url
+      };
+
+      console.log("Salvando dados de execução:", execucaoData);
+      
+      await execucaoTreinamentoService.create(execucaoData);
       
       toast({
         title: "Treinamento salvo com sucesso!",
@@ -99,7 +117,27 @@ const TreinamentosExecucao = () => {
     });
   };
 
-  const CurrentTabComponent = tabs.find(tab => tab.id === activeTab)?.component;
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case "data-horario":
+        return (
+          <div className="space-y-6">
+            <DateTimeFields form={form} />
+            <CCASelector form={form} ccaOptions={ccaOptions} />
+          </div>
+        );
+      case "processo-tipo":
+        return <ProcessoTipoFields form={form} processoOptions={processoOptions} tipoOptions={tipoOptions} />;
+      case "treinamento":
+        return <TreinamentoSelector form={form} treinamentoOptions={treinamentoOptions} />;
+      case "carga-efetivo":
+        return <CargaHorariaEfetivoFields form={form} calculateHorasTotais={calculateHorasTotais} />;
+      case "observacoes":
+        return <ObservacoesAnexoFields form={form} />;
+      default:
+        return null;
+    }
+  };
 
   return (
     <div className="container mx-auto py-6 space-y-6">
@@ -112,7 +150,7 @@ const TreinamentosExecucao = () => {
           <Form {...form}>
             <form className="space-y-6">
               <Tabs value={activeTab} onValueChange={setActiveTab}>
-                <TabsList className="grid w-full grid-cols-1">
+                <TabsList className="grid w-full grid-cols-5">
                   {tabs.map((tab) => (
                     <TabsTrigger key={tab.id} value={tab.id} className="text-xs">
                       {tab.label}
@@ -120,11 +158,9 @@ const TreinamentosExecucao = () => {
                   ))}
                 </TabsList>
 
-                {tabs.map((tab) => (
-                  <TabsContent key={tab.id} value={tab.id} className="mt-6">
-                    {CurrentTabComponent && <CurrentTabComponent form={form} />}
-                  </TabsContent>
-                ))}
+                <TabsContent value={activeTab} className="mt-6">
+                  {renderTabContent()}
+                </TabsContent>
               </Tabs>
 
               <div className="flex justify-between items-center pt-6 border-t">

@@ -184,7 +184,7 @@ export const fetchTreinamentosPorProcesso = async () => {
   // Fetch training data grouped by processo
   const { data: treinamentosData } = await supabase
     .from('execucao_treinamentos')
-    .select('processo_treinamento, efetivo_mod, horas_totais')
+    .select('processo_treinamento, efetivo_mod, efetivo_moi, horas_totais')
     .eq('mes', currentMonth)
     .eq('ano', currentYear);
 
@@ -199,7 +199,8 @@ export const fetchTreinamentosPorProcesso = async () => {
       };
     }
     
-    const horasPorMOD = (item.horas_totais || 0) * (item.efetivo_mod || 0) / ((item.efetivo_mod || 0) + (item.efetivo_moi || 0));
+    const totalEfetivo = (item.efetivo_mod || 0) + (item.efetivo_moi || 0);
+    const horasPorMOD = totalEfetivo > 0 ? (item.horas_totais || 0) * (item.efetivo_mod || 0) / totalEfetivo : 0;
     acc[processo].horasMOD += horasPorMOD;
     acc[processo].totalHoras += item.horas_totais || 0;
     
