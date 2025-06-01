@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
@@ -7,7 +6,7 @@ import {
   TrendingUp, 
   Users
 } from "lucide-react";
-import { fetchTreinamentosStats } from "@/services/treinamentosDashboardService";
+import { fetchTreinamentosStats } from "@/services/treinamentos/treinamentosStatsService";
 
 export const TreinamentosSummaryCards = () => {
   const [loading, setLoading] = useState(true);
