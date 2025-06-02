@@ -33,9 +33,11 @@ const AdminUsuarios = () => {
     deleteUsuarioMutation
   } = useUsuarios();
 
-  // Update filtered users when usuarios data changes
+  // Update filtered users when usuarios data changes - usando useMemo para evitar loop
   useEffect(() => {
-    setFilteredUsers(usuarios);
+    if (usuarios && usuarios.length >= 0) { // Verificação mais específica
+      setFilteredUsers(usuarios);
+    }
   }, [usuarios]);
 
   const onSearchSubmit = (data: SearchFormValues) => {

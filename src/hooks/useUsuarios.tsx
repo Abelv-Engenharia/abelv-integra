@@ -36,13 +36,16 @@ export const useUsuarios = () => {
         throw error;
       }
     },
-    retry: false // Não tentar novamente em caso de erro de permissão
+    retry: false, // Não tentar novamente em caso de erro de permissão
+    staleTime: 5 * 60 * 1000, // Cache por 5 minutos
+    refetchOnWindowFocus: false // Não refetch automaticamente
   });
 
   // Buscar perfis
   const { data: profiles = [] } = useQuery({
     queryKey: ['profiles'],
-    queryFn: fetchProfiles
+    queryFn: fetchProfiles,
+    staleTime: 10 * 60 * 1000 // Cache por 10 minutos
   });
 
   // Mutation para criar usuário

@@ -1,6 +1,7 @@
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect } from "react";
 import {
   Form,
   FormField,
@@ -55,19 +56,22 @@ export const CreateUserDialog = ({
   
   const handleSubmit = (data: AuthUserCreateValues) => {
     onSubmit(data);
-    // Don't reset the form here as we'll only reset after successful submission
   };
   
-  // Reset form when dialog is closed
-  const handleOpenChange = (open: boolean) => {
+  // Reset form when dialog state changes
+  useEffect(() => {
     if (!open) {
-      userForm.reset();
+      userForm.reset({
+        nome: "",
+        email: "",
+        password: "",
+        perfil: "",
+      });
     }
-    onOpenChange(open);
-  };
+  }, [open, userForm]);
 
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Criar Novo Usuário</DialogTitle>
@@ -124,7 +128,7 @@ export const CreateUserDialog = ({
                   <FormLabel>Perfil de Acesso</FormLabel>
                   <Select 
                     onValueChange={field.onChange} 
-                    defaultValue={field.value}
+                    value={field.value}
                   >
                     <FormControl>
                       <SelectTrigger>
