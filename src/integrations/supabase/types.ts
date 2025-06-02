@@ -81,62 +81,6 @@ export type Database = {
         }
         Relationships: []
       }
-      desvios: {
-        Row: {
-          acao_imediata: string | null
-          classificacao: string
-          created_at: string | null
-          data: string
-          descricao: string
-          id: string
-          imagem_url: string | null
-          local: string
-          prazo: string | null
-          responsavel_id: string | null
-          status: string
-          tipo: string
-          updated_at: string | null
-        }
-        Insert: {
-          acao_imediata?: string | null
-          classificacao: string
-          created_at?: string | null
-          data?: string
-          descricao: string
-          id?: string
-          imagem_url?: string | null
-          local: string
-          prazo?: string | null
-          responsavel_id?: string | null
-          status: string
-          tipo: string
-          updated_at?: string | null
-        }
-        Update: {
-          acao_imediata?: string | null
-          classificacao?: string
-          created_at?: string | null
-          data?: string
-          descricao?: string
-          id?: string
-          imagem_url?: string | null
-          local?: string
-          prazo?: string | null
-          responsavel_id?: string | null
-          status?: string
-          tipo?: string
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "desvios_responsavel_id_fkey"
-            columns: ["responsavel_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       desvios_completos: {
         Row: {
           acao_imediata: string | null
@@ -360,27 +304,39 @@ export type Database = {
       empresas: {
         Row: {
           ativo: boolean | null
+          cca_id: number | null
           cnpj: string
           id: number
           nome: string
         }
         Insert: {
           ativo?: boolean | null
+          cca_id?: number | null
           cnpj: string
           id?: number
           nome: string
         }
         Update: {
           ativo?: boolean | null
+          cca_id?: number | null
           cnpj?: string
           id?: number
           nome?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "empresas_cca_id_fkey"
+            columns: ["cca_id"]
+            isOneToOne: false
+            referencedRelation: "ccas"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       encarregados: {
         Row: {
           ativo: boolean | null
+          cca_id: number | null
           email: string | null
           funcao: string
           id: string
@@ -389,6 +345,7 @@ export type Database = {
         }
         Insert: {
           ativo?: boolean | null
+          cca_id?: number | null
           email?: string | null
           funcao: string
           id?: string
@@ -397,17 +354,27 @@ export type Database = {
         }
         Update: {
           ativo?: boolean | null
+          cca_id?: number | null
           email?: string | null
           funcao?: string
           id?: string
           matricula?: string | null
           nome?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "encarregados_cca_id_fkey"
+            columns: ["cca_id"]
+            isOneToOne: false
+            referencedRelation: "ccas"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       engenheiros: {
         Row: {
           ativo: boolean | null
+          cca_id: number | null
           email: string | null
           funcao: string
           id: string
@@ -416,6 +383,7 @@ export type Database = {
         }
         Insert: {
           ativo?: boolean | null
+          cca_id?: number | null
           email?: string | null
           funcao: string
           id?: string
@@ -424,13 +392,22 @@ export type Database = {
         }
         Update: {
           ativo?: boolean | null
+          cca_id?: number | null
           email?: string | null
           funcao?: string
           id?: string
           matricula?: string | null
           nome?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "engenheiros_cca_id_fkey"
+            columns: ["cca_id"]
+            isOneToOne: false
+            referencedRelation: "ccas"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       eventos_identificados: {
         Row: {
@@ -557,6 +534,7 @@ export type Database = {
       funcionarios: {
         Row: {
           ativo: boolean | null
+          cca_id: number | null
           created_at: string | null
           foto: string | null
           funcao: string
@@ -567,6 +545,7 @@ export type Database = {
         }
         Insert: {
           ativo?: boolean | null
+          cca_id?: number | null
           created_at?: string | null
           foto?: string | null
           funcao: string
@@ -577,6 +556,7 @@ export type Database = {
         }
         Update: {
           ativo?: boolean | null
+          cca_id?: number | null
           created_at?: string | null
           foto?: string | null
           funcao?: string
@@ -585,7 +565,15 @@ export type Database = {
           nome?: string
           updated_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "funcionarios_cca_id_fkey"
+            columns: ["cca_id"]
+            isOneToOne: false
+            referencedRelation: "ccas"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       horas_trabalhadas: {
         Row: {
@@ -845,6 +833,7 @@ export type Database = {
       supervisores: {
         Row: {
           ativo: boolean | null
+          cca_id: number | null
           email: string | null
           funcao: string
           id: string
@@ -853,6 +842,7 @@ export type Database = {
         }
         Insert: {
           ativo?: boolean | null
+          cca_id?: number | null
           email?: string | null
           funcao: string
           id?: string
@@ -861,13 +851,22 @@ export type Database = {
         }
         Update: {
           ativo?: boolean | null
+          cca_id?: number | null
           email?: string | null
           funcao?: string
           id?: string
           matricula?: string | null
           nome?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "supervisores_cca_id_fkey"
+            columns: ["cca_id"]
+            isOneToOne: false
+            referencedRelation: "ccas"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       tarefas: {
         Row: {

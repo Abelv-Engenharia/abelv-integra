@@ -42,8 +42,22 @@ export const useFormData = () => {
   });
 
   const { data: empresas = [] } = useQuery({
-    queryKey: ['empresas'],
-    queryFn: fetchEmpresas,
+    queryKey: ['empresas-with-cca'],
+    queryFn: async () => {
+      const { data } = await import("@/integrations/supabase/client").then(m => m.supabase)
+        .from('empresas')
+        .select(`
+          id,
+          nome,
+          cnpj,
+          ativo,
+          cca_id,
+          ccas:cca_id(id, codigo, nome)
+        `)
+        .eq('ativo', true)
+        .order('nome');
+      return data || [];
+    },
   });
 
   const { data: disciplinas = [] } = useQuery({
@@ -52,8 +66,24 @@ export const useFormData = () => {
   });
 
   const { data: engenheiros = [] } = useQuery({
-    queryKey: ['engenheiros'],
-    queryFn: fetchEngenheiros,
+    queryKey: ['engenheiros-with-cca'],
+    queryFn: async () => {
+      const { data } = await import("@/integrations/supabase/client").then(m => m.supabase)
+        .from('engenheiros')
+        .select(`
+          id,
+          nome,
+          funcao,
+          matricula,
+          email,
+          ativo,
+          cca_id,
+          ccas:cca_id(id, codigo, nome)
+        `)
+        .eq('ativo', true)
+        .order('nome');
+      return data || [];
+    },
   });
 
   const { data: baseLegalOpcoes = [] } = useQuery({
@@ -62,18 +92,66 @@ export const useFormData = () => {
   });
 
   const { data: supervisores = [] } = useQuery({
-    queryKey: ['supervisores'],
-    queryFn: fetchSupervisores,
+    queryKey: ['supervisores-with-cca'],
+    queryFn: async () => {
+      const { data } = await import("@/integrations/supabase/client").then(m => m.supabase)
+        .from('supervisores')
+        .select(`
+          id,
+          nome,
+          funcao,
+          matricula,
+          email,
+          ativo,
+          cca_id,
+          ccas:cca_id(id, codigo, nome)
+        `)
+        .eq('ativo', true)
+        .order('nome');
+      return data || [];
+    },
   });
 
   const { data: encarregados = [] } = useQuery({
-    queryKey: ['encarregados'],
-    queryFn: fetchEncarregados,
+    queryKey: ['encarregados-with-cca'],
+    queryFn: async () => {
+      const { data } = await import("@/integrations/supabase/client").then(m => m.supabase)
+        .from('encarregados')
+        .select(`
+          id,
+          nome,
+          funcao,
+          matricula,
+          email,
+          ativo,
+          cca_id,
+          ccas:cca_id(id, codigo, nome)
+        `)
+        .eq('ativo', true)
+        .order('nome');
+      return data || [];
+    },
   });
 
   const { data: funcionarios = [] } = useQuery({
-    queryKey: ['funcionarios'],
-    queryFn: fetchFuncionarios,
+    queryKey: ['funcionarios-with-cca'],
+    queryFn: async () => {
+      const { data } = await import("@/integrations/supabase/client").then(m => m.supabase)
+        .from('funcionarios')
+        .select(`
+          id,
+          nome,
+          funcao,
+          matricula,
+          foto,
+          ativo,
+          cca_id,
+          ccas:cca_id(id, codigo, nome)
+        `)
+        .eq('ativo', true)
+        .order('nome');
+      return data || [];
+    },
   });
 
   return {
