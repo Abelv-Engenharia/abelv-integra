@@ -1,41 +1,130 @@
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useState } from "react";
-import { useToast } from "@/hooks/use-toast";
+import { useProfile, UserProfile } from "@/hooks/useProfile";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Profile = () => {
-  const { toast } = useToast();
-  const [user, setUser] = useState({
-    name: "John Doe",
-    email: "john.doe@empresa.com",
-    role: "Administrador",
-    department: "Segurança",
-    phone: "(11) 99999-9999"
-  });
-  
+  const { user } = useAuth();
+  const { profile, userRole, loadingProfile, updateProfileMutation } = useProfile();
   const [isEditing, setIsEditing] = useState(false);
-  const [formData, setFormData] = useState({ ...user });
+  const [formData, setFormData] = useState<Partial<UserProfile>>({});
+
+  // Atualizar formData quando o perfil carrega
+  React.useEffect(() => {
+    if (profile) {
+      setFormData({
+        nome: profile.nome || '',
+        email: profile.email || '',
+        cargo: profile.cargo || '',
+        departamento: profile.departamento || ''
+      });
+    }
+  }, [profile]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
+    setFormData(prev => ({
+      ...prev,
       [name]: value
-    });
+    }));
   };
 
   const handleSave = () => {
-    setUser(formData);
+    updateProfileMutation.mutate(formData);
     setIsEditing(false);
-    toast({
-      title: "Perfil atualizado",
-      description: "Suas informações foram atualizadas com sucesso"
-    });
   };
+
+  const handleCancel = () => {
+    if (profile) {
+      setFormData({
+        nome: profile.nome || '',
+        email: profile.email || '',
+        cargo: profile.cargo || '',
+        departamento: profile.departamento || ''
+      });
+    }
+    setIsEditing(false);
+  };
+
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(n => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
+  if (loadingProfile) {
+    return (
+      <div className="container mx-auto py-6">
+        <h1 className="text-2xl font-bold mb-6">Meu Perfil</h1>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Card className="md:col-span-1">
+            <CardHeader>
+              <CardTitle>Informações Pessoais</CardTitle>
+              <CardDescription>Visualize e edite suas informações pessoais</CardDescription>
+            </CardHeader>
+            <CardContent className="flex flex-col items-center pt-6">
+              <Skeleton className="h-24 w-24 rounded-full mb-4" />
+              <Skeleton className="h-6 w-32 mb-2" />
+              <Skeleton className="h-4 w-24 mb-2" />
+              <Skeleton className="h-4 w-28 mb-4" />
+              
+              <Separator className="my-4" />
+              
+              <div className="w-full space-y-2">
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-full" />
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card className="md:col-span-2">
+            <CardHeader>
+              <CardTitle>Editar Perfil</CardTitle>
+              <CardDescription>Atualize suas informações pessoais</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Skeleton className="h-10 w-full" />
+                  <Skeleton className="h-10 w-full" />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Skeleton className="h-10 w-full" />
+                  <Skeleton className="h-10 w-full" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
+  if (!profile) {
+    return (
+      <div className="container mx-auto py-6">
+        <h1 className="text-2xl font-bold mb-6">Meu Perfil</h1>
+        <Card>
+          <CardContent className="pt-6">
+            <p className="text-center text-muted-foreground">
+              Não foi possível carregar as informações do perfil.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto py-6">
@@ -49,25 +138,25 @@ const Profile = () => {
           </CardHeader>
           <CardContent className="flex flex-col items-center pt-6">
             <Avatar className="h-24 w-24 mb-4">
-              <AvatarImage src="" />
+              <AvatarImage src={profile.avatar_url} alt={profile.nome} />
               <AvatarFallback className="text-2xl bg-primary text-primary-foreground">
-                {user.name.split(' ').map(n => n[0]).join('')}
+                {getInitials(profile.nome)}
               </AvatarFallback>
             </Avatar>
-            <h3 className="text-lg font-medium">{user.name}</h3>
-            <p className="text-sm text-muted-foreground">{user.role}</p>
-            <p className="text-sm text-muted-foreground">{user.department}</p>
+            <h3 className="text-lg font-medium">{profile.nome}</h3>
+            <p className="text-sm text-muted-foreground">{userRole || 'Usuário'}</p>
+            <p className="text-sm text-muted-foreground">{profile.departamento || 'Departamento não informado'}</p>
             
             <Separator className="my-4" />
             
             <div className="w-full space-y-2">
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Email:</span>
-                <span>{user.email}</span>
+                <span className="truncate ml-2">{profile.email}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Telefone:</span>
-                <span>{user.phone}</span>
+                <span className="text-muted-foreground">Cargo:</span>
+                <span className="truncate ml-2">{profile.cargo || 'Não informado'}</span>
               </div>
             </div>
           </CardContent>
@@ -79,11 +168,14 @@ const Profile = () => {
               <CardTitle>Editar Perfil</CardTitle>
               {isEditing ? (
                 <div className="space-x-2">
-                  <Button variant="outline" onClick={() => setIsEditing(false)}>
+                  <Button variant="outline" onClick={handleCancel}>
                     Cancelar
                   </Button>
-                  <Button onClick={handleSave}>
-                    Salvar
+                  <Button 
+                    onClick={handleSave}
+                    disabled={updateProfileMutation.isPending}
+                  >
+                    {updateProfileMutation.isPending ? 'Salvando...' : 'Salvar'}
                   </Button>
                 </div>
               ) : (
@@ -98,11 +190,11 @@ const Profile = () => {
             <form className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="name">Nome Completo</Label>
+                  <Label htmlFor="nome">Nome Completo</Label>
                   <Input 
-                    id="name" 
-                    name="name" 
-                    value={formData.name}
+                    id="nome" 
+                    name="nome" 
+                    value={formData.nome || ''}
                     onChange={handleChange}
                     disabled={!isEditing}
                   />
@@ -112,7 +204,7 @@ const Profile = () => {
                   <Input 
                     id="email" 
                     name="email" 
-                    value={formData.email}
+                    value={formData.email || ''}
                     onChange={handleChange}
                     disabled={true}
                     readOnly
@@ -122,21 +214,21 @@ const Profile = () => {
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="department">Departamento</Label>
+                  <Label htmlFor="departamento">Departamento</Label>
                   <Input 
-                    id="department" 
-                    name="department" 
-                    value={formData.department}
+                    id="departamento" 
+                    name="departamento" 
+                    value={formData.departamento || ''}
                     onChange={handleChange}
                     disabled={!isEditing}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="phone">Telefone</Label>
+                  <Label htmlFor="cargo">Cargo</Label>
                   <Input 
-                    id="phone" 
-                    name="phone" 
-                    value={formData.phone}
+                    id="cargo" 
+                    name="cargo" 
+                    value={formData.cargo || ''}
                     onChange={handleChange}
                     disabled={!isEditing}
                   />
@@ -144,13 +236,13 @@ const Profile = () => {
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="role">Cargo</Label>
+                <Label htmlFor="role">Perfil de Acesso</Label>
                 <Input 
                   id="role" 
                   name="role" 
-                  value={formData.role}
-                  onChange={handleChange}
-                  disabled={!isEditing}
+                  value={userRole || 'Usuário'}
+                  disabled={true}
+                  readOnly
                 />
               </div>
             </form>
