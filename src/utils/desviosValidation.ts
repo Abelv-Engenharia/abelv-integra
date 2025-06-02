@@ -14,7 +14,7 @@ export const validateRequiredFields = (formData: DesvioFormData): { isValid: boo
     'empresa',
     'disciplina',
     'engenheiroResponsavel',
-    'descricao',
+    'descricaoDesvio', // Corrigido: era 'descricao', agora é 'descricaoDesvio'
     'baseLegal',
     'supervisorResponsavel',
     'encarregadoResponsavel',
@@ -56,7 +56,7 @@ export const getFieldDisplayNames = (): Record<string, string> => ({
   empresa: 'Empresa',
   disciplina: 'Disciplina',
   engenheiroResponsavel: 'Engenheiro Responsável',
-  descricao: 'Descrição',
+  descricaoDesvio: 'Descrição do Desvio', // Corrigido: era 'descricao', agora é 'descricaoDesvio'
   baseLegal: 'Base Legal',
   supervisorResponsavel: 'Supervisor Responsável',
   encarregadoResponsavel: 'Encarregado Responsável',

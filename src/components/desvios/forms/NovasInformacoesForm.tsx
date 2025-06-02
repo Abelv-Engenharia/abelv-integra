@@ -79,7 +79,7 @@ const NovasInformacoesForm = ({ context }: NovasInformacoesFormProps) => {
                 <SelectContent>
                   {baseLegalOpcoes.map((opcao) => (
                     <SelectItem key={opcao.id} value={opcao.id.toString()}>
-                      {opcao.codigo} - {opcao.nome}
+                      {opcao.nome}
                     </SelectItem>
                   ))}
                 </SelectContent>
