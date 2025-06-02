@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import {
   BarChart3,
@@ -11,6 +12,9 @@ import {
   Shield,
   ShieldAlert,
   Users,
+  Building,
+  UserCheck,
+  UserCog,
 } from "lucide-react";
 import {
   Sidebar,
@@ -438,6 +442,33 @@ export function AppSidebar() {
                         <SidebarMenuButton asChild>
                           <Link to="/admin/perfis">
                             <span>Perfis de Acesso</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                      
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                          <Link to="/admin/empresas">
+                            <Building className="h-4 w-4 mr-2" />
+                            <span>Cadastro de Empresas</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                      
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                          <Link to="/admin/engenheiros">
+                            <UserCog className="h-4 w-4 mr-2" />
+                            <span>Cadastro de Engenheiros</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                      
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                          <Link to="/admin/supervisores">
+                            <UserCheck className="h-4 w-4 mr-2" />
+                            <span>Cadastro de Supervisores</span>
                           </Link>
                         </SidebarMenuButton>
                       </SidebarMenuItem>
