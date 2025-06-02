@@ -76,8 +76,8 @@ export const useUsuarios = () => {
           return null;
         }
 
-        // Fazer cast para o tipo correto de permissões
-        return data?.perfis?.permissoes as Permissoes || null;
+        // Fazer cast duplo para o tipo correto de permissões
+        return (data?.perfis?.permissoes as unknown) as Permissoes || null;
       } catch (error) {
         console.error("Erro ao verificar permissões:", error);
         return null;
@@ -88,7 +88,7 @@ export const useUsuarios = () => {
   });
 
   // Verificar se o usuário pode administrar usuários
-  const canManageUsers = (userPermissions as Permissoes)?.admin_usuarios === true;
+  const canManageUsers = ((userPermissions as unknown) as Permissoes)?.admin_usuarios === true;
 
   // Mutation para criar usuário
   const createUsuarioMutation = useMutation({

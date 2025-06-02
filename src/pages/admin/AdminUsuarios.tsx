@@ -101,8 +101,8 @@ const AdminUsuarios = () => {
     usersError instanceof Error && 
     usersError.message.includes('User not allowed'));
 
-  // Cast userPermissions para o tipo correto
-  const permissions = userPermissions as Permissoes;
+  // Cast userPermissions para o tipo correto usando cast duplo
+  const permissions = (userPermissions as unknown) as Permissoes;
 
   return (
     <div className="space-y-6">
