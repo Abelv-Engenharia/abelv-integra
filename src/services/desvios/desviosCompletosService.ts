@@ -137,6 +137,8 @@ export const desviosCompletosService = {
 
   async update(id: string, updates: Partial<DesvioCompleto>): Promise<DesvioCompleto | null> {
     try {
+      console.log('Atualizando desvio com ID:', id, 'Updates:', updates);
+      
       const { data, error } = await supabase
         .from('desvios_completos')
         .update(updates)
@@ -162,19 +164,22 @@ export const desviosCompletosService = {
 
   async delete(id: string): Promise<boolean> {
     try {
+      console.log('Excluindo desvio da tabela desvios_completos com ID:', id);
+      
       const { error } = await supabase
         .from('desvios_completos')
         .delete()
         .eq('id', id);
       
       if (error) {
-        console.error('Erro ao excluir desvio:', error);
+        console.error('Erro ao excluir desvio da tabela desvios_completos:', error);
         return false;
       }
       
+      console.log('Desvio excluído com sucesso da tabela desvios_completos');
       return true;
     } catch (error) {
-      console.error('Exceção ao excluir desvio:', error);
+      console.error('Exceção ao excluir desvio da tabela desvios_completos:', error);
       return false;
     }
   }
