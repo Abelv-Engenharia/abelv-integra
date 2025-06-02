@@ -22,7 +22,7 @@ export const transformFormDataToDesvio = (formData: DesvioFormData) => {
     evento_identificado_id: formData.eventoIdentificado ? parseInt(formData.eventoIdentificado) : null,
     causa_provavel_id: formData.causaProvavel ? parseInt(formData.causaProvavel) : null,
     disciplina_id: formData.disciplina ? parseInt(formData.disciplina) : null,
-    descricao_desvio: formData.descricao.toUpperCase(),
+    descricao_desvio: formData.descricaoDesvio.toUpperCase(),
     acao_imediata: formData.tratativaAplicada.toUpperCase(),
     situacao: formData.situacao,
     exposicao: formData.exposicao ? parseInt(formData.exposicao) : null,
