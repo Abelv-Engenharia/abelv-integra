@@ -10,10 +10,12 @@ import {
   updateUserRole 
 } from "@/services/authAdminService";
 import { fetchProfiles } from "@/services/usuariosService";
+import { useAuth } from "@/contexts/AuthContext";
 
 export const useUsuarios = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { user } = useAuth();
 
   // Buscar usuários com tratamento de erro melhorado
   const { 
@@ -36,25 +38,68 @@ export const useUsuarios = () => {
         throw error;
       }
     },
-    retry: false, // Não tentar novamente em caso de erro de permissão
-    staleTime: 5 * 60 * 1000, // Cache por 5 minutos
-    refetchOnWindowFocus: false // Não refetch automaticamente
+    enabled: !!user, // Só executar se o usuário estiver logado
+    retry: false,
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false
   });
 
   // Buscar perfis
   const { data: profiles = [] } = useQuery({
     queryKey: ['profiles'],
     queryFn: fetchProfiles,
-    staleTime: 10 * 60 * 1000 // Cache por 10 minutos
+    staleTime: 10 * 60 * 1000
   });
+
+  // Verificar se o usuário tem permissões de administrador
+  const { data: userPermissions } = useQuery({
+    queryKey: ['user-permissions', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return null;
+      
+      try {
+        // Buscar o perfil do usuário atual para verificar permissões
+        const { data, error } = await import("@/integrations/supabase/client").then(({ supabase }) =>
+          supabase
+            .from('usuario_perfis')
+            .select(`
+              perfil_id,
+              perfis (
+                permissoes
+              )
+            `)
+            .eq('usuario_id', user.id)
+            .single()
+        );
+
+        if (error) {
+          console.error("Erro ao buscar permissões:", error);
+          return null;
+        }
+
+        return data?.perfis?.permissoes || null;
+      } catch (error) {
+        console.error("Erro ao verificar permissões:", error);
+        return null;
+      }
+    },
+    enabled: !!user?.id,
+    staleTime: 5 * 60 * 1000
+  });
+
+  // Verificar se o usuário pode administrar usuários
+  const canManageUsers = userPermissions?.admin_usuarios === true;
 
   // Mutation para criar usuário
   const createUsuarioMutation = useMutation({
     mutationFn: async (userData: AuthUserCreateValues) => {
+      if (!canManageUsers) {
+        throw new Error("Você não tem permissão para criar usuários");
+      }
+
       try {
         console.log("Criando usuário:", userData);
         
-        // Step 1: Create the Supabase auth user
         const authUserData = await createAuthUser(
           userData.email, 
           userData.password, 
@@ -65,7 +110,6 @@ export const useUsuarios = () => {
           throw new Error("Falha ao criar usuário: ID não retornado");
         }
         
-        // Step 2: Assign the selected profile/role to the user
         const perfilId = parseInt(userData.perfil);
         await updateUserRole(authUserData.user.id, perfilId);
         
@@ -96,12 +140,15 @@ export const useUsuarios = () => {
   // Mutation para atualizar usuário
   const updateUsuarioMutation = useMutation({
     mutationFn: async ({ userId, userData }: { userId: string; userData: UserFormValues }) => {
+      if (!canManageUsers) {
+        throw new Error("Você não tem permissão para editar usuários");
+      }
+
       await updateUser(userId, {
         user_metadata: { nome: userData.nome },
         email: userData.email
       });
       
-      // Update user role if profile changed
       const profileId = profiles.find(p => p.nome === userData.perfil)?.id;
       if (profileId) {
         await updateUserRole(userId, profileId);
@@ -126,6 +173,10 @@ export const useUsuarios = () => {
   // Mutation para deletar usuário
   const deleteUsuarioMutation = useMutation({
     mutationFn: async (userId: string) => {
+      if (!canManageUsers) {
+        throw new Error("Você não tem permissão para excluir usuários");
+      }
+      
       await deleteUser(userId);
     },
     onSuccess: () => {
@@ -150,6 +201,8 @@ export const useUsuarios = () => {
     profiles,
     loadingUsuarios,
     usersError,
+    canManageUsers,
+    userPermissions,
     createUsuarioMutation,
     updateUsuarioMutation,
     deleteUsuarioMutation,

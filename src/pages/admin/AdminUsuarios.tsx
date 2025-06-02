@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, UserPlus, AlertCircle } from "lucide-react";
+import { ArrowLeft, UserPlus, AlertCircle, Lock } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -28,14 +28,16 @@ const AdminUsuarios = () => {
     profiles,
     loadingUsuarios,
     usersError,
+    canManageUsers,
+    userPermissions,
     createUsuarioMutation,
     updateUsuarioMutation,
     deleteUsuarioMutation
   } = useUsuarios();
 
-  // Update filtered users when usuarios data changes - usando useMemo para evitar loop
+  // Update filtered users when usuarios data changes
   useEffect(() => {
-    if (usuarios && usuarios.length >= 0) { // Verificação mais específica
+    if (usuarios && usuarios.length >= 0) {
       setFilteredUsers(usuarios);
     }
   }, [usuarios]);
@@ -95,10 +97,10 @@ const AdminUsuarios = () => {
     setIsCreateDialogOpen(true);
   };
 
-  // Show error alert if there's a permission error
-  const showPermissionError = usersError && 
+  // Show permission error if user doesn't have admin_usuarios permission
+  const showPermissionError = !canManageUsers || (usersError && 
     usersError instanceof Error && 
-    usersError.message.includes('User not allowed');
+    usersError.message.includes('User not allowed'));
 
   return (
     <div className="space-y-6">
@@ -120,9 +122,20 @@ const AdminUsuarios = () => {
 
       {showPermissionError && (
         <Alert variant="destructive">
+          <Lock className="h-4 w-4" />
+          <AlertDescription>
+            Você não tem permissão para gerenciar usuários. Entre em contato com o administrador do sistema para obter as permissões necessárias.
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {!canManageUsers && userPermissions && (
+        <Alert>
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
-            Você não tem permissão para gerenciar usuários. Entre em contato com o administrador do sistema.
+            Suas permissões atuais não incluem administração de usuários. 
+            {userPermissions.admin_perfis ? " Você pode gerenciar perfis." : ""}
+            {userPermissions.admin_funcionarios ? " Você pode gerenciar funcionários." : ""}
           </AlertDescription>
         </Alert>
       )}
@@ -134,7 +147,7 @@ const AdminUsuarios = () => {
             <Button 
               size="sm" 
               onClick={handleCreateClick}
-              disabled={showPermissionError}
+              disabled={!canManageUsers}
             >
               <UserPlus className="mr-2 h-4 w-4" />
               Novo Usuário
@@ -159,7 +172,7 @@ const AdminUsuarios = () => {
 
       {/* Dialogs */}
       <CreateUserDialog
-        open={isCreateDialogOpen}
+        open={isCreateDialogOpen && canManageUsers}
         onOpenChange={setIsCreateDialogOpen}
         profiles={profiles}
         onSubmit={onAuthUserSubmit}
@@ -167,7 +180,7 @@ const AdminUsuarios = () => {
       />
 
       <EditUserDialog
-        open={isEditDialogOpen}
+        open={isEditDialogOpen && canManageUsers}
         onOpenChange={setIsEditDialogOpen}
         profiles={profiles}
         selectedUser={selectedUser}
@@ -175,7 +188,7 @@ const AdminUsuarios = () => {
       />
 
       <DeleteUserDialog
-        open={isDeleteDialogOpen}
+        open={isDeleteDialogOpen && canManageUsers}
         onOpenChange={setIsDeleteDialogOpen}
         selectedUser={selectedUser}
         onConfirm={handleDeleteUser}
