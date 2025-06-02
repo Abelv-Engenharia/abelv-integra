@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -35,6 +36,7 @@ const CadastroFuncionarios = () => {
   const [editingFuncionario, setEditingFuncionario] = useState<Funcionario | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [photoRemoved, setPhotoRemoved] = useState(false);
   const [formData, setFormData] = useState({
     nome: "",
     funcao: "",
@@ -117,8 +119,12 @@ const CadastroFuncionarios = () => {
         // Atualizar funcionário
         let fotoUrl = editingFuncionario.foto;
         
+        // Se a foto foi removida, definir como null
+        if (photoRemoved) {
+          fotoUrl = null;
+        }
         // Se há uma nova foto, fazer upload
-        if (photoFile) {
+        else if (photoFile) {
           const uploadedUrl = await uploadFoto(photoFile, editingFuncionario.id);
           if (uploadedUrl) {
             fotoUrl = uploadedUrl;
@@ -210,6 +216,7 @@ const CadastroFuncionarios = () => {
     setEditingFuncionario(null);
     setPhotoPreview(null);
     setPhotoFile(null);
+    setPhotoRemoved(false);
   };
 
   const handleEdit = (funcionario: Funcionario) => {
@@ -221,6 +228,7 @@ const CadastroFuncionarios = () => {
       cca_id: funcionario.cca_id?.toString() || "none"
     });
     setPhotoPreview(funcionario.foto || null);
+    setPhotoRemoved(false);
     setIsDialogOpen(true);
   };
 
@@ -253,12 +261,19 @@ const CadastroFuncionarios = () => {
       }
 
       setPhotoFile(file);
+      setPhotoRemoved(false);
       const reader = new FileReader();
       reader.onloadend = () => {
         setPhotoPreview(reader.result as string);
       };
       reader.readAsDataURL(file);
     }
+  };
+
+  const handleRemovePhoto = () => {
+    setPhotoPreview(null);
+    setPhotoFile(null);
+    setPhotoRemoved(true);
   };
 
   return (
@@ -302,14 +317,11 @@ const CadastroFuncionarios = () => {
                     className="hidden"
                     onChange={handlePhotoChange}
                   />
-                  {photoPreview && (
+                  {(photoPreview || editingFuncionario?.foto) && !photoRemoved && (
                     <Button
                       type="button"
                       variant="outline"
-                      onClick={() => {
-                        setPhotoPreview(null);
-                        setPhotoFile(null);
-                      }}
+                      onClick={handleRemovePhoto}
                     >
                       Remover
                     </Button>
