@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -79,6 +78,36 @@ const CadastroFuncionarios = () => {
     }
   });
 
+  // Upload de foto para o storage
+  const uploadFoto = async (file: File, funcionarioId: string): Promise<string | null> => {
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${funcionarioId}.${fileExt}`;
+      const filePath = `funcionarios/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('funcionarios-fotos')
+        .upload(filePath, file, { 
+          upsert: true // Permite substituir a foto existente
+        });
+
+      if (uploadError) {
+        console.error('Erro no upload:', uploadError);
+        throw uploadError;
+      }
+
+      // Obter URL pública da imagem
+      const { data: publicData } = supabase.storage
+        .from('funcionarios-fotos')
+        .getPublicUrl(filePath);
+
+      return publicData.publicUrl;
+    } catch (error) {
+      console.error('Erro ao fazer upload da foto:', error);
+      return null;
+    }
+  };
+
   // Mutation para criar/editar funcionário
   const createFuncionarioMutation = useMutation({
     mutationFn: async (funcionario: { nome: string; funcao: string; matricula: string; cca_id: string }) => {
@@ -86,29 +115,57 @@ const CadastroFuncionarios = () => {
       
       if (editingFuncionario) {
         // Atualizar funcionário
+        let fotoUrl = editingFuncionario.foto;
+        
+        // Se há uma nova foto, fazer upload
+        if (photoFile) {
+          const uploadedUrl = await uploadFoto(photoFile, editingFuncionario.id);
+          if (uploadedUrl) {
+            fotoUrl = uploadedUrl;
+          }
+        }
+
         const { error: updateError } = await supabase
           .from('funcionarios')
           .update({ 
             nome: funcionario.nome, 
             funcao: funcionario.funcao,
             matricula: funcionario.matricula,
-            cca_id: ccaId
+            cca_id: ccaId,
+            foto: fotoUrl
           })
           .eq('id', editingFuncionario.id);
         
         if (updateError) throw updateError;
       } else {
         // Criar novo funcionário
-        const { error: createError } = await supabase
+        const { data: novoFuncionario, error: createError } = await supabase
           .from('funcionarios')
           .insert({ 
             nome: funcionario.nome, 
             funcao: funcionario.funcao,
             matricula: funcionario.matricula,
             cca_id: ccaId
-          });
+          })
+          .select()
+          .single();
         
         if (createError) throw createError;
+
+        // Se há foto, fazer upload após criar o funcionário
+        if (photoFile && novoFuncionario) {
+          const uploadedUrl = await uploadFoto(photoFile, novoFuncionario.id);
+          if (uploadedUrl) {
+            const { error: updatePhotoError } = await supabase
+              .from('funcionarios')
+              .update({ foto: uploadedUrl })
+              .eq('id', novoFuncionario.id);
+            
+            if (updatePhotoError) {
+              console.error('Erro ao atualizar URL da foto:', updatePhotoError);
+            }
+          }
+        }
       }
     },
     onSuccess: () => {
@@ -175,6 +232,26 @@ const CadastroFuncionarios = () => {
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      // Validar tipo de arquivo
+      if (!file.type.startsWith('image/')) {
+        toast({
+          title: "Erro",
+          description: "Por favor, selecione apenas arquivos de imagem",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Validar tamanho do arquivo (máximo 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast({
+          title: "Erro",
+          description: "A imagem deve ter no máximo 5MB",
+          variant: "destructive",
+        });
+        return;
+      }
+
       setPhotoFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
