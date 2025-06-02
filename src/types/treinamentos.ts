@@ -85,6 +85,8 @@ export interface Funcionario {
 
 export interface TreinamentoFormValues {
   data: string;
+  ano: number;
+  mes: number;
   carga_horaria: number;
   cca_id: string;
   efetivo_mod: number;

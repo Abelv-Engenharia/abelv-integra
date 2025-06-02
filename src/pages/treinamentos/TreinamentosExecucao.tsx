@@ -43,8 +43,8 @@ const TreinamentosExecucao = () => {
 
       const execucaoData = {
         data: formData.data,
-        mes: dataExecucao.getMonth() + 1,
-        ano: dataExecucao.getFullYear(),
+        mes: formData.mes,
+        ano: formData.ano,
         cca: selectedCCA ? `${selectedCCA.codigo} - ${selectedCCA.nome}` : '',
         cca_id: Number(formData.cca_id),
         processo_treinamento: selectedProcesso?.nome || '',
@@ -101,36 +101,12 @@ const TreinamentosExecucao = () => {
         <CardContent className="p-6">
           <Form {...form}>
             <form className="space-y-6">
-              {/* Data e CCA */}
-              <div className="space-y-6">
-                <h2 className="text-xl font-semibold border-b pb-2">Data e CCA</h2>
-                <DateTimeFields form={form} />
-                <CCASelector form={form} ccaOptions={ccaOptions} />
-              </div>
-
-              {/* Processo e Tipo */}
-              <div className="space-y-6">
-                <h2 className="text-xl font-semibold border-b pb-2">Processo e Tipo de Treinamento</h2>
-                <ProcessoTipoFields form={form} processoOptions={processoOptions} tipoOptions={tipoOptions} />
-              </div>
-
-              {/* Treinamento */}
-              <div className="space-y-6">
-                <h2 className="text-xl font-semibold border-b pb-2">Treinamento</h2>
-                <TreinamentoSelector form={form} treinamentoOptions={treinamentoOptions} />
-              </div>
-
-              {/* Carga Horária e Efetivo */}
-              <div className="space-y-6">
-                <h2 className="text-xl font-semibold border-b pb-2">Carga Horária e Efetivo</h2>
-                <CargaHorariaEfetivoFields form={form} calculateHorasTotais={calculateHorasTotais} />
-              </div>
-
-              {/* Observações e Anexos */}
-              <div className="space-y-6">
-                <h2 className="text-xl font-semibold border-b pb-2">Observações e Anexos</h2>
-                <ObservacoesAnexoFields form={form} />
-              </div>
+              <DateTimeFields form={form} />
+              <CCASelector form={form} ccaOptions={ccaOptions} />
+              <ProcessoTipoFields form={form} processoOptions={processoOptions} tipoOptions={tipoOptions} />
+              <TreinamentoSelector form={form} treinamentoOptions={treinamentoOptions} />
+              <CargaHorariaEfetivoFields form={form} calculateHorasTotais={calculateHorasTotais} />
+              <ObservacoesAnexoFields form={form} />
 
               {/* Botões de ação */}
               <div className="flex justify-end gap-2 pt-6 border-t">

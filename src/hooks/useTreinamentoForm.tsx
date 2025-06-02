@@ -16,6 +16,8 @@ export const useTreinamentoForm = () => {
   const form = useForm<TreinamentoFormValues>({
     defaultValues: {
       data: "",
+      ano: 0,
+      mes: 0,
       carga_horaria: 0,
       cca_id: "",
       efetivo_mod: 0,
