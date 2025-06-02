@@ -47,13 +47,14 @@ const NovasInformacoesForm = ({ context }: NovasInformacoesFormProps) => {
       <CardContent className="space-y-6">
         <FormField
           control={control}
-          name="local"
+          name="descricaoDesvio"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Local*</FormLabel>
+              <FormLabel>Descrição do Desvio*</FormLabel>
               <FormControl>
-                <Input 
-                  placeholder="Local onde ocorreu o desvio" 
+                <Textarea 
+                  placeholder="Descreva o desvio identificado..."
+                  className="min-h-[100px]"
                   {...field}
                   onChange={(e) => field.onChange(e.target.value.toUpperCase())}
                 />
@@ -194,44 +195,6 @@ const NovasInformacoesForm = ({ context }: NovasInformacoesFormProps) => {
             )}
           />
         </div>
-
-        <FormField
-          control={control}
-          name="descricaoDesvio"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Descrição do Desvio*</FormLabel>
-              <FormControl>
-                <Textarea 
-                  placeholder="Descreva o desvio identificado..."
-                  className="min-h-[100px]"
-                  {...field}
-                  onChange={(e) => field.onChange(e.target.value.toUpperCase())}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={control}
-          name="acaoImediata"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Ação Imediata</FormLabel>
-              <FormControl>
-                <Textarea 
-                  placeholder="Descreva a ação imediata tomada..."
-                  className="min-h-[80px]"
-                  {...field}
-                  onChange={(e) => field.onChange(e.target.value.toUpperCase())}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
       </CardContent>
     </Card>
   );
