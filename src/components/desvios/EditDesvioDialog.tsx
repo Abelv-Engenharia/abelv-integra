@@ -12,6 +12,7 @@ import {
 import { Form } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { desviosCompletosService, DesvioCompleto } from "@/services/desvios/desviosCompletosService";
+import { useFormData } from "@/hooks/useFormData";
 import NovaIdentificacaoForm from "@/components/desvios/forms/NovaIdentificacaoForm";
 import NovasInformacoesForm from "@/components/desvios/forms/NovasInformacoesForm";
 import AcaoCorretivaForm from "@/components/desvios/forms/AcaoCorretivaForm";
@@ -27,6 +28,9 @@ interface EditDesvioDialogProps {
 const EditDesvioDialog = ({ desvio, open, onOpenChange, onDesvioUpdated }: EditDesvioDialogProps) => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  
+  // Use real form data instead of mock data
+  const formContext = useFormData();
 
   const form = useForm({
     defaultValues: {
@@ -73,70 +77,13 @@ const EditDesvioDialog = ({ desvio, open, onOpenChange, onDesvioUpdated }: EditD
     },
   });
 
-  // Mock data para os contextos dos formulários
-  const mockContext = {
-    ccas: [
-      { id: 1, codigo: "CCA-001", nome: "CCA 001" },
-      { id: 2, codigo: "CCA-002", nome: "CCA 002" },
-      { id: 3, codigo: "CCA-003", nome: "CCA 003" }
-    ],
-    tiposRegistro: [
-      { id: 1, nome: "Incidente" },
-      { id: 2, nome: "Acidente" },
-      { id: 3, nome: "Quase Acidente" }
-    ],
-    processos: [
-      { id: 1, nome: "Processo A" },
-      { id: 2, nome: "Processo B" },
-      { id: 3, nome: "Processo C" }
-    ],
-    eventosIdentificados: [
-      { id: 1, nome: "Evento 1" },
-      { id: 2, nome: "Evento 2" },
-      { id: 3, nome: "Evento 3" }
-    ],
-    causasProvaveis: [
-      { id: 1, nome: "Causa Humana" },
-      { id: 2, nome: "Causa Material" },
-      { id: 3, nome: "Causa Ambiental" }
-    ],
-    empresas: [
-      { id: 1, nome: "Empresa A" },
-      { id: 2, nome: "Empresa B" },
-      { id: 3, nome: "Empresa C" }
-    ],
-    disciplinas: [
-      { id: 1, nome: "Segurança do Trabalho" },
-      { id: 2, nome: "Meio Ambiente" },
-      { id: 3, nome: "Qualidade" }
-    ],
-    engenheiros: [
-      { id: "eng1", nome: "João Silva" },
-      { id: "eng2", nome: "Maria Santos" }
-    ],
-    baseLegalOpcoes: [
-      { id: 1, nome: "NR-01" },
-      { id: 2, nome: "NR-06" },
-      { id: 3, nome: "NR-10" }
-    ],
-    supervisores: [
-      { id: "sup1", nome: "Carlos Lima" },
-      { id: "sup2", nome: "Ana Costa" }
-    ],
-    encarregados: [
-      { id: "enc1", nome: "Pedro Oliveira" },
-      { id: "enc2", nome: "Lucia Ferreira" }
-    ],
-    funcionarios: [
-      { id: "func1", nome: "José Santos" },
-      { id: "func2", nome: "Maria Oliveira" }
-    ]
-  };
-
   useEffect(() => {
     if (desvio && open) {
+      console.log('Desvio completo para edição:', desvio);
+      
       const dataDesvio = new Date(desvio.data_desvio);
       
+      // Reset form with all the values from the desvio
       form.reset({
         // Nova Identificação
         data: desvio.data_desvio || "",
@@ -148,7 +95,7 @@ const EditDesvioDialog = ({ desvio, open, onOpenChange, onDesvioUpdated }: EditD
         processo: desvio.processo_id?.toString() || "",
         eventoIdentificado: desvio.evento_identificado_id?.toString() || "",
         causaProvavel: desvio.causa_provavel_id?.toString() || "",
-        responsavelInspecao: "", // Campo não existe na tabela desvios_completos
+        responsavelInspecao: (desvio as any).responsavel_inspecao || "",
         empresa: desvio.empresa_id?.toString() || "",
         disciplina: desvio.disciplina_id?.toString() || "",
         engenheiroResponsavel: desvio.engenheiro_responsavel_id || "",
@@ -158,16 +105,16 @@ const EditDesvioDialog = ({ desvio, open, onOpenChange, onDesvioUpdated }: EditD
         baseLegal: desvio.base_legal_opcao_id?.toString() || "",
         supervisorResponsavel: desvio.supervisor_responsavel_id || "",
         encarregadoResponsavel: desvio.encarregado_responsavel_id || "",
-        colaboradorInfrator: "", // Campo não existe na tabela desvios_completos
-        funcao: "", // Campo não existe na tabela desvios_completos
-        matricula: "", // Campo não existe na tabela desvios_completos
+        colaboradorInfrator: "",
+        funcao: "",
+        matricula: "",
         
         // Ação Corretiva
         tratativaAplicada: desvio.acao_imediata || "",
         responsavelAcao: desvio.responsavel_id || "",
         prazoCorrecao: desvio.prazo_conclusao || "",
         situacaoAcao: desvio.status || "",
-        aplicacaoMedidaDisciplinar: false, // Campo não existe na tabela desvios_completos
+        aplicacaoMedidaDisciplinar: false,
         
         // Classificação de Risco
         exposicao: desvio.exposicao?.toString() || "",
@@ -179,6 +126,8 @@ const EditDesvioDialog = ({ desvio, open, onOpenChange, onDesvioUpdated }: EditD
         severidade: desvio.severidade || 0,
         classificacaoRisco: desvio.classificacao_risco || "",
       });
+
+      console.log('Form values after reset:', form.getValues());
     }
   }, [desvio, open, form]);
 
@@ -187,6 +136,8 @@ const EditDesvioDialog = ({ desvio, open, onOpenChange, onDesvioUpdated }: EditD
 
     setIsLoading(true);
     try {
+      console.log('Dados do formulário de edição:', data);
+      
       const updatedDesvio = await desviosCompletosService.update(desvio.id, {
         data_desvio: data.data,
         hora_desvio: data.hora,
@@ -246,8 +197,8 @@ const EditDesvioDialog = ({ desvio, open, onOpenChange, onDesvioUpdated }: EditD
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <NovaIdentificacaoForm context={mockContext} />
-            <NovasInformacoesForm context={mockContext} />
+            <NovaIdentificacaoForm context={formContext} />
+            <NovasInformacoesForm context={formContext} />
             <AcaoCorretivaForm />
             <ClassificacaoRiscoForm />
             
