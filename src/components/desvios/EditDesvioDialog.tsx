@@ -58,7 +58,6 @@ const EditDesvioDialog = ({ desvio, open, onOpenChange, onDesvioUpdated }: EditD
       tratativaAplicada: "",
       responsavelAcao: "",
       prazoCorrecao: "",
-      situacao: "",
       situacaoAcao: "",
       aplicacaoMedidaDisciplinar: false,
       
@@ -167,7 +166,6 @@ const EditDesvioDialog = ({ desvio, open, onOpenChange, onDesvioUpdated }: EditD
         tratativaAplicada: desvio.acao_imediata || "",
         responsavelAcao: desvio.responsavel_id || "",
         prazoCorrecao: desvio.prazo_conclusao || "",
-        situacao: desvio.situacao || "",
         situacaoAcao: desvio.status || "",
         aplicacaoMedidaDisciplinar: false, // Campo não existe na tabela desvios_completos
         
@@ -215,7 +213,6 @@ const EditDesvioDialog = ({ desvio, open, onOpenChange, onDesvioUpdated }: EditD
         classificacao_risco: data.classificacaoRisco,
         responsavel_id: data.responsavelAcao || null,
         prazo_conclusao: data.prazoCorrecao || null,
-        situacao: data.situacao,
       });
 
       if (updatedDesvio) {
