@@ -83,6 +83,17 @@ const EditDesvioDialog = ({ desvio, open, onOpenChange, onDesvioUpdated }: EditD
       
       const dataDesvio = new Date(desvio.data_desvio);
       
+      // Buscar funcionário infrator nos funcionarios_envolvidos
+      let colaboradorInfratorId = "";
+      let funcionarioData = null;
+      
+      if (desvio.funcionarios_envolvidos && Array.isArray(desvio.funcionarios_envolvidos)) {
+        funcionarioData = desvio.funcionarios_envolvidos.find((f: any) => f.tipo === 'infrator') || desvio.funcionarios_envolvidos[0];
+        if (funcionarioData) {
+          colaboradorInfratorId = funcionarioData.funcionario_id || "";
+        }
+      }
+      
       // Reset form with all the values from the desvio
       form.reset({
         // Nova Identificação
@@ -105,9 +116,9 @@ const EditDesvioDialog = ({ desvio, open, onOpenChange, onDesvioUpdated }: EditD
         baseLegal: desvio.base_legal_opcao_id?.toString() || "",
         supervisorResponsavel: desvio.supervisor_responsavel_id || "",
         encarregadoResponsavel: desvio.encarregado_responsavel_id || "",
-        colaboradorInfrator: "",
-        funcao: "",
-        matricula: "",
+        colaboradorInfrator: colaboradorInfratorId,
+        funcao: funcionarioData?.funcao || "",
+        matricula: funcionarioData?.matricula || "",
         
         // Ação Corretiva
         tratativaAplicada: desvio.acao_imediata || "",
