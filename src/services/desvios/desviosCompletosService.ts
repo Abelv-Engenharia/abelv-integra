@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 
 export interface DesvioCompleto {
@@ -44,10 +45,10 @@ export const desviosCompletosService = {
         .select(`
           *,
           ccas:cca_id(id, codigo, nome),
-          empresas:empresa_id(id, nome, cca_id, ccas:cca_id(codigo, nome)),
+          empresas:empresa_id(id, nome, empresa_ccas(ccas:cca_id(codigo, nome))),
           base_legal_opcoes:base_legal_opcao_id(id, codigo, nome),
-          engenheiros:engenheiro_responsavel_id(id, nome, cca_id, ccas:cca_id(codigo, nome)),
-          supervisores:supervisor_responsavel_id(id, nome, cca_id, ccas:cca_id(codigo, nome)),
+          engenheiros:engenheiro_responsavel_id(id, nome, engenheiro_ccas(ccas:cca_id(codigo, nome))),
+          supervisores:supervisor_responsavel_id(id, nome, supervisor_ccas(ccas:cca_id(codigo, nome))),
           encarregados:encarregado_responsavel_id(id, nome, cca_id, ccas:cca_id(codigo, nome)),
           tipos_registro:tipo_registro_id(id, codigo, nome),
           processos:processo_id(id, codigo, nome),
@@ -80,10 +81,10 @@ export const desviosCompletosService = {
         .select(`
           *,
           ccas:cca_id(id, codigo, nome),
-          empresas:empresa_id(id, nome, cca_id, ccas:cca_id(codigo, nome)),
+          empresas:empresa_id(id, nome, empresa_ccas(ccas:cca_id(codigo, nome))),
           base_legal_opcoes:base_legal_opcao_id(id, codigo, nome),
-          engenheiros:engenheiro_responsavel_id(id, nome, cca_id, ccas:cca_id(codigo, nome)),
-          supervisores:supervisor_responsavel_id(id, nome, cca_id, ccas:cca_id(codigo, nome)),
+          engenheiros:engenheiro_responsavel_id(id, nome, engenheiro_ccas(ccas:cca_id(codigo, nome))),
+          supervisores:supervisor_responsavel_id(id, nome, supervisor_ccas(ccas:cca_id(codigo, nome))),
           encarregados:encarregado_responsavel_id(id, nome, cca_id, ccas:cca_id(codigo, nome)),
           tipos_registro:tipo_registro_id(id, codigo, nome),
           processos:processo_id(id, codigo, nome),

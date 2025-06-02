@@ -43,7 +43,7 @@ export const useFormData = () => {
   });
 
   const { data: empresas = [] } = useQuery({
-    queryKey: ['empresas-with-cca'],
+    queryKey: ['empresas-with-ccas'],
     queryFn: async () => {
       const { data } = await supabase
         .from('empresas')
@@ -52,8 +52,10 @@ export const useFormData = () => {
           nome,
           cnpj,
           ativo,
-          cca_id,
-          ccas:cca_id(id, codigo, nome)
+          empresa_ccas!inner(
+            cca_id,
+            ccas:cca_id(id, codigo, nome)
+          )
         `)
         .eq('ativo', true)
         .order('nome');
@@ -67,7 +69,7 @@ export const useFormData = () => {
   });
 
   const { data: engenheiros = [] } = useQuery({
-    queryKey: ['engenheiros-with-cca'],
+    queryKey: ['engenheiros-with-ccas'],
     queryFn: async () => {
       const { data } = await supabase
         .from('engenheiros')
@@ -78,8 +80,10 @@ export const useFormData = () => {
           matricula,
           email,
           ativo,
-          cca_id,
-          ccas:cca_id(id, codigo, nome)
+          engenheiro_ccas!inner(
+            cca_id,
+            ccas:cca_id(id, codigo, nome)
+          )
         `)
         .eq('ativo', true)
         .order('nome');
@@ -93,7 +97,7 @@ export const useFormData = () => {
   });
 
   const { data: supervisores = [] } = useQuery({
-    queryKey: ['supervisores-with-cca'],
+    queryKey: ['supervisores-with-ccas'],
     queryFn: async () => {
       const { data } = await supabase
         .from('supervisores')
@@ -104,8 +108,10 @@ export const useFormData = () => {
           matricula,
           email,
           ativo,
-          cca_id,
-          ccas:cca_id(id, codigo, nome)
+          supervisor_ccas!inner(
+            cca_id,
+            ccas:cca_id(id, codigo, nome)
+          )
         `)
         .eq('ativo', true)
         .order('nome');

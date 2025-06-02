@@ -301,6 +301,42 @@ export type Database = {
         }
         Relationships: []
       }
+      empresa_ccas: {
+        Row: {
+          cca_id: number
+          created_at: string | null
+          empresa_id: number
+          id: string
+        }
+        Insert: {
+          cca_id: number
+          created_at?: string | null
+          empresa_id: number
+          id?: string
+        }
+        Update: {
+          cca_id?: number
+          created_at?: string | null
+          empresa_id?: number
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "empresa_ccas_cca_id_fkey"
+            columns: ["cca_id"]
+            isOneToOne: false
+            referencedRelation: "ccas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "empresa_ccas_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       empresas: {
         Row: {
           ativo: boolean | null
@@ -367,6 +403,42 @@ export type Database = {
             columns: ["cca_id"]
             isOneToOne: false
             referencedRelation: "ccas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      engenheiro_ccas: {
+        Row: {
+          cca_id: number
+          created_at: string | null
+          engenheiro_id: string
+          id: string
+        }
+        Insert: {
+          cca_id: number
+          created_at?: string | null
+          engenheiro_id: string
+          id?: string
+        }
+        Update: {
+          cca_id?: number
+          created_at?: string | null
+          engenheiro_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "engenheiro_ccas_cca_id_fkey"
+            columns: ["cca_id"]
+            isOneToOne: false
+            referencedRelation: "ccas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "engenheiro_ccas_engenheiro_id_fkey"
+            columns: ["engenheiro_id"]
+            isOneToOne: false
+            referencedRelation: "engenheiros"
             referencedColumns: ["id"]
           },
         ]
@@ -829,6 +901,42 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      supervisor_ccas: {
+        Row: {
+          cca_id: number
+          created_at: string | null
+          id: string
+          supervisor_id: string
+        }
+        Insert: {
+          cca_id: number
+          created_at?: string | null
+          id?: string
+          supervisor_id: string
+        }
+        Update: {
+          cca_id?: number
+          created_at?: string | null
+          id?: string
+          supervisor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "supervisor_ccas_cca_id_fkey"
+            columns: ["cca_id"]
+            isOneToOne: false
+            referencedRelation: "ccas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "supervisor_ccas_supervisor_id_fkey"
+            columns: ["supervisor_id"]
+            isOneToOne: false
+            referencedRelation: "supervisores"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       supervisores: {
         Row: {
