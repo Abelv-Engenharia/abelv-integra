@@ -3,11 +3,11 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { supabase } from "@/integrations/supabase/client";
-import { Perfil, Permissoes, Json } from "@/types/users";
+import { Perfil, Permissoes } from "@/types/users";
 import { useToast } from "@/hooks/use-toast";
 import { PerfisTable } from "@/components/admin/perfis/PerfisTable";
 import { PerfilDialog } from "@/components/admin/perfis/PerfilDialog";
+import { fetchPerfis, createPerfil, updatePerfil, deletePerfil } from "@/services/perfisService";
 
 const AdminPerfis = () => {
   const [perfis, setPerfis] = useState<Perfil[]>([]);
@@ -18,6 +18,7 @@ const AdminPerfis = () => {
   
   // Definir permissões iniciais completas para evitar erros de tipo
   const permissoesIniciais: Permissoes = {
+    // Módulos principais
     desvios: true,
     treinamentos: true,
     ocorrencias: true,
@@ -25,56 +26,44 @@ const AdminPerfis = () => {
     relatorios: true,
     hora_seguranca: true,
     medidas_disciplinares: true,
+    
+    // Administração
     admin_usuarios: false,
     admin_perfis: false,
     admin_funcionarios: false,
     admin_hht: false,
-    admin_templates: false
+    admin_templates: false,
+    admin_empresas: false,
+    admin_supervisores: false,
+    admin_engenheiros: false,
+    admin_ccas: false,
+    
+    // IDSMS
+    idsms_dashboard: false,
+    idsms_formularios: false,
+    
+    // Configurações específicas de permissões
+    pode_editar_desvios: false,
+    pode_excluir_desvios: false,
+    pode_editar_ocorrencias: false,
+    pode_excluir_ocorrencias: false,
+    pode_editar_treinamentos: false,
+    pode_excluir_treinamentos: false,
+    pode_editar_tarefas: false,
+    pode_excluir_tarefas: false,
+    pode_aprovar_tarefas: false,
+    pode_visualizar_relatorios_completos: false,
+    pode_exportar_dados: false,
   };
   
   const [perfilSelecionado, setPerfilSelecionado] = useState<Perfil | null>(null);
 
   useEffect(() => {
-    const fetchPerfis = async () => {
+    const loadPerfis = async () => {
       setLoading(true);
       try {
-        const { data, error } = await supabase
-          .from('perfis')
-          .select('*')
-          .order('nome', { ascending: true });
-
-        if (error) throw error;
-
-        if (data) {
-          // Converter o resultado para o tipo Perfil[], garantindo que todas as propriedades necessárias estejam presentes
-          const perfisMapeados: Perfil[] = data.map(p => {
-            // Converter o campo permissoes para o tipo Permissoes
-            const permissoesObj = p.permissoes as unknown;
-            // Garantir que todas as propriedades estejam presentes
-            const permissoesTipadas: Permissoes = {
-              desvios: ((permissoesObj as any)?.desvios ?? true) as boolean,
-              treinamentos: ((permissoesObj as any)?.treinamentos ?? true) as boolean,
-              ocorrencias: ((permissoesObj as any)?.ocorrencias ?? true) as boolean,
-              tarefas: ((permissoesObj as any)?.tarefas ?? true) as boolean,
-              relatorios: ((permissoesObj as any)?.relatorios ?? true) as boolean,
-              hora_seguranca: ((permissoesObj as any)?.hora_seguranca ?? true) as boolean,
-              medidas_disciplinares: ((permissoesObj as any)?.medidas_disciplinares ?? true) as boolean,
-              admin_usuarios: ((permissoesObj as any)?.admin_usuarios ?? false) as boolean,
-              admin_perfis: ((permissoesObj as any)?.admin_perfis ?? false) as boolean,
-              admin_funcionarios: ((permissoesObj as any)?.admin_funcionarios ?? false) as boolean,
-              admin_hht: ((permissoesObj as any)?.admin_hht ?? false) as boolean,
-              admin_templates: ((permissoesObj as any)?.admin_templates ?? false) as boolean
-            };
-            
-            return {
-              id: p.id,
-              nome: p.nome,
-              descricao: p.descricao || '',
-              permissoes: permissoesTipadas
-            };
-          });
-          setPerfis(perfisMapeados);
-        }
+        const data = await fetchPerfis();
+        setPerfis(data);
       } catch (error) {
         console.error('Erro ao carregar perfis:', error);
         toast({
@@ -87,7 +76,7 @@ const AdminPerfis = () => {
       }
     };
 
-    fetchPerfis();
+    loadPerfis();
   }, [toast]);
 
   const handleNovoPerfil = () => {
@@ -109,16 +98,11 @@ const AdminPerfis = () => {
     try {
       if (perfilSelecionado) {
         // Atualizar perfil existente
-        const { error } = await supabase
-          .from('perfis')
-          .update({
-            nome,
-            descricao,
-            permissoes: permissoes as unknown as Json
-          })
-          .eq('id', perfilSelecionado.id);
-
-        if (error) throw error;
+        await updatePerfil(perfilSelecionado.id, {
+          nome,
+          descricao,
+          permissoes
+        });
 
         toast({
           title: "Sucesso",
@@ -135,40 +119,29 @@ const AdminPerfis = () => {
         );
       } else {
         // Criar novo perfil
-        const { data, error } = await supabase
-          .from('perfis')
-          .insert({
-            nome,
-            descricao,
-            permissoes: permissoes as unknown as Json
-          })
-          .select();
-
-        if (error) throw error;
-
-        toast({
-          title: "Sucesso",
-          description: "Perfil criado com sucesso"
+        const novoPerfil = await createPerfil({
+          nome,
+          descricao,
+          permissoes
         });
 
-        // Adicionar o novo perfil ao estado local
-        if (data) {
-          const novoPerfil: Perfil = {
-            id: data[0].id,
-            nome: data[0].nome,
-            descricao: data[0].descricao || '',
-            permissoes: permissoes
-          };
+        if (novoPerfil) {
+          toast({
+            title: "Sucesso",
+            description: "Perfil criado com sucesso"
+          });
+
+          // Adicionar o novo perfil ao estado local
           setPerfis([...perfis, novoPerfil]);
         }
       }
 
       setNovoPerfil(false);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erro ao salvar perfil:', error);
       toast({
         title: "Erro",
-        description: "Não foi possível salvar o perfil",
+        description: error.message || "Não foi possível salvar o perfil",
         variant: "destructive"
       });
     } finally {
@@ -185,12 +158,7 @@ const AdminPerfis = () => {
     if (window.confirm('Tem certeza que deseja excluir este perfil?')) {
       setLoading(true);
       try {
-        const { error } = await supabase
-          .from('perfis')
-          .delete()
-          .eq('id', id);
-
-        if (error) throw error;
+        await deletePerfil(id);
 
         toast({
           title: "Sucesso",
@@ -199,11 +167,11 @@ const AdminPerfis = () => {
 
         // Remover o perfil do estado local
         setPerfis(perfis.filter(p => p.id !== id));
-      } catch (error) {
+      } catch (error: any) {
         console.error('Erro ao excluir perfil:', error);
         toast({
           title: "Erro",
-          description: "Não foi possível excluir o perfil",
+          description: error.message || "Não foi possível excluir o perfil",
           variant: "destructive"
         });
       } finally {
@@ -218,7 +186,7 @@ const AdminPerfis = () => {
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
             <CardTitle>Perfis de Acesso</CardTitle>
-            <CardDescription>Gerencie os perfis de acesso dos usuários</CardDescription>
+            <CardDescription>Gerencie os perfis de acesso dos usuários com todas as permissões do sistema</CardDescription>
           </div>
           <Button onClick={handleNovoPerfil}>Novo Perfil</Button>
         </CardHeader>

@@ -54,8 +54,9 @@ export type SearchFormValues = z.infer<typeof searchFormSchema>;
 export type UserFormValues = z.infer<typeof userFormSchema>;
 export type AuthUserCreateValues = z.infer<typeof authUserCreateSchema>;
 
-// Define the Permissoes interface with all required properties
+// Define the Permissoes interface with all required properties for the system
 export interface Permissoes {
+  // Módulos principais
   desvios: boolean;
   treinamentos: boolean;
   ocorrencias: boolean;
@@ -63,11 +64,34 @@ export interface Permissoes {
   relatorios: boolean;
   hora_seguranca: boolean;
   medidas_disciplinares: boolean;
+  
+  // Administração
   admin_usuarios: boolean;
   admin_perfis: boolean;
   admin_funcionarios: boolean;
   admin_hht: boolean;
   admin_templates: boolean;
+  admin_empresas: boolean;
+  admin_supervisores: boolean;
+  admin_engenheiros: boolean;
+  admin_ccas: boolean;
+  
+  // IDSMS
+  idsms_dashboard: boolean;
+  idsms_formularios: boolean;
+  
+  // Configurações específicas de permissões
+  pode_editar_desvios: boolean;
+  pode_excluir_desvios: boolean;
+  pode_editar_ocorrencias: boolean;
+  pode_excluir_ocorrencias: boolean;
+  pode_editar_treinamentos: boolean;
+  pode_excluir_treinamentos: boolean;
+  pode_editar_tarefas: boolean;
+  pode_excluir_tarefas: boolean;
+  pode_aprovar_tarefas: boolean;
+  pode_visualizar_relatorios_completos: boolean;
+  pode_exportar_dados: boolean;
 }
 
 export interface Perfil {

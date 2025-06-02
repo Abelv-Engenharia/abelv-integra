@@ -1,8 +1,7 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, UserPlus } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,168 +11,68 @@ import { UsersTable } from "@/components/admin/usuarios/UsersTable";
 import { CreateUserDialog } from "@/components/admin/usuarios/CreateUserDialog";
 import { EditUserDialog } from "@/components/admin/usuarios/EditUserDialog";
 import { DeleteUserDialog } from "@/components/admin/usuarios/DeleteUserDialog";
-import { fetchProfiles } from "@/services/usuariosService";
-import { createAuthUser, updateUserRole } from "@/services/authAdminService";
-import { User, Profile, SearchFormValues, UserFormValues, AuthUserCreateValues } from "@/types/users";
-import { fetchUsers } from "@/services/authAdminService";
+import { User, SearchFormValues, UserFormValues, AuthUserCreateValues } from "@/types/users";
+import { useUsuarios } from "@/hooks/useUsuarios";
 
 const AdminUsuarios = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
-  const [users, setUsers] = useState<User[]>([]);
-  const [allUsers, setAllUsers] = useState<User[]>([]);
-  const [profiles, setProfiles] = useState<Profile[]>([]);
+  const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Fetch data from Supabase
-  useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
-      try {
-        // Fetch profiles
-        const profileData = await fetchProfiles();
-        setProfiles(profileData);
-        
-        // Fetch users
-        const userData = await fetchUsers();
-        setUsers(userData);
-        setAllUsers(userData);
-      } catch (error) {
-        console.error('Erro ao buscar dados:', error);
-        toast({
-          title: "Erro ao carregar dados",
-          description: "Ocorreu um erro ao carregar os dados. Tente novamente mais tarde.",
-          variant: "destructive",
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  const {
+    usuarios,
+    profiles,
+    loadingUsuarios,
+    createUsuarioMutation,
+    updateUsuarioMutation,
+    deleteUsuarioMutation
+  } = useUsuarios();
 
-    fetchData();
-  }, [toast]);
+  // Set filtered users when usuarios data changes
+  useState(() => {
+    setFilteredUsers(usuarios);
+  });
 
   const onSearchSubmit = (data: SearchFormValues) => {
     if (!data.search) {
-      setUsers(allUsers);
+      setFilteredUsers(usuarios);
       return;
     }
 
     const searchTerm = data.search.toLowerCase();
-    const filteredUsers = allUsers.filter(
+    const filtered = usuarios.filter(
       (user) => 
         user.nome.toLowerCase().includes(searchTerm) || 
         user.email.toLowerCase().includes(searchTerm) ||
         user.perfil.toLowerCase().includes(searchTerm)
     );
     
-    setUsers(filteredUsers);
+    setFilteredUsers(filtered);
   };
 
   const onUserSubmit = async (data: UserFormValues) => {
-    try {
-      if (selectedUser) {
-        // Edit existing user
-        // Note: In a real system, you would implement the update in Supabase
-        // This is just a simulated example
-        const updatedUsers = users.map(user => 
-          user.id === selectedUser.id ? { ...user, ...data } : user
-        );
-        setUsers(updatedUsers);
-        setAllUsers(allUsers.map(user => 
-          user.id === selectedUser.id ? { ...user, ...data } : user
-        ));
-
-        toast({
-          title: "Usuário atualizado",
-          description: `${data.nome} foi atualizado com sucesso.`,
-        });
-        
-        setIsEditDialogOpen(false);
-      }
-    } catch (error) {
-      console.error('Erro ao salvar usuário:', error);
-      toast({
-        title: "Erro ao salvar usuário",
-        description: "Não foi possível salvar as alterações. Tente novamente mais tarde.",
-        variant: "destructive",
+    if (selectedUser) {
+      updateUsuarioMutation.mutate({ 
+        userId: selectedUser.id.toString(), 
+        userData: data 
       });
+      setIsEditDialogOpen(false);
     }
   };
 
   const onAuthUserSubmit = async (data: AuthUserCreateValues) => {
-    try {
-      setIsSubmitting(true);
-      
-      // Step 1: Create the Supabase auth user
-      const { data: authUserData, error } = await createAuthUser(
-        data.email, 
-        data.password, 
-        { nome: data.nome }
-      );
-      
-      if (error) throw error;
-      
-      if (!authUserData?.user?.id) {
-        throw new Error("Falha ao criar usuário: ID não retornado");
-      }
-      
-      // Step 2: Assign the selected profile/role to the user
-      const perfilId = parseInt(data.perfil);
-      await updateUserRole(authUserData.user.id, perfilId);
-      
-      // Step 3: Refresh the users list
-      const userData = await fetchUsers();
-      setUsers(userData);
-      setAllUsers(userData);
-      
-      toast({
-        title: "Usuário criado",
-        description: `${data.nome} foi criado com sucesso.`,
-      });
-      
-      setIsCreateDialogOpen(false);
-    } catch (error: any) {
-      console.error('Erro ao criar usuário:', error);
-      toast({
-        title: "Erro ao criar usuário",
-        description: error.message || "Não foi possível criar o usuário. Tente novamente mais tarde.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
+    createUsuarioMutation.mutate(data);
+    setIsCreateDialogOpen(false);
   };
 
   const handleDeleteUser = async () => {
     if (selectedUser) {
-      // Simulation of deletion
-      // In a real system, you would implement the deletion in Supabase
-      try {
-        const updatedUsers = users.filter(user => user.id !== selectedUser.id);
-        setUsers(updatedUsers);
-        setAllUsers(allUsers.filter(user => user.id !== selectedUser.id));
-        
-        toast({
-          title: "Usuário excluído",
-          description: `${selectedUser.nome} foi excluído com sucesso.`,
-        });
-      } catch (error) {
-        console.error('Erro ao excluir usuário:', error);
-        toast({
-          title: "Erro ao excluir usuário",
-          description: "Não foi possível excluir o usuário. Tente novamente mais tarde.",
-          variant: "destructive",
-        });
-      } finally {
-        setIsDeleteDialogOpen(false);
-        setSelectedUser(null);
-      }
+      deleteUsuarioMutation.mutate(selectedUser.id.toString());
+      setIsDeleteDialogOpen(false);
+      setSelectedUser(null);
     }
   };
 
@@ -206,7 +105,7 @@ const AdminUsuarios = () => {
         </Button>
         <h1 className="text-2xl font-bold tracking-tight">Administrar Usuários</h1>
         <p className="text-muted-foreground">
-          Gerencie os usuários do sistema
+          Gerencie os usuários do sistema integrado com o Supabase
         </p>
       </div>
 
@@ -227,8 +126,8 @@ const AdminUsuarios = () => {
 
           <div className="relative overflow-x-auto rounded-md border">
             <UsersTable
-              users={users}
-              isLoading={isLoading}
+              users={filteredUsers}
+              isLoading={loadingUsuarios}
               onEditClick={handleEditClick}
               onDeleteClick={handleDeleteClick}
             />
@@ -242,7 +141,7 @@ const AdminUsuarios = () => {
         onOpenChange={setIsCreateDialogOpen}
         profiles={profiles}
         onSubmit={onAuthUserSubmit}
-        isSubmitting={isSubmitting}
+        isSubmitting={createUsuarioMutation.isPending}
       />
 
       <EditUserDialog

@@ -3,18 +3,42 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 
 export type Permissoes = {
+  // Módulos principais
   desvios: boolean;
   treinamentos: boolean;
-  hora_seguranca: boolean;
   ocorrencias: boolean;
-  medidas_disciplinares: boolean;
   tarefas: boolean;
   relatorios: boolean;
+  hora_seguranca: boolean;
+  medidas_disciplinares: boolean;
+  
+  // Administração
   admin_usuarios: boolean;
   admin_perfis: boolean;
   admin_funcionarios: boolean;
   admin_hht: boolean;
   admin_templates: boolean;
+  admin_empresas: boolean;
+  admin_supervisores: boolean;
+  admin_engenheiros: boolean;
+  admin_ccas: boolean;
+  
+  // IDSMS
+  idsms_dashboard: boolean;
+  idsms_formularios: boolean;
+  
+  // Configurações específicas de permissões
+  pode_editar_desvios: boolean;
+  pode_excluir_desvios: boolean;
+  pode_editar_ocorrencias: boolean;
+  pode_excluir_ocorrencias: boolean;
+  pode_editar_treinamentos: boolean;
+  pode_excluir_treinamentos: boolean;
+  pode_editar_tarefas: boolean;
+  pode_excluir_tarefas: boolean;
+  pode_aprovar_tarefas: boolean;
+  pode_visualizar_relatorios_completos: boolean;
+  pode_exportar_dados: boolean;
 };
 
 export type Perfil = {
@@ -50,18 +74,42 @@ export async function fetchPerfis(): Promise<Perfil[]> {
 // Helper to ensure all permission fields exist with default values
 function ensureAllPermissoes(permissoes: any): Permissoes {
   const defaultPermissoes: Permissoes = {
+    // Módulos principais
     desvios: false,
     treinamentos: false,
-    hora_seguranca: false,
     ocorrencias: false,
-    medidas_disciplinares: false,
     tarefas: false,
     relatorios: false,
+    hora_seguranca: false,
+    medidas_disciplinares: false,
+    
+    // Administração
     admin_usuarios: false,
     admin_perfis: false,
     admin_funcionarios: false,
     admin_hht: false,
-    admin_templates: false
+    admin_templates: false,
+    admin_empresas: false,
+    admin_supervisores: false,
+    admin_engenheiros: false,
+    admin_ccas: false,
+    
+    // IDSMS
+    idsms_dashboard: false,
+    idsms_formularios: false,
+    
+    // Configurações específicas de permissões
+    pode_editar_desvios: false,
+    pode_excluir_desvios: false,
+    pode_editar_ocorrencias: false,
+    pode_excluir_ocorrencias: false,
+    pode_editar_treinamentos: false,
+    pode_excluir_treinamentos: false,
+    pode_editar_tarefas: false,
+    pode_excluir_tarefas: false,
+    pode_aprovar_tarefas: false,
+    pode_visualizar_relatorios_completos: false,
+    pode_exportar_dados: false,
   };
   
   return { ...defaultPermissoes, ...permissoes };
