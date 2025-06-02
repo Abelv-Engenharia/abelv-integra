@@ -15,17 +15,28 @@ export const useUsuarios = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Buscar usuários
+  // Buscar usuários com tratamento de erro melhorado
   const { 
     data: usersData, 
     isLoading: loadingUsuarios,
-    refetch: refetchUsers
+    refetch: refetchUsers,
+    error: usersError
   } = useQuery({
     queryKey: ['admin-usuarios'],
     queryFn: async () => {
-      const result = await fetchUsers(1, 100, '', '');
-      return result;
-    }
+      try {
+        const result = await fetchUsers(1, 100, '', '');
+        return result;
+      } catch (error) {
+        console.error("Erro ao buscar usuários:", error);
+        // Se houver erro de permissão, retornar dados vazios em vez de falhar
+        if (error instanceof Error && error.message.includes('User not allowed')) {
+          return { users: [], total: 0, count: 0 };
+        }
+        throw error;
+      }
+    },
+    retry: false // Não tentar novamente em caso de erro de permissão
   });
 
   // Buscar perfis
@@ -37,22 +48,29 @@ export const useUsuarios = () => {
   // Mutation para criar usuário
   const createUsuarioMutation = useMutation({
     mutationFn: async (userData: AuthUserCreateValues) => {
-      // Step 1: Create the Supabase auth user
-      const authUserData = await createAuthUser(
-        userData.email, 
-        userData.password, 
-        { nome: userData.nome }
-      );
-      
-      if (!authUserData?.user?.id) {
-        throw new Error("Falha ao criar usuário: ID não retornado");
+      try {
+        console.log("Criando usuário:", userData);
+        
+        // Step 1: Create the Supabase auth user
+        const authUserData = await createAuthUser(
+          userData.email, 
+          userData.password, 
+          { nome: userData.nome }
+        );
+        
+        if (!authUserData?.user?.id) {
+          throw new Error("Falha ao criar usuário: ID não retornado");
+        }
+        
+        // Step 2: Assign the selected profile/role to the user
+        const perfilId = parseInt(userData.perfil);
+        await updateUserRole(authUserData.user.id, perfilId);
+        
+        return authUserData;
+      } catch (error) {
+        console.error("Erro na mutation de criação:", error);
+        throw error;
       }
-      
-      // Step 2: Assign the selected profile/role to the user
-      const perfilId = parseInt(userData.perfil);
-      await updateUserRole(authUserData.user.id, perfilId);
-      
-      return authUserData;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-usuarios'] });
@@ -62,9 +80,11 @@ export const useUsuarios = () => {
       });
     },
     onError: (error: any) => {
+      console.error("Erro ao criar usuário:", error);
+      const errorMessage = error?.message || "Erro ao criar usuário";
       toast({
         title: "Erro",
-        description: error.message || "Erro ao criar usuário",
+        description: errorMessage,
         variant: "destructive",
       });
     }
@@ -126,6 +146,7 @@ export const useUsuarios = () => {
     totalUsuarios: usersData?.total || 0,
     profiles,
     loadingUsuarios,
+    usersError,
     createUsuarioMutation,
     updateUsuarioMutation,
     deleteUsuarioMutation,

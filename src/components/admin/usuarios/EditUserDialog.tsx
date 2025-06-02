@@ -1,6 +1,7 @@
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect } from "react";
 import {
   Form,
   FormField,
@@ -27,7 +28,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Profile, User, UserFormValues, userFormSchema } from "@/types/users";
-import { useEffect } from "react";
 
 interface EditUserDialogProps {
   open: boolean;
@@ -47,9 +47,9 @@ export const EditUserDialog = ({
   const userForm = useForm<UserFormValues>({
     resolver: zodResolver(userFormSchema),
     defaultValues: {
-      nome: selectedUser?.nome || "",
-      email: selectedUser?.email || "",
-      perfil: selectedUser?.perfil || "",
+      nome: "",
+      email: "",
+      perfil: "",
     },
   });
   
@@ -61,11 +61,29 @@ export const EditUserDialog = ({
         email: selectedUser.email,
         perfil: selectedUser.perfil,
       });
+    } else {
+      userForm.reset({
+        nome: "",
+        email: "",
+        perfil: "",
+      });
     }
   }, [selectedUser, userForm]);
 
+  // Reset form when dialog closes
+  const handleOpenChange = (open: boolean) => {
+    if (!open) {
+      userForm.reset();
+    }
+    onOpenChange(open);
+  };
+
+  const handleSubmit = (data: UserFormValues) => {
+    onSubmit(data);
+  };
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Editar Usuário</DialogTitle>
@@ -74,7 +92,7 @@ export const EditUserDialog = ({
           </DialogDescription>
         </DialogHeader>
         <Form {...userForm}>
-          <form onSubmit={userForm.handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={userForm.handleSubmit(handleSubmit)} className="space-y-4">
             <FormField
               control={userForm.control}
               name="nome"
@@ -109,7 +127,7 @@ export const EditUserDialog = ({
                   <FormLabel>Perfil de Acesso</FormLabel>
                   <Select 
                     onValueChange={field.onChange} 
-                    defaultValue={field.value}
+                    value={field.value}
                   >
                     <FormControl>
                       <SelectTrigger>
@@ -132,7 +150,7 @@ export const EditUserDialog = ({
               <Button 
                 type="button" 
                 variant="outline" 
-                onClick={() => onOpenChange(false)}
+                onClick={() => handleOpenChange(false)}
               >
                 Cancelar
               </Button>

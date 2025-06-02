@@ -1,11 +1,12 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, UserPlus } from "lucide-react";
+import { ArrowLeft, UserPlus, AlertCircle } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { UserSearchForm } from "@/components/admin/usuarios/UserSearchForm";
 import { UsersTable } from "@/components/admin/usuarios/UsersTable";
 import { CreateUserDialog } from "@/components/admin/usuarios/CreateUserDialog";
@@ -26,15 +27,16 @@ const AdminUsuarios = () => {
     usuarios,
     profiles,
     loadingUsuarios,
+    usersError,
     createUsuarioMutation,
     updateUsuarioMutation,
     deleteUsuarioMutation
   } = useUsuarios();
 
-  // Set filtered users when usuarios data changes
-  useState(() => {
+  // Update filtered users when usuarios data changes
+  useEffect(() => {
     setFilteredUsers(usuarios);
-  });
+  }, [usuarios]);
 
   const onSearchSubmit = (data: SearchFormValues) => {
     if (!data.search) {
@@ -91,6 +93,11 @@ const AdminUsuarios = () => {
     setIsCreateDialogOpen(true);
   };
 
+  // Show error alert if there's a permission error
+  const showPermissionError = usersError && 
+    usersError instanceof Error && 
+    usersError.message.includes('User not allowed');
+
   return (
     <div className="space-y-6">
       <div>
@@ -109,11 +116,24 @@ const AdminUsuarios = () => {
         </p>
       </div>
 
+      {showPermissionError && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            Você não tem permissão para gerenciar usuários. Entre em contato com o administrador do sistema.
+          </AlertDescription>
+        </Alert>
+      )}
+
       <Card>
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
             <CardTitle>Usuários</CardTitle>
-            <Button size="sm" onClick={handleCreateClick}>
+            <Button 
+              size="sm" 
+              onClick={handleCreateClick}
+              disabled={showPermissionError}
+            >
               <UserPlus className="mr-2 h-4 w-4" />
               Novo Usuário
             </Button>
