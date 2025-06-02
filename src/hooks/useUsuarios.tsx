@@ -1,7 +1,6 @@
-
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
-import { User, AuthUserCreateValues, UserFormValues } from "@/types/users";
+import { User, AuthUserCreateValues, UserFormValues, Permissoes } from "@/types/users";
 import { 
   fetchUsers, 
   createAuthUser, 
@@ -38,7 +37,7 @@ export const useUsuarios = () => {
         throw error;
       }
     },
-    enabled: !!user, // Só executar se o usuário estiver logado
+    enabled: !!user,
     retry: false,
     staleTime: 5 * 60 * 1000,
     refetchOnWindowFocus: false
@@ -77,7 +76,8 @@ export const useUsuarios = () => {
           return null;
         }
 
-        return data?.perfis?.permissoes || null;
+        // Fazer cast para o tipo correto de permissões
+        return data?.perfis?.permissoes as Permissoes || null;
       } catch (error) {
         console.error("Erro ao verificar permissões:", error);
         return null;
@@ -88,7 +88,7 @@ export const useUsuarios = () => {
   });
 
   // Verificar se o usuário pode administrar usuários
-  const canManageUsers = userPermissions?.admin_usuarios === true;
+  const canManageUsers = (userPermissions as Permissoes)?.admin_usuarios === true;
 
   // Mutation para criar usuário
   const createUsuarioMutation = useMutation({

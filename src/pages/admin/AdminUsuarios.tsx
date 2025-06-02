@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, UserPlus, AlertCircle, Lock } from "lucide-react";
@@ -12,7 +11,7 @@ import { UsersTable } from "@/components/admin/usuarios/UsersTable";
 import { CreateUserDialog } from "@/components/admin/usuarios/CreateUserDialog";
 import { EditUserDialog } from "@/components/admin/usuarios/EditUserDialog";
 import { DeleteUserDialog } from "@/components/admin/usuarios/DeleteUserDialog";
-import { User, SearchFormValues, UserFormValues, AuthUserCreateValues } from "@/types/users";
+import { User, SearchFormValues, UserFormValues, AuthUserCreateValues, Permissoes } from "@/types/users";
 import { useUsuarios } from "@/hooks/useUsuarios";
 
 const AdminUsuarios = () => {
@@ -102,6 +101,9 @@ const AdminUsuarios = () => {
     usersError instanceof Error && 
     usersError.message.includes('User not allowed'));
 
+  // Cast userPermissions para o tipo correto
+  const permissions = userPermissions as Permissoes;
+
   return (
     <div className="space-y-6">
       <div>
@@ -129,13 +131,13 @@ const AdminUsuarios = () => {
         </Alert>
       )}
 
-      {!canManageUsers && userPermissions && (
+      {!canManageUsers && permissions && (
         <Alert>
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
             Suas permissões atuais não incluem administração de usuários. 
-            {userPermissions.admin_perfis ? " Você pode gerenciar perfis." : ""}
-            {userPermissions.admin_funcionarios ? " Você pode gerenciar funcionários." : ""}
+            {permissions.admin_perfis ? " Você pode gerenciar perfis." : ""}
+            {permissions.admin_funcionarios ? " Você pode gerenciar funcionários." : ""}
           </AlertDescription>
         </Alert>
       )}
