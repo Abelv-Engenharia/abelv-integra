@@ -14,6 +14,7 @@ import {
   fetchEncarregados,
   fetchFuncionarios,
 } from "@/services/desviosService";
+import { supabase } from "@/integrations/supabase/client";
 
 export const useFormData = () => {
   const { data: ccas = [] } = useQuery({
@@ -44,7 +45,7 @@ export const useFormData = () => {
   const { data: empresas = [] } = useQuery({
     queryKey: ['empresas-with-cca'],
     queryFn: async () => {
-      const { data } = await import("@/integrations/supabase/client").then(m => m.supabase)
+      const { data } = await supabase
         .from('empresas')
         .select(`
           id,
@@ -68,7 +69,7 @@ export const useFormData = () => {
   const { data: engenheiros = [] } = useQuery({
     queryKey: ['engenheiros-with-cca'],
     queryFn: async () => {
-      const { data } = await import("@/integrations/supabase/client").then(m => m.supabase)
+      const { data } = await supabase
         .from('engenheiros')
         .select(`
           id,
@@ -94,7 +95,7 @@ export const useFormData = () => {
   const { data: supervisores = [] } = useQuery({
     queryKey: ['supervisores-with-cca'],
     queryFn: async () => {
-      const { data } = await import("@/integrations/supabase/client").then(m => m.supabase)
+      const { data } = await supabase
         .from('supervisores')
         .select(`
           id,
@@ -115,7 +116,7 @@ export const useFormData = () => {
   const { data: encarregados = [] } = useQuery({
     queryKey: ['encarregados-with-cca'],
     queryFn: async () => {
-      const { data } = await import("@/integrations/supabase/client").then(m => m.supabase)
+      const { data } = await supabase
         .from('encarregados')
         .select(`
           id,
@@ -136,7 +137,7 @@ export const useFormData = () => {
   const { data: funcionarios = [] } = useQuery({
     queryKey: ['funcionarios-with-cca'],
     queryFn: async () => {
-      const { data } = await import("@/integrations/supabase/client").then(m => m.supabase)
+      const { data } = await supabase
         .from('funcionarios')
         .select(`
           id,
@@ -155,7 +156,7 @@ export const useFormData = () => {
   });
 
   return {
-    ccas,
+    ccas: ccas.sort((a, b) => a.codigo.localeCompare(b.codigo)),
     tiposRegistro,
     processos,
     eventosIdentificados,

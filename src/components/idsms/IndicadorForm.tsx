@@ -26,7 +26,10 @@ const IndicadorForm: React.FC<IndicadorFormProps> = ({ tipo, titulo, descricao, 
 
   const { data: ccaOptions = [] } = useQuery({
     queryKey: ['ccas'],
-    queryFn: ccaService.getAll,
+    queryFn: async () => {
+      const ccas = await ccaService.getAll();
+      return ccas.sort((a, b) => a.codigo.localeCompare(b.codigo));
+    },
   });
 
   const form = useForm<IDSMSFormValues>({

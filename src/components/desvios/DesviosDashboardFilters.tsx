@@ -59,7 +59,7 @@ const DesviosDashboardFilters = ({
   useEffect(() => {
     const fetchFilterOptions = async () => {
       try {
-        // Buscar CCAs
+        // Buscar CCAs ordenados por código
         const { data: ccasData } = await supabase
           .from('ccas')
           .select('id, codigo, nome')

@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 
 // Interfaces para os tipos de dados
@@ -103,7 +102,7 @@ export interface Disciplina {
 export const fetchDesvios = async () => {
   try {
     const { data, error } = await supabase
-      .from('desvios')
+      .from('desvios_completos')
       .select('*')
       .order('created_at', { ascending: false });
       
@@ -124,7 +123,8 @@ export const fetchCCAs = async (): Promise<CCA[]> => {
     const { data, error } = await supabase
       .from('ccas')
       .select('*')
-      .eq('ativo', true);
+      .eq('ativo', true)
+      .order('codigo');
       
     if (error) {
       console.error('Erro ao buscar CCAs:', error);
