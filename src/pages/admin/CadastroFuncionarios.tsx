@@ -40,7 +40,7 @@ const CadastroFuncionarios = () => {
     nome: "",
     funcao: "",
     matricula: "",
-    cca_id: ""
+    cca_id: "none"
   });
 
   // Buscar funcionários
@@ -82,6 +82,8 @@ const CadastroFuncionarios = () => {
   // Mutation para criar/editar funcionário
   const createFuncionarioMutation = useMutation({
     mutationFn: async (funcionario: { nome: string; funcao: string; matricula: string; cca_id: string }) => {
+      const ccaId = funcionario.cca_id === "none" ? null : parseInt(funcionario.cca_id);
+      
       if (editingFuncionario) {
         // Atualizar funcionário
         const { error: updateError } = await supabase
@@ -90,7 +92,7 @@ const CadastroFuncionarios = () => {
             nome: funcionario.nome, 
             funcao: funcionario.funcao,
             matricula: funcionario.matricula,
-            cca_id: funcionario.cca_id ? parseInt(funcionario.cca_id) : null
+            cca_id: ccaId
           })
           .eq('id', editingFuncionario.id);
         
@@ -103,7 +105,7 @@ const CadastroFuncionarios = () => {
             nome: funcionario.nome, 
             funcao: funcionario.funcao,
             matricula: funcionario.matricula,
-            cca_id: funcionario.cca_id ? parseInt(funcionario.cca_id) : null
+            cca_id: ccaId
           });
         
         if (createError) throw createError;
@@ -147,7 +149,7 @@ const CadastroFuncionarios = () => {
   });
 
   const resetForm = () => {
-    setFormData({ nome: "", funcao: "", matricula: "", cca_id: "" });
+    setFormData({ nome: "", funcao: "", matricula: "", cca_id: "none" });
     setEditingFuncionario(null);
     setPhotoPreview(null);
     setPhotoFile(null);
@@ -159,7 +161,7 @@ const CadastroFuncionarios = () => {
       nome: funcionario.nome,
       funcao: funcionario.funcao,
       matricula: funcionario.matricula,
-      cca_id: funcionario.cca_id?.toString() || ""
+      cca_id: funcionario.cca_id?.toString() || "none"
     });
     setPhotoPreview(funcionario.foto || null);
     setIsDialogOpen(true);
@@ -279,7 +281,7 @@ const CadastroFuncionarios = () => {
                       <SelectValue placeholder="Selecione um CCA" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Nenhum CCA</SelectItem>
+                      <SelectItem value="none">Nenhum CCA</SelectItem>
                       {ccas.map((cca) => (
                         <SelectItem key={cca.id} value={cca.id.toString()}>
                           {cca.codigo} - {cca.nome}
