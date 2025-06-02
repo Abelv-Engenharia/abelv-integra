@@ -1,65 +1,174 @@
 
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowLeft, Upload, UserRound } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import { useToast } from "@/hooks/use-toast";
-
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import React, { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Trash2, Edit, Plus, Upload, UserRound } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-// Form schema using zod
-const funcionarioFormSchema = z.object({
-  nome: z.string().min(3, "O nome deve ter pelo menos 3 caracteres"),
-  funcao: z.string().min(2, "A função deve ter pelo menos 2 caracteres"),
-  matricula: z.string().min(2, "A matrícula deve ter pelo menos 2 caracteres"),
-  cpf: z
-    .string()
-    .min(11, "CPF deve ter 11 dígitos")
-    .max(14, "CPF deve ter no máximo 14 caracteres")
-    .refine(
-      (cpf) => {
-        // Remove any non-digit characters
-        const cleanCpf = cpf.replace(/\D/g, "");
-        return cleanCpf.length === 11;
-      },
-      {
-        message: "CPF deve ter 11 dígitos",
-      }
-    ),
-});
+interface Funcionario {
+  id: string;
+  nome: string;
+  funcao: string;
+  matricula: string;
+  foto?: string;
+  ativo: boolean;
+  cca_id?: number;
+  ccas?: { id: number; codigo: string; nome: string };
+}
 
-type FuncionarioFormValues = z.infer<typeof funcionarioFormSchema>;
+interface CCA {
+  id: number;
+  codigo: string;
+  nome: string;
+}
 
 const CadastroFuncionarios = () => {
-  const navigate = useNavigate();
   const { toast } = useToast();
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const queryClient = useQueryClient();
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editingFuncionario, setEditingFuncionario] = useState<Funcionario | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
-
-  // Initialize form with default values
-  const form = useForm<FuncionarioFormValues>({
-    resolver: zodResolver(funcionarioFormSchema),
-    defaultValues: {
-      nome: "",
-      funcao: "",
-      matricula: "",
-      cpf: "",
-    },
+  const [formData, setFormData] = useState({
+    nome: "",
+    funcao: "",
+    matricula: "",
+    cca_id: ""
   });
+
+  // Buscar funcionários
+  const { data: funcionarios = [], isLoading: loadingFuncionarios } = useQuery({
+    queryKey: ['admin-funcionarios'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('funcionarios')
+        .select(`
+          id,
+          nome,
+          funcao,
+          matricula,
+          foto,
+          ativo,
+          cca_id,
+          ccas:cca_id(id, codigo, nome)
+        `)
+        .order('nome');
+      if (error) throw error;
+      return data || [];
+    }
+  });
+
+  // Buscar CCAs
+  const { data: ccas = [] } = useQuery({
+    queryKey: ['ccas-admin'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('ccas')
+        .select('id, codigo, nome')
+        .eq('ativo', true)
+        .order('codigo');
+      if (error) throw error;
+      return data || [];
+    }
+  });
+
+  // Mutation para criar/editar funcionário
+  const createFuncionarioMutation = useMutation({
+    mutationFn: async (funcionario: { nome: string; funcao: string; matricula: string; cca_id: string }) => {
+      if (editingFuncionario) {
+        // Atualizar funcionário
+        const { error: updateError } = await supabase
+          .from('funcionarios')
+          .update({ 
+            nome: funcionario.nome, 
+            funcao: funcionario.funcao,
+            matricula: funcionario.matricula,
+            cca_id: funcionario.cca_id ? parseInt(funcionario.cca_id) : null
+          })
+          .eq('id', editingFuncionario.id);
+        
+        if (updateError) throw updateError;
+      } else {
+        // Criar novo funcionário
+        const { error: createError } = await supabase
+          .from('funcionarios')
+          .insert({ 
+            nome: funcionario.nome, 
+            funcao: funcionario.funcao,
+            matricula: funcionario.matricula,
+            cca_id: funcionario.cca_id ? parseInt(funcionario.cca_id) : null
+          });
+        
+        if (createError) throw createError;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-funcionarios'] });
+      toast({
+        title: "Sucesso",
+        description: editingFuncionario ? "Funcionário atualizado com sucesso!" : "Funcionário criado com sucesso!",
+      });
+      setIsDialogOpen(false);
+      resetForm();
+    },
+    onError: (error) => {
+      toast({
+        title: "Erro",
+        description: "Erro ao salvar funcionário",
+        variant: "destructive",
+      });
+      console.error('Erro:', error);
+    }
+  });
+
+  // Mutation para deletar funcionário
+  const deleteFuncionarioMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from('funcionarios')
+        .update({ ativo: false })
+        .eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-funcionarios'] });
+      toast({
+        title: "Sucesso",
+        description: "Funcionário desativado com sucesso!",
+      });
+    }
+  });
+
+  const resetForm = () => {
+    setFormData({ nome: "", funcao: "", matricula: "", cca_id: "" });
+    setEditingFuncionario(null);
+    setPhotoPreview(null);
+    setPhotoFile(null);
+  };
+
+  const handleEdit = (funcionario: Funcionario) => {
+    setEditingFuncionario(funcionario);
+    setFormData({
+      nome: funcionario.nome,
+      funcao: funcionario.funcao,
+      matricula: funcionario.matricula,
+      cca_id: funcionario.cca_id?.toString() || ""
+    });
+    setPhotoPreview(funcionario.foto || null);
+    setIsDialogOpen(true);
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    createFuncionarioMutation.mutate(formData);
+  };
 
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -73,69 +182,26 @@ const CadastroFuncionarios = () => {
     }
   };
 
-  const onSubmit = async (data: FuncionarioFormValues) => {
-    setIsSubmitting(true);
-    try {
-      // Format CPF for display (XXX.XXX.XXX-XX)
-      const formattedCpf = data.cpf
-        .replace(/\D/g, "")
-        .replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
-      
-      // In a real app, this would save data to the backend along with the photo
-      console.log("Funcionario data to submit:", data);
-      console.log("Photo file:", photoFile);
-      
-      // Simulate API call with timeout
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      toast({
-        title: "Funcionário cadastrado com sucesso",
-        description: `${data.nome} foi cadastrado como ${data.funcao}`,
-      });
-      
-      // Reset form or navigate back
-      form.reset();
-      setPhotoPreview(null);
-      setPhotoFile(null);
-    } catch (error) {
-      console.error("Error submitting funcionario data:", error);
-      toast({
-        title: "Erro ao cadastrar funcionário",
-        description: "Ocorreu um erro ao cadastrar o funcionário. Tente novamente.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
   return (
     <div className="space-y-6">
-      <div>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="mb-2"
-          onClick={() => navigate(-1)}
-        >
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Voltar
-        </Button>
-        <h1 className="text-2xl font-bold tracking-tight">Cadastro de Funcionários</h1>
-        <p className="text-muted-foreground">
-          Cadastre um novo funcionário no sistema
-        </p>
-      </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Novo Funcionário</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h1 className="text-3xl font-bold">Administração de Funcionários</h1>
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogTrigger asChild>
+            <Button onClick={resetForm}>
+              <Plus className="h-4 w-4 mr-2" />
+              Novo Funcionário
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>
+                {editingFuncionario ? "Editar Funcionário" : "Novo Funcionário"}
+              </DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleSubmit} className="space-y-4">
               <div className="flex flex-col items-center sm:items-start mb-6">
-                <FormLabel className="mb-2">Foto</FormLabel>
+                <Label className="mb-2">Foto</Label>
                 <Avatar className="size-32 mb-3">
                   <AvatarImage src={photoPreview || ""} />
                   <AvatarFallback>
@@ -173,86 +239,135 @@ const CadastroFuncionarios = () => {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="nome"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Nome completo</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Digite o nome completo" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="funcao"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Função</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="Digite a função do funcionário"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <div>
+                  <Label htmlFor="nome">Nome</Label>
+                  <Input
+                    id="nome"
+                    value={formData.nome}
+                    onChange={(e) => setFormData(prev => ({ ...prev, nome: e.target.value }))}
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="funcao">Função</Label>
+                  <Input
+                    id="funcao"
+                    value={formData.funcao}
+                    onChange={(e) => setFormData(prev => ({ ...prev, funcao: e.target.value }))}
+                    required
+                  />
+                </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="matricula"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Matrícula</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Digite a matrícula" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="cpf"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>CPF</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="000.000.000-00"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <div>
+                  <Label htmlFor="matricula">Matrícula</Label>
+                  <Input
+                    id="matricula"
+                    value={formData.matricula}
+                    onChange={(e) => setFormData(prev => ({ ...prev, matricula: e.target.value }))}
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="cca">CCA</Label>
+                  <Select 
+                    value={formData.cca_id} 
+                    onValueChange={(value) => setFormData(prev => ({ ...prev, cca_id: value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione um CCA" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">Nenhum CCA</SelectItem>
+                      {ccas.map((cca) => (
+                        <SelectItem key={cca.id} value={cca.id.toString()}>
+                          {cca.codigo} - {cca.nome}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
 
               <div className="flex justify-end space-x-2">
-                <Button
-                  variant="outline"
-                  onClick={() => navigate(-1)}
-                  disabled={isSubmitting}
-                  type="button"
-                >
+                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
                   Cancelar
                 </Button>
-                <Button type="submit" disabled={isSubmitting}>
-                  {isSubmitting ? "Salvando..." : "Salvar funcionário"}
+                <Button type="submit" disabled={createFuncionarioMutation.isPending}>
+                  {createFuncionarioMutation.isPending ? "Salvando..." : "Salvar"}
                 </Button>
               </div>
             </form>
-          </Form>
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Funcionários Cadastrados</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {loadingFuncionarios ? (
+            <p>Carregando...</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse border border-gray-300">
+                <thead>
+                  <tr className="bg-gray-50">
+                    <th className="border border-gray-300 p-2 text-left">Foto</th>
+                    <th className="border border-gray-300 p-2 text-left">Nome</th>
+                    <th className="border border-gray-300 p-2 text-left">Função</th>
+                    <th className="border border-gray-300 p-2 text-left">Matrícula</th>
+                    <th className="border border-gray-300 p-2 text-left">CCA</th>
+                    <th className="border border-gray-300 p-2 text-left">Status</th>
+                    <th className="border border-gray-300 p-2 text-center">Ações</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {funcionarios.map((funcionario) => (
+                    <tr key={funcionario.id}>
+                      <td className="border border-gray-300 p-2">
+                        <Avatar className="size-8">
+                          <AvatarImage src={funcionario.foto || ""} />
+                          <AvatarFallback>
+                            <UserRound className="h-4 w-4" />
+                          </AvatarFallback>
+                        </Avatar>
+                      </td>
+                      <td className="border border-gray-300 p-2">{funcionario.nome}</td>
+                      <td className="border border-gray-300 p-2">{funcionario.funcao}</td>
+                      <td className="border border-gray-300 p-2">{funcionario.matricula}</td>
+                      <td className="border border-gray-300 p-2">
+                        {funcionario.ccas ? `${funcionario.ccas.codigo} - ${funcionario.ccas.nome}` : "Nenhum"}
+                      </td>
+                      <td className="border border-gray-300 p-2">
+                        <span className={`px-2 py-1 rounded text-xs ${funcionario.ativo ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                          {funcionario.ativo ? "Ativo" : "Inativo"}
+                        </span>
+                      </td>
+                      <td className="border border-gray-300 p-2 text-center">
+                        <div className="flex justify-center space-x-2">
+                          <Button size="sm" variant="outline" onClick={() => handleEdit(funcionario)}>
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          {funcionario.ativo && (
+                            <Button 
+                              size="sm" 
+                              variant="destructive" 
+                              onClick={() => deleteFuncionarioMutation.mutate(funcionario.id)}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
