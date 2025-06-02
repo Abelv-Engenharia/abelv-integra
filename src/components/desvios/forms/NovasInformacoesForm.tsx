@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useFormContext } from "react-hook-form";
 import {
@@ -17,6 +18,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useFilteredFormData } from "@/hooks/useFilteredFormData";
 
 interface NovasInformacoesFormProps {
   context: {
@@ -28,31 +30,30 @@ interface NovasInformacoesFormProps {
 }
 
 const NovasInformacoesForm = ({ context }: NovasInformacoesFormProps) => {
-  const { control } = useFormContext();
+  const { control, watch } = useFormContext();
+  const { baseLegalOpcoes } = context;
 
-  const {
-    baseLegalOpcoes,
-    supervisores,
-    encarregados,
-    funcionarios,
-  } = context;
+  // Watch do CCA selecionado para filtrar os outros campos
+  const selectedCcaId = watch("ccaId");
+  
+  // Usar dados filtrados baseados no CCA selecionado
+  const filteredData = useFilteredFormData({ selectedCcaId });
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Informações</CardTitle>
+        <CardTitle>Informações do Desvio</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         <FormField
           control={control}
-          name="descricao"
+          name="local"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Descrição*</FormLabel>
+              <FormLabel>Local*</FormLabel>
               <FormControl>
-                <Textarea 
-                  placeholder="Descreva detalhadamente o desvio identificado"
-                  className="min-h-[100px]"
+                <Input 
+                  placeholder="Local onde ocorreu o desvio" 
                   {...field}
                   onChange={(e) => field.onChange(e.target.value.toUpperCase())}
                 />
@@ -77,7 +78,7 @@ const NovasInformacoesForm = ({ context }: NovasInformacoesFormProps) => {
                 <SelectContent>
                   {baseLegalOpcoes.map((opcao) => (
                     <SelectItem key={opcao.id} value={opcao.id.toString()}>
-                      {opcao.nome}
+                      {opcao.codigo} - {opcao.nome}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -93,15 +94,15 @@ const NovasInformacoesForm = ({ context }: NovasInformacoesFormProps) => {
             name="supervisorResponsavel"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Supervisor Responsável*</FormLabel>
+                <FormLabel>Supervisor Responsável</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Selecione o supervisor" />
+                      <SelectValue placeholder={selectedCcaId ? "Selecione o supervisor" : "Primeiro selecione um CCA"} />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {supervisores.map((supervisor) => (
+                    {filteredData.supervisores.map((supervisor) => (
                       <SelectItem key={supervisor.id} value={supervisor.id}>
                         {supervisor.nome}
                       </SelectItem>
@@ -118,15 +119,15 @@ const NovasInformacoesForm = ({ context }: NovasInformacoesFormProps) => {
             name="encarregadoResponsavel"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Encarregado Responsável*</FormLabel>
+                <FormLabel>Encarregado Responsável</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Selecione o encarregado" />
+                      <SelectValue placeholder={selectedCcaId ? "Selecione o encarregado" : "Primeiro selecione um CCA"} />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {encarregados.map((encarregado) => (
+                    {filteredData.encarregados.map((encarregado) => (
                       <SelectItem key={encarregado.id} value={encarregado.id}>
                         {encarregado.nome}
                       </SelectItem>
@@ -139,32 +140,32 @@ const NovasInformacoesForm = ({ context }: NovasInformacoesFormProps) => {
           />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <FormField
-            control={control}
-            name="colaboradorInfrator"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Colaborador Infrator</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione o colaborador" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {funcionarios.map((funcionario) => (
-                      <SelectItem key={funcionario.id} value={funcionario.id}>
-                        {funcionario.nome}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+        <FormField
+          control={control}
+          name="colaboradorInfrator"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Colaborador Infrator</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder={selectedCcaId ? "Selecione o colaborador" : "Primeiro selecione um CCA"} />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {filteredData.funcionarios.map((funcionario) => (
+                    <SelectItem key={funcionario.id} value={funcionario.id}>
+                      {funcionario.nome} - {funcionario.matricula}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <FormField
             control={control}
             name="funcao"
@@ -193,6 +194,44 @@ const NovasInformacoesForm = ({ context }: NovasInformacoesFormProps) => {
             )}
           />
         </div>
+
+        <FormField
+          control={control}
+          name="descricaoDesvio"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Descrição do Desvio*</FormLabel>
+              <FormControl>
+                <Textarea 
+                  placeholder="Descreva o desvio identificado..."
+                  className="min-h-[100px]"
+                  {...field}
+                  onChange={(e) => field.onChange(e.target.value.toUpperCase())}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={control}
+          name="acaoImediata"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Ação Imediata</FormLabel>
+              <FormControl>
+                <Textarea 
+                  placeholder="Descreva a ação imediata tomada..."
+                  className="min-h-[80px]"
+                  {...field}
+                  onChange={(e) => field.onChange(e.target.value.toUpperCase())}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
       </CardContent>
     </Card>
   );

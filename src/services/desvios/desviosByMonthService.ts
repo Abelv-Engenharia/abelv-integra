@@ -1,40 +1,41 @@
 
 import { supabase } from "@/integrations/supabase/client";
 
-// Function to fetch data for area chart (desvios by month)
 export const fetchDesviosByMonth = async () => {
   try {
     const { data, error } = await supabase
-      .from('desvios')
-      .select('data');
-    
+      .from('desvios_completos')
+      .select(`
+        id,
+        data_desvio,
+        created_at
+      `)
+      .order('created_at', { ascending: false });
+      
     if (error) {
-      console.error('Error fetching desvios by month:', error);
+      console.error('Erro ao buscar desvios por mês:', error);
       return [];
     }
-
-    const monthNames = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
-    const monthlyCounts: Record<string, number> = {};
     
-    // Initialize all months with zero
-    monthNames.forEach(month => {
-      monthlyCounts[month] = 0;
-    });
-
-    // Count desvios by month
-    data?.forEach(desvio => {
-      const date = new Date(desvio.data);
-      const month = monthNames[date.getMonth()];
-      monthlyCounts[month] = (monthlyCounts[month] || 0) + 1;
-    });
-
-    // Convert to the format expected by the area chart
-    return monthNames.map(name => ({
-      name,
-      value: monthlyCounts[name]
+    // Processar dados por mês
+    const desviosByMonth = data?.reduce((acc: any, desvio: any) => {
+      const date = new Date(desvio.data_desvio);
+      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      
+      if (!acc[monthKey]) {
+        acc[monthKey] = 0;
+      }
+      acc[monthKey]++;
+      
+      return acc;
+    }, {});
+    
+    return Object.entries(desviosByMonth || {}).map(([month, count]) => ({
+      month,
+      count
     }));
   } catch (error) {
-    console.error('Exception fetching desvios by month:', error);
+    console.error('Exceção ao buscar desvios por mês:', error);
     return [];
   }
 };

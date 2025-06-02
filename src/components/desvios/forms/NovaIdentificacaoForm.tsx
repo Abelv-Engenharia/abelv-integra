@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useFormContext } from "react-hook-form";
 import {
@@ -16,6 +17,7 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useFilteredFormData } from "@/hooks/useFilteredFormData";
 
 interface NovaIdentificacaoFormProps {
   context: {
@@ -31,7 +33,7 @@ interface NovaIdentificacaoFormProps {
 }
 
 const NovaIdentificacaoForm = ({ context }: NovaIdentificacaoFormProps) => {
-  const { control } = useFormContext();
+  const { control, watch } = useFormContext();
 
   const {
     ccas,
@@ -39,10 +41,14 @@ const NovaIdentificacaoForm = ({ context }: NovaIdentificacaoFormProps) => {
     processos,
     eventosIdentificados,
     causasProvaveis,
-    empresas,
     disciplinas,
-    engenheiros,
   } = context;
+
+  // Watch do CCA selecionado para filtrar os outros campos
+  const selectedCcaId = watch("ccaId");
+  
+  // Usar dados filtrados baseados no CCA selecionado
+  const filteredData = useFilteredFormData({ selectedCcaId });
 
   return (
     <Card>
@@ -265,11 +271,11 @@ const NovaIdentificacaoForm = ({ context }: NovaIdentificacaoFormProps) => {
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Selecione a empresa" />
+                      <SelectValue placeholder={selectedCcaId ? "Selecione a empresa" : "Primeiro selecione um CCA"} />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {empresas.map((empresa) => (
+                    {filteredData.empresas.map((empresa) => (
                       <SelectItem key={empresa.id} value={empresa.id.toString()}>
                         {empresa.nome}
                       </SelectItem>
@@ -316,11 +322,11 @@ const NovaIdentificacaoForm = ({ context }: NovaIdentificacaoFormProps) => {
               <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Selecione o engenheiro responsável" />
+                    <SelectValue placeholder={selectedCcaId ? "Selecione o engenheiro responsável" : "Primeiro selecione um CCA"} />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {engenheiros.map((engenheiro) => (
+                  {filteredData.engenheiros.map((engenheiro) => (
                     <SelectItem key={engenheiro.id} value={engenheiro.id}>
                       {engenheiro.nome}
                     </SelectItem>
