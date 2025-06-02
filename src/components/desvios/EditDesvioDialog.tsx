@@ -50,7 +50,7 @@ const EditDesvioDialog = ({ desvio, open, onOpenChange, onDesvioUpdated }: EditD
       engenheiroResponsavel: "",
       
       // Novas Informações
-      descricao: "",
+      descricaoDesvio: "",
       baseLegal: "",
       supervisorResponsavel: "",
       encarregadoResponsavel: "",
@@ -112,7 +112,7 @@ const EditDesvioDialog = ({ desvio, open, onOpenChange, onDesvioUpdated }: EditD
         engenheiroResponsavel: desvio.engenheiro_responsavel_id || "",
         
         // Novas Informações
-        descricao: desvio.descricao_desvio || "",
+        descricaoDesvio: desvio.descricao_desvio || "",
         baseLegal: desvio.base_legal_opcao_id?.toString() || "",
         supervisorResponsavel: desvio.supervisor_responsavel_id || "",
         encarregadoResponsavel: desvio.encarregado_responsavel_id || "",
@@ -164,7 +164,7 @@ const EditDesvioDialog = ({ desvio, open, onOpenChange, onDesvioUpdated }: EditD
         evento_identificado_id: data.eventoIdentificado ? parseInt(data.eventoIdentificado) : null,
         causa_provavel_id: data.causaProvavel ? parseInt(data.causaProvavel) : null,
         disciplina_id: data.disciplina ? parseInt(data.disciplina) : null,
-        descricao_desvio: data.descricao,
+        descricao_desvio: data.descricaoDesvio,
         acao_imediata: data.tratativaAplicada,
         exposicao: data.exposicao ? parseInt(data.exposicao) : null,
         controle: data.controle ? parseInt(data.controle) : null,
@@ -175,6 +175,12 @@ const EditDesvioDialog = ({ desvio, open, onOpenChange, onDesvioUpdated }: EditD
         classificacao_risco: data.classificacaoRisco,
         responsavel_id: data.responsavelAcao || null,
         prazo_conclusao: data.prazoCorrecao || null,
+        funcionarios_envolvidos: data.colaboradorInfrator ? [{
+          funcionario_id: data.colaboradorInfrator,
+          tipo: 'infrator',
+          funcao: data.funcao,
+          matricula: data.matricula
+        }] : [],
       });
 
       if (updatedDesvio) {

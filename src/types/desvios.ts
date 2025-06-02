@@ -16,7 +16,7 @@ export interface DesvioFormData {
   engenheiroResponsavel: string;
   
   // Novas Informações
-  descricao: string;
+  descricaoDesvio: string; // Campo corrigido para mapear para descricao_desvio
   baseLegal: string;
   supervisorResponsavel: string;
   encarregadoResponsavel: string;
