@@ -80,7 +80,7 @@ const TaxaFrequenciaChart = () => {
         />
         <Bar 
           dataKey="value" 
-          fill={(entry: any) => entry.color}
+          fill="#8884d8"
           name="Taxa"
         />
       </BarChart>

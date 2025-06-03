@@ -39,7 +39,6 @@ const OcorrenciasAtualizarStatus = () => {
   const { register, control, handleSubmit, setValue, watch, reset } = useForm({
     defaultValues: {
       acoes: [],
-      arquivo_rais: null,
       licoes_aprendidas_enviada: "",
       arquivo_licoes_aprendidas: null
     }
@@ -71,7 +70,6 @@ const OcorrenciasAtualizarStatus = () => {
 
         reset({
           acoes: convertedAcoes,
-          arquivo_rais: data.arquivo_rais || null,
           licoes_aprendidas_enviada: data.licoes_aprendidas_enviada || "",
           arquivo_licoes_aprendidas: data.arquivo_licoes_aprendidas || null
         });
@@ -293,21 +291,6 @@ const OcorrenciasAtualizarStatus = () => {
             <CardTitle>Anexos e Documentos</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div>
-              <Label htmlFor="arquivo_rais">Anexo RAIS</Label>
-              <div className="flex items-center gap-2 mt-1">
-                <Input
-                  id="arquivo_rais"
-                  type="file"
-                  accept=".pdf,.doc,.docx,.jpg,.png"
-                />
-                <Button type="button" variant="outline" size="sm">
-                  <Upload className="h-4 w-4 mr-1" />
-                  Upload
-                </Button>
-              </div>
-            </div>
-
             <div>
               <Label htmlFor="licoes_aprendidas_enviada">Status das Lições Aprendidas</Label>
               <Select 
