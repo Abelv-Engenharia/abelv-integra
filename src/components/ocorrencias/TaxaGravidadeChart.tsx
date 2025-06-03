@@ -1,26 +1,26 @@
 
 import { useState, useEffect } from "react";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import { fetchTaxaGravidade } from "@/services/ocorrencias/ocorrenciasStatsService";
+import { ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from "recharts";
+import { fetchTaxaGravidadePorMes, fetchMetaIndicador } from "@/services/ocorrencias/ocorrenciasStatsService";
 
 const TaxaGravidadeChart = () => {
   const [data, setData] = useState<any[]>([]);
+  const [meta, setMeta] = useState<number>(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadData = async () => {
       try {
         setLoading(true);
-        const taxa = await fetchTaxaGravidade();
+        const anoAtual = new Date().getFullYear();
+        
+        const [dadosMensais, metaAnual] = await Promise.all([
+          fetchTaxaGravidadePorMes(anoAtual),
+          fetchMetaIndicador(anoAtual, 'meta_taxa_gravidade')
+        ]);
 
-        const chartData = [
-          {
-            name: "TX GRAV",
-            value: Number(taxa.toFixed(2)),
-          }
-        ];
-
-        setData(chartData);
+        setData(dadosMensais);
+        setMeta(metaAnual);
       } catch (error) {
         console.error("Error loading taxa gravidade data:", error);
       } finally {
@@ -41,11 +41,15 @@ const TaxaGravidadeChart = () => {
 
   return (
     <ResponsiveContainer width="100%" height={300}>
-      <BarChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
+      <ComposedChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis 
-          dataKey="name" 
+          dataKey="mes" 
           tick={{ fontSize: 11 }}
+          tickFormatter={(value) => {
+            const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+            return meses[value - 1] || value;
+          }}
         />
         <YAxis />
         <Tooltip 
@@ -54,14 +58,32 @@ const TaxaGravidadeChart = () => {
             border: '1px solid #ccc',
             borderRadius: '4px'
           }}
-          formatter={(value: any) => [value, 'Taxa']}
+          formatter={(value: any, name: string) => [
+            Number(value).toFixed(2), 
+            name === 'mensal' ? 'Taxa Mensal' : 'Taxa Acumulada'
+          ]}
         />
         <Bar 
-          dataKey="value" 
+          dataKey="mensal" 
           fill="#ea580c"
-          name="Taxa Gravidade"
+          name="Taxa Mensal"
         />
-      </BarChart>
+        <Line 
+          type="monotone" 
+          dataKey="acumulada" 
+          stroke="#c2410c"
+          strokeWidth={2}
+          name="Taxa Acumulada"
+        />
+        {meta > 0 && (
+          <ReferenceLine 
+            y={meta} 
+            stroke="#059669" 
+            strokeDasharray="5 5"
+            label={{ value: `Meta: ${meta.toFixed(2)}`, position: "top" }}
+          />
+        )}
+      </ComposedChart>
     </ResponsiveContainer>
   );
 };

@@ -1,26 +1,26 @@
 
 import { useState, useEffect } from "react";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import { fetchTaxaFrequenciaAcSpd } from "@/services/ocorrencias/ocorrenciasStatsService";
+import { ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from "recharts";
+import { fetchTaxaFrequenciaAcSpdPorMes, fetchMetaIndicador } from "@/services/ocorrencias/ocorrenciasStatsService";
 
 const TaxaFrequenciaAcSpdChart = () => {
   const [data, setData] = useState<any[]>([]);
+  const [meta, setMeta] = useState<number>(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadData = async () => {
       try {
         setLoading(true);
-        const taxa = await fetchTaxaFrequenciaAcSpd();
+        const anoAtual = new Date().getFullYear();
+        
+        const [dadosMensais, metaAnual] = await Promise.all([
+          fetchTaxaFrequenciaAcSpdPorMes(anoAtual),
+          fetchMetaIndicador(anoAtual, 'meta_taxa_frequencia_ac_spd')
+        ]);
 
-        const chartData = [
-          {
-            name: "TX AC SPD",
-            value: Number(taxa.toFixed(2)),
-          }
-        ];
-
-        setData(chartData);
+        setData(dadosMensais);
+        setMeta(metaAnual);
       } catch (error) {
         console.error("Error loading taxa AC SPD data:", error);
       } finally {
@@ -41,11 +41,15 @@ const TaxaFrequenciaAcSpdChart = () => {
 
   return (
     <ResponsiveContainer width="100%" height={300}>
-      <BarChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
+      <ComposedChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis 
-          dataKey="name" 
+          dataKey="mes" 
           tick={{ fontSize: 11 }}
+          tickFormatter={(value) => {
+            const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+            return meses[value - 1] || value;
+          }}
         />
         <YAxis />
         <Tooltip 
@@ -54,14 +58,32 @@ const TaxaFrequenciaAcSpdChart = () => {
             border: '1px solid #ccc',
             borderRadius: '4px'
           }}
-          formatter={(value: any) => [value, 'Taxa']}
+          formatter={(value: any, name: string) => [
+            Number(value).toFixed(2), 
+            name === 'mensal' ? 'Taxa Mensal' : 'Taxa Acumulada'
+          ]}
         />
         <Bar 
-          dataKey="value" 
+          dataKey="mensal" 
           fill="#16a34a"
-          name="Taxa AC SPD"
+          name="Taxa Mensal"
         />
-      </BarChart>
+        <Line 
+          type="monotone" 
+          dataKey="acumulada" 
+          stroke="#15803d"
+          strokeWidth={2}
+          name="Taxa Acumulada"
+        />
+        {meta > 0 && (
+          <ReferenceLine 
+            y={meta} 
+            stroke="#059669" 
+            strokeDasharray="5 5"
+            label={{ value: `Meta: ${meta.toFixed(2)}`, position: "top" }}
+          />
+        )}
+      </ComposedChart>
     </ResponsiveContainer>
   );
 };

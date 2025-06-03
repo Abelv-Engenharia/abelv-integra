@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import {
   BarChart3,
@@ -15,6 +14,7 @@ import {
   Building,
   UserCheck,
   UserCog,
+  Target,
 } from "lucide-react";
 import {
   Sidebar,
@@ -485,6 +485,15 @@ export function AppSidebar() {
                         <SidebarMenuButton asChild>
                           <Link to="/admin/hht">
                             <span>Registro de HHT</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                      
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                          <Link to="/admin/metas-indicadores">
+                            <Target className="h-4 w-4 mr-2" />
+                            <span>Metas de Indicadores</span>
                           </Link>
                         </SidebarMenuButton>
                       </SidebarMenuItem>

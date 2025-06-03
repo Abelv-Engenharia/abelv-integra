@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { format, subMonths, parseISO } from 'date-fns';
 
@@ -174,6 +175,174 @@ export async function fetchTaxaGravidade(): Promise<number> {
     return totalHHT > 0 ? (totalDiasPerdidos * 1000000) / totalHHT : 0;
   } catch (error) {
     console.error('Erro ao calcular taxa de gravidade:', error);
+    return 0;
+  }
+}
+
+// Novas funções para dados mensais e acumulados
+export async function fetchTaxaFrequenciaAcCpdPorMes(ano: number): Promise<any[]> {
+  try {
+    const resultado = [];
+    let acumuladoOcorrencias = 0;
+    let acumuladoHHT = 0;
+
+    for (let mes = 1; mes <= 12; mes++) {
+      // Buscar ocorrências AC CPD do mês
+      const { data: ocorrenciasMes } = await supabase
+        .from('ocorrencias')
+        .select('*')
+        .eq('ano', ano)
+        .eq('mes', mes)
+        .eq('tipo_ocorrencia', 'ACIDENTE')
+        .eq('houve_afastamento', 'SIM');
+
+      // Buscar HHT do mês
+      const { data: hhtMes } = await supabase
+        .from('horas_trabalhadas')
+        .select('horas_trabalhadas')
+        .eq('ano', ano)
+        .eq('mes', mes);
+
+      const ocorrenciasMesCount = ocorrenciasMes?.length || 0;
+      const hhtMesTotal = hhtMes?.reduce((sum, h) => sum + (h.horas_trabalhadas || 0), 0) || 0;
+
+      // Calcular taxa mensal
+      const taxaMensal = hhtMesTotal > 0 ? (ocorrenciasMesCount * 1000000) / hhtMesTotal : 0;
+
+      // Atualizar acumulados
+      acumuladoOcorrencias += ocorrenciasMesCount;
+      acumuladoHHT += hhtMesTotal;
+
+      // Calcular taxa acumulada
+      const taxaAcumulada = acumuladoHHT > 0 ? (acumuladoOcorrencias * 1000000) / acumuladoHHT : 0;
+
+      resultado.push({
+        mes,
+        mensal: taxaMensal,
+        acumulada: taxaAcumulada
+      });
+    }
+
+    return resultado;
+  } catch (error) {
+    console.error('Erro ao buscar dados mensais AC CPD:', error);
+    return [];
+  }
+}
+
+export async function fetchTaxaFrequenciaAcSpdPorMes(ano: number): Promise<any[]> {
+  try {
+    const resultado = [];
+    let acumuladoOcorrencias = 0;
+    let acumuladoHHT = 0;
+
+    for (let mes = 1; mes <= 12; mes++) {
+      // Buscar ocorrências AC SPD do mês
+      const { data: ocorrenciasMes } = await supabase
+        .from('ocorrencias')
+        .select('*')
+        .eq('ano', ano)
+        .eq('mes', mes)
+        .eq('tipo_ocorrencia', 'ACIDENTE')
+        .eq('houve_afastamento', 'NÃO');
+
+      // Buscar HHT do mês
+      const { data: hhtMes } = await supabase
+        .from('horas_trabalhadas')
+        .select('horas_trabalhadas')
+        .eq('ano', ano)
+        .eq('mes', mes);
+
+      const ocorrenciasMesCount = ocorrenciasMes?.length || 0;
+      const hhtMesTotal = hhtMes?.reduce((sum, h) => sum + (h.horas_trabalhadas || 0), 0) || 0;
+
+      // Calcular taxa mensal
+      const taxaMensal = hhtMesTotal > 0 ? (ocorrenciasMesCount * 1000000) / hhtMesTotal : 0;
+
+      // Atualizar acumulados
+      acumuladoOcorrencias += ocorrenciasMesCount;
+      acumuladoHHT += hhtMesTotal;
+
+      // Calcular taxa acumulada
+      const taxaAcumulada = acumuladoHHT > 0 ? (acumuladoOcorrencias * 1000000) / acumuladoHHT : 0;
+
+      resultado.push({
+        mes,
+        mensal: taxaMensal,
+        acumulada: taxaAcumulada
+      });
+    }
+
+    return resultado;
+  } catch (error) {
+    console.error('Erro ao buscar dados mensais AC SPD:', error);
+    return [];
+  }
+}
+
+export async function fetchTaxaGravidadePorMes(ano: number): Promise<any[]> {
+  try {
+    const resultado = [];
+    let acumuladoDiasPerdidos = 0;
+    let acumuladoHHT = 0;
+
+    for (let mes = 1; mes <= 12; mes++) {
+      // Buscar ocorrências com afastamento do mês
+      const { data: ocorrenciasMes } = await supabase
+        .from('ocorrencias')
+        .select('dias_perdidos, dias_debitados')
+        .eq('ano', ano)
+        .eq('mes', mes)
+        .eq('tipo_ocorrencia', 'ACIDENTE')
+        .eq('houve_afastamento', 'SIM');
+
+      // Buscar HHT do mês
+      const { data: hhtMes } = await supabase
+        .from('horas_trabalhadas')
+        .select('horas_trabalhadas')
+        .eq('ano', ano)
+        .eq('mes', mes);
+
+      const diasPerdidosMes = ocorrenciasMes?.reduce((sum, o) => 
+        sum + (o.dias_perdidos || 0) + (o.dias_debitados || 0), 0) || 0;
+      const hhtMesTotal = hhtMes?.reduce((sum, h) => sum + (h.horas_trabalhadas || 0), 0) || 0;
+
+      // Calcular taxa mensal
+      const taxaMensal = hhtMesTotal > 0 ? (diasPerdidosMes * 1000000) / hhtMesTotal : 0;
+
+      // Atualizar acumulados
+      acumuladoDiasPerdidos += diasPerdidosMes;
+      acumuladoHHT += hhtMesTotal;
+
+      // Calcular taxa acumulada
+      const taxaAcumulada = acumuladoHHT > 0 ? (acumuladoDiasPerdidos * 1000000) / acumuladoHHT : 0;
+
+      resultado.push({
+        mes,
+        mensal: taxaMensal,
+        acumulada: taxaAcumulada
+      });
+    }
+
+    return resultado;
+  } catch (error) {
+    console.error('Erro ao buscar dados mensais de gravidade:', error);
+    return [];
+  }
+}
+
+export async function fetchMetaIndicador(ano: number, tipoMeta: string): Promise<number> {
+  try {
+    const { data, error } = await supabase
+      .from('metas_indicadores')
+      .select(tipoMeta)
+      .eq('ano', ano)
+      .single();
+
+    if (error) throw error;
+    return data?.[tipoMeta] || 0;
+  } catch (error) {
+    console.error('Erro ao buscar meta do indicador:', error);
     return 0;
   }
 }
