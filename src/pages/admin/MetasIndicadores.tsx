@@ -30,7 +30,7 @@ const MetasIndicadores = () => {
 
   const carregarMetas = async () => {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('metas_indicadores')
         .select('*')
         .order('ano', { ascending: false });
@@ -63,7 +63,7 @@ const MetasIndicadores = () => {
       
       if (metaExistente) {
         // Atualizar meta existente
-        const { error } = await supabase
+        const { error } = await (supabase as any)
           .from('metas_indicadores')
           .update({
             meta_taxa_frequencia_ac_cpd: novaMetaAcCpd,
@@ -75,7 +75,7 @@ const MetasIndicadores = () => {
         if (error) throw error;
       } else {
         // Criar nova meta
-        const { error } = await supabase
+        const { error } = await (supabase as any)
           .from('metas_indicadores')
           .insert({
             ano: novaMetaAno,
@@ -114,7 +114,7 @@ const MetasIndicadores = () => {
 
   const excluirMeta = async (id: string) => {
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('metas_indicadores')
         .delete()
         .eq('id', id);

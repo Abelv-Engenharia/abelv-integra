@@ -828,6 +828,36 @@ export type Database = {
         }
         Relationships: []
       }
+      metas_indicadores: {
+        Row: {
+          ano: number
+          created_at: string
+          id: string
+          meta_taxa_frequencia_ac_cpd: number
+          meta_taxa_frequencia_ac_spd: number
+          meta_taxa_gravidade: number
+          updated_at: string
+        }
+        Insert: {
+          ano: number
+          created_at?: string
+          id?: string
+          meta_taxa_frequencia_ac_cpd?: number
+          meta_taxa_frequencia_ac_spd?: number
+          meta_taxa_gravidade?: number
+          updated_at?: string
+        }
+        Update: {
+          ano?: number
+          created_at?: string
+          id?: string
+          meta_taxa_frequencia_ac_cpd?: number
+          meta_taxa_frequencia_ac_spd?: number
+          meta_taxa_gravidade?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       natureza_lesao: {
         Row: {
           ativo: boolean | null

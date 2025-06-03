@@ -333,7 +333,7 @@ export async function fetchTaxaGravidadePorMes(ano: number): Promise<any[]> {
 
 export async function fetchMetaIndicador(ano: number, tipoMeta: string): Promise<number> {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from('metas_indicadores')
       .select(tipoMeta)
       .eq('ano', ano)
