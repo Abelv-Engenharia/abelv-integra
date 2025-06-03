@@ -10,216 +10,29 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { useOcorrenciasFormData } from "@/hooks/useOcorrenciasFormData";
+import AbsenceFields from "./components/AbsenceFields";
+import BodyPartLateralityFields from "./components/BodyPartLateralityFields";
+import CauseFields from "./components/CauseFields";
 
 const InformacoesOcorrenciaForm = () => {
-  const { control, watch } = useFormContext();
+  const { control } = useFormContext();
   const { partesCorpo, lateralidades, agentesCausadores, situacoesGeradoras, naturezasLesao } = useOcorrenciasFormData();
-  
-  const houveAfastamento = watch("houveAfastamento");
 
   return (
     <div className="space-y-6">
-      {/* First row: Afastamento e dias */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <FormField
-          control={control}
-          name="houveAfastamento"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Houve afastamento?</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="Sim">Sim</SelectItem>
-                  <SelectItem value="Não">Não</SelectItem>
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        
-        <FormField
-          control={control}
-          name="diasPerdidos"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Dias perdidos</FormLabel>
-              <FormControl>
-                <Input 
-                  type="number" 
-                  {...field} 
-                  disabled={houveAfastamento !== "Sim"} 
-                  onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : null)}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        
-        <FormField
-          control={control}
-          name="diasDebitados"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Dias debitados</FormLabel>
-              <FormControl>
-                <Input 
-                  type="number" 
-                  {...field} 
-                  disabled={houveAfastamento !== "Sim"} 
-                  onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : null)}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      </div>
+      <AbsenceFields />
       
-      {/* Second row: Parte do corpo e lateralidade */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <FormField
-          control={control}
-          name="parteCorpoAtingida"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Parte do corpo atingida</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {partesCorpo.map((parte) => (
-                    <SelectItem key={parte.id} value={parte.nome}>
-                      {parte.codigo} - {parte.nome}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        
-        <FormField
-          control={control}
-          name="lateralidade"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Lateralidade</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {lateralidades.map((lateral) => (
-                    <SelectItem key={lateral.id} value={lateral.nome}>
-                      {lateral.codigo} - {lateral.nome}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      </div>
-      
-      {/* Agente causador */}
-      <FormField
-        control={control}
-        name="agenteCausador"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Agente causador</FormLabel>
-            <Select onValueChange={field.onChange} defaultValue={field.value}>
-              <FormControl>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione" />
-                </SelectTrigger>
-              </FormControl>
-              <SelectContent>
-                {agentesCausadores.map((agente) => (
-                  <SelectItem key={agente.id} value={agente.nome}>
-                    {agente.codigo} - {agente.nome}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <FormMessage />
-          </FormItem>
-        )}
+      <BodyPartLateralityFields
+        partesCorpo={partesCorpo}
+        lateralidades={lateralidades}
       />
       
-      {/* Situação geradora */}
-      <FormField
-        control={control}
-        name="situacaoGeradora"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Situação geradora</FormLabel>
-            <Select onValueChange={field.onChange} defaultValue={field.value}>
-              <FormControl>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione" />
-                </SelectTrigger>
-              </FormControl>
-              <SelectContent>
-                {situacoesGeradoras.map((situacao) => (
-                  <SelectItem key={situacao.id} value={situacao.nome}>
-                    {situacao.codigo} - {situacao.nome}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      
-      {/* Natureza da lesão */}
-      <FormField
-        control={control}
-        name="naturezaLesao"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Natureza da lesão</FormLabel>
-            <Select onValueChange={field.onChange} defaultValue={field.value}>
-              <FormControl>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione" />
-                </SelectTrigger>
-              </FormControl>
-              <SelectContent>
-                {naturezasLesao.map((natureza) => (
-                  <SelectItem key={natureza.id} value={natureza.nome}>
-                    {natureza.codigo} - {natureza.nome}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <FormMessage />
-          </FormItem>
-        )}
+      <CauseFields
+        agentesCausadores={agentesCausadores}
+        situacoesGeradoras={situacoesGeradoras}
+        naturezasLesao={naturezasLesao}
       />
       
       {/* Descrição da ocorrência */}
