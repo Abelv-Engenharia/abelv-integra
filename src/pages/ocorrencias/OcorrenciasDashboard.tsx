@@ -8,13 +8,12 @@ import {
   TabsTrigger 
 } from "@/components/ui/tabs";
 import OcorrenciasSummaryCards from "@/components/ocorrencias/OcorrenciasSummaryCards";
-import OcorrenciasByTipoChart from "@/components/ocorrencias/OcorrenciasByTipoChart";
+import OcorrenciasByTipoColumnChart from "@/components/ocorrencias/OcorrenciasByTipoColumnChart";
 import OcorrenciasByEmpresaChart from "@/components/ocorrencias/OcorrenciasByEmpresaChart";
-import OcorrenciasByRiscoChart from "@/components/ocorrencias/OcorrenciasByRiscoChart";
 import OcorrenciasTimelineChart from "@/components/ocorrencias/OcorrenciasTimelineChart";
+import TaxaFrequenciaChart from "@/components/ocorrencias/TaxaFrequenciaChart";
 import OcorrenciasTable from "@/components/ocorrencias/OcorrenciasTable";
 import { OcorrenciasFiltros } from "@/components/ocorrencias/OcorrenciasFiltros";
-import PartesCorpoChart from "@/components/ocorrencias/PartesCorpoChart";
 
 const OcorrenciasDashboard = () => {
   const [filtroAtivo, setFiltroAtivo] = useState(false);
@@ -49,7 +48,7 @@ const OcorrenciasDashboard = () => {
                 <CardTitle>Ocorrências por Tipo</CardTitle>
               </CardHeader>
               <CardContent>
-                <OcorrenciasByTipoChart />
+                <OcorrenciasByTipoColumnChart />
               </CardContent>
             </Card>
             
@@ -61,25 +60,16 @@ const OcorrenciasDashboard = () => {
                 <OcorrenciasByEmpresaChart />
               </CardContent>
             </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle>Ocorrências por Classificação de Risco</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <OcorrenciasByRiscoChart />
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle>Partes do Corpo Atingidas</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <PartesCorpoChart />
-              </CardContent>
-            </Card>
           </div>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Taxas de Frequência e Gravidade (NBR 14280)</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <TaxaFrequenciaChart />
+            </CardContent>
+          </Card>
           
           <Card>
             <CardHeader>

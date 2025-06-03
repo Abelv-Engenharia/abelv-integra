@@ -11,9 +11,21 @@ import {
 } from "@/components/ui/table";
 import { OcorrenciasFiltros } from "@/components/ocorrencias/OcorrenciasFiltros";
 import { Button } from "@/components/ui/button";
-import { Eye, Search } from "lucide-react";
+import { Eye, Search, Edit, Trash2, CheckSquare } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { getAllOcorrencias } from "@/services/ocorrencias/ocorrenciasService";
+import { getAllOcorrencias, deleteOcorrencia } from "@/services/ocorrencias/ocorrenciasService";
+import { useToast } from "@/hooks/use-toast";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 // Function to get the background and text colors for each risk classification
 const getRiscoClassColor = (classificacao: string) => {
@@ -39,29 +51,45 @@ const OcorrenciasConsulta = () => {
   const [filteredData, setFilteredData] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
+  const [ccas, setCcas] = useState<any[]>([]);
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   useEffect(() => {
-    const loadOcorrencias = async () => {
+    const loadData = async () => {
       try {
         setLoading(true);
-        const data = await getAllOcorrencias();
-        setOcorrencias(data);
-        setFilteredData(data);
+        const [ocorrenciasData, ccasData] = await Promise.all([
+          getAllOcorrencias(),
+          fetch('/api/ccas').then(res => res.json()).catch(() => [])
+        ]);
+        
+        setOcorrencias(ocorrenciasData);
+        setFilteredData(ocorrenciasData);
+        setCcas(ccasData);
       } catch (error) {
-        console.error('Erro ao carregar ocorrências:', error);
+        console.error('Erro ao carregar dados:', error);
+        toast({
+          title: "Erro",
+          description: "Erro ao carregar dados das ocorrências",
+          variant: "destructive"
+        });
       } finally {
         setLoading(false);
       }
     };
 
-    loadOcorrencias();
-  }, []);
+    loadData();
+  }, [toast]);
+
+  const getCcaDisplay = (ccaText: string) => {
+    const cca = ccas.find(c => c.codigo === ccaText || c.nome === ccaText);
+    return cca ? `${cca.codigo} - ${cca.nome}` : ccaText;
+  };
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Simple search filter
     if (searchTerm.trim() === "") {
       setFilteredData(ocorrencias);
       return;
@@ -80,6 +108,35 @@ const OcorrenciasConsulta = () => {
 
   const handleViewOcorrencia = (id: string) => {
     navigate(`/ocorrencias/detalhes/${id}`);
+  };
+
+  const handleEditOcorrencia = (id: string) => {
+    navigate(`/ocorrencias/editar/${id}`);
+  };
+
+  const handleUpdateStatus = (id: string) => {
+    navigate(`/ocorrencias/atualizar-status/${id}`);
+  };
+
+  const handleDeleteOcorrencia = async (id: string) => {
+    try {
+      await deleteOcorrencia(id);
+      const updatedData = filteredData.filter(item => item.id !== id);
+      setFilteredData(updatedData);
+      setOcorrencias(prev => prev.filter(item => item.id !== id));
+      
+      toast({
+        title: "Sucesso",
+        description: "Ocorrência excluída com sucesso",
+      });
+    } catch (error) {
+      console.error('Erro ao excluir ocorrência:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao excluir ocorrência",
+        variant: "destructive"
+      });
+    }
   };
 
   if (loading) {
@@ -153,7 +210,7 @@ const OcorrenciasConsulta = () => {
                       <TableCell>
                         {ocorrencia.data ? new Date(ocorrencia.data).toLocaleDateString() : '-'}
                       </TableCell>
-                      <TableCell>{ocorrencia.cca || '-'}</TableCell>
+                      <TableCell>{getCcaDisplay(ocorrencia.cca || '-')}</TableCell>
                       <TableCell>{ocorrencia.empresa || '-'}</TableCell>
                       <TableCell>{ocorrencia.disciplina || '-'}</TableCell>
                       <TableCell>{ocorrencia.tipo_ocorrencia || '-'}</TableCell>
@@ -174,13 +231,60 @@ const OcorrenciasConsulta = () => {
                         </span>
                       </TableCell>
                       <TableCell>
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          onClick={() => handleViewOcorrencia(ocorrencia.id)}
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
+                        <div className="flex space-x-1">
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            onClick={() => handleViewOcorrencia(ocorrencia.id)}
+                            title="Visualizar"
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            onClick={() => handleEditOcorrencia(ocorrencia.id)}
+                            title="Editar"
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            onClick={() => handleUpdateStatus(ocorrencia.id)}
+                            title="Atualizar Status das Ações"
+                          >
+                            <CheckSquare className="h-4 w-4" />
+                          </Button>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button 
+                                variant="ghost" 
+                                size="icon"
+                                title="Excluir"
+                              >
+                                <Trash2 className="h-4 w-4 text-red-500" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Tem certeza que deseja excluir esta ocorrência? Esta ação não pode ser desfeita.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                <AlertDialogAction 
+                                  onClick={() => handleDeleteOcorrencia(ocorrencia.id)}
+                                  className="bg-red-500 hover:bg-red-600"
+                                >
+                                  Excluir
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}

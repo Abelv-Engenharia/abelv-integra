@@ -187,6 +187,21 @@ export const updateOcorrencia = async (id: string, formData: Partial<OcorrenciaF
   }
 };
 
+export const deleteOcorrencia = async (id: string) => {
+  try {
+    const { error } = await supabase
+      .from('ocorrencias')
+      .delete()
+      .eq('id', id);
+
+    if (error) throw error;
+    return true;
+  } catch (error) {
+    console.error('Erro ao excluir ocorrência:', error);
+    throw error;
+  }
+};
+
 export const getOcorrenciaById = async (id: string) => {
   try {
     const { data, error } = await supabase
