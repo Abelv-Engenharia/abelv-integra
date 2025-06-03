@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import {
   BarChart3,
@@ -15,6 +16,7 @@ import {
   UserCheck,
   UserCog,
   Target,
+  List,
 } from "lucide-react";
 import {
   Sidebar,
@@ -256,7 +258,7 @@ export function AppSidebar() {
                 </Collapsible>
               </SidebarMenuItem>
 
-              {/* IDSMS - NEW MENU */}
+              {/* IDSMS */}
               <SidebarMenuItem>
                 <Collapsible open={openMenu === "idsms"}>
                   <CollapsibleTrigger asChild>
@@ -272,6 +274,15 @@ export function AppSidebar() {
                         <SidebarMenuButton asChild>
                           <Link to="/idsms/dashboard">
                             <span>Dashboard</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                      
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                          <Link to="/idsms/indicadores">
+                            <List className="h-4 w-4 mr-2" />
+                            <span>Lista de Indicadores</span>
                           </Link>
                         </SidebarMenuButton>
                       </SidebarMenuItem>

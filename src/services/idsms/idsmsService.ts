@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { IDSMSIndicador, IDSMSDashboardData } from "@/types/treinamentos";
 
@@ -245,19 +244,46 @@ export const idsmsService = {
     }
   },
 
-  async getAllIndicadores(): Promise<IDSMSIndicador[]> {
+  async getAllIndicadores(filters?: {
+    cca_id?: string;
+    ano?: string;
+    mes?: string;
+  }): Promise<IDSMSIndicador[]> {
     try {
-      const { data, error } = await supabase
+      console.log('Buscando todos os indicadores com filtros:', filters);
+      
+      // Construir query base para indicadores
+      let query = supabase
         .from('idsms_indicadores')
-        .select('*')
+        .select('*');
+
+      // Aplicar filtros se fornecidos
+      if (filters?.cca_id && filters.cca_id !== "all") {
+        query = query.eq('cca_id', parseInt(filters.cca_id));
+      }
+      if (filters?.ano && filters.ano !== "all") {
+        query = query.eq('ano', parseInt(filters.ano));
+      }
+      if (filters?.mes && filters.mes !== "all") {
+        query = query.eq('mes', parseInt(filters.mes));
+      }
+
+      const { data: indicadores, error } = await query
+        .order('data', { ascending: false })
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('Erro ao buscar todos os indicadores:', error);
+        console.error('Erro ao buscar indicadores:', error);
         return [];
       }
 
-      return data.map(item => ({
+      console.log('Total de indicadores encontrados:', indicadores?.length || 0);
+
+      if (!indicadores) {
+        return [];
+      }
+
+      return indicadores.map(item => ({
         ...item,
         tipo: item.tipo as IDSMSIndicador['tipo']
       }));
