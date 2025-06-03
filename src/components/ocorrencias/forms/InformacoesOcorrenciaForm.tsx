@@ -22,10 +22,9 @@ import { useOcorrenciasFormData } from "@/hooks/useOcorrenciasFormData";
 
 const InformacoesOcorrenciaForm = () => {
   const { control, watch } = useFormContext();
-  const { partesCorpo, lateralidades, agentesCausadores, situacoesGeradoras, naturezasLesao, funcionarios } = useOcorrenciasFormData();
+  const { partesCorpo, lateralidades, agentesCausadores, situacoesGeradoras, naturezasLesao } = useOcorrenciasFormData();
   
   const houveAfastamento = watch("houveAfastamento");
-  const responsavelAcaoManual = watch("responsavelAcaoManual");
 
   return (
     <div className="space-y-6">
@@ -233,90 +232,6 @@ const InformacoesOcorrenciaForm = () => {
           </FormItem>
         )}
       />
-
-      {/* Responsável pela ação, Data e Situação */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <FormField
-          control={control}
-          name="responsavelAcao"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Responsável pela ação</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione ou digite manualmente" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="manual">Entrada manual</SelectItem>
-                  {funcionarios.map((funcionario) => (
-                    <SelectItem key={funcionario.id} value={funcionario.nome}>
-                      {funcionario.nome} - {funcionario.funcao}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={control}
-          name="dataAdequacao"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Data</FormLabel>
-              <FormControl>
-                <Input type="date" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={control}
-          name="situacao"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Situação</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione a situação" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="Em andamento">Em andamento</SelectItem>
-                  <SelectItem value="Concluído">Concluído</SelectItem>
-                  <SelectItem value="Pendente">Pendente</SelectItem>
-                  <SelectItem value="Cancelado">Cancelado</SelectItem>
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      </div>
-
-      {/* Campo manual para responsável pela ação quando selecionado */}
-      {responsavelAcaoManual === "manual" && (
-        <FormField
-          control={control}
-          name="responsavelAcaoManual"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Nome do responsável (manual)</FormLabel>
-              <FormControl>
-                <Input {...field} placeholder="Digite o nome do responsável" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      )}
       
       {/* CAT e CID */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

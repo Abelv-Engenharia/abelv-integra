@@ -35,7 +35,16 @@ const classificacaoOcorrenciaOptions = ["Leve", "Moderado", "Grave", "Gravíssim
 
 const IdentificacaoForm = () => {
   const { control, watch, setValue } = useFormContext();
-  const { ccas, empresas, disciplinas, engenheiros, supervisores, encarregados, funcionarios } = useOcorrenciasFormData();
+  const watchedCca = watch("cca");
+  
+  // Extrair o ID do CCA selecionado
+  const selectedCcaId = React.useMemo(() => {
+    if (!watchedCca) return undefined;
+    // Se o valor for um código (ex: "CCA-001"), buscar o ID correspondente
+    return watchedCca;
+  }, [watchedCca]);
+
+  const { ccas, empresas, disciplinas, engenheiros, supervisores, encarregados, funcionarios } = useOcorrenciasFormData({ selectedCcaId });
 
   // Auto-popular ano e mês quando a data for selecionada
   const watchData = watch("data");
@@ -58,6 +67,19 @@ const IdentificacaoForm = () => {
       }
     }
   }, [watchColaborador, funcionarios, setValue]);
+
+  // Limpar campos dependentes quando CCA mudar
+  React.useEffect(() => {
+    if (watchedCca) {
+      setValue("empresa", "");
+      setValue("engenheiroResponsavel", "");
+      setValue("supervisorResponsavel", "");
+      setValue("encarregadoResponsavel", "");
+      setValue("colaboradoresAcidentados.0.colaborador", "");
+      setValue("colaboradoresAcidentados.0.funcao", "");
+      setValue("colaboradoresAcidentados.0.matricula", "");
+    }
+  }, [watchedCca, setValue]);
 
   return (
     <div className="space-y-6">
@@ -162,7 +184,7 @@ const IdentificacaoForm = () => {
                 </FormControl>
                 <SelectContent>
                   {ccas.map((cca) => (
-                    <SelectItem key={cca.id} value={cca.codigo}>
+                    <SelectItem key={cca.id} value={cca.id.toString()}>
                       {cca.codigo} - {cca.nome}
                     </SelectItem>
                   ))}
@@ -179,10 +201,10 @@ const IdentificacaoForm = () => {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Empresa *</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <Select onValueChange={field.onChange} defaultValue={field.value} disabled={!selectedCcaId}>
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Selecione a empresa" />
+                    <SelectValue placeholder={!selectedCcaId ? "Selecione um CCA primeiro" : "Selecione a empresa"} />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
@@ -233,10 +255,10 @@ const IdentificacaoForm = () => {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Engenheiro responsável</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <Select onValueChange={field.onChange} defaultValue={field.value} disabled={!selectedCcaId}>
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Selecione o engenheiro" />
+                    <SelectValue placeholder={!selectedCcaId ? "Selecione um CCA primeiro" : "Selecione o engenheiro"} />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
@@ -258,10 +280,10 @@ const IdentificacaoForm = () => {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Supervisor responsável</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <Select onValueChange={field.onChange} defaultValue={field.value} disabled={!selectedCcaId}>
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Selecione o supervisor" />
+                    <SelectValue placeholder={!selectedCcaId ? "Selecione um CCA primeiro" : "Selecione o supervisor"} />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
@@ -283,10 +305,10 @@ const IdentificacaoForm = () => {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Encarregado responsável</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <Select onValueChange={field.onChange} defaultValue={field.value} disabled={!selectedCcaId}>
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Selecione o encarregado" />
+                    <SelectValue placeholder={!selectedCcaId ? "Selecione um CCA primeiro" : "Selecione o encarregado"} />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
@@ -311,10 +333,10 @@ const IdentificacaoForm = () => {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Colaborador acidentado *</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <Select onValueChange={field.onChange} defaultValue={field.value} disabled={!selectedCcaId}>
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Selecione o colaborador" />
+                    <SelectValue placeholder={!selectedCcaId ? "Selecione um CCA primeiro" : "Selecione o colaborador"} />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>

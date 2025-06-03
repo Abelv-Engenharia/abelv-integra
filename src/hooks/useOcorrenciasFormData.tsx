@@ -1,8 +1,13 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useMemo } from "react";
 
-export const useOcorrenciasFormData = () => {
+interface UseOcorrenciasFormDataProps {
+  selectedCcaId?: string;
+}
+
+export const useOcorrenciasFormData = ({ selectedCcaId }: UseOcorrenciasFormDataProps = {}) => {
   // CCAs
   const { data: ccas = [] } = useQuery({
     queryKey: ['ccas-ocorrencias'],
@@ -17,7 +22,7 @@ export const useOcorrenciasFormData = () => {
   });
 
   // Empresas com CCAs
-  const { data: empresas = [] } = useQuery({
+  const { data: allEmpresas = [] } = useQuery({
     queryKey: ['empresas-ccas-ocorrencias'],
     queryFn: async () => {
       const { data } = await supabase
@@ -48,7 +53,7 @@ export const useOcorrenciasFormData = () => {
   });
 
   // Engenheiros com CCAs
-  const { data: engenheiros = [] } = useQuery({
+  const { data: allEngenheiros = [] } = useQuery({
     queryKey: ['engenheiros-ccas-ocorrencias'],
     queryFn: async () => {
       const { data } = await supabase
@@ -66,7 +71,7 @@ export const useOcorrenciasFormData = () => {
   });
 
   // Supervisores com CCAs
-  const { data: supervisores = [] } = useQuery({
+  const { data: allSupervisores = [] } = useQuery({
     queryKey: ['supervisores-ccas-ocorrencias'],
     queryFn: async () => {
       const { data } = await supabase
@@ -84,7 +89,7 @@ export const useOcorrenciasFormData = () => {
   });
 
   // Encarregados
-  const { data: encarregados = [] } = useQuery({
+  const { data: allEncarregados = [] } = useQuery({
     queryKey: ['encarregados-ocorrencias'],
     queryFn: async () => {
       const { data } = await supabase
@@ -97,7 +102,7 @@ export const useOcorrenciasFormData = () => {
   });
 
   // Funcionários
-  const { data: funcionarios = [] } = useQuery({
+  const { data: allFuncionarios = [] } = useQuery({
     queryKey: ['funcionarios-ocorrencias'],
     queryFn: async () => {
       const { data } = await supabase
@@ -174,14 +179,52 @@ export const useOcorrenciasFormData = () => {
     },
   });
 
+  // Filtrar dados baseado no CCA selecionado
+  const filteredData = useMemo(() => {
+    if (!selectedCcaId) {
+      return {
+        empresas: [],
+        engenheiros: [],
+        supervisores: [],
+        encarregados: [],
+        funcionarios: [],
+      };
+    }
+
+    const ccaIdNumber = parseInt(selectedCcaId);
+
+    // Filtrar empresas que têm relacionamento com o CCA selecionado
+    const filteredEmpresas = allEmpresas.filter(empresa => 
+      empresa.cca_id === ccaIdNumber
+    );
+
+    // Filtrar engenheiros que têm relacionamento com o CCA selecionado
+    const filteredEngenheiros = allEngenheiros.filter(engenheiro => 
+      engenheiro.cca_id === ccaIdNumber
+    );
+
+    // Filtrar supervisores que têm relacionamento com o CCA selecionado
+    const filteredSupervisores = allSupervisores.filter(supervisor => 
+      supervisor.cca_id === ccaIdNumber
+    );
+
+    return {
+      empresas: filteredEmpresas,
+      engenheiros: filteredEngenheiros,
+      supervisores: filteredSupervisores,
+      encarregados: allEncarregados.filter(encarregado => encarregado.cca_id === ccaIdNumber),
+      funcionarios: allFuncionarios.filter(funcionario => funcionario.cca_id === ccaIdNumber),
+    };
+  }, [allEmpresas, allEngenheiros, allSupervisores, allEncarregados, allFuncionarios, selectedCcaId]);
+
   return {
     ccas,
-    empresas,
+    empresas: filteredData.empresas,
     disciplinas,
-    engenheiros,
-    supervisores,
-    encarregados,
-    funcionarios,
+    engenheiros: filteredData.engenheiros,
+    supervisores: filteredData.supervisores,
+    encarregados: filteredData.encarregados,
+    funcionarios: filteredData.funcionarios,
     partesCorpo,
     lateralidades,
     agentesCausadores,
