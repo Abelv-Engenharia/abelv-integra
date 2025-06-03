@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -26,17 +26,21 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { useOcorrenciasFormData } from "@/hooks/useOcorrenciasFormData";
 
 interface OcorrenciasFiltrosProps {
   onFilter: () => void;
 }
 
-// Mock data
-const ccaOptions = ["Todos", "CCA-001", "CCA-002", "CCA-003", "CCA-004"];
-const empresaOptions = ["Todas", "Empresa A", "Empresa B", "Empresa C", "Empresa D"];
-const disciplinaOptions = ["Todas", "Elétrica", "Mecânica", "Civil", "Instrumentação"];
-const tipoOcorrenciaOptions = ["Todos", "Acidente com Afastamento", "Acidente sem Afastamento", "Quase Acidente"];
-const classificacaoRiscoOptions = ["Todas", "Alto", "Médio", "Baixo"];
+// Opções de classificação de risco
+const classificacaoRiscoOptions = [
+  "Todas",
+  "TRIVIAL",
+  "TOLERÁVEL", 
+  "MODERADO",
+  "SUBSTANCIAL",
+  "INTOLERÁVEL"
+];
 
 export const OcorrenciasFiltros = ({ onFilter }: OcorrenciasFiltrosProps) => {
   const [open, setOpen] = useState(false);
@@ -54,6 +58,15 @@ export const OcorrenciasFiltros = ({ onFilter }: OcorrenciasFiltrosProps) => {
   const [disciplina, setDisciplina] = useState("Todas");
   const [tipoOcorrencia, setTipoOcorrencia] = useState("Todos");
   const [classificacaoRisco, setClassificacaoRisco] = useState("Todas");
+
+  // Get form data
+  const {
+    ccas,
+    empresas,
+    disciplinas,
+    tiposOcorrencia,
+    classificacoesOcorrencia
+  } = useOcorrenciasFormData();
 
   const handleApplyFilter = () => {
     setOpen(false);
@@ -146,9 +159,10 @@ export const OcorrenciasFiltros = ({ onFilter }: OcorrenciasFiltrosProps) => {
                   <SelectValue placeholder="Selecione o CCA" />
                 </SelectTrigger>
                 <SelectContent>
-                  {ccaOptions.map((option) => (
-                    <SelectItem key={option} value={option}>
-                      {option}
+                  <SelectItem value="Todos">Todos</SelectItem>
+                  {ccas.map((ccaItem) => (
+                    <SelectItem key={ccaItem.id} value={`${ccaItem.codigo} - ${ccaItem.nome}`}>
+                      {ccaItem.codigo} - {ccaItem.nome}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -162,9 +176,10 @@ export const OcorrenciasFiltros = ({ onFilter }: OcorrenciasFiltrosProps) => {
                   <SelectValue placeholder="Selecione a empresa" />
                 </SelectTrigger>
                 <SelectContent>
-                  {empresaOptions.map((option) => (
-                    <SelectItem key={option} value={option}>
-                      {option}
+                  <SelectItem value="Todas">Todas</SelectItem>
+                  {empresas.map((empresaItem) => (
+                    <SelectItem key={empresaItem.empresa_id} value={empresaItem.empresas.nome}>
+                      {empresaItem.empresas.nome}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -180,9 +195,10 @@ export const OcorrenciasFiltros = ({ onFilter }: OcorrenciasFiltrosProps) => {
                   <SelectValue placeholder="Selecione a disciplina" />
                 </SelectTrigger>
                 <SelectContent>
-                  {disciplinaOptions.map((option) => (
-                    <SelectItem key={option} value={option}>
-                      {option}
+                  <SelectItem value="Todas">Todas</SelectItem>
+                  {disciplinas.map((disciplinaItem) => (
+                    <SelectItem key={disciplinaItem.id} value={disciplinaItem.nome}>
+                      {disciplinaItem.nome}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -196,9 +212,10 @@ export const OcorrenciasFiltros = ({ onFilter }: OcorrenciasFiltrosProps) => {
                   <SelectValue placeholder="Selecione o tipo" />
                 </SelectTrigger>
                 <SelectContent>
-                  {tipoOcorrenciaOptions.map((option) => (
-                    <SelectItem key={option} value={option}>
-                      {option}
+                  <SelectItem value="Todos">Todos</SelectItem>
+                  {tiposOcorrencia.map((tipoItem) => (
+                    <SelectItem key={tipoItem.id} value={tipoItem.nome}>
+                      {tipoItem.nome}
                     </SelectItem>
                   ))}
                 </SelectContent>
