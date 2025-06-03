@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { fetchOcorrenciasByEmpresa } from "@/services/ocorrenciasDashboardService";
+import { supabase } from '@/integrations/supabase/client';
 
 const OcorrenciasByEmpresaChart = () => {
   const [data, setData] = useState<any[]>([]);
@@ -12,7 +12,28 @@ const OcorrenciasByEmpresaChart = () => {
     const loadData = async () => {
       try {
         setLoading(true);
-        const chartData = await fetchOcorrenciasByEmpresa();
+        console.log('Carregando dados por empresa...');
+        
+        const { data: ocorrencias, error } = await supabase
+          .from('ocorrencias')
+          .select('empresa');
+
+        if (error) throw error;
+
+        console.log('Dados de ocorrências por empresa:', ocorrencias);
+
+        const empresaCount = (ocorrencias || []).reduce((acc: Record<string, number>, curr) => {
+          const empresa = curr.empresa || 'Não definido';
+          acc[empresa] = (acc[empresa] || 0) + 1;
+          return acc;
+        }, {});
+
+        const chartData = Object.entries(empresaCount).map(([name, value]) => ({
+          name,
+          value
+        }));
+
+        console.log('Dados do gráfico por empresa:', chartData);
         setData(chartData);
       } catch (err) {
         console.error("Error loading ocorrencias by empresa:", err);
@@ -28,7 +49,7 @@ const OcorrenciasByEmpresaChart = () => {
   if (loading) {
     return (
       <div className="h-[300px] flex items-center justify-center">
-        <p className="text-muted-foreground">Carregando dados...</p>
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
       </div>
     );
   }
@@ -64,9 +85,22 @@ const OcorrenciasByEmpresaChart = () => {
           }}
         >
           <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="name" />
+          <XAxis 
+            dataKey="name" 
+            tick={{ fontSize: 11 }}
+            angle={-45}
+            textAnchor="end"
+            height={80}
+          />
           <YAxis />
-          <Tooltip formatter={(value) => [`${value} ocorrências`, 'Quantidade']} />
+          <Tooltip 
+            contentStyle={{
+              backgroundColor: '#fff',
+              border: '1px solid #ccc',
+              borderRadius: '4px'
+            }}
+            formatter={(value) => [`${value} ocorrências`, 'Quantidade']} 
+          />
           <Legend />
           <Bar dataKey="value" name="Ocorrências" fill="#9b87f5" />
         </BarChart>

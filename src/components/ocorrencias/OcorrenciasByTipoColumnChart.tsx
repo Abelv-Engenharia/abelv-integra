@@ -11,7 +11,9 @@ const OcorrenciasByTipoColumnChart = () => {
     const loadData = async () => {
       try {
         setLoading(true);
+        console.log('Carregando dados do gráfico por tipo...');
         const chartData = await fetchOcorrenciasByTipo();
+        console.log('Dados carregados:', chartData);
         setData(chartData);
       } catch (error) {
         console.error("Error loading chart data:", error);
@@ -41,11 +43,11 @@ const OcorrenciasByTipoColumnChart = () => {
 
   return (
     <ResponsiveContainer width="100%" height={300}>
-      <BarChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+      <BarChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 80 }}>
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis 
           dataKey="tipo" 
-          tick={{ fontSize: 12 }}
+          tick={{ fontSize: 11 }}
           angle={-45}
           textAnchor="end"
           height={80}
@@ -57,6 +59,7 @@ const OcorrenciasByTipoColumnChart = () => {
             border: '1px solid #ccc',
             borderRadius: '4px'
           }}
+          formatter={(value) => [value, 'Quantidade']}
         />
         <Bar 
           dataKey="count" 

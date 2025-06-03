@@ -10,12 +10,14 @@ export async function fetchDashboardStats() {
 
     if (countError) throw countError;
 
+    console.log('Todas as ocorrências para stats:', allOcorrencias);
+
     const today = new Date();
     const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
     
     const ocorrenciasThisMonth = allOcorrencias
       ? allOcorrencias.filter(o => {
-          const ocorrenciaDate = parseISO(o.data);
+          const ocorrenciaDate = new Date(o.data);
           return ocorrenciaDate >= firstDayOfMonth;
         }).length
       : 0;
@@ -28,7 +30,7 @@ export async function fetchDashboardStats() {
     let riskLevel = 'Baixo';
     const criticasRecentes = allOcorrencias
       ? allOcorrencias.filter(o => {
-          const ocorrenciaDate = parseISO(o.data);
+          const ocorrenciaDate = new Date(o.data);
           const threeMonthsAgo = subMonths(today, 3);
           return ocorrenciaDate >= threeMonthsAgo && (o.classificacao_risco === 'INTOLERÁVEL' || o.classificacao_risco === 'SUBSTANCIAL');
         }).length
@@ -67,6 +69,7 @@ export async function fetchLatestOcorrencias() {
 
     if (error) throw error;
     
+    console.log('Últimas ocorrências:', data);
     return data || [];
   } catch (error) {
     console.error('Erro ao buscar ocorrências recentes:', error);
@@ -78,12 +81,14 @@ export async function fetchOcorrenciasByTipo() {
   try {
     const { data, error } = await supabase
       .from('ocorrencias')
-      .select('tipo_ocorrencia');
+      .select('classificacao_ocorrencia');
 
     if (error) throw error;
 
+    console.log('Dados para gráfico por tipo:', data);
+
     const tipoCount = (data || []).reduce((acc: Record<string, number>, curr) => {
-      const tipo = curr.tipo_ocorrencia || 'Não definido';
+      const tipo = curr.classificacao_ocorrencia || 'Não definido';
       acc[tipo] = (acc[tipo] || 0) + 1;
       return acc;
     }, {});
@@ -105,6 +110,8 @@ export async function fetchOcorrenciasByEmpresa() {
       .select('empresa');
 
     if (error) throw error;
+
+    console.log('Dados para gráfico por empresa:', data);
 
     const empresaCount = (data || []).reduce((acc: Record<string, number>, curr) => {
       const empresa = curr.empresa || 'Não definido';
@@ -129,6 +136,8 @@ export async function fetchOcorrenciasByRisco() {
       .select('classificacao_risco');
 
     if (error) throw error;
+
+    console.log('Dados para gráfico por risco:', data);
 
     const riscoCount = (data || []).reduce((acc: Record<string, number>, curr) => {
       const risco = curr.classificacao_risco || 'Não definido';
@@ -156,6 +165,8 @@ export async function fetchParteCorpoData() {
 
     if (error) throw error;
 
+    console.log('Dados para gráfico parte do corpo:', data);
+
     const parteCount = (data || []).reduce((acc: Record<string, number>, curr) => {
       const parte = curr.parte_corpo_atingida || 'Não definido';
       acc[parte] = (acc[parte] || 0) + 1;
@@ -180,6 +191,8 @@ export async function fetchOcorrenciasTimeline() {
       .order('data', { ascending: true });
 
     if (error) throw error;
+
+    console.log('Dados para timeline:', data);
 
     const monthlyCount = (data || []).reduce((acc: Record<string, number>, curr) => {
       if (curr.mes && curr.ano) {

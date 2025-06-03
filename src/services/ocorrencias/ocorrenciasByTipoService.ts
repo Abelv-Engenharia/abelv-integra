@@ -1,28 +1,27 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { OcorrenciasByTipo } from './types';
 
-export async function fetchOcorrenciasByTipo(): Promise<OcorrenciasByTipo[]> {
+export async function fetchOcorrenciasByTipo() {
   try {
-    // Usar o campo tipo_ocorrencia em vez de tipo_acidente
     const { data, error } = await supabase
       .from('ocorrencias')
-      .select('tipo_ocorrencia')
-      .order('tipo_ocorrencia');
+      .select('classificacao_ocorrencia');
 
     if (error) throw error;
 
-    // Agrupar e contar as ocorrências por tipo
-    const tiposContagem: Record<string, number> = {};
-    
-    data?.forEach(ocorrencia => {
-      const tipo = ocorrencia.tipo_ocorrencia || 'Não classificado';
-      tiposContagem[tipo] = (tiposContagem[tipo] || 0) + 1;
-    });
+    console.log('Dados de ocorrências por tipo:', data);
 
-    return Object.entries(tiposContagem).map(([tipo, quantidade]) => ({
-      name: tipo,
-      value: quantidade
+    const tipoCount = (data || []).reduce((acc: Record<string, number>, curr) => {
+      const tipo = curr.classificacao_ocorrencia || 'Não definido';
+      acc[tipo] = (acc[tipo] || 0) + 1;
+      return acc;
+    }, {});
+
+    console.log('Contagem por tipo:', tipoCount);
+
+    return Object.entries(tipoCount).map(([tipo, count]) => ({
+      tipo,
+      count
     }));
   } catch (error) {
     console.error('Erro ao buscar ocorrências por tipo:', error);
