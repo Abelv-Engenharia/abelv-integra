@@ -263,7 +263,7 @@ const PlanoAcaoForm = () => {
                 control={control}
                 name={`acoes.${index}.dataAdequacao`}
                 render={({ field }) => (
-                  <FormItem className="flex flex-col">
+                  <FormItem>
                     <FormLabel>Data para adequação</FormLabel>
                     <Popover>
                       <PopoverTrigger asChild>
