@@ -40,11 +40,16 @@ const IdentificacaoForm = () => {
   // Extrair o ID do CCA selecionado
   const selectedCcaId = React.useMemo(() => {
     if (!watchedCca) return undefined;
-    // Se o valor for um código (ex: "CCA-001"), buscar o ID correspondente
     return watchedCca;
   }, [watchedCca]);
 
   const { ccas, empresas, disciplinas, engenheiros, supervisores, encarregados, funcionarios } = useOcorrenciasFormData({ selectedCcaId });
+
+  console.log('Current CCA:', watchedCca);
+  console.log('Selected CCA ID:', selectedCcaId);
+  console.log('Available empresas:', empresas);
+  console.log('Available engenheiros:', engenheiros);
+  console.log('Available supervisores:', supervisores);
 
   // Auto-popular ano e mês quando a data for selecionada
   const watchData = watch("data");
@@ -342,7 +347,7 @@ const IdentificacaoForm = () => {
                 <SelectContent>
                   {funcionarios.map((funcionario) => (
                     <SelectItem key={funcionario.id} value={funcionario.id}>
-                      {funcionario.nome} - {funcionario.funcao}
+                      {funcionario.nome}
                     </SelectItem>
                   ))}
                 </SelectContent>

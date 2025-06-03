@@ -28,19 +28,15 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Plus, Trash } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
-// Mock data
-const responsaveisOptions = [
-  { nome: "João Silva", funcao: "Gerente de Segurança" },
-  { nome: "Maria Santos", funcao: "Engenheira de Segurança" },
-  { nome: "Carlos Oliveira", funcao: "Supervisor de QSMS" },
-  { nome: "Ana Pereira", funcao: "Técnica de Segurança" },
-];
+import { useOcorrenciasFormData } from "@/hooks/useOcorrenciasFormData";
 
 const situacaoOptions = ["Tratado", "Em tratativa"];
 
 const PlanoAcaoForm = () => {
   const { control, watch, setValue } = useFormContext();
+  const watchedCca = watch("cca");
+  
+  const { funcionarios } = useOcorrenciasFormData({ selectedCcaId: watchedCca });
   
   const acoesField = useFieldArray({
     control,
@@ -78,14 +74,18 @@ const PlanoAcaoForm = () => {
             const adequacaoDate = new Date(acao.dataAdequacao);
             
             if (today > adequacaoDate) {
-              status = "Em andamento";
+              status = "Em atraso";
             } else {
-              status = "Pendente";
+              status = "Em andamento";
             }
+          } else {
+            status = "Pendente";
           }
         }
         
-        setValue(`acoes.${index}.status`, status);
+        if (status && acao.status !== status) {
+          setValue(`acoes.${index}.status`, status);
+        }
       });
     }
   }, [acoes, setValue]);
@@ -94,9 +94,9 @@ const PlanoAcaoForm = () => {
   const handleResponsavelChange = (value: string, index: number) => {
     setValue(`acoes.${index}.responsavelAcao`, value);
     
-    const responsavel = responsaveisOptions.find(r => r.nome === value);
-    if (responsavel) {
-      setValue(`acoes.${index}.funcaoResponsavel`, responsavel.funcao);
+    const funcionario = funcionarios.find(f => f.nome === value);
+    if (funcionario) {
+      setValue(`acoes.${index}.funcaoResponsavel`, funcionario.funcao);
     }
   };
 
@@ -160,54 +160,6 @@ const PlanoAcaoForm = () => {
               )}
             />
             
-            {/* Data para adequação */}
-            <FormField
-              control={control}
-              name={`acoes.${index}.dataAdequacao`}
-              render={({ field }) => (
-                <FormItem className="flex flex-col">
-                  <FormLabel>Data para adequação</FormLabel>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <FormControl>
-                        <Button
-                          variant={"outline"}
-                          className={cn(
-                            "w-full pl-3 text-left font-normal",
-                            !field.value && "text-muted-foreground"
-                          )}
-                        >
-                          {field.value ? (
-                            format(field.value, "dd/MM/yyyy")
-                          ) : (
-                            <span>Selecione uma data</span>
-                          )}
-                          <svg
-                            className="ml-auto h-4 w-4 opacity-50"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                          </svg>
-                        </Button>
-                      </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0 z-50" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={field.value || undefined}
-                        onSelect={field.onChange}
-                        initialFocus
-                        className={cn("p-3 pointer-events-auto")}
-                      />
-                    </PopoverContent>
-                  </Popover>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
             {/* Responsável pela ação e função */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <FormField
@@ -219,23 +171,24 @@ const PlanoAcaoForm = () => {
                     <div className="flex space-x-2">
                       <Select
                         onValueChange={(value) => handleResponsavelChange(value, index)}
-                        value={field.value && responsaveisOptions.some(r => r.nome === field.value) ? field.value : undefined}
+                        value={field.value && funcionarios.some(f => f.nome === field.value) ? field.value : undefined}
+                        disabled={!watchedCca}
                       >
                         <FormControl>
                           <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Selecione ou digite um responsável" />
+                            <SelectValue placeholder={!watchedCca ? "Selecione um CCA primeiro" : "Selecione ou digite um responsável"} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {responsaveisOptions.map((responsavel) => (
-                            <SelectItem key={responsavel.nome} value={responsavel.nome}>
-                              {responsavel.nome}
+                          {funcionarios.map((funcionario) => (
+                            <SelectItem key={funcionario.id} value={funcionario.nome}>
+                              {funcionario.nome}
                             </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
                     </div>
-                    {!field.value || !responsaveisOptions.some(r => r.nome === field.value) ? (
+                    {!field.value || !funcionarios.some(f => f.nome === field.value) ? (
                       <div className="mt-2">
                         <Input
                           placeholder="Ou digite um responsável manualmente"
@@ -258,7 +211,7 @@ const PlanoAcaoForm = () => {
                     <FormControl>
                       <Input
                         {...field}
-                        readOnly={acoes[index]?.responsavelAcao && responsaveisOptions.some(r => r.nome === acoes[index]?.responsavelAcao)}
+                        readOnly={acoes[index]?.responsavelAcao && funcionarios.some(f => f.nome === acoes[index]?.responsavelAcao)}
                       />
                     </FormControl>
                     <FormMessage />
@@ -267,8 +220,8 @@ const PlanoAcaoForm = () => {
               />
             </div>
             
-            {/* Situação e Status */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Situação, Data para adequação e Status */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <FormField
                 control={control}
                 name={`acoes.${index}.situacao`}
@@ -287,6 +240,53 @@ const PlanoAcaoForm = () => {
                         ))}
                       </SelectContent>
                     </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={control}
+                name={`acoes.${index}.dataAdequacao`}
+                render={({ field }) => (
+                  <FormItem className="flex flex-col">
+                    <FormLabel>Data para adequação</FormLabel>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant={"outline"}
+                            className={cn(
+                              "w-full pl-3 text-left font-normal",
+                              !field.value && "text-muted-foreground"
+                            )}
+                          >
+                            {field.value ? (
+                              format(field.value, "dd/MM/yyyy")
+                            ) : (
+                              <span>Selecione uma data</span>
+                            )}
+                            <svg
+                              className="ml-auto h-4 w-4 opacity-50"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0 z-50" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={field.value || undefined}
+                          onSelect={field.onChange}
+                          initialFocus
+                          className={cn("p-3 pointer-events-auto")}
+                        />
+                      </PopoverContent>
+                    </Popover>
                     <FormMessage />
                   </FormItem>
                 )}

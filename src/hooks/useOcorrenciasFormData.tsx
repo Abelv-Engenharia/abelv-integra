@@ -193,6 +193,11 @@ export const useOcorrenciasFormData = ({ selectedCcaId }: UseOcorrenciasFormData
 
     const ccaIdNumber = parseInt(selectedCcaId);
 
+    console.log('Selected CCA ID:', ccaIdNumber);
+    console.log('All empresas:', allEmpresas);
+    console.log('All engenheiros:', allEngenheiros);
+    console.log('All supervisores:', allSupervisores);
+
     // Filtrar empresas que têm relacionamento com o CCA selecionado
     const filteredEmpresas = allEmpresas.filter(empresa => 
       empresa.cca_id === ccaIdNumber
@@ -207,6 +212,10 @@ export const useOcorrenciasFormData = ({ selectedCcaId }: UseOcorrenciasFormData
     const filteredSupervisores = allSupervisores.filter(supervisor => 
       supervisor.cca_id === ccaIdNumber
     );
+
+    console.log('Filtered empresas:', filteredEmpresas);
+    console.log('Filtered engenheiros:', filteredEngenheiros);
+    console.log('Filtered supervisores:', filteredSupervisores);
 
     return {
       empresas: filteredEmpresas,
