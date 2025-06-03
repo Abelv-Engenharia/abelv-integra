@@ -48,10 +48,10 @@ const PlanoAcaoForm = () => {
   useEffect(() => {
     if (!acoesField.fields.length) {
       acoesField.append({
-        tratativaAplicada: "",
-        dataAdequacao: null,
-        responsavelAcao: "",
-        funcaoResponsavel: "",
+        tratativa_aplicada: "",
+        data_adequacao: null,
+        responsavel_acao: "",
+        funcao_responsavel: "",
         situacao: "",
         status: ""
       });
@@ -71,10 +71,10 @@ const PlanoAcaoForm = () => {
         if (acao.situacao === "CONCLUÍDO") {
           status = "CONCLUÍDO";
         } else if (acao.situacao === "PLANEJADO" || acao.situacao === "EM ANDAMENTO") {
-          if (acao.dataAdequacao) {
+          if (acao.data_adequacao) {
             const today = new Date();
             today.setHours(0, 0, 0, 0);
-            const adequacaoDate = new Date(acao.dataAdequacao);
+            const adequacaoDate = new Date(acao.data_adequacao);
             adequacaoDate.setHours(0, 0, 0, 0);
             
             console.log(`Comparing dates - Today: ${today.toDateString()}, Adequacao: ${adequacaoDate.toDateString()}`);
@@ -103,27 +103,11 @@ const PlanoAcaoForm = () => {
 
   // Handle responsável selection and auto-populate function
   const handleResponsavelChange = (value: string, index: number) => {
-    setValue(`acoes.${index}.responsavelAcao`, value);
+    setValue(`acoes.${index}.responsavel_acao`, value);
     
     const funcionario = funcionarios.find(f => f.nome === value);
     if (funcionario) {
-      setValue(`acoes.${index}.funcaoResponsavel`, funcionario.funcao);
-    }
-  };
-
-  // Get badge variant based on status
-  const getStatusBadgeVariant = (status: string) => {
-    switch (status) {
-      case "PLANEJADO":
-        return "default"; // azul
-      case "EM ANDAMENTO":
-        return "secondary"; // laranja
-      case "CONCLUÍDO":
-        return "success"; // verde
-      case "PENDENTE":
-        return "destructive"; // vermelho
-      default:
-        return "outline";
+      setValue(`acoes.${index}.funcao_responsavel`, funcionario.funcao);
     }
   };
 
@@ -150,10 +134,10 @@ const PlanoAcaoForm = () => {
         <Button
           type="button"
           onClick={() => acoesField.append({
-            tratativaAplicada: "",
-            dataAdequacao: null,
-            responsavelAcao: "",
-            funcaoResponsavel: "",
+            tratativa_aplicada: "",
+            data_adequacao: null,
+            responsavel_acao: "",
+            funcao_responsavel: "",
             situacao: "",
             status: ""
           })}
@@ -185,7 +169,7 @@ const PlanoAcaoForm = () => {
             {/* Tratativa aplicada */}
             <FormField
               control={control}
-              name={`acoes.${index}.tratativaAplicada`}
+              name={`acoes.${index}.tratativa_aplicada`}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Tratativa aplicada</FormLabel>
@@ -207,7 +191,7 @@ const PlanoAcaoForm = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <FormField
                 control={control}
-                name={`acoes.${index}.responsavelAcao`}
+                name={`acoes.${index}.responsavel_acao`}
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Responsável pela ação</FormLabel>
@@ -247,14 +231,14 @@ const PlanoAcaoForm = () => {
               
               <FormField
                 control={control}
-                name={`acoes.${index}.funcaoResponsavel`}
+                name={`acoes.${index}.funcao_responsavel`}
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Função</FormLabel>
                     <FormControl>
                       <Input
                         {...field}
-                        readOnly={acoes[index]?.responsavelAcao && funcionarios.some(f => f.nome === acoes[index]?.responsavelAcao)}
+                        readOnly={acoes[index]?.responsavel_acao && funcionarios.some(f => f.nome === acoes[index]?.responsavel_acao)}
                       />
                     </FormControl>
                     <FormMessage />
@@ -290,7 +274,7 @@ const PlanoAcaoForm = () => {
               
               <FormField
                 control={control}
-                name={`acoes.${index}.dataAdequacao`}
+                name={`acoes.${index}.data_adequacao`}
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Data para adequação</FormLabel>
