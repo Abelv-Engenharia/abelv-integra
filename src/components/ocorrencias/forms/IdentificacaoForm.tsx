@@ -1,105 +1,74 @@
-import React, { useState } from "react";
+
+import React from "react";
 import { useFormContext } from "react-hook-form";
-import { 
+import { format } from "date-fns";
+import { CalendarIcon } from "lucide-react";
+import {
   FormField,
   FormItem,
   FormLabel,
   FormControl,
-  FormMessage 
+  FormMessage
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { 
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Plus, X } from "lucide-react";
-import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { cn } from "@/lib/utils";
+import { useOcorrenciasFormData } from "@/hooks/useOcorrenciasFormData";
 
-const ccaOptions = ["CCA-001", "CCA-002", "CCA-003", "CCA-004"];
-const empresaOptions = ["Empresa A", "Empresa B", "Empresa C", "Empresa D"];
-const disciplinaOptions = ["Elétrica", "Mecânica", "Civil", "Instrumentação"];
-const engenheirosOptions = ["Eng. João Silva", "Eng. Maria Santos", "Eng. Carlos Oliveira"];
-const supervisoresOptions = ["Sup. Ana Souza", "Sup. Pedro Lima", "Sup. Fernanda Costa"];
-const encarregadosOptions = ["Enc. Roberto Alves", "Enc. Julia Pereira", "Enc. Marcos Ribeiro"];
-const colaboradoresOptions = [
-  { nome: "José da Silva", funcao: "Eletricista", matricula: "12345" },
-  { nome: "Paulo Souza", funcao: "Mecânico", matricula: "23456" },
-  { nome: "Carla Oliveira", funcao: "Soldadora", matricula: "34567" },
-  { nome: "Rafael Lima", funcao: "Montador", matricula: "45678" },
-  { nome: "Mariana Costa", funcao: "Instrumentista", matricula: "56789" }
-];
-
-const tipoOcorrenciaOptions = ["Acidente com Afastamento", "Acidente sem Afastamento", "Quase Acidente"];
-const tipoEventoOptions = ["Típico", "Trajeto", "Doença Ocupacional"];
-const classificacaoOcorrenciaOptions = ["Leve", "Moderada", "Grave", "Fatal"];
+// Mock data for fields not yet linked to database
+const tipoOcorrenciaOptions = ["Acidente com Afastamento", "Acidente sem Afastamento", "Incidente", "Quase Acidente"];
+const tipoEventoOptions = ["Trabalho em altura", "Trabalho elétrico", "Operação de máquinas", "Movimentação de materiais", "Outro"];
+const classificacaoOcorrenciaOptions = ["Leve", "Moderado", "Grave", "Gravíssimo"];
 
 const IdentificacaoForm = () => {
-  const { control, setValue, watch } = useFormContext();
-  
-  const [colaboradorIndex, setColaboradorIndex] = useState(0);
-  const colaboradoresAcidentados = watch("colaboradoresAcidentados") || [];
+  const { control, watch, setValue } = useFormContext();
+  const { ccas, empresas, disciplinas, engenheiros, supervisores, encarregados, funcionarios } = useOcorrenciasFormData();
 
-  const addColaborador = () => {
-    const updatedColaboradores = [...colaboradoresAcidentados, { 
-      colaborador: "", 
-      funcao: "", 
-      matricula: "" 
-    }];
-    setValue("colaboradoresAcidentados", updatedColaboradores);
-    setColaboradorIndex(updatedColaboradores.length - 1);
-  };
-
-  const removeColaborador = (index: number) => {
-    const updatedColaboradores = [...colaboradoresAcidentados];
-    updatedColaboradores.splice(index, 1);
-    setValue("colaboradoresAcidentados", updatedColaboradores);
-    
-    if (colaboradorIndex >= updatedColaboradores.length) {
-      setColaboradorIndex(Math.max(0, updatedColaboradores.length - 1));
+  // Auto-popular ano e mês quando a data for selecionada
+  const watchData = watch("data");
+  React.useEffect(() => {
+    if (watchData) {
+      const date = new Date(watchData);
+      setValue("ano", date.getFullYear().toString());
+      setValue("mes", (date.getMonth() + 1).toString().padStart(2, '0'));
     }
-  };
+  }, [watchData, setValue]);
 
-  const handleDateChange = (date: Date | undefined) => {
-    if (date) {
-      setValue("data", date);
-      setValue("mes", format(date, "MMMM"));
-      setValue("ano", format(date, "yyyy"));
+  // Auto-popular função e matrícula quando colaborador for selecionado
+  const watchColaborador = watch("colaboradoresAcidentados.0.colaborador");
+  React.useEffect(() => {
+    if (watchColaborador) {
+      const funcionario = funcionarios.find(f => f.id === watchColaborador);
+      if (funcionario) {
+        setValue("colaboradoresAcidentados.0.funcao", funcionario.funcao);
+        setValue("colaboradoresAcidentados.0.matricula", funcionario.matricula);
+      }
     }
-  };
-
-  const handleColaboradorChange = (value: string, index: number) => {
-    const colaborador = colaboradoresOptions.find(c => c.nome === value);
-    
-    const updatedColaboradores = [...colaboradoresAcidentados];
-    updatedColaboradores[index] = {
-      colaborador: value,
-      funcao: colaborador ? colaborador.funcao : "",
-      matricula: colaborador ? colaborador.matricula : ""
-    };
-    
-    setValue("colaboradoresAcidentados", updatedColaboradores);
-  };
+  }, [watchColaborador, funcionarios, setValue]);
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* Data, Hora, Mês, Ano */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <FormField
           control={control}
           name="data"
           render={({ field }) => (
-            <FormItem className="flex flex-col">
-              <FormLabel>Data</FormLabel>
+            <FormItem>
+              <FormLabel>Data da ocorrência *</FormLabel>
               <Popover>
                 <PopoverTrigger asChild>
                   <FormControl>
@@ -115,24 +84,17 @@ const IdentificacaoForm = () => {
                       ) : (
                         <span>Selecione uma data</span>
                       )}
-                      <svg
-                        className="ml-auto h-4 w-4 opacity-50"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                      </svg>
+                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                     </Button>
                   </FormControl>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0 z-50" align="start">
+                <PopoverContent className="w-auto p-0" align="start">
                   <Calendar
                     mode="single"
-                    selected={field.value || undefined}
-                    onSelect={(date) => handleDateChange(date)}
+                    selected={field.value}
+                    onSelect={field.onChange}
+                    disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
                     initialFocus
-                    className={cn("p-3 pointer-events-auto")}
                   />
                 </PopoverContent>
               </Popover>
@@ -146,7 +108,7 @@ const IdentificacaoForm = () => {
           name="hora"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Hora</FormLabel>
+              <FormLabel>Hora *</FormLabel>
               <FormControl>
                 <Input type="time" {...field} />
               </FormControl>
@@ -162,7 +124,7 @@ const IdentificacaoForm = () => {
             <FormItem>
               <FormLabel>Mês</FormLabel>
               <FormControl>
-                <Input {...field} disabled />
+                <Input {...field} readOnly disabled />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -176,21 +138,22 @@ const IdentificacaoForm = () => {
             <FormItem>
               <FormLabel>Ano</FormLabel>
               <FormControl>
-                <Input {...field} disabled />
+                <Input {...field} readOnly disabled />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
       </div>
-      
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+
+      {/* CCA e Empresa */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <FormField
           control={control}
           name="cca"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>CCA</FormLabel>
+              <FormLabel>CCA *</FormLabel>
               <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
                   <SelectTrigger>
@@ -198,8 +161,10 @@ const IdentificacaoForm = () => {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {ccaOptions.map((cca) => (
-                    <SelectItem key={cca} value={cca}>{cca}</SelectItem>
+                  {ccas.map((cca) => (
+                    <SelectItem key={cca.id} value={cca.codigo}>
+                      {cca.codigo} - {cca.nome}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -213,7 +178,7 @@ const IdentificacaoForm = () => {
           name="empresa"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Empresa</FormLabel>
+              <FormLabel>Empresa *</FormLabel>
               <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
                   <SelectTrigger>
@@ -221,31 +186,10 @@ const IdentificacaoForm = () => {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {empresaOptions.map((empresa) => (
-                    <SelectItem key={empresa} value={empresa}>{empresa}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        
-        <FormField
-          control={control}
-          name="disciplina"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Disciplina</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione a disciplina" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {disciplinaOptions.map((disciplina) => (
-                    <SelectItem key={disciplina} value={disciplina}>{disciplina}</SelectItem>
+                  {empresas.map((empresa) => (
+                    <SelectItem key={empresa.empresa_id} value={empresa.empresas.nome}>
+                      {empresa.empresas.nome}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -254,8 +198,35 @@ const IdentificacaoForm = () => {
           )}
         />
       </div>
-      
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+
+      {/* Disciplina */}
+      <FormField
+        control={control}
+        name="disciplina"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Disciplina *</FormLabel>
+            <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <FormControl>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione a disciplina" />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                {disciplinas.map((disciplina) => (
+                  <SelectItem key={disciplina.id} value={disciplina.nome}>
+                    {disciplina.nome}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      {/* Responsáveis */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <FormField
           control={control}
           name="engenheiroResponsavel"
@@ -269,8 +240,10 @@ const IdentificacaoForm = () => {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {engenheirosOptions.map((engenheiro) => (
-                    <SelectItem key={engenheiro} value={engenheiro}>{engenheiro}</SelectItem>
+                  {engenheiros.map((engenheiro) => (
+                    <SelectItem key={engenheiro.engenheiro_id} value={engenheiro.engenheiros.nome}>
+                      {engenheiro.engenheiros.nome} - {engenheiro.engenheiros.funcao}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -292,8 +265,10 @@ const IdentificacaoForm = () => {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {supervisoresOptions.map((supervisor) => (
-                    <SelectItem key={supervisor} value={supervisor}>{supervisor}</SelectItem>
+                  {supervisores.map((supervisor) => (
+                    <SelectItem key={supervisor.supervisor_id} value={supervisor.supervisores.nome}>
+                      {supervisor.supervisores.nome} - {supervisor.supervisores.funcao}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -315,8 +290,10 @@ const IdentificacaoForm = () => {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {encarregadosOptions.map((encarregado) => (
-                    <SelectItem key={encarregado} value={encarregado}>{encarregado}</SelectItem>
+                  {encarregados.map((encarregado) => (
+                    <SelectItem key={encarregado.id} value={encarregado.nome}>
+                      {encarregado.nome} - {encarregado.funcao}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -325,114 +302,71 @@ const IdentificacaoForm = () => {
           )}
         />
       </div>
-      
-      <div>
-        <div className="flex items-center justify-between mb-2">
-          <h3 className="font-medium">Colaboradores acidentados</h3>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={addColaborador}
-          >
-            <Plus className="h-4 w-4 mr-1" />
-            Adicionar colaborador
-          </Button>
-        </div>
+
+      {/* Colaborador acidentado */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <FormField
+          control={control}
+          name="colaboradoresAcidentados.0.colaborador"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Colaborador acidentado *</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione o colaborador" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {funcionarios.map((funcionario) => (
+                    <SelectItem key={funcionario.id} value={funcionario.id}>
+                      {funcionario.nome} - {funcionario.funcao}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         
-        {colaboradoresAcidentados.length === 0 ? (
-          <div className="text-center p-4 border rounded-md">
-            <p className="text-muted-foreground">Adicione pelo menos um colaborador acidentado</p>
-          </div>
-        ) : (
-          colaboradoresAcidentados.map((_, index) => (
-            <div key={index} className="grid grid-cols-12 gap-4 p-4 border rounded-md mb-4 items-start">
-              <div className="col-span-12 sm:col-span-5">
-                <FormField
-                  control={control}
-                  name={`colaboradoresAcidentados.${index}.colaborador`}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Colaborador acidentado</FormLabel>
-                      <Select
-                        onValueChange={(value) => handleColaboradorChange(value, index)}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecione o colaborador" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {colaboradoresOptions.map((colaborador) => (
-                            <SelectItem key={colaborador.nome} value={colaborador.nome}>
-                              {colaborador.nome}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-              
-              <div className="col-span-12 sm:col-span-3">
-                <FormField
-                  control={control}
-                  name={`colaboradoresAcidentados.${index}.funcao`}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Função</FormLabel>
-                      <FormControl>
-                        <Input {...field} disabled />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-              
-              <div className="col-span-10 sm:col-span-3">
-                <FormField
-                  control={control}
-                  name={`colaboradoresAcidentados.${index}.matricula`}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Matrícula</FormLabel>
-                      <FormControl>
-                        <Input {...field} disabled />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-              
-              <div className="col-span-2 sm:col-span-1 flex justify-end pt-8">
-                {colaboradoresAcidentados.length > 1 && (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => removeColaborador(index)}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                )}
-              </div>
-            </div>
-          ))
-        )}
+        <FormField
+          control={control}
+          name="colaboradoresAcidentados.0.funcao"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Função</FormLabel>
+              <FormControl>
+                <Input {...field} readOnly disabled />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        
+        <FormField
+          control={control}
+          name="colaboradoresAcidentados.0.matricula"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Matrícula</FormLabel>
+              <FormControl>
+                <Input {...field} readOnly disabled />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
       </div>
-      
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+
+      {/* Tipo de ocorrência, evento e classificação */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <FormField
           control={control}
           name="tipoOcorrencia"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Tipo da ocorrência</FormLabel>
+              <FormLabel>Tipo de ocorrência *</FormLabel>
               <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
                   <SelectTrigger>
@@ -455,16 +389,16 @@ const IdentificacaoForm = () => {
           name="tipoEvento"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Tipo do evento</FormLabel>
+              <FormLabel>Tipo de evento</FormLabel>
               <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Selecione o tipo" />
+                    <SelectValue placeholder="Selecione o evento" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {tipoEventoOptions.map((tipo) => (
-                    <SelectItem key={tipo} value={tipo}>{tipo}</SelectItem>
+                  {tipoEventoOptions.map((evento) => (
+                    <SelectItem key={evento} value={evento}>{evento}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>

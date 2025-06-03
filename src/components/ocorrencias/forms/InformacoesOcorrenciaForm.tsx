@@ -18,17 +18,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-
-// Mock data
-const parteCorpoOptions = ["Cabeça", "Tronco", "Braços", "Mãos", "Pernas", "Pés", "Múltiplas partes"];
-const lateralidadeOptions = ["Não aplicável", "Esquerdo", "Direito"];
-const agenteCausadorOptions = ["Máquina/Equipamento", "Ferramenta", "Material", "Eletricidade", "Altura", "Temperatura", "Objeto cortante", "Produto químico", "Outro"];
-const situacaoGeradoraOptions = ["Operação incorreta de equipamento", "Condição insegura", "Falta de EPI", "Ato inseguro", "Falha operacional", "Falha mecânica", "Erro de procedimento", "Outro"];
-const naturezaLesaoOptions = ["Corte", "Contusão", "Fratura", "Queimadura", "Entorse", "Luxação", "Esmagamento", "Amputação", "Intoxicação", "Outro"];
+import { useOcorrenciasFormData } from "@/hooks/useOcorrenciasFormData";
 
 const InformacoesOcorrenciaForm = () => {
   const { control, watch } = useFormContext();
+  const { partesCorpo, lateralidades, agentesCausadores, situacoesGeradoras, naturezasLesao, funcionarios } = useOcorrenciasFormData();
+  
   const houveAfastamento = watch("houveAfastamento");
+  const responsavelAcaoManual = watch("responsavelAcaoManual");
 
   return (
     <div className="space-y-6">
@@ -110,8 +107,8 @@ const InformacoesOcorrenciaForm = () => {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {parteCorpoOptions.map((parte) => (
-                    <SelectItem key={parte} value={parte}>{parte}</SelectItem>
+                  {partesCorpo.map((parte) => (
+                    <SelectItem key={parte.id} value={parte.nome}>{parte.nome}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -133,8 +130,8 @@ const InformacoesOcorrenciaForm = () => {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {lateralidadeOptions.map((lateral) => (
-                    <SelectItem key={lateral} value={lateral}>{lateral}</SelectItem>
+                  {lateralidades.map((lateral) => (
+                    <SelectItem key={lateral.id} value={lateral.nome}>{lateral.nome}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -158,8 +155,8 @@ const InformacoesOcorrenciaForm = () => {
                 </SelectTrigger>
               </FormControl>
               <SelectContent>
-                {agenteCausadorOptions.map((agente) => (
-                  <SelectItem key={agente} value={agente}>{agente}</SelectItem>
+                {agentesCausadores.map((agente) => (
+                  <SelectItem key={agente.id} value={agente.nome}>{agente.nome}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -182,8 +179,8 @@ const InformacoesOcorrenciaForm = () => {
                 </SelectTrigger>
               </FormControl>
               <SelectContent>
-                {situacaoGeradoraOptions.map((situacao) => (
-                  <SelectItem key={situacao} value={situacao}>{situacao}</SelectItem>
+                {situacoesGeradoras.map((situacao) => (
+                  <SelectItem key={situacao.id} value={situacao.nome}>{situacao.nome}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -206,8 +203,8 @@ const InformacoesOcorrenciaForm = () => {
                 </SelectTrigger>
               </FormControl>
               <SelectContent>
-                {naturezaLesaoOptions.map((natureza) => (
-                  <SelectItem key={natureza} value={natureza}>{natureza}</SelectItem>
+                {naturezasLesao.map((natureza) => (
+                  <SelectItem key={natureza.id} value={natureza.nome}>{natureza.nome}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -236,6 +233,90 @@ const InformacoesOcorrenciaForm = () => {
           </FormItem>
         )}
       />
+
+      {/* Responsável pela ação, Data e Situação */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <FormField
+          control={control}
+          name="responsavelAcao"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Responsável pela ação</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione ou digite manualmente" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="manual">Entrada manual</SelectItem>
+                  {funcionarios.map((funcionario) => (
+                    <SelectItem key={funcionario.id} value={funcionario.nome}>
+                      {funcionario.nome} - {funcionario.funcao}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={control}
+          name="dataAdequacao"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Data</FormLabel>
+              <FormControl>
+                <Input type="date" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={control}
+          name="situacao"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Situação</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione a situação" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="Em andamento">Em andamento</SelectItem>
+                  <SelectItem value="Concluído">Concluído</SelectItem>
+                  <SelectItem value="Pendente">Pendente</SelectItem>
+                  <SelectItem value="Cancelado">Cancelado</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
+
+      {/* Campo manual para responsável pela ação quando selecionado */}
+      {responsavelAcaoManual === "manual" && (
+        <FormField
+          control={control}
+          name="responsavelAcaoManual"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Nome do responsável (manual)</FormLabel>
+              <FormControl>
+                <Input {...field} placeholder="Digite o nome do responsável" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      )}
       
       {/* CAT e CID */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

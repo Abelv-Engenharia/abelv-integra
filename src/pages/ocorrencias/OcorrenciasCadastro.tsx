@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { 
   ArrowLeft, 
   ArrowRight, 
-  Save 
+  Save,
+  X
 } from "lucide-react";
 import IdentificacaoForm from "@/components/ocorrencias/forms/IdentificacaoForm";
 import InformacoesOcorrenciaForm from "@/components/ocorrencias/forms/InformacoesOcorrenciaForm";
@@ -149,6 +150,7 @@ const mockOcorrencias = [
 const OcorrenciasCadastro = () => {
   const [activeTab, setActiveTab] = useState("identificacao");
   const [successDialogOpen, setSuccessDialogOpen] = useState(false);
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [loadingData, setLoadingData] = useState(false);
   
@@ -244,6 +246,30 @@ const OcorrenciasCadastro = () => {
     }
   };
 
+  const handleCancel = () => {
+    setCancelDialogOpen(true);
+  };
+
+  const confirmCancel = () => {
+    methods.reset({
+      acoes: [{
+        tratativaAplicada: '',
+        dataAdequacao: null,
+        responsavelAcao: '',
+        funcaoResponsavel: '',
+        situacao: '',
+        status: ''
+      }]
+    });
+    setActiveTab("identificacao");
+    setCancelDialogOpen(false);
+    
+    toast({
+      title: "Formulário cancelado",
+      description: "O preenchimento foi cancelado e os dados foram limpos."
+    });
+  };
+
   const onSubmit = (data: OcorrenciaFormData) => {
     console.log("Form submitted:", data);
     console.log("Is edit mode:", isEditMode);
@@ -323,15 +349,26 @@ const OcorrenciasCadastro = () => {
                 </TabsContent>
                 
                 <div className="flex justify-between mt-6 pt-4 border-t">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={handlePrevious}
-                    disabled={activeTab === tabs[0].id}
-                  >
-                    <ArrowLeft className="mr-2 h-4 w-4" />
-                    Anterior
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={handlePrevious}
+                      disabled={activeTab === tabs[0].id}
+                    >
+                      <ArrowLeft className="mr-2 h-4 w-4" />
+                      Anterior
+                    </Button>
+                    
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={handleCancel}
+                    >
+                      <X className="mr-2 h-4 w-4" />
+                      Cancelar
+                    </Button>
+                  </div>
                   
                   {activeTab === tabs[tabs.length - 1].id ? (
                     <Button type="submit">
@@ -350,6 +387,32 @@ const OcorrenciasCadastro = () => {
           </FormProvider>
         </CardContent>
       </Card>
+      
+      {/* Dialog de cancelamento */}
+      <Dialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Cancelar preenchimento</DialogTitle>
+            <DialogDescription>
+              Tem certeza que deseja cancelar o preenchimento? Todos os dados inseridos serão perdidos.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex flex-col sm:flex-row gap-2">
+            <Button 
+              variant="outline" 
+              onClick={() => setCancelDialogOpen(false)}
+            >
+              Continuar preenchendo
+            </Button>
+            <Button 
+              variant="destructive"
+              onClick={confirmCancel}
+            >
+              Sim, cancelar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       
       <Dialog open={successDialogOpen} onOpenChange={setSuccessDialogOpen}>
         <DialogContent>
