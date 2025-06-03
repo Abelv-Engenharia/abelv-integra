@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -42,6 +41,11 @@ const OcorrenciasCadastro = () => {
         funcao_responsavel: '',
         situacao: '',
         status: ''
+      }],
+      colaboradores_acidentados: [{
+        colaborador: '',
+        funcao: '',
+        matricula: ''
       }]
     }
   });
@@ -53,8 +57,8 @@ const OcorrenciasCadastro = () => {
       
       getOcorrenciaById(ocorrenciaId).then((ocorrencia) => {
         if (ocorrencia) {
-          // Mapear os dados da ocorrência para o formato do formulário
-          const formData = {
+          // Converter os dados do banco para o formato do formulário
+          const formData: Partial<OcorrenciaFormData> = {
             data: ocorrencia.data ? new Date(ocorrencia.data) : null,
             hora: ocorrencia.hora || '',
             mes: ocorrencia.mes?.toString() || '',
@@ -68,7 +72,17 @@ const OcorrenciasCadastro = () => {
             engenheiro_responsavel: ocorrencia.engenheiro_responsavel || '',
             supervisor_responsavel: ocorrencia.supervisor_responsavel || '',
             encarregado_responsavel: ocorrencia.encarregado_responsavel || '',
-            colaboradores_acidentados: ocorrencia.colaboradores_acidentados || [],
+            colaboradores_acidentados: Array.isArray(ocorrencia.colaboradores_acidentados) 
+              ? ocorrencia.colaboradores_acidentados.map((col: any) => ({
+                  colaborador: col.colaborador || '',
+                  funcao: col.funcao || '',
+                  matricula: col.matricula || ''
+                }))
+              : [{
+                  colaborador: '',
+                  funcao: '',
+                  matricula: ''
+                }],
             houve_afastamento: ocorrencia.houve_afastamento || '',
             dias_perdidos: ocorrencia.dias_perdidos,
             dias_debitados: ocorrencia.dias_debitados,
@@ -88,7 +102,23 @@ const OcorrenciasCadastro = () => {
             probabilidade: ocorrencia.probabilidade,
             severidade: ocorrencia.severidade,
             classificacao_risco: ocorrencia.classificacao_risco || '',
-            acoes: ocorrencia.acoes || [],
+            acoes: Array.isArray(ocorrencia.acoes) 
+              ? ocorrencia.acoes.map((acao: any) => ({
+                  tratativa_aplicada: acao.tratativa_aplicada || '',
+                  data_adequacao: acao.data_adequacao ? new Date(acao.data_adequacao) : null,
+                  responsavel_acao: acao.responsavel_acao || '',
+                  funcao_responsavel: acao.funcao_responsavel || '',
+                  situacao: acao.situacao || '',
+                  status: acao.status || ''
+                }))
+              : [{
+                  tratativa_aplicada: '',
+                  data_adequacao: null,
+                  responsavel_acao: '',
+                  funcao_responsavel: '',
+                  situacao: '',
+                  status: ''
+                }],
             investigacao_realizada: ocorrencia.investigacao_realizada || '',
             licoes_aprendidas_enviada: ocorrencia.licoes_aprendidas_enviada || '',
             arquivo_cat: null,
@@ -160,6 +190,11 @@ const OcorrenciasCadastro = () => {
         funcao_responsavel: '',
         situacao: '',
         status: ''
+      }],
+      colaboradores_acidentados: [{
+        colaborador: '',
+        funcao: '',
+        matricula: ''
       }]
     });
     setActiveTab("identificacao");
@@ -370,6 +405,11 @@ const OcorrenciasCadastro = () => {
                       funcao_responsavel: '',
                       situacao: '',
                       status: ''
+                    }],
+                    colaboradores_acidentados: [{
+                      colaborador: '',
+                      funcao: '',
+                      matricula: ''
                     }]
                   });
                   setActiveTab("identificacao");

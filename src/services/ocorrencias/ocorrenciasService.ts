@@ -55,6 +55,39 @@ export interface OcorrenciaFormData {
   arquivo_licoes_aprendidas: File | null;
 }
 
+// Função para converter acoes com Date para formato JSON
+const convertAcoesForDatabase = (acoes: OcorrenciaFormData['acoes']) => {
+  return acoes.map(acao => ({
+    ...acao,
+    data_adequacao: acao.data_adequacao ? acao.data_adequacao.toISOString() : null
+  }));
+};
+
+// Função para converter acoes do banco para o formulário
+const convertAcoesFromDatabase = (acoes: any[]): OcorrenciaFormData['acoes'] => {
+  if (!Array.isArray(acoes)) return [];
+  
+  return acoes.map(acao => ({
+    tratativa_aplicada: acao.tratativa_aplicada || '',
+    data_adequacao: acao.data_adequacao ? new Date(acao.data_adequacao) : null,
+    responsavel_acao: acao.responsavel_acao || '',
+    funcao_responsavel: acao.funcao_responsavel || '',
+    situacao: acao.situacao || '',
+    status: acao.status || ''
+  }));
+};
+
+// Função para converter colaboradores do banco para o formulário
+const convertColaboradoresFromDatabase = (colaboradores: any): OcorrenciaFormData['colaboradores_acidentados'] => {
+  if (!Array.isArray(colaboradores)) return [];
+  
+  return colaboradores.map(colaborador => ({
+    colaborador: colaborador.colaborador || '',
+    funcao: colaborador.funcao || '',
+    matricula: colaborador.matricula || ''
+  }));
+};
+
 export const createOcorrencia = async (data: OcorrenciaFormData) => {
   try {
     const ocorrenciaData = {
@@ -92,7 +125,7 @@ export const createOcorrencia = async (data: OcorrenciaFormData) => {
       impacto: data.impacto,
       probabilidade: data.probabilidade,
       severidade: data.severidade,
-      acoes: data.acoes,
+      acoes: convertAcoesForDatabase(data.acoes),
       investigacao_realizada: data.investigacao_realizada,
       licoes_aprendidas_enviada: data.licoes_aprendidas_enviada,
       descricao: data.descricao_ocorrencia
@@ -112,11 +145,34 @@ export const createOcorrencia = async (data: OcorrenciaFormData) => {
   }
 };
 
-export const updateOcorrencia = async (id: string, data: Partial<OcorrenciaFormData>) => {
+export const updateOcorrencia = async (id: string, formData: Partial<OcorrenciaFormData>) => {
   try {
+    // Converter os dados do formulário para o formato do banco
+    const updateData: any = { ...formData };
+    
+    if (formData.data) {
+      updateData.data = formData.data.toISOString();
+    }
+    
+    if (formData.mes) {
+      updateData.mes = parseInt(formData.mes);
+    }
+    
+    if (formData.ano) {
+      updateData.ano = parseInt(formData.ano);
+    }
+    
+    if (formData.acoes) {
+      updateData.acoes = convertAcoesForDatabase(formData.acoes);
+    }
+
+    if (formData.descricao_ocorrencia) {
+      updateData.descricao = formData.descricao_ocorrencia;
+    }
+
     const { data: result, error } = await supabase
       .from('ocorrencias')
-      .update(data)
+      .update(updateData)
       .eq('id', id)
       .select()
       .single();
