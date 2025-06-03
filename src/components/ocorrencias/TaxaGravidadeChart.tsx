@@ -24,7 +24,13 @@ const TaxaGravidadeChart = () => {
         console.log('Dados mensais de gravidade carregados:', dadosMensais);
         console.log('Meta de gravidade carregada:', metaAnual);
 
-        setData(dadosMensais);
+        // Filtrar apenas meses com dados válidos ou que já passaram
+        const mesAtual = new Date().getMonth() + 1;
+        const dadosValidos = dadosMensais.filter(item => 
+          item.mes <= mesAtual || item.mensal > 0 || item.acumulada > 0
+        );
+
+        setData(dadosValidos);
         setMeta(metaAnual);
       } catch (error) {
         console.error("Erro ao carregar dados de gravidade:", error);

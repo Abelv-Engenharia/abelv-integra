@@ -188,6 +188,8 @@ export async function fetchTaxaFrequenciaAcCpdPorMes(ano: number): Promise<any[]
     let acumuladoHHT = 0;
 
     for (let mes = 1; mes <= 12; mes++) {
+      console.log(`Processando mês ${mes}...`);
+      
       // Buscar ocorrências AC CPD do mês
       const { data: ocorrenciasMes, error: ocorrenciasError } = await supabase
         .from('ocorrencias')
@@ -253,6 +255,8 @@ export async function fetchTaxaFrequenciaAcSpdPorMes(ano: number): Promise<any[]
     let acumuladoHHT = 0;
 
     for (let mes = 1; mes <= 12; mes++) {
+      console.log(`Processando mês ${mes}...`);
+      
       // Buscar ocorrências AC SPD do mês
       const { data: ocorrenciasMes, error: ocorrenciasError } = await supabase
         .from('ocorrencias')
@@ -318,6 +322,8 @@ export async function fetchTaxaGravidadePorMes(ano: number): Promise<any[]> {
     let acumuladoHHT = 0;
 
     for (let mes = 1; mes <= 12; mes++) {
+      console.log(`Processando mês ${mes}...`);
+      
       // Buscar ocorrências com afastamento do mês
       const { data: ocorrenciasMes, error: ocorrenciasError } = await supabase
         .from('ocorrencias')

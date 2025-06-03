@@ -24,7 +24,13 @@ const TaxaFrequenciaAcSpdChart = () => {
         console.log('Dados mensais AC SPD carregados:', dadosMensais);
         console.log('Meta AC SPD carregada:', metaAnual);
 
-        setData(dadosMensais);
+        // Filtrar apenas meses com dados válidos ou que já passaram
+        const mesAtual = new Date().getMonth() + 1;
+        const dadosValidos = dadosMensais.filter(item => 
+          item.mes <= mesAtual || item.mensal > 0 || item.acumulada > 0
+        );
+
+        setData(dadosValidos);
         setMeta(metaAnual);
       } catch (error) {
         console.error("Erro ao carregar dados AC SPD:", error);
