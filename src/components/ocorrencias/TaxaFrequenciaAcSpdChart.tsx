@@ -1,13 +1,9 @@
 
 import { useState, useEffect } from "react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import { 
-  fetchTaxaFrequenciaAcCpd, 
-  fetchTaxaFrequenciaAcSpd, 
-  fetchTaxaGravidade 
-} from "@/services/ocorrencias/ocorrenciasStatsService";
+import { fetchTaxaFrequenciaAcSpd } from "@/services/ocorrencias/ocorrenciasStatsService";
 
-const TaxaFrequenciaChart = () => {
+const TaxaFrequenciaAcSpdChart = () => {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -15,33 +11,18 @@ const TaxaFrequenciaChart = () => {
     const loadData = async () => {
       try {
         setLoading(true);
-        const [taxaAcCpd, taxaAcSpd, taxaGravidade] = await Promise.all([
-          fetchTaxaFrequenciaAcCpd(),
-          fetchTaxaFrequenciaAcSpd(),
-          fetchTaxaGravidade()
-        ]);
+        const taxa = await fetchTaxaFrequenciaAcSpd();
 
         const chartData = [
           {
-            name: "Taxa Freq. AC CPD",
-            value: Number(taxaAcCpd.toFixed(2)),
-            color: "#8884d8"
-          },
-          {
-            name: "Taxa Freq. AC SPD", 
-            value: Number(taxaAcSpd.toFixed(2)),
-            color: "#82ca9d"
-          },
-          {
-            name: "Taxa Gravidade",
-            value: Number(taxaGravidade.toFixed(2)),
-            color: "#ffc658"
+            name: "TX AC SPD",
+            value: Number(taxa.toFixed(2)),
           }
         ];
 
         setData(chartData);
       } catch (error) {
-        console.error("Error loading taxa data:", error);
+        console.error("Error loading taxa AC SPD data:", error);
       } finally {
         setLoading(false);
       }
@@ -65,9 +46,6 @@ const TaxaFrequenciaChart = () => {
         <XAxis 
           dataKey="name" 
           tick={{ fontSize: 11 }}
-          angle={-45}
-          textAnchor="end"
-          height={80}
         />
         <YAxis />
         <Tooltip 
@@ -80,12 +58,12 @@ const TaxaFrequenciaChart = () => {
         />
         <Bar 
           dataKey="value" 
-          fill="#8884d8"
-          name="Taxa"
+          fill="#16a34a"
+          name="Taxa AC SPD"
         />
       </BarChart>
     </ResponsiveContainer>
   );
 };
 
-export default TaxaFrequenciaChart;
+export default TaxaFrequenciaAcSpdChart;

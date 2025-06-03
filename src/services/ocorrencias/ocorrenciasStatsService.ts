@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { format, subMonths, parseISO } from 'date-fns';
 
@@ -155,7 +154,7 @@ export async function fetchTaxaGravidade(): Promise<number> {
   try {
     const { data: ocorrencias } = await supabase
       .from('ocorrencias')
-      .select('tipo_ocorrencia, houve_afastamento, dias_perdidos, data');
+      .select('tipo_ocorrencia, houve_afastamento, dias_perdidos, dias_debitados, data');
     
     const { data: hht } = await supabase
       .from('horas_trabalhadas')
@@ -164,14 +163,14 @@ export async function fetchTaxaGravidade(): Promise<number> {
     const totalDiasPerdidos = ocorrencias 
       ? ocorrencias
           .filter(o => o.tipo_ocorrencia === 'ACIDENTE' && o.houve_afastamento === 'SIM')
-          .reduce((sum, o) => sum + (o.dias_perdidos || 0), 0)
+          .reduce((sum, o) => sum + (o.dias_perdidos || 0) + (o.dias_debitados || 0), 0)
       : 0;
 
     const totalHHT = hht 
       ? hht.reduce((sum, h) => sum + (h.horas_trabalhadas || 0), 0)
       : 1;
 
-    // Taxa de gravidade = (dias perdidos * 1.000.000) / HHT
+    // Taxa de gravidade = (dias perdidos + dias debitados) * 1.000.000 / HHT
     return totalHHT > 0 ? (totalDiasPerdidos * 1000000) / totalHHT : 0;
   } catch (error) {
     console.error('Erro ao calcular taxa de gravidade:', error);

@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
@@ -12,6 +11,9 @@ import OcorrenciasByTipoColumnChart from "@/components/ocorrencias/OcorrenciasBy
 import OcorrenciasByEmpresaChart from "@/components/ocorrencias/OcorrenciasByEmpresaChart";
 import OcorrenciasTimelineChart from "@/components/ocorrencias/OcorrenciasTimelineChart";
 import TaxaFrequenciaChart from "@/components/ocorrencias/TaxaFrequenciaChart";
+import TaxaFrequenciaAcCpdChart from "@/components/ocorrencias/TaxaFrequenciaAcCpdChart";
+import TaxaFrequenciaAcSpdChart from "@/components/ocorrencias/TaxaFrequenciaAcSpdChart";
+import TaxaGravidadeChart from "@/components/ocorrencias/TaxaGravidadeChart";
 import OcorrenciasTable from "@/components/ocorrencias/OcorrenciasTable";
 import { OcorrenciasFiltros } from "@/components/ocorrencias/OcorrenciasFiltros";
 
@@ -62,14 +64,34 @@ const OcorrenciasDashboard = () => {
             </Card>
           </div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Taxas de Frequência e Gravidade (NBR 14280)</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <TaxaFrequenciaChart />
-            </CardContent>
-          </Card>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Taxa de Frequência AC CPD</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <TaxaFrequenciaAcCpdChart />
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Taxa de Frequência AC SPD</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <TaxaFrequenciaAcSpdChart />
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Taxa de Gravidade</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <TaxaGravidadeChart />
+              </CardContent>
+            </Card>
+          </div>
           
           <Card>
             <CardHeader>
