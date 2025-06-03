@@ -13,9 +13,14 @@ const IDSMSDashboard = () => {
   const [selectedYear, setSelectedYear] = useState<string>("all");
   const [selectedMonth, setSelectedMonth] = useState<string>("all");
 
+  // Query para dados do dashboard com filtros
   const { data: dashboardData = [], isLoading, refetch, error } = useQuery({
-    queryKey: ['idsms-dashboard'],
-    queryFn: idsmsService.getDashboardData,
+    queryKey: ['idsms-dashboard', selectedCCA, selectedYear, selectedMonth],
+    queryFn: () => idsmsService.getDashboardData({
+      cca_id: selectedCCA,
+      ano: selectedYear,
+      mes: selectedMonth
+    }),
     refetchOnWindowFocus: false,
   });
 
@@ -30,16 +35,12 @@ const IDSMSDashboard = () => {
     isLoading, 
     error,
     dataLength: dashboardData?.length,
-    filterOptions
+    filterOptions,
+    filters: { selectedCCA, selectedYear, selectedMonth }
   });
 
-  // Filtrar dados baseado nos filtros selecionados
-  const filteredData = dashboardData.filter(item => {
-    if (selectedCCA !== "all" && item.cca_id.toString() !== selectedCCA) return false;
-    // Para filtros de ano e mês, precisaríamos implementar a lógica com base na data dos indicadores
-    // Por agora, mantemos apenas o filtro de CCA funcional
-    return true;
-  });
+  // Dados já filtrados no backend
+  const filteredData = dashboardData;
 
   const getIndicatorIcon = (value: number) => {
     if (value > 75) return <TrendingUp className="h-4 w-4 text-green-500" />;
@@ -72,6 +73,22 @@ const IDSMSDashboard = () => {
     10: 'Outubro',
     11: 'Novembro',
     12: 'Dezembro'
+  };
+
+  const handleFilterChange = (filterType: string, value: string) => {
+    console.log(`Alterando filtro ${filterType} para:`, value);
+    
+    switch (filterType) {
+      case 'cca':
+        setSelectedCCA(value);
+        break;
+      case 'year':
+        setSelectedYear(value);
+        break;
+      case 'month':
+        setSelectedMonth(value);
+        break;
+    }
   };
 
   if (isLoading) {
@@ -131,7 +148,7 @@ const IDSMSDashboard = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="block text-sm font-medium mb-2">CCA</label>
-              <Select value={selectedCCA} onValueChange={setSelectedCCA}>
+              <Select value={selectedCCA} onValueChange={(value) => handleFilterChange('cca', value)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione um CCA" />
                 </SelectTrigger>
@@ -148,7 +165,7 @@ const IDSMSDashboard = () => {
             
             <div>
               <label className="block text-sm font-medium mb-2">Ano</label>
-              <Select value={selectedYear} onValueChange={setSelectedYear}>
+              <Select value={selectedYear} onValueChange={(value) => handleFilterChange('year', value)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione o ano" />
                 </SelectTrigger>
@@ -163,7 +180,7 @@ const IDSMSDashboard = () => {
             
             <div>
               <label className="block text-sm font-medium mb-2">Mês</label>
-              <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+              <Select value={selectedMonth} onValueChange={(value) => handleFilterChange('month', value)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione o mês" />
                 </SelectTrigger>
@@ -178,6 +195,15 @@ const IDSMSDashboard = () => {
               </Select>
             </div>
           </div>
+          
+          {/* Indicador dos filtros aplicados */}
+          <div className="mt-4 text-sm text-gray-600">
+            Filtros aplicados: 
+            {selectedCCA !== "all" && ` CCA: ${filterOptions.ccas.find(c => c.id.toString() === selectedCCA)?.codigo}`}
+            {selectedYear !== "all" && ` | Ano: ${selectedYear}`}
+            {selectedMonth !== "all" && ` | Mês: ${mesesNomes[parseInt(selectedMonth) as keyof typeof mesesNomes]}`}
+            {selectedCCA === "all" && selectedYear === "all" && selectedMonth === "all" && " Nenhum filtro aplicado"}
+          </div>
         </CardContent>
       </Card>
 
@@ -185,7 +211,6 @@ const IDSMSDashboard = () => {
         <>
           <div className="mb-6 text-sm text-gray-600">
             Exibindo dados de {filteredData.length} CCA(s) com indicadores IDSMS registrados
-            {selectedCCA !== "all" && ` - Filtrado por CCA: ${filterOptions.ccas.find(c => c.id.toString() === selectedCCA)?.codigo}`}
           </div>
 
           {/* Cards resumo */}
@@ -360,8 +385,8 @@ const IDSMSDashboard = () => {
               <AlertCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-semibold mb-2">Nenhum dado encontrado</h3>
               <p className="text-gray-600 mb-4">
-                {selectedCCA !== "all" 
-                  ? `Não foram encontrados indicadores IDSMS para o CCA ${filterOptions.ccas.find(c => c.id.toString() === selectedCCA)?.codigo}.`
+                {selectedCCA !== "all" || selectedYear !== "all" || selectedMonth !== "all"
+                  ? "Não foram encontrados indicadores IDSMS para os filtros selecionados."
                   : "Não foram encontrados indicadores IDSMS registrados na base de dados."
                 }
               </p>

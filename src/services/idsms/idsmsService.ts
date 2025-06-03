@@ -23,14 +23,31 @@ export const idsmsService = {
     }
   },
 
-  async getDashboardData(): Promise<IDSMSDashboardData[]> {
+  async getDashboardData(filters?: {
+    cca_id?: string;
+    ano?: string;
+    mes?: string;
+  }): Promise<IDSMSDashboardData[]> {
     try {
-      console.log('Iniciando busca dos dados do dashboard IDSMS...');
+      console.log('Iniciando busca dos dados do dashboard IDSMS com filtros:', filters);
       
-      // Buscar todos os indicadores
-      const { data: indicadores, error: indicadoresError } = await supabase
+      // Construir query base para indicadores
+      let indicadoresQuery = supabase
         .from('idsms_indicadores')
-        .select('*')
+        .select('*');
+
+      // Aplicar filtros se fornecidos
+      if (filters?.cca_id && filters.cca_id !== "all") {
+        indicadoresQuery = indicadoresQuery.eq('cca_id', parseInt(filters.cca_id));
+      }
+      if (filters?.ano && filters.ano !== "all") {
+        indicadoresQuery = indicadoresQuery.eq('ano', parseInt(filters.ano));
+      }
+      if (filters?.mes && filters.mes !== "all") {
+        indicadoresQuery = indicadoresQuery.eq('mes', parseInt(filters.mes));
+      }
+
+      const { data: indicadores, error: indicadoresError } = await indicadoresQuery
         .order('created_at', { ascending: false });
 
       if (indicadoresError) {
@@ -41,15 +58,21 @@ export const idsmsService = {
       console.log('Total de indicadores encontrados:', indicadores?.length || 0);
 
       if (!indicadores || indicadores.length === 0) {
-        console.log('Nenhum indicador encontrado na tabela idsms_indicadores');
+        console.log('Nenhum indicador encontrado com os filtros aplicados');
         return [];
       }
 
-      // Buscar todos os CCAs ativos
-      const { data: ccas, error: ccasError } = await supabase
+      // Buscar CCAs - filtrar se necessário
+      let ccasQuery = supabase
         .from('ccas')
         .select('id, codigo, nome')
         .eq('ativo', true);
+
+      if (filters?.cca_id && filters.cca_id !== "all") {
+        ccasQuery = ccasQuery.eq('id', parseInt(filters.cca_id));
+      }
+
+      const { data: ccas, error: ccasError } = await ccasQuery;
 
       if (ccasError) {
         console.error('Erro ao buscar CCAs:', ccasError);
@@ -59,63 +82,75 @@ export const idsmsService = {
       console.log('CCAs encontrados:', ccas?.length || 0);
 
       if (!ccas || ccas.length === 0) {
-        console.log('Nenhum CCA ativo encontrado');
+        console.log('Nenhum CCA encontrado');
         return [];
       }
 
       const dashboardData: IDSMSDashboardData[] = [];
 
-      // Agrupar indicadores por CCA
+      // Agrupar indicadores por CCA e somar por tipo
       const indicadoresPorCCA = indicadores.reduce((acc, indicador) => {
         if (!acc[indicador.cca_id]) {
-          acc[indicador.cca_id] = [];
+          acc[indicador.cca_id] = {};
         }
-        acc[indicador.cca_id].push({
+        if (!acc[indicador.cca_id][indicador.tipo]) {
+          acc[indicador.cca_id][indicador.tipo] = [];
+        }
+        acc[indicador.cca_id][indicador.tipo].push({
           ...indicador,
           tipo: indicador.tipo as IDSMSIndicador['tipo']
         });
         return acc;
-      }, {} as Record<number, IDSMSIndicador[]>);
+      }, {} as Record<number, Record<string, IDSMSIndicador[]>>);
 
       for (const cca of ccas) {
-        const indicadoresDoCCA = indicadoresPorCCA[cca.id] || [];
+        const indicadoresDoCCA = indicadoresPorCCA[cca.id] || {};
         
         console.log(`Processando CCA: ${cca.codigo} (ID: ${cca.id})`);
-        console.log(`Indicadores encontrados para CCA ${cca.codigo}:`, indicadoresDoCCA.length);
+        console.log(`Tipos de indicadores para CCA ${cca.codigo}:`, Object.keys(indicadoresDoCCA));
         
-        if (indicadoresDoCCA.length === 0) {
+        // Se não há indicadores para este CCA, pular
+        if (Object.keys(indicadoresDoCCA).length === 0) {
           console.log(`Pulando CCA ${cca.codigo} - sem indicadores`);
           continue;
         }
 
-        // Pegar o indicador mais recente de cada tipo
+        // Calcular médias ou somas por tipo de indicador
         const tipos = ['IID', 'HSA', 'HT', 'IPOM', 'INSPECAO_ALTA_LIDERANCA', 'INSPECAO_GESTAO_SMS', 'INDICE_REATIVO'];
-        const indicadoresRecentes: Record<string, number> = {};
+        const indicadoresCalculados: Record<string, number> = {};
 
         for (const tipo of tipos) {
-          const indicadorDoTipo = indicadoresDoCCA
-            .filter(ind => ind.tipo === tipo)
-            .sort((a, b) => new Date(b.created_at || '').getTime() - new Date(a.created_at || '').getTime())[0];
+          const indicadoresDoTipo = indicadoresDoCCA[tipo] || [];
           
-          if (indicadorDoTipo) {
-            indicadoresRecentes[tipo] = Number(indicadorDoTipo.resultado);
+          if (indicadoresDoTipo.length > 0) {
+            // Para os filtros de mês específico, somar todos os valores do período
+            // Para filtros gerais, usar a média
+            if (filters?.mes && filters.mes !== "all") {
+              // Se filtrando por mês específico, somar valores
+              indicadoresCalculados[tipo] = indicadoresDoTipo.reduce((sum, ind) => sum + Number(ind.resultado), 0);
+            } else {
+              // Se não filtrando por mês, usar média dos valores
+              const soma = indicadoresDoTipo.reduce((sum, ind) => sum + Number(ind.resultado), 0);
+              indicadoresCalculados[tipo] = soma / indicadoresDoTipo.length;
+            }
           } else {
-            indicadoresRecentes[tipo] = 0;
+            indicadoresCalculados[tipo] = 0;
           }
         }
 
-        const iid = indicadoresRecentes['IID'] || 0;
-        const hsa = indicadoresRecentes['HSA'] || 0;
-        const ht = indicadoresRecentes['HT'] || 0;
-        const ipom = indicadoresRecentes['IPOM'] || 0;
-        const inspecao_alta_lideranca = indicadoresRecentes['INSPECAO_ALTA_LIDERANCA'] || 0;
-        const inspecao_gestao_sms = indicadoresRecentes['INSPECAO_GESTAO_SMS'] || 0;
-        const indice_reativo = indicadoresRecentes['INDICE_REATIVO'] || 0;
+        const iid = indicadoresCalculados['IID'] || 0;
+        const hsa = indicadoresCalculados['HSA'] || 0;
+        const ht = indicadoresCalculados['HT'] || 0;
+        const ipom = indicadoresCalculados['IPOM'] || 0;
+        const inspecao_alta_lideranca = indicadoresCalculados['INSPECAO_ALTA_LIDERANCA'] || 0;
+        const inspecao_gestao_sms = indicadoresCalculados['INSPECAO_GESTAO_SMS'] || 0;
+        const indice_reativo = indicadoresCalculados['INDICE_REATIVO'] || 0;
 
         // Cálculo do IDSMS = ((IID + HSA + HT + IPOM) / 4) + (INSPECAO_ALTA_LIDERANCA + INSPECAO_GESTAO_SMS) - INDICE_REATIVO
         const idsms_total = ((iid + hsa + ht + ipom) / 4) + (inspecao_alta_lideranca + inspecao_gestao_sms) - indice_reativo;
 
         console.log(`IDSMS calculado para ${cca.codigo}: ${idsms_total}`);
+        console.log(`Valores individuais - IID: ${iid}, HSA: ${hsa}, HT: ${ht}, IPOM: ${ipom}`);
 
         dashboardData.push({
           cca_id: cca.id,
