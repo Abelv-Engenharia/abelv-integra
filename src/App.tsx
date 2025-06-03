@@ -28,6 +28,7 @@ import Relatorios from './pages/relatorios/RelatoriosDashboard';
 import UsuariosAdmin from './pages/admin/AdminUsuarios';
 import PerfisAdmin from './pages/admin/AdminPerfis';
 import EmpresasAdmin from './pages/admin/AdminEmpresas';
+import AdminCCAs from './pages/admin/AdminCCAs';
 import EngenheirosAdmin from './pages/admin/AdminEngenheiros';
 import SupervisoresAdmin from './pages/admin/AdminSupervisores';
 import FuncionariosAdmin from './pages/admin/CadastroFuncionarios';
@@ -95,6 +96,7 @@ function App() {
               <Route path="admin/usuarios" element={<UsuariosAdmin />} />
               <Route path="admin/perfis" element={<PerfisAdmin />} />
               <Route path="admin/empresas" element={<EmpresasAdmin />} />
+              <Route path="admin/ccas" element={<AdminCCAs />} />
               <Route path="admin/engenheiros" element={<EngenheirosAdmin />} />
               <Route path="admin/supervisores" element={<SupervisoresAdmin />} />
               <Route path="admin/funcionarios" element={<FuncionariosAdmin />} />

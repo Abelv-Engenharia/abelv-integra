@@ -91,23 +91,29 @@ export type Database = {
         Row: {
           ativo: boolean | null
           codigo: string
+          created_at: string | null
           id: number
           nome: string
           tipo: string
+          updated_at: string | null
         }
         Insert: {
           ativo?: boolean | null
           codigo: string
+          created_at?: string | null
           id?: number
           nome: string
           tipo: string
+          updated_at?: string | null
         }
         Update: {
           ativo?: boolean | null
           codigo?: string
+          created_at?: string | null
           id?: number
           nome?: string
           tipo?: string
+          updated_at?: string | null
         }
         Relationships: []
       }
