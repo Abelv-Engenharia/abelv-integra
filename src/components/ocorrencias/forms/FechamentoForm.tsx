@@ -23,8 +23,8 @@ import { Check, Clock, AlertCircle } from "lucide-react";
 const FechamentoForm = () => {
   const { control, watch } = useFormContext();
   
-  const investigacaoRealizada = watch("investigacaoRealizada");
-  const licoesAprendidasEnviada = watch("licoesAprendidasEnviada");
+  const investigacao_realizada = watch("investigacao_realizada");
+  const licoes_aprendidas_enviada = watch("licoes_aprendidas_enviada");
   const acoes = watch("acoes") || [];
   
   return (
@@ -36,27 +36,30 @@ const FechamentoForm = () => {
           <CardContent className="p-0">
             <div className="divide-y">
               {acoes.length > 0 ? (
-                acoes.map((item, index) => (
+                acoes.map((acao, index) => (
                   <div key={index} className="p-4">
                     <div className="flex justify-between items-start">
                       <div>
-                        <p className="font-medium">Ação #{index + 1}: {item.tratativaAplicada?.substring(0, 50)}...</p>
+                        <p className="font-medium">Ação #{index + 1}: {acao.tratativa_aplicada?.substring(0, 50) || 'Sem descrição'}...</p>
                         <p className="text-sm text-muted-foreground">
-                          Responsável: {item.responsavelAcao} | Prazo: {item.dataAdequacao ? new Date(item.dataAdequacao).toLocaleDateString() : 'N/A'}
+                          Responsável: {acao.responsavel_acao || 'Não definido'} | Prazo: {acao.data_adequacao ? new Date(acao.data_adequacao).toLocaleDateString() : 'N/A'}
                         </p>
                       </div>
                       <div>
                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                          item.status === 'Concluído' 
+                          acao.status === 'CONCLUÍDO' 
                             ? 'bg-green-100 text-green-800' 
-                            : item.status === 'Em andamento'
+                            : acao.status === 'EM ANDAMENTO'
                             ? 'bg-blue-100 text-blue-800' 
-                            : 'bg-yellow-100 text-yellow-800'
+                            : acao.status === 'PLANEJADO'
+                            ? 'bg-yellow-100 text-yellow-800'
+                            : 'bg-red-100 text-red-800'
                         }`}>
-                          {item.status === 'Concluído' && <Check className="w-3 h-3 mr-1" />}
-                          {item.status === 'Em andamento' && <Clock className="w-3 h-3 mr-1" />}
-                          {item.status === 'Pendente' && <AlertCircle className="w-3 h-3 mr-1" />}
-                          {item.status || 'Não definido'}
+                          {acao.status === 'CONCLUÍDO' && <Check className="w-3 h-3 mr-1" />}
+                          {acao.status === 'EM ANDAMENTO' && <Clock className="w-3 h-3 mr-1" />}
+                          {acao.status === 'PLANEJADO' && <Clock className="w-3 h-3 mr-1" />}
+                          {acao.status === 'PENDENTE' && <AlertCircle className="w-3 h-3 mr-1" />}
+                          {acao.status || 'Não definido'}
                         </span>
                       </div>
                     </div>
@@ -75,7 +78,7 @@ const FechamentoForm = () => {
       {/* Investigação */}
       <FormField
         control={control}
-        name="investigacaoRealizada"
+        name="investigacao_realizada"
         render={({ field }) => (
           <FormItem>
             <FormLabel>Investigação realizada em acordo com o PRO-SMS-08?</FormLabel>
@@ -95,11 +98,11 @@ const FechamentoForm = () => {
         )}
       />
       
-      {investigacaoRealizada === "Sim" && (
+      {investigacao_realizada === "Sim" && (
         <>
           <Controller
             control={control}
-            name="informePreliminar"
+            name="informe_preliminar"
             render={({ field: { value, onChange, ...field } }) => (
               <div className="grid w-full gap-1.5">
                 <Label htmlFor="informe-upload">
@@ -125,7 +128,7 @@ const FechamentoForm = () => {
           
           <Controller
             control={control}
-            name="relatorioAnalise"
+            name="relatorio_analise"
             render={({ field: { value, onChange, ...field } }) => (
               <div className="grid w-full gap-1.5">
                 <Label htmlFor="rai-upload">
@@ -154,7 +157,7 @@ const FechamentoForm = () => {
       {/* Lições aprendidas */}
       <FormField
         control={control}
-        name="licoesAprendidasEnviada"
+        name="licoes_aprendidas_enviada"
         render={({ field }) => (
           <FormItem>
             <FormLabel>Lições aprendidas enviada?</FormLabel>
@@ -174,10 +177,10 @@ const FechamentoForm = () => {
         )}
       />
       
-      {licoesAprendidasEnviada === "Sim" && (
+      {licoes_aprendidas_enviada === "Sim" && (
         <Controller
           control={control}
-          name="arquivoLicoesAprendidas"
+          name="arquivo_licoes_aprendidas"
           render={({ field: { value, onChange, ...field } }) => (
             <div className="grid w-full gap-1.5">
               <Label htmlFor="licoes-upload">

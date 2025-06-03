@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 
 export interface OcorrenciaFormData {
@@ -89,49 +90,56 @@ const convertColaboradoresFromDatabase = (colaboradores: any): OcorrenciaFormDat
 
 export const createOcorrencia = async (data: any) => {
   try {
-    // Mapear os dados do formulário (camelCase) para o formato do banco (snake_case)
+    console.log('Creating ocorrencia with data:', data);
+    
+    // Garantir que todos os campos obrigatórios estão preenchidos
+    if (!data.data || !data.cca || !data.empresa || !data.disciplina) {
+      throw new Error('Campos obrigatórios não preenchidos: data, cca, empresa e disciplina são obrigatórios');
+    }
+
+    // Mapear os dados do formulário para o formato do banco
     const ocorrenciaData = {
       data: data.data?.toISOString(),
-      hora: data.hora,
-      mes: parseInt(data.mes),
-      ano: parseInt(data.ano),
+      hora: data.hora || null,
+      mes: data.mes ? parseInt(data.mes) : null,
+      ano: data.ano ? parseInt(data.ano) : null,
       cca: data.cca,
       empresa: data.empresa,
       disciplina: data.disciplina,
-      tipo_ocorrencia: data.tipoOcorrencia || data.tipo_ocorrencia,
-      tipo_evento: data.tipoEvento || data.tipo_evento,
-      classificacao_ocorrencia: data.classificacaoOcorrencia || data.classificacao_ocorrencia,
-      classificacao_risco: data.classificacaoRisco || data.classificacao_risco,
+      tipo_ocorrencia: data.tipo_ocorrencia || '',
+      tipo_evento: data.tipo_evento || '',
+      classificacao_ocorrencia: data.classificacao_ocorrencia || '',
+      classificacao_risco: data.classificacao_risco || '',
       status: 'Em tratativa',
-      engenheiro_responsavel: data.engenheiroResponsavel || data.engenheiro_responsavel,
-      supervisor_responsavel: data.supervisorResponsavel || data.supervisor_responsavel,
-      encarregado_responsavel: data.encarregadoResponsavel || data.encarregado_responsavel,
-      colaboradores_acidentados: data.colaboradoresAcidentados || data.colaboradores_acidentados || [],
-      houve_afastamento: data.houveAfastamento || data.houve_afastamento,
-      dias_perdidos: data.diasPerdidos || data.dias_perdidos,
-      dias_debitados: data.diasDebitados || data.dias_debitados,
-      parte_corpo_atingida: data.parteCorpoAtingida || data.parte_corpo_atingida,
-      lateralidade: data.lateralidade,
-      agente_causador: data.agenteCausador || data.agente_causador,
-      situacao_geradora: data.situacaoGeradora || data.situacao_geradora,
-      natureza_lesao: data.naturezaLesao || data.natureza_lesao,
-      descricao_ocorrencia: data.descricaoOcorrencia || data.descricao_ocorrencia,
-      numero_cat: data.numeroCat || data.numero_cat,
-      cid: data.cid,
-      exposicao: data.exposicao,
-      controle: data.controle,
-      deteccao: data.deteccao,
-      efeito_falha: data.efeitoFalha || data.efeito_falha,
-      impacto: data.impacto,
-      probabilidade: data.probabilidade,
-      severidade: data.severidade,
+      engenheiro_responsavel: data.engenheiro_responsavel || '',
+      supervisor_responsavel: data.supervisor_responsavel || '',
+      encarregado_responsavel: data.encarregado_responsavel || '',
+      colaboradores_acidentados: data.colaboradores_acidentados || [],
+      houve_afastamento: data.houve_afastamento || '',
+      dias_perdidos: data.dias_perdidos || null,
+      dias_debitados: data.dias_debitados || null,
+      parte_corpo_atingida: data.parte_corpo_atingida || '',
+      lateralidade: data.lateralidade || '',
+      agente_causador: data.agente_causador || '',
+      situacao_geradora: data.situacao_geradora || '',
+      natureza_lesao: data.natureza_lesao || '',
+      descricao_ocorrencia: data.descricao_ocorrencia || '',
+      numero_cat: data.numero_cat || '',
+      cid: data.cid || '',
+      exposicao: data.exposicao || '',
+      controle: data.controle || '',
+      deteccao: data.deteccao || '',
+      efeito_falha: data.efeito_falha || '',
+      impacto: data.impacto || '',
+      probabilidade: data.probabilidade || null,
+      severidade: data.severidade || null,
       acoes: convertAcoesForDatabase(data.acoes || []),
-      investigacao_realizada: data.investigacaoRealizada || data.investigacao_realizada,
-      licoes_aprendidas_enviada: data.licoesAprendidasEnviada || data.licoes_aprendidas_enviada,
-      descricao: data.descricaoOcorrencia || data.descricao_ocorrencia
+      investigacao_realizada: data.investigacao_realizada || '',
+      licoes_aprendidas_enviada: data.licoes_aprendidas_enviada || '',
+      descricao: data.descricao_ocorrencia || ''
     };
 
-    console.log('Dados sendo enviados para o banco:', ocorrenciaData);
+    console.log('Mapped data for database:', ocorrenciaData);
 
     const { data: result, error } = await supabase
       .from('ocorrencias')
@@ -139,7 +147,11 @@ export const createOcorrencia = async (data: any) => {
       .select()
       .single();
 
-    if (error) throw error;
+    if (error) {
+      console.error('Database error:', error);
+      throw error;
+    }
+    
     return result;
   } catch (error) {
     console.error('Erro ao criar ocorrência:', error);
@@ -149,6 +161,8 @@ export const createOcorrencia = async (data: any) => {
 
 export const updateOcorrencia = async (id: string, formData: Partial<OcorrenciaFormData>) => {
   try {
+    console.log('Updating ocorrencia with data:', formData);
+    
     // Converter os dados do formulário para o formato do banco
     const updateData: any = { ...formData };
     
@@ -172,6 +186,8 @@ export const updateOcorrencia = async (id: string, formData: Partial<OcorrenciaF
       updateData.descricao = formData.descricao_ocorrencia;
     }
 
+    console.log('Update data for database:', updateData);
+
     const { data: result, error } = await supabase
       .from('ocorrencias')
       .update(updateData)
@@ -179,7 +195,11 @@ export const updateOcorrencia = async (id: string, formData: Partial<OcorrenciaF
       .select()
       .single();
 
-    if (error) throw error;
+    if (error) {
+      console.error('Database error:', error);
+      throw error;
+    }
+    
     return result;
   } catch (error) {
     console.error('Erro ao atualizar ocorrência:', error);
