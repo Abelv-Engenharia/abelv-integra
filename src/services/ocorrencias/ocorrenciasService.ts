@@ -87,8 +87,9 @@ const convertColaboradoresFromDatabase = (colaboradores: any): OcorrenciaFormDat
   }));
 };
 
-export const createOcorrencia = async (data: OcorrenciaFormData) => {
+export const createOcorrencia = async (data: any) => {
   try {
+    // Mapear os dados do formulário (camelCase) para o formato do banco (snake_case)
     const ocorrenciaData = {
       data: data.data?.toISOString(),
       hora: data.hora,
@@ -97,37 +98,37 @@ export const createOcorrencia = async (data: OcorrenciaFormData) => {
       cca: data.cca,
       empresa: data.empresa,
       disciplina: data.disciplina,
-      tipo_ocorrencia: data.tipo_ocorrencia,
-      tipo_evento: data.tipo_evento,
-      classificacao_ocorrencia: data.classificacao_ocorrencia,
-      classificacao_risco: data.classificacao_risco,
+      tipo_ocorrencia: data.tipoOcorrencia || data.tipo_ocorrencia,
+      tipo_evento: data.tipoEvento || data.tipo_evento,
+      classificacao_ocorrencia: data.classificacaoOcorrencia || data.classificacao_ocorrencia,
+      classificacao_risco: data.classificacaoRisco || data.classificacao_risco,
       status: 'Em tratativa',
-      engenheiro_responsavel: data.engenheiro_responsavel,
-      supervisor_responsavel: data.supervisor_responsavel,
-      encarregado_responsavel: data.encarregado_responsavel,
-      colaboradores_acidentados: data.colaboradores_acidentados,
-      houve_afastamento: data.houve_afastamento,
-      dias_perdidos: data.dias_perdidos,
-      dias_debitados: data.dias_debitados,
-      parte_corpo_atingida: data.parte_corpo_atingida,
+      engenheiro_responsavel: data.engenheiroResponsavel || data.engenheiro_responsavel,
+      supervisor_responsavel: data.supervisorResponsavel || data.supervisor_responsavel,
+      encarregado_responsavel: data.encarregadoResponsavel || data.encarregado_responsavel,
+      colaboradores_acidentados: data.colaboradoresAcidentados || data.colaboradores_acidentados || [],
+      houve_afastamento: data.houveAfastamento || data.houve_afastamento,
+      dias_perdidos: data.diasPerdidos || data.dias_perdidos,
+      dias_debitados: data.diasDebitados || data.dias_debitados,
+      parte_corpo_atingida: data.parteCorpoAtingida || data.parte_corpo_atingida,
       lateralidade: data.lateralidade,
-      agente_causador: data.agente_causador,
-      situacao_geradora: data.situacao_geradora,
-      natureza_lesao: data.natureza_lesao,
-      descricao_ocorrencia: data.descricao_ocorrencia,
-      numero_cat: data.numero_cat,
+      agente_causador: data.agenteCausador || data.agente_causador,
+      situacao_geradora: data.situacaoGeradora || data.situacao_geradora,
+      natureza_lesao: data.naturezaLesao || data.natureza_lesao,
+      descricao_ocorrencia: data.descricaoOcorrencia || data.descricao_ocorrencia,
+      numero_cat: data.numeroCat || data.numero_cat,
       cid: data.cid,
       exposicao: data.exposicao,
       controle: data.controle,
       deteccao: data.deteccao,
-      efeito_falha: data.efeito_falha,
+      efeito_falha: data.efeitoFalha || data.efeito_falha,
       impacto: data.impacto,
       probabilidade: data.probabilidade,
       severidade: data.severidade,
-      acoes: convertAcoesForDatabase(data.acoes),
-      investigacao_realizada: data.investigacao_realizada,
-      licoes_aprendidas_enviada: data.licoes_aprendidas_enviada,
-      descricao: data.descricao_ocorrencia
+      acoes: convertAcoesForDatabase(data.acoes || []),
+      investigacao_realizada: data.investigacaoRealizada || data.investigacao_realizada,
+      licoes_aprendidas_enviada: data.licoesAprendidasEnviada || data.licoes_aprendidas_enviada,
+      descricao: data.descricaoOcorrencia || data.descricao_ocorrencia
     };
 
     console.log('Dados sendo enviados para o banco:', ocorrenciaData);
