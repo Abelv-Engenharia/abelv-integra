@@ -144,10 +144,8 @@ export const EditCCADialog: React.FC<EditCCADialogProps> = ({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="centro_custo">Centro de Custo</SelectItem>
-                      <SelectItem value="area">Área</SelectItem>
-                      <SelectItem value="setor">Setor</SelectItem>
-                      <SelectItem value="departamento">Departamento</SelectItem>
+                      <SelectItem value="Sede">Sede</SelectItem>
+                      <SelectItem value="Obra">Obra</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />

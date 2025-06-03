@@ -55,7 +55,12 @@ export const CreateCCADialog: React.FC<CreateCCADialogProps> = ({
 
   const onSubmit = async (data: CCAFormData) => {
     try {
-      const result = await ccaService.create(data);
+      const result = await ccaService.create({
+        codigo: data.codigo,
+        nome: data.nome,
+        tipo: data.tipo,
+        ativo: data.ativo,
+      });
       
       if (result) {
         toast({
@@ -131,10 +136,8 @@ export const CreateCCADialog: React.FC<CreateCCADialogProps> = ({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="centro_custo">Centro de Custo</SelectItem>
-                      <SelectItem value="area">Área</SelectItem>
-                      <SelectItem value="setor">Setor</SelectItem>
-                      <SelectItem value="departamento">Departamento</SelectItem>
+                      <SelectItem value="Sede">Sede</SelectItem>
+                      <SelectItem value="Obra">Obra</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
