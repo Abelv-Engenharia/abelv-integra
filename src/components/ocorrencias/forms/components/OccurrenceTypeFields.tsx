@@ -46,7 +46,7 @@ const OccurrenceTypeFields: React.FC<OccurrenceTypeFieldsProps> = ({
               <SelectContent>
                 {tiposOcorrencia.map((tipo) => (
                   <SelectItem key={tipo.id} value={tipo.nome}>
-                    {tipo.codigo} - {tipo.nome}
+                    {tipo.nome}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -71,7 +71,7 @@ const OccurrenceTypeFields: React.FC<OccurrenceTypeFieldsProps> = ({
               <SelectContent>
                 {tiposEvento.map((evento) => (
                   <SelectItem key={evento.id} value={evento.nome}>
-                    {evento.codigo} - {evento.nome}
+                    {evento.nome}
                   </SelectItem>
                 ))}
               </SelectContent>
