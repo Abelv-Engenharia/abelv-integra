@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -12,6 +13,7 @@ import DesviosConsulta from "./pages/DesviosConsulta";
 import DesviosNaoConformidade from "./pages/DesviosNaoConformidade";
 import AdminTemplates from "./pages/AdminTemplates";
 import AdminLogo from "./pages/admin/AdminLogo";
+import MetasIndicadores from "./pages/admin/MetasIndicadores";
 import Login from "./pages/auth/Login";
 import SignUp from "./pages/auth/SignUp";
 import ForgotPassword from "./pages/auth/ForgotPassword";
@@ -170,6 +172,7 @@ const App = () => (
                 <Route path="/admin/supervisores" element={<AdminSupervisores />} />
                 <Route path="/admin/funcionarios" element={<CadastroFuncionarios />} />
                 <Route path="/admin/hht" element={<RegistroHHT />} />
+                <Route path="/admin/metas-indicadores" element={<MetasIndicadores />} />
                 <Route path="/admin/templates" element={<AdminTemplates />} />
                 <Route path="/admin/logo" element={<AdminLogo />} />
               </Route>
