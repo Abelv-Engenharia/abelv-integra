@@ -114,6 +114,45 @@ export const useOcorrenciasFormData = ({ selectedCcaId }: UseOcorrenciasFormData
     },
   });
 
+  // Tipos de ocorrência
+  const { data: tiposOcorrencia = [] } = useQuery({
+    queryKey: ['tipos-ocorrencia'],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('tipos_ocorrencia')
+        .select('id, codigo, nome')
+        .eq('ativo', true)
+        .order('nome');
+      return data || [];
+    },
+  });
+
+  // Tipos de evento
+  const { data: tiposEvento = [] } = useQuery({
+    queryKey: ['tipos-evento'],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('tipos_evento')
+        .select('id, codigo, nome')
+        .eq('ativo', true)
+        .order('nome');
+      return data || [];
+    },
+  });
+
+  // Classificações de ocorrência
+  const { data: classificacoesOcorrencia = [] } = useQuery({
+    queryKey: ['classificacoes-ocorrencia'],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('classificacoes_ocorrencia')
+        .select('id, codigo, nome')
+        .eq('ativo', true)
+        .order('nome');
+      return data || [];
+    },
+  });
+
   // Parte do corpo atingida
   const { data: partesCorpo = [] } = useQuery({
     queryKey: ['partes-corpo'],
@@ -254,6 +293,9 @@ export const useOcorrenciasFormData = ({ selectedCcaId }: UseOcorrenciasFormData
     supervisores: filteredData.supervisores,
     encarregados: filteredData.encarregados,
     funcionarios: filteredData.funcionarios,
+    tiposOcorrencia,
+    tiposEvento,
+    classificacoesOcorrencia,
     partesCorpo,
     lateralidades,
     agentesCausadores,

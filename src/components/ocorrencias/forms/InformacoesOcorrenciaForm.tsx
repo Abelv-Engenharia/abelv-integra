@@ -107,7 +107,9 @@ const InformacoesOcorrenciaForm = () => {
                 </FormControl>
                 <SelectContent>
                   {partesCorpo.map((parte) => (
-                    <SelectItem key={parte.id} value={parte.nome}>{parte.nome}</SelectItem>
+                    <SelectItem key={parte.id} value={parte.nome}>
+                      {parte.codigo} - {parte.nome}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -130,7 +132,9 @@ const InformacoesOcorrenciaForm = () => {
                 </FormControl>
                 <SelectContent>
                   {lateralidades.map((lateral) => (
-                    <SelectItem key={lateral.id} value={lateral.nome}>{lateral.nome}</SelectItem>
+                    <SelectItem key={lateral.id} value={lateral.nome}>
+                      {lateral.codigo} - {lateral.nome}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -155,7 +159,9 @@ const InformacoesOcorrenciaForm = () => {
               </FormControl>
               <SelectContent>
                 {agentesCausadores.map((agente) => (
-                  <SelectItem key={agente.id} value={agente.nome}>{agente.nome}</SelectItem>
+                  <SelectItem key={agente.id} value={agente.nome}>
+                    {agente.codigo} - {agente.nome}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -179,7 +185,9 @@ const InformacoesOcorrenciaForm = () => {
               </FormControl>
               <SelectContent>
                 {situacoesGeradoras.map((situacao) => (
-                  <SelectItem key={situacao.id} value={situacao.nome}>{situacao.nome}</SelectItem>
+                  <SelectItem key={situacao.id} value={situacao.nome}>
+                    {situacao.codigo} - {situacao.nome}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -203,7 +211,9 @@ const InformacoesOcorrenciaForm = () => {
               </FormControl>
               <SelectContent>
                 {naturezasLesao.map((natureza) => (
-                  <SelectItem key={natureza.id} value={natureza.nome}>{natureza.nome}</SelectItem>
+                  <SelectItem key={natureza.id} value={natureza.nome}>
+                    {natureza.codigo} - {natureza.nome}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>

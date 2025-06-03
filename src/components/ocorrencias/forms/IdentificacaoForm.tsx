@@ -28,11 +28,6 @@ import {
 import { cn } from "@/lib/utils";
 import { useOcorrenciasFormData } from "@/hooks/useOcorrenciasFormData";
 
-// Mock data for fields not yet linked to database
-const tipoOcorrenciaOptions = ["Acidente com Afastamento", "Acidente sem Afastamento", "Incidente", "Quase Acidente"];
-const tipoEventoOptions = ["Trabalho em altura", "Trabalho elétrico", "Operação de máquinas", "Movimentação de materiais", "Outro"];
-const classificacaoOcorrenciaOptions = ["Leve", "Moderado", "Grave", "Gravíssimo"];
-
 const IdentificacaoForm = () => {
   const { control, watch, setValue } = useFormContext();
   const watchedCca = watch("cca");
@@ -43,7 +38,18 @@ const IdentificacaoForm = () => {
     return watchedCca;
   }, [watchedCca]);
 
-  const { ccas, empresas, disciplinas, engenheiros, supervisores, encarregados, funcionarios } = useOcorrenciasFormData({ selectedCcaId });
+  const { 
+    ccas, 
+    empresas, 
+    disciplinas, 
+    engenheiros, 
+    supervisores, 
+    encarregados, 
+    funcionarios,
+    tiposOcorrencia,
+    tiposEvento,
+    classificacoesOcorrencia
+  } = useOcorrenciasFormData({ selectedCcaId });
 
   console.log('Current CCA:', watchedCca);
   console.log('Selected CCA ID:', selectedCcaId);
@@ -65,10 +71,10 @@ const IdentificacaoForm = () => {
   const watchColaborador = watch("colaboradoresAcidentados.0.colaborador");
   React.useEffect(() => {
     if (watchColaborador) {
-      const funcionario = funcionarios.find(f => f.id === watchColaborador);
+      const funcionario = funcionarios.find(f => f.id.toString() === watchColaborador);
       if (funcionario) {
-        setValue("colaboradoresAcidentados.0.funcao", funcionario.funcao);
-        setValue("colaboradoresAcidentados.0.matricula", funcionario.matricula);
+        setValue("colaboradoresAcidentados.0.funcao", funcionario.funcao || "");
+        setValue("colaboradoresAcidentados.0.matricula", funcionario.matricula || "");
       }
     }
   }, [watchColaborador, funcionarios, setValue]);
@@ -346,7 +352,7 @@ const IdentificacaoForm = () => {
                 </FormControl>
                 <SelectContent>
                   {funcionarios.map((funcionario) => (
-                    <SelectItem key={funcionario.id} value={funcionario.id}>
+                    <SelectItem key={funcionario.id} value={funcionario.id.toString()}>
                       {funcionario.nome}
                     </SelectItem>
                   ))}
@@ -401,8 +407,10 @@ const IdentificacaoForm = () => {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {tipoOcorrenciaOptions.map((tipo) => (
-                    <SelectItem key={tipo} value={tipo}>{tipo}</SelectItem>
+                  {tiposOcorrencia.map((tipo) => (
+                    <SelectItem key={tipo.id} value={tipo.nome}>
+                      {tipo.codigo} - {tipo.nome}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -424,8 +432,10 @@ const IdentificacaoForm = () => {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {tipoEventoOptions.map((evento) => (
-                    <SelectItem key={evento} value={evento}>{evento}</SelectItem>
+                  {tiposEvento.map((evento) => (
+                    <SelectItem key={evento.id} value={evento.nome}>
+                      {evento.codigo} - {evento.nome}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -447,8 +457,10 @@ const IdentificacaoForm = () => {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {classificacaoOcorrenciaOptions.map((classificacao) => (
-                    <SelectItem key={classificacao} value={classificacao}>{classificacao}</SelectItem>
+                  {classificacoesOcorrencia.map((classificacao) => (
+                    <SelectItem key={classificacao.id} value={classificacao.nome}>
+                      {classificacao.codigo} - {classificacao.nome}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
