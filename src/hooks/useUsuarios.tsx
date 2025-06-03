@@ -1,3 +1,4 @@
+
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { User, AuthUserCreateValues, UserFormValues, Permissoes } from "@/types/users";
@@ -10,13 +11,50 @@ import {
 } from "@/services/authAdminService";
 import { fetchProfiles } from "@/services/usuariosService";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 
 export const useUsuarios = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { user } = useAuth();
 
-  // Buscar usuários com tratamento de erro melhorado
+  // Verificar permissões do usuário atual através do perfil
+  const { data: userPermissions } = useQuery({
+    queryKey: ['user-permissions', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return null;
+      
+      try {
+        const { data, error } = await supabase
+          .from('usuario_perfis')
+          .select(`
+            perfil_id,
+            perfis (
+              permissoes
+            )
+          `)
+          .eq('usuario_id', user.id)
+          .single();
+
+        if (error) {
+          console.error("Erro ao buscar permissões:", error);
+          return null;
+        }
+
+        return (data?.perfis?.permissoes as unknown) as Permissoes || null;
+      } catch (error) {
+        console.error("Erro ao verificar permissões:", error);
+        return null;
+      }
+    },
+    enabled: !!user?.id,
+    staleTime: 5 * 60 * 1000
+  });
+
+  // Verificar se o usuário pode administrar usuários
+  const canManageUsers = userPermissions?.admin_usuarios === true;
+
+  // Buscar usuários usando a tabela profiles em vez da Admin API
   const { 
     data: usersData, 
     isLoading: loadingUsuarios,
@@ -25,19 +63,66 @@ export const useUsuarios = () => {
   } = useQuery({
     queryKey: ['admin-usuarios'],
     queryFn: async () => {
+      if (!canManageUsers) {
+        console.log("Usuário não tem permissão para administrar usuários");
+        return { users: [], total: 0, count: 0 };
+      }
+
       try {
-        const result = await fetchUsers(1, 100, '', '');
-        return result;
-      } catch (error) {
-        console.error("Erro ao buscar usuários:", error);
-        // Se houver erro de permissão, retornar dados vazios em vez de falhar
-        if (error instanceof Error && error.message.includes('User not allowed')) {
+        // Buscar usuários através da tabela profiles e relacionamentos
+        const { data: profiles, error: profilesError } = await supabase
+          .from('profiles')
+          .select(`
+            id,
+            nome,
+            email,
+            created_at
+          `);
+
+        if (profilesError) {
+          console.error("Erro ao buscar perfis:", profilesError);
           return { users: [], total: 0, count: 0 };
         }
-        throw error;
+
+        // Buscar as relações de perfis de usuários
+        const { data: userPerfis, error: userPerfilsError } = await supabase
+          .from('usuario_perfis')
+          .select(`
+            usuario_id,
+            perfis (
+              nome
+            )
+          `);
+
+        if (userPerfilsError) {
+          console.error("Erro ao buscar perfis de usuários:", userPerfilsError);
+        }
+
+        // Mapear os dados para o formato esperado
+        const users = profiles?.map(profile => {
+          const userPerfil = userPerfis?.find(up => up.usuario_id === profile.id);
+          const perfilNome = userPerfil?.perfis?.nome || 'Usuário';
+
+          return {
+            id: profile.id,
+            nome: profile.nome || 'Sem nome',
+            email: profile.email || '',
+            perfil: perfilNome,
+            status: "Ativo"
+          };
+        }) || [];
+
+        return {
+          users,
+          total: users.length,
+          count: users.length
+        };
+      } catch (error) {
+        console.error("Erro ao buscar usuários:", error);
+        return { users: [], total: 0, count: 0 };
       }
     },
-    enabled: !!user,
+    enabled: !!user && canManageUsers !== undefined,
     retry: false,
     staleTime: 5 * 60 * 1000,
     refetchOnWindowFocus: false
@@ -50,47 +135,7 @@ export const useUsuarios = () => {
     staleTime: 10 * 60 * 1000
   });
 
-  // Verificar se o usuário tem permissões de administrador
-  const { data: userPermissions } = useQuery({
-    queryKey: ['user-permissions', user?.id],
-    queryFn: async () => {
-      if (!user?.id) return null;
-      
-      try {
-        // Buscar o perfil do usuário atual para verificar permissões
-        const { data, error } = await import("@/integrations/supabase/client").then(({ supabase }) =>
-          supabase
-            .from('usuario_perfis')
-            .select(`
-              perfil_id,
-              perfis (
-                permissoes
-              )
-            `)
-            .eq('usuario_id', user.id)
-            .single()
-        );
-
-        if (error) {
-          console.error("Erro ao buscar permissões:", error);
-          return null;
-        }
-
-        // Fazer cast duplo para o tipo correto de permissões
-        return (data?.perfis?.permissoes as unknown) as Permissoes || null;
-      } catch (error) {
-        console.error("Erro ao verificar permissões:", error);
-        return null;
-      }
-    },
-    enabled: !!user?.id,
-    staleTime: 5 * 60 * 1000
-  });
-
-  // Verificar se o usuário pode administrar usuários
-  const canManageUsers = ((userPermissions as unknown) as Permissoes)?.admin_usuarios === true;
-
-  // Mutation para criar usuário
+  // Mutation para criar usuário usando signup direto
   const createUsuarioMutation = useMutation({
     mutationFn: async (userData: AuthUserCreateValues) => {
       if (!canManageUsers) {
@@ -100,20 +145,53 @@ export const useUsuarios = () => {
       try {
         console.log("Criando usuário:", userData);
         
-        const authUserData = await createAuthUser(
-          userData.email, 
-          userData.password, 
-          { nome: userData.nome }
-        );
-        
-        if (!authUserData?.user?.id) {
+        // Criar usuário usando signup
+        const { data: authData, error: signUpError } = await supabase.auth.signUp({
+          email: userData.email,
+          password: userData.password,
+          options: {
+            data: {
+              nome: userData.nome
+            }
+          }
+        });
+
+        if (signUpError) {
+          throw new Error(signUpError.message);
+        }
+
+        if (!authData?.user?.id) {
           throw new Error("Falha ao criar usuário: ID não retornado");
         }
-        
+
+        // Criar perfil na tabela profiles
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .insert({
+            id: authData.user.id,
+            nome: userData.nome,
+            email: userData.email
+          });
+
+        if (profileError) {
+          console.error("Erro ao criar perfil:", profileError);
+        }
+
+        // Associar o perfil de acesso
         const perfilId = parseInt(userData.perfil);
-        await updateUserRole(authUserData.user.id, perfilId);
-        
-        return authUserData;
+        const { error: userPerfilError } = await supabase
+          .from('usuario_perfis')
+          .insert({
+            usuario_id: authData.user.id,
+            perfil_id: perfilId
+          });
+
+        if (userPerfilError) {
+          console.error("Erro ao associar perfil:", userPerfilError);
+          throw new Error("Erro ao associar perfil de acesso");
+        }
+
+        return authData;
       } catch (error) {
         console.error("Erro na mutation de criação:", error);
         throw error;
@@ -144,14 +222,30 @@ export const useUsuarios = () => {
         throw new Error("Você não tem permissão para editar usuários");
       }
 
-      await updateUser(userId, {
-        user_metadata: { nome: userData.nome },
-        email: userData.email
-      });
-      
+      // Atualizar na tabela profiles
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({
+          nome: userData.nome,
+          email: userData.email
+        })
+        .eq('id', userId);
+
+      if (profileError) {
+        throw new Error("Erro ao atualizar perfil do usuário");
+      }
+
+      // Atualizar perfil de acesso
       const profileId = profiles.find(p => p.nome === userData.perfil)?.id;
       if (profileId) {
-        await updateUserRole(userId, profileId);
+        const { error: userPerfilError } = await supabase
+          .from('usuario_perfis')
+          .update({ perfil_id: profileId })
+          .eq('usuario_id', userId);
+
+        if (userPerfilError) {
+          throw new Error("Erro ao atualizar perfil de acesso");
+        }
       }
     },
     onSuccess: () => {
@@ -177,7 +271,15 @@ export const useUsuarios = () => {
         throw new Error("Você não tem permissão para excluir usuários");
       }
       
-      await deleteUser(userId);
+      // Deletar da tabela profiles (cascade deve cuidar do resto)
+      const { error } = await supabase
+        .from('profiles')
+        .delete()
+        .eq('id', userId);
+
+      if (error) {
+        throw new Error("Erro ao excluir usuário");
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-usuarios'] });

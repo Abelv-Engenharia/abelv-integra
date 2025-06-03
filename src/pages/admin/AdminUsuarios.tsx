@@ -1,6 +1,7 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, UserPlus, AlertCircle, Lock } from "lucide-react";
+import { ArrowLeft, UserPlus, AlertCircle, Lock, CheckCircle } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -96,12 +97,7 @@ const AdminUsuarios = () => {
     setIsCreateDialogOpen(true);
   };
 
-  // Show permission error if user doesn't have admin_usuarios permission
-  const showPermissionError = !canManageUsers || (usersError && 
-    usersError instanceof Error && 
-    usersError.message.includes('User not allowed'));
-
-  // Cast userPermissions para o tipo correto usando cast duplo
+  // Cast userPermissions para o tipo correto
   const permissions = (userPermissions as unknown) as Permissoes;
 
   return (
@@ -118,11 +114,19 @@ const AdminUsuarios = () => {
         </Button>
         <h1 className="text-2xl font-bold tracking-tight">Administrar Usuários</h1>
         <p className="text-muted-foreground">
-          Gerencie os usuários do sistema integrado com o Supabase
+          Gerencie os usuários do sistema
         </p>
       </div>
 
-      {showPermissionError && (
+      {/* Mostrar status das permissões */}
+      {canManageUsers ? (
+        <Alert>
+          <CheckCircle className="h-4 w-4" />
+          <AlertDescription>
+            Você tem permissões de administrador para gerenciar usuários.
+          </AlertDescription>
+        </Alert>
+      ) : (
         <Alert variant="destructive">
           <Lock className="h-4 w-4" />
           <AlertDescription>
@@ -135,9 +139,12 @@ const AdminUsuarios = () => {
         <Alert>
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
-            Suas permissões atuais não incluem administração de usuários. 
-            {permissions.admin_perfis ? " Você pode gerenciar perfis." : ""}
-            {permissions.admin_funcionarios ? " Você pode gerenciar funcionários." : ""}
+            Suas permissões atuais: 
+            {permissions.admin_perfis ? " Gerenciar perfis." : ""}
+            {permissions.admin_funcionarios ? " Gerenciar funcionários." : ""}
+            {permissions.desvios ? " Desvios." : ""}
+            {permissions.ocorrencias ? " Ocorrências." : ""}
+            {permissions.treinamentos ? " Treinamentos." : ""}
           </AlertDescription>
         </Alert>
       )}
