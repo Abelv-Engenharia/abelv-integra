@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,14 +5,18 @@ import { idsmsService } from "@/services/idsms/idsmsService";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { RefreshCw, AlertCircle, FileText } from "lucide-react";
+import { RefreshCw, AlertCircle, FileText, Edit } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { EditIndicadorDialog } from "@/components/idsms/EditIndicadorDialog";
+import { IDSMSIndicador } from "@/types/treinamentos";
 
 const IDSMSIndicadores = () => {
   const [selectedCCA, setSelectedCCA] = useState<string>("all");
   const [selectedYear, setSelectedYear] = useState<string>("all");
   const [selectedMonth, setSelectedMonth] = useState<string>("all");
+  const [editingIndicador, setEditingIndicador] = useState<IDSMSIndicador | null>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
   const { data: filterOptions = { ccas: [], anos: [], meses: [] } } = useQuery({
     queryKey: ['idsms-filter-options'],
@@ -77,6 +80,17 @@ const IDSMSIndicadores = () => {
     };
     
     return colors[tipo as keyof typeof colors] || 'bg-gray-100 text-gray-800';
+  };
+
+  const handleEditIndicador = (indicador: IDSMSIndicador) => {
+    setEditingIndicador(indicador);
+    setIsEditDialogOpen(true);
+  };
+
+  const handleEditSuccess = () => {
+    refetch();
+    setEditingIndicador(null);
+    setIsEditDialogOpen(false);
   };
 
   if (isLoading) {
@@ -277,6 +291,7 @@ const IDSMSIndicadores = () => {
                               <TableHead>Tipo</TableHead>
                               <TableHead className="text-right">Resultado (%)</TableHead>
                               <TableHead>Motivo</TableHead>
+                              <TableHead className="text-center">Ações</TableHead>
                             </TableRow>
                           </TableHeader>
                           <TableBody>
@@ -317,6 +332,17 @@ const IDSMSIndicadores = () => {
                                         <span className="text-gray-400 text-sm">-</span>
                                       )}
                                     </TableCell>
+                                    <TableCell className="text-center">
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => handleEditIndicador(indicador)}
+                                        className="flex items-center gap-1"
+                                      >
+                                        <Edit className="h-4 w-4" />
+                                        Editar
+                                      </Button>
+                                    </TableCell>
                                   </TableRow>
                                 );
                               })}
@@ -349,6 +375,17 @@ const IDSMSIndicadores = () => {
             </CardContent>
           </Card>
         </div>
+      )}
+
+      {/* Dialog de Edição */}
+      {editingIndicador && (
+        <EditIndicadorDialog
+          indicador={editingIndicador}
+          open={isEditDialogOpen}
+          onOpenChange={setIsEditDialogOpen}
+          onSuccess={handleEditSuccess}
+          ccas={filterOptions.ccas}
+        />
       )}
     </div>
   );

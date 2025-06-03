@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -43,21 +42,27 @@ const IDSMSDashboard = () => {
   const filteredData = dashboardData;
 
   const getIndicatorIcon = (value: number) => {
-    if (value > 75) return <TrendingUp className="h-4 w-4 text-green-500" />;
-    if (value < 50) return <TrendingDown className="h-4 w-4 text-red-500" />;
+    if (value > 100) return <TrendingUp className="h-4 w-4 text-green-500" />;
+    if (value < 95) return <TrendingDown className="h-4 w-4 text-red-500" />;
     return <Minus className="h-4 w-4 text-yellow-500" />;
   };
 
   const getIndicatorColor = (value: number) => {
-    if (value > 75) return "text-green-600";
-    if (value < 50) return "text-red-600";
+    if (value > 100) return "text-green-600";
+    if (value < 95) return "text-red-600";
     return "text-yellow-600";
   };
 
   const getStatusBadge = (value: number) => {
-    if (value > 75) return "bg-green-100 text-green-800";
-    if (value < 50) return "bg-red-100 text-red-800";
+    if (value > 100) return "bg-green-100 text-green-800";
+    if (value < 95) return "bg-red-100 text-red-800";
     return "bg-yellow-100 text-yellow-800";
+  };
+
+  const getStatusLabel = (value: number) => {
+    if (value > 100) return 'Excelente';
+    if (value >= 95) return 'Regular';
+    return 'Atenção';
   };
 
   const mesesNomes = {
@@ -123,6 +128,13 @@ const IDSMSDashboard = () => {
       </div>
     );
   }
+
+  // Calcular estatísticas para os novos cards
+  const idsmsMedia = filteredData.length > 0 
+    ? filteredData.reduce((sum, item) => sum + item.idsms_total, 0) / filteredData.length 
+    : 0;
+
+  const statusGeral = getStatusLabel(idsmsMedia);
 
   return (
     <div className="container mx-auto py-6">
@@ -231,7 +243,7 @@ const IDSMSDashboard = () => {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
-                  {(filteredData.reduce((sum, item) => sum + item.idsms_total, 0) / filteredData.length).toFixed(1)}%
+                  {idsmsMedia.toFixed(1)}%
                 </div>
                 <p className="text-xs text-gray-500">média geral</p>
               </CardContent>
@@ -251,13 +263,13 @@ const IDSMSDashboard = () => {
 
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-gray-600">CCAs &gt; 75%</CardTitle>
+                <CardTitle className="text-sm font-medium text-gray-600">Status Geral</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-green-600">
-                  {filteredData.filter(item => item.idsms_total > 75).length}
+                <div className={`text-2xl font-bold ${getIndicatorColor(idsmsMedia)}`}>
+                  {statusGeral}
                 </div>
-                <p className="text-xs text-gray-500">acima da meta</p>
+                <p className="text-xs text-gray-500">baseado no IDSMS médio</p>
               </CardContent>
             </Card>
           </div>
@@ -310,7 +322,7 @@ const IDSMSDashboard = () => {
                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusBadge(cca.idsms_total)}`}>
                           {getIndicatorIcon(cca.idsms_total)}
                           <span className="ml-1">
-                            {cca.idsms_total > 75 ? 'Excelente' : cca.idsms_total < 50 ? 'Atenção' : 'Regular'}
+                            {getStatusLabel(cca.idsms_total)}
                           </span>
                         </span>
                       </TableCell>

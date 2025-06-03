@@ -22,6 +22,27 @@ export const idsmsService = {
     }
   },
 
+  async updateIndicador(id: string, indicador: Partial<Omit<IDSMSIndicador, 'id' | 'created_at' | 'updated_at'>>): Promise<IDSMSIndicador | null> {
+    try {
+      const { data, error } = await supabase
+        .from('idsms_indicadores')
+        .update(indicador)
+        .eq('id', id)
+        .select()
+        .single();
+      
+      if (error) {
+        console.error('Erro ao atualizar indicador IDSMS:', error);
+        return null;
+      }
+      
+      return data as IDSMSIndicador;
+    } catch (error) {
+      console.error('Exceção ao atualizar indicador IDSMS:', error);
+      return null;
+    }
+  },
+
   async getDashboardData(filters?: {
     cca_id?: string;
     ano?: string;
