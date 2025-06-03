@@ -65,6 +65,8 @@ const PlanoAcaoForm = () => {
       acoes.forEach((acao, index) => {
         let status = "";
         
+        console.log(`Processing action ${index}:`, acao);
+        
         if (acao.situacao === "Tratado") {
           status = "Concluído";
         } else if (acao.situacao === "Em tratativa") {
@@ -73,6 +75,8 @@ const PlanoAcaoForm = () => {
             today.setHours(0, 0, 0, 0);
             const adequacaoDate = new Date(acao.dataAdequacao);
             adequacaoDate.setHours(0, 0, 0, 0);
+            
+            console.log(`Comparing dates - Today: ${today.toDateString()}, Adequacao: ${adequacaoDate.toDateString()}`);
             
             if (today > adequacaoDate) {
               status = "Em atraso";
@@ -84,7 +88,10 @@ const PlanoAcaoForm = () => {
           }
         }
         
+        console.log(`Calculated status for action ${index}: ${status}`);
+        
         if (status && acao.status !== status) {
+          console.log(`Updating status from ${acao.status} to ${status}`);
           setValue(`acoes.${index}.status`, status);
         }
       });
