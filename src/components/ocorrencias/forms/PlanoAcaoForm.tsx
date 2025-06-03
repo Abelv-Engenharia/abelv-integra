@@ -30,7 +30,7 @@ import { Plus, Trash } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useOcorrenciasFormData } from "@/hooks/useOcorrenciasFormData";
 
-const situacaoOptions = ["Tratado", "Em tratativa"];
+const situacaoOptions = ["PLANEJADO", "EM ANDAMENTO", "CONCLUÍDO", "PENDENTE"];
 
 const PlanoAcaoForm = () => {
   const { control, watch, setValue } = useFormContext();
@@ -67,9 +67,9 @@ const PlanoAcaoForm = () => {
         
         console.log(`Processing action ${index}:`, acao);
         
-        if (acao.situacao === "Tratado") {
-          status = "Concluído";
-        } else if (acao.situacao === "Em tratativa") {
+        if (acao.situacao === "CONCLUÍDO") {
+          status = "CONCLUÍDO";
+        } else if (acao.situacao === "PLANEJADO" || acao.situacao === "EM ANDAMENTO") {
           if (acao.dataAdequacao) {
             const today = new Date();
             today.setHours(0, 0, 0, 0);
@@ -79,13 +79,19 @@ const PlanoAcaoForm = () => {
             console.log(`Comparing dates - Today: ${today.toDateString()}, Adequacao: ${adequacaoDate.toDateString()}`);
             
             if (today > adequacaoDate) {
-              status = "Em atraso";
+              status = "PENDENTE";
             } else {
-              status = "Em andamento";
+              if (acao.situacao === "PLANEJADO") {
+                status = "PLANEJADO";
+              } else if (acao.situacao === "EM ANDAMENTO") {
+                status = "EM ANDAMENTO";
+              }
             }
           } else {
-            status = "Pendente";
+            status = "PENDENTE";
           }
+        } else if (acao.situacao === "PENDENTE") {
+          status = "PENDENTE";
         }
         
         console.log(`Calculated status for action ${index}: ${status}`);
