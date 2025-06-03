@@ -5,10 +5,11 @@ import { idsmsService } from "@/services/idsms/idsmsService";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { RefreshCw, AlertCircle, FileText, Edit } from "lucide-react";
+import { RefreshCw, AlertCircle, FileText, Edit, Trash } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { EditIndicadorDialog } from "@/components/idsms/EditIndicadorDialog";
+import { DeleteIndicadorDialog } from "@/components/idsms/DeleteIndicadorDialog";
 import { IDSMSIndicador } from "@/types/treinamentos";
 
 const IDSMSIndicadores = () => {
@@ -17,6 +18,8 @@ const IDSMSIndicadores = () => {
   const [selectedMonth, setSelectedMonth] = useState<string>("all");
   const [editingIndicador, setEditingIndicador] = useState<IDSMSIndicador | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [deletingIndicador, setDeletingIndicador] = useState<IDSMSIndicador | null>(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   const { data: filterOptions = { ccas: [], anos: [], meses: [] } } = useQuery({
     queryKey: ['idsms-filter-options'],
@@ -87,10 +90,21 @@ const IDSMSIndicadores = () => {
     setIsEditDialogOpen(true);
   };
 
+  const handleDeleteIndicador = (indicador: IDSMSIndicador) => {
+    setDeletingIndicador(indicador);
+    setIsDeleteDialogOpen(true);
+  };
+
   const handleEditSuccess = () => {
     refetch();
     setEditingIndicador(null);
     setIsEditDialogOpen(false);
+  };
+
+  const handleDeleteSuccess = () => {
+    refetch();
+    setDeletingIndicador(null);
+    setIsDeleteDialogOpen(false);
   };
 
   if (isLoading) {
@@ -333,15 +347,26 @@ const IDSMSIndicadores = () => {
                                       )}
                                     </TableCell>
                                     <TableCell className="text-center">
-                                      <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => handleEditIndicador(indicador)}
-                                        className="flex items-center gap-1"
-                                      >
-                                        <Edit className="h-4 w-4" />
-                                        Editar
-                                      </Button>
+                                      <div className="flex items-center gap-2 justify-center">
+                                        <Button
+                                          variant="outline"
+                                          size="sm"
+                                          onClick={() => handleEditIndicador(indicador)}
+                                          className="flex items-center gap-1"
+                                        >
+                                          <Edit className="h-4 w-4" />
+                                          Editar
+                                        </Button>
+                                        <Button
+                                          variant="outline"
+                                          size="sm"
+                                          onClick={() => handleDeleteIndicador(indicador)}
+                                          className="flex items-center gap-1 text-red-600 hover:text-red-700 hover:bg-red-50"
+                                        >
+                                          <Trash className="h-4 w-4" />
+                                          Excluir
+                                        </Button>
+                                      </div>
                                     </TableCell>
                                   </TableRow>
                                 );
@@ -387,6 +412,14 @@ const IDSMSIndicadores = () => {
           ccas={filterOptions.ccas}
         />
       )}
+
+      {/* Dialog de Exclusão */}
+      <DeleteIndicadorDialog
+        indicador={deletingIndicador}
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+        onSuccess={handleDeleteSuccess}
+      />
     </div>
   );
 };

@@ -43,6 +43,25 @@ export const idsmsService = {
     }
   },
 
+  async deleteIndicador(id: string): Promise<boolean> {
+    try {
+      const { error } = await supabase
+        .from('idsms_indicadores')
+        .delete()
+        .eq('id', id);
+      
+      if (error) {
+        console.error('Erro ao excluir indicador IDSMS:', error);
+        return false;
+      }
+      
+      return true;
+    } catch (error) {
+      console.error('Exceção ao excluir indicador IDSMS:', error);
+      return false;
+    }
+  },
+
   async getDashboardData(filters?: {
     cca_id?: string;
     ano?: string;
