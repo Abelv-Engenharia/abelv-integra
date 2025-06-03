@@ -21,13 +21,13 @@ const TaxaGravidadeChart = () => {
           fetchMetaIndicador(anoAtual, 'meta_taxa_gravidade')
         ]);
 
-        console.log('Dados mensais de gravidade:', dadosMensais);
-        console.log('Meta de gravidade:', metaAnual);
+        console.log('Dados mensais de gravidade carregados:', dadosMensais);
+        console.log('Meta de gravidade carregada:', metaAnual);
 
         setData(dadosMensais);
         setMeta(metaAnual);
       } catch (error) {
-        console.error("Error loading taxa gravidade data:", error);
+        console.error("Erro ao carregar dados de gravidade:", error);
       } finally {
         setLoading(false);
       }
@@ -40,6 +40,14 @@ const TaxaGravidadeChart = () => {
     return (
       <div className="h-64 flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (data.length === 0) {
+    return (
+      <div className="h-64 flex items-center justify-center">
+        <p className="text-muted-foreground">Nenhum dado disponível para Taxa de Gravidade</p>
       </div>
     );
   }

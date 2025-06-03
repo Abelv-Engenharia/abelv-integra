@@ -1,6 +1,5 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { format, subMonths, parseISO } from 'date-fns';
 
 export interface OcorrenciasStats {
   totalOcorrencias: number;
@@ -17,7 +16,7 @@ export async function fetchOcorrenciasStats(): Promise<OcorrenciasStats> {
   try {
     const { data: allOcorrencias, error: countError } = await supabase
       .from('ocorrencias')
-      .select('id, tipo_ocorrencia, houve_afastamento, acoes');
+      .select('id, classificacao_ocorrencia, houve_afastamento, acoes');
 
     if (countError) throw countError;
 
@@ -26,20 +25,20 @@ export async function fetchOcorrenciasStats(): Promise<OcorrenciasStats> {
     // Contar AC CPD (Acidentes com afastamento)
     const acCpd = allOcorrencias 
       ? allOcorrencias.filter(o => 
-          o.tipo_ocorrencia === 'ACIDENTE' && o.houve_afastamento === 'SIM'
+          o.classificacao_ocorrencia === 'ACIDENTE' && o.houve_afastamento === 'SIM'
         ).length 
       : 0;
 
     // Contar AC SPD (Acidentes sem afastamento) 
     const acSpd = allOcorrencias 
       ? allOcorrencias.filter(o => 
-          o.tipo_ocorrencia === 'ACIDENTE' && o.houve_afastamento === 'NÃO'
+          o.classificacao_ocorrencia === 'ACIDENTE' && o.houve_afastamento === 'NÃO'
         ).length 
       : 0;
 
     // Contar INC (Incidentes)
     const inc = allOcorrencias 
-      ? allOcorrencias.filter(o => o.tipo_ocorrencia === 'INCIDENTE').length 
+      ? allOcorrencias.filter(o => o.classificacao_ocorrencia === 'INCIDENTE').length 
       : 0;
 
     // Contar ações do plano de ação
@@ -106,7 +105,6 @@ export async function fetchTaxaFrequenciaAcCpd(): Promise<number> {
       .from('horas_trabalhadas')
       .select('horas_trabalhadas');
 
-    // Usar classificacao_ocorrencia para contar acidentes com afastamento
     const acCpd = ocorrencias 
       ? ocorrencias.filter(o => 
           o.classificacao_ocorrencia === 'ACIDENTE' && o.houve_afastamento === 'SIM'
@@ -135,7 +133,6 @@ export async function fetchTaxaFrequenciaAcSpd(): Promise<number> {
       .from('horas_trabalhadas')
       .select('horas_trabalhadas');
 
-    // Usar classificacao_ocorrencia para contar acidentes sem afastamento
     const acSpd = ocorrencias 
       ? ocorrencias.filter(o => 
           o.classificacao_ocorrencia === 'ACIDENTE' && o.houve_afastamento === 'NÃO'
@@ -163,7 +160,6 @@ export async function fetchTaxaGravidade(): Promise<number> {
       .from('horas_trabalhadas')
       .select('horas_trabalhadas');
 
-    // Usar classificacao_ocorrencia e as colunas dias_perdidos e dias_debitados
     const totalDiasPerdidos = ocorrencias 
       ? ocorrencias
           .filter(o => o.classificacao_ocorrencia === 'ACIDENTE' && o.houve_afastamento === 'SIM')
@@ -182,16 +178,18 @@ export async function fetchTaxaGravidade(): Promise<number> {
   }
 }
 
-// Novas funções para dados mensais e acumulados com correções
+// Funções para dados mensais e acumulados
 export async function fetchTaxaFrequenciaAcCpdPorMes(ano: number): Promise<any[]> {
   try {
+    console.log('Buscando dados AC CPD para o ano:', ano);
+    
     const resultado = [];
     let acumuladoOcorrencias = 0;
     let acumuladoHHT = 0;
 
     for (let mes = 1; mes <= 12; mes++) {
-      // Buscar ocorrências AC CPD do mês usando classificacao_ocorrencia
-      const { data: ocorrenciasMes } = await supabase
+      // Buscar ocorrências AC CPD do mês
+      const { data: ocorrenciasMes, error: ocorrenciasError } = await supabase
         .from('ocorrencias')
         .select('*')
         .eq('ano', ano)
@@ -199,15 +197,27 @@ export async function fetchTaxaFrequenciaAcCpdPorMes(ano: number): Promise<any[]
         .eq('classificacao_ocorrencia', 'ACIDENTE')
         .eq('houve_afastamento', 'SIM');
 
+      if (ocorrenciasError) {
+        console.error('Erro ao buscar ocorrências AC CPD:', ocorrenciasError);
+        continue;
+      }
+
       // Buscar HHT do mês
-      const { data: hhtMes } = await supabase
+      const { data: hhtMes, error: hhtError } = await supabase
         .from('horas_trabalhadas')
         .select('horas_trabalhadas')
         .eq('ano', ano)
         .eq('mes', mes);
 
+      if (hhtError) {
+        console.error('Erro ao buscar HHT:', hhtError);
+        continue;
+      }
+
       const ocorrenciasMesCount = ocorrenciasMes?.length || 0;
       const hhtMesTotal = hhtMes?.reduce((sum, h) => sum + (h.horas_trabalhadas || 0), 0) || 0;
+
+      console.log(`Mês ${mes}: ${ocorrenciasMesCount} ocorrências AC CPD, ${hhtMesTotal} HHT`);
 
       // Calcular taxa mensal
       const taxaMensal = hhtMesTotal > 0 ? (ocorrenciasMesCount * 1000000) / hhtMesTotal : 0;
@@ -221,11 +231,12 @@ export async function fetchTaxaFrequenciaAcCpdPorMes(ano: number): Promise<any[]
 
       resultado.push({
         mes,
-        mensal: taxaMensal,
-        acumulada: taxaAcumulada
+        mensal: Number(taxaMensal.toFixed(2)),
+        acumulada: Number(taxaAcumulada.toFixed(2))
       });
     }
 
+    console.log('Resultado AC CPD:', resultado);
     return resultado;
   } catch (error) {
     console.error('Erro ao buscar dados mensais AC CPD:', error);
@@ -235,13 +246,15 @@ export async function fetchTaxaFrequenciaAcCpdPorMes(ano: number): Promise<any[]
 
 export async function fetchTaxaFrequenciaAcSpdPorMes(ano: number): Promise<any[]> {
   try {
+    console.log('Buscando dados AC SPD para o ano:', ano);
+    
     const resultado = [];
     let acumuladoOcorrencias = 0;
     let acumuladoHHT = 0;
 
     for (let mes = 1; mes <= 12; mes++) {
-      // Buscar ocorrências AC SPD do mês usando classificacao_ocorrencia
-      const { data: ocorrenciasMes } = await supabase
+      // Buscar ocorrências AC SPD do mês
+      const { data: ocorrenciasMes, error: ocorrenciasError } = await supabase
         .from('ocorrencias')
         .select('*')
         .eq('ano', ano)
@@ -249,15 +262,27 @@ export async function fetchTaxaFrequenciaAcSpdPorMes(ano: number): Promise<any[]
         .eq('classificacao_ocorrencia', 'ACIDENTE')
         .eq('houve_afastamento', 'NÃO');
 
+      if (ocorrenciasError) {
+        console.error('Erro ao buscar ocorrências AC SPD:', ocorrenciasError);
+        continue;
+      }
+
       // Buscar HHT do mês
-      const { data: hhtMes } = await supabase
+      const { data: hhtMes, error: hhtError } = await supabase
         .from('horas_trabalhadas')
         .select('horas_trabalhadas')
         .eq('ano', ano)
         .eq('mes', mes);
 
+      if (hhtError) {
+        console.error('Erro ao buscar HHT:', hhtError);
+        continue;
+      }
+
       const ocorrenciasMesCount = ocorrenciasMes?.length || 0;
       const hhtMesTotal = hhtMes?.reduce((sum, h) => sum + (h.horas_trabalhadas || 0), 0) || 0;
+
+      console.log(`Mês ${mes}: ${ocorrenciasMesCount} ocorrências AC SPD, ${hhtMesTotal} HHT`);
 
       // Calcular taxa mensal
       const taxaMensal = hhtMesTotal > 0 ? (ocorrenciasMesCount * 1000000) / hhtMesTotal : 0;
@@ -271,11 +296,12 @@ export async function fetchTaxaFrequenciaAcSpdPorMes(ano: number): Promise<any[]
 
       resultado.push({
         mes,
-        mensal: taxaMensal,
-        acumulada: taxaAcumulada
+        mensal: Number(taxaMensal.toFixed(2)),
+        acumulada: Number(taxaAcumulada.toFixed(2))
       });
     }
 
+    console.log('Resultado AC SPD:', resultado);
     return resultado;
   } catch (error) {
     console.error('Erro ao buscar dados mensais AC SPD:', error);
@@ -285,13 +311,15 @@ export async function fetchTaxaFrequenciaAcSpdPorMes(ano: number): Promise<any[]
 
 export async function fetchTaxaGravidadePorMes(ano: number): Promise<any[]> {
   try {
+    console.log('Buscando dados de gravidade para o ano:', ano);
+    
     const resultado = [];
     let acumuladoDiasPerdidos = 0;
     let acumuladoHHT = 0;
 
     for (let mes = 1; mes <= 12; mes++) {
-      // Buscar ocorrências com afastamento do mês usando classificacao_ocorrencia
-      const { data: ocorrenciasMes } = await supabase
+      // Buscar ocorrências com afastamento do mês
+      const { data: ocorrenciasMes, error: ocorrenciasError } = await supabase
         .from('ocorrencias')
         .select('dias_perdidos, dias_debitados')
         .eq('ano', ano)
@@ -299,16 +327,28 @@ export async function fetchTaxaGravidadePorMes(ano: number): Promise<any[]> {
         .eq('classificacao_ocorrencia', 'ACIDENTE')
         .eq('houve_afastamento', 'SIM');
 
+      if (ocorrenciasError) {
+        console.error('Erro ao buscar ocorrências de gravidade:', ocorrenciasError);
+        continue;
+      }
+
       // Buscar HHT do mês
-      const { data: hhtMes } = await supabase
+      const { data: hhtMes, error: hhtError } = await supabase
         .from('horas_trabalhadas')
         .select('horas_trabalhadas')
         .eq('ano', ano)
         .eq('mes', mes);
 
+      if (hhtError) {
+        console.error('Erro ao buscar HHT:', hhtError);
+        continue;
+      }
+
       const diasPerdidosMes = ocorrenciasMes?.reduce((sum, o) => 
         sum + (o.dias_perdidos || 0) + (o.dias_debitados || 0), 0) || 0;
       const hhtMesTotal = hhtMes?.reduce((sum, h) => sum + (h.horas_trabalhadas || 0), 0) || 0;
+
+      console.log(`Mês ${mes}: ${diasPerdidosMes} dias perdidos, ${hhtMesTotal} HHT`);
 
       // Calcular taxa mensal
       const taxaMensal = hhtMesTotal > 0 ? (diasPerdidosMes * 1000000) / hhtMesTotal : 0;
@@ -322,11 +362,12 @@ export async function fetchTaxaGravidadePorMes(ano: number): Promise<any[]> {
 
       resultado.push({
         mes,
-        mensal: taxaMensal,
-        acumulada: taxaAcumulada
+        mensal: Number(taxaMensal.toFixed(2)),
+        acumulada: Number(taxaAcumulada.toFixed(2))
       });
     }
 
+    console.log('Resultado Gravidade:', resultado);
     return resultado;
   } catch (error) {
     console.error('Erro ao buscar dados mensais de gravidade:', error);
@@ -336,14 +377,22 @@ export async function fetchTaxaGravidadePorMes(ano: number): Promise<any[]> {
 
 export async function fetchMetaIndicador(ano: number, tipoMeta: string): Promise<number> {
   try {
+    console.log('Buscando meta:', { ano, tipoMeta });
+    
     const { data, error } = await supabase
       .from('metas_indicadores')
       .select(tipoMeta)
       .eq('ano', ano)
       .maybeSingle();
 
-    if (error) throw error;
-    return data?.[tipoMeta] || 0;
+    if (error) {
+      console.error('Erro ao buscar meta:', error);
+      return 0;
+    }
+
+    const meta = data?.[tipoMeta] || 0;
+    console.log('Meta encontrada:', meta);
+    return meta;
   } catch (error) {
     console.error('Erro ao buscar meta do indicador:', error);
     return 0;

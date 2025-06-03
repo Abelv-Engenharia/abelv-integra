@@ -21,13 +21,13 @@ const TaxaFrequenciaAcCpdChart = () => {
           fetchMetaIndicador(anoAtual, 'meta_taxa_frequencia_ac_cpd')
         ]);
 
-        console.log('Dados mensais AC CPD:', dadosMensais);
-        console.log('Meta AC CPD:', metaAnual);
+        console.log('Dados mensais AC CPD carregados:', dadosMensais);
+        console.log('Meta AC CPD carregada:', metaAnual);
 
         setData(dadosMensais);
         setMeta(metaAnual);
       } catch (error) {
-        console.error("Error loading taxa AC CPD data:", error);
+        console.error("Erro ao carregar dados AC CPD:", error);
       } finally {
         setLoading(false);
       }
@@ -40,6 +40,14 @@ const TaxaFrequenciaAcCpdChart = () => {
     return (
       <div className="h-64 flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (data.length === 0) {
+    return (
+      <div className="h-64 flex items-center justify-center">
+        <p className="text-muted-foreground">Nenhum dado disponível para AC CPD</p>
       </div>
     );
   }
