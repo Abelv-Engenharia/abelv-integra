@@ -14,10 +14,15 @@ const TaxaGravidadeChart = () => {
         setLoading(true);
         const anoAtual = new Date().getFullYear();
         
+        console.log('Carregando dados de gravidade para o ano:', anoAtual);
+        
         const [dadosMensais, metaAnual] = await Promise.all([
           fetchTaxaGravidadePorMes(anoAtual),
           fetchMetaIndicador(anoAtual, 'meta_taxa_gravidade')
         ]);
+
+        console.log('Dados mensais de gravidade:', dadosMensais);
+        console.log('Meta de gravidade:', metaAnual);
 
         setData(dadosMensais);
         setMeta(metaAnual);

@@ -100,15 +100,16 @@ export async function fetchTaxaFrequenciaAcCpd(): Promise<number> {
   try {
     const { data: ocorrencias } = await supabase
       .from('ocorrencias')
-      .select('tipo_ocorrencia, houve_afastamento, data');
+      .select('classificacao_ocorrencia, houve_afastamento, data');
     
     const { data: hht } = await supabase
       .from('horas_trabalhadas')
       .select('horas_trabalhadas');
 
+    // Usar classificacao_ocorrencia para contar acidentes com afastamento
     const acCpd = ocorrencias 
       ? ocorrencias.filter(o => 
-          o.tipo_ocorrencia === 'ACIDENTE' && o.houve_afastamento === 'SIM'
+          o.classificacao_ocorrencia === 'ACIDENTE' && o.houve_afastamento === 'SIM'
         ).length 
       : 0;
 
@@ -128,15 +129,16 @@ export async function fetchTaxaFrequenciaAcSpd(): Promise<number> {
   try {
     const { data: ocorrencias } = await supabase
       .from('ocorrencias')
-      .select('tipo_ocorrencia, houve_afastamento, data');
+      .select('classificacao_ocorrencia, houve_afastamento, data');
     
     const { data: hht } = await supabase
       .from('horas_trabalhadas')
       .select('horas_trabalhadas');
 
+    // Usar classificacao_ocorrencia para contar acidentes sem afastamento
     const acSpd = ocorrencias 
       ? ocorrencias.filter(o => 
-          o.tipo_ocorrencia === 'ACIDENTE' && o.houve_afastamento === 'NÃO'
+          o.classificacao_ocorrencia === 'ACIDENTE' && o.houve_afastamento === 'NÃO'
         ).length 
       : 0;
 
@@ -155,15 +157,16 @@ export async function fetchTaxaGravidade(): Promise<number> {
   try {
     const { data: ocorrencias } = await supabase
       .from('ocorrencias')
-      .select('tipo_ocorrencia, houve_afastamento, dias_perdidos, dias_debitados, data');
+      .select('classificacao_ocorrencia, houve_afastamento, dias_perdidos, dias_debitados, data');
     
     const { data: hht } = await supabase
       .from('horas_trabalhadas')
       .select('horas_trabalhadas');
 
+    // Usar classificacao_ocorrencia e as colunas dias_perdidos e dias_debitados
     const totalDiasPerdidos = ocorrencias 
       ? ocorrencias
-          .filter(o => o.tipo_ocorrencia === 'ACIDENTE' && o.houve_afastamento === 'SIM')
+          .filter(o => o.classificacao_ocorrencia === 'ACIDENTE' && o.houve_afastamento === 'SIM')
           .reduce((sum, o) => sum + (o.dias_perdidos || 0) + (o.dias_debitados || 0), 0)
       : 0;
 
@@ -179,7 +182,7 @@ export async function fetchTaxaGravidade(): Promise<number> {
   }
 }
 
-// Novas funções para dados mensais e acumulados
+// Novas funções para dados mensais e acumulados com correções
 export async function fetchTaxaFrequenciaAcCpdPorMes(ano: number): Promise<any[]> {
   try {
     const resultado = [];
@@ -187,13 +190,13 @@ export async function fetchTaxaFrequenciaAcCpdPorMes(ano: number): Promise<any[]
     let acumuladoHHT = 0;
 
     for (let mes = 1; mes <= 12; mes++) {
-      // Buscar ocorrências AC CPD do mês
+      // Buscar ocorrências AC CPD do mês usando classificacao_ocorrencia
       const { data: ocorrenciasMes } = await supabase
         .from('ocorrencias')
         .select('*')
         .eq('ano', ano)
         .eq('mes', mes)
-        .eq('tipo_ocorrencia', 'ACIDENTE')
+        .eq('classificacao_ocorrencia', 'ACIDENTE')
         .eq('houve_afastamento', 'SIM');
 
       // Buscar HHT do mês
@@ -237,13 +240,13 @@ export async function fetchTaxaFrequenciaAcSpdPorMes(ano: number): Promise<any[]
     let acumuladoHHT = 0;
 
     for (let mes = 1; mes <= 12; mes++) {
-      // Buscar ocorrências AC SPD do mês
+      // Buscar ocorrências AC SPD do mês usando classificacao_ocorrencia
       const { data: ocorrenciasMes } = await supabase
         .from('ocorrencias')
         .select('*')
         .eq('ano', ano)
         .eq('mes', mes)
-        .eq('tipo_ocorrencia', 'ACIDENTE')
+        .eq('classificacao_ocorrencia', 'ACIDENTE')
         .eq('houve_afastamento', 'NÃO');
 
       // Buscar HHT do mês
@@ -287,13 +290,13 @@ export async function fetchTaxaGravidadePorMes(ano: number): Promise<any[]> {
     let acumuladoHHT = 0;
 
     for (let mes = 1; mes <= 12; mes++) {
-      // Buscar ocorrências com afastamento do mês
+      // Buscar ocorrências com afastamento do mês usando classificacao_ocorrencia
       const { data: ocorrenciasMes } = await supabase
         .from('ocorrencias')
         .select('dias_perdidos, dias_debitados')
         .eq('ano', ano)
         .eq('mes', mes)
-        .eq('tipo_ocorrencia', 'ACIDENTE')
+        .eq('classificacao_ocorrencia', 'ACIDENTE')
         .eq('houve_afastamento', 'SIM');
 
       // Buscar HHT do mês
@@ -333,11 +336,11 @@ export async function fetchTaxaGravidadePorMes(ano: number): Promise<any[]> {
 
 export async function fetchMetaIndicador(ano: number, tipoMeta: string): Promise<number> {
   try {
-    const { data, error } = await (supabase as any)
+    const { data, error } = await supabase
       .from('metas_indicadores')
       .select(tipoMeta)
       .eq('ano', ano)
-      .single();
+      .maybeSingle();
 
     if (error) throw error;
     return data?.[tipoMeta] || 0;

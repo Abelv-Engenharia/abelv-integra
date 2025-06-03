@@ -14,10 +14,15 @@ const TaxaFrequenciaAcCpdChart = () => {
         setLoading(true);
         const anoAtual = new Date().getFullYear();
         
+        console.log('Carregando dados AC CPD para o ano:', anoAtual);
+        
         const [dadosMensais, metaAnual] = await Promise.all([
           fetchTaxaFrequenciaAcCpdPorMes(anoAtual),
           fetchMetaIndicador(anoAtual, 'meta_taxa_frequencia_ac_cpd')
         ]);
+
+        console.log('Dados mensais AC CPD:', dadosMensais);
+        console.log('Meta AC CPD:', metaAnual);
 
         setData(dadosMensais);
         setMeta(metaAnual);
