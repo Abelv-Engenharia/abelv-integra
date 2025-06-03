@@ -99,7 +99,7 @@ export async function fetchTaxaFrequenciaAcCpd(): Promise<number> {
   try {
     const { data: ocorrencias } = await supabase
       .from('ocorrencias')
-      .select('classificacao_ocorrencia, houve_afastamento, data');
+      .select('classificacao_ocorrencia, houve_afastamento');
     
     const { data: hht } = await supabase
       .from('horas_trabalhadas')
@@ -127,7 +127,7 @@ export async function fetchTaxaFrequenciaAcSpd(): Promise<number> {
   try {
     const { data: ocorrencias } = await supabase
       .from('ocorrencias')
-      .select('classificacao_ocorrencia, houve_afastamento, data');
+      .select('classificacao_ocorrencia, houve_afastamento');
     
     const { data: hht } = await supabase
       .from('horas_trabalhadas')
@@ -154,7 +154,7 @@ export async function fetchTaxaGravidade(): Promise<number> {
   try {
     const { data: ocorrencias } = await supabase
       .from('ocorrencias')
-      .select('classificacao_ocorrencia, houve_afastamento, dias_perdidos, dias_debitados, data');
+      .select('classificacao_ocorrencia, houve_afastamento, dias_perdidos, dias_debitados');
     
     const { data: hht } = await supabase
       .from('horas_trabalhadas')
