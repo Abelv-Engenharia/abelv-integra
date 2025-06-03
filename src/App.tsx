@@ -1,39 +1,40 @@
+
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from './contexts/AuthContext';
-import Login from './pages/Login';
-import PrivateRoute from './components/PrivateRoute';
+import Login from './pages/auth/Login';
+import { AuthGuard } from './components/auth/AuthGuard';
 import Dashboard from './pages/Dashboard';
-import DesviosDashboard from './pages/desvios/DesviosDashboard';
-import DesviosCadastro from './pages/desvios/DesviosCadastro';
-import DesviosConsulta from './pages/desvios/DesviosConsulta';
-import NaoConformidade from './pages/desvios/NaoConformidade';
+import DesviosDashboard from './pages/DesviosDashboard';
+import DesviosForm from './pages/DesviosForm';
+import DesviosConsulta from './pages/DesviosConsulta';
+import DesviosNaoConformidade from './pages/DesviosNaoConformidade';
 import TreinamentosDashboard from './pages/treinamentos/TreinamentosDashboard';
-import TreinamentoNormativo from './pages/treinamentos/TreinamentoNormativo';
+import TreinamentoNormativo from './pages/treinamentos/TreinamentosNormativo';
 import TreinamentosConsulta from './pages/treinamentos/TreinamentosConsulta';
-import ExecucaoTreinamentos from './pages/treinamentos/ExecucaoTreinamentos';
-import EmissaoCracha from './pages/treinamentos/EmissaoCracha';
+import ExecucaoTreinamentos from './pages/treinamentos/TreinamentosExecucao';
+import EmissaoCracha from './pages/treinamentos/TreinamentosCracha';
 import OcorrenciasDashboard from './pages/ocorrencias/OcorrenciasDashboard';
 import OcorrenciasCadastro from './pages/ocorrencias/OcorrenciasCadastro';
 import OcorrenciasConsulta from './pages/ocorrencias/OcorrenciasConsulta';
-import MedidasDashboard from './pages/medidas_disciplinares/MedidasDashboard';
-import MedidasCadastro from './pages/medidas_disciplinares/MedidasCadastro';
-import MedidasConsulta from './pages/medidas_disciplinares/MedidasConsulta';
+import MedidasDashboard from './pages/PlaceholderPage';
+import MedidasCadastro from './pages/PlaceholderPage';
+import MedidasConsulta from './pages/PlaceholderPage';
 import TarefasDashboard from './pages/tarefas/TarefasDashboard';
 import MinhasTarefas from './pages/tarefas/MinhasTarefas';
 import CadastroTarefas from './pages/tarefas/CadastroTarefas';
-import Relatorios from './pages/relatorios/Relatorios';
-import UsuariosAdmin from './pages/admin/UsuariosAdmin';
-import PerfisAdmin from './pages/admin/PerfisAdmin';
-import EmpresasAdmin from './pages/admin/EmpresasAdmin';
-import EngenheirosAdmin from './pages/admin/EngenheirosAdmin';
-import SupervisoresAdmin from './pages/admin/SupervisoresAdmin';
-import FuncionariosAdmin from './pages/admin/FuncionariosAdmin';
-import HHTAdmin from './pages/admin/HHTAdmin';
-import MetasIndicadoresAdmin from './pages/admin/MetasIndicadoresAdmin';
-import TemplatesAdmin from './pages/admin/TemplatesAdmin';
-import LogoAdmin from './pages/admin/LogoAdmin';
+import Relatorios from './pages/relatorios/RelatoriosDashboard';
+import UsuariosAdmin from './pages/admin/AdminUsuarios';
+import PerfisAdmin from './pages/admin/AdminPerfis';
+import EmpresasAdmin from './pages/admin/AdminEmpresas';
+import EngenheirosAdmin from './pages/admin/AdminEngenheiros';
+import SupervisoresAdmin from './pages/admin/AdminSupervisores';
+import FuncionariosAdmin from './pages/admin/CadastroFuncionarios';
+import HHTAdmin from './pages/admin/RegistroHHT';
+import MetasIndicadoresAdmin from './pages/admin/MetasIndicadores';
+import TemplatesAdmin from './pages/AdminTemplates';
+import LogoAdmin from './pages/admin/AdminLogo';
 import IDSMSDashboard from './pages/idsms/IDSMSDashboard';
 import IIDForm from './pages/idsms/IIDForm';
 import HSAForm from './pages/idsms/HSAForm';
@@ -44,6 +45,7 @@ import InspecaoGestaoSMSForm from './pages/idsms/InspecaoGestaoSMSForm';
 import IndiceReativoForm from './pages/idsms/IndiceReativoForm';
 import RelatoriosIDSMS from './pages/relatorios/RelatoriosIDSMS';
 import IDSMSIndicadores from './pages/idsms/IDSMSIndicadores';
+import Layout from './components/layout/Layout';
 
 const queryClient = new QueryClient();
 
@@ -54,62 +56,64 @@ function App() {
         <AuthProvider>
           <Routes>
             <Route path="/login" element={<Login />} />
-            <Route path="/" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+            <Route path="/" element={<AuthGuard><Layout /></AuthGuard>}>
+              <Route index element={<Dashboard />} />
 
-            {/* Desvios Routes */}
-            <Route path="/desvios/dashboard" element={<PrivateRoute><DesviosDashboard /></PrivateRoute>} />
-            <Route path="/desvios/cadastro" element={<PrivateRoute><DesviosCadastro /></PrivateRoute>} />
-            <Route path="/desvios/consulta" element={<PrivateRoute><DesviosConsulta /></PrivateRoute>} />
-            <Route path="/desvios/nao-conformidade" element={<PrivateRoute><NaoConformidade /></PrivateRoute>} />
+              {/* Desvios Routes */}
+              <Route path="desvios/dashboard" element={<DesviosDashboard />} />
+              <Route path="desvios/cadastro" element={<DesviosForm />} />
+              <Route path="desvios/consulta" element={<DesviosConsulta />} />
+              <Route path="desvios/nao-conformidade" element={<DesviosNaoConformidade />} />
 
-            {/* Treinamentos Routes */}
-            <Route path="/treinamentos/dashboard" element={<PrivateRoute><TreinamentosDashboard /></PrivateRoute>} />
-            <Route path="/treinamentos/normativo" element={<PrivateRoute><TreinamentoNormativo /></PrivateRoute>} />
-            <Route path="/treinamentos/consulta" element={<PrivateRoute><TreinamentosConsulta /></PrivateRoute>} />
-            <Route path="/treinamentos/execucao" element={<PrivateRoute><ExecucaoTreinamentos /></PrivateRoute>} />
-            <Route path="/treinamentos/cracha" element={<PrivateRoute><EmissaoCracha /></PrivateRoute>} />
+              {/* Treinamentos Routes */}
+              <Route path="treinamentos/dashboard" element={<TreinamentosDashboard />} />
+              <Route path="treinamentos/normativo" element={<TreinamentoNormativo />} />
+              <Route path="treinamentos/consulta" element={<TreinamentosConsulta />} />
+              <Route path="treinamentos/execucao" element={<ExecucaoTreinamentos />} />
+              <Route path="treinamentos/cracha" element={<EmissaoCracha />} />
 
-            {/* Ocorrencias Routes */}
-            <Route path="/ocorrencias/dashboard" element={<PrivateRoute><OcorrenciasDashboard /></PrivateRoute>} />
-            <Route path="/ocorrencias/cadastro" element={<PrivateRoute><OcorrenciasCadastro /></PrivateRoute>} />
-            <Route path="/ocorrencias/consulta" element={<PrivateRoute><OcorrenciasConsulta /></PrivateRoute>} />
+              {/* Ocorrencias Routes */}
+              <Route path="ocorrencias/dashboard" element={<OcorrenciasDashboard />} />
+              <Route path="ocorrencias/cadastro" element={<OcorrenciasCadastro />} />
+              <Route path="ocorrencias/consulta" element={<OcorrenciasConsulta />} />
 
-            {/* Medidas Disciplinares Routes */}
-            <Route path="/medidas-disciplinares/dashboard" element={<PrivateRoute><MedidasDashboard /></PrivateRoute>} />
-            <Route path="/medidas-disciplinares/cadastro" element={<PrivateRoute><MedidasCadastro /></PrivateRoute>} />
-            <Route path="/medidas-disciplinares/consulta" element={<PrivateRoute><MedidasConsulta /></PrivateRoute>} />
+              {/* Medidas Disciplinares Routes */}
+              <Route path="medidas-disciplinares/dashboard" element={<MedidasDashboard />} />
+              <Route path="medidas-disciplinares/cadastro" element={<MedidasCadastro />} />
+              <Route path="medidas-disciplinares/consulta" element={<MedidasConsulta />} />
 
-            {/* Tarefas Routes */}
-            <Route path="/tarefas/dashboard" element={<PrivateRoute><TarefasDashboard /></PrivateRoute>} />
-            <Route path="/tarefas/minhas-tarefas" element={<PrivateRoute><MinhasTarefas /></PrivateRoute>} />
-            <Route path="/tarefas/cadastro" element={<PrivateRoute><CadastroTarefas /></PrivateRoute>} />
+              {/* Tarefas Routes */}
+              <Route path="tarefas/dashboard" element={<TarefasDashboard />} />
+              <Route path="tarefas/minhas-tarefas" element={<MinhasTarefas />} />
+              <Route path="tarefas/cadastro" element={<CadastroTarefas />} />
 
-            {/* Relatorios Routes */}
-            <Route path="/relatorios" element={<PrivateRoute><Relatorios /></PrivateRoute>} />
-            <Route path="/relatorios/idsms" element={<PrivateRoute><RelatoriosIDSMS /></PrivateRoute>} />
+              {/* Relatorios Routes */}
+              <Route path="relatorios" element={<Relatorios />} />
+              <Route path="relatorios/idsms" element={<RelatoriosIDSMS />} />
 
-            {/* Admin Routes */}
-            <Route path="/admin/usuarios" element={<PrivateRoute><UsuariosAdmin /></PrivateRoute>} />
-            <Route path="/admin/perfis" element={<PrivateRoute><PerfisAdmin /></PrivateRoute>} />
-            <Route path="/admin/empresas" element={<PrivateRoute><EmpresasAdmin /></PrivateRoute>} />
-            <Route path="/admin/engenheiros" element={<PrivateRoute><EngenheirosAdmin /></PrivateRoute>} />
-            <Route path="/admin/supervisores" element={<PrivateRoute><SupervisoresAdmin /></PrivateRoute>} />
-            <Route path="/admin/funcionarios" element={<PrivateRoute><FuncionariosAdmin /></PrivateRoute>} />
-            <Route path="/admin/hht" element={<PrivateRoute><HHTAdmin /></PrivateRoute>} />
-            <Route path="/admin/metas-indicadores" element={<PrivateRoute><MetasIndicadoresAdmin /></PrivateRoute>} />
-            <Route path="/admin/templates" element={<PrivateRoute><TemplatesAdmin /></PrivateRoute>} />
-            <Route path="/admin/logo" element={<PrivateRoute><LogoAdmin /></PrivateRoute>} />
-            
-            {/* IDSMS Routes */}
-            <Route path="/idsms/dashboard" element={<PrivateRoute><IDSMSDashboard /></PrivateRoute>} />
-            <Route path="/idsms/indicadores" element={<PrivateRoute><IDSMSIndicadores /></PrivateRoute>} />
-            <Route path="/idsms/iid" element={<PrivateRoute><IIDForm /></PrivateRoute>} />
-            <Route path="/idsms/hsa" element={<PrivateRoute><HSAForm /></PrivateRoute>} />
-            <Route path="/idsms/ht" element={<PrivateRoute><HTForm /></PrivateRoute>} />
-            <Route path="/idsms/ipom" element={<PrivateRoute><IPOMForm /></PrivateRoute>} />
-            <Route path="/idsms/inspecao-alta-lideranca" element={<PrivateRoute><InspecaoAltaLiderancaForm /></PrivateRoute>} />
-            <Route path="/idsms/inspecao-gestao-sms" element={<PrivateRoute><InspecaoGestaoSMSForm /></PrivateRoute>} />
-            <Route path="/idsms/indice-reativo" element={<PrivateRoute><IndiceReativoForm /></PrivateRoute>} />
+              {/* Admin Routes */}
+              <Route path="admin/usuarios" element={<UsuariosAdmin />} />
+              <Route path="admin/perfis" element={<PerfisAdmin />} />
+              <Route path="admin/empresas" element={<EmpresasAdmin />} />
+              <Route path="admin/engenheiros" element={<EngenheirosAdmin />} />
+              <Route path="admin/supervisores" element={<SupervisoresAdmin />} />
+              <Route path="admin/funcionarios" element={<FuncionariosAdmin />} />
+              <Route path="admin/hht" element={<HHTAdmin />} />
+              <Route path="admin/metas-indicadores" element={<MetasIndicadoresAdmin />} />
+              <Route path="admin/templates" element={<TemplatesAdmin />} />
+              <Route path="admin/logo" element={<LogoAdmin />} />
+              
+              {/* IDSMS Routes */}
+              <Route path="idsms/dashboard" element={<IDSMSDashboard />} />
+              <Route path="idsms/indicadores" element={<IDSMSIndicadores />} />
+              <Route path="idsms/iid" element={<IIDForm />} />
+              <Route path="idsms/hsa" element={<HSAForm />} />
+              <Route path="idsms/ht" element={<HTForm />} />
+              <Route path="idsms/ipom" element={<IPOMForm />} />
+              <Route path="idsms/inspecao-alta-lideranca" element={<InspecaoAltaLiderancaForm />} />
+              <Route path="idsms/inspecao-gestao-sms" element={<InspecaoGestaoSMSForm />} />
+              <Route path="idsms/indice-reativo" element={<IndiceReativoForm />} />
+            </Route>
           </Routes>
         </AuthProvider>
       </Router>
