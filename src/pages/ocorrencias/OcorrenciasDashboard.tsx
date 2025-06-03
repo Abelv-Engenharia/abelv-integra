@@ -10,7 +10,6 @@ import OcorrenciasSummaryCards from "@/components/ocorrencias/OcorrenciasSummary
 import OcorrenciasByTipoColumnChart from "@/components/ocorrencias/OcorrenciasByTipoColumnChart";
 import OcorrenciasByEmpresaChart from "@/components/ocorrencias/OcorrenciasByEmpresaChart";
 import OcorrenciasTimelineChart from "@/components/ocorrencias/OcorrenciasTimelineChart";
-import TaxaFrequenciaChart from "@/components/ocorrencias/TaxaFrequenciaChart";
 import TaxaFrequenciaAcCpdChart from "@/components/ocorrencias/TaxaFrequenciaAcCpdChart";
 import TaxaFrequenciaAcSpdChart from "@/components/ocorrencias/TaxaFrequenciaAcSpdChart";
 import TaxaGravidadeChart from "@/components/ocorrencias/TaxaGravidadeChart";
