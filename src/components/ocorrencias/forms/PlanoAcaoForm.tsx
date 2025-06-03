@@ -72,6 +72,7 @@ const PlanoAcaoForm = () => {
             const today = new Date();
             today.setHours(0, 0, 0, 0);
             const adequacaoDate = new Date(acao.dataAdequacao);
+            adequacaoDate.setHours(0, 0, 0, 0);
             
             if (today > adequacaoDate) {
               status = "Em atraso";

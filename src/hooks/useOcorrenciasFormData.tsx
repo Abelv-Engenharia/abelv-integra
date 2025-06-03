@@ -30,8 +30,7 @@ export const useOcorrenciasFormData = ({ selectedCcaId }: UseOcorrenciasFormData
         .select(`
           empresa_id,
           cca_id,
-          empresas!inner(id, nome, cnpj, ativo),
-          ccas!inner(id, codigo, nome)
+          empresas!inner(id, nome, cnpj, ativo)
         `)
         .eq('empresas.ativo', true)
         .order('empresas.nome');
@@ -61,8 +60,7 @@ export const useOcorrenciasFormData = ({ selectedCcaId }: UseOcorrenciasFormData
         .select(`
           engenheiro_id,
           cca_id,
-          engenheiros!inner(id, nome, funcao, matricula, email, ativo),
-          ccas!inner(id, codigo, nome)
+          engenheiros!inner(id, nome, funcao, matricula, email, ativo)
         `)
         .eq('engenheiros.ativo', true)
         .order('engenheiros.nome');
@@ -79,8 +77,7 @@ export const useOcorrenciasFormData = ({ selectedCcaId }: UseOcorrenciasFormData
         .select(`
           supervisor_id,
           cca_id,
-          supervisores!inner(id, nome, funcao, matricula, email, ativo),
-          ccas!inner(id, codigo, nome)
+          supervisores!inner(id, nome, funcao, matricula, email, ativo)
         `)
         .eq('supervisores.ativo', true)
         .order('supervisores.nome');
@@ -194,24 +191,27 @@ export const useOcorrenciasFormData = ({ selectedCcaId }: UseOcorrenciasFormData
     const ccaIdNumber = parseInt(selectedCcaId);
 
     console.log('Selected CCA ID:', ccaIdNumber);
-    console.log('All empresas:', allEmpresas);
-    console.log('All engenheiros:', allEngenheiros);
-    console.log('All supervisores:', allSupervisores);
+    console.log('All empresas data:', allEmpresas);
+    console.log('All engenheiros data:', allEngenheiros);
+    console.log('All supervisores data:', allSupervisores);
 
     // Filtrar empresas que têm relacionamento com o CCA selecionado
-    const filteredEmpresas = allEmpresas.filter(empresa => 
-      empresa.cca_id === ccaIdNumber
-    );
+    const filteredEmpresas = allEmpresas.filter(item => {
+      console.log('Checking empresa CCA ID:', item.cca_id, 'against selected:', ccaIdNumber);
+      return item.cca_id === ccaIdNumber;
+    });
 
     // Filtrar engenheiros que têm relacionamento com o CCA selecionado
-    const filteredEngenheiros = allEngenheiros.filter(engenheiro => 
-      engenheiro.cca_id === ccaIdNumber
-    );
+    const filteredEngenheiros = allEngenheiros.filter(item => {
+      console.log('Checking engenheiro CCA ID:', item.cca_id, 'against selected:', ccaIdNumber);
+      return item.cca_id === ccaIdNumber;
+    });
 
     // Filtrar supervisores que têm relacionamento com o CCA selecionado
-    const filteredSupervisores = allSupervisores.filter(supervisor => 
-      supervisor.cca_id === ccaIdNumber
-    );
+    const filteredSupervisores = allSupervisores.filter(item => {
+      console.log('Checking supervisor CCA ID:', item.cca_id, 'against selected:', ccaIdNumber);
+      return item.cca_id === ccaIdNumber;
+    });
 
     console.log('Filtered empresas:', filteredEmpresas);
     console.log('Filtered engenheiros:', filteredEngenheiros);
@@ -221,8 +221,8 @@ export const useOcorrenciasFormData = ({ selectedCcaId }: UseOcorrenciasFormData
       empresas: filteredEmpresas,
       engenheiros: filteredEngenheiros,
       supervisores: filteredSupervisores,
-      encarregados: allEncarregados.filter(encarregado => encarregado.cca_id === ccaIdNumber),
-      funcionarios: allFuncionarios.filter(funcionario => funcionario.cca_id === ccaIdNumber),
+      encarregados: allEncarregados.filter(item => item.cca_id === ccaIdNumber),
+      funcionarios: allFuncionarios.filter(item => item.cca_id === ccaIdNumber),
     };
   }, [allEmpresas, allEngenheiros, allSupervisores, allEncarregados, allFuncionarios, selectedCcaId]);
 
