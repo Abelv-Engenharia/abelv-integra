@@ -860,50 +860,152 @@ export type Database = {
       }
       ocorrencias: {
         Row: {
+          acoes: Json | null
+          agente_causador: string | null
+          ano: number | null
+          arquivo_cat: string | null
+          arquivo_licoes_aprendidas: string | null
           cca: string
+          cid: string | null
+          classificacao_ocorrencia: string | null
           classificacao_risco: string
+          colaboradores_acidentados: Json | null
+          controle: string | null
           created_at: string | null
           data: string
           descricao: string | null
+          descricao_ocorrencia: string | null
+          deteccao: string | null
+          dias_debitados: number | null
+          dias_perdidos: number | null
           disciplina: string
+          efeito_falha: string | null
           empresa: string
+          encarregado_responsavel: string | null
+          engenheiro_responsavel: string | null
+          exposicao: string | null
+          hora: string | null
+          houve_afastamento: string | null
           id: string
+          impacto: string | null
+          informe_preliminar: string | null
+          investigacao_realizada: string | null
+          lateralidade: string | null
+          licoes_aprendidas_enviada: string | null
           medidas_tomadas: string | null
+          mes: number | null
+          natureza_lesao: string | null
+          numero_cat: string | null
+          parte_corpo_atingida: string | null
           partes_corpo_afetadas: string[] | null
+          probabilidade: number | null
+          relatorio_analise: string | null
           responsavel_id: string | null
+          severidade: number | null
+          situacao_geradora: string | null
           status: string
+          supervisor_responsavel: string | null
+          tipo_evento: string | null
           tipo_ocorrencia: string
           updated_at: string | null
         }
         Insert: {
+          acoes?: Json | null
+          agente_causador?: string | null
+          ano?: number | null
+          arquivo_cat?: string | null
+          arquivo_licoes_aprendidas?: string | null
           cca: string
+          cid?: string | null
+          classificacao_ocorrencia?: string | null
           classificacao_risco: string
+          colaboradores_acidentados?: Json | null
+          controle?: string | null
           created_at?: string | null
           data?: string
           descricao?: string | null
+          descricao_ocorrencia?: string | null
+          deteccao?: string | null
+          dias_debitados?: number | null
+          dias_perdidos?: number | null
           disciplina: string
+          efeito_falha?: string | null
           empresa: string
+          encarregado_responsavel?: string | null
+          engenheiro_responsavel?: string | null
+          exposicao?: string | null
+          hora?: string | null
+          houve_afastamento?: string | null
           id?: string
+          impacto?: string | null
+          informe_preliminar?: string | null
+          investigacao_realizada?: string | null
+          lateralidade?: string | null
+          licoes_aprendidas_enviada?: string | null
           medidas_tomadas?: string | null
+          mes?: number | null
+          natureza_lesao?: string | null
+          numero_cat?: string | null
+          parte_corpo_atingida?: string | null
           partes_corpo_afetadas?: string[] | null
+          probabilidade?: number | null
+          relatorio_analise?: string | null
           responsavel_id?: string | null
+          severidade?: number | null
+          situacao_geradora?: string | null
           status: string
+          supervisor_responsavel?: string | null
+          tipo_evento?: string | null
           tipo_ocorrencia: string
           updated_at?: string | null
         }
         Update: {
+          acoes?: Json | null
+          agente_causador?: string | null
+          ano?: number | null
+          arquivo_cat?: string | null
+          arquivo_licoes_aprendidas?: string | null
           cca?: string
+          cid?: string | null
+          classificacao_ocorrencia?: string | null
           classificacao_risco?: string
+          colaboradores_acidentados?: Json | null
+          controle?: string | null
           created_at?: string | null
           data?: string
           descricao?: string | null
+          descricao_ocorrencia?: string | null
+          deteccao?: string | null
+          dias_debitados?: number | null
+          dias_perdidos?: number | null
           disciplina?: string
+          efeito_falha?: string | null
           empresa?: string
+          encarregado_responsavel?: string | null
+          engenheiro_responsavel?: string | null
+          exposicao?: string | null
+          hora?: string | null
+          houve_afastamento?: string | null
           id?: string
+          impacto?: string | null
+          informe_preliminar?: string | null
+          investigacao_realizada?: string | null
+          lateralidade?: string | null
+          licoes_aprendidas_enviada?: string | null
           medidas_tomadas?: string | null
+          mes?: number | null
+          natureza_lesao?: string | null
+          numero_cat?: string | null
+          parte_corpo_atingida?: string | null
           partes_corpo_afetadas?: string[] | null
+          probabilidade?: number | null
+          relatorio_analise?: string | null
           responsavel_id?: string | null
+          severidade?: number | null
+          situacao_geradora?: string | null
           status?: string
+          supervisor_responsavel?: string | null
+          tipo_evento?: string | null
           tipo_ocorrencia?: string
           updated_at?: string | null
         }

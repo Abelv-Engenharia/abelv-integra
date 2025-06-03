@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -17,135 +18,7 @@ import { useForm, FormProvider } from "react-hook-form";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
-
-type AcaoPlanoData = {
-  tratativaAplicada: string;
-  dataAdequacao: Date | null;
-  responsavelAcao: string;
-  funcaoResponsavel: string;
-  situacao: string;
-  status: string;
-};
-
-type OcorrenciaFormData = {
-  data: Date | null;
-  hora: string;
-  mes: string;
-  ano: string;
-  cca: string;
-  empresa: string;
-  disciplina: string;
-  engenheiroResponsavel: string;
-  supervisorResponsavel: string;
-  encarregadoResponsavel: string;
-  colaboradoresAcidentados: Array<{
-    colaborador: string;
-    funcao: string;
-    matricula: string;
-  }>;
-  tipoOcorrencia: string;
-  tipoEvento: string;
-  classificacaoOcorrencia: string;
-  
-  houveAfastamento: string;
-  diasPerdidos: number | null;
-  diasDebitados: number | null;
-  parteCorpoAtingida: string;
-  lateralidade: string;
-  agenteCausador: string;
-  situacaoGeradora: string;
-  naturezaLesao: string;
-  descricaoOcorrencia: string;
-  numeroCat: string;
-  cid: string;
-  arquivoCAT: File | null;
-  
-  exposicao: string;
-  controle: string;
-  deteccao: string;
-  efeitoFalha: string;
-  impacto: string;
-  probabilidade: number | null;
-  severidade: number | null;
-  classificacaoRisco: string;
-  
-  acoes: AcaoPlanoData[];
-  
-  investigacaoRealizada: string;
-  informePreliminar: File | null;
-  relatorioAnalise: File | null;
-  licoesAprendidasEnviada: string;
-  arquivoLicoesAprendidas: File | null;
-};
-
-const mockOcorrencias = [
-  {
-    id: "1",
-    data: new Date("2023-05-15"),
-    hora: "14:30",
-    mes: "Maio",
-    ano: "2023",
-    colaborador: "José da Silva",
-    matricula: "123456",
-    empresa: "Empresa A",
-    cca: "CCA-001",
-    disciplina: "Elétrica",
-    tipoOcorrencia: "Acidente com Afastamento",
-    tipoEvento: "Trabalho em altura",
-    classificacaoOcorrencia: "Grave",
-    engenheiroResponsavel: "Ricardo Engenheiro",
-    supervisorResponsavel: "Carlos Supervisor",
-    encarregadoResponsavel: "João Encarregado",
-    colaboradoresAcidentados: [{
-      colaborador: "José da Silva",
-      funcao: "Eletricista",
-      matricula: "123456"
-    }],
-    houveAfastamento: "Sim",
-    diasPerdidos: 15,
-    diasDebitados: 5,
-    parteCorpoAtingida: "Mão direita",
-    lateralidade: "Direita",
-    agenteCausador: "Equipamento elétrico",
-    situacaoGeradora: "Manutenção sem desligamento",
-    naturezaLesao: "Queimadura",
-    descricao: "O colaborador estava realizando manutenção em um painel elétrico quando sofreu um choque elétrico de alta tensão.",
-    acoesImediatas: "Atendimento médico imediato e isolamento da área para verificação.",
-    numeroCat: "12345678",
-    cid: "T75.4",
-    causaRaiz: "Ausência de procedimento adequado para bloqueio e etiquetagem.",
-    exposicao: "Frequente",
-    controle: "Inadequado",
-    deteccao: "Baixa",
-    efeitoFalha: "Grande",
-    impacto: "Alto",
-    probabilidade: 8,
-    severidade: 8,
-    classificacaoRisco: "INTOLERÁVEL",
-    investigacaoRealizada: "Sim",
-    licoesAprendidasEnviada: "Sim",
-    planoAcao: [
-      {
-        id: "1-1",
-        tratativaAplicada: "Revisar procedimento de bloqueio e etiquetagem",
-        responsavelAcao: "Carlos Santos",
-        funcaoResponsavel: "Engenheiro de Segurança",
-        dataAdequacao: new Date("2023-06-15"),
-        situacao: "Verificado",
-        status: "Concluído"
-      },
-      {
-        id: "1-2",
-        tratativaAplicada: "Realizar treinamento com todos os eletricistas",
-        responsavelAcao: "Mariana Oliveira",
-        funcaoResponsavel: "Analista de Treinamento",
-        dataAdequacao: new Date("2023-06-30"),
-        situacao: "Em andamento",
-        status: "Em andamento"
-      }
-    ]
-  },
-];
+import { createOcorrencia, updateOcorrencia, getOcorrenciaById, OcorrenciaFormData } from "@/services/ocorrencias/ocorrenciasService";
 
 const OcorrenciasCadastro = () => {
   const [activeTab, setActiveTab] = useState("identificacao");
@@ -153,6 +26,7 @@ const OcorrenciasCadastro = () => {
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [loadingData, setLoadingData] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
@@ -162,10 +36,10 @@ const OcorrenciasCadastro = () => {
   const methods = useForm<OcorrenciaFormData>({
     defaultValues: {
       acoes: [{
-        tratativaAplicada: '',
-        dataAdequacao: null,
-        responsavelAcao: '',
-        funcaoResponsavel: '',
+        tratativa_aplicada: '',
+        data_adequacao: null,
+        responsavel_acao: '',
+        funcao_responsavel: '',
         situacao: '',
         status: ''
       }]
@@ -177,38 +51,57 @@ const OcorrenciasCadastro = () => {
       setIsEditMode(true);
       setLoadingData(true);
       
-      setTimeout(() => {
-        const ocorrencia = mockOcorrencias.find(item => item.id === ocorrenciaId);
-        
+      getOcorrenciaById(ocorrenciaId).then((ocorrencia) => {
         if (ocorrencia) {
-          methods.reset({
-            data: ocorrencia.data,
-            hora: ocorrencia.hora,
-            mes: ocorrencia.mes,
-            ano: ocorrencia.ano,
-            cca: ocorrencia.cca,
-            empresa: ocorrencia.empresa,
-            disciplina: ocorrencia.disciplina,
-            tipoOcorrencia: ocorrencia.tipoOcorrencia,
-            tipoEvento: ocorrencia.tipoEvento,
-            classificacaoOcorrencia: ocorrencia.classificacaoOcorrencia,
-            engenheiroResponsavel: ocorrencia.engenheiroResponsavel,
-            supervisorResponsavel: ocorrencia.supervisorResponsavel,
-            encarregadoResponsavel: ocorrencia.encarregadoResponsavel,
-            colaboradoresAcidentados: ocorrencia.colaboradoresAcidentados,
-            acoes: ocorrencia.planoAcao.map(acao => ({
-              tratativaAplicada: acao.tratativaAplicada,
-              dataAdequacao: acao.dataAdequacao,
-              responsavelAcao: acao.responsavelAcao,
-              funcaoResponsavel: acao.funcaoResponsavel,
-              situacao: acao.situacao,
-              status: acao.status
-            }))
-          });
+          // Mapear os dados da ocorrência para o formato do formulário
+          const formData = {
+            data: ocorrencia.data ? new Date(ocorrencia.data) : null,
+            hora: ocorrencia.hora || '',
+            mes: ocorrencia.mes?.toString() || '',
+            ano: ocorrencia.ano?.toString() || '',
+            cca: ocorrencia.cca || '',
+            empresa: ocorrencia.empresa || '',
+            disciplina: ocorrencia.disciplina || '',
+            tipo_ocorrencia: ocorrencia.tipo_ocorrencia || '',
+            tipo_evento: ocorrencia.tipo_evento || '',
+            classificacao_ocorrencia: ocorrencia.classificacao_ocorrencia || '',
+            engenheiro_responsavel: ocorrencia.engenheiro_responsavel || '',
+            supervisor_responsavel: ocorrencia.supervisor_responsavel || '',
+            encarregado_responsavel: ocorrencia.encarregado_responsavel || '',
+            colaboradores_acidentados: ocorrencia.colaboradores_acidentados || [],
+            houve_afastamento: ocorrencia.houve_afastamento || '',
+            dias_perdidos: ocorrencia.dias_perdidos,
+            dias_debitados: ocorrencia.dias_debitados,
+            parte_corpo_atingida: ocorrencia.parte_corpo_atingida || '',
+            lateralidade: ocorrencia.lateralidade || '',
+            agente_causador: ocorrencia.agente_causador || '',
+            situacao_geradora: ocorrencia.situacao_geradora || '',
+            natureza_lesao: ocorrencia.natureza_lesao || '',
+            descricao_ocorrencia: ocorrencia.descricao_ocorrencia || '',
+            numero_cat: ocorrencia.numero_cat || '',
+            cid: ocorrencia.cid || '',
+            exposicao: ocorrencia.exposicao || '',
+            controle: ocorrencia.controle || '',
+            deteccao: ocorrencia.deteccao || '',
+            efeito_falha: ocorrencia.efeito_falha || '',
+            impacto: ocorrencia.impacto || '',
+            probabilidade: ocorrencia.probabilidade,
+            severidade: ocorrencia.severidade,
+            classificacao_risco: ocorrencia.classificacao_risco || '',
+            acoes: ocorrencia.acoes || [],
+            investigacao_realizada: ocorrencia.investigacao_realizada || '',
+            licoes_aprendidas_enviada: ocorrencia.licoes_aprendidas_enviada || '',
+            arquivo_cat: null,
+            informe_preliminar: null,
+            relatorio_analise: null,
+            arquivo_licoes_aprendidas: null
+          };
+          
+          methods.reset(formData);
           
           toast({
             title: "Edição de Ocorrência",
-            description: `Dados da ocorrência ${ocorrencia.id} carregados para edição.`
+            description: `Dados da ocorrência carregados para edição.`
           });
         } else {
           toast({
@@ -220,7 +113,15 @@ const OcorrenciasCadastro = () => {
         }
         
         setLoadingData(false);
-      }, 1000);
+      }).catch((error) => {
+        console.error('Erro ao carregar ocorrência:', error);
+        toast({
+          title: "Erro",
+          description: "Erro ao carregar dados da ocorrência.",
+          variant: "destructive"
+        });
+        setLoadingData(false);
+      });
     }
   }, [ocorrenciaId, methods, toast, navigate]);
 
@@ -253,10 +154,10 @@ const OcorrenciasCadastro = () => {
   const confirmCancel = () => {
     methods.reset({
       acoes: [{
-        tratativaAplicada: '',
-        dataAdequacao: null,
-        responsavelAcao: '',
-        funcaoResponsavel: '',
+        tratativa_aplicada: '',
+        data_adequacao: null,
+        responsavel_acao: '',
+        funcao_responsavel: '',
         situacao: '',
         status: ''
       }]
@@ -270,7 +171,7 @@ const OcorrenciasCadastro = () => {
     });
   };
 
-  const onSubmit = (data: OcorrenciaFormData) => {
+  const onSubmit = async (data: OcorrenciaFormData) => {
     console.log("Form submitted:", data);
     console.log("Is edit mode:", isEditMode);
     
@@ -283,7 +184,34 @@ const OcorrenciasCadastro = () => {
       return;
     }
     
-    setSuccessDialogOpen(true);
+    setIsSubmitting(true);
+    
+    try {
+      if (isEditMode && ocorrenciaId) {
+        await updateOcorrencia(ocorrenciaId, data);
+        toast({
+          title: "Sucesso",
+          description: "Ocorrência atualizada com sucesso!"
+        });
+      } else {
+        await createOcorrencia(data);
+        toast({
+          title: "Sucesso",
+          description: "Ocorrência cadastrada com sucesso!"
+        });
+      }
+      
+      setSuccessDialogOpen(true);
+    } catch (error) {
+      console.error('Erro ao salvar ocorrência:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao salvar a ocorrência. Tente novamente.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (loadingData) {
@@ -371,9 +299,9 @@ const OcorrenciasCadastro = () => {
                   </div>
                   
                   {activeTab === tabs[tabs.length - 1].id ? (
-                    <Button type="submit">
+                    <Button type="submit" disabled={isSubmitting}>
                       <Save className="mr-2 h-4 w-4" />
-                      {isEditMode ? "Salvar alterações" : "Salvar ocorrência"}
+                      {isSubmitting ? "Salvando..." : (isEditMode ? "Salvar alterações" : "Salvar ocorrência")}
                     </Button>
                   ) : (
                     <Button type="button" onClick={handleNext}>
@@ -436,10 +364,10 @@ const OcorrenciasCadastro = () => {
                   setSuccessDialogOpen(false);
                   methods.reset({
                     acoes: [{
-                      tratativaAplicada: '',
-                      dataAdequacao: null,
-                      responsavelAcao: '',
-                      funcaoResponsavel: '',
+                      tratativa_aplicada: '',
+                      data_adequacao: null,
+                      responsavel_acao: '',
+                      funcao_responsavel: '',
                       situacao: '',
                       status: ''
                     }]

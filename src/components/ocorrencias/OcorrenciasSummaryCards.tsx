@@ -1,51 +1,69 @@
 
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { AlertCircle, AlertTriangle, ArrowDown, FileBarChart, FileCheck, FileClock } from "lucide-react";
-import { fetchOcorrenciasStats } from "@/services/ocorrenciasDashboardService";
-import type { OcorrenciasStats } from "@/services/ocorrenciasDashboardService";
+import { TrendingUp, TrendingDown, AlertTriangle, CheckCircle } from "lucide-react";
+import { fetchDashboardStats } from "@/services/ocorrenciasDashboardService";
 
 const OcorrenciasSummaryCards = () => {
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [stats, setStats] = useState<OcorrenciasStats>({
+  const [stats, setStats] = useState({
     totalOcorrencias: 0,
-    ocorrenciasMes: 0,
-    ocorrenciasPendentes: 0,
-    riscoPercentage: 0,
+    ocorrenciasThisMonth: 0,
+    pendingActions: 0,
+    riskLevel: 'Baixo'
   });
+  const [loading, setLoading] = useState(true);
 
-  // Mock data for the metrics that aren't in the API yet
-  const diasPerdidos = 126;
-  const diasDebitados = 75;
-  
   useEffect(() => {
-    const loadData = async () => {
+    const loadStats = async () => {
       try {
         setLoading(true);
-        const data = await fetchOcorrenciasStats();
+        const data = await fetchDashboardStats();
         setStats(data);
-      } catch (err) {
-        console.error("Error loading ocorrencias stats:", err);
-        setError("Erro ao carregar estatísticas de ocorrências");
+      } catch (error) {
+        console.error("Error loading dashboard stats:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    loadData();
+    loadStats();
   }, []);
+
+  const getRiskColor = (level: string) => {
+    switch (level) {
+      case 'Alto':
+        return 'text-red-600';
+      case 'Médio':
+        return 'text-yellow-600';
+      default:
+        return 'text-green-600';
+    }
+  };
+
+  const getRiskIcon = (level: string) => {
+    switch (level) {
+      case 'Alto':
+        return <AlertTriangle className="h-4 w-4 text-red-600" />;
+      case 'Médio':
+        return <TrendingUp className="h-4 w-4 text-yellow-600" />;
+      default:
+        return <CheckCircle className="h-4 w-4 text-green-600" />;
+    }
+  };
 
   if (loading) {
     return (
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-        {Array.from({ length: 6 }).map((_, i) => (
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        {[1, 2, 3, 4].map((i) => (
           <Card key={i}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Carregando...</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                <div className="animate-pulse bg-gray-200 h-4 w-24 rounded"></div>
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="h-2 bg-slate-200 rounded animate-pulse"></div>
+              <div className="animate-pulse bg-gray-200 h-8 w-16 rounded mb-2"></div>
+              <div className="animate-pulse bg-gray-200 h-3 w-32 rounded"></div>
             </CardContent>
           </Card>
         ))}
@@ -53,94 +71,58 @@ const OcorrenciasSummaryCards = () => {
     );
   }
 
-  if (error) {
-    return (
-      <div className="rounded-lg bg-red-50 p-4 border border-red-200">
-        <p className="text-red-700">{error}</p>
-      </div>
-    );
-  }
-
-  // Calculate percentages for the card displays
-  const comAfastamentoPercent = stats.totalOcorrencias ? Math.round((stats.ocorrenciasPendentes / stats.totalOcorrencias) * 100) : 0;
-  const semAfastamentoPercent = stats.totalOcorrencias ? Math.round(((stats.totalOcorrencias - stats.ocorrenciasPendentes) / stats.totalOcorrencias) * 100) : 0;
-  
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Total de Ocorrências</CardTitle>
-          <FileBarChart className="h-4 w-4 text-muted-foreground" />
+          <AlertTriangle className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{stats.totalOcorrencias}</div>
           <p className="text-xs text-muted-foreground">
-            Últimos 12 meses
+            Registradas no sistema
           </p>
         </CardContent>
       </Card>
       
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Com Afastamento</CardTitle>
-          <AlertCircle className="h-4 w-4 text-red-500" />
+          <CardTitle className="text-sm font-medium">Este Mês</CardTitle>
+          <TrendingUp className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{stats.ocorrenciasPendentes}</div>
+          <div className="text-2xl font-bold">{stats.ocorrenciasThisMonth}</div>
           <p className="text-xs text-muted-foreground">
-            {comAfastamentoPercent}% do total
+            Ocorrências registradas
           </p>
         </CardContent>
       </Card>
       
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Sem Afastamento</CardTitle>
-          <AlertTriangle className="h-4 w-4 text-yellow-500" />
+          <CardTitle className="text-sm font-medium">Ações Pendentes</CardTitle>
+          <TrendingDown className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{stats.totalOcorrencias - stats.ocorrenciasPendentes}</div>
+          <div className="text-2xl font-bold">{stats.pendingActions}</div>
           <p className="text-xs text-muted-foreground">
-            {semAfastamentoPercent}% do total
+            Aguardando tratativa
           </p>
         </CardContent>
       </Card>
       
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Ocorrências do Mês</CardTitle>
-          <FileCheck className="h-4 w-4 text-blue-500" />
+          <CardTitle className="text-sm font-medium">Nível de Risco</CardTitle>
+          {getRiskIcon(stats.riskLevel)}
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{stats.ocorrenciasMes}</div>
+          <div className={`text-2xl font-bold ${getRiskColor(stats.riskLevel)}`}>
+            {stats.riskLevel}
+          </div>
           <p className="text-xs text-muted-foreground">
-            Mês atual
-          </p>
-        </CardContent>
-      </Card>
-      
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Dias Perdidos</CardTitle>
-          <ArrowDown className="h-4 w-4 text-red-500" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{diasPerdidos}</div>
-          <p className="text-xs text-muted-foreground">
-            {stats.ocorrenciasPendentes ? Math.round(diasPerdidos / stats.ocorrenciasPendentes) : 0} dias/ocorrência
-          </p>
-        </CardContent>
-      </Card>
-      
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Dias Debitados</CardTitle>
-          <FileClock className="h-4 w-4 text-orange-500" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{diasDebitados}</div>
-          <p className="text-xs text-muted-foreground">
-            Por incapacidade permanente
+            Avaliação geral
           </p>
         </CardContent>
       </Card>

@@ -97,13 +97,17 @@ const OcorrenciasTable = () => {
       <TableBody>
         {data.map((ocorrencia) => (
           <TableRow key={ocorrencia.id}>
-            <TableCell>{new Date(ocorrencia.data).toLocaleDateString()}</TableCell>
-            <TableCell>{ocorrencia.empresa}</TableCell>
-            <TableCell>{ocorrencia.tipo_ocorrencia}</TableCell>
+            <TableCell>
+              {ocorrencia.data ? new Date(ocorrencia.data).toLocaleDateString() : '-'}
+            </TableCell>
+            <TableCell>{ocorrencia.empresa || '-'}</TableCell>
+            <TableCell>{ocorrencia.tipo_ocorrencia || '-'}</TableCell>
             <TableCell className="hidden md:table-cell">
-              <span className={`px-2 py-1 rounded-full text-xs ${getRiscoClassColor(ocorrencia.classificacao_risco)}`}>
-                {ocorrencia.classificacao_risco}
-              </span>
+              {ocorrencia.classificacao_risco ? (
+                <span className={`px-2 py-1 rounded-full text-xs ${getRiscoClassColor(ocorrencia.classificacao_risco)}`}>
+                  {ocorrencia.classificacao_risco}
+                </span>
+              ) : '-'}
             </TableCell>
             <TableCell>
               <span className={`px-2 py-1 rounded-full text-xs ${
@@ -111,7 +115,7 @@ const OcorrenciasTable = () => {
                   ? 'bg-orange-100 text-orange-800' 
                   : 'bg-green-100 text-green-800'
               }`}>
-                {ocorrencia.status}
+                {ocorrencia.status || 'Em tratativa'}
               </span>
             </TableCell>
             <TableCell className="text-right">

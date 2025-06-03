@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
@@ -13,63 +13,10 @@ import { OcorrenciasFiltros } from "@/components/ocorrencias/OcorrenciasFiltros"
 import { Button } from "@/components/ui/button";
 import { Eye, Search } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-
-// Mock data for the occurrence list with the new risk classifications
-const mockOcorrencias = [
-  {
-    id: "1",
-    data: "2023-05-15",
-    empresa: "Empresa A",
-    cca: "CCA-001",
-    disciplina: "Elétrica",
-    tipoOcorrencia: "Acidente com Afastamento",
-    classificacaoRisco: "INTOLERÁVEL",
-    status: "Em tratativa",
-  },
-  {
-    id: "2",
-    data: "2023-06-22",
-    empresa: "Empresa B",
-    cca: "CCA-002",
-    disciplina: "Mecânica",
-    tipoOcorrencia: "Acidente sem Afastamento",
-    classificacaoRisco: "MODERADO",
-    status: "Concluído",
-  },
-  {
-    id: "3",
-    data: "2023-07-05",
-    empresa: "Empresa C",
-    cca: "CCA-003",
-    disciplina: "Civil",
-    tipoOcorrencia: "Quase Acidente",
-    classificacaoRisco: "TRIVIAL",
-    status: "Em tratativa",
-  },
-  {
-    id: "4",
-    data: "2023-08-11",
-    empresa: "Empresa A",
-    cca: "CCA-001",
-    disciplina: "Elétrica",
-    tipoOcorrencia: "Acidente sem Afastamento",
-    classificacaoRisco: "SUBSTANCIAL",
-    status: "Concluído",
-  },
-  {
-    id: "5",
-    data: "2023-09-28",
-    empresa: "Empresa D",
-    cca: "CCA-004",
-    disciplina: "Instrumentação",
-    tipoOcorrencia: "Acidente com Afastamento",
-    classificacaoRisco: "TOLERÁVEL",
-    status: "Em tratativa",
-  },
-];
+import { getAllOcorrencias } from "@/services/ocorrencias/ocorrenciasService";
 
 // Function to get the background and text colors for each risk classification
-const getRiscoClassColor = (classificacao) => {
+const getRiscoClassColor = (classificacao: string) => {
   switch (classificacao) {
     case "TRIVIAL":
       return "bg-[#34C6F4] text-white";
@@ -88,24 +35,44 @@ const getRiscoClassColor = (classificacao) => {
 
 const OcorrenciasConsulta = () => {
   const [filtroAtivo, setFiltroAtivo] = useState(false);
-  const [filteredData, setFilteredData] = useState(mockOcorrencias);
+  const [ocorrencias, setOcorrencias] = useState<any[]>([]);
+  const [filteredData, setFilteredData] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const loadOcorrencias = async () => {
+      try {
+        setLoading(true);
+        const data = await getAllOcorrencias();
+        setOcorrencias(data);
+        setFilteredData(data);
+      } catch (error) {
+        console.error('Erro ao carregar ocorrências:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadOcorrencias();
+  }, []);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Simple search filter for demonstration
+    // Simple search filter
     if (searchTerm.trim() === "") {
-      setFilteredData(mockOcorrencias);
+      setFilteredData(ocorrencias);
       return;
     }
     
-    const filtered = mockOcorrencias.filter(
+    const filtered = ocorrencias.filter(
       (item) => 
-        item.empresa.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.cca.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.tipoOcorrencia.toLowerCase().includes(searchTerm.toLowerCase())
+        item.empresa?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.cca?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.tipo_ocorrencia?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.disciplina?.toLowerCase().includes(searchTerm.toLowerCase())
     );
     
     setFilteredData(filtered);
@@ -114,6 +81,14 @@ const OcorrenciasConsulta = () => {
   const handleViewOcorrencia = (id: string) => {
     navigate(`/ocorrencias/detalhes/${id}`);
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -151,56 +126,68 @@ const OcorrenciasConsulta = () => {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="rounded-md border overflow-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Data</TableHead>
-                  <TableHead>CCA</TableHead>
-                  <TableHead>Empresa</TableHead>
-                  <TableHead>Disciplina</TableHead>
-                  <TableHead>Tipo de Ocorrência</TableHead>
-                  <TableHead className="hidden md:table-cell">Classificação de Risco</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Ações</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredData.map((ocorrencia) => (
-                  <TableRow key={ocorrencia.id}>
-                    <TableCell>{new Date(ocorrencia.data).toLocaleDateString()}</TableCell>
-                    <TableCell>{ocorrencia.cca}</TableCell>
-                    <TableCell>{ocorrencia.empresa}</TableCell>
-                    <TableCell>{ocorrencia.disciplina}</TableCell>
-                    <TableCell>{ocorrencia.tipoOcorrencia}</TableCell>
-                    <TableCell className="hidden md:table-cell">
-                      <span className={`px-2 py-1 rounded-full text-xs ${getRiscoClassColor(ocorrencia.classificacaoRisco)}`}>
-                        {ocorrencia.classificacaoRisco}
-                      </span>
-                    </TableCell>
-                    <TableCell>
-                      <span className={`px-2 py-1 rounded-full text-xs ${
-                        ocorrencia.status === 'Em tratativa' 
-                          ? 'bg-orange-100 text-orange-800' 
-                          : 'bg-green-100 text-green-800'
-                      }`}>
-                        {ocorrencia.status}
-                      </span>
-                    </TableCell>
-                    <TableCell>
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        onClick={() => handleViewOcorrencia(ocorrencia.id)}
-                      >
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                    </TableCell>
+          {filteredData.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-muted-foreground">
+                {searchTerm ? "Nenhuma ocorrência encontrada para a busca." : "Nenhuma ocorrência cadastrada."}
+              </p>
+            </div>
+          ) : (
+            <div className="rounded-md border overflow-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Data</TableHead>
+                    <TableHead>CCA</TableHead>
+                    <TableHead>Empresa</TableHead>
+                    <TableHead>Disciplina</TableHead>
+                    <TableHead>Tipo de Ocorrência</TableHead>
+                    <TableHead className="hidden md:table-cell">Classificação de Risco</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Ações</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+                </TableHeader>
+                <TableBody>
+                  {filteredData.map((ocorrencia) => (
+                    <TableRow key={ocorrencia.id}>
+                      <TableCell>
+                        {ocorrencia.data ? new Date(ocorrencia.data).toLocaleDateString() : '-'}
+                      </TableCell>
+                      <TableCell>{ocorrencia.cca || '-'}</TableCell>
+                      <TableCell>{ocorrencia.empresa || '-'}</TableCell>
+                      <TableCell>{ocorrencia.disciplina || '-'}</TableCell>
+                      <TableCell>{ocorrencia.tipo_ocorrencia || '-'}</TableCell>
+                      <TableCell className="hidden md:table-cell">
+                        {ocorrencia.classificacao_risco ? (
+                          <span className={`px-2 py-1 rounded-full text-xs ${getRiscoClassColor(ocorrencia.classificacao_risco)}`}>
+                            {ocorrencia.classificacao_risco}
+                          </span>
+                        ) : '-'}
+                      </TableCell>
+                      <TableCell>
+                        <span className={`px-2 py-1 rounded-full text-xs ${
+                          ocorrencia.status === 'Em tratativa' 
+                            ? 'bg-orange-100 text-orange-800' 
+                            : 'bg-green-100 text-green-800'
+                        }`}>
+                          {ocorrencia.status || 'Em tratativa'}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          onClick={() => handleViewOcorrencia(ocorrencia.id)}
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

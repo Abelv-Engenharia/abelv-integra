@@ -1,45 +1,202 @@
 
-export {
-  fetchDashboardStats,
-  fetchFilteredDashboardStats
-} from './ocorrencias/dashboardStatsService';
+import { supabase } from '@/integrations/supabase/client';
+import { format, subMonths, parseISO } from 'date-fns';
 
-export {
-  fetchOcorrenciasStats
-} from './ocorrencias/ocorrenciasStatsService';
+export async function fetchDashboardStats() {
+  try {
+    const { data: allOcorrencias, error: countError } = await supabase
+      .from('ocorrencias')
+      .select('id, data, status, classificacao_risco');
 
-export {
-  fetchOcorrenciasByTipo
-} from './ocorrencias/ocorrenciasByTipoService';
+    if (countError) throw countError;
 
-export {
-  fetchOcorrenciasByRisco
-} from './ocorrencias/ocorrenciasByRiscoService';
+    const today = new Date();
+    const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+    
+    const ocorrenciasThisMonth = allOcorrencias
+      ? allOcorrencias.filter(o => {
+          const ocorrenciaDate = parseISO(o.data);
+          return ocorrenciaDate >= firstDayOfMonth;
+        }).length
+      : 0;
 
-export {
-  fetchOcorrenciasByEmpresa
-} from './ocorrencias/ocorrenciasByEmpresaService';
+    const pendingActions = allOcorrencias
+      ? allOcorrencias.filter(o => o.status === 'Em tratativa' || o.status === 'Aberta').length
+      : 0;
 
-export {
-  fetchOcorrenciasByMonth,
-  fetchOcorrenciasTimeline
-} from './ocorrencias/ocorrenciasTimelineService';
+    // Calcular nível de risco com base nas ocorrências recentes
+    let riskLevel = 'Baixo';
+    const criticasRecentes = allOcorrencias
+      ? allOcorrencias.filter(o => {
+          const ocorrenciaDate = parseISO(o.data);
+          const threeMonthsAgo = subMonths(today, 3);
+          return ocorrenciaDate >= threeMonthsAgo && (o.classificacao_risco === 'INTOLERÁVEL' || o.classificacao_risco === 'SUBSTANCIAL');
+        }).length
+      : 0;
 
-export {
-  fetchParteCorpoData
-} from './ocorrencias/parteCorpoService';
+    if (criticasRecentes >= 5) {
+      riskLevel = 'Alto';
+    } else if (criticasRecentes >= 2) {
+      riskLevel = 'Médio';
+    }
 
-export {
-  fetchLatestOcorrencias
-} from './ocorrencias/latestOcorrenciasService';
+    return {
+      totalOcorrencias: allOcorrencias ? allOcorrencias.length : 0,
+      ocorrenciasThisMonth,
+      pendingActions,
+      riskLevel
+    };
+  } catch (error) {
+    console.error('Erro ao buscar estatísticas do dashboard:', error);
+    return {
+      totalOcorrencias: 0,
+      ocorrenciasThisMonth: 0,
+      pendingActions: 0,
+      riskLevel: 'Baixo'
+    };
+  }
+}
 
-// Re-export types
-export type {
-  DashboardStats,
-  OcorrenciasStats,
-  OcorrenciasByTipo,
-  OcorrenciasByRisco,
-  OcorrenciasByEmpresa,
-  OcorrenciasTimeline,
-  ParteCorpoData
-} from './ocorrencias/types';
+export async function fetchLatestOcorrencias() {
+  try {
+    const { data, error } = await supabase
+      .from('ocorrencias')
+      .select('*')
+      .order('data', { ascending: false })
+      .limit(10);
+
+    if (error) throw error;
+    
+    return data || [];
+  } catch (error) {
+    console.error('Erro ao buscar ocorrências recentes:', error);
+    return [];
+  }
+}
+
+export async function fetchOcorrenciasByTipo() {
+  try {
+    const { data, error } = await supabase
+      .from('ocorrencias')
+      .select('tipo_ocorrencia');
+
+    if (error) throw error;
+
+    const tipoCount = (data || []).reduce((acc: Record<string, number>, curr) => {
+      const tipo = curr.tipo_ocorrencia || 'Não definido';
+      acc[tipo] = (acc[tipo] || 0) + 1;
+      return acc;
+    }, {});
+
+    return Object.entries(tipoCount).map(([name, value]) => ({
+      name,
+      value
+    }));
+  } catch (error) {
+    console.error('Erro ao buscar ocorrências por tipo:', error);
+    return [];
+  }
+}
+
+export async function fetchOcorrenciasByEmpresa() {
+  try {
+    const { data, error } = await supabase
+      .from('ocorrencias')
+      .select('empresa');
+
+    if (error) throw error;
+
+    const empresaCount = (data || []).reduce((acc: Record<string, number>, curr) => {
+      const empresa = curr.empresa || 'Não definido';
+      acc[empresa] = (acc[empresa] || 0) + 1;
+      return acc;
+    }, {});
+
+    return Object.entries(empresaCount).map(([name, value]) => ({
+      name,
+      value
+    }));
+  } catch (error) {
+    console.error('Erro ao buscar ocorrências por empresa:', error);
+    return [];
+  }
+}
+
+export async function fetchOcorrenciasByRisco() {
+  try {
+    const { data, error } = await supabase
+      .from('ocorrencias')
+      .select('classificacao_risco');
+
+    if (error) throw error;
+
+    const riscoCount = (data || []).reduce((acc: Record<string, number>, curr) => {
+      const risco = curr.classificacao_risco || 'Não definido';
+      acc[risco] = (acc[risco] || 0) + 1;
+      return acc;
+    }, {});
+
+    return Object.entries(riscoCount).map(([name, value]) => ({
+      name,
+      value
+    }));
+  } catch (error) {
+    console.error('Erro ao buscar ocorrências por risco:', error);
+    return [];
+  }
+}
+
+export async function fetchParteCorpoData() {
+  try {
+    const { data, error } = await supabase
+      .from('ocorrencias')
+      .select('parte_corpo_atingida')
+      .not('parte_corpo_atingida', 'is', null)
+      .neq('parte_corpo_atingida', '');
+
+    if (error) throw error;
+
+    const parteCount = (data || []).reduce((acc: Record<string, number>, curr) => {
+      const parte = curr.parte_corpo_atingida || 'Não definido';
+      acc[parte] = (acc[parte] || 0) + 1;
+      return acc;
+    }, {});
+
+    return Object.entries(parteCount).map(([name, value]) => ({
+      name,
+      value
+    }));
+  } catch (error) {
+    console.error('Erro ao buscar dados de partes do corpo:', error);
+    return [];
+  }
+}
+
+export async function fetchOcorrenciasTimeline() {
+  try {
+    const { data, error } = await supabase
+      .from('ocorrencias')
+      .select('data, mes, ano')
+      .order('data', { ascending: true });
+
+    if (error) throw error;
+
+    const monthlyCount = (data || []).reduce((acc: Record<string, number>, curr) => {
+      if (curr.mes && curr.ano) {
+        const key = `${curr.ano}-${curr.mes.toString().padStart(2, '0')}`;
+        acc[key] = (acc[key] || 0) + 1;
+      }
+      return acc;
+    }, {});
+
+    return Object.entries(monthlyCount)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([month, count]) => ({
+        month,
+        ocorrencias: count
+      }));
+  } catch (error) {
+    console.error('Erro ao buscar timeline de ocorrências:', error);
+    return [];
+  }
+}
