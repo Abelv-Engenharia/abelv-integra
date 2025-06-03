@@ -1,17 +1,12 @@
 
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, UserPlus, AlertCircle, Lock, CheckCircle } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { UserSearchForm } from "@/components/admin/usuarios/UserSearchForm";
-import { UsersTable } from "@/components/admin/usuarios/UsersTable";
-import { CreateUserDialog } from "@/components/admin/usuarios/CreateUserDialog";
-import { EditUserDialog } from "@/components/admin/usuarios/EditUserDialog";
-import { DeleteUserDialog } from "@/components/admin/usuarios/DeleteUserDialog";
+import { PermissionsAlert } from "@/components/admin/usuarios/PermissionsAlert";
+import { UsersManagementCard } from "@/components/admin/usuarios/UsersManagementCard";
+import { UserDialogManager } from "@/components/admin/usuarios/UserDialogManager";
 import { User, SearchFormValues, UserFormValues, AuthUserCreateValues, Permissoes } from "@/types/users";
 import { useUsuarios } from "@/hooks/useUsuarios";
 
@@ -118,89 +113,35 @@ const AdminUsuarios = () => {
         </p>
       </div>
 
-      {/* Mostrar status das permissões */}
-      {canManageUsers ? (
-        <Alert>
-          <CheckCircle className="h-4 w-4" />
-          <AlertDescription>
-            Você tem permissões de administrador para gerenciar usuários.
-          </AlertDescription>
-        </Alert>
-      ) : (
-        <Alert variant="destructive">
-          <Lock className="h-4 w-4" />
-          <AlertDescription>
-            Você não tem permissão para gerenciar usuários. Entre em contato com o administrador do sistema para obter as permissões necessárias.
-          </AlertDescription>
-        </Alert>
-      )}
-
-      {!canManageUsers && permissions && (
-        <Alert>
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>
-            Suas permissões atuais: 
-            {permissions.admin_perfis ? " Gerenciar perfis." : ""}
-            {permissions.admin_funcionarios ? " Gerenciar funcionários." : ""}
-            {permissions.desvios ? " Desvios." : ""}
-            {permissions.ocorrencias ? " Ocorrências." : ""}
-            {permissions.treinamentos ? " Treinamentos." : ""}
-          </AlertDescription>
-        </Alert>
-      )}
-
-      <Card>
-        <CardHeader className="pb-3">
-          <div className="flex items-center justify-between">
-            <CardTitle>Usuários</CardTitle>
-            <Button 
-              size="sm" 
-              onClick={handleCreateClick}
-              disabled={!canManageUsers}
-            >
-              <UserPlus className="mr-2 h-4 w-4" />
-              Novo Usuário
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <UserSearchForm onSearch={onSearchSubmit} />
-
-          <Separator className="my-4" />
-
-          <div className="relative overflow-x-auto rounded-md border">
-            <UsersTable
-              users={filteredUsers}
-              isLoading={loadingUsuarios}
-              onEditClick={handleEditClick}
-              onDeleteClick={handleDeleteClick}
-            />
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Dialogs */}
-      <CreateUserDialog
-        open={isCreateDialogOpen && canManageUsers}
-        onOpenChange={setIsCreateDialogOpen}
-        profiles={profiles}
-        onSubmit={onAuthUserSubmit}
-        isSubmitting={createUsuarioMutation.isPending}
+      <PermissionsAlert 
+        canManageUsers={canManageUsers} 
+        permissions={permissions} 
       />
 
-      <EditUserDialog
-        open={isEditDialogOpen && canManageUsers}
-        onOpenChange={setIsEditDialogOpen}
-        profiles={profiles}
-        selectedUser={selectedUser}
-        onSubmit={onUserSubmit}
+      <UsersManagementCard
+        filteredUsers={filteredUsers}
+        loadingUsuarios={loadingUsuarios}
+        canManageUsers={canManageUsers}
+        onSearch={onSearchSubmit}
+        onCreateClick={handleCreateClick}
+        onEditClick={handleEditClick}
+        onDeleteClick={handleDeleteClick}
       />
 
-      <DeleteUserDialog
-        open={isDeleteDialogOpen && canManageUsers}
-        onOpenChange={setIsDeleteDialogOpen}
+      <UserDialogManager
+        isCreateDialogOpen={isCreateDialogOpen}
+        isEditDialogOpen={isEditDialogOpen}
+        isDeleteDialogOpen={isDeleteDialogOpen}
+        canManageUsers={canManageUsers}
         selectedUser={selectedUser}
-        onConfirm={handleDeleteUser}
+        profiles={profiles}
+        isCreating={createUsuarioMutation.isPending}
+        onCreateDialogChange={setIsCreateDialogOpen}
+        onEditDialogChange={setIsEditDialogOpen}
+        onDeleteDialogChange={setIsDeleteDialogOpen}
+        onCreateSubmit={onAuthUserSubmit}
+        onEditSubmit={onUserSubmit}
+        onDeleteConfirm={handleDeleteUser}
       />
     </div>
   );
