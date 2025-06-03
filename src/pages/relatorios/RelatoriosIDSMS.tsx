@@ -29,8 +29,12 @@ const RelatoriosIDSMS = () => {
   });
 
   const { data: dashboardData = [] } = useQuery({
-    queryKey: ['idsms-dashboard'],
-    queryFn: idsmsService.getDashboardData,
+    queryKey: ['idsms-dashboard', selectedCCA, selectedYear, selectedMonth],
+    queryFn: () => idsmsService.getDashboardData({
+      cca_id: selectedCCA,
+      ano: selectedYear,
+      mes: selectedMonth
+    }),
     refetchOnWindowFocus: false,
   });
 
