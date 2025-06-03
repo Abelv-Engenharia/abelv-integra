@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -333,7 +334,8 @@ const OcorrenciasCadastro = () => {
                     </Button>
                   </div>
                   
-                  {activeTab === tabs[tabs.length - 1].id ? (
+                  {/* Só mostrar botão de salvar na aba "Fechamento" */}
+                  {activeTab === "fechamento" ? (
                     <Button type="submit" disabled={isSubmitting}>
                       <Save className="mr-2 h-4 w-4" />
                       {isSubmitting ? "Salvando..." : (isEditMode ? "Salvar alterações" : "Salvar ocorrência")}

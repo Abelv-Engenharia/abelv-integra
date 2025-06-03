@@ -58,48 +58,50 @@ const PlanoAcaoForm = () => {
     }
   }, [acoesField]);
   
-  // Calculate action status based on situation and date for each action
+  // Watch all actions to calculate status
   const acoes = watch("acoes") || [];
   
+  // Calculate action status based on situation and date for each action
   useEffect(() => {
-    if (acoes.length) {
-      acoes.forEach((acao, index) => {
-        let status = "";
-        
-        console.log(`Processing action ${index}:`, acao);
-        
-        if (acao.situacao === "CONCLUÍDO") {
-          status = "CONCLUÍDO";
-        } else if (acao.situacao === "PLANEJADO" || acao.situacao === "EM ANDAMENTO") {
-          if (acao.data_adequacao) {
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            const adequacaoDate = new Date(acao.data_adequacao);
-            adequacaoDate.setHours(0, 0, 0, 0);
-            
-            console.log(`Comparing dates - Today: ${today.toDateString()}, Adequacao: ${adequacaoDate.toDateString()}`);
-            
-            if (adequacaoDate < today) {
-              status = "PENDENTE";
-            } else {
-              status = acao.situacao;
-            }
+    console.log('Calculando status das ações...', acoes);
+    
+    acoes.forEach((acao, index) => {
+      let novoStatus = "";
+      
+      console.log(`Ação ${index}:`, acao);
+      
+      if (acao.situacao === "CONCLUÍDO") {
+        novoStatus = "CONCLUÍDO";
+      } else if (acao.situacao === "PLANEJADO" || acao.situacao === "EM ANDAMENTO") {
+        if (acao.data_adequacao) {
+          const hoje = new Date();
+          hoje.setHours(0, 0, 0, 0);
+          const dataAdequacao = new Date(acao.data_adequacao);
+          dataAdequacao.setHours(0, 0, 0, 0);
+          
+          console.log(`Comparando datas - Hoje: ${hoje.toDateString()}, Adequação: ${dataAdequacao.toDateString()}`);
+          
+          if (dataAdequacao < hoje) {
+            novoStatus = "PENDENTE";
           } else {
-            status = "PENDENTE";
+            novoStatus = acao.situacao;
           }
-        } else if (acao.situacao === "PENDENTE") {
-          status = "PENDENTE";
+        } else {
+          novoStatus = "PENDENTE";
         }
-        
-        console.log(`Calculated status for action ${index}: ${status}`);
-        
-        if (status && acao.status !== status) {
-          console.log(`Updating status from ${acao.status} to ${status}`);
-          setValue(`acoes.${index}.status`, status);
-        }
-      });
-    }
-  }, [acoes, setValue]);
+      } else if (acao.situacao === "PENDENTE") {
+        novoStatus = "PENDENTE";
+      }
+      
+      console.log(`Status calculado para ação ${index}: ${novoStatus}`);
+      
+      // Atualizar apenas se o status mudou
+      if (novoStatus && acao.status !== novoStatus) {
+        console.log(`Atualizando status da ação ${index} de "${acao.status}" para "${novoStatus}"`);
+        setValue(`acoes.${index}.status`, novoStatus);
+      }
+    });
+  }, [acoes.map(a => `${a.situacao}-${a.data_adequacao}`).join(','), setValue]);
 
   // Handle responsável selection and auto-populate function
   const handleResponsavelChange = (value: string, index: number) => {
@@ -123,7 +125,7 @@ const PlanoAcaoForm = () => {
       case "PENDENTE":
         return "bg-red-100 text-red-800 border-red-200 hover:bg-red-200";
       default:
-        return "";
+        return "bg-gray-100 text-gray-800 border-gray-200 hover:bg-gray-200";
     }
   };
 
