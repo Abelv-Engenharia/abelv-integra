@@ -25,6 +25,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { Plus, Trash } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -78,14 +79,10 @@ const PlanoAcaoForm = () => {
             
             console.log(`Comparing dates - Today: ${today.toDateString()}, Adequacao: ${adequacaoDate.toDateString()}`);
             
-            if (today > adequacaoDate) {
+            if (adequacaoDate < today) {
               status = "PENDENTE";
             } else {
-              if (acao.situacao === "PLANEJADO") {
-                status = "PLANEJADO";
-              } else if (acao.situacao === "EM ANDAMENTO") {
-                status = "EM ANDAMENTO";
-              }
+              status = acao.situacao;
             }
           } else {
             status = "PENDENTE";
@@ -111,6 +108,38 @@ const PlanoAcaoForm = () => {
     const funcionario = funcionarios.find(f => f.nome === value);
     if (funcionario) {
       setValue(`acoes.${index}.funcaoResponsavel`, funcionario.funcao);
+    }
+  };
+
+  // Get badge variant based on status
+  const getStatusBadgeVariant = (status: string) => {
+    switch (status) {
+      case "PLANEJADO":
+        return "default"; // azul
+      case "EM ANDAMENTO":
+        return "secondary"; // laranja
+      case "CONCLUÍDO":
+        return "success"; // verde
+      case "PENDENTE":
+        return "destructive"; // vermelho
+      default:
+        return "outline";
+    }
+  };
+
+  // Get badge color classes
+  const getStatusBadgeClasses = (status: string) => {
+    switch (status) {
+      case "PLANEJADO":
+        return "bg-blue-100 text-blue-800 border-blue-200 hover:bg-blue-200";
+      case "EM ANDAMENTO":
+        return "bg-orange-100 text-orange-800 border-orange-200 hover:bg-orange-200";
+      case "CONCLUÍDO":
+        return "bg-green-100 text-green-800 border-green-200 hover:bg-green-200";
+      case "PENDENTE":
+        return "bg-red-100 text-red-800 border-red-200 hover:bg-red-200";
+      default:
+        return "";
     }
   };
 
@@ -313,7 +342,17 @@ const PlanoAcaoForm = () => {
                   <FormItem>
                     <FormLabel>Status da ação</FormLabel>
                     <FormControl>
-                      <Input {...field} readOnly className="bg-gray-50" />
+                      <div className="flex items-center h-10 px-3 py-2 rounded-md border border-input bg-gray-50">
+                        {field.value ? (
+                          <Badge 
+                            className={cn("text-xs font-medium", getStatusBadgeClasses(field.value))}
+                          >
+                            {field.value}
+                          </Badge>
+                        ) : (
+                          <span className="text-muted-foreground text-sm">Status será calculado automaticamente</span>
+                        )}
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
