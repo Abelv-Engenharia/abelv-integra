@@ -4,7 +4,7 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from './contexts/AuthContext';
 import Login from './pages/auth/Login';
-import { AuthGuard } from './components/auth/AuthGuard';
+import AuthGuard from './components/auth/AuthGuard';
 import Dashboard from './pages/Dashboard';
 import DesviosDashboard from './pages/DesviosDashboard';
 import DesviosForm from './pages/DesviosForm';
