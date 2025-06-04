@@ -51,15 +51,16 @@ const IDSMSDashboard = () => {
   // Dados já filtrados no backend
   const filteredData = dashboardData;
 
-  // Verificar se os dados estão prontos para renderizar
+  // Verificar se os dados estão prontos para renderizar - com fallbacks seguros
+  const safeCCAs = filterOptions?.ccas || [];
+  const safeAnos = filterOptions?.anos || [];
+  const safeMeses = filterOptions?.meses || [];
+  
   const filtersDataReady = !isLoadingFilters && 
     filterOptions && 
-    filterOptions.ccas && 
-    Array.isArray(filterOptions.ccas) &&
-    filterOptions.anos && 
-    Array.isArray(filterOptions.anos) &&
-    filterOptions.meses && 
-    Array.isArray(filterOptions.meses);
+    Array.isArray(safeCCAs) &&
+    Array.isArray(safeAnos) &&
+    Array.isArray(safeMeses);
 
   const getIndicatorIcon = (value: number) => {
     if (value > 100) return <TrendingUp className="h-4 w-4 text-green-500" />;
@@ -218,7 +219,7 @@ const IDSMSDashboard = () => {
                         <CommandInput placeholder="Buscar CCAs..." />
                         <CommandEmpty>Nenhum CCA encontrado.</CommandEmpty>
                         <CommandGroup className="max-h-64 overflow-auto">
-                          {filterOptions.ccas.map(cca => (
+                          {safeCCAs.map(cca => (
                             <CommandItem key={cca.id} className="flex items-center space-x-2">
                               <Checkbox
                                 checked={selectedCCAs.includes(cca.id.toString())}
@@ -252,7 +253,7 @@ const IDSMSDashboard = () => {
                         <CommandInput placeholder="Buscar anos..." />
                         <CommandEmpty>Nenhum ano encontrado.</CommandEmpty>
                         <CommandGroup className="max-h-64 overflow-auto">
-                          {filterOptions.anos.map(ano => (
+                          {safeAnos.map(ano => (
                             <CommandItem key={ano} className="flex items-center space-x-2">
                               <Checkbox
                                 checked={selectedYears.includes(ano.toString())}
@@ -286,7 +287,7 @@ const IDSMSDashboard = () => {
                         <CommandInput placeholder="Buscar meses..." />
                         <CommandEmpty>Nenhum mês encontrado.</CommandEmpty>
                         <CommandGroup className="max-h-64 overflow-auto">
-                          {filterOptions.meses.map(mes => (
+                          {safeMeses.map(mes => (
                             <CommandItem key={mes} className="flex items-center space-x-2">
                               <Checkbox
                                 checked={selectedMonths.includes(mes.toString())}
