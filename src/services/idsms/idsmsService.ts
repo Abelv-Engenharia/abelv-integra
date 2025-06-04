@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { IDSMSIndicador, IDSMSDashboardData } from "@/types/treinamentos";
 
@@ -75,15 +76,18 @@ export const idsmsService = {
         .from('idsms_indicadores')
         .select('*');
 
-      // Aplicar filtros se fornecidos
+      // Aplicar filtros se fornecidos - agora suportando múltiplos valores
       if (filters?.cca_id && filters.cca_id !== "all") {
-        indicadoresQuery = indicadoresQuery.eq('cca_id', parseInt(filters.cca_id));
+        const ccaIds = filters.cca_id.split(',').map(id => parseInt(id));
+        indicadoresQuery = indicadoresQuery.in('cca_id', ccaIds);
       }
       if (filters?.ano && filters.ano !== "all") {
-        indicadoresQuery = indicadoresQuery.eq('ano', parseInt(filters.ano));
+        const anos = filters.ano.split(',').map(ano => parseInt(ano));
+        indicadoresQuery = indicadoresQuery.in('ano', anos);
       }
       if (filters?.mes && filters.mes !== "all") {
-        indicadoresQuery = indicadoresQuery.eq('mes', parseInt(filters.mes));
+        const meses = filters.mes.split(',').map(mes => parseInt(mes));
+        indicadoresQuery = indicadoresQuery.in('mes', meses);
       }
 
       const { data: indicadores, error: indicadoresError } = await indicadoresQuery
@@ -108,7 +112,8 @@ export const idsmsService = {
         .eq('ativo', true);
 
       if (filters?.cca_id && filters.cca_id !== "all") {
-        ccasQuery = ccasQuery.eq('id', parseInt(filters.cca_id));
+        const ccaIds = filters.cca_id.split(',').map(id => parseInt(id));
+        ccasQuery = ccasQuery.in('id', ccaIds);
       }
 
       const { data: ccas, error: ccasError } = await ccasQuery;
@@ -297,15 +302,18 @@ export const idsmsService = {
         .from('idsms_indicadores')
         .select('*');
 
-      // Aplicar filtros se fornecidos
+      // Aplicar filtros se fornecidos - agora suportando múltiplos valores
       if (filters?.cca_id && filters.cca_id !== "all") {
-        query = query.eq('cca_id', parseInt(filters.cca_id));
+        const ccaIds = filters.cca_id.split(',').map(id => parseInt(id));
+        query = query.in('cca_id', ccaIds);
       }
       if (filters?.ano && filters.ano !== "all") {
-        query = query.eq('ano', parseInt(filters.ano));
+        const anos = filters.ano.split(',').map(ano => parseInt(ano));
+        query = query.in('ano', anos);
       }
       if (filters?.mes && filters.mes !== "all") {
-        query = query.eq('mes', parseInt(filters.mes));
+        const meses = filters.mes.split(',').map(mes => parseInt(mes));
+        query = query.in('mes', meses);
       }
 
       const { data: indicadores, error } = await query

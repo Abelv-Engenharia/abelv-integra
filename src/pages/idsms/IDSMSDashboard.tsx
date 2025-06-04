@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -5,21 +6,30 @@ import { idsmsService } from "@/services/idsms/idsmsService";
 import { TrendingUp, TrendingDown, Minus, RefreshCw, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
 
 const IDSMSDashboard = () => {
-  const [selectedCCA, setSelectedCCA] = useState<string>("all");
-  const [selectedYear, setSelectedYear] = useState<string>("all");
-  const [selectedMonth, setSelectedMonth] = useState<string>("all");
+  const [selectedCCAs, setSelectedCCAs] = useState<string[]>([]);
+  const [selectedYears, setSelectedYears] = useState<string[]>([]);
+  const [selectedMonths, setSelectedMonths] = useState<string[]>([]);
 
   // Query para dados do dashboard com filtros
   const { data: dashboardData = [], isLoading, refetch, error } = useQuery({
-    queryKey: ['idsms-dashboard', selectedCCA, selectedYear, selectedMonth],
-    queryFn: () => idsmsService.getDashboardData({
-      cca_id: selectedCCA,
-      ano: selectedYear,
-      mes: selectedMonth
-    }),
+    queryKey: ['idsms-dashboard', selectedCCAs, selectedYears, selectedMonths],
+    queryFn: () => {
+      // Converter arrays para string ou "all" se vazio
+      const ccaFilter = selectedCCAs.length > 0 ? selectedCCAs.join(',') : "all";
+      const yearFilter = selectedYears.length > 0 ? selectedYears.join(',') : "all";
+      const monthFilter = selectedMonths.length > 0 ? selectedMonths.join(',') : "all";
+      
+      return idsmsService.getDashboardData({
+        cca_id: ccaFilter,
+        ano: yearFilter,
+        mes: monthFilter
+      });
+    },
     refetchOnWindowFocus: false,
   });
 
@@ -35,7 +45,7 @@ const IDSMSDashboard = () => {
     error,
     dataLength: dashboardData?.length,
     filterOptions,
-    filters: { selectedCCA, selectedYear, selectedMonth }
+    filters: { selectedCCAs, selectedYears, selectedMonths }
   });
 
   // Dados já filtrados no backend
@@ -44,25 +54,25 @@ const IDSMSDashboard = () => {
   const getIndicatorIcon = (value: number) => {
     if (value > 100) return <TrendingUp className="h-4 w-4 text-green-500" />;
     if (value < 95) return <TrendingDown className="h-4 w-4 text-red-500" />;
-    return <Minus className="h-4 w-4 text-yellow-500" />;
+    return <Minus className="h-4 w-4 text-blue-500" />;
   };
 
   const getIndicatorColor = (value: number) => {
     if (value > 100) return "text-green-600";
     if (value < 95) return "text-red-600";
-    return "text-yellow-600";
+    return "text-blue-600";
   };
 
   const getStatusBadge = (value: number) => {
     if (value > 100) return "bg-green-100 text-green-800";
     if (value < 95) return "bg-red-100 text-red-800";
-    return "bg-yellow-100 text-yellow-800";
+    return "bg-blue-100 text-blue-800";
   };
 
   const getStatusLabel = (value: number) => {
     if (value > 100) return 'Excelente';
-    if (value >= 95) return 'Regular';
-    return 'Atenção';
+    if (value >= 95) return 'Bom';
+    return 'Atenção - Índice necessita ser melhorado';
   };
 
   const mesesNomes = {
@@ -80,20 +90,34 @@ const IDSMSDashboard = () => {
     12: 'Dezembro'
   };
 
-  const handleFilterChange = (filterType: string, value: string) => {
-    console.log(`Alterando filtro ${filterType} para:`, value);
-    
-    switch (filterType) {
-      case 'cca':
-        setSelectedCCA(value);
-        break;
-      case 'year':
-        setSelectedYear(value);
-        break;
-      case 'month':
-        setSelectedMonth(value);
-        break;
+  const handleCCASelection = (ccaId: string, checked: boolean) => {
+    if (checked) {
+      setSelectedCCAs(prev => [...prev, ccaId]);
+    } else {
+      setSelectedCCAs(prev => prev.filter(id => id !== ccaId));
     }
+  };
+
+  const handleYearSelection = (year: string, checked: boolean) => {
+    if (checked) {
+      setSelectedYears(prev => [...prev, year]);
+    } else {
+      setSelectedYears(prev => prev.filter(y => y !== year));
+    }
+  };
+
+  const handleMonthSelection = (month: string, checked: boolean) => {
+    if (checked) {
+      setSelectedMonths(prev => [...prev, month]);
+    } else {
+      setSelectedMonths(prev => prev.filter(m => m !== month));
+    }
+  };
+
+  const clearAllFilters = () => {
+    setSelectedCCAs([]);
+    setSelectedYears([]);
+    setSelectedMonths([]);
   };
 
   if (isLoading) {
@@ -151,70 +175,134 @@ const IDSMSDashboard = () => {
         </Button>
       </div>
 
-      {/* Filtros */}
+      {/* Filtros com Seleção Múltipla */}
       <Card className="mb-6">
         <CardHeader>
           <CardTitle className="text-lg">Filtros</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Filtro CCAs */}
             <div>
-              <label className="block text-sm font-medium mb-2">CCA</label>
-              <Select value={selectedCCA} onValueChange={(value) => handleFilterChange('cca', value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione um CCA" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos os CCAs</SelectItem>
-                  {filterOptions.ccas.map(cca => (
-                    <SelectItem key={cca.id} value={cca.id.toString()}>
-                      {cca.codigo} - {cca.nome}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <label className="block text-sm font-medium mb-2">CCAs</label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="w-full justify-start">
+                    {selectedCCAs.length > 0 
+                      ? `${selectedCCAs.length} CCA(s) selecionado(s)`
+                      : "Selecionar CCAs"
+                    }
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-80">
+                  <Command>
+                    <CommandInput placeholder="Buscar CCAs..." />
+                    <CommandEmpty>Nenhum CCA encontrado.</CommandEmpty>
+                    <CommandGroup className="max-h-64 overflow-auto">
+                      {filterOptions.ccas.map(cca => (
+                        <CommandItem key={cca.id} className="flex items-center space-x-2">
+                          <Checkbox
+                            checked={selectedCCAs.includes(cca.id.toString())}
+                            onCheckedChange={(checked) => 
+                              handleCCASelection(cca.id.toString(), checked as boolean)
+                            }
+                          />
+                          <span>{cca.codigo} - {cca.nome}</span>
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </Command>
+                </PopoverContent>
+              </Popover>
             </div>
             
+            {/* Filtro Anos */}
             <div>
-              <label className="block text-sm font-medium mb-2">Ano</label>
-              <Select value={selectedYear} onValueChange={(value) => handleFilterChange('year', value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o ano" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos os anos</SelectItem>
-                  {filterOptions.anos.map(ano => (
-                    <SelectItem key={ano} value={ano.toString()}>{ano}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <label className="block text-sm font-medium mb-2">Anos</label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="w-full justify-start">
+                    {selectedYears.length > 0 
+                      ? `${selectedYears.length} ano(s) selecionado(s)`
+                      : "Selecionar anos"
+                    }
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-80">
+                  <Command>
+                    <CommandInput placeholder="Buscar anos..." />
+                    <CommandEmpty>Nenhum ano encontrado.</CommandEmpty>
+                    <CommandGroup className="max-h-64 overflow-auto">
+                      {filterOptions.anos.map(ano => (
+                        <CommandItem key={ano} className="flex items-center space-x-2">
+                          <Checkbox
+                            checked={selectedYears.includes(ano.toString())}
+                            onCheckedChange={(checked) => 
+                              handleYearSelection(ano.toString(), checked as boolean)
+                            }
+                          />
+                          <span>{ano}</span>
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </Command>
+                </PopoverContent>
+              </Popover>
             </div>
             
+            {/* Filtro Meses */}
             <div>
-              <label className="block text-sm font-medium mb-2">Mês</label>
-              <Select value={selectedMonth} onValueChange={(value) => handleFilterChange('month', value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o mês" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos os meses</SelectItem>
-                  {filterOptions.meses.map(mes => (
-                    <SelectItem key={mes} value={mes.toString()}>
-                      {mesesNomes[mes as keyof typeof mesesNomes]}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <label className="block text-sm font-medium mb-2">Meses</label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="w-full justify-start">
+                    {selectedMonths.length > 0 
+                      ? `${selectedMonths.length} mês(es) selecionado(s)`
+                      : "Selecionar meses"
+                    }
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-80">
+                  <Command>
+                    <CommandInput placeholder="Buscar meses..." />
+                    <CommandEmpty>Nenhum mês encontrado.</CommandEmpty>
+                    <CommandGroup className="max-h-64 overflow-auto">
+                      {filterOptions.meses.map(mes => (
+                        <CommandItem key={mes} className="flex items-center space-x-2">
+                          <Checkbox
+                            checked={selectedMonths.includes(mes.toString())}
+                            onCheckedChange={(checked) => 
+                              handleMonthSelection(mes.toString(), checked as boolean)
+                            }
+                          />
+                          <span>{mesesNomes[mes as keyof typeof mesesNomes]}</span>
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </Command>
+                </PopoverContent>
+              </Popover>
             </div>
           </div>
           
-          {/* Indicador dos filtros aplicados */}
-          <div className="mt-4 text-sm text-gray-600">
-            Filtros aplicados: 
-            {selectedCCA !== "all" && ` CCA: ${filterOptions.ccas.find(c => c.id.toString() === selectedCCA)?.codigo}`}
-            {selectedYear !== "all" && ` | Ano: ${selectedYear}`}
-            {selectedMonth !== "all" && ` | Mês: ${mesesNomes[parseInt(selectedMonth) as keyof typeof mesesNomes]}`}
-            {selectedCCA === "all" && selectedYear === "all" && selectedMonth === "all" && " Nenhum filtro aplicado"}
+          {/* Filtros aplicados e botão limpar */}
+          <div className="mt-4 flex items-center justify-between">
+            <div className="text-sm text-gray-600">
+              Filtros aplicados: 
+              {selectedCCAs.length > 0 && ` CCAs: ${selectedCCAs.length} selecionado(s)`}
+              {selectedYears.length > 0 && ` | Anos: ${selectedYears.length} selecionado(s)`}
+              {selectedMonths.length > 0 && ` | Meses: ${selectedMonths.length} selecionado(s)`}
+              {selectedCCAs.length === 0 && selectedYears.length === 0 && selectedMonths.length === 0 && " Nenhum filtro aplicado"}
+            </div>
+            {(selectedCCAs.length > 0 || selectedYears.length > 0 || selectedMonths.length > 0) && (
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={clearAllFilters}
+              >
+                Limpar Filtros
+              </Button>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -267,7 +355,7 @@ const IDSMSDashboard = () => {
               </CardHeader>
               <CardContent>
                 <div className={`text-2xl font-bold ${getIndicatorColor(idsmsMedia)}`}>
-                  {statusGeral}
+                  {statusGeral.split(' - ')[0]}
                 </div>
                 <p className="text-xs text-gray-500">baseado no IDSMS médio</p>
               </CardContent>
@@ -322,7 +410,7 @@ const IDSMSDashboard = () => {
                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusBadge(cca.idsms_total)}`}>
                           {getIndicatorIcon(cca.idsms_total)}
                           <span className="ml-1">
-                            {getStatusLabel(cca.idsms_total)}
+                            {getStatusLabel(cca.idsms_total).split(' - ')[0]}
                           </span>
                         </span>
                       </TableCell>
@@ -397,7 +485,7 @@ const IDSMSDashboard = () => {
               <AlertCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-semibold mb-2">Nenhum dado encontrado</h3>
               <p className="text-gray-600 mb-4">
-                {selectedCCA !== "all" || selectedYear !== "all" || selectedMonth !== "all"
+                {selectedCCAs.length > 0 || selectedYears.length > 0 || selectedMonths.length > 0
                   ? "Não foram encontrados indicadores IDSMS para os filtros selecionados."
                   : "Não foram encontrados indicadores IDSMS registrados na base de dados."
                 }

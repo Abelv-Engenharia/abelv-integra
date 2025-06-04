@@ -12,6 +12,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ccaService } from "@/services/treinamentos/ccaService";
 import { idsmsService } from "@/services/idsms/idsmsService";
 import { IDSMSFormValues } from "@/types/treinamentos";
+import { CheckCircle } from "lucide-react";
 
 interface IndicadorFormProps {
   tipo: 'IID' | 'HSA' | 'HT' | 'IPOM' | 'INSPECAO_ALTA_LIDERANCA' | 'INSPECAO_GESTAO_SMS' | 'INDICE_REATIVO';
@@ -23,6 +24,7 @@ interface IndicadorFormProps {
 const IndicadorForm: React.FC<IndicadorFormProps> = ({ tipo, titulo, descricao, showMotivo = false }) => {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   const { data: ccaOptions = [] } = useQuery({
     queryKey: ['ccas'],
@@ -59,11 +61,25 @@ const IndicadorForm: React.FC<IndicadorFormProps> = ({ tipo, titulo, descricao, 
       const result = await idsmsService.createIndicador(indicadorData);
       
       if (result) {
+        // Mostrar mensagem de sucesso
+        setShowSuccess(true);
         toast({
           title: "Indicador registrado com sucesso!",
           description: `${titulo} foi registrado para o CCA selecionado.`,
         });
-        form.reset();
+        
+        // Limpar o formulário
+        form.reset({
+          data: new Date().toISOString().split('T')[0],
+          cca_id: "",
+          resultado: 0,
+          motivo: "",
+        });
+
+        // Ocultar mensagem de sucesso após 3 segundos
+        setTimeout(() => {
+          setShowSuccess(false);
+        }, 3000);
       } else {
         throw new Error("Falha ao registrar indicador");
       }
@@ -82,6 +98,21 @@ const IndicadorForm: React.FC<IndicadorFormProps> = ({ tipo, titulo, descricao, 
   return (
     <div className="container mx-auto py-6 px-4">
       <div className="w-full">
+        {/* Mensagem de sucesso */}
+        {showSuccess && (
+          <Card className="mb-6 border-green-200 bg-green-50">
+            <CardContent className="p-4">
+              <div className="flex items-center space-x-2 text-green-800">
+                <CheckCircle className="h-5 w-5" />
+                <span className="font-medium">Indicador registrado com sucesso!</span>
+              </div>
+              <p className="text-sm text-green-700 mt-1">
+                O formulário foi limpo para uma nova inserção.
+              </p>
+            </CardContent>
+          </Card>
+        )}
+
         <Card>
           <CardHeader>
             <CardTitle className="text-lg">{titulo}</CardTitle>
@@ -107,7 +138,7 @@ const IndicadorForm: React.FC<IndicadorFormProps> = ({ tipo, titulo, descricao, 
 
                 <div className="space-y-2">
                   <Label htmlFor="cca" className="text-sm">CCA</Label>
-                  <Select onValueChange={(value) => form.setValue("cca_id", value)}>
+                  <Select onValueChange={(value) => form.setValue("cca_id", value)} value={form.watch("cca_id")}>
                     <SelectTrigger className="h-9">
                       <SelectValue placeholder="Selecione um CCA" />
                     </SelectTrigger>
@@ -166,7 +197,12 @@ const IndicadorForm: React.FC<IndicadorFormProps> = ({ tipo, titulo, descricao, 
                 <Button 
                   type="button" 
                   variant="outline" 
-                  onClick={() => form.reset()}
+                  onClick={() => form.reset({
+                    data: new Date().toISOString().split('T')[0],
+                    cca_id: "",
+                    resultado: 0,
+                    motivo: "",
+                  })}
                   className="h-9 flex-1 sm:flex-none sm:w-auto"
                 >
                   Limpar
