@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -33,7 +32,7 @@ const IDSMSDashboard = () => {
     refetchOnWindowFocus: false,
   });
 
-  const { data: filterOptions = { ccas: [], anos: [], meses: [] } } = useQuery({
+  const { data: filterOptions, isLoading: isLoadingFilters } = useQuery({
     queryKey: ['idsms-filter-options'],
     queryFn: idsmsService.getFilterOptions,
     refetchOnWindowFocus: false,
@@ -45,8 +44,16 @@ const IDSMSDashboard = () => {
     error,
     dataLength: dashboardData?.length,
     filterOptions,
+    isLoadingFilters,
     filters: { selectedCCAs, selectedYears, selectedMonths }
   });
+
+  // Garantir que os dados de filtro sempre sejam arrays válidos
+  const safeFilterOptions = {
+    ccas: filterOptions?.ccas || [],
+    anos: filterOptions?.anos || [],
+    meses: filterOptions?.meses || []
+  };
 
   // Dados já filtrados no backend
   const filteredData = dashboardData;
@@ -187,10 +194,12 @@ const IDSMSDashboard = () => {
               <label className="block text-sm font-medium mb-2">CCAs</label>
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant="outline" className="w-full justify-start">
-                    {selectedCCAs.length > 0 
-                      ? `${selectedCCAs.length} CCA(s) selecionado(s)`
-                      : "Selecionar CCAs"
+                  <Button variant="outline" className="w-full justify-start" disabled={isLoadingFilters}>
+                    {isLoadingFilters 
+                      ? "Carregando..."
+                      : selectedCCAs.length > 0 
+                        ? `${selectedCCAs.length} CCA(s) selecionado(s)`
+                        : "Selecionar CCAs"
                     }
                   </Button>
                 </PopoverTrigger>
@@ -199,7 +208,7 @@ const IDSMSDashboard = () => {
                     <CommandInput placeholder="Buscar CCAs..." />
                     <CommandEmpty>Nenhum CCA encontrado.</CommandEmpty>
                     <CommandGroup className="max-h-64 overflow-auto">
-                      {filterOptions.ccas.map(cca => (
+                      {safeFilterOptions.ccas.map(cca => (
                         <CommandItem key={cca.id} className="flex items-center space-x-2">
                           <Checkbox
                             checked={selectedCCAs.includes(cca.id.toString())}
@@ -221,10 +230,12 @@ const IDSMSDashboard = () => {
               <label className="block text-sm font-medium mb-2">Anos</label>
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant="outline" className="w-full justify-start">
-                    {selectedYears.length > 0 
-                      ? `${selectedYears.length} ano(s) selecionado(s)`
-                      : "Selecionar anos"
+                  <Button variant="outline" className="w-full justify-start" disabled={isLoadingFilters}>
+                    {isLoadingFilters 
+                      ? "Carregando..."
+                      : selectedYears.length > 0 
+                        ? `${selectedYears.length} ano(s) selecionado(s)`
+                        : "Selecionar anos"
                     }
                   </Button>
                 </PopoverTrigger>
@@ -233,7 +244,7 @@ const IDSMSDashboard = () => {
                     <CommandInput placeholder="Buscar anos..." />
                     <CommandEmpty>Nenhum ano encontrado.</CommandEmpty>
                     <CommandGroup className="max-h-64 overflow-auto">
-                      {filterOptions.anos.map(ano => (
+                      {safeFilterOptions.anos.map(ano => (
                         <CommandItem key={ano} className="flex items-center space-x-2">
                           <Checkbox
                             checked={selectedYears.includes(ano.toString())}
@@ -255,10 +266,12 @@ const IDSMSDashboard = () => {
               <label className="block text-sm font-medium mb-2">Meses</label>
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant="outline" className="w-full justify-start">
-                    {selectedMonths.length > 0 
-                      ? `${selectedMonths.length} mês(es) selecionado(s)`
-                      : "Selecionar meses"
+                  <Button variant="outline" className="w-full justify-start" disabled={isLoadingFilters}>
+                    {isLoadingFilters 
+                      ? "Carregando..."
+                      : selectedMonths.length > 0 
+                        ? `${selectedMonths.length} mês(es) selecionado(s)`
+                        : "Selecionar meses"
                     }
                   </Button>
                 </PopoverTrigger>
@@ -267,7 +280,7 @@ const IDSMSDashboard = () => {
                     <CommandInput placeholder="Buscar meses..." />
                     <CommandEmpty>Nenhum mês encontrado.</CommandEmpty>
                     <CommandGroup className="max-h-64 overflow-auto">
-                      {filterOptions.meses.map(mes => (
+                      {safeFilterOptions.meses.map(mes => (
                         <CommandItem key={mes} className="flex items-center space-x-2">
                           <Checkbox
                             checked={selectedMonths.includes(mes.toString())}
