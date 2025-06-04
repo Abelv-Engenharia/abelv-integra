@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -32,18 +33,11 @@ const IDSMSDashboard = () => {
     refetchOnWindowFocus: false,
   });
 
-  const { data: filterOptionsData, isLoading: isLoadingFilters } = useQuery({
+  const { data: filterOptions = { ccas: [], anos: [], meses: [] } } = useQuery({
     queryKey: ['idsms-filter-options'],
     queryFn: idsmsService.getFilterOptions,
     refetchOnWindowFocus: false,
   });
-
-  // Garantir que sempre temos dados válidos para os filtros
-  const filterOptions = {
-    ccas: Array.isArray(filterOptionsData?.ccas) ? filterOptionsData.ccas : [],
-    anos: Array.isArray(filterOptionsData?.anos) ? filterOptionsData.anos : [],
-    meses: Array.isArray(filterOptionsData?.meses) ? filterOptionsData.meses : []
-  };
 
   console.log('Dashboard state:', { 
     dashboardData, 
@@ -51,7 +45,6 @@ const IDSMSDashboard = () => {
     error,
     dataLength: dashboardData?.length,
     filterOptions,
-    isLoadingFilters,
     filters: { selectedCCAs, selectedYears, selectedMonths }
   });
 
@@ -206,23 +199,17 @@ const IDSMSDashboard = () => {
                     <CommandInput placeholder="Buscar CCAs..." />
                     <CommandEmpty>Nenhum CCA encontrado.</CommandEmpty>
                     <CommandGroup className="max-h-64 overflow-auto">
-                      {isLoadingFilters ? (
-                        <CommandItem disabled>Carregando CCAs...</CommandItem>
-                      ) : filterOptions.ccas.length > 0 ? (
-                        filterOptions.ccas.map(cca => (
-                          <CommandItem key={cca.id} className="flex items-center space-x-2">
-                            <Checkbox
-                              checked={selectedCCAs.includes(cca.id.toString())}
-                              onCheckedChange={(checked) => 
-                                handleCCASelection(cca.id.toString(), checked as boolean)
-                              }
-                            />
-                            <span>{cca.codigo} - {cca.nome}</span>
-                          </CommandItem>
-                        ))
-                      ) : (
-                        <CommandItem disabled>Nenhum CCA disponível</CommandItem>
-                      )}
+                      {filterOptions.ccas.map(cca => (
+                        <CommandItem key={cca.id} className="flex items-center space-x-2">
+                          <Checkbox
+                            checked={selectedCCAs.includes(cca.id.toString())}
+                            onCheckedChange={(checked) => 
+                              handleCCASelection(cca.id.toString(), checked as boolean)
+                            }
+                          />
+                          <span>{cca.codigo} - {cca.nome}</span>
+                        </CommandItem>
+                      ))}
                     </CommandGroup>
                   </Command>
                 </PopoverContent>
@@ -246,23 +233,17 @@ const IDSMSDashboard = () => {
                     <CommandInput placeholder="Buscar anos..." />
                     <CommandEmpty>Nenhum ano encontrado.</CommandEmpty>
                     <CommandGroup className="max-h-64 overflow-auto">
-                      {isLoadingFilters ? (
-                        <CommandItem disabled>Carregando anos...</CommandItem>
-                      ) : filterOptions.anos.length > 0 ? (
-                        filterOptions.anos.map(ano => (
-                          <CommandItem key={ano} className="flex items-center space-x-2">
-                            <Checkbox
-                              checked={selectedYears.includes(ano.toString())}
-                              onCheckedChange={(checked) => 
-                                handleYearSelection(ano.toString(), checked as boolean)
-                              }
-                            />
-                            <span>{ano}</span>
-                          </CommandItem>
-                        ))
-                      ) : (
-                        <CommandItem disabled>Nenhum ano disponível</CommandItem>
-                      )}
+                      {filterOptions.anos.map(ano => (
+                        <CommandItem key={ano} className="flex items-center space-x-2">
+                          <Checkbox
+                            checked={selectedYears.includes(ano.toString())}
+                            onCheckedChange={(checked) => 
+                              handleYearSelection(ano.toString(), checked as boolean)
+                            }
+                          />
+                          <span>{ano}</span>
+                        </CommandItem>
+                      ))}
                     </CommandGroup>
                   </Command>
                 </PopoverContent>
@@ -286,23 +267,17 @@ const IDSMSDashboard = () => {
                     <CommandInput placeholder="Buscar meses..." />
                     <CommandEmpty>Nenhum mês encontrado.</CommandEmpty>
                     <CommandGroup className="max-h-64 overflow-auto">
-                      {isLoadingFilters ? (
-                        <CommandItem disabled>Carregando meses...</CommandItem>
-                      ) : filterOptions.meses.length > 0 ? (
-                        filterOptions.meses.map(mes => (
-                          <CommandItem key={mes} className="flex items-center space-x-2">
-                            <Checkbox
-                              checked={selectedMonths.includes(mes.toString())}
-                              onCheckedChange={(checked) => 
-                                handleMonthSelection(mes.toString(), checked as boolean)
-                              }
-                            />
-                            <span>{mesesNomes[mes as keyof typeof mesesNomes]}</span>
-                          </CommandItem>
-                        ))
-                      ) : (
-                        <CommandItem disabled>Nenhum mês disponível</CommandItem>
-                      )}
+                      {filterOptions.meses.map(mes => (
+                        <CommandItem key={mes} className="flex items-center space-x-2">
+                          <Checkbox
+                            checked={selectedMonths.includes(mes.toString())}
+                            onCheckedChange={(checked) => 
+                              handleMonthSelection(mes.toString(), checked as boolean)
+                            }
+                          />
+                          <span>{mesesNomes[mes as keyof typeof mesesNomes]}</span>
+                        </CommandItem>
+                      ))}
                     </CommandGroup>
                   </Command>
                 </PopoverContent>
