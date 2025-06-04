@@ -48,12 +48,18 @@ const IDSMSDashboard = () => {
     filters: { selectedCCAs, selectedYears, selectedMonths }
   });
 
-  // Garantir que os dados de filtro sempre sejam arrays válidos
+  // Garantir que os dados de filtro sempre sejam arrays válidos e não vazios antes de renderizar
   const safeFilterOptions = {
-    ccas: filterOptions?.ccas || [],
-    anos: filterOptions?.anos || [],
-    meses: filterOptions?.meses || []
+    ccas: (filterOptions?.ccas && Array.isArray(filterOptions.ccas)) ? filterOptions.ccas : [],
+    anos: (filterOptions?.anos && Array.isArray(filterOptions.anos)) ? filterOptions.anos : [],
+    meses: (filterOptions?.meses && Array.isArray(filterOptions.meses)) ? filterOptions.meses : []
   };
+
+  // Só renderizar os filtros quando os dados estiverem completamente carregados
+  const filtersReady = !isLoadingFilters && filterOptions && 
+    Array.isArray(filterOptions.ccas) && 
+    Array.isArray(filterOptions.anos) && 
+    Array.isArray(filterOptions.meses);
 
   // Dados já filtrados no backend
   const filteredData = dashboardData;
@@ -188,135 +194,140 @@ const IDSMSDashboard = () => {
           <CardTitle className="text-lg">Filtros</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* Filtro CCAs */}
-            <div>
-              <label className="block text-sm font-medium mb-2">CCAs</label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" className="w-full justify-start" disabled={isLoadingFilters}>
-                    {isLoadingFilters 
-                      ? "Carregando..."
-                      : selectedCCAs.length > 0 
-                        ? `${selectedCCAs.length} CCA(s) selecionado(s)`
-                        : "Selecionar CCAs"
-                    }
+          {!filtersReady ? (
+            <div className="flex items-center justify-center py-8">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
+                <p className="text-gray-600">Carregando filtros...</p>
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* Filtro CCAs */}
+                <div>
+                  <label className="block text-sm font-medium mb-2">CCAs</label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" className="w-full justify-start">
+                        {selectedCCAs.length > 0 
+                          ? `${selectedCCAs.length} CCA(s) selecionado(s)`
+                          : "Selecionar CCAs"
+                        }
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-80">
+                      <Command>
+                        <CommandInput placeholder="Buscar CCAs..." />
+                        <CommandEmpty>Nenhum CCA encontrado.</CommandEmpty>
+                        <CommandGroup className="max-h-64 overflow-auto">
+                          {safeFilterOptions.ccas.map(cca => (
+                            <CommandItem key={cca.id} className="flex items-center space-x-2">
+                              <Checkbox
+                                checked={selectedCCAs.includes(cca.id.toString())}
+                                onCheckedChange={(checked) => 
+                                  handleCCASelection(cca.id.toString(), checked as boolean)
+                                }
+                              />
+                              <span>{cca.codigo} - {cca.nome}</span>
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+                </div>
+                
+                {/* Filtro Anos */}
+                <div>
+                  <label className="block text-sm font-medium mb-2">Anos</label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" className="w-full justify-start">
+                        {selectedYears.length > 0 
+                          ? `${selectedYears.length} ano(s) selecionado(s)`
+                          : "Selecionar anos"
+                        }
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-80">
+                      <Command>
+                        <CommandInput placeholder="Buscar anos..." />
+                        <CommandEmpty>Nenhum ano encontrado.</CommandEmpty>
+                        <CommandGroup className="max-h-64 overflow-auto">
+                          {safeFilterOptions.anos.map(ano => (
+                            <CommandItem key={ano} className="flex items-center space-x-2">
+                              <Checkbox
+                                checked={selectedYears.includes(ano.toString())}
+                                onCheckedChange={(checked) => 
+                                  handleYearSelection(ano.toString(), checked as boolean)
+                                }
+                              />
+                              <span>{ano}</span>
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+                </div>
+                
+                {/* Filtro Meses */}
+                <div>
+                  <label className="block text-sm font-medium mb-2">Meses</label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" className="w-full justify-start">
+                        {selectedMonths.length > 0 
+                          ? `${selectedMonths.length} mês(es) selecionado(s)`
+                          : "Selecionar meses"
+                        }
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-80">
+                      <Command>
+                        <CommandInput placeholder="Buscar meses..." />
+                        <CommandEmpty>Nenhum mês encontrado.</CommandEmpty>
+                        <CommandGroup className="max-h-64 overflow-auto">
+                          {safeFilterOptions.meses.map(mes => (
+                            <CommandItem key={mes} className="flex items-center space-x-2">
+                              <Checkbox
+                                checked={selectedMonths.includes(mes.toString())}
+                                onCheckedChange={(checked) => 
+                                  handleMonthSelection(mes.toString(), checked as boolean)
+                                }
+                              />
+                              <span>{mesesNomes[mes as keyof typeof mesesNomes]}</span>
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              </div>
+              
+              {/* Filtros aplicados e botão limpar */}
+              <div className="mt-4 flex items-center justify-between">
+                <div className="text-sm text-gray-600">
+                  Filtros aplicados: 
+                  {selectedCCAs.length > 0 && ` CCAs: ${selectedCCAs.length} selecionado(s)`}
+                  {selectedYears.length > 0 && ` | Anos: ${selectedYears.length} selecionado(s)`}
+                  {selectedMonths.length > 0 && ` | Meses: ${selectedMonths.length} selecionado(s)`}
+                  {selectedCCAs.length === 0 && selectedYears.length === 0 && selectedMonths.length === 0 && " Nenhum filtro aplicado"}
+                </div>
+                {(selectedCCAs.length > 0 || selectedYears.length > 0 || selectedMonths.length > 0) && (
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={clearAllFilters}
+                  >
+                    Limpar Filtros
                   </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-80">
-                  <Command>
-                    <CommandInput placeholder="Buscar CCAs..." />
-                    <CommandEmpty>Nenhum CCA encontrado.</CommandEmpty>
-                    <CommandGroup className="max-h-64 overflow-auto">
-                      {safeFilterOptions.ccas.map(cca => (
-                        <CommandItem key={cca.id} className="flex items-center space-x-2">
-                          <Checkbox
-                            checked={selectedCCAs.includes(cca.id.toString())}
-                            onCheckedChange={(checked) => 
-                              handleCCASelection(cca.id.toString(), checked as boolean)
-                            }
-                          />
-                          <span>{cca.codigo} - {cca.nome}</span>
-                        </CommandItem>
-                      ))}
-                    </CommandGroup>
-                  </Command>
-                </PopoverContent>
-              </Popover>
-            </div>
-            
-            {/* Filtro Anos */}
-            <div>
-              <label className="block text-sm font-medium mb-2">Anos</label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" className="w-full justify-start" disabled={isLoadingFilters}>
-                    {isLoadingFilters 
-                      ? "Carregando..."
-                      : selectedYears.length > 0 
-                        ? `${selectedYears.length} ano(s) selecionado(s)`
-                        : "Selecionar anos"
-                    }
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-80">
-                  <Command>
-                    <CommandInput placeholder="Buscar anos..." />
-                    <CommandEmpty>Nenhum ano encontrado.</CommandEmpty>
-                    <CommandGroup className="max-h-64 overflow-auto">
-                      {safeFilterOptions.anos.map(ano => (
-                        <CommandItem key={ano} className="flex items-center space-x-2">
-                          <Checkbox
-                            checked={selectedYears.includes(ano.toString())}
-                            onCheckedChange={(checked) => 
-                              handleYearSelection(ano.toString(), checked as boolean)
-                            }
-                          />
-                          <span>{ano}</span>
-                        </CommandItem>
-                      ))}
-                    </CommandGroup>
-                  </Command>
-                </PopoverContent>
-              </Popover>
-            </div>
-            
-            {/* Filtro Meses */}
-            <div>
-              <label className="block text-sm font-medium mb-2">Meses</label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" className="w-full justify-start" disabled={isLoadingFilters}>
-                    {isLoadingFilters 
-                      ? "Carregando..."
-                      : selectedMonths.length > 0 
-                        ? `${selectedMonths.length} mês(es) selecionado(s)`
-                        : "Selecionar meses"
-                    }
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-80">
-                  <Command>
-                    <CommandInput placeholder="Buscar meses..." />
-                    <CommandEmpty>Nenhum mês encontrado.</CommandEmpty>
-                    <CommandGroup className="max-h-64 overflow-auto">
-                      {safeFilterOptions.meses.map(mes => (
-                        <CommandItem key={mes} className="flex items-center space-x-2">
-                          <Checkbox
-                            checked={selectedMonths.includes(mes.toString())}
-                            onCheckedChange={(checked) => 
-                              handleMonthSelection(mes.toString(), checked as boolean)
-                            }
-                          />
-                          <span>{mesesNomes[mes as keyof typeof mesesNomes]}</span>
-                        </CommandItem>
-                      ))}
-                    </CommandGroup>
-                  </Command>
-                </PopoverContent>
-              </Popover>
-            </div>
-          </div>
-          
-          {/* Filtros aplicados e botão limpar */}
-          <div className="mt-4 flex items-center justify-between">
-            <div className="text-sm text-gray-600">
-              Filtros aplicados: 
-              {selectedCCAs.length > 0 && ` CCAs: ${selectedCCAs.length} selecionado(s)`}
-              {selectedYears.length > 0 && ` | Anos: ${selectedYears.length} selecionado(s)`}
-              {selectedMonths.length > 0 && ` | Meses: ${selectedMonths.length} selecionado(s)`}
-              {selectedCCAs.length === 0 && selectedYears.length === 0 && selectedMonths.length === 0 && " Nenhum filtro aplicado"}
-            </div>
-            {(selectedCCAs.length > 0 || selectedYears.length > 0 || selectedMonths.length > 0) && (
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={clearAllFilters}
-              >
-                Limpar Filtros
-              </Button>
-            )}
-          </div>
+                )}
+              </div>
+            </>
+          )}
         </CardContent>
       </Card>
 
