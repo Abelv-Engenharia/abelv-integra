@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -47,19 +48,6 @@ const IDSMSDashboard = () => {
     isLoadingFilters,
     filters: { selectedCCAs, selectedYears, selectedMonths }
   });
-
-  // Garantir que os dados de filtro sempre sejam arrays válidos e não vazios antes de renderizar
-  const safeFilterOptions = {
-    ccas: (filterOptions?.ccas && Array.isArray(filterOptions.ccas)) ? filterOptions.ccas : [],
-    anos: (filterOptions?.anos && Array.isArray(filterOptions.anos)) ? filterOptions.anos : [],
-    meses: (filterOptions?.meses && Array.isArray(filterOptions.meses)) ? filterOptions.meses : []
-  };
-
-  // Só renderizar os filtros quando os dados estiverem completamente carregados
-  const filtersReady = !isLoadingFilters && filterOptions && 
-    Array.isArray(filterOptions.ccas) && 
-    Array.isArray(filterOptions.anos) && 
-    Array.isArray(filterOptions.meses);
 
   // Dados já filtrados no backend
   const filteredData = dashboardData;
@@ -194,7 +182,7 @@ const IDSMSDashboard = () => {
           <CardTitle className="text-lg">Filtros</CardTitle>
         </CardHeader>
         <CardContent>
-          {!filtersReady ? (
+          {isLoadingFilters ? (
             <div className="flex items-center justify-center py-8">
               <div className="text-center">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
@@ -221,7 +209,7 @@ const IDSMSDashboard = () => {
                         <CommandInput placeholder="Buscar CCAs..." />
                         <CommandEmpty>Nenhum CCA encontrado.</CommandEmpty>
                         <CommandGroup className="max-h-64 overflow-auto">
-                          {safeFilterOptions.ccas.map(cca => (
+                          {filterOptions?.ccas && Array.isArray(filterOptions.ccas) && filterOptions.ccas.map(cca => (
                             <CommandItem key={cca.id} className="flex items-center space-x-2">
                               <Checkbox
                                 checked={selectedCCAs.includes(cca.id.toString())}
@@ -255,7 +243,7 @@ const IDSMSDashboard = () => {
                         <CommandInput placeholder="Buscar anos..." />
                         <CommandEmpty>Nenhum ano encontrado.</CommandEmpty>
                         <CommandGroup className="max-h-64 overflow-auto">
-                          {safeFilterOptions.anos.map(ano => (
+                          {filterOptions?.anos && Array.isArray(filterOptions.anos) && filterOptions.anos.map(ano => (
                             <CommandItem key={ano} className="flex items-center space-x-2">
                               <Checkbox
                                 checked={selectedYears.includes(ano.toString())}
@@ -289,7 +277,7 @@ const IDSMSDashboard = () => {
                         <CommandInput placeholder="Buscar meses..." />
                         <CommandEmpty>Nenhum mês encontrado.</CommandEmpty>
                         <CommandGroup className="max-h-64 overflow-auto">
-                          {safeFilterOptions.meses.map(mes => (
+                          {filterOptions?.meses && Array.isArray(filterOptions.meses) && filterOptions.meses.map(mes => (
                             <CommandItem key={mes} className="flex items-center space-x-2">
                               <Checkbox
                                 checked={selectedMonths.includes(mes.toString())}
