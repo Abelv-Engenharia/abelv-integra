@@ -32,11 +32,18 @@ const IDSMSDashboard = () => {
     refetchOnWindowFocus: false,
   });
 
-  const { data: filterOptions = { ccas: [], anos: [], meses: [] } } = useQuery({
+  const { data: filterOptionsData, isLoading: isLoadingFilters } = useQuery({
     queryKey: ['idsms-filter-options'],
     queryFn: idsmsService.getFilterOptions,
     refetchOnWindowFocus: false,
   });
+
+  // Garantir que sempre temos dados válidos para os filtros
+  const filterOptions = {
+    ccas: Array.isArray(filterOptionsData?.ccas) ? filterOptionsData.ccas : [],
+    anos: Array.isArray(filterOptionsData?.anos) ? filterOptionsData.anos : [],
+    meses: Array.isArray(filterOptionsData?.meses) ? filterOptionsData.meses : []
+  };
 
   console.log('Dashboard state:', { 
     dashboardData, 
@@ -44,6 +51,7 @@ const IDSMSDashboard = () => {
     error,
     dataLength: dashboardData?.length,
     filterOptions,
+    isLoadingFilters,
     filters: { selectedCCAs, selectedYears, selectedMonths }
   });
 
@@ -198,7 +206,9 @@ const IDSMSDashboard = () => {
                     <CommandInput placeholder="Buscar CCAs..." />
                     <CommandEmpty>Nenhum CCA encontrado.</CommandEmpty>
                     <CommandGroup className="max-h-64 overflow-auto">
-                      {Array.isArray(filterOptions?.ccas) && filterOptions.ccas.length > 0 ? (
+                      {isLoadingFilters ? (
+                        <CommandItem disabled>Carregando CCAs...</CommandItem>
+                      ) : filterOptions.ccas.length > 0 ? (
                         filterOptions.ccas.map(cca => (
                           <CommandItem key={cca.id} className="flex items-center space-x-2">
                             <Checkbox
@@ -211,7 +221,7 @@ const IDSMSDashboard = () => {
                           </CommandItem>
                         ))
                       ) : (
-                        <CommandItem disabled>Carregando CCAs...</CommandItem>
+                        <CommandItem disabled>Nenhum CCA disponível</CommandItem>
                       )}
                     </CommandGroup>
                   </Command>
@@ -236,7 +246,9 @@ const IDSMSDashboard = () => {
                     <CommandInput placeholder="Buscar anos..." />
                     <CommandEmpty>Nenhum ano encontrado.</CommandEmpty>
                     <CommandGroup className="max-h-64 overflow-auto">
-                      {Array.isArray(filterOptions?.anos) && filterOptions.anos.length > 0 ? (
+                      {isLoadingFilters ? (
+                        <CommandItem disabled>Carregando anos...</CommandItem>
+                      ) : filterOptions.anos.length > 0 ? (
                         filterOptions.anos.map(ano => (
                           <CommandItem key={ano} className="flex items-center space-x-2">
                             <Checkbox
@@ -249,7 +261,7 @@ const IDSMSDashboard = () => {
                           </CommandItem>
                         ))
                       ) : (
-                        <CommandItem disabled>Carregando anos...</CommandItem>
+                        <CommandItem disabled>Nenhum ano disponível</CommandItem>
                       )}
                     </CommandGroup>
                   </Command>
@@ -274,7 +286,9 @@ const IDSMSDashboard = () => {
                     <CommandInput placeholder="Buscar meses..." />
                     <CommandEmpty>Nenhum mês encontrado.</CommandEmpty>
                     <CommandGroup className="max-h-64 overflow-auto">
-                      {Array.isArray(filterOptions?.meses) && filterOptions.meses.length > 0 ? (
+                      {isLoadingFilters ? (
+                        <CommandItem disabled>Carregando meses...</CommandItem>
+                      ) : filterOptions.meses.length > 0 ? (
                         filterOptions.meses.map(mes => (
                           <CommandItem key={mes} className="flex items-center space-x-2">
                             <Checkbox
@@ -287,7 +301,7 @@ const IDSMSDashboard = () => {
                           </CommandItem>
                         ))
                       ) : (
-                        <CommandItem disabled>Carregando meses...</CommandItem>
+                        <CommandItem disabled>Nenhum mês disponível</CommandItem>
                       )}
                     </CommandGroup>
                   </Command>
