@@ -52,15 +52,15 @@ const IDSMSDashboard = () => {
   const filteredData = dashboardData;
 
   // Verificar se os dados estão prontos para renderizar - com fallbacks seguros
-  const safeCCAs = filterOptions?.ccas || [];
-  const safeAnos = filterOptions?.anos || [];
-  const safeMeses = filterOptions?.meses || [];
+  const safeCCAs = Array.isArray(filterOptions?.ccas) ? filterOptions.ccas : [];
+  const safeAnos = Array.isArray(filterOptions?.anos) ? filterOptions.anos : [];
+  const safeMeses = Array.isArray(filterOptions?.meses) ? filterOptions.meses : [];
   
   const filtersDataReady = !isLoadingFilters && 
     filterOptions && 
-    Array.isArray(safeCCAs) &&
-    Array.isArray(safeAnos) &&
-    Array.isArray(safeMeses);
+    safeCCAs.length >= 0 &&
+    safeAnos.length >= 0 &&
+    safeMeses.length >= 0;
 
   const getIndicatorIcon = (value: number) => {
     if (value > 100) return <TrendingUp className="h-4 w-4 text-green-500" />;
@@ -215,23 +215,29 @@ const IDSMSDashboard = () => {
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-80">
-                      <Command>
-                        <CommandInput placeholder="Buscar CCAs..." />
-                        <CommandEmpty>Nenhum CCA encontrado.</CommandEmpty>
-                        <CommandGroup className="max-h-64 overflow-auto">
-                          {safeCCAs.map(cca => (
-                            <CommandItem key={cca.id} className="flex items-center space-x-2">
-                              <Checkbox
-                                checked={selectedCCAs.includes(cca.id.toString())}
-                                onCheckedChange={(checked) => 
-                                  handleCCASelection(cca.id.toString(), checked as boolean)
-                                }
-                              />
-                              <span>{cca.codigo} - {cca.nome}</span>
-                            </CommandItem>
-                          ))}
-                        </CommandGroup>
-                      </Command>
+                      {safeCCAs.length > 0 ? (
+                        <Command>
+                          <CommandInput placeholder="Buscar CCAs..." />
+                          <CommandEmpty>Nenhum CCA encontrado.</CommandEmpty>
+                          <CommandGroup className="max-h-64 overflow-auto">
+                            {safeCCAs.map(cca => (
+                              <CommandItem key={cca.id} className="flex items-center space-x-2">
+                                <Checkbox
+                                  checked={selectedCCAs.includes(cca.id.toString())}
+                                  onCheckedChange={(checked) => 
+                                    handleCCASelection(cca.id.toString(), checked as boolean)
+                                  }
+                                />
+                                <span>{cca.codigo} - {cca.nome}</span>
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </Command>
+                      ) : (
+                        <div className="p-4 text-center text-gray-500">
+                          Nenhum CCA disponível
+                        </div>
+                      )}
                     </PopoverContent>
                   </Popover>
                 </div>
@@ -249,23 +255,29 @@ const IDSMSDashboard = () => {
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-80">
-                      <Command>
-                        <CommandInput placeholder="Buscar anos..." />
-                        <CommandEmpty>Nenhum ano encontrado.</CommandEmpty>
-                        <CommandGroup className="max-h-64 overflow-auto">
-                          {safeAnos.map(ano => (
-                            <CommandItem key={ano} className="flex items-center space-x-2">
-                              <Checkbox
-                                checked={selectedYears.includes(ano.toString())}
-                                onCheckedChange={(checked) => 
-                                  handleYearSelection(ano.toString(), checked as boolean)
-                                }
-                              />
-                              <span>{ano}</span>
-                            </CommandItem>
-                          ))}
-                        </CommandGroup>
-                      </Command>
+                      {safeAnos.length > 0 ? (
+                        <Command>
+                          <CommandInput placeholder="Buscar anos..." />
+                          <CommandEmpty>Nenhum ano encontrado.</CommandEmpty>
+                          <CommandGroup className="max-h-64 overflow-auto">
+                            {safeAnos.map(ano => (
+                              <CommandItem key={ano} className="flex items-center space-x-2">
+                                <Checkbox
+                                  checked={selectedYears.includes(ano.toString())}
+                                  onCheckedChange={(checked) => 
+                                    handleYearSelection(ano.toString(), checked as boolean)
+                                  }
+                                />
+                                <span>{ano}</span>
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </Command>
+                      ) : (
+                        <div className="p-4 text-center text-gray-500">
+                          Nenhum ano disponível
+                        </div>
+                      )}
                     </PopoverContent>
                   </Popover>
                 </div>
@@ -283,23 +295,29 @@ const IDSMSDashboard = () => {
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-80">
-                      <Command>
-                        <CommandInput placeholder="Buscar meses..." />
-                        <CommandEmpty>Nenhum mês encontrado.</CommandEmpty>
-                        <CommandGroup className="max-h-64 overflow-auto">
-                          {safeMeses.map(mes => (
-                            <CommandItem key={mes} className="flex items-center space-x-2">
-                              <Checkbox
-                                checked={selectedMonths.includes(mes.toString())}
-                                onCheckedChange={(checked) => 
-                                  handleMonthSelection(mes.toString(), checked as boolean)
-                                }
-                              />
-                              <span>{mesesNomes[mes as keyof typeof mesesNomes]}</span>
-                            </CommandItem>
-                          ))}
-                        </CommandGroup>
-                      </Command>
+                      {safeMeses.length > 0 ? (
+                        <Command>
+                          <CommandInput placeholder="Buscar meses..." />
+                          <CommandEmpty>Nenhum mês encontrado.</CommandEmpty>
+                          <CommandGroup className="max-h-64 overflow-auto">
+                            {safeMeses.map(mes => (
+                              <CommandItem key={mes} className="flex items-center space-x-2">
+                                <Checkbox
+                                  checked={selectedMonths.includes(mes.toString())}
+                                  onCheckedChange={(checked) => 
+                                    handleMonthSelection(mes.toString(), checked as boolean)
+                                  }
+                                />
+                                <span>{mesesNomes[mes as keyof typeof mesesNomes]}</span>
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </Command>
+                      ) : (
+                        <div className="p-4 text-center text-gray-500">
+                          Nenhum mês disponível
+                        </div>
+                      )}
                     </PopoverContent>
                   </Popover>
                 </div>
