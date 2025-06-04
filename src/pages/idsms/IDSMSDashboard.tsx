@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -199,7 +198,7 @@ const IDSMSDashboard = () => {
                     <CommandInput placeholder="Buscar CCAs..." />
                     <CommandEmpty>Nenhum CCA encontrado.</CommandEmpty>
                     <CommandGroup className="max-h-64 overflow-auto">
-                      {filterOptions.ccas && filterOptions.ccas.length > 0 ? (
+                      {Array.isArray(filterOptions?.ccas) && filterOptions.ccas.length > 0 ? (
                         filterOptions.ccas.map(cca => (
                           <CommandItem key={cca.id} className="flex items-center space-x-2">
                             <Checkbox
@@ -237,7 +236,7 @@ const IDSMSDashboard = () => {
                     <CommandInput placeholder="Buscar anos..." />
                     <CommandEmpty>Nenhum ano encontrado.</CommandEmpty>
                     <CommandGroup className="max-h-64 overflow-auto">
-                      {filterOptions.anos && filterOptions.anos.length > 0 ? (
+                      {Array.isArray(filterOptions?.anos) && filterOptions.anos.length > 0 ? (
                         filterOptions.anos.map(ano => (
                           <CommandItem key={ano} className="flex items-center space-x-2">
                             <Checkbox
@@ -275,7 +274,7 @@ const IDSMSDashboard = () => {
                     <CommandInput placeholder="Buscar meses..." />
                     <CommandEmpty>Nenhum mês encontrado.</CommandEmpty>
                     <CommandGroup className="max-h-64 overflow-auto">
-                      {filterOptions.meses && filterOptions.meses.length > 0 ? (
+                      {Array.isArray(filterOptions?.meses) && filterOptions.meses.length > 0 ? (
                         filterOptions.meses.map(mes => (
                           <CommandItem key={mes} className="flex items-center space-x-2">
                             <Checkbox
