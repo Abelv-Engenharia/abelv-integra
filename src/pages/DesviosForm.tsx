@@ -48,8 +48,6 @@ const DesviosForm = () => {
     }
   };
 
-  const CurrentTabComponent = tabs.find(tab => tab.id === activeTab)?.component;
-
   // Auto-popular ano e mês quando a data for selecionada
   const watchData = form.watch("data");
   React.useEffect(() => {
@@ -77,6 +75,21 @@ const DesviosForm = () => {
     console.log('Form submit interceptado');
   };
 
+  const renderTabContent = (tab: typeof tabs[0]) => {
+    if (tab.id === "classificacao") {
+      return (
+        <ClassificacaoRiscoForm 
+          context={contextValue} 
+          onSave={handleSave}
+          isSubmitting={isSubmitting}
+        />
+      );
+    } else {
+      const Component = tab.component;
+      return <Component context={contextValue} />;
+    }
+  };
+
   return (
     <div className="container mx-auto py-6 space-y-6">
       <div className="flex items-center justify-between">
@@ -98,20 +111,20 @@ const DesviosForm = () => {
 
                 {tabs.map((tab) => (
                   <TabsContent key={tab.id} value={tab.id} className="mt-6">
-                    {CurrentTabComponent && <CurrentTabComponent context={contextValue} />}
+                    {renderTabContent(tab)}
                   </TabsContent>
                 ))}
               </Tabs>
 
-              <FormNavigation
-                currentTabIndex={currentTabIndex}
-                totalTabs={tabs.length}
-                onPrevious={handlePrevious}
-                onNext={handleNext}
-                onSave={handleSave}
-                onCancel={handleCancel}
-                isSubmitting={isSubmitting}
-              />
+              {activeTab !== "classificacao" && (
+                <FormNavigation
+                  currentTabIndex={currentTabIndex}
+                  totalTabs={tabs.length}
+                  onPrevious={handlePrevious}
+                  onNext={handleNext}
+                  onCancel={handleCancel}
+                />
+              )}
             </form>
           </Form>
         </CardContent>
