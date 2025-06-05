@@ -10,7 +10,8 @@ import AcaoCorretivaForm from "@/components/desvios/forms/AcaoCorretivaForm";
 import ClassificacaoRiscoForm from "@/components/desvios/forms/ClassificacaoRiscoForm";
 import FormSuccessDialog from "@/components/desvios/forms/FormSuccessDialog";
 import FormNavigation from "@/components/desvios/forms/FormNavigation";
-import { Button, Save } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
+import { Save } from "lucide-react";
 
 const DesviosForm = () => {
   const {
