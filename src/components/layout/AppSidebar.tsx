@@ -56,7 +56,7 @@ export function AppSidebar() {
   };
 
   return (
-    <Sidebar>
+    <Sidebar className="w-80">
       <SidebarContent>
         <SidebarGroup>
           <SidebarMenu>

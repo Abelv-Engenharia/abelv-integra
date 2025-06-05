@@ -1,40 +1,21 @@
-import React, { useState } from "react";
+
+import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { idsmsService } from "@/services/idsms/idsmsService";
 import { TrendingUp, TrendingDown, Minus, RefreshCw, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
 
 const IDSMSDashboard = () => {
-  const [selectedCCAs, setSelectedCCAs] = useState<string[]>([]);
-  const [selectedYears, setSelectedYears] = useState<string[]>([]);
-  const [selectedMonths, setSelectedMonths] = useState<string[]>([]);
-
-  // Query para dados do dashboard com filtros
+  // Query para dados do dashboard sem filtros
   const { data: dashboardData = [], isLoading, refetch, error } = useQuery({
-    queryKey: ['idsms-dashboard', selectedCCAs, selectedYears, selectedMonths],
-    queryFn: () => {
-      // Converter arrays para string ou "all" se vazio
-      const ccaFilter = selectedCCAs.length > 0 ? selectedCCAs.join(',') : "all";
-      const yearFilter = selectedYears.length > 0 ? selectedYears.join(',') : "all";
-      const monthFilter = selectedMonths.length > 0 ? selectedMonths.join(',') : "all";
-      
-      return idsmsService.getDashboardData({
-        cca_id: ccaFilter,
-        ano: yearFilter,
-        mes: monthFilter
-      });
-    },
-    refetchOnWindowFocus: false,
-  });
-
-  const { data: filterOptions, isLoading: isLoadingFilters } = useQuery({
-    queryKey: ['idsms-filter-options'],
-    queryFn: idsmsService.getFilterOptions,
+    queryKey: ['idsms-dashboard'],
+    queryFn: () => idsmsService.getDashboardData({
+      cca_id: "all",
+      ano: "all",
+      mes: "all"
+    }),
     refetchOnWindowFocus: false,
   });
 
@@ -42,25 +23,8 @@ const IDSMSDashboard = () => {
     dashboardData, 
     isLoading, 
     error,
-    dataLength: dashboardData?.length,
-    filterOptions,
-    isLoadingFilters,
-    filters: { selectedCCAs, selectedYears, selectedMonths }
+    dataLength: dashboardData?.length
   });
-
-  // Dados já filtrados no backend
-  const filteredData = dashboardData;
-
-  // Verificar se os dados estão prontos para renderizar - com fallbacks seguros
-  const safeCCAs = Array.isArray(filterOptions?.ccas) ? filterOptions.ccas : [];
-  const safeAnos = Array.isArray(filterOptions?.anos) ? filterOptions.anos : [];
-  const safeMeses = Array.isArray(filterOptions?.meses) ? filterOptions.meses : [];
-  
-  const filtersDataReady = !isLoadingFilters && 
-    filterOptions && 
-    safeCCAs.length >= 0 &&
-    safeAnos.length >= 0 &&
-    safeMeses.length >= 0;
 
   const getIndicatorIcon = (value: number) => {
     if (value > 100) return <TrendingUp className="h-4 w-4 text-green-500" />;
@@ -84,51 +48,6 @@ const IDSMSDashboard = () => {
     if (value > 100) return 'Excelente';
     if (value >= 95) return 'Bom';
     return 'Atenção - Índice necessita ser melhorado';
-  };
-
-  const mesesNomes = {
-    1: 'Janeiro',
-    2: 'Fevereiro', 
-    3: 'Março',
-    4: 'Abril',
-    5: 'Maio',
-    6: 'Junho',
-    7: 'Julho',
-    8: 'Agosto',
-    9: 'Setembro',
-    10: 'Outubro',
-    11: 'Novembro',
-    12: 'Dezembro'
-  };
-
-  const handleCCASelection = (ccaId: string, checked: boolean) => {
-    if (checked) {
-      setSelectedCCAs(prev => [...prev, ccaId]);
-    } else {
-      setSelectedCCAs(prev => prev.filter(id => id !== ccaId));
-    }
-  };
-
-  const handleYearSelection = (year: string, checked: boolean) => {
-    if (checked) {
-      setSelectedYears(prev => [...prev, year]);
-    } else {
-      setSelectedYears(prev => prev.filter(y => y !== year));
-    }
-  };
-
-  const handleMonthSelection = (month: string, checked: boolean) => {
-    if (checked) {
-      setSelectedMonths(prev => [...prev, month]);
-    } else {
-      setSelectedMonths(prev => prev.filter(m => m !== month));
-    }
-  };
-
-  const clearAllFilters = () => {
-    setSelectedCCAs([]);
-    setSelectedYears([]);
-    setSelectedMonths([]);
   };
 
   if (isLoading) {
@@ -164,9 +83,9 @@ const IDSMSDashboard = () => {
     );
   }
 
-  // Calcular estatísticas para os novos cards
-  const idsmsMedia = filteredData.length > 0 
-    ? filteredData.reduce((sum, item) => sum + item.idsms_total, 0) / filteredData.length 
+  // Calcular estatísticas
+  const idsmsMedia = dashboardData.length > 0 
+    ? dashboardData.reduce((sum, item) => sum + item.idsms_total, 0) / dashboardData.length 
     : 0;
 
   const statusGeral = getStatusLabel(idsmsMedia);
@@ -186,171 +105,10 @@ const IDSMSDashboard = () => {
         </Button>
       </div>
 
-      {/* Filtros com Seleção Múltipla */}
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle className="text-lg">Filtros</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {!filtersDataReady ? (
-            <div className="flex items-center justify-center py-8">
-              <div className="text-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
-                <p className="text-gray-600">Carregando filtros...</p>
-              </div>
-            </div>
-          ) : (
-            <>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {/* Filtro CCAs */}
-                <div>
-                  <label className="block text-sm font-medium mb-2">CCAs</label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button variant="outline" className="w-full justify-start">
-                        {selectedCCAs.length > 0 
-                          ? `${selectedCCAs.length} CCA(s) selecionado(s)`
-                          : "Selecionar CCAs"
-                        }
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-80">
-                      {safeCCAs.length > 0 ? (
-                        <Command>
-                          <CommandInput placeholder="Buscar CCAs..." />
-                          <CommandEmpty>Nenhum CCA encontrado.</CommandEmpty>
-                          <CommandGroup className="max-h-64 overflow-auto">
-                            {safeCCAs.map(cca => (
-                              <CommandItem key={cca.id} className="flex items-center space-x-2">
-                                <Checkbox
-                                  checked={selectedCCAs.includes(cca.id.toString())}
-                                  onCheckedChange={(checked) => 
-                                    handleCCASelection(cca.id.toString(), checked as boolean)
-                                  }
-                                />
-                                <span>{cca.codigo} - {cca.nome}</span>
-                              </CommandItem>
-                            ))}
-                          </CommandGroup>
-                        </Command>
-                      ) : (
-                        <div className="p-4 text-center text-gray-500">
-                          Nenhum CCA disponível
-                        </div>
-                      )}
-                    </PopoverContent>
-                  </Popover>
-                </div>
-                
-                {/* Filtro Anos */}
-                <div>
-                  <label className="block text-sm font-medium mb-2">Anos</label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button variant="outline" className="w-full justify-start">
-                        {selectedYears.length > 0 
-                          ? `${selectedYears.length} ano(s) selecionado(s)`
-                          : "Selecionar anos"
-                        }
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-80">
-                      {safeAnos.length > 0 ? (
-                        <Command>
-                          <CommandInput placeholder="Buscar anos..." />
-                          <CommandEmpty>Nenhum ano encontrado.</CommandEmpty>
-                          <CommandGroup className="max-h-64 overflow-auto">
-                            {safeAnos.map(ano => (
-                              <CommandItem key={ano} className="flex items-center space-x-2">
-                                <Checkbox
-                                  checked={selectedYears.includes(ano.toString())}
-                                  onCheckedChange={(checked) => 
-                                    handleYearSelection(ano.toString(), checked as boolean)
-                                  }
-                                />
-                                <span>{ano}</span>
-                              </CommandItem>
-                            ))}
-                          </CommandGroup>
-                        </Command>
-                      ) : (
-                        <div className="p-4 text-center text-gray-500">
-                          Nenhum ano disponível
-                        </div>
-                      )}
-                    </PopoverContent>
-                  </Popover>
-                </div>
-                
-                {/* Filtro Meses */}
-                <div>
-                  <label className="block text-sm font-medium mb-2">Meses</label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button variant="outline" className="w-full justify-start">
-                        {selectedMonths.length > 0 
-                          ? `${selectedMonths.length} mês(es) selecionado(s)`
-                          : "Selecionar meses"
-                        }
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-80">
-                      {safeMeses.length > 0 ? (
-                        <Command>
-                          <CommandInput placeholder="Buscar meses..." />
-                          <CommandEmpty>Nenhum mês encontrado.</CommandEmpty>
-                          <CommandGroup className="max-h-64 overflow-auto">
-                            {safeMeses.map(mes => (
-                              <CommandItem key={mes} className="flex items-center space-x-2">
-                                <Checkbox
-                                  checked={selectedMonths.includes(mes.toString())}
-                                  onCheckedChange={(checked) => 
-                                    handleMonthSelection(mes.toString(), checked as boolean)
-                                  }
-                                />
-                                <span>{mesesNomes[mes as keyof typeof mesesNomes]}</span>
-                              </CommandItem>
-                            ))}
-                          </CommandGroup>
-                        </Command>
-                      ) : (
-                        <div className="p-4 text-center text-gray-500">
-                          Nenhum mês disponível
-                        </div>
-                      )}
-                    </PopoverContent>
-                  </Popover>
-                </div>
-              </div>
-              
-              {/* Filtros aplicados e botão limpar */}
-              <div className="mt-4 flex items-center justify-between">
-                <div className="text-sm text-gray-600">
-                  Filtros aplicados: 
-                  {selectedCCAs.length > 0 && ` CCAs: ${selectedCCAs.length} selecionado(s)`}
-                  {selectedYears.length > 0 && ` | Anos: ${selectedYears.length} selecionado(s)`}
-                  {selectedMonths.length > 0 && ` | Meses: ${selectedMonths.length} selecionado(s)`}
-                  {selectedCCAs.length === 0 && selectedYears.length === 0 && selectedMonths.length === 0 && " Nenhum filtro aplicado"}
-                </div>
-                {(selectedCCAs.length > 0 || selectedYears.length > 0 || selectedMonths.length > 0) && (
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={clearAllFilters}
-                  >
-                    Limpar Filtros
-                  </Button>
-                )}
-              </div>
-            </>
-          )}
-        </CardContent>
-      </Card>
-
-      {filteredData.length > 0 ? (
+      {dashboardData.length > 0 ? (
         <>
           <div className="mb-6 text-sm text-gray-600">
-            Exibindo dados de {filteredData.length} CCA(s) com indicadores IDSMS registrados
+            Exibindo dados de {dashboardData.length} CCA(s) com indicadores IDSMS registrados
           </div>
 
           {/* Cards resumo */}
@@ -360,7 +118,7 @@ const IDSMSDashboard = () => {
                 <CardTitle className="text-sm font-medium text-gray-600">Total de CCAs</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{filteredData.length}</div>
+                <div className="text-2xl font-bold">{dashboardData.length}</div>
                 <p className="text-xs text-gray-500">com dados IDSMS</p>
               </CardContent>
             </Card>
@@ -383,7 +141,7 @@ const IDSMSDashboard = () => {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-green-600">
-                  {Math.max(...filteredData.map(item => item.idsms_total)).toFixed(1)}%
+                  {Math.max(...dashboardData.map(item => item.idsms_total)).toFixed(1)}%
                 </div>
                 <p className="text-xs text-gray-500">maior IDSMS</p>
               </CardContent>
@@ -424,7 +182,7 @@ const IDSMSDashboard = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredData
+                  {dashboardData
                     .sort((a, b) => b.idsms_total - a.idsms_total)
                     .map((cca) => (
                     <TableRow key={cca.cca_id}>
@@ -463,7 +221,7 @@ const IDSMSDashboard = () => {
 
           {/* Cards individuais para visão mobile */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6 lg:hidden">
-            {filteredData
+            {dashboardData
               .sort((a, b) => b.idsms_total - a.idsms_total)
               .map((cca) => (
               <Card key={cca.cca_id} className="relative">
@@ -525,10 +283,7 @@ const IDSMSDashboard = () => {
               <AlertCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-semibold mb-2">Nenhum dado encontrado</h3>
               <p className="text-gray-600 mb-4">
-                {selectedCCAs.length > 0 || selectedYears.length > 0 || selectedMonths.length > 0
-                  ? "Não foram encontrados indicadores IDSMS para os filtros selecionados."
-                  : "Não foram encontrados indicadores IDSMS registrados na base de dados."
-                }
+                Não foram encontrados indicadores IDSMS registrados na base de dados.
               </p>
               <p className="text-sm text-gray-500 mb-4">
                 Registre indicadores usando os formulários IDSMS para visualizar dados no dashboard.
