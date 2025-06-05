@@ -1,9 +1,10 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useToast } from "@/hooks/use-toast";
 import { validateRequiredFields } from "@/utils/desviosValidation";
 import { desviosCompletosService } from "@/services/desvios/desviosCompletosService";
+import { calculateStatusAcao } from "@/utils/desviosUtils";
 import { DesvioFormData } from "@/types/desvios";
 
 export const useDesviosForm = () => {
@@ -58,17 +59,58 @@ export const useDesviosForm = () => {
     },
   });
 
+  // Watch situacao and prazoCorrecao to calculate situacaoAcao
+  const situacao = form.watch("situacao");
+  const prazoCorrecao = form.watch("prazoCorrecao");
+
+  useEffect(() => {
+    if (situacao && prazoCorrecao) {
+      const statusCalculado = calculateStatusAcao(situacao, prazoCorrecao);
+      form.setValue("situacaoAcao", statusCalculado);
+    }
+  }, [situacao, prazoCorrecao, form]);
+
   const handleSave = async () => {
     try {
       const formData = form.getValues();
       console.log('Dados do formulário antes da validação:', formData);
       
-      const validation = validateRequiredFields(formData);
-      
-      if (!validation.isValid) {
+      // Validação básica de campos obrigatórios
+      const camposObrigatorios = [
+        { campo: 'data', nome: 'Data' },
+        { campo: 'ccaId', nome: 'CCA' },
+        { campo: 'tipoRegistro', nome: 'Tipo de Registro' },
+        { campo: 'processo', nome: 'Processo' },
+        { campo: 'eventoIdentificado', nome: 'Evento Identificado' },
+        { campo: 'causaProvavel', nome: 'Causa Provável' },
+        { campo: 'empresa', nome: 'Empresa' },
+        { campo: 'disciplina', nome: 'Disciplina' },
+        { campo: 'engenheiroResponsavel', nome: 'Engenheiro Responsável' },
+        { campo: 'descricaoDesvio', nome: 'Descrição do Desvio' },
+        { campo: 'baseLegal', nome: 'Base Legal' },
+        { campo: 'supervisorResponsavel', nome: 'Supervisor Responsável' },
+        { campo: 'encarregadoResponsavel', nome: 'Encarregado Responsável' },
+        { campo: 'tratativaAplicada', nome: 'Tratativa Aplicada' },
+        { campo: 'responsavelAcao', nome: 'Responsável pela Ação' },
+        { campo: 'prazoCorrecao', nome: 'Prazo para Correção' },
+        { campo: 'situacao', nome: 'Situação' },
+        { campo: 'exposicao', nome: 'Exposição' },
+        { campo: 'controle', nome: 'Controle' },
+        { campo: 'deteccao', nome: 'Detecção' },
+        { campo: 'efeitoFalha', nome: 'Efeito da Falha' },
+        { campo: 'impacto', nome: 'Impacto' }
+      ];
+
+      const camposFaltando = camposObrigatorios.filter(({ campo }) => {
+        const valor = formData[campo as keyof DesvioFormData];
+        return !valor || (typeof valor === 'string' && valor.trim() === '');
+      });
+
+      if (camposFaltando.length > 0) {
+        const nomesCampos = camposFaltando.map(({ nome }) => nome).join(", ");
         toast({
           title: "Campos obrigatórios não preenchidos",
-          description: `Por favor, preencha os seguintes campos: ${validation.missingFields.join(", ")}`,
+          description: `Por favor, preencha os seguintes campos: ${nomesCampos}`,
           variant: "destructive",
         });
         return;
@@ -77,14 +119,6 @@ export const useDesviosForm = () => {
       setIsSubmitting(true);
       
       // Validação adicional de dados críticos
-      if (!formData.data) {
-        throw new Error('Data do desvio é obrigatória');
-      }
-      
-      if (!formData.ccaId) {
-        throw new Error('CCA é obrigatório');
-      }
-      
       if (!formData.descricaoDesvio || formData.descricaoDesvio.trim() === '') {
         throw new Error('Descrição do desvio é obrigatória');
       }
