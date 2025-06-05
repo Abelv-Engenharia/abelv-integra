@@ -2,7 +2,6 @@
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useToast } from "@/hooks/use-toast";
-import { validateRequiredFields } from "@/utils/desviosValidation";
 import { desviosCompletosService } from "@/services/desvios/desviosCompletosService";
 import { calculateStatusAcao } from "@/utils/desviosUtils";
 import { DesvioFormData } from "@/types/desvios";
@@ -43,7 +42,7 @@ export const useDesviosForm = () => {
       tratativaAplicada: "",
       responsavelAcao: "",
       prazoCorrecao: "",
-      situacao: "EM ANDAMENTO",
+      situacao: "EM TRATATIVA",
       situacaoAcao: "EM ANDAMENTO",
       aplicacaoMedidaDisciplinar: false,
       
@@ -71,34 +70,17 @@ export const useDesviosForm = () => {
   }, [situacao, prazoCorrecao, form]);
 
   const handleSave = async () => {
+    console.log('handleSave chamado');
+    
     try {
+      setIsSubmitting(true);
       const formData = form.getValues();
-      console.log('Dados do formulário antes da validação:', formData);
+      console.log('Dados do formulário:', formData);
       
-      // Validação básica de campos obrigatórios
+      // Validação básica de campos obrigatórios essenciais
       const camposObrigatorios = [
         { campo: 'data', nome: 'Data' },
-        { campo: 'ccaId', nome: 'CCA' },
-        { campo: 'tipoRegistro', nome: 'Tipo de Registro' },
-        { campo: 'processo', nome: 'Processo' },
-        { campo: 'eventoIdentificado', nome: 'Evento Identificado' },
-        { campo: 'causaProvavel', nome: 'Causa Provável' },
-        { campo: 'empresa', nome: 'Empresa' },
-        { campo: 'disciplina', nome: 'Disciplina' },
-        { campo: 'engenheiroResponsavel', nome: 'Engenheiro Responsável' },
-        { campo: 'descricaoDesvio', nome: 'Descrição do Desvio' },
-        { campo: 'baseLegal', nome: 'Base Legal' },
-        { campo: 'supervisorResponsavel', nome: 'Supervisor Responsável' },
-        { campo: 'encarregadoResponsavel', nome: 'Encarregado Responsável' },
-        { campo: 'tratativaAplicada', nome: 'Tratativa Aplicada' },
-        { campo: 'responsavelAcao', nome: 'Responsável pela Ação' },
-        { campo: 'prazoCorrecao', nome: 'Prazo para Correção' },
-        { campo: 'situacao', nome: 'Situação' },
-        { campo: 'exposicao', nome: 'Exposição' },
-        { campo: 'controle', nome: 'Controle' },
-        { campo: 'deteccao', nome: 'Detecção' },
-        { campo: 'efeitoFalha', nome: 'Efeito da Falha' },
-        { campo: 'impacto', nome: 'Impacto' }
+        { campo: 'descricaoDesvio', nome: 'Descrição do Desvio' }
       ];
 
       const camposFaltando = camposObrigatorios.filter(({ campo }) => {
@@ -116,17 +98,11 @@ export const useDesviosForm = () => {
         return;
       }
 
-      setIsSubmitting(true);
-      
-      // Validação adicional de dados críticos
-      if (!formData.descricaoDesvio || formData.descricaoDesvio.trim() === '') {
-        throw new Error('Descrição do desvio é obrigatória');
-      }
-
+      // Preparar dados para envio
       const desvioData = {
         data_desvio: formData.data,
         hora_desvio: formData.hora || '00:00',
-        local: "Campo removido",
+        local: "Local não especificado",
         cca_id: formData.ccaId ? parseInt(formData.ccaId) : null,
         empresa_id: formData.empresa ? parseInt(formData.empresa) : null,
         base_legal_opcao_id: formData.baseLegal ? parseInt(formData.baseLegal) : null,
@@ -151,7 +127,7 @@ export const useDesviosForm = () => {
         deteccao: formData.deteccao ? parseInt(formData.deteccao) : null,
         efeito_falha: formData.efeitoFalha ? parseInt(formData.efeitoFalha) : null,
         impacto: formData.impacto ? parseInt(formData.impacto) : null,
-        status: formData.situacao || 'EM ANDAMENTO',
+        status: formData.situacao || 'EM TRATATIVA',
         classificacao_risco: formData.classificacaoRisco || '',
         responsavel_id: formData.responsavelAcao || null,
         prazo_conclusao: formData.prazoCorrecao || null,
@@ -169,17 +145,15 @@ export const useDesviosForm = () => {
           description: "O desvio foi registrado no sistema.",
         });
       } else {
-        throw new Error('Resposta inválida do servidor');
+        throw new Error('Erro ao criar desvio - resposta inválida');
       }
     } catch (error) {
-      console.error('Erro detalhado ao salvar desvio:', error);
+      console.error('Erro ao salvar desvio:', error);
       
       let errorMessage = "Ocorreu um erro ao salvar o desvio.";
       
       if (error instanceof Error) {
         errorMessage = error.message;
-      } else if (typeof error === 'object' && error !== null && 'message' in error) {
-        errorMessage = (error as any).message;
       }
       
       toast({

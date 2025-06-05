@@ -72,6 +72,11 @@ const DesviosForm = () => {
     }
   }, [watchColaborador, contextValue.funcionarios, form]);
 
+  const handleFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log('Form submit interceptado');
+  };
+
   return (
     <div className="container mx-auto py-6 space-y-6">
       <div className="flex items-center justify-between">
@@ -81,7 +86,7 @@ const DesviosForm = () => {
       <Card>
         <CardContent className="p-6">
           <Form {...form}>
-            <form className="space-y-6">
+            <form onSubmit={handleFormSubmit} className="space-y-6">
               <Tabs value={activeTab} onValueChange={setActiveTab}>
                 <TabsList className="grid w-full grid-cols-4">
                   {tabs.map((tab) => (

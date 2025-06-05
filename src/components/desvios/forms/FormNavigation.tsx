@@ -22,12 +22,30 @@ const FormNavigation = ({
   onCancel,
   isSubmitting,
 }: FormNavigationProps) => {
-  const handlePrevious = () => {
+  const handleSave = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log("Botão Salvar clicado");
+    onSave();
+  };
+
+  const handleCancel = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log("Botão Cancelar clicado");
+    onCancel();
+  };
+
+  const handlePrevious = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     console.log("Botão Anterior clicado");
     onPrevious();
   };
 
-  const handleNext = () => {
+  const handleNext = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     console.log("Botão Próximo clicado");
     onNext();
   };
@@ -49,7 +67,7 @@ const FormNavigation = ({
         <Button
           type="button"
           variant="outline"
-          onClick={onCancel}
+          onClick={handleCancel}
           className="flex items-center gap-2"
         >
           <X className="h-4 w-4" />
@@ -58,7 +76,7 @@ const FormNavigation = ({
         
         <Button
           type="button"
-          onClick={onSave}
+          onClick={handleSave}
           disabled={isSubmitting}
           className="flex items-center gap-2"
         >
