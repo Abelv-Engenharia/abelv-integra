@@ -16,16 +16,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Save } from "lucide-react";
 
-interface ClassificacaoRiscoFormProps {
-  context?: any;
-  onSave: () => void;
-  isSubmitting: boolean;
-}
-
-const ClassificacaoRiscoForm = ({ context, onSave, isSubmitting }: ClassificacaoRiscoFormProps) => {
+const ClassificacaoRiscoForm = () => {
   const { control, watch, setValue } = useFormContext();
 
   const exposicao = watch("exposicao");
@@ -70,13 +62,6 @@ const ClassificacaoRiscoForm = ({ context, onSave, isSubmitting }: Classificacao
       setValue("classificacaoRisco", classificacao);
     }
   }, [probabilidade, severidade, setValue]);
-
-  const handleSave = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    console.log("Botão Salvar clicado na aba Classificação de Risco");
-    onSave();
-  };
 
   return (
     <div className="space-y-6">
@@ -234,18 +219,6 @@ const ClassificacaoRiscoForm = ({ context, onSave, isSubmitting }: Classificacao
           )}
         </CardContent>
       </Card>
-
-      <div className="flex justify-end pt-6 border-t">
-        <Button
-          type="button"
-          onClick={handleSave}
-          disabled={isSubmitting}
-          className="flex items-center gap-2"
-        >
-          <Save className="h-4 w-4" />
-          {isSubmitting ? "Salvando..." : "Salvar Desvio"}
-        </Button>
-      </div>
     </div>
   );
 };

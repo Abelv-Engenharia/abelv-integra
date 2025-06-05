@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -11,6 +10,7 @@ import AcaoCorretivaForm from "@/components/desvios/forms/AcaoCorretivaForm";
 import ClassificacaoRiscoForm from "@/components/desvios/forms/ClassificacaoRiscoForm";
 import FormSuccessDialog from "@/components/desvios/forms/FormSuccessDialog";
 import FormNavigation from "@/components/desvios/forms/FormNavigation";
+import { Button, Save } from "@/components/ui/button";
 
 const DesviosForm = () => {
   const {
@@ -78,11 +78,20 @@ const DesviosForm = () => {
   const renderTabContent = (tab: typeof tabs[0]) => {
     if (tab.id === "classificacao") {
       return (
-        <ClassificacaoRiscoForm 
-          context={contextValue} 
-          onSave={handleSave}
-          isSubmitting={isSubmitting}
-        />
+        <div className="space-y-6">
+          <ClassificacaoRiscoForm />
+          <div className="flex justify-end pt-6 border-t">
+            <Button
+              type="button"
+              onClick={handleSave}
+              disabled={isSubmitting}
+              className="flex items-center gap-2"
+            >
+              <Save className="h-4 w-4" />
+              {isSubmitting ? "Salvando..." : "Salvar Desvio"}
+            </Button>
+          </div>
+        </div>
       );
     } else {
       const Component = tab.component;

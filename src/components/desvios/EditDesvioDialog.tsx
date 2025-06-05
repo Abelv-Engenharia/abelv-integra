@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
@@ -221,11 +220,7 @@ const EditDesvioDialog = ({ desvio, open, onOpenChange, onDesvioUpdated }: EditD
             <NovaIdentificacaoForm context={formContext} />
             <NovasInformacoesForm context={formContext} />
             <AcaoCorretivaForm />
-            <ClassificacaoRiscoForm 
-              context={formContext}
-              onSave={handleSave}
-              isSubmitting={isLoading}
-            />
+            <ClassificacaoRiscoForm />
             
             <div className="flex justify-end gap-3 pt-4">
               <Button
