@@ -15,7 +15,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Save, X } from "lucide-react";
+
+interface ClassificacaoRiscoFormProps {
+  onSave: () => void;
+  isSubmitting: boolean;
+}
 
 // Classification options
 const exposicaoOptions = [
@@ -74,7 +81,7 @@ const getClassificacaoColor = (classificacao: string) => {
   }
 };
 
-const ClassificacaoRiscoForm = () => {
+const ClassificacaoRiscoForm = ({ onSave, isSubmitting }: ClassificacaoRiscoFormProps) => {
   const { control, watch, setValue } = useFormContext();
   
   const exposicao = watch("exposicao");
@@ -125,6 +132,10 @@ const ClassificacaoRiscoForm = () => {
   
   const classificacao = watch("classificacaoRisco") || "";
   const classificacaoColor = getClassificacaoColor(classificacao);
+
+  const handleCancel = () => {
+    window.location.href = "/desvios/consulta";
+  };
 
   return (
     <div className="space-y-8">
@@ -327,6 +338,35 @@ const ClassificacaoRiscoForm = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Botões de ação apenas na aba de classificação */}
+      <div className="flex justify-between items-center pt-6 border-t">
+        <div></div>
+        
+        <div className="flex gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleCancel}
+            className="flex items-center gap-2"
+          >
+            <X className="h-4 w-4" />
+            Cancelar
+          </Button>
+          
+          <Button
+            type="button"
+            onClick={onSave}
+            disabled={isSubmitting}
+            className="flex items-center gap-2"
+          >
+            <Save className="h-4 w-4" />
+            {isSubmitting ? "Salvando..." : "Salvar"}
+          </Button>
+        </div>
+
+        <div></div>
+      </div>
     </div>
   );
 };

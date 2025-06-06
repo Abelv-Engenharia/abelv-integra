@@ -93,20 +93,27 @@ const DesviosForm = () => {
 
                 {tabs.map((tab) => (
                   <TabsContent key={tab.id} value={tab.id} className="mt-6">
-                    {CurrentTabComponent && <CurrentTabComponent context={contextValue} />}
+                    {tab.id === "classificacao" ? (
+                      <ClassificacaoRiscoForm 
+                        onSave={handleSave}
+                        isSubmitting={isSubmitting}
+                      />
+                    ) : (
+                      CurrentTabComponent && <CurrentTabComponent context={contextValue} />
+                    )}
                   </TabsContent>
                 ))}
               </Tabs>
 
-              <FormNavigation
-                currentTabIndex={currentTabIndex}
-                totalTabs={tabs.length}
-                onPrevious={handlePrevious}
-                onNext={handleNext}
-                onSave={handleSave}
-                onCancel={handleCancel}
-                isSubmitting={isSubmitting}
-              />
+              {activeTab !== "classificacao" && (
+                <FormNavigation
+                  currentTabIndex={currentTabIndex}
+                  totalTabs={tabs.length}
+                  onPrevious={handlePrevious}
+                  onNext={handleNext}
+                  onCancel={handleCancel}
+                />
+              )}
             </form>
           </Form>
         </CardContent>
