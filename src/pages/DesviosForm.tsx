@@ -3,6 +3,7 @@ import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Form } from "@/components/ui/form";
+import { Button } from "@/components/ui/button";
 import { useDesviosForm } from "@/hooks/useDesviosForm";
 import { useFormData } from "@/hooks/useFormData";
 import NovaIdentificacaoForm from "@/components/desvios/forms/NovaIdentificacaoForm";
@@ -94,10 +95,7 @@ const DesviosForm = () => {
                 {tabs.map((tab) => (
                   <TabsContent key={tab.id} value={tab.id} className="mt-6">
                     {tab.id === "classificacao" ? (
-                      <ClassificacaoRiscoForm 
-                        onSave={handleSave}
-                        isSubmitting={isSubmitting}
-                      />
+                      <ClassificacaoRiscoForm />
                     ) : (
                       CurrentTabComponent && <CurrentTabComponent context={contextValue} />
                     )}
@@ -105,15 +103,47 @@ const DesviosForm = () => {
                 ))}
               </Tabs>
 
-              {activeTab !== "classificacao" && (
-                <FormNavigation
-                  currentTabIndex={currentTabIndex}
-                  totalTabs={tabs.length}
-                  onPrevious={handlePrevious}
-                  onNext={handleNext}
-                  onCancel={handleCancel}
-                />
-              )}
+              {/* Navigation with Save button on last tab */}
+              <div className="flex justify-between items-center pt-6 border-t">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handlePrevious}
+                  disabled={currentTabIndex === 0}
+                  className="flex items-center gap-2"
+                >
+                  Anterior
+                </Button>
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleCancel}
+                  className="flex items-center gap-2"
+                >
+                  Cancelar
+                </Button>
+
+                {currentTabIndex === tabs.length - 1 ? (
+                  <Button
+                    type="button"
+                    onClick={handleSave}
+                    disabled={isSubmitting}
+                    className="flex items-center gap-2"
+                  >
+                    {isSubmitting ? "Salvando..." : "Salvar Desvio"}
+                  </Button>
+                ) : (
+                  <Button
+                    type="button"
+                    onClick={handleNext}
+                    disabled={currentTabIndex === tabs.length - 1}
+                    className="flex items-center gap-2"
+                  >
+                    Próximo
+                  </Button>
+                )}
+              </div>
             </form>
           </Form>
         </CardContent>
