@@ -29,8 +29,6 @@ const AcaoCorretivaForm = ({ context }: AcaoCorretivaFormProps) => {
 
   // Watch para mostrar o status calculado automaticamente
   const situacaoAcao = watch("situacaoAcao");
-  const situacao = watch("situacao");
-  const prazoCorrecao = watch("prazoCorrecao");
 
   return (
     <Card>
@@ -113,15 +111,12 @@ const AcaoCorretivaForm = ({ context }: AcaoCorretivaFormProps) => {
           />
         </div>
 
-        {situacaoAcao && (situacao || prazoCorrecao) && (
+        {situacaoAcao && (
           <div className="bg-blue-50 p-4 rounded-lg">
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium text-blue-900">Status da Ação (Calculado Automaticamente):</span>
               <span className="text-sm font-bold text-blue-700">{situacaoAcao}</span>
             </div>
-            <p className="text-xs text-blue-600 mt-1">
-              Este status é calculado automaticamente com base na situação e prazo informados.
-            </p>
           </div>
         )}
 

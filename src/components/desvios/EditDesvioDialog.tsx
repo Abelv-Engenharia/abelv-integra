@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
@@ -200,10 +201,6 @@ const EditDesvioDialog = ({ desvio, open, onOpenChange, onDesvioUpdated }: EditD
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handleSave = () => {
-    form.handleSubmit(onSubmit)();
   };
 
   return (

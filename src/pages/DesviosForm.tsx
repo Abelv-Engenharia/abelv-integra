@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -10,8 +11,6 @@ import AcaoCorretivaForm from "@/components/desvios/forms/AcaoCorretivaForm";
 import ClassificacaoRiscoForm from "@/components/desvios/forms/ClassificacaoRiscoForm";
 import FormSuccessDialog from "@/components/desvios/forms/FormSuccessDialog";
 import FormNavigation from "@/components/desvios/forms/FormNavigation";
-import { Button } from "@/components/ui/button";
-import { Save } from "lucide-react";
 
 const DesviosForm = () => {
   const {
@@ -49,6 +48,8 @@ const DesviosForm = () => {
     }
   };
 
+  const CurrentTabComponent = tabs.find(tab => tab.id === activeTab)?.component;
+
   // Auto-popular ano e mês quando a data for selecionada
   const watchData = form.watch("data");
   React.useEffect(() => {
@@ -71,35 +72,6 @@ const DesviosForm = () => {
     }
   }, [watchColaborador, contextValue.funcionarios, form]);
 
-  const handleFormSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log('Form submit interceptado');
-  };
-
-  const renderTabContent = (tab: typeof tabs[0]) => {
-    if (tab.id === "classificacao") {
-      return (
-        <div className="space-y-6">
-          <ClassificacaoRiscoForm />
-          <div className="flex justify-end pt-6 border-t">
-            <Button
-              type="button"
-              onClick={handleSave}
-              disabled={isSubmitting}
-              className="flex items-center gap-2"
-            >
-              <Save className="h-4 w-4" />
-              {isSubmitting ? "Salvando..." : "Salvar Desvio"}
-            </Button>
-          </div>
-        </div>
-      );
-    } else {
-      const Component = tab.component;
-      return <Component context={contextValue} />;
-    }
-  };
-
   return (
     <div className="container mx-auto py-6 space-y-6">
       <div className="flex items-center justify-between">
@@ -109,7 +81,7 @@ const DesviosForm = () => {
       <Card>
         <CardContent className="p-6">
           <Form {...form}>
-            <form onSubmit={handleFormSubmit} className="space-y-6">
+            <form className="space-y-6">
               <Tabs value={activeTab} onValueChange={setActiveTab}>
                 <TabsList className="grid w-full grid-cols-4">
                   {tabs.map((tab) => (
@@ -121,20 +93,20 @@ const DesviosForm = () => {
 
                 {tabs.map((tab) => (
                   <TabsContent key={tab.id} value={tab.id} className="mt-6">
-                    {renderTabContent(tab)}
+                    {CurrentTabComponent && <CurrentTabComponent context={contextValue} />}
                   </TabsContent>
                 ))}
               </Tabs>
 
-              {activeTab !== "classificacao" && (
-                <FormNavigation
-                  currentTabIndex={currentTabIndex}
-                  totalTabs={tabs.length}
-                  onPrevious={handlePrevious}
-                  onNext={handleNext}
-                  onCancel={handleCancel}
-                />
-              )}
+              <FormNavigation
+                currentTabIndex={currentTabIndex}
+                totalTabs={tabs.length}
+                onPrevious={handlePrevious}
+                onNext={handleNext}
+                onSave={handleSave}
+                onCancel={handleCancel}
+                isSubmitting={isSubmitting}
+              />
             </form>
           </Form>
         </CardContent>

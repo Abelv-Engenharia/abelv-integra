@@ -1,14 +1,16 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, ArrowRight, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, Save, X } from "lucide-react";
 
 interface FormNavigationProps {
   currentTabIndex: number;
   totalTabs: number;
   onPrevious: () => void;
   onNext: () => void;
+  onSave: () => void;
   onCancel: () => void;
+  isSubmitting: boolean;
 }
 
 const FormNavigation = ({
@@ -16,25 +18,16 @@ const FormNavigation = ({
   totalTabs,
   onPrevious,
   onNext,
+  onSave,
   onCancel,
+  isSubmitting,
 }: FormNavigationProps) => {
-  const handleCancel = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    console.log("Botão Cancelar clicado");
-    onCancel();
-  };
-
-  const handlePrevious = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const handlePrevious = () => {
     console.log("Botão Anterior clicado");
     onPrevious();
   };
 
-  const handleNext = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const handleNext = () => {
     console.log("Botão Próximo clicado");
     onNext();
   };
@@ -56,11 +49,21 @@ const FormNavigation = ({
         <Button
           type="button"
           variant="outline"
-          onClick={handleCancel}
+          onClick={onCancel}
           className="flex items-center gap-2"
         >
           <X className="h-4 w-4" />
           Cancelar
+        </Button>
+        
+        <Button
+          type="button"
+          onClick={onSave}
+          disabled={isSubmitting}
+          className="flex items-center gap-2"
+        >
+          <Save className="h-4 w-4" />
+          {isSubmitting ? "Salvando..." : "Salvar"}
         </Button>
       </div>
 
