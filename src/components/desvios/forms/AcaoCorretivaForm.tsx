@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { useFormContext } from "react-hook-form";
 import {
   FormField,
@@ -19,15 +19,26 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
+import { calculateStatusAcao } from "@/utils/desviosUtils";
 
 interface AcaoCorretivaFormProps {
   context?: any;
 }
 
 const AcaoCorretivaForm = ({ context }: AcaoCorretivaFormProps) => {
-  const { control, watch } = useFormContext();
+  const { control, watch, setValue } = useFormContext();
 
-  // Watch para mostrar o status calculado automaticamente
+  const situacao = watch("situacao");
+  const prazoCorrecao = watch("prazoCorrecao");
+
+  // Calcular situação da ação automaticamente
+  useEffect(() => {
+    if (situacao) {
+      const situacaoCalculada = calculateStatusAcao(situacao, prazoCorrecao);
+      setValue("situacaoAcao", situacaoCalculada);
+    }
+  }, [situacao, prazoCorrecao, setValue]);
+
   const situacaoAcao = watch("situacaoAcao");
 
   return (

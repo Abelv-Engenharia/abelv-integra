@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
@@ -29,7 +28,6 @@ const EditDesvioDialog = ({ desvio, open, onOpenChange, onDesvioUpdated }: EditD
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   
-  // Use real form data instead of mock data
   const formContext = useFormData();
 
   const form = useForm({
@@ -152,7 +150,7 @@ const EditDesvioDialog = ({ desvio, open, onOpenChange, onDesvioUpdated }: EditD
       const updatedDesvio = await desviosCompletosService.update(desvio.id, {
         data_desvio: data.data,
         hora_desvio: data.hora,
-        local: desvio.local, // Mantém o local original
+        local: desvio.local,
         cca_id: data.ccaId ? parseInt(data.ccaId) : null,
         empresa_id: data.empresa ? parseInt(data.empresa) : null,
         base_legal_opcao_id: data.baseLegal ? parseInt(data.baseLegal) : null,
@@ -203,6 +201,10 @@ const EditDesvioDialog = ({ desvio, open, onOpenChange, onDesvioUpdated }: EditD
     }
   };
 
+  const handleSave = () => {
+    form.handleSubmit(onSubmit)();
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[1200px] max-h-[90vh] overflow-y-auto">
@@ -217,7 +219,10 @@ const EditDesvioDialog = ({ desvio, open, onOpenChange, onDesvioUpdated }: EditD
             <NovaIdentificacaoForm context={formContext} />
             <NovasInformacoesForm context={formContext} />
             <AcaoCorretivaForm />
-            <ClassificacaoRiscoForm />
+            <ClassificacaoRiscoForm 
+              onSave={handleSave}
+              isSubmitting={isLoading}
+            />
             
             <div className="flex justify-end gap-3 pt-4">
               <Button

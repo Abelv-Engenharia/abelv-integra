@@ -18,45 +18,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Save, X } from "lucide-react";
+import { useClassificacaoRiscoData } from "@/hooks/useClassificacaoRiscoData";
 
 interface ClassificacaoRiscoFormProps {
   onSave: () => void;
   isSubmitting: boolean;
 }
-
-// Classification options
-const exposicaoOptions = [
-  { value: "1", label: "1 - Baixa", description: "Exposição baixa ao risco" },
-  { value: "2", label: "2 - Média", description: "Exposição média ao risco" },
-  { value: "3", label: "3 - Alta", description: "Exposição alta ao risco" }
-];
-
-const controleOptions = [
-  { value: "0", label: "0 - Excelente", description: "Controle excelente" },
-  { value: "1", label: "1 - Essencial", description: "Controle essencial" },
-  { value: "2", label: "2 - Precário", description: "Controle precário" },
-  { value: "3", label: "3 - Inexistente", description: "Sem controle" }
-];
-
-const deteccaoOptions = [
-  { value: "1", label: "1 - Fácil", description: "Fácil detecção" },
-  { value: "2", label: "2 - Moderada", description: "Detecção moderada" },
-  { value: "3", label: "3 - Difícil", description: "Difícil detecção" }
-];
-
-const efeitoFalhaOptions = [
-  { value: "1", label: "1 - Muito baixa", description: "Efeito muito baixo" },
-  { value: "2", label: "2 - Baixa", description: "Efeito baixo" },
-  { value: "3", label: "3 - Média", description: "Efeito médio" },
-  { value: "4", label: "4 - Alta", description: "Efeito alto" },
-  { value: "5", label: "5 - Muito Alta", description: "Efeito muito alto" }
-];
-
-const impactoOptions = [
-  { value: "1", label: "1 - Baixo", description: "Impacto baixo" },
-  { value: "2", label: "2 - Médio", description: "Impacto médio" },
-  { value: "3", label: "3 - Alto", description: "Impacto alto" }
-];
 
 const getClassificacaoRisco = (probabilidade: number, severidade: number) => {
   if (!probabilidade || !severidade) return "";
@@ -83,6 +50,14 @@ const getClassificacaoColor = (classificacao: string) => {
 
 const ClassificacaoRiscoForm = ({ onSave, isSubmitting }: ClassificacaoRiscoFormProps) => {
   const { control, watch, setValue } = useFormContext();
+  const { 
+    exposicaoOpcoes, 
+    controleOpcoes, 
+    deteccaoOpcoes, 
+    efeitoFalhaOpcoes, 
+    impactoOpcoes, 
+    loading 
+  } = useClassificacaoRiscoData();
   
   const exposicao = watch("exposicao");
   const controle = watch("controle");
@@ -137,6 +112,14 @@ const ClassificacaoRiscoForm = ({ onSave, isSubmitting }: ClassificacaoRiscoForm
     window.location.href = "/desvios/consulta";
   };
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-48">
+        <p className="text-muted-foreground">Carregando opções...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -156,11 +139,13 @@ const ClassificacaoRiscoForm = ({ onSave, isSubmitting }: ClassificacaoRiscoForm
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {exposicaoOptions.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
+                    {exposicaoOpcoes.map((option) => (
+                      <SelectItem key={option.id} value={option.valor.toString()}>
                         <div className="flex flex-col">
-                          <span>{option.label}</span>
-                          <span className="text-xs text-muted-foreground">{option.description}</span>
+                          <span>{option.nome}</span>
+                          {option.descricao && (
+                            <span className="text-xs text-muted-foreground">{option.descricao}</span>
+                          )}
                         </div>
                       </SelectItem>
                     ))}
@@ -184,11 +169,13 @@ const ClassificacaoRiscoForm = ({ onSave, isSubmitting }: ClassificacaoRiscoForm
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {controleOptions.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
+                    {controleOpcoes.map((option) => (
+                      <SelectItem key={option.id} value={option.valor.toString()}>
                         <div className="flex flex-col">
-                          <span>{option.label}</span>
-                          <span className="text-xs text-muted-foreground">{option.description}</span>
+                          <span>{option.nome}</span>
+                          {option.descricao && (
+                            <span className="text-xs text-muted-foreground">{option.descricao}</span>
+                          )}
                         </div>
                       </SelectItem>
                     ))}
@@ -212,11 +199,13 @@ const ClassificacaoRiscoForm = ({ onSave, isSubmitting }: ClassificacaoRiscoForm
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {deteccaoOptions.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
+                    {deteccaoOpcoes.map((option) => (
+                      <SelectItem key={option.id} value={option.valor.toString()}>
                         <div className="flex flex-col">
-                          <span>{option.label}</span>
-                          <span className="text-xs text-muted-foreground">{option.description}</span>
+                          <span>{option.nome}</span>
+                          {option.descricao && (
+                            <span className="text-xs text-muted-foreground">{option.descricao}</span>
+                          )}
                         </div>
                       </SelectItem>
                     ))}
@@ -244,11 +233,13 @@ const ClassificacaoRiscoForm = ({ onSave, isSubmitting }: ClassificacaoRiscoForm
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {efeitoFalhaOptions.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
+                    {efeitoFalhaOpcoes.map((option) => (
+                      <SelectItem key={option.id} value={option.valor.toString()}>
                         <div className="flex flex-col">
-                          <span>{option.label}</span>
-                          <span className="text-xs text-muted-foreground">{option.description}</span>
+                          <span>{option.nome}</span>
+                          {option.descricao && (
+                            <span className="text-xs text-muted-foreground">{option.descricao}</span>
+                          )}
                         </div>
                       </SelectItem>
                     ))}
@@ -272,11 +263,13 @@ const ClassificacaoRiscoForm = ({ onSave, isSubmitting }: ClassificacaoRiscoForm
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {impactoOptions.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
+                    {impactoOpcoes.map((option) => (
+                      <SelectItem key={option.id} value={option.valor.toString()}>
                         <div className="flex flex-col">
-                          <span>{option.label}</span>
-                          <span className="text-xs text-muted-foreground">{option.description}</span>
+                          <span>{option.nome}</span>
+                          {option.descricao && (
+                            <span className="text-xs text-muted-foreground">{option.descricao}</span>
+                          )}
                         </div>
                       </SelectItem>
                     ))}
@@ -339,7 +332,6 @@ const ClassificacaoRiscoForm = ({ onSave, isSubmitting }: ClassificacaoRiscoForm
         </CardContent>
       </Card>
 
-      {/* Botões de ação apenas na aba de classificação */}
       <div className="flex justify-between items-center pt-6 border-t">
         <div></div>
         

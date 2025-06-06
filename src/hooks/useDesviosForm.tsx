@@ -5,6 +5,7 @@ import { useToast } from "@/hooks/use-toast";
 import { validateRequiredFields } from "@/utils/desviosValidation";
 import { desviosCompletosService } from "@/services/desvios/desviosCompletosService";
 import { DesvioFormData } from "@/types/desvios";
+import { calculateStatusAcao } from "@/utils/desviosUtils";
 
 export const useDesviosForm = () => {
   const { toast } = useToast();
@@ -42,7 +43,7 @@ export const useDesviosForm = () => {
       tratativaAplicada: "",
       responsavelAcao: "",
       prazoCorrecao: "",
-      situacao: "EM ANDAMENTO",
+      situacao: "EM TRATATIVA",
       situacaoAcao: "EM ANDAMENTO",
       aplicacaoMedidaDisciplinar: false,
       
@@ -76,19 +77,9 @@ export const useDesviosForm = () => {
 
       setIsSubmitting(true);
       
-      // Validação adicional de dados críticos
-      if (!formData.data) {
-        throw new Error('Data do desvio é obrigatória');
-      }
+      // Calcular situação da ação automaticamente
+      const situacaoAcaoCalculada = calculateStatusAcao(formData.situacao, formData.prazoCorrecao);
       
-      if (!formData.ccaId) {
-        throw new Error('CCA é obrigatório');
-      }
-      
-      if (!formData.descricaoDesvio || formData.descricaoDesvio.trim() === '') {
-        throw new Error('Descrição do desvio é obrigatória');
-      }
-
       const desvioData = {
         data_desvio: formData.data,
         hora_desvio: formData.hora || '00:00',
@@ -117,7 +108,7 @@ export const useDesviosForm = () => {
         deteccao: formData.deteccao ? parseInt(formData.deteccao) : null,
         efeito_falha: formData.efeitoFalha ? parseInt(formData.efeitoFalha) : null,
         impacto: formData.impacto ? parseInt(formData.impacto) : null,
-        status: formData.situacao || 'EM ANDAMENTO',
+        status: formData.situacao || 'EM TRATATIVA',
         classificacao_risco: formData.classificacaoRisco || '',
         responsavel_id: formData.responsavelAcao || null,
         prazo_conclusao: formData.prazoCorrecao || null,
@@ -161,6 +152,7 @@ export const useDesviosForm = () => {
   const handleCancel = () => {
     form.reset();
     setActiveTab("identificacao");
+    window.location.href = "/desvios/consulta";
   };
 
   const handleNewRecord = () => {
