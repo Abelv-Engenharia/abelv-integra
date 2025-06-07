@@ -58,12 +58,15 @@ const Login = () => {
 
   return (
     <div 
-      className="flex items-center justify-center min-h-screen bg-cover bg-center bg-no-repeat"
+      className="flex items-center justify-center min-h-screen bg-cover bg-center bg-no-repeat bg-fixed"
       style={{
-        backgroundImage: `url('/lovable-uploads/2929fa74-d69a-47b3-aeee-d6c913144292.png')`
+        backgroundImage: `url('/lovable-uploads/2929fa74-d69a-47b3-aeee-d6c913144292.png')`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundAttachment: 'fixed'
       }}
     >
-      <div className="flex items-center justify-center w-full h-full min-h-screen bg-black/20">
+      <div className="flex items-center justify-center w-full h-full min-h-screen bg-black/30">
         <Card className="w-full max-w-md shadow-2xl bg-white/95 backdrop-blur-sm">
           <CardHeader className="space-y-2">
             <CardTitle className="text-2xl text-center">Sistema de Gestão Abelv Engenharia</CardTitle>
