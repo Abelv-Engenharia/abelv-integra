@@ -57,74 +57,67 @@ const Login = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-abelv-blue-light">
-      <div className="flex w-full max-w-6xl mx-auto p-6 gap-8">
-        {/* Left side - Logo */}
-        <div className="flex-1 flex items-center justify-center">
-          <div className="text-center">
-            <SystemLogo className="h-32 mb-6" defaultTitle="Abelv Engenharia" />
-            <h1 className="text-4xl font-bold text-white mb-4">Abelv Engenharia</h1>
-            <p className="text-white/80 text-lg">Sistema de Gestão Integrada</p>
-          </div>
-        </div>
-
-        {/* Right side - Login form */}
-        <div className="flex-1 flex items-center justify-center">
-          <Card className="w-full max-w-md shadow-xl">
-            <CardHeader className="space-y-2">
-              <CardTitle className="text-2xl text-center">Sistema de Gestão Abelv Engenharia</CardTitle>
-              <CardDescription className="text-center">
-                Faça login para acessar o sistema
-              </CardDescription>
-            </CardHeader>
-            <form onSubmit={handleLogin}>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input 
-                    id="email" 
-                    type="email" 
-                    placeholder="seu.email@empresa.com" 
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="password">Senha</Label>
-                    <Button 
-                      variant="link" 
-                      className="p-0 text-sm"
-                      type="button"
-                      onClick={() => navigate("/auth/forgot-password")}
-                    >
-                      Esqueceu a senha?
-                    </Button>
-                  </div>
-                  <Input 
-                    id="password" 
-                    type="password" 
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                  />
-                </div>
-              </CardContent>
-              <CardFooter className="flex flex-col space-y-3">
-                <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? "Entrando..." : "Entrar"}
-                </Button>
-                <div className="text-center text-sm">
-                  Não possui uma conta?{" "}
-                  <Button variant="link" className="p-0" type="button" onClick={() => navigate("/auth/signup")}>
-                    Cadastre-se
+    <div 
+      className="flex items-center justify-center min-h-screen bg-cover bg-center bg-no-repeat"
+      style={{
+        backgroundImage: `url('/lovable-uploads/2929fa74-d69a-47b3-aeee-d6c913144292.png')`
+      }}
+    >
+      <div className="flex items-center justify-center w-full h-full min-h-screen bg-black/20">
+        <Card className="w-full max-w-md shadow-2xl bg-white/95 backdrop-blur-sm">
+          <CardHeader className="space-y-2">
+            <CardTitle className="text-2xl text-center">Sistema de Gestão Abelv Engenharia</CardTitle>
+            <CardDescription className="text-center">
+              Faça login para acessar o sistema
+            </CardDescription>
+          </CardHeader>
+          <form onSubmit={handleLogin}>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input 
+                  id="email" 
+                  type="email" 
+                  placeholder="seu.email@empresa.com" 
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="password">Senha</Label>
+                  <Button 
+                    variant="link" 
+                    className="p-0 text-sm"
+                    type="button"
+                    onClick={() => navigate("/auth/forgot-password")}
+                  >
+                    Esqueceu a senha?
                   </Button>
                 </div>
-              </CardFooter>
-            </form>
-          </Card>
-        </div>
+                <Input 
+                  id="password" 
+                  type="password" 
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+              </div>
+            </CardContent>
+            <CardFooter className="flex flex-col space-y-3">
+              <Button type="submit" className="w-full" disabled={loading}>
+                {loading ? "Entrando..." : "Entrar"}
+              </Button>
+              <div className="text-center text-sm">
+                Não possui uma conta?{" "}
+                <Button variant="link" className="p-0" type="button" onClick={() => navigate("/auth/signup")}>
+                  Cadastre-se
+                </Button>
+              </div>
+            </CardFooter>
+          </form>
+        </Card>
       </div>
     </div>
   );
