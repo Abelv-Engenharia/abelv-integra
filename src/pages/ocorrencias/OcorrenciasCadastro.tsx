@@ -32,23 +32,63 @@ const OcorrenciasCadastro = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const ocorrenciaId = searchParams.get("id");
+
+  const getDefaultValues = () => ({
+    data: null,
+    hora: '',
+    mes: '',
+    ano: '',
+    cca: '',
+    empresa: '',
+    disciplina: '',
+    engenheiro_responsavel: '',
+    supervisor_responsavel: '',
+    encarregado_responsavel: '',
+    colaboradores_acidentados: [{
+      colaborador: '',
+      funcao: '',
+      matricula: ''
+    }],
+    tipo_ocorrencia: '',
+    tipo_evento: '',
+    classificacao_ocorrencia: '',
+    houve_afastamento: '',
+    dias_perdidos: null,
+    dias_debitados: null,
+    parte_corpo_atingida: '',
+    lateralidade: '',
+    agente_causador: '',
+    situacao_geradora: '',
+    natureza_lesao: '',
+    descricao_ocorrencia: '',
+    numero_cat: '',
+    cid: '',
+    arquivo_cat: null,
+    exposicao: '',
+    controle: '',
+    deteccao: '',
+    efeito_falha: '',
+    impacto: '',
+    probabilidade: null,
+    severidade: null,
+    classificacao_risco: '',
+    acoes: [{
+      tratativa_aplicada: '',
+      data_adequacao: null,
+      responsavel_acao: '',
+      funcao_responsavel: '',
+      situacao: '',
+      status: ''
+    }],
+    investigacao_realizada: '',
+    informe_preliminar: null,
+    relatorio_analise: null,
+    licoes_aprendidas_enviada: '',
+    arquivo_licoes_aprendidas: null
+  });
   
   const methods = useForm<OcorrenciaFormData>({
-    defaultValues: {
-      acoes: [{
-        tratativa_aplicada: '',
-        data_adequacao: null,
-        responsavel_acao: '',
-        funcao_responsavel: '',
-        situacao: '',
-        status: ''
-      }],
-      colaboradores_acidentados: [{
-        colaborador: '',
-        funcao: '',
-        matricula: ''
-      }]
-    }
+    defaultValues: getDefaultValues()
   });
 
   useEffect(() => {
@@ -183,21 +223,7 @@ const OcorrenciasCadastro = () => {
   };
 
   const confirmCancel = () => {
-    methods.reset({
-      acoes: [{
-        tratativa_aplicada: '',
-        data_adequacao: null,
-        responsavel_acao: '',
-        funcao_responsavel: '',
-        situacao: '',
-        status: ''
-      }],
-      colaboradores_acidentados: [{
-        colaborador: '',
-        funcao: '',
-        matricula: ''
-      }]
-    });
+    methods.reset(getDefaultValues());
     setActiveTab("identificacao");
     setCancelDialogOpen(false);
     
@@ -207,14 +233,42 @@ const OcorrenciasCadastro = () => {
     });
   };
 
+  const clearForm = () => {
+    console.log('Limpando formulário...');
+    methods.reset(getDefaultValues());
+    setActiveTab("identificacao");
+  };
+
   const onSubmit = async (data: OcorrenciaFormData) => {
-    console.log("Form submitted:", data);
+    console.log("Form submitted with data:", data);
     console.log("Is edit mode:", isEditMode);
     
-    if (!data.data || !data.cca || !data.empresa) {
+    // Validação mais detalhada
+    if (!data.data) {
+      console.log("Validation error: data is missing");
       toast({
         title: "Erro de validação",
-        description: "Por favor, preencha todos os campos obrigatórios.",
+        description: "O campo 'Data' é obrigatório.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!data.cca) {
+      console.log("Validation error: cca is missing");
+      toast({
+        title: "Erro de validação",
+        description: "O campo 'CCA' é obrigatório.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!data.empresa) {
+      console.log("Validation error: empresa is missing");
+      toast({
+        title: "Erro de validação",
+        description: "O campo 'Empresa' é obrigatório.",
         variant: "destructive"
       });
       return;
@@ -223,26 +277,36 @@ const OcorrenciasCadastro = () => {
     setIsSubmitting(true);
     
     try {
+      console.log("Starting save process...");
+      
       if (isEditMode && ocorrenciaId) {
+        console.log("Updating existing ocorrencia with ID:", ocorrenciaId);
         await updateOcorrencia(ocorrenciaId, data);
         toast({
           title: "Sucesso",
           description: "Ocorrência atualizada com sucesso!"
         });
       } else {
-        await createOcorrencia(data);
+        console.log("Creating new ocorrencia...");
+        const result = await createOcorrencia(data);
+        console.log("Create result:", result);
         toast({
           title: "Sucesso",
           description: "Ocorrência cadastrada com sucesso!"
         });
+        
+        // Limpar formulário após criar nova ocorrência
+        if (!isEditMode) {
+          clearForm();
+        }
       }
       
       setSuccessDialogOpen(true);
     } catch (error) {
-      console.error('Erro ao salvar ocorrência:', error);
+      console.error('Detailed error:', error);
       toast({
         title: "Erro",
-        description: "Erro ao salvar a ocorrência. Tente novamente.",
+        description: `Erro ao salvar a ocorrência: ${error instanceof Error ? error.message : 'Erro desconhecido'}`,
         variant: "destructive"
       });
     } finally {
@@ -399,22 +463,7 @@ const OcorrenciasCadastro = () => {
                 variant="outline" 
                 onClick={() => {
                   setSuccessDialogOpen(false);
-                  methods.reset({
-                    acoes: [{
-                      tratativa_aplicada: '',
-                      data_adequacao: null,
-                      responsavel_acao: '',
-                      funcao_responsavel: '',
-                      situacao: '',
-                      status: ''
-                    }],
-                    colaboradores_acidentados: [{
-                      colaborador: '',
-                      funcao: '',
-                      matricula: ''
-                    }]
-                  });
-                  setActiveTab("identificacao");
+                  clearForm();
                 }}
               >
                 Registrar nova ocorrência

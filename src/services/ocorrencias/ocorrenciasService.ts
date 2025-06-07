@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 
 export interface OcorrenciaFormData {
@@ -90,22 +89,26 @@ const convertColaboradoresFromDatabase = (colaboradores: any): OcorrenciaFormDat
 
 export const createOcorrencia = async (data: any) => {
   try {
-    console.log('Creating ocorrencia with data:', data);
+    console.log('Creating ocorrencia with raw data:', data);
     
     // Garantir que todos os campos obrigatórios estão preenchidos
-    if (!data.data || !data.cca || !data.empresa || !data.disciplina) {
-      throw new Error('Campos obrigatórios não preenchidos: data, cca, empresa e disciplina são obrigatórios');
+    if (!data.data || !data.cca || !data.empresa) {
+      const missingFields = [];
+      if (!data.data) missingFields.push('data');
+      if (!data.cca) missingFields.push('cca');
+      if (!data.empresa) missingFields.push('empresa');
+      throw new Error(`Campos obrigatórios não preenchidos: ${missingFields.join(', ')}`);
     }
 
-    // Mapear os dados do formulário para o formato do banco
+    // Mapear os dados do formulário para o formato do banco com logs detalhados
     const ocorrenciaData = {
-      data: data.data?.toISOString(),
+      data: data.data instanceof Date ? data.data.toISOString() : new Date(data.data).toISOString(),
       hora: data.hora || null,
       mes: data.mes ? parseInt(data.mes) : null,
       ano: data.ano ? parseInt(data.ano) : null,
       cca: data.cca,
       empresa: data.empresa,
-      disciplina: data.disciplina,
+      disciplina: data.disciplina || '',
       tipo_ocorrencia: data.tipo_ocorrencia || '',
       tipo_evento: data.tipo_evento || '',
       classificacao_ocorrencia: data.classificacao_ocorrencia || '',
@@ -140,6 +143,7 @@ export const createOcorrencia = async (data: any) => {
     };
 
     console.log('Mapped data for database:', ocorrenciaData);
+    console.log('About to insert into Supabase...');
 
     const { data: result, error } = await supabase
       .from('ocorrencias')
@@ -148,13 +152,18 @@ export const createOcorrencia = async (data: any) => {
       .single();
 
     if (error) {
-      console.error('Database error:', error);
+      console.error('Supabase error details:', error);
+      console.error('Error code:', error.code);
+      console.error('Error message:', error.message);
+      console.error('Error details:', error.details);
       throw error;
     }
     
+    console.log('Successfully created ocorrencia:', result);
     return result;
   } catch (error) {
-    console.error('Erro ao criar ocorrência:', error);
+    console.error('Complete error in createOcorrencia:', error);
+    console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
     throw error;
   }
 };
