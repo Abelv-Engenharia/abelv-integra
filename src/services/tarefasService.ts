@@ -17,7 +17,74 @@ export interface TarefaFormData {
   };
 }
 
+export interface TarefaUpdateData {
+  status?: TarefaStatus;
+  iniciada?: boolean;
+  anexo?: string;
+}
+
 export const tarefasService = {
+  async getById(id: string): Promise<Tarefa | null> {
+    try {
+      const { data, error } = await supabase
+        .from('tarefas')
+        .select(`
+          *,
+          profiles!inner(id, nome)
+        `)
+        .eq('id', id)
+        .single();
+
+      if (error) {
+        console.error("Erro ao buscar tarefa por ID:", error);
+        return null;
+      }
+
+      if (!data) return null;
+
+      return {
+        id: data.id,
+        cca: data.cca,
+        tipoCca: 'linha-inteira' as const,
+        dataCadastro: data.data_cadastro,
+        dataConclusao: data.data_conclusao,
+        descricao: data.descricao,
+        responsavel: {
+          id: data.responsavel_id || '',
+          nome: data.profiles?.nome || 'Não atribuído'
+        },
+        anexo: data.anexo,
+        status: data.status as TarefaStatus,
+        iniciada: data.iniciada,
+        configuracao: data.configuracao as any
+      };
+    } catch (error) {
+      console.error("Exceção ao buscar tarefa por ID:", error);
+      return null;
+    }
+  },
+
+  async updateStatus(id: string, updateData: TarefaUpdateData): Promise<boolean> {
+    try {
+      console.log("Atualizando tarefa:", id, updateData);
+
+      const { error } = await supabase
+        .from('tarefas')
+        .update(updateData)
+        .eq('id', id);
+
+      if (error) {
+        console.error("Erro ao atualizar tarefa:", error);
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      console.error("Exceção ao atualizar tarefa:", error);
+      return false;
+    }
+  },
+
   async getAll(): Promise<Tarefa[]> {
     try {
       const { data, error } = await supabase
