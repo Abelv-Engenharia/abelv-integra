@@ -1,18 +1,36 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { TarefaCard } from "@/components/tarefas/TarefaCard";
 import { Tarefa } from "@/types/tarefas";
-import { mockTarefas } from "@/utils/tarefasUtils";
+import { tarefasService } from "@/services/tarefasService";
 import { Search } from "lucide-react";
 
 const MinhasTarefas = () => {
-  const [filteredTarefas, setFilteredTarefas] = useState<Tarefa[]>(mockTarefas);
+  const [tarefas, setTarefas] = useState<Tarefa[]>([]);
+  const [filteredTarefas, setFilteredTarefas] = useState<Tarefa[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("todas");
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchTarefas = async () => {
+      try {
+        const data = await tarefasService.getAll();
+        setTarefas(data);
+        setFilteredTarefas(data);
+      } catch (error) {
+        console.error("Erro ao carregar tarefas:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTarefas();
+  }, []);
 
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
     const term = event.target.value.toLowerCase();
@@ -26,7 +44,7 @@ const MinhasTarefas = () => {
   };
 
   const filterTarefas = (term: string, status: string) => {
-    let result = mockTarefas;
+    let result = tarefas;
     
     if (term) {
       result = result.filter(tarefa => 
@@ -45,6 +63,22 @@ const MinhasTarefas = () => {
   const handleTarefaClick = (tarefa: Tarefa) => {
     navigate(`/tarefas/detalhes/${tarefa.id}`);
   };
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="flex flex-col gap-2">
+          <h1 className="text-3xl font-bold">Minhas Tarefas</h1>
+          <p className="text-muted-foreground">
+            Carregando suas tarefas atribuídas...
+          </p>
+        </div>
+        <div className="flex justify-center items-center p-8">
+          <p>Carregando tarefas...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -90,7 +124,12 @@ const MinhasTarefas = () => {
           ))
         ) : (
           <div className="text-center p-8">
-            <p className="text-muted-foreground">Nenhuma tarefa encontrada.</p>
+            <p className="text-muted-foreground">
+              {tarefas.length === 0 
+                ? "Nenhuma tarefa encontrada." 
+                : "Nenhuma tarefa corresponde aos filtros aplicados."
+              }
+            </p>
           </div>
         )}
       </div>
