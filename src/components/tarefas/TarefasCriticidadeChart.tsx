@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   PieChart,
   Pie,
@@ -8,17 +8,59 @@ import {
   ResponsiveContainer,
   Legend
 } from 'recharts';
-
-const data = [
-  { name: 'Baixa', value: 30 },
-  { name: 'Média', value: 45 },
-  { name: 'Alta', value: 25 },
-  { name: 'Crítica', value: 15 },
-];
+import { tarefasService } from '@/services/tarefasService';
 
 const COLORS = ['#82ca9d', '#ffc658', '#ff9e40', '#ff6b6b'];
 
 const TarefasCriticidadeChart = () => {
+  const [data, setData] = useState([
+    { name: 'Baixa', value: 0 },
+    { name: 'Média', value: 0 },
+    { name: 'Alta', value: 0 },
+    { name: 'Crítica', value: 0 },
+  ]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const tarefas = await tarefasService.getAll();
+        const criticidadeCount = {
+          baixa: 0,
+          media: 0,
+          alta: 0,
+          critica: 0
+        };
+
+        tarefas.forEach(tarefa => {
+          const criticidade = tarefa.configuracao?.criticidade || 'media';
+          criticidadeCount[criticidade]++;
+        });
+
+        setData([
+          { name: 'Baixa', value: criticidadeCount.baixa },
+          { name: 'Média', value: criticidadeCount.media },
+          { name: 'Alta', value: criticidadeCount.alta },
+          { name: 'Crítica', value: criticidadeCount.critica },
+        ]);
+      } catch (error) {
+        console.error('Erro ao carregar dados do gráfico:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-[300px]">
+        <p>Carregando dados...</p>
+      </div>
+    );
+  }
+
   return (
     <ResponsiveContainer width="100%" height={300}>
       <PieChart>

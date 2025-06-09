@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -18,17 +18,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { mockUsuarios } from "@/utils/tarefasUtils";
 import { toast } from "@/hooks/use-toast";
-import { TipoCCA } from "@/types/tarefas";
+import { ccaService } from "@/services/admin/ccaService";
+import { fetchUsers } from "@/services/usuariosService";
+import { tarefasService } from "@/services/tarefasService";
 
-// Esquema de validação atualizado
+// Esquema de validação atualizado - removido tipoCca
 const formSchema = z.object({
-  cca: z.string().min(1, "Campo obrigatório"),
-  tipoCca: z.enum(["linha-inteira", "parcial", "equipamento", "especifica"], {
-    required_error: "Selecione o tipo de CCA"
-  }),
-  // Removemos a validação de dataCadastro já que agora é automática
+  cca_id: z.number().min(1, "Selecione um CCA"),
   dataConclusao: z.date(),
   descricao: z.string().min(10, "A descrição deve ter pelo menos 10 caracteres"),
   responsavelId: z.string().min(1, "Selecione um responsável"),
@@ -42,22 +39,14 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-// Mock de CCAs para o dropdown
-const mockCCAs = [
-  { id: "CCA-001", nome: "CCA 001 - Linha de Produção Principal" },
-  { id: "CCA-002", nome: "CCA 002 - Área de Estoque" },
-  { id: "CCA-003", nome: "CCA 003 - Setor de Embalagem" },
-  { id: "CCA-004", nome: "CCA 004 - Laboratório de Qualidade" },
-  { id: "CCA-005", nome: "CCA 005 - Área Administrativa" },
-  { id: "CCA-006", nome: "CCA 006 - Depósito de Materiais" },
-  { id: "CCA-007", nome: "CCA 007 - Estação de Tratamento" },
-];
-
 const CadastroTarefas = () => {
+  const [ccas, setCcas] = useState<any[]>([]);
+  const [usuarios, setUsuarios] = useState<any[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      tipoCca: "linha-inteira",
       dataConclusao: new Date(),
       criticidade: "media",
       requerValidacao: false,
@@ -68,42 +57,84 @@ const CadastroTarefas = () => {
   
   const recorrenciaAtiva = form.watch("recorrenciaAtiva");
   const dataAtual = new Date();
-  
-  const calcularStatusInicial = () => {
-    // No cadastro, sempre começará como programada
-    return "programada";
-  };
-  
-  const onSubmit = (values: FormValues) => {
-    // Adicionando os valores automáticos que não fazem mais parte do form
-    const dadosCompletos = {
-      ...values,
-      dataCadastro: format(dataAtual, "yyyy-MM-dd"),
-      status: calcularStatusInicial(),
-      iniciada: false // No cadastro, a tarefa nunca começa iniciada
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        // Carregar CCAs
+        const ccasData = await ccaService.getAll();
+        setCcas(ccasData.filter(cca => cca.ativo));
+
+        // Carregar usuários
+        const usuariosData = await fetchUsers();
+        setUsuarios(usuariosData);
+      } catch (error) {
+        console.error("Erro ao carregar dados:", error);
+        toast({
+          title: "Erro ao carregar dados",
+          description: "Não foi possível carregar as opções do formulário.",
+          variant: "destructive",
+        });
+      }
     };
-    console.log("Form values:", dadosCompletos);
 
-    // Simulação de envio para API
-    setTimeout(() => {
+    loadData();
+  }, []);
+  
+  const onSubmit = async (values: FormValues) => {
+    setIsSubmitting(true);
+    
+    try {
+      const dadosCompletos = {
+        cca_id: values.cca_id,
+        data_conclusao: values.dataConclusao.toISOString(),
+        descricao: values.descricao,
+        responsavel_id: values.responsavelId,
+        configuracao: {
+          criticidade: values.criticidade,
+          requerValidacao: values.requerValidacao,
+          notificarUsuario: values.notificarUsuario,
+          recorrencia: {
+            ativa: values.recorrenciaAtiva,
+            frequencia: values.frequenciaRecorrencia
+          }
+        }
+      };
+
+      console.log("Salvando tarefa:", dadosCompletos);
+
+      const sucesso = await tarefasService.create(dadosCompletos);
+
+      if (sucesso) {
+        toast({
+          title: "Tarefa cadastrada com sucesso!",
+          description: "A tarefa foi registrada no sistema."
+        });
+
+        // Reset do formulário
+        form.reset({
+          cca_id: undefined,
+          dataConclusao: new Date(),
+          descricao: "",
+          responsavelId: "",
+          criticidade: "media",
+          requerValidacao: false,
+          notificarUsuario: true,
+          recorrenciaAtiva: false
+        });
+      } else {
+        throw new Error("Falha ao salvar tarefa");
+      }
+    } catch (error) {
+      console.error("Erro ao salvar tarefa:", error);
       toast({
-        title: "Tarefa cadastrada com sucesso!",
-        description: "A tarefa foi registrada no sistema."
+        title: "Erro ao salvar tarefa",
+        description: "Não foi possível registrar a tarefa. Tente novamente.",
+        variant: "destructive",
       });
-
-      // Reset do formulário
-      form.reset({
-        cca: "",
-        tipoCca: "linha-inteira",
-        dataConclusao: new Date(),
-        descricao: "",
-        responsavelId: "",
-        criticidade: "media",
-        requerValidacao: false,
-        notificarUsuario: true,
-        recorrenciaAtiva: false
-      });
-    }, 1000);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
   
   return (
@@ -127,23 +158,23 @@ const CadastroTarefas = () => {
               <Card>
                 <CardContent className="pt-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Campo CCA com novo dropdown */}
+                    {/* Campo CCA conectado ao Supabase */}
                     <FormField 
                       control={form.control}
-                      name="cca"
+                      name="cca_id"
                       render={({ field }) => (
                         <FormItem className="col-span-1 md:col-span-2">
                           <FormLabel>CCA</FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <Select onValueChange={(value) => field.onChange(parseInt(value))} value={field.value?.toString()}>
                             <FormControl>
                               <SelectTrigger>
                                 <SelectValue placeholder="Selecione um CCA" />
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              {mockCCAs.map((cca) => (
-                                <SelectItem key={cca.id} value={cca.id}>
-                                  {cca.nome}
+                              {ccas.map((cca) => (
+                                <SelectItem key={cca.id} value={cca.id.toString()}>
+                                  {cca.codigo} - {cca.nome}
                                 </SelectItem>
                               ))}
                             </SelectContent>
@@ -152,33 +183,8 @@ const CadastroTarefas = () => {
                         </FormItem>
                       )}
                     />
-
-                    {/* Tipo CCA */}
-                    <FormField 
-                      control={form.control} 
-                      name="tipoCca" 
-                      render={({ field }) => (
-                        <FormItem className="col-span-1 md:col-span-2">
-                          <FormLabel>Tipo de CCA</FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Selecione o tipo de CCA" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="linha-inteira">Linha Inteira</SelectItem>
-                              <SelectItem value="parcial">Parcial</SelectItem>
-                              <SelectItem value="equipamento">Equipamento</SelectItem>
-                              <SelectItem value="especifica">Específica</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
                     
-                    {/* Data do Cadastro (não editável) e Data para Conclusão em largura completa */}
+                    {/* Data do Cadastro (não editável) e Data para Conclusão */}
                     <FormItem className="col-span-1 md:col-span-2">
                       <FormLabel>Data do Cadastro</FormLabel>
                       <FormControl>
@@ -234,23 +240,23 @@ const CadastroTarefas = () => {
                       )}
                     />
                     
-                    {/* Responsável em linha completa */}
+                    {/* Responsável conectado aos usuários do Supabase */}
                     <FormField 
                       control={form.control} 
                       name="responsavelId" 
                       render={({ field }) => (
                         <FormItem className="col-span-1 md:col-span-2">
                           <FormLabel>Responsável</FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <Select onValueChange={field.onChange} value={field.value}>
                             <FormControl>
                               <SelectTrigger>
                                 <SelectValue placeholder="Selecione um responsável" />
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              {mockUsuarios.map(usuario => (
+                              {usuarios.map(usuario => (
                                 <SelectItem key={usuario.id} value={usuario.id}>
-                                  {usuario.nome} - {usuario.cargo}
+                                  {usuario.nome} - {usuario.perfil}
                                 </SelectItem>
                               ))}
                             </SelectContent>
@@ -323,7 +329,7 @@ const CadastroTarefas = () => {
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>Frequência da Recorrência</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <Select onValueChange={field.onChange} value={field.value}>
                               <FormControl>
                                 <SelectTrigger>
                                   <SelectValue placeholder="Selecione a frequência" />
@@ -423,8 +429,8 @@ const CadastroTarefas = () => {
             <Button type="button" variant="outline">
               Cancelar
             </Button>
-            <Button type="submit">
-              Salvar Tarefa
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? "Salvando..." : "Salvar Tarefa"}
             </Button>
           </div>
         </form>

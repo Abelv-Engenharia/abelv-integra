@@ -4,16 +4,7 @@ import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { supabase } from "@/integrations/supabase/client";
-
-interface Tarefa {
-  id: string;
-  descricao: string;
-  responsavel: { id: string; nome: string };
-  dataConclusao: Date;
-  status: string;
-  criticidade: string;
-}
+import { tarefasService } from "@/services/tarefasService";
 
 const getStatusBadge = (status: string) => {
   const styles = {
@@ -46,63 +37,14 @@ const getCriticidadeBadge = (criticidade: string) => {
 };
 
 const TarefasRecentTable = () => {
-  const [tarefas, setTarefas] = useState<Tarefa[]>([]);
+  const [tarefas, setTarefas] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchTarefas = async () => {
       try {
-        // Buscar tarefas do Supabase
-        const { data: tarefasData, error } = await supabase
-          .from('tarefas')
-          .select(`
-            id,
-            descricao,
-            status,
-            data_conclusao,
-            configuracao,
-            responsavel_id
-          `)
-          .order('created_at', { ascending: false })
-          .limit(5);
-
-        if (error) {
-          console.error('Erro ao carregar tarefas:', error);
-          return;
-        }
-
-        // Obter informações dos responsáveis
-        const responsaveisIds = tarefasData
-          .filter(t => t.responsavel_id)
-          .map(t => t.responsavel_id);
-        
-        const { data: profiles } = await supabase
-          .from('profiles')
-          .select('id, nome')
-          .in('id', responsaveisIds);
-        
-        // Mapear para o formato esperado pelo componente
-        const formattedTarefas = tarefasData.map(tarefa => {
-          // Garantir que configuracao seja tratado corretamente
-          let criticidade = 'media';
-          if (tarefa.configuracao && typeof tarefa.configuracao === 'object') {
-            criticidade = (tarefa.configuracao as any).criticidade || 'media';
-          }
-
-          return {
-            id: tarefa.id,
-            descricao: tarefa.descricao,
-            responsavel: {
-              id: tarefa.responsavel_id || '',
-              nome: profiles?.find(p => p.id === tarefa.responsavel_id)?.nome || 'Não atribuído'
-            },
-            dataConclusao: tarefa.data_conclusao ? new Date(tarefa.data_conclusao) : new Date(),
-            status: tarefa.status || 'pendente',
-            criticidade
-          };
-        });
-
-        setTarefas(formattedTarefas);
+        const data = await tarefasService.getRecentTasks(5);
+        setTarefas(data);
       } catch (error) {
         console.error('Erro ao carregar tarefas:', error);
       } finally {
