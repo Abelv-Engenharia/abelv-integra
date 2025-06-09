@@ -107,10 +107,18 @@ const CadastroTarefas = () => {
     setLoading(true);
     try {
       console.log("Dados do formulário:", data);
+      
+      // Verificar se todos os campos obrigatórios estão preenchidos
+      if (!data.cca_id || !data.data_conclusao || !data.descricao || !data.responsavel_id) {
+        toast.error("Por favor, preencha todos os campos obrigatórios");
+        setLoading(false);
+        return;
+      }
+      
       const success = await tarefasService.create(data);
       
       if (success) {
-        toast.success("Tarefa cadastrada com sucesso!");
+        toast.success("Tarefa cadastrada com sucesso! O responsável foi notificado.");
         reset();
         navigate("/tarefas/dashboard");
       } else {

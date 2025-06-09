@@ -1059,6 +1059,57 @@ export type Database = {
         }
         Relationships: []
       }
+      notificacoes: {
+        Row: {
+          created_at: string
+          id: string
+          lida: boolean
+          mensagem: string
+          tarefa_id: string | null
+          tipo: string
+          titulo: string
+          updated_at: string
+          usuario_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          lida?: boolean
+          mensagem: string
+          tarefa_id?: string | null
+          tipo?: string
+          titulo: string
+          updated_at?: string
+          usuario_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          lida?: boolean
+          mensagem?: string
+          tarefa_id?: string | null
+          tipo?: string
+          titulo?: string
+          updated_at?: string
+          usuario_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notificacoes_tarefa_id_fkey"
+            columns: ["tarefa_id"]
+            isOneToOne: false
+            referencedRelation: "tarefas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notificacoes_usuario_id_fkey"
+            columns: ["usuario_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ocorrencias: {
         Row: {
           acoes: Json | null
