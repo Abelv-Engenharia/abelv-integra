@@ -106,6 +106,7 @@ const CadastroTarefas = () => {
   const onSubmit = async (data: TarefaFormData) => {
     setLoading(true);
     try {
+      console.log("Dados do formulário:", data);
       const success = await tarefasService.create(data);
       
       if (success) {
