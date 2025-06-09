@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { Tarefa, TarefaStatus, TarefaCriticidade } from "@/types/tarefas";
 
@@ -12,7 +11,7 @@ export interface TarefaFormData {
     requerValidacao: boolean;
     notificarUsuario: boolean;
     recorrencia?: {
-      ativa: boolean;
+      ativa?: boolean;
       frequencia?: "diaria" | "semanal" | "mensal" | "trimestral" | "semestral" | "anual";
     };
   };
