@@ -1,6 +1,6 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { Tarefa } from "@/types/tarefas";
+import { Tarefa, TarefaStatus, TarefaCriticidade } from "@/types/tarefas";
 
 export interface TarefaFormData {
   cca_id: number;
@@ -25,7 +25,6 @@ export const tarefasService = {
         .from('tarefas')
         .select(`
           *,
-          ccas!inner(id, codigo, nome),
           profiles!inner(id, nome)
         `)
         .order('created_at', { ascending: false });
@@ -37,8 +36,8 @@ export const tarefasService = {
 
       return (data || []).map(tarefa => ({
         id: tarefa.id,
-        cca: `${tarefa.ccas.codigo} - ${tarefa.ccas.nome}`,
-        tipoCca: tarefa.tipo_cca || 'linha-inteira',
+        cca: tarefa.cca,
+        tipoCca: 'linha-inteira' as const,
         dataCadastro: tarefa.data_cadastro,
         dataConclusao: tarefa.data_conclusao,
         descricao: tarefa.descricao,
@@ -47,9 +46,9 @@ export const tarefasService = {
           nome: tarefa.profiles?.nome || 'Não atribuído'
         },
         anexo: tarefa.anexo,
-        status: tarefa.status,
+        status: tarefa.status as TarefaStatus,
         iniciada: tarefa.iniciada,
-        configuracao: tarefa.configuracao
+        configuracao: tarefa.configuracao as any
       }));
     } catch (error) {
       console.error("Exceção ao buscar tarefas:", error);
@@ -61,10 +60,22 @@ export const tarefasService = {
     try {
       console.log("Criando tarefa:", dadosTarefa);
 
+      // Primeiro, buscar o CCA para obter o código e nome
+      const { data: ccaData, error: ccaError } = await supabase
+        .from('ccas')
+        .select('codigo, nome')
+        .eq('id', dadosTarefa.cca_id)
+        .single();
+
+      if (ccaError || !ccaData) {
+        console.error("Erro ao buscar CCA:", ccaError);
+        return false;
+      }
+
       const { error } = await supabase
         .from('tarefas')
         .insert({
-          cca: dadosTarefa.cca_id.toString(),
+          cca: `${ccaData.codigo} - ${ccaData.nome}`,
           tipo_cca: 'linha-inteira',
           data_conclusao: dadosTarefa.data_conclusao,
           descricao: dadosTarefa.descricao,
@@ -102,17 +113,20 @@ export const tarefasService = {
         return [];
       }
 
-      return (data || []).map(tarefa => ({
-        id: tarefa.id,
-        descricao: tarefa.descricao,
-        responsavel: {
-          id: tarefa.responsavel_id || '',
-          nome: tarefa.profiles?.nome || 'Não atribuído'
-        },
-        dataConclusao: new Date(tarefa.data_conclusao),
-        status: tarefa.status,
-        criticidade: tarefa.configuracao?.criticidade || 'media'
-      }));
+      return (data || []).map(tarefa => {
+        const config = tarefa.configuracao as any;
+        return {
+          id: tarefa.id,
+          descricao: tarefa.descricao,
+          responsavel: {
+            id: tarefa.responsavel_id || '',
+            nome: tarefa.profiles?.nome || 'Não atribuído'
+          },
+          dataConclusao: new Date(tarefa.data_conclusao),
+          status: tarefa.status,
+          criticidade: config?.criticidade || 'media'
+        };
+      });
     } catch (error) {
       console.error("Exceção ao buscar tarefas recentes:", error);
       return [];

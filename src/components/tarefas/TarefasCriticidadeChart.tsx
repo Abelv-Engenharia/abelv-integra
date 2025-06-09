@@ -8,7 +8,7 @@ import {
   ResponsiveContainer,
   Legend
 } from 'recharts';
-import { tarefasService } from '@/services/tarefasService';
+import { supabase } from '@/integrations/supabase/client';
 
 const COLORS = ['#82ca9d', '#ffc658', '#ff9e40', '#ff6b6b'];
 
@@ -24,7 +24,15 @@ const TarefasCriticidadeChart = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const tarefas = await tarefasService.getAll();
+        const { data: tarefas, error } = await supabase
+          .from('tarefas')
+          .select('configuracao');
+
+        if (error) {
+          console.error('Erro ao carregar dados do gráfico:', error);
+          return;
+        }
+
         const criticidadeCount = {
           baixa: 0,
           media: 0,
@@ -32,9 +40,12 @@ const TarefasCriticidadeChart = () => {
           critica: 0
         };
 
-        tarefas.forEach(tarefa => {
-          const criticidade = tarefa.configuracao?.criticidade || 'media';
-          criticidadeCount[criticidade]++;
+        tarefas?.forEach(tarefa => {
+          const config = tarefa.configuracao as any;
+          const criticidade = config?.criticidade || 'media';
+          if (criticidadeCount.hasOwnProperty(criticidade)) {
+            criticidadeCount[criticidade as keyof typeof criticidadeCount]++;
+          }
         });
 
         setData([
