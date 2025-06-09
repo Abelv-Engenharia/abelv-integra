@@ -8,12 +8,12 @@ export interface TarefaFormData {
   descricao: string;
   responsavel_id: string;
   configuracao: {
-    criticidade: string;
+    criticidade: "baixa" | "media" | "alta" | "critica";
     requerValidacao: boolean;
     notificarUsuario: boolean;
     recorrencia?: {
       ativa: boolean;
-      frequencia?: string;
+      frequencia?: "diaria" | "semanal" | "mensal" | "trimestral" | "semestral" | "anual";
     };
   };
 }
@@ -59,6 +59,12 @@ export const tarefasService = {
   async create(dadosTarefa: TarefaFormData): Promise<boolean> {
     try {
       console.log("Criando tarefa:", dadosTarefa);
+
+      // Validar campos obrigatórios
+      if (!dadosTarefa.cca_id || !dadosTarefa.data_conclusao || !dadosTarefa.descricao || !dadosTarefa.responsavel_id) {
+        console.error("Campos obrigatórios não preenchidos:", dadosTarefa);
+        return false;
+      }
 
       // Primeiro, buscar o CCA para obter o código e nome
       const { data: ccaData, error: ccaError } = await supabase

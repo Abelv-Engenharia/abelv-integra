@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,7 +12,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
-import { tarefasService } from "@/services/tarefasService";
+import { tarefasService, TarefaFormData } from "@/services/tarefasService";
 import { supabase } from "@/integrations/supabase/client";
 
 const tarefaSchema = z.object({
@@ -32,7 +31,7 @@ const tarefaSchema = z.object({
   }),
 });
 
-type TarefaFormData = z.infer<typeof tarefaSchema>;
+type TarefaFormSchema = z.infer<typeof tarefaSchema>;
 
 const CadastroTarefas = () => {
   const [ccas, setCcas] = useState<any[]>([]);
@@ -48,7 +47,7 @@ const CadastroTarefas = () => {
     watch,
     reset,
     formState: { errors },
-  } = useForm<TarefaFormData>({
+  } = useForm<TarefaFormSchema>({
     resolver: zodResolver(tarefaSchema),
     defaultValues: {
       configuracao: {
@@ -103,19 +102,26 @@ const CadastroTarefas = () => {
     fetchData();
   }, []);
 
-  const onSubmit = async (data: TarefaFormData) => {
+  const onSubmit = async (data: TarefaFormSchema) => {
     setLoading(true);
     try {
       console.log("Dados do formulário:", data);
       
-      // Verificar se todos os campos obrigatórios estão preenchidos
-      if (!data.cca_id || !data.data_conclusao || !data.descricao || !data.responsavel_id) {
-        toast.error("Por favor, preencha todos os campos obrigatórios");
-        setLoading(false);
-        return;
-      }
+      // Converter para o formato esperado pelo service
+      const tarefaData: TarefaFormData = {
+        cca_id: data.cca_id,
+        data_conclusao: data.data_conclusao,
+        descricao: data.descricao,
+        responsavel_id: data.responsavel_id,
+        configuracao: {
+          criticidade: data.configuracao.criticidade,
+          requerValidacao: data.configuracao.requerValidacao,
+          notificarUsuario: data.configuracao.notificarUsuario,
+          recorrencia: data.configuracao.recorrencia,
+        },
+      };
       
-      const success = await tarefasService.create(data);
+      const success = await tarefasService.create(tarefaData);
       
       if (success) {
         toast.success("Tarefa cadastrada com sucesso! O responsável foi notificado.");
