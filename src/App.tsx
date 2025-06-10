@@ -48,6 +48,7 @@ import IndiceReativoForm from './pages/idsms/IndiceReativoForm';
 import RelatoriosIDSMS from './pages/relatorios/RelatoriosIDSMS';
 import IDSMSIndicadores from './pages/idsms/IDSMSIndicadores';
 import Profile from './pages/account/Profile';
+import Settings from './pages/account/Settings';
 import Layout from './components/layout/Layout';
 
 const queryClient = new QueryClient();
@@ -93,6 +94,7 @@ function App() {
 
               {/* Account Routes */}
               <Route path="account/profile" element={<Profile />} />
+              <Route path="account/settings" element={<Settings />} />
 
               {/* Relatorios Routes */}
               <Route path="relatorios" element={<Relatorios />} />
