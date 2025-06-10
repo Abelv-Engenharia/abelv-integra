@@ -1,8 +1,8 @@
-
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from './contexts/AuthContext';
+import { ThemeProvider } from './contexts/ThemeContext';
 import Login from './pages/auth/Login';
 import AuthGuard from './components/auth/AuthGuard';
 import Dashboard from './pages/Dashboard';
@@ -58,73 +58,75 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <Router>
         <AuthProvider>
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route path="/" element={<AuthGuard><Layout /></AuthGuard>}>
-              <Route index element={<Dashboard />} />
+          <ThemeProvider>
+            <Routes>
+              <Route path="/login" element={<Login />} />
+              <Route path="/" element={<AuthGuard><Layout /></AuthGuard>}>
+                <Route index element={<Dashboard />} />
 
-              {/* Desvios Routes */}
-              <Route path="desvios/dashboard" element={<DesviosDashboard />} />
-              <Route path="desvios/cadastro" element={<DesviosForm />} />
-              <Route path="desvios/consulta" element={<DesviosConsulta />} />
-              <Route path="desvios/nao-conformidade" element={<DesviosNaoConformidade />} />
+                {/* Desvios Routes */}
+                <Route path="desvios/dashboard" element={<DesviosDashboard />} />
+                <Route path="desvios/cadastro" element={<DesviosForm />} />
+                <Route path="desvios/consulta" element={<DesviosConsulta />} />
+                <Route path="desvios/nao-conformidade" element={<DesviosNaoConformidade />} />
 
-              {/* Treinamentos Routes */}
-              <Route path="treinamentos/dashboard" element={<TreinamentosDashboard />} />
-              <Route path="treinamentos/normativo" element={<TreinamentoNormativo />} />
-              <Route path="treinamentos/consulta" element={<TreinamentosConsulta />} />
-              <Route path="treinamentos/execucao" element={<ExecucaoTreinamentos />} />
-              <Route path="treinamentos/cracha" element={<EmissaoCracha />} />
+                {/* Treinamentos Routes */}
+                <Route path="treinamentos/dashboard" element={<TreinamentosDashboard />} />
+                <Route path="treinamentos/normativo" element={<TreinamentoNormativo />} />
+                <Route path="treinamentos/consulta" element={<TreinamentosConsulta />} />
+                <Route path="treinamentos/execucao" element={<ExecucaoTreinamentos />} />
+                <Route path="treinamentos/cracha" element={<EmissaoCracha />} />
 
-              {/* Ocorrencias Routes */}
-              <Route path="ocorrencias/dashboard" element={<OcorrenciasDashboard />} />
-              <Route path="ocorrencias/cadastro" element={<OcorrenciasCadastro />} />
-              <Route path="ocorrencias/consulta" element={<OcorrenciasConsulta />} />
+                {/* Ocorrencias Routes */}
+                <Route path="ocorrencias/dashboard" element={<OcorrenciasDashboard />} />
+                <Route path="ocorrencias/cadastro" element={<OcorrenciasCadastro />} />
+                <Route path="ocorrencias/consulta" element={<OcorrenciasConsulta />} />
 
-              {/* Medidas Disciplinares Routes */}
-              <Route path="medidas-disciplinares/dashboard" element={<MedidasDashboard />} />
-              <Route path="medidas-disciplinares/cadastro" element={<MedidasCadastro />} />
-              <Route path="medidas-disciplinares/consulta" element={<MedidasConsulta />} />
+                {/* Medidas Disciplinares Routes */}
+                <Route path="medidas-disciplinares/dashboard" element={<MedidasDashboard />} />
+                <Route path="medidas-disciplinares/cadastro" element={<MedidasCadastro />} />
+                <Route path="medidas-disciplinares/consulta" element={<MedidasConsulta />} />
 
-              {/* Tarefas Routes */}
-              <Route path="tarefas/dashboard" element={<TarefasDashboard />} />
-              <Route path="tarefas/minhas-tarefas" element={<MinhasTarefas />} />
-              <Route path="tarefas/cadastro" element={<CadastroTarefas />} />
-              <Route path="tarefas/:id" element={<DetalheTarefa />} />
+                {/* Tarefas Routes */}
+                <Route path="tarefas/dashboard" element={<TarefasDashboard />} />
+                <Route path="tarefas/minhas-tarefas" element={<MinhasTarefas />} />
+                <Route path="tarefas/cadastro" element={<CadastroTarefas />} />
+                <Route path="tarefas/:id" element={<DetalheTarefa />} />
 
-              {/* Account Routes */}
-              <Route path="account/profile" element={<Profile />} />
-              <Route path="account/settings" element={<Settings />} />
+                {/* Account Routes */}
+                <Route path="account/profile" element={<Profile />} />
+                <Route path="account/settings" element={<Settings />} />
 
-              {/* Relatorios Routes */}
-              <Route path="relatorios" element={<Relatorios />} />
-              <Route path="relatorios/idsms" element={<RelatoriosIDSMS />} />
+                {/* Relatorios Routes */}
+                <Route path="relatorios" element={<Relatorios />} />
+                <Route path="relatorios/idsms" element={<RelatoriosIDSMS />} />
 
-              {/* Admin Routes */}
-              <Route path="admin/usuarios" element={<UsuariosAdmin />} />
-              <Route path="admin/perfis" element={<PerfisAdmin />} />
-              <Route path="admin/empresas" element={<EmpresasAdmin />} />
-              <Route path="admin/ccas" element={<AdminCCAs />} />
-              <Route path="admin/engenheiros" element={<EngenheirosAdmin />} />
-              <Route path="admin/supervisores" element={<SupervisoresAdmin />} />
-              <Route path="admin/funcionarios" element={<FuncionariosAdmin />} />
-              <Route path="admin/hht" element={<HHTAdmin />} />
-              <Route path="admin/metas-indicadores" element={<MetasIndicadoresAdmin />} />
-              <Route path="admin/templates" element={<TemplatesAdmin />} />
-              <Route path="admin/logo" element={<LogoAdmin />} />
-              
-              {/* IDSMS Routes */}
-              <Route path="idsms/dashboard" element={<IDSMSDashboard />} />
-              <Route path="idsms/indicadores" element={<IDSMSIndicadores />} />
-              <Route path="idsms/iid" element={<IIDForm />} />
-              <Route path="idsms/hsa" element={<HSAForm />} />
-              <Route path="idsms/ht" element={<HTForm />} />
-              <Route path="idsms/ipom" element={<IPOMForm />} />
-              <Route path="idsms/inspecao-alta-lideranca" element={<InspecaoAltaLiderancaForm />} />
-              <Route path="idsms/inspecao-gestao-sms" element={<InspecaoGestaoSMSForm />} />
-              <Route path="idsms/indice-reativo" element={<IndiceReativoForm />} />
-            </Route>
-          </Routes>
+                {/* Admin Routes */}
+                <Route path="admin/usuarios" element={<UsuariosAdmin />} />
+                <Route path="admin/perfis" element={<PerfisAdmin />} />
+                <Route path="admin/empresas" element={<EmpresasAdmin />} />
+                <Route path="admin/ccas" element={<AdminCCAs />} />
+                <Route path="admin/engenheiros" element={<EngenheirosAdmin />} />
+                <Route path="admin/supervisores" element={<SupervisoresAdmin />} />
+                <Route path="admin/funcionarios" element={<FuncionariosAdmin />} />
+                <Route path="admin/hht" element={<HHTAdmin />} />
+                <Route path="admin/metas-indicadores" element={<MetasIndicadoresAdmin />} />
+                <Route path="admin/templates" element={<TemplatesAdmin />} />
+                <Route path="admin/logo" element={<LogoAdmin />} />
+                
+                {/* IDSMS Routes */}
+                <Route path="idsms/dashboard" element={<IDSMSDashboard />} />
+                <Route path="idsms/indicadores" element={<IDSMSIndicadores />} />
+                <Route path="idsms/iid" element={<IIDForm />} />
+                <Route path="idsms/hsa" element={<HSAForm />} />
+                <Route path="idsms/ht" element={<HTForm />} />
+                <Route path="idsms/ipom" element={<IPOMForm />} />
+                <Route path="idsms/inspecao-alta-lideranca" element={<InspecaoAltaLiderancaForm />} />
+                <Route path="idsms/inspecao-gestao-sms" element={<InspecaoGestaoSMSForm />} />
+                <Route path="idsms/indice-reativo" element={<IndiceReativoForm />} />
+              </Route>
+            </Routes>
+          </ThemeProvider>
         </AuthProvider>
       </Router>
     </QueryClientProvider>
