@@ -24,6 +24,7 @@ import MedidasConsulta from './pages/PlaceholderPage';
 import TarefasDashboard from './pages/tarefas/TarefasDashboard';
 import MinhasTarefas from './pages/tarefas/MinhasTarefas';
 import CadastroTarefas from './pages/tarefas/CadastroTarefas';
+import DetalheTarefa from './pages/tarefas/DetalheTarefa';
 import Relatorios from './pages/relatorios/RelatoriosDashboard';
 import UsuariosAdmin from './pages/admin/AdminUsuarios';
 import PerfisAdmin from './pages/admin/AdminPerfis';
@@ -46,6 +47,7 @@ import InspecaoGestaoSMSForm from './pages/idsms/InspecaoGestaoSMSForm';
 import IndiceReativoForm from './pages/idsms/IndiceReativoForm';
 import RelatoriosIDSMS from './pages/relatorios/RelatoriosIDSMS';
 import IDSMSIndicadores from './pages/idsms/IDSMSIndicadores';
+import Profile from './pages/account/Profile';
 import Layout from './components/layout/Layout';
 
 const queryClient = new QueryClient();
@@ -87,6 +89,10 @@ function App() {
               <Route path="tarefas/dashboard" element={<TarefasDashboard />} />
               <Route path="tarefas/minhas-tarefas" element={<MinhasTarefas />} />
               <Route path="tarefas/cadastro" element={<CadastroTarefas />} />
+              <Route path="tarefas/:id" element={<DetalheTarefa />} />
+
+              {/* Account Routes */}
+              <Route path="account/profile" element={<Profile />} />
 
               {/* Relatorios Routes */}
               <Route path="relatorios" element={<Relatorios />} />
