@@ -1,6 +1,6 @@
+
 import React, { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useProfile, UserProfile } from "@/hooks/useProfile";
 import { useAuth } from "@/contexts/AuthContext";
+import PhotoUpload from "@/components/profile/PhotoUpload";
 
 const Profile = () => {
   const { user } = useAuth();
@@ -22,7 +23,8 @@ const Profile = () => {
         nome: profile.nome || '',
         email: profile.email || '',
         cargo: profile.cargo || '',
-        departamento: profile.departamento || ''
+        departamento: profile.departamento || '',
+        avatar_url: profile.avatar_url || ''
       });
     }
   }, [profile]);
@@ -32,6 +34,13 @@ const Profile = () => {
     setFormData(prev => ({
       ...prev,
       [name]: value
+    }));
+  };
+
+  const handlePhotoChange = (photoUrl: string | null) => {
+    setFormData(prev => ({
+      ...prev,
+      avatar_url: photoUrl || undefined
     }));
   };
 
@@ -46,19 +55,11 @@ const Profile = () => {
         nome: profile.nome || '',
         email: profile.email || '',
         cargo: profile.cargo || '',
-        departamento: profile.departamento || ''
+        departamento: profile.departamento || '',
+        avatar_url: profile.avatar_url || ''
       });
     }
     setIsEditing(false);
-  };
-
-  const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map(n => n[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
   };
 
   if (loadingProfile) {
@@ -136,15 +137,18 @@ const Profile = () => {
             <CardDescription>Visualize e edite suas informações pessoais</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col items-center pt-6">
-            <Avatar className="h-24 w-24 mb-4">
-              <AvatarImage src={profile.avatar_url} alt={profile.nome} />
-              <AvatarFallback className="text-2xl bg-primary text-primary-foreground">
-                {getInitials(profile.nome)}
-              </AvatarFallback>
-            </Avatar>
-            <h3 className="text-lg font-medium">{profile.nome}</h3>
-            <p className="text-sm text-muted-foreground">{userRole || 'Usuário'}</p>
-            <p className="text-sm text-muted-foreground">{profile.departamento || 'Departamento não informado'}</p>
+            <PhotoUpload
+              currentPhotoUrl={formData.avatar_url}
+              userName={profile.nome}
+              onPhotoChange={handlePhotoChange}
+              disabled={!isEditing}
+            />
+            
+            <div className="mt-4 text-center">
+              <h3 className="text-lg font-medium">{profile.nome}</h3>
+              <p className="text-sm text-muted-foreground">{userRole || 'Usuário'}</p>
+              <p className="text-sm text-muted-foreground">{profile.departamento || 'Departamento não informado'}</p>
+            </div>
             
             <Separator className="my-4" />
             

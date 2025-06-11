@@ -1,14 +1,11 @@
 
+import React from "react";
+import { useQuery } from "@tanstack/react-query";
 import {
   Activity,
   AlertTriangle,
   Calendar,
-  CheckCircle,
   ClipboardList,
-  Clock,
-  FileText,
-  Shield,
-  Users,
 } from "lucide-react";
 import StatCard from "@/components/dashboard/StatCard";
 import AreaChart from "@/components/dashboard/AreaChart";
@@ -16,98 +13,68 @@ import BarChart from "@/components/dashboard/BarChart";
 import RecentActivitiesList from "@/components/dashboard/RecentActivitiesList";
 import PendingTasksList from "@/components/dashboard/PendingTasksList";
 import SystemLogo from "@/components/common/SystemLogo";
-
-// Mock data for charts
-const areaChartData = [
-  { name: "Jan", value: 12 },
-  { name: "Fev", value: 19 },
-  { name: "Mar", value: 15 },
-  { name: "Abr", value: 27 },
-  { name: "Mai", value: 22 },
-  { name: "Jun", value: 30 },
-  { name: "Jul", value: 25 },
-];
-
-const barChartData = [
-  { name: "Jan", alta: 4, media: 5, baixa: 8 },
-  { name: "Fev", alta: 6, media: 8, baixa: 10 },
-  { name: "Mar", alta: 3, media: 7, baixa: 12 },
-  { name: "Abr", alta: 5, media: 12, baixa: 15 },
-  { name: "Mai", alta: 7, media: 10, baixa: 12 },
-  { name: "Jun", alta: 6, media: 15, baixa: 17 },
-];
-
-const barChartCategories = [
-  { dataKey: "alta", name: "Alta Severidade", color: "#F97316" },
-  { dataKey: "media", name: "Média Severidade", color: "#FB923C" },
-  { dataKey: "baixa", name: "Baixa Severidade", color: "#FDBA74" },
-];
-
-// Mock data for recent activities
-const recentActivities = [
-  {
-    id: "1",
-    title: "Novo desvio registrado",
-    description: "Desvio de segurança reportado na área de operações",
-    timestamp: "Hoje, 10:45",
-    status: "warning" as const,
-  },
-  {
-    id: "2",
-    title: "Treinamento programado",
-    description: "Treinamento normativo para equipe de manutenção",
-    timestamp: "Hoje, 09:30",
-    status: "info" as const,
-  },
-  {
-    id: "3",
-    title: "Inspeção concluída",
-    description: "Inspeção de segurança concluída no setor administrativo",
-    timestamp: "Ontem, 15:20",
-    status: "success" as const,
-  },
-  {
-    id: "4",
-    title: "Ocorrência reportada",
-    description: "Ocorrência de incidente leve relatada no almoxarifado",
-    timestamp: "Ontem, 11:15",
-    status: "error" as const,
-  },
-];
-
-// Mock data for pending tasks
-const pendingTasks = [
-  {
-    id: "1",
-    title: "Revisão de procedimentos de segurança",
-    dueDate: "Hoje, 17:00",
-    priority: "high" as const,
-    status: "pending" as const,
-  },
-  {
-    id: "2",
-    title: "Validar registro de treinamentos do mês",
-    dueDate: "Amanhã, 12:00",
-    priority: "medium" as const,
-    status: "in-progress" as const,
-  },
-  {
-    id: "3",
-    title: "Atualizar documentação de EPIs",
-    dueDate: "28/04/2025",
-    priority: "medium" as const,
-    status: "pending" as const,
-  },
-  {
-    id: "4",
-    title: "Programar hora da segurança semanal",
-    dueDate: "30/04/2025",
-    priority: "low" as const,
-    status: "pending" as const,
-  },
-];
+import { dashboardService } from "@/services/dashboardService";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const Dashboard = () => {
+  const { data: stats, isLoading: statsLoading } = useQuery({
+    queryKey: ['dashboard-stats'],
+    queryFn: dashboardService.getStats,
+    refetchOnWindowFocus: false
+  });
+
+  const { data: recentActivities = [], isLoading: activitiesLoading } = useQuery({
+    queryKey: ['dashboard-activities'],
+    queryFn: dashboardService.getRecentActivities,
+    refetchOnWindowFocus: false
+  });
+
+  const { data: pendingTasks = [], isLoading: tasksLoading } = useQuery({
+    queryKey: ['dashboard-tasks'],
+    queryFn: dashboardService.getPendingTasks,
+    refetchOnWindowFocus: false
+  });
+
+  // Mock data para os gráficos (manter até termos dados suficientes)
+  const areaChartData = [
+    { name: "Jan", value: stats?.desviosThisMonth || 12 },
+    { name: "Fev", value: 19 },
+    { name: "Mar", value: 15 },
+    { name: "Abr", value: 27 },
+    { name: "Mai", value: 22 },
+    { name: "Jun", value: 30 },
+    { name: "Jul", value: 25 },
+  ];
+
+  const barChartData = [
+    { name: "Jan", alta: 4, media: 5, baixa: 8 },
+    { name: "Fev", alta: 6, media: 8, baixa: 10 },
+    { name: "Mar", alta: 3, media: 7, baixa: 12 },
+    { name: "Abr", alta: 5, media: 12, baixa: 15 },
+    { name: "Mai", alta: 7, media: 10, baixa: 12 },
+    { name: "Jun", alta: 6, media: 15, baixa: 17 },
+  ];
+
+  const barChartCategories = [
+    { dataKey: "alta", name: "Alta Severidade", color: "#F97316" },
+    { dataKey: "media", name: "Média Severidade", color: "#FB923C" },
+    { dataKey: "baixa", name: "Baixa Severidade", color: "#FDBA74" },
+  ];
+
+  const calculateTrend = (current: number, total: number) => {
+    if (total === 0) return { trend: "neutral" as const, value: "0%" };
+    const percentage = ((current / total) * 100).toFixed(0);
+    return { 
+      trend: current > total * 0.1 ? "up" as const : "down" as const, 
+      value: `${percentage}%` 
+    };
+  };
+
+  const handleMarkTaskComplete = (taskId: string) => {
+    console.log(`Marcar tarefa ${taskId} como concluída`);
+    // TODO: Implementar a lógica para marcar tarefa como concluída
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col items-center mb-8 mt-4">
@@ -119,38 +86,46 @@ const Dashboard = () => {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <StatCard
-          title="Desvios"
-          value="124"
-          icon={<AlertTriangle className="h-4 w-4" />}
-          description="Total de desvios no mês atual"
-          trend="up"
-          trendValue="12%"
-        />
-        <StatCard
-          title="Treinamentos"
-          value="45"
-          icon={<Calendar className="h-4 w-4" />}
-          description="Treinamentos realizados no mês"
-          trend="up"
-          trendValue="8%"
-        />
-        <StatCard
-          title="Ocorrências"
-          value="18"
-          icon={<Activity className="h-4 w-4" />}
-          description="Ocorrências registradas no mês"
-          trend="down"
-          trendValue="5%"
-        />
-        <StatCard
-          title="Tarefas"
-          value="37"
-          icon={<ClipboardList className="h-4 w-4" />}
-          description="Tarefas pendentes no sistema"
-          trend="neutral"
-          trendValue="2%"
-        />
+        {statsLoading ? (
+          Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} className="h-32" />
+          ))
+        ) : (
+          <>
+            <StatCard
+              title="Desvios"
+              value={stats?.desviosThisMonth.toString() || "0"}
+              icon={<AlertTriangle className="h-4 w-4" />}
+              description="Desvios registrados no mês atual"
+              trend={calculateTrend(stats?.desviosThisMonth || 0, stats?.totalDesvios || 0).trend}
+              trendValue={calculateTrend(stats?.desviosThisMonth || 0, stats?.totalDesvios || 0).value}
+            />
+            <StatCard
+              title="Treinamentos"
+              value={stats?.treinamentosThisMonth.toString() || "0"}
+              icon={<Calendar className="h-4 w-4" />}
+              description="Treinamentos realizados no mês"
+              trend={calculateTrend(stats?.treinamentosThisMonth || 0, stats?.totalTreinamentos || 0).trend}
+              trendValue={calculateTrend(stats?.treinamentosThisMonth || 0, stats?.totalTreinamentos || 0).value}
+            />
+            <StatCard
+              title="Ocorrências"
+              value={stats?.ocorrenciasThisMonth.toString() || "0"}
+              icon={<Activity className="h-4 w-4" />}
+              description="Ocorrências registradas no mês"
+              trend={calculateTrend(stats?.ocorrenciasThisMonth || 0, stats?.totalOcorrencias || 0).trend}
+              trendValue={calculateTrend(stats?.ocorrenciasThisMonth || 0, stats?.totalOcorrencias || 0).value}
+            />
+            <StatCard
+              title="Tarefas"
+              value={stats?.tarefasPendentes.toString() || "0"}
+              icon={<ClipboardList className="h-4 w-4" />}
+              description="Tarefas pendentes no sistema"
+              trend="neutral"
+              trendValue={`${stats?.totalTarefas || 0} total`}
+            />
+          </>
+        )}
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
@@ -167,15 +142,24 @@ const Dashboard = () => {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
-        <RecentActivitiesList 
-          title="Atividades Recentes" 
-          activities={recentActivities} 
-        />
-        <PendingTasksList 
-          title="Tarefas Pendentes" 
-          tasks={pendingTasks} 
-          onMarkComplete={(taskId) => console.log(`Marcar tarefa ${taskId} como concluída`)}
-        />
+        {activitiesLoading ? (
+          <Skeleton className="h-80" />
+        ) : (
+          <RecentActivitiesList 
+            title="Atividades Recentes" 
+            activities={recentActivities} 
+          />
+        )}
+        
+        {tasksLoading ? (
+          <Skeleton className="h-80" />
+        ) : (
+          <PendingTasksList 
+            title="Tarefas Pendentes" 
+            tasks={pendingTasks} 
+            onMarkComplete={handleMarkTaskComplete}
+          />
+        )}
       </div>
     </div>
   );

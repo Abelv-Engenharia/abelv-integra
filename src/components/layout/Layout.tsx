@@ -2,7 +2,7 @@
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
 import { Outlet } from "react-router-dom";
-import { Bell, Settings, User, LogOut } from "lucide-react";
+import { Settings, User, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -16,9 +16,11 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import NotificacoesDropdown from "@/components/notificacoes/NotificacoesDropdown";
+import { useProfile } from "@/hooks/useProfile";
 
 const Layout = () => {
   const navigate = useNavigate();
+  const { profile } = useProfile();
 
   const handleLogout = async () => {
     try {
@@ -29,6 +31,15 @@ const Layout = () => {
       console.error("Erro ao fazer logout:", error);
       toast.error("Erro ao fazer logout");
     }
+  };
+
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(n => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
   };
 
   return (
@@ -45,8 +56,10 @@ const Layout = () => {
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                     <Avatar className="h-8 w-8">
-                      <AvatarImage src="/placeholder.svg" alt="@user" />
-                      <AvatarFallback>U</AvatarFallback>
+                      <AvatarImage src={profile?.avatar_url} alt={profile?.nome || "Usuário"} />
+                      <AvatarFallback>
+                        {profile?.nome ? getInitials(profile.nome) : "U"}
+                      </AvatarFallback>
                     </Avatar>
                   </Button>
                 </DropdownMenuTrigger>
