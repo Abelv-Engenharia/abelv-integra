@@ -1,4 +1,5 @@
-import React from "react";
+
+import React, { useRef } from "react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { User, Printer } from "lucide-react";
@@ -31,17 +32,87 @@ interface Props {
   funcionario: Funcionario | null;
   treinamentosValidos: TreinamentoNormativo[];
   isLoading: boolean;
-  onPrint: () => void;
+  // onPrint pode ser passado de fora, mas aqui usaremos o da visualização
+  onPrint?: () => void;
 }
 
 const CrachaPreview: React.FC<Props> = ({
   funcionario,
   treinamentosValidos,
   isLoading,
-  onPrint
+  onPrint, // não vamos mais usar
 }) => {
-  // Filtra antes de exibir
+  const crachaRef = useRef<HTMLDivElement | null>(null);
+
   const treinamentosFiltrados = getTreinamentosMaisRecentes(treinamentosValidos);
+
+  // Função para imprimir SOMENTE o crachá mostrado (não página toda)
+  const handlePrintCracha = () => {
+    if (!crachaRef.current) return;
+
+    const crachaHtml = crachaRef.current.innerHTML;
+
+    // Janela de impressão dedicada
+    const printWindow = window.open('', '_blank', 'width=400,height=650');
+    if (!printWindow) return;
+
+    // Estilos customizados para impressão fiel
+    const style = `
+      <style>
+        @page { size: 100mm 160mm; margin: 0; }
+        body { margin: 0; font-family: Arial, sans-serif; background: #fff;}
+        .print-cracha {
+          width: 100mm;
+          height: 160mm;
+          margin: 0 auto;
+          box-sizing: border-box;
+          padding: 5mm;
+          display: flex;
+          flex-direction: column;
+          box-shadow: none;
+        }
+        .print-cracha .bg-primary { background: hsl(222.2, 47.4%, 11.2%) !important; color: #fff; }
+        .print-cracha .rounded-t-md { border-radius: 0.5rem 0.5rem 0 0;  }
+        .print-cracha h3, .print-cracha h4, .print-cracha h5 { margin: 0; }
+        .print-cracha .w-28, .print-cracha .h-28 { width: 70px !important; height: 70px !important;}
+        .print-cracha .rounded-full { border-radius: 9999px; }
+        .print-cracha img { width: 100%; height: 100%; object-fit: cover; border-radius: 9999px; }
+        .print-cracha table { width: 100%; font-size: 12px; border-collapse: collapse; }
+        .print-cracha th, .print-cracha td { padding: 3px 5px; }
+        .print-cracha th { text-align: left; }
+        .print-cracha th:last-child, .print-cracha td:last-child { text-align: right;}
+        .print-cracha .border-t { border-top: 1px solid #eee; }
+        .print-cracha .border-b { border-bottom: 1px solid #eee; }
+        .print-cracha .mt-auto { margin-top: auto; }
+        .print-cracha .pt-3 { padding-top: 8px; }
+        .print-cracha .pt-4 { padding-top: 12px; }
+        .print-cracha .font-bold { font-weight: bold; }
+        .print-cracha .font-semibold { font-weight: 600; }
+        .print-cracha .text-center { text-align: center; }
+        .print-cracha .text-xs { font-size: 10px; }
+        .print-cracha .text-sm { font-size: 12px; }
+        .print-cracha .mb-2 { margin-bottom: 8px; }
+      </style>
+    `;
+
+    printWindow.document.write(`
+      <!doctype html>
+      <html>
+      <head><title>Crachá de Capacitação</title>${style}</head>
+      <body>
+        <div class="print-cracha">
+          ${crachaHtml}
+        </div>
+      </body>
+      </html>
+    `);
+    printWindow.document.close();
+
+    setTimeout(() => {
+      printWindow.print();
+      printWindow.close();
+    }, 500);
+  };
 
   return (
     <Card>
@@ -53,6 +124,7 @@ const CrachaPreview: React.FC<Props> = ({
       </CardHeader>
       <CardContent>
         <div
+          ref={crachaRef}
           className="bg-white border rounded-lg shadow-md p-4 w-full max-w-sm mx-auto aspect-[9/16]"
         >
           {funcionario ? (
@@ -134,7 +206,7 @@ const CrachaPreview: React.FC<Props> = ({
       </CardContent>
       {funcionario && treinamentosFiltrados.length > 0 && (
         <CardFooter className="justify-center">
-          <Button onClick={onPrint} variant="outline" className="gap-1">
+          <Button onClick={handlePrintCracha} variant="outline" className="gap-1">
             <Printer className="h-4 w-4" />
             Imprimir crachá
           </Button>
