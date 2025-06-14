@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -151,13 +150,12 @@ const TreinamentosConsulta = () => {
                   <TableHead>Carga Horária</TableHead>
                   <TableHead>Efetivo</TableHead>
                   <TableHead>Horas Totais</TableHead>
-                  <TableHead>Status</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredExecucoes.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
+                    <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
                       Nenhuma execução encontrada
                     </TableCell>
                   </TableRow>
@@ -176,7 +174,6 @@ const TreinamentosConsulta = () => {
                         MOD: {execucao.efetivo_mod} / MOI: {execucao.efetivo_moi}
                       </TableCell>
                       <TableCell>{execucao.horas_totais}h</TableCell>
-                      <TableCell>{getStatusBadge(execucao)}</TableCell>
                     </TableRow>
                   ))
                 )}
