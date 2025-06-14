@@ -1,4 +1,3 @@
-
 import { format, addDays, isBefore, differenceInDays } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -55,19 +54,39 @@ export const formatarData = (data: Date | string): string => {
   return format(dataObj, "dd/MM/yyyy");
 };
 
+/**
+ * Busca o nome do treinamento pelo id nas tabelas treinamentos e lista_treinamentos_normativos
+ */
+import { supabase } from "@/integrations/supabase/client";
+
+/**
+ * Busca o nome do treinamento dado o ID. Tenta primeiro em 'treinamentos', depois em 'lista_treinamentos_normativos'.
+ * Retorna 'Treinamento não encontrado' se não localizar em nenhuma tabela.
+ */
 export async function getNomeTreinamento(id: string): Promise<string> {
-  try {
-    const { data } = await supabase
-      .from('treinamentos')
-      .select('nome')
-      .eq('id', id)
-      .single();
-    
-    return data?.nome || "Treinamento não encontrado";
-  } catch (error) {
-    console.error("Erro ao buscar nome do treinamento:", error);
-    return "Treinamento não encontrado";
+  // Tenta buscar na tabela treinamentos normal
+  const { data: treinamento, error: errTreinamento } = await supabase
+    .from('treinamentos')
+    .select('nome')
+    .eq('id', id)
+    .maybeSingle();
+
+  if (treinamento?.nome) {
+    return treinamento.nome;
   }
+
+  // Se não encontrou, tenta buscar na tabela lista_treinamentos_normativos
+  const { data: treinamentoNormativo, error: errNormativo } = await supabase
+    .from('lista_treinamentos_normativos')
+    .select('nome')
+    .eq('id', id)
+    .maybeSingle();
+
+  if (treinamentoNormativo?.nome) {
+    return treinamentoNormativo.nome;
+  }
+
+  return "Treinamento não encontrado";
 }
 
 // New service to fetch all trainings from Supabase
