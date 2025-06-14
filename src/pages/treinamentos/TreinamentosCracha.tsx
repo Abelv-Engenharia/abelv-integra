@@ -16,6 +16,7 @@ import { ArrowLeft } from "lucide-react";
 import FuncionarioSelector from "@/components/treinamentos/FuncionarioSelector";
 import FuncionarioInfoCard from "@/components/treinamentos/FuncionarioInfoCard";
 import CrachaPreview from "@/components/treinamentos/CrachaPreview";
+import FuncionarioTreinamentosValidosCard from "@/components/treinamentos/FuncionarioTreinamentosValidosCard";
 
 const TreinamentosCracha = () => {
   const [selectedFuncionarioId, setSelectedFuncionarioId] = useState<string | undefined>();
@@ -410,12 +411,10 @@ const TreinamentosCracha = () => {
           />
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <FuncionarioInfoCard
+            <FuncionarioTreinamentosValidosCard
               funcionario={funcionario}
               treinamentosValidos={treinamentosValidos}
               isLoading={isLoading}
-              selectedFuncionarioId={selectedFuncionarioId}
-              onPrint={handlePrint}
             />
 
             <CrachaPreview
