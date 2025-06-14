@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { Table, TableHeader, TableBody, TableRow, TableCell, TableHead } from "@/components/ui/table";
 import { treinamentosNormativosService } from "@/services/treinamentos/treinamentosNormativosService";
@@ -71,10 +70,16 @@ export const TabelaTreinamentosNormativosVencidos: React.FC = () => {
     carregarDados();
   };
 
-  const handleRenovar = (treinamento: TreinamentoNormativo) => {
+  const handleRenovar = async (treinamento: TreinamentoNormativo) => {
     const funcionario = getFuncionarioInfo(treinamento.funcionario_id);
     if (!funcionario) return;
-    // Inclui o campo tipo como "Reciclagem"
+
+    // Marca como arquivado ANTES de navegar
+    await treinamentosNormativosService.arquivar(treinamento.id, "Renovação automática via ciclo de reciclagem");
+    // Recarrega lista/local para sumir instantaneamente na tabela
+    carregarDados();
+
+    // Navega para o formulário, passando dados do funcionário/treinamento
     navigate("/treinamentos/normativo", {
       state: {
         ccaId: funcionario.cca_id ? String(funcionario.cca_id) : "",
