@@ -3,16 +3,15 @@ import { supabase } from "@/integrations/supabase/client";
 
 // Busca dados agregados dos subprocessos, total geral se processoTreinamentoId for nulo
 export async function fetchDonutSubprocessoData(processoTreinamentoId: string | null) {
-  // Se não houver processoTreinamentoId, buscar todos os registros (NÃO filtrar pelo processo)
-  const { data, error } = await supabase
+  let query = supabase
     .from("execucao_treinamentos")
-    .select("tipo_treinamento, horas_totais")
-    .modify((query) => {
-      if (processoTreinamentoId) {
-        query.eq("processo_treinamento_id", processoTreinamentoId);
-      }
-      return query;
-    });
+    .select("tipo_treinamento, horas_totais");
+
+  if (processoTreinamentoId) {
+    query = query.eq("processo_treinamento_id", processoTreinamentoId);
+  }
+
+  const { data, error } = await query;
 
   if (error) {
     console.error("Erro ao buscar subprocessos:", error);

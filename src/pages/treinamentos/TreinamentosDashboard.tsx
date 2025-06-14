@@ -111,7 +111,7 @@ const TreinamentosDashboard = () => {
                 </div>
               </CardHeader>
               <CardContent className="h-[400px] flex items-center justify-center">
-                <DonutSubprocessoChart processoTreinamentoId={processoTreinamentoId} />
+                <DonutSubprocessoChart />
               </CardContent>
             </Card>
           </div>
