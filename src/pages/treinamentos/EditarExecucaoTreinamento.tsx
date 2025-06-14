@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { execucaoTreinamentoService } from "@/services/treinamentos/execucaoTreinamentoService";
@@ -65,17 +64,6 @@ const EditarExecucaoTreinamento = () => {
         <CardContent>
           <form className="space-y-4" onSubmit={handleSave}>
             <div>
-              <Label htmlFor="treinamento_nome">Treinamento</Label>
-              <Input
-                name="treinamento_nome"
-                id="treinamento_nome"
-                value={execucao.treinamento_nome || ""}
-                onChange={handleChange}
-                placeholder="Treinamento"
-                required
-              />
-            </div>
-            <div>
               <Label htmlFor="cca">CCA</Label>
               <Input
                 name="cca"
@@ -83,6 +71,17 @@ const EditarExecucaoTreinamento = () => {
                 value={execucao.cca}
                 onChange={handleChange}
                 placeholder="CCA"
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="treinamento_nome">Treinamento</Label>
+              <Input
+                name="treinamento_nome"
+                id="treinamento_nome"
+                value={execucao.treinamento_nome || ""}
+                onChange={handleChange}
+                placeholder="Treinamento"
                 required
               />
             </div>
