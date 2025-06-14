@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -61,6 +62,7 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 const TreinamentosNormativo = () => {
+  // ----------- HOOKS E DEFINIÇÕES DEVEM FICAR ANTES DE QUALQUER RETURN -----------
   const [isSubmitSuccess, setIsSubmitSuccess] = useState(false);
   const [selectedFuncionario, setSelectedFuncionario] = useState<Funcionario | null>(null);
   const [dataValidade, setDataValidade] = useState<Date | null>(null);
@@ -79,6 +81,7 @@ const TreinamentosNormativo = () => {
     },
   });
 
+  // --- UseEffects e watchers devem ficar aqui ---
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -99,7 +102,6 @@ const TreinamentosNormativo = () => {
         setIsLoading(false);
       }
     };
-    
     loadData();
   }, []);
 
@@ -107,7 +109,7 @@ const TreinamentosNormativo = () => {
   const watchTreinamentoId = form.watch("treinamentoId");
   const watchDataRealizacao = form.watch("dataRealizacao");
   
-  React.useEffect(() => {
+  useEffect(() => {
     if (watchFuncionarioId) {
       const funcionario = funcionarios.find(f => f.id === watchFuncionarioId);
       setSelectedFuncionario(funcionario || null);
@@ -116,7 +118,7 @@ const TreinamentosNormativo = () => {
     }
   }, [watchFuncionarioId, funcionarios]);
   
-  React.useEffect(() => {
+  useEffect(() => {
     const updateDataValidade = async () => {
       if (watchTreinamentoId && watchDataRealizacao) {
         try {
@@ -129,24 +131,34 @@ const TreinamentosNormativo = () => {
         setDataValidade(null);
       }
     };
-    
     updateDataValidade();
   }, [watchTreinamentoId, watchDataRealizacao]);
 
   const watchCcaId = form.watch("ccaId");
   useEffect(() => {
     setSelectedCcaId(watchCcaId || null);
-    // Limpa funcionário selecionado caso mude o CCA
     form.setValue("funcionarioId", "");
   }, [watchCcaId]);
-
-  // Busca CCAs na montagem do componente
+  
   useEffect(() => {
     const fetchCcas = async () => {
       const ccasData = await ccaService.getAll();
       setCcas(ccasData);
     };
     fetchCcas();
+  }, []);
+
+  // Carregar treinamentos normativos da tabela correta no useEffect
+  useEffect(() => {
+    const loadTreinamentosNormativos = async () => {
+      try {
+        const data = await listaTreinamentosNormativosService.getAll();
+        setTreinamentosNormativos(data);
+      } catch (error) {
+        console.error("Erro ao carregar treinamentos normativos:", error);
+      }
+    };
+    loadTreinamentosNormativos();
   }, []);
 
   const filteredFuncionarios = selectedCcaId
@@ -217,6 +229,7 @@ const TreinamentosNormativo = () => {
     }
   };
 
+  // ----------------- SOMENTE AQUI FAREMOS RETURNS CONDICIONAIS -----------------
   if (isSubmitSuccess) {
     return (
       <div className="flex items-center justify-center h-[calc(100vh-200px)]">
@@ -254,19 +267,6 @@ const TreinamentosNormativo = () => {
       </div>
     );
   }
-
-  // Carregar treinamentos normativos da tabela correta no useEffect
-  useEffect(() => {
-    const loadTreinamentosNormativos = async () => {
-      try {
-        const data = await listaTreinamentosNormativosService.getAll();
-        setTreinamentosNormativos(data);
-      } catch (error) {
-        console.error("Erro ao carregar treinamentos normativos:", error);
-      }
-    };
-    loadTreinamentosNormativos();
-  }, []);
 
   return (
     <div className="space-y-6">
@@ -312,8 +312,6 @@ const TreinamentosNormativo = () => {
                           <SelectContent>
                             {[...ccas]
                               .sort((a, b) => {
-                                // Se codigo é sempre numérico, ordene numericamente
-                                // Caso contrário, ordene como string
                                 return String(a.codigo).localeCompare(String(b.codigo), "pt-BR", { numeric: true });
                               })
                               .map((cca) => (
@@ -329,9 +327,7 @@ const TreinamentosNormativo = () => {
                   />
                 </div>
 
-                {/* Agrupar os próximos campos em duas colunas */}
                 <div className="flex flex-col md:flex-row gap-4">
-                  {/* Funcionário */}
                   <FormField
                     control={form.control}
                     name="funcionarioId"
@@ -360,7 +356,6 @@ const TreinamentosNormativo = () => {
                     )}
                   />
 
-                  {/* Função */}
                   <FormItem className="flex-1">
                     <FormLabel>Função</FormLabel>
                     <Input 
@@ -369,7 +364,6 @@ const TreinamentosNormativo = () => {
                     />
                   </FormItem>
                   
-                  {/* Matrícula */}
                   <FormItem className="flex-1">
                     <FormLabel>Matrícula</FormLabel>
                     <Input 
