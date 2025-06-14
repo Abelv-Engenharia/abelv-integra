@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { TreinamentoNormativo } from "@/types/treinamentos";
 
@@ -52,6 +51,21 @@ export const treinamentosNormativosService = {
       console.error('Exceção ao criar treinamento normativo:', error);
       return null;
     }
+  },
+
+  async arquivar(id: string, justificativa?: string): Promise<void> {
+    try {
+      // No momento não existe campo para justificativa de exclusão, apenas arquiva.
+      const { error } = await supabase
+        .from('treinamentos_normativos')
+        .update({ arquivado: true /*, justificativa_exclusao: justificativa */ })
+        .eq('id', id);
+
+      if (error) {
+        console.error('Erro ao arquivar treinamento normativo:', error);
+      }
+    } catch (error) {
+      console.error('Exceção ao arquivar treinamento normativo:', error);
+    }
   }
 };
-

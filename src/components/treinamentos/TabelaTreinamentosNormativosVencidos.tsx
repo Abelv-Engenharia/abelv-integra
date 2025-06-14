@@ -5,26 +5,36 @@ import { treinamentosNormativosService } from "@/services/treinamentos/treinamen
 import { Funcionario, TreinamentoNormativo } from "@/types/treinamentos";
 import { format } from "date-fns";
 import { fetchFuncionarios } from "@/utils/treinamentosUtils";
+import { Button } from "@/components/ui/button";
+import { Trash } from "lucide-react";
 
 export const TabelaTreinamentosNormativosVencidos: React.FC = () => {
   const [treinamentos, setTreinamentos] = useState<TreinamentoNormativo[]>([]);
   const [funcionarios, setFuncionarios] = useState<Funcionario[]>([]);
   const [loading, setLoading] = useState(true);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [justificativa, setJustificativa] = useState("");
+  const [treinamentoSelecionado, setTreinamentoSelecionado] = useState<TreinamentoNormativo | null>(null);
+  const [excluindo, setExcluindo] = useState(false);
 
   useEffect(() => {
+    carregarDados();
+  }, []);
+
+  const carregarDados = async () => {
     setLoading(true);
-    Promise.all([
+    const [treinamentos, funcionarios] = await Promise.all([
       treinamentosNormativosService.getAll(),
       fetchFuncionarios()
-    ]).then(([treinamentos, funcionarios]) => {
-      setTreinamentos(treinamentos);
-      setFuncionarios(funcionarios);
-    }).finally(() => setLoading(false));
-  }, []);
+    ]);
+    setTreinamentos(treinamentos);
+    setFuncionarios(funcionarios);
+    setLoading(false);
+  };
 
   // Filtra vencidos e próximos ao vencimento, e ordena pela data_validade (menor -> maior)
   const treinamentosFiltrados = treinamentos
-    .filter(t => t.status === "Vencido" || t.status === "Próximo ao vencimento")
+    .filter(t => (t.status === "Vencido" || t.status === "Próximo ao vencimento") && !t.arquivado)
     .sort((a, b) => {
       const dataA = a.data_validade ? new Date(a.data_validade).getTime() : 0;
       const dataB = b.data_validade ? new Date(b.data_validade).getTime() : 0;
@@ -34,6 +44,35 @@ export const TabelaTreinamentosNormativosVencidos: React.FC = () => {
   function getFuncionarioInfo(id: string) {
     return funcionarios.find(f => f.id === id);
   }
+
+  const handleOpenModal = (treinamento: TreinamentoNormativo) => {
+    setTreinamentoSelecionado(treinamento);
+    setJustificativa("");
+    setModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setModalOpen(false);
+    setTreinamentoSelecionado(null);
+    setJustificativa("");
+  };
+
+  const handleExcluir = async () => {
+    if (!treinamentoSelecionado || justificativa.trim().length < 5) return;
+    setExcluindo(true);
+    // Atualiza para arquivado = true, e opcionalmente poderia salvar justificativa em um campo próprio no futuro
+    await treinamentosNormativosService.arquivar(treinamentoSelecionado.id, justificativa);
+    setExcluindo(false);
+    setModalOpen(false);
+    setTreinamentoSelecionado(null);
+    setJustificativa("");
+    carregarDados(); // Atualiza lista
+  };
+
+  const handleRenovar = (treinamento: TreinamentoNormativo) => {
+    // Aqui pode abrir um modal/form de renovação - para esta entrega, só um alert como placeholder:
+    alert("Funcionalidade de renovar treinamento em breve.");
+  };
 
   if (loading) {
     return (
@@ -59,6 +98,7 @@ export const TabelaTreinamentosNormativosVencidos: React.FC = () => {
               {/* Removido: <TableHead>Data de Realização</TableHead> */}
               <TableHead>Data de Validade</TableHead>
               <TableHead>Status</TableHead>
+              <TableHead>Ações</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -88,12 +128,30 @@ export const TabelaTreinamentosNormativosVencidos: React.FC = () => {
                         {t.status}
                       </span>
                     </TableCell>
+                    <TableCell className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleRenovar(t)}
+                        title="Renovar treinamento"
+                      >
+                        Renovar
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        size="icon"
+                        onClick={() => handleOpenModal(t)}
+                        title="Excluir trein. vencido"
+                      >
+                        <Trash className="w-4 h-4" />
+                      </Button>
+                    </TableCell>
                   </TableRow>
                 );
               })
             ) : (
               <TableRow>
-                <TableCell colSpan={6} className="h-16 text-center text-muted-foreground">
+                <TableCell colSpan={7} className="h-16 text-center text-muted-foreground">
                   Nenhum treinamento vencido ou próximo ao vencimento encontrado.
                 </TableCell>
               </TableRow>
@@ -101,6 +159,52 @@ export const TabelaTreinamentosNormativosVencidos: React.FC = () => {
           </TableBody>
         </Table>
       </div>
+
+      {/* Modal de justificativa para exclusão */}
+      {modalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="bg-white rounded-lg p-6 max-w-sm w-full shadow-lg flex flex-col gap-4">
+            <h4 className="text-lg font-semibold">Justificativa para exclusão</h4>
+            <textarea
+              className="w-full min-h-[80px] border rounded px-2 py-1"
+              placeholder="Insira a justificativa (mínimo 5 caracteres)"
+              value={justificativa}
+              onChange={e => setJustificativa(e.target.value)}
+              disabled={excluindo}
+            />
+            <div className="flex gap-2 justify-end">
+              <Button
+                variant="outline"
+                onClick={handleCloseModal}
+                disabled={excluindo}
+              >
+                Cancelar
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={handleExcluir}
+                disabled={excluindo || justificativa.trim().length < 5}
+              >
+                {excluindo ? "Excluindo..." : "Confirmar Exclusão"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };
+
+// Serviço para arquivar, será utilizado acima.
+// Você deve adicionar esse método em treinamentosNormativosService:
+
+// treinamentosNormativosService.arquivar = async (id: string, justificativa: string) => {
+//   await supabase
+//     .from('treinamentos_normativos')
+//     .update({ arquivado: true /*, justificativa_exclusao: justificativa */ })
+//     .eq('id', id);
+// };
+
+// Você pode adicionar o campo justificativa em futuro ajuste se desejar auditar esta ação.
+
