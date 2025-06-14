@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { TreinamentosExecucaoChart } from "@/components/treinamentos/TreinamentosExecucaoChart";
 import { TreinamentosNormativosChart } from "@/components/treinamentos/TreinamentosNormativosChart";
 import { TreinamentoStatusTable } from "@/components/treinamentos/TreinamentoStatusTable";
 import { TreinamentosSummaryCards } from "@/components/treinamentos/TreinamentosSummaryCards";
@@ -16,6 +15,9 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import TreinamentosDashboardFilters from "@/components/treinamentos/TreinamentosDashboardFilters";
+import { TreinamentosExecucaoChart } from "@/components/treinamentos/TreinamentosExecucaoChart";
+import { DonutProcessoGeralChart } from "@/components/treinamentos/DonutProcessoGeralChart";
+import { DonutSubprocessoChart } from "@/components/treinamentos/DonutSubprocessoChart";
 
 const TreinamentosDashboard = () => {
   const [year, setYear] = useState<string>("todos");
@@ -66,33 +68,27 @@ const TreinamentosDashboard = () => {
         </TabsList>
         
         <TabsContent value="execucao" className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            <Card className="col-span-2">
-              <CardHeader>
-                <CardTitle>Execução de Treinamentos por Mês</CardTitle>
-                <CardDescription>
-                  Quantidade de treinamentos realizados nos últimos 6 meses
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="h-[300px]">
-                <TreinamentosExecucaoChart />
-              </CardContent>
-            </Card>
-
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2">
             <Card>
               <CardHeader>
-                <CardTitle>Treinamentos por Tipo</CardTitle>
+                <CardTitle>PROCESSO - GERAL</CardTitle>
                 <CardDescription>
-                  Distribuição de treinamentos por categoria
+                  Distribuição geral dos processos de treinamento
                 </CardDescription>
               </CardHeader>
-              <CardContent className="h-[300px]">
-                {/* Placeholder for pie chart */}
-                <div className="flex h-full items-center justify-center">
-                  <p className="text-muted-foreground">
-                    Gráfico de distribuição de treinamentos
-                  </p>
-                </div>
+              <CardContent className="h-[340px]">
+                <DonutProcessoGeralChart />
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle>SUBPROCESSO</CardTitle>
+                <CardDescription>
+                  Distribuição dos subprocessos de treinamento
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="h-[340px]">
+                <DonutSubprocessoChart />
               </CardContent>
             </Card>
           </div>
