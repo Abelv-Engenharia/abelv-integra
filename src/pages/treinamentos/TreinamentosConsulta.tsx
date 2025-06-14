@@ -233,10 +233,21 @@ function TreinamentosNormativosPorFuncionarioTab() {
                 <SelectValue placeholder="Selecione o CCA" />
               </SelectTrigger>
               <SelectContent>
-                {ccas.map((cca) => (
-                  <SelectItem key={cca.id} value={String(cca.id)}>
-                    {cca.codigo} - {cca.nome}
-                  </SelectItem>
+                {/* Ordenar os CCAs do menor para o maior pelo código */}
+                {[...ccas]
+                  .sort((a, b) => {
+                    // Se código for numérico, comparar como número, senão string
+                    const aNum = Number(a.codigo);
+                    const bNum = Number(b.codigo);
+                    if (!isNaN(aNum) && !isNaN(bNum)) {
+                      return aNum - bNum;
+                    }
+                    return (a.codigo || "").localeCompare(b.codigo || "");
+                  })
+                  .map((cca) => (
+                    <SelectItem key={cca.id} value={String(cca.id)}>
+                      {cca.codigo} - {cca.nome}
+                    </SelectItem>
                 ))}
               </SelectContent>
             </Select>
