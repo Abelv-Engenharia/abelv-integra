@@ -75,14 +75,16 @@ const TreinamentosNormativo = () => {
   const [selectedCcaId, setSelectedCcaId] = useState<string | null>(null);
   const [treinamentosNormativos, setTreinamentosNormativos] = useState<{id: string, nome: string, validade_dias?: number}[]>([]);
   const [certificadoFile, setCertificadoFile] = useState<File | null>(null);
-  const [manualDate, setManualDate] = useState<string | null>(null);
-  const [inputDataRealizacao, setInputDataRealizacao] = useState<string>("");
+  // Remove unused states related to manualDate or inputDataRealizacao
+  // const [manualDate, setManualDate] = useState<string | null>(null);
+  // const [inputDataRealizacao, setInputDataRealizacao] = useState<string>("");
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       ccaId: "",
       tipo: "Formação",
+      dataRealizacao: undefined, // Ensure default is undefined, not ""
     },
   });
 
@@ -307,11 +309,13 @@ const TreinamentosNormativo = () => {
   }
 
   const onSubmit = async (data: FormValues) => {
-    // Corrigir: pegar a data da última seleção válida (manual ou calendário)
+    // Instead of any logic using `manualDate`, always use the date from the form
+    // and only transform it to string (yyyy-mm-dd) when sending to the backend
+
     const dataRealizacaoISO =
-      manualDate && /^\d{4}-\d{2}-\d{2}$/.test(manualDate)
-        ? manualDate
-        : dateValueToISODateString(data.dataRealizacao);
+      data.dataRealizacao instanceof Date
+        ? dateValueToISODateString(data.dataRealizacao)
+        : null;
 
     if (!dataRealizacaoISO) {
       toast({
@@ -596,26 +600,22 @@ const TreinamentosNormativo = () => {
                           maxLength={10}
                           placeholder="dd/mm/aaaa"
                           value={
-                            field.value
-                              ? format(field.value as Date, "dd/MM/yyyy")
+                            field.value instanceof Date
+                              ? format(field.value, "dd/MM/yyyy")
                               : ""
                           }
                           className="pr-10"
                           onChange={e => {
-                            // Remove caracteres não numéricos, aceita só "/"
+                            // Allow only "/"" and digits, restrict to dd/mm/aaaa
                             const raw = e.target.value.replace(/[^\d/]/g, "");
                             let digits = raw;
-
-                            // Mascara dd/mm/aaaa
                             if (digits.length >= 2 && digits[2] !== "/") digits = digits.slice(0, 2) + "/" + digits.slice(2);
                             if (digits.length >= 5 && digits[5] !== "/") digits = digits.slice(0, 5) + "/" + digits.slice(5);
                             if (digits.length > 10) digits = digits.slice(0, 10);
-
-                            // Atualiza valor apenas ao completar 10 dígitos (dd/mm/aaaa)
+                            // update only when all 10 digits present
                             if (digits.length === 10) {
                               const [dd, mm, yyyy] = digits.split("/");
                               const asDate = new Date(Number(yyyy), Number(mm) - 1, Number(dd));
-                              // Valida data
                               if (
                                 !isNaN(asDate.getTime()) &&
                                 asDate.getDate() === Number(dd) &&
@@ -624,16 +624,13 @@ const TreinamentosNormativo = () => {
                               ) {
                                 field.onChange(asDate);
                               } else {
-                                // Data inválida
                                 field.onChange(undefined);
                               }
                             } else {
-                              // Campo incompleto: limpa valor do form para não ficar estranho
                               field.onChange(undefined);
                             }
                           }}
                           onBlur={e => {
-                            // Validar se precisa alertar input inválido
                             const [dd, mm, yyyy] = (e.target.value || "").split("/");
                             if (e.target.value && (e.target.value.length !== 10 || isNaN(Number(dd)) || isNaN(Number(mm)) || isNaN(Number(yyyy)))) {
                               toast({
@@ -661,7 +658,7 @@ const TreinamentosNormativo = () => {
                           <PopoverContent className="w-auto p-0" align="start">
                             <Calendar
                               mode="single"
-                              selected={field.value}
+                              selected={field.value instanceof Date ? field.value : undefined}
                               onSelect={date => {
                                 if (date) {
                                   field.onChange(date);
