@@ -1,12 +1,13 @@
+
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Trash2, Edit, UserRound } from "lucide-react";
 import { Funcionario } from "@/types/funcionarios";
+import { useSignedUrl } from "@/hooks/useSignedUrl";
 
 function formatDateBR(dateStr?: string | null) {
   if (!dateStr) return "-";
-  // Espera "YYYY-MM-DD" ou "YYYY-MM-DDTHH:mm:ss"
   const onlyDate = dateStr.slice(0, 10);
   const [ano, mes, dia] = onlyDate.split("-");
   if (!ano || !mes || !dia) return "-";
@@ -20,6 +21,62 @@ interface FuncionariosTableProps {
   onDelete: (id: string) => void;
 }
 
+// Novo componente para renderizar Avatar de funcionário com signedURL
+const FuncionarioAvatar: React.FC<{ funcionario: Funcionario }> = ({ funcionario }) => {
+  const { url, loading, error, generate } = useSignedUrl();
+
+  React.useEffect(() => {
+    // Gera a signed URL sempre que houver foto e id
+    if (funcionario.foto) {
+      // Espera que foto seja do tipo "funcionarios/xxx.jpg" ou só caminho do arquivo
+      let filePath = funcionario.foto;
+      // Em alguns casos, pode vir a URL completa, extraímos o path relativo se for
+      if (/^https?:\/\//.test(filePath)) {
+        // Remove supabase host, pega só o path no storage
+        const match = filePath.match(/\/storage\/v1\/object\/sign\/([^?]+)/);
+        if (match) {
+          filePath = decodeURIComponent(match[1]);
+        } else {
+          // Alternadamente, tenta pegar após 'funcionarios-fotos/' como fallback
+          const idx = filePath.indexOf('funcionarios-fotos/');
+          if (idx >= 0) filePath = filePath.slice(idx + 'funcionarios-fotos/'.length);
+        }
+      } else if (filePath.startsWith('funcionarios/')) {
+        // OK!
+      } else {
+        // Se vier só 'abc.jpg', prefixa corretamente
+        filePath = `funcionarios/${filePath}`;
+      }
+      generate('funcionarios-fotos', filePath, 300);
+    }
+    // Não colocar dependência em generate para evitar loop
+    // eslint-disable-next-line
+  }, [funcionario.foto]);
+
+  if (!funcionario.foto) {
+    return (
+      <Avatar className="size-8">
+        <AvatarFallback>
+          <UserRound className="h-4 w-4" />
+        </AvatarFallback>
+      </Avatar>
+    );
+  }
+
+  return (
+    <Avatar className="size-8">
+      {/* Mostra imagem quando a signed url está disponível */}
+      {url ? (
+        <AvatarImage src={url} />
+      ) : (
+        <AvatarFallback>
+          <UserRound className="h-4 w-4" />
+        </AvatarFallback>
+      )}
+    </Avatar>
+  );
+};
+
 export const FuncionariosTable: React.FC<FuncionariosTableProps> = ({
   funcionarios,
   isLoading,
@@ -29,26 +86,6 @@ export const FuncionariosTable: React.FC<FuncionariosTableProps> = ({
   if (isLoading) {
     return <p>Carregando...</p>;
   }
-
-  // Cache bust robusto: usa updated_at + timestamp
-  const getFotoUrl = (funcionario: Funcionario) => {
-    if (!funcionario.foto) return "";
-    let cacheBust = "";
-    // @ts-ignore: updated_at pode existir no objeto vindo do Supabase aninhado
-    if ((funcionario as any).updated_at) {
-      cacheBust = (funcionario as any).updated_at;
-    } else {
-      cacheBust = `${funcionario.id}${funcionario.foto}`;
-    }
-    // Sempre adiciona data atual para garantir atualização
-    const nowStamp = Date.now();
-    const urlFinal = `${funcionario.foto}${
-      funcionario.foto.includes("?") ? "&" : "?"
-    }cb=${encodeURIComponent(cacheBust)}&rnd=${nowStamp}`;
-
-    console.log("Avatar SRC FINAL:", urlFinal, "para:", funcionario.nome);
-    return urlFinal;
-  };
 
   return (
     <div className="overflow-x-auto">
@@ -69,12 +106,7 @@ export const FuncionariosTable: React.FC<FuncionariosTableProps> = ({
           {funcionarios.map((funcionario) => (
             <tr key={funcionario.id}>
               <td className="border border-gray-300 p-2">
-                <Avatar className="size-8">
-                  <AvatarImage src={getFotoUrl(funcionario)} />
-                  <AvatarFallback>
-                    <UserRound className="h-4 w-4" />
-                  </AvatarFallback>
-                </Avatar>
+                <FuncionarioAvatar funcionario={funcionario} />
               </td>
               <td className="border border-gray-300 p-2">{funcionario.nome}</td>
               <td className="border border-gray-300 p-2">{funcionario.funcao}</td>
