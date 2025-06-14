@@ -25,7 +25,8 @@ const TreinamentosDashboard = () => {
   useEffect(() => {
     fetchProcessosTreinamento().then(setProcessos);
   }, []);
-  return <div className="space-y-6">
+  return (
+    <div className="space-y-6">
       <TreinamentosDashboardFilters year={year} setYear={setYear} month={month} setMonth={setMonth} ccaId={ccaId} setCcaId={setCcaId} />
       <div className="flex items-center justify-between">
         <div>
@@ -59,11 +60,11 @@ const TreinamentosDashboard = () => {
           <TabsTrigger value="execucao">Registros de Execução</TabsTrigger>
           <TabsTrigger value="normativos">Treinamentos Normativos</TabsTrigger>
         </TabsList>
-        
+
         <TabsContent value="execucao" className="space-y-4">
           
           <div className="flex flex-col gap-4">
-            <Card>
+            <Card className="w-full">
               <CardHeader>
                 <CardTitle>PROCESSO - GERAL</CardTitle>
                 <CardDescription>
@@ -91,10 +92,10 @@ const TreinamentosDashboard = () => {
             </Button>
           </div>
         </TabsContent>
-        
-        <TabsContent value="normativos" className="flex flex-col items-center w-full gap-4">
-          <div className="flex flex-col items-center w-full gap-4">
-            {/* Card do gráfico, usando a largura total e altura reduzida */}
+
+        <TabsContent value="normativos" className="flex flex-col w-screen max-w-none px-0 items-center gap-4">
+          <div className="flex flex-col w-full gap-4">
+            {/* Card do gráfico */}
             <Card className="w-full">
               <CardHeader>
                 <CardTitle>Status dos Treinamentos Normativos</CardTitle>
@@ -102,27 +103,27 @@ const TreinamentosDashboard = () => {
                   Visão geral do status dos treinamentos normativos
                 </CardDescription>
               </CardHeader>
-              <CardContent className="h-[350px]">
+              <CardContent className="h-[320px]">
                 <TreinamentosNormativosChart />
               </CardContent>
             </Card>
-            {/* Card da tabela vencidos, usando a mesma largura total */}
+            {/* Card da tabela vencidos */}
             <Card className="w-full">
-              <CardContent>
+              <CardContent className="p-0">
                 <TabelaTreinamentosNormativosVencidos />
               </CardContent>
             </Card>
           </div>
+          
           <div className="flex justify-center gap-4">
             <Button variant="outline" size="lg" asChild>
-              
             </Button>
             <Button variant="outline" size="lg" asChild>
-              
             </Button>
           </div>
         </TabsContent>
       </Tabs>
-    </div>;
+    </div>
+  );
 };
 export default TreinamentosDashboard;

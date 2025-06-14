@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { Table, TableHeader, TableBody, TableRow, TableCell, TableHead } from "@/components/ui/table";
 import { treinamentosNormativosService } from "@/services/treinamentos/treinamentosNormativosService";
@@ -33,18 +32,18 @@ export const TabelaTreinamentosNormativosVencidos: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-24">
+      <div className="flex items-center justify-center h-24 w-full">
         <p className="text-muted-foreground">Carregando registros...</p>
       </div>
     );
   }
 
   return (
-    <div className="mt-4 rounded-md border bg-background p-0 w-full">
+    <div className="mt-4 w-full">
       <h3 className="font-semibold text-lg mb-2 px-6 pt-6">
         Treinamentos Vencidos e Próximos ao Vencimento
       </h3>
-      <Table className="px-0 w-full">
+      <Table className="w-full">
         <TableHeader>
           <TableRow>
             <TableHead>Funcionário</TableHead>
