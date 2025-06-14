@@ -1,5 +1,7 @@
 import React, { useRef } from "react";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
+import {
+  Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { User, Printer } from "lucide-react";
 import { formatarData } from "@/utils/treinamentosUtils";
@@ -47,7 +49,7 @@ const CrachaPreview: React.FC<Props> = ({
   const treinamentosFiltrados = getTreinamentosMaisRecentes(treinamentosValidos);
 
   // Hook: gerar URL segura para foto do funcionário
-  const fotoUrl = useFuncionarioFotoUrl(funcionario?.foto);
+  const { imgUrl: fotoUrl, imgError: fotoError } = useFuncionarioFotoUrl(funcionario?.foto);
 
   // Função para imprimir SOMENTE o crachá mostrado (não página toda)
   const handlePrintCracha = () => {
@@ -137,13 +139,20 @@ const CrachaPreview: React.FC<Props> = ({
               </div>
 
               <div className="flex items-start gap-4 my-4">
-                <div className="w-28 h-28 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden">
+                <div className="w-28 h-28 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden relative">
                   {fotoUrl ? (
                     <img
                       src={fotoUrl}
                       alt={funcionario.nome}
                       className="w-full h-full object-cover rounded-full"
+                      onError={e => { 
+                        (e.currentTarget as HTMLImageElement).style.display = "none";
+                      }}
                     />
+                  ) : fotoError ? (
+                    <div className="absolute inset-0 flex items-center justify-center text-xs text-red-500 text-center p-2">
+                      Erro ao carregar foto
+                    </div>
                   ) : (
                     <User className="w-14 h-14 text-gray-400" />
                   )}
