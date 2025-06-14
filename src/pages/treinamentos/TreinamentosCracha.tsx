@@ -411,8 +411,8 @@ const TreinamentosCracha = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
+              {/* CAMPO CCA EM UMA LINHA SÓ */}
               <div className="flex flex-col md:flex-row gap-4">
-                {/* Campo seleção de CCA */}
                 <div className="w-full md:w-1/2">
                   <Select onValueChange={handleCcaChange} value={selectedCcaId ? String(selectedCcaId) : undefined}>
                     <SelectTrigger>
@@ -427,8 +427,11 @@ const TreinamentosCracha = () => {
                     </SelectContent>
                   </Select>
                 </div>
+              </div>
+              {/* SEGUNDA LINHA: FUNCIONÁRIO, FUNÇÃO, MATRÍCULA */}
+              <div className="mt-4 flex flex-col md:flex-row gap-4">
                 {/* Campo seleção de funcionário, filtrado por CCA */}
-                <div className="w-full md:w-1/2">
+                <div className="w-full md:w-1/3">
                   <Select
                     onValueChange={handleFuncionarioChange}
                     value={selectedFuncionarioId}
@@ -446,19 +449,18 @@ const TreinamentosCracha = () => {
                     </SelectContent>
                   </Select>
                 </div>
-
-                {funcionario && (
-                  <div className="flex flex-1 gap-4">
-                    <div className="flex-1">
-                      <p className="text-sm text-gray-500 mb-1">Função</p>
-                      <p className="font-medium border rounded-md px-3 py-2">{funcionario.funcao}</p>
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-sm text-gray-500 mb-1">Matrícula</p>
-                      <p className="font-medium border rounded-md px-3 py-2">{funcionario.matricula}</p>
-                    </div>
-                  </div>
-                )}
+                <div className="w-full md:w-1/3">
+                  <p className="text-sm text-gray-500 mb-1">Função</p>
+                  <p className="font-medium border rounded-md px-3 py-2 min-h-[40px]">
+                    {funcionario?.funcao || <span className="text-gray-400">---</span>}
+                  </p>
+                </div>
+                <div className="w-full md:w-1/3">
+                  <p className="text-sm text-gray-500 mb-1">Matrícula</p>
+                  <p className="font-medium border rounded-md px-3 py-2 min-h-[40px]">
+                    {funcionario?.matricula || <span className="text-gray-400">---</span>}
+                  </p>
+                </div>
               </div>
             </CardContent>
           </Card>
