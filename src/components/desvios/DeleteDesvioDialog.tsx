@@ -38,26 +38,26 @@ const DeleteDesvioDialog = ({ desvio, onDesvioDeleted }: DeleteDesvioDialogProps
     try {
       console.log('Tentando excluir desvio com ID:', desvio.id);
       const success = await desviosCompletosService.delete(desvio.id);
+      console.log('Retorno do service delete:', success);
 
       if (success) {
         toast({
           title: "Desvio excluído",
           description: "O desvio foi excluído com sucesso da tabela desvios_completos.",
         });
-        setOpen(false); // FECHA DIALOG APÓS sucesso
-        // Dispara o callback somente com sucesso após a promise!
+        setOpen(false); // Fecha dialog
         onDesvioDeleted(desvio.id);
         console.log('Callback onDesvioDeleted disparado com ID:', desvio.id);
       } else {
         toast({
           title: "Erro ao excluir",
-          description: "Não foi possível excluir o desvio. Tente novamente.",
+          description: "Não foi possível excluir o desvio (backend retornou false). Tente novamente.",
           variant: "destructive",
         });
-        console.error('Falha ao excluir desvio:', desvio.id);
+        console.error('Falha ao excluir desvio: BACKEND RETORNOU FALSE ID:', desvio.id);
       }
     } catch (error) {
-      console.error('Erro ao excluir desvio:', error);
+      console.error('Erro ao excluir desvio (exception):', error);
       toast({
         title: "Erro ao excluir",
         description: "Ocorreu um erro ao excluir o desvio da tabela desvios_completos.",
