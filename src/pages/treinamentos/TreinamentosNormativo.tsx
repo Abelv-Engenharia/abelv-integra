@@ -295,11 +295,17 @@ const TreinamentosNormativo = () => {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {ccas.map((cca) => (
-                              <SelectItem key={cca.id} value={String(cca.id)}>
-                                {cca.codigo} - {cca.nome}
-                              </SelectItem>
-                            ))}
+                            {[...ccas]
+                              .sort((a, b) => {
+                                // Se codigo é sempre numérico, ordene numericamente
+                                // Caso contrário, ordene como string
+                                return String(a.codigo).localeCompare(String(b.codigo), "pt-BR", { numeric: true });
+                              })
+                              .map((cca) => (
+                                <SelectItem key={cca.id} value={String(cca.id)}>
+                                  {cca.codigo} - {cca.nome}
+                                </SelectItem>
+                              ))}
                           </SelectContent>
                         </Select>
                         <FormMessage />
