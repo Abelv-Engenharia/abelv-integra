@@ -408,7 +408,8 @@ const TreinamentosNormativo = () => {
       if (ccaId) form.setValue("ccaId", ccaId);
       if (funcionarioId) form.setValue("funcionarioId", funcionarioId);
       if (treinamentoId) form.setValue("treinamentoId", treinamentoId);
-      if (tipo) form.setValue("tipo", tipo); // se vier tipo, setar!
+      // Only set type if it matches expected literal values
+      if (tipo === "Reciclagem" || tipo === "Formação") form.setValue("tipo", tipo);
       // Forçar Função e Matrícula nos elementos exibidos (apenas para exibição, pois são disabled)
       if (funcionarioId && funcionarios.length > 0) {
         const funcionario = funcionarios.find(f => f.id === funcionarioId);
