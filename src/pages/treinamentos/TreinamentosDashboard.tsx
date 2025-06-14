@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -92,22 +93,27 @@ const TreinamentosDashboard = () => {
           </div>
         </TabsContent>
         
-        <TabsContent value="normativos" className="space-y-4">
-          <div className="flex flex-col gap-4 w-full">
-            <Card className="w-full">
+        <TabsContent value="normativos" className="flex flex-col items-center w-full gap-4">
+          <div className="flex flex-col items-center w-full gap-4">
+            {/* Card do gráfico, altura reduzida e largura padronizada */}
+            <Card className="w-full max-w-4xl mx-auto">
               <CardHeader>
                 <CardTitle>Status dos Treinamentos Normativos</CardTitle>
                 <CardDescription>
                   Visão geral do status dos treinamentos normativos
                 </CardDescription>
               </CardHeader>
-              <CardContent className="h-[80vh] p-2">
+              <CardContent className="h-[375px]">
                 <TreinamentosNormativosChart />
+              </CardContent>
+            </Card>
+            {/* Card da tabela vencidos, alinhado a largura do card acima */}
+            <Card className="w-full max-w-4xl mx-auto">
+              <CardContent>
                 <TabelaTreinamentosNormativosVencidos />
               </CardContent>
             </Card>
           </div>
-          
           <div className="flex justify-center gap-4">
             <Button variant="outline" size="lg" asChild>
               
@@ -121,3 +127,4 @@ const TreinamentosDashboard = () => {
     </div>;
 };
 export default TreinamentosDashboard;
+
