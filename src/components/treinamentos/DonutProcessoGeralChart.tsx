@@ -1,3 +1,4 @@
+
 import React from "react";
 import { PieChart, Pie, Cell, Tooltip } from "recharts";
 import { useTreinamentosPorTipoProcesso } from "./useTreinamentosPorTipoProcesso";
@@ -13,8 +14,8 @@ const renderCustomLabel = (props: any) => {
   const name = payload?.name ?? "";
   const value = payload?.horasTotais ?? 0;
 
-  // Deixar rótulo afastado mas não sair da área do card
-  const radius = Number(outerRadius) + 60; // aumentado para separar da fatia, ok pois estamos centralizando
+  // Ajustar: Aproximar o rótulo do donut para não cortar
+  const radius = Number(outerRadius) + 30;
   const x = Number(cx) + radius * Math.cos(-midAngle * RADIAN);
   const y = Number(cy) + radius * Math.sin(-midAngle * RADIAN);
   const color = COLORS[index % COLORS.length];
@@ -61,16 +62,16 @@ export const DonutProcessoGeralChart = () => {
 
   return (
     <div className="w-full flex items-center justify-center">
-      <PieChart width={540} height={400}> {/* aumentei um pouco a largura para caber melhor */}
+      <PieChart width={420} height={310}>
         <Pie
           data={data}
           dataKey="horasTotais"
           nameKey="name"
-          cx="50%"      // Centralizado no meio
-          cy="50%"      // Centralizado verticalmente
-          innerRadius={110}
-          outerRadius={142}
-          paddingAngle={1.5}
+          cx="50%"
+          cy="50%"
+          innerRadius={90}
+          outerRadius={118}
+          paddingAngle={1.2}
           label={renderCustomLabel}
           labelLine={true}
         >
@@ -88,3 +89,4 @@ export const DonutProcessoGeralChart = () => {
 };
 
 export default DonutProcessoGeralChart;
+
