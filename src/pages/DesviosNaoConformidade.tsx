@@ -226,28 +226,57 @@ const DesviosNaoConformidade = () => {
     }
   };
 
-  // Function to send PDF via email (mocked)
-  const sendPdfEmail = (data: FormValues) => {
+  // Função para enviar NC por e-mail usando Supabase Function
+  const sendPdfEmail = async (formData: FormValues) => {
     toast({
       title: "Enviando e-mail",
       description: "Processando o envio do PDF por e-mail...",
     });
-    
-    // This would be an actual API call in a real application
-    setTimeout(() => {
-      toast({
-        title: "E-mail enviado",
-        description: `Não conformidade enviada com sucesso para ${data.destinatario}`,
-      });
-    }, 2000);
-  };
 
-  // Form submission handler
-  const onSubmit = (data: FormValues) => {
-    const desvioData = loadedDesvio || fetchDesvioData(data.desvioId);
-    
-    if (desvioData) {
-      sendPdfEmail(data);
+    let documentoHtml = previewText;
+    // Se previewText está vazio, gera o HTML no momento
+    if (!documentoHtml && loadedDesvio) {
+      documentoHtml = processTemplate(formData.templateText, loadedDesvio);
+    }
+
+    try {
+      const response = await fetch(
+        "https://xexgdtlctyuycohzhmuu.functions.supabase.co/send-nc-email",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            // passa o apikey para autenticar (público, pois proteção está na edge function via env)
+            apikey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhleGdkdGxjdHl1eWNvaHpobXV1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDU4NzY0NTMsImV4cCI6MjA2MTQ1MjQ1M30.hbqL05Y8UMfVaOa4nbDQNClCfjk_yRg_dtoL09_yGyo",
+          },
+          body: JSON.stringify({
+            destinatario: formData.destinatario,
+            assunto: formData.assunto,
+            mensagem: formData.mensagem,
+            documentoHtml: documentoHtml,
+          }),
+        }
+      );
+      const result = await response.json();
+      if (response.ok && result.result === "ok") {
+        toast({
+          title: "E-mail enviado!",
+          description: `E-mail enviado para ${formData.destinatario}`,
+        });
+      } else {
+        toast({
+          title: "Erro ao enviar e-mail",
+          description: result.error || "Falha desconhecida ao enviar o e-mail.",
+          variant: "destructive",
+        });
+      }
+    } catch (error: any) {
+      console.error("Erro ao enviar email:", error);
+      toast({
+        title: "Erro ao enviar e-mail",
+        description: error.message || "Erro imprevisto ao enviar e-mail.",
+        variant: "destructive",
+      });
     }
   };
 
