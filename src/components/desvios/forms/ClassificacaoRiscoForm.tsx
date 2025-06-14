@@ -65,14 +65,18 @@ const ClassificacaoRiscoForm = () => {
   useEffect(() => {
     if (probabilidade !== undefined && severidade !== undefined) {
       let classificacao = "";
-      const soma = probabilidade + severidade;
+      const resultado = probabilidade * severidade;
       
-      if (soma <= 3) {
-        classificacao = "BAIXO";
-      } else if (soma <= 6) {
-        classificacao = "MÉDIO";
+      if (resultado <= 10) {
+        classificacao = "TRIVIAL";
+      } else if (resultado <= 21) {
+        classificacao = "TOLERÁVEL";
+      } else if (resultado <= 40) {
+        classificacao = "MODERADO";
+      } else if (resultado <= 56) {
+        classificacao = "SUBSTANCIAL";
       } else {
-        classificacao = "ALTO";
+        classificacao = "INTOLERÁVEL";
       }
       
       setValue("classificacaoRisco", classificacao);
@@ -80,6 +84,24 @@ const ClassificacaoRiscoForm = () => {
   }, [probabilidade, severidade, setValue]);
 
   const classificacaoRisco = watch("classificacaoRisco");
+
+  // Função para obter a cor da classificação
+  const getClassificacaoColor = (classificacao: string) => {
+    switch (classificacao) {
+      case "TRIVIAL":
+        return "bg-cyan-400 text-white";
+      case "TOLERÁVEL":
+        return "bg-green-400 text-white";
+      case "MODERADO":
+        return "bg-yellow-400 text-white";
+      case "SUBSTANCIAL":
+        return "bg-orange-400 text-white";
+      case "INTOLERÁVEL":
+        return "bg-red-500 text-white";
+      default:
+        return "bg-gray-400 text-white";
+    }
+  };
 
   if (loading) {
     return <div>Carregando opções de classificação...</div>;
@@ -245,7 +267,13 @@ const ClassificacaoRiscoForm = () => {
 
             <div className="bg-gray-50 p-4 rounded-lg border">
               <div className="text-sm font-medium text-gray-600 mb-1">Classificação</div>
-              <div className="text-2xl font-bold text-gray-900">{classificacaoRisco || "Não definida"}</div>
+              {classificacaoRisco ? (
+                <div className={`inline-block px-3 py-1 rounded-md text-sm font-bold ${getClassificacaoColor(classificacaoRisco)}`}>
+                  {classificacaoRisco}
+                </div>
+              ) : (
+                <div className="text-2xl font-bold text-gray-900">Não definida</div>
+              )}
             </div>
           </div>
 
@@ -271,7 +299,7 @@ const ClassificacaoRiscoForm = () => {
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-4 h-4 bg-red-500 rounded"></div>
-                <span>INTOLERÁVEL (>56)</span>
+                <span>INTOLERÁVEL (&gt;56)</span>
               </div>
             </div>
           </div>
