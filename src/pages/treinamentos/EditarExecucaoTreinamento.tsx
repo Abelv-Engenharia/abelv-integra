@@ -85,27 +85,29 @@ const EditarExecucaoTreinamento = () => {
                 required
               />
             </div>
-            <div>
-              <Label htmlFor="processo_treinamento">Processo</Label>
-              <Input
-                name="processo_treinamento"
-                id="processo_treinamento"
-                value={execucao.processo_treinamento}
-                onChange={handleChange}
-                placeholder="Processo"
-                required
-              />
-            </div>
-            <div>
-              <Label htmlFor="tipo_treinamento">Tipo</Label>
-              <Input
-                name="tipo_treinamento"
-                id="tipo_treinamento"
-                value={execucao.tipo_treinamento}
-                onChange={handleChange}
-                placeholder="Tipo"
-                required
-              />
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="flex-1">
+                <Label htmlFor="processo_treinamento">Processo</Label>
+                <Input
+                  name="processo_treinamento"
+                  id="processo_treinamento"
+                  value={execucao.processo_treinamento}
+                  onChange={handleChange}
+                  placeholder="Processo"
+                  required
+                />
+              </div>
+              <div className="flex-1">
+                <Label htmlFor="tipo_treinamento">Tipo</Label>
+                <Input
+                  name="tipo_treinamento"
+                  id="tipo_treinamento"
+                  value={execucao.tipo_treinamento}
+                  onChange={handleChange}
+                  placeholder="Tipo"
+                  required
+                />
+              </div>
             </div>
             <div>
               <Label htmlFor="carga_horaria">Carga Horária</Label>
@@ -170,7 +172,9 @@ const EditarExecucaoTreinamento = () => {
               />
             </div>
             <div className="flex gap-2">
-              <Button type="submit" disabled={saving}>{saving ? "Salvando..." : "Salvar"}</Button>
+              <Button type="submit" disabled={saving}>
+                {saving ? "Salvando..." : "Salvar"}
+              </Button>
               <Button variant="outline" asChild>
                 <Link to="/treinamentos/consulta">Cancelar</Link>
               </Button>
