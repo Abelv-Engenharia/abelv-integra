@@ -440,7 +440,7 @@ const TreinamentosNormativo = () => {
                       </FormItem>} />
                 </div>
 
-                <div className="flex flex-col md:flex-row gap-4">
+                <div className="flex flex-col md:flex-row gap-4 md:items-end">
                   <FormField control={form.control} name="funcionarioId" render={({
                 field
               }) => <FormItem className="flex-1">
