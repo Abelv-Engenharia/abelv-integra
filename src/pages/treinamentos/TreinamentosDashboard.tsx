@@ -97,23 +97,6 @@ const TreinamentosDashboard = () => {
             </Card>
           </div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Últimos Treinamentos Realizados</CardTitle>
-              <CardDescription>
-                Registro dos últimos treinamentos executados
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {/* Placeholder for recent trainings table */}
-              <div className="rounded-md border p-4">
-                <p className="text-muted-foreground text-center py-8">
-                  Lista de treinamentos recentes
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-
           <div className="flex justify-center gap-4">
             <Button variant="outline" size="lg" asChild>
               <Link to="/treinamentos/execucao">
