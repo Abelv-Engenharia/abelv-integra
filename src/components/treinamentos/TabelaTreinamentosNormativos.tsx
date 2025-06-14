@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { getStatusColor } from "@/utils/treinamentosUtils";
@@ -27,7 +26,7 @@ export const TabelaTreinamentosNormativos: React.FC<Props> = ({ treinamentos }) 
           <TableHead>Data Realização</TableHead>
           <TableHead>Data Validade</TableHead>
           <TableHead>Status</TableHead>
-          <TableHead>Certificado</TableHead>
+          <TableHead className="text-center">Certificado</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -69,7 +68,7 @@ export const TabelaTreinamentosNormativos: React.FC<Props> = ({ treinamentos }) 
                   {tr.status || "-"}
                 </span>
               </TableCell>
-              <TableCell>
+              <TableCell className="text-center">
                 {tr.certificado_url ? (
                   <a
                     href={tr.certificado_url}
