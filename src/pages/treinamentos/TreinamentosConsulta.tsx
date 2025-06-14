@@ -139,7 +139,7 @@ function TreinamentosNormativosPorFuncionarioTab() {
       }
       setLoading(true);
       try {
-        // Busca todos os treinamentos normativos desse funcionário, ordenado por nome, data desc, só não arquivados!
+        // Corrigido: NÃO ordenar por campo relacionado, só por data
         const { data, error } = await supabase
           .from('treinamentos_normativos')
           .select(`
@@ -155,7 +155,6 @@ function TreinamentosNormativosPorFuncionarioTab() {
           `)
           .eq("funcionario_id", selectedFuncionarioId)
           .eq("arquivado", false)
-          .order('lista_treinamentos_normativos.nome', { ascending: true })
           .order('data_realizacao', { ascending: false });
 
         console.log("[Treinamentos] Query params funcionario_id:", selectedFuncionarioId);
@@ -172,29 +171,8 @@ function TreinamentosNormativosPorFuncionarioTab() {
           return;
         }
 
-        // Fallback: se o campo arquivado vier null, mostrar tudo (debug)
-        if ((data || []).length === 0) {
-          // Tenta buscar sem filtrar arquivado:
-          const debugRes = await supabase
-            .from('treinamentos_normativos')
-            .select(`
-              id, 
-              treinamento_id, 
-              tipo, 
-              data_realizacao, 
-              data_validade, 
-              certificado_url, 
-              status, 
-              arquivado,
-              lista_treinamentos_normativos (nome)
-            `)
-            .eq("funcionario_id", selectedFuncionarioId)
-            .order('lista_treinamentos_normativos.nome', { ascending: true })
-            .order('data_realizacao', { ascending: false });
-          console.log("[Treinamentos][DEBUG sem arquivado] Normativos recebidos:", debugRes.data, "Erro:", debugRes.error);
-        }
-
-        const normativos: any[] = (data || []).map(row => ({
+        // Se desejar ordenar por nome, faça aqui no JS:
+        let normativos: any[] = (data || []).map(row => ({
           id: row.id,
           treinamento_nome: row.lista_treinamentos_normativos?.nome || "-",
           tipo: row.tipo,
@@ -205,6 +183,11 @@ function TreinamentosNormativosPorFuncionarioTab() {
           arquivado: row.arquivado,
         }));
 
+        // Ordena por nome se desejar:
+        normativos = normativos.sort((a, b) =>
+          (a.treinamento_nome || "").localeCompare(b.treinamento_nome || "")
+        );
+
         // Agrupar por treinamento_nome e filtrar o mais atual para "Treinamentos" e antigos para "Histórico"
         const agrupados: { [nome: string]: any[] } = {};
         normativos.forEach(t => {
@@ -214,7 +197,6 @@ function TreinamentosNormativosPorFuncionarioTab() {
         const atuais: any[] = [];
         const reciclados: any[] = [];
         Object.values(agrupados).forEach(arr => {
-          // Os dados já estão ordenados por data desc, logo o primeiro é o mais novo
           if (arr.length > 0) {
             atuais.push(arr[0]);
             reciclados.push(...arr.slice(1));
@@ -222,6 +204,7 @@ function TreinamentosNormativosPorFuncionarioTab() {
         });
         setTreinamentosAtual(atuais);
         setHistoricoReciclados(reciclados);
+
       } catch (err) {
         toast({
           title: "Erro",
