@@ -1,105 +1,65 @@
 
-import React, { useState, useEffect } from "react";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { fetchTreinamentosPorProcesso } from "@/services/treinamentosDashboardService";
-import { Skeleton } from "@/components/ui/skeleton";
 
-type ProcessoTreinamento = {
-  processo: string;
-  horasMOD: number;
-  totalHoras: number;
-  percentualMOD: number;
-};
+const linhasProcessos = [
+  "ADMISSÃO - FORMAÇÃO (PROCESSO DE MOBILIZAÇÃO)",
+  "FORMAÇÃO (REALIZADOS APÓS O INÍCIO DAS ATIVIDADES)",
+  "RECICLAGEM",
+  "TRANSFERÊNCIA - MOBILIZAÇÃO",
+];
 
 export const TreinamentosPorProcessoTable = () => {
-  const [dados, setDados] = useState<ProcessoTreinamento[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const loadDados = async () => {
-      try {
-        setLoading(true);
-        const data = await fetchTreinamentosPorProcesso();
-        setDados(data);
-      } catch (error) {
-        console.error("Erro ao carregar dados por processo:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadDados();
-  }, []);
-
-  if (loading) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Treinamentos por Processo - Efetivo MOD</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            {Array(5).fill(0).map((_, i) => (
-              <div key={i} className="flex space-x-4">
-                <Skeleton className="h-4 w-32" />
-                <Skeleton className="h-4 w-20" />
-                <Skeleton className="h-4 w-16" />
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Treinamentos por Processo - Efetivo MOD</CardTitle>
-        <p className="text-sm text-muted-foreground">
-          Distribuição de horas de treinamento por processo para o efetivo MOD
-        </p>
+        <CardTitle className="uppercase text-center text-base font-bold tracking-widest bg-blue-900 text-white rounded-t-md py-2">
+          Treinamentos por Processo
+        </CardTitle>
       </CardHeader>
-      <CardContent>
-        <div className="rounded-md border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Processo</TableHead>
-                <TableHead className="text-right">Horas MOD</TableHead>
-                <TableHead className="text-right">Percentual MOD</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {dados.length > 0 ? (
-                dados.map((item, index) => (
-                  <TableRow key={index}>
-                    <TableCell className="font-medium">{item.processo}</TableCell>
-                    <TableCell className="text-right">
-                      {item.horasMOD.toLocaleString('pt-BR', { maximumFractionDigits: 1 })} h
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {item.percentualMOD.toFixed(1)}%
-                    </TableCell>
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={3} className="text-center py-6 text-muted-foreground">
-                    Nenhum registro de treinamento encontrado para o mês atual
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
+      <CardContent className="p-0">
+        <div className="overflow-x-auto rounded-b-md border border-gray-300">
+          <table className="min-w-full bg-white">
+            <thead>
+              <tr className="bg-blue-800 text-white text-center text-sm font-semibold">
+                <th className="border border-white px-4 py-2">PROCESSO</th>
+                <th className="border border-white px-4 py-2">
+                  HORAS TREINAMENTO MOD
+                </th>
+                <th className="border border-white px-4 py-2">
+                  PERCENTUAL % MOD
+                </th>
+                <th className="border border-white px-4 py-2">
+                  HORAS TREINAMENTO MOI
+                </th>
+                <th className="border border-white px-4 py-2">
+                  PERCENTUAL % MOI
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {linhasProcessos.map((processo, idx) => (
+                <tr key={processo} className="text-center text-sm">
+                  <td className="border border-gray-300 px-4 py-2 font-medium">{processo}</td>
+                  <td className="border border-gray-300 px-4 py-2">-</td>
+                  <td className="border border-gray-300 px-4 py-2">-</td>
+                  <td className="border border-gray-300 px-4 py-2">-</td>
+                  <td className="border border-gray-300 px-4 py-2">-</td>
+                </tr>
+              ))}
+            </tbody>
+            <tfoot>
+              <tr className="text-center font-bold bg-gray-100 text-sm">
+                <td className="border border-gray-300 px-4 py-2">
+                  HORAS TOTAIS POR MÃO DE OBRA
+                </td>
+                <td className="border border-gray-300 px-4 py-2">0</td>
+                <td className="border border-gray-300 px-4 py-2">-</td>
+                <td className="border border-gray-300 px-4 py-2">0</td>
+                <td className="border border-gray-300 px-4 py-2">-</td>
+              </tr>
+            </tfoot>
+          </table>
         </div>
       </CardContent>
     </Card>
