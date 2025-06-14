@@ -179,8 +179,8 @@ const TreinamentosNormativo = () => {
       // Implementar upload do certificado aqui
       let certificadoUrl = undefined;
       
+      // FIX: Remover ccaId do objeto passado para criarTreinamentoNormativo
       const result = await criarTreinamentoNormativo({
-        ccaId: data.ccaId,
         funcionarioId: data.funcionarioId,
         treinamentoId: data.treinamentoId,
         tipo: data.tipo,
