@@ -608,16 +608,16 @@ const TreinamentosNormativo = () => {
                           value={inputDataRealizacao}
                           className="pr-10"
                           onChange={e => {
-                            const raw = e.target.value.replace(/[^\d/]/g, "");
-                            let digits = raw;
-                            if (digits.length >= 2 && digits[2] !== "/") digits = digits.slice(0, 2) + "/" + digits.slice(2);
-                            if (digits.length >= 5 && digits[5] !== "/") digits = digits.slice(0, 5) + "/" + digits.slice(5);
-                            if (digits.length > 10) digits = digits.slice(0, 10);
-                            setInputDataRealizacao(digits);
+                            // Permitir digitação livre, mas padronizar o formato
+                            let val = e.target.value.replace(/[^\d/]/g, "");
+                            if (val.length === 2 && inputDataRealizacao.length < 2) val += "/";
+                            if (val.length === 5 && inputDataRealizacao.length < 5) val += "/";
+                            if (val.length > 10) val = val.slice(0, 10);
+                            setInputDataRealizacao(val);
 
-                            // Só tenta atualizar o valor do form quando for 10 dígitos e formato válido
-                            if (digits.length === 10) {
-                              const [dd, mm, yyyy] = digits.split("/");
+                            // Só tenta atualizar o valor do field quando todos dígitos estão presentes
+                            if (val.length === 10) {
+                              const [dd, mm, yyyy] = val.split("/");
                               const asDate = new Date(Number(yyyy), Number(mm) - 1, Number(dd));
                               if (
                                 !isNaN(asDate.getTime()) &&
@@ -626,20 +626,18 @@ const TreinamentosNormativo = () => {
                                 asDate.getFullYear() === Number(yyyy)
                               ) {
                                 field.onChange(asDate);
-                                // mantem o inputDataRealizacao já no formato
                               } else {
+                                // Valor inválido, não atualiza o form ainda
                                 field.onChange(undefined);
                               }
                             } else {
-                              // Para menos de 10 caracteres, não tenta atualizar no form.
+                              // Enquanto o usuário digita, mantém o valor do form undefined
                               field.onChange(undefined);
                             }
                           }}
-                          onBlur={e => {
-                            if (
-                              inputDataRealizacao &&
-                              inputDataRealizacao.length === 10
-                            ) {
+                          onBlur={() => {
+                            // Ao sair do campo, se o texto não for uma data válida, limpa!
+                            if (inputDataRealizacao.length === 10) {
                               const [dd, mm, yyyy] = inputDataRealizacao.split("/");
                               const asDate = new Date(Number(yyyy), Number(mm) - 1, Number(dd));
                               if (
@@ -653,8 +651,8 @@ const TreinamentosNormativo = () => {
                                   description: "Use o formato dd/mm/aaaa",
                                   variant: "destructive"
                                 });
-                                field.onChange(undefined);
                                 setInputDataRealizacao("");
+                                field.onChange(undefined);
                               }
                             }
                           }}
