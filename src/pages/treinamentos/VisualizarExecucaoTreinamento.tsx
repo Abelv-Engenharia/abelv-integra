@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { execucaoTreinamentoService } from "@/services/treinamentos/execucaoTreinamentoService";
@@ -7,12 +6,24 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog";
 import { Download, Eye } from "lucide-react";
+import { useSignedUrl } from "@/hooks/useSignedUrl";
 
 const VisualizarExecucaoTreinamento = () => {
   const { id } = useParams<{ id: string }>();
   const [execucao, setExecucao] = useState<ExecucaoTreinamento | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // Modal e signed URL state para visualizar
   const [openVisualizar, setOpenVisualizar] = useState(false);
+  const [filePath, setFilePath] = useState<string | null>(null);
+
+  // Hook para obter signed URL
+  const {
+    url: signedUrl,
+    loading: loadingSignedUrl,
+    error: errorSignedUrl,
+    generate: generateSignedUrl,
+  } = useSignedUrl();
 
   useEffect(() => {
     if (!id) return;
@@ -23,8 +34,40 @@ const VisualizarExecucaoTreinamento = () => {
       .finally(() => setLoading(false));
   }, [id]);
 
-  const handleOpenVisualizar = () => setOpenVisualizar(true);
+  // Função utilitária para extrair apenas o path do arquivo a partir da URL salva
+  function extractPathFromUrl(url: string) {
+    // O path começa depois de 'treinamentos-anexos/'
+    const splitToken = "treinamentos-anexos/";
+    const idx = url.indexOf(splitToken);
+    if (idx === -1) return "";
+    return url.substring(idx + splitToken.length);
+  }
+
+  // Ao clicar em visualizar
+  const handleOpenVisualizar = async () => {
+    if (execucao?.lista_presenca_url) {
+      const path = extractPathFromUrl(execucao.lista_presenca_url);
+      setFilePath(path);
+      await generateSignedUrl("treinamentos-anexos", path);
+      setOpenVisualizar(true);
+    }
+  };
+
   const handleCloseVisualizar = () => setOpenVisualizar(false);
+
+  // Faz download usando signed URL válido
+  const handleDownload = async () => {
+    if (execucao?.lista_presenca_url) {
+      const path = extractPathFromUrl(execucao.lista_presenca_url);
+      await generateSignedUrl("treinamentos-anexos", path);
+      // Espera signedUrl ser atualizado
+      setTimeout(() => {
+        if (signedUrl) {
+          window.open(signedUrl, "_blank");
+        }
+      }, 100);
+    }
+  };
 
   if (loading) {
     return <div className="flex justify-center items-center h-full min-h-[300px]">Carregando execução...</div>;
@@ -58,17 +101,18 @@ const VisualizarExecucaoTreinamento = () => {
               <strong>Anexo Lista:</strong> {execucao.lista_presenca_url
                 ? (
                   <div className="flex gap-2 mt-1">
-                    <a
-                      href={execucao.lista_presenca_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      download
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="gap-1"
+                      type="button"
+                      onClick={handleDownload}
+                      title="Baixar PDF"
+                      disabled={loadingSignedUrl}
                     >
-                      <Button variant="outline" size="sm" className="gap-1" title="Baixar PDF">
-                        <Download className="h-4 w-4" />
-                        Baixar
-                      </Button>
-                    </a>
+                      <Download className="h-4 w-4" />
+                      {loadingSignedUrl ? "Gerando link..." : "Baixar"}
+                    </Button>
                     <Button
                       variant="outline"
                       size="sm"
@@ -76,6 +120,7 @@ const VisualizarExecucaoTreinamento = () => {
                       type="button"
                       onClick={handleOpenVisualizar}
                       title="Visualizar PDF"
+                      disabled={loadingSignedUrl}
                     >
                       <Eye className="h-4 w-4" />
                       Visualizar
@@ -102,9 +147,11 @@ const VisualizarExecucaoTreinamento = () => {
               <DialogTitle>Visualização da Lista de Presença (PDF)</DialogTitle>
             </DialogHeader>
             <div className="w-full h-[70vh] flex justify-center items-center">
-              {execucao.lista_presenca_url && (
+              {loadingSignedUrl && <span>Carregando PDF...</span>}
+              {errorSignedUrl && <span className="text-destructive">Erro ao carregar PDF: {errorSignedUrl}</span>}
+              {(signedUrl && !loadingSignedUrl && !errorSignedUrl) && (
                 <iframe
-                  src={execucao.lista_presenca_url}
+                  src={signedUrl}
                   title="Lista Presença PDF"
                   className="w-full h-full rounded border"
                   frameBorder={0}
@@ -119,4 +166,3 @@ const VisualizarExecucaoTreinamento = () => {
 };
 
 export default VisualizarExecucaoTreinamento;
-
