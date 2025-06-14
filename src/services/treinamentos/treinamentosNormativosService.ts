@@ -9,7 +9,7 @@ export const treinamentosNormativosService = {
         .from('treinamentos_normativos')
         .select(`
           *,
-          treinamentos(nome)
+          lista_treinamentos_normativos(nome)
         `)
         .order('data_realizacao', { ascending: false });
       
@@ -22,7 +22,7 @@ export const treinamentosNormativosService = {
         ...item,
         data_realizacao: typeof item.data_realizacao === 'string' ? item.data_realizacao : new Date(item.data_realizacao).toISOString().split('T')[0],
         data_validade: typeof item.data_validade === 'string' ? item.data_validade : new Date(item.data_validade).toISOString().split('T')[0],
-        treinamentoNome: item.treinamentos?.nome || 'N/A'
+        treinamentoNome: item.lista_treinamentos_normativos?.nome || 'N/A'
       }));
     } catch (error) {
       console.error('Exceção ao buscar treinamentos normativos:', error);
@@ -54,3 +54,4 @@ export const treinamentosNormativosService = {
     }
   }
 };
+
