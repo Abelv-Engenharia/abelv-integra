@@ -139,7 +139,7 @@ function TreinamentosNormativosPorFuncionarioTab() {
       }
       setLoading(true);
       try {
-        // Busca todos os treinamentos normativos desse funcionário, ordenado por nome, data desc
+        // Busca todos os treinamentos normativos desse funcionário, ordenado por nome, data desc - AGORA só não arquivados!
         const { data, error } = await supabase
           .from('treinamentos_normativos')
           .select(`
@@ -150,9 +150,11 @@ function TreinamentosNormativosPorFuncionarioTab() {
             data_validade, 
             certificado_url, 
             status, 
+            arquivado,
             lista_treinamentos_normativos (nome)
           `)
           .eq("funcionario_id", selectedFuncionarioId)
+          .eq("arquivado", false)
           .order('lista_treinamentos_normativos.nome', { ascending: true })
           .order('data_realizacao', { ascending: false });
         if (error) {
@@ -165,6 +167,10 @@ function TreinamentosNormativosPorFuncionarioTab() {
           setHistoricoReciclados([]);
           return;
         }
+
+        // Adicione um log para visualizar o que veio
+        console.log("[Treinamentos] Normativos recebidos:", data);
+
         const normativos: any[] = (data || []).map(row => ({
           id: row.id,
           treinamento_nome: row.lista_treinamentos_normativos?.nome || "-",
@@ -192,7 +198,7 @@ function TreinamentosNormativosPorFuncionarioTab() {
         });
         setTreinamentosAtual(atuais);
         setHistoricoReciclados(reciclados);
-      } catch {
+      } catch (err) {
         toast({
           title: "Erro",
           description: "Erro ao buscar treinamentos",
