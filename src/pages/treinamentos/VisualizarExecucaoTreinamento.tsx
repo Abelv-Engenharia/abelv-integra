@@ -5,7 +5,7 @@ import { execucaoTreinamentoService } from "@/services/treinamentos/execucaoTrei
 import { ExecucaoTreinamento } from "@/types/treinamentos";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Download, Eye } from "lucide-react";
 import { useSignedUrl } from "@/hooks/useSignedUrl";
 
@@ -16,6 +16,7 @@ const VisualizarExecucaoTreinamento = () => {
 
   // Modal e signed URL state para visualizar
   const [openVisualizar, setOpenVisualizar] = useState(false);
+  const [pendingVisualizar, setPendingVisualizar] = useState(false); // novo: aguarda URL
   const [filePath, setFilePath] = useState<string | null>(null);
 
   // Hook para obter signed URL
@@ -35,33 +36,34 @@ const VisualizarExecucaoTreinamento = () => {
       .finally(() => setLoading(false));
   }, [id]);
 
-  // Função utilitária para extrair apenas o path do arquivo a partir da URL salva
   function extractPathFromUrl(url: string) {
-    // O path começa depois de 'treinamentos-anexos/'
     const splitToken = "treinamentos-anexos/";
     const idx = url.indexOf(splitToken);
     if (idx === -1) return "";
     return url.substring(idx + splitToken.length);
   }
 
-  // Função para visualizar PDF
+  // FUNÇÃO MODIFICADA: SÓ ABRE O MODAL QUANDO O signedUrl ESTIVER PRONTO
   const handleOpenVisualizar = async () => {
     if (execucao?.lista_presenca_url) {
       const path = extractPathFromUrl(execucao.lista_presenca_url);
       setFilePath(path);
-
-      // Gera a URL assinada e só abre o modal após a URL ser definida com sucesso
+      setPendingVisualizar(true);
       await generateSignedUrl("treinamentos-anexos", path);
-
-      setOpenVisualizar(true);
+      // Modal será aberto por efeito depois do signedUrl disponível!
     }
   };
 
-  // Limpa URL ao fechar modal
+  // Efeito para abrir o modal só quando o signedUrl está disponível após pendingVisualizar
+  useEffect(() => {
+    if (pendingVisualizar && signedUrl && !loadingSignedUrl && !errorSignedUrl) {
+      setOpenVisualizar(true);
+      setPendingVisualizar(false);
+    }
+  }, [pendingVisualizar, signedUrl, loadingSignedUrl, errorSignedUrl]);
+
   const handleCloseVisualizar = () => {
     setOpenVisualizar(false);
-    // No hook de signed url, limpe a url ao fechar o modal
-    // Poderíamos adicionar um método no hook, mas aqui reseta via "gerar" com caminho nulo:
     setFilePath(null);
   };
 
@@ -69,13 +71,9 @@ const VisualizarExecucaoTreinamento = () => {
   const handleDownload = async () => {
     if (execucao?.lista_presenca_url) {
       const path = extractPathFromUrl(execucao.lista_presenca_url);
+      await generateSignedUrl("treinamentos-anexos", path);
 
-      // Gera a URL e só então faz o download
-      const result = await generateSignedUrl("treinamentos-anexos", path);
-
-      // Espera o signedUrl realmente ser definido
       setTimeout(() => {
-        // "signedUrl" está atualizado via re-render do hook.
         if (signedUrl) {
           window.open(signedUrl, "_blank");
         }
@@ -83,18 +81,9 @@ const VisualizarExecucaoTreinamento = () => {
     }
   };
 
-  useEffect(() => {
-    // Quando fechar o modal, reseta URL do arquivo assinado
-    if (!openVisualizar) {
-      // Aqui podemos chamar um gerador nulo, mas não necessário se o modal já oculta pelo estado
-      // O hook reseta o signedUrl novo no próximo open
-    }
-  }, [openVisualizar]);
-
   if (loading) {
     return <div className="flex justify-center items-center h-full min-h-[300px]">Carregando execução...</div>;
   }
-
   if (!execucao) {
     return <div className="flex justify-center items-center h-full min-h-[300px]">Execução não encontrada.</div>;
   }
@@ -130,10 +119,10 @@ const VisualizarExecucaoTreinamento = () => {
                       type="button"
                       onClick={handleDownload}
                       title="Baixar PDF"
-                      disabled={loadingSignedUrl}
+                      disabled={loadingSignedUrl || pendingVisualizar}
                     >
                       <Download className="h-4 w-4" />
-                      {loadingSignedUrl ? "Gerando link..." : "Baixar"}
+                      {loadingSignedUrl && !pendingVisualizar ? "Gerando link..." : "Baixar"}
                     </Button>
                     <Button
                       variant="outline"
@@ -142,10 +131,10 @@ const VisualizarExecucaoTreinamento = () => {
                       type="button"
                       onClick={handleOpenVisualizar}
                       title="Visualizar PDF"
-                      disabled={loadingSignedUrl}
+                      disabled={loadingSignedUrl || pendingVisualizar}
                     >
                       <Eye className="h-4 w-4" />
-                      Visualizar
+                      {pendingVisualizar ? "Carregando..." : "Visualizar"}
                     </Button>
                   </div>
                 )
@@ -164,14 +153,17 @@ const VisualizarExecucaoTreinamento = () => {
 
         {/* Modal de visualização do PDF */}
         <Dialog open={openVisualizar} onOpenChange={setOpenVisualizar}>
-          <DialogContent className="max-w-3xl w-full flex flex-col items-center">
+          {/* Aria-label do dialog está OK, mas estava faltando um Description explícito (acessibilidade): */}
+          <DialogContent className="max-w-3xl w-full flex flex-col items-center" aria-describedby="dialog-desc">
             <DialogHeader>
               <DialogTitle>Visualização da Lista de Presença (PDF)</DialogTitle>
+              {/* Acessibilidade: fornece descrição para screen-readers */}
+              <span id="dialog-desc" className="sr-only">Lista de presença em PDF anexada à execução do treinamento.</span>
             </DialogHeader>
             <div className="w-full h-[70vh] flex justify-center items-center">
               {loadingSignedUrl && <span>Carregando PDF...</span>}
               {errorSignedUrl && <span className="text-destructive">Erro ao carregar PDF: {errorSignedUrl}</span>}
-              {(signedUrl && !loadingSignedUrl && !errorSignedUrl) && (
+              {(signedUrl && !loadingSignedUrl && !errorSignedUrl && openVisualizar) && (
                 <iframe
                   src={signedUrl}
                   title="Lista Presença PDF"
@@ -188,3 +180,4 @@ const VisualizarExecucaoTreinamento = () => {
 };
 
 export default VisualizarExecucaoTreinamento;
+
