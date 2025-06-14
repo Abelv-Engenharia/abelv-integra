@@ -31,6 +31,13 @@ export const FuncionariosTable: React.FC<FuncionariosTableProps> = ({
     return <p>Carregando...</p>;
   }
 
+  // Gera uma query string simples para o cache bust de imagem
+  const getFotoUrl = (foto?: string | null) => {
+    if (!foto) return "";
+    // Adiciona um timestamp para evitar cache
+    return `${foto}${foto.includes("?") ? "&" : "?"}t=${Date.now()}`;
+  };
+
   return (
     <div className="overflow-x-auto">
       <table className="w-full border-collapse border border-gray-300">
@@ -51,7 +58,7 @@ export const FuncionariosTable: React.FC<FuncionariosTableProps> = ({
             <tr key={funcionario.id}>
               <td className="border border-gray-300 p-2">
                 <Avatar className="size-8">
-                  <AvatarImage src={funcionario.foto || ""} />
+                  <AvatarImage src={getFotoUrl(funcionario.foto)} />
                   <AvatarFallback>
                     <UserRound className="h-4 w-4" />
                   </AvatarFallback>
