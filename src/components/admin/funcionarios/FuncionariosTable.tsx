@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -31,19 +30,24 @@ export const FuncionariosTable: React.FC<FuncionariosTableProps> = ({
     return <p>Carregando...</p>;
   }
 
-  // Cria um cache bust customizado baseado em updated_at (ou fallback para id+foto)
+  // Cache bust robusto: usa updated_at + timestamp
   const getFotoUrl = (funcionario: Funcionario) => {
     if (!funcionario.foto) return "";
     let cacheBust = "";
     // @ts-ignore: updated_at pode existir no objeto vindo do Supabase aninhado
     if ((funcionario as any).updated_at) {
-      // Usa a data de atualização para garantir que a imagem mudará quando houver atualização no registro do funcionário
       cacheBust = (funcionario as any).updated_at;
     } else {
-      // Fallback: combina id e nome do arquivo, é menos robusto para cache busting, mas cobre edge cases
       cacheBust = `${funcionario.id}${funcionario.foto}`;
     }
-    return `${funcionario.foto}${funcionario.foto.includes("?") ? "&" : "?"}cb=${encodeURIComponent(cacheBust)}`;
+    // Sempre adiciona data atual para garantir atualização
+    const nowStamp = Date.now();
+    const urlFinal = `${funcionario.foto}${
+      funcionario.foto.includes("?") ? "&" : "?"
+    }cb=${encodeURIComponent(cacheBust)}&rnd=${nowStamp}`;
+
+    console.log("Avatar SRC FINAL:", urlFinal, "para:", funcionario.nome);
+    return urlFinal;
   };
 
   return (
