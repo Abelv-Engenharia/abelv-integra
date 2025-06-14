@@ -86,18 +86,19 @@ const ClassificacaoRiscoForm = () => {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Classificação de Risco</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div className="space-y-6">
+      {/* Seções de Probabilidade e Severidade lado a lado */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        {/* Seção de Probabilidade */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold">Probabilidade</h3>
+          
           <FormField
             control={control}
             name="exposicao"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Exposição*</FormLabel>
+                <FormLabel>Exposição</FormLabel>
                 <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger>
@@ -122,7 +123,7 @@ const ClassificacaoRiscoForm = () => {
             name="controle"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Controle*</FormLabel>
+                <FormLabel>Controle</FormLabel>
                 <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger>
@@ -147,7 +148,7 @@ const ClassificacaoRiscoForm = () => {
             name="deteccao"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Detecção*</FormLabel>
+                <FormLabel>Detecção</FormLabel>
                 <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger>
@@ -168,13 +169,16 @@ const ClassificacaoRiscoForm = () => {
           />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Seção de Severidade */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold">Severidade</h3>
+          
           <FormField
             control={control}
             name="efeitoFalha"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Efeito de Falha*</FormLabel>
+                <FormLabel>Efeito de Falha</FormLabel>
                 <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger>
@@ -199,7 +203,7 @@ const ClassificacaoRiscoForm = () => {
             name="impacto"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Impacto*</FormLabel>
+                <FormLabel>Impacto</FormLabel>
                 <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger>
@@ -219,26 +223,61 @@ const ClassificacaoRiscoForm = () => {
             )}
           />
         </div>
+      </div>
 
-        {/* Resultados Calculados */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
-          <div className="bg-blue-50 p-4 rounded-lg">
-            <div className="text-sm font-medium text-blue-900 mb-1">Probabilidade (Calculada)</div>
-            <div className="text-lg font-bold text-blue-700">{probabilidade || 0}</div>
+      {/* Seção de Gradação de Risco */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Gradação de Risco</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {/* Resultados Calculados */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="bg-gray-50 p-4 rounded-lg border">
+              <div className="text-sm font-medium text-gray-600 mb-1">Probabilidade</div>
+              <div className="text-2xl font-bold text-gray-900">{probabilidade || "-"}</div>
+            </div>
+
+            <div className="bg-gray-50 p-4 rounded-lg border">
+              <div className="text-sm font-medium text-gray-600 mb-1">Severidade</div>
+              <div className="text-2xl font-bold text-gray-900">{severidade || "-"}</div>
+            </div>
+
+            <div className="bg-gray-50 p-4 rounded-lg border">
+              <div className="text-sm font-medium text-gray-600 mb-1">Classificação</div>
+              <div className="text-2xl font-bold text-gray-900">{classificacaoRisco || "Não definida"}</div>
+            </div>
           </div>
 
-          <div className="bg-green-50 p-4 rounded-lg">
-            <div className="text-sm font-medium text-green-900 mb-1">Severidade (Calculada)</div>
-            <div className="text-lg font-bold text-green-700">{severidade || 0}</div>
+          {/* Legendas de Classificação */}
+          <div className="space-y-2">
+            <h4 className="font-medium text-sm text-gray-700">Legendas de Classificação</h4>
+            <div className="flex flex-wrap gap-4 text-sm">
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 bg-cyan-400 rounded"></div>
+                <span>TRIVIAL (≤10)</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 bg-green-400 rounded"></div>
+                <span>TOLERÁVEL (≤21)</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 bg-yellow-400 rounded"></div>
+                <span>MODERADO (≤40)</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 bg-orange-400 rounded"></div>
+                <span>SUBSTANCIAL (≤56)</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 bg-red-500 rounded"></div>
+                <span>INTOLERÁVEL (>56)</span>
+              </div>
+            </div>
           </div>
-
-          <div className="bg-purple-50 p-4 rounded-lg">
-            <div className="text-sm font-medium text-purple-900 mb-1">Classificação de Risco</div>
-            <div className="text-lg font-bold text-purple-700">{classificacaoRisco || "Pendente"}</div>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 
