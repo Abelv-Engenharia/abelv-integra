@@ -657,10 +657,13 @@ const TreinamentosNormativo = () => {
                     onChange={e => {
                       const valor = e.target.value.replace(/\D/g, ""); // Apenas dígitos
                       setAnoManual(valor);
+                    }}
+                    onBlur={e => {
+                      const valor = e.target.value;
                       if (valor.length === 4) {
                         const anoNovo = Number(valor);
                         if (anoNovo >= 1900 && anoNovo <= 2100) {
-                          const dataAtual = form.watch("dataRealizacao");
+                          const dataAtual = form.getValues("dataRealizacao");
                           let novaData: Date;
                           if (dataAtual instanceof Date && !isNaN(dataAtual.getTime())) {
                             novaData = new Date(dataAtual);
@@ -670,11 +673,12 @@ const TreinamentosNormativo = () => {
                           }
                           novaData.setFullYear(anoNovo);
                           form.setValue("dataRealizacao", novaData, { shouldValidate: true });
+                          return; // Sai da função, pois a data foi atualizada com sucesso
                         }
                       }
-                    }}
-                    onBlur={e => {
-                      // Ao sair, se o ano estiver incompleto ou inválido, sincroniza de volta com o campo de data principal
+                      
+                      // Se o código chegou até aqui, o valor do ano é inválido ou incompleto.
+                      // Reverte para o valor que está no campo de data principal.
                       const dataAtual = form.getValues("dataRealizacao");
                       if (dataAtual instanceof Date && !isNaN(dataAtual.getTime())) {
                         setAnoManual(String(dataAtual.getFullYear()));
