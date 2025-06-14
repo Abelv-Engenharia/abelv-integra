@@ -52,12 +52,12 @@ const EditarExecucaoTreinamento = () => {
     }
   };
 
-  if (loading) return <div className="flex justify-center py-20">Carregando execução...</div>;
-  if (!execucao) return <div className="flex justify-center py-20">Execução não encontrada.</div>;
+  if (loading) return <div className="flex justify-center items-center h-full min-h-[300px]">Carregando execução...</div>;
+  if (!execucao) return <div className="flex justify-center items-center h-full min-h-[300px]">Execução não encontrada.</div>;
 
   return (
-    <div className="container max-w-xl mx-auto py-8">
-      <Card>
+    <div className="w-full h-full p-0 overflow-auto">
+      <Card className="w-full h-full shadow-none border-none rounded-none">
         <CardHeader>
           <CardTitle>Editar Execução</CardTitle>
         </CardHeader>
