@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { format } from "date-fns";
-import { CalendarIcon, Check, Save, ArrowLeft } from "lucide-react";
+import { CalendarIcon, Check, Save, ArrowLeft, X } from "lucide-react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,7 +20,9 @@ import { ccaService } from "@/services/treinamentos/ccaService";
 import { listaTreinamentosNormativosService } from "@/services/treinamentos/listaTreinamentosNormativosService";
 import { supabase } from "@/integrations/supabase/client";
 import { DatePickerWithManualInput } from "@/components/ui/date-picker-with-manual-input";
+
 const BUCKET_CERTIFICADOS = "certificados-treinamentos-normativos";
+
 const formSchema = z.object({
   ccaId: z.string({
     required_error: "O CCA é obrigatório"
@@ -39,7 +41,9 @@ const formSchema = z.object({
   }),
   certificado: z.any().optional()
 });
+
 type FormValues = z.infer<typeof formSchema>;
+
 const TreinamentosNormativo = () => {
   // ----------- HOOKS E DEFINIÇÕES DEVEM FICAR ANTES DE QUALQUER RETURN -----------
   const [isSubmitSuccess, setIsSubmitSuccess] = useState(false);
@@ -60,6 +64,7 @@ const TreinamentosNormativo = () => {
     validade_dias?: number;
   }[]>([]);
   const [certificadoFile, setCertificadoFile] = useState<File | null>(null);
+
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -91,9 +96,11 @@ const TreinamentosNormativo = () => {
     };
     loadData();
   }, []);
+
   const watchFuncionarioId = form.watch("funcionarioId");
   const watchTreinamentoId = form.watch("treinamentoId");
   const watchDataRealizacao = form.watch("dataRealizacao");
+
   useEffect(() => {
     if (watchFuncionarioId) {
       const funcionario = funcionarios.find(f => f.id === watchFuncionarioId);
@@ -102,6 +109,7 @@ const TreinamentosNormativo = () => {
       setSelectedFuncionario(null);
     }
   }, [watchFuncionarioId, funcionarios]);
+
   useEffect(() => {
     const updateDataValidade = async () => {
       if (watchTreinamentoId && watchDataRealizacao) {
@@ -117,11 +125,14 @@ const TreinamentosNormativo = () => {
     };
     updateDataValidade();
   }, [watchTreinamentoId, watchDataRealizacao]);
+
   const watchCcaId = form.watch("ccaId");
+
   useEffect(() => {
     setSelectedCcaId(watchCcaId || null);
     form.setValue("funcionarioId", "");
   }, [watchCcaId]);
+
   useEffect(() => {
     const fetchCcas = async () => {
       const ccasData = await ccaService.getAll();
@@ -142,6 +153,7 @@ const TreinamentosNormativo = () => {
     };
     loadTreinamentosNormativos();
   }, []);
+
   const filteredFuncionarios = selectedCcaId ? funcionarios.filter(f => String(f.cca_id) === selectedCcaId) : [];
 
   // Função para buscar nome do treinamento pelo id selecionado
@@ -163,6 +175,7 @@ const TreinamentosNormativo = () => {
       .replace(/\s{2,}/g, " ") // Remove múltiplos espaços
       .trim();
     }
+
     const baseNomeArquivo = `${removeSpecialChars(baseTreinamento)}_${matriculaFuncionario}_${removeSpecialChars(nomeFuncionario).toUpperCase()}`.replace(/ /g, " ");
 
     // Garante extensão
@@ -177,6 +190,7 @@ const TreinamentosNormativo = () => {
     const funcionarioId = form.getValues("funcionarioId");
     const treinamentoNome = getTreinamentoNomeById(treinamentoId || "");
     const funcionario = funcionarios.find(f => f.id === funcionarioId);
+
     if (!treinamentoNome || !funcionario) {
       toast({
         title: "Dados insuficientes",
@@ -185,6 +199,7 @@ const TreinamentosNormativo = () => {
       });
       return null;
     }
+
     const ext = file.name.split(".").pop() || "pdf";
     const matricula = funcionario.matricula || "XXXX";
     const nomeFuncionario = funcionario.nome || "FUNCIONARIO_DESCONHECIDO";
@@ -198,6 +213,7 @@ const TreinamentosNormativo = () => {
       upsert: true,
       contentType: "application/pdf"
     });
+
     if (error) {
       toast({
         title: "Erro ao anexar certificado",
@@ -221,6 +237,7 @@ const TreinamentosNormativo = () => {
       });
       return null;
     }
+
     return signedUrlData.signedUrl;
   }
 
@@ -228,6 +245,7 @@ const TreinamentosNormativo = () => {
   function dateValueToISODateString(value: any): string | null {
     // Aceita tanto Date quanto string no formato yyyy-mm-dd
     if (!value) return null;
+
     if (value instanceof Date) {
       // Retorna data local no formato yyyy-mm-dd
       const y = value.getFullYear();
@@ -235,10 +253,12 @@ const TreinamentosNormativo = () => {
       const d = String(value.getDate()).padStart(2, "0");
       return `${y}-${m}-${d}`;
     }
+
     // Se vier string ISO (formato yyyy-mm-dd), usa direto, só se for válido
     if (typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
       return value;
     }
+
     // Outras strings: tenta converter
     const tryDate = new Date(value);
     if (!isNaN(tryDate.getTime())) {
@@ -247,8 +267,10 @@ const TreinamentosNormativo = () => {
       const d = String(tryDate.getDate()).padStart(2, "0");
       return `${y}-${m}-${d}`;
     }
+
     return null;
   }
+
   const onSubmit = async (data: FormValues) => {
     if (!data.dataRealizacao || !(data.dataRealizacao instanceof Date)) {
       toast({
@@ -258,6 +280,7 @@ const TreinamentosNormativo = () => {
       });
       return;
     }
+
     if (!dataValidade) {
       toast({
         title: "Erro",
@@ -266,6 +289,7 @@ const TreinamentosNormativo = () => {
       });
       return;
     }
+
     console.log("Form data:", data);
     let certificadoUrl: string | undefined = undefined;
 
@@ -280,6 +304,7 @@ const TreinamentosNormativo = () => {
         });
         return;
       }
+
       if (!certificadoFile.name.toLowerCase().endsWith(".pdf")) {
         toast({
           title: "Erro ao salvar",
@@ -294,8 +319,10 @@ const TreinamentosNormativo = () => {
       if (!url) return;
       certificadoUrl = url;
     }
+
     try {
       setIsLoading(true);
+
       const result = await criarTreinamentoNormativo({
         funcionarioId: data.funcionarioId,
         treinamentoId: data.treinamentoId,
@@ -306,6 +333,7 @@ const TreinamentosNormativo = () => {
         // dataValidade já é um Date
         certificadoUrl
       });
+
       if (result.success) {
         toast({
           title: "Sucesso!",
@@ -331,6 +359,7 @@ const TreinamentosNormativo = () => {
       setIsLoading(false);
     }
   };
+
   if (isSubmitSuccess) {
     return <div className="flex items-center justify-center h-[calc(100vh-200px)]">
         <Card className="w-[500px]">
@@ -363,10 +392,13 @@ const TreinamentosNormativo = () => {
         </Card>
       </div>;
   }
+
   return <div className="space-y-6">
       <div className="flex items-center">
         <Button variant="ghost" size="sm" className="mr-2" asChild>
-          
+          <Link to="/treinamentos/dashboard">
+            <ArrowLeft />
+          </Link>
         </Button>
         <h1 className="text-3xl font-bold tracking-tight">Registro de Treinamentos Normativos</h1>
       </div>
@@ -477,23 +509,25 @@ const TreinamentosNormativo = () => {
                       <FormMessage />
                     </FormItem>} />
 
-                <FormField control={form.control} name="dataRealizacao" render={({
-              field
-            }) => <FormItem className="flex flex-col">
-                      <FormLabel>Data da realização</FormLabel>
-                      <FormControl>
-                        <DatePickerWithManualInput value={field.value} onChange={field.onChange} disabled={date => date > new Date()} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>} />
+                <div className="flex flex-col md:flex-row gap-4">
+                  <FormField control={form.control} name="dataRealizacao" render={({
+                field
+              }) => <FormItem className="flex flex-1 flex-col">
+                        <FormLabel>Data da realização</FormLabel>
+                        <FormControl>
+                          <DatePickerWithManualInput value={field.value} onChange={field.onChange} disabled={date => date > new Date()} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>} />
 
-                <FormItem>
-                  <FormLabel>Data de validade</FormLabel>
-                  <Input value={dataValidade ? format(dataValidade, "dd/MM/yyyy") : ""} disabled />
-                  {dataValidade && <div className="text-xs text-muted-foreground mt-1">
-                      {calcularStatusTreinamento(dataValidade) === "Válido" ? <span className="text-green-600">Válido até esta data</span> : calcularStatusTreinamento(dataValidade) === "Próximo ao vencimento" ? <span className="text-amber-600">Próximo ao vencimento</span> : <span className="text-red-600">Vencido</span>}
-                    </div>}
-                </FormItem>
+                  <FormItem className="flex-1">
+                    <FormLabel>Data de validade</FormLabel>
+                    <Input value={dataValidade ? format(dataValidade, "dd/MM/yyyy") : ""} disabled />
+                    {dataValidade && <div className="text-xs text-muted-foreground mt-1">
+                        {calcularStatusTreinamento(dataValidade) === "Válido" ? <span className="text-green-600">Válido até esta data</span> : calcularStatusTreinamento(dataValidade) === "Próximo ao vencimento" ? <span className="text-amber-600">Próximo ao vencimento</span> : <span className="text-red-600">Vencido</span>}
+                      </div>}
+                  </FormItem>
+                </div>
 
                 <div>
                   <label htmlFor="certificado" className="block font-medium mb-1">Anexar certificado (PDF, máx. 2MB)</label>
@@ -514,9 +548,32 @@ const TreinamentosNormativo = () => {
                     </div>}
                 </div>
 
-                <div className="flex justify-end">
-                  <Button type="submit" className="gap-1" disabled={isLoading}>
-                    <Save className="h-4 w-4" />
+                <div className="flex justify-end gap-2 pt-6 border-t">
+                  <Button type="button" variant="outline" asChild>
+                    <Link to="/treinamentos/dashboard">
+                      <ArrowLeft />
+                      Voltar
+                    </Link>
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    onClick={() => {
+                      form.reset();
+                      setSelectedFuncionario(null);
+                      setDataValidade(null);
+                      setCertificadoFile(null);
+                      toast({
+                        title: "Cancelado",
+                        description: "O formulário foi limpo.",
+                      });
+                    }}
+                  >
+                    <X />
+                    Cancelar
+                  </Button>
+                  <Button type="submit" disabled={isLoading}>
+                    <Save />
                     {isLoading ? "Salvando..." : "Salvar registro"}
                   </Button>
                 </div>
@@ -526,4 +583,5 @@ const TreinamentosNormativo = () => {
       </Card>
     </div>;
 };
+
 export default TreinamentosNormativo;
