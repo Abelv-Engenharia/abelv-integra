@@ -280,13 +280,13 @@ const TreinamentosNormativo = () => {
           ) : (
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                <div className="flex flex-col md:flex-row gap-4">
-                  {/* CCA */}
+                {/* CCA em linha inteira */}
+                <div className="mb-4">
                   <FormField
                     control={form.control}
                     name="ccaId"
                     render={({ field }) => (
-                      <FormItem className="flex-1">
+                      <FormItem>
                         <FormLabel>CCA</FormLabel>
                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                           <FormControl>
@@ -297,7 +297,7 @@ const TreinamentosNormativo = () => {
                           <SelectContent>
                             {ccas.map((cca) => (
                               <SelectItem key={cca.id} value={String(cca.id)}>
-                                {cca.nome}
+                                {cca.codigo} - {cca.nome}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -306,7 +306,10 @@ const TreinamentosNormativo = () => {
                       </FormItem>
                     )}
                   />
+                </div>
 
+                {/* Agrupar os próximos campos em duas colunas */}
+                <div className="flex flex-col md:flex-row gap-4">
                   {/* Funcionário */}
                   <FormField
                     control={form.control}
