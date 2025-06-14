@@ -22,7 +22,8 @@ export const useFuncionarios = () => {
           ativo,
           cca_id,
           ccas:cca_id(id, codigo, nome),
-          updated_at
+          updated_at,
+          data_admissao
         `)
         .order('nome');
       if (error) throw error;
@@ -50,6 +51,7 @@ export const useFuncionarios = () => {
       const fileExt = file.name.split('.').pop();
       const fileName = `${funcionarioId}.${fileExt}`;
       const filePath = `funcionarios/${fileName}`;
+      console.log('[uploadFoto] Uploading file to', filePath);
 
       const { error: uploadError } = await supabase.storage
         .from('funcionarios-fotos')
@@ -88,8 +90,11 @@ export const useFuncionarios = () => {
     }) => {
       const ccaId = funcionario.cca_id === "none" ? null : parseInt(funcionario.cca_id);
 
-      // Preparar campo data_admissao corretamente
-      const dataAdmissao = funcionario.data_admissao ? funcionario.data_admissao : null;
+      // Preparar campo data_admissao corretamente (null ou string ISO yyyy-mm-dd)
+      let dataAdmissao: string | null = null;
+      if (funcionario.data_admissao) {
+        dataAdmissao = funcionario.data_admissao || null;
+      }
 
       if (editingFuncionario) {
         let fotoUrl = editingFuncionario.foto;
@@ -102,6 +107,8 @@ export const useFuncionarios = () => {
             fotoUrl = uploadedUrl;
           }
         }
+        // Adicionando log para checagem
+        console.log('[Editar] id:', editingFuncionario.id, 'nome:', funcionario.nome, 'fotoUrl:', fotoUrl, 'data_admissao:', dataAdmissao);
 
         const { error: updateError } = await supabase
           .from('funcionarios')
@@ -115,7 +122,10 @@ export const useFuncionarios = () => {
           })
           .eq('id', editingFuncionario.id);
         
-        if (updateError) throw updateError;
+        if (updateError) {
+          console.error('Erro ao atualizar funcionário:', updateError);
+          throw updateError;
+        }
       } else {
         const { data: novoFuncionario, error: createError } = await supabase
           .from('funcionarios')
@@ -129,7 +139,10 @@ export const useFuncionarios = () => {
           .select()
           .single();
         
-        if (createError) throw createError;
+        if (createError) {
+          console.error('Erro ao criar funcionário:', createError);
+          throw createError;
+        }
 
         if (photoFile && novoFuncionario) {
           const uploadedUrl = await uploadFoto(photoFile, novoFuncionario.id);
@@ -147,7 +160,9 @@ export const useFuncionarios = () => {
       }
     },
     onSuccess: (_, { editingFuncionario }) => {
+      // Forçar refetch
       queryClient.invalidateQueries({ queryKey: ['admin-funcionarios'] });
+      queryClient.refetchQueries({ queryKey: ['admin-funcionarios'] });
       toast({
         title: "Sucesso",
         description: editingFuncionario ? "Funcionário atualizado com sucesso!" : "Funcionário criado com sucesso!",
