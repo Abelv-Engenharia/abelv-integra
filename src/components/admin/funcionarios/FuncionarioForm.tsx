@@ -106,6 +106,7 @@ export const FuncionarioForm: React.FC<FuncionarioFormProps> = ({
         </div>
       </div>
 
+      {/* Matrícula e Data de Admissão lado a lado */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <Label htmlFor="matricula">Matrícula</Label>
@@ -117,39 +118,40 @@ export const FuncionarioForm: React.FC<FuncionarioFormProps> = ({
           />
         </div>
         <div>
-          <Label htmlFor="cca">CCA</Label>
-          <Select 
-            value={formData.cca_id} 
-            onValueChange={(value) => setFormData(prev => ({ ...prev, cca_id: value }))}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Selecione um CCA" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="none">Nenhum CCA</SelectItem>
-              {ccas.map((cca) => (
-                <SelectItem key={cca.id} value={cca.id.toString()}>
-                  {cca.codigo} - {cca.nome}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <Label htmlFor="data_admissao">Data de admissão</Label>
+          <Input
+            id="data_admissao"
+            type="date"
+            value={formData.data_admissao ? formData.data_admissao : ""}
+            onChange={e =>
+              setFormData(prev => ({
+                ...prev,
+                data_admissao: e.target.value
+              }))
+            }
+          />
         </div>
       </div>
 
+      {/* CCA logo abaixo */}
       <div>
-        <Label htmlFor="data_admissao">Data de admissão</Label>
-        <Input
-          id="data_admissao"
-          type="date"
-          value={formData.data_admissao ? formData.data_admissao : ""}
-          onChange={e =>
-            setFormData(prev => ({
-              ...prev,
-              data_admissao: e.target.value
-            }))
-          }
-        />
+        <Label htmlFor="cca">CCA</Label>
+        <Select
+          value={formData.cca_id}
+          onValueChange={(value) => setFormData(prev => ({ ...prev, cca_id: value }))}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Selecione um CCA" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="none">Nenhum CCA</SelectItem>
+            {ccas.map((cca) => (
+              <SelectItem key={cca.id} value={cca.id.toString()}>
+                {cca.codigo} - {cca.nome}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="flex justify-end space-x-2">
