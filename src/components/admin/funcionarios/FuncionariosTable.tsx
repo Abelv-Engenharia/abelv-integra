@@ -5,6 +5,15 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Trash2, Edit, UserRound } from "lucide-react";
 import { Funcionario } from "@/types/funcionarios";
 
+function formatDateBR(dateStr?: string | null) {
+  if (!dateStr) return "-";
+  // Espera "YYYY-MM-DD" ou "YYYY-MM-DDTHH:mm:ss"
+  const onlyDate = dateStr.slice(0, 10);
+  const [ano, mes, dia] = onlyDate.split("-");
+  if (!ano || !mes || !dia) return "-";
+  return `${dia}/${mes}/${ano}`;
+}
+
 interface FuncionariosTableProps {
   funcionarios: Funcionario[];
   isLoading: boolean;
@@ -31,6 +40,7 @@ export const FuncionariosTable: React.FC<FuncionariosTableProps> = ({
             <th className="border border-gray-300 p-2 text-left">Nome</th>
             <th className="border border-gray-300 p-2 text-left">Função</th>
             <th className="border border-gray-300 p-2 text-left">Matrícula</th>
+            <th className="border border-gray-300 p-2 text-left">Data de admissão</th>
             <th className="border border-gray-300 p-2 text-left">CCA</th>
             <th className="border border-gray-300 p-2 text-left">Status</th>
             <th className="border border-gray-300 p-2 text-center">Ações</th>
@@ -50,6 +60,9 @@ export const FuncionariosTable: React.FC<FuncionariosTableProps> = ({
               <td className="border border-gray-300 p-2">{funcionario.nome}</td>
               <td className="border border-gray-300 p-2">{funcionario.funcao}</td>
               <td className="border border-gray-300 p-2">{funcionario.matricula}</td>
+              <td className="border border-gray-300 p-2">
+                {formatDateBR(funcionario.data_admissao)}
+              </td>
               <td className="border border-gray-300 p-2">
                 {funcionario.ccas ? `${funcionario.ccas.codigo} - ${funcionario.ccas.nome}` : "Nenhum"}
               </td>
