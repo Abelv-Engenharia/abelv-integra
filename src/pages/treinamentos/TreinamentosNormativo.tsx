@@ -403,7 +403,7 @@ const TreinamentosNormativo = () => {
         funcao?: string;
         matricula?: string;
         treinamentoId?: string;
-        tipo?: string; // agora permite tipo
+        tipo?: string;
       };
       if (ccaId) form.setValue("ccaId", ccaId);
       if (funcionarioId) form.setValue("funcionarioId", funcionarioId);
