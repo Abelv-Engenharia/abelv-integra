@@ -77,7 +77,7 @@ export const TabelaTreinamentosNormativos: React.FC<Props> = ({ treinamentos }) 
                     rel="noopener noreferrer"
                     className="text-blue-600 underline"
                   >
-                    Abrir PDF
+                    Visualizar certificado
                   </a>
                 ) : (
                   <span className="text-muted-foreground text-xs">-</span>
