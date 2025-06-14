@@ -1,6 +1,7 @@
 
 import React from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { getStatusColor } from "@/utils/treinamentosUtils";
 
 interface TreinamentoNormativo {
   id: string;
@@ -43,7 +44,31 @@ export const TabelaTreinamentosNormativos: React.FC<Props> = ({ treinamentos }) 
               <TableCell>{tr.tipo}</TableCell>
               <TableCell>{new Date(tr.data_realizacao).toLocaleDateString("pt-BR")}</TableCell>
               <TableCell>{new Date(tr.data_validade).toLocaleDateString("pt-BR")}</TableCell>
-              <TableCell>{tr.status}</TableCell>
+              <TableCell>
+                <span
+                  className={`font-semibold px-3 py-1 rounded-full ${getStatusColor(tr.status || "")}`}
+                  style={{
+                    backgroundColor:
+                      tr.status === "Válido"
+                        ? "#D1FADF"
+                        : tr.status === "Próximo ao vencimento"
+                        ? "#FDEFC6"
+                        : tr.status === "Vencido"
+                        ? "#FCD7D7"
+                        : "#F3F4F6",
+                    color:
+                      tr.status === "Válido"
+                        ? "#027A48"
+                        : tr.status === "Próximo ao vencimento"
+                        ? "#B54708"
+                        : tr.status === "Vencido"
+                        ? "#B42318"
+                        : "#6B7280",
+                  }}
+                >
+                  {tr.status || "-"}
+                </span>
+              </TableCell>
               <TableCell>
                 {tr.certificado_url ? (
                   <a
