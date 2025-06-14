@@ -89,31 +89,6 @@ const TreinamentosDashboard = () => {
                 <DonutProcessoGeralChart />
               </CardContent>
             </Card>
-            <Card>
-              <CardHeader>
-                <CardTitle>SUBPROCESSO</CardTitle>
-                <CardDescription>
-                  Distribuição dos subprocessos de treinamento vinculados ao processo selecionado
-                </CardDescription>
-                {/* Select para processo_treinamento */}
-                <div className="mt-2">
-                  <label className="mr-2 font-medium">Filtrar por Processo: </label>
-                  <select
-                    value={processoTreinamentoId || ""}
-                    onChange={e => setProcessoTreinamentoId(e.target.value || null)}
-                    className="border rounded px-2 py-1"
-                  >
-                    <option value="">Selecione um processo</option>
-                    {processos.map(p => (
-                      <option key={p.id} value={p.id}>{p.nome}</option>
-                    ))}
-                  </select>
-                </div>
-              </CardHeader>
-              <CardContent className="h-[400px] flex items-center justify-center">
-                <DonutSubprocessoChart />
-              </CardContent>
-            </Card>
           </div>
 
           <div className="flex justify-center gap-4">
