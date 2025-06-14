@@ -1,27 +1,36 @@
-
 import React from "react";
 import { PieChart, Pie, Cell, Tooltip, PieLabelRenderProps } from "recharts";
-import { useFilteredTreinamentosPorSubprocesso } from "@/services/treinamentos/hooks/useFilteredTreinamentosPorSubprocesso";
 
-const COLORS = ["#F59E0B", "#2563EB", "#6B7280", "#FAA43A", "#60A5FA", "#DB2777", "#34D399", "#818CF8", "#A21CAF", "#F472B6"];
+const data = [
+  { name: "Treinamentos Normativos Obrigatórios (NRs)", value: 36 },
+  { name: "DESMAS", value: 14 },
+  { name: "Procedimentos de SMS e Aulas", value: 7 },
+  { name: "Formação", value: 7 },
+  { name: "Integração corporativa (NRI, NR10, NRE1, NR45 etc)", value: 29 }
+];
 
-const renderCustomLabel = (props: PieLabelRenderProps & { payload: any }) => {
+const COLORS = ["#F59E0B", "#2563EB", "#6B7280", "#FAA43A", "#60A5FA"];
+
+// Custom label logic igual ao do gráfico geral
+const renderCustomLabel = (props: PieLabelRenderProps) => {
   const RADIAN = Math.PI / 180;
+  // Coerce cx, cy, and outerRadius to numbers for safe math
   const cx = Number(props.cx);
   const cy = Number(props.cy);
   const midAngle = props.midAngle;
   const outerRadius = Number(props.outerRadius);
-  const name = props.name ?? "";
+  const percent = props.percent;
+  const name = props.name;
   const index = props.index ?? 0;
-  const payload = props.payload;
-  const horas = payload?.horasTotais ?? 0;
-  const percentual = payload?.percentual ?? 0;
 
-  const radius = outerRadius + 32;
+  const radius = outerRadius + 28;
   const x = cx + radius * Math.cos(-midAngle * RADIAN);
   const y = cy + radius * Math.sin(-midAngle * RADIAN);
+
   const color = COLORS[index % COLORS.length];
-  const labelName = typeof name === "string" && name.length > 30 ? name.substring(0, 27) + "..." : name;
+
+  const label =
+    String(name).length > 28 ? String(name).substring(0, 23) + "..." : String(name);
 
   return (
     <text
@@ -32,48 +41,24 @@ const renderCustomLabel = (props: PieLabelRenderProps & { payload: any }) => {
       dominantBaseline="central"
       fontSize="15"
     >
-      {`${labelName}: ${percentual.toFixed(1)}% (${horas}h)`}
+      {`${label}: ${(percent * 100).toFixed(0)}%`}
     </text>
   );
 };
 
-interface DonutSubprocessoChartProps {
-  processoId: string;
-  year: string;
-  month: string;
-  ccaId: string;
-}
-
-export const DonutSubprocessoChart = ({ processoId, year, month, ccaId }: DonutSubprocessoChartProps) => {
-  const { data = [], isLoading, error } = useFilteredTreinamentosPorSubprocesso({ processoId, year, month, ccaId });
-
-  if (isLoading) {
-    return (
-      <div className="w-full flex items-center justify-center h-80">
-        <span className="text-muted-foreground">Carregando...</span>
-      </div>
-    );
-  }
-  if (error || data.length === 0) {
-    return (
-      <div className="w-full flex items-center justify-center h-80">
-        <span className="text-muted-foreground">Nenhum dado de subprocesso encontrado para o processo selecionado.</span>
-      </div>
-    );
-  }
-
+export const DonutSubprocessoChart = () => {
   return (
     <div className="w-full flex items-center justify-center">
-      <PieChart width={460} height={330}>
+      <PieChart width={540} height={360}>
         <Pie
           data={data}
-          dataKey="horasTotais"
+          dataKey="value"
           nameKey="name"
-          cx="50%"
+          cx="60%"
           cy="50%"
-          innerRadius={72}
-          outerRadius={104}
-          paddingAngle={1.8}
+          innerRadius={92}
+          outerRadius={132}
+          paddingAngle={2}
           label={renderCustomLabel}
           labelLine={true}
         >
@@ -81,10 +66,7 @@ export const DonutSubprocessoChart = ({ processoId, year, month, ccaId }: DonutS
             <Cell key={entry.name} fill={COLORS[index % COLORS.length]} />
           ))}
         </Pie>
-        <Tooltip
-          formatter={(value: any, _: string, props: any) => `${value} horas`}
-          contentStyle={{ fontSize: 15 }}
-        />
+        <Tooltip />
       </PieChart>
     </div>
   );

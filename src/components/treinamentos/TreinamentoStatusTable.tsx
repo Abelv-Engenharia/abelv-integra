@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { formatarData, getStatusColor } from "@/utils/treinamentosUtils";
 import { fetchFuncionariosComTreinamentos } from "@/services/treinamentosDashboardService";
 
-export const TreinamentoStatusTable = ({ year, month, ccaId }: { year?: string; month?: string; ccaId?: string }) => {
+export const TreinamentoStatusTable = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [funcionariosComTreinamentos, setFuncionariosComTreinamentos] = useState<any[]>([]);
 
@@ -13,7 +13,7 @@ export const TreinamentoStatusTable = ({ year, month, ccaId }: { year?: string; 
     const fetchData = async () => {
       try {
         setLoading(true);
-        const data = await fetchFuncionariosComTreinamentos({ year, month, ccaId });
+        const data = await fetchFuncionariosComTreinamentos();
         setFuncionariosComTreinamentos(data);
       } catch (error) {
         console.error("Error loading training status data:", error);
@@ -23,7 +23,7 @@ export const TreinamentoStatusTable = ({ year, month, ccaId }: { year?: string; 
     };
 
     fetchData();
-  }, [year, month, ccaId]);
+  }, []);
 
   if (loading) {
     return (
@@ -103,5 +103,3 @@ export const TreinamentoStatusTable = ({ year, month, ccaId }: { year?: string; 
     </div>
   );
 };
-
-export default TreinamentoStatusTable;

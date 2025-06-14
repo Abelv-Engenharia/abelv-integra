@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TreinamentosNormativosChart } from "@/components/treinamentos/TreinamentosNormativosChart";
@@ -19,32 +19,10 @@ import { TreinamentosExecucaoChart } from "@/components/treinamentos/Treinamento
 import { DonutProcessoGeralChart } from "@/components/treinamentos/DonutProcessoGeralChart";
 import { DonutSubprocessoChart } from "@/components/treinamentos/DonutSubprocessoChart";
 
-// Novos hooks para o dashboard filtrado
-import { useFilteredTreinamentosStats } from "@/services/treinamentos/hooks/useFilteredTreinamentosStats";
-import { useFilteredTreinamentosExecucaoData } from "@/services/treinamentos/hooks/useFilteredTreinamentosExecucaoData";
-import { useFilteredNormativosData } from "@/services/treinamentos/hooks/useFilteredNormativosData";
-import { useFilteredTreinamentosPorProcesso } from "@/services/treinamentos/hooks/useFilteredTreinamentosPorProcesso";
-
 const TreinamentosDashboard = () => {
   const [year, setYear] = useState<string>("todos");
   const [month, setMonth] = useState<string>("todos");
   const [ccaId, setCcaId] = useState<string>("todos");
-  const [processoId, setProcessoId] = useState<string>("todos");
-  const [processoOptions, setProcessoOptions] = useState<{ id: string; nome: string }[]>([]);
-
-  // Buscar lista de processos
-  React.useEffect(() => {
-    import("@/services/treinamentos/processoTreinamentoService").then(async (mod) => {
-      const lista = await mod.fetchProcessosTreinamento();
-      setProcessoOptions([{ id: "todos", nome: "Todos os Processos" }, ...lista]);
-    });
-  }, []);
-
-  // Novos hooks filtrados
-  const { data: stats, isLoading: isLoadingStats } = useFilteredTreinamentosStats({ year, month, ccaId });
-  const { data: execucaoData, isLoading: isLoadingExecucao } = useFilteredTreinamentosExecucaoData({ year, month, ccaId });
-  const { data: normativosData, isLoading: isLoadingNormativos } = useFilteredNormativosData({ year, month, ccaId });
-  const { data: porProcessoData, isLoading: isLoadingPorProcesso } = useFilteredTreinamentosPorProcesso({ year, month, ccaId });
 
   return (
     <div className="space-y-6">
@@ -79,31 +57,9 @@ const TreinamentosDashboard = () => {
         </div>
       </div>
 
-      <TreinamentosSummaryCards 
-        stats={stats}
-        isLoading={isLoadingStats}
-      />
+      <TreinamentosSummaryCards />
 
-      <TreinamentosPorProcessoTable 
-        data={porProcessoData}
-        isLoading={isLoadingPorProcesso}
-      />
-
-      <div className="w-full flex flex-col md:flex-row items-center gap-4">
-        <label className="font-medium text-base text-gray-700" htmlFor="processo-treinamento-select">
-          Processo de Treinamento (para detalhar subprocesso):
-        </label>
-        <select
-          id="processo-treinamento-select"
-          className="border rounded px-3 py-2 focus:outline-none"
-          value={processoId}
-          onChange={e => setProcessoId(e.target.value)}
-        >
-          {processoOptions.map(opt => (
-            <option key={opt.id} value={opt.id}>{opt.nome}</option>
-          ))}
-        </select>
-      </div>
+      <TreinamentosPorProcessoTable />
 
       <Tabs defaultValue="execucao" className="space-y-4">
         <TabsList>
@@ -112,6 +68,7 @@ const TreinamentosDashboard = () => {
         </TabsList>
         
         <TabsContent value="execucao" className="space-y-4">
+          {/* Alterado para exibir gráficos um abaixo do outro */}
           <div className="flex flex-col gap-4">
             <Card>
               <CardHeader>
@@ -121,25 +78,18 @@ const TreinamentosDashboard = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent className="h-[400px] flex items-center justify-center">
-                <DonutProcessoGeralChart 
-                  year={year} month={month} ccaId={ccaId}
-                />
+                <DonutProcessoGeralChart />
               </CardContent>
             </Card>
             <Card>
               <CardHeader>
                 <CardTitle>SUBPROCESSO</CardTitle>
                 <CardDescription>
-                  Distribuição dos subprocessos de treinamento por processo selecionado
+                  Distribuição dos subprocessos de treinamento
                 </CardDescription>
               </CardHeader>
               <CardContent className="h-[400px] flex items-center justify-center">
-                <DonutSubprocessoChart 
-                  processoId={processoId}
-                  year={year} 
-                  month={month}
-                  ccaId={ccaId}
-                />
+                <DonutSubprocessoChart />
               </CardContent>
             </Card>
           </div>
@@ -170,10 +120,7 @@ const TreinamentosDashboard = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent className="h-[300px]">
-                <TreinamentosNormativosChart 
-                  data={normativosData}
-                  isLoading={isLoadingNormativos}
-                />
+                <TreinamentosNormativosChart />
               </CardContent>
             </Card>
 
@@ -185,6 +132,7 @@ const TreinamentosDashboard = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent className="h-[300px]">
+                {/* Placeholder for expiration chart */}
                 <div className="flex h-full items-center justify-center">
                   <p className="text-muted-foreground">
                     Gráfico de vencimentos próximos
@@ -202,11 +150,7 @@ const TreinamentosDashboard = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <TreinamentoStatusTable 
-                year={year}
-                month={month}
-                ccaId={ccaId}
-              />
+              <TreinamentoStatusTable />
             </CardContent>
           </Card>
 

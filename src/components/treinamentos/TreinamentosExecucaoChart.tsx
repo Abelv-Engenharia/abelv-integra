@@ -1,11 +1,31 @@
+
 import React, { useState, useEffect } from "react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
-import { useFilteredTreinamentosExecucaoData } from "@/services/treinamentos/hooks/useFilteredTreinamentosExecucaoData";
+import { fetchTreinamentosExecucaoData } from "@/services/treinamentosDashboardService";
 
-export const TreinamentosExecucaoChart = ({ year, month, ccaId }: { year: string, month: string, ccaId: string }) => {
-  const { data = [], isLoading, error } = useFilteredTreinamentosExecucaoData({ year, month, ccaId });
+export const TreinamentosExecucaoChart = () => {
+  const [data, setData] = useState<any[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
-  if (isLoading) {
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const chartData = await fetchTreinamentosExecucaoData();
+        setData(chartData);
+      } catch (error) {
+        console.error("Error loading training execution data:", error);
+        setError("Erro ao carregar dados de execução de treinamentos");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  if (loading) {
     return (
       <div className="flex items-center justify-center h-full">
         <p className="text-muted-foreground">Carregando dados...</p>
@@ -16,11 +36,12 @@ export const TreinamentosExecucaoChart = ({ year, month, ccaId }: { year: string
   if (error) {
     return (
       <div className="flex items-center justify-center h-full">
-        <p className="text-red-500">{error.message || "Erro ao carregar dados"}</p>
+        <p className="text-red-500">{error}</p>
       </div>
     );
   }
 
+  // If no data is available
   if (data.length === 0) {
     return (
       <div className="flex items-center justify-center h-full">
