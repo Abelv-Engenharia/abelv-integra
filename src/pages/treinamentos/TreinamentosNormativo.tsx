@@ -75,6 +75,7 @@ const TreinamentosNormativo = () => {
   const [selectedCcaId, setSelectedCcaId] = useState<string | null>(null);
   const [treinamentosNormativos, setTreinamentosNormativos] = useState<{id: string, nome: string, validade_dias?: number}[]>([]);
   const [certificadoFile, setCertificadoFile] = useState<File | null>(null);
+  const [manualDate, setManualDate] = useState<string | null>(null);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -260,11 +261,43 @@ const TreinamentosNormativo = () => {
     return signedUrlData.signedUrl;
   }
 
+  // Para garantir que a data seja sempre salva corretamente (sem perder 1 dia), convertendo sempre para "YYYY-MM-DD" (local).
+  function dateValueToISODateString(value: any): string | null {
+    // Aceita tanto Date quanto string no formato yyyy-mm-dd
+    if (!value) return null;
+    if (value instanceof Date) {
+      // Retorna data local no formato yyyy-mm-dd
+      const y = value.getFullYear();
+      const m = String(value.getMonth() + 1).padStart(2, "0");
+      const d = String(value.getDate()).padStart(2, "0");
+      return `${y}-${m}-${d}`;
+    }
+    // Se vier string ISO (formato yyyy-mm-dd), usa direto, só se for válido
+    if (typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
+      return value;
+    }
+    // Outras strings: tenta converter
+    const tryDate = new Date(value);
+    if (!isNaN(tryDate.getTime())) {
+      const y = tryDate.getFullYear();
+      const m = String(tryDate.getMonth() + 1).padStart(2, "0");
+      const d = String(tryDate.getDate()).padStart(2, "0");
+      return `${y}-${m}-${d}`;
+    }
+    return null;
+  }
+
   const onSubmit = async (data: FormValues) => {
-    if (!dataValidade) {
+    // Corrigir: pegar a data da última seleção válida (manual ou calendário)
+    const dataRealizacaoISO =
+      manualDate && /^\d{4}-\d{2}-\d{2}$/.test(manualDate)
+        ? manualDate
+        : dateValueToISODateString(data.dataRealizacao);
+
+    if (!dataRealizacaoISO) {
       toast({
         title: "Erro",
-        description: "Não foi possível calcular a data de validade",
+        description: "A data de realização é obrigatória e deve ser válida.",
         variant: "destructive",
       });
       return;
@@ -309,7 +342,7 @@ const TreinamentosNormativo = () => {
         funcionarioId: data.funcionarioId,
         treinamentoId: data.treinamentoId,
         tipo: data.tipo,
-        dataRealizacao: data.dataRealizacao,
+        dataRealizacao: dataRealizacaoISO, // <-- sempre string yyyy-mm-dd
         dataValidade: dataValidade,
         certificadoUrl
       });
@@ -537,36 +570,92 @@ const TreinamentosNormativo = () => {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Data da realização</FormLabel>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <FormControl>
-                            <Button
-                              variant={"outline"}
-                              className={cn(
-                                "w-full pl-3 text-left font-normal",
-                                !field.value && "text-muted-foreground"
-                              )}
-                            >
-                              {field.value ? (
-                                format(field.value, "dd/MM/yyyy")
-                              ) : (
-                                <span>Selecione uma data</span>
-                              )}
-                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                            </Button>
-                          </FormControl>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                          <Calendar
-                            mode="single"
-                            selected={field.value}
-                            onSelect={field.onChange}
-                            disabled={(date) => date > new Date()}
-                            initialFocus
-                            className={cn("p-3 pointer-events-auto")}
-                          />
-                        </PopoverContent>
-                      </Popover>
+                      <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center">
+                        {/* Input manual */}
+                        <Input
+                          type="date"
+                          value={
+                            // Preferência: manualDate, senão valor do formulário convertido
+                            manualDate
+                              ? manualDate
+                              : field.value
+                              ? dateValueToISODateString(field.value)
+                              : ""
+                          }
+                          onChange={e => {
+                            setManualDate(e.target.value);
+                            // seta o valor no RHF também para manter sincronia
+                            field.onChange(new Date(e.target.value));
+                          }}
+                          className="max-w-[180px]"
+                          min="1900-01-01"
+                          max={dateValueToISODateString(new Date()) || ""}
+                        />
+                        <span className="text-xs text-muted-foreground">ou</span>
+                        {/* Popover do Calendário */}
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <FormControl>
+                              <Button
+                                type="button"
+                                variant={"outline"}
+                                className={cn(
+                                  "w-full pl-3 text-left font-normal max-w-[180px]",
+                                  !(manualDate || field.value) &&
+                                    "text-muted-foreground"
+                                )}
+                              >
+                                {manualDate || field.value ? (
+                                  dateValueToISODateString(
+                                    manualDate
+                                      ? manualDate
+                                      : field.value
+                                  ) &&
+                                  (() => {
+                                    const v =
+                                      manualDate ??
+                                      dateValueToISODateString(field.value);
+                                    if (v) {
+                                      const [y, m, d] = v.split("-");
+                                      return `${d}/${m}/${y}`;
+                                    }
+                                    return null;
+                                  })()
+                                ) : (
+                                  <span>Calendário</span>
+                                )}
+                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                              </Button>
+                            </FormControl>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar
+                              mode="single"
+                              // valor selecionado via date API (preferência manualDate p/ visual)
+                              selected={
+                                manualDate
+                                  ? new Date(manualDate)
+                                  : field.value instanceof Date
+                                  ? field.value
+                                  : field.value
+                                  ? new Date(field.value)
+                                  : undefined
+                              }
+                              onSelect={date => {
+                                if (date) {
+                                  // seta campo manual
+                                  const iso = dateValueToISODateString(date);
+                                  setManualDate(iso);
+                                  field.onChange(date);
+                                }
+                              }}
+                              disabled={date => date > new Date()}
+                              initialFocus
+                              className={cn("p-3 pointer-events-auto")}
+                            />
+                          </PopoverContent>
+                        </Popover>
+                      </div>
                       <FormMessage />
                     </FormItem>
                   )}
