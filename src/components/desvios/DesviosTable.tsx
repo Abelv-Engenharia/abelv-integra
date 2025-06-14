@@ -21,6 +21,7 @@ const DesviosTable = () => {
   const [editDesvioId, setEditDesvioId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Recarrega desvios do backend
   const fetchDesvios = async () => {
     setIsLoading(true);
     try {
@@ -57,29 +58,25 @@ const DesviosTable = () => {
     setEditDesvioId(null);
   };
 
-  // Corrigido: garantir refresh e logs detalhados após exclusão
-  const handleDesvioDeleted = (id?: string) => {
-    console.log("Chamando handleDesvioDeleted id:", id);
-    setIsLoading(true);
-    fetchDesvios()
-      .then(() => {
-        setIsLoading(false);
-        toast({
-          title: "Desvio excluído",
-          description: "O desvio foi removido com sucesso.",
-          variant: "default",
-        });
-        console.log("Tabela de desvios atualizada após exclusão.");
-      })
-      .catch((err) => {
-        setIsLoading(false);
-        console.error("Erro ao atualizar tabela após exclusão", err);
-        toast({
-          title: "Erro ao atualizar lista",
-          description: "Ocorreu um erro ao atualizar os desvios após exclusão.",
-          variant: "destructive",
-        });
+  // Remove o desvio da UI de forma otimista, e faz fetch para manter sincronizado
+  const handleDesvioDeleted = (id?: string, deleted?: boolean) => {
+    if (deleted && id) {
+      console.log("Removendo desvio da tabela na UI (otimista):", id);
+      setDesvios(prev => prev.filter((d) => d.id !== id));
+      fetchDesvios();
+      toast({
+        title: "Desvio excluído",
+        description: "O desvio foi removido com sucesso.",
+        variant: "default",
       });
+    } else {
+      toast({
+        title: "Erro técnico ao excluir",
+        description: "Não foi possível remover o desvio no servidor. Por favor, recarregue a página ou tente novamente.",
+        variant: "destructive",
+      });
+      console.error("Falha no handleDesvioDeleted (deleted=false ou id indefinido):", id, deleted);
+    }
   };
 
   return (
@@ -111,7 +108,7 @@ const DesviosTable = () => {
                       desvio={desvio}
                       onStatusUpdated={handleStatusUpdated}
                       onEditClick={handleEditClick}
-                      onDesvioDeleted={() => handleDesvioDeleted(desvio.id)}
+                      onDesvioDeleted={handleDesvioDeleted}
                       editDesvioId={editDesvioId}
                       editDialogOpen={editDialogOpen}
                       setEditDialogOpen={setEditDialogOpen}
@@ -148,6 +145,3 @@ const DesviosTable = () => {
 };
 
 export default DesviosTable;
-
-// Após esta alteração, DesviosTable.tsx ficou muito menor e muito mais simples!
-

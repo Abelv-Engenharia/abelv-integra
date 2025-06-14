@@ -16,7 +16,7 @@ import { desviosCompletosService, DesvioCompleto } from "@/services/desvios/desv
 
 interface DeleteDesvioDialogProps {
   desvio: DesvioCompleto;
-  onDesvioDeleted: (id?: string) => void;
+  onDesvioDeleted: (id?: string, deleted?: boolean) => void;
 }
 
 const DeleteDesvioDialog = ({ desvio, onDesvioDeleted }: DeleteDesvioDialogProps) => {
@@ -31,6 +31,7 @@ const DeleteDesvioDialog = ({ desvio, onDesvioDeleted }: DeleteDesvioDialogProps
         description: "ID do desvio não encontrado.",
         variant: "destructive",
       });
+      onDesvioDeleted(undefined, false);
       return;
     }
 
@@ -43,26 +44,29 @@ const DeleteDesvioDialog = ({ desvio, onDesvioDeleted }: DeleteDesvioDialogProps
       if (success) {
         toast({
           title: "Desvio excluído",
-          description: "O desvio foi excluído com sucesso da tabela desvios_completos.",
+          description: "O desvio foi excluído do banco de dados.",
         });
-        setOpen(false); // Fecha dialog
-        onDesvioDeleted(desvio.id);
-        console.log('Callback onDesvioDeleted disparado com ID:', desvio.id);
+        setOpen(false);
+        // Passa true para deleted para mostrar que de fato foi removido
+        onDesvioDeleted(desvio.id, true);
+        console.log('Callback onDesvioDeleted SÓ disparado em caso de sucesso.', desvio.id);
       } else {
         toast({
           title: "Erro ao excluir",
-          description: "Não foi possível excluir o desvio (backend retornou false). Tente novamente.",
+          description: "Não foi possível excluir o desvio no servidor Supabase.",
           variant: "destructive",
         });
-        console.error('Falha ao excluir desvio: BACKEND RETORNOU FALSE ID:', desvio.id);
+        onDesvioDeleted(desvio.id, false);
+        console.error('Falha ao excluir desvio: BACKEND RETORNOU FALSE', desvio.id);
       }
     } catch (error) {
-      console.error('Erro ao excluir desvio (exception):', error);
+      console.error('Erro ao excluir desvio:', error);
       toast({
-        title: "Erro ao excluir",
-        description: "Ocorreu um erro ao excluir o desvio da tabela desvios_completos.",
+        title: "Erro técnico ao excluir",
+        description: "Erro inesperado ao tentar excluir o desvio.",
         variant: "destructive",
       });
+      onDesvioDeleted(desvio.id, false);
     } finally {
       setIsLoading(false);
     }
