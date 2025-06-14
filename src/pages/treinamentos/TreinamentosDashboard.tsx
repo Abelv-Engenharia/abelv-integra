@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TreinamentosNormativosChart } from "@/components/treinamentos/TreinamentosNormativosChart";
@@ -23,6 +23,17 @@ const TreinamentosDashboard = () => {
   const [year, setYear] = useState<string>("todos");
   const [month, setMonth] = useState<string>("todos");
   const [ccaId, setCcaId] = useState<string>("todos");
+  // Processo de treinamento selecionado para filtrar subprocesso. (All por padrão)
+  const [processoId, setProcessoId] = useState<string>("todos");
+  // Vamos buscar opções de processo para o filtro
+  const [processoOptions, setProcessoOptions] = useState<{ id: string; nome: string }[]>([]);
+  // UseEffect para buscar processos ativos (ID e nome) apenas uma vez
+  React.useEffect(() => {
+    import("@/services/treinamentos/processoTreinamentoService").then(async (mod) => {
+      const lista = await mod.fetchProcessosTreinamento();
+      setProcessoOptions([{ id: "todos", nome: "Todos os Processos" }, ...lista]);
+    });
+  }, []);
 
   return (
     <div className="space-y-6">
@@ -61,6 +72,23 @@ const TreinamentosDashboard = () => {
 
       <TreinamentosPorProcessoTable />
 
+      {/* Filtro DINÂMICO para o processo (irá atualizar o gráfico de subprocesso) */}
+      <div className="w-full flex flex-col md:flex-row items-center gap-4">
+        <label className="font-medium text-base text-gray-700" htmlFor="processo-treinamento-select">
+          Processo de Treinamento (para detalhar subprocesso):
+        </label>
+        <select
+          id="processo-treinamento-select"
+          className="border rounded px-3 py-2 focus:outline-none"
+          value={processoId}
+          onChange={e => setProcessoId(e.target.value)}
+        >
+          {processoOptions.map(opt => (
+            <option key={opt.id} value={opt.id}>{opt.nome}</option>
+          ))}
+        </select>
+      </div>
+
       <Tabs defaultValue="execucao" className="space-y-4">
         <TabsList>
           <TabsTrigger value="execucao">Registros de Execução</TabsTrigger>
@@ -85,11 +113,11 @@ const TreinamentosDashboard = () => {
               <CardHeader>
                 <CardTitle>SUBPROCESSO</CardTitle>
                 <CardDescription>
-                  Distribuição dos subprocessos de treinamento
+                  Distribuição dos subprocessos de treinamento por processo selecionado
                 </CardDescription>
               </CardHeader>
               <CardContent className="h-[400px] flex items-center justify-center">
-                <DonutSubprocessoChart />
+                <DonutSubprocessoChart processoId={processoId} />
               </CardContent>
             </Card>
           </div>
