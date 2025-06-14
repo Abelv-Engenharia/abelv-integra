@@ -62,7 +62,8 @@ export const TabelaTreinamentosNormativosVencidos: React.FC = () => {
   const handleExcluir = async () => {
     if (!treinamentoSelecionado || justificativa.trim().length < 5) return;
     setExcluindo(true);
-    await treinamentosNormativosService.arquivar(treinamentoSelecionado.id, justificativa);
+    // Agora arquiva com status "Excluído"
+    await treinamentosNormativosService.arquivar(treinamentoSelecionado.id, justificativa, true);
     setExcluindo(false);
     setModalOpen(false);
     setTreinamentoSelecionado(null);
