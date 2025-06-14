@@ -60,6 +60,7 @@ const TreinamentosDashboard = () => {
         </TabsList>
         
         <TabsContent value="execucao" className="space-y-4">
+          
           <div className="flex flex-col gap-4">
             <Card>
               <CardHeader>
@@ -91,39 +92,21 @@ const TreinamentosDashboard = () => {
         </TabsContent>
         
         <TabsContent value="normativos" className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            <Card className="col-span-2">
+          <div className="flex flex-col gap-4 w-full">
+            <Card className="w-full">
               <CardHeader>
                 <CardTitle>Status dos Treinamentos Normativos</CardTitle>
                 <CardDescription>
                   Visão geral do status dos treinamentos normativos
                 </CardDescription>
               </CardHeader>
-              <CardContent className="h-[300px]">
+              <CardContent className="h-[70vh] p-2">
                 <TreinamentosNormativosChart />
               </CardContent>
             </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Vencimentos Próximos</CardTitle>
-                <CardDescription>
-                  Treinamentos com vencimento nos próximos 30 dias
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="h-[300px]">
-                {/* Placeholder for expiration chart */}
-                <div className="flex h-full items-center justify-center">
-                  <p className="text-muted-foreground">
-                    Gráfico de vencimentos próximos
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
+            
           </div>
-
           
-
           <div className="flex justify-center gap-4">
             <Button variant="outline" size="lg" asChild>
               
