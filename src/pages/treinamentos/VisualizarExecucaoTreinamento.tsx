@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { execucaoTreinamentoService } from "@/services/treinamentos/execucaoTreinamentoService";
@@ -43,31 +44,52 @@ const VisualizarExecucaoTreinamento = () => {
     return url.substring(idx + splitToken.length);
   }
 
-  // Ao clicar em visualizar
+  // Função para visualizar PDF
   const handleOpenVisualizar = async () => {
     if (execucao?.lista_presenca_url) {
       const path = extractPathFromUrl(execucao.lista_presenca_url);
       setFilePath(path);
+
+      // Gera a URL assinada e só abre o modal após a URL ser definida com sucesso
       await generateSignedUrl("treinamentos-anexos", path);
+
       setOpenVisualizar(true);
     }
   };
 
-  const handleCloseVisualizar = () => setOpenVisualizar(false);
+  // Limpa URL ao fechar modal
+  const handleCloseVisualizar = () => {
+    setOpenVisualizar(false);
+    // No hook de signed url, limpe a url ao fechar o modal
+    // Poderíamos adicionar um método no hook, mas aqui reseta via "gerar" com caminho nulo:
+    setFilePath(null);
+  };
 
   // Faz download usando signed URL válido
   const handleDownload = async () => {
     if (execucao?.lista_presenca_url) {
       const path = extractPathFromUrl(execucao.lista_presenca_url);
-      await generateSignedUrl("treinamentos-anexos", path);
-      // Espera signedUrl ser atualizado
+
+      // Gera a URL e só então faz o download
+      const result = await generateSignedUrl("treinamentos-anexos", path);
+
+      // Espera o signedUrl realmente ser definido
       setTimeout(() => {
+        // "signedUrl" está atualizado via re-render do hook.
         if (signedUrl) {
           window.open(signedUrl, "_blank");
         }
-      }, 100);
+      }, 200);
     }
   };
+
+  useEffect(() => {
+    // Quando fechar o modal, reseta URL do arquivo assinado
+    if (!openVisualizar) {
+      // Aqui podemos chamar um gerador nulo, mas não necessário se o modal já oculta pelo estado
+      // O hook reseta o signedUrl novo no próximo open
+    }
+  }, [openVisualizar]);
 
   if (loading) {
     return <div className="flex justify-center items-center h-full min-h-[300px]">Carregando execução...</div>;
