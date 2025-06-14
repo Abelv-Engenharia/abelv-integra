@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
+import { useSignedUrl } from "@/hooks/useSignedUrl";
 
 interface PhotoUploadProps {
   photoPreview: string | null;
@@ -22,6 +23,35 @@ export const PhotoUpload: React.FC<PhotoUploadProps> = ({
   onRemovePhoto
 }) => {
   const { toast } = useToast();
+  const { url: signedUrl, generate } = useSignedUrl();
+
+  // Gera signed URL para exibir foto privada do funcionário, se necessário
+  React.useEffect(() => {
+    if (
+      !photoPreview && // Não está mostrando uma imagem enviada agora
+      editingFuncionario?.foto &&
+      !photoRemoved
+    ) {
+      let filePath = editingFuncionario.foto;
+      // Se for URL absoluta, extrai o path relativo ou ajusta
+      if (/^https?:\/\//.test(filePath)) {
+        const match = filePath.match(/\/storage\/v1\/object\/sign\/([^?]+)/);
+        if (match) {
+          filePath = decodeURIComponent(match[1]);
+        } else {
+          const idx = filePath.indexOf('funcionarios-fotos/');
+          if (idx >= 0) filePath = filePath.slice(idx + 'funcionarios-fotos/'.length);
+        }
+      } else if (filePath.startsWith('funcionarios/')) {
+        // ok
+      } else {
+        filePath = `funcionarios/${filePath}`;
+      }
+      generate('funcionarios-fotos', filePath, 480); // 8 min
+    }
+    // Não adicionar generate como dependência para evitar loops
+    // eslint-disable-next-line
+  }, [editingFuncionario?.foto, photoPreview, photoRemoved]);
 
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -48,11 +78,18 @@ export const PhotoUpload: React.FC<PhotoUploadProps> = ({
     }
   };
 
+  // Mostra a preview local se for novo upload, senão signedUrl do funcionário atual
+  const avatarSrc = photoPreview
+    ? photoPreview
+    : (!photoRemoved && editingFuncionario?.foto)
+      ? signedUrl || ""
+      : "";
+
   return (
     <div className="flex flex-col items-center sm:items-start mb-6">
       <Label className="mb-2">Foto</Label>
       <Avatar className="size-32 mb-3">
-        <AvatarImage src={photoPreview || ""} />
+        <AvatarImage src={avatarSrc} />
         <AvatarFallback>
           <UserRound className="h-12 w-12" />
         </AvatarFallback>
@@ -72,7 +109,7 @@ export const PhotoUpload: React.FC<PhotoUploadProps> = ({
           className="hidden"
           onChange={handlePhotoChange}
         />
-        {(photoPreview || editingFuncionario?.foto) && !photoRemoved && (
+        {(!!avatarSrc || editingFuncionario?.foto) && !photoRemoved && (
           <Button
             type="button"
             variant="outline"
