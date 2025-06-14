@@ -20,7 +20,6 @@ const MinhasTarefas = () => {
     const fetchTarefas = async () => {
       try {
         const data = await tarefasService.getAll();
-        console.log("Tarefas carregadas:", data);
         setTarefas(data);
         setFilteredTarefas(data);
       } catch (error) {
@@ -62,8 +61,6 @@ const MinhasTarefas = () => {
   };
 
   const handleTarefaClick = (tarefa: Tarefa) => {
-    console.log("handleTarefaClick chamado com tarefa:", tarefa.id);
-    console.log("Navegando para:", `/tarefas/detalhes/${tarefa.id}`);
     navigate(`/tarefas/detalhes/${tarefa.id}`);
   };
 

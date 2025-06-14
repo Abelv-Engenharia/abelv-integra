@@ -45,10 +45,7 @@ export const TarefaCard: React.FC<TarefaCardProps> = ({ tarefa, onClick }) => {
   const dataLimite = new Date(tarefa.dataConclusao);
   const restante = formatDistanceToNow(dataLimite, { addSuffix: true, locale: ptBR });
   
-  const handleClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    console.log("TarefaCard clicked, ID:", tarefa.id);
+  const handleClick = () => {
     onClick(tarefa);
   };
   
