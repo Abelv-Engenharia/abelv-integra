@@ -1,4 +1,3 @@
-
 export interface Treinamento {
   id: string;
   nome: string;
@@ -81,6 +80,7 @@ export interface Funcionario {
   ativo?: boolean;
   created_at?: string;
   updated_at?: string;
+  cca_id?: number; // <-- Fix: Adicionado campo para compatibilidade com TreinamentosNormativo.tsx
 }
 
 export interface TreinamentoFormValues {
