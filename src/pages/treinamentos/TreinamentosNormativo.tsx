@@ -37,6 +37,7 @@ import {
 import { calcularDataValidade, calcularStatusTreinamento, fetchFuncionarios, fetchTreinamentos, criarTreinamentoNormativo } from "@/utils/treinamentosUtils";
 import { cn } from "@/lib/utils";
 import { ccaService } from "@/services/treinamentos/ccaService";
+import { listaTreinamentosNormativosService } from "@/services/treinamentos/listaTreinamentosNormativosService";
 
 const formSchema = z.object({
   ccaId: z.string({
@@ -68,6 +69,7 @@ const TreinamentosNormativo = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [ccas, setCcas] = useState<{ id: number; codigo: string; nome: string }[]>([]);
   const [selectedCcaId, setSelectedCcaId] = useState<string | null>(null);
+  const [treinamentosNormativos, setTreinamentosNormativos] = useState<{id: string, nome: string, validade_dias?: number}[]>([]);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -253,6 +255,19 @@ const TreinamentosNormativo = () => {
     );
   }
 
+  // Carregar treinamentos normativos da tabela correta no useEffect
+  useEffect(() => {
+    const loadTreinamentosNormativos = async () => {
+      try {
+        const data = await listaTreinamentosNormativosService.getAll();
+        setTreinamentosNormativos(data);
+      } catch (error) {
+        console.error("Erro ao carregar treinamentos normativos:", error);
+      }
+    };
+    loadTreinamentosNormativos();
+  }, []);
+
   return (
     <div className="space-y-6">
       <div className="flex items-center">
@@ -377,7 +392,7 @@ const TreinamentosNormativo = () => {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {treinamentos.map((treinamento) => (
+                          {treinamentosNormativos.map((treinamento) => (
                             <SelectItem key={treinamento.id} value={treinamento.id}>
                               {treinamento.nome}
                             </SelectItem>

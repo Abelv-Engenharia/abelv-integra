@@ -999,6 +999,30 @@ export type Database = {
         }
         Relationships: []
       }
+      lista_treinamentos_normativos: {
+        Row: {
+          created_at: string | null
+          id: string
+          nome: string
+          updated_at: string | null
+          validade_dias: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          nome: string
+          updated_at?: string | null
+          validade_dias?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          nome?: string
+          updated_at?: string | null
+          validade_dias?: number | null
+        }
+        Relationships: []
+      }
       metas_indicadores: {
         Row: {
           ano: number
