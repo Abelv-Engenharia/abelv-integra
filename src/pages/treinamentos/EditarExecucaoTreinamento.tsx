@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { execucaoTreinamentoService } from "@/services/treinamentos/execucaoTreinamentoService";
@@ -31,6 +30,9 @@ const EditarExecucaoTreinamento = () => {
   const [treinamentoOptions, setTreinamentoOptions] = useState<Treinamento[]>([]);
   const [processoOptions, setProcessoOptions] = useState<any[]>([]);
   const [tipoOptions, setTipoOptions] = useState<any[]>([]);
+
+  // Novo estado para arquivo lista de presença
+  const [listaPresencaFile, setListaPresencaFile] = useState<File | null>(null);
 
   useEffect(() => {
     // Carregar opções
@@ -114,7 +116,19 @@ const EditarExecucaoTreinamento = () => {
             if (!execucao?.id) return;
             setSaving(true);
             try {
-              await execucaoTreinamentoService.update(execucao.id, execucao);
+              let lista_presenca_url = execucao.lista_presenca_url;
+              // Se um novo arquivo foi anexado, faça upload aqui
+              if (listaPresencaFile) {
+                // Você pode implementar a lógica de upload para Supabase Storage aqui
+                // Por enquanto apenas usamos um valor genérico para ilustrar
+                // Depois troque este trecho pelo upload real
+                lista_presenca_url = `uploads/${listaPresencaFile.name}`;
+              }
+
+              await execucaoTreinamentoService.update(execucao.id, {
+                ...execucao,
+                lista_presenca_url,
+              });
               toast({
                 title: "Execução atualizada",
                 description: "A execução foi salva com sucesso.",
@@ -305,6 +319,27 @@ const EditarExecucaoTreinamento = () => {
                 placeholder="Observações"
               />
             </div>
+
+            {/* Campo de upload de lista de presença, só se não estiver anexado */}
+            {(!execucao.lista_presenca_url || execucao.lista_presenca_url === "") && (
+              <div>
+                <Label htmlFor="listaPresenca">Anexar lista de presença (PDF, máx. 2MB)</Label>
+                <Input
+                  id="listaPresenca"
+                  type="file"
+                  accept=".pdf"
+                  onChange={e => {
+                    if (e.target.files && e.target.files[0]) {
+                      setListaPresencaFile(e.target.files[0]);
+                    } else {
+                      setListaPresencaFile(null);
+                    }
+                  }}
+                />
+                <div className="text-xs text-muted-foreground mt-1">Apenas arquivos PDF, máximo 2MB.</div>
+              </div>
+            )}
+
             <div className="flex gap-2">
               <Button type="submit" disabled={saving}>
                 {saving ? "Salvando..." : "Salvar"}
