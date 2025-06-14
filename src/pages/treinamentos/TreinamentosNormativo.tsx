@@ -289,7 +289,7 @@ const TreinamentosNormativo = () => {
 
   // Função utilitária para parse simples de dd/mm/aaaa (apenas para este campo)
   function parseDateString(str: string): Date | undefined {
-    if (!str) return undefined;
+    if (!str || !/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(str)) return undefined;
     const [dd, mm, yyyy] = str.split("/");
     if (!dd || !mm || !yyyy) return undefined;
     const date = new Date(Number(yyyy), Number(mm) - 1, Number(dd));
@@ -584,41 +584,87 @@ const TreinamentosNormativo = () => {
                 <FormField
                   control={form.control}
                   name="dataRealizacao"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-col">
-                      <FormLabel>Data da realização</FormLabel>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <FormControl>
-                            <Button
-                              variant={"outline"}
-                              className={cn(
-                                "w-full pl-3 text-left font-normal",
-                                !field.value && "text-muted-foreground"
-                              )}
-                            >
-                              {field.value ? (
-                                format(field.value, "dd/MM/yyyy")
-                              ) : (
-                                <span>Selecione uma data</span>
-                              )}
-                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                            </Button>
-                          </FormControl>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                          <Calendar
-                            mode="single"
-                            selected={field.value}
-                            onSelect={field.onChange}
-                            disabled={(date) => date > new Date()}
-                            initialFocus
-                          />
-                        </PopoverContent>
-                      </Popover>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                  render={({ field }) => {
+                    const [dateString, setDateString] = React.useState<string>(
+                      field.value ? format(field.value, "dd/MM/yyyy") : ""
+                    );
+
+                    React.useEffect(() => {
+                      if (field.value) {
+                        const formatted = format(field.value, "dd/MM/yyyy");
+                        if (formatted !== dateString) {
+                          setDateString(formatted);
+                        }
+                      } else {
+                        setDateString("");
+                      }
+                    }, [field.value, dateString]);
+
+                    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+                      const value = e.target.value;
+                      setDateString(value);
+                      if (/^\d{2}\/\d{2}\/\d{4}$/.test(value)) {
+                        const parsedDate = parseDateString(value);
+                        if (parsedDate && parsedDate <= new Date()) {
+                          field.onChange(parsedDate);
+                        } else {
+                          field.onChange(undefined);
+                        }
+                      }
+                    };
+
+                    const handleBlur = () => {
+                      const parsedDate = parseDateString(dateString);
+                      if (!parsedDate || parsedDate > new Date()) {
+                        if (field.value) {
+                          setDateString(format(field.value, "dd/MM/yyyy"));
+                        } else {
+                          setDateString("");
+                          field.onChange(undefined);
+                        }
+                      }
+                    };
+                    
+                    return (
+                      <FormItem className="flex flex-col">
+                        <FormLabel>Data da realização</FormLabel>
+                        <Popover>
+                          <div className="relative w-full">
+                            <FormControl>
+                              <Input
+                                placeholder="dd/MM/yyyy"
+                                value={dateString}
+                                onChange={handleInputChange}
+                                onBlur={handleBlur}
+                                className="pr-10"
+                              />
+                            </FormControl>
+                            <PopoverTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                className="absolute right-0 top-0 h-full rounded-l-none px-3"
+                              >
+                                <CalendarIcon className="h-4 w-4 opacity-50" />
+                                <span className="sr-only">Abrir calendário</span>
+                              </Button>
+                            </PopoverTrigger>
+                          </div>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar
+                              mode="single"
+                              selected={field.value}
+                              onSelect={(date) => {
+                                field.onChange(date);
+                              }}
+                              disabled={(date) => date > new Date()}
+                              initialFocus
+                            />
+                          </PopoverContent>
+                        </Popover>
+                        <FormMessage />
+                      </FormItem>
+                    );
+                  }}
                 />
 
                 <FormItem>
