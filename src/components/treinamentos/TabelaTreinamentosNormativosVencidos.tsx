@@ -7,6 +7,7 @@ import { format } from "date-fns";
 import { fetchFuncionarios } from "@/utils/treinamentosUtils";
 import { Button } from "@/components/ui/button";
 import { Trash } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export const TabelaTreinamentosNormativosVencidos: React.FC = () => {
   const [treinamentos, setTreinamentos] = useState<TreinamentoNormativo[]>([]);
@@ -16,6 +17,8 @@ export const TabelaTreinamentosNormativosVencidos: React.FC = () => {
   const [justificativa, setJustificativa] = useState("");
   const [treinamentoSelecionado, setTreinamentoSelecionado] = useState<TreinamentoNormativo | null>(null);
   const [excluindo, setExcluindo] = useState(false);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     carregarDados();
@@ -60,18 +63,27 @@ export const TabelaTreinamentosNormativosVencidos: React.FC = () => {
   const handleExcluir = async () => {
     if (!treinamentoSelecionado || justificativa.trim().length < 5) return;
     setExcluindo(true);
-    // Atualiza para arquivado = true, e opcionalmente poderia salvar justificativa em um campo próprio no futuro
     await treinamentosNormativosService.arquivar(treinamentoSelecionado.id, justificativa);
     setExcluindo(false);
     setModalOpen(false);
     setTreinamentoSelecionado(null);
     setJustificativa("");
-    carregarDados(); // Atualiza lista
+    carregarDados();
   };
 
   const handleRenovar = (treinamento: TreinamentoNormativo) => {
-    // Aqui pode abrir um modal/form de renovação - para esta entrega, só um alert como placeholder:
-    alert("Funcionalidade de renovar treinamento em breve.");
+    const funcionario = getFuncionarioInfo(treinamento.funcionario_id);
+    if (!funcionario) return;
+    // Vamos passar os campos de CCA, funcionario, função, matrícula e treinamento realizado
+    navigate("/treinamentos/normativo", {
+      state: {
+        ccaId: funcionario.cca_id ? String(funcionario.cca_id) : "",
+        funcionarioId: funcionario.id,
+        funcao: funcionario.funcao,
+        matricula: funcionario.matricula,
+        treinamentoId: treinamento.treinamento_id,
+      },
+    });
   };
 
   if (loading) {
@@ -95,7 +107,6 @@ export const TabelaTreinamentosNormativosVencidos: React.FC = () => {
               <TableHead>Matrícula</TableHead>
               <TableHead>Treinamento</TableHead>
               <TableHead>Tipo</TableHead>
-              {/* Removido: <TableHead>Data de Realização</TableHead> */}
               <TableHead>Data de Validade</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Ações</TableHead>
@@ -111,7 +122,6 @@ export const TabelaTreinamentosNormativosVencidos: React.FC = () => {
                     <TableCell>{funcionario?.matricula || "-"}</TableCell>
                     <TableCell>{t.treinamentoNome || "-"}</TableCell>
                     <TableCell>{t.tipo || "-"}</TableCell>
-                    {/* Removido: campo Data de Realização */}
                     <TableCell>
                       {t.data_validade
                         ? format(new Date(t.data_validade), "dd/MM/yyyy")
@@ -159,7 +169,6 @@ export const TabelaTreinamentosNormativosVencidos: React.FC = () => {
           </TableBody>
         </Table>
       </div>
-
       {/* Modal de justificativa para exclusão */}
       {modalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
@@ -191,20 +200,6 @@ export const TabelaTreinamentosNormativosVencidos: React.FC = () => {
           </div>
         </div>
       )}
-
     </div>
   );
 };
-
-// Serviço para arquivar, será utilizado acima.
-// Você deve adicionar esse método em treinamentosNormativosService:
-
-// treinamentosNormativosService.arquivar = async (id: string, justificativa: string) => {
-//   await supabase
-//     .from('treinamentos_normativos')
-//     .update({ arquivado: true /*, justificativa_exclusao: justificativa */ })
-//     .eq('id', id);
-// };
-
-// Você pode adicionar o campo justificativa em futuro ajuste se desejar auditar esta ação.
-

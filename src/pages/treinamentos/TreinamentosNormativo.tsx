@@ -64,6 +64,7 @@ const TreinamentosNormativo = () => {
     validade_dias?: number;
   }[]>([]);
   const [certificadoFile, setCertificadoFile] = useState<File | null>(null);
+  const location = useLocation();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -392,6 +393,29 @@ const TreinamentosNormativo = () => {
         </Card>
       </div>;
   }
+
+  // Novo: detecta dados vindos via state da tabela para renovação
+  useEffect(() => {
+    if (location?.state) {
+      const { ccaId, funcionarioId, funcao, matricula, treinamentoId } = location.state as {
+        ccaId?: string;
+        funcionarioId?: string;
+        funcao?: string;
+        matricula?: string;
+        treinamentoId?: string;
+      };
+      if (ccaId) form.setValue("ccaId", ccaId);
+      if (funcionarioId) form.setValue("funcionarioId", funcionarioId);
+      if (treinamentoId) form.setValue("treinamentoId", treinamentoId);
+
+      // Forçar Função e Matrícula nos elementos exibidos (apenas para exibição, pois são disabled)
+      if (funcionarioId && funcionarios.length > 0) {
+        const funcionario = funcionarios.find(f => f.id === funcionarioId);
+        setSelectedFuncionario(funcionario || null);
+      }
+    }
+    // eslint-disable-next-line
+  }, [location.state, funcionarios]); // executa novamente se funcionários forem carregados
 
   return <div className="space-y-6">
       {/* TÍTULO SEM A SETA */}
