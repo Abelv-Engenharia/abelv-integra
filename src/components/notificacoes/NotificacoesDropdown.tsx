@@ -13,8 +13,10 @@ import { Bell, Check, CheckCheck } from "lucide-react";
 import { notificacoesService } from "@/services/notificacoesService";
 import { Notificacao } from "@/types/notificacoes";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 const NotificacoesDropdown = () => {
+  const navigate = useNavigate();
   const [notificacoes, setNotificacoes] = useState<Notificacao[]>([]);
   const [naoLidas, setNaoLidas] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -24,7 +26,7 @@ const NotificacoesDropdown = () => {
     try {
       const data = await notificacoesService.getNotificacoes();
       setNotificacoes(data);
-      
+
       const count = await notificacoesService.contarNaoLidas();
       setNaoLidas(count);
     } catch (error) {
@@ -47,6 +49,20 @@ const NotificacoesDropdown = () => {
       console.error("Erro ao marcar notificação como lida:", error);
       toast.error("Erro ao marcar notificação como lida");
     }
+  };
+
+  // Nova função: ao clicar na notificação, redireciona para o destino apropriado
+  const handleNotificacaoClick = async (notificacao: Notificacao) => {
+    // Exemplo: existe tarefa vinculada, ir para a rota de detalhe
+    if (notificacao.tarefa_id) {
+      await marcarComoLida(notificacao.id);
+      navigate(`/tarefas/detalhe/${notificacao.tarefa_id}`);
+      return;
+    }
+    // Adicione outros destinos conforme necessário, exemplo:
+    // if (notificacao.ocorrencia_id) { ... }
+    // se nenhum destino, apenas marca como lida
+    await marcarComoLida(notificacao.id);
   };
 
   const marcarTodasComoLidas = async () => {
@@ -95,7 +111,6 @@ const NotificacoesDropdown = () => {
           )}
         </div>
         <DropdownMenuSeparator />
-        
         {loading ? (
           <div className="p-4 text-center text-muted-foreground">
             Carregando notificações...
@@ -109,10 +124,8 @@ const NotificacoesDropdown = () => {
             {notificacoes.slice(0, 10).map((notificacao) => (
               <DropdownMenuItem
                 key={notificacao.id}
-                className={`p-3 cursor-pointer ${
-                  !notificacao.lida ? 'bg-blue-50' : ''
-                }`}
-                onClick={() => !notificacao.lida && marcarComoLida(notificacao.id)}
+                className={`p-3 cursor-pointer ${!notificacao.lida ? 'bg-blue-50' : ''}`}
+                onClick={() => handleNotificacaoClick(notificacao)}
               >
                 <div className="flex-1">
                   <div className="flex items-start justify-between">
@@ -131,7 +144,7 @@ const NotificacoesDropdown = () => {
                           variant="ghost"
                           size="sm"
                           className="h-6 w-6 p-0"
-                          onClick={(e) => {
+                          onClick={e => {
                             e.stopPropagation();
                             marcarComoLida(notificacao.id);
                           }}
