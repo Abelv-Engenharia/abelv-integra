@@ -32,7 +32,17 @@ export function DatePickerWithManualInput({ value, onChange, disabled }: DatePic
   }, [value]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const str = e.target.value;
+    let str = e.target.value.replace(/\D/g, ""); // Remove todos os caracteres que não são dígitos
+
+    if (str.length > 2) {
+      str = `${str.slice(0, 2)}/${str.slice(2)}`;
+    }
+    if (str.length > 5) {
+      str = `${str.slice(0, 5)}/${str.slice(5)}`;
+    }
+    
+    str = str.slice(0, 10); // Limita ao formato dd/MM/yyyy
+
     setDateString(str);
     
     if (/^\d{2}\/\d{2}\/\d{4}$/.test(str)) {
