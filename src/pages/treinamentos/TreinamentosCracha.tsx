@@ -59,6 +59,19 @@ const TreinamentosCracha = () => {
     loadData();
   }, []);
 
+  // Ordenar CCAs pelo campo 'codigo' em ordem crescente antes de mostrar as opções
+  const ccasOrdenados = [...ccas].sort((a, b) => {
+    if (!a.codigo || !b.codigo) return 0;
+    // Se for numérico, compara como número. Se não, compara como string.
+    const numA = Number(a.codigo);
+    const numB = Number(b.codigo);
+    if (!isNaN(numA) && !isNaN(numB)) {
+      return numA - numB;
+    } else {
+      return a.codigo.localeCompare(b.codigo, "pt-BR", { numeric: true });
+    }
+  });
+
   // Lista de funcionários filtrada por CCA selecionado
   const funcionariosFiltrados = selectedCcaId
     ? funcionarios.filter((f) => f.cca_id === selectedCcaId)
@@ -406,7 +419,7 @@ const TreinamentosCracha = () => {
                       <SelectValue placeholder="Selecione um CCA" />
                     </SelectTrigger>
                     <SelectContent>
-                      {ccas.map((cca) => (
+                      {ccasOrdenados.map((cca) => (
                         <SelectItem key={cca.id} value={String(cca.id)}>
                           {cca.codigo} - {cca.nome}
                         </SelectItem>
