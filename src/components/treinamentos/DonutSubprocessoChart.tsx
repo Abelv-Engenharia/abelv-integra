@@ -5,18 +5,15 @@ import { fetchDonutSubprocessoData } from "@/services/treinamentos/treinamentosS
 
 const COLORS = ["#F59E0B", "#2563EB", "#6B7280", "#FAA43A", "#60A5FA"];
 
-// Novo label para seguir o formato da imagem enviada
 const renderCustomLabel = (props: PieLabelRenderProps) => {
   const RADIAN = Math.PI / 180;
   const cx = Number(props.cx);
   const cy = Number(props.cy);
   const midAngle = props.midAngle;
   const outerRadius = Number(props.outerRadius);
-  // Usar percent diretamente se estiver no objeto, para o novo comportamento
   const percent = (props as any).percent ?? 0;
   const name = props.name ?? "";
   const value = props.value ?? 0;
-  const index = props.index ?? 0;
 
   // Posicionamento para fora do donut
   const radius = outerRadius + 42;
@@ -41,26 +38,17 @@ const renderCustomLabel = (props: PieLabelRenderProps) => {
   );
 };
 
-interface DonutSubprocessoChartProps {
-  processoTreinamentoId: string | null;
-}
-
-export const DonutSubprocessoChart: React.FC<DonutSubprocessoChartProps> = ({
-  processoTreinamentoId
-}) => {
+// Remover obrigatoriedade do id
+export const DonutSubprocessoChart: React.FC = () => {
   const [data, setData] = useState<Array<{ name: string; value: number; percent: number }>>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (!processoTreinamentoId) {
-      setData([]);
-      return;
-    }
     setLoading(true);
-    fetchDonutSubprocessoData(processoTreinamentoId)
+    fetchDonutSubprocessoData(null)
       .then(result => setData(result))
       .finally(() => setLoading(false));
-  }, [processoTreinamentoId]);
+  }, []);
 
   if (loading) {
     return (
@@ -69,7 +57,7 @@ export const DonutSubprocessoChart: React.FC<DonutSubprocessoChartProps> = ({
       </div>
     );
   }
-  if ((!data || data.length === 0) && processoTreinamentoId) {
+  if (!data || data.length === 0) {
     return (
       <div className="w-full flex items-center justify-center h-60">
         <span className="text-muted-foreground">Não há dados para exibir.</span>

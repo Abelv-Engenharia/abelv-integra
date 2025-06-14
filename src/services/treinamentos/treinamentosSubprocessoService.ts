@@ -1,16 +1,18 @@
 
 import { supabase } from "@/integrations/supabase/client";
 
-// Busca dados agregados dos subprocessos para um processo específico
+// Busca dados agregados dos subprocessos, total geral se processoTreinamentoId for nulo
 export async function fetchDonutSubprocessoData(processoTreinamentoId: string | null) {
-  if (!processoTreinamentoId) return [];
-
-  // Busca todos os registros vinculados ao processo selecionado,
-  // agrupando apenas pelo nome/opção do subprocesso (tipo_treinamento)
+  // Se não houver processoTreinamentoId, buscar todos os registros (NÃO filtrar pelo processo)
   const { data, error } = await supabase
     .from("execucao_treinamentos")
     .select("tipo_treinamento, horas_totais")
-    .eq("processo_treinamento_id", processoTreinamentoId);
+    .modify((query) => {
+      if (processoTreinamentoId) {
+        query.eq("processo_treinamento_id", processoTreinamentoId);
+      }
+      return query;
+    });
 
   if (error) {
     console.error("Erro ao buscar subprocessos:", error);
@@ -27,7 +29,7 @@ export async function fetchDonutSubprocessoData(processoTreinamentoId: string | 
     totalHoras += horas;
   });
 
-  // Para mostrar opções em relação ao total, precisamos calcular o valor relativo ao total geral de subprocessos
+  // Calcula o percentual
   return Object.keys(aggregate).map(name => ({
     name,
     value: aggregate[name],
