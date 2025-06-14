@@ -6,20 +6,13 @@ import { TreinamentoStatusTable } from "@/components/treinamentos/TreinamentoSta
 import { TreinamentosSummaryCards } from "@/components/treinamentos/TreinamentosSummaryCards";
 import { TreinamentosPorProcessoTable } from "@/components/treinamentos/TreinamentosPorProcessoTable";
 import { Button } from "@/components/ui/button";
-import { 
-  Calendar, 
-  FileText, 
-  LayoutDashboard, 
-  Plus, 
-  Users 
-} from "lucide-react";
+import { Calendar, FileText, LayoutDashboard, Plus, Users } from "lucide-react";
 import { Link } from "react-router-dom";
 import TreinamentosDashboardFilters from "@/components/treinamentos/TreinamentosDashboardFilters";
 import { TreinamentosExecucaoChart } from "@/components/treinamentos/TreinamentosExecucaoChart";
 import { DonutProcessoGeralChart } from "@/components/treinamentos/DonutProcessoGeralChart";
 import { DonutSubprocessoChart } from "@/components/treinamentos/DonutSubprocessoChart";
 import { fetchProcessosTreinamento } from "@/services/treinamentos/processoTreinamentoService";
-
 const TreinamentosDashboard = () => {
   const [year, setYear] = useState<string>("todos");
   const [month, setMonth] = useState<string>("todos");
@@ -28,21 +21,11 @@ const TreinamentosDashboard = () => {
   // Opções de processo treinamento para o seletor
   const [processos, setProcessos] = useState<any[]>([]);
   const [processoTreinamentoId, setProcessoTreinamentoId] = useState<string | null>(null);
-
   useEffect(() => {
     fetchProcessosTreinamento().then(setProcessos);
   }, []);
-
-  return (
-    <div className="space-y-6">
-      <TreinamentosDashboardFilters
-        year={year}
-        setYear={setYear}
-        month={month}
-        setMonth={setMonth}
-        ccaId={ccaId}
-        setCcaId={setCcaId}
-      />
+  return <div className="space-y-6">
+      <TreinamentosDashboardFilters year={year} setYear={setYear} month={month} setMonth={setMonth} ccaId={ccaId} setCcaId={setCcaId} />
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Dashboard de Treinamentos</h1>
@@ -139,36 +122,18 @@ const TreinamentosDashboard = () => {
             </Card>
           </div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Status dos Treinamentos por Funcionário</CardTitle>
-              <CardDescription>
-                Visão detalhada do status de treinamentos normativos
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <TreinamentoStatusTable />
-            </CardContent>
-          </Card>
+          
 
           <div className="flex justify-center gap-4">
             <Button variant="outline" size="lg" asChild>
-              <Link to="/treinamentos/normativo">
-                <FileText className="mr-2 h-5 w-5" />
-                Registrar Treinamento Normativo
-              </Link>
+              
             </Button>
             <Button variant="outline" size="lg" asChild>
-              <Link to="/treinamentos/cracha">
-                <Users className="mr-2 h-5 w-5" />
-                Emitir Crachá de Capacitação
-              </Link>
+              
             </Button>
           </div>
         </TabsContent>
       </Tabs>
-    </div>
-  );
+    </div>;
 };
-
 export default TreinamentosDashboard;
