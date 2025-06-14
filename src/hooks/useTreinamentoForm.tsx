@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useQuery } from "@tanstack/react-query";
 import { TreinamentoFormValues } from "@/types/treinamentos";
@@ -51,6 +50,30 @@ export const useTreinamentoForm = () => {
     queryKey: ['tipo-treinamento'],
     queryFn: tipoTreinamentoService.getAll,
   });
+
+  // Preencher a carga horária automaticamente ao selecionar um treinamento
+  useEffect(() => {
+    const idSelecionado = form.watch("treinamento_id");
+    if (
+      idSelecionado &&
+      idSelecionado !== "outro" &&
+      treinamentoOptions.length > 0
+    ) {
+      const treinamentoSelecionado = treinamentoOptions.find((t) => t.id === idSelecionado);
+      if (treinamentoSelecionado && treinamentoSelecionado.carga_horaria != null) {
+        // Atualiza o campo se for diferente
+        if (form.getValues("carga_horaria") !== treinamentoSelecionado.carga_horaria) {
+          form.setValue("carga_horaria", treinamentoSelecionado.carga_horaria);
+        }
+      }
+    } else if (idSelecionado === "outro") {
+      // Limpa a carga horária para permitir edição livre
+      if (form.getValues("carga_horaria") !== 0) {
+        form.setValue("carga_horaria", 0);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form.watch("treinamento_id"), treinamentoOptions]);
 
   const calculateHorasTotais = () => {
     const cargaHoraria = form.watch("carga_horaria") || 0;
