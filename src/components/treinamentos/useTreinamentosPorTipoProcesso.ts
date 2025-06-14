@@ -1,0 +1,47 @@
+
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+
+export interface ProcessoGeralChartData {
+  name: string;
+  value: number; // soma total MOD + MOI em horas para o tipo_treinamento
+  percentual: number;
+  horasTotais: number; // alias pra value para facilitar nas labels
+}
+
+// Hook para buscar e agregar os dados para o gráfico de processo geral
+export function useTreinamentosPorTipoProcesso() {
+  return useQuery<ProcessoGeralChartData[]>({
+    queryKey: ["treinamentos-por-processo-tipo-treinamento-grafico"],
+    async queryFn() {
+      const { data, error } = await supabase
+        .from("execucao_treinamentos")
+        .select("tipo_treinamento, carga_horaria, efetivo_mod, efetivo_moi");
+
+      if (error) throw new Error("Erro ao buscar execucao_treinamentos: " + error.message);
+
+      // Agrupa por tipo de treinamento e soma as horas total MOD + MOI
+      const agrupados: Record<string, number> = {};
+
+      (data || []).forEach((linha) => {
+        const tipo = linha.tipo_treinamento || "Não informado";
+        const cargaHoraria = Number(linha.carga_horaria) || 0;
+        const mod = Number(linha.efetivo_mod) || 0;
+        const moi = Number(linha.efetivo_moi) || 0;
+        const totalHoras = cargaHoraria * (mod + moi);
+
+        if (!agrupados[tipo]) agrupados[tipo] = 0;
+        agrupados[tipo] += totalHoras;
+      });
+
+      const totalGeral = Object.values(agrupados).reduce((s, v) => s + v, 0);
+
+      return Object.entries(agrupados).map(([name, horasTotais]) => ({
+        name,
+        value: horasTotais,
+        horasTotais,
+        percentual: totalGeral ? (horasTotais / totalGeral) * 100 : 0,
+      }));
+    }
+  });
+}

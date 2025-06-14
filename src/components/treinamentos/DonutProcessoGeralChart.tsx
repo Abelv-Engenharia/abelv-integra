@@ -1,20 +1,13 @@
 import React from "react";
-import { PieChart, Pie, Cell, Tooltip, PieLabelRenderProps } from "recharts";
+import { PieChart, Pie, Cell, Tooltip } from "recharts";
+import { useTreinamentosPorTipoProcesso } from "./useTreinamentosPorTipoProcesso";
 
-// Dados mantidos
-const data = [
-  { name: "Admissão - Formação", value: 66 },
-  { name: "Reciclagem", value: 18 },
-  { name: "Transferência - Mobilização", value: 14 },
-  { name: "Formação", value: 4 }
-];
+// Definir cores fixas (ou aleatórias se tipos ultrapassarem o length)
+const COLORS = ["#F59E0B", "#2563EB", "#6B7280", "#FAA43A", "#34D399", "#DB2777", "#60A5FA"];
 
-const COLORS = ["#F59E0B", "#2563EB", "#6B7280", "#FAA43A"];
-
-// Função para rótulo customizado, posicionando fora do arco
-const renderCustomLabel = (props: PieLabelRenderProps) => {
+// Custom label para mostrar tipo, percentual e total de horas
+const renderCustomLabel = (props: any) => {
   const RADIAN = Math.PI / 180;
-  // Coerce cx, cy, and outerRadius to numbers for proper math
   const cx = Number(props.cx);
   const cy = Number(props.cy);
   const midAngle = props.midAngle;
@@ -22,16 +15,16 @@ const renderCustomLabel = (props: PieLabelRenderProps) => {
   const percent = props.percent;
   const name = props.name;
   const index = props.index ?? 0;
+  const value = props.value; // total horas (MOD+MOI)
+  const total = props.payload?.horasTotais ?? value;
 
-  const radius = outerRadius + 24;
+  const radius = outerRadius + 36;
   const x = cx + radius * Math.cos(-midAngle * RADIAN);
   const y = cy + radius * Math.sin(-midAngle * RADIAN);
-
   const color = COLORS[index % COLORS.length];
 
-  // Exibir o nome completo, mas corta se for excesso
-  const label =
-    String(name).length > 22 ? String(name).substring(0, 18) + "..." : String(name);
+  // Maior nome de tipo -> pode cortar para visualização responsiva
+  const labelName = String(name).length > 24 ? String(name).substring(0, 20) + "..." : String(name);
 
   return (
     <text
@@ -40,29 +33,45 @@ const renderCustomLabel = (props: PieLabelRenderProps) => {
       fill={color}
       textAnchor={x > cx ? "start" : "end"}
       dominantBaseline="central"
-      fontSize="16"
-      fontWeight={index === 0 ? "bold" : "normal"}
+      fontSize="15"
+      fontWeight="bold"
     >
-      {index === 0
-        ? `- ${name}: ${(percent * 100).toFixed(0)}%`
-        : `${label}: ${(percent * 100).toFixed(0)}%`}
+      {`${labelName}: ${percent ? percent.toFixed(1) : "0"}% (${total}h)`}
     </text>
   );
 };
 
 export const DonutProcessoGeralChart = () => {
+  const { data = [], isLoading, error } = useTreinamentosPorTipoProcesso();
+
+  // Placeholder se carregando ou erro
+  if (isLoading) {
+    return (
+      <div className="w-full flex items-center justify-center h-80">
+        <span className="text-muted-foreground">Carregando...</span>
+      </div>
+    );
+  }
+  if (error || data.length === 0) {
+    return (
+      <div className="w-full flex items-center justify-center h-80">
+        <span className="text-red-600">Não há dados para exibir.</span>
+      </div>
+    );
+  }
+
   return (
     <div className="w-full flex items-center justify-center">
-      <PieChart width={540} height={360}>
+      <PieChart width={520} height={400}>
         <Pie
           data={data}
-          dataKey="value"
+          dataKey="horasTotais"
           nameKey="name"
           cx="58%"
-          cy="50%"
-          innerRadius={92}
-          outerRadius={132}
-          paddingAngle={2}
+          cy="52%"
+          innerRadius={110}
+          outerRadius={142}
+          paddingAngle={1.5}
           label={renderCustomLabel}
           labelLine={true}
         >
@@ -70,7 +79,10 @@ export const DonutProcessoGeralChart = () => {
             <Cell key={entry.name} fill={COLORS[index % COLORS.length]} />
           ))}
         </Pie>
-        <Tooltip />
+        <Tooltip
+          formatter={(value: any, _: string, props: any) => `${value} horas`}
+          contentStyle={{ fontSize: 15 }}
+        />
       </PieChart>
     </div>
   );
