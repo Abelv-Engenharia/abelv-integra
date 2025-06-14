@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
@@ -12,7 +13,7 @@ export const TreinamentoStatusTable = ({ year, month, ccaId }: { year?: string; 
     const fetchData = async () => {
       try {
         setLoading(true);
-        const data = await fetchFuncionariosComTreinamentos(year, month, ccaId);
+        const data = await fetchFuncionariosComTreinamentos({ year, month, ccaId });
         setFuncionariosComTreinamentos(data);
       } catch (error) {
         console.error("Error loading training status data:", error);

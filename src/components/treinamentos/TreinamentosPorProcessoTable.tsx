@@ -9,46 +9,6 @@ type LinhaTabela = {
   percentualMOI: number;
 };
 
-// Nova função que soma horas totais corretamente
-async function fetchTreinamentosPorTipoTreinamento(): Promise<LinhaTabela[]> {
-  const { data, error } = await supabase
-    .from("execucao_treinamentos")
-    .select(
-      "tipo_treinamento, carga_horaria, efetivo_mod, efetivo_moi"
-    );
-
-  if (error) {
-    throw new Error("Erro ao buscar execucao_treinamentos: " + error.message);
-  }
-
-  // Agrupa por tipo de treinamento e soma as horas totais
-  const agrupados: Record<string, { horasTotaisMOD: number; horasTotaisMOI: number }> = {};
-
-  (data || []).forEach((linha) => {
-    const tipo = linha.tipo_treinamento || "Não informado";
-    const cargaHoraria = Number(linha.carga_horaria) || 0;
-    const efetivoMOD = Number(linha.efetivo_mod) || 0;
-    const efetivoMOI = Number(linha.efetivo_moi) || 0;
-
-    if (!agrupados[tipo]) {
-      agrupados[tipo] = { horasTotaisMOD: 0, horasTotaisMOI: 0 };
-    }
-    agrupados[tipo].horasTotaisMOD += cargaHoraria * efetivoMOD;
-    agrupados[tipo].horasTotaisMOI += cargaHoraria * efetivoMOI;
-  });
-
-  const totalMOD = Object.values(agrupados).reduce((s, v) => s + v.horasTotaisMOD, 0);
-  const totalMOI = Object.values(agrupados).reduce((s, v) => s + v.horasTotaisMOI, 0);
-
-  return Object.entries(agrupados).map(([tipoTreinamento, valores]) => ({
-    tipoTreinamento,
-    horasTotaisMOD: valores.horasTotaisMOD,
-    percentualMOD: totalMOD ? (valores.horasTotaisMOD / totalMOD) * 100 : 0,
-    horasTotaisMOI: valores.horasTotaisMOI,
-    percentualMOI: totalMOI ? (valores.horasTotaisMOI / totalMOI) * 100 : 0,
-  }));
-}
-
 export const TreinamentosPorProcessoTable = ({ data = [], isLoading = false }: { data?: any[]; isLoading?: boolean }) => {
   // Totais
   const totalMOD = data.reduce((sum, row) => sum + (row.horasTotaisMOD || 0), 0);

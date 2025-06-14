@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -42,10 +41,10 @@ const TreinamentosDashboard = () => {
   }, []);
 
   // Novos hooks filtrados
-  const { stats, isLoadingStats } = useFilteredTreinamentosStats({year, month, ccaId});
-  const { data: execucaoData, isLoading: isLoadingExecucao } = useFilteredTreinamentosExecucaoData({year, month, ccaId});
-  const { data: normativosData, isLoading: isLoadingNormativos } = useFilteredNormativosData({year, month, ccaId});
-  const { data: porProcessoData, isLoading: isLoadingPorProcesso } = useFilteredTreinamentosPorProcesso({year, month, ccaId});
+  const { data: stats, isLoading: isLoadingStats } = useFilteredTreinamentosStats({ year, month, ccaId });
+  const { data: execucaoData, isLoading: isLoadingExecucao } = useFilteredTreinamentosExecucaoData({ year, month, ccaId });
+  const { data: normativosData, isLoading: isLoadingNormativos } = useFilteredNormativosData({ year, month, ccaId });
+  const { data: porProcessoData, isLoading: isLoadingPorProcesso } = useFilteredTreinamentosPorProcesso({ year, month, ccaId });
 
   return (
     <div className="space-y-6">

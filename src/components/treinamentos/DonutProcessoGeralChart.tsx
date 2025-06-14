@@ -11,7 +11,7 @@ const renderCustomLabel = (props: any) => {
   const RADIAN = Math.PI / 180;
   const { cx, cy, midAngle, outerRadius, index, payload } = props;
   const percentual = payload?.percentual ?? 0;
-  const name = payload?.name ?? "";
+  const name = props.payload?.processo ?? "";
   const value = payload?.horasTotais ?? 0;
 
   // Ajustar: Aproximar o rótulo do donut para não cortar
@@ -65,8 +65,8 @@ export const DonutProcessoGeralChart = ({ year, month, ccaId }: { year:string, m
       <PieChart width={420} height={310}>
         <Pie
           data={data}
-          dataKey="horasTotais"
-          nameKey="name"
+          dataKey="horasMOD"
+          nameKey="processo"
           cx="50%"
           cy="50%"
           innerRadius={90}
@@ -76,11 +76,11 @@ export const DonutProcessoGeralChart = ({ year, month, ccaId }: { year:string, m
           labelLine={true}
         >
           {data.map((entry, index) => (
-            <Cell key={entry.name} fill={COLORS[index % COLORS.length]} />
+            <Cell key={entry.processo} fill={COLORS[index % COLORS.length]} />
           ))}
         </Pie>
         <Tooltip
-          formatter={(value: any, _: string, props: any) => `${value} horas`}
+          formatter={(value: any) => `${value} horas`}
           contentStyle={{ fontSize: 15 }}
         />
       </PieChart>
