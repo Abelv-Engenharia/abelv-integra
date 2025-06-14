@@ -108,7 +108,7 @@ const EditarExecucaoTreinamento = () => {
     <div className="w-full h-full p-0 overflow-auto">
       <Card className="w-full h-full shadow-none border-none rounded-none">
         <CardHeader>
-          <CardTitle>Editar Execução</CardTitle>
+          <CardTitle>Editar Registro de Treinamento Realizado</CardTitle>
         </CardHeader>
         <CardContent>
           <form className="space-y-4" onSubmit={async (e) => {
