@@ -75,7 +75,8 @@ const TreinamentosNormativo = () => {
   const [selectedCcaId, setSelectedCcaId] = useState<string | null>(null);
   const [treinamentosNormativos, setTreinamentosNormativos] = useState<{id: string, nome: string, validade_dias?: number}[]>([]);
   const [certificadoFile, setCertificadoFile] = useState<File | null>(null);
-  const [inputDataRealizacao, setInputDataRealizacao] = useState<string>("");
+  // --- Remove inputDataRealizacao do state, pois não vamos mais precisar dele ---
+  // const [inputDataRealizacao, setInputDataRealizacao] = useState<string>("");
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -395,12 +396,12 @@ const TreinamentosNormativo = () => {
   };
 
   // --- Campo dataRealizacao - sincronização digitado/selecionado ---
-  useEffect(() => {
-    // Se o valor do formulário mudar (ex: selecionado pelo calendário), atualiza o texto.
-    const val = form.watch("dataRealizacao");
-    if (val instanceof Date) setInputDataRealizacao(format(val, "dd/MM/yyyy"));
-    if (!val) setInputDataRealizacao("");
-  }, [form.watch("dataRealizacao")]);
+  // useEffect(() => {
+  //   // Se o valor do formulário mudar (ex: selecionado pelo calendário), atualiza o texto.
+  //   const val = form.watch("dataRealizacao");
+  //   if (val instanceof Date) setInputDataRealizacao(format(val, "dd/MM/yyyy"));
+  //   if (!val) setInputDataRealizacao("");
+  // }, [form.watch("dataRealizacao")]);
 
   // ----------------- SOMENTE AQUI FAREMOS RETURNS CONDICIONAIS -----------------
   if (isSubmitSuccess) {
@@ -599,94 +600,39 @@ const TreinamentosNormativo = () => {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Data da realização</FormLabel>
-                      <div className="relative flex items-center gap-2 w-full max-w-xs">
+                      <FormControl>
                         <Input
-                          type="text"
-                          inputMode="numeric"
-                          maxLength={10}
-                          placeholder="dd/mm/aaaa"
-                          value={inputDataRealizacao}
-                          className="pr-10"
+                          type="date"
+                          value={
+                            field.value
+                              ? typeof field.value === "string"
+                                ? field.value
+                                : field.value instanceof Date
+                                  ? field.value
+                                    ? `${field.value.getFullYear()}-${String(field.value.getMonth() + 1).padStart(2, '0')}-${String(field.value.getDate()).padStart(2, '0')}`
+                                    : ""
+                                  : ""
+                              : ""
+                          }
                           onChange={e => {
-                            // Permitir digitação livre, mas padronizar o formato
-                            let val = e.target.value.replace(/[^\d/]/g, "");
-                            if (val.length === 2 && inputDataRealizacao.length < 2) val += "/";
-                            if (val.length === 5 && inputDataRealizacao.length < 5) val += "/";
-                            if (val.length > 10) val = val.slice(0, 10);
-                            setInputDataRealizacao(val);
-
-                            // Só tenta atualizar o valor do field quando todos dígitos estão presentes
-                            if (val.length === 10) {
-                              const [dd, mm, yyyy] = val.split("/");
+                            // O type=date já garante formato yyyy-mm-dd
+                            const v = e.target.value;
+                            if (v) {
+                              // Convertemos para Date para garantir compatibilidade
+                              const [yyyy, mm, dd] = v.split("-");
                               const asDate = new Date(Number(yyyy), Number(mm) - 1, Number(dd));
-                              if (
-                                !isNaN(asDate.getTime()) &&
-                                asDate.getDate() === Number(dd) &&
-                                asDate.getMonth() + 1 === Number(mm) &&
-                                asDate.getFullYear() === Number(yyyy)
-                              ) {
+                              if (!isNaN(asDate.getTime())) {
                                 field.onChange(asDate);
                               } else {
-                                // Valor inválido, não atualiza o form ainda
                                 field.onChange(undefined);
                               }
                             } else {
-                              // Enquanto o usuário digita, mantém o valor do form undefined
                               field.onChange(undefined);
                             }
                           }}
-                          onBlur={() => {
-                            // Ao sair do campo, se o texto não for uma data válida, limpa!
-                            if (inputDataRealizacao.length === 10) {
-                              const [dd, mm, yyyy] = inputDataRealizacao.split("/");
-                              const asDate = new Date(Number(yyyy), Number(mm) - 1, Number(dd));
-                              if (
-                                isNaN(asDate.getTime()) ||
-                                asDate.getDate() !== Number(dd) ||
-                                asDate.getMonth() + 1 !== Number(mm) ||
-                                asDate.getFullYear() !== Number(yyyy)
-                              ) {
-                                toast({
-                                  title: "Data inválida",
-                                  description: "Use o formato dd/mm/aaaa",
-                                  variant: "destructive"
-                                });
-                                setInputDataRealizacao("");
-                                field.onChange(undefined);
-                              }
-                            }
-                          }}
+                          max={new Date().toISOString().split("T")[0]}
                         />
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              type="button"
-                              tabIndex={-1}
-                              className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 p-0"
-                              aria-label="Abrir calendário"
-                            >
-                              <CalendarIcon className="h-4 w-4 opacity-60" />
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0" align="start">
-                            <Calendar
-                              mode="single"
-                              selected={field.value instanceof Date ? field.value : undefined}
-                              onSelect={date => {
-                                if (date) {
-                                  field.onChange(date);
-                                  setInputDataRealizacao(format(date, "dd/MM/yyyy"));
-                                }
-                              }}
-                              disabled={date => date > new Date()}
-                              initialFocus
-                              className={cn("p-3 pointer-events-auto")}
-                            />
-                          </PopoverContent>
-                        </Popover>
-                      </div>
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
