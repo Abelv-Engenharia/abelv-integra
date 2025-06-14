@@ -113,7 +113,7 @@ const TreinamentosConsulta = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Search className="h-5 w-5" />
-            Consulta de Execuções de Treinamento
+            Consulta de Treinamentos Realizados
           </CardTitle>
         </CardHeader>
         <CardContent>
