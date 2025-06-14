@@ -31,11 +31,19 @@ export const FuncionariosTable: React.FC<FuncionariosTableProps> = ({
     return <p>Carregando...</p>;
   }
 
-  // Gera uma query string simples para o cache bust de imagem
-  const getFotoUrl = (foto?: string | null) => {
-    if (!foto) return "";
-    // Adiciona um timestamp para evitar cache
-    return `${foto}${foto.includes("?") ? "&" : "?"}t=${Date.now()}`;
+  // Cria um cache bust customizado baseado em updated_at (ou fallback para id+foto)
+  const getFotoUrl = (funcionario: Funcionario) => {
+    if (!funcionario.foto) return "";
+    let cacheBust = "";
+    // @ts-ignore: updated_at pode existir no objeto vindo do Supabase aninhado
+    if ((funcionario as any).updated_at) {
+      // Usa a data de atualização para garantir que a imagem mudará quando houver atualização no registro do funcionário
+      cacheBust = (funcionario as any).updated_at;
+    } else {
+      // Fallback: combina id e nome do arquivo, é menos robusto para cache busting, mas cobre edge cases
+      cacheBust = `${funcionario.id}${funcionario.foto}`;
+    }
+    return `${funcionario.foto}${funcionario.foto.includes("?") ? "&" : "?"}cb=${encodeURIComponent(cacheBust)}`;
   };
 
   return (
@@ -58,7 +66,7 @@ export const FuncionariosTable: React.FC<FuncionariosTableProps> = ({
             <tr key={funcionario.id}>
               <td className="border border-gray-300 p-2">
                 <Avatar className="size-8">
-                  <AvatarImage src={getFotoUrl(funcionario.foto)} />
+                  <AvatarImage src={getFotoUrl(funcionario)} />
                   <AvatarFallback>
                     <UserRound className="h-4 w-4" />
                   </AvatarFallback>
