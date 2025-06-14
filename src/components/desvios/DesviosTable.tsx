@@ -26,6 +26,7 @@ const DesviosTable = () => {
     try {
       const data = await desviosCompletosService.getAll();
       setDesvios(data);
+      console.log("Desvios recarregados do backend:", data);
     } catch (error) {
       console.error('Erro ao buscar desvios:', error);
       setDesvios([]);
@@ -56,19 +57,29 @@ const DesviosTable = () => {
     setEditDesvioId(null);
   };
 
-  // Corrigido: forçar o refresh imediado dos dados após exclusão e logar
+  // Corrigido: garantir refresh e logs detalhados após exclusão
   const handleDesvioDeleted = (id?: string) => {
-    console.log("Chamando handleDesvioDeleted", id);
+    console.log("Chamando handleDesvioDeleted id:", id);
     setIsLoading(true);
-    fetchDesvios().then(() => {
-      setIsLoading(false);
-      toast({
-        title: "Desvio excluído",
-        description: "O desvio foi removido com sucesso.",
-        variant: "default",
+    fetchDesvios()
+      .then(() => {
+        setIsLoading(false);
+        toast({
+          title: "Desvio excluído",
+          description: "O desvio foi removido com sucesso.",
+          variant: "default",
+        });
+        console.log("Tabela de desvios atualizada após exclusão.");
+      })
+      .catch((err) => {
+        setIsLoading(false);
+        console.error("Erro ao atualizar tabela após exclusão", err);
+        toast({
+          title: "Erro ao atualizar lista",
+          description: "Ocorreu um erro ao atualizar os desvios após exclusão.",
+          variant: "destructive",
+        });
       });
-      console.log("Tabela de desvios atualizada após exclusão.");
-    });
   };
 
   return (
