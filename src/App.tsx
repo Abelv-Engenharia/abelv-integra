@@ -1,134 +1,103 @@
-import React from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { AuthProvider } from './contexts/AuthContext';
-import { ThemeProvider } from './contexts/ThemeContext';
-import Login from './pages/auth/Login';
-import AuthGuard from './components/auth/AuthGuard';
-import Dashboard from './pages/Dashboard';
-import DesviosDashboard from './pages/DesviosDashboard';
-import DesviosForm from './pages/DesviosForm';
-import DesviosConsulta from './pages/DesviosConsulta';
-import DesviosNaoConformidade from './pages/DesviosNaoConformidade';
-import TreinamentosDashboard from './pages/treinamentos/TreinamentosDashboard';
-import TreinamentoNormativo from './pages/treinamentos/TreinamentosNormativo';
-import TreinamentosConsulta from './pages/treinamentos/TreinamentosConsulta';
-import ExecucaoTreinamentos from './pages/treinamentos/TreinamentosExecucao';
-import EmissaoCracha from './pages/treinamentos/TreinamentosCracha';
-import OcorrenciasDashboard from './pages/ocorrencias/OcorrenciasDashboard';
-import OcorrenciasCadastro from './pages/ocorrencias/OcorrenciasCadastro';
-import OcorrenciasConsulta from './pages/ocorrencias/OcorrenciasConsulta';
-import MedidasDashboard from './pages/PlaceholderPage';
-import MedidasCadastro from './pages/PlaceholderPage';
-import MedidasConsulta from './pages/PlaceholderPage';
-import TarefasDashboard from './pages/tarefas/TarefasDashboard';
-import MinhasTarefas from './pages/tarefas/MinhasTarefas';
-import CadastroTarefas from './pages/tarefas/CadastroTarefas';
-import DetalheTarefa from './pages/tarefas/DetalheTarefa';
-import Relatorios from './pages/relatorios/RelatoriosDashboard';
-import UsuariosAdmin from './pages/admin/AdminUsuarios';
-import PerfisAdmin from './pages/admin/AdminPerfis';
-import EmpresasAdmin from './pages/admin/AdminEmpresas';
-import AdminCCAs from './pages/admin/AdminCCAs';
-import EngenheirosAdmin from './pages/admin/AdminEngenheiros';
-import SupervisoresAdmin from './pages/admin/AdminSupervisores';
-import FuncionariosAdmin from './pages/admin/CadastroFuncionarios';
-import HHTAdmin from './pages/admin/RegistroHHT';
-import MetasIndicadoresAdmin from './pages/admin/MetasIndicadores';
-import TemplatesAdmin from './pages/AdminTemplates';
-import LogoAdmin from './pages/admin/AdminLogo';
-import IDSMSDashboard from './pages/idsms/IDSMSDashboard';
-import IIDForm from './pages/idsms/IIDForm';
-import HSAForm from './pages/idsms/HSAForm';
-import HTForm from './pages/idsms/HTForm';
-import IPOMForm from './pages/idsms/IPOMForm';
-import InspecaoAltaLiderancaForm from './pages/idsms/InspecaoAltaLiderancaForm';
-import InspecaoGestaoSMSForm from './pages/idsms/InspecaoGestaoSMSForm';
-import IndiceReativoForm from './pages/idsms/IndiceReativoForm';
-import RelatoriosIDSMS from './pages/relatorios/RelatoriosIDSMS';
-import IDSMSIndicadores from './pages/idsms/IDSMSIndicadores';
-import Profile from './pages/account/Profile';
-import Settings from './pages/account/Settings';
-import Layout from './components/layout/Layout';
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { AuthProvider } from "./contexts/AuthContext";
+import { ThemeProvider } from "./contexts/ThemeContext";
+import { Toaster } from "@/components/ui/sonner";
+import AuthGuard from "./components/auth/AuthGuard";
+import Layout from "./components/layout/Layout";
+
+// Auth pages
+import Login from "./pages/auth/Login";
+import SignUp from "./pages/auth/SignUp";
+import ForgotPassword from "./pages/auth/ForgotPassword";
+import ResetPassword from "./pages/auth/ResetPassword";
+
+// Main pages
+import Dashboard from "./pages/Dashboard";
+import Index from "./pages/Index";
+import NotFound from "./pages/NotFound";
+
+// Tarefas pages
+import TarefasDashboard from "./pages/tarefas/TarefasDashboard";
+import CadastroTarefas from "./pages/tarefas/CadastroTarefas";
+import MinhasTarefas from "./pages/tarefas/MinhasTarefas";
+import EditarTarefa from "./pages/tarefas/EditarTarefa";
+import DetalheTarefa from "./pages/tarefas/DetalheTarefa";
+
+// Ocorrencias pages
+import OcorrenciasDashboard from "./pages/ocorrencias/OcorrenciasDashboard";
+import CadastroOcorrencias from "./pages/ocorrencias/CadastroOcorrencias";
+import EditarOcorrencia from "./pages/ocorrencias/EditarOcorrencia";
+
+// Desvios pages
+import DesviosDashboard from "./pages/desvios/DesviosDashboard";
+import CadastroDesvios from "./pages/desvios/CadastroDesvios";
+import EditarDesvio from "./pages/desvios/EditarDesvio";
+
+// Treinamentos pages
+import TreinamentosDashboard from "./pages/treinamentos/TreinamentosDashboard";
+import CadastroTreinamentos from "./pages/treinamentos/CadastroTreinamentos";
+import EditarTreinamento from "./pages/treinamentos/EditarTreinamento";
+
+// Account pages
+import Profile from "./pages/account/Profile";
+import Settings from "./pages/account/Settings";
 
 const queryClient = new QueryClient();
 
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <Router>
-        <AuthProvider>
-          <ThemeProvider>
+      <AuthProvider>
+        <ThemeProvider>
+          <Router>
             <Routes>
+              {/* Public routes */}
               <Route path="/login" element={<Login />} />
-              <Route path="/" element={<AuthGuard><Layout /></AuthGuard>}>
-                <Route index element={<Dashboard />} />
-
-                {/* Desvios Routes */}
-                <Route path="desvios/dashboard" element={<DesviosDashboard />} />
-                <Route path="desvios/cadastro" element={<DesviosForm />} />
-                <Route path="desvios/consulta" element={<DesviosConsulta />} />
-                <Route path="desvios/nao-conformidade" element={<DesviosNaoConformidade />} />
-
-                {/* Treinamentos Routes */}
-                <Route path="treinamentos/dashboard" element={<TreinamentosDashboard />} />
-                <Route path="treinamentos/normativo" element={<TreinamentoNormativo />} />
-                <Route path="treinamentos/consulta" element={<TreinamentosConsulta />} />
-                <Route path="treinamentos/execucao" element={<ExecucaoTreinamentos />} />
-                <Route path="treinamentos/cracha" element={<EmissaoCracha />} />
-
-                {/* Ocorrencias Routes */}
-                <Route path="ocorrencias/dashboard" element={<OcorrenciasDashboard />} />
-                <Route path="ocorrencias/cadastro" element={<OcorrenciasCadastro />} />
-                <Route path="ocorrencias/consulta" element={<OcorrenciasConsulta />} />
-
-                {/* Medidas Disciplinares Routes */}
-                <Route path="medidas-disciplinares/dashboard" element={<MedidasDashboard />} />
-                <Route path="medidas-disciplinares/cadastro" element={<MedidasCadastro />} />
-                <Route path="medidas-disciplinares/consulta" element={<MedidasConsulta />} />
-
-                {/* Tarefas Routes */}
-                <Route path="tarefas/dashboard" element={<TarefasDashboard />} />
-                <Route path="tarefas/minhas-tarefas" element={<MinhasTarefas />} />
-                <Route path="tarefas/cadastro" element={<CadastroTarefas />} />
-                <Route path="tarefas/:id" element={<DetalheTarefa />} />
-
-                {/* Account Routes */}
-                <Route path="account/profile" element={<Profile />} />
-                <Route path="account/settings" element={<Settings />} />
-
-                {/* Relatorios Routes */}
-                <Route path="relatorios" element={<Relatorios />} />
-                <Route path="relatorios/idsms" element={<RelatoriosIDSMS />} />
-
-                {/* Admin Routes */}
-                <Route path="admin/usuarios" element={<UsuariosAdmin />} />
-                <Route path="admin/perfis" element={<PerfisAdmin />} />
-                <Route path="admin/empresas" element={<EmpresasAdmin />} />
-                <Route path="admin/ccas" element={<AdminCCAs />} />
-                <Route path="admin/engenheiros" element={<EngenheirosAdmin />} />
-                <Route path="admin/supervisores" element={<SupervisoresAdmin />} />
-                <Route path="admin/funcionarios" element={<FuncionariosAdmin />} />
-                <Route path="admin/hht" element={<HHTAdmin />} />
-                <Route path="admin/metas-indicadores" element={<MetasIndicadoresAdmin />} />
-                <Route path="admin/templates" element={<TemplatesAdmin />} />
-                <Route path="admin/logo" element={<LogoAdmin />} />
+              <Route path="/signup" element={<SignUp />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
+              
+              {/* Protected routes */}
+              <Route element={<AuthGuard><Layout /></AuthGuard>}>
+                <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/index" element={<Index />} />
                 
-                {/* IDSMS Routes */}
-                <Route path="idsms/dashboard" element={<IDSMSDashboard />} />
-                <Route path="idsms/indicadores" element={<IDSMSIndicadores />} />
-                <Route path="idsms/iid" element={<IIDForm />} />
-                <Route path="idsms/hsa" element={<HSAForm />} />
-                <Route path="idsms/ht" element={<HTForm />} />
-                <Route path="idsms/ipom" element={<IPOMForm />} />
-                <Route path="idsms/inspecao-alta-lideranca" element={<InspecaoAltaLiderancaForm />} />
-                <Route path="idsms/inspecao-gestao-sms" element={<InspecaoGestaoSMSForm />} />
-                <Route path="idsms/indice-reativo" element={<IndiceReativoForm />} />
+                {/* Tarefas routes */}
+                <Route path="/tarefas/dashboard" element={<TarefasDashboard />} />
+                <Route path="/tarefas/cadastro" element={<CadastroTarefas />} />
+                <Route path="/tarefas/minhas-tarefas" element={<MinhasTarefas />} />
+                <Route path="/tarefas/editar/:id" element={<EditarTarefa />} />
+                <Route path="/tarefas/detalhes/:id" element={<DetalheTarefa />} />
+                
+                {/* Ocorrencias routes */}
+                <Route path="/ocorrencias/dashboard" element={<OcorrenciasDashboard />} />
+                <Route path="/ocorrencias/cadastro" element={<CadastroOcorrencias />} />
+                <Route path="/ocorrencias/editar/:id" element={<EditarOcorrencia />} />
+
+                {/* Desvios routes */}
+                <Route path="/desvios/dashboard" element={<DesviosDashboard />} />
+                <Route path="/desvios/cadastro" element={<CadastroDesvios />} />
+                <Route path="/desvios/editar/:id" element={<EditarDesvio />} />
+
+                {/* Treinamentos routes */}
+                <Route path="/treinamentos/dashboard" element={<TreinamentosDashboard />} />
+                <Route path="/treinamentos/cadastro" element={<CadastroTreinamentos />} />
+                <Route path="/treinamentos/editar/:id" element={<EditarTreinamento />} />
+
+                {/* Account routes */}
+                <Route path="/account/profile" element={<Profile />} />
+                <Route path="/account/settings" element={<Settings />} />
               </Route>
+              
+              {/* 404 page */}
+              <Route path="*" element={<NotFound />} />
             </Routes>
-          </ThemeProvider>
-        </AuthProvider>
-      </Router>
+          </Router>
+          <Toaster />
+        </ThemeProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }
