@@ -1,11 +1,10 @@
-
 import React, { useState, useEffect } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { formatarData, getStatusColor } from "@/utils/treinamentosUtils";
 import { fetchFuncionariosComTreinamentos } from "@/services/treinamentosDashboardService";
 
-export const TreinamentoStatusTable = () => {
+export const TreinamentoStatusTable = ({ year, month, ccaId }: { year?: string; month?: string; ccaId?: string }) => {
   const [loading, setLoading] = useState<boolean>(true);
   const [funcionariosComTreinamentos, setFuncionariosComTreinamentos] = useState<any[]>([]);
 
@@ -13,7 +12,7 @@ export const TreinamentoStatusTable = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const data = await fetchFuncionariosComTreinamentos();
+        const data = await fetchFuncionariosComTreinamentos(year, month, ccaId);
         setFuncionariosComTreinamentos(data);
       } catch (error) {
         console.error("Error loading training status data:", error);
@@ -23,7 +22,7 @@ export const TreinamentoStatusTable = () => {
     };
 
     fetchData();
-  }, []);
+  }, [year, month, ccaId]);
 
   if (loading) {
     return (
@@ -103,3 +102,5 @@ export const TreinamentoStatusTable = () => {
     </div>
   );
 };
+
+export default TreinamentoStatusTable;

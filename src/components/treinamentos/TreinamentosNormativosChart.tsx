@@ -1,38 +1,16 @@
 
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from "recharts";
-import { fetchTreinamentosNormativosData } from "@/services/treinamentosDashboardService";
 
-const COLORS = ["#10b981", "#f59e0b", "#ef4444"];
-
-export const TreinamentosNormativosChart = () => {
-  const [data, setData] = useState<any[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const chartData = await fetchTreinamentosNormativosData();
-        setData(chartData);
-      } catch (error) {
-        console.error("Error loading normative training data:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  if (loading) {
+export const TreinamentosNormativosChart = ({ data = [], isLoading = false }: { data?: any[]; isLoading?: boolean }) => {
+  const COLORS = ["#10b981", "#f59e0b", "#ef4444"];
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center h-full">
         <p className="text-muted-foreground">Carregando dados...</p>
       </div>
     );
   }
-
   return (
     <ResponsiveContainer width="100%" height="100%">
       <PieChart>

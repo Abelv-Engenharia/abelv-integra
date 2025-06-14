@@ -1,7 +1,7 @@
 
 import React from "react";
 import { PieChart, Pie, Cell, Tooltip, PieLabelRenderProps } from "recharts";
-import { useTreinamentosPorSubprocesso } from "./useTreinamentosPorSubprocesso";
+import { useFilteredTreinamentosPorSubprocesso } from "@/services/treinamentos/hooks/useFilteredTreinamentosPorSubprocesso";
 
 const COLORS = ["#F59E0B", "#2563EB", "#6B7280", "#FAA43A", "#60A5FA", "#DB2777", "#34D399", "#818CF8", "#A21CAF", "#F472B6"];
 
@@ -11,20 +11,16 @@ const renderCustomLabel = (props: PieLabelRenderProps & { payload: any }) => {
   const cy = Number(props.cy);
   const midAngle = props.midAngle;
   const outerRadius = Number(props.outerRadius);
-  const percent = props.percent; // Entre 0 e 1
   const name = props.name ?? "";
   const index = props.index ?? 0;
   const payload = props.payload;
-
   const horas = payload?.horasTotais ?? 0;
+  const percentual = payload?.percentual ?? 0;
 
-  // Label: nome - percentual - horas
   const radius = outerRadius + 32;
   const x = cx + radius * Math.cos(-midAngle * RADIAN);
   const y = cy + radius * Math.sin(-midAngle * RADIAN);
-
   const color = COLORS[index % COLORS.length];
-
   const labelName = typeof name === "string" && name.length > 30 ? name.substring(0, 27) + "..." : name;
 
   return (
@@ -36,17 +32,20 @@ const renderCustomLabel = (props: PieLabelRenderProps & { payload: any }) => {
       dominantBaseline="central"
       fontSize="15"
     >
-      {`${labelName}: ${(payload.percentual ?? percent*100).toFixed(1)}% (${horas}h)`}
+      {`${labelName}: ${percentual.toFixed(1)}% (${horas}h)`}
     </text>
   );
 };
 
 interface DonutSubprocessoChartProps {
   processoId: string;
+  year: string;
+  month: string;
+  ccaId: string;
 }
 
-export const DonutSubprocessoChart = ({ processoId }: DonutSubprocessoChartProps) => {
-  const { data = [], isLoading, error } = useTreinamentosPorSubprocesso(processoId);
+export const DonutSubprocessoChart = ({ processoId, year, month, ccaId }: DonutSubprocessoChartProps) => {
+  const { data = [], isLoading, error } = useFilteredTreinamentosPorSubprocesso({ processoId, year, month, ccaId });
 
   if (isLoading) {
     return (

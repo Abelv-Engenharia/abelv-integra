@@ -51,12 +51,7 @@ async function fetchTreinamentosPorTipoTreinamento(): Promise<LinhaTabela[]> {
   }));
 }
 
-export const TreinamentosPorProcessoTable = () => {
-  const { data = [], isLoading, error } = useQuery({
-    queryKey: ["treinamentos-por-processo-tipo-treinamento-horas"],
-    queryFn: fetchTreinamentosPorTipoTreinamento,
-  });
-
+export const TreinamentosPorProcessoTable = ({ data = [], isLoading = false }: { data?: any[]; isLoading?: boolean }) => {
   // Totais
   const totalMOD = data.reduce((sum, row) => sum + (row.horasTotaisMOD || 0), 0);
   const totalMOI = data.reduce((sum, row) => sum + (row.horasTotaisMOI || 0), 0);
@@ -148,3 +143,5 @@ export const TreinamentosPorProcessoTable = () => {
     </Card>
   );
 };
+
+export default TreinamentosPorProcessoTable;

@@ -1,7 +1,7 @@
-
 import React from "react";
 import { PieChart, Pie, Cell, Tooltip } from "recharts";
-import { useTreinamentosPorTipoProcesso } from "./useTreinamentosPorTipoProcesso";
+import { useFilteredTreinamentosPorProcesso } from "@/services/treinamentos/hooks/useFilteredTreinamentosPorProcesso";
+import { useEffect } from "react";
 
 // Definir cores fixas (ou aleatórias se tipos ultrapassarem o length)
 const COLORS = ["#F59E0B", "#2563EB", "#6B7280", "#FAA43A", "#34D399", "#DB2777", "#60A5FA"];
@@ -42,8 +42,8 @@ const renderCustomLabel = (props: any) => {
   );
 };
 
-export const DonutProcessoGeralChart = () => {
-  const { data = [], isLoading, error } = useTreinamentosPorTipoProcesso();
+export const DonutProcessoGeralChart = ({ year, month, ccaId }: { year:string, month:string, ccaId:string }) => {
+  const { data = [], isLoading, error } = useFilteredTreinamentosPorProcesso({ year, month, ccaId });
 
   if (isLoading) {
     return (
@@ -89,4 +89,3 @@ export const DonutProcessoGeralChart = () => {
 };
 
 export default DonutProcessoGeralChart;
-
