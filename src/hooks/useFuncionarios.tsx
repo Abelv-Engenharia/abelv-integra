@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -81,16 +80,19 @@ export const useFuncionarios = () => {
       photoFile, 
       photoRemoved 
     }: {
-      funcionario: { nome: string; funcao: string; matricula: string; cca_id: string };
+      funcionario: { nome: string; funcao: string; matricula: string; cca_id: string; data_admissao?: string | null };
       editingFuncionario?: Funcionario | null;
       photoFile?: File | null;
       photoRemoved?: boolean;
     }) => {
       const ccaId = funcionario.cca_id === "none" ? null : parseInt(funcionario.cca_id);
-      
+
+      // Preparar campo data_admissao corretamente
+      const dataAdmissao = funcionario.data_admissao ? funcionario.data_admissao : null;
+
       if (editingFuncionario) {
         let fotoUrl = editingFuncionario.foto;
-        
+
         if (photoRemoved) {
           fotoUrl = null;
         } else if (photoFile) {
@@ -107,7 +109,8 @@ export const useFuncionarios = () => {
             funcao: funcionario.funcao,
             matricula: funcionario.matricula,
             cca_id: ccaId,
-            foto: fotoUrl
+            foto: fotoUrl,
+            data_admissao: dataAdmissao
           })
           .eq('id', editingFuncionario.id);
         
@@ -119,7 +122,8 @@ export const useFuncionarios = () => {
             nome: funcionario.nome, 
             funcao: funcionario.funcao,
             matricula: funcionario.matricula,
-            cca_id: ccaId
+            cca_id: ccaId,
+            data_admissao: dataAdmissao
           })
           .select()
           .single();

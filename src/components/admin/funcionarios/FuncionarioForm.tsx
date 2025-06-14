@@ -29,7 +29,8 @@ export const FuncionarioForm: React.FC<FuncionarioFormProps> = ({
     nome: "",
     funcao: "",
     matricula: "",
-    cca_id: "none"
+    cca_id: "none",
+    data_admissao: ""
   });
 
   useEffect(() => {
@@ -38,12 +39,13 @@ export const FuncionarioForm: React.FC<FuncionarioFormProps> = ({
         nome: editingFuncionario.nome,
         funcao: editingFuncionario.funcao,
         matricula: editingFuncionario.matricula,
-        cca_id: editingFuncionario.cca_id?.toString() || "none"
+        cca_id: editingFuncionario.cca_id?.toString() || "none",
+        data_admissao: editingFuncionario.data_admissao ?? ""
       });
       setPhotoPreview(editingFuncionario.foto || null);
       setPhotoRemoved(false);
     } else {
-      setFormData({ nome: "", funcao: "", matricula: "", cca_id: "none" });
+      setFormData({ nome: "", funcao: "", matricula: "", cca_id: "none", data_admissao: "" });
       setPhotoPreview(null);
       setPhotoFile(null);
       setPhotoRemoved(false);
@@ -133,6 +135,21 @@ export const FuncionarioForm: React.FC<FuncionarioFormProps> = ({
             </SelectContent>
           </Select>
         </div>
+      </div>
+
+      <div>
+        <Label htmlFor="data_admissao">Data de admissão</Label>
+        <Input
+          id="data_admissao"
+          type="date"
+          value={formData.data_admissao ? formData.data_admissao : ""}
+          onChange={e =>
+            setFormData(prev => ({
+              ...prev,
+              data_admissao: e.target.value
+            }))
+          }
+        />
       </div>
 
       <div className="flex justify-end space-x-2">
