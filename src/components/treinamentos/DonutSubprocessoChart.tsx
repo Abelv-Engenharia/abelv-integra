@@ -1,4 +1,3 @@
-
 import React from "react";
 import { PieChart, Pie, Cell, Tooltip, PieLabelRenderProps } from "recharts";
 
@@ -15,7 +14,15 @@ const COLORS = ["#F59E0B", "#2563EB", "#6B7280", "#FAA43A", "#60A5FA"];
 // Custom label logic igual ao do gráfico geral
 const renderCustomLabel = (props: PieLabelRenderProps) => {
   const RADIAN = Math.PI / 180;
-  const { cx, cy, midAngle, outerRadius, percent, name, index } = props;
+  // Coerce cx, cy, and outerRadius to numbers for safe math
+  const cx = Number(props.cx);
+  const cy = Number(props.cy);
+  const midAngle = props.midAngle;
+  const outerRadius = Number(props.outerRadius);
+  const percent = props.percent;
+  const name = props.name;
+  const index = props.index ?? 0;
+
   const radius = outerRadius + 28;
   const x = cx + radius * Math.cos(-midAngle * RADIAN);
   const y = cy + radius * Math.sin(-midAngle * RADIAN);
@@ -23,7 +30,7 @@ const renderCustomLabel = (props: PieLabelRenderProps) => {
   const color = COLORS[index % COLORS.length];
 
   const label =
-    name.length > 28 ? name.substring(0, 23) + "..." : name;
+    String(name).length > 28 ? String(name).substring(0, 23) + "..." : String(name);
 
   return (
     <text

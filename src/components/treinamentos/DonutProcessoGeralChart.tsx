@@ -1,4 +1,3 @@
-
 import React from "react";
 import { PieChart, Pie, Cell, Tooltip, PieLabelRenderProps } from "recharts";
 
@@ -15,7 +14,15 @@ const COLORS = ["#F59E0B", "#2563EB", "#6B7280", "#FAA43A"];
 // Função para rótulo customizado, posicionando fora do arco
 const renderCustomLabel = (props: PieLabelRenderProps) => {
   const RADIAN = Math.PI / 180;
-  const { cx, cy, midAngle, outerRadius, percent, name, index } = props;
+  // Coerce cx, cy, and outerRadius to numbers for proper math
+  const cx = Number(props.cx);
+  const cy = Number(props.cy);
+  const midAngle = props.midAngle;
+  const outerRadius = Number(props.outerRadius);
+  const percent = props.percent;
+  const name = props.name;
+  const index = props.index ?? 0;
+
   const radius = outerRadius + 24;
   const x = cx + radius * Math.cos(-midAngle * RADIAN);
   const y = cy + radius * Math.sin(-midAngle * RADIAN);
@@ -24,7 +31,7 @@ const renderCustomLabel = (props: PieLabelRenderProps) => {
 
   // Exibir o nome completo, mas corta se for excesso
   const label =
-    name.length > 22 ? name.substring(0, 18) + "..." : name;
+    String(name).length > 22 ? String(name).substring(0, 18) + "..." : String(name);
 
   return (
     <text
