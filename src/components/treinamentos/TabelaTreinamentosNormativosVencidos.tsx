@@ -22,10 +22,14 @@ export const TabelaTreinamentosNormativosVencidos: React.FC = () => {
     }).finally(() => setLoading(false));
   }, []);
 
-  // Pega todos os registros vencidos e próximos ao vencimento
-  const treinamentosFiltrados = treinamentos.filter(t =>
-    t.status === "Vencido" || t.status === "Próximo ao vencimento"
-  );
+  // Filtra vencidos e próximos ao vencimento, e ordena pela data_validade (menor -> maior)
+  const treinamentosFiltrados = treinamentos
+    .filter(t => t.status === "Vencido" || t.status === "Próximo ao vencimento")
+    .sort((a, b) => {
+      const dataA = a.data_validade ? new Date(a.data_validade).getTime() : 0;
+      const dataB = b.data_validade ? new Date(b.data_validade).getTime() : 0;
+      return dataA - dataB;
+    });
 
   function getFuncionarioInfo(id: string) {
     return funcionarios.find(f => f.id === id);
@@ -52,7 +56,7 @@ export const TabelaTreinamentosNormativosVencidos: React.FC = () => {
               <TableHead>Matrícula</TableHead>
               <TableHead>Treinamento</TableHead>
               <TableHead>Tipo</TableHead>
-              <TableHead>Data de Realização</TableHead>
+              {/* Removido: <TableHead>Data de Realização</TableHead> */}
               <TableHead>Data de Validade</TableHead>
               <TableHead>Status</TableHead>
             </TableRow>
@@ -67,11 +71,7 @@ export const TabelaTreinamentosNormativosVencidos: React.FC = () => {
                     <TableCell>{funcionario?.matricula || "-"}</TableCell>
                     <TableCell>{t.treinamentoNome || "-"}</TableCell>
                     <TableCell>{t.tipo || "-"}</TableCell>
-                    <TableCell>
-                      {t.data_realizacao
-                        ? format(new Date(t.data_realizacao), "dd/MM/yyyy")
-                        : "-"}
-                    </TableCell>
+                    {/* Removido: campo Data de Realização */}
                     <TableCell>
                       {t.data_validade
                         ? format(new Date(t.data_validade), "dd/MM/yyyy")
@@ -93,7 +93,7 @@ export const TabelaTreinamentosNormativosVencidos: React.FC = () => {
               })
             ) : (
               <TableRow>
-                <TableCell colSpan={7} className="h-16 text-center text-muted-foreground">
+                <TableCell colSpan={6} className="h-16 text-center text-muted-foreground">
                   Nenhum treinamento vencido ou próximo ao vencimento encontrado.
                 </TableCell>
               </TableRow>
