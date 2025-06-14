@@ -1,6 +1,6 @@
 
 import React from "react";
-import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from "recharts";
+import { PieChart, Pie, Cell, Tooltip } from "recharts";
 
 const data = [
   { name: "Treinamentos Normativos Obrigatórios (NRs)", value: 36 },
@@ -14,8 +14,8 @@ const COLORS = ["#F59E0B", "#2563EB", "#6B7280", "#FAA43A", "#60A5FA"];
 
 export const DonutSubprocessoChart = () => {
   return (
-    <ResponsiveContainer width="100%" height="100%">
-      <PieChart>
+    <div className="w-full h-full flex items-center justify-center">
+      <PieChart width={300} height={300}>
         <Pie
           data={data}
           dataKey="value"
@@ -32,9 +32,9 @@ export const DonutSubprocessoChart = () => {
           ))}
         </Pie>
         <Tooltip />
-        <Legend layout="vertical" align="right" verticalAlign="middle" />
+        {/* Legenda removida */}
       </PieChart>
-    </ResponsiveContainer>
+    </div>
   );
 };
 

@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -68,7 +69,8 @@ const TreinamentosDashboard = () => {
         </TabsList>
         
         <TabsContent value="execucao" className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2">
+          {/* Alterado para exibir gráficos um abaixo do outro */}
+          <div className="flex flex-col gap-4">
             <Card>
               <CardHeader>
                 <CardTitle>PROCESSO - GERAL</CardTitle>
@@ -76,7 +78,7 @@ const TreinamentosDashboard = () => {
                   Distribuição geral dos processos de treinamento
                 </CardDescription>
               </CardHeader>
-              <CardContent className="h-[340px]">
+              <CardContent className="h-[340px] flex items-center justify-center">
                 <DonutProcessoGeralChart />
               </CardContent>
             </Card>
@@ -87,7 +89,7 @@ const TreinamentosDashboard = () => {
                   Distribuição dos subprocessos de treinamento
                 </CardDescription>
               </CardHeader>
-              <CardContent className="h-[340px]">
+              <CardContent className="h-[340px] flex items-center justify-center">
                 <DonutSubprocessoChart />
               </CardContent>
             </Card>
