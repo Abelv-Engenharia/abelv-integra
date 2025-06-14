@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { execucaoTreinamentoService } from "@/services/treinamentos/execucaoTreinamentoService";
@@ -119,22 +118,10 @@ const VisualizarExecucaoTreinamento = () => {
                       type="button"
                       onClick={handleDownload}
                       title="Baixar PDF"
-                      disabled={loadingSignedUrl || pendingVisualizar}
+                      disabled={loadingSignedUrl}
                     >
                       <Download className="h-4 w-4" />
-                      {loadingSignedUrl && !pendingVisualizar ? "Gerando link..." : "Baixar"}
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="gap-1"
-                      type="button"
-                      onClick={handleOpenVisualizar}
-                      title="Visualizar PDF"
-                      disabled={loadingSignedUrl || pendingVisualizar}
-                    >
-                      <Eye className="h-4 w-4" />
-                      {pendingVisualizar ? "Carregando..." : "Visualizar"}
+                      {loadingSignedUrl ? "Gerando link..." : "Baixar"}
                     </Button>
                   </div>
                 )
@@ -150,34 +137,10 @@ const VisualizarExecucaoTreinamento = () => {
             <Link to={`/treinamentos/execucao/editar/${execucao.id}`}>Editar</Link>
           </Button>
         </div>
-
-        {/* Modal de visualização do PDF */}
-        <Dialog open={openVisualizar} onOpenChange={setOpenVisualizar}>
-          {/* Aria-label do dialog está OK, mas estava faltando um Description explícito (acessibilidade): */}
-          <DialogContent className="max-w-3xl w-full flex flex-col items-center" aria-describedby="dialog-desc">
-            <DialogHeader>
-              <DialogTitle>Visualização da Lista de Presença (PDF)</DialogTitle>
-              {/* Acessibilidade: fornece descrição para screen-readers */}
-              <span id="dialog-desc" className="sr-only">Lista de presença em PDF anexada à execução do treinamento.</span>
-            </DialogHeader>
-            <div className="w-full h-[70vh] flex justify-center items-center">
-              {loadingSignedUrl && <span>Carregando PDF...</span>}
-              {errorSignedUrl && <span className="text-destructive">Erro ao carregar PDF: {errorSignedUrl}</span>}
-              {(signedUrl && !loadingSignedUrl && !errorSignedUrl && openVisualizar) && (
-                <iframe
-                  src={signedUrl}
-                  title="Lista Presença PDF"
-                  className="w-full h-full rounded border"
-                  frameBorder={0}
-                />
-              )}
-            </div>
-          </DialogContent>
-        </Dialog>
+        {/* Modal de visualização removido */}
       </Card>
     </div>
   );
 };
 
 export default VisualizarExecucaoTreinamento;
-
