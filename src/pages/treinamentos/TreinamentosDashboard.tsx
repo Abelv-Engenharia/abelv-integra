@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -78,7 +77,7 @@ const TreinamentosDashboard = () => {
                   Distribuição geral dos processos de treinamento
                 </CardDescription>
               </CardHeader>
-              <CardContent className="h-[340px] flex items-center justify-center">
+              <CardContent className="h-[400px] flex items-center justify-center">
                 <DonutProcessoGeralChart />
               </CardContent>
             </Card>
@@ -89,7 +88,7 @@ const TreinamentosDashboard = () => {
                   Distribuição dos subprocessos de treinamento
                 </CardDescription>
               </CardHeader>
-              <CardContent className="h-[340px] flex items-center justify-center">
+              <CardContent className="h-[400px] flex items-center justify-center">
                 <DonutSubprocessoChart />
               </CardContent>
             </Card>
