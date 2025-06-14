@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -37,8 +36,12 @@ import {
 } from "@/types/treinamentos";
 import { calcularDataValidade, calcularStatusTreinamento, fetchFuncionarios, fetchTreinamentos, criarTreinamentoNormativo } from "@/utils/treinamentosUtils";
 import { cn } from "@/lib/utils";
+import { ccaService } from "@/services/treinamentos/ccaService";
 
 const formSchema = z.object({
+  ccaId: z.string({
+    required_error: "O CCA é obrigatório",
+  }),
   funcionarioId: z.string({
     required_error: "O funcionário é obrigatório",
   }),
@@ -63,10 +66,13 @@ const TreinamentosNormativo = () => {
   const [funcionarios, setFuncionarios] = useState<Funcionario[]>([]);
   const [treinamentos, setTreinamentos] = useState<Treinamento[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [ccas, setCcas] = useState<{ id: number; codigo: string; nome: string }[]>([]);
+  const [selectedCcaId, setSelectedCcaId] = useState<string | null>(null);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      ccaId: "",
       tipo: "Formação",
     },
   });
@@ -125,6 +131,26 @@ const TreinamentosNormativo = () => {
     updateDataValidade();
   }, [watchTreinamentoId, watchDataRealizacao]);
 
+  const watchCcaId = form.watch("ccaId");
+  useEffect(() => {
+    setSelectedCcaId(watchCcaId || null);
+    // Limpa funcionário selecionado caso mude o CCA
+    form.setValue("funcionarioId", "");
+  }, [watchCcaId]);
+
+  // Busca CCAs na montagem do componente
+  useEffect(() => {
+    const fetchCcas = async () => {
+      const ccasData = await ccaService.getAll();
+      setCcas(ccasData);
+    };
+    fetchCcas();
+  }, []);
+
+  const filteredFuncionarios = selectedCcaId
+    ? funcionarios.filter(f => String(f.cca_id) === selectedCcaId)
+    : [];
+
   const onSubmit = async (data: FormValues) => {
     if (!dataValidade) {
       toast({
@@ -154,6 +180,7 @@ const TreinamentosNormativo = () => {
       let certificadoUrl = undefined;
       
       const result = await criarTreinamentoNormativo({
+        ccaId: data.ccaId,
         funcionarioId: data.funcionarioId,
         treinamentoId: data.treinamentoId,
         tipo: data.tipo,
@@ -254,20 +281,50 @@ const TreinamentosNormativo = () => {
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                 <div className="flex flex-col md:flex-row gap-4">
+                  {/* CCA */}
+                  <FormField
+                    control={form.control}
+                    name="ccaId"
+                    render={({ field }) => (
+                      <FormItem className="flex-1">
+                        <FormLabel>CCA</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecione o CCA" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {ccas.map((cca) => (
+                              <SelectItem key={cca.id} value={String(cca.id)}>
+                                {cca.nome}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* Funcionário */}
                   <FormField
                     control={form.control}
                     name="funcionarioId"
                     render={({ field }) => (
                       <FormItem className="flex-1">
                         <FormLabel>Funcionário</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <Select onValueChange={field.onChange} value={field.value}>
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Selecione o funcionário" />
+                              <SelectValue placeholder={selectedCcaId ? "Selecione o funcionário" : "Selecione o CCA primeiro"} />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {funcionarios.map((funcionario) => (
+                            {filteredFuncionarios.length === 0 && (
+                              <div className="p-2 text-muted-foreground text-sm">Nenhum funcionário cadastrado para este CCA</div>
+                            )}
+                            {filteredFuncionarios.map((funcionario) => (
                               <SelectItem key={funcionario.id} value={funcionario.id}>
                                 {funcionario.nome}
                               </SelectItem>
@@ -278,7 +335,8 @@ const TreinamentosNormativo = () => {
                       </FormItem>
                     )}
                   />
-                  
+
+                  {/* Função */}
                   <FormItem className="flex-1">
                     <FormLabel>Função</FormLabel>
                     <Input 
@@ -287,6 +345,7 @@ const TreinamentosNormativo = () => {
                     />
                   </FormItem>
                   
+                  {/* Matrícula */}
                   <FormItem className="flex-1">
                     <FormLabel>Matrícula</FormLabel>
                     <Input 
