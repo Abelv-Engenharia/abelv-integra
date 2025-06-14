@@ -12,7 +12,8 @@ const renderCustomLabel = (props: any) => {
   const cy = Number(props.cy);
   const midAngle = props.midAngle;
   const outerRadius = Number(props.outerRadius);
-  const percent = props.percent;
+  // ATENÇÃO: O percentual correto está no payload.percentual
+  const percentual = props.payload?.percentual ?? 0;
   const name = props.name;
   const index = props.index ?? 0;
   const value = props.value; // total horas (MOD+MOI)
@@ -23,7 +24,6 @@ const renderCustomLabel = (props: any) => {
   const y = cy + radius * Math.sin(-midAngle * RADIAN);
   const color = COLORS[index % COLORS.length];
 
-  // Maior nome de tipo -> pode cortar para visualização responsiva
   const labelName = String(name).length > 24 ? String(name).substring(0, 20) + "..." : String(name);
 
   return (
@@ -36,7 +36,7 @@ const renderCustomLabel = (props: any) => {
       fontSize="15"
       fontWeight="bold"
     >
-      {`${labelName}: ${percent ? percent.toFixed(1) : "0"}% (${total}h)`}
+      {`${labelName}: ${percentual ? percentual.toFixed(1) : "0"}% (${total}h)`}
     </text>
   );
 };
