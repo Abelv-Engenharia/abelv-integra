@@ -1,3 +1,4 @@
+
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider } from "./contexts/AuthContext";
@@ -26,18 +27,6 @@ import DetalheTarefa from "./pages/tarefas/DetalheTarefa";
 
 // Ocorrencias pages
 import OcorrenciasDashboard from "./pages/ocorrencias/OcorrenciasDashboard";
-import CadastroOcorrencias from "./pages/ocorrencias/CadastroOcorrencias";
-import EditarOcorrencia from "./pages/ocorrencias/EditarOcorrencia";
-
-// Desvios pages
-import DesviosDashboard from "./pages/desvios/DesviosDashboard";
-import CadastroDesvios from "./pages/desvios/CadastroDesvios";
-import EditarDesvio from "./pages/desvios/EditarDesvio";
-
-// Treinamentos pages
-import TreinamentosDashboard from "./pages/treinamentos/TreinamentosDashboard";
-import CadastroTreinamentos from "./pages/treinamentos/CadastroTreinamentos";
-import EditarTreinamento from "./pages/treinamentos/EditarTreinamento";
 
 // Account pages
 import Profile from "./pages/account/Profile";
@@ -73,18 +62,6 @@ function App() {
                 
                 {/* Ocorrencias routes */}
                 <Route path="/ocorrencias/dashboard" element={<OcorrenciasDashboard />} />
-                <Route path="/ocorrencias/cadastro" element={<CadastroOcorrencias />} />
-                <Route path="/ocorrencias/editar/:id" element={<EditarOcorrencia />} />
-
-                {/* Desvios routes */}
-                <Route path="/desvios/dashboard" element={<DesviosDashboard />} />
-                <Route path="/desvios/cadastro" element={<CadastroDesvios />} />
-                <Route path="/desvios/editar/:id" element={<EditarDesvio />} />
-
-                {/* Treinamentos routes */}
-                <Route path="/treinamentos/dashboard" element={<TreinamentosDashboard />} />
-                <Route path="/treinamentos/cadastro" element={<CadastroTreinamentos />} />
-                <Route path="/treinamentos/editar/:id" element={<EditarTreinamento />} />
 
                 {/* Account routes */}
                 <Route path="/account/profile" element={<Profile />} />
