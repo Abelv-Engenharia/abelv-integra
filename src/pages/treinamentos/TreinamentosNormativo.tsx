@@ -75,8 +75,7 @@ const TreinamentosNormativo = () => {
   const [selectedCcaId, setSelectedCcaId] = useState<string | null>(null);
   const [treinamentosNormativos, setTreinamentosNormativos] = useState<{id: string, nome: string, validade_dias?: number}[]>([]);
   const [certificadoFile, setCertificadoFile] = useState<File | null>(null);
-  // --- Remove inputDataRealizacao do state, pois não vamos mais precisar dele ---
-  // const [inputDataRealizacao, setInputDataRealizacao] = useState<string>("");
+  const [anoManual, setAnoManual] = useState<string>("");
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -395,6 +394,16 @@ const TreinamentosNormativo = () => {
     }
   };
 
+  // Manter anoManual em sincronia se usuário muda data pelo calendário ou manual do input de data
+  useEffect(() => {
+    const data = form.watch("dataRealizacao");
+    if (data instanceof Date && !isNaN(data.getTime())) {
+      setAnoManual(String(data.getFullYear()));
+    } else {
+      setAnoManual("");
+    }
+  }, [form.watch("dataRealizacao")]);
+
   // --- Campo dataRealizacao - sincronização digitado/selecionado ---
   // useEffect(() => {
   //   // Se o valor do formulário mudar (ex: selecionado pelo calendário), atualiza o texto.
@@ -634,49 +643,49 @@ const TreinamentosNormativo = () => {
                   )}
                 />
 
-                {/* NOVO CAMPO ANO */}
+                {/* NOVO CAMPO ANO (agora corrigido) */}
                 <FormItem>
                   <FormLabel>Ano</FormLabel>
                   <Input
                     type="number"
+                    placeholder="YYYY"
                     min={1900}
                     max={2100}
-                    step={1}
+                    inputMode="numeric"
                     pattern="\d{4}"
-                    placeholder="YYYY"
-                    value={
-                      form.watch("dataRealizacao") instanceof Date
-                        ? (form.watch("dataRealizacao") as Date).getFullYear()
-                        : ""
-                    }
+                    maxLength={4}
+                    className="w-32"
+                    value={anoManual}
                     onChange={e => {
-                      // Ao digitar o ano, manter o mês e dia caso existam
-                      const anoNovo = Number(e.target.value);
-                      const data = form.watch("dataRealizacao");
-                      if (
-                        !isNaN(anoNovo) &&
-                        anoNovo >= 1900 &&
-                        anoNovo <= 2100 &&
-                        data instanceof Date
-                      ) {
-                        const novaData = new Date(data);
-                        novaData.setFullYear(anoNovo);
-                        form.setValue("dataRealizacao", novaData, { shouldValidate: true });
+                      const valor = e.target.value.replace(/\D/g, ""); // Só permite dígitos
+                      setAnoManual(valor);
+                      if (valor.length === 4) {
+                        const anoNovo = Number(valor);
+                        if (
+                          !isNaN(anoNovo) &&
+                          anoNovo >= 1900 &&
+                          anoNovo <= 2100
+                        ) {
+                          const dataAtual = form.watch("dataRealizacao");
+                          const novaData = dataAtual instanceof Date && !isNaN(dataAtual.getTime())
+                            ? new Date(dataAtual)
+                            : new Date();
+                          novaData.setFullYear(anoNovo);
+                          form.setValue("dataRealizacao", novaData, { shouldValidate: true });
+                        }
                       }
-                      if (!e.target.value) {
-                        // Limpa o campo se usuário apagar tudo
+                      if (!valor) {
                         form.setValue("dataRealizacao", undefined, { shouldValidate: true });
                       }
                     }}
                     onBlur={e => {
-                      const v = e.target.value;
-                      if (!v || v.length !== 4) {
+                      const valor = e.target.value;
+                      if (valor.length !== 4 || Number(valor) < 1900 || Number(valor) > 2100) {
+                        // Reseta o campo se ano for inválido
+                        setAnoManual("");
                         form.setValue("dataRealizacao", undefined, { shouldValidate: true });
                       }
                     }}
-                    inputMode="numeric"
-                    maxLength={4}
-                    className="w-32"
                   />
                 </FormItem>
 
