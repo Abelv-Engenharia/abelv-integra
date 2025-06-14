@@ -13,6 +13,7 @@ import { TreinamentosExecucaoChart } from "@/components/treinamentos/Treinamento
 import { DonutProcessoGeralChart } from "@/components/treinamentos/DonutProcessoGeralChart";
 import { DonutSubprocessoChart } from "@/components/treinamentos/DonutSubprocessoChart";
 import { fetchProcessosTreinamento } from "@/services/treinamentos/processoTreinamentoService";
+import { TabelaTreinamentosNormativosVencidos } from "@/components/treinamentos/TabelaTreinamentosNormativosVencidos";
 const TreinamentosDashboard = () => {
   const [year, setYear] = useState<string>("todos");
   const [month, setMonth] = useState<string>("todos");
@@ -100,11 +101,11 @@ const TreinamentosDashboard = () => {
                   Visão geral do status dos treinamentos normativos
                 </CardDescription>
               </CardHeader>
-              <CardContent className="h-[70vh] p-2">
+              <CardContent className="h-[80vh] p-2">
                 <TreinamentosNormativosChart />
+                <TabelaTreinamentosNormativosVencidos />
               </CardContent>
             </Card>
-            
           </div>
           
           <div className="flex justify-center gap-4">
