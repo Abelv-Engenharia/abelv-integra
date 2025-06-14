@@ -307,18 +307,19 @@ const TreinamentosNormativo = () => {
   }
 
   const onSubmit = async (data: FormValues) => {
-    // Instead of any logic using `manualDate`, always use the date from the form
-    // and only transform it to string (yyyy-mm-dd) when sending to the backend
-
-    const dataRealizacaoISO =
-      data.dataRealizacao instanceof Date
-        ? dateValueToISODateString(data.dataRealizacao)
-        : null;
-
-    if (!dataRealizacaoISO) {
+    if (!data.dataRealizacao || !(data.dataRealizacao instanceof Date)) {
       toast({
         title: "Erro",
         description: "A data de realização é obrigatória e deve ser válida.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!dataValidade) {
+      toast({
+        title: "Erro",
+        description: "A data de validade não pode ser calculada. Verifique se o treinamento e a data de realização estão corretos.",
         variant: "destructive",
       });
       return;
@@ -357,14 +358,12 @@ const TreinamentosNormativo = () => {
     try {
       setIsLoading(true);
       
-      // Implementar upload do certificado aqui
-      // FIX: Remover ccaId do objeto passado para criarTreinamentoNormativo
       const result = await criarTreinamentoNormativo({
         funcionarioId: data.funcionarioId,
         treinamentoId: data.treinamentoId,
         tipo: data.tipo,
-        dataRealizacao: dataRealizacaoISO, // <-- sempre string yyyy-mm-dd
-        dataValidade: dataValidade,
+        dataRealizacao: data.dataRealizacao, // FIX: Passar o objeto Date diretamente
+        dataValidade: dataValidade, // dataValidade já é um Date
         certificadoUrl
       });
       
@@ -648,48 +647,39 @@ const TreinamentosNormativo = () => {
                 <FormItem>
                   <FormLabel>Ano</FormLabel>
                   <Input
-                    type="number"
+                    type="text"
                     placeholder="YYYY"
-                    min={1900}
-                    max={2100}
                     inputMode="numeric"
                     pattern="\d{4}"
                     maxLength={4}
                     className="w-32"
                     value={anoManual}
                     onChange={e => {
-                      const valor = e.target.value.replace(/\D/g, ""); // Só números
+                      const valor = e.target.value.replace(/\D/g, ""); // Apenas dígitos
                       setAnoManual(valor);
                       if (valor.length === 4) {
                         const anoNovo = Number(valor);
-                        if (
-                          !isNaN(anoNovo) &&
-                          anoNovo >= 1900 &&
-                          anoNovo <= 2100
-                        ) {
-                          // Só atualiza data quando year completo!
+                        if (anoNovo >= 1900 && anoNovo <= 2100) {
                           const dataAtual = form.watch("dataRealizacao");
                           let novaData: Date;
                           if (dataAtual instanceof Date && !isNaN(dataAtual.getTime())) {
                             novaData = new Date(dataAtual);
                           } else {
-                            // Caso não haja data, usa 01/01/ano
+                            // Se não houver data, cria uma nova em 01/01 do ano digitado
                             novaData = new Date(anoNovo, 0, 1);
                           }
                           novaData.setFullYear(anoNovo);
                           form.setValue("dataRealizacao", novaData, { shouldValidate: true });
                         }
-                      } else if (valor === "") {
-                        // Campo apagado: limpa a data
-                        form.setValue("dataRealizacao", undefined, { shouldValidate: true });
                       }
-                      // Não faz nada se não tiver 4 dígitos
                     }}
                     onBlur={e => {
-                      const valor = e.target.value.replace(/\D/g, "");
-                      if (valor.length !== 4 || Number(valor) < 1900 || Number(valor) > 2100) {
+                      // Ao sair, se o ano estiver incompleto ou inválido, sincroniza de volta com o campo de data principal
+                      const dataAtual = form.getValues("dataRealizacao");
+                      if (dataAtual instanceof Date && !isNaN(dataAtual.getTime())) {
+                        setAnoManual(String(dataAtual.getFullYear()));
+                      } else {
                         setAnoManual("");
-                        form.setValue("dataRealizacao", undefined, { shouldValidate: true });
                       }
                     }}
                   />
