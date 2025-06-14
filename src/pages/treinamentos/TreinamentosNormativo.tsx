@@ -583,16 +583,20 @@ const TreinamentosNormativo = () => {
                           }
                           onChange={e => {
                             setManualDate(e.target.value);
-                            // CORREÇÃO: sempre enviar um Date para onChange
+                            // Always send a Date or undefined to the RHF field
                             if (e.target.value) {
-                              // Only call onChange if date string is valid
                               const [yyyy, mm, dd] = e.target.value.split("-");
                               const _date = new Date(
                                 Number(yyyy),
                                 Number(mm) - 1,
                                 Number(dd)
                               );
-                              field.onChange(_date);
+                              // Only pass Date object to field.onChange
+                              if (!isNaN(_date.getTime())) {
+                                field.onChange(_date);
+                              } else {
+                                field.onChange(undefined);
+                              }
                             } else {
                               field.onChange(undefined);
                             }
