@@ -573,34 +573,22 @@ const TreinamentosNormativo = () => {
                     </div>}
                 </div>
 
-                <div className="flex justify-end gap-2 pt-6 border-t">
+                <div className="flex justify-between gap-2 pt-6 border-t">
                   <Button type="button" variant="outline" asChild>
                     <Link to="/treinamentos/dashboard">
                       <ArrowLeft />
                       Voltar
                     </Link>
                   </Button>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    onClick={() => {
-                      form.reset();
-                      setSelectedFuncionario(null);
-                      setDataValidade(null);
-                      setCertificadoFile(null);
-                      toast({
-                        title: "Cancelado",
-                        description: "O formulário foi limpo.",
-                      });
-                    }}
-                  >
-                    <X />
-                    Cancelar
-                  </Button>
-                  <Button type="submit" disabled={isLoading}>
-                    <Save />
-                    {isLoading ? "Salvando..." : "Salvar registro"}
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button 
+                      type="submit" 
+                      disabled={isLoading}
+                    >
+                      <Save />
+                      {isLoading ? "Salvando..." : "Salvar registro"}
+                    </Button>
+                  </div>
                 </div>
               </form>
             </Form>}
