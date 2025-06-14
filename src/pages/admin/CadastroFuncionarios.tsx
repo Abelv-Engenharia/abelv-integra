@@ -6,13 +6,15 @@ import { Plus } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { FuncionarioForm } from "@/components/admin/funcionarios/FuncionarioForm";
 import { FuncionariosTable } from "@/components/admin/funcionarios/FuncionariosTable";
+import { FuncionarioAutocomplete } from "@/components/admin/funcionarios/FuncionarioAutocomplete";
 import { useFuncionarios } from "@/hooks/useFuncionarios";
 import { Funcionario, FuncionarioFormData } from "@/types/funcionarios";
 
 const CadastroFuncionarios = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingFuncionario, setEditingFuncionario] = useState<Funcionario | null>(null);
-  
+  const [filteredFuncionarios, setFilteredFuncionarios] = useState<Funcionario[] | null>(null);
+
   const {
     funcionarios,
     ccas,
@@ -50,10 +52,36 @@ const CadastroFuncionarios = () => {
     deleteFuncionarioMutation.mutate(id);
   };
 
+  const handleFuncionarioSelect = (funcionario: Funcionario) => {
+    setFilteredFuncionarios([funcionario]);
+  };
+
+  const handleSearchClear = () => {
+    setFilteredFuncionarios(null);
+  };
+
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
         <h1 className="text-3xl font-bold">Administração de Funcionários</h1>
+        <div className="flex-1 max-w-md">
+          {/* Busca por nome */}
+          <FuncionarioAutocomplete
+            funcionarios={funcionarios}
+            onSelect={handleFuncionarioSelect}
+          />
+          {/* Exibir botão para limpar busca, caso haja filtro */}
+          {filteredFuncionarios && (
+            <Button
+              size="sm"
+              variant="ghost"
+              className="mt-2"
+              onClick={handleSearchClear}
+            >
+              Limpar busca
+            </Button>
+          )}
+        </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button onClick={handleNewFuncionario}>
@@ -84,7 +112,7 @@ const CadastroFuncionarios = () => {
         </CardHeader>
         <CardContent>
           <FuncionariosTable
-            funcionarios={funcionarios}
+            funcionarios={filteredFuncionarios || funcionarios}
             isLoading={loadingFuncionarios}
             onEdit={handleEdit}
             onDelete={handleDelete}
