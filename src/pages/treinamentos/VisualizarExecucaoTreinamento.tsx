@@ -21,16 +21,16 @@ const VisualizarExecucaoTreinamento = () => {
   }, [id]);
 
   if (loading) {
-    return <div className="flex justify-center py-20">Carregando execução...</div>;
+    return <div className="flex justify-center items-center h-full min-h-[300px]">Carregando execução...</div>;
   }
 
   if (!execucao) {
-    return <div className="flex justify-center py-20">Execução não encontrada.</div>;
+    return <div className="flex justify-center items-center h-full min-h-[300px]">Execução não encontrada.</div>;
   }
 
   return (
-    <div className="container max-w-xl mx-auto py-8">
-      <Card>
+    <div className="w-full h-full p-0 overflow-auto"> {/* Remove o container centralizado e deixa ocupar a tela */}
+      <Card className="w-full h-full shadow-none border-none rounded-none"> {/* Deixa o card ocupar tudo */}
         <CardHeader>
           <CardTitle>Detalhes da Execução</CardTitle>
           <CardDescription>
@@ -38,7 +38,7 @@ const VisualizarExecucaoTreinamento = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="space-y-2">
+          <div className="space-y-3">
             <div><strong>Data:</strong> {new Date(execucao.data).toLocaleDateString("pt-BR")}</div>
             <div><strong>Treinamento:</strong> {execucao.treinamento_nome}</div>
             <div><strong>CCA:</strong> {execucao.cca}</div>
