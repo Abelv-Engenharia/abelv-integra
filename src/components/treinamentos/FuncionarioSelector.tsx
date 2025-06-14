@@ -49,8 +49,9 @@ const FuncionarioSelector: React.FC<Props> = ({
           </Select>
         </div>
       </div>
-      {/* SEGUNDA LINHA: FUNCIONÁRIO, FUNÇÃO, MATRÍCULA */}
+      {/* SEGUNDA LINHA: FUNCIONÁRIO, FUNÇÃO, MATRÍCULA (proporções ajustadas) */}
       <div className="mt-4 flex flex-col md:flex-row gap-4">
+        {/* Funcionário */}
         <div className="w-full md:w-1/3">
           <label className="text-sm text-gray-500 mb-1 block" htmlFor="funcionario-select">Funcionário</label>
           <Select
@@ -70,15 +71,17 @@ const FuncionarioSelector: React.FC<Props> = ({
             </SelectContent>
           </Select>
         </div>
-        <div className="w-full md:w-1/3">
+        {/* Função - mais largo */}
+        <div className="w-full md:w-1/2">
           <label className="text-sm text-gray-500 mb-1 block">Função</label>
-          <p className="font-medium border rounded-md px-3 py-2 min-h-[40px]">
+          <p className="font-medium border rounded-md px-3 py-2 min-h-[40px] bg-white">
             {funcionario?.funcao || <span className="text-gray-400">---</span>}
           </p>
         </div>
-        <div className="w-full md:w-1/3">
+        {/* Matrícula - mais estreito */}
+        <div className="w-full md:w-1/6">
           <label className="text-sm text-gray-500 mb-1 block">Matrícula</label>
-          <p className="font-medium border rounded-md px-3 py-2 min-h-[40px]">
+          <p className="font-medium border rounded-md px-3 py-2 min-h-[40px] bg-white">
             {funcionario?.matricula || <span className="text-gray-400">---</span>}
           </p>
         </div>
