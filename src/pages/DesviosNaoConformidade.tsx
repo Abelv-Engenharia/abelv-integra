@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { ArrowLeft, FileText, Mail, Send } from "lucide-react";
@@ -28,6 +27,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useToast } from "@/hooks/use-toast";
 import { desviosCompletosService, DesvioCompleto } from "@/services/desvios/desviosCompletosService";
+import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
 
 // Schema for form validation
 const formSchema = z.object({
@@ -44,14 +44,37 @@ type FormValues = z.infer<typeof formSchema>;
 const templateCodes = [
   { code: "{ID}", description: "ID do desvio" },
   { code: "{DATA}", description: "Data do desvio" },
-  { code: "{LOCAL}", description: "Local do desvio" },
+  { code: "{HORA}", description: "Hora do desvio" },
+  { code: "{CCA_ID}", description: "ID da CCA" },
+  { code: "{CCA_NOME}", description: "Nome da CCA" },
+  { code: "{CCA_CODIGO}", description: "Código da CCA" },
+  { code: "{TIPO_REGISTRO}", description: "Tipo de registro" },
+  { code: "{PROCESSO}", description: "Processo" },
+  { code: "{EVENTO_IDENTIFICADO}", description: "Evento identificado" },
+  { code: "{CAUSA_PROVAVEL}", description: "Causa provável" },
+  { code: "{DISCIPLINA}", description: "Disciplina" },
+  { code: "{ENGENHEIRO_NOME}", description: "Engenheiro responsável" },
+  { code: "{SUPERVISOR_NOME}", description: "Supervisor responsável" },
+  { code: "{ENCARREGADO_NOME}", description: "Encarregado responsável" },
+  { code: "{EMPRESA_ID}", description: "ID da Empresa" },
+  { code: "{EMPRESA_NOME}", description: "Nome da Empresa" },
+  { code: "{BASE_LEGAL}", description: "Base legal" },
   { code: "{DESCRICAO}", description: "Descrição do desvio" },
-  { code: "{CCA}", description: "CCA" },
-  { code: "{EMPRESA}", description: "Empresa" },
-  { code: "{RISCO}", description: "Nível de risco" },
+  { code: "{ACAO_IMEDIATA}", description: "Ação imediata" },
+  { code: "{IMAGEM_URL}", description: "Imagem URL" },
+  { code: "{EXPOSICAO}", description: "Exposição" },
+  { code: "{CONTROLE}", description: "Controle" },
+  { code: "{DETECCAO}", description: "Detecção" },
+  { code: "{EFEITO_FALHA}", description: "Efeito da falha" },
+  { code: "{IMPACTO}", description: "Impacto" },
+  { code: "{PROBABILIDADE}", description: "Probabilidade" },
+  { code: "{SEVERIDADE}", description: "Severidade" },
+  { code: "{CLASSIFICACAO_RISCO}", description: "Classificação de risco" },
   { code: "{STATUS}", description: "Status do desvio" },
-  { code: "{ACAO_IMEDIATA}", description: "Ação imediata tomada" },
-  { code: "{PRAZO}", description: "Prazo para resolução" },
+  { code: "{RESPONSAVEL_ID}", description: "ID do responsável" },
+  { code: "{PRAZO}", description: "Prazo de conclusão" },
+  // Campos para funcionários envolvidos
+  { code: "{FUNCIONARIOS_ENVOLVIDOS}", description: "Funcionários envolvidos (JSON)" },
 ];
 
 // Default template text
@@ -148,10 +171,10 @@ const DesviosNaoConformidade = () => {
   // Function to process template and replace codes with actual data
   const processTemplate = (template: string, data: DesvioCompleto) => {
     if (!data) return template;
-    
+    // Códigos antigos (legado)
     let processed = template;
-    processed = processed.replace(/{ID}/g, data.id?.slice(0, 8) + '...' || "");
-    processed = processed.replace(/{DATA}/g, new Date(data.data_desvio).toLocaleDateString("pt-BR") || "");
+    processed = processed.replace(/{ID}/g, data.id?.slice(0, 8) + "..." || "");
+    processed = processed.replace(/{DATA}/g, data.data_desvio ? new Date(data.data_desvio).toLocaleDateString("pt-BR") : "");
     processed = processed.replace(/{LOCAL}/g, data.local || "");
     processed = processed.replace(/{DESCRICAO}/g, data.descricao_desvio || "");
     processed = processed.replace(/{CCA}/g, (data as any).ccas?.nome || "");
@@ -160,7 +183,34 @@ const DesviosNaoConformidade = () => {
     processed = processed.replace(/{STATUS}/g, data.status || "");
     processed = processed.replace(/{ACAO_IMEDIATA}/g, data.acao_imediata || "");
     processed = processed.replace(/{PRAZO}/g, data.prazo_conclusao ? new Date(data.prazo_conclusao).toLocaleDateString("pt-BR") : "");
-    
+    // Novos campos abrangentes
+    processed = processed.replace(/{HORA}/g, data.hora_desvio || "");
+    processed = processed.replace(/{CCA_ID}/g, data.cca_id ? String(data.cca_id) : "");
+    processed = processed.replace(/{CCA_NOME}/g, (data as any).ccas?.nome || "");
+    processed = processed.replace(/{CCA_CODIGO}/g, (data as any).ccas?.codigo || "");
+    processed = processed.replace(/{TIPO_REGISTRO}/g, (data as any).tipos_registro?.nome || "");
+    processed = processed.replace(/{PROCESSO}/g, (data as any).processos?.nome || "");
+    processed = processed.replace(/{EVENTO_IDENTIFICADO}/g, (data as any).eventos_identificados?.nome || "");
+    processed = processed.replace(/{CAUSA_PROVAVEL}/g, (data as any).causas_provaveis?.nome || "");
+    processed = processed.replace(/{DISCIPLINA}/g, (data as any).disciplinas?.nome || "");
+    processed = processed.replace(/{ENGENHEIRO_NOME}/g, (data as any).engenheiros?.nome || "");
+    processed = processed.replace(/{SUPERVISOR_NOME}/g, (data as any).supervisores?.nome || "");
+    processed = processed.replace(/{ENCARREGADO_NOME}/g, (data as any).encarregados?.nome || "");
+    processed = processed.replace(/{EMPRESA_ID}/g, data.empresa_id ? String(data.empresa_id) : "");
+    processed = processed.replace(/{EMPRESA_NOME}/g, (data as any).empresas?.nome || "");
+    processed = processed.replace(/{BASE_LEGAL}/g, (data as any).base_legal_opcoes?.nome || "");
+    processed = processed.replace(/{IMAGEM_URL}/g, data.imagem_url || "");
+    processed = processed.replace(/{EXPOSICAO}/g, data.exposicao !== undefined ? String(data.exposicao ?? "") : "");
+    processed = processed.replace(/{CONTROLE}/g, data.controle !== undefined ? String(data.controle ?? "") : "");
+    processed = processed.replace(/{DETECCAO}/g, data.deteccao !== undefined ? String(data.deteccao ?? "") : "");
+    processed = processed.replace(/{EFEITO_FALHA}/g, data.efeito_falha !== undefined ? String(data.efeito_falha ?? "") : "");
+    processed = processed.replace(/{IMPACTO}/g, data.impacto !== undefined ? String(data.impacto ?? "") : "");
+    processed = processed.replace(/{PROBABILIDADE}/g, data.probabilidade !== undefined ? String(data.probabilidade ?? "") : "");
+    processed = processed.replace(/{SEVERIDADE}/g, data.severidade !== undefined ? String(data.severidade ?? "") : "");
+    processed = processed.replace(/{CLASSIFICACAO_RISCO}/g, data.classificacao_risco || "");
+    processed = processed.replace(/{RESPONSAVEL_ID}/g, data.responsavel_id || "");
+    processed = processed.replace(/{FUNCIONARIOS_ENVOLVIDOS}/g, data.funcionarios_envolvidos ? JSON.stringify(data.funcionarios_envolvidos) : "");
+
     return processed;
   };
 
@@ -245,26 +295,38 @@ const DesviosNaoConformidade = () => {
           <CardContent>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                {/* SELETOR DE DESVIO */}
                 <FormField
                   control={form.control}
                   name="desvioId"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>ID do Desvio</FormLabel>
-                      <div className="flex gap-2">
-                        <FormControl>
-                          <Input placeholder="Cole o ID completo do desvio" {...field} />
-                        </FormControl>
-                        <Button 
-                          type="button" 
-                          variant="outline"
-                          onClick={generatePreview}
-                        >
-                          Carregar
-                        </Button>
-                      </div>
+                      <FormLabel>Selecione o Desvio</FormLabel>
+                      <Select
+                        value={field.value}
+                        onValueChange={async (value) => {
+                          field.onChange(value);
+                          await generatePreview();
+                        }}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione um desvio" />
+                        </SelectTrigger>
+                        <SelectContent className="z-50 bg-white">
+                          {desvios.map((d) => (
+                            <SelectItem key={d.id} value={d.id!}>
+                              <div>
+                                <span className="font-semibold">{d.id?.slice(0, 8)}... </span>
+                                <span>{new Date(d.data_desvio).toLocaleDateString("pt-BR")} </span>
+                                <span className="italic truncate">{d.local}</span>
+                              </div>
+                              <div className="text-xs text-muted-foreground">{(d.descricao_desvio || "").slice(0, 40)}...</div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                       <FormDescription>
-                        Digite o ID completo do desvio para carregar os dados.
+                        Escolha o desvio desejado para gerar a não conformidade.
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -329,7 +391,7 @@ const DesviosNaoConformidade = () => {
                           Códigos Disponíveis
                         </Button>
                       </PopoverTrigger>
-                      <PopoverContent className="w-80">
+                      <PopoverContent className="w-96 z-50 bg-white">
                         <div className="grid gap-4">
                           <div className="space-y-2">
                             <h4 className="font-medium leading-none">Códigos de Template</h4>
@@ -337,7 +399,7 @@ const DesviosNaoConformidade = () => {
                               Clique em um código para inseri-lo no template.
                             </p>
                           </div>
-                          <div className="grid gap-2">
+                          <div className="grid gap-2 max-h-60 overflow-y-auto">
                             {templateCodes.map((item) => (
                               <div 
                                 key={item.code} 
@@ -345,7 +407,7 @@ const DesviosNaoConformidade = () => {
                                 onClick={() => insertCodeAtCursor(item.code)}
                               >
                                 <code className="bg-muted px-1 py-0.5 rounded">{item.code}</code>
-                                <span className="text-sm text-muted-foreground">{item.description}</span>
+                                <span className="text-xs text-muted-foreground">{item.description}</span>
                               </div>
                             ))}
                           </div>
