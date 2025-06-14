@@ -1,4 +1,3 @@
-
 import React from "react";
 import {
   FormField,
@@ -29,6 +28,11 @@ const ObservacoesAnexoFields = ({ form }: ObservacoesAnexoFieldsProps) => {
               <Textarea
                 placeholder="Informações adicionais sobre o treinamento"
                 {...field}
+                className="uppercase"
+                onChange={e => {
+                  // garante MAIÚSCULAS no estado
+                  field.onChange(e.target.value.toUpperCase());
+                }}
               />
             </FormControl>
             <FormMessage />
