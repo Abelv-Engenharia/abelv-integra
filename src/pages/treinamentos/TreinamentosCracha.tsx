@@ -1,25 +1,21 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { ArrowLeft, Printer, User } from "lucide-react";
 import { Link } from "react-router-dom";
 import { format } from "date-fns";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { toast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { ccaService } from "@/services/treinamentos/ccaService";
 import { 
   Funcionario,
   TreinamentoNormativo,
   Treinamento
 } from "@/types/treinamentos";
 import { calcularStatusTreinamento, formatarData, fetchFuncionarios, fetchTreinamentos, getNomeTreinamento } from "@/utils/treinamentosUtils";
-import { toast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
-import { ccaService } from "@/services/treinamentos/ccaService";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
+
+import FuncionarioSelector from "@/components/treinamentos/FuncionarioSelector";
+import FuncionarioInfoCard from "@/components/treinamentos/FuncionarioInfoCard";
+import CrachaPreview from "@/components/treinamentos/CrachaPreview";
 
 const TreinamentosCracha = () => {
   const [selectedFuncionarioId, setSelectedFuncionarioId] = useState<string | undefined>();
@@ -403,251 +399,31 @@ const TreinamentosCracha = () => {
         </div>
       ) : (
         <>
-          <Card>
-            <CardHeader>
-              <CardTitle>Selecione o Funcionário</CardTitle>
-              <CardDescription>
-                Escolha um CCA e um funcionário para gerar o crachá de capacitação
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {/* CAMPO CCA EM UMA LINHA SÓ */}
-              <div className="flex flex-col md:flex-row gap-4">
-                <div className="w-full md:w-1/2">
-                  <Select onValueChange={handleCcaChange} value={selectedCcaId ? String(selectedCcaId) : undefined}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione um CCA" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {ccasOrdenados.map((cca) => (
-                        <SelectItem key={cca.id} value={String(cca.id)}>
-                          {cca.codigo} - {cca.nome}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              {/* SEGUNDA LINHA: FUNCIONÁRIO, FUNÇÃO, MATRÍCULA */}
-              <div className="mt-4 flex flex-col md:flex-row gap-4">
-                {/* Campo seleção de funcionário, filtrado por CCA */}
-                <div className="w-full md:w-1/3">
-                  <Select
-                    onValueChange={handleFuncionarioChange}
-                    value={selectedFuncionarioId}
-                    disabled={!selectedCcaId || funcionariosFiltrados.length === 0}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder={selectedCcaId ? (funcionariosFiltrados.length > 0 ? "Selecione um funcionário" : "Nenhum funcionário disponível") : "Selecione um CCA primeiro"} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {funcionariosFiltrados.map((funcionario) => (
-                        <SelectItem key={funcionario.id} value={funcionario.id}>
-                          {funcionario.nome}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="w-full md:w-1/3">
-                  <p className="text-sm text-gray-500 mb-1">Função</p>
-                  <p className="font-medium border rounded-md px-3 py-2 min-h-[40px]">
-                    {funcionario?.funcao || <span className="text-gray-400">---</span>}
-                  </p>
-                </div>
-                <div className="w-full md:w-1/3">
-                  <p className="text-sm text-gray-500 mb-1">Matrícula</p>
-                  <p className="font-medium border rounded-md px-3 py-2 min-h-[40px]">
-                    {funcionario?.matricula || <span className="text-gray-400">---</span>}
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <FuncionarioSelector
+            ccasOrdenados={ccasOrdenados}
+            selectedCcaId={selectedCcaId}
+            handleCcaChange={handleCcaChange}
+            funcionariosFiltrados={funcionariosFiltrados}
+            selectedFuncionarioId={selectedFuncionarioId}
+            handleFuncionarioChange={handleFuncionarioChange}
+            funcionario={funcionario}
+          />
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Left side - Employee information */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Informações do Funcionário</CardTitle>
-                <CardDescription>
-                  Dados do funcionário e treinamentos válidos
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {isLoading && selectedFuncionarioId ? (
-                  <div className="flex justify-center items-center py-8">
-                    <p>Carregando dados do funcionário...</p>
-                  </div>
-                ) : funcionario ? (
-                  <>
-                    <div className="flex flex-col items-center md:flex-row md:items-start gap-4">
-                      <div className="flex-shrink-0 w-24 h-24 bg-gray-200 rounded-md flex items-center justify-center">
-                        {funcionario.foto ? (
-                          <img 
-                            src={funcionario.foto} 
-                            alt={funcionario.nome} 
-                            className="w-full h-full object-cover rounded-md"
-                          />
-                        ) : (
-                          <User className="w-12 h-12 text-gray-400" />
-                        )}
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <div>
-                          <p className="text-sm text-gray-500">Nome</p>
-                          <p className="font-medium">{funcionario.nome}</p>
-                        </div>
-                        <div>
-                          <p className="text-sm text-gray-500">Função</p>
-                          <p>{funcionario.funcao}</p>
-                        </div>
-                        <div>
-                          <p className="text-sm text-gray-500">Matrícula</p>
-                          <p>{funcionario.matricula}</p>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <h3 className="text-lg font-medium mb-2">Treinamentos Válidos</h3>
-                      {treinamentosValidos.length > 0 ? (
-                        <ul className="space-y-2">
-                          {treinamentosValidos.map(treinamento => (
-                            <li key={treinamento.id} className="flex justify-between items-center">
-                              <span>{treinamento.treinamentoNome}</span>
-                              <span className="text-sm">
-                                Válido até {formatarData(treinamento.data_validade)}
-                              </span>
-                            </li>
-                          ))}
-                        </ul>
-                      ) : (
-                        <p className="text-muted-foreground">
-                          Este funcionário não possui treinamentos válidos.
-                        </p>
-                      )}
-                    </div>
-                  </>
-                ) : (
-                  <div className="flex flex-col items-center justify-center py-12">
-                    <User className="w-16 h-16 text-gray-300 mb-4" />
-                    <p className="text-muted-foreground">
-                      Selecione um funcionário para ver suas informações
-                    </p>
-                  </div>
-                )}
-              </CardContent>
-              {funcionario && treinamentosValidos.length > 0 && (
-                <CardFooter>
-                  <Button onClick={handlePrint} className="gap-1">
-                    <Printer className="h-4 w-4" />
-                    Gerar crachá de capacitação
-                  </Button>
-                </CardFooter>
-              )}
-            </Card>
+            <FuncionarioInfoCard
+              funcionario={funcionario}
+              treinamentosValidos={treinamentosValidos}
+              isLoading={isLoading}
+              selectedFuncionarioId={selectedFuncionarioId}
+              onPrint={handlePrint}
+            />
 
-            {/* Right side - Badge preview */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Pré-visualização do Crachá</CardTitle>
-                <CardDescription>
-                  Como ficará o crachá de capacitação
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div 
-                  ref={crachaRef} 
-                  className="bg-white border rounded-lg shadow-md p-4 w-full max-w-sm mx-auto aspect-[9/16]"
-                >
-                  {funcionario ? (
-                    <div className="flex flex-col h-full">
-                      <div className="bg-primary text-white text-center py-3 rounded-t-md">
-                        <h3 className="font-bold uppercase">Crachá de Capacitação</h3>
-                      </div>
-                      
-                      <div className="flex items-start gap-4 my-4">
-                        <div className="w-28 h-28 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0">
-                          {funcionario.foto ? (
-                            <img 
-                              src={funcionario.foto} 
-                              alt={funcionario.nome} 
-                              className="w-full h-full object-cover rounded-full"
-                            />
-                          ) : (
-                            <User className="w-14 h-14 text-gray-400" />
-                          )}
-                        </div>
-                        
-                        <div className="flex flex-col">
-                          <h4 className="font-bold text-lg">{funcionario.nome}</h4>
-                          <p className="text-gray-600">{funcionario.funcao}</p>
-                          <p className="text-sm text-gray-500">Matrícula: {funcionario.matricula}</p>
-                        </div>
-                      </div>
-                      
-                      <div className="border-t pt-4 mt-2 flex-grow">
-                        <h5 className="font-semibold text-center mb-2">Certificações Válidas</h5>
-                        
-                        {isLoading ? (
-                          <p className="text-center text-sm text-muted-foreground">Carregando treinamentos...</p>
-                        ) : treinamentosValidos.length > 0 ? (
-                          <div className="overflow-auto max-h-[200px]">
-                            <table className="text-sm w-full">
-                              <thead>
-                                <tr className="border-b">
-                                  <th className="text-left py-1">Treinamento</th>
-                                  <th className="text-right py-1">Validade</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {treinamentosValidos.map(treinamento => (
-                                  <tr key={treinamento.id} className="border-b">
-                                    <td className="py-2 text-left">
-                                      {treinamento.treinamentoNome}
-                                    </td>
-                                    <td className="py-2 text-right">
-                                      {formatarData(treinamento.data_validade)}
-                                    </td>
-                                  </tr>
-                                ))}
-                              </tbody>
-                            </table>
-                          </div>
-                        ) : (
-                          <p className="text-center text-sm text-muted-foreground">
-                            Sem treinamentos válidos
-                          </p>
-                        )}
-                      </div>
-                      
-                      <div className="mt-auto border-t pt-3">
-                        <p className="text-center text-xs text-gray-500">
-                          Emitido em {format(new Date(), "dd/MM/yyyy")}
-                        </p>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="flex flex-col items-center justify-center h-full text-gray-400">
-                      <User className="w-16 h-16 mb-4" />
-                      <p className="text-center">
-                        Selecione um funcionário para visualizar o crachá
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-              {funcionario && treinamentosValidos.length > 0 && (
-                <CardFooter className="justify-center">
-                  <Button onClick={handlePrint} variant="outline" className="gap-1">
-                    <Printer className="h-4 w-4" />
-                    Imprimir crachá
-                  </Button>
-                </CardFooter>
-              )}
-            </Card>
+            <CrachaPreview
+              funcionario={funcionario}
+              treinamentosValidos={treinamentosValidos}
+              isLoading={isLoading}
+              onPrint={handlePrint}
+            />
           </div>
         </>
       )}
