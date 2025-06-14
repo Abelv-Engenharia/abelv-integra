@@ -6,6 +6,7 @@ import { ExecucaoTreinamento } from "@/types/treinamentos";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
 
 const EditarExecucaoTreinamento = () => {
@@ -63,15 +64,112 @@ const EditarExecucaoTreinamento = () => {
         </CardHeader>
         <CardContent>
           <form className="space-y-4" onSubmit={handleSave}>
-            <Input name="treinamento_nome" value={execucao.treinamento_nome || ""} onChange={handleChange} placeholder="Treinamento" required />
-            <Input name="cca" value={execucao.cca} onChange={handleChange} placeholder="CCA" required />
-            <Input name="processo_treinamento" value={execucao.processo_treinamento} onChange={handleChange} placeholder="Processo" required />
-            <Input name="tipo_treinamento" value={execucao.tipo_treinamento} onChange={handleChange} placeholder="Tipo" required />
-            <Input name="carga_horaria" value={execucao.carga_horaria} type="number" min={0} onChange={handleChange} placeholder="Carga Horária" required />
-            <Input name="efetivo_mod" value={execucao.efetivo_mod ?? 0} type="number" min={0} onChange={handleChange} placeholder="Efetivo MOD" required />
-            <Input name="efetivo_moi" value={execucao.efetivo_moi ?? 0} type="number" min={0} onChange={handleChange} placeholder="Efetivo MOI" required />
-            <Input name="horas_totais" value={execucao.horas_totais ?? 0} type="number" min={0} onChange={handleChange} placeholder="Horas Totais" required />
-            <Input name="observacoes" value={execucao.observacoes ?? ""} onChange={handleChange} placeholder="Observações" />
+            <div>
+              <Label htmlFor="treinamento_nome">Treinamento</Label>
+              <Input
+                name="treinamento_nome"
+                id="treinamento_nome"
+                value={execucao.treinamento_nome || ""}
+                onChange={handleChange}
+                placeholder="Treinamento"
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="cca">CCA</Label>
+              <Input
+                name="cca"
+                id="cca"
+                value={execucao.cca}
+                onChange={handleChange}
+                placeholder="CCA"
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="processo_treinamento">Processo</Label>
+              <Input
+                name="processo_treinamento"
+                id="processo_treinamento"
+                value={execucao.processo_treinamento}
+                onChange={handleChange}
+                placeholder="Processo"
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="tipo_treinamento">Tipo</Label>
+              <Input
+                name="tipo_treinamento"
+                id="tipo_treinamento"
+                value={execucao.tipo_treinamento}
+                onChange={handleChange}
+                placeholder="Tipo"
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="carga_horaria">Carga Horária</Label>
+              <Input
+                name="carga_horaria"
+                id="carga_horaria"
+                value={execucao.carga_horaria}
+                type="number"
+                min={0}
+                onChange={handleChange}
+                placeholder="Carga Horária"
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="efetivo_mod">Efetivo MOD</Label>
+              <Input
+                name="efetivo_mod"
+                id="efetivo_mod"
+                value={execucao.efetivo_mod ?? 0}
+                type="number"
+                min={0}
+                onChange={handleChange}
+                placeholder="Efetivo MOD"
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="efetivo_moi">Efetivo MOI</Label>
+              <Input
+                name="efetivo_moi"
+                id="efetivo_moi"
+                value={execucao.efetivo_moi ?? 0}
+                type="number"
+                min={0}
+                onChange={handleChange}
+                placeholder="Efetivo MOI"
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="horas_totais">Horas Totais</Label>
+              <Input
+                name="horas_totais"
+                id="horas_totais"
+                value={execucao.horas_totais ?? 0}
+                type="number"
+                min={0}
+                onChange={handleChange}
+                placeholder="Horas Totais"
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="observacoes">Observações</Label>
+              <Input
+                name="observacoes"
+                id="observacoes"
+                value={execucao.observacoes ?? ""}
+                onChange={handleChange}
+                placeholder="Observações"
+              />
+            </div>
             <div className="flex gap-2">
               <Button type="submit" disabled={saving}>{saving ? "Salvando..." : "Salvar"}</Button>
               <Button variant="outline" asChild>
