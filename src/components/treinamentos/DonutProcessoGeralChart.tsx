@@ -1,3 +1,4 @@
+
 import React from "react";
 import { PieChart, Pie, Cell, Tooltip } from "recharts";
 import { useTreinamentosPorTipoProcesso } from "./useTreinamentosPorTipoProcesso";
@@ -8,35 +9,37 @@ const COLORS = ["#F59E0B", "#2563EB", "#6B7280", "#FAA43A", "#34D399", "#DB2777"
 // Custom label para mostrar tipo, percentual e total de horas
 const renderCustomLabel = (props: any) => {
   const RADIAN = Math.PI / 180;
-  const cx = Number(props.cx);
-  const cy = Number(props.cy);
-  const midAngle = props.midAngle;
-  const outerRadius = Number(props.outerRadius);
-  // ATENÇÃO: O percentual correto está no payload.percentual
-  const percentual = props.payload?.percentual ?? 0;
-  const name = props.name;
-  const index = props.index ?? 0;
-  const value = props.value; // total horas (MOD+MOI)
-  const total = props.payload?.horasTotais ?? value;
+  const { cx, cy, midAngle, outerRadius, index, payload } = props;
+  // Utilizar valores corretos do payload
+  const percentual = payload?.percentual ?? 0;
+  const name = payload?.name ?? "";
+  const value = payload?.horasTotais ?? 0; // total horas (MOD+MOI)
 
-  const radius = outerRadius + 36;
-  const x = cx + radius * Math.cos(-midAngle * RADIAN);
-  const y = cy + radius * Math.sin(-midAngle * RADIAN);
+  // Definir raio maior para afastar rótulo e melhorar visualização
+  const radius = Number(outerRadius) + 48;
+  const x = Number(cx) + radius * Math.cos(-midAngle * RADIAN);
+  const y = Number(cy) + radius * Math.sin(-midAngle * RADIAN);
   const color = COLORS[index % COLORS.length];
 
-  const labelName = String(name).length > 24 ? String(name).substring(0, 20) + "..." : String(name);
+  // Não cortar nome (permitir até 32 caracteres), cortar apenas se for longo demais
+  const maxLen = 32;
+  const labelName = name.length > maxLen ? name.substring(0, maxLen - 3) + "..." : name;
 
   return (
     <text
       x={x}
       y={y}
       fill={color}
-      textAnchor={x > cx ? "start" : "end"}
+      textAnchor={x > Number(cx) ? "start" : "end"}
       dominantBaseline="central"
       fontSize="15"
       fontWeight="bold"
+      style={{
+        textShadow: "1px 1px 2px #fff",
+        userSelect: "none"
+      }}
     >
-      {`${labelName}: ${percentual ? percentual.toFixed(1) : "0"}% (${total}h)`}
+      {`${labelName}: ${percentual.toFixed(1)}% (${value}h)`}
     </text>
   );
 };
