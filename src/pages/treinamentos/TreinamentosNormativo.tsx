@@ -575,7 +575,6 @@ const TreinamentosNormativo = () => {
                         <Input
                           type="date"
                           value={
-                            // Preferência: manualDate, senão valor do formulário convertido
                             manualDate
                               ? manualDate
                               : field.value
@@ -584,8 +583,19 @@ const TreinamentosNormativo = () => {
                           }
                           onChange={e => {
                             setManualDate(e.target.value);
-                            // seta o valor no RHF também para manter sincronia
-                            field.onChange(new Date(e.target.value));
+                            // CORREÇÃO: sempre enviar um Date para onChange
+                            if (e.target.value) {
+                              // Only call onChange if date string is valid
+                              const [yyyy, mm, dd] = e.target.value.split("-");
+                              const _date = new Date(
+                                Number(yyyy),
+                                Number(mm) - 1,
+                                Number(dd)
+                              );
+                              field.onChange(_date);
+                            } else {
+                              field.onChange(undefined);
+                            }
                           }}
                           className="max-w-[180px]"
                           min="1900-01-01"
@@ -631,7 +641,6 @@ const TreinamentosNormativo = () => {
                           <PopoverContent className="w-auto p-0" align="start">
                             <Calendar
                               mode="single"
-                              // valor selecionado via date API (preferência manualDate p/ visual)
                               selected={
                                 manualDate
                                   ? new Date(manualDate)
@@ -643,9 +652,8 @@ const TreinamentosNormativo = () => {
                               }
                               onSelect={date => {
                                 if (date) {
-                                  // seta campo manual
-                                  const iso = dateValueToISODateString(date);
-                                  setManualDate(iso);
+                                  // Quando seleciona no calendário, limpa manualDate e atualiza o campo para Date
+                                  setManualDate(null);
                                   field.onChange(date);
                                 }
                               }}
