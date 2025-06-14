@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -20,6 +19,7 @@ import {
 import { calcularStatusTreinamento, formatarData, fetchFuncionarios, fetchTreinamentos, getNomeTreinamento } from "@/utils/treinamentosUtils";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { ccaService } from "@/services/treinamentos/ccaService";
 
 const TreinamentosCracha = () => {
   const [selectedFuncionarioId, setSelectedFuncionarioId] = useState<string | undefined>();
@@ -27,6 +27,8 @@ const TreinamentosCracha = () => {
   const [treinamentosValidos, setTreinamentosValidos] = useState<TreinamentoNormativo[]>([]);
   const [funcionarios, setFuncionarios] = useState<Funcionario[]>([]);
   const [treinamentosInfo, setTreinamentosInfo] = useState<Treinamento[]>([]);
+  const [ccas, setCcas] = useState<{ id: number; codigo: string; nome: string }[]>([]);
+  const [selectedCcaId, setSelectedCcaId] = useState<number | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(true);
   const crachaRef = useRef<HTMLDivElement | null>(null);
 
@@ -35,10 +37,14 @@ const TreinamentosCracha = () => {
     const loadData = async () => {
       try {
         setIsLoading(true);
-        const funcionariosData = await fetchFuncionarios();
-        const treinamentosData = await fetchTreinamentos();
+        const [funcionariosData, treinamentosData, ccasData] = await Promise.all([
+          fetchFuncionarios(),
+          fetchTreinamentos(),
+          ccaService.getAll(),
+        ]);
         setFuncionarios(funcionariosData);
         setTreinamentosInfo(treinamentosData);
+        setCcas(ccasData);
       } catch (error) {
         console.error("Erro ao carregar dados:", error);
         toast({
@@ -50,17 +56,28 @@ const TreinamentosCracha = () => {
         setIsLoading(false);
       }
     };
-    
     loadData();
   }, []);
+
+  // Lista de funcionários filtrada por CCA selecionado
+  const funcionariosFiltrados = selectedCcaId
+    ? funcionarios.filter((f) => f.cca_id === selectedCcaId)
+    : [];
+
+  // Ao trocar o CCA, limpa seleção de funcionário e info dependentes
+  const handleCcaChange = (ccaId: string) => {
+    setSelectedCcaId(Number(ccaId));
+    setSelectedFuncionarioId(undefined);
+    setFuncionario(null);
+    setTreinamentosValidos([]);
+  };
 
   const handleFuncionarioChange = async (funcionarioId: string) => {
     setSelectedFuncionarioId(funcionarioId);
     setIsLoading(true);
     
     try {
-      // Find funcionario
-      const selectedFuncionario = funcionarios.find(f => f.id === funcionarioId);
+      const selectedFuncionario = funcionariosFiltrados.find(f => f.id === funcionarioId);
       setFuncionario(selectedFuncionario || null);
       
       // Get valid trainings for this funcionario from Supabase
@@ -377,18 +394,38 @@ const TreinamentosCracha = () => {
             <CardHeader>
               <CardTitle>Selecione o Funcionário</CardTitle>
               <CardDescription>
-                Escolha um funcionário para gerar o crachá de capacitação
+                Escolha um CCA e um funcionário para gerar o crachá de capacitação
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="flex flex-col md:flex-row gap-4">
+                {/* Campo seleção de CCA */}
                 <div className="w-full md:w-1/2">
-                  <Select onValueChange={handleFuncionarioChange} value={selectedFuncionarioId}>
+                  <Select onValueChange={handleCcaChange} value={selectedCcaId ? String(selectedCcaId) : undefined}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Selecione um funcionário" />
+                      <SelectValue placeholder="Selecione um CCA" />
                     </SelectTrigger>
                     <SelectContent>
-                      {funcionarios.map((funcionario) => (
+                      {ccas.map((cca) => (
+                        <SelectItem key={cca.id} value={String(cca.id)}>
+                          {cca.codigo} - {cca.nome}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                {/* Campo seleção de funcionário, filtrado por CCA */}
+                <div className="w-full md:w-1/2">
+                  <Select
+                    onValueChange={handleFuncionarioChange}
+                    value={selectedFuncionarioId}
+                    disabled={!selectedCcaId || funcionariosFiltrados.length === 0}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={selectedCcaId ? (funcionariosFiltrados.length > 0 ? "Selecione um funcionário" : "Nenhum funcionário disponível") : "Selecione um CCA primeiro"} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {funcionariosFiltrados.map((funcionario) => (
                         <SelectItem key={funcionario.id} value={funcionario.id}>
                           {funcionario.nome}
                         </SelectItem>
@@ -396,7 +433,7 @@ const TreinamentosCracha = () => {
                     </SelectContent>
                   </Select>
                 </div>
-                
+
                 {funcionario && (
                   <div className="flex flex-1 gap-4">
                     <div className="flex-1">
