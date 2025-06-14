@@ -117,11 +117,11 @@ const VisualizarExecucaoTreinamento = () => {
                       className="gap-1"
                       type="button"
                       onClick={handleDownload}
-                      title="Baixar PDF"
+                      title="Visualizar PDF"
                       disabled={loadingSignedUrl}
                     >
                       <Download className="h-4 w-4" />
-                      {loadingSignedUrl ? "Gerando link..." : "Baixar"}
+                      {loadingSignedUrl ? "Gerando link..." : "Visualizar"}
                     </Button>
                   </div>
                 )
