@@ -1,5 +1,5 @@
 
 project_id = "xexgdtlctyuycohzhmuu"
 
-[functions.send-nc-email]
+[functions.treinamentos-delete-anexo]
 verify_jwt = false
