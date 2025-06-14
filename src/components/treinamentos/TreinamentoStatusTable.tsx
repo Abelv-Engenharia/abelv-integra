@@ -1,8 +1,8 @@
 
 import React, { useState, useEffect } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { formatarData, getStatusColor } from "@/utils/treinamentosUtils";
+// Removido: import { Badge } from "@/components/ui/badge";
+import { formatarData /*, getStatusColor*/ } from "@/utils/treinamentosUtils";
 import { fetchFuncionariosComTreinamentos } from "@/services/treinamentosDashboardService";
 
 export const TreinamentoStatusTable = () => {
@@ -43,7 +43,7 @@ export const TreinamentoStatusTable = () => {
             <TableHead>Função</TableHead>
             <TableHead className="w-[200px]">Treinamento</TableHead>
             <TableHead>Validade</TableHead>
-            <TableHead>Status</TableHead>
+            {/* Coluna de Status removida */}
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -74,26 +74,13 @@ export const TreinamentoStatusTable = () => {
                 ) : null}
                 <TableCell>{treinamento.treinamentoNome}</TableCell>
                 <TableCell>{formatarData(treinamento.data_validade)}</TableCell>
-                <TableCell>
-                  <Badge
-                    variant={
-                      treinamento.status === "Válido"
-                        ? "outline"
-                        : treinamento.status === "Próximo ao vencimento"
-                        ? "secondary"
-                        : "destructive"
-                    }
-                    className={getStatusColor(treinamento.status)}
-                  >
-                    {treinamento.status}
-                  </Badge>
-                </TableCell>
+                {/* Coluna de status removida */}
               </TableRow>
             ))
           )}
           {funcionariosComTreinamentos.flatMap(f => f.treinamentos).length === 0 && (
             <TableRow>
-              <TableCell colSpan={6} className="h-24 text-center">
+              <TableCell colSpan={5} className="h-24 text-center">
                 Não há registros de treinamentos.
               </TableCell>
             </TableRow>
