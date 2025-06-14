@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Search, Filter, Download } from "lucide-react";
+import { Search, Filter, Download, Eye, Edit, Trash2 } from "lucide-react";
 import { execucaoTreinamentoService } from "@/services/treinamentos/execucaoTreinamentoService";
 import { ExecucaoTreinamento } from "@/types/treinamentos";
 
@@ -81,6 +81,23 @@ const TreinamentosConsulta = () => {
     return <Badge variant="secondary">Pendente</Badge>;
   };
 
+  const handleView = (execucao: ExecucaoTreinamento) => {
+    console.log("Visualizar:", execucao);
+    // Implemente a navegação ou diálogo de detalhes aqui
+  };
+
+  const handleEdit = (execucao: ExecucaoTreinamento) => {
+    console.log("Editar:", execucao);
+    // Implemente a navegação ou diálogo de edição aqui
+  };
+
+  const handleDelete = (execucao: ExecucaoTreinamento) => {
+    if (window.confirm("Deseja realmente excluir esta execução?")) {
+      console.log("Excluir:", execucao);
+      // Implemente a exclusão aqui
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-96">
@@ -150,12 +167,13 @@ const TreinamentosConsulta = () => {
                   <TableHead>Carga Horária</TableHead>
                   <TableHead>Efetivo</TableHead>
                   <TableHead>Horas Totais</TableHead>
+                  <TableHead>Ações</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredExecucoes.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                    <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
                       Nenhuma execução encontrada
                     </TableCell>
                   </TableRow>
@@ -174,6 +192,19 @@ const TreinamentosConsulta = () => {
                         MOD: {execucao.efetivo_mod} / MOI: {execucao.efetivo_moi}
                       </TableCell>
                       <TableCell>{execucao.horas_totais}h</TableCell>
+                      <TableCell>
+                        <div className="flex gap-2">
+                          <Button variant="ghost" size="icon" onClick={() => handleView(execucao)} title="Visualizar">
+                            <Eye className="w-4 h-4" />
+                          </Button>
+                          <Button variant="ghost" size="icon" onClick={() => handleEdit(execucao)} title="Editar">
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                          <Button variant="ghost" size="icon" onClick={() => handleDelete(execucao)} title="Excluir">
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
                     </TableRow>
                   ))
                 )}
