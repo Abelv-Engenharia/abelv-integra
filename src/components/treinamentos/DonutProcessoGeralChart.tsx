@@ -1,4 +1,3 @@
-
 import React from "react";
 import { PieChart, Pie, Cell, Tooltip } from "recharts";
 import { useTreinamentosPorTipoProcesso } from "./useTreinamentosPorTipoProcesso";
@@ -10,18 +9,16 @@ const COLORS = ["#F59E0B", "#2563EB", "#6B7280", "#FAA43A", "#34D399", "#DB2777"
 const renderCustomLabel = (props: any) => {
   const RADIAN = Math.PI / 180;
   const { cx, cy, midAngle, outerRadius, index, payload } = props;
-  // Utilizar valores corretos do payload
   const percentual = payload?.percentual ?? 0;
   const name = payload?.name ?? "";
-  const value = payload?.horasTotais ?? 0; // total horas (MOD+MOI)
+  const value = payload?.horasTotais ?? 0;
 
-  // Definir raio maior para afastar rótulo e melhorar visualização
-  const radius = Number(outerRadius) + 48;
+  // Deixar rótulo afastado mas não sair da área do card
+  const radius = Number(outerRadius) + 60; // aumentado para separar da fatia, ok pois estamos centralizando
   const x = Number(cx) + radius * Math.cos(-midAngle * RADIAN);
   const y = Number(cy) + radius * Math.sin(-midAngle * RADIAN);
   const color = COLORS[index % COLORS.length];
 
-  // Não cortar nome (permitir até 32 caracteres), cortar apenas se for longo demais
   const maxLen = 32;
   const labelName = name.length > maxLen ? name.substring(0, maxLen - 3) + "..." : name;
 
@@ -47,7 +44,6 @@ const renderCustomLabel = (props: any) => {
 export const DonutProcessoGeralChart = () => {
   const { data = [], isLoading, error } = useTreinamentosPorTipoProcesso();
 
-  // Placeholder se carregando ou erro
   if (isLoading) {
     return (
       <div className="w-full flex items-center justify-center h-80">
@@ -65,13 +61,13 @@ export const DonutProcessoGeralChart = () => {
 
   return (
     <div className="w-full flex items-center justify-center">
-      <PieChart width={520} height={400}>
+      <PieChart width={540} height={400}> {/* aumentei um pouco a largura para caber melhor */}
         <Pie
           data={data}
           dataKey="horasTotais"
           nameKey="name"
-          cx="58%"
-          cy="52%"
+          cx="50%"      // Centralizado no meio
+          cy="50%"      // Centralizado verticalmente
           innerRadius={110}
           outerRadius={142}
           paddingAngle={1.5}
