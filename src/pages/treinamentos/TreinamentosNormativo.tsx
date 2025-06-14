@@ -11,7 +11,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
 import { Funcionario, Treinamento } from "@/types/treinamentos";
 import { calcularDataValidade, calcularStatusTreinamento, fetchFuncionarios, fetchTreinamentos, criarTreinamentoNormativo } from "@/utils/treinamentosUtils";
