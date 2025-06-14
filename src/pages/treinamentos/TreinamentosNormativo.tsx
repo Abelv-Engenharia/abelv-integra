@@ -75,7 +75,6 @@ const TreinamentosNormativo = () => {
   const [selectedCcaId, setSelectedCcaId] = useState<string | null>(null);
   const [treinamentosNormativos, setTreinamentosNormativos] = useState<{id: string, nome: string, validade_dias?: number}[]>([]);
   const [certificadoFile, setCertificadoFile] = useState<File | null>(null);
-  const [anoManual, setAnoManual] = useState<string>("");
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -393,26 +392,6 @@ const TreinamentosNormativo = () => {
     }
   };
 
-  // Corrigir o campo Ano - fim do bloco de hooks e antes do return:
-  useEffect(() => {
-    const data = form.watch("dataRealizacao");
-    if (data instanceof Date && !isNaN(data.getTime())) {
-      setAnoManual(String(data.getFullYear()));
-    } else {
-      setAnoManual("");
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [form.watch("dataRealizacao")]);
-
-  // --- Campo dataRealizacao - sincronização digitado/selecionado ---
-  // useEffect(() => {
-  //   // Se o valor do formulário mudar (ex: selecionado pelo calendário), atualiza o texto.
-  //   const val = form.watch("dataRealizacao");
-  //   if (val instanceof Date) setInputDataRealizacao(format(val, "dd/MM/yyyy"));
-  //   if (!val) setInputDataRealizacao("");
-  // }, [form.watch("dataRealizacao")]);
-
-  // ----------------- SOMENTE AQUI FAREMOS RETURNS CONDICIONAIS -----------------
   if (isSubmitSuccess) {
     return (
       <div className="flex items-center justify-center h-[calc(100vh-200px)]">
@@ -478,7 +457,6 @@ const TreinamentosNormativo = () => {
           ) : (
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                {/* CCA em linha inteira */}
                 <div className="mb-4">
                   <FormField
                     control={form.control}
@@ -607,87 +585,41 @@ const TreinamentosNormativo = () => {
                   control={form.control}
                   name="dataRealizacao"
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem className="flex flex-col">
                       <FormLabel>Data da realização</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="date"
-                          value={
-                            field.value
-                              ? typeof field.value === "string"
-                                ? field.value
-                                : field.value instanceof Date
-                                  ? `${field.value.getFullYear()}-${String(field.value.getMonth() + 1).padStart(2, '0')}-${String(field.value.getDate()).padStart(2, '0')}`
-                                  : ""
-                              : ""
-                          }
-                          onChange={e => {
-                            const v = e.target.value;
-                            if (v) {
-                              const [yyyy, mm, dd] = v.split("-");
-                              const asDate = new Date(Number(yyyy), Number(mm) - 1, Number(dd));
-                              if (!isNaN(asDate.getTime())) {
-                                field.onChange(asDate);
-                              } else {
-                                field.onChange(undefined);
-                              }
-                            } else {
-                              field.onChange(undefined);
-                            }
-                          }}
-                          max={new Date().toISOString().split("T")[0]}
-                        />
-                      </FormControl>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              variant={"outline"}
+                              className={cn(
+                                "w-full pl-3 text-left font-normal",
+                                !field.value && "text-muted-foreground"
+                              )}
+                            >
+                              {field.value ? (
+                                format(field.value, "dd/MM/yyyy")
+                              ) : (
+                                <span>Selecione uma data</span>
+                              )}
+                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={field.value}
+                            onSelect={field.onChange}
+                            disabled={(date) => date > new Date()}
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-
-                {/* NOVO CAMPO ANO (agora corrigido) */}
-                <FormItem>
-                  <FormLabel>Ano</FormLabel>
-                  <Input
-                    type="text"
-                    placeholder="YYYY"
-                    inputMode="numeric"
-                    pattern="\d{4}"
-                    maxLength={4}
-                    className="w-32"
-                    value={anoManual}
-                    onChange={e => {
-                      const valor = e.target.value.replace(/\D/g, ""); // Apenas dígitos
-                      setAnoManual(valor);
-                    }}
-                    onBlur={e => {
-                      const valor = e.target.value;
-                      if (valor.length === 4) {
-                        const anoNovo = Number(valor);
-                        if (anoNovo >= 1900 && anoNovo <= 2100) {
-                          const dataAtual = form.getValues("dataRealizacao");
-                          let novaData: Date;
-                          if (dataAtual instanceof Date && !isNaN(dataAtual.getTime())) {
-                            novaData = new Date(dataAtual);
-                          } else {
-                            // Se não houver data, cria uma nova em 01/01 do ano digitado
-                            novaData = new Date(anoNovo, 0, 1);
-                          }
-                          novaData.setFullYear(anoNovo);
-                          form.setValue("dataRealizacao", novaData, { shouldValidate: true });
-                          return; // Sai da função, pois a data foi atualizada com sucesso
-                        }
-                      }
-                      
-                      // Se o código chegou até aqui, o valor do ano é inválido ou incompleto.
-                      // Reverte para o valor que está no campo de data principal.
-                      const dataAtual = form.getValues("dataRealizacao");
-                      if (dataAtual instanceof Date && !isNaN(dataAtual.getTime())) {
-                        setAnoManual(String(dataAtual.getFullYear()));
-                      } else {
-                        setAnoManual("");
-                      }
-                    }}
-                  />
-                </FormItem>
 
                 <FormItem>
                   <FormLabel>Data de validade</FormLabel>
@@ -723,7 +655,6 @@ const TreinamentosNormativo = () => {
                     }}
                   />
                   <div className="text-xs text-muted-foreground mt-1">Apenas arquivos PDF, máximo 2MB.</div>
-                  {/* Exibe o nome do arquivo customizado que será usado no bucket, se tudo já tiver sido selecionado */}
                   {certificadoFile && form.getValues("treinamentoId") && selectedFuncionario && (
                     <div className="text-xs text-blue-600 mt-1 font-mono">
                       Nome no bucket:{" "}
