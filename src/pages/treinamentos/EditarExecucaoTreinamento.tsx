@@ -109,57 +109,59 @@ const EditarExecucaoTreinamento = () => {
                 />
               </div>
             </div>
-            <div>
-              <Label htmlFor="carga_horaria">Carga Horária</Label>
-              <Input
-                name="carga_horaria"
-                id="carga_horaria"
-                value={execucao.carga_horaria}
-                type="number"
-                min={0}
-                onChange={handleChange}
-                placeholder="Carga Horária"
-                required
-              />
-            </div>
-            <div>
-              <Label htmlFor="efetivo_mod">Efetivo MOD</Label>
-              <Input
-                name="efetivo_mod"
-                id="efetivo_mod"
-                value={execucao.efetivo_mod ?? 0}
-                type="number"
-                min={0}
-                onChange={handleChange}
-                placeholder="Efetivo MOD"
-                required
-              />
-            </div>
-            <div>
-              <Label htmlFor="efetivo_moi">Efetivo MOI</Label>
-              <Input
-                name="efetivo_moi"
-                id="efetivo_moi"
-                value={execucao.efetivo_moi ?? 0}
-                type="number"
-                min={0}
-                onChange={handleChange}
-                placeholder="Efetivo MOI"
-                required
-              />
-            </div>
-            <div>
-              <Label htmlFor="horas_totais">Horas Totais</Label>
-              <Input
-                name="horas_totais"
-                id="horas_totais"
-                value={execucao.horas_totais ?? 0}
-                type="number"
-                min={0}
-                onChange={handleChange}
-                placeholder="Horas Totais"
-                required
-              />
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="flex-1">
+                <Label htmlFor="carga_horaria">Carga Horária</Label>
+                <Input
+                  name="carga_horaria"
+                  id="carga_horaria"
+                  value={execucao.carga_horaria}
+                  type="number"
+                  min={0}
+                  onChange={handleChange}
+                  placeholder="Carga Horária"
+                  required
+                />
+              </div>
+              <div className="flex-1">
+                <Label htmlFor="efetivo_mod">Efetivo MOD</Label>
+                <Input
+                  name="efetivo_mod"
+                  id="efetivo_mod"
+                  value={execucao.efetivo_mod ?? 0}
+                  type="number"
+                  min={0}
+                  onChange={handleChange}
+                  placeholder="Efetivo MOD"
+                  required
+                />
+              </div>
+              <div className="flex-1">
+                <Label htmlFor="efetivo_moi">Efetivo MOI</Label>
+                <Input
+                  name="efetivo_moi"
+                  id="efetivo_moi"
+                  value={execucao.efetivo_moi ?? 0}
+                  type="number"
+                  min={0}
+                  onChange={handleChange}
+                  placeholder="Efetivo MOI"
+                  required
+                />
+              </div>
+              <div className="flex-1">
+                <Label htmlFor="horas_totais">Horas Totais</Label>
+                <Input
+                  name="horas_totais"
+                  id="horas_totais"
+                  value={execucao.horas_totais ?? 0}
+                  type="number"
+                  min={0}
+                  onChange={handleChange}
+                  placeholder="Horas Totais"
+                  required
+                />
+              </div>
             </div>
             <div>
               <Label htmlFor="observacoes">Observações</Label>
