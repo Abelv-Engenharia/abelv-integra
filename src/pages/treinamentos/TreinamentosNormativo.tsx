@@ -288,6 +288,24 @@ const TreinamentosNormativo = () => {
     return null;
   }
 
+  // Função utilitária para parse simples de dd/mm/aaaa (apenas para este campo)
+  function parseDateString(str: string): Date | undefined {
+    if (!str) return undefined;
+    const [dd, mm, yyyy] = str.split("/");
+    if (!dd || !mm || !yyyy) return undefined;
+    const date = new Date(Number(yyyy), Number(mm) - 1, Number(dd));
+    // Valida ano lógico e correspondência de campos
+    if (
+      date &&
+      date.getDate() === Number(dd) &&
+      date.getMonth() + 1 === Number(mm) &&
+      date.getFullYear() === Number(yyyy)
+    ) {
+      return date;
+    }
+    return undefined;
+  }
+
   const onSubmit = async (data: FormValues) => {
     // Corrigir: pegar a data da última seleção válida (manual ou calendário)
     const dataRealizacaoISO =
@@ -571,35 +589,71 @@ const TreinamentosNormativo = () => {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Data da realização</FormLabel>
-                      <div className="flex gap-2 items-center">
+                      <div className="relative flex items-center gap-2 w-full max-w-xs">
+                        <Input
+                          type="text"
+                          inputMode="numeric"
+                          maxLength={10}
+                          placeholder="dd/mm/aaaa"
+                          value={
+                            field.value ? format(field.value as Date, "dd/MM/yyyy") : ""
+                          }
+                          className="pr-10"
+                          onChange={(e) => {
+                            const raw = e.target.value.replace(/[^\d/]/g, "");
+                            let digits = raw;
+                            if (digits.length === 2 && !digits.endsWith("/")) digits += "/";
+                            if (digits.length === 5 && !digits.endsWith("/")) digits += "/";
+                            // Mantém só 10 caracteres (dd/mm/aaaa)
+                            if (digits.length > 10) digits = digits.slice(0, 10);
+
+                            // Atualiza input
+                            // Só atualiza field.value se a string for completa e válida (10 dígitos)
+                            if (digits.length === 10) {
+                              const data = parseDateString(digits);
+                              if (data) {
+                                field.onChange(data);
+                              } else {
+                                // Inválida, não atualiza campo
+                                field.onChange(undefined);
+                              }
+                            } else {
+                              // Campo incompleto: limpa valor do form para não ficar estranho
+                              field.onChange(undefined);
+                            }
+                          }}
+                          onBlur={(e) => {
+                            const data = parseDateString(e.target.value);
+                            if (!data && e.target.value) {
+                              toast({
+                                title: "Data inválida",
+                                description: "Use o formato dd/mm/aaaa",
+                                variant: "destructive"
+                              });
+                              field.onChange(undefined);
+                            }
+                          }}
+                        />
+                        {/* Ícone/calendário sobreposto ao campo — 1 só campo */}
                         <Popover>
                           <PopoverTrigger asChild>
-                            <FormControl>
-                              <Button
-                                variant="outline"
-                                className={cn(
-                                  "w-[150px] text-left font-normal pl-2 pr-2 py-2",
-                                  !field.value && "text-muted-foreground"
-                                )}
-                                tabIndex={-1}
-                                type="button"
-                              >
-                                {field.value
-                                  ? format(field.value as Date, "dd/MM/yyyy")
-                                  : <span>dd/mm/aaaa</span>}
-                                <span className="ml-auto">
-                                  <CalendarIcon className="h-4 w-4 opacity-50" />
-                                </span>
-                              </Button>
-                            </FormControl>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              type="button"
+                              tabIndex={-1}
+                              className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 p-0"
+                              aria-label="Abrir calendário"
+                            >
+                              <CalendarIcon className="h-4 w-4 opacity-60" />
+                            </Button>
                           </PopoverTrigger>
                           <PopoverContent className="w-auto p-0" align="start">
                             <Calendar
                               mode="single"
                               selected={field.value}
-                              onSelect={date => {
+                              onSelect={(date) => {
                                 if (date) {
-                                  setInputDataRealizacao(format(date, "dd/MM/yyyy"));
                                   field.onChange(date);
                                 }
                               }}
@@ -609,47 +663,6 @@ const TreinamentosNormativo = () => {
                             />
                           </PopoverContent>
                         </Popover>
-                        <Input
-                          className="w-[120px]"
-                          placeholder="dd/mm/aaaa"
-                          value={inputDataRealizacao}
-                          maxLength={10}
-                          onChange={e => {
-                            // Só mantém números e barra
-                            const val = e.target.value.replace(/[^\d/]/g, '');
-                            // Formata automaticamente dd/mm/aaaa
-                            let f = val;
-                            if (val.length === 2 || val.length === 5) {
-                              if (val.endsWith("/")) {
-                                f = val;
-                              } else {
-                                f = val + "/";
-                              }
-                            }
-                            setInputDataRealizacao(f);
-
-                            // Só tenta atualizar se string tem 10 caracteres
-                            if (f.length === 10) {
-                              const data = parseDateString(f);
-                              field.onChange(data);
-                            } else {
-                              field.onChange(undefined);
-                            }
-                          }}
-                          onBlur={() => {
-                            const data = parseDateString(inputDataRealizacao);
-                            if (inputDataRealizacao && !data) {
-                              // Formato inválido
-                              toast({
-                                title: "Data inválida",
-                                description: "Use o formato dd/mm/aaaa",
-                                variant: "destructive"
-                              });
-                              setInputDataRealizacao("");
-                              field.onChange(undefined);
-                            }
-                          }}
-                        />
                       </div>
                       <FormMessage />
                     </FormItem>
