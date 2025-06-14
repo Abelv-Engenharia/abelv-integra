@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { Table, TableHeader, TableBody, TableRow, TableCell, TableHead } from "@/components/ui/table";
 import { treinamentosNormativosService } from "@/services/treinamentos/treinamentosNormativosService";
@@ -36,10 +37,7 @@ export const TabelaTreinamentosNormativosVencidos: React.FC = () => {
 
   // Filtra vencidos e próximos ao vencimento, e ordena pela data_validade (menor -> maior)
   const treinamentosFiltrados = treinamentos
-    .filter(t =>
-      (t.status === "Vencido" || t.status === "Próximo ao vencimento") &&
-      !t.arquivado // Agora garante que só mostra os não arquivados!
-    )
+    .filter(t => (t.status === "Vencido" || t.status === "Próximo ao vencimento") && !t.arquivado)
     .sort((a, b) => {
       const dataA = a.data_validade ? new Date(a.data_validade).getTime() : 0;
       const dataB = b.data_validade ? new Date(b.data_validade).getTime() : 0;
@@ -65,8 +63,7 @@ export const TabelaTreinamentosNormativosVencidos: React.FC = () => {
   const handleExcluir = async () => {
     if (!treinamentoSelecionado || justificativa.trim().length < 5) return;
     setExcluindo(true);
-    // Agora arquiva com status "Excluído"
-    await treinamentosNormativosService.arquivar(treinamentoSelecionado.id, justificativa, true);
+    await treinamentosNormativosService.arquivar(treinamentoSelecionado.id, justificativa);
     setExcluindo(false);
     setModalOpen(false);
     setTreinamentoSelecionado(null);
@@ -74,16 +71,10 @@ export const TabelaTreinamentosNormativosVencidos: React.FC = () => {
     carregarDados();
   };
 
-  const handleRenovar = async (treinamento: TreinamentoNormativo) => {
+  const handleRenovar = (treinamento: TreinamentoNormativo) => {
     const funcionario = getFuncionarioInfo(treinamento.funcionario_id);
     if (!funcionario) return;
-
-    // Marca como arquivado ANTES de navegar
-    await treinamentosNormativosService.arquivar(treinamento.id, "Renovação automática via ciclo de reciclagem");
-    // Recarrega lista/local para sumir instantaneamente na tabela
-    carregarDados();
-
-    // Navega para o formulário, passando dados do funcionário/treinamento
+    // Inclui o campo tipo como "Reciclagem"
     navigate("/treinamentos/normativo", {
       state: {
         ccaId: funcionario.cca_id ? String(funcionario.cca_id) : "",

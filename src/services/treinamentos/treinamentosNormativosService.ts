@@ -53,20 +53,12 @@ export const treinamentosNormativosService = {
     }
   },
 
-  /**
-   * Arquiva um treinamento.
-   * Se statusForExcluido for true (default false), atualiza o status para "Excluído".
-   */
-  async arquivar(id: string, justificativa?: string, statusForExcluido = false): Promise<void> {
+  async arquivar(id: string, justificativa?: string): Promise<void> {
     try {
-      const updateObj: Record<string, any> = { arquivado: true };
-      if (statusForExcluido) {
-        updateObj.status = "Excluído";
-      }
-      // No momento não existe campo para justificativa de exclusão, apenas arquiva, mas poderíamos guardar justificativa se campo existir futuramente
+      // No momento não existe campo para justificativa de exclusão, apenas arquiva.
       const { error } = await supabase
         .from('treinamentos_normativos')
-        .update(updateObj)
+        .update({ arquivado: true /*, justificativa_exclusao: justificativa */ })
         .eq('id', id);
 
       if (error) {
