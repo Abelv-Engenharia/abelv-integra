@@ -82,7 +82,7 @@ export function DatePickerWithManualInput({ value, onChange, disabled }: DatePic
     <Popover open={open} onOpenChange={setOpen}>
       <div className="relative w-full">
         <Input
-          placeholder="dd/MM/yyyy"
+          placeholder="dd/mm/aaaa"
           value={dateString}
           onChange={handleInputChange}
           onBlur={handleBlur}
