@@ -75,16 +75,14 @@ const TreinamentosNormativo = () => {
   const [selectedCcaId, setSelectedCcaId] = useState<string | null>(null);
   const [treinamentosNormativos, setTreinamentosNormativos] = useState<{id: string, nome: string, validade_dias?: number}[]>([]);
   const [certificadoFile, setCertificadoFile] = useState<File | null>(null);
-  // Remove unused states related to manualDate or inputDataRealizacao
-  // const [manualDate, setManualDate] = useState<string | null>(null);
-  // const [inputDataRealizacao, setInputDataRealizacao] = useState<string>("");
+  const [inputDataRealizacao, setInputDataRealizacao] = useState<string>("");
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       ccaId: "",
       tipo: "Formação",
-      dataRealizacao: undefined, // Ensure default is undefined, not ""
+      dataRealizacao: undefined,
     },
   });
 
@@ -396,6 +394,14 @@ const TreinamentosNormativo = () => {
     }
   };
 
+  // --- Campo dataRealizacao - sincronização digitado/selecionado ---
+  useEffect(() => {
+    // Se o valor do formulário mudar (ex: selecionado pelo calendário), atualiza o texto.
+    const val = form.watch("dataRealizacao");
+    if (val instanceof Date) setInputDataRealizacao(format(val, "dd/MM/yyyy"));
+    if (!val) setInputDataRealizacao("");
+  }, [form.watch("dataRealizacao")]);
+
   // ----------------- SOMENTE AQUI FAREMOS RETURNS CONDICIONAIS -----------------
   if (isSubmitSuccess) {
     return (
@@ -599,20 +605,17 @@ const TreinamentosNormativo = () => {
                           inputMode="numeric"
                           maxLength={10}
                           placeholder="dd/mm/aaaa"
-                          value={
-                            field.value instanceof Date
-                              ? format(field.value, "dd/MM/yyyy")
-                              : ""
-                          }
+                          value={inputDataRealizacao}
                           className="pr-10"
                           onChange={e => {
-                            // Allow only "/"" and digits, restrict to dd/mm/aaaa
                             const raw = e.target.value.replace(/[^\d/]/g, "");
                             let digits = raw;
                             if (digits.length >= 2 && digits[2] !== "/") digits = digits.slice(0, 2) + "/" + digits.slice(2);
                             if (digits.length >= 5 && digits[5] !== "/") digits = digits.slice(0, 5) + "/" + digits.slice(5);
                             if (digits.length > 10) digits = digits.slice(0, 10);
-                            // update only when all 10 digits present
+                            setInputDataRealizacao(digits);
+
+                            // Só tenta atualizar o valor do form quando for 10 dígitos e formato válido
                             if (digits.length === 10) {
                               const [dd, mm, yyyy] = digits.split("/");
                               const asDate = new Date(Number(yyyy), Number(mm) - 1, Number(dd));
@@ -623,22 +626,36 @@ const TreinamentosNormativo = () => {
                                 asDate.getFullYear() === Number(yyyy)
                               ) {
                                 field.onChange(asDate);
+                                // mantem o inputDataRealizacao já no formato
                               } else {
                                 field.onChange(undefined);
                               }
                             } else {
+                              // Para menos de 10 caracteres, não tenta atualizar no form.
                               field.onChange(undefined);
                             }
                           }}
                           onBlur={e => {
-                            const [dd, mm, yyyy] = (e.target.value || "").split("/");
-                            if (e.target.value && (e.target.value.length !== 10 || isNaN(Number(dd)) || isNaN(Number(mm)) || isNaN(Number(yyyy)))) {
-                              toast({
-                                title: "Data inválida",
-                                description: "Use o formato dd/mm/aaaa",
-                                variant: "destructive"
-                              });
-                              field.onChange(undefined);
+                            if (
+                              inputDataRealizacao &&
+                              inputDataRealizacao.length === 10
+                            ) {
+                              const [dd, mm, yyyy] = inputDataRealizacao.split("/");
+                              const asDate = new Date(Number(yyyy), Number(mm) - 1, Number(dd));
+                              if (
+                                isNaN(asDate.getTime()) ||
+                                asDate.getDate() !== Number(dd) ||
+                                asDate.getMonth() + 1 !== Number(mm) ||
+                                asDate.getFullYear() !== Number(yyyy)
+                              ) {
+                                toast({
+                                  title: "Data inválida",
+                                  description: "Use o formato dd/mm/aaaa",
+                                  variant: "destructive"
+                                });
+                                field.onChange(undefined);
+                                setInputDataRealizacao("");
+                              }
                             }
                           }}
                         />
@@ -662,6 +679,7 @@ const TreinamentosNormativo = () => {
                               onSelect={date => {
                                 if (date) {
                                   field.onChange(date);
+                                  setInputDataRealizacao(format(date, "dd/MM/yyyy"));
                                 }
                               }}
                               disabled={date => date > new Date()}
