@@ -5,6 +5,7 @@ import { fetchDonutSubprocessoData } from "@/services/treinamentos/treinamentosS
 
 const COLORS = ["#F59E0B", "#2563EB", "#6B7280", "#FAA43A", "#60A5FA"];
 
+// Novo label para seguir o formato da imagem enviada
 const renderCustomLabel = (props: PieLabelRenderProps) => {
   const RADIAN = Math.PI / 180;
   const cx = Number(props.cx);
@@ -13,26 +14,29 @@ const renderCustomLabel = (props: PieLabelRenderProps) => {
   const outerRadius = Number(props.outerRadius);
   // Usar percent diretamente se estiver no objeto, para o novo comportamento
   const percent = (props as any).percent ?? 0;
-  const name = props.name;
+  const name = props.name ?? "";
+  const value = props.value ?? 0;
   const index = props.index ?? 0;
 
-  const radius = outerRadius + 28;
+  // Posicionamento para fora do donut
+  const radius = outerRadius + 42;
   const x = cx + radius * Math.cos(-midAngle * RADIAN);
   const y = cy + radius * Math.sin(-midAngle * RADIAN);
 
-  const color = COLORS[index % COLORS.length];
-  const label = String(name).length > 28 ? String(name).substring(0, 23) + "..." : String(name);
+  const labelText = `${name}; ${value}; ${(percent * 100).toFixed(0)}%`;
 
   return (
     <text
       x={x}
       y={y}
-      fill={color}
+      fill="#444"
       textAnchor={x > cx ? "start" : "end"}
       dominantBaseline="central"
-      fontSize="15"
+      fontSize="17"
+      fontWeight="bold"
+      style={{ fontFamily: "inherit" }}
     >
-      {`${label}: ${(percent * 100).toFixed(0)}%`}
+      {labelText}
     </text>
   );
 };
@@ -75,18 +79,19 @@ export const DonutSubprocessoChart: React.FC<DonutSubprocessoChartProps> = ({
 
   return (
     <div className="w-full flex items-center justify-center">
-      <PieChart width={540} height={360}>
+      <PieChart width={820} height={440}>
         <Pie
           data={data}
           dataKey="value"
           nameKey="name"
-          cx="60%"
+          cx="50%"
           cy="50%"
-          innerRadius={92}
-          outerRadius={132}
+          innerRadius={116}
+          outerRadius={166}
           paddingAngle={2}
           label={renderCustomLabel}
           labelLine={true}
+          isAnimationActive={false}
         >
           {data.map((entry, index) => (
             <Cell key={entry.name} fill={COLORS[index % COLORS.length]} />
