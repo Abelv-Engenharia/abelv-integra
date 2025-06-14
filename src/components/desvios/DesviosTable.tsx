@@ -56,9 +56,6 @@ const DesviosTable = () => {
   };
 
   const handleDesvioDeleted = (id?: string) => {
-    if (id) {
-      setDesvios(prev => prev.filter(d => d.id !== id));
-    }
     fetchDesvios();
     toast({
       title: "Desvio excluído",
