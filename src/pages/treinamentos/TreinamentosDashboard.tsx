@@ -93,33 +93,32 @@ const TreinamentosDashboard = () => {
           </div>
         </TabsContent>
 
-        <TabsContent value="normativos" className="flex flex-col w-screen max-w-none px-0 items-center gap-4">
-          <div className="flex flex-col w-full gap-4">
-            {/* Card do gráfico */}
-            <Card className="w-full">
-              <CardHeader>
-                <CardTitle>Status dos Treinamentos Normativos</CardTitle>
-                <CardDescription>
-                  Visão geral do status dos treinamentos normativos
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="h-[320px]">
-                <TreinamentosNormativosChart />
-              </CardContent>
-            </Card>
-            {/* Card da tabela vencidos */}
-            <Card className="w-full">
-              <CardContent className="p-0">
-                <TabelaTreinamentosNormativosVencidos />
-              </CardContent>
-            </Card>
+        <TabsContent value="normativos" className="w-full px-0">
+          <div className="w-full overflow-x-auto">
+            <div className="flex flex-col w-full gap-4 min-w-[700px] max-w-full">
+              {/* Card do gráfico */}
+              <Card className="w-full max-w-full">
+                <CardHeader>
+                  <CardTitle>Status dos Treinamentos Normativos</CardTitle>
+                  <CardDescription>
+                    Visão geral do status dos treinamentos normativos
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="h-[320px]">
+                  <TreinamentosNormativosChart />
+                </CardContent>
+              </Card>
+              {/* Card da tabela vencidos */}
+              <Card className="w-full max-w-full">
+                <CardContent className="p-0">
+                  <TabelaTreinamentosNormativosVencidos />
+                </CardContent>
+              </Card>
+            </div>
           </div>
-          
           <div className="flex justify-center gap-4">
-            <Button variant="outline" size="lg" asChild>
-            </Button>
-            <Button variant="outline" size="lg" asChild>
-            </Button>
+            <Button variant="outline" size="lg" asChild></Button>
+            <Button variant="outline" size="lg" asChild></Button>
           </div>
         </TabsContent>
       </Tabs>

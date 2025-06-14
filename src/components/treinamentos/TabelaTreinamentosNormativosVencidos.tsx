@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { Table, TableHeader, TableBody, TableRow, TableCell, TableHead } from "@/components/ui/table";
 import { treinamentosNormativosService } from "@/services/treinamentos/treinamentosNormativosService";
@@ -39,65 +40,67 @@ export const TabelaTreinamentosNormativosVencidos: React.FC = () => {
   }
 
   return (
-    <div className="mt-4 w-full">
+    <div className="mt-4 w-full overflow-x-auto">
       <h3 className="font-semibold text-lg mb-2 px-6 pt-6">
         Treinamentos Vencidos e Próximos ao Vencimento
       </h3>
-      <Table className="w-full">
-        <TableHeader>
-          <TableRow>
-            <TableHead>Funcionário</TableHead>
-            <TableHead>Matrícula</TableHead>
-            <TableHead>Treinamento</TableHead>
-            <TableHead>Tipo</TableHead>
-            <TableHead>Data de Realização</TableHead>
-            <TableHead>Data de Validade</TableHead>
-            <TableHead>Status</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {treinamentosFiltrados.length > 0 ? (
-            treinamentosFiltrados.map((t) => {
-              const funcionario = getFuncionarioInfo(t.funcionario_id);
-              return (
-                <TableRow key={t.id}>
-                  <TableCell>{funcionario?.nome || "-"}</TableCell>
-                  <TableCell>{funcionario?.matricula || "-"}</TableCell>
-                  <TableCell>{t.treinamentoNome || "-"}</TableCell>
-                  <TableCell>{t.tipo || "-"}</TableCell>
-                  <TableCell>
-                    {t.data_realizacao
-                      ? format(new Date(t.data_realizacao), "dd/MM/yyyy")
-                      : "-"}
-                  </TableCell>
-                  <TableCell>
-                    {t.data_validade
-                      ? format(new Date(t.data_validade), "dd/MM/yyyy")
-                      : "-"}
-                  </TableCell>
-                  <TableCell>
-                    <span
-                      className={
-                        t.status === "Vencido"
-                          ? "text-red-600 font-semibold"
-                          : "text-amber-600 font-semibold"
-                      }
-                    >
-                      {t.status}
-                    </span>
-                  </TableCell>
-                </TableRow>
-              );
-            })
-          ) : (
+      <div className="min-w-[700px] max-w-full">
+        <Table className="w-full">
+          <TableHeader>
             <TableRow>
-              <TableCell colSpan={7} className="h-16 text-center text-muted-foreground">
-                Nenhum treinamento vencido ou próximo ao vencimento encontrado.
-              </TableCell>
+              <TableHead>Funcionário</TableHead>
+              <TableHead>Matrícula</TableHead>
+              <TableHead>Treinamento</TableHead>
+              <TableHead>Tipo</TableHead>
+              <TableHead>Data de Realização</TableHead>
+              <TableHead>Data de Validade</TableHead>
+              <TableHead>Status</TableHead>
             </TableRow>
-          )}
-        </TableBody>
-      </Table>
+          </TableHeader>
+          <TableBody>
+            {treinamentosFiltrados.length > 0 ? (
+              treinamentosFiltrados.map((t) => {
+                const funcionario = getFuncionarioInfo(t.funcionario_id);
+                return (
+                  <TableRow key={t.id}>
+                    <TableCell>{funcionario?.nome || "-"}</TableCell>
+                    <TableCell>{funcionario?.matricula || "-"}</TableCell>
+                    <TableCell>{t.treinamentoNome || "-"}</TableCell>
+                    <TableCell>{t.tipo || "-"}</TableCell>
+                    <TableCell>
+                      {t.data_realizacao
+                        ? format(new Date(t.data_realizacao), "dd/MM/yyyy")
+                        : "-"}
+                    </TableCell>
+                    <TableCell>
+                      {t.data_validade
+                        ? format(new Date(t.data_validade), "dd/MM/yyyy")
+                        : "-"}
+                    </TableCell>
+                    <TableCell>
+                      <span
+                        className={
+                          t.status === "Vencido"
+                            ? "text-red-600 font-semibold"
+                            : "text-amber-600 font-semibold"
+                        }
+                      >
+                        {t.status}
+                      </span>
+                    </TableCell>
+                  </TableRow>
+                );
+              })
+            ) : (
+              <TableRow>
+                <TableCell colSpan={7} className="h-16 text-center text-muted-foreground">
+                  Nenhum treinamento vencido ou próximo ao vencimento encontrado.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
     </div>
   );
 };
