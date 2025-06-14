@@ -615,7 +615,6 @@ const TreinamentosNormativo = () => {
                           onChange={e => {
                             const v = e.target.value;
                             if (v) {
-                              // v is yyyy-mm-dd, convert to Date
                               const [yyyy, mm, dd] = v.split("-");
                               const asDate = new Date(Number(yyyy), Number(mm) - 1, Number(dd));
                               if (!isNaN(asDate.getTime())) {
@@ -634,6 +633,52 @@ const TreinamentosNormativo = () => {
                     </FormItem>
                   )}
                 />
+
+                {/* NOVO CAMPO ANO */}
+                <FormItem>
+                  <FormLabel>Ano</FormLabel>
+                  <Input
+                    type="number"
+                    min={1900}
+                    max={2100}
+                    step={1}
+                    pattern="\d{4}"
+                    placeholder="YYYY"
+                    value={
+                      form.watch("dataRealizacao") instanceof Date
+                        ? (form.watch("dataRealizacao") as Date).getFullYear()
+                        : ""
+                    }
+                    onChange={e => {
+                      // Ao digitar o ano, manter o mês e dia caso existam
+                      const anoNovo = Number(e.target.value);
+                      const data = form.watch("dataRealizacao");
+                      if (
+                        !isNaN(anoNovo) &&
+                        anoNovo >= 1900 &&
+                        anoNovo <= 2100 &&
+                        data instanceof Date
+                      ) {
+                        const novaData = new Date(data);
+                        novaData.setFullYear(anoNovo);
+                        form.setValue("dataRealizacao", novaData, { shouldValidate: true });
+                      }
+                      if (!e.target.value) {
+                        // Limpa o campo se usuário apagar tudo
+                        form.setValue("dataRealizacao", undefined, { shouldValidate: true });
+                      }
+                    }}
+                    onBlur={e => {
+                      const v = e.target.value;
+                      if (!v || v.length !== 4) {
+                        form.setValue("dataRealizacao", undefined, { shouldValidate: true });
+                      }
+                    }}
+                    inputMode="numeric"
+                    maxLength={4}
+                    className="w-32"
+                  />
+                </FormItem>
 
                 <FormItem>
                   <FormLabel>Data de validade</FormLabel>
