@@ -394,12 +394,8 @@ const TreinamentosNormativo = () => {
   }
 
   return <div className="space-y-6">
+      {/* TÍTULO SEM A SETA */}
       <div className="flex items-center">
-        <Button variant="ghost" size="sm" className="mr-2" asChild>
-          <Link to="/treinamentos/dashboard">
-            <ArrowLeft />
-          </Link>
-        </Button>
         <h1 className="text-3xl font-bold tracking-tight">Registro de Treinamentos Normativos</h1>
       </div>
 
