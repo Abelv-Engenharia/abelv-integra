@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -12,7 +11,6 @@ import { ExecucaoTreinamento } from "@/types/treinamentos";
 import { useNavigate } from "react-router-dom";
 import ConfirmacaoExclusaoModal from "@/components/treinamentos/ConfirmacaoExclusaoModal";
 import { toast } from "@/hooks/use-toast";
-
 const TreinamentosConsulta = () => {
   const [execucoes, setExecucoes] = useState<ExecucaoTreinamento[]>([]);
   const [filteredExecucoes, setFilteredExecucoes] = useState<ExecucaoTreinamento[]>([]);
@@ -24,13 +22,10 @@ const TreinamentosConsulta = () => {
   // Exclusion modal state
   const [idParaExcluir, setIdParaExcluir] = useState<string | null>(null);
   const [modalAberto, setModalAberto] = useState(false);
-
   const navigate = useNavigate();
-
   useEffect(() => {
     loadExecucoes();
   }, []);
-
   const loadExecucoes = async () => {
     try {
       setIsLoading(true);
@@ -51,32 +46,22 @@ const TreinamentosConsulta = () => {
       setIsLoading(false);
     }
   };
-
   const filterExecucoes = () => {
-    let results = execucoes.filter((execucao) => {
+    let results = execucoes.filter(execucao => {
       const term = searchTerm.toLowerCase();
-      return (
-        execucao.treinamento_nome?.toLowerCase().includes(term) ||
-        execucao.cca?.toLowerCase().includes(term) ||
-        execucao.processo_treinamento?.toLowerCase().includes(term)
-      );
+      return execucao.treinamento_nome?.toLowerCase().includes(term) || execucao.cca?.toLowerCase().includes(term) || execucao.processo_treinamento?.toLowerCase().includes(term);
     });
-
     if (filterMes !== "todos") {
-      results = results.filter((execucao) => execucao.mes.toString() === filterMes);
+      results = results.filter(execucao => execucao.mes.toString() === filterMes);
     }
-
     if (filterAno !== "todos") {
-      results = results.filter((execucao) => execucao.ano.toString() === filterAno);
+      results = results.filter(execucao => execucao.ano.toString() === filterAno);
     }
-
     setFilteredExecucoes(results);
   };
-
   useEffect(() => {
     filterExecucoes();
   }, [searchTerm, filterMes, filterAno, execucoes]);
-
   const formatDate = (date: string) => {
     if (!date) return "";
     const d = new Date(date);
@@ -89,18 +74,15 @@ const TreinamentosConsulta = () => {
       navigate(`/treinamentos/execucao/visualizar/${execucao.id}`);
     }
   };
-
   const handleEdit = (execucao: ExecucaoTreinamento) => {
     if (execucao.id) {
       navigate(`/treinamentos/execucao/editar/${execucao.id}`);
     }
   };
-
   const handleDelete = (execucao: ExecucaoTreinamento) => {
     setIdParaExcluir(execucao.id || "");
     setModalAberto(true);
   };
-
   const confirmarExclusao = async () => {
     if (!idParaExcluir) return;
     try {
@@ -120,17 +102,12 @@ const TreinamentosConsulta = () => {
       });
     }
   };
-
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-96">
+    return <div className="flex items-center justify-center h-96">
         <div className="text-lg">Carregando execuções...</div>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="container mx-auto py-8">
+  return <div className="container mx-auto py-8">
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -141,12 +118,7 @@ const TreinamentosConsulta = () => {
         <CardContent>
           <div className="flex flex-col md:flex-row gap-4 mb-6">
             <div className="flex-1">
-              <Input
-                placeholder="Buscar por treinamento, CCA ou processo..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full"
-              />
+              <Input placeholder="Buscar por treinamento, CCA ou processo..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="w-full" />
             </div>
             <Select value={filterMes} onValueChange={setFilterMes}>
               <SelectTrigger className="w-40">
@@ -154,11 +126,13 @@ const TreinamentosConsulta = () => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="todos">Todos</SelectItem>
-                {Array.from({ length: 12 }, (_, i) => (
-                  <SelectItem key={i + 1} value={(i + 1).toString()}>
-                    {new Date(2024, i).toLocaleDateString("pt-BR", { month: "long" })}
-                  </SelectItem>
-                ))}
+                {Array.from({
+                length: 12
+              }, (_, i) => <SelectItem key={i + 1} value={(i + 1).toString()}>
+                    {new Date(2024, i).toLocaleDateString("pt-BR", {
+                  month: "long"
+                })}
+                  </SelectItem>)}
               </SelectContent>
             </Select>
             <Select value={filterAno} onValueChange={setFilterAno}>
@@ -193,15 +167,11 @@ const TreinamentosConsulta = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredExecucoes.length === 0 ? (
-                  <TableRow>
+                {filteredExecucoes.length === 0 ? <TableRow>
                     <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
                       Nenhuma execução encontrada
                     </TableCell>
-                  </TableRow>
-                ) : (
-                  filteredExecucoes.map((execucao) => (
-                    <TableRow key={execucao.id}>
+                  </TableRow> : filteredExecucoes.map(execucao => <TableRow key={execucao.id}>
                       <TableCell>{formatDate(execucao.data)}</TableCell>
                       <TableCell className="font-medium">
                         {execucao.treinamento_nome}
@@ -222,28 +192,20 @@ const TreinamentosConsulta = () => {
                           <Button variant="ghost" size="icon" onClick={() => handleEdit(execucao)} title="Editar">
                             <Edit className="w-4 h-4" />
                           </Button>
-                          <Button variant="ghost" size="icon" onClick={() => handleDelete(execucao)} title="Excluir">
+                          <Button variant="ghost" size="icon" onClick={() => handleDelete(execucao)} title="Excluir" className="text-red-600">
                             <Trash2 className="w-4 h-4" />
                           </Button>
                         </div>
                       </TableCell>
-                    </TableRow>
-                  ))
-                )}
+                    </TableRow>)}
               </TableBody>
             </Table>
           </div>
         </CardContent>
       </Card>
-      <ConfirmacaoExclusaoModal
-        open={modalAberto}
-        onOpenChange={setModalAberto}
-        onConfirm={confirmarExclusao}
-      />
-    </div>
-  );
+      <ConfirmacaoExclusaoModal open={modalAberto} onOpenChange={setModalAberto} onConfirm={confirmarExclusao} />
+    </div>;
 };
-
 export default TreinamentosConsulta;
 
 // O arquivo está ficando longo; considere pedir refatoração em breve.
