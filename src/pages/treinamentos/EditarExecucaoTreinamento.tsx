@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { execucaoTreinamentoService } from "@/services/treinamentos/execucaoTreinamentoService";
@@ -18,6 +19,9 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
+import { supabase } from "@/integrations/supabase/client";
+
+const BUCKET_NAME = "treinamentos-anexos";
 
 const EditarExecucaoTreinamento = () => {
   const { id } = useParams<{ id: string }>();
@@ -104,6 +108,30 @@ const EditarExecucaoTreinamento = () => {
       </div>
     );
 
+  // Função para upload de arquivo para o Storage e retornar URL pública
+  async function uploadListaPresenca(file: File): Promise<string | null> {
+    // Nome único para evitar colisão
+    const ext = file.name.split('.').pop();
+    const fileName = `presenca_${Date.now()}.${ext}`;
+    // Faz upload para o bucket especificado
+    const { data, error } = await supabase
+      .storage
+      .from(BUCKET_NAME)
+      .upload(fileName, file, { upsert: true, contentType: "application/pdf" });
+    if (error) {
+      toast({
+        title: "Erro ao anexar lista",
+        description: "Falha ao enviar arquivo para o storage.",
+        variant: "destructive"
+      });
+      return null;
+    }
+    // Monta URL pública
+    const supabaseUrl = "https://xexgdtlctyuycohzhmuu.supabase.co";
+    const publicUrl = `${supabaseUrl}/storage/v1/object/public/${BUCKET_NAME}/${fileName}`;
+    return publicUrl;
+  }
+
   return (
     <div className="w-full h-full p-0 overflow-auto">
       <Card className="w-full h-full shadow-none border-none rounded-none">
@@ -117,14 +145,15 @@ const EditarExecucaoTreinamento = () => {
             setSaving(true);
             try {
               let lista_presenca_url = execucao.lista_presenca_url;
-              // Se um novo arquivo foi anexado, faça upload aqui
+              // Se um novo arquivo foi anexado, faça upload real no Supabase Storage
               if (listaPresencaFile) {
-                // Você pode implementar a lógica de upload para Supabase Storage aqui
-                // Por enquanto apenas usamos um valor genérico para ilustrar
-                // Depois troque este trecho pelo upload real
-                lista_presenca_url = `uploads/${listaPresencaFile.name}`;
+                const url = await uploadListaPresenca(listaPresencaFile);
+                if (!url) {
+                  setSaving(false);
+                  return;
+                }
+                lista_presenca_url = url;
               }
-
               await execucaoTreinamentoService.update(execucao.id, {
                 ...execucao,
                 lista_presenca_url,
@@ -339,7 +368,6 @@ const EditarExecucaoTreinamento = () => {
                 <div className="text-xs text-muted-foreground mt-1">Apenas arquivos PDF, máximo 2MB.</div>
               </div>
             )}
-
             <div className="flex gap-2">
               <Button type="submit" disabled={saving}>
                 {saving ? "Salvando..." : "Salvar"}
@@ -356,3 +384,4 @@ const EditarExecucaoTreinamento = () => {
 };
 
 export default EditarExecucaoTreinamento;
+
