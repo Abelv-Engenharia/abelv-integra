@@ -36,7 +36,10 @@ export const TabelaTreinamentosNormativosVencidos: React.FC = () => {
 
   // Filtra vencidos e próximos ao vencimento, e ordena pela data_validade (menor -> maior)
   const treinamentosFiltrados = treinamentos
-    .filter(t => (t.status === "Vencido" || t.status === "Próximo ao vencimento") && !t.arquivado)
+    .filter(t =>
+      (t.status === "Vencido" || t.status === "Próximo ao vencimento") &&
+      !t.arquivado // Agora garante que só mostra os não arquivados!
+    )
     .sort((a, b) => {
       const dataA = a.data_validade ? new Date(a.data_validade).getTime() : 0;
       const dataB = b.data_validade ? new Date(b.data_validade).getTime() : 0;

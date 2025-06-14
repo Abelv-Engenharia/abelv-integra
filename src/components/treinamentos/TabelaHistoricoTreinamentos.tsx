@@ -2,7 +2,6 @@
 import React from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
-// O tipo agora aceita status "Excluído"
 interface TreinamentoHistorico {
   id: string;
   treinamento_nome: string;
@@ -19,12 +18,8 @@ interface Props {
 }
 
 export const TabelaHistoricoTreinamentos: React.FC<Props> = ({ historico }) => {
-  // Inclui status arquivado: true e status Excluído ou Reciclado
-  const historicoFiltrado = historico.filter(
-    (tr) =>
-      (tr.arquivado && tr.status === "Excluído") ||
-      (tr.status === "Reciclado")
-  );
+  // Agora mostra TODO treinamento arquivado (independente do status)
+  const historicoFiltrado = historico.filter((tr) => tr.arquivado);
 
   return (
     <div className="rounded-md border">
@@ -43,7 +38,7 @@ export const TabelaHistoricoTreinamentos: React.FC<Props> = ({ historico }) => {
           {historicoFiltrado.length === 0 ? (
             <TableRow>
               <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                Nenhum registro reciclado ou excluído encontrado
+                Nenhum registro histórico encontrado
               </TableCell>
             </TableRow>
           ) : (
@@ -54,11 +49,14 @@ export const TabelaHistoricoTreinamentos: React.FC<Props> = ({ historico }) => {
                 <TableCell>{new Date(tr.data_realizacao).toLocaleDateString("pt-BR")}</TableCell>
                 <TableCell>{new Date(tr.data_validade).toLocaleDateString("pt-BR")}</TableCell>
                 <TableCell>
-                  {tr.status === "Excluído" ? (
+                  {tr.status === "Excluído" && (
                     <span className="text-red-600 font-semibold">Excluído</span>
-                  ) : (
-                    <span className="text-amber-700">Reciclado</span>
                   )}
+                  {tr.status === "Reciclado" && (
+                    <span className="text-amber-700 font-semibold">Reciclado</span>
+                  )}
+                  {!tr.status && <span>-</span>}
+                  {tr.status !== "Reciclado" && tr.status !== "Excluído" && tr.status && <span>{tr.status}</span>}
                 </TableCell>
                 <TableCell>
                   {tr.certificado_url ? (
