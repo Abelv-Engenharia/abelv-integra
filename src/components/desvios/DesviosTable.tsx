@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -55,12 +56,18 @@ const DesviosTable = () => {
     setEditDesvioId(null);
   };
 
+  // Corrigido: forçar o refresh imediado dos dados após exclusão e logar
   const handleDesvioDeleted = (id?: string) => {
-    fetchDesvios();
-    toast({
-      title: "Desvio excluído",
-      description: "O desvio foi removido com sucesso.",
-      variant: "default",
+    console.log("Chamando handleDesvioDeleted", id);
+    setIsLoading(true);
+    fetchDesvios().then(() => {
+      setIsLoading(false);
+      toast({
+        title: "Desvio excluído",
+        description: "O desvio foi removido com sucesso.",
+        variant: "default",
+      });
+      console.log("Tabela de desvios atualizada após exclusão.");
     });
   };
 
@@ -132,3 +139,4 @@ const DesviosTable = () => {
 export default DesviosTable;
 
 // Após esta alteração, DesviosTable.tsx ficou muito menor e muito mais simples!
+
