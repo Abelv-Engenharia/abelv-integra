@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
@@ -14,10 +13,14 @@ import TreinamentoSelector from "@/components/treinamentos/execucao/TreinamentoS
 import CargaHorariaEfetivoFields from "@/components/treinamentos/execucao/CargaHorariaEfetivoFields";
 import ObservacoesAnexoFields from "@/components/treinamentos/execucao/ObservacoesAnexoFields";
 import { Save, X } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import SuccessExecucaoCard from "@/components/treinamentos/execucao/SuccessExecucaoCard";
 
 const TreinamentosExecucao = () => {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const navigate = useNavigate();
 
   const {
     form,
@@ -64,13 +67,8 @@ const TreinamentosExecucao = () => {
       console.log("Salvando dados de execução:", execucaoData);
       
       await execucaoTreinamentoService.create(execucaoData);
-      
-      toast({
-        title: "Treinamento salvo com sucesso!",
-        description: "Os dados foram registrados no sistema.",
-      });
-      
-      form.reset();
+
+      setSuccess(true);
     } catch (error) {
       console.error("Erro ao salvar treinamento:", error);
       toast({
@@ -91,49 +89,64 @@ const TreinamentosExecucao = () => {
     });
   };
 
+  const handleNewTraining = () => {
+    form.reset();
+    setSuccess(false);
+  };
+
+  const handleGoToDashboard = () => {
+    navigate("/treinamentos/dashboard");
+  };
+
   return (
     <div className="container mx-auto py-6 space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Execução de Treinamentos</h1>
       </div>
+      {success ? (
+        <SuccessExecucaoCard
+          onNewTraining={handleNewTraining}
+          onGoToDashboard={handleGoToDashboard}
+        />
+      ) : (
+        <Card>
+          <CardContent className="p-6">
+            <Form {...form}>
+              <form className="space-y-6">
+                <DateTimeFields form={form} />
+                <CCASelector form={form} ccaOptions={ccaOptions} />
+                <ProcessoTipoFields form={form} processoOptions={processoOptions} tipoOptions={tipoOptions} />
+                <TreinamentoSelector form={form} treinamentoOptions={treinamentoOptions} />
+                <CargaHorariaEfetivoFields form={form} calculateHorasTotais={calculateHorasTotais} />
+                <ObservacoesAnexoFields form={form} />
 
-      <Card>
-        <CardContent className="p-6">
-          <Form {...form}>
-            <form className="space-y-6">
-              <DateTimeFields form={form} />
-              <CCASelector form={form} ccaOptions={ccaOptions} />
-              <ProcessoTipoFields form={form} processoOptions={processoOptions} tipoOptions={tipoOptions} />
-              <TreinamentoSelector form={form} treinamentoOptions={treinamentoOptions} />
-              <CargaHorariaEfetivoFields form={form} calculateHorasTotais={calculateHorasTotais} />
-              <ObservacoesAnexoFields form={form} />
-
-              {/* Botões de ação */}
-              <div className="flex justify-end gap-2 pt-6 border-t">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={handleCancel}
-                  className="flex items-center gap-2"
-                >
-                  <X className="h-4 w-4" />
-                  Cancelar
-                </Button>
-                
-                <Button
-                  type="button"
-                  onClick={handleSave}
-                  disabled={isSubmitting}
-                  className="flex items-center gap-2"
-                >
-                  <Save className="h-4 w-4" />
-                  {isSubmitting ? "Salvando..." : "Salvar"}
-                </Button>
-              </div>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
+                {/* Botões de ação */}
+                <div className="flex justify-end gap-2 pt-6 border-t">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleCancel}
+                    className="flex items-center gap-2"
+                  >
+                    <X className="h-4 w-4" />
+                    Cancelar
+                  </Button>
+                  
+                  <Button
+                    type="button"
+                    onClick={handleSave}
+                    disabled={isSubmitting}
+                    className="flex items-center gap-2"
+                  >
+                    <Save className="h-4 w-4" />
+                    {isSubmitting ? "Salvando..." : "Salvar"}
+                  </Button>
+                </div>
+              </form>
+            </Form>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };
