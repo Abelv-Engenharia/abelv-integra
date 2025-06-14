@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Eye, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -135,6 +134,11 @@ const DesviosTable = () => {
 
   const handleDesvioDeleted = () => {
     fetchDesvios();
+    toast({
+      title: "Desvio excluído",
+      description: "O desvio foi removido com sucesso.",
+      variant: "success",
+    });
   };
 
   const formatDate = (dateString: string) => {
