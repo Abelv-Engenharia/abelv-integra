@@ -11,7 +11,8 @@ const renderCustomLabel = (props: PieLabelRenderProps) => {
   const cy = Number(props.cy);
   const midAngle = props.midAngle;
   const outerRadius = Number(props.outerRadius);
-  const percent = props.percent;
+  // Usar percent diretamente se estiver no objeto, para o novo comportamento
+  const percent = (props as any).percent ?? 0;
   const name = props.name;
   const index = props.index ?? 0;
 
@@ -43,7 +44,7 @@ interface DonutSubprocessoChartProps {
 export const DonutSubprocessoChart: React.FC<DonutSubprocessoChartProps> = ({
   processoTreinamentoId
 }) => {
-  const [data, setData] = useState<Array<{ name: string; value: number }>>([]);
+  const [data, setData] = useState<Array<{ name: string; value: number; percent: number }>>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -91,7 +92,11 @@ export const DonutSubprocessoChart: React.FC<DonutSubprocessoChartProps> = ({
             <Cell key={entry.name} fill={COLORS[index % COLORS.length]} />
           ))}
         </Pie>
-        <Tooltip />
+        <Tooltip
+          formatter={(value, name, props) =>
+            [`${value} horas`, data[props?.payload?.index]?.name]
+          }
+        />
       </PieChart>
     </div>
   );
