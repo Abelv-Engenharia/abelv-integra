@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -163,7 +164,7 @@ const TreinamentosConsulta = () => {
                   <TableHead>Carga Horária</TableHead>
                   <TableHead>Efetivo</TableHead>
                   <TableHead>Horas Totais</TableHead>
-                  <TableHead>Ações</TableHead>
+                  <TableHead className="text-center">Ações</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
