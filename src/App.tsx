@@ -5,7 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
-import { AuthGuard } from "@/components/auth/AuthGuard";
+import AuthGuard from "@/components/auth/AuthGuard";
 import Layout from "@/components/layout/Layout";
 
 // Auth pages
@@ -26,8 +26,8 @@ import Settings from "@/pages/account/Settings";
 import Support from "@/pages/account/Support";
 
 // Desvios pages
-import DesviosConsulta from "@/pages/desvios/DesviosConsulta";
-import DesviosForm from "@/pages/desvios/DesviosForm";
+import DesviosConsulta from "@/pages/DesviosConsulta";
+import DesviosForm from "@/pages/DesviosForm";
 
 // Treinamentos pages
 import TreinamentosConsulta from "@/pages/treinamentos/TreinamentosConsulta";
@@ -35,12 +35,12 @@ import TreinamentosExecucao from "@/pages/treinamentos/TreinamentosExecucao";
 
 // Ocorrencias pages
 import OcorrenciasConsulta from "@/pages/ocorrencias/OcorrenciasConsulta";
-import OcorrenciasForm from "@/pages/ocorrencias/OcorrenciasForm";
+import OcorrenciasForm from "@/pages/ocorrencias/OcorrenciasCadastro";
 
 // Tarefas pages
 import TarefasDashboard from "@/pages/tarefas/TarefasDashboard";
 import MinhasTarefas from "@/pages/tarefas/MinhasTarefas";
-import TarefasDetalhes from "@/pages/tarefas/TarefasDetalhes";
+import TarefasDetalhes from "@/pages/tarefas/DetalheTarefa";
 
 // Relatorios pages
 import RelatoriosDashboard from "@/pages/relatorios/RelatoriosDashboard";

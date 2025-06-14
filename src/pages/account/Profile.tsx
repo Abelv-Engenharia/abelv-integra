@@ -1,17 +1,18 @@
-
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Edit } from "lucide-react";
-import { useProfile } from "@/hooks/useProfile";
+import { useProfile, UserProfile } from "@/hooks/useProfile";
 import { useAuth } from "@/contexts/AuthContext";
 
 const Profile = () => {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const { profile, userRole, loadingProfile, updateProfileMutation } = useProfile();
   const [isEditing, setIsEditing] = useState(false);
@@ -160,44 +161,36 @@ const Profile = () => {
                 <span className="truncate ml-2">{profile.cargo || 'Não informado'}</span>
               </div>
             </div>
+            
+            {/* Botão para editar perfil */}
+            <Button 
+              className="mt-4 w-full" 
+              onClick={() => navigate('/account/edit-profile')}
+            >
+              <Edit className="h-4 w-4 mr-2" />
+              Editar Perfil
+            </Button>
           </CardContent>
         </Card>
         
         <Card className="md:col-span-2">
           <CardHeader>
             <div className="flex justify-between items-center">
-              <CardTitle>Editar Perfil</CardTitle>
-              {isEditing ? (
-                <div className="space-x-2">
-                  <Button variant="outline" onClick={handleCancel}>
-                    Cancelar
-                  </Button>
-                  <Button 
-                    onClick={handleSave}
-                    disabled={updateProfileMutation.isPending}
-                  >
-                    {updateProfileMutation.isPending ? 'Salvando...' : 'Salvar'}
-                  </Button>
-                </div>
-              ) : (
-                <Button onClick={() => setIsEditing(true)}>
-                  Editar
-                </Button>
-              )}
+              <CardTitle>Informações Detalhadas</CardTitle>
             </div>
-            <CardDescription>Atualize suas informações pessoais</CardDescription>
+            <CardDescription>Visualize suas informações completas</CardDescription>
           </CardHeader>
           <CardContent>
-            <form className="space-y-4">
+            <div className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="nome">Nome Completo</Label>
                   <Input 
                     id="nome" 
                     name="nome" 
-                    value={formData.nome || ''}
-                    onChange={handleChange}
-                    disabled={!isEditing}
+                    value={profile.nome || ''}
+                    disabled
+                    readOnly
                   />
                 </div>
                 <div className="space-y-2">
@@ -205,9 +198,8 @@ const Profile = () => {
                   <Input 
                     id="email" 
                     name="email" 
-                    value={formData.email || ''}
-                    onChange={handleChange}
-                    disabled={true}
+                    value={profile.email || ''}
+                    disabled
                     readOnly
                   />
                 </div>
@@ -219,9 +211,9 @@ const Profile = () => {
                   <Input 
                     id="departamento" 
                     name="departamento" 
-                    value={formData.departamento || ''}
-                    onChange={handleChange}
-                    disabled={!isEditing}
+                    value={profile.departamento || ''}
+                    disabled
+                    readOnly
                   />
                 </div>
                 <div className="space-y-2">
@@ -229,9 +221,9 @@ const Profile = () => {
                   <Input 
                     id="cargo" 
                     name="cargo" 
-                    value={formData.cargo || ''}
-                    onChange={handleChange}
-                    disabled={!isEditing}
+                    value={profile.cargo || ''}
+                    disabled
+                    readOnly
                   />
                 </div>
               </div>
@@ -242,11 +234,11 @@ const Profile = () => {
                   id="role" 
                   name="role" 
                   value={userRole || 'Usuário'}
-                  disabled={true}
+                  disabled
                   readOnly
                 />
               </div>
-            </form>
+            </div>
           </CardContent>
         </Card>
       </div>
