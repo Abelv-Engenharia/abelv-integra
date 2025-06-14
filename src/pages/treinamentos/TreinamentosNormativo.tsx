@@ -441,9 +441,11 @@ const TreinamentosNormativo = () => {
                 </div>
 
                 <div className="flex flex-col md:flex-row gap-4 md:items-end">
-                  <FormField control={form.control} name="funcionarioId" render={({
-                field
-              }) => <FormItem className="flex-1">
+                  <FormField 
+                    control={form.control} 
+                    name="funcionarioId" 
+                    render={({ field }) => (
+                      <FormItem className="flex-1">
                         <FormLabel>Funcionário</FormLabel>
                         <Select onValueChange={field.onChange} value={field.value}>
                           <FormControl>
@@ -459,7 +461,9 @@ const TreinamentosNormativo = () => {
                           </SelectContent>
                         </Select>
                         <FormMessage />
-                      </FormItem>} />
+                      </FormItem>
+                    )}
+                  />
 
                   <FormItem className="flex-1">
                     <FormLabel>Função</FormLabel>
@@ -512,20 +516,41 @@ const TreinamentosNormativo = () => {
                 <div className="flex flex-col md:flex-row gap-4">
                   <FormField control={form.control} name="dataRealizacao" render={({
                 field
-              }) => <FormItem className="flex flex-1 flex-col">
+              }) => <FormItem className="flex-1">
                         <FormLabel>Data da realização</FormLabel>
                         <FormControl>
-                          <DatePickerWithManualInput value={field.value} onChange={field.onChange} disabled={date => date > new Date()} />
+                          <div className="w-full">
+                            <DatePickerWithManualInput 
+                              value={field.value} 
+                              onChange={field.onChange} 
+                              disabled={date => date > new Date()} 
+                              // Ajusta a altura do input do DatePicker para igualar ao input normal
+                              // E garante alinhamento vertical
+                              // (input do date picker já usa Tailwind, então, só forçar altura se necessário)
+                            />
+                          </div>
                         </FormControl>
                         <FormMessage />
                       </FormItem>} />
 
                   <FormItem className="flex-1">
                     <FormLabel>Data de validade</FormLabel>
-                    <Input value={dataValidade ? format(dataValidade, "dd/MM/yyyy") : ""} disabled />
-                    {dataValidade && <div className="text-xs text-muted-foreground mt-1">
-                        {calcularStatusTreinamento(dataValidade) === "Válido" ? <span className="text-green-600">Válido até esta data</span> : calcularStatusTreinamento(dataValidade) === "Próximo ao vencimento" ? <span className="text-amber-600">Próximo ao vencimento</span> : <span className="text-red-600">Vencido</span>}
-                      </div>}
+                    <Input
+                      value={dataValidade ? format(dataValidade, "dd/MM/yyyy") : ""}
+                      disabled
+                      className="h-10"
+                    />
+                    {dataValidade && (
+                      <div className="text-xs text-muted-foreground mt-1">
+                        {calcularStatusTreinamento(dataValidade) === "Válido" ? (
+                          <span className="text-green-600">Válido até esta data</span>
+                        ) : calcularStatusTreinamento(dataValidade) === "Próximo ao vencimento" ? (
+                          <span className="text-amber-600">Próximo ao vencimento</span>
+                        ) : (
+                          <span className="text-red-600">Vencido</span>
+                        )}
+                      </div>
+                    )}
                   </FormItem>
                 </div>
 
