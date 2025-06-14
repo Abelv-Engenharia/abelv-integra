@@ -596,25 +596,35 @@ const TreinamentosNormativo = () => {
                           maxLength={10}
                           placeholder="dd/mm/aaaa"
                           value={
-                            field.value ? format(field.value as Date, "dd/MM/yyyy") : ""
+                            field.value
+                              ? format(field.value as Date, "dd/MM/yyyy")
+                              : ""
                           }
                           className="pr-10"
-                          onChange={(e) => {
+                          onChange={e => {
+                            // Remove caracteres não numéricos, aceita só "/"
                             const raw = e.target.value.replace(/[^\d/]/g, "");
                             let digits = raw;
-                            if (digits.length === 2 && !digits.endsWith("/")) digits += "/";
-                            if (digits.length === 5 && !digits.endsWith("/")) digits += "/";
-                            // Mantém só 10 caracteres (dd/mm/aaaa)
+
+                            // Mascara dd/mm/aaaa
+                            if (digits.length >= 2 && digits[2] !== "/") digits = digits.slice(0, 2) + "/" + digits.slice(2);
+                            if (digits.length >= 5 && digits[5] !== "/") digits = digits.slice(0, 5) + "/" + digits.slice(5);
                             if (digits.length > 10) digits = digits.slice(0, 10);
 
-                            // Atualiza input
-                            // Só atualiza field.value se a string for completa e válida (10 dígitos)
+                            // Atualiza valor apenas ao completar 10 dígitos (dd/mm/aaaa)
                             if (digits.length === 10) {
-                              const data = parseDateString(digits);
-                              if (data) {
-                                field.onChange(data);
+                              const [dd, mm, yyyy] = digits.split("/");
+                              const asDate = new Date(Number(yyyy), Number(mm) - 1, Number(dd));
+                              // Valida data
+                              if (
+                                !isNaN(asDate.getTime()) &&
+                                asDate.getDate() === Number(dd) &&
+                                asDate.getMonth() + 1 === Number(mm) &&
+                                asDate.getFullYear() === Number(yyyy)
+                              ) {
+                                field.onChange(asDate);
                               } else {
-                                // Inválida, não atualiza campo
+                                // Data inválida
                                 field.onChange(undefined);
                               }
                             } else {
@@ -622,9 +632,10 @@ const TreinamentosNormativo = () => {
                               field.onChange(undefined);
                             }
                           }}
-                          onBlur={(e) => {
-                            const data = parseDateString(e.target.value);
-                            if (!data && e.target.value) {
+                          onBlur={e => {
+                            // Validar se precisa alertar input inválido
+                            const [dd, mm, yyyy] = (e.target.value || "").split("/");
+                            if (e.target.value && (e.target.value.length !== 10 || isNaN(Number(dd)) || isNaN(Number(mm)) || isNaN(Number(yyyy)))) {
                               toast({
                                 title: "Data inválida",
                                 description: "Use o formato dd/mm/aaaa",
@@ -634,7 +645,6 @@ const TreinamentosNormativo = () => {
                             }
                           }}
                         />
-                        {/* Ícone/calendário sobreposto ao campo — 1 só campo */}
                         <Popover>
                           <PopoverTrigger asChild>
                             <Button
@@ -652,7 +662,7 @@ const TreinamentosNormativo = () => {
                             <Calendar
                               mode="single"
                               selected={field.value}
-                              onSelect={(date) => {
+                              onSelect={date => {
                                 if (date) {
                                   field.onChange(date);
                                 }
