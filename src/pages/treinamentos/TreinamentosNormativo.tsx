@@ -76,6 +76,7 @@ const TreinamentosNormativo = () => {
   const [treinamentosNormativos, setTreinamentosNormativos] = useState<{id: string, nome: string, validade_dias?: number}[]>([]);
   const [certificadoFile, setCertificadoFile] = useState<File | null>(null);
   const [manualDate, setManualDate] = useState<string | null>(null);
+  const [inputDataRealizacao, setInputDataRealizacao] = useState<string>("");
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -570,43 +571,86 @@ const TreinamentosNormativo = () => {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Data da realização</FormLabel>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <FormControl>
-                            <Button
-                              variant="outline"
-                              className={cn(
-                                "w-[180px] justify-start text-left font-normal",
-                                !field.value && "text-muted-foreground"
-                              )}
-                            >
-                              {field.value
-                                ? (() => {
-                                    const d = field.value as Date;
-                                    const day = String(d.getDate()).padStart(2, "0");
-                                    const month = String(d.getMonth() + 1).padStart(2, "0");
-                                    const year = String(d.getFullYear());
-                                    return `${day}/${month}/${year}`;
-                                  })()
-                                : <span>dd/mm/aaaa</span>
+                      <div className="flex gap-2 items-center">
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <FormControl>
+                              <Button
+                                variant="outline"
+                                className={cn(
+                                  "w-[150px] text-left font-normal pl-2 pr-2 py-2",
+                                  !field.value && "text-muted-foreground"
+                                )}
+                                tabIndex={-1}
+                                type="button"
+                              >
+                                {field.value
+                                  ? format(field.value as Date, "dd/MM/yyyy")
+                                  : <span>dd/mm/aaaa</span>}
+                                <span className="ml-auto">
+                                  <CalendarIcon className="h-4 w-4 opacity-50" />
+                                </span>
+                              </Button>
+                            </FormControl>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar
+                              mode="single"
+                              selected={field.value}
+                              onSelect={date => {
+                                if (date) {
+                                  setInputDataRealizacao(format(date, "dd/MM/yyyy"));
+                                  field.onChange(date);
+                                }
+                              }}
+                              disabled={date => date > new Date()}
+                              initialFocus
+                              className={cn("p-3 pointer-events-auto")}
+                            />
+                          </PopoverContent>
+                        </Popover>
+                        <Input
+                          className="w-[120px]"
+                          placeholder="dd/mm/aaaa"
+                          value={inputDataRealizacao}
+                          maxLength={10}
+                          onChange={e => {
+                            // Só mantém números e barra
+                            const val = e.target.value.replace(/[^\d/]/g, '');
+                            // Formata automaticamente dd/mm/aaaa
+                            let f = val;
+                            if (val.length === 2 || val.length === 5) {
+                              if (val.endsWith("/")) {
+                                f = val;
+                              } else {
+                                f = val + "/";
                               }
-                              <span className="ml-auto">
-                                <CalendarIcon className="h-4 w-4 opacity-50" />
-                              </span>
-                            </Button>
-                          </FormControl>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                          <Calendar
-                            mode="single"
-                            selected={field.value}
-                            onSelect={field.onChange}
-                            disabled={date => date > new Date()}
-                            initialFocus
-                            className={cn("p-3 pointer-events-auto")}
-                          />
-                        </PopoverContent>
-                      </Popover>
+                            }
+                            setInputDataRealizacao(f);
+
+                            // Só tenta atualizar se string tem 10 caracteres
+                            if (f.length === 10) {
+                              const data = parseDateString(f);
+                              field.onChange(data);
+                            } else {
+                              field.onChange(undefined);
+                            }
+                          }}
+                          onBlur={() => {
+                            const data = parseDateString(inputDataRealizacao);
+                            if (inputDataRealizacao && !data) {
+                              // Formato inválido
+                              toast({
+                                title: "Data inválida",
+                                description: "Use o formato dd/mm/aaaa",
+                                variant: "destructive"
+                              });
+                              setInputDataRealizacao("");
+                              field.onChange(undefined);
+                            }
+                          }}
+                        />
+                      </div>
                       <FormMessage />
                     </FormItem>
                   )}
