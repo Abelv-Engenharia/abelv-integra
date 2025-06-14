@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -61,6 +60,7 @@ export const TreinamentosPorProcessoTable = () => {
   // Totais
   const totalMOD = data.reduce((sum, row) => sum + (row.horasTotaisMOD || 0), 0);
   const totalMOI = data.reduce((sum, row) => sum + (row.horasTotaisMOI || 0), 0);
+  const totalGeral = totalMOD + totalMOI;
 
   return (
     <Card>
@@ -113,9 +113,17 @@ export const TreinamentosPorProcessoTable = () => {
                 <tr key={row.tipoTreinamento} className="text-center text-sm">
                   <td className="border border-gray-300 px-4 py-2 font-medium">{row.tipoTreinamento}</td>
                   <td className="border border-gray-300 px-4 py-2">{row.horasTotaisMOD}</td>
-                  <td className="border border-gray-300 px-4 py-2">{row.percentualMOD ? `${row.percentualMOD.toLocaleString("pt-BR", { maximumFractionDigits: 2 })} %` : "-"}</td>
+                  <td className="border border-gray-300 px-4 py-2">
+                    {totalGeral > 0 && row.horasTotaisMOD > 0
+                      ? `${((row.horasTotaisMOD / totalGeral) * 100).toLocaleString("pt-BR", { maximumFractionDigits: 2 })} %`
+                      : "-"}
+                  </td>
                   <td className="border border-gray-300 px-4 py-2">{row.horasTotaisMOI}</td>
-                  <td className="border border-gray-300 px-4 py-2">{row.percentualMOI ? `${row.percentualMOI.toLocaleString("pt-BR", { maximumFractionDigits: 2 })} %` : "-"}</td>
+                  <td className="border border-gray-300 px-4 py-2">
+                    {totalGeral > 0 && row.horasTotaisMOI > 0
+                      ? `${((row.horasTotaisMOI / totalGeral) * 100).toLocaleString("pt-BR", { maximumFractionDigits: 2 })} %`
+                      : "-"}
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -125,9 +133,13 @@ export const TreinamentosPorProcessoTable = () => {
                   HORAS TOTAIS POR MÃO DE OBRA
                 </td>
                 <td className="border border-gray-300 px-4 py-2">{totalMOD}</td>
-                <td className="border border-gray-300 px-4 py-2">100%</td>
+                <td className="border border-gray-300 px-4 py-2">
+                  {totalGeral > 0 ? `${((totalMOD / totalGeral) * 100).toLocaleString("pt-BR", { maximumFractionDigits: 2 })} %` : "0 %"}
+                </td>
                 <td className="border border-gray-300 px-4 py-2">{totalMOI}</td>
-                <td className="border border-gray-300 px-4 py-2">100%</td>
+                <td className="border border-gray-300 px-4 py-2">
+                  {totalGeral > 0 ? `${((totalMOI / totalGeral) * 100).toLocaleString("pt-BR", { maximumFractionDigits: 2 })} %` : "0 %"}
+                </td>
               </tr>
             </tfoot>
           </table>
