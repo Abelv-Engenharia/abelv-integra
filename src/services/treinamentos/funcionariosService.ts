@@ -14,16 +14,16 @@ export async function fetchFuncionarios(): Promise<Funcionario[]> {
         nome,
         matricula,
         funcao,
-        ativo
+        ativo,
+        foto,
+        data_admissao
       `)
       .eq('ativo', true)
       .order('nome');
-
     if (error) {
       console.error("Erro ao buscar funcionários:", error);
       return [];
     }
-
     return data || [];
   } catch (error) {
     console.error("Exceção ao buscar funcionários:", error);

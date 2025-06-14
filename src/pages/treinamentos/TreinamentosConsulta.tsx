@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,9 +12,12 @@ import { fetchFuncionarios } from "@/utils/treinamentosUtils";
 import { useNavigate } from "react-router-dom";
 import ConfirmacaoExclusaoModal from "@/components/treinamentos/ConfirmacaoExclusaoModal";
 import { toast } from "@/hooks/use-toast";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Tabs as ShadTabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ccaService } from "@/services/treinamentos/ccaService";
 import { Funcionario } from "@/types/treinamentos";
+import { FuncionarioPerfilCard } from "@/components/treinamentos/FuncionarioPerfilCard";
+import { TabelaTreinamentosNormativos } from "@/components/treinamentos/TabelaTreinamentosNormativos";
+import { TabelaHistoricoTreinamentos } from "@/components/treinamentos/TabelaHistoricoTreinamentos";
 
 // ---------------- Novo componente da aba 2 ----------------
 
@@ -27,6 +29,10 @@ function TreinamentosNormativosPorFuncionarioTab() {
   const [treinamentos, setTreinamentos] = useState<{ id: string; nome: string; validade_dias?: number }[]>([]);
   const [historicoFuncionario, setHistoricoFuncionario] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const [perfilFuncionario, setPerfilFuncionario] = useState<any | null>(null);
+  const [abaInterna, setAbaInterna] = useState("treinamentos");
+  const [treinamentosAtual, setTreinamentosAtual] = useState<any[]>([]);
+  const [historicoReciclados, setHistoricoReciclados] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchCcas = async () => {
@@ -113,6 +119,93 @@ function TreinamentosNormativosPorFuncionarioTab() {
     buscarHistoricoFuncionario();
   }, [selectedFuncionarioId]);
 
+  useEffect(() => {
+    if (selectedFuncionarioId && funcionarios.length > 0) {
+      const func = funcionarios.find(f => f.id === selectedFuncionarioId);
+      setPerfilFuncionario(func || null);
+    } else {
+      setPerfilFuncionario(null);
+    }
+  }, [selectedFuncionarioId, funcionarios]);
+
+  // Buscar treinamentos normativos por funcionário
+  useEffect(() => {
+    const buscarTreinamentosNormativosFuncionario = async () => {
+      if (!selectedFuncionarioId) {
+        setTreinamentosAtual([]);
+        setHistoricoReciclados([]);
+        return;
+      }
+      setLoading(true);
+      try {
+        // Busca todos os treinamentos normativos desse funcionário, ordenado por nome, data desc
+        const { data, error } = await window.supabase
+          .from('treinamentos_normativos')
+          .select(`
+            id, 
+            treinamento_id, 
+            tipo, 
+            data_realizacao, 
+            data_validade, 
+            certificado_url, 
+            status, 
+            lista_treinamentos_normativos (nome)
+          `)
+          .eq("funcionario_id", selectedFuncionarioId)
+          .order('lista_treinamentos_normativos.nome', { ascending: true })
+          .order('data_realizacao', { ascending: false });
+        if (error) {
+          toast({
+            title: "Erro",
+            description: "Erro ao buscar treinamentos normativos",
+            variant: "destructive",
+          });
+          setTreinamentosAtual([]);
+          setHistoricoReciclados([]);
+          return;
+        }
+        const normativos: any[] = (data || []).map(row => ({
+          id: row.id,
+          treinamento_nome: row.lista_treinamentos_normativos?.nome || "-",
+          tipo: row.tipo,
+          data_realizacao: row.data_realizacao,
+          data_validade: row.data_validade,
+          certificado_url: row.certificado_url,
+          status: row.status,
+        }));
+
+        // Agrupar por treinamento_nome e filtrar o mais atual para "Treinamentos" e antigos para "Histórico"
+        const agrupados: { [nome: string]: any[] } = {};
+        normativos.forEach(t => {
+          if (!agrupados[t.treinamento_nome]) agrupados[t.treinamento_nome] = [];
+          agrupados[t.treinamento_nome].push(t);
+        });
+        const atuais: any[] = [];
+        const reciclados: any[] = [];
+        Object.values(agrupados).forEach(arr => {
+          // Os dados já estão ordenados por data desc, logo o primeiro é o mais novo
+          if (arr.length > 0) {
+            atuais.push(arr[0]);
+            reciclados.push(...arr.slice(1));
+          }
+        });
+        setTreinamentosAtual(atuais);
+        setHistoricoReciclados(reciclados);
+      } catch {
+        toast({
+          title: "Erro",
+          description: "Erro ao buscar treinamentos",
+          variant: "destructive",
+        });
+        setTreinamentosAtual([]);
+        setHistoricoReciclados([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    buscarTreinamentosNormativosFuncionario();
+  }, [selectedFuncionarioId]);
+
   return (
     <Card>
       <CardHeader>
@@ -156,56 +249,33 @@ function TreinamentosNormativosPorFuncionarioTab() {
             </Select>
           </div>
         </div>
-        {/* Histórico de treinamentos normativos */}
+        {perfilFuncionario && (
+          <FuncionarioPerfilCard funcionario={perfilFuncionario} />
+        )}
+
         {selectedFuncionarioId && (
-          <>
-            {loading ? (
-              <div className="py-8 text-center">Carregando histórico...</div>
-            ) : historicoFuncionario.length === 0 ? (
-              <div className="py-8 text-muted-foreground text-center text-sm">
-                Nenhum treinamento normativo encontrado para este funcionário.
-              </div>
-            ) : (
-              <div className="rounded-md border">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Treinamento</TableHead>
-                      <TableHead>Tipo</TableHead>
-                      <TableHead>Data Realização</TableHead>
-                      <TableHead>Validade</TableHead>
-                      <TableHead>Certificado</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {historicoFuncionario.map((trein, idx) => (
-                      <TableRow key={idx}>
-                        <TableCell>{trein.treinamento_nome}</TableCell>
-                        <TableCell>{trein.tipo}</TableCell>
-                        <TableCell>{trein.data_realizacao 
-                          ? new Date(trein.data_realizacao).toLocaleDateString("pt-BR")
-                          : "-"}
-                        </TableCell>
-                        <TableCell>{trein.data_validade 
-                          ? new Date(trein.data_validade).toLocaleDateString("pt-BR")
-                          : "-"}
-                        </TableCell>
-                        <TableCell>
-                          {trein.certificado_url ? (
-                            <a href={trein.certificado_url} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">
-                              Abrir PDF
-                            </a>
-                          ) : (
-                            <span className="text-muted-foreground text-xs">-</span>
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            )}
-          </>
+          <div className="mt-4">
+            <ShadTabs value={abaInterna} onValueChange={setAbaInterna}>
+              <TabsList>
+                <TabsTrigger value="treinamentos">Treinamentos</TabsTrigger>
+                <TabsTrigger value="historico">Histórico</TabsTrigger>
+              </TabsList>
+              <TabsContent value="treinamentos">
+                {loading ? (
+                  <div className="py-8 text-center">Carregando treinamentos...</div>
+                ) : (
+                  <TabelaTreinamentosNormativos treinamentos={treinamentosAtual} />
+                )}
+              </TabsContent>
+              <TabsContent value="historico">
+                {loading ? (
+                  <div className="py-8 text-center">Carregando histórico...</div>
+                ) : (
+                  <TabelaHistoricoTreinamentos historico={historicoReciclados} />
+                )}
+              </TabsContent>
+            </ShadTabs>
+          </div>
         )}
       </CardContent>
     </Card>
@@ -309,7 +379,7 @@ const TreinamentosConsulta = () => {
 
   return (
     <div className="container mx-auto py-8">
-      <Tabs value={tab} onValueChange={setTab}>
+      <ShadTabs value={tab} onValueChange={setTab}>
         <TabsList className="mb-6">
           <TabsTrigger value="realizados">Consulta de Treinamentos Realizados</TabsTrigger>
           <TabsTrigger value="normativo-funcionario">Consulta de Treinamentos Normativos por Funcionário</TabsTrigger>
@@ -430,7 +500,7 @@ const TreinamentosConsulta = () => {
         <TabsContent value="normativo-funcionario">
           <TreinamentosNormativosPorFuncionarioTab />
         </TabsContent>
-      </Tabs>
+      </ShadTabs>
     </div>
   );
 };
@@ -438,4 +508,3 @@ const TreinamentosConsulta = () => {
 export default TreinamentosConsulta;
 
 // O arquivo está ficando longo; considere pedir refatoração em breve.
-

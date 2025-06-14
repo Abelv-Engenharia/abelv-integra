@@ -8,6 +8,7 @@ export interface Funcionario {
   ativo: boolean;
   cca_id?: number;
   ccas?: { id: number; codigo: string; nome: string };
+  data_admissao?: string | null;
 }
 
 export interface CCA {
@@ -21,4 +22,5 @@ export interface FuncionarioFormData {
   funcao: string;
   matricula: string;
   cca_id: string;
+  data_admissao?: string | null;
 }

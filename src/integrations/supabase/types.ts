@@ -806,6 +806,7 @@ export type Database = {
           ativo: boolean | null
           cca_id: number | null
           created_at: string | null
+          data_admissao: string | null
           foto: string | null
           funcao: string
           id: string
@@ -817,6 +818,7 @@ export type Database = {
           ativo?: boolean | null
           cca_id?: number | null
           created_at?: string | null
+          data_admissao?: string | null
           foto?: string | null
           funcao: string
           id?: string
@@ -828,6 +830,7 @@ export type Database = {
           ativo?: boolean | null
           cca_id?: number | null
           created_at?: string | null
+          data_admissao?: string | null
           foto?: string | null
           funcao?: string
           id?: string
