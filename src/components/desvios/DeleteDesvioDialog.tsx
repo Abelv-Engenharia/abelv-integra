@@ -16,7 +16,7 @@ import { desviosCompletosService, DesvioCompleto } from "@/services/desvios/desv
 
 interface DeleteDesvioDialogProps {
   desvio: DesvioCompleto;
-  onDesvioDeleted: () => void;
+  onDesvioDeleted: (id?: string) => void;
 }
 
 const DeleteDesvioDialog = ({ desvio, onDesvioDeleted }: DeleteDesvioDialogProps) => {
@@ -38,15 +38,15 @@ const DeleteDesvioDialog = ({ desvio, onDesvioDeleted }: DeleteDesvioDialogProps
     try {
       console.log('Tentando excluir desvio com ID:', desvio.id);
       const success = await desviosCompletosService.delete(desvio.id);
-      
+
       if (success) {
         toast({
           title: "Desvio excluído",
           description: "O desvio foi excluído com sucesso da tabela desvios_completos.",
         });
         setOpen(false);
-        // Aguarda a atualização da lista no componente pai após sucesso.
-        onDesvioDeleted();
+        // Corrigido: passa o ID ao callback de exclusão
+        onDesvioDeleted(desvio.id);
       } else {
         toast({
           title: "Erro ao excluir",
