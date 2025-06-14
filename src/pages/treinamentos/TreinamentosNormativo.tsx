@@ -168,10 +168,65 @@ const TreinamentosNormativo = () => {
     ? funcionarios.filter(f => String(f.cca_id) === selectedCcaId)
     : [];
 
+  // Função para buscar nome do treinamento pelo id selecionado
+  function getTreinamentoNomeById(id: string): string | null {
+    const trein = treinamentosNormativos.find((t) => t.id === id);
+    return trein ? trein.nome : null;
+  }
+
+  // Função para construir o nome customizado do arquivo
+  function buildCertificadoFileName(
+    nomeTreinamento: string,
+    matriculaFuncionario: string,
+    nomeFuncionario: string,
+    ext: string
+  ): string {
+    let baseTreinamento = nomeTreinamento.split("-")[0].trim();
+    // Remove espaços extras e mantém apenas a parte antes de "-"
+    baseTreinamento = baseTreinamento.replace(/\s+$/, "");
+
+    // Remove acentos e caracteres especiais por segurança no nome do arquivo
+    function removeSpecialChars(str: string) {
+      return str
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "") // Remove acentos
+        .replace(/[^a-zA-Z0-9_\-\s]/g, "") // Remove caracteres não permitidos
+        .replace(/\s{2,}/g, " ") // Remove múltiplos espaços
+        .trim();
+    }
+
+    const baseNomeArquivo =
+      `${removeSpecialChars(baseTreinamento)}_${matriculaFuncionario}_${removeSpecialChars(nomeFuncionario).toUpperCase()}`.replace(/ /g, " ");
+
+    // Garante extensão
+    const arquivoFinal = `${baseNomeArquivo}.${ext.toLowerCase()}`;
+    return arquivoFinal;
+  }
+
   // Função para upload de certificado e retornar a URL segura
-  async function uploadCertificado(file: File): Promise<string | null> {
-    const ext = file.name.split(".").pop();
-    const fileName = `certificado_${Date.now()}.${ext}`;
+  async function uploadCertificadoPersonalizado(file: File): Promise<string | null> {
+    // Precisa dos campos para construir o nome customizado
+    const treinamentoId = form.getValues("treinamentoId");
+    const funcionarioId = form.getValues("funcionarioId");
+
+    const treinamentoNome = getTreinamentoNomeById(treinamentoId || "");
+    const funcionario = funcionarios.find(f => f.id === funcionarioId);
+
+    if (!treinamentoNome || !funcionario) {
+      toast({
+        title: "Dados insuficientes",
+        description: "Selecione o treinamento e o funcionário antes de anexar o certificado.",
+        variant: "destructive"
+      });
+      return null;
+    }
+
+    const ext = file.name.split(".").pop() || "pdf";
+    const matricula = funcionario.matricula || "XXXX";
+    const nomeFuncionario = funcionario.nome || "FUNCIONARIO_DESCONHECIDO";
+
+    const fileName = buildCertificadoFileName(treinamentoNome, matricula, nomeFuncionario, ext);
+
     // Upload usando o bucket privado
     const { data, error } = await supabase
       .storage
@@ -238,7 +293,9 @@ const TreinamentosNormativo = () => {
         });
         return;
       }
-      const url = await uploadCertificado(certificadoFile);
+
+      // NOVO: upload usando nome customizado
+      const url = await uploadCertificadoPersonalizado(certificadoFile);
       if (!url) return;
       certificadoUrl = url;
     }
@@ -549,6 +606,18 @@ const TreinamentosNormativo = () => {
                     }}
                   />
                   <div className="text-xs text-muted-foreground mt-1">Apenas arquivos PDF, máximo 2MB.</div>
+                  {/* Exibe o nome do arquivo customizado que será usado no bucket, se tudo já tiver sido selecionado */}
+                  {certificadoFile && form.getValues("treinamentoId") && selectedFuncionario && (
+                    <div className="text-xs text-blue-600 mt-1 font-mono">
+                      Nome no bucket:{" "}
+                      {buildCertificadoFileName(
+                        getTreinamentoNomeById(form.getValues("treinamentoId")) || "",
+                        selectedFuncionario.matricula,
+                        selectedFuncionario.nome,
+                        "pdf"
+                      )}
+                    </div>
+                  )}
                   {certificadoFile && (
                     <div className="text-xs text-green-600 mt-1">
                       Arquivo selecionado: {certificadoFile.name}
