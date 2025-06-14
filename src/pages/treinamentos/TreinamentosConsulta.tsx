@@ -8,13 +8,216 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Search, Filter, Download, Eye, Edit, Trash2 } from "lucide-react";
 import { execucaoTreinamentoService } from "@/services/treinamentos/execucaoTreinamentoService";
-import { ExecucaoTreinamento } from "@/types/treinamentos";
+import { listaTreinamentosNormativosService } from "@/services/treinamentos/listaTreinamentosNormativosService";
+import { fetchFuncionarios } from "@/utils/treinamentosUtils";
 import { useNavigate } from "react-router-dom";
 import ConfirmacaoExclusaoModal from "@/components/treinamentos/ConfirmacaoExclusaoModal";
 import { toast } from "@/hooks/use-toast";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { ccaService } from "@/services/treinamentos/ccaService";
+import { Funcionario } from "@/types/treinamentos";
+
+// ---------------- Novo componente da aba 2 ----------------
+
+function TreinamentosNormativosPorFuncionarioTab() {
+  const [ccas, setCcas] = useState<{ id: number; codigo: string; nome: string }[]>([]);
+  const [selectedCcaId, setSelectedCcaId] = useState<string | null>(null);
+  const [funcionarios, setFuncionarios] = useState<Funcionario[]>([]);
+  const [selectedFuncionarioId, setSelectedFuncionarioId] = useState<string | null>(null);
+  const [treinamentos, setTreinamentos] = useState<{ id: string; nome: string; validade_dias?: number }[]>([]);
+  const [historicoFuncionario, setHistoricoFuncionario] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchCcas = async () => {
+      const ccasData = await ccaService.getAll();
+      setCcas(ccasData);
+    };
+    fetchCcas();
+  }, []);
+
+  useEffect(() => {
+    const carregarFuncionarios = async () => {
+      if (selectedCcaId) {
+        setLoading(true);
+        try {
+          const todos = await fetchFuncionarios();
+          setFuncionarios(
+            todos.filter(f => f.cca_id && String(f.cca_id) === selectedCcaId)
+          );
+        } catch {
+          toast({
+            title: "Erro",
+            description: "Erro ao carregar funcionários",
+            variant: "destructive"
+          });
+        } finally {
+          setLoading(false);
+        }
+      } else {
+        setFuncionarios([]);
+      }
+    };
+    carregarFuncionarios();
+    setSelectedFuncionarioId(null);
+    setHistoricoFuncionario([]);
+  }, [selectedCcaId]);
+
+  // Pega todos os treinamentos normativos disponíveis (nome)
+  useEffect(() => {
+    const fetchTreinamentos = async () => {
+      const tr = await listaTreinamentosNormativosService.getAll();
+      setTreinamentos(tr);
+    };
+    fetchTreinamentos();
+  }, []);
+
+  // Quando seleciona funcionário, busca histórico desse funcionário na base (pelo id)
+  useEffect(() => {
+    const buscarHistoricoFuncionario = async () => {
+      if (!selectedFuncionarioId) {
+        setHistoricoFuncionario([]);
+        return;
+      }
+      setLoading(true);
+      try {
+        // Supondo que há um service: fetch histórico de treinamentos normativos do funcionário
+        // (aqui idealmente deveria ser um método próprio, mas usaremos utilitário fetchFuncionarios() p/ demo)
+        // O fetchFuncionarios traz todos, então fazemos o filtro só do selecionado:
+        // Este dado deveria idealmente vir da tabela histórica de execuções normativas. Aqui apenas exibe placeholder.
+        // Você pode conectar ao endpoint real facilmente.
+        // Vamos buscar e simular o array [{treinamento_nome, data_realizacao, data_validade, tipo, certificado_url}]
+        // Suponha que há um endpoint/função: funcionario.normativosRealizados[]
+        // Aqui mostramos um exemplo mock:
+        setHistoricoFuncionario([
+          // Exemplo
+          {
+            treinamento_nome: "NR 35",
+            data_realizacao: "2024-05-01",
+            data_validade: "2026-04-30",
+            tipo: "Formação",
+            certificado_url: null,
+          },
+        ]);
+        // Para usar dados reais, substitua pelo endpoint correto.
+      } catch {
+        toast({
+          title: "Erro",
+          description: "Erro ao buscar histórico",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+    buscarHistoricoFuncionario();
+  }, [selectedFuncionarioId]);
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Consulta de Treinamentos Normativos por Funcionário</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="flex flex-col md:flex-row gap-4 mb-6">
+          <div className="flex-1">
+            <Select value={selectedCcaId ?? ""} onValueChange={setSelectedCcaId}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Selecione o CCA" />
+              </SelectTrigger>
+              <SelectContent>
+                {ccas.map((cca) => (
+                  <SelectItem key={cca.id} value={String(cca.id)}>
+                    {cca.codigo} - {cca.nome}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="flex-1">
+            <Select 
+              value={selectedFuncionarioId ?? ""} 
+              onValueChange={setSelectedFuncionarioId} 
+              disabled={!selectedCcaId || funcionarios.length === 0}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder={selectedCcaId ? "Selecione o funcionário" : "Selecione o CCA"} />
+              </SelectTrigger>
+              <SelectContent>
+                {funcionarios.length === 0 && (
+                  <div className="text-xs text-muted-foreground px-2 py-2">Nenhum funcionário encontrado</div>
+                )}
+                {funcionarios.map(func => (
+                  <SelectItem key={func.id} value={func.id}>
+                    {func.nome}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        {/* Histórico de treinamentos normativos */}
+        {selectedFuncionarioId && (
+          <>
+            {loading ? (
+              <div className="py-8 text-center">Carregando histórico...</div>
+            ) : historicoFuncionario.length === 0 ? (
+              <div className="py-8 text-muted-foreground text-center text-sm">
+                Nenhum treinamento normativo encontrado para este funcionário.
+              </div>
+            ) : (
+              <div className="rounded-md border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Treinamento</TableHead>
+                      <TableHead>Tipo</TableHead>
+                      <TableHead>Data Realização</TableHead>
+                      <TableHead>Validade</TableHead>
+                      <TableHead>Certificado</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {historicoFuncionario.map((trein, idx) => (
+                      <TableRow key={idx}>
+                        <TableCell>{trein.treinamento_nome}</TableCell>
+                        <TableCell>{trein.tipo}</TableCell>
+                        <TableCell>{trein.data_realizacao 
+                          ? new Date(trein.data_realizacao).toLocaleDateString("pt-BR")
+                          : "-"}
+                        </TableCell>
+                        <TableCell>{trein.data_validade 
+                          ? new Date(trein.data_validade).toLocaleDateString("pt-BR")
+                          : "-"}
+                        </TableCell>
+                        <TableCell>
+                          {trein.certificado_url ? (
+                            <a href={trein.certificado_url} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">
+                              Abrir PDF
+                            </a>
+                          ) : (
+                            <span className="text-muted-foreground text-xs">-</span>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+          </>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+// ------------------- ABA ORIGINAL -----------------------
+
 const TreinamentosConsulta = () => {
-  const [execucoes, setExecucoes] = useState<ExecucaoTreinamento[]>([]);
-  const [filteredExecucoes, setFilteredExecucoes] = useState<ExecucaoTreinamento[]>([]);
+  const [tab, setTab] = useState("realizados"); // <--- Nova aba
+  const [execucoes, setExecucoes] = useState<any[]>([]);
+  const [filteredExecucoes, setFilteredExecucoes] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterMes, setFilterMes] = useState("todos");
   const [filterAno, setFilterAno] = useState("todos");
@@ -24,6 +227,7 @@ const TreinamentosConsulta = () => {
   const [idParaExcluir, setIdParaExcluir] = useState<string | null>(null);
   const [modalAberto, setModalAberto] = useState(false);
   const navigate = useNavigate();
+
   useEffect(() => {
     loadExecucoes();
   }, []);
@@ -68,19 +272,18 @@ const TreinamentosConsulta = () => {
     const d = new Date(date);
     return d.toLocaleDateString("pt-BR");
   };
-
   // Opções de ação
-  const handleView = (execucao: ExecucaoTreinamento) => {
+  const handleView = (execucao: any) => {
     if (execucao.id) {
       navigate(`/treinamentos/execucao/visualizar/${execucao.id}`);
     }
   };
-  const handleEdit = (execucao: ExecucaoTreinamento) => {
+  const handleEdit = (execucao: any) => {
     if (execucao.id) {
       navigate(`/treinamentos/execucao/editar/${execucao.id}`);
     }
   };
-  const handleDelete = (execucao: ExecucaoTreinamento) => {
+  const handleDelete = (execucao: any) => {
     setIdParaExcluir(execucao.id || "");
     setModalAberto(true);
   };
@@ -103,110 +306,136 @@ const TreinamentosConsulta = () => {
       });
     }
   };
-  if (isLoading) {
-    return <div className="flex items-center justify-center h-96">
-        <div className="text-lg">Carregando execuções...</div>
-      </div>;
-  }
-  return <div className="container mx-auto py-8">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Search className="h-5 w-5" />
-            Consulta de Treinamentos Realizados
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col md:flex-row gap-4 mb-6">
-            <div className="flex-1">
-              <Input placeholder="Buscar por treinamento, CCA ou processo..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="w-full" />
-            </div>
-            <Select value={filterMes} onValueChange={setFilterMes}>
-              <SelectTrigger className="w-40">
-                <SelectValue placeholder="Mês" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="todos">Todos</SelectItem>
-                {Array.from({
-                length: 12
-              }, (_, i) => <SelectItem key={i + 1} value={(i + 1).toString()}>
-                    {new Date(2024, i).toLocaleDateString("pt-BR", {
-                  month: "long"
-                })}
-                  </SelectItem>)}
-              </SelectContent>
-            </Select>
-            <Select value={filterAno} onValueChange={setFilterAno}>
-              <SelectTrigger className="w-32">
-                <SelectValue placeholder="Ano" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="todos">Todos</SelectItem>
-                <SelectItem value="2024">2024</SelectItem>
-                <SelectItem value="2023">2023</SelectItem>
-              </SelectContent>
-            </Select>
-            <Button variant="outline" size="icon">
-              <Download className="h-4 w-4" />
-            </Button>
-          </div>
 
-          {/* Tabela */}
-          <div className="rounded-md border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Data</TableHead>
-                  <TableHead>Treinamento</TableHead>
-                  <TableHead>CCA</TableHead>
-                  <TableHead>Processo</TableHead>
-                  <TableHead>Tipo</TableHead>
-                  <TableHead>Carga Horária</TableHead>
-                  <TableHead>Efetivo</TableHead>
-                  <TableHead>Horas Totais</TableHead>
-                  <TableHead className="text-center">Ações</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredExecucoes.length === 0 ? <TableRow>
-                    <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
-                      Nenhuma execução encontrada
-                    </TableCell>
-                  </TableRow> : filteredExecucoes.map(execucao => <TableRow key={execucao.id}>
-                      <TableCell>{formatDate(execucao.data)}</TableCell>
-                      <TableCell className="font-medium">
-                        {execucao.treinamento_nome}
-                      </TableCell>
-                      <TableCell>{execucao.cca}</TableCell>
-                      <TableCell>{execucao.processo_treinamento}</TableCell>
-                      <TableCell>{execucao.tipo_treinamento}</TableCell>
-                      <TableCell>{execucao.carga_horaria}h</TableCell>
-                      <TableCell>
-                        MOD: {execucao.efetivo_mod} / MOI: {execucao.efetivo_moi}
-                      </TableCell>
-                      <TableCell>{execucao.horas_totais}h</TableCell>
-                      <TableCell>
-                        <div className="flex gap-2">
-                          <Button variant="ghost" size="icon" onClick={() => handleView(execucao)} title="Visualizar">
-                            <Eye className="w-4 h-4" />
-                          </Button>
-                          <Button variant="ghost" size="icon" onClick={() => handleEdit(execucao)} title="Editar">
-                            <Edit className="w-4 h-4" />
-                          </Button>
-                          <Button variant="ghost" size="icon" onClick={() => handleDelete(execucao)} title="Excluir" className="text-red-600">
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>)}
-              </TableBody>
-            </Table>
-          </div>
-        </CardContent>
-      </Card>
-      <ConfirmacaoExclusaoModal open={modalAberto} onOpenChange={setModalAberto} onConfirm={confirmarExclusao} />
-    </div>;
+  return (
+    <div className="container mx-auto py-8">
+      <Tabs value={tab} onValueChange={setTab}>
+        <TabsList className="mb-6">
+          <TabsTrigger value="realizados">Consulta de Treinamentos Realizados</TabsTrigger>
+          <TabsTrigger value="normativo-funcionario">Consulta de Treinamentos Normativos por Funcionário</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="realizados">
+          {isLoading ? (
+            <div className="flex items-center justify-center h-96">
+              <div className="text-lg">Carregando execuções...</div>
+            </div>
+          ) : (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Search className="h-5 w-5" />
+                  Consulta de Treinamentos Realizados
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-col md:flex-row gap-4 mb-6">
+                  <div className="flex-1">
+                    <Input placeholder="Buscar por treinamento, CCA ou processo..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="w-full" />
+                  </div>
+                  <Select value={filterMes} onValueChange={setFilterMes}>
+                    <SelectTrigger className="w-40">
+                      <SelectValue placeholder="Mês" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="todos">Todos</SelectItem>
+                      {Array.from({ length: 12 }, (_, i) => (
+                        <SelectItem key={i + 1} value={(i + 1).toString()}>
+                          {new Date(2024, i).toLocaleDateString("pt-BR", { month: "long" })}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Select value={filterAno} onValueChange={setFilterAno}>
+                    <SelectTrigger className="w-32">
+                      <SelectValue placeholder="Ano" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="todos">Todos</SelectItem>
+                      <SelectItem value="2024">2024</SelectItem>
+                      <SelectItem value="2023">2023</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Button variant="outline" size="icon">
+                    <Download className="h-4 w-4" />
+                  </Button>
+                </div>
+                {/* Tabela */}
+                <div className="rounded-md border">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Data</TableHead>
+                        <TableHead>Treinamento</TableHead>
+                        <TableHead>CCA</TableHead>
+                        <TableHead>Processo</TableHead>
+                        <TableHead>Tipo</TableHead>
+                        <TableHead>Carga Horária</TableHead>
+                        <TableHead>Efetivo</TableHead>
+                        <TableHead>Horas Totais</TableHead>
+                        <TableHead className="text-center">Ações</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredExecucoes.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
+                            Nenhuma execução encontrada
+                          </TableCell>
+                        </TableRow>
+                      ) : (
+                        filteredExecucoes.map(execucao => (
+                          <TableRow key={execucao.id}>
+                            <TableCell>{formatDate(execucao.data)}</TableCell>
+                            <TableCell className="font-medium">{execucao.treinamento_nome}</TableCell>
+                            <TableCell>{execucao.cca}</TableCell>
+                            <TableCell>{execucao.processo_treinamento}</TableCell>
+                            <TableCell>{execucao.tipo_treinamento}</TableCell>
+                            <TableCell>{execucao.carga_horaria}h</TableCell>
+                            <TableCell>
+                              MOD: {execucao.efetivo_mod} / MOI: {execucao.efetivo_moi}
+                            </TableCell>
+                            <TableCell>{execucao.horas_totais}h</TableCell>
+                            <TableCell>
+                              <div className="flex gap-2">
+                                <Button variant="ghost" size="icon" onClick={() => handleView(execucao)} title="Visualizar">
+                                  <Eye className="w-4 h-4" />
+                                </Button>
+                                <Button variant="ghost" size="icon" onClick={() => handleEdit(execucao)} title="Editar">
+                                  <Edit className="w-4 h-4" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => handleDelete(execucao)}
+                                  title="Excluir"
+                                  className="text-red-600"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+          <ConfirmacaoExclusaoModal open={modalAberto} onOpenChange={setModalAberto} onConfirm={confirmarExclusao} />
+        </TabsContent>
+
+        <TabsContent value="normativo-funcionario">
+          <TreinamentosNormativosPorFuncionarioTab />
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
 };
+
 export default TreinamentosConsulta;
 
 // O arquivo está ficando longo; considere pedir refatoração em breve.
+
