@@ -570,104 +570,43 @@ const TreinamentosNormativo = () => {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Data da realização</FormLabel>
-                      <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center">
-                        {/* Input manual */}
-                        <Input
-                          type="date"
-                          value={
-                            manualDate
-                              ? manualDate
-                              : field.value
-                              ? dateValueToISODateString(field.value)
-                              : ""
-                          }
-                          onChange={e => {
-                            setManualDate(e.target.value);
-                            // Always send a Date or undefined to the RHF field
-                            if (e.target.value) {
-                              const [yyyy, mm, dd] = e.target.value.split("-");
-                              const _date = new Date(
-                                Number(yyyy),
-                                Number(mm) - 1,
-                                Number(dd)
-                              );
-                              // Only pass Date object to field.onChange
-                              if (!isNaN(_date.getTime())) {
-                                field.onChange(_date);
-                              } else {
-                                field.onChange(undefined);
-                              }
-                            } else {
-                              field.onChange(undefined);
-                            }
-                          }}
-                          className="max-w-[180px]"
-                          min="1900-01-01"
-                          max={dateValueToISODateString(new Date()) || ""}
-                        />
-                        <span className="text-xs text-muted-foreground">ou</span>
-                        {/* Popover do Calendário */}
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <FormControl>
-                              <Button
-                                type="button"
-                                variant={"outline"}
-                                className={cn(
-                                  "w-full pl-3 text-left font-normal max-w-[180px]",
-                                  !(manualDate || field.value) &&
-                                    "text-muted-foreground"
-                                )}
-                              >
-                                {manualDate || field.value ? (
-                                  dateValueToISODateString(
-                                    manualDate
-                                      ? manualDate
-                                      : field.value
-                                  ) &&
-                                  (() => {
-                                    const v =
-                                      manualDate ??
-                                      dateValueToISODateString(field.value);
-                                    if (v) {
-                                      const [y, m, d] = v.split("-");
-                                      return `${d}/${m}/${y}`;
-                                    }
-                                    return null;
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              variant="outline"
+                              className={cn(
+                                "w-[180px] justify-start text-left font-normal",
+                                !field.value && "text-muted-foreground"
+                              )}
+                            >
+                              {field.value
+                                ? (() => {
+                                    const d = field.value as Date;
+                                    const day = String(d.getDate()).padStart(2, "0");
+                                    const month = String(d.getMonth() + 1).padStart(2, "0");
+                                    const year = String(d.getFullYear());
+                                    return `${day}/${month}/${year}`;
                                   })()
-                                ) : (
-                                  <span>Calendário</span>
-                                )}
-                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                              </Button>
-                            </FormControl>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0" align="start">
-                            <Calendar
-                              mode="single"
-                              selected={
-                                manualDate
-                                  ? new Date(manualDate)
-                                  : field.value instanceof Date
-                                  ? field.value
-                                  : field.value
-                                  ? new Date(field.value)
-                                  : undefined
+                                : <span>dd/mm/aaaa</span>
                               }
-                              onSelect={date => {
-                                if (date) {
-                                  // Quando seleciona no calendário, limpa manualDate e atualiza o campo para Date
-                                  setManualDate(null);
-                                  field.onChange(date);
-                                }
-                              }}
-                              disabled={date => date > new Date()}
-                              initialFocus
-                              className={cn("p-3 pointer-events-auto")}
-                            />
-                          </PopoverContent>
-                        </Popover>
-                      </div>
+                              <span className="ml-auto">
+                                <CalendarIcon className="h-4 w-4 opacity-50" />
+                              </span>
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={field.value}
+                            onSelect={field.onChange}
+                            disabled={date => date > new Date()}
+                            initialFocus
+                            className={cn("p-3 pointer-events-auto")}
+                          />
+                        </PopoverContent>
+                      </Popover>
                       <FormMessage />
                     </FormItem>
                   )}
