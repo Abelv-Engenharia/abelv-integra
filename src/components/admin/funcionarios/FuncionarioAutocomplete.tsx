@@ -7,21 +7,34 @@ interface FuncionarioAutocompleteProps {
   funcionarios: Funcionario[];
   onSelect: (funcionario: Funcionario) => void;
   className?: string;
+  search?: string;
+  onSearchChange?: (value: string) => void;
 }
 
+/**
+ * Componente de autocomplete que permite busca livre (sem seleção obrigatória).
+ * Exibe sugestões mas não obriga selecionar - o valor digitado já filtra a tabela.
+ */
 export const FuncionarioAutocomplete: React.FC<FuncionarioAutocompleteProps> = ({
   funcionarios,
   onSelect,
   className = "",
+  search = "",
+  onSearchChange,
 }) => {
-  const [search, setSearch] = useState("");
+  const [internalSearch, setInternalSearch] = useState(search);
   const [suggestions, setSuggestions] = useState<Funcionario[]>([]);
   const [open, setOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // Mantém sincronizado valor controlado
   useEffect(() => {
-    if (search.trim().length > 0) {
-      const filter = search.toLowerCase();
+    setInternalSearch(search);
+  }, [search]);
+
+  useEffect(() => {
+    if (internalSearch.trim().length > 0) {
+      const filter = internalSearch.toLowerCase();
       setSuggestions(
         funcionarios.filter((f) =>
           f.nome.toLowerCase().includes(filter)
@@ -32,10 +45,17 @@ export const FuncionarioAutocomplete: React.FC<FuncionarioAutocompleteProps> = (
       setSuggestions([]);
       setOpen(false);
     }
-  }, [search, funcionarios]);
+  }, [internalSearch, funcionarios]);
 
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInternalSearch(e.target.value);
+    onSearchChange && onSearchChange(e.target.value);
+  };
+
+  // Se clicar em sugestão, atualiza estado e aciona onSearchChange
   const handleSelect = (funcionario: Funcionario) => {
-    setSearch(funcionario.nome);
+    setInternalSearch(funcionario.nome);
+    onSearchChange && onSearchChange(funcionario.nome);
     onSelect(funcionario);
     setOpen(false);
   };
@@ -58,9 +78,9 @@ export const FuncionarioAutocomplete: React.FC<FuncionarioAutocompleteProps> = (
         ref={inputRef}
         type="text"
         placeholder="Buscar funcionário pelo nome..."
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        onFocus={() => search.length > 0 && setOpen(true)}
+        value={internalSearch}
+        onChange={handleInputChange}
+        onFocus={() => internalSearch.length > 0 && setOpen(true)}
         autoComplete="off"
       />
       {open && suggestions.length > 0 && (

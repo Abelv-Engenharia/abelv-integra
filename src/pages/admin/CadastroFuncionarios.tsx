@@ -13,7 +13,7 @@ import { Funcionario, FuncionarioFormData } from "@/types/funcionarios";
 const CadastroFuncionarios = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingFuncionario, setEditingFuncionario] = useState<Funcionario | null>(null);
-  const [filteredFuncionarios, setFilteredFuncionarios] = useState<Funcionario[] | null>(null);
+  const [searchText, setSearchText] = useState<string>("");
 
   const {
     funcionarios,
@@ -52,13 +52,21 @@ const CadastroFuncionarios = () => {
     deleteFuncionarioMutation.mutate(id);
   };
 
-  const handleFuncionarioSelect = (funcionario: Funcionario) => {
-    setFilteredFuncionarios([funcionario]);
+  // Atualiza o estado de busca conforme digitado
+  const handleSearchChange = (value: string) => {
+    setSearchText(value);
   };
 
   const handleSearchClear = () => {
-    setFilteredFuncionarios(null);
+    setSearchText("");
   };
+
+  // Filtra funcionários conforme texto digitado
+  const filteredFuncionarios = searchText.trim().length > 0
+    ? funcionarios.filter(func =>
+        func.nome.toLowerCase().includes(searchText.trim().toLowerCase())
+      )
+    : funcionarios;
 
   return (
     <div className="space-y-6">
@@ -68,10 +76,12 @@ const CadastroFuncionarios = () => {
           {/* Busca por nome */}
           <FuncionarioAutocomplete
             funcionarios={funcionarios}
-            onSelect={handleFuncionarioSelect}
+            search={searchText}
+            onSearchChange={handleSearchChange}
+            onSelect={() => {}} // Não precisa tratar seleção, busca é livre agora
           />
           {/* Exibir botão para limpar busca, caso haja filtro */}
-          {filteredFuncionarios && (
+          {searchText.trim().length > 0 && (
             <Button
               size="sm"
               variant="ghost"
@@ -112,7 +122,7 @@ const CadastroFuncionarios = () => {
         </CardHeader>
         <CardContent>
           <FuncionariosTable
-            funcionarios={filteredFuncionarios || funcionarios}
+            funcionarios={filteredFuncionarios}
             isLoading={loadingFuncionarios}
             onEdit={handleEdit}
             onDelete={handleDelete}
@@ -124,3 +134,4 @@ const CadastroFuncionarios = () => {
 };
 
 export default CadastroFuncionarios;
+
