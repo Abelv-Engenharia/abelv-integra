@@ -18,6 +18,7 @@ import { Funcionario } from "@/types/treinamentos";
 import { FuncionarioPerfilCard } from "@/components/treinamentos/FuncionarioPerfilCard";
 import { TabelaTreinamentosNormativos } from "@/components/treinamentos/TabelaTreinamentosNormativos";
 import { TabelaHistoricoTreinamentos } from "@/components/treinamentos/TabelaHistoricoTreinamentos";
+import { supabase } from "@/integrations/supabase/client";
 
 // ---------------- Novo componente da aba 2 ----------------
 
@@ -139,7 +140,7 @@ function TreinamentosNormativosPorFuncionarioTab() {
       setLoading(true);
       try {
         // Busca todos os treinamentos normativos desse funcionário, ordenado por nome, data desc
-        const { data, error } = await window.supabase
+        const { data, error } = await supabase
           .from('treinamentos_normativos')
           .select(`
             id, 
