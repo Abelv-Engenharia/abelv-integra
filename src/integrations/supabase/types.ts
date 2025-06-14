@@ -1780,7 +1780,7 @@ export type Database = {
             foreignKeyName: "treinamentos_normativos_treinamento_id_fkey"
             columns: ["treinamento_id"]
             isOneToOne: false
-            referencedRelation: "treinamentos"
+            referencedRelation: "lista_treinamentos_normativos"
             referencedColumns: ["id"]
           },
         ]
