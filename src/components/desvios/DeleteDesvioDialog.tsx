@@ -44,9 +44,9 @@ const DeleteDesvioDialog = ({ desvio, onDesvioDeleted }: DeleteDesvioDialogProps
           title: "Desvio excluído",
           description: "O desvio foi excluído com sucesso da tabela desvios_completos.",
         });
-        
-        onDesvioDeleted();
         setOpen(false);
+        // Aguarda a atualização da lista no componente pai após sucesso.
+        onDesvioDeleted();
       } else {
         toast({
           title: "Erro ao excluir",
