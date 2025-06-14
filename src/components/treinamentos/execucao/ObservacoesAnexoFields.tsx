@@ -13,9 +13,10 @@ import { TreinamentoFormValues } from "@/hooks/useTreinamentoForm";
 
 interface ObservacoesAnexoFieldsProps {
   form: UseFormReturn<TreinamentoFormValues>;
+  onListaPresencaFileChange?: (file: File | null) => void;
 }
 
-const ObservacoesAnexoFields = ({ form }: ObservacoesAnexoFieldsProps) => {
+const ObservacoesAnexoFields = ({ form, onListaPresencaFileChange }: ObservacoesAnexoFieldsProps) => {
   return (
     <>
       <FormField
@@ -50,7 +51,11 @@ const ObservacoesAnexoFields = ({ form }: ObservacoesAnexoFieldsProps) => {
               <Input
                 type="file"
                 accept=".pdf"
-                onChange={(e) => onChange(e.target.files)}
+                onChange={(e) => {
+                  const file = e.target.files && e.target.files[0] ? e.target.files[0] : null;
+                  onChange(e.target.files);
+                  if (onListaPresencaFileChange) onListaPresencaFileChange(file);
+                }}
                 {...field}
               />
             </FormControl>

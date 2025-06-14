@@ -15,12 +15,16 @@ import ObservacoesAnexoFields from "@/components/treinamentos/execucao/Observaco
 import { Save, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import SuccessExecucaoCard from "@/components/treinamentos/execucao/SuccessExecucaoCard";
+import { supabase } from "@/integrations/supabase/client";
 
 const TreinamentosExecucao = () => {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const navigate = useNavigate();
+
+  // Novo estado para gerenciamento do arquivo anexo
+  const [listaPresencaFile, setListaPresencaFile] = useState<File | null>(null);
 
   const {
     form,
@@ -44,6 +48,32 @@ const TreinamentosExecucao = () => {
       const selectedTipo = tipoOptions.find(t => t.id === formData.tipo_treinamento_id);
       const selectedTreinamento = treinamentoOptions.find(t => t.id === formData.treinamento_id);
 
+      let lista_presenca_url = formData.lista_presenca_url;
+
+      // 1. Se tiver anexo, realiza upload no Supabase Storage antes de salvar
+      if (listaPresencaFile) {
+        // Crie um nome único para evitar sobrescritas
+        const ext = listaPresencaFile.name.split(".").pop();
+        const path = `presenca_${Date.now()}.${ext}`;
+
+        let { data: uploadData, error: uploadError } = await supabase.storage
+          .from("treinamentos-anexos")
+          .upload(path, listaPresencaFile, {
+            cacheControl: "3600",
+            upsert: false,
+            contentType: "application/pdf",
+          });
+
+        if (uploadError) {
+          throw uploadError;
+        }
+
+        // O URL público pode ser composto assim:
+        lista_presenca_url = supabase.storage
+          .from("treinamentos-anexos")
+          .getPublicUrl(uploadData.path).data.publicUrl;
+      }
+
       const execucaoData = {
         data: formData.data,
         mes: formData.mes,
@@ -61,7 +91,7 @@ const TreinamentosExecucao = () => {
         efetivo_moi: formData.efetivo_moi,
         horas_totais: calculateHorasTotais(),
         observacoes: formData.observacoes,
-        lista_presenca_url: formData.lista_presenca_url
+        lista_presenca_url, // Salva url caso tenha anexo
       };
 
       console.log("Salvando dados de execução:", execucaoData);
@@ -112,15 +142,19 @@ const TreinamentosExecucao = () => {
         <Card>
           <CardContent className="p-6">
             <Form {...form}>
-              <form className="space-y-6">
+              <form className="space-y-6" onSubmit={e => e.preventDefault()}>
                 <DateTimeFields form={form} />
                 <CCASelector form={form} ccaOptions={ccaOptions} />
                 <ProcessoTipoFields form={form} processoOptions={processoOptions} tipoOptions={tipoOptions} />
                 <TreinamentoSelector form={form} treinamentoOptions={treinamentoOptions} />
                 <CargaHorariaEfetivoFields form={form} calculateHorasTotais={calculateHorasTotais} />
-                <ObservacoesAnexoFields form={form} />
-
-                {/* Botões de ação */}
+                {/* ---------------------------------- */}
+                {/* Observações e Anexo */}
+                <ObservacoesAnexoFields
+                  form={form}
+                  onListaPresencaFileChange={setListaPresencaFile}
+                />
+                {/* ---------------------------------- */}
                 <div className="flex justify-end gap-2 pt-6 border-t">
                   <Button
                     type="button"
