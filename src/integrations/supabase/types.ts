@@ -1761,42 +1761,6 @@ export type Database = {
           },
         ]
       }
-      user_settings: {
-        Row: {
-          created_at: string
-          dark_mode: boolean | null
-          email_notifications: boolean | null
-          id: string
-          language: string | null
-          sms_notifications: boolean | null
-          timezone: string | null
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          dark_mode?: boolean | null
-          email_notifications?: boolean | null
-          id?: string
-          language?: string | null
-          sms_notifications?: boolean | null
-          timezone?: string | null
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          dark_mode?: boolean | null
-          email_notifications?: boolean | null
-          id?: string
-          language?: string | null
-          sms_notifications?: boolean | null
-          timezone?: string | null
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
       usuario_perfis: {
         Row: {
           id: string

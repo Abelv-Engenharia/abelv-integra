@@ -13,13 +13,11 @@ import { Bell, Check, CheckCheck } from "lucide-react";
 import { notificacoesService } from "@/services/notificacoesService";
 import { Notificacao } from "@/types/notificacoes";
 import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
 
 const NotificacoesDropdown = () => {
   const [notificacoes, setNotificacoes] = useState<Notificacao[]>([]);
   const [naoLidas, setNaoLidas] = useState(0);
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
 
   const carregarNotificacoes = async () => {
     setLoading(true);
@@ -59,36 +57,6 @@ const NotificacoesDropdown = () => {
     } catch (error) {
       console.error("Erro ao marcar todas como lidas:", error);
       toast.error("Erro ao marcar todas as notificações como lidas");
-    }
-  };
-
-  const handleNotificacaoClick = async (notificacao: Notificacao) => {
-    // Marcar como lida se não estiver lida
-    if (!notificacao.lida) {
-      await marcarComoLida(notificacao.id);
-    }
-
-    // Navegar para a página apropriada baseada no tipo
-    switch (notificacao.tipo) {
-      case 'tarefa':
-        if (notificacao.tarefa_id) {
-          navigate(`/tarefas/${notificacao.tarefa_id}`);
-        } else {
-          navigate('/tarefas/minhas-tarefas');
-        }
-        break;
-      case 'desvio':
-        navigate('/desvios/consulta');
-        break;
-      case 'ocorrencia':
-        navigate('/ocorrencias/consulta');
-        break;
-      case 'treinamento':
-        navigate('/treinamentos/consulta');
-        break;
-      default:
-        navigate('/');
-        break;
     }
   };
 
@@ -144,7 +112,7 @@ const NotificacoesDropdown = () => {
                 className={`p-3 cursor-pointer ${
                   !notificacao.lida ? 'bg-blue-50' : ''
                 }`}
-                onClick={() => handleNotificacaoClick(notificacao)}
+                onClick={() => !notificacao.lida && marcarComoLida(notificacao.id)}
               >
                 <div className="flex-1">
                   <div className="flex items-start justify-between">

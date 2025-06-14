@@ -3,33 +3,39 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { useUserSettings } from "@/hooks/useUserSettings";
-import { useTheme } from "@/contexts/ThemeContext";
 
 const Settings = () => {
-  const { settings, updateSettings, isUpdating } = useUserSettings();
-  const { toggleDarkMode } = useTheme();
+  const { toast } = useToast();
+  const [settings, setSettings] = useState({
+    emailNotifications: true,
+    smsNotifications: false,
+    darkMode: false,
+    language: "pt-BR",
+    timezone: "America/Sao_Paulo"
+  });
 
-  const handleToggleChange = (setting: keyof typeof settings) => {
-    if (setting === 'dark_mode') {
-      toggleDarkMode();
-    } else {
-      updateSettings({
-        [setting]: !settings[setting]
-      });
-    }
+  const handleToggleChange = (setting: string) => {
+    setSettings(prev => ({
+      ...prev,
+      [setting]: !prev[setting as keyof typeof prev]
+    }));
   };
 
-  const handleSelectChange = (setting: keyof typeof settings, value: string) => {
-    updateSettings({
+  const handleSelectChange = (setting: string, value: string) => {
+    setSettings(prev => ({
+      ...prev,
       [setting]: value
-    });
+    }));
   };
 
   const handleSave = () => {
-    // Força uma atualização completa das configurações
-    updateSettings(settings);
+    toast({
+      title: "Configurações salvas",
+      description: "Suas preferências foram atualizadas com sucesso"
+    });
   };
 
   return (
@@ -52,9 +58,8 @@ const Settings = () => {
               </div>
               <Switch
                 id="email-notifications"
-                checked={settings.email_notifications}
-                onCheckedChange={() => handleToggleChange('email_notifications')}
-                disabled={isUpdating}
+                checked={settings.emailNotifications}
+                onCheckedChange={() => handleToggleChange('emailNotifications')}
               />
             </div>
             
@@ -67,9 +72,8 @@ const Settings = () => {
               </div>
               <Switch
                 id="sms-notifications"
-                checked={settings.sms_notifications}
-                onCheckedChange={() => handleToggleChange('sms_notifications')}
-                disabled={isUpdating}
+                checked={settings.smsNotifications}
+                onCheckedChange={() => handleToggleChange('smsNotifications')}
               />
             </div>
           </CardContent>
@@ -90,9 +94,8 @@ const Settings = () => {
               </div>
               <Switch
                 id="dark-mode"
-                checked={settings.dark_mode}
-                onCheckedChange={() => handleToggleChange('dark_mode')}
-                disabled={isUpdating}
+                checked={settings.darkMode}
+                onCheckedChange={() => handleToggleChange('darkMode')}
               />
             </div>
           </CardContent>
@@ -110,7 +113,6 @@ const Settings = () => {
                 <Select
                   value={settings.language}
                   onValueChange={(value) => handleSelectChange('language', value)}
-                  disabled={isUpdating}
                 >
                   <SelectTrigger id="language">
                     <SelectValue placeholder="Selecione o idioma" />
@@ -128,7 +130,6 @@ const Settings = () => {
                 <Select
                   value={settings.timezone}
                   onValueChange={(value) => handleSelectChange('timezone', value)}
-                  disabled={isUpdating}
                 >
                   <SelectTrigger id="timezone">
                     <SelectValue placeholder="Selecione o fuso horário" />
@@ -146,11 +147,8 @@ const Settings = () => {
         </Card>
         
         <div className="flex justify-end">
-          <Button 
-            onClick={handleSave}
-            disabled={isUpdating}
-          >
-            {isUpdating ? "Salvando..." : "Salvar Configurações"}
+          <Button onClick={handleSave}>
+            Salvar Configurações
           </Button>
         </div>
       </div>

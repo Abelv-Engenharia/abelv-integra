@@ -45,14 +45,10 @@ export const TarefaCard: React.FC<TarefaCardProps> = ({ tarefa, onClick }) => {
   const dataLimite = new Date(tarefa.dataConclusao);
   const restante = formatDistanceToNow(dataLimite, { addSuffix: true, locale: ptBR });
   
-  const handleClick = () => {
-    onClick(tarefa);
-  };
-  
   return (
     <Card 
       className="mb-4 hover:shadow-md transition-shadow cursor-pointer"
-      onClick={handleClick}
+      onClick={() => onClick(tarefa)}
     >
       <CardHeader className="pb-2 flex flex-row justify-between items-center">
         <div>
