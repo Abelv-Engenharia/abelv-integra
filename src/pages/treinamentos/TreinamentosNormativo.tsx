@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -39,6 +38,9 @@ import { calcularDataValidade, calcularStatusTreinamento, fetchFuncionarios, fet
 import { cn } from "@/lib/utils";
 import { ccaService } from "@/services/treinamentos/ccaService";
 import { listaTreinamentosNormativosService } from "@/services/treinamentos/listaTreinamentosNormativosService";
+import { supabase } from "@/integrations/supabase/client";
+
+const BUCKET_CERTIFICADOS = "certificados-treinamentos-normativos";
 
 const formSchema = z.object({
   ccaId: z.string({
@@ -72,6 +74,7 @@ const TreinamentosNormativo = () => {
   const [ccas, setCcas] = useState<{ id: number; codigo: string; nome: string }[]>([]);
   const [selectedCcaId, setSelectedCcaId] = useState<string | null>(null);
   const [treinamentosNormativos, setTreinamentosNormativos] = useState<{id: string, nome: string, validade_dias?: number}[]>([]);
+  const [certificadoFile, setCertificadoFile] = useState<File | null>(null);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -165,6 +168,43 @@ const TreinamentosNormativo = () => {
     ? funcionarios.filter(f => String(f.cca_id) === selectedCcaId)
     : [];
 
+  // Função para upload de certificado e retornar a URL segura
+  async function uploadCertificado(file: File): Promise<string | null> {
+    const ext = file.name.split(".").pop();
+    const fileName = `certificado_${Date.now()}.${ext}`;
+    // Upload usando o bucket privado
+    const { data, error } = await supabase
+      .storage
+      .from(BUCKET_CERTIFICADOS)
+      .upload(fileName, file, { upsert: true, contentType: "application/pdf" });
+
+    if (error) {
+      toast({
+        title: "Erro ao anexar certificado",
+        description: "Falha ao enviar arquivo para o storage.",
+        variant: "destructive"
+      });
+      return null;
+    }
+
+    // Gera URL assinada (válida por 7d) — bucket privado!
+    const { data: signedUrlData, error: signedUrlError } = await supabase
+      .storage
+      .from(BUCKET_CERTIFICADOS)
+      .createSignedUrl(fileName, 60 * 60 * 24 * 7); // 7 dias
+
+    if (signedUrlError || !signedUrlData?.signedUrl) {
+      toast({
+        title: "Erro ao gerar URL do certificado",
+        description: "Não foi possível gerar a URL segura.",
+        variant: "destructive"
+      });
+      return null;
+    }
+
+    return signedUrlData.signedUrl;
+  }
+
   const onSubmit = async (data: FormValues) => {
     if (!dataValidade) {
       toast({
@@ -177,22 +217,36 @@ const TreinamentosNormativo = () => {
     
     console.log("Form data:", data);
     
-    const file = data.certificado?.[0];
-    if (file && file.size > 2 * 1024 * 1024) {
-      toast({
-        title: "Erro ao salvar",
-        description: "O arquivo deve ter no máximo 2MB",
-        variant: "destructive",
-      });
-      return;
+    let certificadoUrl: string | undefined = undefined;
+
+    // Faz upload do certificado, se houver
+    if (certificadoFile) {
+      // Validação extra de tamanho e formato
+      if (certificadoFile.size > 2 * 1024 * 1024) {
+        toast({
+          title: "Erro ao salvar",
+          description: "O arquivo deve ter no máximo 2MB",
+          variant: "destructive",
+        });
+        return;
+      }
+      if (!certificadoFile.name.toLowerCase().endsWith(".pdf")) {
+        toast({
+          title: "Erro ao salvar",
+          description: "Apenas arquivos PDF são permitidos.",
+          variant: "destructive",
+        });
+        return;
+      }
+      const url = await uploadCertificado(certificadoFile);
+      if (!url) return;
+      certificadoUrl = url;
     }
     
     try {
       setIsLoading(true);
       
       // Implementar upload do certificado aqui
-      let certificadoUrl = undefined;
-      
       // FIX: Remover ccaId do objeto passado para criarTreinamentoNormativo
       const result = await criarTreinamentoNormativo({
         funcionarioId: data.funcionarioId,
@@ -480,24 +534,27 @@ const TreinamentosNormativo = () => {
                   )}
                 </FormItem>
 
-                <FormField
-                  control={form.control}
-                  name="certificado"
-                  render={({ field: { value, onChange, ...field } }) => (
-                    <FormItem>
-                      <FormLabel>Anexar certificado (PDF, máx. 2MB)</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="file"
-                          accept=".pdf"
-                          onChange={(e) => onChange(e.target.files)}
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
+                <div>
+                  <label htmlFor="certificado" className="block font-medium mb-1">Anexar certificado (PDF, máx. 2MB)</label>
+                  <Input
+                    id="certificado"
+                    type="file"
+                    accept=".pdf"
+                    onChange={e => {
+                      if (e.target.files && e.target.files[0]) {
+                        setCertificadoFile(e.target.files[0]);
+                      } else {
+                        setCertificadoFile(null);
+                      }
+                    }}
+                  />
+                  <div className="text-xs text-muted-foreground mt-1">Apenas arquivos PDF, máximo 2MB.</div>
+                  {certificadoFile && (
+                    <div className="text-xs text-green-600 mt-1">
+                      Arquivo selecionado: {certificadoFile.name}
+                    </div>
                   )}
-                />
+                </div>
 
                 <div className="flex justify-end">
                   <Button type="submit" className="gap-1" disabled={isLoading}>
