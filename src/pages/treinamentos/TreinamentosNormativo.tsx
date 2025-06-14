@@ -394,7 +394,7 @@ const TreinamentosNormativo = () => {
     }
   };
 
-  // Manter anoManual em sincronia se usuário muda data pelo calendário ou manual do input de data
+  // Corrigir o campo Ano - fim do bloco de hooks e antes do return:
   useEffect(() => {
     const data = form.watch("dataRealizacao");
     if (data instanceof Date && !isNaN(data.getTime())) {
@@ -402,6 +402,7 @@ const TreinamentosNormativo = () => {
     } else {
       setAnoManual("");
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form.watch("dataRealizacao")]);
 
   // --- Campo dataRealizacao - sincronização digitado/selecionado ---
@@ -657,7 +658,7 @@ const TreinamentosNormativo = () => {
                     className="w-32"
                     value={anoManual}
                     onChange={e => {
-                      const valor = e.target.value.replace(/\D/g, ""); // Só permite dígitos
+                      const valor = e.target.value.replace(/\D/g, ""); // Só números
                       setAnoManual(valor);
                       if (valor.length === 4) {
                         const anoNovo = Number(valor);
@@ -666,22 +667,27 @@ const TreinamentosNormativo = () => {
                           anoNovo >= 1900 &&
                           anoNovo <= 2100
                         ) {
+                          // Só atualiza data quando year completo!
                           const dataAtual = form.watch("dataRealizacao");
-                          const novaData = dataAtual instanceof Date && !isNaN(dataAtual.getTime())
-                            ? new Date(dataAtual)
-                            : new Date();
+                          let novaData: Date;
+                          if (dataAtual instanceof Date && !isNaN(dataAtual.getTime())) {
+                            novaData = new Date(dataAtual);
+                          } else {
+                            // Caso não haja data, usa 01/01/ano
+                            novaData = new Date(anoNovo, 0, 1);
+                          }
                           novaData.setFullYear(anoNovo);
                           form.setValue("dataRealizacao", novaData, { shouldValidate: true });
                         }
-                      }
-                      if (!valor) {
+                      } else if (valor === "") {
+                        // Campo apagado: limpa a data
                         form.setValue("dataRealizacao", undefined, { shouldValidate: true });
                       }
+                      // Não faz nada se não tiver 4 dígitos
                     }}
                     onBlur={e => {
-                      const valor = e.target.value;
+                      const valor = e.target.value.replace(/\D/g, "");
                       if (valor.length !== 4 || Number(valor) < 1900 || Number(valor) > 2100) {
-                        // Reseta o campo se ano for inválido
                         setAnoManual("");
                         form.setValue("dataRealizacao", undefined, { shouldValidate: true });
                       }
