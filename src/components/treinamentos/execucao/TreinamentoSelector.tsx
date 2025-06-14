@@ -67,7 +67,15 @@ const TreinamentoSelector = ({
             <FormItem>
               <FormLabel>Nome do treinamento</FormLabel>
               <FormControl>
-                <Input {...field} placeholder="Informe o nome do treinamento" />
+                <Input
+                  {...field}
+                  placeholder="Informe o nome do treinamento"
+                  className="uppercase"
+                  onChange={e => {
+                    // garante que o valor no form fiquem MAIÚSCULAS no estado
+                    field.onChange(e.target.value.toUpperCase());
+                  }}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -79,3 +87,4 @@ const TreinamentoSelector = ({
 };
 
 export default TreinamentoSelector;
+
