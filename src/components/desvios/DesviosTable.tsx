@@ -55,7 +55,10 @@ const DesviosTable = () => {
     setEditDesvioId(null);
   };
 
-  const handleDesvioDeleted = () => {
+  const handleDesvioDeleted = (id?: string) => {
+    if (id) {
+      setDesvios(prev => prev.filter(d => d.id !== id));
+    }
     fetchDesvios();
     toast({
       title: "Desvio excluído",
@@ -93,7 +96,7 @@ const DesviosTable = () => {
                       desvio={desvio}
                       onStatusUpdated={handleStatusUpdated}
                       onEditClick={handleEditClick}
-                      onDesvioDeleted={handleDesvioDeleted}
+                      onDesvioDeleted={() => handleDesvioDeleted(desvio.id)}
                       editDesvioId={editDesvioId}
                       editDialogOpen={editDialogOpen}
                       setEditDialogOpen={setEditDialogOpen}
