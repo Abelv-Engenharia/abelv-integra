@@ -28,6 +28,9 @@ import DetalheTarefa from "./pages/tarefas/DetalheTarefa";
 // Ocorrencias pages
 import OcorrenciasDashboard from "./pages/ocorrencias/OcorrenciasDashboard";
 
+// Desvios pages
+import DesviosForm from "./pages/DesviosForm";
+
 // Account pages
 import Profile from "./pages/account/Profile";
 import Settings from "./pages/account/Settings";
@@ -62,6 +65,9 @@ function App() {
                 
                 {/* Ocorrencias routes */}
                 <Route path="/ocorrencias/dashboard" element={<OcorrenciasDashboard />} />
+
+                {/* Desvios routes */}
+                <Route path="/desvios/cadastro" element={<DesviosForm />} />
 
                 {/* Account routes */}
                 <Route path="/account/profile" element={<Profile />} />
