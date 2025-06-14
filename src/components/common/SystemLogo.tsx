@@ -1,14 +1,13 @@
-
 import { useEffect, useState } from "react";
-
 interface SystemLogoProps {
   className?: string;
   defaultTitle?: string;
 }
-
-const SystemLogo = ({ className = "h-8", defaultTitle = "Gestão de SMS Abelv" }: SystemLogoProps) => {
+const SystemLogo = ({
+  className = "h-8",
+  defaultTitle = "Gestão de SMS Abelv"
+}: SystemLogoProps) => {
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
-
   useEffect(() => {
     // Recuperar a logo do localStorage
     const savedLogo = localStorage.getItem("system-logo");
@@ -16,23 +15,11 @@ const SystemLogo = ({ className = "h-8", defaultTitle = "Gestão de SMS Abelv" }
       setLogoUrl(savedLogo);
     }
   }, []);
-
   if (logoUrl) {
-    return (
-      <img 
-        src={logoUrl} 
-        alt="Logo do Sistema" 
-        className={`object-contain ${className}`}
-      />
-    );
+    return <img src={logoUrl} alt="Logo do Sistema" className={`object-contain ${className}`} />;
   }
 
   // Retorna texto padrão se não houver logo
-  return (
-    <div className={`font-semibold ${className} flex items-center text-abelv-blue`}>
-      {defaultTitle}
-    </div>
-  );
+  return;
 };
-
 export default SystemLogo;
