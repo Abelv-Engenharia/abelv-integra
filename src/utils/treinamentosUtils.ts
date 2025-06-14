@@ -55,11 +55,6 @@ export const formatarData = (data: Date | string): string => {
 };
 
 /**
- * Busca o nome do treinamento pelo id nas tabelas treinamentos e lista_treinamentos_normativos
- */
-import { supabase } from "@/integrations/supabase/client";
-
-/**
  * Busca o nome do treinamento dado o ID. Tenta primeiro em 'treinamentos', depois em 'lista_treinamentos_normativos'.
  * Retorna 'Treinamento não encontrado' se não localizar em nenhuma tabela.
  */
