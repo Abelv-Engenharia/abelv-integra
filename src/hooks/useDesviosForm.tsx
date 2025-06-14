@@ -110,7 +110,7 @@ export const useDesviosForm = () => {
         impacto: formData.impacto ? parseInt(formData.impacto) : null,
         status: formData.situacao || 'EM TRATATIVA',
         classificacao_risco: formData.classificacaoRisco || '',
-        responsavel_id: formData.responsavelAcao || null,
+        responsavel_id: null, // Removido o campo responsavel_id que estava causando erro
         prazo_conclusao: formData.prazoCorrecao || null,
       };
 
