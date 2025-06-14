@@ -139,7 +139,7 @@ function TreinamentosNormativosPorFuncionarioTab() {
       }
       setLoading(true);
       try {
-        // Busca todos os treinamentos normativos desse funcionário, ordenado por nome, data desc - AGORA só não arquivados!
+        // Busca todos os treinamentos normativos desse funcionário, ordenado por nome, data desc, só não arquivados!
         const { data, error } = await supabase
           .from('treinamentos_normativos')
           .select(`
@@ -157,6 +157,10 @@ function TreinamentosNormativosPorFuncionarioTab() {
           .eq("arquivado", false)
           .order('lista_treinamentos_normativos.nome', { ascending: true })
           .order('data_realizacao', { ascending: false });
+
+        console.log("[Treinamentos] Query params funcionario_id:", selectedFuncionarioId);
+        console.log("[Treinamentos] Normativos recebidos do Supabase:", data, "Erro?:", error);
+
         if (error) {
           toast({
             title: "Erro",
@@ -168,8 +172,27 @@ function TreinamentosNormativosPorFuncionarioTab() {
           return;
         }
 
-        // Adicione um log para visualizar o que veio
-        console.log("[Treinamentos] Normativos recebidos:", data);
+        // Fallback: se o campo arquivado vier null, mostrar tudo (debug)
+        if ((data || []).length === 0) {
+          // Tenta buscar sem filtrar arquivado:
+          const debugRes = await supabase
+            .from('treinamentos_normativos')
+            .select(`
+              id, 
+              treinamento_id, 
+              tipo, 
+              data_realizacao, 
+              data_validade, 
+              certificado_url, 
+              status, 
+              arquivado,
+              lista_treinamentos_normativos (nome)
+            `)
+            .eq("funcionario_id", selectedFuncionarioId)
+            .order('lista_treinamentos_normativos.nome', { ascending: true })
+            .order('data_realizacao', { ascending: false });
+          console.log("[Treinamentos][DEBUG sem arquivado] Normativos recebidos:", debugRes.data, "Erro:", debugRes.error);
+        }
 
         const normativos: any[] = (data || []).map(row => ({
           id: row.id,
@@ -179,6 +202,7 @@ function TreinamentosNormativosPorFuncionarioTab() {
           data_validade: row.data_validade,
           certificado_url: row.certificado_url,
           status: row.status,
+          arquivado: row.arquivado,
         }));
 
         // Agrupar por treinamento_nome e filtrar o mais atual para "Treinamentos" e antigos para "Histórico"
@@ -270,6 +294,17 @@ function TreinamentosNormativosPorFuncionarioTab() {
               <TabsContent value="treinamentos">
                 {loading ? (
                   <div className="py-8 text-center">Carregando treinamentos...</div>
+                ) : treinamentosAtual.length === 0 ? (
+                  <div>
+                    <TabelaTreinamentosNormativos treinamentos={treinamentosAtual} />
+                    <div className="mt-4">
+                      <div className="text-xs text-muted-foreground">
+                        <strong>Depuração:</strong> Nenhum treinamento encontrado.<br />
+                        <span>Caso espere registros, veja o console do navegador para logs detalhados e confirme se existem registros no banco para este funcionário com <code>arquivado=false</code>. 
+                        Caso não tenha certeza, envie para o suporte um print do log <strong>[Treinamentos] Normativos recebidos do Supabase</strong> que aparece no console do navegador.</span>
+                      </div>
+                    </div>
+                  </div>
                 ) : (
                   <TabelaTreinamentosNormativos treinamentos={treinamentosAtual} />
                 )}
