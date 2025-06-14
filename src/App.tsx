@@ -46,6 +46,8 @@ import InspecaoGestaoSMSForm from './pages/idsms/InspecaoGestaoSMSForm';
 import IndiceReativoForm from './pages/idsms/IndiceReativoForm';
 import RelatoriosIDSMS from './pages/relatorios/RelatoriosIDSMS';
 import IDSMSIndicadores from './pages/idsms/IDSMSIndicadores';
+import VisualizarExecucaoTreinamento from './pages/treinamentos/VisualizarExecucaoTreinamento';
+import EditarExecucaoTreinamento from './pages/treinamentos/EditarExecucaoTreinamento';
 import Layout from './components/layout/Layout';
 
 const queryClient = new QueryClient();
@@ -72,6 +74,8 @@ function App() {
               <Route path="treinamentos/consulta" element={<TreinamentosConsulta />} />
               <Route path="treinamentos/execucao" element={<ExecucaoTreinamentos />} />
               <Route path="treinamentos/cracha" element={<EmissaoCracha />} />
+              <Route path="/treinamentos/execucao/visualizar/:id" element={<VisualizarExecucaoTreinamento />} />
+              <Route path="/treinamentos/execucao/editar/:id" element={<EditarExecucaoTreinamento />} />
 
               {/* Ocorrencias Routes */}
               <Route path="ocorrencias/dashboard" element={<OcorrenciasDashboard />} />

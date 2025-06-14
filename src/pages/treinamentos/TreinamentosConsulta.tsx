@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,6 +9,9 @@ import { Badge } from "@/components/ui/badge";
 import { Search, Filter, Download, Eye, Edit, Trash2 } from "lucide-react";
 import { execucaoTreinamentoService } from "@/services/treinamentos/execucaoTreinamentoService";
 import { ExecucaoTreinamento } from "@/types/treinamentos";
+import { useNavigate } from "react-router-dom";
+import ConfirmacaoExclusaoModal from "@/components/treinamentos/ConfirmacaoExclusaoModal";
+import { toast } from "@/hooks/use-toast";
 
 const TreinamentosConsulta = () => {
   const [execucoes, setExecucoes] = useState<ExecucaoTreinamento[]>([]);
@@ -17,6 +21,12 @@ const TreinamentosConsulta = () => {
   const [filterAno, setFilterAno] = useState("todos");
   const [isLoading, setIsLoading] = useState(true);
 
+  // Exclusion modal state
+  const [idParaExcluir, setIdParaExcluir] = useState<string | null>(null);
+  const [modalAberto, setModalAberto] = useState(false);
+
+  const navigate = useNavigate();
+
   useEffect(() => {
     loadExecucoes();
   }, []);
@@ -25,11 +35,10 @@ const TreinamentosConsulta = () => {
     try {
       setIsLoading(true);
       const data = await execucaoTreinamentoService.getAll();
-      // Process data to ensure all required fields are present and properly typed
       const execucoesProcessadas = data.map(item => ({
         ...item,
         id: item.id || crypto.randomUUID(),
-        data: item.data, // Keep as string since it comes from the database as string
+        data: item.data,
         efetivo_mod: item.efetivo_mod || 0,
         efetivo_moi: item.efetivo_moi || 0,
         horas_totais: item.horas_totais || 0
@@ -74,27 +83,41 @@ const TreinamentosConsulta = () => {
     return d.toLocaleDateString("pt-BR");
   };
 
-  const getStatusBadge = (execucao: ExecucaoTreinamento) => {
-    if (execucao.lista_presenca_url) {
-      return <Badge variant="default">Concluído</Badge>;
-    }
-    return <Badge variant="secondary">Pendente</Badge>;
-  };
-
+  // Opções de ação
   const handleView = (execucao: ExecucaoTreinamento) => {
-    console.log("Visualizar:", execucao);
-    // Implemente a navegação ou diálogo de detalhes aqui
+    if (execucao.id) {
+      navigate(`/treinamentos/execucao/visualizar/${execucao.id}`);
+    }
   };
 
   const handleEdit = (execucao: ExecucaoTreinamento) => {
-    console.log("Editar:", execucao);
-    // Implemente a navegação ou diálogo de edição aqui
+    if (execucao.id) {
+      navigate(`/treinamentos/execucao/editar/${execucao.id}`);
+    }
   };
 
   const handleDelete = (execucao: ExecucaoTreinamento) => {
-    if (window.confirm("Deseja realmente excluir esta execução?")) {
-      console.log("Excluir:", execucao);
-      // Implemente a exclusão aqui
+    setIdParaExcluir(execucao.id || "");
+    setModalAberto(true);
+  };
+
+  const confirmarExclusao = async () => {
+    if (!idParaExcluir) return;
+    try {
+      await execucaoTreinamentoService.delete(idParaExcluir);
+      toast({
+        title: "Excluído!",
+        description: "Execução excluída com sucesso.",
+        variant: "default"
+      });
+      setModalAberto(false);
+      loadExecucoes();
+    } catch {
+      toast({
+        title: "Erro ao excluir",
+        description: "Não foi possível excluir a execução.",
+        variant: "destructive"
+      });
     }
   };
 
@@ -116,7 +139,6 @@ const TreinamentosConsulta = () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {/* Filtros */}
           <div className="flex flex-col md:flex-row gap-4 mb-6">
             <div className="flex-1">
               <Input
@@ -213,8 +235,15 @@ const TreinamentosConsulta = () => {
           </div>
         </CardContent>
       </Card>
+      <ConfirmacaoExclusaoModal
+        open={modalAberto}
+        onOpenChange={setModalAberto}
+        onConfirm={confirmarExclusao}
+      />
     </div>
   );
 };
 
 export default TreinamentosConsulta;
+
+// O arquivo está ficando longo; considere pedir refatoração em breve.
