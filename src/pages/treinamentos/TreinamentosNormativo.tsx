@@ -608,17 +608,14 @@ const TreinamentosNormativo = () => {
                               ? typeof field.value === "string"
                                 ? field.value
                                 : field.value instanceof Date
-                                  ? field.value
-                                    ? `${field.value.getFullYear()}-${String(field.value.getMonth() + 1).padStart(2, '0')}-${String(field.value.getDate()).padStart(2, '0')}`
-                                    : ""
+                                  ? `${field.value.getFullYear()}-${String(field.value.getMonth() + 1).padStart(2, '0')}-${String(field.value.getDate()).padStart(2, '0')}`
                                   : ""
                               : ""
                           }
                           onChange={e => {
-                            // O type=date já garante formato yyyy-mm-dd
                             const v = e.target.value;
                             if (v) {
-                              // Convertemos para Date para garantir compatibilidade
+                              // v is yyyy-mm-dd, convert to Date
                               const [yyyy, mm, dd] = v.split("-");
                               const asDate = new Date(Number(yyyy), Number(mm) - 1, Number(dd));
                               if (!isNaN(asDate.getTime())) {
