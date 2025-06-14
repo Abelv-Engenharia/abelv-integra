@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TreinamentosNormativosChart } from "@/components/treinamentos/TreinamentosNormativosChart";
@@ -18,11 +18,20 @@ import TreinamentosDashboardFilters from "@/components/treinamentos/Treinamentos
 import { TreinamentosExecucaoChart } from "@/components/treinamentos/TreinamentosExecucaoChart";
 import { DonutProcessoGeralChart } from "@/components/treinamentos/DonutProcessoGeralChart";
 import { DonutSubprocessoChart } from "@/components/treinamentos/DonutSubprocessoChart";
+import { fetchProcessosTreinamento } from "@/services/treinamentos/processoTreinamentoService";
 
 const TreinamentosDashboard = () => {
   const [year, setYear] = useState<string>("todos");
   const [month, setMonth] = useState<string>("todos");
   const [ccaId, setCcaId] = useState<string>("todos");
+
+  // Opções de processo treinamento para o seletor
+  const [processos, setProcessos] = useState<any[]>([]);
+  const [processoTreinamentoId, setProcessoTreinamentoId] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchProcessosTreinamento().then(setProcessos);
+  }, []);
 
   return (
     <div className="space-y-6">
@@ -68,7 +77,6 @@ const TreinamentosDashboard = () => {
         </TabsList>
         
         <TabsContent value="execucao" className="space-y-4">
-          {/* Alterado para exibir gráficos um abaixo do outro */}
           <div className="flex flex-col gap-4">
             <Card>
               <CardHeader>
@@ -85,11 +93,25 @@ const TreinamentosDashboard = () => {
               <CardHeader>
                 <CardTitle>SUBPROCESSO</CardTitle>
                 <CardDescription>
-                  Distribuição dos subprocessos de treinamento
+                  Distribuição dos subprocessos de treinamento vinculados ao processo selecionado
                 </CardDescription>
+                {/* Select para processo_treinamento */}
+                <div className="mt-2">
+                  <label className="mr-2 font-medium">Filtrar por Processo: </label>
+                  <select
+                    value={processoTreinamentoId || ""}
+                    onChange={e => setProcessoTreinamentoId(e.target.value || null)}
+                    className="border rounded px-2 py-1"
+                  >
+                    <option value="">Selecione um processo</option>
+                    {processos.map(p => (
+                      <option key={p.id} value={p.id}>{p.nome}</option>
+                    ))}
+                  </select>
+                </div>
               </CardHeader>
               <CardContent className="h-[400px] flex items-center justify-center">
-                <DonutSubprocessoChart />
+                <DonutSubprocessoChart processoTreinamentoId={processoTreinamentoId} />
               </CardContent>
             </Card>
           </div>

@@ -1,20 +1,12 @@
-import React from "react";
-import { PieChart, Pie, Cell, Tooltip, PieLabelRenderProps } from "recharts";
 
-const data = [
-  { name: "Treinamentos Normativos Obrigatórios (NRs)", value: 36 },
-  { name: "DESMAS", value: 14 },
-  { name: "Procedimentos de SMS e Aulas", value: 7 },
-  { name: "Formação", value: 7 },
-  { name: "Integração corporativa (NRI, NR10, NRE1, NR45 etc)", value: 29 }
-];
+import React, { useEffect, useState } from "react";
+import { PieChart, Pie, Cell, Tooltip, PieLabelRenderProps } from "recharts";
+import { fetchDonutSubprocessoData } from "@/services/treinamentos/treinamentosSubprocessoService";
 
 const COLORS = ["#F59E0B", "#2563EB", "#6B7280", "#FAA43A", "#60A5FA"];
 
-// Custom label logic igual ao do gráfico geral
 const renderCustomLabel = (props: PieLabelRenderProps) => {
   const RADIAN = Math.PI / 180;
-  // Coerce cx, cy, and outerRadius to numbers for safe math
   const cx = Number(props.cx);
   const cy = Number(props.cy);
   const midAngle = props.midAngle;
@@ -28,9 +20,7 @@ const renderCustomLabel = (props: PieLabelRenderProps) => {
   const y = cy + radius * Math.sin(-midAngle * RADIAN);
 
   const color = COLORS[index % COLORS.length];
-
-  const label =
-    String(name).length > 28 ? String(name).substring(0, 23) + "..." : String(name);
+  const label = String(name).length > 28 ? String(name).substring(0, 23) + "..." : String(name);
 
   return (
     <text
@@ -46,7 +36,42 @@ const renderCustomLabel = (props: PieLabelRenderProps) => {
   );
 };
 
-export const DonutSubprocessoChart = () => {
+interface DonutSubprocessoChartProps {
+  processoTreinamentoId: string | null;
+}
+
+export const DonutSubprocessoChart: React.FC<DonutSubprocessoChartProps> = ({
+  processoTreinamentoId
+}) => {
+  const [data, setData] = useState<Array<{ name: string; value: number }>>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!processoTreinamentoId) {
+      setData([]);
+      return;
+    }
+    setLoading(true);
+    fetchDonutSubprocessoData(processoTreinamentoId)
+      .then(result => setData(result))
+      .finally(() => setLoading(false));
+  }, [processoTreinamentoId]);
+
+  if (loading) {
+    return (
+      <div className="w-full flex items-center justify-center h-60">
+        <span className="text-muted-foreground">Carregando...</span>
+      </div>
+    );
+  }
+  if ((!data || data.length === 0) && processoTreinamentoId) {
+    return (
+      <div className="w-full flex items-center justify-center h-60">
+        <span className="text-muted-foreground">Não há dados para exibir.</span>
+      </div>
+    );
+  }
+
   return (
     <div className="w-full flex items-center justify-center">
       <PieChart width={540} height={360}>
