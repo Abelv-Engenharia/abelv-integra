@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -24,6 +23,7 @@ import MedidasConsulta from './pages/PlaceholderPage';
 import TarefasDashboard from './pages/tarefas/TarefasDashboard';
 import MinhasTarefas from './pages/tarefas/MinhasTarefas';
 import CadastroTarefas from './pages/tarefas/CadastroTarefas';
+import DetalheTarefa from './pages/tarefas/DetalheTarefa';
 import Relatorios from './pages/relatorios/RelatoriosDashboard';
 import UsuariosAdmin from './pages/admin/AdminUsuarios';
 import PerfisAdmin from './pages/admin/AdminPerfis';
@@ -87,6 +87,7 @@ function App() {
               <Route path="tarefas/dashboard" element={<TarefasDashboard />} />
               <Route path="tarefas/minhas-tarefas" element={<MinhasTarefas />} />
               <Route path="tarefas/cadastro" element={<CadastroTarefas />} />
+              <Route path="tarefas/detalhe/:id" element={<DetalheTarefa />} />
 
               {/* Relatorios Routes */}
               <Route path="relatorios" element={<Relatorios />} />
