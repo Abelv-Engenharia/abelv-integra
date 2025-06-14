@@ -21,7 +21,8 @@ export const useFuncionarios = () => {
           foto,
           ativo,
           cca_id,
-          ccas:cca_id(id, codigo, nome)
+          ccas:cca_id(id, codigo, nome),
+          updated_at
         `)
         .order('nome');
       if (error) throw error;
