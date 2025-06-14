@@ -137,7 +137,7 @@ const DesviosTable = () => {
     toast({
       title: "Desvio excluído",
       description: "O desvio foi removido com sucesso.",
-      variant: "success",
+      variant: "default",
     });
   };
 
