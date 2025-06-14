@@ -1,4 +1,3 @@
-
 import React, { useRef } from "react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,6 +5,7 @@ import { User, Printer } from "lucide-react";
 import { formatarData } from "@/utils/treinamentosUtils";
 import { format } from "date-fns";
 import { Funcionario, TreinamentoNormativo } from "@/types/treinamentos";
+import { useFuncionarioFotoUrl } from "./useFuncionarioFotoUrl";
 
 // Função deduplicar treinamentos, igual usada no card de treinamentos válidos
 const getTreinamentosMaisRecentes = (
@@ -45,6 +45,9 @@ const CrachaPreview: React.FC<Props> = ({
   const crachaRef = useRef<HTMLDivElement | null>(null);
 
   const treinamentosFiltrados = getTreinamentosMaisRecentes(treinamentosValidos);
+
+  // Hook: gerar URL segura para foto do funcionário
+  const fotoUrl = useFuncionarioFotoUrl(funcionario?.foto);
 
   // Função para imprimir SOMENTE o crachá mostrado (não página toda)
   const handlePrintCracha = () => {
@@ -134,10 +137,10 @@ const CrachaPreview: React.FC<Props> = ({
               </div>
 
               <div className="flex items-start gap-4 my-4">
-                <div className="w-28 h-28 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0">
-                  {funcionario.foto ? (
+                <div className="w-28 h-28 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden">
+                  {fotoUrl ? (
                     <img
-                      src={funcionario.foto}
+                      src={fotoUrl}
                       alt={funcionario.nome}
                       className="w-full h-full object-cover rounded-full"
                     />
