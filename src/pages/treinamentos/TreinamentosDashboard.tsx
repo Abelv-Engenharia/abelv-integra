@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -16,10 +15,23 @@ import {
   Users 
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import TreinamentosDashboardFilters from "@/components/treinamentos/TreinamentosDashboardFilters";
 
 const TreinamentosDashboard = () => {
+  const [year, setYear] = useState<string>("todos");
+  const [month, setMonth] = useState<string>("todos");
+  const [ccaId, setCcaId] = useState<string>("todos");
+
   return (
     <div className="space-y-6">
+      <TreinamentosDashboardFilters
+        year={year}
+        setYear={setYear}
+        month={month}
+        setMonth={setMonth}
+        ccaId={ccaId}
+        setCcaId={setCcaId}
+      />
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Dashboard de Treinamentos</h1>
