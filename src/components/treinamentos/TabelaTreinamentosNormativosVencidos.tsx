@@ -74,7 +74,7 @@ export const TabelaTreinamentosNormativosVencidos: React.FC = () => {
   const handleRenovar = (treinamento: TreinamentoNormativo) => {
     const funcionario = getFuncionarioInfo(treinamento.funcionario_id);
     if (!funcionario) return;
-    // Vamos passar os campos de CCA, funcionario, função, matrícula e treinamento realizado
+    // Inclui o campo tipo como "Reciclagem"
     navigate("/treinamentos/normativo", {
       state: {
         ccaId: funcionario.cca_id ? String(funcionario.cca_id) : "",
@@ -82,6 +82,7 @@ export const TabelaTreinamentosNormativosVencidos: React.FC = () => {
         funcao: funcionario.funcao,
         matricula: funcionario.matricula,
         treinamentoId: treinamento.treinamento_id,
+        tipo: "Reciclagem", // novo campo!
       },
     });
   };

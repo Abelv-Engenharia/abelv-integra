@@ -397,17 +397,18 @@ const TreinamentosNormativo = () => {
   // Novo: detecta dados vindos via state da tabela para renovação
   useEffect(() => {
     if (location?.state) {
-      const { ccaId, funcionarioId, funcao, matricula, treinamentoId } = location.state as {
+      const { ccaId, funcionarioId, funcao, matricula, treinamentoId, tipo } = location.state as {
         ccaId?: string;
         funcionarioId?: string;
         funcao?: string;
         matricula?: string;
         treinamentoId?: string;
+        tipo?: string; // agora permite tipo
       };
       if (ccaId) form.setValue("ccaId", ccaId);
       if (funcionarioId) form.setValue("funcionarioId", funcionarioId);
       if (treinamentoId) form.setValue("treinamentoId", treinamentoId);
-
+      if (tipo) form.setValue("tipo", tipo); // se vier tipo, setar!
       // Forçar Função e Matrícula nos elementos exibidos (apenas para exibição, pois são disabled)
       if (funcionarioId && funcionarios.length > 0) {
         const funcionario = funcionarios.find(f => f.id === funcionarioId);
