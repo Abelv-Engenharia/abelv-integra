@@ -1,7 +1,5 @@
 import React from "react";
-import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { supabase } from "@/integrations/supabase/client";
 
 type LinhaTabela = {
   tipoTreinamento: string;
@@ -92,12 +90,7 @@ export const TreinamentosPorProcessoTable = ({ data = [], isLoading = false }: {
                   </td>
                 </tr>
               )}
-              {error && (
-                <tr>
-                  <td colSpan={5} className="text-center text-red-600 p-4">Erro ao carregar dados.</td>
-                </tr>
-              )}
-              {!isLoading && !error && data.length === 0 && (
+              {!isLoading && data.length === 0 && (
                 <tr>
                   <td colSpan={5} className="text-center py-6 text-muted-foreground">
                     Nenhum dado de treinamento encontrado.
