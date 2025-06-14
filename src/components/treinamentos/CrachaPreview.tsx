@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -88,7 +87,7 @@ const CrachaPreview: React.FC<Props> = ({
                 {isLoading ? (
                   <p className="text-center text-sm text-muted-foreground">Carregando treinamentos...</p>
                 ) : treinamentosFiltrados.length > 0 ? (
-                  <div className="overflow-auto max-h-[200px]">
+                  <div>
                     <table className="text-sm w-full">
                       <thead>
                         <tr className="border-b">
@@ -146,4 +145,3 @@ const CrachaPreview: React.FC<Props> = ({
 };
 
 export default CrachaPreview;
-
