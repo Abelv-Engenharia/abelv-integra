@@ -294,6 +294,15 @@ const DesviosNaoConformidade = () => {
     form.setValue("templateText", newValue);
   };
 
+  // Handler for form submit
+  const onSubmit = async (formData: FormValues) => {
+    // Optionally re-generate preview before sending (for up-to-date data)
+    if (!previewText) {
+      await generatePreview();
+    }
+    await sendPdfEmail(formData);
+  };
+
   return (
     <div className="space-y-6">
       <div>
