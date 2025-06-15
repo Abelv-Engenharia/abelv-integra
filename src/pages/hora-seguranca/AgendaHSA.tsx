@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardTitle, CardHeader } from "@/components/ui/card";
@@ -14,6 +13,23 @@ interface InspecaoAgenda {
   status: string;
   inspecao_programada: string | null;
 }
+
+const getInspecaoStatusColor = (status: string) => {
+  switch (status) {
+    case "REALIZADA":
+      return "bg-green-100 border-green-200 text-green-800";
+    case "REALIZADA (NÃO PROGRAMADA)":
+      return "bg-orange-100 border-orange-200 text-orange-800";
+    case "A REALIZAR":
+      return "bg-blue-100 border-blue-200 text-blue-800";
+    case "NÃO REALIZADA":
+      return "bg-red-100 border-red-200 text-red-800";
+    case "CANCELADA":
+      return "bg-gray-200 border-gray-300 text-gray-800";
+    default:
+      return "bg-gray-100 border-gray-200 text-gray-800";
+  }
+};
 
 export default function AgendaHSA() {
   const [inspecoes, setInspecoes] = useState<InspecaoAgenda[]>([]);
@@ -51,15 +67,15 @@ export default function AgendaHSA() {
     return (
       <div className="flex flex-col h-full w-full p-2">
         <span className={`font-medium self-start ${isToday ? 'text-blue-600 font-bold' : ''}`}>{date.getDate()}</span>
-        <div className="flex-grow overflow-y-auto text-[10px] mt-1 space-y-0">
+        <div className="flex-grow overflow-y-auto text-[10px] mt-1 space-y-0.5">
           {eventosDoDia.map((inspecao) => (
             <div
               key={inspecao.id}
-              className="rounded p-0.5 bg-green-50 border border-green-200 text-gray-800"
+              className={`rounded p-0.5 ${getInspecaoStatusColor(inspecao.status)}`}
               title={`${inspecao.inspecao_programada || 'Inspeção'} - ${inspecao.status}`}
             >
               <p className="font-bold truncate">{inspecao.responsavel_inspecao}</p>
-              <p className="truncate text-gray-600">{inspecao.inspecao_programada || 'Não Programada'}</p>
+              <p className="truncate opacity-80">{inspecao.inspecao_programada || 'Não Programada'}</p>
             </div>
           ))}
         </div>
