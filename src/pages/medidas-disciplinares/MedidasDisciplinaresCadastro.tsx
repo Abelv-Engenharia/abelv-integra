@@ -8,9 +8,9 @@ export default function MedidasDisciplinaresCadastro() {
   const [success, setSuccess] = useState(false);
 
   return (
-    <div className="max-w-2xl mx-auto py-8 space-y-6">
-      <h1 className="text-2xl font-bold">Cadastro de Medida Disciplinar</h1>
-      <Card className="p-6 shadow-md">
+    <div className="w-full px-2 sm:px-4 md:px-6 py-8 flex flex-col items-center">
+      <h1 className="text-2xl font-bold mb-4">Cadastro de Medida Disciplinar</h1>
+      <Card className="w-full max-w-xl sm:max-w-2xl md:max-w-3xl lg:max-w-4xl p-4 sm:p-6 shadow-md">
         {success ? (
           <MedidaDisciplinarSuccess onNew={() => setSuccess(false)} />
         ) : (
