@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -25,68 +26,95 @@ import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 
+// Define types for our data
+interface Cca {
+  id: number;
+  codigo: string;
+  nome: string;
+}
+
+interface Funcionario {
+  id: string;
+  nome: string;
+  funcao: string;
+}
+
+interface TipoInspecao {
+  id: string;
+  nome: string;
+}
+
+
 // Busca CCAs ativos
 const useCCAs = () => {
-  const [ccas, setCcas] = React.useState([]);
+  const [ccas, setCcas] = React.useState<Cca[]>([]);
   React.useEffect(() => {
     supabase
       .from("ccas")
-      .select("codigo, nome")
+      .select("id, codigo, nome")
       .eq("ativo", true)
       .order("codigo")
-      .then(({ data }) => setCcas(data || []));
+      .then(({ data }) => setCcas((data as Cca[]) || []));
   }, []);
   return ccas;
 };
 
 // Atualiza o hook para aceitar o código do CCA
 const useFuncionarios = (ccaCodigo?: string) => {
-  const [funcionarios, setFuncionarios] = React.useState([]);
+  const [funcionarios, setFuncionarios] = React.useState<Funcionario[]>([]);
   React.useEffect(() => {
-    if (!ccaCodigo) {
-      setFuncionarios([]);
-      return;
-    }
-    supabase
-      .from("funcionarios")
-      .select("id, nome, funcao, cca_id, ativo, matricula")
-      .eq("ativo", true)
-      .order("nome")
-      .then(({ data }) => {
-        // Filtra funcionários pelo cca_id relacionado ao código selecionado
-        if (!data) {
-          setFuncionarios([]);
-          return;
-        }
-        // Buscar o ID do CCA a partir do código
-        supabase
-          .from("ccas")
-          .select("id")
-          .eq("codigo", ccaCodigo)
-          .maybeSingle()
-          .then(({ data: ccaData }) => {
-            if (!ccaData) {
-              setFuncionarios([]);
-              return;
-            }
-            const filtered = data.filter((f: any) => f.cca_id === ccaData.id);
-            setFuncionarios(filtered);
-          });
-      });
+    const fetchFuncionarios = async () => {
+      if (!ccaCodigo) {
+        setFuncionarios([]);
+        return;
+      }
+
+      // 1. Get cca_id from cca_codigo
+      const { data: ccaData, error: ccaError } = await supabase
+        .from('ccas')
+        .select('id')
+        .eq('codigo', ccaCodigo)
+        .maybeSingle();
+
+      if (ccaError || !ccaData) {
+        console.error("Error fetching CCA or CCA not found:", ccaError?.message);
+        setFuncionarios([]);
+        return;
+      }
+
+      // 2. Get employees for that cca_id
+      const { data: funcData, error: funcError } = await supabase
+        .from('funcionarios')
+        .select('id, nome, funcao')
+        .eq('ativo', true)
+        .eq('cca_id', ccaData.id)
+        .order('nome');
+      
+      if (funcError) {
+        console.error("Error fetching funcionarios:", funcError.message);
+        setFuncionarios([]);
+        return;
+      }
+      
+      setFuncionarios((funcData as Funcionario[]) || []);
+    };
+
+    fetchFuncionarios();
   }, [ccaCodigo]);
   return funcionarios;
 };
 
+
 // Tipos de inspeção HSA
 const useTiposInspecao = () => {
-  const [tipos, setTipos] = React.useState([]);
+  const [tipos, setTipos] = React.useState<TipoInspecao[]>([]);
   React.useEffect(() => {
     supabase
       .from("tipo_inspecao_hsa")
       .select("id, nome")
       .eq("ativo", true)
       .order("nome")
-      .then(({ data }) => setTipos(data || []));
+      .then(({ data }) => setTipos((data as TipoInspecao[]) || []));
   }, []);
   return tipos;
 };
@@ -137,11 +165,11 @@ const InspecaoCadastroHSA = () => {
 
   const handleSubmit = async (values: FormType) => {
     setIsSaving(true);
-    let responsavel_nome = "";
-    let funcao = "";
+    let responsavel_nome: string | undefined = "";
+    let funcao: string | undefined = "";
 
     if (values.responsavelTipo === "funcionario") {
-      const funcionario = funcionarios.find((f: any) => f.id === values.responsavelFuncionarioId);
+      const funcionario = funcionarios.find((f) => f.id === values.responsavelFuncionarioId);
       responsavel_nome = funcionario?.nome;
       funcao = funcionario?.funcao;
     } else {
@@ -150,7 +178,7 @@ const InspecaoCadastroHSA = () => {
     }
 
     // Corrigir busca do ID do CCA pelo código
-    const ccaObj = ccas.find((c: any) => c.codigo === values.cca);
+    const ccaObj = ccas.find((c) => c.codigo === values.cca);
     const cca_id = ccaObj?.id;
 
     // Checar campos obrigatórios antes de salvar
@@ -201,7 +229,7 @@ const InspecaoCadastroHSA = () => {
     }
 
     // Nome do tipo de inspeção
-    const tipoInspecaoLabel = tiposInspecao.find((t: any) => t.id === values.tipoInspecao)?.nome || "";
+    const tipoInspecaoLabel = tiposInspecao.find((t) => t.id === values.tipoInspecao)?.nome || "";
 
     // Insert só com cca_id e campos obrigatórios
     const { error } = await supabase
@@ -330,7 +358,7 @@ const InspecaoCadastroHSA = () => {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent className="max-h-72 overflow-y-auto">
-                          {ccas.map((cca: any) => (
+                          {ccas.map((cca) => (
                             <SelectItem key={cca.codigo} value={cca.codigo}>
                               {cca.codigo} - {cca.nome}
                             </SelectItem>
@@ -396,7 +424,7 @@ const InspecaoCadastroHSA = () => {
                           {funcionarios.length === 0 && watchCCA && (
                             <div className="text-sm text-gray-500 px-2 py-1">Nenhum funcionário para este CCA</div>
                           )}
-                          {funcionarios.map((f: any) => (
+                          {funcionarios.map((f) => (
                             <SelectItem key={f.id} value={f.id}>
                               {f.nome}
                             </SelectItem>
@@ -428,7 +456,7 @@ const InspecaoCadastroHSA = () => {
                         value={
                           (() => {
                             const funcionario = funcionarios.find(
-                              (f: any) => f.id === form.watch("responsavelFuncionarioId")
+                              (f) => f.id === form.watch("responsavelFuncionarioId")
                             );
                             return funcionario?.funcao || "";
                           })()
@@ -509,3 +537,4 @@ const InspecaoCadastroHSA = () => {
 };
 
 export default InspecaoCadastroHSA;
+
