@@ -116,8 +116,9 @@ const CadastroTarefas = () => {
     try {
       console.log("Dados do formulário:", data);
       
-      // Converter para o formato esperado pelo service
+      // Corrigido: incluímos 'titulo' no objeto enviado!
       const tarefaData: TarefaFormData = {
+        titulo: data.titulo, // <-- Adicionado aqui!
         cca_id: data.cca_id,
         data_conclusao: data.data_conclusao,
         descricao: data.descricao,
@@ -129,7 +130,7 @@ const CadastroTarefas = () => {
           recorrencia: data.configuracao.recorrencia,
         },
       };
-      
+
       const success = await tarefasService.create(tarefaData);
       
       if (success) {
