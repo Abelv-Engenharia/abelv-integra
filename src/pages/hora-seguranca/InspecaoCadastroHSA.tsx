@@ -275,7 +275,7 @@ const InspecaoCadastroHSA = () => {
                             <SelectValue placeholder="Selecione o CCA" />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent>
+                        <SelectContent className="max-h-72 overflow-y-auto">
                           {ccas.map((cca: any) => (
                             <SelectItem key={cca.codigo} value={cca.codigo}>
                               {cca.codigo} - {cca.nome}
@@ -301,7 +301,7 @@ const InspecaoCadastroHSA = () => {
                             <SelectValue placeholder="Selecione o tipo de inspeção" />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent>
+                        <SelectContent className="max-h-72 overflow-y-auto">
                           {tiposInspecao.map((t: any) => (
                             <SelectItem key={t.id} value={t.id}>{t.nome}</SelectItem>
                           ))}
