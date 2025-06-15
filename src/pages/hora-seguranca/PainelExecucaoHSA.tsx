@@ -244,8 +244,9 @@ export default function PainelExecucaoHSA() {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-sm text-gray-500 font-medium">
-                  Aderência real HSA
+                <div className="text-sm text-gray-500 font-bold">
+                  {/* Título alterado para negrito e texto solicitado */}
+                  Aderência HSA real
                 </div>
                 <div className={`text-3xl font-bold mt-2 ${aderenciaColor}`}>
                   {isLoading
@@ -270,7 +271,8 @@ export default function PainelExecucaoHSA() {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-sm text-gray-500 font-medium">
+                <div className="text-sm text-gray-500 font-bold">
+                  {/* Título agora em negrito */}
                   Aderência HSA Ajustada
                 </div>
                 <div className={`text-3xl font-bold mt-2 ${aderenciaAjustadaColor}`}>
@@ -281,11 +283,15 @@ export default function PainelExecucaoHSA() {
                         maximumFractionDigits: 1,
                       })}%`}
                 </div>
+                {/* Rótulos simplificados conforme solicitado */}
                 <div className="mt-2 text-xs text-gray-400">
-                  (Realizadas + Não programadas) ÷ Inspeções programadas
+                  Inspeções programadas: {isLoading ? "..." : programadasCard}
                 </div>
                 <div className="mt-1 text-xs text-gray-400">
-                  {isLoading ? "..." : `( ${realizadasCard} + ${realizadasNaoProgramadaCard} ) ÷ ${programadasCard} `}
+                  Inspeções realizadas (considerando realizada não programada):{" "}
+                  {isLoading
+                    ? "..."
+                    : aderenciaAjustadaNum}
                 </div>
               </div>
             </div>
