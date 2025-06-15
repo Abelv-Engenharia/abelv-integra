@@ -4,7 +4,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { format, isSameDay } from "date-fns";
-import ptBR from "date-fns/locale/pt-BR";
+import { ptBR } from "date-fns/locale/pt-BR";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
 
@@ -43,30 +43,35 @@ export default function AgendaHSA() {
     groupedByDay[day].push(inspecao);
   });
 
-  // Renderiza inspeções de um determinado dia (props: date)
-  const renderDayContent = (date: Date) => {
+  // Componente personalizado para o conteúdo do dia
+  const CustomDayContent = (props: { date: Date }) => {
+    const date = props.date;
     const key = format(date, "yyyy-MM-dd");
     const eventos = groupedByDay[key];
-    if (eventos && eventos.length > 0) {
-      return (
-        <div className="flex flex-col gap-1">
-          {eventos.map((inspecao) => (
-            <div
-              key={inspecao.id}
-              className="rounded px-1 py-0.5 bg-green-100 border text-xs text-green-900 border-green-400 flex flex-col"
-              title={`Status: ${inspecao.status}${inspecao.inspecao_programada ? " • " + inspecao.inspecao_programada : ""}`}
-            >
-              <span className="font-semibold">{inspecao.responsavel_inspecao}</span>
-              <span className="text-[10px]">{inspecao.status}</span>
-              {inspecao.inspecao_programada && (
-                <span className="text-[10px] text-gray-500">{inspecao.inspecao_programada}</span>
-              )}
+    return (
+      <div className="relative flex flex-col items-center">
+        <span>{date.getDate()}</span>
+        <div className="absolute z-10 top-6 left-1 right-1">
+          {eventos && eventos.length > 0 && (
+            <div className="flex flex-col gap-1">
+              {eventos.map((inspecao) => (
+                <div
+                  key={inspecao.id}
+                  className="rounded px-1 py-0.5 bg-green-100 border text-xs text-green-900 border-green-400 flex flex-col"
+                  title={`Status: ${inspecao.status}${inspecao.inspecao_programada ? " • " + inspecao.inspecao_programada : ""}`}
+                >
+                  <span className="font-semibold">{inspecao.responsavel_inspecao}</span>
+                  <span className="text-[10px]">{inspecao.status}</span>
+                  {inspecao.inspecao_programada && (
+                    <span className="text-[10px] text-gray-500">{inspecao.inspecao_programada}</span>
+                  )}
+                </div>
+              ))}
             </div>
-          ))}
+          )}
         </div>
-      );
-    }
-    return null;
+      </div>
+    );
   };
 
   if (isLoading)
@@ -98,15 +103,7 @@ export default function AgendaHSA() {
               modifiersClassNames={{
                 hasInspecao: "outline outline-green-400/70 outline-2",
               }}
-              dayContent={(date) => (
-                <div className="relative flex flex-col items-center">
-                  <span>{date.getDate()}</span>
-                  {/* Renderiza as inspeções, mas só mostra no calendário dias que têm eventos */}
-                  <div className="absolute z-10 top-6 left-1 right-1">
-                    {renderDayContent(date)}
-                  </div>
-                </div>
-              )}
+              components={{ DayContent: CustomDayContent }}
             />
             {/* Lista detalhada das inspeções no dia selecionado */}
             {selectedDate && (
