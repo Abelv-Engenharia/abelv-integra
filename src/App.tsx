@@ -53,6 +53,7 @@ import Profile from './pages/account/Profile';
 import Settings from './pages/account/Settings';
 import ForgotPassword from './pages/auth/ForgotPassword';
 import ResetPassword from './pages/auth/ResetPassword';
+import InspecaoCadastroHSA from './pages/hora-seguranca/InspecaoCadastroHSA';
 
 const queryClient = new QueryClient();
 
@@ -130,6 +131,9 @@ function App() {
               <Route path="idsms/inspecao-alta-lideranca" element={<InspecaoAltaLiderancaForm />} />
               <Route path="idsms/inspecao-gestao-sms" element={<InspecaoGestaoSMSForm />} />
               <Route path="idsms/indice-reativo" element={<IndiceReativoForm />} />
+
+              {/* Hora da Segurança - Nova página de cadastro */}
+              <Route path="hora-seguranca/cadastro" element={<InspecaoCadastroHSA />} />
             </Route>
           </Routes>
         </AuthProvider>
