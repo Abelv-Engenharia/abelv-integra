@@ -67,33 +67,6 @@ export default function PainelExecucaoHSA() {
     loadData();
   }, []);
 
-  // KPIs - Define Aderência real HSA
-  // Considera status: 'A REALIZAR', 'REALIZADA', 'NÃO REALIZADA'
-  // Como no mock do painel, statusData está disponível (cada status e valor)
-  // Para calcular programadas:
-  const statusProgramada = ["A REALIZAR", "REALIZADA", "NÃO REALIZADA"];
-  const programadasCard = statusData
-    .filter((s) => statusProgramada.includes((s.name || "").toUpperCase()))
-    .reduce((acc, cur) => acc + (cur.value ?? 0), 0);
-
-  // Realizadas: assume statusData com status "REALIZADA"
-  const realizadasCard = statusData
-    .filter((s) => (s.name || "").toUpperCase() === "REALIZADA")
-    .reduce((acc, cur) => acc + (cur.value ?? 0), 0);
-
-  const aderenciaPerc =
-    programadasCard > 0
-      ? Math.round((realizadasCard / programadasCard) * 1000) / 10 // 1 decimal
-      : 0;
-
-  // Define a cor do valor
-  let aderenciaColor = "text-green-600";
-  if (aderenciaPerc < 90) {
-    aderenciaColor = "text-red-600";
-  } else if (aderenciaPerc < 95) {
-    aderenciaColor = "text-yellow-500";
-  }
-
   // Calcula percentuais dos KPIs:
   const totalInspecoes = summary?.totalInspecoes ?? 0;
   const concluidas = summary?.realizadas ?? 0;
@@ -209,32 +182,6 @@ export default function PainelExecucaoHSA() {
       
       {/* CARDS KPIs */}
       <div className="grid gap-4 md:grid-cols-4 px-2 pb-6">
-        {/* Aderência real HSA */}
-        <Card className="bg-white border border-gray-200 shadow-none">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-sm text-gray-500 font-medium">
-                  Aderência real HSA
-                </div>
-                <div className={`text-3xl font-bold mt-2 ${aderenciaColor}`}>
-                  {isLoading
-                    ? "..."
-                    : `${aderenciaPerc.toLocaleString("pt-BR", {
-                        minimumFractionDigits: 1,
-                        maximumFractionDigits: 1,
-                      })}%`}
-                </div>
-                <div className="mt-2 text-xs text-gray-400">
-                  Inspeções programadas: {isLoading ? "..." : programadasCard}
-                </div>
-                <div className="mt-1 text-xs text-gray-400">
-                  Inspeções realizadas: {isLoading ? "..." : realizadasCard}
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
         {/* Total de Inspeções */}
         <Card className="bg-white border border-gray-200 shadow-none">
           <CardContent className="p-4">
@@ -290,7 +237,7 @@ export default function PainelExecucaoHSA() {
             <div className="flex items-center justify-between">
               <div>
                 <div className="text-sm text-gray-500 font-medium flex items-center gap-1">
-                  Inspeções Pendentes <AlertTriangle className="h-4 w-4 text-red-600" />
+                  Inspeções Pendentes 
                 </div>
                 <div className="text-3xl font-bold mt-2">
                   {isLoading ? "..." : `${pendentes} (${percentPendentes}%)`}
