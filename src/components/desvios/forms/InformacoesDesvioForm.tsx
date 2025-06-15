@@ -85,7 +85,7 @@ const InformacoesDesvioForm = () => {
                 <FormLabel>Evento Identificado</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
-                    <SelectTrigger>
+                    <SelectTrigger className="text-left justify-start">
                       <SelectValue placeholder="Selecione o evento" />
                     </SelectTrigger>
                   </FormControl>
