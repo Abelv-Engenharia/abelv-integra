@@ -91,6 +91,7 @@ export default function AgendaHSA() {
               className="p-0 border rounded-md"
               locale={ptBR}
               showOutsideDays
+              hidden={(date) => date.getDay() === 0 || date.getDay() === 6}
               classNames={{
                 months: "flex flex-col sm:flex-row",
                 month: "w-full space-y-4 p-4",
