@@ -180,7 +180,8 @@ export async function createPerfil(perfil: Omit<Perfil, "id">): Promise<Perfil |
       .insert([{
         nome: perfil.nome,
         descricao: perfil.descricao,
-        permissoes: perfil.permissoes
+        // cast permissoes to any as expected by supabase (jsonb)
+        permissoes: perfil.permissoes as any,
       }])
       .select()
       .single();
@@ -212,7 +213,8 @@ export async function updatePerfil(
       .update({
         nome: perfil.nome,
         descricao: perfil.descricao,
-        permissoes: perfil.permissoes
+        // cast permissoes to any as expected by supabase (jsonb)
+        permissoes: perfil.permissoes as any,
       })
       .eq('id', id);
     
