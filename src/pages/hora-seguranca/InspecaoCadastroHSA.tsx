@@ -373,101 +373,58 @@ const InspecaoCadastroHSA = () => {
               </div>
 
               {/* Responsável pela inspeção e Função - conforme imagem */}
-              <div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-                  <div>
-                    <label className="block font-medium mb-1" htmlFor={
-                        form.watch("responsavelTipo") === "funcionario"
-                          ? "responsavelFuncionarioId"
-                          : "responsavelNome"
-                      }>
-                      Responsável pela inspeção
-                    </label>
-                    {form.watch("responsavelTipo") === "funcionario" ? (
-                      <Select
-                        onValueChange={(value) => form.setValue("responsavelFuncionarioId", value)}
-                        value={form.watch("responsavelFuncionarioId")}
-                        disabled={!watchCCA}
-                      >
-                        <SelectTrigger id="responsavelFuncionarioId" className="w-full">
-                          <SelectValue
-                            placeholder={
-                              watchCCA
-                                ? "Selecione o funcionário"
-                                : "Selecione um CCA primeiro"
-                            }
-                          />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {funcionarios.length === 0 && watchCCA && (
-                            <div className="text-sm text-gray-500 px-2 py-1">Nenhum funcionário para este CCA</div>
-                          )}
-                          {funcionarios.map((f) => (
-                            <SelectItem key={f.id} value={f.id}>
-                              {f.nome}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    ) : (
-                      <Input
-                        id="responsavelNome"
-                        value={form.watch("responsavelNome") || ""}
-                        onChange={e => form.setValue("responsavelNome", e.target.value)}
-                        placeholder="Ou digite um responsável manualmente"
-                        disabled={!watchCCA}
-                        className="w-full"
-                      />
-                    )}
-                  </div>
-                  <div>
-                    <label className="block font-medium mb-1" htmlFor={
-                        form.watch("responsavelTipo") === "funcionario"
-                          ? "funcaoFuncionario"
-                          : "responsavelFuncao"
-                      }>
-                      Função
-                    </label>
-                    {form.watch("responsavelTipo") === "funcionario" ? (
-                      <Input
-                        id="funcaoFuncionario"
-                        value={
-                          (() => {
-                            const funcionario = funcionarios.find(
-                              (f) => f.id === form.watch("responsavelFuncionarioId")
-                            );
-                            return funcionario?.funcao || "";
-                          })()
-                        }
-                        placeholder={
-                          watchCCA
-                            ? "Função do funcionário"
-                            : ""
-                        }
-                        disabled
-                        className="w-full"
-                      />
-                    ) : (
-                      <Input
-                        id="responsavelFuncao"
-                        value={form.watch("responsavelFuncao") || ""}
-                        onChange={e => form.setValue("responsavelFuncao", e.target.value)}
-                        placeholder="Digite a função do responsável"
-                        disabled={!watchCCA}
-                        className="w-full"
-                      />
-                    )}
-                  </div>
-                </div>
-                {/* Seleção entre funcionário e manual */}
-                <div className="mt-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+                <div className="space-y-2">
+                  <label className="block font-medium" htmlFor={
+                      form.watch("responsavelTipo") === "funcionario"
+                        ? "responsavelFuncionarioId"
+                        : "responsavelNome"
+                    }>
+                    Responsável pela inspeção
+                  </label>
+                  {form.watch("responsavelTipo") === "funcionario" ? (
+                    <Select
+                      onValueChange={(value) => form.setValue("responsavelFuncionarioId", value)}
+                      value={form.watch("responsavelFuncionarioId")}
+                      disabled={!watchCCA}
+                    >
+                      <SelectTrigger id="responsavelFuncionarioId" className="w-full">
+                        <SelectValue
+                          placeholder={
+                            watchCCA
+                              ? "Selecione o funcionário"
+                              : "Selecione um CCA primeiro"
+                          }
+                        />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {funcionarios.length === 0 && watchCCA && (
+                          <div className="text-sm text-gray-500 px-2 py-1">Nenhum funcionário para este CCA</div>
+                        )}
+                        {funcionarios.map((f) => (
+                          <SelectItem key={f.id} value={f.id}>
+                            {f.nome}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    <Input
+                      id="responsavelNome"
+                      value={form.watch("responsavelNome") || ""}
+                      onChange={e => form.setValue("responsavelNome", e.target.value)}
+                      placeholder="Ou digite um responsável manualmente"
+                      disabled={!watchCCA}
+                      className="w-full"
+                    />
+                  )}
                   <FormField
                     control={form.control}
                     name="responsavelTipo"
                     render={({ field }) => (
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
-                          <SelectTrigger className="w-full max-w-xs">
+                          <SelectTrigger className="w-full">
                             <SelectValue placeholder="Selecione como informar o responsável" />
                           </SelectTrigger>
                         </FormControl>
@@ -479,8 +436,46 @@ const InspecaoCadastroHSA = () => {
                     )}
                   />
                 </div>
+                <div className="space-y-2">
+                  <label className="block font-medium" htmlFor={
+                      form.watch("responsavelTipo") === "funcionario"
+                        ? "funcaoFuncionario"
+                        : "responsavelFuncao"
+                    }>
+                    Função
+                  </label>
+                  {form.watch("responsavelTipo") === "funcionario" ? (
+                    <Input
+                      id="funcaoFuncionario"
+                      value={
+                        (() => {
+                          const funcionario = funcionarios.find(
+                            (f) => f.id === form.watch("responsavelFuncionarioId")
+                          );
+                          return funcionario?.funcao || "";
+                        })()
+                      }
+                      placeholder={
+                        watchCCA
+                          ? "Função do funcionário"
+                          : ""
+                      }
+                      disabled
+                      className="w-full"
+                    />
+                  ) : (
+                    <Input
+                      id="responsavelFuncao"
+                      value={form.watch("responsavelFuncao") || ""}
+                      onChange={e => form.setValue("responsavelFuncao", e.target.value)}
+                      placeholder="Digite a função do responsável"
+                      disabled={!watchCCA}
+                      className="w-full"
+                    />
+                  )}
+                </div>
               </div>
-
+              
               <div className="flex flex-col md:flex-row w-full pt-4 gap-3 md:gap-0">
                 <div className="flex md:flex-1 md:justify-start">
                   <Button
