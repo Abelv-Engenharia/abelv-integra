@@ -4,7 +4,7 @@ export const calculateStatusAcao = (situacao: string, prazoCorrecao: string): st
     return "CONCLUÍDO";
   }
   
-  if (situacao === "EM TRATATIVA") {
+  if (situacao === "EM ANDAMENTO" || situacao === "EM TRATATIVA") {
     if (prazoCorrecao) {
       const prazoDate = new Date(prazoCorrecao);
       const currentDate = new Date();

@@ -58,12 +58,12 @@ const EditDesvioDialog = ({ desvio, open, onOpenChange, onDesvioUpdated }: EditD
       matricula: "",
       
       // Ação Corretiva
-      tratativaAplicada: "",
-      responsavelAcao: "",
-      prazoCorrecao: "",
-      situacao: "",
-      situacaoAcao: "",
-      aplicacaoMedidaDisciplinar: false,
+      tratativaAplicada: desvio.acao_imediata || acao.tratativa || "",
+      responsavelAcao: acao.responsavel || "",
+      prazoCorrecao: desvio.prazo_conclusao || acao.prazo || "",
+      situacao: acao.situacao || desvio.status || "EM ANDAMENTO",
+      situacaoAcao: acao.situacao_acao || calculateStatusAcao(acao.situacao || desvio.status, desvio.prazo_conclusao),
+      aplicacaoMedidaDisciplinar: acao.medida_disciplinar || false,
       
       // Classificação de Risco
       exposicao: "",
@@ -126,7 +126,7 @@ const EditDesvioDialog = ({ desvio, open, onOpenChange, onDesvioUpdated }: EditD
         tratativaAplicada: desvio.acao_imediata || acao.tratativa || "",
         responsavelAcao: acao.responsavel || "",
         prazoCorrecao: desvio.prazo_conclusao || acao.prazo || "",
-        situacao: acao.situacao || desvio.status || "EM TRATATIVA",
+        situacao: acao.situacao || desvio.status || "EM ANDAMENTO",
         situacaoAcao: acao.situacao_acao || calculateStatusAcao(acao.situacao || desvio.status, desvio.prazo_conclusao),
         aplicacaoMedidaDisciplinar: acao.medida_disciplinar || false,
         

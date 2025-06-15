@@ -19,13 +19,13 @@ export const fetchDashboardStats = async (): Promise<DashboardStats> => {
     const { count: acoesAndamento } = await supabase
       .from('desvios_completos')
       .select('*', { count: 'exact', head: true })
-      .eq('status', 'EM TRATATIVA');
+      .in('status', ['EM TRATATIVA', 'EM ANDAMENTO']);
 
-    // Ações Pendentes: status 'Aberto'
+    // Ações Pendentes: status 'Aberto' ou 'PENDENTE'
     const { count: acoesPendentes } = await supabase
       .from('desvios_completos')
       .select('*', { count: 'exact', head: true })
-      .eq('status', 'Aberto');
+      .in('status', ['Aberto', 'PENDENTE']);
       
     // Calcular percentuais
     const percentages = calculatePercentages(

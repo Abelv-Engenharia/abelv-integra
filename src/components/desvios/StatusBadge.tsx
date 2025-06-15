@@ -8,6 +8,7 @@ const getStatusColor = (status: string) => {
       return "bg-green-100 text-green-800 hover:bg-green-200";
     case "EM ANDAMENTO":
     case "Em andamento":
+    case "EM TRATATIVA":
       return "bg-blue-100 text-blue-800 hover:bg-blue-200";
     case "PENDENTE":
     case "Aberto":
@@ -17,10 +18,20 @@ const getStatusColor = (status: string) => {
   }
 };
 
-const StatusBadge = ({ status }: { status?: string }) => (
-  <Badge variant="secondary" className={getStatusColor(status || "")}>
-    {status || "PENDENTE"}
-  </Badge>
-);
+const statusDisplayMap: { [key: string]: string } = {
+  "EM TRATATIVA": "EM ANDAMENTO",
+  "Aberto": "PENDENTE",
+};
+
+const StatusBadge = ({ status }: { status?: string }) => {
+  const currentStatus = status || "PENDENTE";
+  const displayStatus = statusDisplayMap[currentStatus] || currentStatus;
+
+  return (
+    <Badge variant="secondary" className={getStatusColor(currentStatus)}>
+      {displayStatus}
+    </Badge>
+  );
+};
 
 export default StatusBadge;

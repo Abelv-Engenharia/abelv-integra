@@ -43,7 +43,7 @@ export const useDesviosForm = () => {
       tratativaAplicada: "",
       responsavelAcao: "",
       prazoCorrecao: "",
-      situacao: "EM TRATATIVA",
+      situacao: "EM ANDAMENTO",
       situacaoAcao: "EM ANDAMENTO",
       aplicacaoMedidaDisciplinar: false,
       
@@ -108,7 +108,7 @@ export const useDesviosForm = () => {
         deteccao: formData.deteccao ? parseInt(formData.deteccao) : null,
         efeito_falha: formData.efeitoFalha ? parseInt(formData.efeitoFalha) : null,
         impacto: formData.impacto ? parseInt(formData.impacto) : null,
-        status: formData.situacao || 'EM TRATATIVA',
+        status: formData.situacao || 'EM ANDAMENTO',
         classificacao_risco: formData.classificacaoRisco || '',
         responsavel_id: null,
         prazo_conclusao: formData.prazoCorrecao || null,
