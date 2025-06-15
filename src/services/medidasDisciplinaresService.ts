@@ -29,22 +29,38 @@ function getAnoMes(dataISO: string): { ano: string; mes: string } {
   return { ano: ano || '', mes: mes || '' };
 }
 
-/* Criar medida disciplinar */
+/* Buscar tipos de medida disciplinar do banco */
+export async function listarTiposMedidaDisciplinar() {
+  const { data, error } = await supabase
+    .from("tipo_medida_disciplinar")
+    .select("nome, id")
+    .eq("ativo", true)
+    .order("id", { ascending: true });
+  if (error) throw error;
+  // Retorna array de objetos com { id, nome }
+  return data || [];
+}
+
+/* Criar medida disciplinar - agora 'tipo_medida' é o nome do tipo vindo do banco */
 export async function criarMedidaDisciplinar(form: MedidaDisciplinarFormData, arquivoUrl?: string) {
   const { cca_id, funcionario_id, tipo_medida, data_aplicacao, descricao } = form;
   const { ano, mes } = getAnoMes(data_aplicacao);
-  // tipo_medida já validado no enum (não pode ser vazio)
+
   const insertObj = {
     cca_id: parseInt(cca_id, 10),
     funcionario_id,
-    medida: tipo_medida,
+    medida: tipo_medida, // agora já vem pronto com o nome correto
     data: data_aplicacao,
     motivo: descricao,
     arquivo_url: arquivoUrl || null,
     ano,
     mes,
   };
-  const { data, error } = await supabase.from("medidas_disciplinares").insert([insertObj]).select("*").single();
+  const { data, error } = await supabase
+    .from("medidas_disciplinares")
+    .insert([insertObj])
+    .select("*")
+    .single();
   if (error) throw error;
   return {
     id: data.id,

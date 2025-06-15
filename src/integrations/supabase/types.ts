@@ -1736,6 +1736,24 @@ export type Database = {
         }
         Relationships: []
       }
+      tipo_medida_disciplinar: {
+        Row: {
+          ativo: boolean
+          id: number
+          nome: string
+        }
+        Insert: {
+          ativo?: boolean
+          id?: number
+          nome: string
+        }
+        Update: {
+          ativo?: boolean
+          id?: number
+          nome?: string
+        }
+        Relationships: []
+      }
       tipo_treinamento: {
         Row: {
           ativo: boolean | null

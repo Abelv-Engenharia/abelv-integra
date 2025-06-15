@@ -12,16 +12,13 @@ import { useEffect, useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { useProfile } from "@/hooks/useProfile";
 import { Loader2 } from "lucide-react";
+import { listarTiposMedidaDisciplinar } from "@/services/medidasDisciplinaresService";
+import { useQuery } from "@tanstack/react-query";
 
 const schema = z.object({
   cca_id: z.string().nonempty("CCA obrigatório"),
   funcionario_id: z.string().nonempty("Funcionário obrigatório"),
-  tipo_medida: z.enum([
-    "ADVERTÊNCIA VERBAL",
-    "ADVERTÊNCIA ESCRITA",
-    "SUSPENSÃO",
-    "DEMISSÃO POR JUSTA CAUSA"
-  ], { errorMap: () => ({ message: "Tipo obrigatório" }) }),
+  tipo_medida: z.string().nonempty("Tipo obrigatório"),
   data_aplicacao: z.string().nonempty("Data obrigatória"),
   descricao: z.string().optional(),
   arquivo: z
@@ -50,6 +47,10 @@ export default function MedidaDisciplinarForm({ onSuccess }: { onSuccess: () => 
   const { mutateAsync, isPending } = useCriarMedidaDisciplinar();
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const { profile } = useProfile();
+  const { data: tiposMedida = [], isLoading: tiposLoading } = useQuery({
+    queryKey: ["tiposMedidaDisciplinar"],
+    queryFn: listarTiposMedidaDisciplinar
+  });
 
   useEffect(() => {
     setValue("funcionario_id", "");
@@ -148,12 +149,14 @@ export default function MedidaDisciplinarForm({ onSuccess }: { onSuccess: () => 
                 <Select onValueChange={field.onChange} value={field.value || ""}>
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Selecione" />
+                      <SelectValue placeholder={tiposLoading ? "Carregando..." : "Selecione"} />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {tiposMedidaAplicada.map(tipo => (
-                      <SelectItem value={tipo.value} key={tipo.value}>{tipo.label}</SelectItem>
+                    {tiposMedida.map((tipo: any) => (
+                      <SelectItem value={tipo.nome} key={tipo.id}>
+                        {tipo.nome}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
