@@ -211,10 +211,10 @@ export default function PGRMedidasForm({ planoId }: PGRMedidasFormProps) {
                   </span>
                 )}
                 <div className="flex gap-1">
-                  <Button size="xs" type="button" variant="outline" onClick={() => prepararEdicao(m)}>
+                  <Button size="sm" type="button" variant="outline" onClick={() => prepararEdicao(m)}>
                     Editar
                   </Button>
-                  <Button size="xs" type="button" variant="destructive" onClick={() => excluirMedida(m.id)}>
+                  <Button size="sm" type="button" variant="destructive" onClick={() => excluirMedida(m.id)}>
                     Excluir
                   </Button>
                 </div>

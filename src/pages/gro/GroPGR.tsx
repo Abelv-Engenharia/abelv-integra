@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import PGRMedidasForm from "@/components/gro/PGRMedidasForm";
 import { toast } from "@/hooks/use-toast";
+import PGRDashboardIndicadores from "@/components/gro/PGRDashboardIndicadores";
 
 type Plano = {
   id: string;
@@ -55,6 +56,8 @@ export default function GroPGR() {
 
   return (
     <div className="max-w-3xl mx-auto p-4 animate-fade-in">
+      <PGRDashboardIndicadores />
+
       <h1 className="text-2xl font-bold mb-2">Programa de Gerenciamento de Riscos (PGR)</h1>
       <p className="mb-6 text-muted-foreground">
         Acompanhe o Plano de Ação com cadastro de medidas de controle para cada risco identificado.
