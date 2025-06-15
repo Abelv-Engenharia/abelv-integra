@@ -18,6 +18,8 @@ import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { createOcorrencia, updateOcorrencia, getOcorrenciaById, OcorrenciaFormData } from "@/services/ocorrencias/ocorrenciasService";
+import { OcorrenciaFormNavigation } from "@/components/ocorrencias/forms/OcorrenciaFormNavigation";
+import { useOcorrenciaTabs } from "@/hooks/ocorrencias/useOcorrenciaTabs";
 
 const OcorrenciasCadastro = () => {
   const [activeTab, setActiveTab] = useState("identificacao");
@@ -194,27 +196,13 @@ const OcorrenciasCadastro = () => {
     }
   }, [ocorrenciaId, methods, toast, navigate]);
 
-  const tabs = [
-    { id: "identificacao", label: "Identificação" },
-    { id: "informacoes", label: "Informações da Ocorrência" },
-    { id: "classificacaoRisco", label: "Classificação de Risco" },
-    { id: "planoAcao", label: "Plano de Ação" },
-    { id: "fechamento", label: "Fechamento" },
-  ];
-
-  const handleNext = () => {
-    const currentIndex = tabs.findIndex(tab => tab.id === activeTab);
-    if (currentIndex < tabs.length - 1) {
-      setActiveTab(tabs[currentIndex + 1].id);
-    }
-  };
-
-  const handlePrevious = () => {
-    const currentIndex = tabs.findIndex(tab => tab.id === activeTab);
-    if (currentIndex > 0) {
-      setActiveTab(tabs[currentIndex - 1].id);
-    }
-  };
+  const {
+    tabs,
+    activeTab,
+    setActiveTab,
+    handleNext,
+    handlePrevious,
+  } = useOcorrenciaTabs();
 
   const handleCancel = () => {
     setCancelDialogOpen(true);
@@ -361,11 +349,12 @@ const OcorrenciasCadastro = () => {
         <CardContent className="pt-6">
           <FormProvider {...methods}>
             <form onSubmit={methods.handleSubmit(onSubmit)}>
+              {/* Tabs e conteúdo */}
               <Tabs value={activeTab} onValueChange={setActiveTab}>
                 <TabsList className="w-full flex overflow-x-auto max-w-full mb-6">
                   {tabs.map(tab => (
                     <TabsTrigger 
-                      key={tab.id} 
+                      key={tab.id}
                       value={tab.id}
                       className="flex-1"
                     >
@@ -373,68 +362,28 @@ const OcorrenciasCadastro = () => {
                     </TabsTrigger>
                   ))}
                 </TabsList>
-
-                <TabsContent value="identificacao">
-                  <IdentificacaoForm />
-                </TabsContent>
-
-                <TabsContent value="informacoes">
-                  <InformacoesOcorrenciaForm />
-                </TabsContent>
-
-                <TabsContent value="classificacaoRisco">
-                  <ClassificacaoRiscoForm />
-                </TabsContent>
-
-                <TabsContent value="planoAcao">
-                  <PlanoAcaoForm />
-                </TabsContent>
-
-                <TabsContent value="fechamento">
-                  <FechamentoForm />
-                </TabsContent>
+                <TabsContent value="identificacao"><IdentificacaoForm /></TabsContent>
+                <TabsContent value="informacoes"><InformacoesOcorrenciaForm /></TabsContent>
+                <TabsContent value="classificacaoRisco"><ClassificacaoRiscoForm /></TabsContent>
+                <TabsContent value="planoAcao"><PlanoAcaoForm /></TabsContent>
+                <TabsContent value="fechamento"><FechamentoForm /></TabsContent>
                 
-                <div className="flex justify-between mt-6 pt-4 border-t">
-                  <div className="flex gap-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={handlePrevious}
-                      disabled={activeTab === tabs[0].id}
-                    >
-                      <ArrowLeft className="mr-2 h-4 w-4" />
-                      Anterior
-                    </Button>
-                    
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={handleCancel}
-                    >
-                      <X className="mr-2 h-4 w-4" />
-                      Cancelar
-                    </Button>
-                  </div>
-                  
-                  {/* Só mostrar botão de salvar na aba "Fechamento" */}
-                  {activeTab === "fechamento" ? (
-                    <Button type="submit" disabled={isSubmitting}>
-                      <Save className="mr-2 h-4 w-4" />
-                      {isSubmitting ? "Salvando..." : (isEditMode ? "Salvar alterações" : "Salvar ocorrência")}
-                    </Button>
-                  ) : (
-                    <Button type="button" onClick={handleNext}>
-                      Próximo
-                      <ArrowRight className="ml-2 h-4 w-4" />
-                    </Button>
-                  )}
-                </div>
+                {/* Navegação dos formularios */}
+                <OcorrenciaFormNavigation
+                  activeTab={activeTab}
+                  tabs={tabs}
+                  onPrevious={handlePrevious}
+                  onNext={handleNext}
+                  onCancel={handleCancel}
+                  onSubmit={methods.handleSubmit(onSubmit)}
+                  isSubmitting={isSubmitting}
+                  isEditMode={isEditMode}
+                />
               </Tabs>
             </form>
           </FormProvider>
         </CardContent>
       </Card>
-      
       {/* Dialog de cancelamento */}
       <Dialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
         <DialogContent>
