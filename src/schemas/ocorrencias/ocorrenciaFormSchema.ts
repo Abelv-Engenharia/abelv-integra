@@ -8,7 +8,7 @@ export const ocorrenciaFormSchema = z.object({
   mes: z.string().min(1, "Campo obrigatório"),
   ano: z.string().min(1, "Campo obrigatório"),
   cca: z.string().min(1, "Campo obrigatório"),
-  empresa: z.string().optional(),
+  empresa: z.string().min(1, "Campo obrigatório"),
   disciplina: z.string().min(1, "Campo obrigatório"),
   engenheiro_responsavel: z.string().optional(),
   supervisor_responsavel: z.string().optional(),

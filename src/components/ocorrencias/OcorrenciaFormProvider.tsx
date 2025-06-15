@@ -4,7 +4,7 @@ import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
+import { createOcorrencia } from "@/services/ocorrencias/ocorrenciasService";
 import IdentificacaoForm from "@/components/ocorrencias/forms/IdentificacaoForm";
 import InformacoesOcorrenciaForm from "@/components/ocorrencias/forms/InformacoesOcorrenciaForm";
 import ClassificacaoRiscoForm from "@/components/ocorrencias/forms/ClassificacaoRiscoForm";
@@ -52,18 +52,22 @@ export const OcorrenciaFormProvider: React.FC = () => {
   const onSubmit = async (values: OcorrenciaFormSchema) => {
     try {
       setIsSubmitting(true);
-      // Montar payload para tabela ocorrencias
-      const payload: any = {
+
+      const payload = {
         ...values,
         descricao_ocorrencia: values.descricaoOcorrencia,
-        created_at: new Date().toISOString(),
+        numero_cat: values.numeroCat,
+        efeito_falha: values.efeitoFalha,
+        classificacao_risco: values.classificacaoRisco,
       };
-      const { error } = await supabase.from("ocorrencias").insert(payload);
-      if (error) throw error;
+
+      await createOcorrencia(payload);
+      
       toast.success("Ocorrência cadastrada com sucesso!");
       navigate("/ocorrencias/consulta");
     } catch (e: any) {
       toast.error("Erro ao cadastrar ocorrência: " + (e.message || e));
+    } finally {
       setIsSubmitting(false);
     }
   };
