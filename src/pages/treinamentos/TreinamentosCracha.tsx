@@ -175,144 +175,137 @@ const TreinamentosCracha = () => {
       description: "Enviando crachá para impressão...",
     });
     
-    // Implementação da funcionalidade de impressão
     if (crachaRef.current) {
       const printWindow = window.open('', '_blank');
       if (printWindow) {
         printWindow.document.open();
         
-        // Adicionar estilos para impressão (layout lado a lado)
         const style = document.createElement('style');
         style.innerHTML = `
-          @page { size: 100mm 160mm; margin: 0; }
+          @page { size: A4; margin: 0; }
           body {
             margin: 0;
-            padding: 0;
-            font-family: Arial, sans-serif;
-            background-color: white;
+            background: #f3f3f3;
+            font-family: Arial, Helvetica, sans-serif;
+            color: #222;
           }
           .cracha-container {
-            width: 100mm;
-            height: 160mm;
-            box-sizing: border-box;
-            padding: 5mm;
-            margin: 0 auto;
+            background: #fff;
+            width: 400px;
+            min-height: 600px;
+            margin: 30px auto;
+            box-shadow: 0 2px 8px #0002;
+            border-radius: 4px;
+            padding: 0;
             display: flex;
             flex-direction: column;
-          }
-          .header {
-            background-color: hsl(222.2, 47.4%, 11.2%);
-            color: white;
-            text-align: center;
-            padding: 10px;
-            border-radius: 8px 8px 0 0;
-            margin-bottom: 15px;
-          }
-          .header h3 {
-            margin: 0;
-            font-size: 16px;
-            font-weight: bold;
-            text-transform: uppercase;
-          }
-          .profile {
-            display: flex;
-            flex-direction: row;
-            gap: 15px;
-            margin-bottom: 15px;
-            align-items: flex-start;
-          }
-          .logo-print {
-            width: 70px;
-            height: 70px;
-            background-color: #f3f4f6;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-            overflow: hidden;
             position: relative;
           }
-          .logo-print img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            padding: 8px;
-            background: white;
-            border-radius: 9999px;
+          .cracha-title {
+            text-align: center;
+            font-size: 2rem;
+            font-weight: 500;
+            color: #b0b0b0;
+            padding-top: 28px;
+            margin-bottom: 18px;
+            letter-spacing: 0.01em;
           }
-          .info {
+          .cracha-header-row {
+            display: flex;
+            flex-direction: row;
+            align-items: flex-start;
+            padding: 0 32px 0 30px;
+            margin-bottom: 18px;
+            gap: 14px;
+          }
+          .cracha-logo {
+            width: 96px;
+            height: 96px;
+            margin-right: 16px;
+            margin-top: 4px;
+            object-fit: contain;
+            background: none;
+            border-radius: 0;
+          }
+          .cracha-info {
             display: flex;
             flex-direction: column;
-            justify-content: center;
+            justify-content: flex-start;
+            padding-top: 5px;
+            min-width: 0;
+            flex: 1;
           }
-          .info h4 {
-            font-size: 18px;
+          .cracha-nome {
             font-weight: bold;
-            margin: 0 0 5px 0;
+            font-size: 1.25rem;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.01em;
+            word-break: break-word;
           }
-          .info p {
-            margin: 0 0 5px 0;
-            font-size: 14px;
-            color: #1f2937;
+          .cracha-funcao {
+            font-size: 1.1rem;
+            font-weight: 500;
+            margin-bottom: 6px;
+            word-break: break-word;
           }
-          .info .matricula {
-            font-size: 12px;
-            color: #6b7280;
+          .cracha-matricula {
+            font-size: 1rem;
+            margin-bottom: 0;
           }
-          .certifications {
-            border-top: 1px solid #e5e7eb;
-            padding-top: 10px;
-            margin-top: 10px;
-            flex-grow: 1;
+          .cracha-divider {
+            border: none;
+            border-top: 1px solid #e0e0e0;
+            margin: 10px 25px 0 25px;
           }
-          .certifications h5 {
-            font-size: 14px;
+          .cracha-table-section {
+            margin: 10px 25px 0 25px;
+            flex: 1 1 auto;
+            display: flex;
+            flex-direction: column;
+          }
+          .cracha-table-title {
             text-align: center;
-            margin-top: 0;
-            margin-bottom: 10px;
-            font-weight: 600;
+            font-weight: bold;
+            margin: 15px 0 10px 0;
+            font-size: 1.05rem;
+            letter-spacing: 0.01em;
           }
-          .certifications-table {
+          .cracha-table {
             width: 100%;
-            font-size: 12px;
             border-collapse: collapse;
+            font-size: 0.98rem;
           }
-          .certifications-table thead {
-            border-bottom: 1px solid #e5e7eb;
-          }
-          .certifications-table th {
+          .cracha-table thead tr th {
+            font-weight: bold;
+            border-bottom: 1px solid #bbb;
+            font-size: 1rem;
+            padding: 5px;
+            background: none;
             text-align: left;
-            padding: 5px;
-            font-weight: 600;
           }
-          .certifications-table th:last-child {
+          .cracha-table th:last-child, .cracha-table td:last-child {
             text-align: right;
           }
-          .certifications-table td {
-            padding: 5px;
-            border-bottom: 1px solid #e5e7eb;
+          .cracha-table tbody td {
+            border-bottom: 1px solid #efefef;
+            padding: 4px 5px 3px 5px;
+            vertical-align: top;
           }
-          .certifications-table td:last-child {
-            text-align: right;
-          }
-          .footer {
-            border-top: 1px solid #e5e7eb;
-            margin-top: auto;
-            padding-top: 8px;
+          .cracha-no-training {
             text-align: center;
-            font-size: 10px;
-            color: #6b7280;
+            color: #888;
+            font-size: 1rem;
+            padding: 14px 0;
           }
-          .empty-message {
+          .cracha-emissao {
             text-align: center;
-            color: #6b7280;
-            font-size: 13px;
-            margin-top: 20px;
+            color: #777;
+            font-size: 1rem;
+            margin: 30px 0 14px 0;
           }
         `;
 
-        // Criar HTML para impressão usando o design exato do preview
         printWindow.document.write(`
           <!DOCTYPE html>
           <html>
@@ -322,59 +315,53 @@ const TreinamentosCracha = () => {
           </head>
           <body>
             <div class="cracha-container">
-              <div class="header">
-                <h3>Crachá de Capacitação</h3>
-              </div>
-              
-              <div class="profile">
-                <div class="logo-print">
-                  ${logoUrl
-                    ? `<img src="${logoUrl}" alt="Logo do Sistema" />`
-                    : ""
-                  }
-                </div>
-                <div class="info">
-                  <h4>${funcionario.nome}</h4>
-                  <p>${funcionario.funcao}</p>
-                  <p class="matricula">Matrícula: ${funcionario.matricula}</p>
+              <div class="cracha-title">Crachá de Capacitação</div>
+              <div class="cracha-header-row">
+                <img class="cracha-logo" src="${logoUrl || ''}" alt="Logo do Sistema" />
+                <div class="cracha-info">
+                  <div class="cracha-nome">${funcionario.nome}</div>
+                  <div class="cracha-funcao">${funcionario.funcao}</div>
+                  <div class="cracha-matricula">Matrícula: ${funcionario.matricula}</div>
                 </div>
               </div>
-              
-              <div class="certifications">
-                <h5>Certificações Válidas</h5>
-                
-                ${treinamentosValidos.length > 0 
-                  ? `<table class="certifications-table">
-                      <thead>
-                        <tr>
-                          <th>Treinamento</th>
-                          <th>Validade</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        ${treinamentosValidos.map(treinamento => `
+              <hr class="cracha-divider" />
+              <div class="cracha-table-section">
+                <div class="cracha-table-title">Certificações Válidas</div>
+                ${
+                  treinamentosValidos.length > 0
+                    ? `<table class="cracha-table">
+                        <thead>
                           <tr>
-                            <td>${treinamento.treinamentoNome || 'Treinamento não encontrado'}</td>
-                            <td>${formatarData(treinamento.data_validade)}</td>
+                            <th>Treinamento</th>
+                            <th>Validade</th>
                           </tr>
-                        `).join('')}
-                      </tbody>
-                    </table>`
-                  : `<p class="empty-message">Sem treinamentos válidos</p>`
+                        </thead>
+                        <tbody>
+                          ${treinamentosValidos
+                            .map(
+                              (treinamento) => `
+                            <tr>
+                              <td>${treinamento.treinamentoNome || "Treinamento não encontrado"}</td>
+                              <td>${formatarData(treinamento.data_validade)}</td>
+                            </tr>
+                          `
+                            )
+                            .join("")}
+                        </tbody>
+                      </table>`
+                    : `<div class="cracha-no-training">Sem treinamentos válidos</div>`
                 }
               </div>
-              
-              <div class="footer">
-                <p>Emitido em ${format(new Date(), "dd/MM/yyyy")}</p>
+              <div class="cracha-emissao">
+                Emitido em ${format(new Date(), "dd/MM/yyyy")}
               </div>
             </div>
           </body>
           </html>
         `);
-        
+
         printWindow.document.close();
-        
-        // Delay para garantir que o conteúdo foi renderizado antes de imprimir
+
         setTimeout(() => {
           printWindow.print();
           printWindow.close();
