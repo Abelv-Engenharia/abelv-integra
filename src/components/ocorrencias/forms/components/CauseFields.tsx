@@ -47,7 +47,7 @@ const CauseFields: React.FC<CauseFieldsProps> = ({
               <SelectContent>
                 {agentesCausadores.map((agente) => (
                   <SelectItem key={agente.id} value={agente.nome}>
-                    {agente.codigo} - {agente.nome}
+                    <span className="-ml-4">{agente.codigo} - {agente.nome}</span>
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -73,7 +73,7 @@ const CauseFields: React.FC<CauseFieldsProps> = ({
               <SelectContent>
                 {situacoesGeradoras.map((situacao) => (
                   <SelectItem key={situacao.id} value={situacao.nome}>
-                    {situacao.codigo} - {situacao.nome}
+                    <span className="-ml-4">{situacao.codigo} - {situacao.nome}</span>
                   </SelectItem>
                 ))}
               </SelectContent>
