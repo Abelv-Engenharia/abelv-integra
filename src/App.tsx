@@ -49,6 +49,7 @@ import IDSMSIndicadores from './pages/idsms/IDSMSIndicadores';
 import VisualizarExecucaoTreinamento from './pages/treinamentos/VisualizarExecucaoTreinamento';
 import EditarExecucaoTreinamento from './pages/treinamentos/EditarExecucaoTreinamento';
 import Layout from './components/layout/Layout';
+import Profile from './pages/account/Profile';
 
 const queryClient = new QueryClient();
 
@@ -67,6 +68,9 @@ function App() {
               <Route path="desvios/cadastro" element={<DesviosForm />} />
               <Route path="desvios/consulta" element={<DesviosConsulta />} />
               <Route path="desvios/nao-conformidade" element={<DesviosNaoConformidade />} />
+
+              {/* Account/Profile/Auth pages */}
+              <Route path="account/profile" element={<Profile />} />
 
               {/* Treinamentos Routes */}
               <Route path="treinamentos/dashboard" element={<TreinamentosDashboard />} />
