@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   Activity,
   AlertTriangle,
@@ -13,6 +13,7 @@ import RecentActivitiesList from "@/components/dashboard/RecentActivitiesList";
 import PendingTasksList from "@/components/dashboard/PendingTasksList";
 import SystemLogo from "@/components/common/SystemLogo";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
 
 // Hook para buscar contagem de desvios
 function useTotalDesvios() {
@@ -73,101 +74,153 @@ function useTotalTarefasPendentes() {
   return total;
 }
 
-// Mock data for charts
-const areaChartData = [
-  { name: "Jan", value: 12 },
-  { name: "Fev", value: 19 },
-  { name: "Mar", value: 15 },
-  { name: "Abr", value: 27 },
-  { name: "Mai", value: 22 },
-  { name: "Jun", value: 30 },
-  { name: "Jul", value: 25 },
-];
+// Hook para buscar atividades recentes usando "desvios_completos"
+function useRecentActivitiesFromDesvios() {
+  const [activities, setActivities] = React.useState<any[]>([]);
+  const [loading, setLoading] = React.useState(true);
 
-const barChartData = [
-  { name: "Jan", alta: 4, media: 5, baixa: 8 },
-  { name: "Fev", alta: 6, media: 8, baixa: 10 },
-  { name: "Mar", alta: 3, media: 7, baixa: 12 },
-  { name: "Abr", alta: 5, media: 12, baixa: 15 },
-  { name: "Mai", alta: 7, media: 10, baixa: 12 },
-  { name: "Jun", alta: 6, media: 15, baixa: 17 },
-];
+  React.useEffect(() => {
+    // Busca os desvios mais recentes e formata para o componente
+    async function fetchActivities() {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from("desvios_completos")
+        .select("id, descricao_desvio, data_desvio, status")
+        .order("created_at", { ascending: false })
+        .limit(10);
 
-const barChartCategories = [
-  { dataKey: "alta", name: "Alta Severidade", color: "#F97316" },
-  { dataKey: "media", name: "Média Severidade", color: "#FB923C" },
-  { dataKey: "baixa", name: "Baixa Severidade", color: "#FDBA74" },
-];
+      if (error) {
+        setActivities([]);
+        setLoading(false);
+        return;
+      }
 
-// Mock data for recent activities
-const recentActivities = [
-  {
-    id: "1",
-    title: "Novo desvio registrado",
-    description: "Desvio de segurança reportado na área de operações",
-    timestamp: "Hoje, 10:45",
-    status: "warning" as const,
-  },
-  {
-    id: "2",
-    title: "Treinamento programado",
-    description: "Treinamento normativo para equipe de manutenção",
-    timestamp: "Hoje, 09:30",
-    status: "info" as const,
-  },
-  {
-    id: "3",
-    title: "Inspeção concluída",
-    description: "Inspeção de segurança concluída no setor administrativo",
-    timestamp: "Ontem, 15:20",
-    status: "success" as const,
-  },
-  {
-    id: "4",
-    title: "Ocorrência reportada",
-    description: "Ocorrência de incidente leve relatada no almoxarifado",
-    timestamp: "Ontem, 11:15",
-    status: "error" as const,
-  },
-];
+      // Mapear status para tipos de atividades
+      const statusMap: Record<string, any> = {
+        "Aberto": "warning",
+        "Fechado": "success",
+        "Concluido": "success",
+        "Concluída": "success",
+        "Em Andamento": "info",
+        "Pendente": "warning",
+        "Intolerável": "error",
+        "Intoleravel": "error",
+      };
 
-// Mock data for pending tasks
-const pendingTasks = [
-  {
-    id: "1",
-    title: "Revisão de procedimentos de segurança",
-    dueDate: "Hoje, 17:00",
-    priority: "high" as const,
-    status: "pending" as const,
-  },
-  {
-    id: "2",
-    title: "Validar registro de treinamentos do mês",
-    dueDate: "Amanhã, 12:00",
-    priority: "medium" as const,
-    status: "in-progress" as const,
-  },
-  {
-    id: "3",
-    title: "Atualizar documentação de EPIs",
-    dueDate: "28/04/2025",
-    priority: "medium" as const,
-    status: "pending" as const,
-  },
-  {
-    id: "4",
-    title: "Programar hora da segurança semanal",
-    dueDate: "30/04/2025",
-    priority: "low" as const,
-    status: "pending" as const,
-  },
-];
+      setActivities(
+        (data || []).map((desvio) => ({
+          id: desvio.id,
+          title: "Novo desvio registrado",
+          description: desvio.descricao_desvio?.slice(0, 60) ?? "",
+          timestamp: desvio.data_desvio
+            ? new Date(desvio.data_desvio).toLocaleDateString("pt-BR")
+            : "",
+          status: statusMap[desvio.status || ""] || "info",
+        }))
+      );
+      setLoading(false);
+    }
+    fetchActivities();
+  }, []);
+  return { activities, loading };
+}
+
+// Hook para buscar tarefas pendentes do Supabase
+function usePendingTasksFromSupabase() {
+  const [tasks, setTasks] = React.useState<any[]>([]);
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    async function fetchTasks() {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from("tarefas")
+        .select(
+          `
+            id,
+            titulo,
+            descricao,
+            data_conclusao,
+            status,
+            configuracao,
+            responsavel_id,
+            profiles!inner(id, nome)
+          `
+        )
+        .in("status", ["pendente", "em_andamento"])
+        .order("created_at", { ascending: false })
+        .limit(10);
+
+      if (error) {
+        setTasks([]);
+        setLoading(false);
+        return;
+      }
+
+      setTasks(
+        (data || []).map((t: any) => ({
+          id: t.id,
+          title: t.titulo || t.descricao?.slice(0, 40) || "Tarefa sem título",
+          dueDate: t.data_conclusao
+            ? new Date(t.data_conclusao).toLocaleDateString("pt-BR")
+            : "",
+          priority:
+            t?.configuracao?.criticidade ||
+            (t?.configuracao && t.configuracao["criticidade"]) ||
+            "media",
+          status:
+            t.status === "em_andamento"
+              ? "in-progress"
+              : t.status === "pendente"
+              ? "pending"
+              : t.status === "concluida"
+              ? "completed"
+              : t.status || "pending",
+          responsavel:
+            t.profiles?.nome || "Não atribuído",
+        }))
+      );
+      setLoading(false);
+    }
+    fetchTasks();
+  }, []);
+
+  return { tasks, loading, setTasks };
+}
 
 const Dashboard = () => {
   const totalDesvios = useTotalDesvios();
   const totalTreinamentos = useTotalTreinamentosMes();
   const totalOcorrencias = useTotalOcorrenciasMes();
   const totalTarefas = useTotalTarefasPendentes();
+
+  const { activities, loading: loadingActivities } = useRecentActivitiesFromDesvios();
+  const { tasks, loading: loadingTasks, setTasks } = usePendingTasksFromSupabase();
+
+  // Função para concluir tarefa via Supabase
+  const handleMarkTaskComplete = useCallback(
+    async (taskId: string) => {
+      const { error } = await supabase
+        .from("tarefas")
+        .update({ status: "concluida", data_real_conclusao: new Date().toISOString() })
+        .eq("id", taskId);
+      if (error) {
+        toast({
+          title: "Erro ao concluir tarefa",
+          description: error.message,
+          variant: "destructive",
+        });
+        return;
+      }
+      // Remover do state para um refresh rápido, sem recarregar tudo
+      setTasks((prev) => prev.filter((t) => t.id !== taskId));
+      toast({
+        title: "Tarefa concluída",
+        description: "Tarefa marcada como concluída com sucesso",
+      });
+    },
+    [setTasks]
+  );
 
   return (
     <div className="space-y-6">
@@ -219,14 +272,14 @@ const Dashboard = () => {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
-        <RecentActivitiesList 
-          title="Atividades Recentes" 
-          activities={recentActivities} 
+        <RecentActivitiesList
+          title="Atividades Recentes"
+          activities={loadingActivities ? [] : activities}
         />
-        <PendingTasksList 
-          title="Tarefas Pendentes" 
-          tasks={pendingTasks} 
-          onMarkComplete={(taskId) => console.log(`Marcar tarefa ${taskId} como concluída`)}
+        <PendingTasksList
+          title="Tarefas Pendentes"
+          tasks={loadingTasks ? [] : tasks}
+          onMarkComplete={handleMarkTaskComplete}
         />
       </div>
     </div>
