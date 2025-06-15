@@ -165,22 +165,27 @@ export default function InspecoesAcompanhamento() {
   };
 
   return (
-    <div className="container mx-auto py-6">
-      <h2 className="text-3xl font-bold tracking-tight mb-6">Acompanhamento de Inspeções HSA</h2>
+    <div className="container mx-auto py-4">
+      <h2 className="text-2xl font-bold tracking-tight mb-4">Acompanhamento de Inspeções HSA</h2>
       {isLoading ? (
         <div>Carregando inspeções...</div>
       ) : inspecoes.length === 0 ? (
         <div className="text-gray-500">Nenhuma inspeção cadastrada encontrada.</div>
       ) : (
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-2">
           {inspecoes.map((inspecao) => (
-            <Card key={inspecao.id} className="animate-fade-in relative min-h-[156px]">
+            <Card key={inspecao.id} className="animate-fade-in relative min-h-[112px] p-3">
               {/* Status badge canto superior direito */}
-              <div className="absolute right-4 top-4 z-10">
-                <Badge className={getStatusBadgeClass(inspecao.status)}>
+              <div className="absolute right-2 top-2 z-10">
+                <Badge
+                  className={
+                    getStatusBadgeClass(inspecao.status) +
+                    " text-[10px] px-2 py-0.5 h-5 min-h-0 leading-tight"
+                  }
+                >
                   <div className="flex items-center gap-1">
                     {getStatusIcon(inspecao.status)}
-                    <span className="text-xs">
+                    <span className="text-[10px]">
                       {inspecao.status === "REALIZADA (NÃO PROGRAMADA)"
                         ? "REALIZADA (NÃO PROG.)"
                         : inspecao.status}
@@ -188,57 +193,57 @@ export default function InspecoesAcompanhamento() {
                   </div>
                 </Badge>
               </div>
-              <CardHeader className="pb-2 pt-4">
-                <CardTitle className="text-base flex flex-col gap-0.5 min-h-0 leading-tight">
+              <CardHeader className="pb-1 pt-3 px-3">
+                <CardTitle className="text-sm flex flex-col gap-0.5 min-h-0 leading-tight">
                   {/* Exibe CCA completo */}
-                  <span className="font-bold text-lg leading-tight">
+                  <span className="font-bold text-base leading-tight">
                     {inspecao.cca?.codigo
                       ? `${inspecao.cca.codigo} - ${inspecao.cca.nome}`
                       : "CCA não definido"}
                   </span>
-                  {/* Data logo abaixo */}
-                  <span className="font-light text-xs mt-0.5">
+                  {/* Data logo abaixo, agora em negrito */}
+                  <span className="font-bold text-xs mt-0.5">
                     {inspecao.data ? format(new Date(inspecao.data), "dd/MM/yyyy") : "--"}
                   </span>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="flex flex-col gap-1 pt-0 px-6 pb-3">
-                <div className="text-xs leading-snug">
+              <CardContent className="flex flex-col gap-1 pt-0 px-3 pb-2">
+                <div className="text-[11px] leading-snug">
                   <span className="font-medium">Responsável:</span>{" "}
                   {inspecao.responsavel_inspecao}
                 </div>
-                <div className="text-xs leading-snug">
+                <div className="text-[11px] leading-snug">
                   <span className="font-medium">Função:</span>{" "}
                   {inspecao.funcao}
                 </div>
-                <div className="text-xs leading-snug">
+                <div className="text-[11px] leading-snug">
                   <span className="font-medium">Inspeção programada:</span>{" "}
                   {inspecao.inspecao_programada}
                 </div>
-                <div className="text-xs leading-snug">
+                <div className="text-[11px] leading-snug">
                   <span className="font-medium">Desvios identificados:</span>{" "}
                   {inspecao.desvios_identificados ?? 0}
                 </div>
               </CardContent>
               {/* Botões canto inferior direito, menores */}
-              <CardFooter className="pt-0 px-6 pb-3 justify-end">
-                <div className="flex gap-2">
+              <CardFooter className="pt-0 px-3 pb-2 justify-end">
+                <div className="flex gap-1">
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => openUpdateDialog(inspecao)}
-                    className="flex items-center gap-2 px-2 py-1 h-8 text-xs"
+                    className="flex items-center gap-1 px-2 py-1 h-7 min-h-0 text-[11px] leading-none"
                   >
-                    <Pencil className="w-4 h-4" />
+                    <Pencil className="w-3.5 h-3.5" />
                     Atualizar Status
                   </Button>
                   <Button
                     variant="destructive"
                     size="sm"
-                    className="flex items-center gap-2 px-2 py-1 h-8 text-xs"
+                    className="flex items-center gap-1 px-2 py-1 h-7 min-h-0 text-[11px] leading-none"
                     onClick={() => handleDelete(inspecao.id)}
                   >
-                    <Trash2 className="w-4 h-4" />
+                    <Trash2 className="w-3.5 h-3.5" />
                     Excluir
                   </Button>
                 </div>
@@ -314,10 +319,10 @@ export default function InspecoesAcompanhamento() {
                   )}
                 />
                 <DialogFooter>
-                  <Button variant="outline" type="button" onClick={() => setUpdateDialogOpen(false)}>
+                  <Button variant="outline" type="button" onClick={() => setUpdateDialogOpen(false)} className="text-[12px] h-8 px-3">
                     Cancelar
                   </Button>
-                  <Button type="submit">Salvar alterações</Button>
+                  <Button type="submit" className="text-[12px] h-8 px-3">Salvar alterações</Button>
                 </DialogFooter>
               </form>
             </Form>
