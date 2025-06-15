@@ -235,8 +235,8 @@ const InspecaoNaoProgramadaHSA = () => {
   return <div className="w-full px-2 sm:px-4 md:px-8 py-6 flex justify-center text-black text-left">
       <Card className="w-full max-w-4xl border bg-card shadow-md">
         <CardContent className="pt-6 pb-8 space-y-6">
-          <h2 className="text-2xl font-bold text-center w-full text-orange-500">
-            Cadastro de Inspeção Hora da Segurança NÃO PROGRAMADA
+          <h2 className="text-2xl font-bold text-left w-full">
+            Cadastrar Inspeção Não Programada - HSA
           </h2>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6 w-full">
