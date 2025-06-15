@@ -219,19 +219,6 @@ const Dashboard = () => {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
-        <AreaChart
-          title="Tendência de Desvios de Segurança"
-          data={areaChartData}
-          dataKey="value"
-        />
-        <BarChart
-          title="Desvios por Severidade"
-          data={barChartData}
-          categories={barChartCategories}
-        />
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-2">
         <RecentActivitiesList 
           title="Atividades Recentes" 
           activities={recentActivities} 
