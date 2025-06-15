@@ -24,7 +24,7 @@ import { uploadRAIToBucket } from "@/utils/uploadRAIToBucket";
 import { uploadLicoesAprendidasToBucket } from "@/utils/uploadLicoesAprendidasToBucket";
 
 const FechamentoForm = () => {
-  const { control, watch, setValue } = useFormContext();
+  const { control, watch, setValue, getValues } = useFormContext();
   
   const investigacao_realizada = watch("investigacao_realizada");
   const licoes_aprendidas_enviada = watch("licoes_aprendidas_enviada");
@@ -149,11 +149,24 @@ const FechamentoForm = () => {
                   {...field}
                   onChange={async (e) => {
                     const file = e.target.files?.[0];
-                    // Logs de debug para analisar valores no momento do upload
-                    console.log("Data:", dataOcorrencia);
-                    console.log("Classificacao:", classificacaoOcorrencia);
-                    console.log("selectedCcaId:", selectedCcaId);
-                    console.log("codigoCca:", codigoCca);
+                    // Usar getValues para garantir dados fresh
+                    const values = getValues([
+                      "data",
+                      "classificacao_ocorrencia",
+                      "cca",
+                      "ccas"
+                    ]);
+                    const dataOcorrencia = values[0] as Date | null;
+                    const classificacaoOcorrencia = values[1] || null;
+                    const selectedCcaId = values[2] || null;
+                    const ccas = values[3] || [];
+                    let codigoCca: string | null = null;
+                    if (selectedCcaId && ccas.length > 0) {
+                      const foundCca = ccas.find((c: any) => (c.id?.toString() ?? c.id) === selectedCcaId?.toString());
+                      codigoCca = foundCca?.codigo || null;
+                    }
+                    // Logs para debug
+                    console.log("UP-INFORME: Data:", dataOcorrencia, "Classificacao:", classificacaoOcorrencia, "selectedCcaId:", selectedCcaId, "codigoCca:", codigoCca);
                     if (file && file.size <= 2 * 1024 * 1024) { // 2MB limit
                       if (!dataOcorrencia || !classificacaoOcorrencia || !codigoCca) {
                         alert("Preencha a data da ocorrência, a classificação e o CCA antes de anexar o informe.");
@@ -207,7 +220,6 @@ const FechamentoForm = () => {
               </div>
             )}
           />
-          
           <Controller
             control={control}
             name="relatorio_analise"
@@ -223,6 +235,23 @@ const FechamentoForm = () => {
                   {...field}
                   onChange={async (e) => {
                     const file = e.target.files?.[0];
+                    // Usar getValues para garantir dados atualizados
+                    const values = getValues([
+                      "data",
+                      "classificacao_ocorrencia",
+                      "cca",
+                      "ccas"
+                    ]);
+                    const dataOcorrencia = values[0] as Date | null;
+                    const classificacaoOcorrencia = values[1] || null;
+                    const selectedCcaId = values[2] || null;
+                    const ccas = values[3] || [];
+                    let codigoCca: string | null = null;
+                    if (selectedCcaId && ccas.length > 0) {
+                      const foundCca = ccas.find((c: any) => (c.id?.toString() ?? c.id) === selectedCcaId?.toString());
+                      codigoCca = foundCca?.codigo || null;
+                    }
+                    console.log("UP-RAI: Data:", dataOcorrencia, "Classificacao:", classificacaoOcorrencia, "selectedCcaId:", selectedCcaId, "codigoCca:", codigoCca);
                     if (file && file.size <= 2 * 1024 * 1024) { // 2MB limit
                       if (!dataOcorrencia || !classificacaoOcorrencia || !codigoCca) {
                         alert("Preencha a data da ocorrência, a classificação e o CCA antes de anexar o RAI.");
@@ -318,11 +347,23 @@ const FechamentoForm = () => {
                 {...field}
                 onChange={async (e) => {
                   const file = e.target.files?.[0];
-                  // Logs para depuração dos valores
-                  console.log("Data:", dataOcorrencia);
-                  console.log("Classificacao:", classificacaoOcorrencia);
-                  console.log("selectedCcaId:", selectedCcaId);
-                  console.log("codigoCca:", codigoCca);
+                  // Pega valores com getValues (garante frescor dos dados)
+                  const values = getValues([
+                    "data",
+                    "classificacao_ocorrencia",
+                    "cca",
+                    "ccas"
+                  ]);
+                  const dataOcorrencia = values[0] as Date | null;
+                  const classificacaoOcorrencia = values[1] || null;
+                  const selectedCcaId = values[2] || null;
+                  const ccas = values[3] || [];
+                  let codigoCca: string | null = null;
+                  if (selectedCcaId && ccas.length > 0) {
+                    const foundCca = ccas.find((c: any) => (c.id?.toString() ?? c.id) === selectedCcaId?.toString());
+                    codigoCca = foundCca?.codigo || null;
+                  }
+                  console.log("UP-LICOES: Data:", dataOcorrencia, "Classificacao:", classificacaoOcorrencia, "selectedCcaId:", selectedCcaId, "codigoCca:", codigoCca);
                   if (file && file.size <= 2 * 1024 * 1024) {
                     if (!dataOcorrencia || !classificacaoOcorrencia || !codigoCca) {
                       alert("Preencha a data da ocorrência, a classificação e o CCA antes de anexar o arquivo de lições aprendidas.");
