@@ -53,21 +53,25 @@ export default function PainelExecucaoHSA() {
         "ACC PREV": s.previsto ?? s.quantidade,
         "ACC REAL": s.realizado ?? s.quantidade
       })));
-      // Execução por Responsável
+      // Execução por Responsável - garantir todas as chaves
       const responsaveis = await fetchInspecoesByResponsavel();
-      // Agora associar corretamente nome do CCA via id
-      setRespData(responsaveis.map((d: any) => ({
-        name: d.responsavel,
-        "Cancelada": d.cancelada ?? 0,
-        "Realizada": d.realizada ?? 0,
-        "Não Realizada": d.nao_realizada ?? 0,
-        "Realizada (Não Programada)": d["realizada (não programada)"] ?? 0
-      })));
+      setRespData(
+        responsaveis.map((d: any) => ({
+          name: d.responsavel,
+          "A Realizar": d.a_realizar ?? 0,
+          "Realizada": d.realizada ?? 0,
+          "Não Realizada": d.nao_realizada ?? 0,
+          "Realizada (Não Programada)": d["realizada (não programada)"] ?? 0,
+          "Cancelada": d.cancelada ?? 0,
+        }))
+      );
       // Desvios Identificados por Responsável (mocked)
-      setDesvioRespData(responsaveis.map((d: any) => ({
-        name: d.responsavel,
-        desvios: Math.floor(Math.random() * 30 + 1) // mock para exemplo
-      })));
+      setDesvioRespData(
+        responsaveis.map((d: any) => ({
+          name: d.responsavel,
+          desvios: Math.floor(Math.random() * 30 + 1) // mock para exemplo
+        }))
+      );
       // Desvios por Atividade Crítica (pie)
       const pie = await fetchDesviosByInspectionType();
       setPieData(pie.map((d: any) => ({
@@ -389,10 +393,11 @@ export default function PainelExecucaoHSA() {
                 <YAxis allowDecimals={false} />
                 <Tooltip />
                 <Legend />
-                <Bar dataKey="Cancelada" fill="#757575" />
+                <Bar dataKey="A Realizar" fill="#4285F4" />
                 <Bar dataKey="Realizada" fill="#43A047" />
                 <Bar dataKey="Não Realizada" fill="#E53935" />
                 <Bar dataKey="Realizada (Não Programada)" fill="#FFA000" />
+                <Bar dataKey="Cancelada" fill="#757575" />
               </ReBarChart>
             </ResponsiveContainer>
           </CardContent>
