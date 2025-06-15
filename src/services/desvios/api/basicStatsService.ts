@@ -19,29 +19,19 @@ export const fetchDashboardStats = async (): Promise<DashboardStats> => {
     const { count: acoesAndamento } = await supabase
       .from('desvios_completos')
       .select('*', { count: 'exact', head: true })
-      .eq('status', 'EM TRATATIVA')
-      .gt('prazo_conclusao', new Date().toISOString());
+      .eq('status', 'EM TRATATIVA');
 
     // Ações Pendentes: status 'Aberto'
-    const { count: pendentesAberto } = await supabase
+    const { count: acoesPendentes } = await supabase
       .from('desvios_completos')
       .select('*', { count: 'exact', head: true })
       .eq('status', 'Aberto');
-
-    // Ações Pendentes: 'EM TRATATIVA' com prazo vencido/nulo
-    const { count: pendentesAtrasado } = await supabase
-      .from('desvios_completos')
-      .select('*', { count: 'exact', head: true })
-      .eq('status', 'EM TRATATIVA')
-      .or(`prazo_conclusao.is.null,prazo_conclusao.lte.${new Date().toISOString()}`);
       
-    const acoesPendentes = (pendentesAberto || 0) + (pendentesAtrasado || 0);
-
     // Calcular percentuais
     const percentages = calculatePercentages(
       acoesCompletas || 0,
       acoesAndamento || 0,
-      acoesPendentes,
+      acoesPendentes || 0,
       totalDesvios || 0
     );
 
@@ -57,7 +47,7 @@ export const fetchDashboardStats = async (): Promise<DashboardStats> => {
       totalDesvios: totalDesvios || 0,
       acoesCompletas: acoesCompletas || 0,
       acoesAndamento: acoesAndamento || 0,
-      acoesPendentes: acoesPendentes,
+      acoesPendentes: acoesPendentes || 0,
       ...percentages,
       riskLevel,
     };

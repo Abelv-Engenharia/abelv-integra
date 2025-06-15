@@ -18,30 +18,20 @@ export const fetchFilteredDashboardStats = async (filters: FilterParams): Promis
 
     // Buscar ações em andamento filtradas
     let andamentoQuery = createBaseQuery()
-      .eq('status', 'EM TRATATIVA')
-      .gt('prazo_conclusao', new Date().toISOString());
+      .eq('status', 'EM TRATATIVA');
     andamentoQuery = applyFiltersToQuery(andamentoQuery, filters);
     const { count: acoesAndamento } = await andamentoQuery;
 
     // Buscar ações pendentes filtradas (status 'Aberto')
-    let pendentesAbertoQuery = createBaseQuery().eq('status', 'Aberto');
-    pendentesAbertoQuery = applyFiltersToQuery(pendentesAbertoQuery, filters);
-    const { count: pendentesAberto } = await pendentesAbertoQuery;
-
-    // Buscar ações pendentes filtradas ('EM TRATATIVA' com prazo vencido/nulo)
-    let pendentesAtrasadoQuery = createBaseQuery()
-      .eq('status', 'EM TRATATIVA')
-      .or(`prazo_conclusao.is.null,prazo_conclusao.lte.${new Date().toISOString()}`);
-    pendentesAtrasadoQuery = applyFiltersToQuery(pendentesAtrasadoQuery, filters);
-    const { count: pendentesAtrasado } = await pendentesAtrasadoQuery;
-
-    const acoesPendentes = (pendentesAberto || 0) + (pendentesAtrasado || 0);
+    let pendentesQuery = createBaseQuery().eq('status', 'Aberto');
+    pendentesQuery = applyFiltersToQuery(pendentesQuery, filters);
+    const { count: acoesPendentes } = await pendentesQuery;
 
     // Calcular percentuais
     const percentages = calculatePercentages(
       acoesCompletas || 0,
       acoesAndamento || 0,
-      acoesPendentes,
+      acoesPendentes || 0,
       totalDesvios || 0
     );
 
@@ -56,7 +46,7 @@ export const fetchFilteredDashboardStats = async (filters: FilterParams): Promis
       totalDesvios: totalDesvios || 0,
       acoesCompletas: acoesCompletas || 0,
       acoesAndamento: acoesAndamento || 0,
-      acoesPendentes: acoesPendentes,
+      acoesPendentes: acoesPendentes || 0,
       ...percentages,
       riskLevel,
     };
