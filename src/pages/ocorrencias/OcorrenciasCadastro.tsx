@@ -38,8 +38,8 @@ const schema = z.object({
 
   // Informações Ocorrência
   houve_afastamento: z.string().optional(),
-  dias_perdidos: z.union([z.number(), z.naive.number(), z.null()]).optional(),
-  dias_debitados: z.union([z.number(), z.naive.number(), z.null()]).optional(),
+  dias_perdidos: z.union([z.number(), z.null()]).optional(),
+  dias_debitados: z.union([z.number(), z.null()]).optional(),
   parte_corpo_atingida: z.string().optional(),
   lateralidade: z.string().optional(),
   agente_causador: z.string().optional(),
