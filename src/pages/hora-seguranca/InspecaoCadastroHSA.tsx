@@ -154,6 +154,9 @@ const InspecaoCadastroHSA = () => {
     });
   };
 
+  const watchCCA = form.watch("cca");
+  const ccaSelecionado = !!watchCCA;
+
   if (success) {
     return (
       <div className="w-full px-2 sm:px-4 md:px-8 py-6 flex justify-center">
@@ -280,16 +283,89 @@ const InspecaoCadastroHSA = () => {
                 />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-                <FormField
-                  control={form.control}
-                  name="responsavelTipo"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Responsável pela inspeção</FormLabel>
+              {/* Responsável pela inspeção e Função - conforme imagem */}
+              <div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+                  <div>
+                    <label className="block font-medium mb-1">
+                      Responsável pela ação
+                    </label>
+                    {/* Seleção via funcionário */}
+                    {form.watch("responsavelTipo") === "funcionario" ? (
+                      <Select
+                        onValueChange={(value) => form.setValue("responsavelFuncionarioId", value)}
+                        value={form.watch("responsavelFuncionarioId")}
+                        disabled={!ccaSelecionado}
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue
+                            placeholder={
+                              ccaSelecionado
+                                ? "Selecione o funcionário"
+                                : "Selecione um CCA primeiro"
+                            }
+                          />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {funcionarios.map((f: any) => (
+                            <SelectItem key={f.id} value={f.id}>
+                              {f.nome} ({f.funcao})
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    ) : (
+                      <Input
+                        value={form.watch("responsavelNome") || ""}
+                        onChange={e => form.setValue("responsavelNome", e.target.value)}
+                        placeholder="Ou digite um responsável manualmente"
+                        disabled={!ccaSelecionado}
+                        className="w-full"
+                      />
+                    )}
+                  </div>
+                  <div>
+                    <label className="block font-medium mb-1">
+                      Função
+                    </label>
+                    {form.watch("responsavelTipo") === "funcionario" ? (
+                      <Input
+                        value={
+                          (() => {
+                            const funcionario = funcionarios.find(
+                              (f: any) => f.id === form.watch("responsavelFuncionarioId")
+                            );
+                            return funcionario?.funcao || "";
+                          })()
+                        }
+                        placeholder={
+                          ccaSelecionado
+                            ? "Função do funcionário"
+                            : ""
+                        }
+                        disabled
+                        className="w-full"
+                      />
+                    ) : (
+                      <Input
+                        value={form.watch("responsavelFuncao") || ""}
+                        onChange={e => form.setValue("responsavelFuncao", e.target.value)}
+                        placeholder="Digite a função do responsável"
+                        disabled={!ccaSelecionado}
+                        className="w-full"
+                      />
+                    )}
+                  </div>
+                </div>
+                {/* Seleção entre funcionário e manual */}
+                <div className="mt-2">
+                  <FormField
+                    control={form.control}
+                    name="responsavelTipo"
+                    render={({ field }) => (
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
-                          <SelectTrigger>
+                          <SelectTrigger className="w-full max-w-xs">
                             <SelectValue placeholder="Selecione como informar o responsável" />
                           </SelectTrigger>
                         </FormControl>
@@ -298,60 +374,9 @@ const InspecaoCadastroHSA = () => {
                           <SelectItem value="manual">Inserir manualmente</SelectItem>
                         </SelectContent>
                       </Select>
-                    </FormItem>
-                  )}
-                />
-
-                {watchResponsavelTipo === "funcionario" ? (
-                  <FormField
-                    control={form.control}
-                    name="responsavelFuncionarioId"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Funcionário</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Selecione o funcionário" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {funcionarios.map((f: any) => (
-                              <SelectItem key={f.id} value={f.id}>{f.nome} ({f.funcao})</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </FormItem>
                     )}
                   />
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="responsavelNome"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Nome do responsável</FormLabel>
-                          <FormControl>
-                            <Input {...field} placeholder="Digite o nome do responsável" className="w-full" />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="responsavelFuncao"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Função do responsável</FormLabel>
-                          <FormControl>
-                            <Input {...field} placeholder="Digite a função do responsável" className="w-full" />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                )}
+                </div>
               </div>
 
               <div className="flex flex-col md:flex-row w-full pt-4 gap-3 md:gap-0">
