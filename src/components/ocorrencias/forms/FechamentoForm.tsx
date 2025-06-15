@@ -19,7 +19,8 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Check, Clock, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { uploadInformePreliminarToBucket, uploadRAIToBucket } from "@/utils/uploadInformePreliminarToBucket";
+import { uploadInformePreliminarToBucket } from "@/utils/uploadInformePreliminarToBucket";
+import { uploadRAIToBucket } from "@/utils/uploadRAIToBucket";
 
 const FechamentoForm = () => {
   const { control, watch, setValue } = useFormContext();
