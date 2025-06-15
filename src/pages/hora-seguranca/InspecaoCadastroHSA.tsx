@@ -139,7 +139,7 @@ const InspecaoCadastroHSA = () => {
     setIsSaving(true);
     let responsavel_nome = "";
     let funcao = "";
-    // Nome e função do responsável
+
     if (values.responsavelTipo === "funcionario") {
       const funcionario = funcionarios.find((f: any) => f.id === values.responsavelFuncionarioId);
       responsavel_nome = funcionario?.nome;
@@ -148,6 +148,11 @@ const InspecaoCadastroHSA = () => {
       responsavel_nome = values.responsavelNome || "";
       funcao = values.responsavelFuncao || "";
     }
+
+    // Buscar o nome do CCA a partir do código selecionado:
+    const ccaObj = ccas.find((c: any) => c.codigo === values.cca);
+    const cca_nome = ccaObj ? ccaObj.nome : "";
+
     // Nome do tipo de inspeção
     const tipoInspecaoLabel = tiposInspecao.find((t: any) => t.id === values.tipoInspecao)?.nome || "";
 
@@ -155,6 +160,7 @@ const InspecaoCadastroHSA = () => {
       .from("execucao_hsa")
       .insert({
         cca: values.cca,
+        cca_nome, // Salva o nome do CCA
         data: format(values.data, "yyyy-MM-dd"),
         ano: parseInt(ano),
         mes: parseInt(mes),

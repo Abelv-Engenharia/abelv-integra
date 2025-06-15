@@ -118,10 +118,15 @@ const InspecaoNaoProgramadaHSA = () => {
       funcao = values.responsavelFuncao || "";
     }
 
+    // Buscar o nome do CCA selecionado:
+    const ccaObj = ccas.find((c: any) => c.codigo === values.cca);
+    const cca_nome = ccaObj ? ccaObj.nome : "";
+
     const { error } = await supabase
       .from("execucao_hsa")
       .insert({
         cca: values.cca,
+        cca_nome, // Salva o nome do CCA aqui
         data: format(values.data, "yyyy-MM-dd"),
         ano: parseInt(ano),
         mes: parseInt(mes),
