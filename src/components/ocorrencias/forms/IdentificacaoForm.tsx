@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useFormContext } from "react-hook-form";
 import { useOcorrenciasFormData } from "@/hooks/useOcorrenciasFormData";
@@ -57,19 +58,6 @@ const IdentificacaoForm = () => {
       }
     }
   }, [watchColaborador, funcionarios, setValue]);
-
-  // Limpar campos dependentes quando CCA mudar
-  React.useEffect(() => {
-    if (watchedCca) {
-      setValue("empresa", "");
-      setValue("engenheiro_responsavel", "");
-      setValue("supervisor_responsavel", "");
-      setValue("encarregado_responsavel", "");
-      setValue("colaboradores_acidentados.0.colaborador", "");
-      setValue("colaboradores_acidentados.0.funcao", "");
-      setValue("colaboradores_acidentados.0.matricula", "");
-    }
-  }, [watchedCca, setValue]);
 
   return (
     <div className="space-y-6">

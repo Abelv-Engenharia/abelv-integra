@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useFormContext } from "react-hook-form";
 import {
@@ -58,8 +59,12 @@ const CompanyLocationFields: React.FC<CompanyLocationFieldsProps> = ({
                 onValueChange={value => {
                   if (value !== field.value) {
                     field.onChange(value);
-                    // Limpar empresa apenas se mudou
+                    // Limpar campos dependentes do CCA
                     setValue("empresa", "");
+                    setValue("engenheiro_responsavel", "");
+                    setValue("supervisor_responsavel", "");
+                    setValue("encarregado_responsavel", "");
+                    setValue("colaboradores_acidentados", [{ colaborador: "", funcao: "", matricula: "" }]);
                   }
                 }}
                 value={field.value}
