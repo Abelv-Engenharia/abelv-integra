@@ -35,11 +35,11 @@ const ResponsiblePersonFields: React.FC<ResponsiblePersonFieldsProps> = ({
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
       <FormField
         control={control}
-        name="engenheiroResponsavel"
+        name="engenheiro_responsavel"
         render={({ field }) => (
           <FormItem>
             <FormLabel>Engenheiro responsável</FormLabel>
-            <Select onValueChange={field.onChange} defaultValue={field.value} disabled={!selectedCcaId}>
+            <Select onValueChange={field.onChange} value={field.value || ''} disabled={!selectedCcaId}>
               <FormControl>
                 <SelectTrigger>
                   <SelectValue placeholder={!selectedCcaId ? "Selecione um CCA primeiro" : "Selecione o engenheiro"} />
@@ -48,7 +48,7 @@ const ResponsiblePersonFields: React.FC<ResponsiblePersonFieldsProps> = ({
               <SelectContent>
                 {engenheiros.map((engenheiro) => (
                   <SelectItem key={engenheiro.engenheiro_id} value={engenheiro.engenheiros.nome}>
-                    {engenheiro.engenheiros.nome} - {engenheiro.engenheiros.funcao}
+                    {engenheiro.engenheiros.nome}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -60,11 +60,11 @@ const ResponsiblePersonFields: React.FC<ResponsiblePersonFieldsProps> = ({
       
       <FormField
         control={control}
-        name="supervisorResponsavel"
+        name="supervisor_responsavel"
         render={({ field }) => (
           <FormItem>
             <FormLabel>Supervisor responsável</FormLabel>
-            <Select onValueChange={field.onChange} defaultValue={field.value} disabled={!selectedCcaId}>
+            <Select onValueChange={field.onChange} value={field.value || ''} disabled={!selectedCcaId}>
               <FormControl>
                 <SelectTrigger>
                   <SelectValue placeholder={!selectedCcaId ? "Selecione um CCA primeiro" : "Selecione o supervisor"} />
@@ -73,7 +73,7 @@ const ResponsiblePersonFields: React.FC<ResponsiblePersonFieldsProps> = ({
               <SelectContent>
                 {supervisores.map((supervisor) => (
                   <SelectItem key={supervisor.supervisor_id} value={supervisor.supervisores.nome}>
-                    {supervisor.supervisores.nome} - {supervisor.supervisores.funcao}
+                    {supervisor.supervisores.nome}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -85,11 +85,11 @@ const ResponsiblePersonFields: React.FC<ResponsiblePersonFieldsProps> = ({
       
       <FormField
         control={control}
-        name="encarregadoResponsavel"
+        name="encarregado_responsavel"
         render={({ field }) => (
           <FormItem>
             <FormLabel>Encarregado responsável</FormLabel>
-            <Select onValueChange={field.onChange} defaultValue={field.value} disabled={!selectedCcaId}>
+            <Select onValueChange={field.onChange} value={field.value || ''} disabled={!selectedCcaId}>
               <FormControl>
                 <SelectTrigger>
                   <SelectValue placeholder={!selectedCcaId ? "Selecione um CCA primeiro" : "Selecione o encarregado"} />
@@ -98,7 +98,7 @@ const ResponsiblePersonFields: React.FC<ResponsiblePersonFieldsProps> = ({
               <SelectContent>
                 {encarregados.map((encarregado) => (
                   <SelectItem key={encarregado.id} value={encarregado.nome}>
-                    {encarregado.nome} - {encarregado.funcao}
+                    {encarregado.nome}
                   </SelectItem>
                 ))}
               </SelectContent>
