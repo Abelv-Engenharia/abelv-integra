@@ -59,7 +59,7 @@ const Login = () => {
       <div className="flex items-center justify-center w-full h-full min-h-screen bg-black/30">
         <Card className="w-full max-w-md shadow-2xl bg-white/95 backdrop-blur-sm">
           <CardHeader className="space-y-2">
-            <CardTitle className="text-2xl text-center">Gestão de SMS                                                                            Abelv Engenharia</CardTitle>
+            <CardTitle className="text-2xl text-center">Gestão de SMS </CardTitle>
             <CardDescription className="text-center">
               Faça login para acessar o sistema
             </CardDescription>
