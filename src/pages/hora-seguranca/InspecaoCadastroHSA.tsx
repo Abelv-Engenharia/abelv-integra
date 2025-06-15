@@ -7,13 +7,7 @@ import { CheckCircle, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
@@ -26,29 +20,23 @@ interface Cca {
   codigo: string;
   nome: string;
 }
-
 interface Funcionario {
   id: string;
   nome: string;
   funcao: string;
 }
-
 interface TipoInspecao {
   id: string;
   nome: string;
 }
 
-
 // Busca CCAs ativos
 const useCCAs = () => {
   const [ccas, setCcas] = React.useState<Cca[]>([]);
   React.useEffect(() => {
-    supabase
-      .from("ccas")
-      .select("id, codigo, nome")
-      .eq("ativo", true)
-      .order("codigo")
-      .then(({ data }) => setCcas((data as Cca[]) || []));
+    supabase.from("ccas").select("id, codigo, nome").eq("ativo", true).order("codigo").then(({
+      data
+    }) => setCcas(data as Cca[] || []));
   }, []);
   return ccas;
 };
@@ -64,12 +52,10 @@ const useFuncionarios = (ccaCodigo?: string) => {
       }
 
       // 1. Get cca_id from cca_codigo
-      const { data: ccaData, error: ccaError } = await supabase
-        .from('ccas')
-        .select('id')
-        .eq('codigo', ccaCodigo)
-        .maybeSingle();
-
+      const {
+        data: ccaData,
+        error: ccaError
+      } = await supabase.from('ccas').select('id').eq('codigo', ccaCodigo).maybeSingle();
       if (ccaError || !ccaData) {
         console.error("Error fetching CCA or CCA not found:", ccaError?.message);
         setFuncionarios([]);
@@ -77,60 +63,48 @@ const useFuncionarios = (ccaCodigo?: string) => {
       }
 
       // 2. Get employees for that cca_id
-      const { data: funcData, error: funcError } = await supabase
-        .from('funcionarios')
-        .select('id, nome, funcao')
-        .eq('ativo', true)
-        .eq('cca_id', ccaData.id)
-        .order('nome');
-      
+      const {
+        data: funcData,
+        error: funcError
+      } = await supabase.from('funcionarios').select('id, nome, funcao').eq('ativo', true).eq('cca_id', ccaData.id).order('nome');
       if (funcError) {
         console.error("Error fetching funcionarios:", funcError.message);
         setFuncionarios([]);
         return;
       }
-      
-      setFuncionarios((funcData as Funcionario[]) || []);
+      setFuncionarios(funcData as Funcionario[] || []);
     };
-
     fetchFuncionarios();
   }, [ccaCodigo]);
   return funcionarios;
 };
 
-
 // Tipos de inspeção HSA
 const useTiposInspecao = () => {
   const [tipos, setTipos] = React.useState<TipoInspecao[]>([]);
   React.useEffect(() => {
-    supabase
-      .from("tipo_inspecao_hsa")
-      .select("id, nome")
-      .eq("ativo", true)
-      .order("nome")
-      .then(({ data }) => setTipos((data as TipoInspecao[]) || []));
+    supabase.from("tipo_inspecao_hsa").select("id, nome").eq("ativo", true).order("nome").then(({
+      data
+    }) => setTipos(data as TipoInspecao[] || []));
   }, []);
   return tipos;
 };
-
 const formSchema = z.object({
   data: z.date({
-    required_error: "A data da inspeção é obrigatória.",
+    required_error: "A data da inspeção é obrigatória."
   }),
   cca: z.string({
-    required_error: "O CCA é obrigatório.",
+    required_error: "O CCA é obrigatório."
   }),
   responsavelTipo: z.enum(["funcionario", "manual"]).default("funcionario"),
   responsavelFuncionarioId: z.string().optional(),
   responsavelNome: z.string().optional(),
   responsavelFuncao: z.string().optional(),
   tipoInspecao: z.string({
-    required_error: "Inspeção programada é obrigatória.",
-  }),
+    required_error: "Inspeção programada é obrigatória."
+  })
 });
-
 type FormType = z.infer<typeof formSchema>;
-
 const InspecaoCadastroHSA = () => {
   const ccas = useCCAs();
 
@@ -139,31 +113,27 @@ const InspecaoCadastroHSA = () => {
     resolver: zodResolver(formSchema),
     defaultValues: {
       responsavelTipo: "funcionario",
-      responsavelFuncionarioId: "",
-    },
+      responsavelFuncionarioId: ""
+    }
   });
   const watchCCA = form.watch("cca");
   const funcionarios = useFuncionarios(watchCCA);
   const tiposInspecao = useTiposInspecao();
-  const { toast } = useToast();
-
+  const {
+    toast
+  } = useToast();
   const [success, setSuccess] = useState(false);
-
   const watchData = form.watch("data");
   const ano = watchData ? format(watchData, "yyyy") : "";
   const mes = watchData ? format(watchData, "MM") : "";
-
   const watchResponsavelTipo = form.watch("responsavelTipo");
-
   const [isSaving, setIsSaving] = useState(false);
-
   const handleSubmit = async (values: FormType) => {
     setIsSaving(true);
     let responsavel_nome: string | undefined = "";
     let funcao: string | undefined = "";
-
     if (values.responsavelTipo === "funcionario") {
-      const funcionario = funcionarios.find((f) => f.id === values.responsavelFuncionarioId);
+      const funcionario = funcionarios.find(f => f.id === values.responsavelFuncionarioId);
       responsavel_nome = funcionario?.nome;
       funcao = funcionario?.funcao;
     } else {
@@ -172,7 +142,7 @@ const InspecaoCadastroHSA = () => {
     }
 
     // Corrigir busca do ID do CCA pelo código
-    const ccaObj = ccas.find((c) => c.codigo === values.cca);
+    const ccaObj = ccas.find(c => c.codigo === values.cca);
     const cca_id = ccaObj?.id;
 
     // Checar campos obrigatórios antes de salvar
@@ -180,7 +150,7 @@ const InspecaoCadastroHSA = () => {
       toast({
         title: "Erro ao cadastrar inspeção",
         description: "Selecione um CCA válido.",
-        variant: "destructive",
+        variant: "destructive"
       });
       setIsSaving(false);
       return;
@@ -189,7 +159,7 @@ const InspecaoCadastroHSA = () => {
       toast({
         title: "Erro ao cadastrar inspeção",
         description: "Informe a data da inspeção.",
-        variant: "destructive",
+        variant: "destructive"
       });
       setIsSaving(false);
       return;
@@ -198,7 +168,7 @@ const InspecaoCadastroHSA = () => {
       toast({
         title: "Erro ao cadastrar inspeção",
         description: "Selecione ou informe o responsável pela inspeção.",
-        variant: "destructive",
+        variant: "destructive"
       });
       setIsSaving(false);
       return;
@@ -207,7 +177,7 @@ const InspecaoCadastroHSA = () => {
       toast({
         title: "Erro ao cadastrar inspeção",
         description: "Informe a função do responsável.",
-        variant: "destructive",
+        variant: "destructive"
       });
       setIsSaving(false);
       return;
@@ -216,61 +186,57 @@ const InspecaoCadastroHSA = () => {
       toast({
         title: "Erro ao cadastrar inspeção",
         description: "Selecione o tipo de inspeção.",
-        variant: "destructive",
+        variant: "destructive"
       });
       setIsSaving(false);
       return;
     }
 
     // Nome do tipo de inspeção
-    const tipoInspecaoLabel = tiposInspecao.find((t) => t.id === values.tipoInspecao)?.nome || "";
+    const tipoInspecaoLabel = tiposInspecao.find(t => t.id === values.tipoInspecao)?.nome || "";
 
     // Insert só com cca_id e campos obrigatórios
-    const { error } = await supabase
-      .from("execucao_hsa")
-      .insert({
-        cca_id,
-        data: format(values.data, "yyyy-MM-dd"),
-        ano: parseInt(ano),
-        mes: parseInt(mes),
-        inspecao_programada: tipoInspecaoLabel,
-        responsavel_inspecao: responsavel_nome,
-        funcao,
-        status: "A REALIZAR",
-      });
-
+    const {
+      error
+    } = await supabase.from("execucao_hsa").insert({
+      cca_id,
+      data: format(values.data, "yyyy-MM-dd"),
+      ano: parseInt(ano),
+      mes: parseInt(mes),
+      inspecao_programada: tipoInspecaoLabel,
+      responsavel_inspecao: responsavel_nome,
+      funcao,
+      status: "A REALIZAR"
+    });
     setIsSaving(false);
-
     if (error) {
       toast({
         title: "Erro ao cadastrar inspeção",
         description: error.message,
-        variant: "destructive",
+        variant: "destructive"
       });
       return;
     }
     setSuccess(true);
     toast({
       title: "Inspeção cadastrada",
-      description: "Inspeção cadastrada com sucesso!",
+      description: "Inspeção cadastrada com sucesso!"
     });
   };
 
   // Remove a segunda declaração duplicada de watchCCA e usa apenas a original declarada acima.
   const ccaSelecionado = !!watchCCA;
-
   if (success) {
-    return (
-      <div className="w-full px-2 sm:px-4 md:px-8 py-6 flex justify-center">
+    return <div className="w-full px-2 sm:px-4 md:px-8 py-6 flex justify-center">
         <Card className="w-full max-w-2xl mx-auto">
           <CardContent className="pt-6 flex flex-col items-center gap-6">
             <CheckCircle className="h-16 w-16 text-green-500" />
             <h2 className="text-2xl font-bold text-center">Inspeção cadastrada com sucesso!</h2>
             <div className="flex flex-col md:flex-row gap-4 w-full">
               <Button className="flex-1" onClick={() => {
-                form.reset();
-                setSuccess(false);
-              }}>
+              form.reset();
+              setSuccess(false);
+            }}>
                 Cadastrar nova inspeção
               </Button>
               <Button className="flex-1" variant="outline" asChild>
@@ -279,36 +245,25 @@ const InspecaoCadastroHSA = () => {
             </div>
           </CardContent>
         </Card>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="w-full px-2 sm:px-4 md:px-8 py-6 flex justify-center">
+  return <div className="w-full px-2 sm:px-4 md:px-8 py-6 flex justify-center">
       <Card className="w-full max-w-4xl border bg-card shadow-md">
         <CardContent className="pt-6 pb-8 space-y-6">
-          <h2 className="text-2xl font-bold text-center w-full">Cadastro de Inspeção Hora da Segurança (HSA)</h2>
+          <h2 className="text-2xl font-bold w-full text-left">Cadastrar de Inspeção HSA</h2>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6 w-full">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
                 {/* Data */}
-                <FormField
-                  control={form.control}
-                  name="data"
-                  render={({ field }) => (
-                    <FormItem>
+                <FormField control={form.control} name="data" render={({
+                field
+              }) => <FormItem>
                       <FormLabel>Data da inspeção</FormLabel>
                       <FormControl>
-                        <DatePickerWithManualInput
-                          value={field.value}
-                          onChange={field.onChange}
-                          disabled={(date) => date < new Date("1900-01-01")}
-                        />
+                        <DatePickerWithManualInput value={field.value} onChange={field.onChange} disabled={date => date < new Date("1900-01-01")} />
                       </FormControl>
                       <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                    </FormItem>} />
                 {/* MÊS (apenas visual, não FormField) */}
                 <FormItem>
                   <FormLabel htmlFor="mes-input">Mês</FormLabel>
@@ -323,11 +278,9 @@ const InspecaoCadastroHSA = () => {
 
               {/* Os campos CCA e Inspeção programada agora estão um abaixo do outro */}
               <div className="grid grid-cols-1 gap-4 md:gap-6">
-                <FormField
-                  control={form.control}
-                  name="cca"
-                  render={({ field }) => (
-                    <FormItem>
+                <FormField control={form.control} name="cca" render={({
+                field
+              }) => <FormItem>
                       <FormLabel>CCA</FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
@@ -336,24 +289,18 @@ const InspecaoCadastroHSA = () => {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent className="max-h-72 overflow-y-auto">
-                          {ccas.map((cca) => (
-                            <SelectItem key={cca.codigo} value={cca.codigo}>
+                          {ccas.map(cca => <SelectItem key={cca.codigo} value={cca.codigo}>
                               {cca.codigo} - {cca.nome}
-                            </SelectItem>
-                          ))}
+                            </SelectItem>)}
                         </SelectContent>
                       </Select>
-                    </FormItem>
-                  )}
-                />
+                    </FormItem>} />
               </div>
 
               <div className="grid grid-cols-1 gap-4 md:gap-6">
-                <FormField
-                  control={form.control}
-                  name="tipoInspecao"
-                  render={({ field }) => (
-                    <FormItem>
+                <FormField control={form.control} name="tipoInspecao" render={({
+                field
+              }) => <FormItem>
                       <FormLabel>Inspeção programada</FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
@@ -362,67 +309,32 @@ const InspecaoCadastroHSA = () => {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent className="max-h-72 overflow-y-auto">
-                          {tiposInspecao.map((t: any) => (
-                            <SelectItem key={t.id} value={t.id}>{t.nome}</SelectItem>
-                          ))}
+                          {tiposInspecao.map((t: any) => <SelectItem key={t.id} value={t.id}>{t.nome}</SelectItem>)}
                         </SelectContent>
                       </Select>
-                    </FormItem>
-                  )}
-                />
+                    </FormItem>} />
               </div>
 
               {/* Responsável pela inspeção e Função - conforme imagem */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
-                  <label className="block font-medium" htmlFor={
-                      form.watch("responsavelTipo") === "funcionario"
-                        ? "responsavelFuncionarioId"
-                        : "responsavelNome"
-                    }>
+                  <label className="block font-medium" htmlFor={form.watch("responsavelTipo") === "funcionario" ? "responsavelFuncionarioId" : "responsavelNome"}>
                     Responsável pela inspeção
                   </label>
-                  {form.watch("responsavelTipo") === "funcionario" ? (
-                    <Select
-                      onValueChange={(value) => form.setValue("responsavelFuncionarioId", value)}
-                      value={form.watch("responsavelFuncionarioId")}
-                      disabled={!watchCCA}
-                    >
+                  {form.watch("responsavelTipo") === "funcionario" ? <Select onValueChange={value => form.setValue("responsavelFuncionarioId", value)} value={form.watch("responsavelFuncionarioId")} disabled={!watchCCA}>
                       <SelectTrigger id="responsavelFuncionarioId" className="w-full">
-                        <SelectValue
-                          placeholder={
-                            watchCCA
-                              ? "Selecione o funcionário"
-                              : "Selecione um CCA primeiro"
-                          }
-                        />
+                        <SelectValue placeholder={watchCCA ? "Selecione o funcionário" : "Selecione um CCA primeiro"} />
                       </SelectTrigger>
                       <SelectContent>
-                        {funcionarios.length === 0 && watchCCA && (
-                          <div className="text-sm text-gray-500 px-2 py-1">Nenhum funcionário para este CCA</div>
-                        )}
-                        {funcionarios.map((f) => (
-                          <SelectItem key={f.id} value={f.id}>
+                        {funcionarios.length === 0 && watchCCA && <div className="text-sm text-gray-500 px-2 py-1">Nenhum funcionário para este CCA</div>}
+                        {funcionarios.map(f => <SelectItem key={f.id} value={f.id}>
                             {f.nome}
-                          </SelectItem>
-                        ))}
+                          </SelectItem>)}
                       </SelectContent>
-                    </Select>
-                  ) : (
-                    <Input
-                      id="responsavelNome"
-                      value={form.watch("responsavelNome") || ""}
-                      onChange={e => form.setValue("responsavelNome", e.target.value)}
-                      placeholder="Ou digite um responsável manualmente"
-                      disabled={!watchCCA}
-                      className="w-full"
-                    />
-                  )}
-                  <FormField
-                    control={form.control}
-                    name="responsavelTipo"
-                    render={({ field }) => (
-                      <Select onValueChange={field.onChange} value={field.value}>
+                    </Select> : <Input id="responsavelNome" value={form.watch("responsavelNome") || ""} onChange={e => form.setValue("responsavelNome", e.target.value)} placeholder="Ou digite um responsável manualmente" disabled={!watchCCA} className="w-full" />}
+                  <FormField control={form.control} name="responsavelTipo" render={({
+                  field
+                }) => <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger className="w-full">
                             <SelectValue placeholder="Selecione como informar o responsável" />
@@ -432,58 +344,22 @@ const InspecaoCadastroHSA = () => {
                           <SelectItem value="funcionario">Escolher funcionário</SelectItem>
                           <SelectItem value="manual">Inserir manualmente</SelectItem>
                         </SelectContent>
-                      </Select>
-                    )}
-                  />
+                      </Select>} />
                 </div>
                 <div className="space-y-2">
-                  <label className="block font-medium" htmlFor={
-                      form.watch("responsavelTipo") === "funcionario"
-                        ? "funcaoFuncionario"
-                        : "responsavelFuncao"
-                    }>
+                  <label className="block font-medium" htmlFor={form.watch("responsavelTipo") === "funcionario" ? "funcaoFuncionario" : "responsavelFuncao"}>
                     Função
                   </label>
-                  {form.watch("responsavelTipo") === "funcionario" ? (
-                    <Input
-                      id="funcaoFuncionario"
-                      value={
-                        (() => {
-                          const funcionario = funcionarios.find(
-                            (f) => f.id === form.watch("responsavelFuncionarioId")
-                          );
-                          return funcionario?.funcao || "";
-                        })()
-                      }
-                      placeholder={
-                        watchCCA
-                          ? "Função do funcionário"
-                          : ""
-                      }
-                      disabled
-                      className="w-full"
-                    />
-                  ) : (
-                    <Input
-                      id="responsavelFuncao"
-                      value={form.watch("responsavelFuncao") || ""}
-                      onChange={e => form.setValue("responsavelFuncao", e.target.value)}
-                      placeholder="Digite a função do responsável"
-                      disabled={!watchCCA}
-                      className="w-full"
-                    />
-                  )}
+                  {form.watch("responsavelTipo") === "funcionario" ? <Input id="funcaoFuncionario" value={(() => {
+                  const funcionario = funcionarios.find(f => f.id === form.watch("responsavelFuncionarioId"));
+                  return funcionario?.funcao || "";
+                })()} placeholder={watchCCA ? "Função do funcionário" : ""} disabled className="w-full" /> : <Input id="responsavelFuncao" value={form.watch("responsavelFuncao") || ""} onChange={e => form.setValue("responsavelFuncao", e.target.value)} placeholder="Digite a função do responsável" disabled={!watchCCA} className="w-full" />}
                 </div>
               </div>
               
               <div className="flex flex-col md:flex-row w-full pt-4 gap-3 md:gap-0">
                 <div className="flex md:flex-1 md:justify-start">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="w-full md:w-auto"
-                    asChild
-                  >
+                  <Button type="button" variant="outline" className="w-full md:w-auto" asChild>
                     <Link to="/hora-seguranca/dashboard">
                       <ArrowLeft className="w-4 h-4 mr-2" />
                       Voltar
@@ -491,12 +367,7 @@ const InspecaoCadastroHSA = () => {
                   </Button>
                 </div>
                 <div className="flex md:flex-1 md:justify-end">
-                  <Button
-                    type="submit"
-                    size="default"
-                    disabled={isSaving}
-                    className="w-full md:w-auto"
-                  >
+                  <Button type="submit" size="default" disabled={isSaving} className="w-full md:w-auto">
                     {isSaving ? "Salvando..." : "Salvar"}
                   </Button>
                 </div>
@@ -505,8 +376,6 @@ const InspecaoCadastroHSA = () => {
           </Form>
         </CardContent>
       </Card>
-    </div>
-  );
+    </div>;
 };
-
 export default InspecaoCadastroHSA;
