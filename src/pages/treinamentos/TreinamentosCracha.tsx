@@ -178,6 +178,7 @@ const TreinamentosCracha = () => {
       if (printWindow) {
         printWindow.document.open();
 
+        // ↓↓↓ ALTERAÇÃO DO CSS PARA FONTE MENOR NOS DADOS DO FUNCIONÁRIO ↓↓↓
         const style = `
           <style>
             @page { size: A4; margin: 0; }
@@ -238,24 +239,27 @@ const TreinamentosCracha = () => {
               flex: 1;
               min-width: 0;
             }
+            /* ↓↓↓ FONTES MENORES NOS CAMPOS DO FUNCIONÁRIO ↓↓↓ */
             .cracha-nome {
               font-weight: bold;
-              font-size: 1.19rem;
+              font-size: 1rem !important;
               text-transform: uppercase;
-              margin-bottom: 3px;
+              margin-bottom: 2px;
               word-break: break-word;
               color: #181818;
+              line-height: 1.2;
             }
             .cracha-funcao {
-              font-size: 1rem;
+              font-size: 0.9rem !important;
               font-weight: 500;
               color: #232323;
-              margin-bottom: 2px;
+              margin-bottom: 1px;
               text-transform: none;
               word-break: break-word;
+              line-height: 1.1;
             }
             .cracha-matricula {
-              font-size: 1.01rem;
+              font-size: 0.83rem !important;
               color: #7b7b7b;
               font-weight: normal;
               letter-spacing: 0.02em;
