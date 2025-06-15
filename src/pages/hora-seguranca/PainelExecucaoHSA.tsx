@@ -67,46 +67,35 @@ export default function PainelExecucaoHSA() {
     loadData();
   }, []);
 
-  // KPIs - Define Aderência real HSA
-  // Considera status: 'A REALIZAR', 'REALIZADA', 'NÃO REALIZADA'
-  // Como no mock do painel, statusData está disponível (cada status e valor)
-  // Para calcular programadas:
+  // Cálculos dos cards
   const statusProgramada = ["A REALIZAR", "REALIZADA", "NÃO REALIZADA"];
   const programadasCard = statusData
     .filter((s) => statusProgramada.includes((s.name || "").toUpperCase()))
     .reduce((acc, cur) => acc + (cur.value ?? 0), 0);
-
-  // Realizadas: assume statusData com status "REALIZADA"
   const realizadasCard = statusData
     .filter((s) => (s.name || "").toUpperCase() === "REALIZADA")
     .reduce((acc, cur) => acc + (cur.value ?? 0), 0);
-
+  const naoRealizadaCard = statusData
+    .filter((s) => (s.name || "").toUpperCase() === "NÃO REALIZADA")
+    .reduce((acc, cur) => acc + (cur.value ?? 0), 0);
+  const realizadasNaoProgramadaCard = statusData
+    .filter((s) => (s.name || "").toUpperCase() === "REALIZADA (NÃO PROGRAMADA)")
+    .reduce((acc, cur) => acc + (cur.value ?? 0), 0);
   const aderenciaPerc =
     programadasCard > 0
       ? Math.round((realizadasCard / programadasCard) * 1000) / 10 // 1 decimal
       : 0;
 
-  // Define a cor do valor
+  // Cores do card de aderência real
   let aderenciaColor = "text-green-600";
   if (aderenciaPerc < 90) {
     aderenciaColor = "text-red-600";
   } else if (aderenciaPerc < 95) {
-    aderenciaColor = "text-yellow-500";
+    aderenciaColor = "text-orange-500";
   }
 
-  // Calcula percentuais dos KPIs:
-  const totalInspecoes = summary?.totalInspecoes ?? 0;
-  const concluidas = summary?.realizadas ?? 0;
-  const programadas = summary?.programadas ?? 1;
-  const canceladas = summary?.canceladas ?? 0;
-  const pendentes = summary ? summary.programadas - summary.realizadas - summary.canceladas : 0;
-
-  // Evita divisão por zero
-  const percentConcluidas = programadas > 0 ? Math.round(concluidas / programadas * 100) : 0;
-  const percentPendentes = programadas > 0 ? Math.round(pendentes / programadas * 100) : 0;
-  // Supondo que em andamento = 0 (mock)
-  const percentAndamento = 0;
-  return <div className="max-w-7xl mx-auto py-8 animate-fade-in">
+  return (
+    <div className="max-w-7xl mx-auto py-8 animate-fade-in">
       {/* HEADER */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 px-2">
         <div>
@@ -207,7 +196,7 @@ export default function PainelExecucaoHSA() {
         </CardContent>
       </Card>
       
-      {/* CARDS KPIs */}
+      {/* CARDS KPIs NOVA ORGANIZAÇÃO */}
       <div className="grid gap-4 md:grid-cols-4 px-2 pb-6">
         {/* Aderência real HSA */}
         <Card className="bg-white border border-gray-200 shadow-none">
@@ -235,69 +224,54 @@ export default function PainelExecucaoHSA() {
             </div>
           </CardContent>
         </Card>
-        {/* Total de Inspeções */}
-        <Card className="bg-white border border-gray-200 shadow-none">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-sm text-gray-500 font-medium">Total de Inspeções</div>
-                <div className="text-3xl font-bold mt-2">{isLoading ? "..." : totalInspecoes}</div>
-                <div className="mt-2 text-xs text-gray-400">Todos as inspeções registradas</div>
-                <div className="mt-1 text-abelv-green text-xs font-semibold">↑8%</div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        {/* Inspeções Concluídas */}
+        {/* Inspeções Realizadas */}
         <Card className="bg-white border border-green-500 shadow-none">
           <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-sm text-gray-500 font-medium flex items-center gap-1">
-                  Inspeções Concluídas{" "}
-                  <Check className="h-4 w-4 text-green-600" />
-                </div>
-                <div className="text-3xl font-bold mt-2">
-                  {isLoading ? "..." : `${concluidas} (${percentConcluidas}%)`}
-                </div>
-                <div className="mt-2 text-xs text-gray-400">Inspeções finalizadas</div>
-                <div className="mt-1 text-green-600 text-xs font-semibold">↑{percentConcluidas}%</div>
+            <div className="flex flex-col items-start">
+              <div className="text-sm text-gray-500 font-medium flex items-center gap-1">
+                Inspeções Realizadas
+                <span>
+                  <svg className="inline h-4 w-4 text-green-600" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7"></path></svg>
+                </span>
               </div>
+              <div className="text-3xl font-bold mt-2">
+                {isLoading ? "..." : realizadasCard}
+              </div>
+              <div className="mt-2 text-xs text-gray-400">Inspeções finalizadas</div>
             </div>
           </CardContent>
         </Card>
-        {/* Inspeções em Andamento */}
-        <Card className="bg-white border border-yellow-400 shadow-none">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-sm text-gray-500 font-medium flex items-center gap-1">
-                  Inspeções em Andamento{" "}
-                  <Clock className="h-4 w-4 text-yellow-500" />
-                </div>
-                <div className="text-3xl font-bold mt-2">
-                  {isLoading ? "..." : `0 (0%)`}
-                </div>
-                <div className="mt-2 text-xs text-gray-400">Inspeções sendo executadas</div>
-                <div className="mt-1 text-yellow-500 text-xs font-semibold">→0%</div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        {/* Inspeções Pendentes */}
+        {/* Inspeções Não Realizadas */}
         <Card className="bg-white border border-red-500 shadow-none">
           <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-sm text-gray-500 font-medium flex items-center gap-1">
-                  Inspeções Pendentes <AlertTriangle className="h-4 w-4 text-red-600" />
-                </div>
-                <div className="text-3xl font-bold mt-2">
-                  {isLoading ? "..." : `${pendentes} (${percentPendentes}%)`}
-                </div>
-                <div className="mt-2 text-xs text-gray-400">Inspeções a serem iniciadas</div>
-                <div className="mt-1 text-red-600 text-xs font-semibold">↓{percentPendentes}%</div>
+            <div className="flex flex-col items-start">
+              <div className="text-sm text-gray-500 font-medium flex items-center gap-1">
+                Inspeções Não Realizadas
+                <span>
+                  <svg className="inline h-4 w-4 text-red-600" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M12 19a7 7 0 110-14 7 7 0 010 14z"></path></svg>
+                </span>
               </div>
+              <div className="text-3xl font-bold mt-2">
+                {isLoading ? "..." : naoRealizadaCard}
+              </div>
+              <div className="mt-2 text-xs text-gray-400">Inspeções não foram realizadas</div>
+            </div>
+          </CardContent>
+        </Card>
+        {/* Inspeções Realizadas Não Programadas */}
+        <Card className="bg-white border border-yellow-500 shadow-none">
+          <CardContent className="p-4">
+            <div className="flex flex-col items-start">
+              <div className="text-sm text-gray-500 font-medium flex items-center gap-1">
+                Inspeções Realizadas Não Programadas
+                <span>
+                  <svg className="inline h-4 w-4 text-yellow-500" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12" y2="16"></line></svg>
+                </span>
+              </div>
+              <div className="text-3xl font-bold mt-2">
+                {isLoading ? "..." : realizadasNaoProgramadaCard}
+              </div>
+              <div className="mt-2 text-xs text-gray-400">Realizadas fora do previsto</div>
             </div>
           </CardContent>
         </Card>
@@ -387,5 +361,6 @@ export default function PainelExecucaoHSA() {
           </CardContent>
         </Card>
       </div>
-    </div>;
+    </div>
+  );
 }
