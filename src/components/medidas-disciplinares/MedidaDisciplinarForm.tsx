@@ -45,7 +45,7 @@ export default function MedidaDisciplinarForm({ onSuccess }: { onSuccess: () => 
   const { data: funcionarios, isLoading: funcLoading } = useFuncionarios(cca_id);
   const { mutateAsync, isPending } = useCriarMedidaDisciplinar();
   const [pdfFile, setPdfFile] = useState<File | null>(null);
-  const { profile } = useProfile(); // Correção: useProfile retorna profile diretamente
+  const { profile } = useProfile();
 
   useEffect(() => {
     setValue("funcionario_id", "");
@@ -57,8 +57,23 @@ export default function MedidaDisciplinarForm({ onSuccess }: { onSuccess: () => 
 
   const onSubmit = async (data: Schema) => {
     if (!profile?.id) return;
-    await mutateAsync({ form: data, arquivo: pdfFile, userId: profile.id });
-    reset();
+    // Garantir que todos os campos obrigatórios serão enviados ao reset
+    await mutateAsync({ form: {
+      cca_id: data.cca_id ?? "",
+      funcionario_id: data.funcionario_id ?? "",
+      tipo_medida: data.tipo_medida ?? "",
+      data_aplicacao: data.data_aplicacao ?? "",
+      descricao: data.descricao ?? "",
+      arquivo: data.arquivo ?? null,
+    }, arquivo: pdfFile, userId: profile.id });
+    reset({
+      cca_id: "",
+      funcionario_id: "",
+      tipo_medida: "",
+      data_aplicacao: "",
+      descricao: "",
+      arquivo: null,
+    });
     onSuccess();
   };
 

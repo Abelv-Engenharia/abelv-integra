@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { Table, TableHead, TableHeader, TableRow, TableCell, TableBody } from "@/components/ui/table";
 import { listarCCAs } from "@/services/medidasDisciplinaresService";
@@ -39,36 +38,41 @@ const MedidasDisciplinaresTable = ({ searchTerm, filters }: Props) => {
 
       let query = supabase
         .from("medidas_disciplinares")
-        .select("id, cca_id, funcionario_id, tipo_medida:medida, data_aplicacao:data, descricao:motivo, arquivo_url:pdf_url, created_at")
-        // Filtering by year/month if provided
-        ;
+        .select("id, cca_id, funcionario_id, medida, data, motivo, arquivo_url, created_at");
 
-      // Filter year
+      // Filtros
       if (filters.year && filters.year !== "todos") {
-        query = query.gte("data_aplicacao", `${filters.year}-01-01`).lte("data_aplicacao", `${filters.year}-12-31`);
+        query = query.gte("data", `${filters.year}-01-01`).lte("data", `${filters.year}-12-31`);
       }
-      // Filter month
       if (filters.month && filters.month !== "" && filters.month !== "todos") {
-        // Uses any day in the month
         const monthNum = Number(filters.month).toString().padStart(2, "0");
-        query = query.gte("data_aplicacao", `${filters.year}-${monthNum}-01`).lte("data_aplicacao", `${filters.year}-${monthNum}-31`);
+        query = query.gte("data", `${filters.year}-${monthNum}-01`).lte("data", `${filters.year}-${monthNum}-31`);
       }
-      // Filter CCA
       if (filters.cca && filters.cca !== "" && filters.cca !== "todos") {
         query = query.eq("cca_id", Number(filters.cca));
       }
-      // Filter tipo_medida
       if (filters.tipo_medida && filters.tipo_medida !== "todos") {
-        query = query.eq("tipo_medida", filters.tipo_medida);
+        query = query.eq("medida", filters.tipo_medida);
       }
-      // Simple search
       if (searchTerm) {
-        query = query.ilike("descricao", `%${searchTerm}%`);
+        query = query.ilike("motivo", `%${searchTerm}%`);
       }
 
-      const { data, error } = await query.order("data_aplicacao", { ascending: false });
-      if (!error && data) setMedidas(data as MedidaDisciplinar[]);
-      else setMedidas([]);
+      const { data, error } = await query.order("data", { ascending: false });
+      if (!error && data) {
+        setMedidas(
+          (data as any[]).map((m) => ({
+            id: m.id,
+            cca_id: m.cca_id?.toString() ?? "",
+            funcionario_id: m.funcionario_id ?? "",
+            tipo_medida: m.medida,
+            data_aplicacao: m.data,
+            descricao: m.motivo,
+            arquivo_url: m.arquivo_url,
+            created_at: m.created_at,
+          }))
+        );
+      } else setMedidas([]);
       setLoading(false);
     }
     fetchMedidas();
@@ -111,7 +115,7 @@ const MedidasDisciplinaresTable = ({ searchTerm, filters }: Props) => {
                     <TableCell>{medida.descricao || "-"}</TableCell>
                     <TableCell>
                       {medida.cca_id
-                        ? <CCAName ccaId={medida.cca_id} />
+                        ? <CCAName ccaId={Number(medida.cca_id)} />
                         : "-"}
                     </TableCell>
                     <TableCell>

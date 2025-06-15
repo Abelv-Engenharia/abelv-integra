@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { MedidaDisciplinar, MedidaDisciplinarFormData } from "@/types/medidasDisciplinares";
 
@@ -24,22 +23,39 @@ export async function listarFuncionariosPorCCAOuTodos(cca_id?: string) {
   return data;
 }
 
+// Utilitário para extrair ano e mês de data ISO yyyy-MM-dd
+function getAnoMes(dataISO: string): { ano: string; mes: string } {
+  const [ano, mes] = (dataISO || '').split('-');
+  return { ano: ano || '', mes: mes || '' };
+}
+
 /* Criar medida disciplinar */
 export async function criarMedidaDisciplinar(form: MedidaDisciplinarFormData, arquivoUrl?: string) {
   const { cca_id, funcionario_id, tipo_medida, data_aplicacao, descricao } = form;
+  const { ano, mes } = getAnoMes(data_aplicacao);
   const insertObj = {
-    cca_id: parseInt(cca_id),
+    cca_id: parseInt(cca_id, 10),
     funcionario_id,
-    tipo_medida,
-    data_aplicacao,
-    descricao,
+    medida: tipo_medida, // campo do Supabase
+    data: data_aplicacao, // campo do Supabase para data
+    motivo: descricao,
     arquivo_url: arquivoUrl || null,
+    ano,
+    mes,
   };
-  const { data, error } = await supabase.from("medidas_disciplinares").insert([
-    insertObj
-  ]).select("*").single();
+  const { data, error } = await supabase.from("medidas_disciplinares").insert([insertObj]).select("*").single();
   if (error) throw error;
-  return data as MedidaDisciplinar;
+  // Mapear para o formato esperado do frontend
+  return {
+    id: data.id,
+    cca_id: data.cca_id?.toString() || "",
+    funcionario_id: data.funcionario_id || "",
+    tipo_medida: data.medida,
+    data_aplicacao: data.data,
+    descricao: data.motivo,
+    arquivo_url: data.arquivo_url,
+    created_at: data.created_at,
+  };
 }
 
 /* Upload de arquivo PDF no bucket 'medidas_disciplinares' */
