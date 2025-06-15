@@ -235,7 +235,8 @@ const InspecaoCadastroHSA = () => {
                 </FormItem>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+              {/* Os campos CCA e Inspeção programada agora estão um abaixo do outro */}
+              <div className="grid grid-cols-1 gap-4 md:gap-6">
                 <FormField
                   control={form.control}
                   name="cca"
@@ -259,7 +260,9 @@ const InspecaoCadastroHSA = () => {
                     </FormItem>
                   )}
                 />
+              </div>
 
+              <div className="grid grid-cols-1 gap-4 md:gap-6">
                 <FormField
                   control={form.control}
                   name="tipoInspecao"
