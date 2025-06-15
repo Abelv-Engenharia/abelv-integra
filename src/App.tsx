@@ -62,6 +62,7 @@ import MedidasDisciplinaresDashboard from "./pages/medidas-disciplinares/Medidas
 import MedidasDisciplinaresCadastro from "./pages/medidas-disciplinares/MedidasDisciplinaresCadastro";
 import MedidasDisciplinaresConsulta from "./pages/medidas-disciplinares/MedidasDisciplinaresConsulta";
 import GroCadastroPerigos from "./pages/gro/GroCadastroPerigos";
+import GroAvaliacaoRiscos from './pages/gro/GroAvaliacaoRiscos';
 
 const queryClient = new QueryClient();
 
@@ -145,6 +146,7 @@ function App() {
               <Route path="hora-seguranca/acompanhamento" element={<InspecoesAcompanhamento />} />
               {/* GRO */}
               <Route path="gro/perigos" element={<GroCadastroPerigos />} />
+              <Route path="gro/avaliacao" element={<GroAvaliacaoRiscos />} />
             </Route>
           </Routes>
         </AuthProvider>
