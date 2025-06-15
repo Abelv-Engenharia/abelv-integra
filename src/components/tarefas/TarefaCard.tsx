@@ -4,7 +4,7 @@ import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle, Clock, AlertCircle, User, Calendar, Trash } from "lucide-react";
 import { Tarefa } from "@/types/tarefas";
-import { formatDistanceToNow, format } from "date-fns";
+import { formatDistanceToNow, format, differenceInCalendarDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import {
   AlertDialog,
@@ -73,22 +73,33 @@ export const TarefaCard: React.FC<TarefaCardProps> = ({
   const statusConfig = getStatusConfig(tarefa.status);
   const dataLimite = new Date(tarefa.dataConclusao);
 
-  // NOVO: data de criação formatada
+  // Formatada: data de criação
   const dataCriacaoFormatada = format(new Date(tarefa.dataCadastro), "dd/MM/yyyy", { locale: ptBR });
-  // NOVO: data de conclusão formatada
+  // Formatada: data de conclusão
   const dataConclusaoFormatada = format(new Date(tarefa.dataConclusao), "dd/MM/yyyy", { locale: ptBR });
 
-  // Antigo: texto de prazo
+  // Texto prazo restante (se não concluída)
   const restante = formatDistanceToNow(dataLimite, {
     addSuffix: true,
     locale: ptBR
   });
 
+  // NOVO: dias entre cadastro e conclusão, para tarefas concluídas
+  let diasConclusao: number | null = null;
+  if (tarefa.status === "concluida") {
+    try {
+      const inicio = new Date(tarefa.dataCadastro);
+      const fim = new Date(tarefa.dataConclusao);
+      diasConclusao = differenceInCalendarDays(fim, inicio);
+    } catch (e) {
+      diasConclusao = null;
+    }
+  }
+
   const [openDialog, setOpenDialog] = useState(false);
 
   return (
     <Card className="mb-4 hover:shadow-md transition-shadow cursor-pointer relative" onClick={() => onClick(tarefa)}>
-      {/* Botão de excluir no canto superior direito */}
       {onDelete && (
         <div className="absolute top-3 right-3 z-10">
           <AlertDialog open={openDialog} onOpenChange={setOpenDialog}>
@@ -133,7 +144,6 @@ export const TarefaCard: React.FC<TarefaCardProps> = ({
       <CardHeader className="pb-2 flex flex-row justify-between items-center">
         <div>
           <p className="font-medium text-sm text-muted-foreground">CCA: {tarefa.cca}</p>
-          {/* NOVO: Responsável e data de criação */}
           <div className="flex flex-col mt-1 gap-0.5">
             <span className="flex items-center text-xs text-muted-foreground">
               <User className="w-3 h-3 mr-1" />
@@ -168,6 +178,9 @@ export const TarefaCard: React.FC<TarefaCardProps> = ({
             <p className="text-xs text-muted-foreground flex items-center">
               <CheckCircle className="w-3 h-3 mr-1 text-green-600" />
               Concluída em {dataConclusaoFormatada}
+              {typeof diasConclusao === "number" && diasConclusao >= 0 && (
+                <span>{` (${diasConclusao} ${diasConclusao === 1 ? "dia" : "dias"} corridos)`}</span>
+              )}
             </p>
           )
           : (
