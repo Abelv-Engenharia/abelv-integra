@@ -9,6 +9,7 @@ export {
   fetchInspecoesByMonth,
   fetchRecentInspections,
   fetchDesviosByInspectionType,
+  fetchDesviosByResponsavel,
   fetchHHTByMonth,
   fetchHHTByCCA,
   createHorasTrabalhadas

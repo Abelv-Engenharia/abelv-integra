@@ -5,6 +5,7 @@ export { fetchInspecoesByTipo } from './inspecoesByTipoService';
 export { fetchInspecoesStats } from './inspecoesStatsService';
 export { fetchInspecoesByResponsavel } from './inspecoesByResponsavelService';
 export { fetchDesviosByInspectionType } from './desviosInspectionService';
+export { fetchDesviosByResponsavel } from './desviosByResponsavelService';
 export { fetchHHTByMonth, fetchHHTByCCA, createHorasTrabalhadas } from './horasTrabalhadasService';
 export { fetchInspecoesByStatus } from './inspecoesByStatusService';
 export { fetchInspecoesByMonth } from './inspecoesByMonthService';

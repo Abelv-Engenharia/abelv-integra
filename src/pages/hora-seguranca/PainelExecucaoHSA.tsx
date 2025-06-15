@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { fetchInspecoesSummary, fetchInspecoesByStatus, fetchInspecoesByMonth, fetchInspecoesByResponsavel, fetchDesviosByInspectionType } from "@/services/horaSegurancaService";
+import { fetchInspecoesSummary, fetchInspecoesByStatus, fetchInspecoesByMonth, fetchInspecoesByResponsavel, fetchDesviosByInspectionType, fetchDesviosByResponsavel } from "@/services/horaSegurancaService";
 import { Gauge, Check, Clock, AlertTriangle, Search, Plus } from "lucide-react";
 import { ResponsiveContainer, BarChart as ReBarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, LineChart as ReLineChart, Line, Legend, Pie as RePie, PieChart as RePieChart, Cell } from "recharts";
 import { Button } from "@/components/ui/button";
@@ -67,11 +67,13 @@ export default function PainelExecucaoHSA() {
           "Cancelada": d.cancelada ?? 0,
         }))
       );
-      // Desvios Identificados por Responsável (mocked)
+      // Desvios Identificados por Responsável - agora usa dados reais
+      const desviosReais = await fetchDesviosByResponsavel();
+      console.log('[HSA][PainelExecucaoHSA] desviosReais:', desviosReais);
       setDesvioRespData(
-        responsaveis.map((d: any) => ({
+        desviosReais.map((d: any) => ({
           name: d.responsavel,
-          desvios: Math.floor(Math.random() * 30 + 1) // mock para exemplo
+          desvios: d.desvios
         }))
       );
       // Desvios por Atividade Crítica (pie)
