@@ -3,21 +3,29 @@ import { supabase } from '@/integrations/supabase/client';
 import { InspecoesByStatus } from './types';
 
 /**
- * Fetch inspeções by status
+ * Fetch inspeções by status directly from execucao_hsa
  */
 export async function fetchInspecoesByStatus(): Promise<InspecoesByStatus[]> {
   try {
-    // Since we don't have this RPC yet, we'll return mock data for now
-    // TODO: Replace with real RPC call when available
-    const mockData: InspecoesByStatus[] = [
-      { name: 'Concluída', value: 45, status: 'Concluída' },
-      { name: 'Pendente', value: 30, status: 'Pendente' },
-      { name: 'Cancelada', value: 10, status: 'Cancelada' }
-    ];
+    const { data, error } = await supabase
+      .from('execucao_hsa')
+      .select('status');
 
-    return mockData;
+    if (error) throw error;
+
+    // Agrupa por status
+    const grouped: Record<string, number> = {};
+    data.forEach((row: any) => {
+      const st = (row.status || 'Indefinido');
+      grouped[st] = (grouped[st] || 0) + 1;
+    });
+    return Object.keys(grouped).map((status) => ({
+      name: status,
+      value: grouped[status],
+      status,
+    }));
   } catch (error) {
-    console.error("Exceção ao buscar inspeções por status:", error);
+    console.error("Erro ao buscar inspeções por status:", error);
     return [];
   }
 }
