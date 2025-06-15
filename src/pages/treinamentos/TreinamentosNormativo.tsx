@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -154,6 +155,31 @@ const TreinamentosNormativo = () => {
     };
     loadTreinamentosNormativos();
   }, []);
+
+  // Novo: detecta dados vindos via state da tabela para renovação
+  useEffect(() => {
+    if (location?.state) {
+      const { ccaId, funcionarioId, funcao, matricula, treinamentoId, tipo } = location.state as {
+        ccaId?: string;
+        funcionarioId?: string;
+        funcao?: string;
+        matricula?: string;
+        treinamentoId?: string;
+        tipo?: string;
+      };
+      if (ccaId) form.setValue("ccaId", ccaId);
+      if (funcionarioId) form.setValue("funcionarioId", funcionarioId);
+      if (treinamentoId) form.setValue("treinamentoId", treinamentoId);
+      // Only set type if it matches expected literal values
+      if (tipo === "Reciclagem" || tipo === "Formação") form.setValue("tipo", tipo);
+      // Forçar Função e Matrícula nos elementos exibidos (apenas para exibição, pois são disabled)
+      if (funcionarioId && funcionarios.length > 0) {
+        const funcionario = funcionarios.find(f => f.id === funcionarioId);
+        setSelectedFuncionario(funcionario || null);
+      }
+    }
+    // eslint-disable-next-line
+  }, [location.state, funcionarios]); // executa novamente se funcionários forem carregados
 
   const filteredFuncionarios = selectedCcaId ? funcionarios.filter(f => String(f.cca_id) === selectedCcaId) : [];
 
@@ -393,31 +419,6 @@ const TreinamentosNormativo = () => {
         </Card>
       </div>;
   }
-
-  // Novo: detecta dados vindos via state da tabela para renovação
-  useEffect(() => {
-    if (location?.state) {
-      const { ccaId, funcionarioId, funcao, matricula, treinamentoId, tipo } = location.state as {
-        ccaId?: string;
-        funcionarioId?: string;
-        funcao?: string;
-        matricula?: string;
-        treinamentoId?: string;
-        tipo?: string;
-      };
-      if (ccaId) form.setValue("ccaId", ccaId);
-      if (funcionarioId) form.setValue("funcionarioId", funcionarioId);
-      if (treinamentoId) form.setValue("treinamentoId", treinamentoId);
-      // Only set type if it matches expected literal values
-      if (tipo === "Reciclagem" || tipo === "Formação") form.setValue("tipo", tipo);
-      // Forçar Função e Matrícula nos elementos exibidos (apenas para exibição, pois são disabled)
-      if (funcionarioId && funcionarios.length > 0) {
-        const funcionario = funcionarios.find(f => f.id === funcionarioId);
-        setSelectedFuncionario(funcionario || null);
-      }
-    }
-    // eslint-disable-next-line
-  }, [location.state, funcionarios]); // executa novamente se funcionários forem carregados
 
   return <div className="space-y-6">
       {/* TÍTULO SEM A SETA */}
