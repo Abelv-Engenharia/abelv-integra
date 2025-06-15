@@ -118,15 +118,24 @@ const InspecaoNaoProgramadaHSA = () => {
       funcao = values.responsavelFuncao || "";
     }
 
-    // Buscar o nome do CCA selecionado:
+    // Buscar o objeto do CCA a partir do código selecionado:
     const ccaObj = ccas.find((c: any) => c.codigo === values.cca);
-    const cca_nome = ccaObj ? ccaObj.nome : "";
+    const cca_id = ccaObj ? ccaObj.id : undefined;
+
+    if (!cca_id) {
+      toast({
+        title: "Erro ao cadastrar inspeção",
+        description: "Selecione um CCA válido.",
+        variant: "destructive",
+      });
+      setIsSaving(false);
+      return;
+    }
 
     const { error } = await supabase
       .from("execucao_hsa")
       .insert({
-        cca: values.cca,
-        cca_nome, // Salva o nome do CCA aqui
+        cca_id,
         data: format(values.data, "yyyy-MM-dd"),
         ano: parseInt(ano),
         mes: parseInt(mes),
