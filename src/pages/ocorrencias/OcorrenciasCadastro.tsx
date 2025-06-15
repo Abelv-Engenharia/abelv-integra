@@ -275,12 +275,22 @@ const OcorrenciasCadastro = () => {
       return;
     }
 
-    // Conversão extra de empresa para string caso venha como number
-    const fixedEmpresa = typeof data.empresa === "number" ? data.empresa.toString() : data.empresa || "";
+    // --- FIX BELOW: context of 'empresa' type (force as string | number | undefined) ---
+    const empresaValue = data.empresa as string | number | undefined;
+    const fixedEmpresa =
+      typeof empresaValue === "number"
+        ? empresaValue.toString()
+        : empresaValue || "";
     if (data.empresa !== fixedEmpresa) {
-      console.log("Corrigindo valor de empresa para string. Antes:", data.empresa, "Depois:", fixedEmpresa);
+      console.log(
+        "Corrigindo valor de empresa para string. Antes:",
+        data.empresa,
+        "Depois:",
+        fixedEmpresa
+      );
       data.empresa = fixedEmpresa;
     }
+    // --- END FIX ---
 
     setIsSubmitting(true);
 
@@ -302,13 +312,13 @@ const OcorrenciasCadastro = () => {
           title: "Sucesso",
           description: "Ocorrência cadastrada com sucesso!"
         });
-        
+
         // Limpar formulário após criar nova ocorrência
         if (!isEditMode) {
           clearForm();
         }
       }
-      
+
       setSuccessDialogOpen(true);
     } catch (error) {
       console.error('Detailed error:', error);
