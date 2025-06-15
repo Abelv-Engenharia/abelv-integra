@@ -10,6 +10,7 @@ import {
   Settings,
   Shield,
   ShieldAlert,
+  ShieldCheck,
   Users,
   Building,
   UserCheck,
@@ -387,6 +388,64 @@ export function AppSidebar() {
                         <SidebarMenuButton asChild>
                           <Link to="/idsms/indice-reativo">
                             <span className="text-xs leading-tight">Índice Reativo</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </Collapsible>
+              </SidebarMenuItem>
+
+              {/* GRO (Gerenciamento de Riscos Ocupacionais) */}
+              <SidebarMenuItem>
+                <Collapsible open={openMenu === "gro"}>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton onClick={() => toggleMenu("gro")}>
+                      <ShieldCheck className="h-4 w-4" />
+                      <span className="text-sm leading-tight">GRO</span>
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent asChild>
+                    <SidebarMenuSub>
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                          <Link to="/gro/dashboard">
+                            <span className="text-xs leading-tight">Dashboard do GRO</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                          <Link to="/gro/perigos">
+                            <span className="text-xs leading-tight">Cadastro/Perigos</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                          <Link to="/gro/avaliacao">
+                            <span className="text-xs leading-tight">Avaliação de Riscos</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                          <Link to="/gro/pgr">
+                            <span className="text-xs leading-tight">PGR – Plano de Ação</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                          <Link to="/gro/revisao">
+                            <span className="text-xs leading-tight">Monitoramento & Revisão</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                          <Link to="/gro/relatorios">
+                            <span className="text-xs leading-tight">Relatórios & IRO</span>
                           </Link>
                         </SidebarMenuButton>
                       </SidebarMenuItem>
