@@ -317,7 +317,7 @@ const InspecaoCadastroHSA = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div>
                     <label className="block font-medium mb-1">
-                      Responsável pela ação
+                      Responsável pela inspeção
                     </label>
                     {form.watch("responsavelTipo") === "funcionario" ? (
                       <Select
