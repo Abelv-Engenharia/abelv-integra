@@ -1,14 +1,10 @@
-
+import React, { useEffect, useState } from "react";
 import {
   Activity,
   AlertTriangle,
   Calendar,
   CheckCircle,
   ClipboardList,
-  Clock,
-  FileText,
-  Shield,
-  Users,
 } from "lucide-react";
 import StatCard from "@/components/dashboard/StatCard";
 import AreaChart from "@/components/dashboard/AreaChart";
@@ -16,6 +12,66 @@ import BarChart from "@/components/dashboard/BarChart";
 import RecentActivitiesList from "@/components/dashboard/RecentActivitiesList";
 import PendingTasksList from "@/components/dashboard/PendingTasksList";
 import SystemLogo from "@/components/common/SystemLogo";
+import { supabase } from "@/integrations/supabase/client";
+
+// Hook para buscar contagem de desvios
+function useTotalDesvios() {
+  const [total, setTotal] = useState<number | null>(null);
+  useEffect(() => {
+    supabase
+      .from("desvios_completos")
+      .select("*", { count: "exact", head: true })
+      .then(({ count }) => setTotal(count || 0));
+  }, []);
+  return total;
+}
+
+// Hook para buscar contagem de treinamentos do mês atual
+function useTotalTreinamentosMes() {
+  const [total, setTotal] = useState<number | null>(null);
+  useEffect(() => {
+    const dt = new Date();
+    const mes = dt.getMonth() + 1;
+    const ano = dt.getFullYear();
+    supabase
+      .from("execucao_treinamentos")
+      .select("*", { count: "exact", head: true })
+      .eq("mes", mes)
+      .eq("ano", ano)
+      .then(({ count }) => setTotal(count || 0));
+  }, []);
+  return total;
+}
+
+// Hook para buscar número de ocorrências do mês atual
+function useTotalOcorrenciasMes() {
+  const [total, setTotal] = useState<number | null>(null);
+  useEffect(() => {
+    const dt = new Date();
+    const mes = dt.getMonth() + 1;
+    const ano = dt.getFullYear();
+    supabase
+      .from("ocorrencias")
+      .select("id", { count: "exact", head: true })
+      .eq("mes", mes)
+      .eq("ano", ano)
+      .then(({ count }) => setTotal(count || 0));
+  }, []);
+  return total;
+}
+
+// Hook para buscar número de tarefas pendentes
+function useTotalTarefasPendentes() {
+  const [total, setTotal] = useState<number | null>(null);
+  useEffect(() => {
+    supabase
+      .from("tarefas")
+      .select("id", { count: "exact", head: true })
+      .in("status", ["pendente", "em_andamento"])
+      .then(({ count }) => setTotal(count || 0));
+  }, []);
+  return total;
+}
 
 // Mock data for charts
 const areaChartData = [
@@ -108,6 +164,11 @@ const pendingTasks = [
 ];
 
 const Dashboard = () => {
+  const totalDesvios = useTotalDesvios();
+  const totalTreinamentos = useTotalTreinamentosMes();
+  const totalOcorrencias = useTotalOcorrenciasMes();
+  const totalTarefas = useTotalTarefasPendentes();
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col items-center mb-8 mt-4">
@@ -121,35 +182,39 @@ const Dashboard = () => {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatCard
           title="Desvios"
-          value="124"
+          value={totalDesvios === null ? "..." : totalDesvios.toString()}
           icon={<AlertTriangle className="h-4 w-4" />}
           description="Total de desvios no mês atual"
           trend="up"
           trendValue="12%"
+          loading={totalDesvios === null}
         />
         <StatCard
           title="Treinamentos"
-          value="45"
+          value={totalTreinamentos === null ? "..." : totalTreinamentos.toString()}
           icon={<Calendar className="h-4 w-4" />}
           description="Treinamentos realizados no mês"
           trend="up"
           trendValue="8%"
+          loading={totalTreinamentos === null}
         />
         <StatCard
           title="Ocorrências"
-          value="18"
+          value={totalOcorrencias === null ? "..." : totalOcorrencias.toString()}
           icon={<Activity className="h-4 w-4" />}
           description="Ocorrências registradas no mês"
           trend="down"
           trendValue="5%"
+          loading={totalOcorrencias === null}
         />
         <StatCard
           title="Tarefas"
-          value="37"
+          value={totalTarefas === null ? "..." : totalTarefas.toString()}
           icon={<ClipboardList className="h-4 w-4" />}
           description="Tarefas pendentes no sistema"
           trend="neutral"
           trendValue="2%"
+          loading={totalTarefas === null}
         />
       </div>
 
