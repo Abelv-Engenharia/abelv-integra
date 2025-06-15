@@ -30,7 +30,8 @@ const FechamentoForm = () => {
   
   // Extrair dados necessários para nomear o arquivo
   const dataOcorrencia = watch("data") as Date | null;
-  const colaboradores = watch("colaboradores_acidentados");
+  // Busca classificação da ocorrência para usar no nome do arquivo
+  const classificacaoOcorrencia = watch("classificacaoOcorrencia") || null;
   let colaboradorAcidentadoId: string | null = null;
   if (colaboradores && colaboradores.length > 0) {
     if (typeof colaboradores[0] === "object" && colaboradores[0] !== null) {
@@ -138,12 +139,12 @@ const FechamentoForm = () => {
                   onChange={async (e) => {
                     const file = e.target.files?.[0];
                     if (file && file.size <= 2 * 1024 * 1024) { // 2MB limit
-                      if (!dataOcorrencia || !colaboradorAcidentadoNome) {
-                        alert("Preencha a data da ocorrência e o colaborador acidentado antes de anexar o informe.");
+                      if (!dataOcorrencia || !classificacaoOcorrencia) {
+                        alert("Preencha a data da ocorrência e a classificação antes de anexar o informe.");
                         return;
                       }
-                      // Faz upload ao bucket
-                      const url = await uploadInformePreliminarToBucket(file, dataOcorrencia, colaboradorAcidentadoNome);
+                      // Faz upload ao bucket usando o novo nome padrão
+                      const url = await uploadInformePreliminarToBucket(file, dataOcorrencia, classificacaoOcorrencia);
                       if (url) {
                         onChange(url);
                         setValue("informe_preliminar", url);

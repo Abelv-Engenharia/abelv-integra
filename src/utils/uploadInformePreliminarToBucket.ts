@@ -5,17 +5,18 @@ import { supabase } from "@/integrations/supabase/client";
 export async function uploadInformePreliminarToBucket(
   file: File,
   dataOcorrencia: Date | null,
-  colaboradorAcidentado: string | null
+  classificacaoOcorrencia: string | null
 ): Promise<string | null> {
-  if (!dataOcorrencia || !colaboradorAcidentado) {
-    console.error("Data da ocorrência ou colaborador acidentado não fornecido.");
+  if (!dataOcorrencia || !classificacaoOcorrencia) {
+    console.error("Data da ocorrência ou classificação da ocorrência não fornecido.");
     return null;
   }
   const dataFormatada = dataOcorrencia
     ? new Date(dataOcorrencia).toISOString().slice(0, 10).replace(/-/g, "")
     : "semdata";
-  // Remover espaços, acentos e caracteres especiais do nome do colaborador
-  const normColab = colaboradorAcidentado
+
+  // Normaliza classificação para ser “seguro” em nomes de arquivos
+  const normClassificacao = classificacaoOcorrencia
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .replace(/\s+/g, "_")
@@ -23,7 +24,7 @@ export async function uploadInformePreliminarToBucket(
     .slice(0, 40);
 
   const fileExt = file.name.split('.').pop();
-  const fileName = `INFORME_PRELIMINAR_${dataFormatada}_${normColab}.${fileExt}`;
+  const fileName = `INFORME PRELIMINAR_${dataFormatada}_${normClassificacao}.${fileExt}`;
 
   // Upload para o bucket
   const { data, error } = await supabase.storage
@@ -50,3 +51,4 @@ export async function uploadInformePreliminarToBucket(
 
   return signedUrlData.signedUrl;
 }
+
