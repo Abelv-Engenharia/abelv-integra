@@ -160,7 +160,6 @@ const TreinamentosCracha = () => {
       });
       return;
     }
-
     if (treinamentosValidos.length === 0) {
       toast({
         title: "Aviso",
@@ -169,7 +168,6 @@ const TreinamentosCracha = () => {
       });
       return;
     }
-
     toast({
       title: "Imprimindo",
       description: "Enviando crachá para impressão...",
@@ -185,28 +183,28 @@ const TreinamentosCracha = () => {
             @page { size: A4; margin: 0; }
             body {
               margin: 0;
-              background: #f3f3f3;
+              background: #fff;
               font-family: Arial, Helvetica, sans-serif;
-              color: #222;
+              color: #111;
             }
             .cracha-box {
+              width: 370px;
+              min-height: 520px;
               background: #fff;
-              width: 360px;
-              min-height: 525px;
-              margin: 30px auto;
+              margin: 32px auto;
               border-radius: 9px;
               border: 1.5px solid #e5e7eb;
-              padding: 0;
               display: flex;
               flex-direction: column;
               align-items: stretch;
+              box-shadow: none;
             }
             .cracha-title {
               background: #2563eb;
               color: #fff;
-              font-size: 1.15rem;
+              font-size: 1.17rem;
               text-align: center;
-              padding: 18px 0 14px 0;
+              padding: 18px 0 18px 0;
               border-radius: 9px 9px 0 0;
               font-weight: 700;
               letter-spacing: 0.03em;
@@ -214,14 +212,15 @@ const TreinamentosCracha = () => {
             .cracha-upper {
               display: flex;
               flex-direction: row;
-              align-items: center;
-              gap: 20px;
-              padding: 20px 20px 8px 20px;
+              align-items: flex-start;
+              gap: 22px;
+              padding: 26px 26px 16px 22px;
               border-bottom: none;
+              min-height: 97px;
             }
             .cracha-logo {
-              width: 80px;
-              height: 80px;
+              width: 77px;
+              height: 77px;
               object-fit: contain;
               background: none;
               border-radius: 100%;
@@ -235,74 +234,78 @@ const TreinamentosCracha = () => {
             .cracha-funcionario-info {
               display: flex;
               flex-direction: column;
-              justify-content: center;
+              justify-content: flex-start;
               flex: 1;
+              min-width: 0;
             }
             .cracha-nome {
               font-weight: bold;
-              font-size: 1.17rem;
+              font-size: 1.19rem;
               text-transform: uppercase;
               margin-bottom: 3px;
               word-break: break-word;
+              color: #181818;
             }
             .cracha-funcao {
               font-size: 1rem;
               font-weight: 500;
-              color: #404040;
+              color: #232323;
               margin-bottom: 2px;
               text-transform: none;
               word-break: break-word;
             }
             .cracha-matricula {
-              font-size: 0.98rem;
+              font-size: 1.01rem;
               color: #7b7b7b;
-              margin-bottom: 0;
               font-weight: normal;
               letter-spacing: 0.02em;
             }
             .cracha-divider {
               border: none;
               border-top: 1px solid #e5e7eb;
-              margin: 10px 20px 0 20px;
+              margin: 10px 24px 0 24px;
             }
             .cracha-table-section {
               margin: 0 0 0 0;
               flex: 1;
               display: flex;
               flex-direction: column;
+              padding: 0px 20px;
             }
             .cracha-table-title {
               text-align: center;
               font-weight: bold;
-              margin: 24px 0 7px 0;
-              font-size: 1.05rem;
+              margin: 22px 0 8px 0;
+              font-size: 1.07rem;
               letter-spacing: 0.01em;
-              color: #222;
+              color: #1a1a1a;
             }
             .cracha-table {
               width: 100%;
               border-collapse: collapse;
-              font-size: 0.97rem;
+              font-size: 1.03rem;
               margin: 0;
               background: #fff;
             }
             .cracha-table thead tr th {
               font-weight: bold;
-              border-bottom: 1.3px solid #d4d4d4;
-              font-size: 0.97rem;
-              padding: 7px 8px;
+              border-bottom: 1px solid #c8c8c8;
+              font-size: 0.98rem;
+              padding: 7px 6px 7px 6px;
               background: #fff;
               color: #111;
               text-align: left;
             }
-            .cracha-table th:last-child, .cracha-table td:last-child {
+            .cracha-table th:last-child,
+            .cracha-table td:last-child {
               text-align: right;
             }
             .cracha-table tbody td {
-              border-bottom: 1px solid #ececec;
-              padding: 7px 8px 7px 8px;
+              border-bottom: 1px solid #ededed;
+              padding: 7px 6px 7px 6px;
               vertical-align: top;
-              color: #333;
+              color: #222;
+              background: #fff;
             }
             .cracha-table tbody tr:last-child td {
               border-bottom: none;
@@ -315,9 +318,11 @@ const TreinamentosCracha = () => {
             }
             .cracha-emissao {
               text-align: center;
-              color: #777;
-              font-size: 1rem;
-              margin: 30px 0 14px 0;
+              color: #444;
+              font-size: 1.04rem;
+              margin: 36px 0 16px 0;
+              font-weight: 400;
+              letter-spacing: 0.02em;
             }
           </style>
         `;
@@ -356,11 +361,11 @@ const TreinamentosCracha = () => {
                           ${treinamentosValidos
                             .map(
                               (treinamento) => `
-                            <tr>
-                              <td>${treinamento.treinamentoNome || "Treinamento não encontrado"}</td>
-                              <td>${formatarData(treinamento.data_validade)}</td>
-                            </tr>
-                          `
+                              <tr>
+                                <td>${treinamento.treinamentoNome || "Treinamento não encontrado"}</td>
+                                <td>${formatarData(treinamento.data_validade)}</td>
+                              </tr>
+                            `
                             )
                             .join("")}
                         </tbody>
@@ -377,7 +382,6 @@ const TreinamentosCracha = () => {
         `);
 
         printWindow.document.close();
-
         setTimeout(() => {
           printWindow.print();
           printWindow.close();
