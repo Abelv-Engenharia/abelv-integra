@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useFormContext, Controller } from "react-hook-form";
 import {
@@ -15,10 +14,14 @@ import { useOcorrenciasFormData } from "@/hooks/useOcorrenciasFormData";
 import AbsenceFields from "./components/AbsenceFields";
 import BodyPartLateralityFields from "./components/BodyPartLateralityFields";
 import CauseFields from "./components/CauseFields";
+import { uploadCatFileToBucket } from "@/utils/uploadCatFileToBucket";
 
 const InformacoesOcorrenciaForm = () => {
   const { control } = useFormContext();
   const { partesCorpo, lateralidades, agentesCausadores, situacoesGeradoras, naturezasLesao } = useOcorrenciasFormData();
+
+  // Estado para mostrar status de upload
+  const [uploadingCat, setUploadingCat] = React.useState(false);
 
   return (
     <div className="space-y-6">
@@ -90,7 +93,7 @@ const InformacoesOcorrenciaForm = () => {
       {/* Anexar CAT */}
       <Controller
         control={control}
-        name="arquivoCAT"
+        name="arquivo_cat"
         render={({ field: { value, onChange, ...field } }) => (
           <div className="grid w-full gap-1.5">
             <Label htmlFor="cat-upload">Anexar CAT (PDF, máx. 2MB)</Label>
@@ -99,15 +102,35 @@ const InformacoesOcorrenciaForm = () => {
               type="file"
               accept=".pdf"
               {...field}
-              onChange={(e) => {
+              onChange={async (e) => {
                 const file = e.target.files?.[0];
-                if (file && file.size <= 2 * 1024 * 1024) { // 2MB limit
-                  onChange(file);
+                if (file && file.size <= 2 * 1024 * 1024) {
+                  setUploadingCat(true);
+                  const url = await uploadCatFileToBucket(file);
+                  setUploadingCat(false);
+                  if (url) {
+                    onChange(url);
+                  } else {
+                    alert("Erro ao fazer upload do arquivo CAT.");
+                  }
                 } else if (file) {
                   alert("O arquivo deve ter no máximo 2MB");
                 }
               }}
             />
+            {uploadingCat && (
+              <span className="text-sm text-gray-500">Enviando arquivo...</span>
+            )}
+            {value && typeof value === "string" && (
+              <a
+                href={value}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 underline mt-2 text-xs"
+              >
+                Visualizar CAT anexada
+              </a>
+            )}
           </div>
         )}
       />
