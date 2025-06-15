@@ -5,12 +5,12 @@
  */
 export function transformFormDataToOcorrencia(formData: any) {
   return {
-    // Datas
+    // Datas e horários
     data: formData.data ? (formData.data instanceof Date ? formData.data.toISOString() : new Date(formData.data).toISOString()) : null,
     hora: formData.hora || null,
     mes: formData.mes ? parseInt(formData.mes) : null,
     ano: formData.ano ? parseInt(formData.ano) : null,
-    // Identificadores
+    // Identificação básica
     cca: formData.cca || '',
     empresa: formData.empresa || '',
     disciplina: formData.disciplina || '',
@@ -58,3 +58,4 @@ export function transformFormDataToOcorrencia(formData: any) {
     status: formData.status || 'Em tratativa'
   };
 }
+

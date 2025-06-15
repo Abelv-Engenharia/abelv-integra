@@ -27,7 +27,6 @@ const defaultValues: Partial<OcorrenciaFormSchema> = {
       status: "",
     },
   ],
-  // outros valores padrão...
 };
 
 export const OcorrenciaFormProvider: React.FC = () => {
@@ -50,47 +49,37 @@ export const OcorrenciaFormProvider: React.FC = () => {
     navigate("/ocorrencias/consulta");
   };
 
+  // Checagem idêntica ao desvio: usa o snake_case, campos simples e permite log de debug.
   const onSubmit = async (values: OcorrenciaFormSchema) => {
     setIsSubmitting(true);
 
-    // Transformar dados (como nos desvios)
     const ocorrenciaData = transformFormDataToOcorrencia(values);
 
-    // Log campos críticos para debug
-    console.log("[OCORRENCIA - CAMPOS CRÍTICOS]", {
-      data: ocorrenciaData.data,
-      classificacao_risco: ocorrenciaData.classificacao_risco,
-      cca: ocorrenciaData.cca,
-      empresa: ocorrenciaData.empresa
-    });
+    // Log de debug
+    console.log("[OCORRENCIA - DADOS TRANSFORMADOS]", ocorrenciaData);
 
-    // Validação crítica
-    if (
-      !ocorrenciaData.data ||
-      !ocorrenciaData.classificacao_risco ||
-      !ocorrenciaData.cca ||
-      !ocorrenciaData.empresa
-    ) {
+    // Validação mínima (igual desvio, pouquíssimos campos realmente obrigatórios)
+    if (!ocorrenciaData.data || !ocorrenciaData.classificacao_risco || !ocorrenciaData.cca || !ocorrenciaData.empresa) {
       toast.error(
-        `Preencha os campos obrigatórios: data, classificação de risco, CCA e empresa! 
-        (data: ${ocorrenciaData.data ? "Ok" : "Vazio"}, classificação: ${
-          ocorrenciaData.classificacao_risco ? "Ok" : "Vazio"
-        }, CCA: ${ocorrenciaData.cca ? "Ok" : "Vazio"}, empresa: ${
-          ocorrenciaData.empresa ? "Ok" : "Vazio"
-        })`
+        `Preencha os campos obrigatórios: data, classificação de risco, CCA e empresa!
+        (data: ${!!ocorrenciaData.data ? "Ok" : "Vazio"},
+        classificação: ${!!ocorrenciaData.classificacao_risco ? "Ok" : "Vazio"},
+        CCA: ${!!ocorrenciaData.cca ? "Ok" : "Vazio"},
+        empresa: ${!!ocorrenciaData.empresa ? "Ok" : "Vazio"}
+        )`
       );
       setIsSubmitting(false);
       return;
     }
 
     try {
-      // Logar para depuração
       console.log("[OCORRENCIA - ENVIANDO PARA SUPABASE]:", ocorrenciaData);
 
       const result = await createOcorrencia(ocorrenciaData);
 
       if (!result) {
         toast.error("Erro ao cadastrar ocorrência: Registro não foi salvo no banco.");
+        setIsSubmitting(false);
         return;
       }
 
