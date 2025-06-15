@@ -7,9 +7,7 @@ import { ResponsiveContainer, BarChart as ReBarChart, Bar, XAxis, YAxis, Cartesi
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useNavigate } from "react-router-dom";
-
 const COLORS = ["#4285F4", "#34A853", "#FBBC05", "#EA4335", "#8D6E63", "#FF9800", "#7E57C2"];
-
 export default function PainelExecucaoHSA() {
   const [summary, setSummary] = useState<any>(null);
   const [statusData, setStatusData] = useState<any[]>([]);
@@ -24,9 +22,7 @@ export default function PainelExecucaoHSA() {
   const [mes, setMes] = useState("todos");
   const [cca, setCca] = useState("todos");
   const [responsavel, setResponsavel] = useState("todos");
-
   const navigate = useNavigate();
-
   useEffect(() => {
     async function loadData() {
       setIsLoading(true);
@@ -35,47 +31,37 @@ export default function PainelExecucaoHSA() {
       setSummary(resumo);
       // Execução HSA Status
       const status = await fetchInspecoesByStatus();
-      setStatusData(
-        status.map((s: any) => ({
-          name: s.status,
-          value: s.quantidade ?? s.value ?? 0,
-        }))
-      );
+      setStatusData(status.map((s: any) => ({
+        name: s.status,
+        value: s.quantidade ?? s.value ?? 0
+      })));
       // Evolução Mensal
       const monthly = await fetchInspecoesByMonth();
-      setMonthData(
-        monthly.map((s: any, i: number) => ({
-          name: `S-${i + 1}`,
-          "ACC PREV": s.previsto ?? s.quantidade,
-          "ACC REAL": s.realizado ?? s.quantidade,
-        }))
-      );
+      setMonthData(monthly.map((s: any, i: number) => ({
+        name: `S-${i + 1}`,
+        "ACC PREV": s.previsto ?? s.quantidade,
+        "ACC REAL": s.realizado ?? s.quantidade
+      })));
       // Execução por Responsável
       const responsaveis = await fetchInspecoesByResponsavel();
-      setRespData(
-        responsaveis.map((d: any) => ({
-          name: d.responsavel,
-          "Cancelada": d.cancelada ?? 0,
-          "Realizada": d.realizada ?? 0,
-          "Não Realizada": d.nao_realizada ?? 0,
-          "Realizada (Não Programada)": d["realizada (não programada)"] ?? 0,
-        }))
-      );
+      setRespData(responsaveis.map((d: any) => ({
+        name: d.responsavel,
+        "Cancelada": d.cancelada ?? 0,
+        "Realizada": d.realizada ?? 0,
+        "Não Realizada": d.nao_realizada ?? 0,
+        "Realizada (Não Programada)": d["realizada (não programada)"] ?? 0
+      })));
       // Desvios Identificados por Responsável (mocked)
-      setDesvioRespData(
-        responsaveis.map((d: any) => ({
-          name: d.responsavel,
-          desvios: Math.floor(Math.random() * 30 + 1), // mock para exemplo
-        }))
-      );
+      setDesvioRespData(responsaveis.map((d: any) => ({
+        name: d.responsavel,
+        desvios: Math.floor(Math.random() * 30 + 1) // mock para exemplo
+      })));
       // Desvios por Atividade Crítica (pie)
       const pie = await fetchDesviosByInspectionType();
-      setPieData(
-        pie.map((d: any) => ({
-          name: d.tipo,
-          value: d.quantidade,
-        }))
-      );
+      setPieData(pie.map((d: any) => ({
+        name: d.tipo,
+        value: d.quantidade
+      })));
       setIsLoading(false);
     }
     loadData();
@@ -89,13 +75,11 @@ export default function PainelExecucaoHSA() {
   const pendentes = summary ? summary.programadas - summary.realizadas - summary.canceladas : 0;
 
   // Evita divisão por zero
-  const percentConcluidas = programadas > 0 ? Math.round((concluidas / programadas) * 100) : 0;
-  const percentPendentes = programadas > 0 ? Math.round((pendentes / programadas) * 100) : 0;
+  const percentConcluidas = programadas > 0 ? Math.round(concluidas / programadas * 100) : 0;
+  const percentPendentes = programadas > 0 ? Math.round(pendentes / programadas * 100) : 0;
   // Supondo que em andamento = 0 (mock)
   const percentAndamento = 0;
-
-  return (
-    <div className="max-w-7xl mx-auto py-8 animate-fade-in">
+  return <div className="max-w-7xl mx-auto py-8 animate-fade-in">
       {/* HEADER */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 px-2">
         <div>
@@ -105,18 +89,11 @@ export default function PainelExecucaoHSA() {
           </p>
         </div>
         <div className="flex flex-row gap-2">
-          <Button
-            variant="outline"
-            className="flex items-center gap-2"
-            onClick={() => navigate("/hora-seguranca/consulta")}
-          >
+          <Button variant="outline" className="flex items-center gap-2" onClick={() => navigate("/hora-seguranca/consulta")}>
             <Search className="h-4 w-4" />
             Consultar Inspeções
           </Button>
-          <Button
-            className="flex items-center gap-2 font-semibold"
-            onClick={() => navigate("/hora-seguranca/cadastro")}
-          >
+          <Button className="flex items-center gap-2 font-semibold" onClick={() => navigate("/hora-seguranca/cadastro")}>
             <Plus className="h-4 w-4" />
             Nova Inspeção
           </Button>
@@ -277,62 +254,7 @@ export default function PainelExecucaoHSA() {
       {/* Mantém o restante igual, apenas adicionando espaçamento */}
       <div className="px-2 space-y-6">
         {/* Gauge/Velocímetro */}
-        <div className="flex flex-col md:flex-row gap-6">
-          <Card className="flex-1">
-            <CardHeader>
-              <CardTitle>HSA com aderência satisfatória</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={180}>
-                <RePieChart>
-                  <RePie
-                    data={[
-                      { name: "Aderência", value: summary ? summary.realizadas : 0 },
-                      {
-                        name: "Fora da Meta",
-                        value: summary && summary.programadas ? summary.programadas - summary.realizadas : 0,
-                      },
-                    ]}
-                    cx="50%"
-                    cy="75%"
-                    startAngle={180}
-                    endAngle={0}
-                    innerRadius={60}
-                    outerRadius={80}
-                    dataKey="value"
-                  >
-                    <Cell key="cell1" fill="#4CAF50" />
-                    <Cell key="cell2" fill="#E0E0E0" />
-                  </RePie>
-                </RePieChart>
-              </ResponsiveContainer>
-              <div className="text-center text-xl pt-2">
-                {summary && summary.programadas > 0
-                  ? `${Math.round((summary.realizadas / summary.programadas) * 100)}%`
-                  : "--"}
-              </div>
-            </CardContent>
-          </Card>
-          {/* Evolução Mensal */}
-          <Card className="flex-[2]">
-            <CardHeader>
-              <CardTitle>Evolução Mensal</CardTitle>
-            </CardHeader>
-            <CardContent className="p-2">
-              <ResponsiveContainer width="100%" height={180}>
-                <ReLineChart data={monthData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Line type="monotone" dataKey="ACC PREV" stroke="#A5A5A5" strokeWidth={2} />
-                  <Line type="monotone" dataKey="ACC REAL" stroke="#43A047" strokeWidth={3} />
-                </ReLineChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-        </div>
+        
 
         {/* Execução HSA por status */}
         <Card>
@@ -344,7 +266,7 @@ export default function PainelExecucaoHSA() {
               <ReBarChart data={statusData}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" />
-                <YAxis allowDecimals={false}/>
+                <YAxis allowDecimals={false} />
                 <Tooltip />
                 <Bar dataKey="value" fill="#43A047" />
               </ReBarChart>
@@ -362,13 +284,13 @@ export default function PainelExecucaoHSA() {
               <ReBarChart data={respData}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" />
-                <YAxis allowDecimals={false}/>
+                <YAxis allowDecimals={false} />
                 <Tooltip />
                 <Legend />
-                <Bar dataKey="Cancelada" fill="#757575"/>
-                <Bar dataKey="Realizada" fill="#43A047"/>
-                <Bar dataKey="Não Realizada" fill="#E53935"/>
-                <Bar dataKey="Realizada (Não Programada)" fill="#FFA000"/>
+                <Bar dataKey="Cancelada" fill="#757575" />
+                <Bar dataKey="Realizada" fill="#43A047" />
+                <Bar dataKey="Não Realizada" fill="#E53935" />
+                <Bar dataKey="Realizada (Não Programada)" fill="#FFA000" />
               </ReBarChart>
             </ResponsiveContainer>
           </CardContent>
@@ -400,19 +322,11 @@ export default function PainelExecucaoHSA() {
           <CardContent>
             <ResponsiveContainer width="100%" height={230}>
               <RePieChart>
-                <RePie
-                  data={pieData}
-                  dataKey="value"
-                  nameKey="name"
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={90}
-                  fill="#1565C0"
-                  label={({ name, percent }) => `${name} • ${(percent * 100).toFixed(1)}%`}
-                >
-                  {pieData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
+                <RePie data={pieData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={90} fill="#1565C0" label={({
+                name,
+                percent
+              }) => `${name} • ${(percent * 100).toFixed(1)}%`}>
+                  {pieData.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
                 </RePie>
                 <Tooltip />
               </RePieChart>
@@ -420,6 +334,5 @@ export default function PainelExecucaoHSA() {
           </CardContent>
         </Card>
       </div>
-    </div>
-  );
+    </div>;
 }
