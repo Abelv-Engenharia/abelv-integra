@@ -71,17 +71,14 @@ function App() {
             <Route path="/auth/reset-password" element={<ResetPassword />} />
             <Route path="/" element={<AuthGuard><Layout /></AuthGuard>}>
               <Route index element={<Dashboard />} />
-
               {/* Desvios Routes */}
               <Route path="desvios/dashboard" element={<DesviosDashboard />} />
               <Route path="desvios/cadastro" element={<DesviosForm />} />
               <Route path="desvios/consulta" element={<DesviosConsulta />} />
               <Route path="desvios/nao-conformidade" element={<DesviosNaoConformidade />} />
-
               {/* Account/Profile/Auth pages */}
               <Route path="account/profile" element={<Profile />} />
               <Route path="account/settings" element={<Settings />} />
-
               {/* Treinamentos Routes */}
               <Route path="treinamentos/dashboard" element={<TreinamentosDashboard />} />
               <Route path="treinamentos/normativo" element={<TreinamentoNormativo />} />
@@ -90,27 +87,22 @@ function App() {
               <Route path="treinamentos/cracha" element={<EmissaoCracha />} />
               <Route path="/treinamentos/execucao/visualizar/:id" element={<VisualizarExecucaoTreinamento />} />
               <Route path="/treinamentos/execucao/editar/:id" element={<EditarExecucaoTreinamento />} />
-
               {/* Ocorrencias Routes */}
               <Route path="ocorrencias/dashboard" element={<OcorrenciasDashboard />} />
               <Route path="ocorrencias/consulta" element={<OcorrenciasConsulta />} />
               <Route path="ocorrencias/cadastro" element={<OcorrenciasCadastro />} />
-
               {/* Medidas Disciplinares Routes */}
               <Route path="medidas-disciplinares/dashboard" element={<MedidasDashboard />} />
               <Route path="medidas-disciplinares/cadastro" element={<MedidasCadastro />} />
               <Route path="medidas-disciplinares/consulta" element={<MedidasConsulta />} />
-
               {/* Tarefas Routes */}
               <Route path="tarefas/dashboard" element={<TarefasDashboard />} />
               <Route path="tarefas/minhas-tarefas" element={<MinhasTarefas />} />
               <Route path="tarefas/cadastro" element={<CadastroTarefas />} />
               <Route path="tarefas/detalhe/:id" element={<DetalheTarefa />} />
-
               {/* Relatorios Routes */}
               <Route path="relatorios" element={<Relatorios />} />
               <Route path="relatorios/idsms" element={<RelatoriosIDSMS />} />
-
               {/* Admin Routes */}
               <Route path="admin/usuarios" element={<UsuariosAdmin />} />
               <Route path="admin/perfis" element={<PerfisAdmin />} />
@@ -123,7 +115,6 @@ function App() {
               <Route path="admin/metas-indicadores" element={<MetasIndicadoresAdmin />} />
               <Route path="admin/templates" element={<TemplatesAdmin />} />
               <Route path="admin/logo" element={<LogoAdmin />} />
-              
               {/* IDSMS Routes */}
               <Route path="idsms/dashboard" element={<IDSMSDashboard />} />
               <Route path="idsms/indicadores" element={<IDSMSIndicadores />} />
@@ -134,14 +125,14 @@ function App() {
               <Route path="idsms/inspecao-alta-lideranca" element={<InspecaoAltaLiderancaForm />} />
               <Route path="idsms/inspecao-gestao-sms" element={<InspecaoGestaoSMSForm />} />
               <Route path="idsms/indice-reativo" element={<IndiceReativoForm />} />
-
               {/* Hora da Segurança - Nova página de cadastro */}
               <Route path="hora-seguranca/cadastro" element={<InspecaoCadastroHSA />} />
               <Route path="hora-seguranca/cadastro-inspecao" element={<InspecaoCadastroHSA />} />
               <Route path="hora-seguranca/cadastro-inspecao-nao-programada" element={<InspecaoNaoProgramadaHSA />} />
               <Route path="hora-seguranca/cadastro-inspecao-nao-planejada" element={<InspecaoNaoProgramadaHSA />} />
-+             {/* Painel Execução HSA */}
-+             <Route path="hora-seguranca/painel-execucao" element={<PainelExecucaoHSA />} />
+              {/* Painel Execução HSA - ADICIONADA ROTA DO DASHBOARD */}
+              <Route path="hora-seguranca/painel-execucao" element={<PainelExecucaoHSA />} />
+              <Route path="hora-seguranca/dashboard" element={<PainelExecucaoHSA />} />
               {/* Página de acompanhamento */}
               <Route path="hora-seguranca/acompanhamento" element={<InspecoesAcompanhamento />} />
             </Route>
