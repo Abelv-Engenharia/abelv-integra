@@ -1,9 +1,8 @@
-
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { fetchInspecoesSummary, fetchInspecoesByStatus, fetchInspecoesByMonth, fetchInspecoesByResponsavel, fetchDesviosByInspectionType } from "@/services/horaSegurancaService";
-import { Gauge, Check, Clock, Alert, Search, Plus } from "lucide-react";
+import { Gauge, Check, Clock, AlertTriangle, Search, Plus } from "lucide-react";
 import { ResponsiveContainer, BarChart as ReBarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, LineChart as ReLineChart, Line, Legend, Pie as RePie, PieChart as RePieChart, Cell } from "recharts";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -261,7 +260,7 @@ export default function PainelExecucaoHSA() {
             <div className="flex items-center justify-between">
               <div>
                 <div className="text-sm text-gray-500 font-medium flex items-center gap-1">
-                  Inspeções Pendentes <Alert className="h-4 w-4 text-red-600" />
+                  Inspeções Pendentes <AlertTriangle className="h-4 w-4 text-red-600" />
                 </div>
                 <div className="text-3xl font-bold mt-2">
                   {isLoading ? "..." : `${pendentes} (${percentPendentes}%)`}
