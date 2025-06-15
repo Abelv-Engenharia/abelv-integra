@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useFormContext, Controller } from "react-hook-form";
 import {
@@ -19,14 +18,37 @@ import {
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Check, Clock, AlertCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { uploadInformePreliminarToBucket } from "@/utils/uploadInformePreliminarToBucket";
 
 const FechamentoForm = () => {
-  const { control, watch } = useFormContext();
+  const { control, watch, setValue } = useFormContext();
   
   const investigacao_realizada = watch("investigacao_realizada");
   const licoes_aprendidas_enviada = watch("licoes_aprendidas_enviada");
   const acoes = watch("acoes") || [];
   
+  // Extrair dados necessários para nomear o arquivo
+  const dataOcorrencia = watch("data") as Date | null;
+  const colaboradores = watch("colaboradores_acidentados");
+  let colaboradorAcidentadoId: string | null = null;
+  if (colaboradores && colaboradores.length > 0) {
+    if (typeof colaboradores[0] === "object" && colaboradores[0] !== null) {
+      colaboradorAcidentadoId = colaboradores[0].colaborador || null;
+    } else {
+      colaboradorAcidentadoId = colaboradores[0] || null;
+    }
+  }
+  // Buscar nome do colaborador pelo id selecionado
+  const funcionarios = watch("funcionarios") || [];
+  let colaboradorAcidentadoNome: string | null = null;
+  if (colaboradorAcidentadoId && funcionarios.length > 0) {
+    const found = funcionarios.find((f: any) => f.id?.toString() === colaboradorAcidentadoId?.toString());
+    colaboradorAcidentadoNome = found?.nome || colaboradorAcidentadoId;
+  } else if (colaboradorAcidentadoId) {
+    colaboradorAcidentadoNome = colaboradorAcidentadoId;
+  }
+
   return (
     <div className="space-y-6">
       {/* Status do plano de ação */}
@@ -113,15 +135,58 @@ const FechamentoForm = () => {
                   type="file"
                   accept=".pdf"
                   {...field}
-                  onChange={(e) => {
+                  onChange={async (e) => {
                     const file = e.target.files?.[0];
                     if (file && file.size <= 2 * 1024 * 1024) { // 2MB limit
-                      onChange(file);
+                      if (!dataOcorrencia || !colaboradorAcidentadoNome) {
+                        alert("Preencha a data da ocorrência e o colaborador acidentado antes de anexar o informe.");
+                        return;
+                      }
+                      // Faz upload ao bucket
+                      const url = await uploadInformePreliminarToBucket(file, dataOcorrencia, colaboradorAcidentadoNome);
+                      if (url) {
+                        onChange(url);
+                        setValue("informe_preliminar", url);
+                      } else {
+                        alert("Erro ao fazer upload do arquivo do informe preliminar.");
+                      }
                     } else if (file) {
                       alert("O arquivo deve ter no máximo 2MB");
                     }
                   }}
                 />
+                {/* Mostrar se envio está presente */}
+                {value && typeof value === "string" && (
+                  <div className="flex items-center space-x-2 mt-2">
+                    <Button
+                      asChild
+                      type="button"
+                      size="sm"
+                      variant="default"
+                      className="text-xs px-2 py-0.5 h-7"
+                    >
+                      <a
+                        href={value}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        Visualizar informe anexado
+                      </a>
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="destructive"
+                      onClick={() => {
+                        onChange(null);
+                        setValue("informe_preliminar", null);
+                      }}
+                      className="text-xs px-2 py-0.5 h-7"
+                    >
+                      Remover informe
+                    </Button>
+                  </div>
+                )}
               </div>
             )}
           />
