@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -44,7 +43,7 @@ const OcorrenciasCadastro = () => {
     engenheiro_responsavel: '',
     supervisor_responsavel: '',
     encarregado_responsavel: '',
-    colaboradores_acidentados: [{
+    colaboradoresAcidentados: [{
       colaborador: '',
       funcao: '',
       matricula: ''
@@ -113,7 +112,7 @@ const OcorrenciasCadastro = () => {
             engenheiro_responsavel: ocorrencia.engenheiro_responsavel || '',
             supervisor_responsavel: ocorrencia.supervisor_responsavel || '',
             encarregado_responsavel: ocorrencia.encarregado_responsavel || '',
-            colaboradores_acidentados: Array.isArray(ocorrencia.colaboradores_acidentados) 
+            colaboradoresAcidentados: Array.isArray(ocorrencia.colaboradores_acidentados) 
               ? ocorrencia.colaboradores_acidentados.map((col: any) => ({
                   colaborador: col.colaborador || '',
                   funcao: col.funcao || '',

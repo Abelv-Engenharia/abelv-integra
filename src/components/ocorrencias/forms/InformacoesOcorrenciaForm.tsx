@@ -25,8 +25,8 @@ const InformacoesOcorrenciaForm = () => {
 
   // Obter valores necessários para o nome do arquivo
   const dataOcorrencia = watch("data") as Date | null;
-  // Considera apenas o primeiro colaborador acidentado
-  const colaboradores = watch("colaboradores_acidentados") || watch("colaboradoresAcidentados");
+  // Usar sempre colaboradoresAcidentados
+  const colaboradores = watch("colaboradoresAcidentados");
   let colaboradorAcidentado: string | null = null;
   if (colaboradores && colaboradores.length > 0) {
     // Pode ser um objeto tipo { colaborador: string (nome) ou id }
@@ -91,7 +91,6 @@ const InformacoesOcorrenciaForm = () => {
             </FormItem>
           )}
         />
-        
         <FormField
           control={control}
           name="cid"
