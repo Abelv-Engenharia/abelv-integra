@@ -54,6 +54,7 @@ import Settings from './pages/account/Settings';
 import ForgotPassword from './pages/auth/ForgotPassword';
 import ResetPassword from './pages/auth/ResetPassword';
 import InspecaoCadastroHSA from './pages/hora-seguranca/InspecaoCadastroHSA';
+import InspecaoNaoProgramadaHSA from './pages/hora-seguranca/InspecaoNaoProgramadaHSA';
 
 const queryClient = new QueryClient();
 
@@ -135,6 +136,7 @@ function App() {
               {/* Hora da Segurança - Nova página de cadastro */}
               <Route path="hora-seguranca/cadastro" element={<InspecaoCadastroHSA />} />
               <Route path="hora-seguranca/cadastro-inspecao" element={<InspecaoCadastroHSA />} />
+              <Route path="hora-seguranca/cadastro-inspecao-nao-programada" element={<InspecaoNaoProgramadaHSA />} />
             </Route>
           </Routes>
         </AuthProvider>
