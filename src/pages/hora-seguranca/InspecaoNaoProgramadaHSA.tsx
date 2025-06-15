@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -28,6 +27,20 @@ const useCCAs = () => {
       .then(({ data }) => setCcas(data || []));
   }, []);
   return ccas;
+};
+
+// Novo hook para buscar os tipos de inspeção ativos
+const useTiposInspecao = () => {
+  const [tipos, setTipos] = React.useState([]);
+  React.useEffect(() => {
+    supabase
+      .from("tipo_inspecao_hsa")
+      .select("id, nome")
+      .eq("ativo", true)
+      .order("nome")
+      .then(({ data }) => setTipos(data || []));
+  }, []);
+  return tipos;
 };
 
 const useFuncionarios = (ccaCodigo?: string) => {
@@ -72,6 +85,9 @@ const formSchema = z.object({
   cca: z.string({
     required_error: "O CCA é obrigatório.",
   }),
+  tipoInspecao: z.string({
+    required_error: "Selecione o tipo de inspeção realizada.",
+  }),
   responsavelTipo: z.enum(["funcionario", "manual"]).default("funcionario"),
   responsavelFuncionarioId: z.string().optional(),
   responsavelNome: z.string().optional(),
@@ -87,6 +103,7 @@ type FormType = z.infer<typeof formSchema>;
 
 const InspecaoNaoProgramadaHSA = () => {
   const ccas = useCCAs();
+  const tiposInspecao = useTiposInspecao();
   const form = useForm<FormType>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -122,10 +139,22 @@ const InspecaoNaoProgramadaHSA = () => {
     const ccaObj = ccas.find((c: any) => c.codigo === values.cca);
     const cca_id = ccaObj ? ccaObj.id : undefined;
 
+    // Buscar o nome do tipo de inspeção a partir do id
+    const tipoInspecaoLabel = tiposInspecao.find((t: any) => t.id === values.tipoInspecao)?.nome || "";
+
     if (!cca_id) {
       toast({
         title: "Erro ao cadastrar inspeção",
         description: "Selecione um CCA válido.",
+        variant: "destructive",
+      });
+      setIsSaving(false);
+      return;
+    }
+    if (!values.tipoInspecao) {
+      toast({
+        title: "Erro ao cadastrar inspeção",
+        description: "Selecione o tipo de inspeção realizada.",
         variant: "destructive",
       });
       setIsSaving(false);
@@ -139,7 +168,7 @@ const InspecaoNaoProgramadaHSA = () => {
         data: format(values.data, "yyyy-MM-dd"),
         ano: parseInt(ano),
         mes: parseInt(mes),
-        inspecao_programada: "NÃO PROGRAMADA",
+        inspecao_programada: tipoInspecaoLabel,
         responsavel_inspecao: responsavel_nome,
         funcao,
         desvios_identificados: values.desviosIdentificados,
@@ -264,6 +293,32 @@ const InspecaoNaoProgramadaHSA = () => {
                           ))}
                         </SelectContent>
                       </Select>
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              {/* Novo campo: Inspeção programada */}
+              <div className="grid grid-cols-1 gap-4 md:gap-6">
+                <FormField
+                  control={form.control}
+                  name="tipoInspecao"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Inspeção programada</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione o tipo de inspeção realizada" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent className="max-h-72 overflow-y-auto">
+                          {tiposInspecao.map((t: any) => (
+                            <SelectItem key={t.id} value={t.id}>{t.nome}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
