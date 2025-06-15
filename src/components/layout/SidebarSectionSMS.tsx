@@ -1,4 +1,3 @@
-
 import React from "react";
 import {
   Calendar,
@@ -7,6 +6,7 @@ import {
   BarChart3,
   List,
   ShieldCheck,
+  ClipboardList,
 } from "lucide-react";
 import {
   SidebarGroup,
@@ -166,6 +166,42 @@ export default function SidebarSectionSMS({ openMenu, toggleMenu }: Props) {
                     <SidebarMenuButton asChild>
                       <Link to="/hora-seguranca/cadastro-inspecao-nao-planejada">
                         <span className="text-xs leading-tight">Cadastro de Inspeção Não Planejada</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                </SidebarMenuSub>
+              </CollapsibleContent>
+            </Collapsible>
+          </SidebarMenuItem>
+          {/* Ocorrências */}
+          <SidebarMenuItem>
+            <Collapsible open={openMenu === "ocorrencias"}>
+              <CollapsibleTrigger asChild>
+                <SidebarMenuButton onClick={() => toggleMenu("ocorrencias")}>
+                  <ClipboardList className="h-4 w-4" />
+                  <span className="text-sm leading-tight">Ocorrências</span>
+                </SidebarMenuButton>
+              </CollapsibleTrigger>
+              <CollapsibleContent asChild>
+                <SidebarMenuSub>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild>
+                      <Link to="/ocorrencias/dashboard">
+                        <span className="text-xs leading-tight">Dashboard</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild>
+                      <Link to="/ocorrencias/cadastro">
+                        <span className="text-xs leading-tight">Cadastro</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild>
+                      <Link to="/ocorrencias/consulta">
+                        <span className="text-xs leading-tight">Consulta</span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
