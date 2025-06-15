@@ -137,6 +137,7 @@ function App() {
               <Route path="hora-seguranca/cadastro" element={<InspecaoCadastroHSA />} />
               <Route path="hora-seguranca/cadastro-inspecao" element={<InspecaoCadastroHSA />} />
               <Route path="hora-seguranca/cadastro-inspecao-nao-programada" element={<InspecaoNaoProgramadaHSA />} />
+              <Route path="hora-seguranca/cadastro-inspecao-nao-planejada" element={<InspecaoNaoProgramadaHSA />} />
             </Route>
           </Routes>
         </AuthProvider>
