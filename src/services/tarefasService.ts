@@ -22,6 +22,7 @@ export interface TarefaUpdateData {
   status?: TarefaStatus;
   iniciada?: boolean;
   anexo?: string;
+  data_real_conclusao?: string | null;
 }
 
 export const tarefasService = {
@@ -49,8 +50,9 @@ export const tarefasService = {
         tipoCca: 'linha-inteira' as const,
         dataCadastro: data.data_cadastro,
         dataConclusao: data.data_conclusao,
+        data_real_conclusao: data.data_real_conclusao ?? null, // <-- garantir que o campo vai pro front
         descricao: data.descricao,
-        titulo: data.titulo ?? "", // <<< Garantir que titulo vem do banco
+        titulo: data.titulo ?? "",
         responsavel: {
           id: data.responsavel_id || '',
           nome: data.profiles?.nome || 'Não atribuído'
@@ -70,9 +72,18 @@ export const tarefasService = {
     try {
       console.log("Atualizando tarefa:", id, updateData);
 
+      // Se a tarefa está sendo marcada como "concluída", registrar data_real_conclusao se não enviada
+      let patch = { ...updateData };
+      if (
+        updateData.status === "concluida" &&
+        typeof updateData.data_real_conclusao === "undefined"
+      ) {
+        patch.data_real_conclusao = new Date().toISOString();
+      }
+
       const { error } = await supabase
         .from('tarefas')
-        .update(updateData)
+        .update(patch)
         .eq('id', id);
 
       if (error) {
@@ -108,8 +119,9 @@ export const tarefasService = {
         tipoCca: 'linha-inteira' as const,
         dataCadastro: tarefa.data_cadastro,
         dataConclusao: tarefa.data_conclusao,
+        data_real_conclusao: tarefa.data_real_conclusao ?? null, // <-- garantir que o campo vai pro front
         descricao: tarefa.descricao,
-        titulo: tarefa.titulo ?? "",   // <<< Garantir que titulo do banco populado
+        titulo: tarefa.titulo ?? "",
         responsavel: {
           id: tarefa.responsavel_id || '',
           nome: tarefa.profiles?.nome || 'Não atribuído'

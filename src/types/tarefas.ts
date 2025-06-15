@@ -1,8 +1,6 @@
 
 export type TarefaStatus = 'programada' | 'concluida' | 'em-andamento' | 'pendente';
-
 export type TarefaCriticidade = 'baixa' | 'media' | 'alta' | 'critica';
-
 export type TipoCCA = 'linha-inteira' | 'parcial' | 'equipamento' | 'especifica';
 
 export type Tarefa = {
@@ -11,6 +9,7 @@ export type Tarefa = {
   tipoCca: TipoCCA;
   dataCadastro: string;
   dataConclusao: string;
+  data_real_conclusao?: string | null; // <-- NOVO: campo opcional para a data real de conclusão
   descricao: string;
   titulo?: string;
   responsavel: {
