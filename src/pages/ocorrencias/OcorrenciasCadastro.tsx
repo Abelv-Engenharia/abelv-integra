@@ -230,8 +230,11 @@ const OcorrenciasCadastro = () => {
     console.log("===== Chamada onSubmit =====");
     console.log("Form submitted with data:", data);
     console.log("Is edit mode:", isEditMode);
-
-    // Logging the empresa field before validation
+    toast({
+      title: "Depuração",
+      description: `Valor da empresa no submit: "${data.empresa}"`,
+      variant: !data.empresa ? "destructive" : "default",
+    });
     console.log("Valor capturado de empresa (pré-validação):", data.empresa);
 
     // Validação detalhada
@@ -259,7 +262,7 @@ const OcorrenciasCadastro = () => {
       console.log("Validation error: empresa is missing");
       toast({
         title: "Erro de validação",
-        description: "O campo 'Empresa' é obrigatório.",
+        description: "O campo 'Empresa' é obrigatório. Veja se você selecionou a empresa após trocar o CCA.",
         variant: "destructive"
       });
       return;
