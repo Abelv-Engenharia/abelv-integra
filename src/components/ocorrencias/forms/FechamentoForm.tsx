@@ -30,14 +30,11 @@ const FechamentoForm = () => {
   const licoes_aprendidas_enviada = watch("licoes_aprendidas_enviada");
   const acoes = watch("acoes") || [];
   
-  // Extrair dados necessários para nomear o arquivo
+  // Corrigir os nomes para snake_case conforme schema dos dados
   const dataOcorrencia = watch("data") as Date | null;
-  // Busca classificação da ocorrência para usar no nome do arquivo
-  const classificacaoOcorrencia = watch("classificacaoOcorrencia") || null;
-  // Busca CCA selecionado para usar no nome do arquivo
+  const classificacaoOcorrencia = watch("classificacao_ocorrencia") || null; // corrigido para snake_case
   const selectedCcaId = watch("cca") || null;
-  const ccas = watch("ccas") || []; // Armazena os CCAs do form context, ou um array vazio
-  // Obtenha o código do CCA pelo id selecionado
+  const ccas = watch("ccas") || [];
   let codigoCca: string | null = null;
   if (selectedCcaId && ccas.length > 0) {
     const foundCca = ccas.find((c: any) => (c.id?.toString() ?? c.id) === selectedCcaId?.toString());
@@ -152,12 +149,16 @@ const FechamentoForm = () => {
                   {...field}
                   onChange={async (e) => {
                     const file = e.target.files?.[0];
+                    // Logs de debug para analisar valores no momento do upload
+                    console.log("Data:", dataOcorrencia);
+                    console.log("Classificacao:", classificacaoOcorrencia);
+                    console.log("selectedCcaId:", selectedCcaId);
+                    console.log("codigoCca:", codigoCca);
                     if (file && file.size <= 2 * 1024 * 1024) { // 2MB limit
                       if (!dataOcorrencia || !classificacaoOcorrencia || !codigoCca) {
                         alert("Preencha a data da ocorrência, a classificação e o CCA antes de anexar o informe.");
                         return;
                       }
-                      // Faz upload ao bucket usando o novo nome padrão
                       const url = await uploadInformePreliminarToBucket(
                         file, dataOcorrencia, classificacaoOcorrencia, codigoCca
                       );
@@ -172,7 +173,6 @@ const FechamentoForm = () => {
                     }
                   }}
                 />
-                {/* Mostrar se envio está presente */}
                 {value && typeof value === "string" && (
                   <div className="flex items-center space-x-2 mt-2">
                     <Button
@@ -318,7 +318,12 @@ const FechamentoForm = () => {
                 {...field}
                 onChange={async (e) => {
                   const file = e.target.files?.[0];
-                  if (file && file.size <= 2 * 1024 * 1024) { // 2MB limit
+                  // Logs para depuração dos valores
+                  console.log("Data:", dataOcorrencia);
+                  console.log("Classificacao:", classificacaoOcorrencia);
+                  console.log("selectedCcaId:", selectedCcaId);
+                  console.log("codigoCca:", codigoCca);
+                  if (file && file.size <= 2 * 1024 * 1024) {
                     if (!dataOcorrencia || !classificacaoOcorrencia || !codigoCca) {
                       alert("Preencha a data da ocorrência, a classificação e o CCA antes de anexar o arquivo de lições aprendidas.");
                       return;
