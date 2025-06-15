@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Bell, Settings, User, LogOut } from "lucide-react";
+import { Bell, Settings, User, LogOut, Image as ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -29,6 +29,14 @@ const Navbar = () => {
   const { profile } = useProfile();
   const { url: avatarUrl } = useProfileAvatarUrl(profile?.avatar_url);
 
+  // Estado local para detectar se a imagem deu erro ao carregar
+  const [imgError, setImgError] = React.useState(false);
+
+  // Limpa o erro caso o avatarUrl mude (ex: user troca de imagem)
+  React.useEffect(() => {
+    setImgError(false);
+  }, [avatarUrl]);
+
   const handleLogout = async () => {
     try {
       await supabase.auth.signOut();
@@ -46,19 +54,23 @@ const Navbar = () => {
         <div className="flex items-center space-x-4">
           <h1 className="text-xl font-semibold">GESTÃO DE SMS ABELV</h1>
         </div>
-
         <div className="flex items-center space-x-4">
           <NotificacoesDropdown />
-          
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                 <Avatar className="h-8 w-8">
-                  {avatarUrl ? (
-                    <AvatarImage src={avatarUrl} alt={profile?.nome || "avatar"} />
+                  {/* Se der erro ou não houver url, mostra fallback! */}
+                  {avatarUrl && !imgError ? (
+                    <AvatarImage
+                      src={avatarUrl}
+                      alt={profile?.nome || "avatar"}
+                      onError={() => setImgError(true)}
+                    />
                   ) : (
-                    <AvatarFallback>
-                      {getInitials(profile?.nome) || "U"}
+                    <AvatarFallback className="bg-primary text-primary-foreground flex items-center justify-center">
+                      <ImageIcon size={16} className="mr-1" />
+                      {getInitials(profile?.nome)}
                     </AvatarFallback>
                   )}
                 </Avatar>
@@ -85,4 +97,5 @@ const Navbar = () => {
     </header>
   );
 };
+
 export default Navbar;
