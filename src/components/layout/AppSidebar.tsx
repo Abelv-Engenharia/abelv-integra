@@ -75,6 +75,109 @@ export function AppSidebar() {
           <SidebarGroupLabel>Gestão de SMS</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
+
+              {/* Desvios */}
+              <SidebarMenuItem>
+                <Collapsible open={openMenu === "desvios"}>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton onClick={() => toggleMenu("desvios")}>
+                      <ShieldAlert className="h-4 w-4" />
+                      <span>Desvios</span>
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent asChild>
+                    <SidebarMenuSub>
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                          <Link to="/desvios/dashboard">
+                            <span className="text-xs leading-tight">Dashboard de Desvios</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                      
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                          <Link to="/desvios/cadastro">
+                            <span className="text-xs leading-tight">Cadastro de Desvios</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                      
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                          <Link to="/desvios/consulta">
+                            <span className="text-xs leading-tight">Consulta de Desvios</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                      
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                          <Link to="/desvios/nao-conformidade">
+                            <span className="text-xs leading-tight">Emissão de Não Conformidade</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </Collapsible>
+              </SidebarMenuItem>
+
+              {/* Treinamentos */}
+              <SidebarMenuItem>
+                <Collapsible open={openMenu === "treinamentos"}>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton onClick={() => toggleMenu("treinamentos")}>
+                      <Calendar className="h-4 w-4" />
+                      <span>Treinamentos</span>
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent asChild>
+                    <SidebarMenuSub>
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                          <Link to="/treinamentos/dashboard">
+                            <span className="text-xs leading-tight">Dashboard de Treinamentos</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                      
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                          <Link to="/treinamentos/normativo">
+                            <span className="text-xs leading-tight">Treinamento Normativo</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                      
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                          <Link to="/treinamentos/consulta">
+                            <span className="text-xs leading-tight">Consulta de Treinamento</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                      
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                          <Link to="/treinamentos/execucao">
+                            <span className="text-xs leading-tight">Execução de Treinamentos</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                      
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                          <Link to="/treinamentos/cracha">
+                            <span className="text-xs leading-tight">Emissão de Crachá</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </Collapsible>
+              </SidebarMenuItem>
+
               {/* Hora da Segurança */}
               <SidebarMenuItem>
                 <Collapsible open={openMenu === "hora-seguranca"}>
@@ -126,110 +229,6 @@ export function AppSidebar() {
                 </Collapsible>
               </SidebarMenuItem>
 
-              {/* Desvios */}
-              <SidebarMenuItem>
-                <Collapsible open={openMenu === "desvios"}>
-                  <CollapsibleTrigger asChild>
-                    <SidebarMenuButton onClick={() => toggleMenu("desvios")}>
-                      <ShieldAlert className="h-4 w-4" />
-                      <span>Desvios</span>
-                    </SidebarMenuButton>
-                  </CollapsibleTrigger>
-                  
-                  <CollapsibleContent asChild>
-                    <SidebarMenuSub>
-                      <SidebarMenuItem>
-                        <SidebarMenuButton asChild>
-                          <Link to="/desvios/dashboard">
-                            <span className="text-xs leading-tight">Dashboard de Desvios</span>
-                          </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                      
-                      <SidebarMenuItem>
-                        <SidebarMenuButton asChild>
-                          <Link to="/desvios/cadastro">
-                            <span className="text-xs leading-tight">Cadastro de Desvios</span>
-                          </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                      
-                      <SidebarMenuItem>
-                        <SidebarMenuButton asChild>
-                          <Link to="/desvios/consulta">
-                            <span className="text-xs leading-tight">Consulta de Desvios</span>
-                          </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                      
-                      <SidebarMenuItem>
-                        <SidebarMenuButton asChild>
-                          <Link to="/desvios/nao-conformidade">
-                            <span className="text-xs leading-tight">Emissão de Não Conformidade</span>
-                          </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                    </SidebarMenuSub>
-                  </CollapsibleContent>
-                </Collapsible>
-              </SidebarMenuItem>
-
-              {/* Treinamentos */}
-              <SidebarMenuItem>
-                <Collapsible open={openMenu === "treinamentos"}>
-                  <CollapsibleTrigger asChild>
-                    <SidebarMenuButton onClick={() => toggleMenu("treinamentos")}>
-                      <Calendar className="h-4 w-4" />
-                      <span>Treinamentos</span>
-                    </SidebarMenuButton>
-                  </CollapsibleTrigger>
-                  
-                  <CollapsibleContent asChild>
-                    <SidebarMenuSub>
-                      <SidebarMenuItem>
-                        <SidebarMenuButton asChild>
-                          <Link to="/treinamentos/dashboard">
-                            <span className="text-xs leading-tight">Dashboard de Treinamentos</span>
-                          </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                      
-                      <SidebarMenuItem>
-                        <SidebarMenuButton asChild>
-                          <Link to="/treinamentos/normativo">
-                            <span className="text-xs leading-tight">Treinamento Normativo</span>
-                          </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                      
-                      <SidebarMenuItem>
-                        <SidebarMenuButton asChild>
-                          <Link to="/treinamentos/consulta">
-                            <span className="text-xs leading-tight">Consulta de Treinamento</span>
-                          </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                      
-                      <SidebarMenuItem>
-                        <SidebarMenuButton asChild>
-                          <Link to="/treinamentos/execucao">
-                            <span className="text-xs leading-tight">Execução de Treinamentos</span>
-                          </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                      
-                      <SidebarMenuItem>
-                        <SidebarMenuButton asChild>
-                          <Link to="/treinamentos/cracha">
-                            <span className="text-xs leading-tight">Emissão de Crachá</span>
-                          </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                    </SidebarMenuSub>
-                  </CollapsibleContent>
-                </Collapsible>
-              </SidebarMenuItem>
-
               {/* Ocorrências */}
               <SidebarMenuItem>
                 <Collapsible open={openMenu === "ocorrencias"}>
@@ -239,7 +238,6 @@ export function AppSidebar() {
                       <span>Ocorrências</span>
                     </SidebarMenuButton>
                   </CollapsibleTrigger>
-                  
                   <CollapsibleContent asChild>
                     <SidebarMenuSub>
                       <SidebarMenuItem>
@@ -279,7 +277,6 @@ export function AppSidebar() {
                       <span className="text-sm leading-tight">Medidas Disciplinares</span>
                     </SidebarMenuButton>
                   </CollapsibleTrigger>
-                  
                   <CollapsibleContent asChild>
                     <SidebarMenuSub>
                       <SidebarMenuItem>
@@ -319,7 +316,6 @@ export function AppSidebar() {
                       <span>IDSMS</span>
                     </SidebarMenuButton>
                   </CollapsibleTrigger>
-                  
                   <CollapsibleContent asChild>
                     <SidebarMenuSub>
                       <SidebarMenuItem>
