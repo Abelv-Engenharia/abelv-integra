@@ -18,7 +18,7 @@ export async function listarFuncionariosPorCCAOuTodos(cca_id?: string) {
     .from("funcionarios")
     .select("id, nome, matricula")
     .eq("ativo", true);
-  if (cca_id) query = query.eq("cca_id", cca_id);
+  if (cca_id && cca_id !== "") query = query.eq("cca_id", parseInt(cca_id));
   const { data, error } = await query.order("nome", { ascending: true });
   if (error) throw error;
   return data;
@@ -27,15 +27,16 @@ export async function listarFuncionariosPorCCAOuTodos(cca_id?: string) {
 /* Criar medida disciplinar */
 export async function criarMedidaDisciplinar(form: MedidaDisciplinarFormData, arquivoUrl?: string) {
   const { cca_id, funcionario_id, tipo_medida, data_aplicacao, descricao } = form;
+  const insertObj = {
+    cca_id: parseInt(cca_id),
+    funcionario_id,
+    tipo_medida,
+    data_aplicacao,
+    descricao,
+    arquivo_url: arquivoUrl || null,
+  };
   const { data, error } = await supabase.from("medidas_disciplinares").insert([
-    {
-      cca_id,
-      funcionario_id,
-      tipo_medida,
-      data_aplicacao,
-      descricao,
-      arquivo_url: arquivoUrl || null,
-    }
+    insertObj
   ]).select("*").single();
   if (error) throw error;
   return data as MedidaDisciplinar;
@@ -51,6 +52,6 @@ export async function uploadArquivoPdf(file: File, userId: string) {
     contentType: "application/pdf",
   });
   if (error) throw error;
-  const { data: { publicUrl } } = supabase.storage.from("medidas_disciplinares").getPublicUrl(path);
-  return publicUrl;
+  const { data: publicData } = supabase.storage.from("medidas_disciplinares").getPublicUrl(path);
+  return publicData.publicUrl;
 }

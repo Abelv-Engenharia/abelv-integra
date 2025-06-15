@@ -28,14 +28,24 @@ const schema = z.object({
 type Schema = z.infer<typeof schema>;
 
 export default function MedidaDisciplinarForm({ onSuccess }: { onSuccess: () => void }) {
-  const methods = useForm<Schema>({ resolver: zodResolver(schema), defaultValues: { arquivo: null } });
+  const methods = useForm<Schema>({
+    resolver: zodResolver(schema),
+    defaultValues: {
+      cca_id: "",
+      funcionario_id: "",
+      tipo_medida: "",
+      data_aplicacao: "",
+      descricao: "",
+      arquivo: null,
+    },
+  });
   const { watch, setValue, handleSubmit, reset } = methods;
   const cca_id = watch("cca_id");
   const { data: ccas, isLoading: ccasLoading } = useCcas();
   const { data: funcionarios, isLoading: funcLoading } = useFuncionarios(cca_id);
   const { mutateAsync, isPending } = useCriarMedidaDisciplinar();
   const [pdfFile, setPdfFile] = useState<File | null>(null);
-  const { data: profile } = useProfile();
+  const { profile } = useProfile(); // Correção: useProfile retorna profile diretamente
 
   useEffect(() => {
     setValue("funcionario_id", "");
@@ -71,7 +81,7 @@ export default function MedidaDisciplinarForm({ onSuccess }: { onSuccess: () => 
                   </FormControl>
                   <SelectContent>
                     {ccas?.map((cca: any) => (
-                      <SelectItem key={cca.id} value={cca.id}>
+                      <SelectItem key={cca.id} value={String(cca.id)}>
                         {cca.codigo} - {cca.nome}
                       </SelectItem>
                     ))}
