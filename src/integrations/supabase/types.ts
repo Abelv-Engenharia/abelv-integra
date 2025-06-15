@@ -1599,6 +1599,33 @@ export type Database = {
           },
         ]
       }
+      tipo_inspecao_hsa: {
+        Row: {
+          ativo: boolean
+          created_at: string | null
+          descricao: string | null
+          id: string
+          nome: string
+          updated_at: string | null
+        }
+        Insert: {
+          ativo?: boolean
+          created_at?: string | null
+          descricao?: string | null
+          id?: string
+          nome: string
+          updated_at?: string | null
+        }
+        Update: {
+          ativo?: boolean
+          created_at?: string | null
+          descricao?: string | null
+          id?: string
+          nome?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       tipo_treinamento: {
         Row: {
           ativo: boolean | null
