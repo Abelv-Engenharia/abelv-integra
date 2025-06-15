@@ -43,7 +43,7 @@ const OcorrenciasCadastro = () => {
     engenheiro_responsavel: '',
     supervisor_responsavel: '',
     encarregado_responsavel: '',
-    colaboradoresAcidentados: [{
+    colaboradores_acidentados: [{
       colaborador: '',
       funcao: '',
       matricula: ''
@@ -97,7 +97,6 @@ const OcorrenciasCadastro = () => {
       
       getOcorrenciaById(ocorrenciaId).then((ocorrencia) => {
         if (ocorrencia) {
-          // Converter os dados do banco para o formato do formulário
           const formData: Partial<OcorrenciaFormData> = {
             data: ocorrencia.data ? new Date(ocorrencia.data) : null,
             hora: ocorrencia.hora || '',
@@ -112,7 +111,7 @@ const OcorrenciasCadastro = () => {
             engenheiro_responsavel: ocorrencia.engenheiro_responsavel || '',
             supervisor_responsavel: ocorrencia.supervisor_responsavel || '',
             encarregado_responsavel: ocorrencia.encarregado_responsavel || '',
-            colaboradoresAcidentados: Array.isArray(ocorrencia.colaboradores_acidentados) 
+            colaboradores_acidentados: Array.isArray(ocorrencia.colaboradores_acidentados) 
               ? ocorrencia.colaboradores_acidentados.map((col: any) => ({
                   colaborador: col.colaborador || '',
                   funcao: col.funcao || '',

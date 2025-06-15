@@ -20,11 +20,13 @@ import {
 interface AccidentedEmployeeFieldsProps {
   funcionarios: any[];
   selectedCcaId?: string;
+  namePrefix?: string;
 }
 
 const AccidentedEmployeeFields: React.FC<AccidentedEmployeeFieldsProps> = ({
   funcionarios,
-  selectedCcaId
+  selectedCcaId,
+  namePrefix = "colaboradores_acidentados",
 }) => {
   const { control } = useFormContext();
 
@@ -32,7 +34,7 @@ const AccidentedEmployeeFields: React.FC<AccidentedEmployeeFieldsProps> = ({
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
       <FormField
         control={control}
-        name="colaboradoresAcidentados.0.colaborador"
+        name={`${namePrefix}.0.colaborador`}
         render={({ field }) => (
           <FormItem>
             <FormLabel>Colaborador acidentado *</FormLabel>
@@ -57,7 +59,7 @@ const AccidentedEmployeeFields: React.FC<AccidentedEmployeeFieldsProps> = ({
       
       <FormField
         control={control}
-        name="colaboradoresAcidentados.0.funcao"
+        name={`${namePrefix}.0.funcao`}
         render={({ field }) => (
           <FormItem>
             <FormLabel>Função</FormLabel>
@@ -71,7 +73,7 @@ const AccidentedEmployeeFields: React.FC<AccidentedEmployeeFieldsProps> = ({
       
       <FormField
         control={control}
-        name="colaboradoresAcidentados.0.matricula"
+        name={`${namePrefix}.0.matricula`}
         render={({ field }) => (
           <FormItem>
             <FormLabel>Matrícula</FormLabel>

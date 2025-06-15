@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useFormContext } from "react-hook-form";
 import { useOcorrenciasFormData } from "@/hooks/useOcorrenciasFormData";
@@ -48,13 +47,13 @@ const IdentificacaoForm = () => {
   }, [watchData, setValue]);
 
   // Auto-popular função e matrícula quando colaborador for selecionado
-  const watchColaborador = watch("colaboradoresAcidentados.0.colaborador");
+  const watchColaborador = watch("colaboradores_acidentados.0.colaborador");
   React.useEffect(() => {
     if (watchColaborador) {
       const funcionario = funcionarios.find(f => f.id.toString() === watchColaborador);
       if (funcionario) {
-        setValue("colaboradoresAcidentados.0.funcao", funcionario.funcao || "");
-        setValue("colaboradoresAcidentados.0.matricula", funcionario.matricula || "");
+        setValue("colaboradores_acidentados.0.funcao", funcionario.funcao || "");
+        setValue("colaboradores_acidentados.0.matricula", funcionario.matricula || "");
       }
     }
   }, [watchColaborador, funcionarios, setValue]);
@@ -63,12 +62,12 @@ const IdentificacaoForm = () => {
   React.useEffect(() => {
     if (watchedCca) {
       setValue("empresa", "");
-      setValue("engenheiroResponsavel", "");
-      setValue("supervisorResponsavel", "");
-      setValue("encarregadoResponsavel", "");
-      setValue("colaboradoresAcidentados.0.colaborador", "");
-      setValue("colaboradoresAcidentados.0.funcao", "");
-      setValue("colaboradoresAcidentados.0.matricula", "");
+      setValue("engenheiro_responsavel", "");
+      setValue("supervisor_responsavel", "");
+      setValue("encarregado_responsavel", "");
+      setValue("colaboradores_acidentados.0.colaborador", "");
+      setValue("colaboradores_acidentados.0.funcao", "");
+      setValue("colaboradores_acidentados.0.matricula", "");
     }
   }, [watchedCca, setValue]);
 
@@ -93,6 +92,7 @@ const IdentificacaoForm = () => {
       <AccidentedEmployeeFields
         funcionarios={funcionarios}
         selectedCcaId={selectedCcaId}
+        namePrefix="colaboradores_acidentados"
       />
 
       <OccurrenceTypeFields

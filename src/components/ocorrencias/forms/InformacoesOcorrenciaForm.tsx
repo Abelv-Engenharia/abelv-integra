@@ -25,16 +25,12 @@ const InformacoesOcorrenciaForm = () => {
 
   // Obter valores necessários para o nome do arquivo
   const dataOcorrencia = watch("data") as Date | null;
-  // Usar sempre colaboradoresAcidentados
-  const colaboradores = watch("colaboradoresAcidentados");
+  // Usar sempre colaboradores_acidentados (padroniza snake_case)
+  const colaboradores = watch("colaboradores_acidentados");
   let colaboradorAcidentado: string | null = null;
   if (colaboradores && colaboradores.length > 0) {
-    // Pode ser um objeto tipo { colaborador: string (nome) ou id }
-    // Aqui tenta pegar o valor do campo colaborador, supondo que é o nome. Se for id, ajustar se necessário.
     if (typeof colaboradores[0] === "object" && colaboradores[0] !== null) {
       colaboradorAcidentado = colaboradores[0].colaborador || null;
-      // Se for um id (UUID ou string numérica), pode ser necessário converter para nome
-      // MAS, como só há acesso ao que está em memória do formulário, usa mesmo assim
     } else {
       colaboradorAcidentado = colaboradores[0] || null;
     }
