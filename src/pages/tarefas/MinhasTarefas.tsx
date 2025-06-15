@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
@@ -61,7 +60,8 @@ const MinhasTarefas = () => {
   };
 
   const handleTarefaClick = (tarefa: Tarefa) => {
-    navigate(`/tarefas/detalhes/${tarefa.id}`);
+    // Corrigido para corresponder à rota definida em App.tsx
+    navigate(`/tarefas/detalhe/${tarefa.id}`);
   };
 
   if (loading) {
