@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import IdentificacaoForm from "@/components/ocorrencias/forms/IdentificacaoForm";
 import InformacoesOcorrenciaForm from "@/components/ocorrencias/forms/InformacoesOcorrenciaForm";
 import { OcorrenciaFormNavigation } from "@/components/ocorrencias/forms/OcorrenciaFormNavigation";
+import ClassificacaoRiscoForm from "@/components/ocorrencias/forms/ClassificacaoRiscoForm";
 
 const schema = z.object({
   // Aba 1: Identificação
@@ -50,7 +51,17 @@ const schema = z.object({
   cid: z.string().optional(),
   arquivo_cat: z.any().optional(),
 
-  // Demais etapas omitidas para foco - incluir campos extra conforme necessidade futura
+  // Classificação de Risco
+  exposicao: z.string().optional(),
+  controle: z.string().optional(),
+  deteccao: z.string().optional(),
+  efeitoFalha: z.string().optional(),
+  impacto: z.string().optional(),
+  probabilidade: z.number().optional(),
+  severidade: z.number().optional(),
+  classificacaoRisco: z.string().optional(),
+
+  // Demais etapas omitidas (Plano de Ação, Fechamento)
 });
 
 type OcorrenciaFormSchema = z.infer<typeof schema>;
@@ -58,6 +69,7 @@ type OcorrenciaFormSchema = z.infer<typeof schema>;
 const tabs = [
   { id: "identificacao", label: "Identificação" },
   { id: "informacoes", label: "Informações da Ocorrência" },
+  { id: "classificacaoRisco", label: "Classificação de Risco" },
   // Outras abas podem ser adicionadas posteriormente
 ];
 
@@ -97,8 +109,6 @@ const OcorrenciasCadastro: React.FC = () => {
         descricao_ocorrencia: values.descricaoOcorrencia,
         created_at: new Date().toISOString(),
       };
-      // converter datas, arquivos, arrays, etc. se necessário
-      // upload de arquivo_cat pode ser implementado depois!
       const { error } = await supabase.from("ocorrencias").insert(payload);
       if (error) throw error;
       toast.success("Ocorrência cadastrada com sucesso!");
@@ -129,12 +139,11 @@ const OcorrenciasCadastro: React.FC = () => {
             </button>
           ))}
         </div>
-
         <FormProvider {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
             {activeTab === "identificacao" && <IdentificacaoForm />}
             {activeTab === "informacoes" && <InformacoesOcorrenciaForm />}
-            
+            {activeTab === "classificacaoRisco" && <ClassificacaoRiscoForm />}
             <OcorrenciaFormNavigation
               activeTab={activeTab}
               tabs={tabs}
@@ -151,5 +160,4 @@ const OcorrenciasCadastro: React.FC = () => {
     </div>
   );
 };
-
 export default OcorrenciasCadastro;
