@@ -100,10 +100,22 @@ export default function PainelExecucaoHSA() {
     .filter((s) => (s.name || "").toUpperCase() === "REALIZADA (NÃO PROGRAMADA)")
     .reduce((acc, cur) => acc + (cur.value ?? 0), 0);
 
-  // Adesão
+  // Inspeções a Realizar = status "A REALIZAR"
+  const aRealizarCard = statusData
+    .filter((s) => (s.name || "").toUpperCase() === "A REALIZAR")
+    .reduce((acc, cur) => acc + (cur.value ?? 0), 0);
+
+  // Aderência Real HSA
   const aderenciaPerc =
     programadasCard > 0
       ? Math.round((realizadasCard / programadasCard) * 1000) / 10 // 1 decimal
+      : 0;
+
+  // Aderência HSA Ajustada
+  const aderenciaAjustadaNum = realizadasCard + realizadasNaoProgramadaCard;
+  const aderenciaAjustadaPerc = 
+    programadasCard > 0
+      ? Math.round((aderenciaAjustadaNum / programadasCard) * 1000) / 10
       : 0;
 
   let aderenciaColor = "text-green-600";
@@ -111,6 +123,13 @@ export default function PainelExecucaoHSA() {
     aderenciaColor = "text-red-600";
   } else if (aderenciaPerc < 95) {
     aderenciaColor = "text-orange-500";
+  }
+
+  let aderenciaAjustadaColor = "text-green-600";
+  if (aderenciaAjustadaPerc < 90) {
+    aderenciaAjustadaColor = "text-red-600";
+  } else if (aderenciaAjustadaPerc < 95) {
+    aderenciaAjustadaColor = "text-orange-500";
   }
 
   return (
@@ -217,31 +236,83 @@ export default function PainelExecucaoHSA() {
         </CardContent>
       </Card>
       
-      {/* CARDS KPIs NOVA ORGANIZAÇÃO */}
-      <div className="grid gap-4 md:grid-cols-4 px-2 pb-6">
-        {/* Aderência real HSA */}
-        <Card className="bg-white border border-gray-200 shadow-none">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-sm text-gray-500 font-medium">
-                  Aderência real HSA
-                </div>
-                <div className={`text-3xl font-bold mt-2 ${aderenciaColor}`}>
-                  {isLoading
-                    ? "..."
-                    : `${aderenciaPerc.toLocaleString("pt-BR", {
-                        minimumFractionDigits: 1,
-                        maximumFractionDigits: 1,
-                      })}%`}
-                </div>
-                <div className="mt-2 text-xs text-gray-400">
-                  Inspeções programadas: {isLoading ? "..." : programadasCard}
-                </div>
-                <div className="mt-1 text-xs text-gray-400">
-                  Inspeções realizadas: {isLoading ? "..." : realizadasCard}
+      {/* CARDS KPIs - NOVA ORGANIZAÇÃO */}
+      <div className="grid gap-4 md:grid-cols-2 px-2 pb-2">
+        {/* Linha de aderência */}
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
+          {/* Aderência real HSA */}
+          <Card className="bg-white border border-gray-200 shadow-none">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-sm text-gray-500 font-medium">
+                    Aderência real HSA
+                  </div>
+                  <div className={`text-3xl font-bold mt-2 ${aderenciaColor}`}>
+                    {isLoading
+                      ? "..."
+                      : `${aderenciaPerc.toLocaleString("pt-BR", {
+                          minimumFractionDigits: 1,
+                          maximumFractionDigits: 1,
+                        })}%`}
+                  </div>
+                  <div className="mt-2 text-xs text-gray-400">
+                    Inspeções programadas: {isLoading ? "..." : programadasCard}
+                  </div>
+                  <div className="mt-1 text-xs text-gray-400">
+                    Inspeções realizadas: {isLoading ? "..." : realizadasCard}
+                  </div>
                 </div>
               </div>
+            </CardContent>
+          </Card>
+          {/* Aderência HSA Ajustada */}
+          <Card className="bg-white border border-blue-400 shadow-none">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-sm text-gray-500 font-medium">
+                    Aderência HSA Ajustada
+                  </div>
+                  <div className={`text-3xl font-bold mt-2 ${aderenciaAjustadaColor}`}>
+                    {isLoading
+                      ? "..."
+                      : `${aderenciaAjustadaPerc.toLocaleString("pt-BR", {
+                          minimumFractionDigits: 1,
+                          maximumFractionDigits: 1,
+                        })}%`}
+                  </div>
+                  <div className="mt-2 text-xs text-gray-400">
+                    (Realizadas + Não programadas) ÷ Inspeções programadas
+                  </div>
+                  <div className="mt-1 text-xs text-gray-400">
+                    {isLoading ? "..." : `( ${realizadasCard} + ${realizadasNaoProgramadaCard} ) ÷ ${programadasCard} `}
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+        {/* placeholder para manter alinhamento com md:grid-cols-2 */}
+        <div className="hidden sm:block" />
+      </div>
+
+      {/* CARDS KPIs NOVA ORGANIZAÇÃO */}
+      <div className="grid gap-4 md:grid-cols-4 px-2 pb-6">
+        {/* Inspeções a realizar */}
+        <Card className="bg-white border border-blue-500 shadow-none">
+          <CardContent className="p-4">
+            <div className="flex flex-col items-start">
+              <div className="text-sm text-gray-500 font-medium flex items-center gap-1">
+                Inspeções a Realizar
+                <span>
+                  <svg className="inline h-4 w-4 text-blue-600" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4l3 3" strokeLinecap="round" strokeLinejoin="round"></path></svg>
+                </span>
+              </div>
+              <div className="text-3xl font-bold mt-2">
+                {isLoading ? "..." : aRealizarCard}
+              </div>
+              <div className="mt-2 text-xs text-gray-400">Aguardando execução</div>
             </div>
           </CardContent>
         </Card>
