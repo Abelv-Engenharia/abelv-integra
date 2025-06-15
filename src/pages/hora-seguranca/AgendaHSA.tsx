@@ -97,7 +97,7 @@ export default function AgendaHSA() {
                 month: "w-full space-y-4 p-4",
                 table: "w-full border-collapse",
                 head_row: "flex w-full border-b",
-                head_cell: "text-muted-foreground flex-1 font-normal text-sm p-2 text-center first:hidden last:hidden",
+                head_cell: "text-muted-foreground flex-1 font-normal text-sm py-2 text-center first:hidden last:hidden",
                 row: "flex w-full divide-x divide-gray-200",
                 cell: "h-40 flex-1 p-0 relative border-t border-gray-200 [&:has(.day_hidden)]:hidden",
                 day: "w-full h-full",
