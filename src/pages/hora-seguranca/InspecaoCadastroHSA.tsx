@@ -182,19 +182,6 @@ const InspecaoCadastroHSA = () => {
     <div className="w-full px-2 sm:px-4 md:px-8 py-6 flex justify-center">
       <Card className="w-full max-w-4xl border bg-card shadow-md">
         <CardContent className="pt-6 pb-8 space-y-6">
-          <div className="flex items-center mb-2">
-            <Button
-              variant="outline"
-              size="sm"
-              className="flex items-center gap-1"
-              asChild
-            >
-              <Link to="/hora-seguranca/dashboard">
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Voltar
-              </Link>
-            </Button>
-          </div>
           <h2 className="text-2xl font-bold text-center w-full">Cadastro de Inspeção Hora da Segurança (HSA)</h2>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6 w-full">
@@ -367,9 +354,20 @@ const InspecaoCadastroHSA = () => {
                 )}
               </div>
 
-              <div className="flex justify-end">
-                <Button type="submit" size="default" disabled={isSaving} className="w-full md:w-auto">
+              <div className="flex flex-col md:flex-row gap-3 justify-end pt-4 w-full">
+                <Button type="submit" size="default" disabled={isSaving} className="md:w-auto w-full">
                   {isSaving ? "Salvando..." : "Salvar"}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="md:w-auto w-full"
+                  asChild
+                >
+                  <Link to="/hora-seguranca/dashboard">
+                    <ArrowLeft className="w-4 h-4 mr-2" />
+                    Voltar
+                  </Link>
                 </Button>
               </div>
             </form>
