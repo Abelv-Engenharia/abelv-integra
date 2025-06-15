@@ -1,51 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
-
-export type Permissoes = {
-  // Módulos principais
-  desvios: boolean;
-  treinamentos: boolean;
-  ocorrencias: boolean;
-  tarefas: boolean;
-  relatorios: boolean;
-  hora_seguranca: boolean;
-  medidas_disciplinares: boolean;
-  
-  // Administração
-  admin_usuarios: boolean;
-  admin_perfis: boolean;
-  admin_funcionarios: boolean;
-  admin_hht: boolean;
-  admin_templates: boolean;
-  admin_empresas: boolean;
-  admin_supervisores: boolean;
-  admin_engenheiros: boolean;
-  admin_ccas: boolean;
-  
-  // IDSMS
-  idsms_dashboard: boolean;
-  idsms_formularios: boolean;
-  
-  // Configurações específicas de permissões
-  pode_editar_desvios: boolean;
-  pode_excluir_desvios: boolean;
-  pode_editar_ocorrencias: boolean;
-  pode_excluir_ocorrencias: boolean;
-  pode_editar_treinamentos: boolean;
-  pode_excluir_treinamentos: boolean;
-  pode_editar_tarefas: boolean;
-  pode_excluir_tarefas: boolean;
-  pode_aprovar_tarefas: boolean;
-  pode_visualizar_relatorios_completos: boolean;
-  pode_exportar_dados: boolean;
-};
-
-export type Perfil = {
-  id: number;
-  nome: string;
-  descricao: string | null;
-  permissoes: Permissoes;
-};
+import { Permissoes, Perfil } from "@/types/users";
 
 // Helper para pegar todos os menus e submenus possíveis do sistema
 function getAllMenusSidebar(): string[] {
@@ -106,7 +61,6 @@ function getAllMenusSidebar(): string[] {
 
 // Helper para montar permissões do admin sempre com todas as permissões ativas e todos os menus
 function getFullAdminPermissions(): Permissoes {
-  // Clonar o objeto default do sistema e acrescentar menus_sidebar
   const permissoes: Permissoes = {
     // Módulos principais
     desvios: true,
@@ -116,7 +70,7 @@ function getFullAdminPermissions(): Permissoes {
     relatorios: true,
     hora_seguranca: true,
     medidas_disciplinares: true,
-    
+
     // Administração
     admin_usuarios: true,
     admin_perfis: true,
@@ -127,11 +81,11 @@ function getFullAdminPermissions(): Permissoes {
     admin_supervisores: true,
     admin_engenheiros: true,
     admin_ccas: true,
-    
+
     // IDSMS
     idsms_dashboard: true,
     idsms_formularios: true,
-    
+
     // Configurações específicas de permissões
     pode_editar_desvios: true,
     pode_excluir_desvios: true,
@@ -144,6 +98,7 @@ function getFullAdminPermissions(): Permissoes {
     pode_aprovar_tarefas: true,
     pode_visualizar_relatorios_completos: true,
     pode_exportar_dados: true,
+
     menus_sidebar: getAllMenusSidebar(),
   };
   return permissoes;
@@ -218,7 +173,7 @@ function ensureAllPermissoes(permissoes: any, nomePerfil?: string): Permissoes {
   return merged;
 }
 
-export async function createPerfil(perfil: Omit<Perfil, 'id'>): Promise<Perfil | null> {
+export async function createPerfil(perfil: Omit<Perfil, "id">): Promise<Perfil | null> {
   try {
     const { data, error } = await supabase
       .from('perfis')
@@ -247,7 +202,10 @@ export async function createPerfil(perfil: Omit<Perfil, 'id'>): Promise<Perfil |
   }
 }
 
-export async function updatePerfil(id: number, perfil: Partial<Omit<Perfil, 'id'>>): Promise<boolean> {
+export async function updatePerfil(
+  id: number,
+  perfil: Partial<Omit<Perfil, "id">>
+): Promise<boolean> {
   try {
     const { error } = await supabase
       .from('perfis')
