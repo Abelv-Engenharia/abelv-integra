@@ -20,11 +20,11 @@ type ChatMsg = {
   text: string;
 };
 
-const WELCOME_MSG = "Olá! Eu sou o mascote ABELV e posso te ajudar com dúvidas sobre como navegar e usar o sistema. Pergunte como realizar tarefas ou a localização de funcionalidades.";
+const WELCOME_MSG = "Olá! Eu sou o Abelvinho e posso te ajudar com dúvidas sobre como navegar e usar o sistema. Pergunte como realizar tarefas ou a localização de funcionalidades.";
 
 // Prompt com instruções para o assistente lidar com dúvidas do sistema
 const SYSTEM_PROMPT = `
-Você é o mascote do sistema chamado ABELV. Seu papel é ajudar os usuários a tirar dúvidas sobre as funcionalidades deste sistema, mostrando o passo a passo e explicando o caminho das telas quando possível. Seja amigável e objetivo. 
+Você é um mascote chamado Abelvinho. Seu papel é ajudar os usuários a tirar dúvidas sobre as funcionalidades deste sistema, mostrando o passo a passo e explicando o caminho das telas quando possível. Seja amigável e objetivo.
 Se não souber a resposta, oriente o usuário a buscar o suporte.
 Responda preferencialmente em tópicos, se possível.
 `;
@@ -94,7 +94,7 @@ const MascoteChatbot = () => {
         <div className="flex items-center justify-between bg-blue-100 px-4 py-2 border-b">
           <div className="flex items-center gap-2">
             <img src={mascotImg} alt="" className="h-10 w-10 rounded-full bg-white border" />
-            <span className="font-bold text-blue-700">Mascote ABELV</span>
+            <span className="font-bold text-blue-700">Abelvinho</span>
           </div>
           <span className="text-xs font-semibold text-blue-700">Tira-dúvidas</span>
         </div>
@@ -148,3 +148,4 @@ const MascoteChatbot = () => {
 };
 
 export default MascoteChatbot;
+
