@@ -237,64 +237,60 @@ export default function PainelExecucaoHSA() {
       </Card>
       
       {/* CARDS KPIs - NOVA ORGANIZAÇÃO */}
-      <div className="grid gap-4 md:grid-cols-2 px-2 pb-2">
-        {/* Linha de aderência */}
-        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
-          {/* Aderência real HSA */}
-          <Card className="bg-white border border-gray-200 shadow-none">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="text-sm text-gray-500 font-medium">
-                    Aderência real HSA
-                  </div>
-                  <div className={`text-3xl font-bold mt-2 ${aderenciaColor}`}>
-                    {isLoading
-                      ? "..."
-                      : `${aderenciaPerc.toLocaleString("pt-BR", {
-                          minimumFractionDigits: 1,
-                          maximumFractionDigits: 1,
-                        })}%`}
-                  </div>
-                  <div className="mt-2 text-xs text-gray-400">
-                    Inspeções programadas: {isLoading ? "..." : programadasCard}
-                  </div>
-                  <div className="mt-1 text-xs text-gray-400">
-                    Inspeções realizadas: {isLoading ? "..." : realizadasCard}
-                  </div>
+      {/* Linha de aderência: agora divide igualmente a largura */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 px-2 pb-2">
+        {/* Aderência real HSA */}
+        <Card className="bg-white border border-gray-200 shadow-none w-full">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="text-sm text-gray-500 font-medium">
+                  Aderência real HSA
+                </div>
+                <div className={`text-3xl font-bold mt-2 ${aderenciaColor}`}>
+                  {isLoading
+                    ? "..."
+                    : `${aderenciaPerc.toLocaleString("pt-BR", {
+                        minimumFractionDigits: 1,
+                        maximumFractionDigits: 1,
+                      })}%`}
+                </div>
+                <div className="mt-2 text-xs text-gray-400">
+                  Inspeções programadas: {isLoading ? "..." : programadasCard}
+                </div>
+                <div className="mt-1 text-xs text-gray-400">
+                  Inspeções realizadas: {isLoading ? "..." : realizadasCard}
                 </div>
               </div>
-            </CardContent>
-          </Card>
-          {/* Aderência HSA Ajustada */}
-          <Card className="bg-white border border-blue-400 shadow-none">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="text-sm text-gray-500 font-medium">
-                    Aderência HSA Ajustada
-                  </div>
-                  <div className={`text-3xl font-bold mt-2 ${aderenciaAjustadaColor}`}>
-                    {isLoading
-                      ? "..."
-                      : `${aderenciaAjustadaPerc.toLocaleString("pt-BR", {
-                          minimumFractionDigits: 1,
-                          maximumFractionDigits: 1,
-                        })}%`}
-                  </div>
-                  <div className="mt-2 text-xs text-gray-400">
-                    (Realizadas + Não programadas) ÷ Inspeções programadas
-                  </div>
-                  <div className="mt-1 text-xs text-gray-400">
-                    {isLoading ? "..." : `( ${realizadasCard} + ${realizadasNaoProgramadaCard} ) ÷ ${programadasCard} `}
-                  </div>
+            </div>
+          </CardContent>
+        </Card>
+        {/* Aderência HSA Ajustada */}
+        <Card className="bg-white border border-blue-400 shadow-none w-full">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="text-sm text-gray-500 font-medium">
+                  Aderência HSA Ajustada
+                </div>
+                <div className={`text-3xl font-bold mt-2 ${aderenciaAjustadaColor}`}>
+                  {isLoading
+                    ? "..."
+                    : `${aderenciaAjustadaPerc.toLocaleString("pt-BR", {
+                        minimumFractionDigits: 1,
+                        maximumFractionDigits: 1,
+                      })}%`}
+                </div>
+                <div className="mt-2 text-xs text-gray-400">
+                  (Realizadas + Não programadas) ÷ Inspeções programadas
+                </div>
+                <div className="mt-1 text-xs text-gray-400">
+                  {isLoading ? "..." : `( ${realizadasCard} + ${realizadasNaoProgramadaCard} ) ÷ ${programadasCard} `}
                 </div>
               </div>
-            </CardContent>
-          </Card>
-        </div>
-        {/* placeholder para manter alinhamento com md:grid-cols-2 */}
-        <div className="hidden sm:block" />
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* CARDS KPIs NOVA ORGANIZAÇÃO */}
