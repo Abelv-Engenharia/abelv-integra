@@ -1,8 +1,8 @@
+
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
 import Navbar from "./Navbar";
 import { Outlet } from "react-router-dom";
-import MascoteChatbot from "@/components/chatbot/MascoteChatbot";
 
 const Layout = () => {
   return (
@@ -15,7 +15,6 @@ const Layout = () => {
             <Outlet />
           </main>
         </div>
-        <MascoteChatbot />
       </div>
     </SidebarProvider>
   );
