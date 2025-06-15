@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
@@ -108,6 +107,37 @@ export const useProfile = () => {
     staleTime: 5 * 60 * 1000
   });
 
+  // Buscar permissões do perfil do usuário (especialmente menus_sidebar)
+  const { data: userPermissoes } = useQuery({
+    queryKey: ['user-permissoes', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return null;
+      try {
+        const { data, error } = await supabase
+          .from('usuario_perfis')
+          .select(`
+            perfil_id,
+            perfis (
+              permissoes
+            )
+          `)
+          .eq('usuario_id', user.id)
+          .maybeSingle();
+
+        if (error) {
+          console.error("Erro ao buscar permissões do usuário:", error);
+          return null;
+        }
+        return data?.perfis?.permissoes || null;
+      } catch (error) {
+        console.error("Erro ao consultar permissões do usuário:", error);
+        return null;
+      }
+    },
+    enabled: !!user?.id,
+    staleTime: 10 * 60 * 1000
+  });
+
   // Mutation para atualizar perfil
   const updateProfileMutation = useMutation({
     mutationFn: async (profileData: Partial<UserProfile>) => {
@@ -143,6 +173,7 @@ export const useProfile = () => {
     userRole,
     loadingProfile,
     profileError,
-    updateProfileMutation
+    updateProfileMutation,
+    userPermissoes
   };
 };

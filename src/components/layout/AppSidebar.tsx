@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Home } from "lucide-react";
 import {
@@ -13,10 +12,19 @@ import SidebarSectionSMS from "./SidebarSectionSMS";
 import SidebarSectionTarefas from "./SidebarSectionTarefas";
 import SidebarSectionRelatorios from "./SidebarSectionRelatorios";
 import SidebarSectionAdministracao from "./SidebarSectionAdministracao";
+import { useProfile } from "@/hooks/useProfile";
+
+// Função utilitária para verificar acesso (contem na lista)
+function podeVerMenu(menu: string, menusSidebar?: string[]) {
+  if (!menusSidebar || !Array.isArray(menusSidebar)) return false;
+  return menusSidebar.includes(menu);
+}
 
 export function AppSidebar() {
   const location = useLocation();
   const currentPath = location.pathname;
+  const { userPermissoes } = useProfile();
+  const menusSidebar = userPermissoes?.menus_sidebar || [];
 
   // Defina o menu principal aberto inicialmente
   const [openMenu, setOpenMenu] = useState<string | null>(() => {
@@ -36,23 +44,58 @@ export function AppSidebar() {
     setOpenMenu(openMenu === menuName ? null : menuName);
   };
 
+  // Para cada seção, só renderizar se houver pelo menos 1 menu permitido na seção
   return (
     <Sidebar>
       <SidebarContent>
         <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild>
-              <Link to="/">
-                <Home className="h-4 w-4" />
-                <span>Dashboard</span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
+          {podeVerMenu("dashboard", menusSidebar) && (
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild>
+                <Link to="/">
+                  <Home className="h-4 w-4" />
+                  <span>Dashboard</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          )}
         </SidebarMenu>
-        <SidebarSectionSMS openMenu={openMenu} toggleMenu={toggleMenu} />
-        <SidebarSectionTarefas openMenu={openMenu} toggleMenu={toggleMenu} />
-        <SidebarSectionRelatorios openMenu={openMenu} toggleMenu={toggleMenu} />
-        <SidebarSectionAdministracao openMenu={openMenu} toggleMenu={toggleMenu} />
+
+        {/* Render SMS se tiver acesso a pelo menos 1 menu dele */}
+        {["desvios_dashboard", "desvios_cadastro", "desvios_consulta", "desvios_nao_conformidade"].some(menu =>
+          podeVerMenu(menu, menusSidebar)
+        ) && (
+          <SidebarSectionSMS openMenu={openMenu} toggleMenu={toggleMenu} menusSidebar={menusSidebar} />
+        )}
+
+        {/* Render Tarefas */}
+        {["tarefas_dashboard", "tarefas_minhas_tarefas", "tarefas_cadastro"].some(menu =>
+          podeVerMenu(menu, menusSidebar)
+        ) && (
+          <SidebarSectionTarefas openMenu={openMenu} toggleMenu={toggleMenu} menusSidebar={menusSidebar} />
+        )}
+
+        {/* Render Relatórios */}
+        {["relatorios", "relatorios_idsms"].some(menu => podeVerMenu(menu, menusSidebar)) && (
+          <SidebarSectionRelatorios openMenu={openMenu} toggleMenu={toggleMenu} menusSidebar={menusSidebar} />
+        )}
+
+        {/* Render Administração */}
+        {[
+          "admin_usuarios",
+          "admin_perfis",
+          "admin_empresas",
+          "admin_ccas",
+          "admin_engenheiros",
+          "admin_supervisores",
+          "admin_funcionarios",
+          "admin_hht",
+          "admin_metas_indicadores",
+          "admin_templates",
+          "admin_logo"
+        ].some(menu => podeVerMenu(menu, menusSidebar)) && (
+          <SidebarSectionAdministracao openMenu={openMenu} toggleMenu={toggleMenu} menusSidebar={menusSidebar} />
+        )}
       </SidebarContent>
     </Sidebar>
   );
