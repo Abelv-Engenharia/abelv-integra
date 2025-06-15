@@ -32,12 +32,15 @@ const FechamentoForm = () => {
   const dataOcorrencia = watch("data") as Date | null;
   // Busca classificação da ocorrência para usar no nome do arquivo
   const classificacaoOcorrencia = watch("classificacaoOcorrencia") || null;
+
+  // Corrigido: buscar colaboradores_acidentados corretamente (evita erro TS2304)
+  const colaboradores_acidentados = watch("colaboradores_acidentados");
   let colaboradorAcidentadoId: string | null = null;
-  if (colaboradores && colaboradores.length > 0) {
-    if (typeof colaboradores[0] === "object" && colaboradores[0] !== null) {
-      colaboradorAcidentadoId = colaboradores[0].colaborador || null;
+  if (colaboradores_acidentados && colaboradores_acidentados.length > 0) {
+    if (typeof colaboradores_acidentados[0] === "object" && colaboradores_acidentados[0] !== null) {
+      colaboradorAcidentadoId = colaboradores_acidentados[0].colaborador || null;
     } else {
-      colaboradorAcidentadoId = colaboradores[0] || null;
+      colaboradorAcidentadoId = colaboradores_acidentados[0] || null;
     }
   }
   // Buscar nome do colaborador pelo id selecionado
