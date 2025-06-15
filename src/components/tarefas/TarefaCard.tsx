@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -66,7 +65,8 @@ export const TarefaCard: React.FC<TarefaCardProps> = ({
     locale: ptBR
   });
 
-  return <Card className="mb-4 hover:shadow-md transition-shadow cursor-pointer" onClick={() => onClick(tarefa)}>
+  return (
+    <Card className="mb-4 hover:shadow-md transition-shadow cursor-pointer" onClick={() => onClick(tarefa)}>
       <CardHeader className="pb-2 flex flex-row justify-between items-center">
         <div>
           <p className="font-medium text-sm text-muted-foreground">CCA: {tarefa.cca}</p>
@@ -89,8 +89,7 @@ export const TarefaCard: React.FC<TarefaCardProps> = ({
       <CardContent className="pb-2">
         {/* Mostrar o TÍTULO no lugar da DESCRIÇÃO */}
         <p className="text-sm font-semibold text-primary line-clamp-2">
-          {/* Verifica se tem título, senão mostra um texto padrão */}
-          {"titulo" in tarefa && tarefa.titulo
+          {typeof tarefa.titulo === "string" && tarefa.titulo.trim().length > 0
             ? tarefa.titulo
             : "(Sem título)"}
         </p>
@@ -102,7 +101,6 @@ export const TarefaCard: React.FC<TarefaCardProps> = ({
           </Badge>
           {tarefa.configuracao.recorrencia?.ativa && <Badge variant="outline">Recorrente</Badge>}
         </div>
-        {/* NOVO: Substituir prazo por data da conclusão, se concluída */}
         {tarefa.status === "concluida"
           ? (
             <p className="text-xs text-muted-foreground flex items-center">
@@ -115,5 +113,6 @@ export const TarefaCard: React.FC<TarefaCardProps> = ({
           )
         }
       </CardFooter>
-    </Card>;
+    </Card>
+  );
 };
