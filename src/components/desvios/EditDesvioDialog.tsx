@@ -16,6 +16,7 @@ import NovaIdentificacaoForm from "@/components/desvios/forms/NovaIdentificacaoF
 import InformacoesDesvioForm from "@/components/desvios/forms/InformacoesDesvioForm";
 import AcaoCorretivaForm from "@/components/desvios/forms/AcaoCorretivaForm";
 import ClassificacaoRiscoForm from "@/components/desvios/forms/ClassificacaoRiscoForm";
+import { calculateStatusAcao } from "@/utils/desviosUtils";
 
 interface EditDesvioDialogProps {
   desvio: DesvioCompleto | null;
@@ -60,6 +61,7 @@ const EditDesvioDialog = ({ desvio, open, onOpenChange, onDesvioUpdated }: EditD
       tratativaAplicada: "",
       responsavelAcao: "",
       prazoCorrecao: "",
+      situacao: "",
       situacaoAcao: "",
       aplicacaoMedidaDisciplinar: false,
       
@@ -92,6 +94,8 @@ const EditDesvioDialog = ({ desvio, open, onOpenChange, onDesvioUpdated }: EditD
         }
       }
       
+      const acao = desvio.acoes && Array.isArray(desvio.acoes) && desvio.acoes.length > 0 ? desvio.acoes[0] : {};
+
       // Reset form with all the values from the desvio
       form.reset({
         // Nova Identificação
@@ -119,11 +123,12 @@ const EditDesvioDialog = ({ desvio, open, onOpenChange, onDesvioUpdated }: EditD
         matricula: funcionarioData?.matricula || "",
         
         // Ação Corretiva
-        tratativaAplicada: desvio.acao_imediata || "",
-        responsavelAcao: desvio.responsavel_id || "",
-        prazoCorrecao: desvio.prazo_conclusao || "",
-        situacaoAcao: desvio.status || "",
-        aplicacaoMedidaDisciplinar: false,
+        tratativaAplicada: desvio.acao_imediata || acao.tratativa || "",
+        responsavelAcao: acao.responsavel || "",
+        prazoCorrecao: desvio.prazo_conclusao || acao.prazo || "",
+        situacao: acao.situacao || desvio.status || "EM TRATATIVA",
+        situacaoAcao: acao.situacao_acao || calculateStatusAcao(acao.situacao || desvio.status, desvio.prazo_conclusao),
+        aplicacaoMedidaDisciplinar: acao.medida_disciplinar || false,
         
         // Classificação de Risco
         exposicao: desvio.exposicao?.toString() || "",
@@ -147,6 +152,8 @@ const EditDesvioDialog = ({ desvio, open, onOpenChange, onDesvioUpdated }: EditD
     try {
       console.log('Dados do formulário de edição:', data);
       
+      const situacaoAcaoCalculada = calculateStatusAcao(data.situacao, data.prazoCorrecao);
+
       const updatedDesvio = await desviosCompletosService.update(desvio.id, {
         data_desvio: data.data,
         hora_desvio: data.hora,
@@ -169,15 +176,23 @@ const EditDesvioDialog = ({ desvio, open, onOpenChange, onDesvioUpdated }: EditD
         deteccao: data.deteccao ? parseInt(data.deteccao) : null,
         efeito_falha: data.efeitoFalha ? parseInt(data.efeitoFalha) : null,
         impacto: data.impacto ? parseInt(data.impacto) : null,
-        status: data.situacaoAcao,
+        status: data.situacao,
         classificacao_risco: data.classificacaoRisco,
-        responsavel_id: data.responsavelAcao || null,
+        responsavel_id: desvio.responsavel_id, // Manter o original, não sobrescrever com campo de texto
         prazo_conclusao: data.prazoCorrecao || null,
         funcionarios_envolvidos: data.colaboradorInfrator ? [{
           funcionario_id: data.colaboradorInfrator,
           tipo: 'infrator',
           funcao: data.funcao,
           matricula: data.matricula
+        }] : [],
+        acoes: data.tratativaAplicada || data.responsavelAcao ? [{
+            responsavel: data.responsavelAcao,
+            prazo: data.prazoCorrecao || null,
+            situacao: data.situacao,
+            situacao_acao: situacaoAcaoCalculada,
+            medida_disciplinar: data.aplicacaoMedidaDisciplinar,
+            tratativa: data.tratativaAplicada
         }] : [],
       });
 

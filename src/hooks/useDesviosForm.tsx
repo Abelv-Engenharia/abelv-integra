@@ -110,8 +110,16 @@ export const useDesviosForm = () => {
         impacto: formData.impacto ? parseInt(formData.impacto) : null,
         status: formData.situacao || 'EM TRATATIVA',
         classificacao_risco: formData.classificacaoRisco || '',
-        responsavel_id: null, // Removido o campo responsavel_id que estava causando erro
+        responsavel_id: null,
         prazo_conclusao: formData.prazoCorrecao || null,
+        acoes: formData.tratativaAplicada || formData.responsavelAcao ? [{
+            responsavel: formData.responsavelAcao,
+            prazo: formData.prazoCorrecao,
+            situacao: formData.situacao,
+            situacao_acao: situacaoAcaoCalculada,
+            medida_disciplinar: formData.aplicacaoMedidaDisciplinar,
+            tratativa: formData.tratativaAplicada
+        }] : [],
       };
 
       console.log('Dados enviados para o Supabase:', desvioData);
