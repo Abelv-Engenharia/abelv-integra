@@ -62,6 +62,7 @@ export default function InspecoesAcompanhamento() {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedInspecao, setSelectedInspecao] = useState<any | null>(null);
   const [updateDialogOpen, setUpdateDialogOpen] = useState(false);
+  const [busca, setBusca] = useState("");
   const { toast } = useToast();
   const [ccas, setCcas] = useState<{ id: number; codigo: string; nome: string }[]>([]);
 
@@ -93,6 +94,26 @@ export default function InspecoesAcompanhamento() {
         }
       });
   }, []);
+
+  // Função auxiliar: filtra inspeções conforme o texto de busca
+  const filtrarInspecoes = (lista: any[], termo: string) => {
+    if (!termo.trim()) return lista;
+    const t = termo.toLocaleLowerCase();
+    return lista.filter((insp) => {
+      const ccaStr = insp.cca?.codigo + " - " + insp.cca?.nome;
+      const responsavel = insp.responsavel_inspecao || "";
+      const funcao = insp.funcao || "";
+      const status = insp.status || "";
+      return (
+        ccaStr?.toLocaleLowerCase().includes(t) ||
+        responsavel.toLocaleLowerCase().includes(t) ||
+        funcao.toLocaleLowerCase().includes(t) ||
+        status.toLocaleLowerCase().includes(t)
+      );
+    });
+  };
+
+  const inspecoesFiltradas = filtrarInspecoes(inspecoes, busca);
 
   // Excluir inspeção
   const handleDelete = async (id: string) => {
@@ -167,14 +188,23 @@ export default function InspecoesAcompanhamento() {
   return (
     <div className="container mx-auto py-4">
       <h2 className="text-2xl font-bold tracking-tight mb-4">Acompanhamento de Inspeções HSA</h2>
+      {/* Campo de busca */}
+      <div className="mb-3 flex items-center max-w-xs">
+        <Input
+          value={busca}
+          placeholder="Buscar por CCA, responsável, função ou status..."
+          onChange={e => setBusca(e.target.value)}
+          className="text-xs h-8"
+        />
+      </div>
       {isLoading ? (
         <div>Carregando inspeções...</div>
-      ) : inspecoes.length === 0 ? (
-        <div className="text-gray-500">Nenhuma inspeção cadastrada encontrada.</div>
+      ) : inspecoesFiltradas.length === 0 ? (
+        <div className="text-gray-500">Nenhuma inspeção encontrada.</div>
       ) : (
         <div className="flex flex-col gap-2">
-          {inspecoes.map((inspecao) => (
-            <Card key={inspecao.id} className="animate-fade-in relative min-h-[92px] p-2">
+          {inspecoesFiltradas.map((inspecao) => (
+            <Card key={inspecao.id} className="animate-fade-in relative min-h-[72px] p-1.5">
               {/* Status badge canto superior direito */}
               <div className="absolute right-2 top-2 z-10">
                 <Badge
