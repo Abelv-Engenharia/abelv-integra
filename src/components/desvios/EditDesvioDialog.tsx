@@ -58,12 +58,12 @@ const EditDesvioDialog = ({ desvio, open, onOpenChange, onDesvioUpdated }: EditD
       matricula: "",
       
       // Ação Corretiva
-      tratativaAplicada: desvio.acao_imediata || acao.tratativa || "",
-      responsavelAcao: acao.responsavel || "",
-      prazoCorrecao: desvio.prazo_conclusao || acao.prazo || "",
-      situacao: acao.situacao || desvio.status || "EM ANDAMENTO",
-      situacaoAcao: acao.situacao_acao || calculateStatusAcao(acao.situacao || desvio.status, desvio.prazo_conclusao),
-      aplicacaoMedidaDisciplinar: acao.medida_disciplinar || false,
+      tratativaAplicada: "",
+      responsavelAcao: "",
+      prazoCorrecao: "",
+      situacao: "EM ANDAMENTO",
+      situacaoAcao: "EM ANDAMENTO",
+      aplicacaoMedidaDisciplinar: false,
       
       // Classificação de Risco
       exposicao: "",
