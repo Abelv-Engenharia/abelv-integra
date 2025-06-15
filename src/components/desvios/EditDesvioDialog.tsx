@@ -13,7 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { desviosCompletosService, DesvioCompleto } from "@/services/desvios/desviosCompletosService";
 import { useFormData } from "@/hooks/useFormData";
 import NovaIdentificacaoForm from "@/components/desvios/forms/NovaIdentificacaoForm";
-import NovasInformacoesForm from "@/components/desvios/forms/NovasInformacoesForm";
+import InformacoesDesvioForm from "@/components/desvios/forms/InformacoesDesvioForm";
 import AcaoCorretivaForm from "@/components/desvios/forms/AcaoCorretivaForm";
 import ClassificacaoRiscoForm from "@/components/desvios/forms/ClassificacaoRiscoForm";
 
@@ -213,7 +213,7 @@ const EditDesvioDialog = ({ desvio, open, onOpenChange, onDesvioUpdated }: EditD
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <NovaIdentificacaoForm context={formContext} />
-            <NovasInformacoesForm context={formContext} />
+            <InformacoesDesvioForm context={formContext} />
             <AcaoCorretivaForm />
             <ClassificacaoRiscoForm />
             

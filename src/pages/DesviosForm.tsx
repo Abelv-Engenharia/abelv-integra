@@ -7,11 +7,10 @@ import { Button } from "@/components/ui/button";
 import { useDesviosForm } from "@/hooks/useDesviosForm";
 import { useFormData } from "@/hooks/useFormData";
 import NovaIdentificacaoForm from "@/components/desvios/forms/NovaIdentificacaoForm";
-import NovasInformacoesForm from "@/components/desvios/forms/NovasInformacoesForm";
+import InformacoesDesvioForm from "@/components/desvios/forms/InformacoesDesvioForm";
 import AcaoCorretivaForm from "@/components/desvios/forms/AcaoCorretivaForm";
 import ClassificacaoRiscoForm from "@/components/desvios/forms/ClassificacaoRiscoForm";
 import FormSuccessDialog from "@/components/desvios/forms/FormSuccessDialog";
-import FormNavigation from "@/components/desvios/forms/FormNavigation";
 
 const DesviosForm = () => {
   const {
@@ -30,7 +29,7 @@ const DesviosForm = () => {
 
   const tabs = [
     { id: "identificacao", label: "Identificação", component: NovaIdentificacaoForm },
-    { id: "informacoes", label: "Informações", component: NovasInformacoesForm },
+    { id: "informacoes", label: "Informações", component: InformacoesDesvioForm },
     { id: "acao-corretiva", label: "Ação Corretiva", component: AcaoCorretivaForm },
     { id: "classificacao", label: "Classificação de Risco", component: ClassificacaoRiscoForm },
   ];
