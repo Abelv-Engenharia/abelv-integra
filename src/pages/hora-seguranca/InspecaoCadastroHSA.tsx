@@ -149,10 +149,11 @@ const InspecaoCadastroHSA = () => {
       funcao = values.responsavelFuncao || "";
     }
 
-    // Buscar o objeto do CCA a partir do código selecionado:
+    // Corrigir busca do ID do CCA pelo código
     const ccaObj = ccas.find((c: any) => c.codigo === values.cca);
-    const cca_id = ccaObj ? ccaObj.id : undefined;
+    const cca_id = ccaObj?.id;
 
+    // Checar campos obrigatórios antes de salvar
     if (!cca_id) {
       toast({
         title: "Erro ao cadastrar inspeção",
@@ -162,11 +163,47 @@ const InspecaoCadastroHSA = () => {
       setIsSaving(false);
       return;
     }
+    if (!values.data) {
+      toast({
+        title: "Erro ao cadastrar inspeção",
+        description: "Informe a data da inspeção.",
+        variant: "destructive",
+      });
+      setIsSaving(false);
+      return;
+    }
+    if (!responsavel_nome) {
+      toast({
+        title: "Erro ao cadastrar inspeção",
+        description: "Selecione ou informe o responsável pela inspeção.",
+        variant: "destructive",
+      });
+      setIsSaving(false);
+      return;
+    }
+    if (!funcao) {
+      toast({
+        title: "Erro ao cadastrar inspeção",
+        description: "Informe a função do responsável.",
+        variant: "destructive",
+      });
+      setIsSaving(false);
+      return;
+    }
+    if (!values.tipoInspecao) {
+      toast({
+        title: "Erro ao cadastrar inspeção",
+        description: "Selecione o tipo de inspeção.",
+        variant: "destructive",
+      });
+      setIsSaving(false);
+      return;
+    }
 
     // Nome do tipo de inspeção
     const tipoInspecaoLabel = tiposInspecao.find((t: any) => t.id === values.tipoInspecao)?.nome || "";
 
-    // Insert só com cca_id (não enviar cca)
+    // Insert só com cca_id e campos obrigatórios
     const { error } = await supabase
       .from("execucao_hsa")
       .insert({
