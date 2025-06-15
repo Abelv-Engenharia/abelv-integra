@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -70,10 +69,8 @@ export const OcorrenciaFormProvider: React.FC = () => {
 
       console.log("[OCORRENCIA] Resultado do Supabase:", result);
 
-      if (!result || result.error) {
-        // Mensagem de erro detalhado do Supabase se disponível
-        const errorMsg = (result && result.error && result.error.message) ? result.error.message : "Erro desconhecido ao criar ocorrência.";
-        toast.error("Erro ao cadastrar ocorrência: " + errorMsg);
+      if (!result) {
+        toast.error("Erro ao cadastrar ocorrência: Registro não foi salvo no banco.");
         return;
       }
 
