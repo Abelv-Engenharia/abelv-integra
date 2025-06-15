@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,8 +29,6 @@ const Login = () => {
           title: "Login realizado com sucesso",
           description: "Bem-vindo ao sistema"
         });
-
-        // Force page reload to ensure a clean state
         window.location.href = "/";
       }
     } catch (error: any) {
@@ -51,7 +50,7 @@ const Login = () => {
     }
   };
   return <div className="flex items-center justify-center min-h-screen bg-cover bg-center bg-no-repeat bg-fixed" style={{
-    backgroundImage: `url('/lovable-uploads/2929fa74-d69a-47b3-aeee-d6c913144292.png')`,
+    backgroundImage: `url('/lovable-uploads/7cbbd591-f45a-4755-9bb4-82b591a1ba13.png')`,
     backgroundSize: 'cover',
     backgroundPosition: 'center',
     backgroundAttachment: 'fixed'

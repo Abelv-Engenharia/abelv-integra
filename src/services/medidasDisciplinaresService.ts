@@ -33,11 +33,12 @@ function getAnoMes(dataISO: string): { ano: string; mes: string } {
 export async function criarMedidaDisciplinar(form: MedidaDisciplinarFormData, arquivoUrl?: string) {
   const { cca_id, funcionario_id, tipo_medida, data_aplicacao, descricao } = form;
   const { ano, mes } = getAnoMes(data_aplicacao);
+  // tipo_medida já validado no enum (não pode ser vazio)
   const insertObj = {
     cca_id: parseInt(cca_id, 10),
     funcionario_id,
-    medida: tipo_medida, // campo do Supabase
-    data: data_aplicacao, // campo do Supabase para data
+    medida: tipo_medida,
+    data: data_aplicacao,
     motivo: descricao,
     arquivo_url: arquivoUrl || null,
     ano,
@@ -45,7 +46,6 @@ export async function criarMedidaDisciplinar(form: MedidaDisciplinarFormData, ar
   };
   const { data, error } = await supabase.from("medidas_disciplinares").insert([insertObj]).select("*").single();
   if (error) throw error;
-  // Mapear para o formato esperado do frontend
   return {
     id: data.id,
     cca_id: data.cca_id?.toString() || "",

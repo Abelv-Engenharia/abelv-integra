@@ -22,10 +22,10 @@ function formatDate(date: string) {
 }
 
 const tiposBadgeColor: Record<string, string> = {
-  "Advertência Verbal": "bg-yellow-200 text-yellow-900",
-  "Advertência Escrita": "bg-orange-200 text-orange-900",
-  "Suspensão": "bg-pink-200 text-pink-900",
-  "Demissão": "bg-red-200 text-red-900",
+  "ADVERTÊNCIA VERBAL": "bg-yellow-200 text-yellow-900",
+  "ADVERTÊNCIA ESCRITA": "bg-orange-200 text-orange-900",
+  "SUSPENSÃO": "bg-pink-200 text-pink-900",
+  "DEMISSÃO POR JUSTA CAUSA": "bg-red-200 text-red-900",
 };
 
 const MedidasDisciplinaresTable = ({ searchTerm, filters }: Props) => {
@@ -52,7 +52,7 @@ const MedidasDisciplinaresTable = ({ searchTerm, filters }: Props) => {
         query = query.eq("cca_id", Number(filters.cca));
       }
       if (filters.tipo_medida && filters.tipo_medida !== "todos") {
-        query = query.eq("medida", filters.tipo_medida);
+        query = query.eq("medida", filters.tipo_medida as "ADVERTÊNCIA VERBAL" | "ADVERTÊNCIA ESCRITA" | "SUSPENSÃO" | "DEMISSÃO POR JUSTA CAUSA");
       }
       if (searchTerm) {
         query = query.ilike("motivo", `%${searchTerm}%`);
@@ -65,7 +65,7 @@ const MedidasDisciplinaresTable = ({ searchTerm, filters }: Props) => {
             id: m.id,
             cca_id: m.cca_id?.toString() ?? "",
             funcionario_id: m.funcionario_id ?? "",
-            tipo_medida: m.medida,
+            tipo_medida: m.medida as "ADVERTÊNCIA VERBAL" | "ADVERTÊNCIA ESCRITA" | "SUSPENSÃO" | "DEMISSÃO POR JUSTA CAUSA",
             data_aplicacao: m.data,
             descricao: m.motivo,
             arquivo_url: m.arquivo_url,

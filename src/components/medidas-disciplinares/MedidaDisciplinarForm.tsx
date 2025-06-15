@@ -1,4 +1,3 @@
-
 import { useForm, FormProvider } from "react-hook-form";
 import { MedidaDisciplinarFormData, tiposMedidaAplicada } from "@/types/medidasDisciplinares";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -17,7 +16,12 @@ import { Loader2 } from "lucide-react";
 const schema = z.object({
   cca_id: z.string().nonempty("CCA obrigatório"),
   funcionario_id: z.string().nonempty("Funcionário obrigatório"),
-  tipo_medida: z.string().nonempty("Tipo obrigatório"),
+  tipo_medida: z.enum([
+    "ADVERTÊNCIA VERBAL",
+    "ADVERTÊNCIA ESCRITA",
+    "SUSPENSÃO",
+    "DEMISSÃO POR JUSTA CAUSA"
+  ], { errorMap: () => ({ message: "Tipo obrigatório" }) }),
   data_aplicacao: z.string().nonempty("Data obrigatória"),
   descricao: z.string().optional(),
   arquivo: z
@@ -33,7 +37,7 @@ export default function MedidaDisciplinarForm({ onSuccess }: { onSuccess: () => 
     defaultValues: {
       cca_id: "",
       funcionario_id: "",
-      tipo_medida: "",
+      tipo_medida: undefined,
       data_aplicacao: "",
       descricao: "",
       arquivo: null,
@@ -57,19 +61,22 @@ export default function MedidaDisciplinarForm({ onSuccess }: { onSuccess: () => 
 
   const onSubmit = async (data: Schema) => {
     if (!profile?.id) return;
-    // Garantir que todos os campos obrigatórios serão enviados ao reset
-    await mutateAsync({ form: {
-      cca_id: data.cca_id ?? "",
-      funcionario_id: data.funcionario_id ?? "",
-      tipo_medida: data.tipo_medida ?? "",
-      data_aplicacao: data.data_aplicacao ?? "",
-      descricao: data.descricao ?? "",
-      arquivo: data.arquivo ?? null,
-    }, arquivo: pdfFile, userId: profile.id });
+    await mutateAsync({
+      form: {
+        cca_id: data.cca_id,
+        funcionario_id: data.funcionario_id,
+        tipo_medida: data.tipo_medida,
+        data_aplicacao: data.data_aplicacao,
+        descricao: data.descricao ?? "",
+        arquivo: data.arquivo ?? null,
+      },
+      arquivo: pdfFile,
+      userId: profile.id
+    });
     reset({
       cca_id: "",
       funcionario_id: "",
-      tipo_medida: "",
+      tipo_medida: undefined,
       data_aplicacao: "",
       descricao: "",
       arquivo: null,
