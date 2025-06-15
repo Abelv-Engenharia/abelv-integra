@@ -49,6 +49,7 @@ const getStatusConfig = (status: Tarefa["status"]) => {
       };
   }
 };
+
 const getCriticidadeConfig = (criticidade: Tarefa["configuracao"]["criticidade"]) => {
   switch (criticidade) {
     case "critica":
@@ -86,7 +87,7 @@ export const TarefaCard: React.FC<TarefaCardProps> = ({
   const [openDialog, setOpenDialog] = useState(false);
 
   return (
-    <Card className="mb-4 hover:shadow-md transition-shadow cursor-pointer relative">
+    <Card className="mb-4 hover:shadow-md transition-shadow cursor-pointer relative" onClick={() => onClick(tarefa)}>
       {/* Botão de excluir no canto superior direito */}
       {onDelete && (
         <div className="absolute top-3 right-3 z-10">
