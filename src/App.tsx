@@ -59,6 +59,7 @@ import InspecoesAcompanhamento from './pages/hora-seguranca/InspecoesAcompanhame
 import PainelExecucaoHSA from './pages/hora-seguranca/PainelExecucaoHSA';
 import AgendaHSA from './pages/hora-seguranca/AgendaHSA';
 import MedidasDisciplinaresDashboard from "./pages/medidas-disciplinares/MedidasDisciplinaresDashboard";
+import MedidasDisciplinaresCadastro from "./pages/medidas-disciplinares/MedidasDisciplinaresCadastro";
 import MedidasDisciplinaresConsulta from "./pages/medidas-disciplinares/MedidasDisciplinaresConsulta";
 
 const queryClient = new QueryClient();
