@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -71,30 +70,36 @@ export const TarefaCard: React.FC<TarefaCardProps> = ({
   onDelete
 }) => {
   const statusConfig = getStatusConfig(tarefa.status);
-  const dataLimite = new Date(tarefa.dataConclusao);
 
-  // Formatada: data de criação
+  // Preparar a data real de conclusão, se existir; se não, usar dataConclusao para manter retrocompatibilidade
+  const dataRealConclusao = tarefa.data_real_conclusao
+    ? new Date(tarefa.data_real_conclusao)
+    : tarefa.status === "concluida"
+      ? new Date(tarefa.dataConclusao)
+      : null;
+
   const dataCriacaoFormatada = format(new Date(tarefa.dataCadastro), "dd/MM/yyyy", { locale: ptBR });
-  // Formatada: data de conclusão
-  const dataConclusaoFormatada = format(new Date(tarefa.dataConclusao), "dd/MM/yyyy", { locale: ptBR });
+  const dataRealConclusaoFormatada = dataRealConclusao
+    ? format(dataRealConclusao, "dd/MM/yyyy HH:mm", { locale: ptBR })
+    : null;
+
+  // Cálculo dos dias corridos entre cadastro e data real de conclusão
+  let diasConclusao: number | null = null;
+  if (tarefa.status === "concluida" && dataRealConclusao) {
+    try {
+      const inicio = new Date(tarefa.dataCadastro);
+      diasConclusao = differenceInCalendarDays(dataRealConclusao, inicio);
+    } catch {
+      diasConclusao = null;
+    }
+  }
 
   // Texto prazo restante (se não concluída)
+  const dataLimite = new Date(tarefa.dataConclusao);
   const restante = formatDistanceToNow(dataLimite, {
     addSuffix: true,
     locale: ptBR
   });
-
-  // NOVO: dias entre cadastro e conclusão, para tarefas concluídas
-  let diasConclusao: number | null = null;
-  if (tarefa.status === "concluida") {
-    try {
-      const inicio = new Date(tarefa.dataCadastro);
-      const fim = new Date(tarefa.dataConclusao);
-      diasConclusao = differenceInCalendarDays(fim, inicio);
-    } catch (e) {
-      diasConclusao = null;
-    }
-  }
 
   const [openDialog, setOpenDialog] = useState(false);
 
@@ -177,10 +182,17 @@ export const TarefaCard: React.FC<TarefaCardProps> = ({
           ? (
             <p className="text-xs text-muted-foreground flex items-center">
               <CheckCircle className="w-3 h-3 mr-1 text-green-600" />
-              Concluída em {dataConclusaoFormatada}
-              {typeof diasConclusao === "number" && diasConclusao >= 0 && (
-                <span>{` (${diasConclusao} ${diasConclusao === 1 ? "dia" : "dias"} corridos)`}</span>
-              )}
+              {dataRealConclusaoFormatada
+                ? (
+                  <>
+                    Concluída em {dataRealConclusaoFormatada}
+                    {typeof diasConclusao === "number" && diasConclusao >= 0 && (
+                      <span>{` (${diasConclusao} ${diasConclusao === 1 ? "dia" : "dias"} corridos)`}</span>
+                    )}
+                  </>
+                )
+                : "Data de conclusão não registrada"
+              }
             </p>
           )
           : (

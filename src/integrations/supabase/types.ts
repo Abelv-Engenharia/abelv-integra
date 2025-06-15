@@ -1545,6 +1545,7 @@ export type Database = {
           created_at: string | null
           data_cadastro: string | null
           data_conclusao: string | null
+          data_real_conclusao: string | null
           descricao: string
           id: string
           iniciada: boolean | null
@@ -1561,6 +1562,7 @@ export type Database = {
           created_at?: string | null
           data_cadastro?: string | null
           data_conclusao?: string | null
+          data_real_conclusao?: string | null
           descricao: string
           id?: string
           iniciada?: boolean | null
@@ -1577,6 +1579,7 @@ export type Database = {
           created_at?: string | null
           data_cadastro?: string | null
           data_conclusao?: string | null
+          data_real_conclusao?: string | null
           descricao?: string
           id?: string
           iniciada?: boolean | null
