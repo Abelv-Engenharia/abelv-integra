@@ -3,12 +3,12 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { fetchInspecoesSummary, fetchInspecoesByStatus, fetchInspecoesByMonth, fetchInspecoesByResponsavel, fetchDesviosByInspectionType, fetchDesviosByResponsavel } from "@/services/horaSegurancaService";
 import { Gauge, Check, Clock, AlertTriangle, Search, Plus } from "lucide-react";
-import { ResponsiveContainer, BarChart as ReBarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, LineChart as ReLineChart, Line, Legend, Pie as RePie, PieChart as RePieChart, Cell } from "recharts";
+import { ResponsiveContainer, BarChart as ReBarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, LineChart as ReLineChart, Line, Pie as RePie, PieChart as RePieChart, Cell } from "recharts";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent, type ChartConfig } from "@/components/ui/chart";
 const COLORS = ["#4285F4", "#34A853", "#FBBC05", "#EA4335", "#8D6E63", "#FF9800", "#7E57C2"];
 export default function PainelExecucaoHSA() {
   const [summary, setSummary] = useState<any>(null);
@@ -141,6 +141,13 @@ export default function PainelExecucaoHSA() {
   } else if (aderenciaAjustadaPerc < 95) {
     aderenciaAjustadaColor = "text-orange-500";
   }
+
+  const chartConfig = pieData.reduce((acc, entry) => {
+    if (entry.name) {
+      acc[entry.name] = { label: entry.name };
+    }
+    return acc;
+  }, {} as ChartConfig);
 
   return (
     <div className="max-w-7xl mx-auto py-8 animate-fade-in">
@@ -398,7 +405,7 @@ export default function PainelExecucaoHSA() {
                 <XAxis dataKey="name" />
                 <YAxis allowDecimals={false} />
                 <Tooltip />
-                <Legend />
+                <ChartLegend />
                 <Bar dataKey="A Realizar" fill="#4285F4" />
                 <Bar dataKey="Realizada" fill="#43A047" />
                 <Bar dataKey="Não Realizada" fill="#E53935" />
@@ -434,19 +441,36 @@ export default function PainelExecucaoHSA() {
           </CardHeader>
           <CardContent>
             <ChartContainer
-              config={{}}
-              className="mx-auto aspect-square h-[300px] [&_.recharts-pie-label-text]:text-xs"
+              config={chartConfig}
+              className="mx-auto aspect-square h-[300px]"
             >
               <RePieChart>
                 <ChartTooltip
                   content={<ChartTooltipContent nameKey="name" />}
                 />
-                <RePie data={pieData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} fill="#1565C0" label={({
-                name,
-                percent
-              }) => `${name} • ${(percent * 100).toFixed(1)}%`}>
+                <RePie data={pieData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} fill="#1565C0" labelLine={false} label={({
+                cx,
+                cy,
+                midAngle,
+                innerRadius,
+                outerRadius,
+                percent,
+              }) => {
+                if (percent < 0.05) {
+                  return null
+                }
+                const radius = innerRadius + (outerRadius - innerRadius) * 0.5
+                const x = cx + radius * Math.cos(-midAngle * Math.PI / 180)
+                const y = cy + radius * Math.sin(-midAngle * Math.PI / 180)
+                return (
+                  <text x={x} y={y} fill="white" className="text-xs font-bold" textAnchor="middle" dominantBaseline="central">
+                    {`${(percent * 100).toFixed(0)}%`}
+                  </text>
+                )
+              }}>
                   {pieData.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
                 </RePie>
+                <ChartLegend content={<ChartLegendContent nameKey="name" />} />
               </RePieChart>
             </ChartContainer>
           </CardContent>
