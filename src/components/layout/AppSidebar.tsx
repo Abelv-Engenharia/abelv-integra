@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Home } from "lucide-react";
 import {
@@ -24,7 +25,14 @@ export function AppSidebar() {
   const location = useLocation();
   const currentPath = location.pathname;
   const { userPermissoes } = useProfile();
-  const menusSidebar = userPermissoes?.menus_sidebar || [];
+
+  // menusSidebar agora é sempre array de string (ou array vazio)
+  const menusSidebar =
+    (userPermissoes &&
+      typeof userPermissoes === "object" &&
+      Array.isArray((userPermissoes as any).menus_sidebar)
+      ? (userPermissoes as any).menus_sidebar
+      : []) as string[];
 
   // Defina o menu principal aberto inicialmente
   const [openMenu, setOpenMenu] = useState<string | null>(() => {
@@ -65,19 +73,19 @@ export function AppSidebar() {
         {["desvios_dashboard", "desvios_cadastro", "desvios_consulta", "desvios_nao_conformidade"].some(menu =>
           podeVerMenu(menu, menusSidebar)
         ) && (
-          <SidebarSectionSMS openMenu={openMenu} toggleMenu={toggleMenu} menusSidebar={menusSidebar} />
+          <SidebarSectionSMS openMenu={openMenu} toggleMenu={toggleMenu} />
         )}
 
         {/* Render Tarefas */}
         {["tarefas_dashboard", "tarefas_minhas_tarefas", "tarefas_cadastro"].some(menu =>
           podeVerMenu(menu, menusSidebar)
         ) && (
-          <SidebarSectionTarefas openMenu={openMenu} toggleMenu={toggleMenu} menusSidebar={menusSidebar} />
+          <SidebarSectionTarefas openMenu={openMenu} toggleMenu={toggleMenu} />
         )}
 
         {/* Render Relatórios */}
         {["relatorios", "relatorios_idsms"].some(menu => podeVerMenu(menu, menusSidebar)) && (
-          <SidebarSectionRelatorios openMenu={openMenu} toggleMenu={toggleMenu} menusSidebar={menusSidebar} />
+          <SidebarSectionRelatorios openMenu={openMenu} toggleMenu={toggleMenu} />
         )}
 
         {/* Render Administração */}
@@ -94,7 +102,7 @@ export function AppSidebar() {
           "admin_templates",
           "admin_logo"
         ].some(menu => podeVerMenu(menu, menusSidebar)) && (
-          <SidebarSectionAdministracao openMenu={openMenu} toggleMenu={toggleMenu} menusSidebar={menusSidebar} />
+          <SidebarSectionAdministracao openMenu={openMenu} toggleMenu={toggleMenu} />
         )}
       </SidebarContent>
     </Sidebar>
