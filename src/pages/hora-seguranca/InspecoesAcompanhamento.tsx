@@ -173,21 +173,23 @@ export default function InspecoesAcompanhamento() {
                   <div className="flex items-center gap-1">
                     {getStatusIcon(inspecao.status)}
                     <span>
-                      {inspecao.status === "REALIZADA (NÃO PROGRAMADA)" ? "REALIZADA (NÃO PROG.)" : inspecao.status}
+                      {inspecao.status === "REALIZADA (NÃO PROGRAMADA)"
+                        ? "REALIZADA (NÃO PROG.)"
+                        : inspecao.status}
                     </span>
                   </div>
                 </Badge>
               </div>
               <CardHeader className="pb-2">
                 <CardTitle className="text-lg flex flex-col gap-1 min-h-0">
-                  <div>
-                    {/* Código + nome do CCA */}
-                    <span className="font-bold">{inspecao.cca}</span>
-                    {inspecao.cca_nome && (
-                      <span className="ml-2 text-base font-normal">{inspecao.cca_nome}</span>
-                    )}
-                  </div>
-                  {/* Data logo abaixo da indicação do CCA */}
+                  {/* Código + Nome do CCA SEMPRE APARECEM */}
+                  <span className="font-bold text-2xl">
+                    {inspecao.cca}
+                    <span className="font-normal text-base ml-2">
+                      - {inspecao.cca_nome?.trim() || "NÃO DEFINIDO"}
+                    </span>
+                  </span>
+                  {/* Data logo abaixo */}
                   <span className="font-light text-xs mt-1">
                     {inspecao.data ? format(new Date(inspecao.data), "dd/MM/yyyy") : "--"}
                   </span>
