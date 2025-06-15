@@ -1,4 +1,3 @@
-
 import {
   Dialog,
   DialogContent,
@@ -26,15 +25,19 @@ const formatDate = (dateString: string) => (dateString ? new Date(dateString).to
 const DesvioDetailsDialog = ({ desvio, onStatusUpdated }: Props) => {
   const { toast } = useToast();
   const [actionStatus, setActionStatus] = useState<string>("");
+  const [open, setOpen] = useState(false);
+
   const updateStatus = async () => {
     if (!desvio.id || !actionStatus) return;
     try {
       await desviosCompletosService.update(desvio.id, { status: actionStatus });
       toast({
-        title: "Status atualizado",
-        description: `O status do desvio ${desvio.id} foi alterado para ${actionStatus}.`,
+        title: "Status atualizado com sucesso!",
       });
-      onStatusUpdated?.(desvio.id, actionStatus);
+      if (onStatusUpdated) {
+        onStatusUpdated(desvio.id, actionStatus);
+      }
+      setOpen(false);
     } catch {
       toast({
         title: "Erro ao atualizar status",
@@ -45,7 +48,7 @@ const DesvioDetailsDialog = ({ desvio, onStatusUpdated }: Props) => {
   };
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="ghost" size="icon">
           <Eye className="h-4 w-4" />
