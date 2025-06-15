@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Bell, Settings, User, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -7,8 +8,27 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import NotificacoesDropdown from "@/components/notificacoes/NotificacoesDropdown";
+import { useAuth } from "@/contexts/AuthContext";
+import { useProfile } from "@/hooks/useProfile";
+import { useProfileAvatarUrl } from "@/hooks/useProfileAvatarUrl";
+
+// Utilitário para pegar as iniciais do nome
+function getInitials(name?: string) {
+  if (!name) return "U";
+  return name
+    .split(' ')
+    .map(n => n[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2);
+}
+
 const Navbar = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { profile } = useProfile();
+  const { url: avatarUrl } = useProfileAvatarUrl(profile?.avatar_url);
+
   const handleLogout = async () => {
     try {
       await supabase.auth.signOut();
@@ -19,7 +39,9 @@ const Navbar = () => {
       toast.error("Erro ao fazer logout");
     }
   };
-  return <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+
+  return (
+    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-14 items-center justify-between">
         <div className="flex items-center space-x-4">
           <h1 className="text-xl font-semibold">GESTÃO DE SMS ABELV</h1>
@@ -32,8 +54,13 @@ const Navbar = () => {
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                 <Avatar className="h-8 w-8">
-                  <AvatarImage src="/placeholder.svg" alt="@user" />
-                  <AvatarFallback>U</AvatarFallback>
+                  {avatarUrl ? (
+                    <AvatarImage src={avatarUrl} alt={profile?.nome || "avatar"} />
+                  ) : (
+                    <AvatarFallback>
+                      {getInitials(profile?.nome) || "U"}
+                    </AvatarFallback>
+                  )}
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>
@@ -55,6 +82,7 @@ const Navbar = () => {
           </DropdownMenu>
         </div>
       </div>
-    </header>;
+    </header>
+  );
 };
 export default Navbar;
