@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
-import { CalendarIcon, CheckCircle } from "lucide-react";
+import { CalendarIcon, CheckCircle, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent } from "@/components/ui/card";
@@ -156,8 +156,8 @@ const InspecaoCadastroHSA = () => {
 
   if (success) {
     return (
-      <div className="container mx-auto py-6">
-        <Card className="max-w-4xl w-full mx-auto">
+      <div className="w-full px-2 sm:px-4 md:px-8 py-6 flex justify-center">
+        <Card className="w-full max-w-2xl mx-auto">
           <CardContent className="pt-6 flex flex-col items-center gap-6">
             <CheckCircle className="h-16 w-16 text-green-500" />
             <h2 className="text-2xl font-bold text-center">Inspeção cadastrada com sucesso!</h2>
@@ -179,13 +179,26 @@ const InspecaoCadastroHSA = () => {
   }
 
   return (
-    <div className="container mx-auto py-6">
-      <Card className="max-w-4xl w-full mx-auto">
-        <CardContent className="pt-6 space-y-6">
-          <h2 className="text-2xl font-bold text-center">Cadastro de Inspeção Hora da Segurança (HSA)</h2>
+    <div className="w-full px-2 sm:px-4 md:px-8 py-6 flex justify-center">
+      <Card className="w-full max-w-4xl border bg-card shadow-md">
+        <CardContent className="pt-6 pb-8 space-y-6">
+          <div className="flex items-center mb-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex items-center gap-1"
+              asChild
+            >
+              <Link to="/hora-seguranca/dashboard">
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Voltar
+              </Link>
+            </Button>
+          </div>
+          <h2 className="text-2xl font-bold text-center w-full">Cadastro de Inspeção Hora da Segurança (HSA)</h2>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6 w-full">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
                 {/* Data */}
                 <FormField
                   control={form.control}
@@ -232,7 +245,7 @@ const InspecaoCadastroHSA = () => {
                 </FormItem>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <FormField
                   control={form.control}
                   name="cca"
@@ -280,7 +293,7 @@ const InspecaoCadastroHSA = () => {
                 />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <FormField
                   control={form.control}
                   name="responsavelTipo"
