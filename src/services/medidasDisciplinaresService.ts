@@ -53,18 +53,32 @@ export async function criarMedidaDisciplinar(form: MedidaDisciplinarFormData, ar
   const { ano, mes } = getAnoMes(data_aplicacao);
 
   // Converta o nome do tipo do UI (TipoMedidaAplicada) para formato banco
-  const medidaBanco = tipo_medida ? UI_TO_DB_TIPO_MAP[tipo_medida as TipoMedidaAplicada] : "";
+  const medidaBanco = tipo_medida
+    ? UI_TO_DB_TIPO_MAP[tipo_medida as TipoMedidaAplicada]
+    : undefined;
 
-  const insertObj = {
+  // O Supabase espera explicitamente o tipo do enum, então garantimos o cast correto aqui:
+  // (o valor sempre será um dos especificados porque vem do UI_TO_DB_TIPO_MAP)
+  const insertObj: {
+    cca_id: number;
+    funcionario_id: string;
+    medida: "ADVERTÊNCIA VERBAL" | "ADVERTÊNCIA FORMAL" | "SUSPENSÃO" | "DEMISSÃO POR JUSTA CAUSA";
+    data: string;
+    motivo: string;
+    pdf_url: string | null;
+    ano: string;
+    mes: string;
+  } = {
     cca_id: parseInt(cca_id, 10),
     funcionario_id,
-    medida: medidaBanco,
+    medida: medidaBanco as "ADVERTÊNCIA VERBAL" | "ADVERTÊNCIA FORMAL" | "SUSPENSÃO" | "DEMISSÃO POR JUSTA CAUSA",
     data: data_aplicacao,
-    motivo: descricao,
+    motivo: descricao ?? "",
     pdf_url: arquivoUrl || null,
     ano,
     mes,
   };
+
   const { data, error } = await supabase
     .from("medidas_disciplinares")
     .insert([insertObj])
