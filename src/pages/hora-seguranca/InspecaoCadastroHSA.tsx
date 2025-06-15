@@ -354,21 +354,30 @@ const InspecaoCadastroHSA = () => {
                 )}
               </div>
 
-              <div className="flex flex-col md:flex-row gap-3 justify-end pt-4 w-full">
-                <Button type="submit" size="default" disabled={isSaving} className="md:w-auto w-full">
-                  {isSaving ? "Salvando..." : "Salvar"}
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="md:w-auto w-full"
-                  asChild
-                >
-                  <Link to="/hora-seguranca/dashboard">
-                    <ArrowLeft className="w-4 h-4 mr-2" />
-                    Voltar
-                  </Link>
-                </Button>
+              <div className="flex flex-col md:flex-row w-full pt-4 gap-3 md:gap-0">
+                <div className="flex md:flex-1 md:justify-start">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full md:w-auto"
+                    asChild
+                  >
+                    <Link to="/hora-seguranca/dashboard">
+                      <ArrowLeft className="w-4 h-4 mr-2" />
+                      Voltar
+                    </Link>
+                  </Button>
+                </div>
+                <div className="flex md:flex-1 md:justify-end">
+                  <Button
+                    type="submit"
+                    size="default"
+                    disabled={isSaving}
+                    className="w-full md:w-auto"
+                  >
+                    {isSaving ? "Salvando..." : "Salvar"}
+                  </Button>
+                </div>
               </div>
             </form>
           </Form>
