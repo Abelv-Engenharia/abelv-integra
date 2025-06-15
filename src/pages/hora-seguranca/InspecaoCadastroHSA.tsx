@@ -150,17 +150,18 @@ const InspecaoCadastroHSA = () => {
     }
 
     // Buscar o nome do CCA a partir do código selecionado:
-    const ccaObj = ccas.find((c: any) => c.codigo === values.cca);
-    const cca_nome = ccaObj ? ccaObj.nome : "";
+    // const ccaObj = ccas.find((c: any) => c.codigo === values.cca);
+    // const cca_nome = ccaObj ? ccaObj.nome : "";
 
     // Nome do tipo de inspeção
     const tipoInspecaoLabel = tiposInspecao.find((t: any) => t.id === values.tipoInspecao)?.nome || "";
 
+    // Corrija aqui: Retire o campo cca_nome do insert!
     const { error } = await supabase
       .from("execucao_hsa")
       .insert({
         cca: values.cca,
-        cca_nome, // Salva o nome do CCA
+        // cca_nome, // Remover este campo!
         data: format(values.data, "yyyy-MM-dd"),
         ano: parseInt(ano),
         mes: parseInt(mes),
@@ -169,6 +170,7 @@ const InspecaoCadastroHSA = () => {
         funcao,
         status: "A REALIZAR",
       });
+
     setIsSaving(false);
 
     if (error) {
