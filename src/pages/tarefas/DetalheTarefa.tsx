@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -27,6 +26,12 @@ const DetalheTarefa = () => {
   const [showProgressDialog, setShowProgressDialog] = useState(false);
   const [progressNotes, setProgressNotes] = useState("");
   const [attachmentFile, setAttachmentFile] = useState<File | null>(null);
+  const [progressoList, setProgressoList] = useState<
+    { descricao: string; percentual: number; data: Date }[]
+  >([]);
+  const [descricaoProgresso, setDescricaoProgresso] = useState("");
+  const [percentualProgresso, setPercentualProgresso] = useState<number>(0);
+  const [salvando, setSalvando] = useState(false);
   
   useEffect(() => {
     const fetchTarefa = async () => {
@@ -161,6 +166,25 @@ const DetalheTarefa = () => {
     } finally {
       setUpdating(false);
     }
+  };
+  
+  const handleRegistrarProgresso = (e: React.FormEvent) => {
+    e.preventDefault();
+    setSalvando(true);
+    // Simular "salvamento"
+    setTimeout(() => {
+      setProgressoList((prev) => [
+        ...prev,
+        {
+          descricao: descricaoProgresso,
+          percentual: percentualProgresso,
+          data: new Date(),
+        },
+      ]);
+      setDescricaoProgresso("");
+      setPercentualProgresso(0);
+      setSalvando(false);
+    }, 600);
   };
   
   if (loading) {
@@ -392,6 +416,86 @@ const DetalheTarefa = () => {
           )}
         </div>
       </div>
+
+      {/* Área de registro de progresso */}
+      <section className="mt-8 border rounded-lg p-6 bg-muted/10">
+        <h2 className="text-lg font-semibold mb-3">Registrar Progresso da Tarefa</h2>
+        <form
+          className="flex flex-col gap-4 md:flex-row md:items-end md:gap-8"
+          onSubmit={handleRegistrarProgresso}
+        >
+          <div className="flex-1 flex flex-col gap-1">
+            <label className="text-sm font-medium text-muted-foreground" htmlFor="descricaoProgresso">
+              Descrição do Progresso
+            </label>
+            <textarea
+              id="descricaoProgresso"
+              className="border rounded px-2 py-1 min-h-[36px] text-sm"
+              value={descricaoProgresso}
+              onChange={(e) => setDescricaoProgresso(e.target.value)}
+              required
+              placeholder="Descreva o avanço realizado..."
+              disabled={salvando}
+              rows={2}
+            />
+          </div>
+          <div>
+            <label className="text-sm font-medium text-muted-foreground" htmlFor="percentualProgresso">
+              Percentual de Avanço
+            </label>
+            <input
+              id="percentualProgresso"
+              type="number"
+              min={0}
+              max={100}
+              step={1}
+              className="w-[80px] border rounded px-2 py-1 text-right text-sm"
+              value={percentualProgresso}
+              onChange={(e) =>
+                setPercentualProgresso(Number(e.target.value))
+              }
+              required
+              disabled={salvando}
+            />%
+          </div>
+          <button
+            type="submit"
+            className="bg-primary text-primary-foreground rounded px-4 py-2 font-medium hover:bg-primary/90 transition-colors disabled:opacity-60"
+            disabled={
+              !descricaoProgresso ||
+              percentualProgresso < 0 ||
+              percentualProgresso > 100 ||
+              salvando
+            }
+          >
+            {salvando ? "Salvando..." : "Registrar"}
+          </button>
+        </form>
+
+        {/* Exibição dos registros de progresso */}
+        <div className="mt-6 space-y-2">
+          <h3 className="font-medium text-muted-foreground mb-2 text-sm">
+            Histórico de Progresso
+          </h3>
+          {progressoList.length === 0 && (
+            <div className="text-xs text-muted-foreground italic">Nenhum progresso registrado ainda.</div>
+          )}
+          {progressoList.map((prog, idx) => (
+            <div
+              key={idx}
+              className="flex gap-3 items-center border-l-4 border-primary pl-3 py-2 bg-muted/20 rounded"
+            >
+              <div className="flex-1">
+                <div className="text-sm">{prog.descricao}</div>
+                <div className="text-xs text-muted-foreground">
+                  {prog.data.toLocaleString()} 
+                </div>
+              </div>
+              <div className="font-semibold text-primary">{prog.percentual}%</div>
+            </div>
+          ))}
+        </div>
+      </section>
     </div>
   );
 };
