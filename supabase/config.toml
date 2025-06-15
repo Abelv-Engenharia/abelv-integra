@@ -1,5 +1,5 @@
 
 project_id = "xexgdtlctyuycohzhmuu"
 
-[functions.treinamentos-delete-anexo]
+[functions.generate-with-ai]
 verify_jwt = false
