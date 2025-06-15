@@ -18,6 +18,8 @@ import FuncionarioInfoCard from "@/components/treinamentos/FuncionarioInfoCard";
 import CrachaPreview from "@/components/treinamentos/CrachaPreview";
 import FuncionarioTreinamentosValidosCard from "@/components/treinamentos/FuncionarioTreinamentosValidosCard";
 
+import { useSystemLogoUrl } from "@/components/common/useSystemLogoUrl";
+
 const TreinamentosCracha = () => {
   const [selectedFuncionarioId, setSelectedFuncionarioId] = useState<string | undefined>();
   const [funcionario, setFuncionario] = useState<Funcionario | null>(null);
@@ -28,6 +30,7 @@ const TreinamentosCracha = () => {
   const [selectedCcaId, setSelectedCcaId] = useState<number | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(true);
   const crachaRef = useRef<HTMLDivElement | null>(null);
+  const logoUrl = useSystemLogoUrl();
 
   // Fetch funcionarios data
   useEffect(() => {
@@ -178,13 +181,10 @@ const TreinamentosCracha = () => {
       if (printWindow) {
         printWindow.document.open();
         
-        // Adicionar estilos para impressão que mantêm o layout exato do preview
+        // Adicionar estilos para impressão (layout lado a lado)
         const style = document.createElement('style');
         style.innerHTML = `
-          @page {
-            size: 100mm 160mm;
-            margin: 0;
-          }
+          @page { size: 100mm 160mm; margin: 0; }
           body {
             margin: 0;
             padding: 0;
@@ -197,7 +197,6 @@ const TreinamentosCracha = () => {
             box-sizing: border-box;
             padding: 5mm;
             margin: 0 auto;
-            page-break-after: always;
             display: flex;
             flex-direction: column;
           }
@@ -206,7 +205,7 @@ const TreinamentosCracha = () => {
             color: white;
             text-align: center;
             padding: 10px;
-            border-radius: 4px 4px 0 0;
+            border-radius: 8px 8px 0 0;
             margin-bottom: 15px;
           }
           .header h3 {
@@ -217,12 +216,14 @@ const TreinamentosCracha = () => {
           }
           .profile {
             display: flex;
+            flex-direction: row;
             gap: 15px;
             margin-bottom: 15px;
+            align-items: flex-start;
           }
-          .photo {
-            width: 80px;
-            height: 80px;
+          .logo-print {
+            width: 70px;
+            height: 70px;
             background-color: #f3f4f6;
             border-radius: 50%;
             display: flex;
@@ -230,20 +231,20 @@ const TreinamentosCracha = () => {
             justify-content: center;
             flex-shrink: 0;
             overflow: hidden;
+            position: relative;
           }
-          .photo img {
+          .logo-print img {
             width: 100%;
             height: 100%;
-            object-fit: cover;
-          }
-          .photo svg {
-            width: 40px;
-            height: 40px;
-            color: #9ca3af;
+            object-fit: contain;
+            padding: 8px;
+            background: white;
+            border-radius: 9999px;
           }
           .info {
             display: flex;
             flex-direction: column;
+            justify-content: center;
           }
           .info h4 {
             font-size: 18px;
@@ -253,6 +254,7 @@ const TreinamentosCracha = () => {
           .info p {
             margin: 0 0 5px 0;
             font-size: 14px;
+            color: #1f2937;
           }
           .info .matricula {
             font-size: 12px;
@@ -325,13 +327,12 @@ const TreinamentosCracha = () => {
               </div>
               
               <div class="profile">
-                <div class="photo">
-                  ${funcionario.foto 
-                    ? `<img src="${funcionario.foto}" alt="${funcionario.nome}" />` 
-                    : `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>`
+                <div class="logo-print">
+                  ${logoUrl
+                    ? `<img src="${logoUrl}" alt="Logo do Sistema" />`
+                    : ""
                   }
                 </div>
-                
                 <div class="info">
                   <h4>${funcionario.nome}</h4>
                   <p>${funcionario.funcao}</p>
