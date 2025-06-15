@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Bell, Settings, User, LogOut, Image as ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -11,6 +10,7 @@ import NotificacoesDropdown from "@/components/notificacoes/NotificacoesDropdown
 import { useAuth } from "@/contexts/AuthContext";
 import { useProfile } from "@/hooks/useProfile";
 import { useProfileAvatarUrl } from "@/hooks/useProfileAvatarUrl";
+import { cleanupAuthState } from "@/utils/authUtils";
 
 // Utilitário para pegar as iniciais do nome
 function getInitials(name?: string) {
@@ -39,11 +39,21 @@ const Navbar = () => {
 
   const handleLogout = async () => {
     try {
-      await supabase.auth.signOut();
-      navigate("/auth/login");
-      toast.success("Logout realizado com sucesso!");
+      // Limpa o estado de autenticação
+      cleanupAuthState();
+      // Logout global do Supabase
+      try {
+        await supabase.auth.signOut({ scope: "global" });
+      } catch (err) {
+        // Se falhar, continua mesmo assim
+        console.error("Erro no signOut global:", err);
+      }
+      // Força reload na rota de login para garantir sessão limpa
+      window.location.href = "/login";
+      // toast.success("Logout realizado com sucesso!"); // Não mostramos toast pois a página será recarregada.
     } catch (error) {
       console.error("Erro ao fazer logout:", error);
+      // O toast aqui não aparece, mas deixamos para debugging
       toast.error("Erro ao fazer logout");
     }
   };
