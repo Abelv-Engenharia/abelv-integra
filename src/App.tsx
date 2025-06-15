@@ -15,7 +15,6 @@ import TreinamentosConsulta from './pages/treinamentos/TreinamentosConsulta';
 import ExecucaoTreinamentos from './pages/treinamentos/TreinamentosExecucao';
 import EmissaoCracha from './pages/treinamentos/TreinamentosCracha';
 import OcorrenciasDashboard from './pages/ocorrencias/OcorrenciasDashboard';
-import OcorrenciasCadastro from './pages/ocorrencias/OcorrenciasCadastro';
 import OcorrenciasConsulta from './pages/ocorrencias/OcorrenciasConsulta';
 import MedidasDashboard from './pages/PlaceholderPage';
 import MedidasCadastro from './pages/PlaceholderPage';
@@ -79,7 +78,6 @@ function App() {
 
               {/* Ocorrencias Routes */}
               <Route path="ocorrencias/dashboard" element={<OcorrenciasDashboard />} />
-              <Route path="ocorrencias/cadastro" element={<OcorrenciasCadastro />} />
               <Route path="ocorrencias/consulta" element={<OcorrenciasConsulta />} />
 
               {/* Medidas Disciplinares Routes */}
