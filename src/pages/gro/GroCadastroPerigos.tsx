@@ -64,7 +64,7 @@ export default function GroCadastroPerigos() {
           <div><strong>Função:</strong> {data.funcao}</div>
         </div>
       ),
-      variant: "success",
+      variant: "default",
     });
     form.reset();
     setFiles([]);
