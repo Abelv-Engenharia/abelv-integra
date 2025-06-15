@@ -31,6 +31,14 @@ const getInspecaoStatusColor = (status: string) => {
   }
 };
 
+const legendItems = [
+  { status: "REALIZADA", label: "Realizada", colorClasses: "bg-green-100 border-green-200" },
+  { status: "REALIZADA (NÃO PROGRAMADA)", label: "Realizada (Não Prog.)", colorClasses: "bg-orange-100 border-orange-200" },
+  { status: "A REALIZAR", label: "A Realizar", colorClasses: "bg-blue-100 border-blue-200" },
+  { status: "NÃO REALIZADA", label: "Não Realizada", colorClasses: "bg-red-100 border-red-200" },
+  { status: "CANCELADA", label: "Cancelada", colorClasses: "bg-gray-200 border-gray-300" },
+];
+
 export default function AgendaHSA() {
   const [inspecoes, setInspecoes] = useState<InspecaoAgenda[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
@@ -100,28 +108,37 @@ export default function AgendaHSA() {
           </p>
         </CardHeader>
         <CardContent>
-            <Calendar
-              mode="single"
-              selected={selectedDate}
-              onSelect={setSelectedDate}
-              className="p-0 border rounded-md"
-              locale={ptBR}
-              showOutsideDays
-              classNames={{
-                months: "flex flex-col sm:flex-row",
-                month: "w-full space-y-4 p-4",
-                table: "w-full border-collapse",
-                head_row: "flex w-full border-b",
-                head_cell: "text-muted-foreground w-[14.28%] font-normal text-sm p-2 text-center",
-                row: "flex w-full divide-x divide-gray-200",
-                cell: "h-40 w-[14.28%] p-0 relative border-t border-gray-200",
-                day: "w-full h-full",
-                day_selected: "bg-primary/10 text-primary",
-                day_today: "bg-accent text-accent-foreground",
-                day_outside: "day-outside text-muted-foreground opacity-30",
-              }}
-              components={{ DayContent: CustomDayContent }}
-            />
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mb-4 border-b pb-4">
+            <h3 className="text-sm font-medium text-muted-foreground">Legenda:</h3>
+            {legendItems.map((item) => (
+              <div key={item.status} className="flex items-center gap-2">
+                <div className={`w-3 h-3 rounded-full ${item.colorClasses}`} />
+                <span className="text-xs text-muted-foreground">{item.label}</span>
+              </div>
+            ))}
+          </div>
+          <Calendar
+            mode="single"
+            selected={selectedDate}
+            onSelect={setSelectedDate}
+            className="p-0 border rounded-md"
+            locale={ptBR}
+            showOutsideDays
+            classNames={{
+              months: "flex flex-col sm:flex-row",
+              month: "w-full space-y-4 p-4",
+              table: "w-full border-collapse",
+              head_row: "flex w-full border-b",
+              head_cell: "text-muted-foreground w-[14.28%] font-normal text-sm p-2 text-center",
+              row: "flex w-full divide-x divide-gray-200",
+              cell: "h-40 w-[14.28%] p-0 relative border-t border-gray-200",
+              day: "w-full h-full",
+              day_selected: "bg-primary/10 text-primary",
+              day_today: "bg-accent text-accent-foreground",
+              day_outside: "day-outside text-muted-foreground opacity-30",
+            }}
+            components={{ DayContent: CustomDayContent }}
+          />
         </CardContent>
       </Card>
     </div>
