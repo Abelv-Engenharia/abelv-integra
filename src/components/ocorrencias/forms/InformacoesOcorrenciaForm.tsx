@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useFormContext, Controller } from "react-hook-form";
 import {
@@ -10,6 +11,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 import { useOcorrenciasFormData } from "@/hooks/useOcorrenciasFormData";
 import AbsenceFields from "./components/AbsenceFields";
 import BodyPartLateralityFields from "./components/BodyPartLateralityFields";
@@ -17,40 +19,43 @@ import CauseFields from "./components/CauseFields";
 import { uploadCatFileToBucket } from "@/utils/uploadCatFileToBucket";
 
 const InformacoesOcorrenciaForm = () => {
-  const { control, watch } = useFormContext();
-  const { partesCorpo, lateralidades, agentesCausadores, situacoesGeradoras, naturezasLesao } = useOcorrenciasFormData();
+  const { control, watch, setValue } = useFormContext();
+  const { partesCorpo, lateralidades, agentesCausadores, situacoesGeradoras, naturezasLesao, funcionarios } = useOcorrenciasFormData();
 
-  // Estado para mostrar status de upload
   const [uploadingCat, setUploadingCat] = React.useState(false);
 
-  // Obter valores necessários para o nome do arquivo
   const dataOcorrencia = watch("data") as Date | null;
-  // Usar sempre colaboradores_acidentados (padroniza snake_case)
   const colaboradores = watch("colaboradores_acidentados");
-  let colaboradorAcidentado: string | null = null;
+  let colaboradorAcidentadoId: string | null = null;
   if (colaboradores && colaboradores.length > 0) {
     if (typeof colaboradores[0] === "object" && colaboradores[0] !== null) {
-      colaboradorAcidentado = colaboradores[0].colaborador || null;
+      colaboradorAcidentadoId = colaboradores[0].colaborador || null;
     } else {
-      colaboradorAcidentado = colaboradores[0] || null;
+      colaboradorAcidentadoId = colaboradores[0] || null;
     }
+  }
+  // Buscar nome do colaborador pelo id selecionado (garante nome para upload)
+  let colaboradorAcidentadoNome: string | null = null;
+  if (colaboradorAcidentadoId && funcionarios) {
+    const found = funcionarios.find((f: any) => f.id?.toString() === colaboradorAcidentadoId?.toString());
+    colaboradorAcidentadoNome = found?.nome || colaboradorAcidentadoId; // fallback para compatibilidade
   }
 
   return (
     <div className="space-y-6">
       <AbsenceFields />
-      
+
       <BodyPartLateralityFields
         partesCorpo={partesCorpo}
         lateralidades={lateralidades}
       />
-      
+
       <CauseFields
         agentesCausadores={agentesCausadores}
         situacoesGeradoras={situacoesGeradoras}
         naturezasLesao={naturezasLesao}
       />
-      
+
       {/* Descrição da ocorrência */}
       <FormField
         control={control}
@@ -71,7 +76,7 @@ const InformacoesOcorrenciaForm = () => {
           </FormItem>
         )}
       />
-      
+
       {/* CAT e CID */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <FormField
@@ -101,7 +106,7 @@ const InformacoesOcorrenciaForm = () => {
           )}
         />
       </div>
-      
+
       {/* Anexar CAT */}
       <Controller
         control={control}
@@ -117,12 +122,12 @@ const InformacoesOcorrenciaForm = () => {
               onChange={async (e) => {
                 const file = e.target.files?.[0];
                 if (file && file.size <= 2 * 1024 * 1024) {
-                  if (!dataOcorrencia || !colaboradorAcidentado) {
+                  if (!dataOcorrencia || !colaboradorAcidentadoNome) {
                     alert("Preencha a data da ocorrência e o colaborador acidentado antes de anexar o CAT.");
                     return;
                   }
                   setUploadingCat(true);
-                  const url = await uploadCatFileToBucket(file, dataOcorrencia, colaboradorAcidentado);
+                  const url = await uploadCatFileToBucket(file, dataOcorrencia, colaboradorAcidentadoNome);
                   setUploadingCat(false);
                   if (url) {
                     onChange(url);
@@ -138,14 +143,28 @@ const InformacoesOcorrenciaForm = () => {
               <span className="text-sm text-gray-500">Enviando arquivo...</span>
             )}
             {value && typeof value === "string" && (
-              <a
-                href={value}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-600 underline mt-2 text-xs"
-              >
-                Visualizar CAT anexada
-              </a>
+              <div className="flex items-center space-x-2 mt-2">
+                <a
+                  href={value}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 underline text-xs"
+                >
+                  Visualizar CAT anexada
+                </a>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="destructive"
+                  onClick={() => {
+                    onChange(null);
+                    setValue("arquivo_cat", null);
+                  }}
+                  className="text-xs px-2 py-0.5 h-7"
+                >
+                  Remover CAT
+                </Button>
+              </div>
             )}
           </div>
         )}
