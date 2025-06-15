@@ -18,18 +18,24 @@ type Plano = {
 
 export default function GroPGR() {
   const [planos, setPlanos] = useState<Plano[]>([]);
-  const [nome, setNome] = useState("");
-  const [descricao, setDescricao] = useState("");
+  const [nome, setNome] = useState('');
+  const [descricao, setDescricao] = useState('');
   const [carregando, setCarregando] = useState(false);
 
   async function carregarPlanos() {
     setCarregando(true);
     const { data, error } = await supabase
-      .from("pgr_planos")
-      .select("*")
-      .order("criado_em", { ascending: false });
+      .from('pgr_planos')
+      .select('*')
+      .order('criado_em', { ascending: false });
     if (data) setPlanos(data);
-    if (error) toast({ title: "Erro ao listar PGRs", description: error.message, variant: "destructive" });
+    if (error) {
+      toast({
+        title: 'Erro ao listar PGRs',
+        description: error.message,
+        variant: 'destructive',
+      });
+    }
     setCarregando(false);
   }
 
@@ -40,17 +46,26 @@ export default function GroPGR() {
   async function criarPGR(e: React.FormEvent) {
     e.preventDefault();
     const { data, error } = await supabase
-      .from("pgr_planos")
+      .from('pgr_planos')
       .insert([{ nome, descricao }])
       .select()
       .single();
+
     if (data) {
-      toast({ title: "Plano criado!", description: data.nome, variant: "default" });
-      setNome("");
-      setDescricao("");
+      toast({
+        title: 'Plano criado!',
+        description: data.nome,
+        variant: 'default',
+      });
+      setNome('');
+      setDescricao('');
       carregarPlanos();
     } else if (error) {
-      toast({ title: "Erro ao criar Plano", description: error.message, variant: "destructive" });
+      toast({
+        title: 'Erro ao criar Plano',
+        description: error.message,
+        variant: 'destructive',
+      });
     }
   }
 
@@ -76,7 +91,9 @@ export default function GroPGR() {
             value={descricao}
             onChange={e => setDescricao(e.target.value)}
           />
-          <Button type="submit" disabled={!nome}>Criar Novo PGR</Button>
+          <Button type="submit" disabled={!nome}>
+            Criar Novo PGR
+          </Button>
         </form>
       </Card>
 
@@ -88,7 +105,9 @@ export default function GroPGR() {
             <div className="flex justify-between items-start gap-2 mb-2">
               <div>
                 <div className="font-bold">{plano.nome}</div>
-                <div className="text-xs text-muted-foreground">Criado em {new Date(plano.criado_em).toLocaleString()}</div>
+                <div className="text-xs text-muted-foreground">
+                  Criado em {new Date(plano.criado_em).toLocaleString()}
+                </div>
               </div>
             </div>
             <div className="text-sm text-muted-foreground mb-3">
