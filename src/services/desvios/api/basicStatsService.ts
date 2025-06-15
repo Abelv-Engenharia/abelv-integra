@@ -14,7 +14,7 @@ export const fetchDashboardStats = async (): Promise<DashboardStats> => {
     const { count: acoesCompletas } = await supabase
       .from('desvios_completos')
       .select('*', { count: 'exact', head: true })
-      .eq('status', 'Fechado');
+      .in('status', ['Fechado', 'CONCLUÍDO']);
 
     const { count: acoesAndamento } = await supabase
       .from('desvios_completos')

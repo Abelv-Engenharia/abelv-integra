@@ -12,7 +12,7 @@ export const fetchFilteredDashboardStats = async (filters: FilterParams): Promis
     const { count: totalDesvios } = await totalQuery;
 
     // Buscar ações completas filtradas
-    let completasQuery = createBaseQuery().eq('status', 'Fechado');
+    let completasQuery = createBaseQuery().in('status', ['Fechado', 'CONCLUÍDO']);
     completasQuery = applyFiltersToQuery(completasQuery, filters);
     const { count: acoesCompletas } = await completasQuery;
 
