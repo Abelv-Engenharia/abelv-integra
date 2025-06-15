@@ -49,16 +49,12 @@ export const OcorrenciaFormProvider: React.FC = () => {
     navigate("/ocorrencias/consulta");
   };
 
-  // Checagem idêntica ao desvio: usa o snake_case, campos simples e permite log de debug.
   const onSubmit = async (values: OcorrenciaFormSchema) => {
     setIsSubmitting(true);
 
     const ocorrenciaData = transformFormDataToOcorrencia(values);
 
-    // Log de debug
-    console.log("[OCORRENCIA - DADOS TRANSFORMADOS]", ocorrenciaData);
-
-    // Validação mínima (igual desvio, pouquíssimos campos realmente obrigatórios)
+    // Validação mínima
     if (!ocorrenciaData.data || !ocorrenciaData.classificacao_risco || !ocorrenciaData.cca || !ocorrenciaData.empresa) {
       toast.error(
         `Preencha os campos obrigatórios: data, classificação de risco, CCA e empresa!
@@ -73,8 +69,6 @@ export const OcorrenciaFormProvider: React.FC = () => {
     }
 
     try {
-      console.log("[OCORRENCIA - ENVIANDO PARA SUPABASE]:", ocorrenciaData);
-
       const result = await createOcorrencia(ocorrenciaData);
 
       if (!result) {

@@ -12,3 +12,4 @@ const OcorrenciasCadastro: React.FC = () => {
 };
 
 export default OcorrenciasCadastro;
+
