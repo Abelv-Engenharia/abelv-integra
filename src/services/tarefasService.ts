@@ -2,6 +2,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Tarefa, TarefaStatus, TarefaCriticidade } from "@/types/tarefas";
 
 export interface TarefaFormData {
+  titulo?: string;
   cca_id: number;
   data_conclusao: string;
   descricao: string;
@@ -127,7 +128,7 @@ export const tarefasService = {
       console.log("Criando tarefa:", dadosTarefa);
 
       // Validar campos obrigatórios
-      if (!dadosTarefa.cca_id || !dadosTarefa.data_conclusao || !dadosTarefa.descricao || !dadosTarefa.responsavel_id) {
+      if (!dadosTarefa.titulo || !dadosTarefa.cca_id || !dadosTarefa.data_conclusao || !dadosTarefa.descricao || !dadosTarefa.responsavel_id) {
         console.error("Campos obrigatórios não preenchidos:", dadosTarefa);
         return false;
       }
@@ -147,6 +148,7 @@ export const tarefasService = {
       const { error } = await supabase
         .from('tarefas')
         .insert({
+          titulo: dadosTarefa.titulo,
           cca: `${ccaData.codigo} - ${ccaData.nome}`,
           tipo_cca: 'linha-inteira',
           data_conclusao: dadosTarefa.data_conclusao,

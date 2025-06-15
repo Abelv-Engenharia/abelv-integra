@@ -16,6 +16,7 @@ import { tarefasService, TarefaFormData } from "@/services/tarefasService";
 import { supabase } from "@/integrations/supabase/client";
 
 const tarefaSchema = z.object({
+  titulo: z.string().min(1, "Título é obrigatório"),
   cca_id: z.number({ required_error: "CCA é obrigatório" }),
   data_conclusao: z.string().min(1, "Data de conclusão é obrigatória"),
   descricao: z.string().min(1, "Descrição é obrigatória"),
@@ -163,6 +164,19 @@ const CadastroTarefas = () => {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            {/* TÍTULO */}
+            <div className="space-y-2">
+              <Label htmlFor="titulo">Título *</Label>
+              <Input
+                id="titulo"
+                placeholder="Digite o título da tarefa"
+                {...register("titulo")}
+              />
+              {errors.titulo && (
+                <p className="text-sm text-red-500">{errors.titulo.message}</p>
+              )}
+            </div>
+
             {/* CCA e Responsável */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
