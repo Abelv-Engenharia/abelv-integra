@@ -11,6 +11,7 @@ import IdentificacaoForm from "@/components/ocorrencias/forms/IdentificacaoForm"
 import InformacoesOcorrenciaForm from "@/components/ocorrencias/forms/InformacoesOcorrenciaForm";
 import { OcorrenciaFormNavigation } from "@/components/ocorrencias/forms/OcorrenciaFormNavigation";
 import ClassificacaoRiscoForm from "@/components/ocorrencias/forms/ClassificacaoRiscoForm";
+import PlanoAcaoForm from "@/components/ocorrencias/forms/PlanoAcaoForm";
 
 const schema = z.object({
   // Aba 1: Identificação
@@ -61,7 +62,21 @@ const schema = z.object({
   severidade: z.number().optional(),
   classificacaoRisco: z.string().optional(),
 
-  // Demais etapas omitidas (Plano de Ação, Fechamento)
+  // Plano de Ação
+  acoes: z
+    .array(
+      z.object({
+        tratativa_aplicada: z.string().optional(),
+        data_adequacao: z.date().nullable().optional(),
+        responsavel_acao: z.string().optional(),
+        funcao_responsavel: z.string().optional(),
+        situacao: z.string().optional(),
+        status: z.string().optional(),
+      })
+    )
+    .optional(),
+
+  // Demais etapas omitidas (Fechamento)
 });
 
 type OcorrenciaFormSchema = z.infer<typeof schema>;
@@ -70,6 +85,7 @@ const tabs = [
   { id: "identificacao", label: "Identificação" },
   { id: "informacoes", label: "Informações da Ocorrência" },
   { id: "classificacaoRisco", label: "Classificação de Risco" },
+  { id: "planoAcao", label: "Plano de Ação" },
   // Outras abas podem ser adicionadas posteriormente
 ];
 
@@ -82,6 +98,16 @@ const OcorrenciasCadastro: React.FC = () => {
     resolver: zodResolver(schema),
     defaultValues: {
       colaboradores_acidentados: [{ colaborador: "", funcao: "", matricula: "" }],
+      acoes: [
+        {
+          tratativa_aplicada: "",
+          data_adequacao: null,
+          responsavel_acao: "",
+          funcao_responsavel: "",
+          situacao: "",
+          status: "",
+        },
+      ],
       // outros valores padrão...
     }
   });
@@ -144,6 +170,7 @@ const OcorrenciasCadastro: React.FC = () => {
             {activeTab === "identificacao" && <IdentificacaoForm />}
             {activeTab === "informacoes" && <InformacoesOcorrenciaForm />}
             {activeTab === "classificacaoRisco" && <ClassificacaoRiscoForm />}
+            {activeTab === "planoAcao" && <PlanoAcaoForm />}
             <OcorrenciaFormNavigation
               activeTab={activeTab}
               tabs={tabs}
