@@ -1,5 +1,11 @@
 import { supabase } from "@/integrations/supabase/client";
-import { MedidaDisciplinar, MedidaDisciplinarFormData } from "@/types/medidasDisciplinares";
+import {
+  MedidaDisciplinar,
+  MedidaDisciplinarFormData,
+  DB_TO_UI_TIPO_MAP,
+  UI_TO_DB_TIPO_MAP,
+  TipoMedidaAplicada,
+} from "@/types/medidasDisciplinares";
 
 /* Buscar CCAs para select */
 export async function listarCCAs() {
@@ -41,18 +47,21 @@ export async function listarTiposMedidaDisciplinar() {
   return data || [];
 }
 
-/* Criar medida disciplinar - agora 'tipo_medida' é o nome do tipo vindo do banco */
+/* Criar medida disciplinar - converter entre form e banco */
 export async function criarMedidaDisciplinar(form: MedidaDisciplinarFormData, arquivoUrl?: string) {
   const { cca_id, funcionario_id, tipo_medida, data_aplicacao, descricao } = form;
   const { ano, mes } = getAnoMes(data_aplicacao);
 
+  // Converta o nome do tipo do UI (TipoMedidaAplicada) para formato banco
+  const medidaBanco = tipo_medida ? UI_TO_DB_TIPO_MAP[tipo_medida as TipoMedidaAplicada] : "";
+
   const insertObj = {
     cca_id: parseInt(cca_id, 10),
     funcionario_id,
-    medida: tipo_medida, // agora já vem pronto com o nome correto
+    medida: medidaBanco,
     data: data_aplicacao,
     motivo: descricao,
-    arquivo_url: arquivoUrl || null,
+    pdf_url: arquivoUrl || null,
     ano,
     mes,
   };
@@ -62,14 +71,16 @@ export async function criarMedidaDisciplinar(form: MedidaDisciplinarFormData, ar
     .select("*")
     .single();
   if (error) throw error;
+
+  // Mapeia medida do banco para formato UI
   return {
     id: data.id,
     cca_id: data.cca_id?.toString() || "",
     funcionario_id: data.funcionario_id || "",
-    tipo_medida: data.medida,
+    tipo_medida: data.medida ? DB_TO_UI_TIPO_MAP[data.medida] : "",
     data_aplicacao: data.data,
     descricao: data.motivo,
-    arquivo_url: data.arquivo_url,
+    arquivo_url: data.pdf_url,
     created_at: data.created_at,
   };
 }

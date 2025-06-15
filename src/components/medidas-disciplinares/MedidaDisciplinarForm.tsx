@@ -1,5 +1,5 @@
 import { useForm, FormProvider } from "react-hook-form";
-import { MedidaDisciplinarFormData, tiposMedidaAplicada } from "@/types/medidasDisciplinares";
+import { MedidaDisciplinarFormData, tiposMedidaAplicada, TipoMedidaAplicada, DB_TO_UI_TIPO_MAP } from "@/types/medidasDisciplinares";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -29,12 +29,12 @@ const schema = z.object({
 type Schema = z.infer<typeof schema>;
 
 export default function MedidaDisciplinarForm({ onSuccess }: { onSuccess: () => void }) {
-  const methods = useForm<Schema>({
+  const methods = useForm<MedidaDisciplinarFormData>({
     resolver: zodResolver(schema),
     defaultValues: {
       cca_id: "",
       funcionario_id: "",
-      tipo_medida: undefined,
+      tipo_medida: "",
       data_aplicacao: "",
       descricao: "",
       arquivo: null,
@@ -60,13 +60,13 @@ export default function MedidaDisciplinarForm({ onSuccess }: { onSuccess: () => 
     setValue("arquivo", pdfFile);
   }, [pdfFile, setValue]);
 
-  const onSubmit = async (data: Schema) => {
+  const onSubmit = async (data: MedidaDisciplinarFormData) => {
     if (!profile?.id) return;
     await mutateAsync({
       form: {
         cca_id: data.cca_id,
         funcionario_id: data.funcionario_id,
-        tipo_medida: data.tipo_medida,
+        tipo_medida: data.tipo_medida as TipoMedidaAplicada,
         data_aplicacao: data.data_aplicacao,
         descricao: data.descricao ?? "",
         arquivo: data.arquivo ?? null,
@@ -77,7 +77,7 @@ export default function MedidaDisciplinarForm({ onSuccess }: { onSuccess: () => 
     reset({
       cca_id: "",
       funcionario_id: "",
-      tipo_medida: undefined,
+      tipo_medida: "",
       data_aplicacao: "",
       descricao: "",
       arquivo: null,
@@ -146,18 +146,28 @@ export default function MedidaDisciplinarForm({ onSuccess }: { onSuccess: () => 
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Tipo de medida *</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value || ""}>
+                <Select
+                  onValueChange={field.onChange}
+                  value={field.value || ""}
+                >
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder={tiposLoading ? "Carregando..." : "Selecione"} />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {tiposMedida.map((tipo: any) => (
-                      <SelectItem value={tipo.nome} key={tipo.id}>
-                        {tipo.nome}
-                      </SelectItem>
-                    ))}
+                    {/* Use mapping para garantir UI e tipo corretos */}
+                    {tiposMedida
+                      .map((tipo: any) => {
+                        // Default to undefined if not mapped, so UI stays valid
+                        const uiTipo = DB_TO_UI_TIPO_MAP[tipo.nome];
+                        if (!uiTipo) return null;
+                        return (
+                          <SelectItem value={uiTipo} key={tipo.id}>
+                            {uiTipo}
+                          </SelectItem>
+                        );
+                      })}
                   </SelectContent>
                 </Select>
                 <FormMessage />

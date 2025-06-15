@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Table, TableHead, TableHeader, TableRow, TableCell, TableBody } from "@/components/ui/table";
 import { listarCCAs } from "@/services/medidasDisciplinaresService";
 import { supabase } from "@/integrations/supabase/client";
-import { MedidaDisciplinar } from "@/types/medidasDisciplinares";
+import { MedidaDisciplinar, DB_TO_UI_TIPO_MAP, TipoMedidaAplicada } from "@/types/medidasDisciplinares";
 import { Badge } from "@/components/ui/badge";
 
 interface Props {
@@ -38,7 +38,7 @@ const MedidasDisciplinaresTable = ({ searchTerm, filters }: Props) => {
 
       let query = supabase
         .from("medidas_disciplinares")
-        .select("id, cca_id, funcionario_id, medida, data, motivo, arquivo_url, created_at");
+        .select("id, cca_id, funcionario_id, medida, data, motivo, pdf_url, created_at");
 
       // Filtros
       if (filters.year && filters.year !== "todos") {
@@ -65,10 +65,10 @@ const MedidasDisciplinaresTable = ({ searchTerm, filters }: Props) => {
             id: m.id,
             cca_id: m.cca_id?.toString() ?? "",
             funcionario_id: m.funcionario_id ?? "",
-            tipo_medida: m.medida as "ADVERTÊNCIA VERBAL" | "ADVERTÊNCIA ESCRITA" | "SUSPENSÃO" | "DEMISSÃO POR JUSTA CAUSA",
+            tipo_medida: DB_TO_UI_TIPO_MAP[m.medida] as TipoMedidaAplicada, // MAPA tipo_medida para enum UI
             data_aplicacao: m.data,
             descricao: m.motivo,
-            arquivo_url: m.arquivo_url,
+            arquivo_url: m.pdf_url,
             created_at: m.created_at,
           }))
         );
