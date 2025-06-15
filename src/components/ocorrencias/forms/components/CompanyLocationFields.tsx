@@ -85,72 +85,74 @@ const CompanyLocationFields: React.FC<CompanyLocationFieldsProps> = ({
         )}
       />
 
-      <FormField
-        control={control}
-        name="empresa"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>
-              Empresa *{" "}
-              {empresaObrigatoria && (
-                <span className="text-destructive ml-1 animate-pulse">(obrigatório)</span>
-              )}
-            </FormLabel>
-            <Select
-              onValueChange={value => {
-                field.onChange(value);
-                console.log("Empresa selecionada (empresa_id):", value);
-              }}
-              value={field.value || ""}
-              disabled={!selectedCcaId}
-            >
-              <FormControl>
-                <SelectTrigger
-                  className={empresaObrigatoria ? "border-destructive ring-destructive" : ""}
-                >
-                  <SelectValue placeholder={!selectedCcaId ? "Selecione um CCA primeiro" : "Selecione a empresa"} />
-                </SelectTrigger>
-              </FormControl>
-              <SelectContent>
-                {empresas.map((empresa) => (
-                  <SelectItem
-                    key={empresa.empresa_id?.toString()}
-                    value={empresa.empresa_id?.toString()}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <FormField
+          control={control}
+          name="empresa"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>
+                Empresa *{" "}
+                {empresaObrigatoria && (
+                  <span className="text-destructive ml-1 animate-pulse">(obrigatório)</span>
+                )}
+              </FormLabel>
+              <Select
+                onValueChange={value => {
+                  field.onChange(value);
+                  console.log("Empresa selecionada (empresa_id):", value);
+                }}
+                value={field.value || ""}
+                disabled={!selectedCcaId}
+              >
+                <FormControl>
+                  <SelectTrigger
+                    className={empresaObrigatoria ? "border-destructive ring-destructive" : ""}
                   >
-                    {empresa.empresas?.nome || empresa.nome}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+                    <SelectValue placeholder={!selectedCcaId ? "Selecione um CCA primeiro" : "Selecione a empresa"} />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {empresas.map((empresa) => (
+                    <SelectItem
+                      key={empresa.empresa_id?.toString()}
+                      value={empresa.empresa_id?.toString()}
+                    >
+                      {empresa.empresas?.nome || empresa.nome}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-      <FormField
-        control={control}
-        name="disciplina"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Disciplina *</FormLabel>
-            <Select onValueChange={field.onChange} value={field.value}>
-              <FormControl>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione a disciplina" />
-                </SelectTrigger>
-              </FormControl>
-              <SelectContent>
-                {disciplinas.map((disciplina) => (
-                  <SelectItem key={disciplina.id} value={disciplina.nome}>
-                    {disciplina.nome}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+        <FormField
+          control={control}
+          name="disciplina"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Disciplina *</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione a disciplina" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {disciplinas.map((disciplina) => (
+                    <SelectItem key={disciplina.id} value={disciplina.nome}>
+                      {disciplina.nome}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
     </div>
   );
 };
