@@ -157,7 +157,7 @@ const InspecaoCadastroHSA = () => {
   if (success) {
     return (
       <div className="container mx-auto py-6">
-        <Card className="max-w-2xl mx-auto">
+        <Card className="max-w-4xl w-full mx-auto">
           <CardContent className="pt-6 flex flex-col items-center gap-6">
             <CheckCircle className="h-16 w-16 text-green-500" />
             <h2 className="text-2xl font-bold text-center">Inspeção cadastrada com sucesso!</h2>
@@ -180,12 +180,13 @@ const InspecaoCadastroHSA = () => {
 
   return (
     <div className="container mx-auto py-6">
-      <Card className="max-w-2xl mx-auto">
+      <Card className="max-w-4xl w-full mx-auto">
         <CardContent className="pt-6 space-y-6">
           <h2 className="text-2xl font-bold text-center">Cadastro de Inspeção Hora da Segurança (HSA)</h2>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* Data */}
                 <FormField
                   control={form.control}
                   name="data"
@@ -222,136 +223,139 @@ const InspecaoCadastroHSA = () => {
                 {/* MÊS (apenas visual, não FormField) */}
                 <FormItem>
                   <FormLabel>Mês</FormLabel>
-                  <Input readOnly value={mes} placeholder="Mês" />
+                  <Input readOnly value={mes} placeholder="Mês" className="w-full" />
                 </FormItem>
                 {/* ANO (apenas visual, não FormField) */}
                 <FormItem>
                   <FormLabel>Ano</FormLabel>
-                  <Input readOnly value={ano} placeholder="Ano" />
+                  <Input readOnly value={ano} placeholder="Ano" className="w-full" />
                 </FormItem>
               </div>
 
-              <FormField
-                control={form.control}
-                name="cca"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>CCA</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione o CCA" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {ccas.map((cca: any) => (
-                          <SelectItem key={cca.codigo} value={cca.codigo}>
-                            {cca.codigo} - {cca.nome}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="tipoInspecao"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Inspeção programada</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione o tipo de inspeção" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {tiposInspecao.map((t: any) => (
-                          <SelectItem key={t.id} value={t.id}>{t.nome}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </FormItem>
-                )}
-              />
-
-              {/* Seleção do responsável */}
-              <FormField
-                control={form.control}
-                name="responsavelTipo"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Responsável pela inspeção</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione como informar o responsável" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="funcionario">Escolher funcionário</SelectItem>
-                        <SelectItem value="manual">Inserir manualmente</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </FormItem>
-                )}
-              />
-
-              {watchResponsavelTipo === "funcionario" ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
-                  name="responsavelFuncionarioId"
+                  name="cca"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Funcionário</FormLabel>
+                      <FormLabel>CCA</FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Selecione o funcionário" />
+                            <SelectValue placeholder="Selecione o CCA" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {funcionarios.map((f: any) => (
-                            <SelectItem key={f.id} value={f.id}>{f.nome} ({f.funcao})</SelectItem>
+                          {ccas.map((cca: any) => (
+                            <SelectItem key={cca.codigo} value={cca.codigo}>
+                              {cca.codigo} - {cca.nome}
+                            </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
                     </FormItem>
                   )}
                 />
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                <FormField
+                  control={form.control}
+                  name="tipoInspecao"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Inspeção programada</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione o tipo de inspeção" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {tiposInspecao.map((t: any) => (
+                            <SelectItem key={t.id} value={t.id}>{t.nome}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="responsavelTipo"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Responsável pela inspeção</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione como informar o responsável" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="funcionario">Escolher funcionário</SelectItem>
+                          <SelectItem value="manual">Inserir manualmente</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </FormItem>
+                  )}
+                />
+
+                {watchResponsavelTipo === "funcionario" ? (
                   <FormField
                     control={form.control}
-                    name="responsavelNome"
+                    name="responsavelFuncionarioId"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Nome do responsável</FormLabel>
-                        <FormControl>
-                          <Input {...field} placeholder="Digite o nome do responsável" />
-                        </FormControl>
+                        <FormLabel>Funcionário</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecione o funcionário" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {funcionarios.map((f: any) => (
+                              <SelectItem key={f.id} value={f.id}>{f.nome} ({f.funcao})</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       </FormItem>
                     )}
                   />
-                  <FormField
-                    control={form.control}
-                    name="responsavelFuncao"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Função do responsável</FormLabel>
-                        <FormControl>
-                          <Input {...field} placeholder="Digite a função do responsável" />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              )}
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="responsavelNome"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Nome do responsável</FormLabel>
+                          <FormControl>
+                            <Input {...field} placeholder="Digite o nome do responsável" className="w-full" />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="responsavelFuncao"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Função do responsável</FormLabel>
+                          <FormControl>
+                            <Input {...field} placeholder="Digite a função do responsável" className="w-full" />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                )}
+              </div>
 
               <div className="flex justify-end">
-                <Button type="submit" size="default" disabled={isSaving}>
+                <Button type="submit" size="default" disabled={isSaving} className="w-full md:w-auto">
                   {isSaving ? "Salvando..." : "Salvar"}
                 </Button>
               </div>
