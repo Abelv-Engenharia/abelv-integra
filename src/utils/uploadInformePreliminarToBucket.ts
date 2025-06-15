@@ -11,9 +11,12 @@ export async function uploadInformePreliminarToBucket(
     console.error("Data da ocorrência ou classificação da ocorrência não fornecido.");
     return null;
   }
-  const dataFormatada = dataOcorrencia
-    ? new Date(dataOcorrencia).toISOString().slice(0, 10).replace(/-/g, "")
-    : "semdata";
+  // Data no formato dd.mm.aaaa
+  const oc = new Date(dataOcorrencia);
+  const dd = String(oc.getDate()).padStart(2, '0');
+  const mm = String(oc.getMonth() + 1).padStart(2, '0');
+  const aaaa = oc.getFullYear();
+  const dataFormatada = `${dd}.${mm}.${aaaa}`;
 
   // Normaliza classificação para ser “seguro” em nomes de arquivos
   const normClassificacao = classificacaoOcorrencia
