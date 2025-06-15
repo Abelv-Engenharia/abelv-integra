@@ -135,6 +135,8 @@ function App() {
               <Route path="hora-seguranca/painel-execucao" element={<PainelExecucaoHSA />} />
               <Route path="hora-seguranca/dashboard" element={<PainelExecucaoHSA />} />
               <Route path="hora-seguranca/agenda" element={<AgendaHSA />} />
+              {/* ROTA ALTERNATIVA PARA AGENDA HSA */}
+              <Route path="hora-seguranca/agenda-hsa" element={<AgendaHSA />} />
               {/* Página de acompanhamento */}
               <Route path="hora-seguranca/acompanhamento" element={<InspecoesAcompanhamento />} />
             </Route>
