@@ -17,10 +17,12 @@ import {
 } from "@/components/ui/select";
 
 /**
- * ATENÇÃO: Mapeamento correto — agora o value da empresa sempre é empresa.empresas.nome,
- * mas pode ser salvo como o id caso queira garantir unicidade e evitar problemas de duplicidade.
- * Aqui vamos manter empresa.empresas.nome, mas registraremos um console.log em onValueChange
- * para depuração.
+ * Atualizado: O value da empresa agora é SEMPRE o empresa_id.
+ *
+ * Isso evita problemas de unicidade e compatibilidade com banco.
+ * O form armazena empresa como string (empresa_id).
+ *
+ * O onValueChange e value são ajustados.
  */
 
 interface CompanyLocationFieldsProps {
@@ -51,7 +53,7 @@ const CompanyLocationFields: React.FC<CompanyLocationFieldsProps> = ({
               <Select
                 onValueChange={value => {
                   field.onChange(value);
-                  // Limpar empresa se trocar o CCA
+                  // Limpar empresa ao trocar CCA para evitar inconsistência
                   setValue("empresa", "");
                 }}
                 value={field.value}
@@ -81,11 +83,13 @@ const CompanyLocationFields: React.FC<CompanyLocationFieldsProps> = ({
             <FormItem>
               <FormLabel>Empresa *</FormLabel>
               <Select
+                // Agora armazena o empresa_id (sempre será string)
                 onValueChange={value => {
-                  console.log("Empresa selecionada:", value);
                   field.onChange(value);
+                  // logs para depuração no console
+                  console.log("Empresa selecionada (empresa_id):", value);
                 }}
-                value={field.value}
+                value={field.value || ""}
                 disabled={!selectedCcaId}
               >
                 <FormControl>
@@ -96,10 +100,10 @@ const CompanyLocationFields: React.FC<CompanyLocationFieldsProps> = ({
                 <SelectContent>
                   {empresas.map((empresa) => (
                     <SelectItem
-                      key={empresa.empresa_id}
-                      value={empresa.empresas.nome}
+                      key={empresa.empresa_id?.toString()}
+                      value={empresa.empresa_id?.toString()}
                     >
-                      {empresa.empresas.nome}
+                      {empresa.empresas?.nome || empresa.nome}
                     </SelectItem>
                   ))}
                 </SelectContent>
