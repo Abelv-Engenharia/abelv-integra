@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -15,13 +16,13 @@ import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 
-// Hooks de busca de dados reutilizando o padrão do cadastro programado
+// Hooks para buscar dados
 const useCCAs = () => {
   const [ccas, setCcas] = React.useState([]);
   React.useEffect(() => {
     supabase
       .from("ccas")
-      .select("codigo, nome")
+      .select("id, codigo, nome, ativo")
       .eq("ativo", true)
       .order("codigo")
       .then(({ data }) => setCcas(data || []));
@@ -29,7 +30,6 @@ const useCCAs = () => {
   return ccas;
 };
 
-// Novo hook para buscar os tipos de inspeção ativos
 const useTiposInspecao = () => {
   const [tipos, setTipos] = React.useState([]);
   React.useEffect(() => {
@@ -79,15 +79,9 @@ const useFuncionarios = (ccaCodigo?: string) => {
 };
 
 const formSchema = z.object({
-  data: z.date({
-    required_error: "A data da inspeção é obrigatória.",
-  }),
-  cca: z.string({
-    required_error: "O CCA é obrigatório.",
-  }),
-  tipoInspecao: z.string({
-    required_error: "Selecione o tipo de inspeção realizada.",
-  }),
+  data: z.date({ required_error: "A data da inspeção é obrigatória." }),
+  cca: z.string({ required_error: "O CCA é obrigatório." }),
+  tipoInspecao: z.string({ required_error: "Selecione o tipo de inspeção realizada." }),
   responsavelTipo: z.enum(["funcionario", "manual"]).default("funcionario"),
   responsavelFuncionarioId: z.string().optional(),
   responsavelNome: z.string().optional(),
@@ -98,11 +92,10 @@ const formSchema = z.object({
     .min(0, "Não pode ser negativo")
     .default(0),
 });
-
 type FormType = z.infer<typeof formSchema>;
 
 const InspecaoNaoProgramadaHSA = () => {
-  const ccas = useCCAs();
+  const ccas = useCCAs(); // [{ id, codigo, nome }]
   const tiposInspecao = useTiposInspecao();
   const form = useForm<FormType>({
     resolver: zodResolver(formSchema),
@@ -112,6 +105,7 @@ const InspecaoNaoProgramadaHSA = () => {
       responsavelFuncionarioId: "",
     },
   });
+
   const watchCCA = form.watch("cca");
   const funcionarios = useFuncionarios(watchCCA);
   const watchData = form.watch("data");
@@ -124,42 +118,64 @@ const InspecaoNaoProgramadaHSA = () => {
 
   const handleSubmit = async (values: FormType) => {
     setIsSaving(true);
+
+    // Encontre o objeto CCA para obter o id (integer)
+    const ccaObj = ccas.find((c: any) => c.codigo === values.cca);
+    const cca_id = ccaObj ? ccaObj.id : undefined;
+
+    // Nome da inspeção programada
+    const tipoInspecaoLabel = tiposInspecao.find((t: any) => t.id === values.tipoInspecao)?.nome || "";
+
     let responsavel_nome = "";
     let funcao = "";
     if (values.responsavelTipo === "funcionario") {
       const funcionario = funcionarios.find((f: any) => f.id === values.responsavelFuncionarioId);
-      responsavel_nome = funcionario?.nome;
-      funcao = funcionario?.funcao;
+      responsavel_nome = funcionario?.nome || "";
+      funcao = funcionario?.funcao || "";
     } else {
       responsavel_nome = values.responsavelNome || "";
       funcao = values.responsavelFuncao || "";
     }
 
-    // Buscar o objeto do CCA a partir do código selecionado:
-    const ccaObj = ccas.find((c: any) => c.codigo === values.cca);
-    const cca_id = ccaObj ? ccaObj.id : undefined;
-
-    // Buscar o nome do tipo de inspeção a partir do id
-    const tipoInspecaoLabel = tiposInspecao.find((t: any) => t.id === values.tipoInspecao)?.nome || "";
-
+    // Campos obrigatórios validados antes do envio
     if (!cca_id) {
-      toast({
-        title: "Erro ao cadastrar inspeção",
-        description: "Selecione um CCA válido.",
-        variant: "destructive",
-      });
+      toast({ title: "Erro ao cadastrar inspeção", description: "Selecione um CCA válido.", variant: "destructive" });
+      setIsSaving(false);
+      return;
+    }
+    if (!values.data) {
+      toast({ title: "Erro ao cadastrar inspeção", description: "Informe a data da inspeção.", variant: "destructive" });
+      setIsSaving(false);
+      return;
+    }
+    if (!responsavel_nome) {
+      toast({ title: "Erro ao cadastrar inspeção", description: "Selecione ou informe o responsável.", variant: "destructive" });
+      setIsSaving(false);
+      return;
+    }
+    if (!funcao) {
+      toast({ title: "Erro ao cadastrar inspeção", description: "Informe a função do responsável.", variant: "destructive" });
       setIsSaving(false);
       return;
     }
     if (!values.tipoInspecao) {
-      toast({
-        title: "Erro ao cadastrar inspeção",
-        description: "Selecione o tipo de inspeção realizada.",
-        variant: "destructive",
-      });
+      toast({ title: "Erro ao cadastrar inspeção", description: "Selecione o tipo de inspeção realizada.", variant: "destructive" });
       setIsSaving(false);
       return;
     }
+
+    // Debug: conferir o que vai para o Supabase
+    console.log("[SUBMIT NÃO PROGRAMADA] Dados enviados:", {
+      cca_id,
+      data: format(values.data, "yyyy-MM-dd"),
+      ano: parseInt(ano),
+      mes: parseInt(mes),
+      inspecao_programada: tipoInspecaoLabel,
+      responsavel_inspecao: responsavel_nome,
+      funcao,
+      desvios_identificados: values.desviosIdentificados,
+      status: "REALIZADA (NÃO PROGRAMADA)",
+    });
 
     const { error } = await supabase
       .from("execucao_hsa")
@@ -177,9 +193,10 @@ const InspecaoNaoProgramadaHSA = () => {
     setIsSaving(false);
 
     if (error) {
+      console.error("Erro supabase:", error);
       toast({
         title: "Erro ao cadastrar inspeção",
-        description: error.message,
+        description: error.message || "Erro inesperado",
         variant: "destructive",
       });
       return;
@@ -293,12 +310,13 @@ const InspecaoNaoProgramadaHSA = () => {
                           ))}
                         </SelectContent>
                       </Select>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
               </div>
 
-              {/* Novo campo: Inspeção programada */}
+              {/* Inspeção programada */}
               <div className="grid grid-cols-1 gap-4 md:gap-6">
                 <FormField
                   control={form.control}
