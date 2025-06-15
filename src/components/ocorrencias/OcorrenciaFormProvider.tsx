@@ -54,17 +54,19 @@ export const OcorrenciaFormProvider: React.FC = () => {
     // Adicionar logs dos principais campos
     console.log("[OCORRENCIA - SUBMIT] Dados enviados:", values);
 
-    // Verificação dos campos essenciais para o upload dos anexos:
+    // Corrigido: Checa ambos os formatos dos campos críticos
     const camposCriticos = {
       data: values.data,
-      classificacaoRisco: values.classificacaoRisco,
+      classificacaoRisco: values.classificacaoRisco || (values as any).classificacao_risco,
       cca: values.cca,
     };
     console.log("[OCORRENCIA - CAMPOS CRÍTICOS]", camposCriticos);
-    // Checa se algum deles está vazio/falsy
+
+    // Mensagem de erro com detalhes:
     if (!camposCriticos.data || !camposCriticos.classificacaoRisco || !camposCriticos.cca) {
       toast.error(
-        "Preencha a data da ocorrência, a classificação e o CCA para prosseguir com o cadastro."
+        `Preencha a data da ocorrência, a classificação e o CCA para prosseguir com o cadastro. 
+        (data: ${camposCriticos.data ? 'Ok' : 'Vazio'}, classificação: ${camposCriticos.classificacaoRisco ? 'Ok' : 'Vazio'}, cca: ${camposCriticos.cca ? 'Ok' : 'Vazio'})`
       );
       setIsSubmitting(false);
       return;
