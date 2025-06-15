@@ -1459,6 +1459,87 @@ export type Database = {
         }
         Relationships: []
       }
+      pgr_medidas: {
+        Row: {
+          atualizado_em: string | null
+          criado_em: string | null
+          descricao: string
+          eficacia: string | null
+          id: string
+          plano_id: string | null
+          prazo: string | null
+          responsavel_id: string | null
+          risco_id: string | null
+          status: string
+          tipo: string
+        }
+        Insert: {
+          atualizado_em?: string | null
+          criado_em?: string | null
+          descricao: string
+          eficacia?: string | null
+          id?: string
+          plano_id?: string | null
+          prazo?: string | null
+          responsavel_id?: string | null
+          risco_id?: string | null
+          status?: string
+          tipo: string
+        }
+        Update: {
+          atualizado_em?: string | null
+          criado_em?: string | null
+          descricao?: string
+          eficacia?: string | null
+          id?: string
+          plano_id?: string | null
+          prazo?: string | null
+          responsavel_id?: string | null
+          risco_id?: string | null
+          status?: string
+          tipo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pgr_medidas_plano_id_fkey"
+            columns: ["plano_id"]
+            isOneToOne: false
+            referencedRelation: "pgr_planos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pgr_medidas_responsavel_id_fkey"
+            columns: ["responsavel_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pgr_planos: {
+        Row: {
+          atualizado_em: string | null
+          criado_em: string | null
+          descricao: string | null
+          id: string
+          nome: string
+        }
+        Insert: {
+          atualizado_em?: string | null
+          criado_em?: string | null
+          descricao?: string | null
+          id?: string
+          nome: string
+        }
+        Update: {
+          atualizado_em?: string | null
+          criado_em?: string | null
+          descricao?: string | null
+          id?: string
+          nome?: string
+        }
+        Relationships: []
+      }
       processo_treinamento: {
         Row: {
           ativo: boolean | null
