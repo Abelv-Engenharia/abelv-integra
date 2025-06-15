@@ -8,11 +8,13 @@ import { useNavigate } from "react-router-dom";
 import SystemLogo from "@/components/common/SystemLogo";
 import { signIn } from "@/services/authService";
 import { toast } from "@/hooks/use-toast";
+
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -49,12 +51,17 @@ const Login = () => {
       setLoading(false);
     }
   };
-  return <div className="flex items-center justify-center min-h-screen bg-cover bg-center bg-no-repeat bg-fixed" style={{
-    backgroundImage: `url('/lovable-uploads/7cbbd591-f45a-4755-9bb4-82b591a1ba13.png')`,
-    backgroundSize: 'cover',
-    backgroundPosition: 'center',
-    backgroundAttachment: 'fixed'
-  }}>
+
+  return (
+    <div 
+      className="flex items-center justify-center min-h-screen bg-cover bg-center bg-no-repeat bg-fixed" 
+      style={{
+        backgroundImage: `url('/lovable-uploads/bbe07e7e-feac-4840-b440-978fe4b9401d.png')`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundAttachment: 'fixed'
+      }}
+    >
       <div className="flex items-center justify-center w-full h-full min-h-screen bg-black/30">
         <Card className="w-full max-w-md shadow-2xl bg-white/95 backdrop-blur-sm">
           <CardHeader className="space-y-2">
@@ -83,11 +90,12 @@ const Login = () => {
               <Button type="submit" className="w-full" disabled={loading}>
                 {loading ? "Entrando..." : "Entrar"}
               </Button>
-              
             </CardFooter>
           </form>
         </Card>
       </div>
-    </div>;
+    </div>
+  );
 };
+
 export default Login;
