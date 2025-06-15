@@ -61,6 +61,7 @@ import AgendaHSA from './pages/hora-seguranca/AgendaHSA';
 import MedidasDisciplinaresDashboard from "./pages/medidas-disciplinares/MedidasDisciplinaresDashboard";
 import MedidasDisciplinaresCadastro from "./pages/medidas-disciplinares/MedidasDisciplinaresCadastro";
 import MedidasDisciplinaresConsulta from "./pages/medidas-disciplinares/MedidasDisciplinaresConsulta";
+import GroCadastroPerigos from "./pages/gro/GroCadastroPerigos";
 
 const queryClient = new QueryClient();
 
@@ -142,6 +143,8 @@ function App() {
               <Route path="hora-seguranca/agenda-hsa" element={<AgendaHSA />} />
               {/* Página de acompanhamento */}
               <Route path="hora-seguranca/acompanhamento" element={<InspecoesAcompanhamento />} />
+              {/* GRO */}
+              <Route path="gro/perigos" element={<GroCadastroPerigos />} />
             </Route>
           </Routes>
         </AuthProvider>
