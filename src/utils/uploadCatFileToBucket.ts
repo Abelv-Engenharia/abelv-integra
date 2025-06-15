@@ -2,10 +2,29 @@
 import { supabase } from "@/integrations/supabase/client";
 
 // Faz upload do arquivo CAT para o bucket ocorrencias, retorna a URL pública
-export async function uploadCatFileToBucket(file: File): Promise<string | null> {
-  // Gera um nome único para o arquivo
+export async function uploadCatFileToBucket(
+  file: File,
+  dataOcorrencia: Date | null,
+  colaboradorAcidentado: string | null
+): Promise<string | null> {
+  // Gera nome do arquivo no padrão: CAT_<data_ocorrencia>_<colaborador>.pdf
+  if (!dataOcorrencia || !colaboradorAcidentado) {
+    console.error("Data da ocorrência ou colaborador acidentado não fornecido.");
+    return null;
+  }
+  const dataFormatada = dataOcorrencia
+    ? new Date(dataOcorrencia).toISOString().slice(0, 10).replace(/-/g, "")
+    : "semdata";
+  // Remover espaços, acentos e caracteres especiais do nome do colaborador
+  const normColab = colaboradorAcidentado
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s+/g, "_")
+    .replace(/[^a-zA-Z0-9_]/g, "")
+    .slice(0, 40); // Limita tamanho
+  
   const fileExt = file.name.split('.').pop();
-  const fileName = `cat_${Date.now()}_${Math.random().toString(36).substr(2, 8)}.${fileExt}`;
+  const fileName = `CAT_${dataFormatada}_${normColab}.${fileExt}`;
 
   // Upload para o bucket
   const { data, error } = await supabase.storage

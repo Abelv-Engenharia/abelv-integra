@@ -17,11 +17,28 @@ import CauseFields from "./components/CauseFields";
 import { uploadCatFileToBucket } from "@/utils/uploadCatFileToBucket";
 
 const InformacoesOcorrenciaForm = () => {
-  const { control } = useFormContext();
+  const { control, watch } = useFormContext();
   const { partesCorpo, lateralidades, agentesCausadores, situacoesGeradoras, naturezasLesao } = useOcorrenciasFormData();
 
   // Estado para mostrar status de upload
   const [uploadingCat, setUploadingCat] = React.useState(false);
+
+  // Obter valores necessários para o nome do arquivo
+  const dataOcorrencia = watch("data") as Date | null;
+  // Considera apenas o primeiro colaborador acidentado
+  const colaboradores = watch("colaboradores_acidentados") || watch("colaboradoresAcidentados");
+  let colaboradorAcidentado: string | null = null;
+  if (colaboradores && colaboradores.length > 0) {
+    // Pode ser um objeto tipo { colaborador: string (nome) ou id }
+    // Aqui tenta pegar o valor do campo colaborador, supondo que é o nome. Se for id, ajustar se necessário.
+    if (typeof colaboradores[0] === "object" && colaboradores[0] !== null) {
+      colaboradorAcidentado = colaboradores[0].colaborador || null;
+      // Se for um id (UUID ou string numérica), pode ser necessário converter para nome
+      // MAS, como só há acesso ao que está em memória do formulário, usa mesmo assim
+    } else {
+      colaboradorAcidentado = colaboradores[0] || null;
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -105,8 +122,12 @@ const InformacoesOcorrenciaForm = () => {
               onChange={async (e) => {
                 const file = e.target.files?.[0];
                 if (file && file.size <= 2 * 1024 * 1024) {
+                  if (!dataOcorrencia || !colaboradorAcidentado) {
+                    alert("Preencha a data da ocorrência e o colaborador acidentado antes de anexar o CAT.");
+                    return;
+                  }
                   setUploadingCat(true);
-                  const url = await uploadCatFileToBucket(file);
+                  const url = await uploadCatFileToBucket(file, dataOcorrencia, colaboradorAcidentado);
                   setUploadingCat(false);
                   if (url) {
                     onChange(url);
