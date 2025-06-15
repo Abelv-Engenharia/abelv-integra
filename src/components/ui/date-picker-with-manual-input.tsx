@@ -1,6 +1,7 @@
 
 import * as React from "react";
 import { format, parse, isValid } from "date-fns";
+import { ptBR } from "date-fns/locale";
 import { Calendar as CalendarIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -21,18 +22,18 @@ interface DatePickerWithManualInputProps {
 export function DatePickerWithManualInput({ value, onChange, disabled }: DatePickerWithManualInputProps) {
   const [open, setOpen] = React.useState(false);
   const [dateString, setDateString] = React.useState<string>(
-    value && isValid(value) ? format(value, "dd/MM/yyyy") : ""
+    value && isValid(value) ? format(value, "dd/MM/yyyy", { locale: ptBR }) : ""
   );
 
   React.useEffect(() => {
-    const newDateString = value && isValid(value) ? format(value, "dd/MM/yyyy") : "";
+    const newDateString = value && isValid(value) ? format(value, "dd/MM/yyyy", { locale: ptBR }) : "";
     if (newDateString !== dateString) {
       setDateString(newDateString);
     }
   }, [value]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let str = e.target.value.replace(/\D/g, ""); // Remove todos os caracteres que não são dígitos
+    let str = e.target.value.replace(/\D/g, "");
 
     if (str.length > 2) {
       str = `${str.slice(0, 2)}/${str.slice(2)}`;
@@ -40,13 +41,13 @@ export function DatePickerWithManualInput({ value, onChange, disabled }: DatePic
     if (str.length > 5) {
       str = `${str.slice(0, 5)}/${str.slice(5)}`;
     }
-    
-    str = str.slice(0, 10); // Limita ao formato dd/MM/yyyy
+
+    str = str.slice(0, 10);
 
     setDateString(str);
-    
+
     if (/^\d{2}\/\d{2}\/\d{4}$/.test(str)) {
-      const parsedDate = parse(str, "dd/MM/yyyy", new Date());
+      const parsedDate = parse(str, "dd/MM/yyyy", new Date(), { locale: ptBR });
       if (isValid(parsedDate) && (!disabled || !disabled(parsedDate))) {
         onChange(parsedDate);
       } else {
@@ -59,21 +60,21 @@ export function DatePickerWithManualInput({ value, onChange, disabled }: DatePic
 
   const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
     const str = e.target.value;
-    const parsedDate = parse(str, "dd/MM/yyyy", new Date());
+    const parsedDate = parse(str, "dd/MM/yyyy", new Date(), { locale: ptBR });
 
     if (!isValid(parsedDate) || (disabled && disabled(parsedDate))) {
-        if (value && isValid(value)) {
-            setDateString(format(value, "dd/MM/yyyy"));
-        } else {
-            setDateString("");
-        }
+      if (value && isValid(value)) {
+        setDateString(format(value, "dd/MM/yyyy", { locale: ptBR }));
+      } else {
+        setDateString("");
+      }
     }
   };
 
   const handleSelect = (selectedDate: Date | undefined) => {
     onChange(selectedDate);
-    if(selectedDate && isValid(selectedDate)) {
-        setDateString(format(selectedDate, "dd/MM/yyyy"));
+    if (selectedDate && isValid(selectedDate)) {
+      setDateString(format(selectedDate, "dd/MM/yyyy", { locale: ptBR }));
     }
     setOpen(false);
   };
@@ -106,8 +107,10 @@ export function DatePickerWithManualInput({ value, onChange, disabled }: DatePic
           onSelect={handleSelect}
           disabled={disabled}
           initialFocus
+          locale={ptBR}
         />
       </PopoverContent>
     </Popover>
   );
 }
+
