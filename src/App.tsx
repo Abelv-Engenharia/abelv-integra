@@ -58,6 +58,7 @@ import InspecaoNaoProgramadaHSA from './pages/hora-seguranca/InspecaoNaoPrograma
 import InspecoesAcompanhamento from './pages/hora-seguranca/InspecoesAcompanhamento';
 import PainelExecucaoHSA from './pages/hora-seguranca/PainelExecucaoHSA';
 import AgendaHSA from './pages/hora-seguranca/AgendaHSA';
+import MedidasDisciplinaresCadastro from "./pages/medidas-disciplinares/MedidasDisciplinaresCadastro";
 
 const queryClient = new QueryClient();
 
@@ -94,7 +95,7 @@ function App() {
               <Route path="ocorrencias/cadastro" element={<OcorrenciasCadastro />} />
               {/* Medidas Disciplinares Routes */}
               <Route path="medidas-disciplinares/dashboard" element={<MedidasDashboard />} />
-              <Route path="medidas-disciplinares/cadastro" element={<MedidasCadastro />} />
+              <Route path="medidas-disciplinares/cadastro" element={<MedidasDisciplinaresCadastro />} />
               <Route path="medidas-disciplinares/consulta" element={<MedidasConsulta />} />
               {/* Tarefas Routes */}
               <Route path="tarefas/dashboard" element={<TarefasDashboard />} />

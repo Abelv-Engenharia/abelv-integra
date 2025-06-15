@@ -1082,6 +1082,60 @@ export type Database = {
         }
         Relationships: []
       }
+      medidas_disciplinares: {
+        Row: {
+          ano: string
+          cca_id: number | null
+          created_at: string | null
+          data: string
+          funcionario_id: string | null
+          id: string
+          medida: Database["public"]["Enums"]["medida_aplicada_enum"]
+          mes: string
+          motivo: string | null
+          pdf_url: string | null
+        }
+        Insert: {
+          ano: string
+          cca_id?: number | null
+          created_at?: string | null
+          data: string
+          funcionario_id?: string | null
+          id?: string
+          medida: Database["public"]["Enums"]["medida_aplicada_enum"]
+          mes: string
+          motivo?: string | null
+          pdf_url?: string | null
+        }
+        Update: {
+          ano?: string
+          cca_id?: number | null
+          created_at?: string | null
+          data?: string
+          funcionario_id?: string | null
+          id?: string
+          medida?: Database["public"]["Enums"]["medida_aplicada_enum"]
+          mes?: string
+          motivo?: string | null
+          pdf_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "medidas_disciplinares_cca_id_fkey"
+            columns: ["cca_id"]
+            isOneToOne: false
+            referencedRelation: "ccas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "medidas_disciplinares_funcionario_id_fkey"
+            columns: ["funcionario_id"]
+            isOneToOne: false
+            referencedRelation: "funcionarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       metas_indicadores: {
         Row: {
           ano: number
@@ -1970,7 +2024,11 @@ export type Database = {
       }
     }
     Enums: {
-      [_ in never]: never
+      medida_aplicada_enum:
+        | "ADVERTÊNCIA VERBAL"
+        | "ADVERTÊNCIA ESCRITA"
+        | "SUSPENSÃO"
+        | "DEMISSÃO POR JUSTA CAUSA"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -2085,6 +2143,13 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      medida_aplicada_enum: [
+        "ADVERTÊNCIA VERBAL",
+        "ADVERTÊNCIA ESCRITA",
+        "SUSPENSÃO",
+        "DEMISSÃO POR JUSTA CAUSA",
+      ],
+    },
   },
 } as const
