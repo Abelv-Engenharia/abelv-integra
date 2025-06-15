@@ -14,6 +14,7 @@ import { z } from "zod";
 import { toast } from "sonner";
 import { tarefasService, TarefaFormData } from "@/services/tarefasService";
 import { supabase } from "@/integrations/supabase/client";
+import SuccessCadastroTarefaCard from "@/components/tarefas/SuccessCadastroTarefaCard";
 
 const tarefaSchema = z.object({
   titulo: z.string().min(1, "Título é obrigatório"),
@@ -39,6 +40,7 @@ const CadastroTarefas = () => {
   const [usuarios, setUsuarios] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(true);
+  const [success, setSuccess] = useState(false); // indica sucesso ao cadastrar
   const navigate = useNavigate();
 
   const {
@@ -115,10 +117,9 @@ const CadastroTarefas = () => {
     setLoading(true);
     try {
       console.log("Dados do formulário:", data);
-      
-      // Corrigido: incluímos 'titulo' no objeto enviado!
+
       const tarefaData: TarefaFormData = {
-        titulo: data.titulo, // <-- Adicionado aqui!
+        titulo: data.titulo,
         cca_id: data.cca_id,
         data_conclusao: data.data_conclusao,
         descricao: data.descricao,
@@ -132,11 +133,10 @@ const CadastroTarefas = () => {
       };
 
       const success = await tarefasService.create(tarefaData);
-      
+
       if (success) {
-        toast.success("Tarefa cadastrada com sucesso! O responsável foi notificado.");
+        setSuccess(true); // exibe tela de sucesso
         reset();
-        navigate("/tarefas/dashboard");
       } else {
         toast.error("Erro ao cadastrar tarefa. Tente novamente.");
       }
@@ -154,6 +154,21 @@ const CadastroTarefas = () => {
         <div className="flex justify-center items-center p-8">
           <p>Carregando formulário...</p>
         </div>
+      </div>
+    );
+  }
+
+  if (success) {
+    return (
+      <div className="container mx-auto py-6 flex justify-center items-center h-[80vh]">
+        <SuccessCadastroTarefaCard
+          onNewTask={() => {
+            setSuccess(false);
+          }}
+          onGoToDashboard={() => {
+            navigate("/tarefas/dashboard");
+          }}
+        />
       </div>
     );
   }
