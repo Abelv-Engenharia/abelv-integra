@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
@@ -167,28 +166,34 @@ export default function InspecoesAcompanhamento() {
       ) : (
         <div className="flex flex-col gap-4">
           {inspecoes.map((inspecao) => (
-            <Card key={inspecao.id} className="animate-fade-in">
-              <CardHeader>
-                <div className="flex items-center justify-between gap-2">
-                  <CardTitle className="text-lg flex gap-2 items-center">
-                    {inspecao.cca && <span className="font-bold">{inspecao.cca}</span>}
-                    <Badge className={getStatusBadgeClass(inspecao.status)}>
-                      <div className="flex items-center gap-1">
-                        {getStatusIcon(inspecao.status)}
-                        <span>
-                          {inspecao.status === "REALIZADA (NÃO PROGRAMADA)"
-                            ? "REALIZADA (NÃO PROG.)"
-                            : inspecao.status}
-                        </span>
-                      </div>
-                    </Badge>
-                  </CardTitle>
-                  <span className="font-light text-xs">
+            <Card key={inspecao.id} className="animate-fade-in relative">
+              {/* Status badge canto superior direito */}
+              <div className="absolute right-4 top-4 z-10">
+                <Badge className={getStatusBadgeClass(inspecao.status)}>
+                  <div className="flex items-center gap-1">
+                    {getStatusIcon(inspecao.status)}
+                    <span>
+                      {inspecao.status === "REALIZADA (NÃO PROGRAMADA)" ? "REALIZADA (NÃO PROG.)" : inspecao.status}
+                    </span>
+                  </div>
+                </Badge>
+              </div>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg flex flex-col gap-1 min-h-0">
+                  <div>
+                    {/* Código + nome do CCA */}
+                    <span className="font-bold">{inspecao.cca}</span>
+                    {inspecao.cca_nome && (
+                      <span className="ml-2 text-base font-normal">{inspecao.cca_nome}</span>
+                    )}
+                  </div>
+                  {/* Data logo abaixo da indicação do CCA */}
+                  <span className="font-light text-xs mt-1">
                     {inspecao.data ? format(new Date(inspecao.data), "dd/MM/yyyy") : "--"}
                   </span>
-                </div>
+                </CardTitle>
               </CardHeader>
-              <CardContent className="flex flex-col gap-2">
+              <CardContent className="flex flex-col gap-2 pt-0">
                 <div>
                   <span className="font-medium">Responsável:</span>{" "}
                   {inspecao.responsavel_inspecao}
@@ -206,19 +211,28 @@ export default function InspecoesAcompanhamento() {
                   {inspecao.desvios_identificados ?? 0}
                 </div>
               </CardContent>
-              <CardFooter className="flex gap-3">
-                <Button variant="outline" onClick={() => openUpdateDialog(inspecao)} className="flex items-center gap-2">
-                  <Pencil className="w-4 h-4" />
-                  Atualizar Status
-                </Button>
-                <Button
-                  variant="destructive"
-                  className="flex items-center gap-2"
-                  onClick={() => handleDelete(inspecao.id)}
-                >
-                  <Trash2 className="w-4 h-4" />
-                  Excluir
-                </Button>
+              {/* Botões canto inferior esquerdo, menores */}
+              <CardFooter className="pt-0 px-6 pb-4">
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => openUpdateDialog(inspecao)}
+                    className="flex items-center gap-2 px-2 py-1 h-8 text-xs"
+                  >
+                    <Pencil className="w-4 h-4" />
+                    Atualizar Status
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    className="flex items-center gap-2 px-2 py-1 h-8 text-xs"
+                    onClick={() => handleDelete(inspecao.id)}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    Excluir
+                  </Button>
+                </div>
               </CardFooter>
             </Card>
           ))}
