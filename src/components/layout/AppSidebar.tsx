@@ -14,6 +14,7 @@ import SidebarSectionTarefas from "./SidebarSectionTarefas";
 import SidebarSectionRelatorios from "./SidebarSectionRelatorios";
 import SidebarSectionAdministracao from "./SidebarSectionAdministracao";
 import { useProfile } from "@/hooks/useProfile";
+import { getAllMenusSidebar } from "@/services/perfisService";
 
 // Função utilitária para verificar acesso (contem na lista)
 function podeVerMenu(menu: string, menusSidebar?: string[]) {
@@ -24,15 +25,26 @@ function podeVerMenu(menu: string, menusSidebar?: string[]) {
 export function AppSidebar() {
   const location = useLocation();
   const currentPath = location.pathname;
-  const { userPermissoes } = useProfile();
+  const { userPermissoes, userRole } = useProfile();
 
-  // menusSidebar agora é sempre array de string (ou array vazio)
-  const menusSidebar =
+  // Garantir fallback para admins
+  const isAdmin =
+    (userRole && typeof userRole === "string" && userRole.toLowerCase().startsWith("admin")) ||
+    // fallback extra: talvez userPermissoes tenha perfil admin
     (userPermissoes &&
       typeof userPermissoes === "object" &&
-      Array.isArray((userPermissoes as any).menus_sidebar)
-      ? (userPermissoes as any).menus_sidebar
-      : []) as string[];
+      typeof (userPermissoes as any).nome === "string" &&
+      (userPermissoes as any).nome.toLowerCase().startsWith("admin"));
+
+  const menusSidebar = isAdmin
+    ? getAllMenusSidebar()
+    : (
+        userPermissoes &&
+        typeof userPermissoes === "object" &&
+        Array.isArray((userPermissoes as any).menus_sidebar)
+        ? (userPermissoes as any).menus_sidebar
+        : []
+      );
 
   // Defina o menu principal aberto inicialmente
   const [openMenu, setOpenMenu] = useState<string | null>(() => {
