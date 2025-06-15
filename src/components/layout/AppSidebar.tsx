@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import {
   BarChart3,
@@ -69,6 +68,65 @@ export function AppSidebar() {
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
+        </SidebarGroup>
+
+        {/* Novo grupo Hora da Segurança */}
+        <SidebarGroup>
+          <SidebarGroupLabel>Hora da Segurança</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {/* Submenu com as opções */}
+              <SidebarMenuItem>
+                <Collapsible open={openMenu === "hora-seguranca"}>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton onClick={() => toggleMenu("hora-seguranca")}>
+                      <ShieldAlert className="h-4 w-4" />
+                      <span>Hora da Segurança</span>
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent asChild>
+                    <SidebarMenuSub>
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                          <Link to="/hora-seguranca/dashboard">
+                            <span className="text-xs leading-tight">Dashboard</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                          <Link to="/hora-seguranca/agenda-hsa">
+                            <span className="text-xs leading-tight">Agenda HSA</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                          <Link to="/hora-seguranca/cadastro-inspecao">
+                            <span className="text-xs leading-tight">Cadastro de Inspeção</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                          <Link to="/hora-seguranca/acompanhamento">
+                            <span className="text-xs leading-tight">Acompanhamento</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                          <Link to="/hora-seguranca/cadastro-inspecao-nao-planejada">
+                            <span className="text-xs leading-tight">Cadastro de Inspeção Não Planejada</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </Collapsible>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
         </SidebarGroup>
 
         <SidebarGroup>
