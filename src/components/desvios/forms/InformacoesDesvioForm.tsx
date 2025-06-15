@@ -19,13 +19,14 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Funcionario } from "@/types/funcionarios";
+import { BaseLegalOpcao } from "@/services/desviosService";
 
 interface InformacoesDesvioFormProps {
   context: {
     funcionarios: Funcionario[];
     supervisores: { id: string; nome: string }[];
     encarregados: { id: string; nome: string }[];
-    basesLegais: { id: string; nome: string; codigo: string }[];
+    baseLegalOpcoes: BaseLegalOpcao[];
   }
 }
 
@@ -70,7 +71,7 @@ const InformacoesDesvioForm = ({ context }: InformacoesDesvioFormProps) => {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {(context.basesLegais || []).map(item => (
+                    {(context.baseLegalOpcoes || []).map(item => (
                       <SelectItem key={item.id} value={item.id.toString()}>
                         {`${item.codigo} - ${item.nome}`}
                       </SelectItem>
