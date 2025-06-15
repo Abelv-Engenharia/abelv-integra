@@ -56,6 +56,7 @@ import ResetPassword from './pages/auth/ResetPassword';
 import InspecaoCadastroHSA from './pages/hora-seguranca/InspecaoCadastroHSA';
 import InspecaoNaoProgramadaHSA from './pages/hora-seguranca/InspecaoNaoProgramadaHSA';
 import InspecoesAcompanhamento from './pages/hora-seguranca/InspecoesAcompanhamento';
+import PainelExecucaoHSA from './pages/hora-seguranca/PainelExecucaoHSA';
 
 const queryClient = new QueryClient();
 
@@ -139,6 +140,8 @@ function App() {
               <Route path="hora-seguranca/cadastro-inspecao" element={<InspecaoCadastroHSA />} />
               <Route path="hora-seguranca/cadastro-inspecao-nao-programada" element={<InspecaoNaoProgramadaHSA />} />
               <Route path="hora-seguranca/cadastro-inspecao-nao-planejada" element={<InspecaoNaoProgramadaHSA />} />
++             {/* Painel Execução HSA */}
++             <Route path="hora-seguranca/painel-execucao" element={<PainelExecucaoHSA />} />
               {/* Página de acompanhamento */}
               <Route path="hora-seguranca/acompanhamento" element={<InspecoesAcompanhamento />} />
             </Route>
