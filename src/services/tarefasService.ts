@@ -50,6 +50,7 @@ export const tarefasService = {
         dataCadastro: data.data_cadastro,
         dataConclusao: data.data_conclusao,
         descricao: data.descricao,
+        titulo: data.titulo ?? "", // <<< Garantir que titulo vem do banco
         responsavel: {
           id: data.responsavel_id || '',
           nome: data.profiles?.nome || 'Não atribuído'
@@ -108,6 +109,7 @@ export const tarefasService = {
         dataCadastro: tarefa.data_cadastro,
         dataConclusao: tarefa.data_conclusao,
         descricao: tarefa.descricao,
+        titulo: tarefa.titulo ?? "",   // <<< Garantir que titulo do banco populado
         responsavel: {
           id: tarefa.responsavel_id || '',
           nome: tarefa.profiles?.nome || 'Não atribuído'
