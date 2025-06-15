@@ -8,10 +8,13 @@ import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useProfile, UserProfile } from "@/hooks/useProfile";
 import { useAuth } from "@/contexts/AuthContext";
+import { useProfileAvatarUrl } from "@/hooks/useProfileAvatarUrl";
 
 const Profile = () => {
   const { user } = useAuth();
   const { profile, userRole, loadingProfile, updateProfileMutation } = useProfile();
+  // Hook para obter URL da foto do perfil
+  const { url: avatarUrl } = useProfileAvatarUrl(profile?.avatar_url);
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState<Partial<UserProfile>>({});
 
@@ -137,10 +140,14 @@ const Profile = () => {
           </CardHeader>
           <CardContent className="flex flex-col items-center pt-6">
             <Avatar className="h-24 w-24 mb-4">
-              <AvatarImage src={profile.avatar_url} alt={profile.nome} />
-              <AvatarFallback className="text-2xl bg-primary text-primary-foreground">
-                {getInitials(profile.nome)}
-              </AvatarFallback>
+              {/* Atualizado para usar avatarUrl assinado (caso precise) */}
+              {avatarUrl ? (
+                <AvatarImage src={avatarUrl} alt={profile.nome} />
+              ) : (
+                <AvatarFallback className="text-2xl bg-primary text-primary-foreground">
+                  {getInitials(profile.nome)}
+                </AvatarFallback>
+              )}
             </Avatar>
             <h3 className="text-lg font-medium">{profile.nome}</h3>
             <p className="text-sm text-muted-foreground">{userRole || 'Usuário'}</p>
