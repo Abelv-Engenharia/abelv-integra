@@ -22,7 +22,6 @@ import { OcorrenciaFormNavigation } from "@/components/ocorrencias/forms/Ocorren
 import { useOcorrenciaTabs } from "@/hooks/ocorrencias/useOcorrenciaTabs";
 
 const OcorrenciasCadastro = () => {
-  const [activeTab, setActiveTab] = useState("identificacao");
   const [successDialogOpen, setSuccessDialogOpen] = useState(false);
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
@@ -196,6 +195,7 @@ const OcorrenciasCadastro = () => {
     }
   }, [ocorrenciaId, methods, toast, navigate]);
 
+  // ---- Use only the tab hook below ----
   const {
     tabs,
     activeTab,
