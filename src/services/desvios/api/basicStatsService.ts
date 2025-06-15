@@ -14,17 +14,18 @@ export const fetchDashboardStats = async (): Promise<DashboardStats> => {
     const { count: acoesCompletas } = await supabase
       .from('desvios_completos')
       .select('*', { count: 'exact', head: true })
-      .in('status', ['Fechado', 'CONCLUÍDO']);
+      .in('status', ['Fechado', 'CONCLUÍDO', 'TRATADO']);
 
     const { count: acoesAndamento } = await supabase
       .from('desvios_completos')
       .select('*', { count: 'exact', head: true })
-      .eq('status', 'Em Andamento');
+      .eq('status', 'EM TRATATIVA')
+      .gt('prazo_conclusao', new Date().toISOString());
 
     const { count: acoesPendentes } = await supabase
       .from('desvios_completos')
       .select('*', { count: 'exact', head: true })
-      .eq('status', 'Aberto');
+      .or(`status.eq.Aberto,and(status.eq.EM TRATATIVA,or(prazo_conclusao.is.null,prazo_conclusao.lte.${new Date().toISOString()}))`);
 
     // Calcular percentuais
     const percentages = calculatePercentages(

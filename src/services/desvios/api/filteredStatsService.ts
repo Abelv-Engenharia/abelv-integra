@@ -12,17 +12,20 @@ export const fetchFilteredDashboardStats = async (filters: FilterParams): Promis
     const { count: totalDesvios } = await totalQuery;
 
     // Buscar ações completas filtradas
-    let completasQuery = createBaseQuery().in('status', ['Fechado', 'CONCLUÍDO']);
+    let completasQuery = createBaseQuery().in('status', ['Fechado', 'CONCLUÍDO', 'TRATADO']);
     completasQuery = applyFiltersToQuery(completasQuery, filters);
     const { count: acoesCompletas } = await completasQuery;
 
     // Buscar ações em andamento filtradas
-    let andamentoQuery = createBaseQuery().eq('status', 'Em Andamento');
+    let andamentoQuery = createBaseQuery()
+      .eq('status', 'EM TRATATIVA')
+      .gt('prazo_conclusao', new Date().toISOString());
     andamentoQuery = applyFiltersToQuery(andamentoQuery, filters);
     const { count: acoesAndamento } = await andamentoQuery;
 
     // Buscar ações pendentes filtradas
-    let pendentesQuery = createBaseQuery().eq('status', 'Aberto');
+    let pendentesQuery = createBaseQuery()
+      .or(`status.eq.Aberto,and(status.eq.EM TRATATIVA,or(prazo_conclusao.is.null,prazo_conclusao.lte.${new Date().toISOString()}))`);
     pendentesQuery = applyFiltersToQuery(pendentesQuery, filters);
     const { count: acoesPendentes } = await pendentesQuery;
 
