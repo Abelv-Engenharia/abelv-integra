@@ -1,5 +1,6 @@
 
 import React, { useState, useRef, useEffect } from "react";
+import { X } from "lucide-react";
 
 // URL da mascote enviada pelo usuário
 const mascotImg = "/lovable-uploads/62e9b834-d6d6-403f-b398-9654f480c00e.png";
@@ -61,6 +62,7 @@ const MascoteChatbot = () => {
   ]);
   const [input, setInput] = useState("");
   const [isSending, setIsSending] = useState(false);
+  const [open, setOpen] = useState(true);
 
   const messagesEndRef = useAutoScroll(messages);
 
@@ -87,6 +89,21 @@ const MascoteChatbot = () => {
     }
   }
 
+  // Flutuante ícone com mascote para reabrir chat
+  if (!open) {
+    return (
+      <button
+        className="fixed bottom-7 right-5 z-50 shadow-lg rounded-full bg-white w-16 h-16 flex flex-col items-center justify-center border border-gray-300 transition hover:bg-blue-50"
+        style={{ boxShadow: "0 2px 16px 4px #0001" }}
+        onClick={() => setOpen(true)}
+        aria-label="Abrir chat Abelvinho"
+      >
+        <img src={mascotImg} alt="Abrir chat Abelvinho" className="h-10 w-10 rounded-full mb-0.5" />
+        <span className="text-xs text-blue-700 font-bold">Chat</span>
+      </button>
+    );
+  }
+
   return (
     <div className="fixed bottom-7 right-5 z-50 w-80 sm:w-96">
       <div className="bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden w-full flex flex-col">
@@ -96,7 +113,17 @@ const MascoteChatbot = () => {
             <img src={mascotImg} alt="" className="h-10 w-10 rounded-full bg-white border" />
             <span className="font-bold text-blue-700">Abelvinho</span>
           </div>
-          <span className="text-xs font-semibold text-blue-700">Tira-dúvidas</span>
+          <div className="flex items-center gap-1">
+            <span className="text-xs font-semibold text-blue-700">Tira-dúvidas</span>
+            <button
+              className="ml-2 rounded p-1 hover:bg-blue-200 transition text-blue-700"
+              aria-label="Fechar chat"
+              onClick={() => setOpen(false)}
+              type="button"
+            >
+              <X size={20} />
+            </button>
+          </div>
         </div>
         {/* Mensagens */}
         <div className="flex-1 flex flex-col gap-2 px-4 py-3 overflow-y-auto max-h-72" style={{ background: "#f6fafd" }}>
@@ -148,4 +175,3 @@ const MascoteChatbot = () => {
 };
 
 export default MascoteChatbot;
-
