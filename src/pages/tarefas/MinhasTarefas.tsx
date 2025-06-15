@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
@@ -62,16 +61,27 @@ const MinhasTarefas = () => {
     navigate(`/tarefas/detalhe/${tarefa.id}`);
   };
 
-  // Função de remover tarefa da lista após exclusão (efeito local)
-  const handleTarefaDelete = (tarefa: Tarefa) => {
-    setTarefas(prev => prev.filter(t => t.id !== tarefa.id));
-    setFilteredTarefas(prev => prev.filter(t => t.id !== tarefa.id));
-    toast({
-      title: "Tarefa excluída",
-      description: "A tarefa foi removida com sucesso.",
-      variant: "default"
-    });
-    // Aqui você pode adicionar chamada para service/exclusão real se desejar!
+  // Função de remover tarefa da lista após exclusão (efeito local + banco)
+  const handleTarefaDelete = async (tarefa: Tarefa) => {
+    setLoading(true);
+    const sucesso = await tarefasService.deleteById(tarefa.id);
+    setLoading(false);
+
+    if (sucesso) {
+      setTarefas(prev => prev.filter(t => t.id !== tarefa.id));
+      setFilteredTarefas(prev => prev.filter(t => t.id !== tarefa.id));
+      toast({
+        title: "Tarefa excluída",
+        description: "A tarefa foi removida com sucesso.",
+        variant: "default"
+      });
+    } else {
+      toast({
+        title: "Erro ao excluir",
+        description: "Não foi possível excluir a tarefa. Tente novamente.",
+        variant: "destructive"
+      });
+    }
   };
 
   if (loading) {
@@ -149,4 +159,3 @@ const MinhasTarefas = () => {
 };
 
 export default MinhasTarefas;
-

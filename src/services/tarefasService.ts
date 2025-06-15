@@ -265,5 +265,23 @@ export const tarefasService = {
         programadas: 0
       };
     }
+  },
+
+  async deleteById(id: string): Promise<boolean> {
+    try {
+      const { error } = await supabase
+        .from('tarefas')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        console.error("Erro ao excluir tarefa:", error);
+        return false;
+      }
+      return true;
+    } catch (error) {
+      console.error("Exceção ao excluir tarefa:", error);
+      return false;
+    }
   }
 };
