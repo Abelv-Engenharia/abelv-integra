@@ -22,17 +22,14 @@ export function useProfileAvatarUrl(avatarUrl?: string | null) {
       return;
     }
 
-    // Caso venha apenas com o nome do arquivo, assume bucket "avatars"
-    let path = avatarUrl;
-    if (!avatarUrl.startsWith("avatars/") && !avatarUrl.startsWith("/")) {
-      path = "avatars/" + avatarUrl;
-    }
+    // Para bucket avatars: utiliza apenas o filename (não prefixar “avatars/”)
+    const filePath = avatarUrl.replace(/^avatars\//, "");
 
     setLoading(true);
 
     supabase.storage
       .from("avatars")
-      .createSignedUrl(path, 300)
+      .createSignedUrl(filePath, 300)
       .then(({ data, error }) => {
         if (error || !data?.signedUrl) {
           setUrl(null);
