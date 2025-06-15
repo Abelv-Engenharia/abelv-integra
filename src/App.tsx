@@ -51,6 +51,8 @@ import EditarExecucaoTreinamento from './pages/treinamentos/EditarExecucaoTreina
 import Layout from './components/layout/Layout';
 import Profile from './pages/account/Profile';
 import Settings from './pages/account/Settings';
+import ForgotPassword from './pages/auth/ForgotPassword';
+import ResetPassword from './pages/auth/ResetPassword';
 
 const queryClient = new QueryClient();
 
@@ -61,6 +63,8 @@ function App() {
         <AuthProvider>
           <Routes>
             <Route path="/login" element={<Login />} />
+            <Route path="/auth/forgot-password" element={<ForgotPassword />} />
+            <Route path="/auth/reset-password" element={<ResetPassword />} />
             <Route path="/" element={<AuthGuard><Layout /></AuthGuard>}>
               <Route index element={<Dashboard />} />
 
