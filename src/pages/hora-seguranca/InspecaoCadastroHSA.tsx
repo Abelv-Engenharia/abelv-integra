@@ -305,13 +305,13 @@ const InspecaoCadastroHSA = () => {
                 />
                 {/* MÊS (apenas visual, não FormField) */}
                 <FormItem>
-                  <FormLabel>Mês</FormLabel>
-                  <Input readOnly value={mes} placeholder="Mês" className="w-full" />
+                  <FormLabel htmlFor="mes-input">Mês</FormLabel>
+                  <Input id="mes-input" readOnly value={mes} placeholder="Mês" className="w-full" />
                 </FormItem>
                 {/* ANO (apenas visual, não FormField) */}
                 <FormItem>
-                  <FormLabel>Ano</FormLabel>
-                  <Input readOnly value={ano} placeholder="Ano" className="w-full" />
+                  <FormLabel htmlFor="ano-input">Ano</FormLabel>
+                  <Input id="ano-input" readOnly value={ano} placeholder="Ano" className="w-full" />
                 </FormItem>
               </div>
 
@@ -370,7 +370,11 @@ const InspecaoCadastroHSA = () => {
               <div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div>
-                    <label className="block font-medium mb-1">
+                    <label className="block font-medium mb-1" htmlFor={
+                        form.watch("responsavelTipo") === "funcionario"
+                          ? "responsavelFuncionarioId"
+                          : "responsavelNome"
+                      }>
                       Responsável pela inspeção
                     </label>
                     {form.watch("responsavelTipo") === "funcionario" ? (
@@ -379,7 +383,7 @@ const InspecaoCadastroHSA = () => {
                         value={form.watch("responsavelFuncionarioId")}
                         disabled={!watchCCA}
                       >
-                        <SelectTrigger className="w-full">
+                        <SelectTrigger id="responsavelFuncionarioId" className="w-full">
                           <SelectValue
                             placeholder={
                               watchCCA
@@ -401,6 +405,7 @@ const InspecaoCadastroHSA = () => {
                       </Select>
                     ) : (
                       <Input
+                        id="responsavelNome"
                         value={form.watch("responsavelNome") || ""}
                         onChange={e => form.setValue("responsavelNome", e.target.value)}
                         placeholder="Ou digite um responsável manualmente"
@@ -410,11 +415,16 @@ const InspecaoCadastroHSA = () => {
                     )}
                   </div>
                   <div>
-                    <label className="block font-medium mb-1">
+                    <label className="block font-medium mb-1" htmlFor={
+                        form.watch("responsavelTipo") === "funcionario"
+                          ? "funcaoFuncionario"
+                          : "responsavelFuncao"
+                      }>
                       Função
                     </label>
                     {form.watch("responsavelTipo") === "funcionario" ? (
                       <Input
+                        id="funcaoFuncionario"
                         value={
                           (() => {
                             const funcionario = funcionarios.find(
@@ -433,6 +443,7 @@ const InspecaoCadastroHSA = () => {
                       />
                     ) : (
                       <Input
+                        id="responsavelFuncao"
                         value={form.watch("responsavelFuncao") || ""}
                         onChange={e => form.setValue("responsavelFuncao", e.target.value)}
                         placeholder="Digite a função do responsável"
