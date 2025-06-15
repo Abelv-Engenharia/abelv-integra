@@ -673,7 +673,7 @@ export type Database = {
       execucao_hsa: {
         Row: {
           ano: number
-          cca: string
+          cca_id: number
           created_at: string | null
           data: string
           desvios_identificados: number
@@ -688,7 +688,7 @@ export type Database = {
         }
         Insert: {
           ano: number
-          cca: string
+          cca_id: number
           created_at?: string | null
           data: string
           desvios_identificados?: number
@@ -703,7 +703,7 @@ export type Database = {
         }
         Update: {
           ano?: number
-          cca?: string
+          cca_id?: number
           created_at?: string | null
           data?: string
           desvios_identificados?: number
@@ -716,7 +716,15 @@ export type Database = {
           status?: string
           updated_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "execucao_hsa_cca_id_fkey"
+            columns: ["cca_id"]
+            isOneToOne: false
+            referencedRelation: "ccas"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       execucao_treinamentos: {
         Row: {
