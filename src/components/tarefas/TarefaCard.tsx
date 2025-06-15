@@ -1,9 +1,10 @@
+
 import React from "react";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle, Clock, AlertCircle } from "lucide-react";
+import { CheckCircle, Clock, AlertCircle, User, Calendar } from "lucide-react";
 import { Tarefa } from "@/types/tarefas";
-import { formatDistanceToNow } from "date-fns";
+import { formatDistanceToNow, format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 interface TarefaCardProps {
   tarefa: Tarefa;
@@ -53,15 +54,33 @@ export const TarefaCard: React.FC<TarefaCardProps> = ({
 }) => {
   const statusConfig = getStatusConfig(tarefa.status);
   const dataLimite = new Date(tarefa.dataConclusao);
+
+  // NOVO: data de criação formatada
+  const dataCriacaoFormatada = format(new Date(tarefa.dataCadastro), "dd/MM/yyyy", { locale: ptBR });
+  // NOVO: data de conclusão formatada
+  const dataConclusaoFormatada = format(new Date(tarefa.dataConclusao), "dd/MM/yyyy", { locale: ptBR });
+
+  // Antigo: texto de prazo
   const restante = formatDistanceToNow(dataLimite, {
     addSuffix: true,
     locale: ptBR
   });
+
   return <Card className="mb-4 hover:shadow-md transition-shadow cursor-pointer" onClick={() => onClick(tarefa)}>
       <CardHeader className="pb-2 flex flex-row justify-between items-center">
         <div>
           <p className="font-medium text-sm text-muted-foreground">CCA: {tarefa.cca}</p>
-          
+          {/* NOVO: Responsável e data de criação */}
+          <div className="flex flex-col mt-1 gap-0.5">
+            <span className="flex items-center text-xs text-muted-foreground">
+              <User className="w-3 h-3 mr-1" />
+              {tarefa.responsavel?.nome}
+            </span>
+            <span className="flex items-center text-xs text-muted-foreground">
+              <Calendar className="w-3 h-3 mr-1" />
+              Criada em {dataCriacaoFormatada}
+            </span>
+          </div>
         </div>
         <Badge variant="outline" className={`flex items-center ${statusConfig.color}`}>
           {statusConfig.icon} {tarefa.status.replace('-', ' ')}
@@ -77,7 +96,18 @@ export const TarefaCard: React.FC<TarefaCardProps> = ({
           </Badge>
           {tarefa.configuracao.recorrencia?.ativa && <Badge variant="outline">Recorrente</Badge>}
         </div>
-        <p className="text-xs text-muted-foreground">Prazo: {restante}</p>
+        {/* NOVO: Substituir prazo por data da conclusão, se concluída */}
+        {tarefa.status === "concluida"
+          ? (
+            <p className="text-xs text-muted-foreground flex items-center">
+              <CheckCircle className="w-3 h-3 mr-1 text-green-600" />
+              Concluída em {dataConclusaoFormatada}
+            </p>
+          )
+          : (
+            <p className="text-xs text-muted-foreground">Prazo: {restante}</p>
+          )
+        }
       </CardFooter>
     </Card>;
 };
