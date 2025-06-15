@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardTitle, CardHeader } from "@/components/ui/card";
@@ -50,11 +51,11 @@ export default function AgendaHSA() {
     return (
       <div className="flex flex-col h-full w-full p-2">
         <span className={`font-medium self-start ${isToday ? 'text-blue-600 font-bold' : ''}`}>{date.getDate()}</span>
-        <div className="flex-grow overflow-y-auto text-xs mt-1 space-y-1">
+        <div className="flex-grow overflow-y-auto text-[11px] mt-1 space-y-0.5">
           {eventosDoDia.map((inspecao) => (
             <div
               key={inspecao.id}
-              className="rounded p-1 bg-green-50 border border-green-200 text-gray-800"
+              className="rounded p-0.5 bg-green-50 border border-green-200 text-gray-800"
               title={`${inspecao.inspecao_programada || 'Inspeção'} - ${inspecao.status}`}
             >
               <p className="font-bold truncate">{inspecao.responsavel_inspecao}</p>
