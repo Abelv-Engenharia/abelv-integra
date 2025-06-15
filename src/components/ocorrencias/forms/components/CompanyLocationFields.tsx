@@ -16,6 +16,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+/**
+ * ATENÇÃO: Mapeamento correto — agora o value da empresa sempre é empresa.empresas.nome,
+ * mas pode ser salvo como o id caso queira garantir unicidade e evitar problemas de duplicidade.
+ * Aqui vamos manter empresa.empresas.nome, mas registraremos um console.log em onValueChange
+ * para depuração.
+ */
+
 interface CompanyLocationFieldsProps {
   ccas: any[];
   empresas: any[];
@@ -29,7 +36,7 @@ const CompanyLocationFields: React.FC<CompanyLocationFieldsProps> = ({
   disciplinas,
   selectedCcaId
 }) => {
-  const { control } = useFormContext();
+  const { control, setValue } = useFormContext();
 
   return (
     <>
@@ -41,7 +48,14 @@ const CompanyLocationFields: React.FC<CompanyLocationFieldsProps> = ({
           render={({ field }) => (
             <FormItem>
               <FormLabel>CCA *</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <Select
+                onValueChange={value => {
+                  field.onChange(value);
+                  // Limpar empresa se trocar o CCA
+                  setValue("empresa", "");
+                }}
+                value={field.value}
+              >
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione o CCA" />
@@ -59,14 +73,21 @@ const CompanyLocationFields: React.FC<CompanyLocationFieldsProps> = ({
             </FormItem>
           )}
         />
-        
+
         <FormField
           control={control}
           name="empresa"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Empresa *</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value} disabled={!selectedCcaId}>
+              <Select
+                onValueChange={value => {
+                  console.log("Empresa selecionada:", value);
+                  field.onChange(value);
+                }}
+                value={field.value}
+                disabled={!selectedCcaId}
+              >
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder={!selectedCcaId ? "Selecione um CCA primeiro" : "Selecione a empresa"} />
@@ -74,7 +95,10 @@ const CompanyLocationFields: React.FC<CompanyLocationFieldsProps> = ({
                 </FormControl>
                 <SelectContent>
                   {empresas.map((empresa) => (
-                    <SelectItem key={empresa.empresa_id} value={empresa.empresas.nome}>
+                    <SelectItem
+                      key={empresa.empresa_id}
+                      value={empresa.empresas.nome}
+                    >
                       {empresa.empresas.nome}
                     </SelectItem>
                   ))}
@@ -93,7 +117,7 @@ const CompanyLocationFields: React.FC<CompanyLocationFieldsProps> = ({
         render={({ field }) => (
           <FormItem>
             <FormLabel>Disciplina *</FormLabel>
-            <Select onValueChange={field.onChange} defaultValue={field.value}>
+            <Select onValueChange={field.onChange} value={field.value}>
               <FormControl>
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione a disciplina" />
