@@ -160,7 +160,7 @@ const TreinamentosCracha = () => {
       });
       return;
     }
-    
+
     if (treinamentosValidos.length === 0) {
       toast({
         title: "Aviso",
@@ -169,141 +169,157 @@ const TreinamentosCracha = () => {
       });
       return;
     }
-    
+
     toast({
       title: "Imprimindo",
       description: "Enviando crachá para impressão...",
     });
-    
+
     if (crachaRef.current) {
       const printWindow = window.open('', '_blank');
       if (printWindow) {
         printWindow.document.open();
-        
-        const style = document.createElement('style');
-        style.innerHTML = `
-          @page { size: A4; margin: 0; }
-          body {
-            margin: 0;
-            background: #f3f3f3;
-            font-family: Arial, Helvetica, sans-serif;
-            color: #222;
-          }
-          .cracha-container {
-            background: #fff;
-            width: 400px;
-            min-height: 600px;
-            margin: 30px auto;
-            box-shadow: 0 2px 8px #0002;
-            border-radius: 4px;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            position: relative;
-          }
-          .cracha-title {
-            text-align: center;
-            font-size: 2rem;
-            font-weight: 500;
-            color: #b0b0b0;
-            padding-top: 28px;
-            margin-bottom: 18px;
-            letter-spacing: 0.01em;
-          }
-          .cracha-header-row {
-            display: flex;
-            flex-direction: row;
-            align-items: flex-start;
-            padding: 0 32px 0 30px;
-            margin-bottom: 18px;
-            gap: 14px;
-          }
-          .cracha-logo {
-            width: 96px;
-            height: 96px;
-            margin-right: 16px;
-            margin-top: 4px;
-            object-fit: contain;
-            background: none;
-            border-radius: 0;
-          }
-          .cracha-info {
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-start;
-            padding-top: 5px;
-            min-width: 0;
-            flex: 1;
-          }
-          .cracha-nome {
-            font-weight: bold;
-            font-size: 1.25rem;
-            margin-bottom: 4px;
-            text-transform: uppercase;
-            letter-spacing: 0.01em;
-            word-break: break-word;
-          }
-          .cracha-funcao {
-            font-size: 1.1rem;
-            font-weight: 500;
-            margin-bottom: 6px;
-            word-break: break-word;
-          }
-          .cracha-matricula {
-            font-size: 1rem;
-            margin-bottom: 0;
-          }
-          .cracha-divider {
-            border: none;
-            border-top: 1px solid #e0e0e0;
-            margin: 10px 25px 0 25px;
-          }
-          .cracha-table-section {
-            margin: 10px 25px 0 25px;
-            flex: 1 1 auto;
-            display: flex;
-            flex-direction: column;
-          }
-          .cracha-table-title {
-            text-align: center;
-            font-weight: bold;
-            margin: 15px 0 10px 0;
-            font-size: 1.05rem;
-            letter-spacing: 0.01em;
-          }
-          .cracha-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.98rem;
-          }
-          .cracha-table thead tr th {
-            font-weight: bold;
-            border-bottom: 1px solid #bbb;
-            font-size: 1rem;
-            padding: 5px;
-            background: none;
-            text-align: left;
-          }
-          .cracha-table th:last-child, .cracha-table td:last-child {
-            text-align: right;
-          }
-          .cracha-table tbody td {
-            border-bottom: 1px solid #efefef;
-            padding: 4px 5px 3px 5px;
-            vertical-align: top;
-          }
-          .cracha-no-training {
-            text-align: center;
-            color: #888;
-            font-size: 1rem;
-            padding: 14px 0;
-          }
-          .cracha-emissao {
-            text-align: center;
-            color: #777;
-            font-size: 1rem;
-            margin: 30px 0 14px 0;
-          }
+
+        const style = `
+          <style>
+            @page { size: A4; margin: 0; }
+            body {
+              margin: 0;
+              background: #f3f3f3;
+              font-family: Arial, Helvetica, sans-serif;
+              color: #222;
+            }
+            .cracha-box {
+              background: #fff;
+              width: 360px;
+              min-height: 525px;
+              margin: 30px auto;
+              border-radius: 9px;
+              border: 1.5px solid #e5e7eb;
+              padding: 0;
+              display: flex;
+              flex-direction: column;
+              align-items: stretch;
+            }
+            .cracha-title {
+              background: #2563eb;
+              color: #fff;
+              font-size: 1.15rem;
+              text-align: center;
+              padding: 18px 0 14px 0;
+              border-radius: 9px 9px 0 0;
+              font-weight: 700;
+              letter-spacing: 0.03em;
+            }
+            .cracha-upper {
+              display: flex;
+              flex-direction: row;
+              align-items: center;
+              gap: 20px;
+              padding: 20px 20px 8px 20px;
+              border-bottom: none;
+            }
+            .cracha-logo {
+              width: 80px;
+              height: 80px;
+              object-fit: contain;
+              background: none;
+              border-radius: 100%;
+              flex-shrink: 0;
+              border: 1px solid #f1f1f1;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              padding: 4px;
+            }
+            .cracha-funcionario-info {
+              display: flex;
+              flex-direction: column;
+              justify-content: center;
+              flex: 1;
+            }
+            .cracha-nome {
+              font-weight: bold;
+              font-size: 1.17rem;
+              text-transform: uppercase;
+              margin-bottom: 3px;
+              word-break: break-word;
+            }
+            .cracha-funcao {
+              font-size: 1rem;
+              font-weight: 500;
+              color: #404040;
+              margin-bottom: 2px;
+              text-transform: none;
+              word-break: break-word;
+            }
+            .cracha-matricula {
+              font-size: 0.98rem;
+              color: #7b7b7b;
+              margin-bottom: 0;
+              font-weight: normal;
+              letter-spacing: 0.02em;
+            }
+            .cracha-divider {
+              border: none;
+              border-top: 1px solid #e5e7eb;
+              margin: 10px 20px 0 20px;
+            }
+            .cracha-table-section {
+              margin: 0 0 0 0;
+              flex: 1;
+              display: flex;
+              flex-direction: column;
+            }
+            .cracha-table-title {
+              text-align: center;
+              font-weight: bold;
+              margin: 24px 0 7px 0;
+              font-size: 1.05rem;
+              letter-spacing: 0.01em;
+              color: #222;
+            }
+            .cracha-table {
+              width: 100%;
+              border-collapse: collapse;
+              font-size: 0.97rem;
+              margin: 0;
+              background: #fff;
+            }
+            .cracha-table thead tr th {
+              font-weight: bold;
+              border-bottom: 1.3px solid #d4d4d4;
+              font-size: 0.97rem;
+              padding: 7px 8px;
+              background: #fff;
+              color: #111;
+              text-align: left;
+            }
+            .cracha-table th:last-child, .cracha-table td:last-child {
+              text-align: right;
+            }
+            .cracha-table tbody td {
+              border-bottom: 1px solid #ececec;
+              padding: 7px 8px 7px 8px;
+              vertical-align: top;
+              color: #333;
+            }
+            .cracha-table tbody tr:last-child td {
+              border-bottom: none;
+            }
+            .cracha-no-training {
+              text-align: center;
+              color: #888;
+              font-size: 1rem;
+              padding: 14px 0;
+            }
+            .cracha-emissao {
+              text-align: center;
+              color: #777;
+              font-size: 1rem;
+              margin: 30px 0 14px 0;
+            }
+          </style>
         `;
 
         printWindow.document.write(`
@@ -311,14 +327,14 @@ const TreinamentosCracha = () => {
           <html>
           <head>
             <title>Crachá de Capacitação - ${funcionario.nome}</title>
-            ${style.outerHTML}
+            ${style}
           </head>
           <body>
-            <div class="cracha-container">
-              <div class="cracha-title">Crachá de Capacitação</div>
-              <div class="cracha-header-row">
+            <div class="cracha-box">
+              <div class="cracha-title">CRACHÁ DE CAPACITAÇÃO</div>
+              <div class="cracha-upper">
                 <img class="cracha-logo" src="${logoUrl || ''}" alt="Logo do Sistema" />
-                <div class="cracha-info">
+                <div class="cracha-funcionario-info">
                   <div class="cracha-nome">${funcionario.nome}</div>
                   <div class="cracha-funcao">${funcionario.funcao}</div>
                   <div class="cracha-matricula">Matrícula: ${funcionario.matricula}</div>
