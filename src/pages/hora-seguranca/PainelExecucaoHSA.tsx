@@ -376,25 +376,6 @@ export default function PainelExecucaoHSA() {
       <div className="px-2 space-y-6">
         {/* Gauge/Velocímetro */}
         
-
-        {/* Execução HSA por status */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Execução HSA</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={220}>
-              <ReBarChart data={statusData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis allowDecimals={false} />
-                <Tooltip />
-                <Bar dataKey="value" fill="#43A047" />
-              </ReBarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-
         {/* Execução HSA por responsável */}
         <Card>
           <CardHeader>
