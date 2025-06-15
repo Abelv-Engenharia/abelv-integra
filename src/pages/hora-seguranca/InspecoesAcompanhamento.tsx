@@ -189,7 +189,7 @@ export default function InspecoesAcompanhamento() {
     <div className="container mx-auto py-4">
       <h2 className="text-2xl font-bold tracking-tight mb-4">Acompanhamento de Inspeções HSA</h2>
       {/* Campo de busca */}
-      <div className="mb-3 flex items-center max-w-xs">
+      <div className="mb-3 flex items-center max-w-md">
         <Input
           value={busca}
           placeholder="Buscar por CCA, responsável, função ou status..."
