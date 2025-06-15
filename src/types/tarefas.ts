@@ -12,6 +12,7 @@ export type Tarefa = {
   dataCadastro: string;
   dataConclusao: string;
   descricao: string;
+  titulo?: string;
   responsavel: {
     id: string;
     nome: string;
