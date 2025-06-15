@@ -1,6 +1,5 @@
-
 import React from "react";
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from "recharts";
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 import { useTreinamentosPorTipoProcesso } from "./useTreinamentosPorTipoProcesso";
 
 const COLORS = ["#F59E0B", "#2563EB", "#6B7280", "#FAA43A", "#34D399", "#DB2777", "#60A5FA"];
@@ -43,7 +42,6 @@ export const ProcessoGeralPieChart = () => {
         <Tooltip
           formatter={(value: any, name: string, props: any) => [`${Number(value).toFixed(1)} horas`, `Percentual: ${props.payload.percentual.toFixed(1)}%`]}
         />
-        <Legend />
       </PieChart>
     </ResponsiveContainer>
   );
