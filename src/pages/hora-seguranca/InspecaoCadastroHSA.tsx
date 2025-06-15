@@ -180,7 +180,7 @@ const InspecaoCadastroHSA = () => {
     });
   };
 
-  const watchCCA = form.watch("cca");
+  // Remove a segunda declaração duplicada de watchCCA e usa apenas a original declarada acima.
   const ccaSelecionado = !!watchCCA;
 
   if (success) {
