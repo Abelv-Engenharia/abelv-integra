@@ -128,12 +128,18 @@ export const tarefasService = {
       console.log("Criando tarefa:", dadosTarefa);
 
       // Validar campos obrigatórios
-      if (!dadosTarefa.titulo || !dadosTarefa.cca_id || !dadosTarefa.data_conclusao || !dadosTarefa.descricao || !dadosTarefa.responsavel_id) {
+      if (
+        !dadosTarefa.titulo ||
+        !dadosTarefa.cca_id ||
+        !dadosTarefa.data_conclusao ||
+        !dadosTarefa.descricao ||
+        !dadosTarefa.responsavel_id
+      ) {
         console.error("Campos obrigatórios não preenchidos:", dadosTarefa);
         return false;
       }
 
-      // Primeiro, buscar o CCA para obter o código e nome
+      // Buscar CCA para obter código e nome
       const { data: ccaData, error: ccaError } = await supabase
         .from('ccas')
         .select('codigo, nome')
