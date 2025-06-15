@@ -225,7 +225,9 @@ const OcorrenciasCadastro = () => {
     setActiveTab("identificacao");
   };
 
+  // Adicionar log para saber se o submit está ocorrendo
   const onSubmit = async (data: OcorrenciaFormData) => {
+    console.log("===== Chamada onSubmit =====");
     console.log("Form submitted with data:", data);
     console.log("Is edit mode:", isEditMode);
 
@@ -263,7 +265,7 @@ const OcorrenciasCadastro = () => {
       return;
     }
 
-    // --- FIX BELOW: context of 'empresa' type (force as string | number | undefined) ---
+    // --- FIX context of 'empresa' type ---
     const empresaValue = data.empresa as string | number | undefined;
     const fixedEmpresa =
       typeof empresaValue === "number"

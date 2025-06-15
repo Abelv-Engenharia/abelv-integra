@@ -29,7 +29,10 @@ export const OcorrenciaFormNavigation: React.FC<OcorrenciaFormNavigationProps> =
       <Button
         type="button"
         variant="outline"
-        onClick={onPrevious}
+        onClick={() => {
+          console.log("Botão anterior clicado");
+          onPrevious();
+        }}
         disabled={activeTab === tabs[0].id}
       >
         <ArrowLeft className="mr-2 h-4 w-4" />
@@ -38,19 +41,32 @@ export const OcorrenciaFormNavigation: React.FC<OcorrenciaFormNavigationProps> =
       <Button
         type="button"
         variant="outline"
-        onClick={onCancel}
+        onClick={() => {
+          console.log("Botão cancelar clicado");
+          onCancel();
+        }}
       >
         <X className="mr-2 h-4 w-4" />
         Cancelar
       </Button>
     </div>
     {activeTab === "fechamento" ? (
-      <Button type="submit" disabled={isSubmitting}>
+      <Button
+        type="submit"
+        disabled={isSubmitting}
+        onClick={() => {
+          console.log("Botão Salvar ocorrência clicado")
+          // O submit real será disparado pelo tipo submit, mas esse log mostra se botão responde ao click
+        }}
+      >
         <Save className="mr-2 h-4 w-4" />
         {isSubmitting ? "Salvando..." : (isEditMode ? "Salvar alterações" : "Salvar ocorrência")}
       </Button>
     ) : (
-      <Button type="button" onClick={onNext}>
+      <Button type="button" onClick={() => {
+        console.log("Botão próximo clicado");
+        onNext();
+      }}>
         Próximo
         <ArrowRight className="ml-2 h-4 w-4" />
       </Button>
