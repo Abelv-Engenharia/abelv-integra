@@ -51,7 +51,7 @@ export default function AgendaHSA() {
     return (
       <div className="flex flex-col h-full w-full p-2">
         <span className={`font-medium self-start ${isToday ? 'text-blue-600 font-bold' : ''}`}>{date.getDate()}</span>
-        <div className="flex-grow overflow-y-auto text-[11px] mt-1 space-y-0.5">
+        <div className="flex-grow overflow-y-auto text-[10px] mt-1 space-y-0">
           {eventosDoDia.map((inspecao) => (
             <div
               key={inspecao.id}
@@ -97,9 +97,9 @@ export default function AgendaHSA() {
                 month: "w-full space-y-4 p-4",
                 table: "w-full border-collapse",
                 head_row: "flex w-full border-b divide-x divide-transparent",
-                head_cell: "text-muted-foreground flex-1 font-normal text-sm p-2 text-center first:hidden last:hidden",
+                head_cell: "text-muted-foreground w-1/5 font-normal text-sm p-2 text-left first:hidden last:hidden",
                 row: "flex w-full divide-x divide-gray-200",
-                cell: "h-40 flex-1 p-0 relative border-t border-gray-200 [&:has(.day_hidden)]:hidden",
+                cell: "h-40 w-1/5 p-0 relative border-t border-gray-200 [&:has(.day_hidden)]:hidden",
                 day: "w-full h-full",
                 day_selected: "bg-primary/10 text-primary",
                 day_today: "bg-accent text-accent-foreground",
