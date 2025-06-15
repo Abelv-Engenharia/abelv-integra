@@ -55,10 +55,12 @@ export default function PainelExecucaoHSA() {
       })));
       // Execução por Responsável - garantir todas as chaves
       const responsaveis = await fetchInspecoesByResponsavel();
+      // LOG DEBUG para ver os dados recebidos
+      console.log('[HSA][PainelExecucaoHSA] respData (por responsável):', responsaveis);
       setRespData(
         responsaveis.map((d: any) => ({
           name: d.responsavel,
-          "A Realizar": d.a_realizar ?? 0,
+          "A Realizar": d["A Realizar"] ?? 0,
           "Realizada": d.realizada ?? 0,
           "Não Realizada": d.nao_realizada ?? 0,
           "Realizada (Não Programada)": d["realizada (não programada)"] ?? 0,

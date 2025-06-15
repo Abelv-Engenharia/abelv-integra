@@ -29,10 +29,13 @@ export async function fetchInspecoesByResponsavel(): Promise<InspecoesByResponsa
       const status = (row.status || '').toUpperCase();
       if (status.includes('CANCELADA')) grouped[nome].cancelada += 1;
       else if (status === 'REALIZADA') grouped[nome].realizada += 1;
+      else if (status === 'A REALIZAR') grouped[nome].a_realizar += 1;
       else if (status.includes('NÃO REALIZADA')) grouped[nome].nao_realizada += 1;
       else if (status.includes('NÃO PROGRAMADA')) grouped[nome].realizada_np += 1;
-      else if (status === 'A REALIZAR') grouped[nome].a_realizar += 1;
     });
+
+    // DEBUG: log agrupamento final
+    console.log('[HSA][fetchInspecoesByResponsavel] grouped:', grouped);
 
     return Object.entries(grouped).map(([responsavel, qtds]) => ({
       responsavel,
@@ -40,7 +43,7 @@ export async function fetchInspecoesByResponsavel(): Promise<InspecoesByResponsa
       cancelada: qtds.cancelada,
       realizada: qtds.realizada,
       nao_realizada: qtds.nao_realizada,
-      "A Realizar": qtds.a_realizar, // <- Corrigido: adiciona chave para a barra azul
+      "A Realizar": qtds.a_realizar,
       "Realizada": qtds.realizada,
       "Não Realizada": qtds.nao_realizada,
       "Realizada (Não Programada)": qtds.realizada_np,
