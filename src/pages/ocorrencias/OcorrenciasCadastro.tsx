@@ -258,15 +258,16 @@ const OcorrenciasCadastro = () => {
       return;
     }
 
-    if (!data.empresa) {
-      console.log("Validation error: empresa is missing");
-      toast({
-        title: "Erro de validação",
-        description: "O campo 'Empresa' é obrigatório. Veja se você selecionou a empresa após trocar o CCA.",
-        variant: "destructive"
-      });
-      return;
-    }
+    // Removendo a obrigatoriedade de empresa
+    // if (!data.empresa) {
+    //   console.log("Validation error: empresa is missing");
+    //   toast({
+    //     title: "Erro de validação",
+    //     description: "O campo 'Empresa' é obrigatório. Veja se você selecionou a empresa após trocar o CCA.",
+    //     variant: "destructive"
+    //   });
+    //   return;
+    // }
 
     // --- FIX context of 'empresa' type ---
     const empresaValue = data.empresa as string | number | undefined;
