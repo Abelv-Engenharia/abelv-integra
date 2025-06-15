@@ -50,8 +50,10 @@ export const OcorrenciaFormProvider: React.FC = () => {
   };
 
   const onSubmit = async (values: OcorrenciaFormSchema) => {
+    setIsSubmitting(true);
     try {
-      setIsSubmitting(true);
+      // Logar dados enviados para depuração
+      console.log("[OCORRENCIA] Submetendo valores:", values);
 
       const payload = {
         ...values,
@@ -61,12 +63,29 @@ export const OcorrenciaFormProvider: React.FC = () => {
         classificacao_risco: values.classificacaoRisco,
       };
 
-      await createOcorrencia(payload);
-      
+      // Logando o payload para depuração
+      console.log("[OCORRENCIA] Payload convertido:", payload);
+
+      const result = await createOcorrencia(payload);
+
+      console.log("[OCORRENCIA] Resultado do Supabase:", result);
+
+      if (!result || result.error) {
+        // Mensagem de erro detalhado do Supabase se disponível
+        const errorMsg = (result && result.error && result.error.message) ? result.error.message : "Erro desconhecido ao criar ocorrência.";
+        toast.error("Erro ao cadastrar ocorrência: " + errorMsg);
+        return;
+      }
+
       toast.success("Ocorrência cadastrada com sucesso!");
       navigate("/ocorrencias/consulta");
     } catch (e: any) {
-      toast.error("Erro ao cadastrar ocorrência: " + (e.message || e));
+      // Exibe erro com detalhes, seja string simples, objeto ou supabase error
+      const erroMsg =
+        e?.message ||
+        (e && typeof e === "object" ? JSON.stringify(e) : String(e));
+      toast.error("Erro crítico ao cadastrar ocorrência: " + erroMsg);
+      console.error("[OCORRENCIA] Erro ao cadastrar:", e);
     } finally {
       setIsSubmitting(false);
     }
