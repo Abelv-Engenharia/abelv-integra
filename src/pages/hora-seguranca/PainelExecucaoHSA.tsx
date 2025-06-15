@@ -76,9 +76,10 @@ export default function PainelExecucaoHSA() {
           desvios: d.desvios
         }))
       );
-      // Desvios por Atividade Crítica (pie)
-      const pie = await fetchDesviosByInspectionType();
-      setPieData(pie.map((d: any) => ({
+      // Desvios por Atividade Crítica (pie) - agora usa dados reais da execucao_hsa
+      const desviosPorTipo = await fetchDesviosByInspectionType();
+      console.log('[HSA][PainelExecucaoHSA] desviosPorTipo:', desviosPorTipo);
+      setPieData(desviosPorTipo.map((d: any) => ({
         name: d.tipo,
         value: d.quantidade
       })));
@@ -431,9 +432,9 @@ export default function PainelExecucaoHSA() {
             <CardTitle>Desvios por Atividade Crítica</CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={230}>
+            <ResponsiveContainer width="100%" height={350}>
               <RePieChart>
-                <RePie data={pieData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={90} fill="#1565C0" label={({
+                <RePie data={pieData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={120} fill="#1565C0" label={({
                 name,
                 percent
               }) => `${name} • ${(percent * 100).toFixed(1)}%`}>
