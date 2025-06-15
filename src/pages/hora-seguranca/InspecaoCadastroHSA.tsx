@@ -340,7 +340,7 @@ const InspecaoCadastroHSA = () => {
                           )}
                           {funcionarios.map((f: any) => (
                             <SelectItem key={f.id} value={f.id}>
-                              {f.nome} ({f.funcao})
+                              {f.nome}
                             </SelectItem>
                           ))}
                         </SelectContent>
