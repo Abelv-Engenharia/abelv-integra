@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useFormContext } from "react-hook-form";
 import {
@@ -38,7 +37,12 @@ const CompanyLocationFields: React.FC<CompanyLocationFieldsProps> = ({
   disciplinas,
   selectedCcaId
 }) => {
-  const { control, setValue } = useFormContext();
+  const { control, setValue, watch } = useFormContext();
+  const empresaValue = watch("empresa");
+  const ccaValue = watch("cca");
+
+  // Empresa obrigatória: destaca caso <string vazia>
+  const empresaObrigatoria = !empresaValue && !!ccaValue;
 
   return (
     <>
@@ -52,9 +56,11 @@ const CompanyLocationFields: React.FC<CompanyLocationFieldsProps> = ({
               <FormLabel>CCA *</FormLabel>
               <Select
                 onValueChange={value => {
-                  field.onChange(value);
-                  // Limpar empresa ao trocar CCA para evitar inconsistência
-                  setValue("empresa", "");
+                  if (value !== field.value) {
+                    field.onChange(value);
+                    // Limpar empresa apenas se mudou
+                    setValue("empresa", "");
+                  }
                 }}
                 value={field.value}
               >
@@ -81,19 +87,24 @@ const CompanyLocationFields: React.FC<CompanyLocationFieldsProps> = ({
           name="empresa"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Empresa *</FormLabel>
+              <FormLabel>
+                Empresa *{" "}
+                {empresaObrigatoria && (
+                  <span className="text-destructive ml-1 animate-pulse">(obrigatório)</span>
+                )}
+              </FormLabel>
               <Select
-                // Agora armazena o empresa_id (sempre será string)
                 onValueChange={value => {
                   field.onChange(value);
-                  // logs para depuração no console
                   console.log("Empresa selecionada (empresa_id):", value);
                 }}
                 value={field.value || ""}
                 disabled={!selectedCcaId}
               >
                 <FormControl>
-                  <SelectTrigger>
+                  <SelectTrigger
+                    className={empresaObrigatoria ? "border-destructive ring-destructive" : ""}
+                  >
                     <SelectValue placeholder={!selectedCcaId ? "Selecione um CCA primeiro" : "Selecione a empresa"} />
                   </SelectTrigger>
                 </FormControl>
