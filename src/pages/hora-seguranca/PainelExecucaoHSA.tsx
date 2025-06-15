@@ -72,21 +72,28 @@ export default function PainelExecucaoHSA() {
   const programadasCard = statusData
     .filter((s) => statusProgramada.includes((s.name || "").toUpperCase()))
     .reduce((acc, cur) => acc + (cur.value ?? 0), 0);
+
+  // Inspeções Realizadas = status "REALIZADA"
   const realizadasCard = statusData
     .filter((s) => (s.name || "").toUpperCase() === "REALIZADA")
     .reduce((acc, cur) => acc + (cur.value ?? 0), 0);
+
+  // Inspeções Não Realizadas = status "NÃO REALIZADA"
   const naoRealizadaCard = statusData
     .filter((s) => (s.name || "").toUpperCase() === "NÃO REALIZADA")
     .reduce((acc, cur) => acc + (cur.value ?? 0), 0);
+
+  // Inspeções Realizadas Não Programadas = status "REALIZADA (NÃO PROGRAMADA)"
   const realizadasNaoProgramadaCard = statusData
     .filter((s) => (s.name || "").toUpperCase() === "REALIZADA (NÃO PROGRAMADA)")
     .reduce((acc, cur) => acc + (cur.value ?? 0), 0);
+
+  // Adesão
   const aderenciaPerc =
     programadasCard > 0
       ? Math.round((realizadasCard / programadasCard) * 1000) / 10 // 1 decimal
       : 0;
 
-  // Cores do card de aderência real
   let aderenciaColor = "text-green-600";
   if (aderenciaPerc < 90) {
     aderenciaColor = "text-red-600";
