@@ -65,6 +65,14 @@ const CadastroTarefas = () => {
 
   const watchRecorrencia = watch("configuracao.recorrencia.ativa");
 
+  // Função para transformar em letras maiúsculas e atualizar o valor do campo
+  const handleUppercaseChange = (field: "titulo" | "descricao") => (
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const upperValue = event.target.value.toUpperCase();
+    setValue(field, upperValue, { shouldValidate: true });
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -171,6 +179,7 @@ const CadastroTarefas = () => {
                 id="titulo"
                 placeholder="Digite o título da tarefa"
                 {...register("titulo")}
+                onChange={handleUppercaseChange("titulo")}
               />
               {errors.titulo && (
                 <p className="text-sm text-red-500">{errors.titulo.message}</p>
@@ -238,6 +247,7 @@ const CadastroTarefas = () => {
                 id="descricao"
                 placeholder="Descreva a tarefa detalhadamente..."
                 {...register("descricao")}
+                onChange={handleUppercaseChange("descricao")}
               />
               {errors.descricao && (
                 <p className="text-sm text-red-500">{errors.descricao.message}</p>
