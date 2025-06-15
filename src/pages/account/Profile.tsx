@@ -9,6 +9,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useProfile, UserProfile } from "@/hooks/useProfile";
 import { useAuth } from "@/contexts/AuthContext";
 import { useProfileAvatarUrl } from "@/hooks/useProfileAvatarUrl";
+import { uploadAvatarToBucket } from "@/utils/uploadAvatarToBucket";
+import { useToast } from "@/hooks/use-toast";
+import { Image } from "lucide-react";
 
 const Profile = () => {
   const { user } = useAuth();
@@ -17,6 +20,9 @@ const Profile = () => {
   const { url: avatarUrl } = useProfileAvatarUrl(profile?.avatar_url);
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState<Partial<UserProfile>>({});
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const { toast } = useToast();
 
   // Atualizar formData quando o perfil carrega
   React.useEffect(() => {
@@ -38,21 +44,35 @@ const Profile = () => {
     }));
   };
 
-  const handleSave = () => {
-    updateProfileMutation.mutate(formData);
-    setIsEditing(false);
+  // Atualiza preview e file selecionado
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      toast({
+        title: "Erro",
+        description: "Escolha um arquivo de imagem.",
+        variant: "destructive"
+      });
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "Erro",
+        description: "Tamanho máximo da imagem: 5MB.",
+        variant: "destructive"
+      });
+      return;
+    }
+    setAvatarFile(file);
+    setAvatarPreview(URL.createObjectURL(file));
   };
 
-  const handleCancel = () => {
-    if (profile) {
-      setFormData({
-        nome: profile.nome || '',
-        email: profile.email || '',
-        cargo: profile.cargo || '',
-        departamento: profile.departamento || ''
-      });
-    }
-    setIsEditing(false);
+  // Limpa seleção do avatar
+  const handleAvatarRemove = () => {
+    setAvatarFile(null);
+    setAvatarPreview(null);
+    setFormData(prev => ({ ...prev, avatar_url: undefined }));
   };
 
   const getInitials = (name: string) => {
@@ -128,6 +148,55 @@ const Profile = () => {
     );
   }
 
+  const handleSave = async () => {
+    let avatar_url = formData.avatar_url; // path do avatar que vai para o banco
+
+    // Caso imagem foi selecionada
+    if (avatarFile) {
+      if (!user?.id) {
+        toast({
+          title: "Erro",
+          description: "Não foi possível identificar o usuário.",
+          variant: "destructive",
+        });
+        return;
+      }
+      const result = await uploadAvatarToBucket(user.id, avatarFile);
+      if (result) {
+        avatar_url = result;
+      } else {
+        toast({
+          title: "Erro",
+          description: "Falha ao enviar a imagem de perfil.",
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+
+    // Salva as outras alterações no perfil, incluindo avatar_url atualizado se houver
+    updateProfileMutation.mutate({
+      ...formData,
+      avatar_url
+    });
+
+    setIsEditing(false);
+    setAvatarFile(null);
+    setAvatarPreview(null);
+  };
+
+  const handleCancel = () => {
+    if (profile) {
+      setFormData({
+        nome: profile.nome || '',
+        email: profile.email || '',
+        cargo: profile.cargo || '',
+        departamento: profile.departamento || ''
+      });
+    }
+    setIsEditing(false);
+  };
+
   return (
     <div className="container mx-auto py-6">
       <h1 className="text-2xl font-bold mb-6">Meu Perfil</h1>
@@ -139,22 +208,53 @@ const Profile = () => {
             <CardDescription>Visualize e edite suas informações pessoais</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col items-center pt-6">
-            <Avatar className="h-24 w-24 mb-4">
-              {/* Atualizado para usar avatarUrl assinado (caso precise) */}
-              {avatarUrl ? (
-                <AvatarImage src={avatarUrl} alt={profile.nome} />
-              ) : (
-                <AvatarFallback className="text-2xl bg-primary text-primary-foreground">
-                  {getInitials(profile.nome)}
-                </AvatarFallback>
+            <div className="relative">
+              <Avatar className="h-24 w-24 mb-4">
+                {avatarPreview ? (
+                  <AvatarImage src={avatarPreview} alt={profile.nome} />
+                ) : avatarUrl ? (
+                  <AvatarImage src={avatarUrl} alt={profile.nome} />
+                ) : (
+                  <AvatarFallback className="text-2xl bg-primary text-primary-foreground flex flex-col items-center justify-center">
+                    <Image size={32} className="mb-1" />
+                    {getInitials(profile.nome)}
+                  </AvatarFallback>
+                )}
+              </Avatar>
+              {/* Apenas durante edição, mostra botão de input da foto */}
+              {isEditing && (
+                <label
+                  htmlFor="avatar-upload"
+                  className="absolute -bottom-1.5 -right-1.5 bg-secondary p-2 rounded-full border shadow cursor-pointer hover:bg-secondary/80 transition"
+                  title="Alterar foto"
+                >
+                  <input
+                    id="avatar-upload"
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleAvatarChange}
+                  />
+                  <Image size={20} />
+                </label>
               )}
-            </Avatar>
+              {/* Botão remover foto */}
+              {isEditing && (avatarPreview || formData.avatar_url) && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  className="absolute top-2 right-2 px-2 py-1 text-xs text-destructive"
+                  onClick={handleAvatarRemove}
+                >
+                  Remover
+                </Button>
+              )}
+            </div>
             <h3 className="text-lg font-medium">{profile.nome}</h3>
             <p className="text-sm text-muted-foreground">{userRole || 'Usuário'}</p>
             <p className="text-sm text-muted-foreground">{profile.departamento || 'Departamento não informado'}</p>
             
             <Separator className="my-4" />
-            
             <div className="w-full space-y-2">
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Email:</span>
@@ -194,6 +294,46 @@ const Profile = () => {
           </CardHeader>
           <CardContent>
             <form className="space-y-4">
+              {/* Adiciona seletor de foto de perfil em modo edição (mobile/desktop) */}
+              {isEditing && (
+                <div className="space-y-2 flex flex-col">
+                  <Label>Foto do Perfil</Label>
+                  <div className="flex gap-2 items-center">
+                    <input
+                      id="avatar-upload-secondary"
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleAvatarChange}
+                    />
+                    <Button asChild variant="outline" type="button" size="sm">
+                      <label htmlFor="avatar-upload-secondary" className="cursor-pointer flex items-center gap-2">
+                        <Image size={18} /> Selecionar imagem
+                      </label>
+                    </Button>
+                    {(avatarPreview || formData.avatar_url) && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="text-destructive"
+                        onClick={handleAvatarRemove}
+                      >
+                        Remover
+                      </Button>
+                    )}
+                  </div>
+                  {avatarPreview && (
+                    <div className="mt-2">
+                      <img
+                        src={avatarPreview}
+                        alt="Preview"
+                        className="h-20 w-20 rounded-full object-cover border"
+                      />
+                    </div>
+                  )}
+                </div>
+              )}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="nome">Nome Completo</Label>
