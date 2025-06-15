@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -10,10 +11,11 @@ import { Calendar, FileText, LayoutDashboard, Plus, Users } from "lucide-react";
 import { Link } from "react-router-dom";
 import TreinamentosDashboardFilters from "@/components/treinamentos/TreinamentosDashboardFilters";
 import { TreinamentosExecucaoChart } from "@/components/treinamentos/TreinamentosExecucaoChart";
-import { DonutProcessoGeralChart } from "@/components/treinamentos/DonutProcessoGeralChart";
+import ProcessoGeralPieChart from "@/components/treinamentos/ProcessoGeralPieChart";
 import { DonutSubprocessoChart } from "@/components/treinamentos/DonutSubprocessoChart";
 import { fetchProcessosTreinamento } from "@/services/treinamentos/processoTreinamentoService";
 import { TabelaTreinamentosNormativosVencidos } from "@/components/treinamentos/TabelaTreinamentosNormativosVencidos";
+
 const TreinamentosDashboard = () => {
   const [year, setYear] = useState<string>("todos");
   const [month, setMonth] = useState<string>("todos");
@@ -72,7 +74,7 @@ const TreinamentosDashboard = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent className="h-[400px] flex items-center justify-center">
-                <DonutProcessoGeralChart />
+                <ProcessoGeralPieChart />
               </CardContent>
             </Card>
           </div>
