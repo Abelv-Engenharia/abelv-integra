@@ -57,6 +57,7 @@ import InspecaoCadastroHSA from './pages/hora-seguranca/InspecaoCadastroHSA';
 import InspecaoNaoProgramadaHSA from './pages/hora-seguranca/InspecaoNaoProgramadaHSA';
 import InspecoesAcompanhamento from './pages/hora-seguranca/InspecoesAcompanhamento';
 import PainelExecucaoHSA from './pages/hora-seguranca/PainelExecucaoHSA';
+import AgendaHSA from './pages/hora-seguranca/AgendaHSA';
 
 const queryClient = new QueryClient();
 
@@ -133,6 +134,7 @@ function App() {
               {/* Painel Execução HSA - ADICIONADA ROTA DO DASHBOARD */}
               <Route path="hora-seguranca/painel-execucao" element={<PainelExecucaoHSA />} />
               <Route path="hora-seguranca/dashboard" element={<PainelExecucaoHSA />} />
+              <Route path="hora-seguranca/agenda" element={<AgendaHSA />} />
               {/* Página de acompanhamento */}
               <Route path="hora-seguranca/acompanhamento" element={<InspecoesAcompanhamento />} />
             </Route>
