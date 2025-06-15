@@ -38,6 +38,7 @@ export function AppSidebar() {
   
   // Define the main menu sections to track which one is open
   const [openMenu, setOpenMenu] = useState<string | null>(() => {
+    if (currentPath.startsWith("/hora-seguranca")) return "hora-seguranca";
     if (currentPath.startsWith("/desvios")) return "desvios";
     if (currentPath.startsWith("/treinamentos")) return "treinamentos";
     if (currentPath.startsWith("/ocorrencias")) return "ocorrencias";
@@ -70,12 +71,11 @@ export function AppSidebar() {
           </SidebarMenu>
         </SidebarGroup>
 
-        {/* Novo grupo Hora da Segurança */}
         <SidebarGroup>
-          <SidebarGroupLabel>Hora da Segurança</SidebarGroupLabel>
+          <SidebarGroupLabel>Gestão de SMS</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {/* Submenu com as opções */}
+              {/* Hora da Segurança */}
               <SidebarMenuItem>
                 <Collapsible open={openMenu === "hora-seguranca"}>
                   <CollapsibleTrigger asChild>
@@ -125,14 +125,7 @@ export function AppSidebar() {
                   </CollapsibleContent>
                 </Collapsible>
               </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
 
-        <SidebarGroup>
-          <SidebarGroupLabel>Gestão de SMS</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
               {/* Desvios */}
               <SidebarMenuItem>
                 <Collapsible open={openMenu === "desvios"}>
