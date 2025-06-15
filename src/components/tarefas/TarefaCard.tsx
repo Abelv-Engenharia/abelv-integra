@@ -87,7 +87,13 @@ export const TarefaCard: React.FC<TarefaCardProps> = ({
         </Badge>
       </CardHeader>
       <CardContent className="pb-2">
-        <p className="text-sm text-muted-foreground line-clamp-2">{tarefa.descricao}</p>
+        {/* Mostrar o TÍTULO no lugar da DESCRIÇÃO */}
+        <p className="text-sm font-semibold text-primary line-clamp-2">
+          {/* Verifica se tem título, senão mostra um texto padrão */}
+          {"titulo" in tarefa && tarefa.titulo
+            ? tarefa.titulo
+            : "(Sem título)"}
+        </p>
       </CardContent>
       <CardFooter className="pt-0 flex justify-between">
         <div className="flex space-x-2">
