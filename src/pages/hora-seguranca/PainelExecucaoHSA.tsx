@@ -432,9 +432,9 @@ export default function PainelExecucaoHSA() {
             <CardTitle>Desvios por Atividade Crítica</CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={350}>
+            <ResponsiveContainer width="100%" height={300}>
               <RePieChart>
-                <RePie data={pieData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={120} fill="#1565C0" label={({
+                <RePie data={pieData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} fill="#1565C0" label={({
                 name,
                 percent
               }) => `${name} • ${(percent * 100).toFixed(1)}%`}>
