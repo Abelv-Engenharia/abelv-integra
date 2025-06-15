@@ -174,76 +174,69 @@ export default function InspecoesAcompanhamento() {
       ) : (
         <div className="flex flex-col gap-2">
           {inspecoes.map((inspecao) => (
-            <Card key={inspecao.id} className="animate-fade-in relative min-h-[112px] p-3">
+            <Card key={inspecao.id} className="animate-fade-in relative min-h-[92px] p-2">
               {/* Status badge canto superior direito */}
               <div className="absolute right-2 top-2 z-10">
                 <Badge
                   className={
                     getStatusBadgeClass(inspecao.status) +
-                    " text-[10px] px-2 py-0.5 h-5 min-h-0 leading-tight"
+                    " text-[9px] px-2 py-0.5 h-5 min-h-0 leading-tight"
                   }
                 >
-                  <div className="flex items-center gap-1">
-                    {getStatusIcon(inspecao.status)}
-                    <span className="text-[10px]">
-                      {inspecao.status === "REALIZADA (NÃO PROGRAMADA)"
-                        ? "REALIZADA (NÃO PROG.)"
-                        : inspecao.status}
-                    </span>
-                  </div>
+                  <span className="text-[9px] font-semibold">
+                    {inspecao.status === "REALIZADA (NÃO PROGRAMADA)"
+                      ? "REALIZADA (NÃO PROG.)"
+                      : inspecao.status}
+                  </span>
                 </Badge>
               </div>
-              <CardHeader className="pb-1 pt-3 px-3">
-                <CardTitle className="text-sm flex flex-col gap-0.5 min-h-0 leading-tight">
-                  {/* Exibe CCA completo */}
-                  <span className="font-bold text-base leading-tight">
+              <CardHeader className="pb-1 pt-2 px-2">
+                <CardTitle className="text-xs flex flex-col gap-0.5 min-h-0 leading-tight">
+                  <span className="font-bold text-sm leading-tight">
                     {inspecao.cca?.codigo
                       ? `${inspecao.cca.codigo} - ${inspecao.cca.nome}`
                       : "CCA não definido"}
                   </span>
-                  {/* Data logo abaixo, agora em negrito */}
-                  <span className="font-bold text-xs mt-0.5">
+                  <span className="font-bold text-[11px] mt-0.5">
                     {inspecao.data ? format(new Date(inspecao.data), "dd/MM/yyyy") : "--"}
                   </span>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="flex flex-col gap-1 pt-0 px-3 pb-2">
-                <div className="text-[11px] leading-snug">
+              <CardContent className="flex flex-col gap-1 pt-0 px-2 pb-2">
+                <div className="text-[10px] leading-snug">
                   <span className="font-medium">Responsável:</span>{" "}
                   {inspecao.responsavel_inspecao}
                 </div>
-                <div className="text-[11px] leading-snug">
+                <div className="text-[10px] leading-snug">
                   <span className="font-medium">Função:</span>{" "}
                   {inspecao.funcao}
                 </div>
-                <div className="text-[11px] leading-snug">
+                <div className="text-[10px] leading-snug">
                   <span className="font-medium">Inspeção programada:</span>{" "}
                   {inspecao.inspecao_programada}
                 </div>
-                <div className="text-[11px] leading-snug">
+                <div className="text-[10px] leading-snug">
                   <span className="font-medium">Desvios identificados:</span>{" "}
                   {inspecao.desvios_identificados ?? 0}
                 </div>
               </CardContent>
               {/* Botões canto inferior direito, menores */}
-              <CardFooter className="pt-0 px-3 pb-2 justify-end">
+              <CardFooter className="pt-0 px-2 pb-2 justify-end">
                 <div className="flex gap-1">
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => openUpdateDialog(inspecao)}
-                    className="flex items-center gap-1 px-2 py-1 h-7 min-h-0 text-[11px] leading-none"
+                    className="flex items-center gap-1 px-2 py-0.5 h-6 min-h-0 text-[10px] leading-none"
                   >
-                    <Pencil className="w-3.5 h-3.5" />
                     Atualizar Status
                   </Button>
                   <Button
                     variant="destructive"
                     size="sm"
-                    className="flex items-center gap-1 px-2 py-1 h-7 min-h-0 text-[11px] leading-none"
+                    className="flex items-center gap-1 px-2 py-0.5 h-6 min-h-0 text-[10px] leading-none"
                     onClick={() => handleDelete(inspecao.id)}
                   >
-                    <Trash2 className="w-3.5 h-3.5" />
                     Excluir
                   </Button>
                 </div>
