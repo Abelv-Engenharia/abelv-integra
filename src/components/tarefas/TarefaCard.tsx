@@ -1,14 +1,30 @@
-import React from "react";
+
+import React, { useState } from "react";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle, Clock, AlertCircle, User, Calendar } from "lucide-react";
+import { CheckCircle, Clock, AlertCircle, User, Calendar, Trash } from "lucide-react";
 import { Tarefa } from "@/types/tarefas";
 import { formatDistanceToNow, format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogFooter,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogAction,
+  AlertDialogCancel
+} from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+
 interface TarefaCardProps {
   tarefa: Tarefa;
   onClick: (tarefa: Tarefa) => void;
+  onDelete?: (tarefa: Tarefa) => void;
 }
+
 const getStatusConfig = (status: Tarefa["status"]) => {
   switch (status) {
     case "concluida":
@@ -47,9 +63,11 @@ const getCriticidadeConfig = (criticidade: Tarefa["configuracao"]["criticidade"]
       return "bg-gray-100 text-gray-800";
   }
 };
+
 export const TarefaCard: React.FC<TarefaCardProps> = ({
   tarefa,
-  onClick
+  onClick,
+  onDelete
 }) => {
   const statusConfig = getStatusConfig(tarefa.status);
   const dataLimite = new Date(tarefa.dataConclusao);
@@ -65,8 +83,52 @@ export const TarefaCard: React.FC<TarefaCardProps> = ({
     locale: ptBR
   });
 
+  const [openDialog, setOpenDialog] = useState(false);
+
   return (
-    <Card className="mb-4 hover:shadow-md transition-shadow cursor-pointer" onClick={() => onClick(tarefa)}>
+    <Card className="mb-4 hover:shadow-md transition-shadow cursor-pointer relative">
+      {/* Botão de excluir no canto superior direito */}
+      {onDelete && (
+        <div className="absolute top-3 right-3 z-10">
+          <AlertDialog open={openDialog} onOpenChange={setOpenDialog}>
+            <AlertDialogTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-destructive hover:bg-red-100"
+                onClick={e => {
+                  e.stopPropagation();
+                  setOpenDialog(true);
+                }}
+                title="Excluir tarefa"
+              >
+                <Trash />
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Tem certeza que deseja excluir esta tarefa? Esta ação não pode ser desfeita.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                <AlertDialogAction
+                  className="bg-red-600 hover:bg-red-700"
+                  onClick={e => {
+                    e.stopPropagation();
+                    setOpenDialog(false);
+                    onDelete(tarefa);
+                  }}
+                >
+                  Excluir tarefa
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
+      )}
       <CardHeader className="pb-2 flex flex-row justify-between items-center">
         <div>
           <p className="font-medium text-sm text-muted-foreground">CCA: {tarefa.cca}</p>
@@ -87,7 +149,6 @@ export const TarefaCard: React.FC<TarefaCardProps> = ({
         </Badge>
       </CardHeader>
       <CardContent className="pb-2">
-        {/* Mostrar o TÍTULO no lugar da DESCRIÇÃO */}
         <p className="text-sm font-semibold text-primary line-clamp-2">
           {typeof tarefa.titulo === "string" && tarefa.titulo.trim().length > 0
             ? tarefa.titulo
