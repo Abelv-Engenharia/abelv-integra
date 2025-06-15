@@ -3,7 +3,7 @@ import { toast } from "@/hooks/use-toast";
 import { Permissoes, Perfil } from "@/types/users";
 
 // Helper para pegar todos os menus e submenus possíveis do sistema
-function getAllMenusSidebar(): string[] {
+export function getAllMenusSidebar(): string[] {
   return [
     "dashboard",
     "desvios_dashboard",
