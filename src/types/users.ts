@@ -1,4 +1,3 @@
-
 import { z } from "zod";
 
 export interface User {
@@ -92,6 +91,9 @@ export interface Permissoes {
   pode_aprovar_tarefas: boolean;
   pode_visualizar_relatorios_completos: boolean;
   pode_exportar_dados: boolean;
+
+  // Novidade: definição explícita dos menus/submenus visíveis para esse perfil
+  menus_sidebar?: string[]; // Ex: ['dashboard', 'desvios', 'tarefas-minhas', ...]  
 }
 
 export interface Perfil {
