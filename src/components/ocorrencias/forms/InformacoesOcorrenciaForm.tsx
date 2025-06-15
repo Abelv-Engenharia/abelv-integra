@@ -144,14 +144,21 @@ const InformacoesOcorrenciaForm = () => {
             )}
             {value && typeof value === "string" && (
               <div className="flex items-center space-x-2 mt-2">
-                <a
-                  href={value}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-600 underline text-xs"
+                <Button
+                  asChild
+                  type="button"
+                  size="sm"
+                  variant="default"
+                  className="text-xs px-2 py-0.5 h-7"
                 >
-                  Visualizar CAT anexada
-                </a>
+                  <a
+                    href={value}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Visualizar CAT anexada
+                  </a>
+                </Button>
                 <Button
                   type="button"
                   size="sm"
