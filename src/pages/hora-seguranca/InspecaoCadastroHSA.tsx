@@ -39,17 +39,41 @@ const useCCAs = () => {
   return ccas;
 };
 
-// Busca FUNCIONÁRIOS ATIVOS
-const useFuncionarios = () => {
+// Atualiza o hook para aceitar o código do CCA
+const useFuncionarios = (ccaCodigo?: string) => {
   const [funcionarios, setFuncionarios] = React.useState([]);
   React.useEffect(() => {
+    if (!ccaCodigo) {
+      setFuncionarios([]);
+      return;
+    }
     supabase
       .from("funcionarios")
-      .select("id, nome, funcao")
+      .select("id, nome, funcao, cca_id, ativo, matricula")
       .eq("ativo", true)
       .order("nome")
-      .then(({ data }) => setFuncionarios(data || []));
-  }, []);
+      .then(({ data }) => {
+        // Filtra funcionários pelo cca_id relacionado ao código selecionado
+        if (!data) {
+          setFuncionarios([]);
+          return;
+        }
+        // Buscar o ID do CCA a partir do código
+        supabase
+          .from("ccas")
+          .select("id")
+          .eq("codigo", ccaCodigo)
+          .maybeSingle()
+          .then(({ data: ccaData }) => {
+            if (!ccaData) {
+              setFuncionarios([]);
+              return;
+            }
+            const filtered = data.filter((f: any) => f.cca_id === ccaData.id);
+            setFuncionarios(filtered);
+          });
+      });
+  }, [ccaCodigo]);
   return funcionarios;
 };
 
@@ -87,12 +111,8 @@ type FormType = z.infer<typeof formSchema>;
 
 const InspecaoCadastroHSA = () => {
   const ccas = useCCAs();
-  const funcionarios = useFuncionarios();
-  const tiposInspecao = useTiposInspecao();
-  const { toast } = useToast();
 
-  const [success, setSuccess] = useState(false);
-
+  // Pega o valor de CCA selecionado e atualiza o hook de funcionários para filtrar corretamente
   const form = useForm<FormType>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -100,6 +120,12 @@ const InspecaoCadastroHSA = () => {
       responsavelFuncionarioId: "",
     },
   });
+  const watchCCA = form.watch("cca");
+  const funcionarios = useFuncionarios(watchCCA);
+  const tiposInspecao = useTiposInspecao();
+  const { toast } = useToast();
+
+  const [success, setSuccess] = useState(false);
 
   const watchData = form.watch("data");
   const ano = watchData ? format(watchData, "yyyy") : "";
@@ -293,23 +319,25 @@ const InspecaoCadastroHSA = () => {
                     <label className="block font-medium mb-1">
                       Responsável pela ação
                     </label>
-                    {/* Seleção via funcionário */}
                     {form.watch("responsavelTipo") === "funcionario" ? (
                       <Select
                         onValueChange={(value) => form.setValue("responsavelFuncionarioId", value)}
                         value={form.watch("responsavelFuncionarioId")}
-                        disabled={!ccaSelecionado}
+                        disabled={!watchCCA}
                       >
                         <SelectTrigger className="w-full">
                           <SelectValue
                             placeholder={
-                              ccaSelecionado
+                              watchCCA
                                 ? "Selecione o funcionário"
                                 : "Selecione um CCA primeiro"
                             }
                           />
                         </SelectTrigger>
                         <SelectContent>
+                          {funcionarios.length === 0 && watchCCA && (
+                            <div className="text-sm text-gray-500 px-2 py-1">Nenhum funcionário para este CCA</div>
+                          )}
                           {funcionarios.map((f: any) => (
                             <SelectItem key={f.id} value={f.id}>
                               {f.nome} ({f.funcao})
@@ -322,7 +350,7 @@ const InspecaoCadastroHSA = () => {
                         value={form.watch("responsavelNome") || ""}
                         onChange={e => form.setValue("responsavelNome", e.target.value)}
                         placeholder="Ou digite um responsável manualmente"
-                        disabled={!ccaSelecionado}
+                        disabled={!watchCCA}
                         className="w-full"
                       />
                     )}
@@ -342,7 +370,7 @@ const InspecaoCadastroHSA = () => {
                           })()
                         }
                         placeholder={
-                          ccaSelecionado
+                          watchCCA
                             ? "Função do funcionário"
                             : ""
                         }
@@ -354,7 +382,7 @@ const InspecaoCadastroHSA = () => {
                         value={form.watch("responsavelFuncao") || ""}
                         onChange={e => form.setValue("responsavelFuncao", e.target.value)}
                         placeholder="Digite a função do responsável"
-                        disabled={!ccaSelecionado}
+                        disabled={!watchCCA}
                         className="w-full"
                       />
                     )}
