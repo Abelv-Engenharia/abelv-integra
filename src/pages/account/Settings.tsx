@@ -3,45 +3,70 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useState } from "react";
-import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
+import { useEffect, useState } from "react";
+import { useUserSettings, UserSettings } from "@/hooks/useUserSettings";
 
 const Settings = () => {
-  const { toast } = useToast();
-  const [settings, setSettings] = useState({
-    emailNotifications: true,
-    smsNotifications: false,
-    darkMode: false,
+  const { settings, isLoading, saveSettingsMutation } = useUserSettings();
+  const [form, setForm] = useState<Omit<UserSettings, "id" | "user_id">>({
+    email_notifications: true,
+    sms_notifications: false,
+    dark_mode: false,
     language: "pt-BR",
-    timezone: "America/Sao_Paulo"
+    timezone: "America/Sao_Paulo",
   });
 
-  const handleToggleChange = (setting: string) => {
-    setSettings(prev => ({
+  // Sincroniza form local quando settings carregadas
+  useEffect(() => {
+    if (settings) {
+      setForm({
+        email_notifications: !!settings.email_notifications,
+        sms_notifications: !!settings.sms_notifications,
+        dark_mode: !!settings.dark_mode,
+        language: settings.language || "pt-BR",
+        timezone: settings.timezone || "America/Sao_Paulo"
+      });
+    }
+  }, [settings]);
+
+  const handleToggleChange = (field: keyof typeof form) => {
+    setForm((prev) => ({
       ...prev,
-      [setting]: !prev[setting as keyof typeof prev]
+      [field]: !prev[field]
     }));
   };
 
-  const handleSelectChange = (setting: string, value: string) => {
-    setSettings(prev => ({
+  const handleSelectChange = (field: keyof typeof form, value: string) => {
+    setForm((prev) => ({
       ...prev,
-      [setting]: value
+      [field]: value
     }));
   };
 
   const handleSave = () => {
-    toast({
-      title: "Configurações salvas",
-      description: "Suas preferências foram atualizadas com sucesso"
-    });
+    saveSettingsMutation.mutate(form);
   };
+
+  if (isLoading) {
+    return (
+      <div className="container mx-auto py-6">
+        <h1 className="text-2xl font-bold mb-6">Configurações</h1>
+        <Card>
+          <CardContent>
+            <div className="my-6 space-y-2">
+              <div className="h-4 w-2/3 bg-muted rounded animate-pulse" />
+              <div className="h-8 w-full bg-muted rounded animate-pulse" />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto py-6">
       <h1 className="text-2xl font-bold mb-6">Configurações</h1>
-      
       <div className="grid grid-cols-1 gap-6">
         <Card>
           <CardHeader>
@@ -58,11 +83,10 @@ const Settings = () => {
               </div>
               <Switch
                 id="email-notifications"
-                checked={settings.emailNotifications}
-                onCheckedChange={() => handleToggleChange('emailNotifications')}
+                checked={form.email_notifications}
+                onCheckedChange={() => handleToggleChange('email_notifications')}
               />
             </div>
-            
             <div className="flex items-center justify-between">
               <div>
                 <Label htmlFor="sms-notifications" className="text-base">Notificações por SMS</Label>
@@ -72,8 +96,8 @@ const Settings = () => {
               </div>
               <Switch
                 id="sms-notifications"
-                checked={settings.smsNotifications}
-                onCheckedChange={() => handleToggleChange('smsNotifications')}
+                checked={form.sms_notifications}
+                onCheckedChange={() => handleToggleChange('sms_notifications')}
               />
             </div>
           </CardContent>
@@ -94,8 +118,8 @@ const Settings = () => {
               </div>
               <Switch
                 id="dark-mode"
-                checked={settings.darkMode}
-                onCheckedChange={() => handleToggleChange('darkMode')}
+                checked={form.dark_mode}
+                onCheckedChange={() => handleToggleChange('dark_mode')}
               />
             </div>
           </CardContent>
@@ -111,7 +135,7 @@ const Settings = () => {
               <div className="space-y-2">
                 <Label htmlFor="language">Idioma</Label>
                 <Select
-                  value={settings.language}
+                  value={form.language}
                   onValueChange={(value) => handleSelectChange('language', value)}
                 >
                   <SelectTrigger id="language">
@@ -124,11 +148,10 @@ const Settings = () => {
                   </SelectContent>
                 </Select>
               </div>
-              
               <div className="space-y-2">
                 <Label htmlFor="timezone">Fuso Horário</Label>
                 <Select
-                  value={settings.timezone}
+                  value={form.timezone}
                   onValueChange={(value) => handleSelectChange('timezone', value)}
                 >
                   <SelectTrigger id="timezone">
@@ -145,10 +168,9 @@ const Settings = () => {
             </div>
           </CardContent>
         </Card>
-        
         <div className="flex justify-end">
-          <Button onClick={handleSave}>
-            Salvar Configurações
+          <Button onClick={handleSave} disabled={saveSettingsMutation.isPending}>
+            {saveSettingsMutation.isPending ? "Salvando..." : "Salvar Configurações"}
           </Button>
         </div>
       </div>
