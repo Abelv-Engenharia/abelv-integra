@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -220,26 +219,16 @@ const InspecaoCadastroHSA = () => {
                     </FormItem>
                   )}
                 />
-                <FormField
-                  control={form.control}
-                  name="mes"
-                  render={() => (
-                    <FormItem>
-                      <FormLabel>Mês</FormLabel>
-                      <Input readOnly value={mes} placeholder="Mês" />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="ano"
-                  render={() => (
-                    <FormItem>
-                      <FormLabel>Ano</FormLabel>
-                      <Input readOnly value={ano} placeholder="Ano" />
-                    </FormItem>
-                  )}
-                />
+                {/* MÊS (apenas visual, não FormField) */}
+                <FormItem>
+                  <FormLabel>Mês</FormLabel>
+                  <Input readOnly value={mes} placeholder="Mês" />
+                </FormItem>
+                {/* ANO (apenas visual, não FormField) */}
+                <FormItem>
+                  <FormLabel>Ano</FormLabel>
+                  <Input readOnly value={ano} placeholder="Ano" />
+                </FormItem>
               </div>
 
               <FormField
