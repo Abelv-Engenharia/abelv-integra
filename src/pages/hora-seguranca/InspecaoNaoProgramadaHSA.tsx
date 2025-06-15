@@ -232,10 +232,12 @@ const InspecaoNaoProgramadaHSA = () => {
         </Card>
       </div>;
   }
-  return <div className="w-full px-2 sm:px-4 md:px-8 py-6 flex justify-center text-inherit text-left">
+  return <div className="w-full px-2 sm:px-4 md:px-8 py-6 flex justify-center text-black text-left">
       <Card className="w-full max-w-4xl border bg-card shadow-md">
         <CardContent className="pt-6 pb-8 space-y-6">
-          <h2 className="text-2xl font-bold w-full text-orange-500 text-left">Cadastrar Inspeção Não Programada - HSA</h2>
+          <h2 className="text-2xl font-bold text-center w-full text-orange-500">
+            Cadastro de Inspeção Hora da Segurança NÃO PROGRAMADA
+          </h2>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6 w-full">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
