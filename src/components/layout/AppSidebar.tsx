@@ -42,7 +42,6 @@ export function AppSidebar() {
     if (currentPath.startsWith("/hora-seguranca")) return "hora-seguranca";
     if (currentPath.startsWith("/desvios")) return "desvios";
     if (currentPath.startsWith("/treinamentos")) return "treinamentos";
-    if (currentPath.startsWith("/ocorrencias")) return "ocorrencias";
     if (currentPath.startsWith("/medidas-disciplinares")) return "medidas-disciplinares";
     if (currentPath.startsWith("/tarefas")) return "tarefas";
     if (currentPath.startsWith("/relatorios")) return "relatorios";
@@ -230,45 +229,6 @@ export function AppSidebar() {
                 </Collapsible>
               </SidebarMenuItem>
 
-              {/* Ocorrências */}
-              <SidebarMenuItem>
-                <Collapsible open={openMenu === "ocorrencias"}>
-                  <CollapsibleTrigger asChild>
-                    <SidebarMenuButton onClick={() => toggleMenu("ocorrencias")}>
-                      <Shield className="h-4 w-4" />
-                      <span>Ocorrências</span>
-                    </SidebarMenuButton>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent asChild>
-                    <SidebarMenuSub>
-                      <SidebarMenuItem>
-                        <SidebarMenuButton asChild>
-                          <Link to="/ocorrencias/dashboard">
-                            <span className="text-xs leading-tight">Dashboard de Ocorrências</span>
-                          </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                      
-                      <SidebarMenuItem>
-                        <SidebarMenuButton asChild>
-                          <Link to="/ocorrencias/cadastro">
-                            <span className="text-xs leading-tight">Cadastro de Ocorrências</span>
-                          </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                      
-                      <SidebarMenuItem>
-                        <SidebarMenuButton asChild>
-                          <Link to="/ocorrencias/consulta">
-                            <span className="text-xs leading-tight">Consulta de Ocorrências</span>
-                          </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                    </SidebarMenuSub>
-                  </CollapsibleContent>
-                </Collapsible>
-              </SidebarMenuItem>
-
               {/* Medidas Disciplinares */}
               <SidebarMenuItem>
                 <Collapsible open={openMenu === "medidas-disciplinares"}>
@@ -396,7 +356,7 @@ export function AppSidebar() {
                 </Collapsible>
               </SidebarMenuItem>
 
-              {/* GRO (Gerenciamento de Riscos Ocupacionais) */}
+              {/* GRO */}
               <SidebarMenuItem>
                 <Collapsible open={openMenu === "gro"}>
                   <CollapsibleTrigger asChild>
