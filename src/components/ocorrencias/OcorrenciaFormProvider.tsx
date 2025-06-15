@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -12,6 +13,7 @@ import FechamentoForm from "@/components/ocorrencias/forms/FechamentoForm";
 import { OcorrenciaFormNavigation } from "@/components/ocorrencias/forms/OcorrenciaFormNavigation";
 import { useOcorrenciaTabs } from "@/hooks/ocorrencias/useOcorrenciaTabs";
 import { ocorrenciaFormSchema, OcorrenciaFormSchema } from "@/schemas/ocorrencias/ocorrenciaFormSchema";
+import { transformFormDataToOcorrencia } from "@/utils/ocorrenciasDataTransform";
 
 const defaultValues: Partial<OcorrenciaFormSchema> = {
   colaboradores_acidentados: [{ colaborador: "", funcao: "", matricula: "" }],
@@ -51,45 +53,41 @@ export const OcorrenciaFormProvider: React.FC = () => {
   const onSubmit = async (values: OcorrenciaFormSchema) => {
     setIsSubmitting(true);
 
-    // Adicionar logs dos principais campos
-    console.log("[OCORRENCIA - SUBMIT] Dados enviados:", values);
+    // Transformar dados (como nos desvios)
+    const ocorrenciaData = transformFormDataToOcorrencia(values);
 
-    // Corrigido: Checa ambos os formatos dos campos críticos
-    const camposCriticos = {
-      data: values.data,
-      classificacaoRisco: values.classificacaoRisco || (values as any).classificacao_risco,
-      cca: values.cca,
-    };
-    console.log("[OCORRENCIA - CAMPOS CRÍTICOS]", camposCriticos);
+    // Log campos críticos para debug
+    console.log("[OCORRENCIA - CAMPOS CRÍTICOS]", {
+      data: ocorrenciaData.data,
+      classificacao_risco: ocorrenciaData.classificacao_risco,
+      cca: ocorrenciaData.cca,
+      empresa: ocorrenciaData.empresa
+    });
 
-    // Mensagem de erro com detalhes:
-    if (!camposCriticos.data || !camposCriticos.classificacaoRisco || !camposCriticos.cca) {
+    // Validação crítica
+    if (
+      !ocorrenciaData.data ||
+      !ocorrenciaData.classificacao_risco ||
+      !ocorrenciaData.cca ||
+      !ocorrenciaData.empresa
+    ) {
       toast.error(
-        `Preencha a data da ocorrência, a classificação e o CCA para prosseguir com o cadastro. 
-        (data: ${camposCriticos.data ? 'Ok' : 'Vazio'}, classificação: ${camposCriticos.classificacaoRisco ? 'Ok' : 'Vazio'}, cca: ${camposCriticos.cca ? 'Ok' : 'Vazio'})`
+        `Preencha os campos obrigatórios: data, classificação de risco, CCA e empresa! 
+        (data: ${ocorrenciaData.data ? "Ok" : "Vazio"}, classificação: ${
+          ocorrenciaData.classificacao_risco ? "Ok" : "Vazio"
+        }, CCA: ${ocorrenciaData.cca ? "Ok" : "Vazio"}, empresa: ${
+          ocorrenciaData.empresa ? "Ok" : "Vazio"
+        })`
       );
       setIsSubmitting(false);
       return;
     }
 
     try {
-      // Logar dados enviados para depuração
-      console.log("[OCORRENCIA] Submetendo valores:", values);
+      // Logar para depuração
+      console.log("[OCORRENCIA - ENVIANDO PARA SUPABASE]:", ocorrenciaData);
 
-      const payload = {
-        ...values,
-        descricao_ocorrencia: values.descricaoOcorrencia,
-        numero_cat: values.numeroCat,
-        efeito_falha: values.efeitoFalha,
-        classificacao_risco: values.classificacaoRisco,
-      };
-
-      // Logando o payload para depuração
-      console.log("[OCORRENCIA] Payload convertido:", payload);
-
-      const result = await createOcorrencia(payload);
-
-      console.log("[OCORRENCIA] Resultado do Supabase:", result);
+      const result = await createOcorrencia(ocorrenciaData);
 
       if (!result) {
         toast.error("Erro ao cadastrar ocorrência: Registro não foi salvo no banco.");
@@ -99,7 +97,6 @@ export const OcorrenciaFormProvider: React.FC = () => {
       toast.success("Ocorrência cadastrada com sucesso!");
       navigate("/ocorrencias/consulta");
     } catch (e: any) {
-      // Exibe erro com detalhes, seja string simples, objeto ou supabase error
       const erroMsg =
         e?.message ||
         (e && typeof e === "object" ? JSON.stringify(e) : String(e));
