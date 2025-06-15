@@ -3,19 +3,21 @@ import React from "react";
 import { cn } from "@/lib/utils";
 
 const levels = [
-  { value: "baixo", color: "bg-green-400", label: "Baixo" },
+  { value: "trivial", color: "bg-green-400", label: "Trivial" },
+  { value: "toleravel", color: "bg-lime-400", label: "Tolerável" },
   { value: "moderado", color: "bg-yellow-300", label: "Moderado" },
-  { value: "alto", color: "bg-orange-400", label: "Alto" },
-  { value: "critico", color: "bg-red-500", label: "Crítico" },
+  { value: "substancial", color: "bg-orange-400", label: "Substancial" },
+  { value: "intoleravel", color: "bg-red-500", label: "Intolerável" },
 ];
 
-// Cálculo padrão: risco = probabilidade * severidade
+// Nova categorização: trivial, tolerável, moderado, substancial, intolerável
 function categorizarRisco(prob: number, sev: number) {
   const risco = prob * sev;
-  if (risco <= 4) return "baixo";
-  if (risco <= 8) return "moderado";
-  if (risco <= 15) return "alto";
-  return "critico";
+  if (risco <= 2) return "trivial";
+  if (risco <= 5) return "toleravel";
+  if (risco <= 10) return "moderado";
+  if (risco <= 15) return "substancial";
+  return "intoleravel";
 }
 
 type MatrizRiscoProps = {

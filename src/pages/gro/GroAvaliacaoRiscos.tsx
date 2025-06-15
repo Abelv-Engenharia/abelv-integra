@@ -11,6 +11,15 @@ const metodologias = [
   { value: "hazop", label: "HAZOP" },
 ];
 
+function categorizarRisco(prob: number, sev: number) {
+  const risco = prob * sev;
+  if (risco <= 2) return "Trivial";
+  if (risco <= 5) return "Tolerável";
+  if (risco <= 10) return "Moderado";
+  if (risco <= 15) return "Substancial";
+  return "Intolerável";
+}
+
 export default function GroAvaliacaoRiscos() {
   const [metodologia, setMetodologia] = useState("matriz");
   const [prob, setProb] = useState(1);
@@ -25,11 +34,7 @@ export default function GroAvaliacaoRiscos() {
           Metodologia: <b>{metodologias.find(m=>m.value===metodologia)?.label}</b><br/>
           Probabilidade: {prob} <br/>
           Severidade: {sev} <br/>
-          Nível de risco: <b>{
-            prob * sev <= 4 ? "Baixo" :
-            prob * sev <= 8 ? "Moderado" :
-            prob * sev <= 15 ? "Alto" : "Crítico"
-          }</b>
+          Nível de risco: <b>{categorizarRisco(prob, sev)}</b>
         </div>
       )
     });
