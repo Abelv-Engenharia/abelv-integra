@@ -50,6 +50,7 @@ import VisualizarExecucaoTreinamento from './pages/treinamentos/VisualizarExecuc
 import EditarExecucaoTreinamento from './pages/treinamentos/EditarExecucaoTreinamento';
 import Layout from './components/layout/Layout';
 import Profile from './pages/account/Profile';
+import Settings from './pages/account/Settings';
 
 const queryClient = new QueryClient();
 
@@ -71,6 +72,7 @@ function App() {
 
               {/* Account/Profile/Auth pages */}
               <Route path="account/profile" element={<Profile />} />
+              <Route path="account/settings" element={<Settings />} />
 
               {/* Treinamentos Routes */}
               <Route path="treinamentos/dashboard" element={<TreinamentosDashboard />} />
