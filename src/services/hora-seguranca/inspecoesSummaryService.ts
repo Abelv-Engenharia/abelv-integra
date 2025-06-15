@@ -7,12 +7,12 @@ import { InspecoesSummary } from './types';
  */
 export async function fetchInspecoesSummary(): Promise<InspecoesSummary> {
   try {
-    // Puxa todos dados da tabela execucao_hsa
+    // Corrige o select removendo sintaxe inválida
     const { data: rows, error } = await supabase
       .from('execucao_hsa')
-      .select('id, inspecao_programada, desvios_identificados, status, canceladas=eq.status')
-    
-    if (error) throw error;
+      .select('id, inspecao_programada, desvios_identificados, status');
+
+    if (error || !rows) throw error;
 
     // Totais
     const totalInspecoes = rows.length;
