@@ -145,6 +145,10 @@ function App() {
               <Route path="gro/perigos" element={<GroCadastroPerigos />} />
               <Route path="gro/avaliacao" element={<GroAvaliacaoRiscos />} />
               <Route path="gro/pgr" element={<GroPGR />} />
+              {/* Ocorrencias */}
+              <Route path="ocorrencias/dashboard" element={<OcorrenciasDashboard />} />
+              <Route path="ocorrencias/cadastro" element={<OcorrenciasCadastro />} />
+              <Route path="ocorrencias/consulta" element={<OcorrenciasConsulta />} />
             </Route>
           </Routes>
         </AuthProvider>
