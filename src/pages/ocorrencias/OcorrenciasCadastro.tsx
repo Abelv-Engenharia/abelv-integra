@@ -240,8 +240,11 @@ const OcorrenciasCadastro = () => {
   const onSubmit = async (data: OcorrenciaFormData) => {
     console.log("Form submitted with data:", data);
     console.log("Is edit mode:", isEditMode);
-    
-    // Validação mais detalhada
+
+    // Logging the empresa field before validation
+    console.log("Valor capturado de empresa (pré-validação):", data.empresa);
+
+    // Validação detalhada
     if (!data.data) {
       console.log("Validation error: data is missing");
       toast({
@@ -271,12 +274,19 @@ const OcorrenciasCadastro = () => {
       });
       return;
     }
-    
+
+    // Conversão extra de empresa para string caso venha como number
+    const fixedEmpresa = typeof data.empresa === "number" ? data.empresa.toString() : data.empresa || "";
+    if (data.empresa !== fixedEmpresa) {
+      console.log("Corrigindo valor de empresa para string. Antes:", data.empresa, "Depois:", fixedEmpresa);
+      data.empresa = fixedEmpresa;
+    }
+
     setIsSubmitting(true);
-    
+
     try {
       console.log("Starting save process...");
-      
+      console.log("Valor FINAL de empresa antes de criar/atualizar:", data.empresa, "Tipo:", typeof data.empresa);
       if (isEditMode && ocorrenciaId) {
         console.log("Updating existing ocorrencia with ID:", ocorrenciaId);
         await updateOcorrencia(ocorrenciaId, data);
