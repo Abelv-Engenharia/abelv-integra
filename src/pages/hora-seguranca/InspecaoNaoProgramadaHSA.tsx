@@ -232,7 +232,7 @@ const InspecaoNaoProgramadaHSA = () => {
         </Card>
       </div>;
   }
-  return <div className="w-full px-2 sm:px-4 md:px-8 py-6 flex justify-center">
+  return <div className="w-full px-2 sm:px-4 md:px-8 py-6 flex justify-center text-inherit text-left">
       <Card className="w-full max-w-4xl border bg-card shadow-md">
         <CardContent className="pt-6 pb-8 space-y-6">
           <h2 className="text-2xl font-bold w-full text-orange-500 text-left">Cadastrar Inspeção Não Programada - HSA</h2>
