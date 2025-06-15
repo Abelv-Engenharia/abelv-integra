@@ -14,9 +14,6 @@ import TreinamentoNormativo from './pages/treinamentos/TreinamentosNormativo';
 import TreinamentosConsulta from './pages/treinamentos/TreinamentosConsulta';
 import ExecucaoTreinamentos from './pages/treinamentos/TreinamentosExecucao';
 import EmissaoCracha from './pages/treinamentos/TreinamentosCracha';
-import OcorrenciasDashboard from './pages/ocorrencias/OcorrenciasDashboard';
-import OcorrenciasConsulta from './pages/ocorrencias/OcorrenciasConsulta';
-import OcorrenciasCadastro from './pages/ocorrencias/OcorrenciasCadastro';
 import MedidasDashboard from './pages/PlaceholderPage';
 import MedidasCadastro from './pages/PlaceholderPage';
 import MedidasConsulta from './pages/PlaceholderPage';
@@ -64,6 +61,9 @@ import MedidasDisciplinaresConsulta from "./pages/medidas-disciplinares/MedidasD
 import GroCadastroPerigos from "./pages/gro/GroCadastroPerigos";
 import GroAvaliacaoRiscos from './pages/gro/GroAvaliacaoRiscos';
 import GroPGR from "./pages/gro/GroPGR";
+import OcorrenciasDashboard from './pages/ocorrencias/OcorrenciasDashboard';
+import OcorrenciasConsulta from './pages/ocorrencias/OcorrenciasConsulta';
+import OcorrenciasCadastro from './pages/ocorrencias/OcorrenciasCadastro';
 
 const queryClient = new QueryClient();
 
@@ -94,10 +94,6 @@ function App() {
               <Route path="treinamentos/cracha" element={<EmissaoCracha />} />
               <Route path="/treinamentos/execucao/visualizar/:id" element={<VisualizarExecucaoTreinamento />} />
               <Route path="/treinamentos/execucao/editar/:id" element={<EditarExecucaoTreinamento />} />
-              {/* Ocorrencias Routes */}
-              <Route path="ocorrencias/dashboard" element={<OcorrenciasDashboard />} />
-              <Route path="ocorrencias/consulta" element={<OcorrenciasConsulta />} />
-              <Route path="ocorrencias/cadastro" element={<OcorrenciasCadastro />} />
               {/* Medidas Disciplinares Routes */}
               <Route path="medidas-disciplinares/dashboard" element={<MedidasDisciplinaresDashboard />} />
               <Route path="medidas-disciplinares/cadastro" element={<MedidasDisciplinaresCadastro />} />
