@@ -250,7 +250,7 @@ const InspecaoCadastroHSA = () => {
   return <div className="w-full px-2 sm:px-4 md:px-8 py-6 flex justify-center">
       <Card className="w-full max-w-4xl border bg-card shadow-md">
         <CardContent className="pt-6 pb-8 space-y-6">
-          <h2 className="text-2xl font-bold w-full text-left">Cadastrar de Inspeção HSA</h2>
+          <h2 className="text-2xl font-bold w-full text-left">Cadastrar Inspeção - HSA</h2>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6 w-full">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
