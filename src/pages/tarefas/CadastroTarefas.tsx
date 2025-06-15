@@ -186,27 +186,29 @@ const CadastroTarefas = () => {
               )}
             </div>
 
-            {/* CCA e Responsável */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="cca_id">CCA *</Label>
-                <Select onValueChange={(value) => setValue("cca_id", parseInt(value))}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione o CCA" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {ccas.map((cca) => (
-                      <SelectItem key={cca.id} value={cca.id.toString()}>
-                        {cca.codigo} - {cca.nome}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {errors.cca_id && (
-                  <p className="text-sm text-red-500">{errors.cca_id.message}</p>
-                )}
-              </div>
+            {/* CCA (em uma linha própria) */}
+            <div className="space-y-2">
+              <Label htmlFor="cca_id">CCA *</Label>
+              <Select onValueChange={(value) => setValue("cca_id", parseInt(value))}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o CCA" />
+                </SelectTrigger>
+                <SelectContent>
+                  {ccas.map((cca) => (
+                    <SelectItem key={cca.id} value={cca.id.toString()}>
+                      {cca.codigo} - {cca.nome}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.cca_id && (
+                <p className="text-sm text-red-500">{errors.cca_id.message}</p>
+              )}
+            </div>
 
+            {/* Responsável e Data de Conclusão */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Responsável */}
               <div className="space-y-2">
                 <Label htmlFor="responsavel_id">Responsável *</Label>
                 <Select onValueChange={(value) => setValue("responsavel_id", value)}>
@@ -225,19 +227,19 @@ const CadastroTarefas = () => {
                   <p className="text-sm text-red-500">{errors.responsavel_id.message}</p>
                 )}
               </div>
-            </div>
 
-            {/* Data de Conclusão */}
-            <div className="space-y-2">
-              <Label htmlFor="data_conclusao">Data de Conclusão *</Label>
-              <Input
-                id="data_conclusao"
-                type="datetime-local"
-                {...register("data_conclusao")}
-              />
-              {errors.data_conclusao && (
-                <p className="text-sm text-red-500">{errors.data_conclusao.message}</p>
-              )}
+              {/* Data de Conclusão */}
+              <div className="space-y-2">
+                <Label htmlFor="data_conclusao">Data de Conclusão *</Label>
+                <Input
+                  id="data_conclusao"
+                  type="datetime-local"
+                  {...register("data_conclusao")}
+                />
+                {errors.data_conclusao && (
+                  <p className="text-sm text-red-500">{errors.data_conclusao.message}</p>
+                )}
+              </div>
             </div>
 
             {/* Descrição */}
