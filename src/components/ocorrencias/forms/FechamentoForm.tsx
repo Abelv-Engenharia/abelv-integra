@@ -19,7 +19,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Check, Clock, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { uploadInformePreliminarToBucket } from "@/utils/uploadInformePreliminarToBucket";
+import { uploadInformePreliminarToBucket, uploadRAIToBucket } from "@/utils/uploadInformePreliminarToBucket";
 
 const FechamentoForm = () => {
   const { control, watch, setValue } = useFormContext();
@@ -219,15 +219,58 @@ const FechamentoForm = () => {
                   type="file"
                   accept=".pdf"
                   {...field}
-                  onChange={(e) => {
+                  onChange={async (e) => {
                     const file = e.target.files?.[0];
                     if (file && file.size <= 2 * 1024 * 1024) { // 2MB limit
-                      onChange(file);
+                      if (!dataOcorrencia || !classificacaoOcorrencia || !codigoCca) {
+                        alert("Preencha a data da ocorrência, a classificação e o CCA antes de anexar o RAI.");
+                        return;
+                      }
+                      const url = await uploadRAIToBucket(
+                        file, dataOcorrencia, classificacaoOcorrencia, codigoCca
+                      );
+                      if (url) {
+                        onChange(url);
+                        setValue("relatorio_analise", url);
+                      } else {
+                        alert("Erro ao fazer upload do arquivo RAI.");
+                      }
                     } else if (file) {
                       alert("O arquivo deve ter no máximo 2MB");
                     }
                   }}
                 />
+                {value && typeof value === "string" && (
+                  <div className="flex items-center space-x-2 mt-2">
+                    <Button
+                      asChild
+                      type="button"
+                      size="sm"
+                      variant="default"
+                      className="text-xs px-2 py-0.5 h-7"
+                    >
+                      <a
+                        href={value}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        Visualizar RAI anexado
+                      </a>
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="destructive"
+                      onClick={() => {
+                        onChange(null);
+                        setValue("relatorio_analise", null);
+                      }}
+                      className="text-xs px-2 py-0.5 h-7"
+                    >
+                      Remover RAI
+                    </Button>
+                  </div>
+                )}
               </div>
             )}
           />
