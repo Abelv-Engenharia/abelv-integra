@@ -8,7 +8,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, Plus, Home } from "lucide-react";
+import { CheckCircle, Plus, BarChart3 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 interface FormSuccessDialogProps {
@@ -25,8 +25,8 @@ const FormSuccessDialog = ({ open, onOpenChange, onNewRecord }: FormSuccessDialo
     onOpenChange(false);
   };
 
-  const handleGoHome = () => {
-    navigate("/");
+  const handleGoToDashboard = () => {
+    navigate("/desvios/dashboard");
     onOpenChange(false);
   };
 
@@ -49,9 +49,9 @@ const FormSuccessDialog = ({ open, onOpenChange, onNewRecord }: FormSuccessDialo
             <Plus className="h-4 w-4" />
             Novo Registro
           </Button>
-          <Button onClick={handleGoHome} variant="outline" className="w-full flex items-center gap-2">
-            <Home className="h-4 w-4" />
-            Menu Principal
+          <Button onClick={handleGoToDashboard} variant="outline" className="w-full flex items-center gap-2">
+            <BarChart3 className="h-4 w-4" />
+            Dashboard de Desvios
           </Button>
         </div>
       </DialogContent>
