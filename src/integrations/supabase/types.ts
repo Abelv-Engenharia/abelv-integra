@@ -670,6 +670,54 @@ export type Database = {
         }
         Relationships: []
       }
+      execucao_hsa: {
+        Row: {
+          ano: number
+          cca: string
+          created_at: string | null
+          data: string
+          desvios_identificados: number
+          funcao: string | null
+          id: string
+          inspecao_programada: string | null
+          mes: number
+          observacao: string | null
+          responsavel_inspecao: string
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          ano: number
+          cca: string
+          created_at?: string | null
+          data: string
+          desvios_identificados?: number
+          funcao?: string | null
+          id?: string
+          inspecao_programada?: string | null
+          mes: number
+          observacao?: string | null
+          responsavel_inspecao: string
+          status: string
+          updated_at?: string | null
+        }
+        Update: {
+          ano?: number
+          cca?: string
+          created_at?: string | null
+          data?: string
+          desvios_identificados?: number
+          funcao?: string | null
+          id?: string
+          inspecao_programada?: string | null
+          mes?: number
+          observacao?: string | null
+          responsavel_inspecao?: string
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       execucao_treinamentos: {
         Row: {
           ano: number
