@@ -14,23 +14,38 @@ export async function fetchInspecoesByResponsavel(): Promise<InspecoesByResponsa
     if (error) throw error;
 
     // Agrupa por responsável
-    const grouped: Record<string, { cancelada: number, realizada: number, nao_realizada: number, realizada_np: number }> = {};
+    const grouped: Record<string, {
+      cancelada: number;
+      realizada: number;
+      nao_realizada: number;
+      realizada_np: number;
+      a_realizar: number;
+    }> = {};
     data.forEach((row: any) => {
       const nome = row.responsavel_inspecao || "Indefinido";
-      if (!(nome in grouped)) grouped[nome] = { cancelada: 0, realizada: 0, nao_realizada: 0, realizada_np: 0 };
+      if (!(nome in grouped)) {
+        grouped[nome] = { cancelada: 0, realizada: 0, nao_realizada: 0, realizada_np: 0, a_realizar: 0 };
+      }
       const status = (row.status || '').toUpperCase();
       if (status.includes('CANCELADA')) grouped[nome].cancelada += 1;
       else if (status === 'REALIZADA') grouped[nome].realizada += 1;
       else if (status.includes('NÃO REALIZADA')) grouped[nome].nao_realizada += 1;
       else if (status.includes('NÃO PROGRAMADA')) grouped[nome].realizada_np += 1;
+      else if (status === 'A REALIZAR') grouped[nome].a_realizar += 1;
     });
+
     return Object.entries(grouped).map(([responsavel, qtds]) => ({
       responsavel,
       quantidade: qtds.realizada,
       cancelada: qtds.cancelada,
       realizada: qtds.realizada,
       nao_realizada: qtds.nao_realizada,
-      "realizada (não programada)": qtds.realizada_np
+      "A Realizar": qtds.a_realizar, // <- Corrigido: adiciona chave para a barra azul
+      "Realizada": qtds.realizada,
+      "Não Realizada": qtds.nao_realizada,
+      "Realizada (Não Programada)": qtds.realizada_np,
+      "Cancelada": qtds.cancelada,
+      "realizada (não programada)": qtds.realizada_np // compatibilidade
     }));
   } catch (error) {
     console.error("Erro ao buscar inspeções por responsável:", error);
