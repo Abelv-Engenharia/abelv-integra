@@ -1,8 +1,7 @@
 
 import React, { useEffect, useState } from "react";
 import { Calendar } from "@/components/ui/calendar";
-import { Card, CardContent, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardTitle, CardHeader } from "@/components/ui/card";
 import { format, isSameDay } from "date-fns";
 import { ptBR } from "date-fns/locale/pt-BR";
 import { supabase } from "@/integrations/supabase/client";
@@ -18,7 +17,7 @@ interface InspecaoAgenda {
 
 export default function AgendaHSA() {
   const [inspecoes, setInspecoes] = useState<InspecaoAgenda[]>([]);
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -44,31 +43,25 @@ export default function AgendaHSA() {
   });
 
   // Componente personalizado para o conteúdo do dia
-  const CustomDayContent = (props: { date: Date }) => {
-    const date = props.date;
-    const key = format(date, "yyyy-MM-dd");
-    const eventos = groupedByDay[key];
+  const CustomDayContent = ({ date }: { date: Date }) => {
+    const dayKey = format(date, "yyyy-MM-dd");
+    const eventosDoDia = groupedByDay[dayKey] || [];
+    const isToday = isSameDay(date, new Date());
+
     return (
-      <div className="relative flex flex-col items-center">
-        <span>{date.getDate()}</span>
-        <div className="absolute z-10 top-6 left-1 right-1">
-          {eventos && eventos.length > 0 && (
-            <div className="flex flex-col gap-1">
-              {eventos.map((inspecao) => (
-                <div
-                  key={inspecao.id}
-                  className="rounded px-1 py-0.5 bg-green-100 border text-xs text-green-900 border-green-400 flex flex-col"
-                  title={`Status: ${inspecao.status}${inspecao.inspecao_programada ? " • " + inspecao.inspecao_programada : ""}`}
-                >
-                  <span className="font-semibold">{inspecao.responsavel_inspecao}</span>
-                  <span className="text-[10px]">{inspecao.status}</span>
-                  {inspecao.inspecao_programada && (
-                    <span className="text-[10px] text-gray-500">{inspecao.inspecao_programada}</span>
-                  )}
-                </div>
-              ))}
+      <div className="flex flex-col h-full w-full p-2">
+        <span className={`font-medium self-start ${isToday ? 'text-blue-600 font-bold' : ''}`}>{date.getDate()}</span>
+        <div className="flex-grow overflow-y-auto text-xs mt-1 space-y-1">
+          {eventosDoDia.map((inspecao) => (
+            <div
+              key={inspecao.id}
+              className="rounded p-1 bg-green-50 border border-green-200 text-gray-800"
+              title={`${inspecao.inspecao_programada || 'Inspeção'} - ${inspecao.status}`}
+            >
+              <p className="font-bold truncate">{inspecao.responsavel_inspecao}</p>
+              <p className="truncate text-gray-600">{inspecao.inspecao_programada || 'Não Programada'}</p>
             </div>
-          )}
+          ))}
         </div>
       </div>
     );
@@ -82,58 +75,37 @@ export default function AgendaHSA() {
     );
 
   return (
-    <div className="container max-w-3xl mx-auto py-6 animate-fade-in">
-      <Card className="mb-6">
-        <CardTitle className="text-2xl py-4 px-4">Agenda HSA</CardTitle>
-        <CardContent>
-          <p className="mb-4 text-sm text-muted-foreground">
-            Veja todas as inspeções de Hora da Segurança agendadas, agrupadas por responsável.
-            <br />
-            Clique em um dia para realçar as inspeções daquele dia.
+    <div className="container max-w-7xl mx-auto py-6 animate-fade-in">
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-2xl">Agenda HSA</CardTitle>
+          <p className="text-sm text-muted-foreground">
+            Calendário de inspeções de Hora da Segurança.
           </p>
-          <div className="flex flex-col items-center">
+        </CardHeader>
+        <CardContent>
             <Calendar
               mode="single"
               selected={selectedDate}
               onSelect={setSelectedDate}
-              className="p-3 pointer-events-auto bg-white rounded-lg"
+              className="p-0 border rounded-md"
               locale={ptBR}
               showOutsideDays
-              modifiers={{ hasInspecao: (date) => Boolean(groupedByDay[format(date, "yyyy-MM-dd")]) }}
-              modifiersClassNames={{
-                hasInspecao: "outline outline-green-400/70 outline-2",
+              classNames={{
+                months: "flex flex-col sm:flex-row",
+                month: "w-full space-y-4 p-4",
+                table: "w-full border-collapse",
+                head_row: "flex w-full border-b",
+                head_cell: "text-muted-foreground flex-1 font-normal text-sm p-2 text-center",
+                row: "flex w-full divide-x divide-gray-200",
+                cell: "h-40 flex-1 p-0 relative border-t border-gray-200",
+                day: "w-full h-full",
+                day_selected: "bg-primary/10 text-primary",
+                day_today: "bg-accent text-accent-foreground",
+                day_outside: "day-outside text-muted-foreground opacity-30",
               }}
               components={{ DayContent: CustomDayContent }}
             />
-            {/* Lista detalhada das inspeções no dia selecionado */}
-            {selectedDate && (
-              <div className="mt-6 w-full">
-                <h3 className="font-bold text-lg mb-2 text-center">
-                  Inspeções do dia {format(selectedDate, "dd/MM/yyyy", { locale: ptBR })}
-                </h3>
-                {groupedByDay[format(selectedDate, "yyyy-MM-dd")] ? (
-                  <ul className="space-y-2">
-                    {groupedByDay[format(selectedDate, "yyyy-MM-dd")].map((inspecao) => (
-                      <li key={inspecao.id} className="border rounded p-2 bg-green-50 flex justify-between items-center">
-                        <span>
-                          <span className="font-semibold">{inspecao.responsavel_inspecao}</span>
-                          {" — "}
-                          <span className="text-xs text-gray-500">{inspecao.status}</span>
-                        </span>
-                        {inspecao.inspecao_programada && (
-                          <Badge>{inspecao.inspecao_programada}</Badge>
-                        )}
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <div className="text-center text-muted-foreground py-8">
-                    Nenhuma inspeção agendada neste dia.
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
         </CardContent>
       </Card>
     </div>
