@@ -7,6 +7,7 @@ import { ResponsiveContainer, BarChart as ReBarChart, Bar, XAxis, YAxis, Cartesi
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 const COLORS = ["#4285F4", "#34A853", "#FBBC05", "#EA4335", "#8D6E63", "#FF9800", "#7E57C2"];
 export default function PainelExecucaoHSA() {
   const [summary, setSummary] = useState<any>(null);
@@ -16,6 +17,16 @@ export default function PainelExecucaoHSA() {
   const [desvioRespData, setDesvioRespData] = useState<any[]>([]);
   const [pieData, setPieData] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Carregar lista de CCAs (para rótulos e filtros)
+  const [ccas, setCcas] = useState<{ id: number; codigo: string; nome: string }[]>([]);
+  useEffect(() => {
+    async function getCcas() {
+      const { data } = await supabase.from("ccas").select("id,codigo,nome").order("codigo");
+      setCcas(data || []);
+    }
+    getCcas();
+  }, []);
 
   // Filtros - estão apenas visuais por enquanto!
   const [ano, setAno] = useState("todos");
@@ -44,6 +55,7 @@ export default function PainelExecucaoHSA() {
       })));
       // Execução por Responsável
       const responsaveis = await fetchInspecoesByResponsavel();
+      // Agora associar corretamente nome do CCA via id
       setRespData(responsaveis.map((d: any) => ({
         name: d.responsavel,
         "Cancelada": d.cancelada ?? 0,
@@ -175,9 +187,11 @@ export default function PainelExecucaoHSA() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="todos">Todos os CCAs</SelectItem>
-                  <SelectItem value="CCA001">CCA 001</SelectItem>
-                  <SelectItem value="CCA002">CCA 002</SelectItem>
-                  <SelectItem value="CCA003">CCA 003</SelectItem>
+                  {ccas.map(c => (
+                    <SelectItem key={c.id} value={String(c.id)}>
+                      {c.codigo} - {c.nome}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>

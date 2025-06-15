@@ -63,13 +63,21 @@ export default function InspecoesAcompanhamento() {
   const [selectedInspecao, setSelectedInspecao] = useState<any | null>(null);
   const [updateDialogOpen, setUpdateDialogOpen] = useState(false);
   const { toast } = useToast();
+  const [ccas, setCcas] = useState<{ id: number; codigo: string; nome: string }[]>([]);
 
-  // Load all inspections
+  // Load all CCA info for mapping IDs to labels
+  useEffect(() => {
+    supabase.from("ccas").select("id,codigo,nome").order("codigo").then(({ data }) => {
+      setCcas(data || []);
+    });
+  }, []);
+
+  // Load all inspections with join de CCA
   useEffect(() => {
     setIsLoading(true);
     supabase
       .from("execucao_hsa")
-      .select("*")
+      .select("*, cca:ccas(id, codigo, nome)")
       .order("data", { ascending: false })
       .then(({ data, error }) => {
         if (error) {
@@ -182,12 +190,11 @@ export default function InspecoesAcompanhamento() {
               </div>
               <CardHeader className="pb-2">
                 <CardTitle className="text-lg flex flex-col gap-1 min-h-0">
-                  {/* Código + Nome do CCA SEMPRE APARECEM */}
+                  {/* Exibe CCA completo */}
                   <span className="font-bold text-2xl">
-                    {inspecao.cca}
-                    <span className="font-normal text-base ml-2">
-                      - {inspecao.cca_nome?.trim() || "NÃO DEFINIDO"}
-                    </span>
+                    {inspecao.cca?.codigo
+                      ? `${inspecao.cca.codigo} - ${inspecao.cca.nome}`
+                      : "CCA não definido"}
                   </span>
                   {/* Data logo abaixo */}
                   <span className="font-light text-xs mt-1">
@@ -253,7 +260,7 @@ export default function InspecoesAcompanhamento() {
                 <div className="grid grid-cols-2 gap-4">
                   <FormItem>
                     <FormLabel>CCA</FormLabel>
-                    <Input value={selectedInspecao.cca} disabled />
+                    <Input value={selectedInspecao.cca?.codigo} disabled />
                   </FormItem>
                   <FormItem>
                     <FormLabel>Data</FormLabel>
