@@ -174,13 +174,13 @@ export default function InspecoesAcompanhamento() {
       ) : (
         <div className="flex flex-col gap-4">
           {inspecoes.map((inspecao) => (
-            <Card key={inspecao.id} className="animate-fade-in relative">
+            <Card key={inspecao.id} className="animate-fade-in relative min-h-[156px]">
               {/* Status badge canto superior direito */}
               <div className="absolute right-4 top-4 z-10">
                 <Badge className={getStatusBadgeClass(inspecao.status)}>
                   <div className="flex items-center gap-1">
                     {getStatusIcon(inspecao.status)}
-                    <span>
+                    <span className="text-xs">
                       {inspecao.status === "REALIZADA (NÃO PROGRAMADA)"
                         ? "REALIZADA (NÃO PROG.)"
                         : inspecao.status}
@@ -188,40 +188,40 @@ export default function InspecoesAcompanhamento() {
                   </div>
                 </Badge>
               </div>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-lg flex flex-col gap-1 min-h-0">
+              <CardHeader className="pb-2 pt-4">
+                <CardTitle className="text-base flex flex-col gap-0.5 min-h-0 leading-tight">
                   {/* Exibe CCA completo */}
-                  <span className="font-bold text-2xl">
+                  <span className="font-bold text-lg leading-tight">
                     {inspecao.cca?.codigo
                       ? `${inspecao.cca.codigo} - ${inspecao.cca.nome}`
                       : "CCA não definido"}
                   </span>
                   {/* Data logo abaixo */}
-                  <span className="font-light text-xs mt-1">
+                  <span className="font-light text-xs mt-0.5">
                     {inspecao.data ? format(new Date(inspecao.data), "dd/MM/yyyy") : "--"}
                   </span>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="flex flex-col gap-2 pt-0">
-                <div>
+              <CardContent className="flex flex-col gap-1 pt-0 px-6 pb-3">
+                <div className="text-xs leading-snug">
                   <span className="font-medium">Responsável:</span>{" "}
                   {inspecao.responsavel_inspecao}
                 </div>
-                <div>
+                <div className="text-xs leading-snug">
                   <span className="font-medium">Função:</span>{" "}
                   {inspecao.funcao}
                 </div>
-                <div>
+                <div className="text-xs leading-snug">
                   <span className="font-medium">Inspeção programada:</span>{" "}
                   {inspecao.inspecao_programada}
                 </div>
-                <div>
+                <div className="text-xs leading-snug">
                   <span className="font-medium">Desvios identificados:</span>{" "}
                   {inspecao.desvios_identificados ?? 0}
                 </div>
               </CardContent>
-              {/* Botões canto inferior esquerdo, menores */}
-              <CardFooter className="pt-0 px-6 pb-4">
+              {/* Botões canto inferior direito, menores */}
+              <CardFooter className="pt-0 px-6 pb-3 justify-end">
                 <div className="flex gap-2">
                   <Button
                     variant="outline"
