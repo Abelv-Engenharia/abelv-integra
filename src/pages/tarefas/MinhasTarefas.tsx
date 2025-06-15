@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
@@ -6,6 +7,7 @@ import { TarefaCard } from "@/components/tarefas/TarefaCard";
 import { Tarefa } from "@/types/tarefas";
 import { tarefasService } from "@/services/tarefasService";
 import { Search } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 const MinhasTarefas = () => {
   const [tarefas, setTarefas] = useState<Tarefa[]>([]);
@@ -14,6 +16,7 @@ const MinhasTarefas = () => {
   const [statusFilter, setStatusFilter] = useState("todas");
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   useEffect(() => {
     const fetchTarefas = async () => {
@@ -27,7 +30,6 @@ const MinhasTarefas = () => {
         setLoading(false);
       }
     };
-
     fetchTarefas();
   }, []);
 
@@ -44,24 +46,32 @@ const MinhasTarefas = () => {
 
   const filterTarefas = (term: string, status: string) => {
     let result = tarefas;
-    
     if (term) {
       result = result.filter(tarefa => 
         tarefa.descricao.toLowerCase().includes(term) || 
         tarefa.cca.toLowerCase().includes(term)
       );
     }
-    
     if (status !== "todas") {
       result = result.filter(tarefa => tarefa.status === status);
     }
-    
     setFilteredTarefas(result);
   };
 
   const handleTarefaClick = (tarefa: Tarefa) => {
-    // Corrigido para corresponder à rota definida em App.tsx
     navigate(`/tarefas/detalhe/${tarefa.id}`);
+  };
+
+  // Função de remover tarefa da lista após exclusão (efeito local)
+  const handleTarefaDelete = (tarefa: Tarefa) => {
+    setTarefas(prev => prev.filter(t => t.id !== tarefa.id));
+    setFilteredTarefas(prev => prev.filter(t => t.id !== tarefa.id));
+    toast({
+      title: "Tarefa excluída",
+      description: "A tarefa foi removida com sucesso.",
+      variant: "default"
+    });
+    // Aqui você pode adicionar chamada para service/exclusão real se desejar!
   };
 
   if (loading) {
@@ -120,6 +130,7 @@ const MinhasTarefas = () => {
               key={tarefa.id}
               tarefa={tarefa}
               onClick={handleTarefaClick}
+              onDelete={handleTarefaDelete}
             />
           ))
         ) : (
@@ -138,3 +149,4 @@ const MinhasTarefas = () => {
 };
 
 export default MinhasTarefas;
+
