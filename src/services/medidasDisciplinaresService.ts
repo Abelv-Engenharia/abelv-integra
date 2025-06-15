@@ -62,7 +62,7 @@ export async function criarMedidaDisciplinar(form: MedidaDisciplinarFormData, ar
   const insertObj: {
     cca_id: number;
     funcionario_id: string;
-    medida: "ADVERTÊNCIA VERBAL" | "ADVERTÊNCIA FORMAL" | "SUSPENSÃO" | "DEMISSÃO POR JUSTA CAUSA";
+    medida: "ADVERTÊNCIA VERBAL" | "ADVERTÊNCIA ESCRITA" | "SUSPENSÃO" | "DEMISSÃO POR JUSTA CAUSA";
     data: string;
     motivo: string;
     pdf_url: string | null;
@@ -71,7 +71,7 @@ export async function criarMedidaDisciplinar(form: MedidaDisciplinarFormData, ar
   } = {
     cca_id: parseInt(cca_id, 10),
     funcionario_id,
-    medida: medidaBanco as "ADVERTÊNCIA VERBAL" | "ADVERTÊNCIA FORMAL" | "SUSPENSÃO" | "DEMISSÃO POR JUSTA CAUSA",
+    medida: medidaBanco as "ADVERTÊNCIA VERBAL" | "ADVERTÊNCIA ESCRITA" | "SUSPENSÃO" | "DEMISSÃO POR JUSTA CAUSA",
     data: data_aplicacao,
     motivo: descricao ?? "",
     pdf_url: arquivoUrl || null,
