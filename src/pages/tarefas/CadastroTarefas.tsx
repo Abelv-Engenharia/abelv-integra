@@ -234,6 +234,7 @@ const CadastroTarefas = () => {
                 <Input
                   id="data_conclusao"
                   type="datetime-local"
+                  className="max-w-xs md:w-56"
                   {...register("data_conclusao")}
                 />
                 {errors.data_conclusao && (
