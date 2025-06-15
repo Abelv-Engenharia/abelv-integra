@@ -12,6 +12,7 @@ import InformacoesOcorrenciaForm from "@/components/ocorrencias/forms/Informacoe
 import { OcorrenciaFormNavigation } from "@/components/ocorrencias/forms/OcorrenciaFormNavigation";
 import ClassificacaoRiscoForm from "@/components/ocorrencias/forms/ClassificacaoRiscoForm";
 import PlanoAcaoForm from "@/components/ocorrencias/forms/PlanoAcaoForm";
+import FechamentoForm from "@/components/ocorrencias/forms/FechamentoForm"; // NOVO IMPORT
 
 const schema = z.object({
   // Aba 1: Identificação
@@ -76,17 +77,25 @@ const schema = z.object({
     )
     .optional(),
 
-  // Demais etapas omitidas (Fechamento)
+  // Fechamento
+  investigacao_realizada: z.string().optional(),
+  informe_preliminar: z.any().optional(),
+  relatorio_analise: z.any().optional(),
+  licoes_aprendidas_enviada: z.string().optional(),
+  arquivo_licoes_aprendidas: z.any().optional(),
+
+  // outros campos podem ser adicionados aqui...
 });
 
 type OcorrenciaFormSchema = z.infer<typeof schema>;
 
+// Atualização de abas para incluir Fechamento
 const tabs = [
   { id: "identificacao", label: "Identificação" },
   { id: "informacoes", label: "Informações da Ocorrência" },
   { id: "classificacaoRisco", label: "Classificação de Risco" },
   { id: "planoAcao", label: "Plano de Ação" },
-  // Outras abas podem ser adicionadas posteriormente
+  { id: "fechamento", label: "Fechamento" },
 ];
 
 const OcorrenciasCadastro: React.FC = () => {
@@ -171,6 +180,7 @@ const OcorrenciasCadastro: React.FC = () => {
             {activeTab === "informacoes" && <InformacoesOcorrenciaForm />}
             {activeTab === "classificacaoRisco" && <ClassificacaoRiscoForm />}
             {activeTab === "planoAcao" && <PlanoAcaoForm />}
+            {activeTab === "fechamento" && <FechamentoForm />}
             <OcorrenciaFormNavigation
               activeTab={activeTab}
               tabs={tabs}
@@ -187,4 +197,6 @@ const OcorrenciasCadastro: React.FC = () => {
     </div>
   );
 };
+
 export default OcorrenciasCadastro;
+
