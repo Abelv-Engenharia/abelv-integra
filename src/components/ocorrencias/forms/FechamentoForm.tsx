@@ -32,6 +32,15 @@ const FechamentoForm = () => {
   const dataOcorrencia = watch("data") as Date | null;
   // Busca classificação da ocorrência para usar no nome do arquivo
   const classificacaoOcorrencia = watch("classificacaoOcorrencia") || null;
+  // Busca CCA selecionado para usar no nome do arquivo
+  const selectedCcaId = watch("cca") || null;
+  const ccas = watch("ccas") || []; // Armazena os CCAs do form context, ou um array vazio
+  // Obtenha o código do CCA pelo id selecionado
+  let codigoCca: string | null = null;
+  if (selectedCcaId && ccas.length > 0) {
+    const foundCca = ccas.find((c: any) => (c.id?.toString() ?? c.id) === selectedCcaId?.toString());
+    codigoCca = foundCca?.codigo || null;
+  }
 
   // Corrigido: buscar colaboradores_acidentados corretamente (evita erro TS2304)
   const colaboradores_acidentados = watch("colaboradores_acidentados");
@@ -142,12 +151,14 @@ const FechamentoForm = () => {
                   onChange={async (e) => {
                     const file = e.target.files?.[0];
                     if (file && file.size <= 2 * 1024 * 1024) { // 2MB limit
-                      if (!dataOcorrencia || !classificacaoOcorrencia) {
-                        alert("Preencha a data da ocorrência e a classificação antes de anexar o informe.");
+                      if (!dataOcorrencia || !classificacaoOcorrencia || !codigoCca) {
+                        alert("Preencha a data da ocorrência, a classificação e o CCA antes de anexar o informe.");
                         return;
                       }
                       // Faz upload ao bucket usando o novo nome padrão
-                      const url = await uploadInformePreliminarToBucket(file, dataOcorrencia, classificacaoOcorrencia);
+                      const url = await uploadInformePreliminarToBucket(
+                        file, dataOcorrencia, classificacaoOcorrencia, codigoCca
+                      );
                       if (url) {
                         onChange(url);
                         setValue("informe_preliminar", url);

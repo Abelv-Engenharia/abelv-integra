@@ -5,10 +5,11 @@ import { supabase } from "@/integrations/supabase/client";
 export async function uploadInformePreliminarToBucket(
   file: File,
   dataOcorrencia: Date | null,
-  classificacaoOcorrencia: string | null
+  classificacaoOcorrencia: string | null,
+  codigoCca: string | null
 ): Promise<string | null> {
-  if (!dataOcorrencia || !classificacaoOcorrencia) {
-    console.error("Data da ocorrência ou classificação da ocorrência não fornecido.");
+  if (!dataOcorrencia || !classificacaoOcorrencia || !codigoCca) {
+    console.error("Data da ocorrência, classificação da ocorrência ou código do CCA não fornecido.");
     return null;
   }
   // Data no formato dd.mm.aaaa
@@ -26,8 +27,15 @@ export async function uploadInformePreliminarToBucket(
     .replace(/[^a-zA-Z0-9_]/g, "")
     .slice(0, 40);
 
+  // Normaliza código do CCA para evitar caracteres indesejados
+  const normCodigoCca = codigoCca
+    .toString()
+    .replace(/\s+/g, "_")
+    .replace(/[^a-zA-Z0-9_]/g, "")
+    .slice(0, 20);
+
   const fileExt = file.name.split('.').pop();
-  const fileName = `INFORME PRELIMINAR_${dataFormatada}_${normClassificacao}.${fileExt}`;
+  const fileName = `${normCodigoCca}_INFORME PRELIMINAR_${dataFormatada}_${normClassificacao}.${fileExt}`;
 
   // Upload para o bucket
   const { data, error } = await supabase.storage
