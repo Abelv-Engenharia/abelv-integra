@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Eye, Search, Edit, Trash2, CheckSquare } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { getAllOcorrencias, deleteOcorrencia } from "@/services/ocorrencias/ocorrenciasService";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -53,7 +53,6 @@ const OcorrenciasConsulta = () => {
   const [loading, setLoading] = useState(true);
   const [ccas, setCcas] = useState<any[]>([]);
   const navigate = useNavigate();
-  const { toast } = useToast();
 
   useEffect(() => {
     const loadData = async () => {
@@ -69,18 +68,14 @@ const OcorrenciasConsulta = () => {
         setCcas(ccasData);
       } catch (error) {
         console.error('Erro ao carregar dados:', error);
-        toast({
-          title: "Erro",
-          description: "Erro ao carregar dados das ocorrências",
-          variant: "destructive"
-        });
+        toast.error("Erro ao carregar dados das ocorrências");
       } finally {
         setLoading(false);
       }
     };
 
     loadData();
-  }, [toast]);
+  }, []);
 
   const getCcaDisplay = (ccaText: string) => {
     const cca = ccas.find(c => c.codigo === ccaText || c.nome === ccaText);
@@ -125,17 +120,10 @@ const OcorrenciasConsulta = () => {
       setFilteredData(updatedData);
       setOcorrencias(prev => prev.filter(item => item.id !== id));
       
-      toast({
-        title: "Sucesso",
-        description: "Ocorrência excluída com sucesso",
-      });
+      toast.success("Ocorrência excluída com sucesso");
     } catch (error) {
       console.error('Erro ao excluir ocorrência:', error);
-      toast({
-        title: "Erro",
-        description: "Erro ao excluir ocorrência",
-        variant: "destructive"
-      });
+      toast.error("Erro ao excluir ocorrência");
     }
   };
 

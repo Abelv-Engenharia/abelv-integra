@@ -11,6 +11,8 @@ import ClassificacaoRiscoForm from "@/components/ocorrencias/forms/Classificacao
 import PlanoAcaoForm from "@/components/ocorrencias/forms/PlanoAcaoForm";
 import FechamentoForm from "@/components/ocorrencias/forms/FechamentoForm";
 import { OcorrenciaFormNavigation } from "@/components/ocorrencias/forms/OcorrenciaFormNavigation";
+import { ValidationDialog } from "@/components/ocorrencias/ValidationDialog";
+import { SuccessDialog } from "@/components/ocorrencias/SuccessDialog";
 import { useOcorrenciaTabs } from "@/hooks/ocorrencias/useOcorrenciaTabs";
 import { ocorrenciaFormSchema, OcorrenciaFormSchema } from "@/schemas/ocorrencias/ocorrenciaFormSchema";
 
@@ -30,6 +32,9 @@ const defaultValues: Partial<OcorrenciaFormSchema> = {
 
 export const OcorrenciaFormProvider: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [validationDialogOpen, setValidationDialogOpen] = useState(false);
+  const [successDialogOpen, setSuccessDialogOpen] = useState(false);
+  const [missingFields, setMissingFields] = useState<string[]>([]);
   const navigate = useNavigate();
   const {
     tabs,
@@ -48,16 +53,38 @@ export const OcorrenciaFormProvider: React.FC = () => {
     navigate("/ocorrencias/consulta");
   };
 
+  const validateRequiredFields = (formData: OcorrenciaFormSchema): string[] => {
+    const missing: string[] = [];
+    
+    if (!formData.data) missing.push("Data");
+    if (!formData.cca) missing.push("CCA");
+    if (!formData.empresa) missing.push("Empresa");
+    if (!formData.disciplina) missing.push("Disciplina");
+    if (!formData.tipoOcorrencia) missing.push("Tipo de Ocorrência");
+    if (!formData.tipoEvento) missing.push("Tipo de Evento");
+    if (!formData.classificacaoOcorrencia) missing.push("Classificação da Ocorrência");
+    
+    return missing;
+  };
+
   const handleFormSubmit = async () => {
     console.log("Iniciando salvamento da ocorrência...");
     setIsSubmitting(true);
 
     try {
-      // Obter todos os dados do formulário
       const formData = form.getValues();
       console.log("Dados do formulário:", formData);
 
-      // Validar formulário
+      // Verificar campos obrigatórios
+      const missingRequiredFields = validateRequiredFields(formData);
+      if (missingRequiredFields.length > 0) {
+        setMissingFields(missingRequiredFields);
+        setValidationDialogOpen(true);
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Validar formulário com Zod
       const isValid = await form.trigger();
       if (!isValid) {
         console.log("Formulário inválido:", form.formState.errors);
@@ -66,23 +93,10 @@ export const OcorrenciaFormProvider: React.FC = () => {
         return;
       }
 
-      // Verificar campos obrigatórios básicos
-      if (!formData.data || !formData.cca || !formData.empresa || !formData.disciplina) {
-        toast.error("Preencha os campos obrigatórios: Data, CCA, Empresa e Disciplina.");
-        setIsSubmitting(false);
-        return;
-      }
-
-      if (!formData.tipoOcorrencia || !formData.tipoEvento || !formData.classificacaoOcorrencia) {
-        toast.error("Preencha os campos obrigatórios: Tipo de Ocorrência, Tipo de Evento e Classificação da Ocorrência.");
-        setIsSubmitting(false);
-        return;
-      }
-
-      // Preparar dados para envio ao banco (convertendo para snake_case)
+      // Preparar dados para envio ao banco (convertendo camelCase para snake_case)
       const ocorrenciaData = {
-        // Campos básicos
-        data: formData.data,
+        // Campos básicos - conversão manual
+        data: formData.data instanceof Date ? formData.data.toISOString() : new Date(formData.data).toISOString(),
         hora: formData.hora || null,
         mes: formData.mes ? parseInt(formData.mes) : null,
         ano: formData.ano ? parseInt(formData.ano) : null,
@@ -98,12 +112,12 @@ export const OcorrenciaFormProvider: React.FC = () => {
         // Colaboradores
         colaboradores_acidentados: formData.colaboradores_acidentados || [],
         
-        // Tipos e classificações (convertendo camelCase para snake_case)
+        // Tipos e classificações (camelCase para snake_case)
         tipo_ocorrencia: formData.tipoOcorrencia,
         tipo_evento: formData.tipoEvento,
         classificacao_ocorrencia: formData.classificacaoOcorrencia,
         
-        // Informações da ocorrência
+        // Informações da ocorrência (camelCase para snake_case)
         houve_afastamento: formData.houve_afastamento || null,
         dias_perdidos: formData.dias_perdidos || null,
         dias_debitados: formData.dias_debitados || null,
@@ -117,7 +131,7 @@ export const OcorrenciaFormProvider: React.FC = () => {
         cid: formData.cid || null,
         arquivo_cat: formData.arquivo_cat || null,
         
-        // Classificação de risco
+        // Classificação de risco (camelCase para snake_case)
         exposicao: formData.exposicao || null,
         controle: formData.controle || null,
         deteccao: formData.deteccao || null,
@@ -130,7 +144,7 @@ export const OcorrenciaFormProvider: React.FC = () => {
         // Plano de ação
         acoes: formData.acoes || [],
         
-        // Fechamento
+        // Fechamento (camelCase para snake_case)
         investigacao_realizada: formData.investigacao_realizada || null,
         informe_preliminar: formData.informe_preliminar || null,
         relatorio_analise: formData.relatorio_analise || null,
@@ -148,8 +162,7 @@ export const OcorrenciaFormProvider: React.FC = () => {
       
       if (result) {
         console.log("Ocorrência salva com sucesso:", result);
-        toast.success("Ocorrência cadastrada com sucesso!");
-        navigate("/ocorrencias/consulta");
+        setSuccessDialogOpen(true);
       } else {
         throw new Error("Falha ao salvar no banco de dados");
       }
@@ -163,45 +176,65 @@ export const OcorrenciaFormProvider: React.FC = () => {
     }
   };
 
+  const handleNewOccurrence = () => {
+    // Reset do formulário
+    form.reset(defaultValues);
+    setActiveTab("identificacao");
+  };
+
   return (
-    <div className="bg-white rounded-lg shadow border p-6">
-      <div className="flex border-b mb-6">
-        {tabs.map(tab => (
-          <button
-            key={tab.id}
-            className={
-              "flex-1 py-2 px-2 text-sm font-medium border-0 rounded-t transition-colors" +
-              (activeTab === tab.id ? " bg-background" : " bg-muted hover:bg-muted/60")
-            }
-            style={{ borderBottom: activeTab === tab.id ? "2px solid #7c3aed" : undefined }}
-            onClick={() => setActiveTab(tab.id)}
-            type="button"
-          >
-            {tab.label}
-          </button>
-        ))}
+    <>
+      <div className="bg-white rounded-lg shadow border p-6">
+        <div className="flex border-b mb-6">
+          {tabs.map(tab => (
+            <button
+              key={tab.id}
+              className={
+                "flex-1 py-2 px-2 text-sm font-medium border-0 rounded-t transition-colors" +
+                (activeTab === tab.id ? " bg-background" : " bg-muted hover:bg-muted/60")
+              }
+              style={{ borderBottom: activeTab === tab.id ? "2px solid #7c3aed" : undefined }}
+              onClick={() => setActiveTab(tab.id)}
+              type="button"
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+        
+        <FormProvider {...form}>
+          <form onSubmit={(e) => e.preventDefault()}>
+            {activeTab === "identificacao" && <IdentificacaoForm />}
+            {activeTab === "informacoes" && <InformacoesOcorrenciaForm />}
+            {activeTab === "classificacaoRisco" && <ClassificacaoRiscoForm />}
+            {activeTab === "planoAcao" && <PlanoAcaoForm />}
+            {activeTab === "fechamento" && <FechamentoForm />}
+            
+            <OcorrenciaFormNavigation
+              activeTab={activeTab}
+              tabs={tabs}
+              onPrevious={onPrevious}
+              onNext={onNext}
+              onCancel={onCancel}
+              onSubmit={handleFormSubmit}
+              isSubmitting={isSubmitting}
+              isEditMode={false}
+            />
+          </form>
+        </FormProvider>
       </div>
-      
-      <FormProvider {...form}>
-        <form onSubmit={(e) => e.preventDefault()}>
-          {activeTab === "identificacao" && <IdentificacaoForm />}
-          {activeTab === "informacoes" && <InformacoesOcorrenciaForm />}
-          {activeTab === "classificacaoRisco" && <ClassificacaoRiscoForm />}
-          {activeTab === "planoAcao" && <PlanoAcaoForm />}
-          {activeTab === "fechamento" && <FechamentoForm />}
-          
-          <OcorrenciaFormNavigation
-            activeTab={activeTab}
-            tabs={tabs}
-            onPrevious={onPrevious}
-            onNext={onNext}
-            onCancel={onCancel}
-            onSubmit={handleFormSubmit}
-            isSubmitting={isSubmitting}
-            isEditMode={false}
-          />
-        </form>
-      </FormProvider>
-    </div>
+
+      <ValidationDialog
+        open={validationDialogOpen}
+        onOpenChange={setValidationDialogOpen}
+        missingFields={missingFields}
+      />
+
+      <SuccessDialog
+        open={successDialogOpen}
+        onOpenChange={setSuccessDialogOpen}
+        onNewOccurrence={handleNewOccurrence}
+      />
+    </>
   );
 };

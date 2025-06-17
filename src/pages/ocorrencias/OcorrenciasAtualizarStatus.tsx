@@ -1,157 +1,66 @@
 
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useForm, useFieldArray } from "react-hook-form";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { ArrowLeft, Upload, Download } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ArrowLeft, Save } from "lucide-react";
 import { getOcorrenciaById, updateOcorrencia } from "@/services/ocorrencias/ocorrenciasService";
-import { format } from "date-fns";
-import { Calendar } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
-import { Badge } from "@/components/ui/badge";
-
-const situacaoOptions = ["PLANEJADO", "EM ANDAMENTO", "CONCLUÍDO", "PENDENTE"];
+import { toast } from "sonner";
 
 const OcorrenciasAtualizarStatus = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { toast } = useToast();
-  const [loading, setLoading] = useState(true);
   const [ocorrencia, setOcorrencia] = useState<any>(null);
-
-  const { register, control, handleSubmit, setValue, watch, reset } = useForm({
-    defaultValues: {
-      acoes: [],
-      licoes_aprendidas_enviada: "",
-      arquivo_licoes_aprendidas: null
-    }
-  });
-
-  const { fields: acoesFields } = useFieldArray({
-    control,
-    name: "acoes"
-  });
-
-  const acoes = watch("acoes") || [];
+  const [loading, setLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [acoes, setAcoes] = useState<any[]>([]);
 
   useEffect(() => {
     const loadOcorrencia = async () => {
       if (!id) return;
       
       try {
-        setLoading(true);
         const data = await getOcorrenciaById(id);
         setOcorrencia(data);
-        
-        // Convert acoes from database format
-        const convertedAcoes = Array.isArray(data.acoes) 
-          ? data.acoes.map((acao: any) => ({
-              ...acao,
-              data_adequacao: acao.data_adequacao ? new Date(acao.data_adequacao) : null
-            }))
-          : [];
-
-        reset({
-          acoes: convertedAcoes,
-          licoes_aprendidas_enviada: data.licoes_aprendidas_enviada || "",
-          arquivo_licoes_aprendidas: data.arquivo_licoes_aprendidas || null
-        });
+        setAcoes(data.acoes || []);
       } catch (error) {
         console.error('Erro ao carregar ocorrência:', error);
-        toast({
-          title: "Erro",
-          description: "Erro ao carregar dados da ocorrência",
-          variant: "destructive"
-        });
+        toast.error("Erro ao carregar dados da ocorrência");
       } finally {
         setLoading(false);
       }
     };
 
     loadOcorrencia();
-  }, [id, reset, toast]);
+  }, [id]);
 
-  // Calculate action status
-  useEffect(() => {
-    if (acoes.length) {
-      acoes.forEach((acao, index) => {
-        let status = "";
-        
-        if (acao.situacao === "CONCLUÍDO") {
-          status = "CONCLUÍDO";
-        } else if (acao.situacao === "PLANEJADO" || acao.situacao === "EM ANDAMENTO") {
-          if (acao.data_adequacao) {
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            const adequacaoDate = new Date(acao.data_adequacao);
-            adequacaoDate.setHours(0, 0, 0, 0);
-            
-            if (adequacaoDate < today) {
-              status = "PENDENTE";
-            } else {
-              status = acao.situacao;
-            }
-          } else {
-            status = "PENDENTE";
-          }
-        } else if (acao.situacao === "PENDENTE") {
-          status = "PENDENTE";
-        }
-        
-        if (status && acao.status !== status) {
-          setValue(`acoes.${index}.status`, status);
-        }
-      });
-    }
-  }, [acoes, setValue]);
-
-  const getStatusBadgeClasses = (status: string) => {
-    switch (status) {
-      case "PLANEJADO":
-        return "bg-blue-100 text-blue-800 border-blue-200";
-      case "EM ANDAMENTO":
-        return "bg-orange-100 text-orange-800 border-orange-200";
-      case "CONCLUÍDO":
-        return "bg-green-100 text-green-800 border-green-200";
-      case "PENDENTE":
-        return "bg-red-100 text-red-800 border-red-200";
-      default:
-        return "";
-    }
+  const handleStatusChange = (index: number, newStatus: string) => {
+    const updatedAcoes = [...acoes];
+    updatedAcoes[index] = { ...updatedAcoes[index], status: newStatus };
+    setAcoes(updatedAcoes);
   };
 
-  const onSubmit = async (data: any) => {
+  const handleSituacaoChange = (index: number, newSituacao: string) => {
+    const updatedAcoes = [...acoes];
+    updatedAcoes[index] = { ...updatedAcoes[index], situacao: newSituacao };
+    setAcoes(updatedAcoes);
+  };
+
+  const handleSave = async () => {
+    if (!id) return;
+    
+    setIsSubmitting(true);
+
     try {
-      await updateOcorrencia(id!, data);
-      toast({
-        title: "Sucesso",
-        description: "Status das ações atualizado com sucesso",
-      });
-      navigate('/ocorrencias/consulta');
+      await updateOcorrencia(id, { acoes });
+      toast.success("Status das ações atualizado com sucesso!");
+      navigate("/ocorrencias/consulta");
     } catch (error) {
-      console.error('Erro ao atualizar status:', error);
-      toast({
-        title: "Erro",
-        description: "Erro ao atualizar status das ações",
-        variant: "destructive"
-      });
+      console.error("Erro ao atualizar status:", error);
+      toast.error("Erro ao atualizar status das ações");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -166,178 +75,134 @@ const OcorrenciasAtualizarStatus = () => {
   if (!ocorrencia) {
     return (
       <div className="text-center py-8">
-        <p className="text-muted-foreground">Ocorrência não encontrada</p>
+        <p className="text-muted-foreground">Ocorrência não encontrada.</p>
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-4">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => navigate('/ocorrencias/consulta')}
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Voltar
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="mb-2"
+            onClick={() => navigate("/ocorrencias/consulta")}
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Voltar para Consulta
+          </Button>
+          <h2 className="text-3xl font-bold tracking-tight">Atualizar Status das Ações</h2>
+          <p className="text-muted-foreground">
+            Ocorrência de {ocorrencia.data ? new Date(ocorrencia.data).toLocaleDateString('pt-BR') : ''} - {ocorrencia.empresa}
+          </p>
+        </div>
+        <Button onClick={handleSave} disabled={isSubmitting}>
+          <Save className="mr-2 h-4 w-4" />
+          {isSubmitting ? "Salvando..." : "Salvar Alterações"}
         </Button>
-        <h2 className="text-3xl font-bold tracking-tight">Atualizar Status das Ações</h2>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        {/* Ações */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Plano de Ação</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {acoesFields.map((field, index) => (
-              <Card key={field.id} className="p-4">
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <h4 className="font-medium">Ação #{index + 1}</h4>
-                    {acoes[index]?.status && (
-                      <Badge className={getStatusBadgeClasses(acoes[index].status)}>
-                        {acoes[index].status}
-                      </Badge>
-                    )}
-                  </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>Plano de Ação</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {acoes.length === 0 ? (
+            <p className="text-muted-foreground text-center py-8">
+              Nenhuma ação cadastrada para esta ocorrência.
+            </p>
+          ) : (
+            <div className="space-y-6">
+              {acoes.map((acao, index) => (
+                <div key={index} className="border rounded-lg p-4 space-y-4">
+                  <h4 className="font-medium">Ação {index + 1}</h4>
                   
-                  <div>
-                    <Label>Tratativa aplicada</Label>
-                    <Textarea 
-                      {...register(`acoes.${index}.tratativa_aplicada`)}
-                      readOnly
-                      className="bg-gray-50"
-                    />
-                  </div>
-
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <Label>Responsável pela ação</Label>
-                      <Input 
-                        {...register(`acoes.${index}.responsavel_acao`)}
-                        readOnly
-                        className="bg-gray-50"
-                      />
+                      <label className="text-sm font-medium text-muted-foreground">
+                        Tratativa Aplicada
+                      </label>
+                      <p className="text-sm p-2 bg-gray-50 rounded border mt-1">
+                        {acao.tratativa_aplicada || '-'}
+                      </p>
                     </div>
+                    
                     <div>
-                      <Label>Função</Label>
-                      <Input 
-                        {...register(`acoes.${index}.funcao_responsavel`)}
-                        readOnly
-                        className="bg-gray-50"
-                      />
+                      <label className="text-sm font-medium text-muted-foreground">
+                        Responsável
+                      </label>
+                      <p className="text-sm p-2 bg-gray-50 rounded border mt-1">
+                        {acao.responsavel_acao || '-'}
+                      </p>
                     </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    
                     <div>
-                      <Label>Situação</Label>
-                      <Select 
-                        onValueChange={(value) => setValue(`acoes.${index}.situacao`, value)}
-                        value={acoes[index]?.situacao || ""}
+                      <label className="text-sm font-medium text-muted-foreground">
+                        Data de Adequação
+                      </label>
+                      <p className="text-sm p-2 bg-gray-50 rounded border mt-1">
+                        {acao.data_adequacao ? new Date(acao.data_adequacao).toLocaleDateString('pt-BR') : '-'}
+                      </p>
+                    </div>
+                    
+                    <div>
+                      <label className="text-sm font-medium text-muted-foreground">
+                        Função do Responsável
+                      </label>
+                      <p className="text-sm p-2 bg-gray-50 rounded border mt-1">
+                        {acao.funcao_responsavel || '-'}
+                      </p>
+                    </div>
+                    
+                    <div>
+                      <label className="text-sm font-medium text-muted-foreground">
+                        Situação *
+                      </label>
+                      <Select
+                        value={acao.situacao || ""}
+                        onValueChange={(value) => handleSituacaoChange(index, value)}
                       >
-                        <SelectTrigger>
+                        <SelectTrigger className="mt-1">
                           <SelectValue placeholder="Selecione a situação" />
                         </SelectTrigger>
                         <SelectContent>
-                          {situacaoOptions.map((opcao) => (
-                            <SelectItem key={opcao} value={opcao}>{opcao}</SelectItem>
-                          ))}
+                          <SelectItem value="Pendente">Pendente</SelectItem>
+                          <SelectItem value="Em andamento">Em andamento</SelectItem>
+                          <SelectItem value="Concluída">Concluída</SelectItem>
+                          <SelectItem value="Cancelada">Cancelada</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
                     
                     <div>
-                      <Label>Data para adequação</Label>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Button
-                            variant="outline"
-                            className={cn(
-                              "w-full justify-start text-left font-normal",
-                              !acoes[index]?.data_adequacao && "text-muted-foreground"
-                            )}
-                          >
-                            {acoes[index]?.data_adequacao ? (
-                              format(acoes[index].data_adequacao, "dd/MM/yyyy")
-                            ) : (
-                              <span>Selecione uma data</span>
-                            )}
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0">
-                          <Calendar
-                            mode="single"
-                            selected={acoes[index]?.data_adequacao || undefined}
-                            onSelect={(date) => setValue(`acoes.${index}.data_adequacao`, date)}
-                            initialFocus
-                          />
-                        </PopoverContent>
-                      </Popover>
+                      <label className="text-sm font-medium text-muted-foreground">
+                        Status *
+                      </label>
+                      <Select
+                        value={acao.status || ""}
+                        onValueChange={(value) => handleStatusChange(index, value)}
+                      >
+                        <SelectTrigger className="mt-1">
+                          <SelectValue placeholder="Selecione o status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Aberto">Aberto</SelectItem>
+                          <SelectItem value="Em execução">Em execução</SelectItem>
+                          <SelectItem value="Concluído">Concluído</SelectItem>
+                          <SelectItem value="Atrasado">Atrasado</SelectItem>
+                          <SelectItem value="Cancelado">Cancelado</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
                 </div>
-              </Card>
-            ))}
-          </CardContent>
-        </Card>
-
-        {/* Anexos */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Anexos e Documentos</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <Label htmlFor="licoes_aprendidas_enviada">Status das Lições Aprendidas</Label>
-              <Select 
-                onValueChange={(value) => setValue('licoes_aprendidas_enviada', value)}
-                value={watch('licoes_aprendidas_enviada') || ""}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="SIM">Enviada</SelectItem>
-                  <SelectItem value="NÃO">Não enviada</SelectItem>
-                  <SelectItem value="EM ELABORAÇÃO">Em elaboração</SelectItem>
-                </SelectContent>
-              </Select>
+              ))}
             </div>
-
-            <div>
-              <Label htmlFor="arquivo_licoes_aprendidas">Anexo Lições Aprendidas</Label>
-              <div className="flex items-center gap-2 mt-1">
-                <Input
-                  id="arquivo_licoes_aprendidas"
-                  type="file"
-                  accept=".pdf,.doc,.docx"
-                />
-                <Button type="button" variant="outline" size="sm">
-                  <Upload className="h-4 w-4 mr-1" />
-                  Upload
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <div className="flex justify-end gap-4">
-          <Button 
-            type="button" 
-            variant="outline" 
-            onClick={() => navigate('/ocorrencias/consulta')}
-          >
-            Cancelar
-          </Button>
-          <Button type="submit">
-            Salvar Alterações
-          </Button>
-        </div>
-      </form>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 };
