@@ -55,7 +55,6 @@ export const CreateUserDialog = ({
   });
   
   const handleSubmit = (data: AuthUserCreateValues) => {
-    console.log("Dados do formulário:", data);
     onSubmit(data);
   };
   

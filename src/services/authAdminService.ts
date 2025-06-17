@@ -106,62 +106,9 @@ export async function fetchUserById(userId: string) {
 export async function createAuthUser(email: string, password: string, userData = {}) {
   console.log("Criando usuário:", { email, userData });
   try {
-    // Primeiro tentar criar diretamente no banco em vez de usar a edge function
-    const { data: authData, error: signUpError } = await supabase.auth.admin.createUser({
-      email: email,
-      password: password,
-      user_metadata: userData,
-      email_confirm: true // Auto-confirmar o email para evitar problemas de rate limit
-    });
-
-    if (signUpError) {
-      console.error("Erro no signUp:", signUpError);
-      throw new Error(signUpError.message);
-    }
-
-    if (!authData?.user?.id) {
-      throw new Error("Falha ao criar usuário: ID não retornado");
-    }
-
-    console.log("Usuário criado no auth:", authData.user);
-
-    // Criar o perfil na tabela profiles
-    const { error: profileError } = await supabase
-      .from('profiles')
-      .insert({
-        id: authData.user.id,
-        nome: userData.nome,
-        email: email
-      });
-
-    if (profileError) {
-      console.error("Erro ao criar perfil:", profileError);
-      // Se falhar, tentar deletar o usuário do auth
-      try {
-        await supabase.auth.admin.deleteUser(authData.user.id);
-      } catch (deleteError) {
-        console.error("Erro ao reverter criação do usuário:", deleteError);
-      }
-      throw new Error("Erro ao criar perfil do usuário");
-    }
-
-    // Associar o perfil de acesso se fornecido
-    if (userData.perfil_id) {
-      const { error: userPerfilError } = await supabase
-        .from('usuario_perfis')
-        .insert({
-          usuario_id: authData.user.id,
-          perfil_id: userData.perfil_id
-        });
-
-      if (userPerfilError) {
-        console.error("Erro ao associar perfil:", userPerfilError);
-        // Não falhar aqui, apenas logar o erro
-      }
-    }
-
-    console.log("Usuário criado com sucesso completo");
-    return authData;
+    const result = await callEdgeFunction("create", "POST", { email, password, userData });
+    console.log("Usuário criado com sucesso:", result);
+    return result;
   } catch (error) {
     console.error("Erro ao criar usuário:", error);
     throw error;
