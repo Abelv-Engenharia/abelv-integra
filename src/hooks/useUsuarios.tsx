@@ -135,7 +135,7 @@ export const useUsuarios = () => {
     staleTime: 10 * 60 * 1000
   });
 
-  // Mutation para criar usuário usando signup direto
+  // Mutation para criar usuário usando a edge function
   const createUsuarioMutation = useMutation({
     mutationFn: async (userData: AuthUserCreateValues) => {
       if (!canManageUsers) {
@@ -143,55 +143,16 @@ export const useUsuarios = () => {
       }
 
       try {
-        console.log("Criando usuário:", userData);
+        console.log("Criando usuário via edge function:", userData);
         
-        // Criar usuário usando signup
-        const { data: authData, error: signUpError } = await supabase.auth.signUp({
-          email: userData.email,
-          password: userData.password,
-          options: {
-            data: {
-              nome: userData.nome
-            }
-          }
+        // Usar a edge function em vez do signUp direto
+        const result = await createAuthUser(userData.email, userData.password, {
+          nome: userData.nome,
+          perfil_id: parseInt(userData.perfil)
         });
 
-        if (signUpError) {
-          throw new Error(signUpError.message);
-        }
-
-        if (!authData?.user?.id) {
-          throw new Error("Falha ao criar usuário: ID não retornado");
-        }
-
-        // Criar perfil na tabela profiles
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .insert({
-            id: authData.user.id,
-            nome: userData.nome,
-            email: userData.email
-          });
-
-        if (profileError) {
-          console.error("Erro ao criar perfil:", profileError);
-        }
-
-        // Associar o perfil de acesso
-        const perfilId = parseInt(userData.perfil);
-        const { error: userPerfilError } = await supabase
-          .from('usuario_perfis')
-          .insert({
-            usuario_id: authData.user.id,
-            perfil_id: perfilId
-          });
-
-        if (userPerfilError) {
-          console.error("Erro ao associar perfil:", userPerfilError);
-          throw new Error("Erro ao associar perfil de acesso");
-        }
-
-        return authData;
+        console.log("Usuário criado com sucesso:", result);
+        return result;
       } catch (error) {
         console.error("Erro na mutation de criação:", error);
         throw error;
@@ -206,7 +167,16 @@ export const useUsuarios = () => {
     },
     onError: (error: any) => {
       console.error("Erro ao criar usuário:", error);
-      const errorMessage = error?.message || "Erro ao criar usuário";
+      let errorMessage = "Erro ao criar usuário";
+      
+      if (error?.message?.includes("rate limit")) {
+        errorMessage = "Limite de criação de usuários excedido. Tente novamente em alguns minutos.";
+      } else if (error?.message?.includes("User already registered")) {
+        errorMessage = "Este email já está cadastrado no sistema.";
+      } else if (error?.message) {
+        errorMessage = error.message;
+      }
+      
       toast({
         title: "Erro",
         description: errorMessage,
