@@ -69,9 +69,9 @@ export const OcorrenciaFormProvider: React.FC = () => {
     if (!values.cca) missing.push("CCA");
     if (!values.empresa) missing.push("Empresa");
     if (!values.disciplina) missing.push("Disciplina");
-    if (!values.tipo_ocorrencia) missing.push("Tipo de ocorrência");
-    if (!values.tipo_evento) missing.push("Tipo de evento");
-    if (!values.classificacao_ocorrencia) missing.push("Classificação da ocorrência");
+    if (!values.tipoOcorrencia) missing.push("Tipo de ocorrência");
+    if (!values.tipoEvento) missing.push("Tipo de evento");
+    if (!values.classificacaoOcorrencia) missing.push("Classificação da ocorrência");
 
     // Verificar se pelo menos um responsável foi preenchido
     const hasResponsible = values.engenheiro_responsavel || 
