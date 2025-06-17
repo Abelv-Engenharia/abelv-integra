@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useForm, FormProvider } from "react-hook-form";
@@ -93,8 +94,8 @@ const OcorrenciasEdicao = () => {
           deteccao: data.deteccao || "",
           efeitoFalha: data.efeito_falha || "",
           impacto: data.impacto || "",
-          probabilidade: data.probabilidade || "",
-          severidade: data.severidade || "",
+          probabilidade: typeof data.probabilidade === 'number' ? data.probabilidade : undefined,
+          severidade: typeof data.severidade === 'number' ? data.severidade : undefined,
           classificacaoRisco: data.classificacao_risco || "",
           acoes: acoes,
           investigacao_realizada: data.investigacao_realizada || "",
@@ -148,7 +149,11 @@ const OcorrenciasEdicao = () => {
         engenheiro_responsavel: formData.engenheiro_responsavel,
         supervisor_responsavel: formData.supervisor_responsavel,
         encarregado_responsavel: formData.encarregado_responsavel,
-        colaboradores_acidentados: formData.colaboradores_acidentados,
+        colaboradores_acidentados: formData.colaboradores_acidentados?.map(col => ({
+          colaborador: col.colaborador || "",
+          funcao: col.funcao || "",
+          matricula: col.matricula || ""
+        })) || [],
         tipo_ocorrencia: formData.tipoOcorrencia,
         tipo_evento: formData.tipoEvento,
         classificacao_ocorrencia: formData.classificacaoOcorrencia,
@@ -171,7 +176,14 @@ const OcorrenciasEdicao = () => {
         probabilidade: formData.probabilidade,
         severidade: formData.severidade,
         classificacao_risco: formData.classificacaoRisco,
-        acoes: formData.acoes,
+        acoes: formData.acoes?.map(acao => ({
+          tratativa_aplicada: acao.tratativa_aplicada || "",
+          data_adequacao: acao.data_adequacao,
+          responsavel_acao: acao.responsavel_acao || "",
+          funcao_responsavel: acao.funcao_responsavel || "",
+          situacao: acao.situacao || "",
+          status: acao.status || ""
+        })) || [],
         investigacao_realizada: formData.investigacao_realizada,
         informe_preliminar: formData.informe_preliminar,
         relatorio_analise: formData.relatorio_analise,

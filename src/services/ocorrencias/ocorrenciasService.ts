@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 
 export interface OcorrenciaFormData {
@@ -168,7 +169,7 @@ export const createOcorrencia = async (data: any) => {
   }
 };
 
-export const updateOcorrencia = async (id: string, formData: Partial<OcorrenciaFormData>) => {
+export const updateOcorrencia = async (id: string, formData: any) => {
   try {
     console.log('Updating ocorrencia with data:', formData);
     
