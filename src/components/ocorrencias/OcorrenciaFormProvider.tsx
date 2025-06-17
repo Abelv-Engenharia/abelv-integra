@@ -96,7 +96,21 @@ export const OcorrenciaFormProvider: React.FC = () => {
     console.log("onSubmit chamado com valores:", values);
     setIsSubmitting(true);
 
-    const ocorrenciaData = transformFormDataToOcorrencia(values);
+    // Mapear os campos do camelCase para snake_case manualmente antes de transformar
+    const mappedValues = {
+      ...values,
+      tipo_ocorrencia: values.tipoOcorrencia || '',
+      tipo_evento: values.tipoEvento || '',
+      classificacao_ocorrencia: values.classificacaoOcorrencia || '',
+      classificacao_risco: values.classificacaoRisco || '',
+      descricao_ocorrencia: values.descricaoOcorrencia || '',
+      numero_cat: values.numeroCat || '',
+      efeito_falha: values.efeitoFalha || ''
+    };
+
+    console.log("Valores mapeados para snake_case:", mappedValues);
+
+    const ocorrenciaData = transformFormDataToOcorrencia(mappedValues);
 
     // Validação mínima
     if (!ocorrenciaData.data || !ocorrenciaData.classificacao_risco || !ocorrenciaData.cca || !ocorrenciaData.empresa) {
