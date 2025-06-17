@@ -2,7 +2,6 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight, Save, X } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
 
 interface OcorrenciaFormNavigationProps {
   activeTab: string;
@@ -25,8 +24,6 @@ export const OcorrenciaFormNavigation: React.FC<OcorrenciaFormNavigationProps> =
   isSubmitting,
   isEditMode,
 }) => {
-  const { toast } = useToast();
-
   return (
     <div className="flex justify-between mt-6 pt-4 border-t">
       <div className="flex gap-2">
@@ -58,14 +55,10 @@ export const OcorrenciaFormNavigation: React.FC<OcorrenciaFormNavigationProps> =
         <Button
           type="submit"
           disabled={isSubmitting}
-          onClick={(e: React.MouseEvent) => {
-            console.log("Botão Salvar ocorrência clicado");
-            toast({
-              title: "Clique detectado",
-              description: "Tentando enviar o formulário para salvar a ocorrência!",
-            });
-            // O submit deve ser disparado pelo tipo submit no form.
-            // Se o toast aparece, o click do botão responde!
+          onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+            e.preventDefault();
+            console.log("Botão Salvar ocorrência clicado - executando onSubmit");
+            onSubmit(e as any);
           }}
         >
           <Save className="mr-2 h-4 w-4" />

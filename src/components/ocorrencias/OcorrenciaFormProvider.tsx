@@ -50,6 +50,7 @@ export const OcorrenciaFormProvider: React.FC = () => {
   };
 
   const onSubmit = async (values: OcorrenciaFormSchema) => {
+    console.log("onSubmit chamado com valores:", values);
     setIsSubmitting(true);
 
     const ocorrenciaData = transformFormDataToOcorrencia(values);
@@ -69,6 +70,7 @@ export const OcorrenciaFormProvider: React.FC = () => {
     }
 
     try {
+      console.log("Enviando dados para createOcorrencia:", ocorrenciaData);
       const result = await createOcorrencia(ocorrenciaData);
 
       if (!result) {
@@ -77,6 +79,7 @@ export const OcorrenciaFormProvider: React.FC = () => {
         return;
       }
 
+      console.log("Ocorrência salva com sucesso:", result);
       toast.success("Ocorrência cadastrada com sucesso!");
       navigate("/ocorrencias/consulta");
     } catch (e: any) {
@@ -88,6 +91,12 @@ export const OcorrenciaFormProvider: React.FC = () => {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleFormSubmit = (e: React.FormEvent) => {
+    console.log("handleFormSubmit executado");
+    e.preventDefault();
+    form.handleSubmit(onSubmit)();
   };
 
   return (
@@ -109,7 +118,7 @@ export const OcorrenciaFormProvider: React.FC = () => {
         ))}
       </div>
       <FormProvider {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)}>
+        <form onSubmit={handleFormSubmit}>
           {activeTab === "identificacao" && <IdentificacaoForm />}
           {activeTab === "informacoes" && <InformacoesOcorrenciaForm />}
           {activeTab === "classificacaoRisco" && <ClassificacaoRiscoForm />}
@@ -121,7 +130,7 @@ export const OcorrenciaFormProvider: React.FC = () => {
             onPrevious={onPrevious}
             onNext={onNext}
             onCancel={onCancel}
-            onSubmit={(e) => form.handleSubmit(onSubmit)(e as any)}
+            onSubmit={handleFormSubmit}
             isSubmitting={isSubmitting}
             isEditMode={false}
           />
