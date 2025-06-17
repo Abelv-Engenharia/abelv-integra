@@ -13,16 +13,6 @@ import FechamentoForm from "@/components/ocorrencias/forms/FechamentoForm";
 import { OcorrenciaFormNavigation } from "@/components/ocorrencias/forms/OcorrenciaFormNavigation";
 import { useOcorrenciaTabs } from "@/hooks/ocorrencias/useOcorrenciaTabs";
 import { ocorrenciaFormSchema, OcorrenciaFormSchema } from "@/schemas/ocorrencias/ocorrenciaFormSchema";
-import { transformFormDataToOcorrencia } from "@/utils/ocorrenciasDataTransform";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 
 const defaultValues: Partial<OcorrenciaFormSchema> = {
   colaboradores_acidentados: [{ colaborador: "", funcao: "", matricula: "" }],
@@ -40,8 +30,6 @@ const defaultValues: Partial<OcorrenciaFormSchema> = {
 
 export const OcorrenciaFormProvider: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showMissingFieldsDialog, setShowMissingFieldsDialog] = useState(false);
-  const [missingFields, setMissingFields] = useState<string[]>([]);
   const navigate = useNavigate();
   const {
     tabs,
@@ -60,123 +48,119 @@ export const OcorrenciaFormProvider: React.FC = () => {
     navigate("/ocorrencias/consulta");
   };
 
-  const validateRequiredFields = (values: any) => {
-    const missing: string[] = [];
-    
-    console.log("Validando campos obrigatórios com valores:", values);
-    
-    // Campos obrigatórios básicos
-    if (!values.data) missing.push("Data da ocorrência");
-    if (!values.hora) missing.push("Hora da ocorrência");
-    if (!values.cca) missing.push("CCA");
-    if (!values.empresa) missing.push("Empresa");
-    if (!values.disciplina) missing.push("Disciplina");
-    
-    // Usar os nomes dos campos conforme aparecem no formulário (camelCase)
-    if (!values.tipoOcorrencia) missing.push("Tipo de ocorrência");
-    if (!values.tipoEvento) missing.push("Tipo de evento");
-    if (!values.classificacaoOcorrencia) missing.push("Classificação da ocorrência");
-
-    // Verificar se pelo menos um responsável foi preenchido
-    const hasResponsible = values.engenheiro_responsavel || 
-                          values.supervisor_responsavel || 
-                          values.encarregado_responsavel;
-    if (!hasResponsible) {
-      missing.push("Pelo menos um responsável (Engenheiro, Supervisor ou Encarregado)");
-    }
-
-    // Campos de classificação de risco
-    if (!values.classificacaoRisco) missing.push("Classificação de risco");
-
-    console.log("Campos faltantes encontrados:", missing);
-    return missing;
-  };
-
-  const onSubmit = async (values: OcorrenciaFormSchema) => {
-    console.log("onSubmit chamado com valores:", values);
+  const handleFormSubmit = async () => {
+    console.log("Iniciando salvamento da ocorrência...");
     setIsSubmitting(true);
 
-    // Mapear os campos do camelCase para snake_case manualmente antes de transformar
-    const mappedValues = {
-      ...values,
-      tipo_ocorrencia: values.tipoOcorrencia || '',
-      tipo_evento: values.tipoEvento || '',
-      classificacao_ocorrencia: values.classificacaoOcorrencia || '',
-      classificacao_risco: values.classificacaoRisco || '',
-      descricao_ocorrencia: values.descricaoOcorrencia || '',
-      numero_cat: values.numeroCat || '',
-      efeito_falha: values.efeitoFalha || ''
-    };
-
-    console.log("Valores mapeados para snake_case:", mappedValues);
-
-    const ocorrenciaData = transformFormDataToOcorrencia(mappedValues);
-
-    // Validação mínima
-    if (!ocorrenciaData.data || !ocorrenciaData.classificacao_risco || !ocorrenciaData.cca || !ocorrenciaData.empresa) {
-      toast.error(
-        `Preencha os campos obrigatórios: data, classificação de risco, CCA e empresa!
-        (data: ${!!ocorrenciaData.data ? "Ok" : "Vazio"},
-        classificação: ${!!ocorrenciaData.classificacao_risco ? "Ok" : "Vazio"},
-        CCA: ${!!ocorrenciaData.cca ? "Ok" : "Vazio"},
-        empresa: ${!!ocorrenciaData.empresa ? "Ok" : "Vazio"}
-        )`
-      );
-      setIsSubmitting(false);
-      return;
-    }
-
     try {
-      console.log("Enviando dados para createOcorrencia:", ocorrenciaData);
-      const result = await createOcorrencia(ocorrenciaData);
+      // Obter todos os dados do formulário
+      const formData = form.getValues();
+      console.log("Dados do formulário:", formData);
 
-      if (!result) {
-        toast.error("Erro ao cadastrar ocorrência: Registro não foi salvo no banco.");
+      // Validar formulário
+      const isValid = await form.trigger();
+      if (!isValid) {
+        console.log("Formulário inválido:", form.formState.errors);
+        toast.error("Por favor, corrija os erros no formulário antes de salvar.");
         setIsSubmitting(false);
         return;
       }
 
-      console.log("Ocorrência salva com sucesso:", result);
-      toast.success("Ocorrência cadastrada com sucesso!");
-      navigate("/ocorrencias/consulta");
-    } catch (e: any) {
-      const erroMsg =
-        e?.message ||
-        (e && typeof e === "object" ? JSON.stringify(e) : String(e));
-      toast.error("Erro crítico ao cadastrar ocorrência: " + erroMsg);
-      console.error("[OCORRENCIA] Erro ao cadastrar:", e);
+      // Verificar campos obrigatórios básicos
+      if (!formData.data || !formData.cca || !formData.empresa || !formData.disciplina) {
+        toast.error("Preencha os campos obrigatórios: Data, CCA, Empresa e Disciplina.");
+        setIsSubmitting(false);
+        return;
+      }
+
+      if (!formData.tipoOcorrencia || !formData.tipoEvento || !formData.classificacaoOcorrencia) {
+        toast.error("Preencha os campos obrigatórios: Tipo de Ocorrência, Tipo de Evento e Classificação da Ocorrência.");
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Preparar dados para envio ao banco (convertendo para snake_case)
+      const ocorrenciaData = {
+        // Campos básicos
+        data: formData.data,
+        hora: formData.hora || null,
+        mes: formData.mes ? parseInt(formData.mes) : null,
+        ano: formData.ano ? parseInt(formData.ano) : null,
+        cca: formData.cca,
+        empresa: formData.empresa,
+        disciplina: formData.disciplina,
+        
+        // Responsáveis
+        engenheiro_responsavel: formData.engenheiro_responsavel || null,
+        supervisor_responsavel: formData.supervisor_responsavel || null,
+        encarregado_responsavel: formData.encarregado_responsavel || null,
+        
+        // Colaboradores
+        colaboradores_acidentados: formData.colaboradores_acidentados || [],
+        
+        // Tipos e classificações (convertendo camelCase para snake_case)
+        tipo_ocorrencia: formData.tipoOcorrencia,
+        tipo_evento: formData.tipoEvento,
+        classificacao_ocorrencia: formData.classificacaoOcorrencia,
+        
+        // Informações da ocorrência
+        houve_afastamento: formData.houve_afastamento || null,
+        dias_perdidos: formData.dias_perdidos || null,
+        dias_debitados: formData.dias_debitados || null,
+        parte_corpo_atingida: formData.parte_corpo_atingida || null,
+        lateralidade: formData.lateralidade || null,
+        agente_causador: formData.agente_causador || null,
+        situacao_geradora: formData.situacao_geradora || null,
+        natureza_lesao: formData.natureza_lesao || null,
+        descricao_ocorrencia: formData.descricaoOcorrencia || null,
+        numero_cat: formData.numeroCat || null,
+        cid: formData.cid || null,
+        arquivo_cat: formData.arquivo_cat || null,
+        
+        // Classificação de risco
+        exposicao: formData.exposicao || null,
+        controle: formData.controle || null,
+        deteccao: formData.deteccao || null,
+        efeito_falha: formData.efeitoFalha || null,
+        impacto: formData.impacto || null,
+        probabilidade: formData.probabilidade || null,
+        severidade: formData.severidade || null,
+        classificacao_risco: formData.classificacaoRisco || null,
+        
+        // Plano de ação
+        acoes: formData.acoes || [],
+        
+        // Fechamento
+        investigacao_realizada: formData.investigacao_realizada || null,
+        informe_preliminar: formData.informe_preliminar || null,
+        relatorio_analise: formData.relatorio_analise || null,
+        licoes_aprendidas_enviada: formData.licoes_aprendidas_enviada || null,
+        arquivo_licoes_aprendidas: formData.arquivo_licoes_aprendidas || null,
+        
+        // Status padrão
+        status: "Em tratativa"
+      };
+
+      console.log("Dados preparados para envio:", ocorrenciaData);
+
+      // Enviar para o banco
+      const result = await createOcorrencia(ocorrenciaData);
+      
+      if (result) {
+        console.log("Ocorrência salva com sucesso:", result);
+        toast.success("Ocorrência cadastrada com sucesso!");
+        navigate("/ocorrencias/consulta");
+      } else {
+        throw new Error("Falha ao salvar no banco de dados");
+      }
+
+    } catch (error) {
+      console.error("Erro ao salvar ocorrência:", error);
+      const errorMessage = error instanceof Error ? error.message : "Erro desconhecido";
+      toast.error(`Erro ao cadastrar ocorrência: ${errorMessage}`);
     } finally {
       setIsSubmitting(false);
     }
-  };
-
-  const handleFormSubmit = async () => {
-    console.log("handleFormSubmit executado");
-    const values = form.getValues();
-    console.log("Valores atuais do formulário:", values);
-    
-    // Verificar campos obrigatórios
-    const missing = validateRequiredFields(values);
-    
-    if (missing.length > 0) {
-      console.log("Campos obrigatórios não preenchidos:", missing);
-      setMissingFields(missing);
-      setShowMissingFieldsDialog(true);
-      return;
-    }
-    
-    // Validar o formulário antes de submeter
-    const isValid = await form.trigger();
-    console.log("Formulário válido:", isValid);
-    
-    if (!isValid) {
-      const errors = form.formState.errors;
-      console.log("Erros de validação:", errors);
-      toast.error("Por favor, corrija os erros no formulário antes de salvar.");
-      return;
-    }
-    
-    await onSubmit(values);
   };
 
   return (
@@ -197,6 +181,7 @@ export const OcorrenciaFormProvider: React.FC = () => {
           </button>
         ))}
       </div>
+      
       <FormProvider {...form}>
         <form onSubmit={(e) => e.preventDefault()}>
           {activeTab === "identificacao" && <IdentificacaoForm />}
@@ -204,6 +189,7 @@ export const OcorrenciaFormProvider: React.FC = () => {
           {activeTab === "classificacaoRisco" && <ClassificacaoRiscoForm />}
           {activeTab === "planoAcao" && <PlanoAcaoForm />}
           {activeTab === "fechamento" && <FechamentoForm />}
+          
           <OcorrenciaFormNavigation
             activeTab={activeTab}
             tabs={tabs}
@@ -216,29 +202,6 @@ export const OcorrenciaFormProvider: React.FC = () => {
           />
         </form>
       </FormProvider>
-
-      <AlertDialog open={showMissingFieldsDialog} onOpenChange={setShowMissingFieldsDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Campos obrigatórios não preenchidos</AlertDialogTitle>
-            <AlertDialogDescription>
-              Para salvar a ocorrência, você precisa preencher os seguintes campos obrigatórios:
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <div className="py-4">
-            <ul className="list-disc list-inside space-y-1">
-              {missingFields.map((field, index) => (
-                <li key={index} className="text-sm text-red-600">{field}</li>
-              ))}
-            </ul>
-          </div>
-          <AlertDialogFooter>
-            <AlertDialogAction onClick={() => setShowMissingFieldsDialog(false)}>
-              Entendi
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 };

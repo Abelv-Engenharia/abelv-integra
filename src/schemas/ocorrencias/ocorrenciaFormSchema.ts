@@ -70,7 +70,6 @@ export const ocorrenciaFormSchema = z.object({
   relatorio_analise: z.any().optional(),
   licoes_aprendidas_enviada: z.string().optional(),
   arquivo_licoes_aprendidas: z.any().optional(),
-  // outros campos podem ser adicionados aqui...
 });
 
 export type OcorrenciaFormSchema = z.infer<typeof ocorrenciaFormSchema>;
