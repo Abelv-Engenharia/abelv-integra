@@ -1,3 +1,4 @@
+
 import { z } from "zod";
 
 export interface User {
@@ -101,6 +102,7 @@ export interface Perfil {
   nome: string;
   descricao: string;
   permissoes: Permissoes;
+  ccas_permitidas: number[]; // Novo campo para CCAs permitidas
 }
 
 // Add JSON type for Supabase compatibility

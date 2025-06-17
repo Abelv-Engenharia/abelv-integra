@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { Permissoes, Perfil } from "@/types/users";
@@ -104,6 +105,26 @@ function getFullAdminPermissions(): Permissoes {
   return permissoes;
 }
 
+// Helper para buscar todos os CCAs disponíveis para preenchimento padrão
+async function getAllCCAsIds(): Promise<number[]> {
+  try {
+    const { data, error } = await supabase
+      .from('ccas')
+      .select('id')
+      .eq('ativo', true);
+    
+    if (error) {
+      console.error('Erro ao buscar CCAs:', error);
+      return [];
+    }
+    
+    return data?.map(cca => cca.id) || [];
+  } catch (error) {
+    console.error('Exceção ao buscar CCAs:', error);
+    return [];
+  }
+}
+
 export async function fetchPerfis(): Promise<Perfil[]> {
   try {
     const { data, error } = await supabase
@@ -119,7 +140,8 @@ export async function fetchPerfis(): Promise<Perfil[]> {
       id: perfil.id,
       nome: perfil.nome,
       descricao: perfil.descricao || "",
-      permissoes: ensureAllPermissoes(perfil.permissoes, perfil.nome)
+      permissoes: ensureAllPermissoes(perfil.permissoes, perfil.nome),
+      ccas_permitidas: Array.isArray(perfil.ccas_permitidas) ? perfil.ccas_permitidas : []
     }));
   } catch (error) {
     console.error('Exceção ao buscar perfis:', error);
@@ -182,6 +204,7 @@ export async function createPerfil(perfil: Omit<Perfil, "id">): Promise<Perfil |
         descricao: perfil.descricao,
         // cast permissoes to any as expected by supabase (jsonb)
         permissoes: perfil.permissoes as any,
+        ccas_permitidas: perfil.ccas_permitidas || []
       }])
       .select()
       .single();
@@ -195,7 +218,8 @@ export async function createPerfil(perfil: Omit<Perfil, "id">): Promise<Perfil |
       id: data.id,
       nome: data.nome,
       descricao: data.descricao || "",
-      permissoes: ensureAllPermissoes(data.permissoes)
+      permissoes: ensureAllPermissoes(data.permissoes),
+      ccas_permitidas: Array.isArray(data.ccas_permitidas) ? data.ccas_permitidas : []
     };
   } catch (error) {
     console.error('Exceção ao criar perfil:', error);
@@ -215,6 +239,7 @@ export async function updatePerfil(
         descricao: perfil.descricao,
         // cast permissoes to any as expected by supabase (jsonb)
         permissoes: perfil.permissoes as any,
+        ccas_permitidas: perfil.ccas_permitidas || []
       })
       .eq('id', id);
     

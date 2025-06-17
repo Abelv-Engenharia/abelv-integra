@@ -9,7 +9,7 @@ interface PerfilDialogProps {
   perfilSelecionado: Perfil | null;
   loading: boolean;
   permissoesIniciais: Permissoes;
-  onSalvar: (nome: string, descricao: string, permissoes: Permissoes) => void;
+  onSalvar: (nome: string, descricao: string, permissoes: Permissoes, ccas_permitidas: number[]) => void;
 }
 
 export const PerfilDialog = ({ 
@@ -23,24 +23,26 @@ export const PerfilDialog = ({
   const initialData = perfilSelecionado ? {
     nome: perfilSelecionado.nome,
     descricao: perfilSelecionado.descricao,
-    permissoes: perfilSelecionado.permissoes
+    permissoes: perfilSelecionado.permissoes,
+    ccas_permitidas: perfilSelecionado.ccas_permitidas || []
   } : {
     nome: '',
     descricao: '',
-    permissoes: permissoesIniciais
+    permissoes: permissoesIniciais,
+    ccas_permitidas: []
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-4xl">
         <DialogHeader>
           <DialogTitle>
             {perfilSelecionado ? `Editar perfil: ${perfilSelecionado.nome}` : "Novo Perfil de Acesso"}
           </DialogTitle>
           <DialogDescription>
             {perfilSelecionado 
-              ? "Atualize as informações do perfil e suas permissões" 
-              : "Crie um novo perfil de acesso e defina suas permissões"
+              ? "Atualize as informações do perfil, suas permissões e CCAs permitidas" 
+              : "Crie um novo perfil de acesso, defina suas permissões e selecione os CCAs permitidos"
             }
           </DialogDescription>
         </DialogHeader>

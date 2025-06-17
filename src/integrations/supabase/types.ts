@@ -1440,18 +1440,21 @@ export type Database = {
       }
       perfis: {
         Row: {
+          ccas_permitidas: Json | null
           descricao: string | null
           id: number
           nome: string
           permissoes: Json
         }
         Insert: {
+          ccas_permitidas?: Json | null
           descricao?: string | null
           id?: number
           nome: string
           permissoes?: Json
         }
         Update: {
+          ccas_permitidas?: Json | null
           descricao?: string | null
           id?: number
           nome?: string

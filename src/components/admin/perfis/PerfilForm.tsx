@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -5,15 +6,17 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Perfil, Permissoes } from "@/types/users";
 import { getAllMenusSidebar } from "@/services/perfisService";
+import { CCASelector } from "./CCASelector";
 
 interface PerfilFormProps {
   initialData: {
     nome: string;
     descricao: string;
     permissoes: Permissoes;
+    ccas_permitidas: number[];
   };
   onCancel: () => void;
-  onSave: (nome: string, descricao: string, permissoes: Permissoes) => void;
+  onSave: (nome: string, descricao: string, permissoes: Permissoes, ccas_permitidas: number[]) => void;
   loading: boolean;
 }
 
@@ -21,6 +24,7 @@ export const PerfilForm = ({ initialData, onCancel, onSave, loading }: PerfilFor
   const [nome, setNome] = useState<string>(initialData.nome);
   const [descricao, setDescricao] = useState<string>(initialData.descricao);
   const [permissoes, setPermissoes] = useState<Permissoes>(initialData.permissoes);
+  const [ccasPermitidas, setCcasPermitidas] = useState<number[]>(initialData.ccas_permitidas || []);
 
   // Obter menus definidos globalmente
   const menusSidebar = getAllMenusSidebar();
@@ -38,7 +42,6 @@ export const PerfilForm = ({ initialData, onCancel, onSave, loading }: PerfilFor
     { key: 'idsms_formularios', label: 'IDSMS Formulários' },
   ];
 
-  // Agrupamento de administração
   const administrativos: { key: keyof Permissoes; label: string }[] = [
     { key: 'admin_usuarios', label: 'Admin: Usuários' },
     { key: 'admin_perfis', label: 'Admin: Perfis' },
@@ -51,7 +54,6 @@ export const PerfilForm = ({ initialData, onCancel, onSave, loading }: PerfilFor
     { key: 'admin_ccas', label: 'Admin: CCAs' }
   ];
 
-  // Agrupamento das permissões específicas
   const permissoesEspecificas: { key: keyof Permissoes; label: string }[] = [
     { key: 'pode_editar_desvios', label: 'Pode Editar Desvios' },
     { key: 'pode_excluir_desvios', label: 'Pode Excluir Desvios' },
@@ -87,7 +89,7 @@ export const PerfilForm = ({ initialData, onCancel, onSave, loading }: PerfilFor
   };
 
   const handleSave = () => {
-    onSave(nome, descricao, permissoes);
+    onSave(nome, descricao, permissoes, ccasPermitidas);
   };
 
   return (
@@ -111,6 +113,18 @@ export const PerfilForm = ({ initialData, onCancel, onSave, loading }: PerfilFor
             placeholder="Descrição do perfil" 
           />
         </div>
+      </div>
+
+      {/* CCAs Permitidas */}
+      <div className="space-y-2 pt-4">
+        <h4 className="text-md font-semibold text-red-700">CCAs Permitidas</h4>
+        <p className="text-sm text-muted-foreground">
+          Selecione quais CCAs este perfil pode visualizar e editar
+        </p>
+        <CCASelector
+          selectedCCAs={ccasPermitidas}
+          onSelectionChange={setCcasPermitidas}
+        />
       </div>
       
       {/* Módulos Principais */}
@@ -209,7 +223,6 @@ const PermissaoCheckbox = ({ id, label, checked, onChange }: PermissaoCheckboxPr
   </div>
 );
 
-// Componente para checkbox dos menus da sidebar
 interface SidebarMenuCheckboxProps {
   id: string;
   label: string;

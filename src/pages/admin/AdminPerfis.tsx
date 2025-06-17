@@ -135,7 +135,7 @@ const AdminPerfis = () => {
     setPerfilSelecionado(null);
   };
 
-  const handleSalvar = async (nome: string, descricao: string, permissoes: Permissoes) => {
+  const handleSalvar = async (nome: string, descricao: string, permissoes: Permissoes, ccas_permitidas: number[]) => {
     if (!nome) {
       toast({
         title: "Erro",
@@ -152,7 +152,8 @@ const AdminPerfis = () => {
         await updatePerfil(perfilSelecionado.id, {
           nome,
           descricao,
-          permissoes
+          permissoes,
+          ccas_permitidas
         });
 
         toast({
@@ -164,7 +165,7 @@ const AdminPerfis = () => {
         setPerfis(prevPerfis =>
           prevPerfis.map(p =>
             p.id === perfilSelecionado.id
-              ? { ...p, nome, descricao, permissoes }
+              ? { ...p, nome, descricao, permissoes, ccas_permitidas }
               : p
           )
         );
@@ -173,7 +174,8 @@ const AdminPerfis = () => {
         const novoPerfil = await createPerfil({
           nome,
           descricao,
-          permissoes
+          permissoes,
+          ccas_permitidas
         });
 
         if (novoPerfil) {
@@ -237,7 +239,7 @@ const AdminPerfis = () => {
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
             <CardTitle>Perfis de Acesso</CardTitle>
-            <CardDescription>Gerencie os perfis de acesso dos usuários com todas as permissões do sistema</CardDescription>
+            <CardDescription>Gerencie os perfis de acesso dos usuários com todas as permissões do sistema e CCAs permitidas</CardDescription>
           </div>
           <Button onClick={handleNovoPerfil}>Novo Perfil</Button>
         </CardHeader>
