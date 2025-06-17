@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { Permissoes, Perfil } from "@/types/users";
@@ -125,6 +124,12 @@ async function getAllCCAsIds(): Promise<number[]> {
   }
 }
 
+// Helper para converter Json[] para number[]
+function convertJsonArrayToNumberArray(jsonArray: any): number[] {
+  if (!Array.isArray(jsonArray)) return [];
+  return jsonArray.filter(item => typeof item === 'number' || !isNaN(Number(item))).map(item => Number(item));
+}
+
 export async function fetchPerfis(): Promise<Perfil[]> {
   try {
     const { data, error } = await supabase
@@ -141,7 +146,7 @@ export async function fetchPerfis(): Promise<Perfil[]> {
       nome: perfil.nome,
       descricao: perfil.descricao || "",
       permissoes: ensureAllPermissoes(perfil.permissoes, perfil.nome),
-      ccas_permitidas: Array.isArray(perfil.ccas_permitidas) ? perfil.ccas_permitidas : []
+      ccas_permitidas: convertJsonArrayToNumberArray(perfil.ccas_permitidas)
     }));
   } catch (error) {
     console.error('Exceção ao buscar perfis:', error);
@@ -219,7 +224,7 @@ export async function createPerfil(perfil: Omit<Perfil, "id">): Promise<Perfil |
       nome: data.nome,
       descricao: data.descricao || "",
       permissoes: ensureAllPermissoes(data.permissoes),
-      ccas_permitidas: Array.isArray(data.ccas_permitidas) ? data.ccas_permitidas : []
+      ccas_permitidas: convertJsonArrayToNumberArray(data.ccas_permitidas)
     };
   } catch (error) {
     console.error('Exceção ao criar perfil:', error);
