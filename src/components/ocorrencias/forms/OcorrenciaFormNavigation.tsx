@@ -53,12 +53,12 @@ export const OcorrenciaFormNavigation: React.FC<OcorrenciaFormNavigationProps> =
       </div>
       {activeTab === "fechamento" ? (
         <Button
-          type="submit"
+          type="button"
           disabled={isSubmitting}
-          onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
-            e.preventDefault();
+          onClick={() => {
             console.log("Botão Salvar ocorrência clicado - executando onSubmit");
-            onSubmit(e as any);
+            const fakeEvent = { preventDefault: () => {} } as React.FormEvent;
+            onSubmit(fakeEvent);
           }}
         >
           <Save className="mr-2 h-4 w-4" />

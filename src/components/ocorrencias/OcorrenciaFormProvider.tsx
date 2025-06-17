@@ -93,10 +93,23 @@ export const OcorrenciaFormProvider: React.FC = () => {
     }
   };
 
-  const handleFormSubmit = (e: React.FormEvent) => {
+  const handleFormSubmit = async () => {
     console.log("handleFormSubmit executado");
-    e.preventDefault();
-    form.handleSubmit(onSubmit)();
+    const values = form.getValues();
+    console.log("Valores atuais do formulário:", values);
+    
+    // Validar o formulário antes de submeter
+    const isValid = await form.trigger();
+    console.log("Formulário válido:", isValid);
+    
+    if (!isValid) {
+      const errors = form.formState.errors;
+      console.log("Erros de validação:", errors);
+      toast.error("Por favor, corrija os erros no formulário antes de salvar.");
+      return;
+    }
+    
+    await onSubmit(values);
   };
 
   return (
@@ -118,7 +131,7 @@ export const OcorrenciaFormProvider: React.FC = () => {
         ))}
       </div>
       <FormProvider {...form}>
-        <form onSubmit={handleFormSubmit}>
+        <form onSubmit={(e) => e.preventDefault()}>
           {activeTab === "identificacao" && <IdentificacaoForm />}
           {activeTab === "informacoes" && <InformacoesOcorrenciaForm />}
           {activeTab === "classificacaoRisco" && <ClassificacaoRiscoForm />}
