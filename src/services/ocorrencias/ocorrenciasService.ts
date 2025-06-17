@@ -36,8 +36,8 @@ export interface OcorrenciaFormData {
   deteccao: string;
   efeito_falha: string;
   impacto: string;
-  probabilidade: number | null;
-  severidade: number | null;
+  probabilidade: number | string | null;
+  severidade: number | string | null;
   classificacao_risco: string;
   acoes: Array<{
     tratativa_aplicada: string;

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useForm, FormProvider } from "react-hook-form";
@@ -41,6 +40,27 @@ const OcorrenciasEdicao = () => {
       try {
         const data = await getOcorrenciaById(id);
         
+        // Safely handle colaboradores_acidentados data
+        const colaboradores = Array.isArray(data.colaboradores_acidentados) 
+          ? data.colaboradores_acidentados.map((col: any) => ({
+              colaborador: col.colaborador || "",
+              funcao: col.funcao || "",
+              matricula: col.matricula || ""
+            }))
+          : [];
+
+        // Safely handle acoes data
+        const acoes = Array.isArray(data.acoes)
+          ? data.acoes.map((acao: any) => ({
+              tratativa_aplicada: acao.tratativa_aplicada || "",
+              data_adequacao: acao.data_adequacao ? new Date(acao.data_adequacao) : null,
+              responsavel_acao: acao.responsavel_acao || "",
+              funcao_responsavel: acao.funcao_responsavel || "",
+              situacao: acao.situacao || "",
+              status: acao.status || ""
+            }))
+          : [];
+        
         // Convert database data back to form format
         const formData: Partial<OcorrenciaFormSchema> = {
           data: data.data ? new Date(data.data) : undefined,
@@ -53,7 +73,7 @@ const OcorrenciasEdicao = () => {
           engenheiro_responsavel: data.engenheiro_responsavel || "",
           supervisor_responsavel: data.supervisor_responsavel || "",
           encarregado_responsavel: data.encarregado_responsavel || "",
-          colaboradores_acidentados: data.colaboradores_acidentados || [],
+          colaboradores_acidentados: colaboradores,
           tipoOcorrencia: data.tipo_ocorrencia || "",
           tipoEvento: data.tipo_evento || "",
           classificacaoOcorrencia: data.classificacao_ocorrencia || "",
@@ -73,10 +93,10 @@ const OcorrenciasEdicao = () => {
           deteccao: data.deteccao || "",
           efeitoFalha: data.efeito_falha || "",
           impacto: data.impacto || "",
-          probabilidade: data.probabilidade || null,
-          severidade: data.severidade || null,
+          probabilidade: data.probabilidade || "",
+          severidade: data.severidade || "",
           classificacaoRisco: data.classificacao_risco || "",
-          acoes: data.acoes || [],
+          acoes: acoes,
           investigacao_realizada: data.investigacao_realizada || "",
           informe_preliminar: data.informe_preliminar || null,
           relatorio_analise: data.relatorio_analise || null,

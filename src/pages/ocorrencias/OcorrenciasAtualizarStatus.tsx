@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -23,7 +22,13 @@ const OcorrenciasAtualizarStatus = () => {
       try {
         const data = await getOcorrenciaById(id);
         setOcorrencia(data);
-        setAcoes(data.acoes || []);
+        
+        // Safely handle acoes data from database
+        if (data.acoes && Array.isArray(data.acoes)) {
+          setAcoes(data.acoes);
+        } else {
+          setAcoes([]);
+        }
       } catch (error) {
         console.error('Erro ao carregar ocorrência:', error);
         toast.error("Erro ao carregar dados da ocorrência");
