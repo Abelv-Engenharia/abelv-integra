@@ -9,7 +9,7 @@ interface OcorrenciaFormNavigationProps {
   onPrevious: () => void;
   onNext: () => void;
   onCancel: () => void;
-  onSubmit: (e: React.FormEvent) => void;
+  onSubmit: () => void;
   isSubmitting: boolean;
   isEditMode: boolean;
 }
@@ -57,8 +57,7 @@ export const OcorrenciaFormNavigation: React.FC<OcorrenciaFormNavigationProps> =
           disabled={isSubmitting}
           onClick={() => {
             console.log("Botão Salvar ocorrência clicado - executando onSubmit");
-            const fakeEvent = { preventDefault: () => {} } as React.FormEvent;
-            onSubmit(fakeEvent);
+            onSubmit();
           }}
         >
           <Save className="mr-2 h-4 w-4" />
