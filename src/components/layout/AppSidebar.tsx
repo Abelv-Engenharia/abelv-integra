@@ -82,7 +82,12 @@ export function AppSidebar() {
         </SidebarMenu>
 
         {/* Render SMS se tiver acesso a pelo menos 1 menu dele */}
-        {["desvios_dashboard", "desvios_cadastro", "desvios_consulta", "desvios_nao_conformidade"].some(menu =>
+        {["desvios_dashboard", "desvios_cadastro", "desvios_consulta", "desvios_nao_conformidade", 
+          "treinamentos_dashboard", "treinamentos_normativo", "treinamentos_consulta", "treinamentos_execucao", "treinamentos_cracha",
+          "hora_seguranca_cadastro", "hora_seguranca_cadastro_inspecao", "hora_seguranca_cadastro_nao_programada", 
+          "hora_seguranca_dashboard", "hora_seguranca_agenda", "hora_seguranca_acompanhamento",
+          "medidas_disciplinares_dashboard", "medidas_disciplinares_cadastro", "medidas_disciplinares_consulta",
+          "ocorrencias_dashboard", "ocorrencias_cadastro", "ocorrencias_consulta"].some(menu =>
           podeVerMenu(menu, menusSidebar)
         ) && (
           <SidebarSectionSMS openMenu={openMenu} toggleMenu={toggleMenu} />
