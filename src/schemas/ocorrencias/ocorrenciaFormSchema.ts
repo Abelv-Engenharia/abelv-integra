@@ -22,9 +22,9 @@ export const ocorrenciaFormSchema = z.object({
       })
     )
     .optional(),
-  tipo_ocorrencia: z.string().min(1, "Campo obrigatório"),
-  tipo_evento: z.string().min(1, "Campo obrigatório"),
-  classificacao_ocorrencia: z.string().min(1, "Campo obrigatório"),
+  tipoOcorrencia: z.string().min(1, "Campo obrigatório"),
+  tipoEvento: z.string().min(1, "Campo obrigatório"),
+  classificacaoOcorrencia: z.string().min(1, "Campo obrigatório"),
 
   // Informações Ocorrência
   houve_afastamento: z.string().optional(),
