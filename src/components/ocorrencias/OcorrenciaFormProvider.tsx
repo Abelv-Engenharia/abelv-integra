@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -59,8 +60,10 @@ export const OcorrenciaFormProvider: React.FC = () => {
     navigate("/ocorrencias/consulta");
   };
 
-  const validateRequiredFields = (values: OcorrenciaFormSchema) => {
+  const validateRequiredFields = (values: any) => {
     const missing: string[] = [];
+    
+    console.log("Validando campos obrigatórios com valores:", values);
     
     // Campos obrigatórios básicos
     if (!values.data) missing.push("Data da ocorrência");
@@ -68,9 +71,11 @@ export const OcorrenciaFormProvider: React.FC = () => {
     if (!values.cca) missing.push("CCA");
     if (!values.empresa) missing.push("Empresa");
     if (!values.disciplina) missing.push("Disciplina");
-    if (!values.tipo_ocorrencia) missing.push("Tipo de ocorrência");
-    if (!values.tipo_evento) missing.push("Tipo de evento");
-    if (!values.classificacao_ocorrencia) missing.push("Classificação da ocorrência");
+    
+    // Usar os nomes dos campos conforme aparecem no formulário (camelCase)
+    if (!values.tipoOcorrencia) missing.push("Tipo de ocorrência");
+    if (!values.tipoEvento) missing.push("Tipo de evento");
+    if (!values.classificacaoOcorrencia) missing.push("Classificação da ocorrência");
 
     // Verificar se pelo menos um responsável foi preenchido
     const hasResponsible = values.engenheiro_responsavel || 
@@ -83,6 +88,7 @@ export const OcorrenciaFormProvider: React.FC = () => {
     // Campos de classificação de risco
     if (!values.classificacaoRisco) missing.push("Classificação de risco");
 
+    console.log("Campos faltantes encontrados:", missing);
     return missing;
   };
 
