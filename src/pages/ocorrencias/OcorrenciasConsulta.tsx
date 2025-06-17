@@ -1,18 +1,8 @@
-
 import React, { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { OcorrenciasFiltros } from "@/components/ocorrencias/OcorrenciasFiltros";
-import { Button } from "@/components/ui/button";
-import { Eye, Search, Edit, Trash2, CheckSquare } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Plus, Eye, Edit, RefreshCw, Trash2 } from "lucide-react";
 import { getAllOcorrencias, deleteOcorrencia } from "@/services/ocorrencias/ocorrenciasService";
 import { toast } from "sonner";
 import {
@@ -24,88 +14,37 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
-// Function to get the background and text colors for each risk classification
-const getRiscoClassColor = (classificacao: string) => {
-  switch (classificacao) {
-    case "TRIVIAL":
-      return "bg-[#34C6F4] text-white";
-    case "TOLERÁVEL":
-      return "bg-[#92D050] text-white";
-    case "MODERADO":
-      return "bg-[#FFE07D] text-gray-800";
-    case "SUBSTANCIAL":
-      return "bg-[#FFC000] text-gray-800";
-    case "INTOLERÁVEL":
-      return "bg-[#D13F3F] text-white";
-    default:
-      return "bg-gray-100 text-gray-800";
-  }
-};
-
 const OcorrenciasConsulta = () => {
-  const [filtroAtivo, setFiltroAtivo] = useState(false);
   const [ocorrencias, setOcorrencias] = useState<any[]>([]);
-  const [filteredData, setFilteredData] = useState<any[]>([]);
-  const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
-  const [ccas, setCcas] = useState<any[]>([]);
+  const [deleteConfirmationOpen, setDeleteConfirmationOpen] = useState(false);
+  const [ocorrenciaToDeleteId, setOcorrenciaToDeleteId] = useState<string | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const loadData = async () => {
+    const loadOcorrencias = async () => {
+      setLoading(true);
       try {
-        setLoading(true);
-        const [ocorrenciasData, ccasData] = await Promise.all([
-          getAllOcorrencias(),
-          fetch('/api/ccas').then(res => res.json()).catch(() => [])
-        ]);
-        
-        setOcorrencias(ocorrenciasData);
-        setFilteredData(ocorrenciasData);
-        setCcas(ccasData);
+        const data = await getAllOcorrencias();
+        setOcorrencias(data);
       } catch (error) {
-        console.error('Erro ao carregar dados:', error);
-        toast.error("Erro ao carregar dados das ocorrências");
+        console.error('Erro ao buscar ocorrências:', error);
+        toast.error("Erro ao carregar ocorrências");
       } finally {
         setLoading(false);
       }
     };
 
-    loadData();
+    loadOcorrencias();
   }, []);
 
-  const getCcaDisplay = (ccaText: string) => {
-    const cca = ccas.find(c => c.codigo === ccaText || c.nome === ccaText);
-    return cca ? `${cca.codigo} - ${cca.nome}` : ccaText;
+  const handleView = (id: string) => {
+    navigate(`/ocorrencias/visualizar/${id}`);
   };
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (searchTerm.trim() === "") {
-      setFilteredData(ocorrencias);
-      return;
-    }
-    
-    const filtered = ocorrencias.filter(
-      (item) => 
-        item.empresa?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.cca?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.tipo_ocorrencia?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.disciplina?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-    
-    setFilteredData(filtered);
-  };
-
-  const handleViewOcorrencia = (id: string) => {
-    navigate(`/ocorrencias/detalhes/${id}`);
-  };
-
-  const handleEditOcorrencia = (id: string) => {
+  const handleEdit = (id: string) => {
     navigate(`/ocorrencias/editar/${id}`);
   };
 
@@ -113,175 +52,154 @@ const OcorrenciasConsulta = () => {
     navigate(`/ocorrencias/atualizar-status/${id}`);
   };
 
-  const handleDeleteOcorrencia = async (id: string) => {
-    try {
-      await deleteOcorrencia(id);
-      const updatedData = filteredData.filter(item => item.id !== id);
-      setFilteredData(updatedData);
-      setOcorrencias(prev => prev.filter(item => item.id !== id));
-      
-      toast.success("Ocorrência excluída com sucesso");
-    } catch (error) {
-      console.error('Erro ao excluir ocorrência:', error);
-      toast.error("Erro ao excluir ocorrência");
+  const handleDelete = (id: string) => {
+    setOcorrenciaToDeleteId(id);
+    setDeleteConfirmationOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (ocorrenciaToDeleteId) {
+      try {
+        await deleteOcorrencia(ocorrenciaToDeleteId);
+        setOcorrencias(ocorrencias.filter(ocorrencia => ocorrencia.id !== ocorrenciaToDeleteId));
+        toast.success("Ocorrência excluída com sucesso!");
+      } catch (error) {
+        console.error('Erro ao excluir ocorrência:', error);
+        toast.error("Erro ao excluir ocorrência");
+      } finally {
+        setDeleteConfirmationOpen(false);
+        setOcorrenciaToDeleteId(null);
+      }
     }
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex justify-between items-center">
         <h2 className="text-3xl font-bold tracking-tight">Consulta de Ocorrências</h2>
-        <OcorrenciasFiltros onFilter={() => setFiltroAtivo(true)} />
+        <Button onClick={() => navigate("/ocorrencias/cadastro")}>
+          <Plus className="mr-2 h-4 w-4" />
+          Cadastrar Ocorrência
+        </Button>
       </div>
-
-      {filtroAtivo && (
-        <div className="bg-slate-50 p-2 rounded-md border border-slate-200">
-          <p className="text-sm text-muted-foreground">
-            Filtros aplicados - <button className="text-primary underline" onClick={() => setFiltroAtivo(false)}>Limpar filtros</button>
-          </p>
-        </div>
-      )}
 
       <Card>
         <CardHeader>
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <CardTitle>Lista de Ocorrências</CardTitle>
-            <form onSubmit={handleSearch} className="flex w-full sm:w-auto">
-              <div className="relative flex-grow sm:flex-grow-0">
-                <input
-                  type="text"
-                  placeholder="Buscar ocorrência..."
-                  className="px-3 py-2 border rounded-l-md w-full sm:w-80"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
-              <Button type="submit" className="rounded-l-none">
-                <Search className="h-4 w-4" />
-              </Button>
-            </form>
-          </div>
+          <CardTitle>Ocorrências Registradas</CardTitle>
         </CardHeader>
         <CardContent>
-          {filteredData.length === 0 ? (
-            <div className="text-center py-8">
-              <p className="text-muted-foreground">
-                {searchTerm ? "Nenhuma ocorrência encontrada para a busca." : "Nenhuma ocorrência cadastrada."}
-              </p>
+          {loading ? (
+            <div className="flex items-center justify-center h-32">
+              <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
             </div>
+          ) : ocorrencias.length === 0 ? (
+            <p className="text-center text-muted-foreground py-8">
+              Nenhuma ocorrência encontrada.
+            </p>
           ) : (
-            <div className="rounded-md border overflow-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Data</TableHead>
-                    <TableHead>CCA</TableHead>
-                    <TableHead>Empresa</TableHead>
-                    <TableHead>Disciplina</TableHead>
-                    <TableHead>Tipo de Ocorrência</TableHead>
-                    <TableHead className="hidden md:table-cell">Classificação de Risco</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Ações</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredData.map((ocorrencia) => (
-                    <TableRow key={ocorrencia.id}>
-                      <TableCell>
-                        {ocorrencia.data ? new Date(ocorrencia.data).toLocaleDateString() : '-'}
-                      </TableCell>
-                      <TableCell>{getCcaDisplay(ocorrencia.cca || '-')}</TableCell>
-                      <TableCell>{ocorrencia.empresa || '-'}</TableCell>
-                      <TableCell>{ocorrencia.disciplina || '-'}</TableCell>
-                      <TableCell>{ocorrencia.tipo_ocorrencia || '-'}</TableCell>
-                      <TableCell className="hidden md:table-cell">
-                        {ocorrencia.classificacao_risco ? (
-                          <span className={`px-2 py-1 rounded-full text-xs ${getRiscoClassColor(ocorrencia.classificacao_risco)}`}>
-                            {ocorrencia.classificacao_risco}
-                          </span>
-                        ) : '-'}
-                      </TableCell>
-                      <TableCell>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b">
+                    <th className="text-left p-2">Data</th>
+                    <th className="text-left p-2">Empresa</th>
+                    <th className="text-left p-2">Tipo</th>
+                    <th className="text-left p-2">Status</th>
+                    <th className="text-left p-2">Risco</th>
+                    <th className="text-center p-2">Ações</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {ocorrencias.map((ocorrencia) => (
+                    <tr key={ocorrencia.id} className="border-b hover:bg-gray-50">
+                      <td className="p-2">
+                        {new Date(ocorrencia.data).toLocaleDateString('pt-BR')}
+                      </td>
+                      <td className="p-2">{ocorrencia.empresa}</td>
+                      <td className="p-2">{ocorrencia.tipo_ocorrencia}</td>
+                      <td className="p-2">
                         <span className={`px-2 py-1 rounded-full text-xs ${
-                          ocorrencia.status === 'Em tratativa' 
-                            ? 'bg-orange-100 text-orange-800' 
-                            : 'bg-green-100 text-green-800'
+                          ocorrencia.status === 'Fechado' 
+                            ? 'bg-green-100 text-green-800' 
+                            : 'bg-orange-100 text-orange-800'
                         }`}>
                           {ocorrencia.status || 'Em tratativa'}
                         </span>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex space-x-1">
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            onClick={() => handleViewOcorrencia(ocorrencia.id)}
+                      </td>
+                      <td className="p-2">
+                        {ocorrencia.classificacao_risco && (
+                          <span className={`px-2 py-1 rounded-full text-xs ${
+                            ocorrencia.classificacao_risco === 'TRIVIAL' ? 'bg-blue-100 text-blue-800' :
+                            ocorrencia.classificacao_risco === 'TOLERÁVEL' ? 'bg-green-100 text-green-800' :
+                            ocorrencia.classificacao_risco === 'MODERADO' ? 'bg-yellow-100 text-yellow-800' :
+                            ocorrencia.classificacao_risco === 'SUBSTANCIAL' ? 'bg-orange-100 text-orange-800' :
+                            ocorrencia.classificacao_risco === 'INTOLERÁVEL' ? 'bg-red-100 text-red-800' :
+                            'bg-gray-100 text-gray-800'
+                          }`}>
+                            {ocorrencia.classificacao_risco}
+                          </span>
+                        )}
+                      </td>
+                      <td className="p-2">
+                        <div className="flex gap-1 justify-center">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleView(ocorrencia.id)}
                             title="Visualizar"
                           >
                             <Eye className="h-4 w-4" />
                           </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            onClick={() => handleEditOcorrencia(ocorrencia.id)}
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleEdit(ocorrencia.id)}
                             title="Editar"
                           >
                             <Edit className="h-4 w-4" />
                           </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
+                          <Button
+                            variant="outline"
+                            size="sm"
                             onClick={() => handleUpdateStatus(ocorrencia.id)}
-                            title="Atualizar Status das Ações"
+                            title="Atualizar Status"
                           >
-                            <CheckSquare className="h-4 w-4" />
+                            <RefreshCw className="h-4 w-4" />
                           </Button>
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                              <Button 
-                                variant="ghost" 
-                                size="icon"
-                                title="Excluir"
-                              >
-                                <Trash2 className="h-4 w-4 text-red-500" />
-                              </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                              <AlertDialogHeader>
-                                <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                  Tem certeza que deseja excluir esta ocorrência? Esta ação não pode ser desfeita.
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                <AlertDialogAction 
-                                  onClick={() => handleDeleteOcorrencia(ocorrencia.id)}
-                                  className="bg-red-500 hover:bg-red-600"
-                                >
-                                  Excluir
-                                </AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleDelete(ocorrencia.id)}
+                            title="Excluir"
+                            className="text-red-600 hover:text-red-700"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
                         </div>
-                      </TableCell>
-                    </TableRow>
+                      </td>
+                    </tr>
                   ))}
-                </TableBody>
-              </Table>
+                </tbody>
+              </table>
             </div>
           )}
         </CardContent>
       </Card>
+
+      <AlertDialog open={deleteConfirmationOpen} onOpenChange={setDeleteConfirmationOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza de que deseja excluir esta ocorrência? Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setOcorrenciaToDeleteId(null)}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete}>Excluir</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

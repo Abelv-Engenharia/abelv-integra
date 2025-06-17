@@ -61,9 +61,12 @@ import MedidasDisciplinaresConsulta from "./pages/medidas-disciplinares/MedidasD
 import GroCadastroPerigos from "./pages/gro/GroCadastroPerigos";
 import GroAvaliacaoRiscos from './pages/gro/GroAvaliacaoRiscos';
 import GroPGR from "./pages/gro/GroPGR";
-import OcorrenciasDashboard from './pages/ocorrencias/OcorrenciasDashboard';
-import OcorrenciasConsulta from './pages/ocorrencias/OcorrenciasConsulta';
-import OcorrenciasCadastro from './pages/ocorrencias/OcorrenciasCadastro';
+import OcorrenciasDashboard from "@/pages/ocorrencias/OcorrenciasDashboard";
+import OcorrenciasCadastro from "@/pages/ocorrencias/OcorrenciasCadastro";
+import OcorrenciasConsulta from "@/pages/ocorrencias/OcorrenciasConsulta";
+import OcorrenciasVisualizacao from "@/pages/ocorrencias/OcorrenciasVisualizacao";
+import OcorrenciasEdicao from "@/pages/ocorrencias/OcorrenciasEdicao";
+import OcorrenciasAtualizarStatus from "@/pages/ocorrencias/OcorrenciasAtualizarStatus";
 
 const queryClient = new QueryClient();
 
@@ -146,9 +149,12 @@ function App() {
               <Route path="gro/avaliacao" element={<GroAvaliacaoRiscos />} />
               <Route path="gro/pgr" element={<GroPGR />} />
               {/* Ocorrencias */}
-              <Route path="ocorrencias/dashboard" element={<OcorrenciasDashboard />} />
-              <Route path="ocorrencias/cadastro" element={<OcorrenciasCadastro />} />
-              <Route path="ocorrencias/consulta" element={<OcorrenciasConsulta />} />
+              <Route path="/ocorrencias/dashboard" element={<OcorrenciasDashboard />} />
+              <Route path="/ocorrencias/cadastro" element={<OcorrenciasCadastro />} />
+              <Route path="/ocorrencias/consulta" element={<OcorrenciasConsulta />} />
+              <Route path="/ocorrencias/visualizar/:id" element={<OcorrenciasVisualizacao />} />
+              <Route path="/ocorrencias/editar/:id" element={<OcorrenciasEdicao />} />
+              <Route path="/ocorrencias/atualizar-status/:id" element={<OcorrenciasAtualizarStatus />} />
             </Route>
           </Routes>
         </AuthProvider>
