@@ -1,6 +1,7 @@
 
 import { useMemo } from "react";
 import { useFormData } from "@/hooks/useFormData";
+import { useUserCCAs } from "@/hooks/useUserCCAs";
 
 interface UseFilteredFormDataProps {
   selectedCcaId?: string;
@@ -8,11 +9,16 @@ interface UseFilteredFormDataProps {
 
 export const useFilteredFormData = ({ selectedCcaId }: UseFilteredFormDataProps) => {
   const allData = useFormData();
+  const { data: userCCAs = [] } = useUserCCAs();
 
   const filteredData = useMemo(() => {
+    // IDs dos CCAs que o usuário tem acesso
+    const allowedCcaIds = userCCAs.map(cca => cca.id);
+
     if (!selectedCcaId) {
       return {
         ...allData,
+        ccas: userCCAs, // Mostra apenas os CCAs permitidos
         empresas: [],
         engenheiros: [],
         supervisores: [],
@@ -22,6 +28,19 @@ export const useFilteredFormData = ({ selectedCcaId }: UseFilteredFormDataProps)
     }
 
     const ccaIdNumber = parseInt(selectedCcaId);
+
+    // Verifica se o CCA selecionado é permitido para o usuário
+    if (!allowedCcaIds.includes(ccaIdNumber)) {
+      return {
+        ...allData,
+        ccas: userCCAs,
+        empresas: [],
+        engenheiros: [],
+        supervisores: [],
+        encarregados: [],
+        funcionarios: [],
+      };
+    }
 
     // Filtrar empresas que têm relacionamento com o CCA selecionado
     const filteredEmpresas = allData.empresas.filter(empresa => 
@@ -40,13 +59,14 @@ export const useFilteredFormData = ({ selectedCcaId }: UseFilteredFormDataProps)
 
     return {
       ...allData,
+      ccas: userCCAs, // Sempre mostra apenas os CCAs permitidos
       empresas: filteredEmpresas,
       engenheiros: filteredEngenheiros,
       supervisores: filteredSupervisores,
       encarregados: allData.encarregados.filter(encarregado => encarregado.cca_id === ccaIdNumber),
       funcionarios: allData.funcionarios.filter(funcionario => funcionario.cca_id === ccaIdNumber),
     };
-  }, [allData, selectedCcaId]);
+  }, [allData, selectedCcaId, userCCAs]);
 
   return filteredData;
 };

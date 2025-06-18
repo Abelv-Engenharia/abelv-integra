@@ -3,6 +3,7 @@ import { useOcorrenciasBasicData } from "./ocorrencias/useOcorrenciasBasicData";
 import { useOcorrenciasPersonnelData } from "./ocorrencias/useOcorrenciasPersonnelData";
 import { useOcorrenciasReferenceData } from "./ocorrencias/useOcorrenciasReferenceData";
 import { useFilteredPersonnelData } from "./ocorrencias/useFilteredPersonnelData";
+import { useUserCCAs } from "./useUserCCAs";
 
 interface UseOcorrenciasFormDataProps {
   selectedCcaId?: string;
@@ -12,6 +13,7 @@ export const useOcorrenciasFormData = ({ selectedCcaId }: UseOcorrenciasFormData
   const basicData = useOcorrenciasBasicData();
   const personnelData = useOcorrenciasPersonnelData();
   const referenceData = useOcorrenciasReferenceData();
+  const { data: userCCAs = [] } = useUserCCAs();
   
   const filteredData = useFilteredPersonnelData({
     selectedCcaId,
@@ -21,6 +23,7 @@ export const useOcorrenciasFormData = ({ selectedCcaId }: UseOcorrenciasFormData
   return {
     ...basicData,
     ...referenceData,
+    ccas: userCCAs, // Usa apenas os CCAs permitidos ao usuário
     empresas: filteredData.empresas,
     engenheiros: filteredData.engenheiros,
     supervisores: filteredData.supervisores,

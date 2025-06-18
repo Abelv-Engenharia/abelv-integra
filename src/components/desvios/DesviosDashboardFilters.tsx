@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useUserCCAs } from "@/hooks/useUserCCAs";
 
 interface DesviosDashboardFiltersProps {
   year: string;
@@ -19,12 +20,6 @@ interface DesviosDashboardFiltersProps {
   setDisciplinaId: (disciplinaId: string) => void;
   setEmpresaId: (empresaId: string) => void;
   onFilterChange: () => void;
-}
-
-interface CCA {
-  id: number;
-  codigo: string;
-  nome: string;
 }
 
 interface Disciplina {
@@ -52,20 +47,13 @@ const DesviosDashboardFilters = ({
   onFilterChange
 }: DesviosDashboardFiltersProps) => {
   const { toast } = useToast();
-  const [ccas, setCcas] = useState<CCA[]>([]);
+  const { data: userCCAs = [] } = useUserCCAs();
   const [disciplinas, setDisciplinas] = useState<Disciplina[]>([]);
   const [empresas, setEmpresas] = useState<Empresa[]>([]);
 
   useEffect(() => {
     const fetchFilterOptions = async () => {
       try {
-        // Buscar CCAs ordenados por código
-        const { data: ccasData } = await supabase
-          .from('ccas')
-          .select('id, codigo, nome')
-          .eq('ativo', true)
-          .order('codigo');
-
         // Buscar Disciplinas
         const { data: disciplinasData } = await supabase
           .from('disciplinas')
@@ -80,7 +68,6 @@ const DesviosDashboardFilters = ({
           .eq('ativo', true)
           .order('nome');
 
-        if (ccasData) setCcas(ccasData);
         if (disciplinasData) setDisciplinas(disciplinasData);
         if (empresasData) setEmpresas(empresasData);
       } catch (error) {
@@ -168,7 +155,7 @@ const DesviosDashboardFilters = ({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="todos">Todos</SelectItem>
-                {ccas.map((cca) => (
+                {userCCAs.map((cca) => (
                   <SelectItem key={cca.id} value={cca.id.toString()}>
                     {cca.codigo} - {cca.nome}
                   </SelectItem>

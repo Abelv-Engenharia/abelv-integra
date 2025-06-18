@@ -1,6 +1,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useUserCCAs } from "./useUserCCAs";
 
 export interface CCA {
   id: number;
@@ -11,22 +12,25 @@ export interface CCA {
 }
 
 export const useCCAs = () => {
-  return useQuery({
-    queryKey: ['ccas'],
-    queryFn: async (): Promise<CCA[]> => {
-      const { data, error } = await supabase
-        .from('ccas')
-        .select('*')
-        .eq('ativo', true)
-        .order('nome');
+  const { data: userCCAs, isLoading: isLoadingUserCCAs } = useUserCCAs();
 
-      if (error) {
-        console.error('Erro ao buscar CCAs:', error);
-        throw error;
+  return useQuery({
+    queryKey: ['ccas', userCCAs?.map(cca => cca.id)],
+    queryFn: async (): Promise<CCA[]> => {
+      // Se ainda está carregando os CCAs do usuário, aguarda
+      if (isLoadingUserCCAs) {
+        return [];
       }
 
-      return data || [];
+      // Se o usuário não tem CCAs permitidos, retorna vazio
+      if (!userCCAs || userCCAs.length === 0) {
+        return [];
+      }
+
+      // Retorna apenas os CCAs que o usuário tem acesso
+      return userCCAs;
     },
-    staleTime: 5 * 60 * 1000, // 5 minutos
+    enabled: !isLoadingUserCCAs && !!userCCAs,
+    staleTime: 5 * 60 * 1000,
   });
 };
