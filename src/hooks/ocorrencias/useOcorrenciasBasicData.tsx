@@ -1,20 +1,10 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useUserCCAs } from "../useUserCCAs";
 
 export const useOcorrenciasBasicData = () => {
-  // CCAs
-  const { data: ccas = [] } = useQuery({
-    queryKey: ['ccas-ocorrencias'],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from('ccas')
-        .select('id, codigo, nome')
-        .eq('ativo', true)
-        .order('codigo');
-      return data || [];
-    },
-  });
+  const { data: userCCAs = [] } = useUserCCAs();
 
   // Disciplinas
   const { data: disciplinas = [] } = useQuery({
@@ -69,7 +59,7 @@ export const useOcorrenciasBasicData = () => {
   });
 
   return {
-    ccas,
+    ccas: userCCAs, // Usa apenas os CCAs permitidos
     disciplinas,
     tiposOcorrencia,
     tiposEvento,

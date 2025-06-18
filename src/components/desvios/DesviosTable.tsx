@@ -10,24 +10,58 @@ import {
   TableCell,
 } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
-import { desviosCompletosService, DesvioCompleto } from "@/services/desvios/desviosCompletosService";
+import { supabase } from "@/integrations/supabase/client";
+import { useUserCCAs } from "@/hooks/useUserCCAs";
 import DesviosTableRow from "./DesviosTableRow";
+
+interface DesvioCompleto {
+  id: string;
+  data_desvio: string;
+  descricao_desvio: string;
+  classificacao_risco: string;
+  status: string;
+  cca_id: number;
+  ccas?: {
+    nome: string;
+  };
+}
 
 const DesviosTable = () => {
   const { toast } = useToast();
+  const { data: userCCAs = [] } = useUserCCAs();
   const [desvios, setDesvios] = useState<DesvioCompleto[]>([]);
   const [editDesvio, setEditDesvio] = useState<DesvioCompleto | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editDesvioId, setEditDesvioId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Recarrega desvios do backend
+  const allowedCcaIds = userCCAs.map(cca => cca.id);
+
+  // Recarrega desvios do backend filtrando pelos CCAs permitidos
   const fetchDesvios = async () => {
     setIsLoading(true);
     try {
-      const data = await desviosCompletosService.getAll();
-      setDesvios(data);
-      console.log("Desvios recarregados do backend:", data);
+      if (allowedCcaIds.length === 0) {
+        setDesvios([]);
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from('desvios_completos')
+        .select(`
+          *,
+          ccas:cca_id(nome)
+        `)
+        .in('cca_id', allowedCcaIds)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Erro ao buscar desvios:', error);
+        setDesvios([]);
+      } else {
+        console.log("Desvios filtrados por CCA carregados:", data);
+        setDesvios(data || []);
+      }
     } catch (error) {
       console.error('Erro ao buscar desvios:', error);
       setDesvios([]);
@@ -37,8 +71,13 @@ const DesviosTable = () => {
   };
 
   useEffect(() => {
-    fetchDesvios();
-  }, []);
+    if (allowedCcaIds.length > 0) {
+      fetchDesvios();
+    } else {
+      setDesvios([]);
+      setIsLoading(false);
+    }
+  }, [allowedCcaIds.join(',')]);
 
   const handleStatusUpdated = (id: string, newStatus: string) => {
     setDesvios(desvios.map(d =>
@@ -79,6 +118,16 @@ const DesviosTable = () => {
     }
   };
 
+  if (userCCAs.length === 0 && !isLoading) {
+    return (
+      <div className="bg-white rounded-md border shadow-sm">
+        <div className="flex justify-center items-center p-8">
+          <p className="text-muted-foreground">Você não tem acesso a nenhum CCA.</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <>
       <div className="bg-white rounded-md border shadow-sm">
@@ -118,7 +167,7 @@ const DesviosTable = () => {
                 ) : (
                   <TableRow>
                     <TableCell colSpan={7} className="h-24 text-center">
-                      Nenhum desvio encontrado.
+                      Nenhum desvio encontrado para os CCAs permitidos.
                     </TableCell>
                   </TableRow>
                 )}
@@ -128,7 +177,7 @@ const DesviosTable = () => {
         </div>
         <div className="flex items-center justify-between p-4 border-t">
           <div className="text-sm text-muted-foreground">
-            Mostrando {desvios.length} de {desvios.length} desvios
+            Mostrando {desvios.length} de {desvios.length} desvios dos CCAs permitidos
           </div>
           <div className="flex items-center gap-2">
             <Button variant="outline" disabled>

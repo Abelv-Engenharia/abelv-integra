@@ -1,26 +1,19 @@
 
 import { useQuery } from "@tanstack/react-query";
 import {
-  fetchCCAs,
   fetchTiposRegistro,
   fetchProcessos,
   fetchEventosIdentificados,
   fetchCausasProvaveis,
-  fetchEmpresas,
   fetchDisciplinas,
-  fetchEngenheiros,
   fetchBaseLegalOpcoes,
-  fetchSupervisores,
-  fetchEncarregados,
-  fetchFuncionarios,
 } from "@/services/desviosService";
 import { supabase } from "@/integrations/supabase/client";
+import { useUserCCAs } from "./useUserCCAs";
 
 export const useFormData = () => {
-  const { data: ccas = [] } = useQuery({
-    queryKey: ['ccas'],
-    queryFn: fetchCCAs,
-  });
+  const { data: userCCAs = [] } = useUserCCAs();
+  const allowedCcaIds = userCCAs.map(cca => cca.id);
 
   const { data: tiposRegistro = [] } = useQuery({
     queryKey: ['tipos-registro'],
@@ -43,8 +36,10 @@ export const useFormData = () => {
   });
 
   const { data: empresas = [] } = useQuery({
-    queryKey: ['empresas-with-ccas'],
+    queryKey: ['empresas-with-ccas', allowedCcaIds],
     queryFn: async () => {
+      if (allowedCcaIds.length === 0) return [];
+      
       const { data } = await supabase
         .from('empresas')
         .select(`
@@ -58,9 +53,11 @@ export const useFormData = () => {
           )
         `)
         .eq('ativo', true)
+        .in('empresa_ccas.cca_id', allowedCcaIds)
         .order('nome');
       return data || [];
     },
+    enabled: allowedCcaIds.length > 0,
   });
 
   const { data: disciplinas = [] } = useQuery({
@@ -69,8 +66,10 @@ export const useFormData = () => {
   });
 
   const { data: engenheiros = [] } = useQuery({
-    queryKey: ['engenheiros-with-ccas'],
+    queryKey: ['engenheiros-with-ccas', allowedCcaIds],
     queryFn: async () => {
+      if (allowedCcaIds.length === 0) return [];
+      
       const { data } = await supabase
         .from('engenheiros')
         .select(`
@@ -86,9 +85,11 @@ export const useFormData = () => {
           )
         `)
         .eq('ativo', true)
+        .in('engenheiro_ccas.cca_id', allowedCcaIds)
         .order('nome');
       return data || [];
     },
+    enabled: allowedCcaIds.length > 0,
   });
 
   const { data: baseLegalOpcoes = [] } = useQuery({
@@ -97,8 +98,10 @@ export const useFormData = () => {
   });
 
   const { data: supervisores = [] } = useQuery({
-    queryKey: ['supervisores-with-ccas'],
+    queryKey: ['supervisores-with-ccas', allowedCcaIds],
     queryFn: async () => {
+      if (allowedCcaIds.length === 0) return [];
+      
       const { data } = await supabase
         .from('supervisores')
         .select(`
@@ -114,14 +117,18 @@ export const useFormData = () => {
           )
         `)
         .eq('ativo', true)
+        .in('supervisor_ccas.cca_id', allowedCcaIds)
         .order('nome');
       return data || [];
     },
+    enabled: allowedCcaIds.length > 0,
   });
 
   const { data: encarregados = [] } = useQuery({
-    queryKey: ['encarregados-with-cca'],
+    queryKey: ['encarregados-with-cca', allowedCcaIds],
     queryFn: async () => {
+      if (allowedCcaIds.length === 0) return [];
+      
       const { data } = await supabase
         .from('encarregados')
         .select(`
@@ -135,14 +142,18 @@ export const useFormData = () => {
           ccas:cca_id(id, codigo, nome)
         `)
         .eq('ativo', true)
+        .in('cca_id', allowedCcaIds)
         .order('nome');
       return data || [];
     },
+    enabled: allowedCcaIds.length > 0,
   });
 
   const { data: funcionarios = [] } = useQuery({
-    queryKey: ['funcionarios-with-cca'],
+    queryKey: ['funcionarios-with-cca', allowedCcaIds],
     queryFn: async () => {
+      if (allowedCcaIds.length === 0) return [];
+      
       const { data } = await supabase
         .from('funcionarios')
         .select(`
@@ -156,13 +167,15 @@ export const useFormData = () => {
           ccas:cca_id(id, codigo, nome)
         `)
         .eq('ativo', true)
+        .in('cca_id', allowedCcaIds)
         .order('nome');
       return data || [];
     },
+    enabled: allowedCcaIds.length > 0,
   });
 
   return {
-    ccas: ccas.sort((a, b) => a.codigo.localeCompare(b.codigo)),
+    ccas: userCCAs.sort((a, b) => a.codigo.localeCompare(b.codigo)),
     tiposRegistro,
     processos,
     eventosIdentificados,

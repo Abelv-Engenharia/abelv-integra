@@ -29,5 +29,9 @@ export const useOcorrenciasFormData = ({ selectedCcaId }: UseOcorrenciasFormData
     supervisores: filteredData.supervisores,
     encarregados: filteredData.encarregados,
     funcionarios: filteredData.funcionarios,
+    disciplinas: basicData.disciplinas, // Disciplinas não são filtradas por CCA
+    tiposOcorrencia: basicData.tiposOcorrencia,
+    tiposEvento: basicData.tiposEvento,
+    classificacoesOcorrencia: basicData.classificacoesOcorrencia,
   };
 };
