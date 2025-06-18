@@ -49,7 +49,8 @@ const InformacoesDesvioForm = ({ context }: InformacoesDesvioFormProps) => {
                 <Textarea 
                   placeholder="Descreva detalhadamente o desvio identificado"
                   className="min-h-[100px]"
-                  {...field} 
+                  {...field}
+                  onChange={(e) => field.onChange(e.target.value.toUpperCase())}
                 />
               </FormControl>
               <FormMessage />
@@ -57,32 +58,32 @@ const InformacoesDesvioForm = ({ context }: InformacoesDesvioFormProps) => {
           )}
         />
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <FormField
-            control={control}
-            name="baseLegal"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Base Legal</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione a base legal" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {(context.baseLegalOpcoes || []).map(item => (
-                      <SelectItem key={item.id} value={item.id.toString()}>
-                        {`${item.codigo} - ${item.nome}`}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+        <FormField
+          control={control}
+          name="baseLegal"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Base Legal</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione a base legal" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {(context.baseLegalOpcoes || []).map(item => (
+                    <SelectItem key={item.id} value={item.id.toString()}>
+                      {`${item.codigo} - ${item.nome}`}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <FormField
             control={control}
             name="supervisorResponsavel"
@@ -107,9 +108,7 @@ const InformacoesDesvioForm = ({ context }: InformacoesDesvioFormProps) => {
               </FormItem>
             )}
           />
-        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <FormField
             control={control}
             name="encarregadoResponsavel"
@@ -134,33 +133,34 @@ const InformacoesDesvioForm = ({ context }: InformacoesDesvioFormProps) => {
               </FormItem>
             )}
           />
-          <FormField
-            control={control}
-            name="colaboradorInfrator"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Colaborador Infrator</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione o colaborador" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {(context.funcionarios || []).map(func => (
-                      <SelectItem key={func.id} value={func.id}>
-                        {func.nome}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <FormField
+          control={control}
+          name="colaboradorInfrator"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Colaborador Infrator</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione o colaborador" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {(context.funcionarios || []).map(func => (
+                    <SelectItem key={func.id} value={func.id}>
+                      {func.nome}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
            <FormField
             control={control}
             name="funcao"
