@@ -14,6 +14,7 @@ export interface FilterParams {
   year?: string;
   month?: string;
   ccaId?: string;
+  ccaIds?: string[]; // Add support for multiple CCA IDs
   disciplinaId?: string;
   empresaId?: string;
 }

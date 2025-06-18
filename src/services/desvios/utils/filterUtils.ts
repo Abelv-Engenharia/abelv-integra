@@ -21,10 +21,15 @@ export const applyFiltersToQuery = (query: any, filters: FilterParams) => {
     filteredQuery = filteredQuery.gte('data_desvio', startDate).lte('data_desvio', endDate);
   }
 
-  // Aplicar filtros de CCA, Disciplina e Empresa
-  if (filters.ccaId && filters.ccaId !== "todos") {
+  // Aplicar filtros de CCA - support both single and multiple CCAs
+  if (filters.ccaIds && filters.ccaIds.length > 0) {
+    // Filter by multiple CCAs (for user access control)
+    filteredQuery = filteredQuery.in('cca_id', filters.ccaIds.map(id => parseInt(id)));
+  } else if (filters.ccaId && filters.ccaId !== "todos") {
+    // Filter by single CCA (for user selection)
     filteredQuery = filteredQuery.eq('cca_id', parseInt(filters.ccaId));
   }
+  
   if (filters.disciplinaId && filters.disciplinaId !== "todos") {
     filteredQuery = filteredQuery.eq('disciplina_id', parseInt(filters.disciplinaId));
   }
