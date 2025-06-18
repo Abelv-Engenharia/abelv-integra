@@ -2,7 +2,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -16,12 +15,14 @@ import InspecoesSummaryCards from "@/components/hora-seguranca/InspecoesSummaryC
 import { RecentInspectionsList } from "@/components/hora-seguranca/RecentInspectionsList";
 import { DesviosResponsaveisChart } from "@/components/hora-seguranca/DesviosResponsaveisChart";
 import { DesviosTipoInspecaoChart } from "@/components/hora-seguranca/DesviosTipoInspecaoChart";
+import { useUserCCAs } from "@/hooks/useUserCCAs";
 
 const HoraSegurancaDashboard = () => {
   const [tab, setTab] = useState("overview");
   const [filterCCA, setFilterCCA] = useState("");
   const [filterResponsavel, setFilterResponsavel] = useState("");
   const [filterPeriodo, setFilterPeriodo] = useState("");
+  const { data: userCCAs = [] } = useUserCCAs();
 
   return (
     <div className="container mx-auto py-6">
@@ -46,9 +47,11 @@ const HoraSegurancaDashboard = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="todos">Todos</SelectItem>
-                  <SelectItem value="CCA001">CCA 001</SelectItem>
-                  <SelectItem value="CCA002">CCA 002</SelectItem>
-                  <SelectItem value="CCA003">CCA 003</SelectItem>
+                  {userCCAs.map(cca => (
+                    <SelectItem key={cca.id} value={cca.id.toString()}>
+                      {cca.codigo} - {cca.nome}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
 

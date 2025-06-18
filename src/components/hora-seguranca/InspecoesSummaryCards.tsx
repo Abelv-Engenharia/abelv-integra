@@ -4,6 +4,7 @@ import { fetchInspecoesSummary } from "@/services/hora-seguranca";
 import { Activity, Calendar, CheckSquare, FileWarning } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { InspecoesSummary } from "@/services/hora-seguranca/types";
+import { useUserCCAs } from "@/hooks/useUserCCAs";
 
 interface StatCardProps {
   title: string;
@@ -31,11 +32,26 @@ const StatCard = ({ title, value, description, icon, className }: StatCardProps)
 const InspecoesSummaryCards = () => {
   const [data, setData] = useState<InspecoesSummary | null>(null);
   const [loading, setLoading] = useState(true);
+  const { data: userCCAs = [] } = useUserCCAs();
 
   useEffect(() => {
     const loadData = async () => {
       try {
         setLoading(true);
+        
+        if (userCCAs.length === 0) {
+          setData({
+            totalInspecoes: 0,
+            programadas: 0,
+            naoProgramadas: 0,
+            desviosIdentificados: 0,
+          });
+          setLoading(false);
+          return;
+        }
+        
+        // TODO: Implementar filtro por CCAs permitidos no serviço
+        // Por enquanto, buscar todos os dados
         const summary = await fetchInspecoesSummary();
         setData(summary);
       } catch (error) {
@@ -46,7 +62,7 @@ const InspecoesSummaryCards = () => {
     };
 
     loadData();
-  }, []);
+  }, [userCCAs]);
 
   if (loading) {
     return (

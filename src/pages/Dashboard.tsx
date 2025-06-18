@@ -1,3 +1,4 @@
+
 import React, { useCallback, useEffect, useState } from "react";
 import {
   Activity,
@@ -14,78 +15,133 @@ import PendingTasksList from "@/components/dashboard/PendingTasksList";
 import SystemLogo from "@/components/common/SystemLogo";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
+import { useUserCCAs } from "@/hooks/useUserCCAs";
 
-// Hook para buscar contagem de desvios
+// Hook para buscar contagem de desvios filtrado por CCAs permitidos
 function useTotalDesvios() {
   const [total, setTotal] = useState<number | null>(null);
+  const { data: userCCAs = [] } = useUserCCAs();
+  
   useEffect(() => {
+    if (userCCAs.length === 0) {
+      setTotal(0);
+      return;
+    }
+    
+    const allowedCcaIds = userCCAs.map(cca => cca.id);
+    
     supabase
       .from("desvios_completos")
       .select("*", { count: "exact", head: true })
+      .in('cca_id', allowedCcaIds)
       .then(({ count }) => setTotal(count || 0));
-  }, []);
+  }, [userCCAs]);
+  
   return total;
 }
 
-// Hook para buscar contagem de treinamentos do mês atual
+// Hook para buscar contagem de treinamentos do mês atual filtrado por CCAs
 function useTotalTreinamentosMes() {
   const [total, setTotal] = useState<number | null>(null);
+  const { data: userCCAs = [] } = useUserCCAs();
+  
   useEffect(() => {
+    if (userCCAs.length === 0) {
+      setTotal(0);
+      return;
+    }
+    
     const dt = new Date();
     const mes = dt.getMonth() + 1;
     const ano = dt.getFullYear();
+    const allowedCcaIds = userCCAs.map(cca => cca.id);
+    
     supabase
       .from("execucao_treinamentos")
       .select("*", { count: "exact", head: true })
       .eq("mes", mes)
       .eq("ano", ano)
+      .in('cca_id', allowedCcaIds)
       .then(({ count }) => setTotal(count || 0));
-  }, []);
+  }, [userCCAs]);
+  
   return total;
 }
 
-// Hook para buscar número de ocorrências do mês atual
+// Hook para buscar número de ocorrências do mês atual filtrado por CCAs
 function useTotalOcorrenciasMes() {
   const [total, setTotal] = useState<number | null>(null);
+  const { data: userCCAs = [] } = useUserCCAs();
+  
   useEffect(() => {
+    if (userCCAs.length === 0) {
+      setTotal(0);
+      return;
+    }
+    
     const dt = new Date();
     const mes = dt.getMonth() + 1;
     const ano = dt.getFullYear();
+    const allowedCcaNames = userCCAs.map(cca => cca.codigo);
+    
     supabase
       .from("ocorrencias")
       .select("id", { count: "exact", head: true })
       .eq("mes", mes)
       .eq("ano", ano)
+      .in('cca', allowedCcaNames)
       .then(({ count }) => setTotal(count || 0));
-  }, []);
+  }, [userCCAs]);
+  
   return total;
 }
 
-// Hook para buscar número de tarefas pendentes
+// Hook para buscar número de tarefas pendentes filtrado por CCAs
 function useTotalTarefasPendentes() {
   const [total, setTotal] = useState<number | null>(null);
+  const { data: userCCAs = [] } = useUserCCAs();
+  
   useEffect(() => {
+    if (userCCAs.length === 0) {
+      setTotal(0);
+      return;
+    }
+    
+    const allowedCcaNames = userCCAs.map(cca => cca.codigo);
+    
     supabase
       .from("tarefas")
       .select("id", { count: "exact", head: true })
       .in("status", ["pendente", "em_andamento"])
+      .in('cca', allowedCcaNames)
       .then(({ count }) => setTotal(count || 0));
-  }, []);
+  }, [userCCAs]);
+  
   return total;
 }
 
-// Hook para buscar atividades recentes usando "desvios_completos"
+// Hook para buscar atividades recentes usando "desvios_completos" filtrado por CCAs
 function useRecentActivitiesFromDesvios() {
   const [activities, setActivities] = React.useState<any[]>([]);
   const [loading, setLoading] = React.useState(true);
+  const { data: userCCAs = [] } = useUserCCAs();
 
   React.useEffect(() => {
-    // Busca os desvios mais recentes e formata para o componente
     async function fetchActivities() {
       setLoading(true);
+      
+      if (userCCAs.length === 0) {
+        setActivities([]);
+        setLoading(false);
+        return;
+      }
+      
+      const allowedCcaIds = userCCAs.map(cca => cca.id);
+      
       const { data, error } = await supabase
         .from("desvios_completos")
         .select("id, descricao_desvio, data_desvio, status")
+        .in('cca_id', allowedCcaIds)
         .order("created_at", { ascending: false })
         .limit(10);
 
@@ -121,18 +177,29 @@ function useRecentActivitiesFromDesvios() {
       setLoading(false);
     }
     fetchActivities();
-  }, []);
+  }, [userCCAs]);
+  
   return { activities, loading };
 }
 
-// Hook para buscar tarefas pendentes do Supabase
+// Hook para buscar tarefas pendentes do Supabase filtrado por CCAs
 function usePendingTasksFromSupabase() {
   const [tasks, setTasks] = React.useState<any[]>([]);
   const [loading, setLoading] = React.useState(true);
+  const { data: userCCAs = [] } = useUserCCAs();
 
   React.useEffect(() => {
     async function fetchTasks() {
       setLoading(true);
+      
+      if (userCCAs.length === 0) {
+        setTasks([]);
+        setLoading(false);
+        return;
+      }
+      
+      const allowedCcaNames = userCCAs.map(cca => cca.codigo);
+      
       const { data, error } = await supabase
         .from("tarefas")
         .select(
@@ -148,6 +215,7 @@ function usePendingTasksFromSupabase() {
           `
         )
         .in("status", ["pendente", "em_andamento"])
+        .in('cca', allowedCcaNames)
         .order("created_at", { ascending: false })
         .limit(10);
 
@@ -183,7 +251,7 @@ function usePendingTasksFromSupabase() {
       setLoading(false);
     }
     fetchTasks();
-  }, []);
+  }, [userCCAs]);
 
   return { tasks, loading, setTasks };
 }

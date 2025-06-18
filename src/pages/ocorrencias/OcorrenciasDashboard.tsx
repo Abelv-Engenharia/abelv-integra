@@ -16,9 +16,11 @@ import TaxaFrequenciaAcSpdChart from "@/components/ocorrencias/TaxaFrequenciaAcS
 import TaxaGravidadeChart from "@/components/ocorrencias/TaxaGravidadeChart";
 import OcorrenciasTable from "@/components/ocorrencias/OcorrenciasTable";
 import { OcorrenciasFiltros } from "@/components/ocorrencias/OcorrenciasFiltros";
+import { useUserCCAs } from "@/hooks/useUserCCAs";
 
 const OcorrenciasDashboard = () => {
   const [filtroAtivo, setFiltroAtivo] = useState(false);
+  const { data: userCCAs = [] } = useUserCCAs();
 
   return (
     <div className="space-y-6">
@@ -35,80 +37,88 @@ const OcorrenciasDashboard = () => {
         </div>
       )}
 
-      <OcorrenciasSummaryCards />
+      {userCCAs.length === 0 ? (
+        <div className="text-center py-8">
+          <p className="text-muted-foreground">Você não possui acesso a nenhum CCA.</p>
+        </div>
+      ) : (
+        <>
+          <OcorrenciasSummaryCards />
 
-      <Tabs defaultValue="charts" className="w-full">
-        <TabsList className="w-full md:w-auto">
-          <TabsTrigger value="charts">Gráficos</TabsTrigger>
-          <TabsTrigger value="table">Ocorrências Recentes</TabsTrigger>
-        </TabsList>
+          <Tabs defaultValue="charts" className="w-full">
+            <TabsList className="w-full md:w-auto">
+              <TabsTrigger value="charts">Gráficos</TabsTrigger>
+              <TabsTrigger value="table">Ocorrências Recentes</TabsTrigger>
+            </TabsList>
 
-        <TabsContent value="charts" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Ocorrências por Tipo</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <OcorrenciasByTipoColumnChart />
-              </CardContent>
-            </Card>
+            <TabsContent value="charts" className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Ocorrências por Tipo</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <OcorrenciasByTipoColumnChart />
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Ocorrências por Empresa</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <OcorrenciasByEmpresaChart />
+                  </CardContent>
+                </Card>
+              </div>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Tendências de Ocorrências</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <OcorrenciasTimelineChart />
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Taxa de Frequência AC CPD</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <TaxaFrequenciaAcCpdChart />
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Taxa de Frequência AC SPD</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <TaxaFrequenciaAcSpdChart />
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Taxa de Gravidade</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <TaxaGravidadeChart />
+                </CardContent>
+              </Card>
+            </TabsContent>
             
-            <Card>
-              <CardHeader>
-                <CardTitle>Ocorrências por Empresa</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <OcorrenciasByEmpresaChart />
-              </CardContent>
-            </Card>
-          </div>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Tendências de Ocorrências</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <OcorrenciasTimelineChart />
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Taxa de Frequência AC CPD</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <TaxaFrequenciaAcCpdChart />
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Taxa de Frequência AC SPD</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <TaxaFrequenciaAcSpdChart />
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Taxa de Gravidade</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <TaxaGravidadeChart />
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="table">
-          <Card>
-            <CardContent className="p-0">
-              <OcorrenciasTable />
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+            <TabsContent value="table">
+              <Card>
+                <CardContent className="p-0">
+                  <OcorrenciasTable />
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
+        </>
+      )}
     </div>
   );
 };

@@ -3,8 +3,73 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LayoutDashboard } from "lucide-react";
+import { useUserCCAs } from "@/hooks/useUserCCAs";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function MedidasDisciplinaresDashboard() {
+  const { data: userCCAs = [] } = useUserCCAs();
+  const [stats, setStats] = useState({
+    totalMedidas: 0,
+    comAnexo: 0,
+    ultimaMedida: "-"
+  });
+
+  useEffect(() => {
+    const loadStats = async () => {
+      if (userCCAs.length === 0) return;
+
+      const allowedCcaIds = userCCAs.map(cca => cca.id);
+      const currentYear = new Date().getFullYear();
+
+      try {
+        // Total de medidas no ano atual
+        const { count: totalCount } = await supabase
+          .from("medidas_disciplinares")
+          .select("*", { count: "exact", head: true })
+          .in('cca_id', allowedCcaIds)
+          .eq('ano', currentYear.toString());
+
+        // Medidas com anexo
+        const { count: comAnexoCount } = await supabase
+          .from("medidas_disciplinares")
+          .select("*", { count: "exact", head: true })
+          .in('cca_id', allowedCcaIds)
+          .not('pdf_url', 'is', null);
+
+        // Última medida
+        const { data: ultimaMedidaData } = await supabase
+          .from("medidas_disciplinares")
+          .select("data")
+          .in('cca_id', allowedCcaIds)
+          .order('data', { ascending: false })
+          .limit(1);
+
+        setStats({
+          totalMedidas: totalCount || 0,
+          comAnexo: comAnexoCount || 0,
+          ultimaMedida: ultimaMedidaData?.[0]?.data 
+            ? new Date(ultimaMedidaData[0].data).toLocaleDateString('pt-BR')
+            : "-"
+        });
+      } catch (error) {
+        console.error('Erro ao carregar estatísticas:', error);
+      }
+    };
+
+    loadStats();
+  }, [userCCAs]);
+
+  if (userCCAs.length === 0) {
+    return (
+      <div className="space-y-6 max-w-6xl mx-auto py-4 animate-fade-in">
+        <div className="text-center py-8">
+          <p className="text-muted-foreground">Você não possui acesso a nenhum CCA.</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6 max-w-6xl mx-auto py-4 animate-fade-in">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
@@ -29,13 +94,12 @@ export default function MedidasDisciplinaresDashboard() {
 
       {/* Cards de estatísticas rápidas */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* Estes números podem ser integrados ao banco posteriormente */}
         <Card>
           <CardHeader>
             <CardTitle>Total de Medidas</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-3xl font-bold">-</span>
+            <span className="text-3xl font-bold">{stats.totalMedidas}</span>
             <div className="text-xs text-muted-foreground">No ano atual</div>
           </CardContent>
         </Card>
@@ -44,7 +108,7 @@ export default function MedidasDisciplinaresDashboard() {
             <CardTitle>Com Anexo</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-3xl font-bold">-</span>
+            <span className="text-3xl font-bold">{stats.comAnexo}</span>
             <div className="text-xs text-muted-foreground">Com documento anexado</div>
           </CardContent>
         </Card>
@@ -53,7 +117,7 @@ export default function MedidasDisciplinaresDashboard() {
             <CardTitle>Última Medida</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-3xl font-bold">-</span>
+            <span className="text-lg font-bold">{stats.ultimaMedida}</span>
             <div className="text-xs text-muted-foreground">Data mais recente</div>
           </CardContent>
         </Card>
@@ -61,7 +125,7 @@ export default function MedidasDisciplinaresDashboard() {
 
       <div className="text-sm text-muted-foreground mb-10">
         <span>
-          Utilize os botões acima para registrar ou consultar medidas disciplinares. Estatísticas detalhadas em breve!
+          Utilize os botões acima para registrar ou consultar medidas disciplinares dos CCAs permitidos.
         </span>
       </div>
     </div>
