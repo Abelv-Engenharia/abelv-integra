@@ -64,7 +64,7 @@ export async function fetchUsers(page = 1, perPage = 100, query = "", status = "
         let perfil = "Usuário";
         try {
           const rolesResponse = await getUserRoles(authUser.id);
-          if (rolesResponse && rolesResponse.length > 0 && rolesResponse[0].perfis) {
+          if (rolesResponse && rolesResponse.length > 0 && rolesResponse[0]?.perfis) {
             perfil = rolesResponse[0].perfis.nome;
           }
         } catch (error) {
@@ -73,7 +73,7 @@ export async function fetchUsers(page = 1, perPage = 100, query = "", status = "
         
         return {
           id: authUser.id,
-          nome: authUser.user_metadata?.nome || "Sem nome",
+          nome: authUser.user_metadata?.nome || authUser.email?.split('@')[0] || "Sem nome",
           email: authUser.email || "",
           perfil: perfil,
           status: authUser.email_confirmed_at ? "Ativo" : "Pendente"
@@ -124,13 +124,66 @@ export async function deleteUser(userId: string) {
 }
 
 export async function getUserRoles(userId: string) {
-  return callEdgeFunction(`${userId}/roles`);
+  try {
+    const { data, error } = await supabase
+      .from('usuario_perfis')
+      .select(`
+        perfil_id,
+        perfis (
+          nome
+        )
+      `)
+      .eq('usuario_id', userId);
+
+    if (error) {
+      console.error("Erro ao buscar perfis do usuário:", error);
+      return [];
+    }
+
+    return data || [];
+  } catch (error) {
+    console.error("Erro ao buscar perfis do usuário:", error);
+    return [];
+  }
 }
 
 export async function updateUserRole(userId: string, perfilId: number) {
   console.log("Atualizando perfil:", { userId, perfilId });
   try {
-    const result = await callEdgeFunction(`${userId}/roles`, "PUT", { perfilId });
+    // First, check if user already has a role
+    const { data: existingRole, error: checkError } = await supabase
+      .from('usuario_perfis')
+      .select('id')
+      .eq('usuario_id', userId)
+      .maybeSingle();
+
+    if (checkError) {
+      console.error("Erro ao verificar perfil existente:", checkError);
+      throw checkError;
+    }
+
+    let result;
+    if (existingRole) {
+      // Update existing role
+      const { data, error } = await supabase
+        .from('usuario_perfis')
+        .update({ perfil_id: perfilId })
+        .eq('usuario_id', userId)
+        .select();
+      
+      if (error) throw error;
+      result = data;
+    } else {
+      // Create new role assignment
+      const { data, error } = await supabase
+        .from('usuario_perfis')
+        .insert({ usuario_id: userId, perfil_id: perfilId })
+        .select();
+      
+      if (error) throw error;
+      result = data;
+    }
+
     console.log("Perfil atualizado com sucesso:", result);
     return result;
   } catch (error) {
