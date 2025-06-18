@@ -35,22 +35,22 @@ export const useFilteredPersonnelData = ({
     console.log('Selected CCA ID:', ccaIdNumber);
 
     // Filtrar empresas que têm relacionamento com o CCA selecionado
-    const filteredEmpresas = allEmpresas.filter(item => {
-      console.log('Checking empresa CCA ID:', item.cca_id, 'against selected:', ccaIdNumber);
-      return item.cca_id === ccaIdNumber;
-    });
+    const filteredEmpresas = allEmpresas
+      .filter(item => item.cca_id === ccaIdNumber)
+      .map(item => item.empresas)
+      .filter(Boolean);
 
     // Filtrar engenheiros que têm relacionamento com o CCA selecionado
-    const filteredEngenheiros = allEngenheiros.filter(item => {
-      console.log('Checking engenheiro CCA ID:', item.cca_id, 'against selected:', ccaIdNumber);
-      return item.cca_id === ccaIdNumber;
-    });
+    const filteredEngenheiros = allEngenheiros
+      .filter(item => item.cca_id === ccaIdNumber)
+      .map(item => item.engenheiros)
+      .filter(Boolean);
 
     // Filtrar supervisores que têm relacionamento com o CCA selecionado
-    const filteredSupervisores = allSupervisores.filter(item => {
-      console.log('Checking supervisor CCA ID:', item.cca_id, 'against selected:', ccaIdNumber);
-      return item.cca_id === ccaIdNumber;
-    });
+    const filteredSupervisores = allSupervisores
+      .filter(item => item.cca_id === ccaIdNumber)
+      .map(item => item.supervisores)
+      .filter(Boolean);
 
     // Filtrar encarregados e funcionários pelo CCA
     const filteredEncarregados = allEncarregados.filter(item => {

@@ -11,7 +11,7 @@ import {
 import { Form } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { desviosCompletosService, DesvioCompleto } from "@/services/desvios/desviosCompletosService";
-import { useFormData } from "@/hooks/useFormData";
+import { useFilteredFormData } from "@/hooks/useFilteredFormData";
 import NovaIdentificacaoForm from "@/components/desvios/forms/NovaIdentificacaoForm";
 import InformacoesDesvioForm from "@/components/desvios/forms/InformacoesDesvioForm";
 import AcaoCorretivaForm from "@/components/desvios/forms/AcaoCorretivaForm";
@@ -29,8 +29,6 @@ const EditDesvioDialog = ({ desvio, open, onOpenChange, onDesvioUpdated }: EditD
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   
-  const formContext = useFormData();
-
   const form = useForm({
     defaultValues: {
       // Nova Identificação
@@ -76,6 +74,10 @@ const EditDesvioDialog = ({ desvio, open, onOpenChange, onDesvioUpdated }: EditD
       classificacaoRisco: "",
     },
   });
+
+  // Usar dados filtrados baseados no CCA selecionado
+  const selectedCcaId = form.watch("ccaId");
+  const formContext = useFilteredFormData({ selectedCcaId });
 
   useEffect(() => {
     if (desvio && open) {
@@ -178,7 +180,7 @@ const EditDesvioDialog = ({ desvio, open, onOpenChange, onDesvioUpdated }: EditD
         impacto: data.impacto ? parseInt(data.impacto) : null,
         status: data.situacao,
         classificacao_risco: data.classificacaoRisco,
-        responsavel_id: desvio.responsavel_id, // Manter o original, não sobrescrever com campo de texto
+        responsavel_id: desvio.responsavel_id,
         prazo_conclusao: data.prazoCorrecao || null,
         funcionarios_envolvidos: data.colaboradorInfrator ? [{
           funcionario_id: data.colaboradorInfrator,

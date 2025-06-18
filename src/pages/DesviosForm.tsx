@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { useDesviosForm } from "@/hooks/useDesviosForm";
-import { useFormData } from "@/hooks/useFormData";
+import { useFilteredFormData } from "@/hooks/useFilteredFormData";
 import NovaIdentificacaoForm from "@/components/desvios/forms/NovaIdentificacaoForm";
 import InformacoesDesvioForm from "@/components/desvios/forms/InformacoesDesvioForm";
 import AcaoCorretivaForm from "@/components/desvios/forms/AcaoCorretivaForm";
@@ -25,7 +25,9 @@ const DesviosForm = () => {
     handleNewRecord,
   } = useDesviosForm();
 
-  const contextValue = useFormData();
+  // Usar dados filtrados baseados no CCA selecionado
+  const selectedCcaId = form.watch("ccaId");
+  const contextValue = useFilteredFormData({ selectedCcaId });
 
   const tabs = [
     { id: "identificacao", label: "Identificação", component: NovaIdentificacaoForm },

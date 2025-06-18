@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { fetchDashboardStats, fetchFilteredDashboardStats, DashboardStats, FilterParams } from "@/services/desvios/dashboardStatsService";
+import { useUserCCAs } from "@/hooks/useUserCCAs";
 import DesviosDashboardHeader from "@/components/desvios/DesviosDashboardHeader";
 import DesviosDashboardFilters from "@/components/desvios/DesviosDashboardFilters";
 import DesviosDashboardStats from "@/components/desvios/DesviosDashboardStats";
@@ -9,6 +10,7 @@ import DesviosChartRows from "@/components/desvios/DesviosChartRows";
 
 const DesviosDashboard = () => {
   const { toast } = useToast();
+  const { data: userCCAs = [] } = useUserCCAs();
   const [year, setYear] = useState<string>("");
   const [month, setMonth] = useState<string>("");
   const [ccaId, setCcaId] = useState<string>("");
@@ -26,13 +28,35 @@ const DesviosDashboard = () => {
   });
   const [loading, setLoading] = useState(true);
 
-  // Buscar estatísticas do dashboard
+  // Buscar estatísticas do dashboard filtrando pelos CCAs permitidos
   useEffect(() => {
     const loadDashboardStats = async () => {
       setLoading(true);
       try {
-        console.log('Carregando estatísticas do dashboard...');
-        const stats = await fetchDashboardStats();
+        console.log('Carregando estatísticas do dashboard para CCAs permitidos...');
+        
+        // Se o usuário não tem CCAs permitidos, não buscar dados
+        if (userCCAs.length === 0) {
+          setDashboardStats({
+            totalDesvios: 0,
+            acoesCompletas: 0,
+            acoesAndamento: 0,
+            acoesPendentes: 0,
+            percentualCompletas: 0,
+            percentualAndamento: 0,
+            percentualPendentes: 0,
+            riskLevel: "Baixo",
+          });
+          return;
+        }
+
+        // Filtrar pelos CCAs permitidos
+        const allowedCcaIds = userCCAs.map(cca => cca.id.toString());
+        const filters: FilterParams = {
+          ccaIds: allowedCcaIds
+        };
+        
+        const stats = await fetchFilteredDashboardStats(filters);
         console.log('Estatísticas carregadas:', stats);
         setDashboardStats(stats);
       } catch (error) {
@@ -48,30 +72,33 @@ const DesviosDashboard = () => {
     };
 
     loadDashboardStats();
-  }, [toast]);
+  }, [toast, userCCAs]);
 
   const handleFilterChange = async () => {
     setLoading(true);
     try {
-      const filters: FilterParams = {};
+      // Sempre aplicar filtro por CCAs permitidos
+      const allowedCcaIds = userCCAs.map(cca => cca.id.toString());
+      const filters: FilterParams = {
+        ccaIds: allowedCcaIds
+      };
       
       if (year && year !== "todos") filters.year = year;
       if (month && month !== "todos") filters.month = month;
-      if (ccaId && ccaId !== "todos") filters.ccaId = ccaId;
+      if (ccaId && ccaId !== "todos") {
+        // Verificar se o CCA selecionado está nos permitidos
+        if (allowedCcaIds.includes(ccaId)) {
+          filters.ccaId = ccaId;
+        }
+      }
       if (disciplinaId && disciplinaId !== "todos") filters.disciplinaId = disciplinaId;
       if (empresaId && empresaId !== "todos") filters.empresaId = empresaId;
 
       console.log('Aplicando filtros:', filters);
       
-      // Se não há filtros, buscar dados sem filtros
-      if (Object.keys(filters).length === 0) {
-        const stats = await fetchDashboardStats();
-        setDashboardStats(stats);
-      } else {
-        const filteredStats = await fetchFilteredDashboardStats(filters);
-        console.log('Estatísticas filtradas:', filteredStats);
-        setDashboardStats(filteredStats);
-      }
+      const filteredStats = await fetchFilteredDashboardStats(filters);
+      console.log('Estatísticas filtradas:', filteredStats);
+      setDashboardStats(filteredStats);
       
       toast({
         title: "Filtros aplicados",
