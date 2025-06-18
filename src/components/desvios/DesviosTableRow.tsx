@@ -12,7 +12,7 @@ interface Props {
   desvio: DesvioCompleto;
   onStatusUpdated: (id: string, newStatus: string) => void;
   onEditClick: (desvio: DesvioCompleto) => void;
-  onDesvioDeleted: () => void;
+  onDesvioDeleted: (id?: string, deleted?: boolean) => void;
   editDesvioId: string | null;
   editDialogOpen: boolean;
   setEditDialogOpen: (open: boolean) => void;

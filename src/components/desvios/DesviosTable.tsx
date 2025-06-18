@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,18 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserCCAs } from "@/hooks/useUserCCAs";
 import DesviosTableRow from "./DesviosTableRow";
-
-interface DesvioCompleto {
-  id: string;
-  data_desvio: string;
-  descricao_desvio: string;
-  classificacao_risco: string;
-  status: string;
-  cca_id: number;
-  ccas?: {
-    nome: string;
-  };
-}
+import { DesvioCompleto } from "@/services/desvios/desviosCompletosService";
 
 const DesviosTable = () => {
   const { toast } = useToast();
