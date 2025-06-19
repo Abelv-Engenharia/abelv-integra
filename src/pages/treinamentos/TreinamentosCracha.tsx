@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import { format } from "date-fns";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { ccaService } from "@/services/treinamentos/ccaService";
 import { 
   Funcionario,
   TreinamentoNormativo,
@@ -19,6 +18,7 @@ import CrachaPreview from "@/components/treinamentos/CrachaPreview";
 import FuncionarioTreinamentosValidosCard from "@/components/treinamentos/FuncionarioTreinamentosValidosCard";
 
 import { useSystemLogoUrl } from "@/components/common/useSystemLogoUrl";
+import { useUserCCAs } from "@/hooks/useUserCCAs";
 
 const TreinamentosCracha = () => {
   const [selectedFuncionarioId, setSelectedFuncionarioId] = useState<string | undefined>();
@@ -31,20 +31,36 @@ const TreinamentosCracha = () => {
   const [isLoading, setIsLoading] = useState(true);
   const crachaRef = useRef<HTMLDivElement | null>(null);
   const logoUrl = useSystemLogoUrl();
+  const { data: userCCAs = [] } = useUserCCAs();
 
   // Fetch funcionarios data
   useEffect(() => {
     const loadData = async () => {
       try {
         setIsLoading(true);
-        const [funcionariosData, treinamentosData, ccasData] = await Promise.all([
+        
+        if (userCCAs.length === 0) {
+          setFuncionarios([]);
+          setTreinamentosInfo([]);
+          setCcas([]);
+          setIsLoading(false);
+          return;
+        }
+
+        const [funcionariosData, treinamentosData] = await Promise.all([
           fetchFuncionarios(),
           fetchTreinamentos(),
-          ccaService.getAll(),
         ]);
-        setFuncionarios(funcionariosData);
+
+        // Filtrar funcionários apenas dos CCAs permitidos
+        const userCCAIds = userCCAs.map(cca => cca.id);
+        const funcionariosFiltrados = funcionariosData.filter(f => 
+          userCCAIds.includes(f.cca_id)
+        );
+
+        setFuncionarios(funcionariosFiltrados);
         setTreinamentosInfo(treinamentosData);
-        setCcas(ccasData);
+        setCcas(userCCAs); // Usar apenas os CCAs do usuário
       } catch (error) {
         console.error("Erro ao carregar dados:", error);
         toast({
@@ -57,7 +73,7 @@ const TreinamentosCracha = () => {
       }
     };
     loadData();
-  }, []);
+  }, [userCCAs]);
 
   // Ordenar CCAs pelo campo 'codigo' em ordem crescente antes de mostrar as opções
   const ccasOrdenados = [...ccas].sort((a, b) => {
@@ -178,7 +194,6 @@ const TreinamentosCracha = () => {
       if (printWindow) {
         printWindow.document.open();
 
-        // ↓↓↓ ALTERAÇÃO DO CSS PARA FONTE MENOR NOS DADOS DO FUNCIONÁRIO ↓↓↓
         const style = `
           <style>
             @page { size: A4; margin: 0; }
@@ -239,7 +254,6 @@ const TreinamentosCracha = () => {
               flex: 1;
               min-width: 0;
             }
-            /* ↓↓↓ FONTES MENORES NOS CAMPOS DO FUNCIONÁRIO ↓↓↓ */
             .cracha-nome {
               font-weight: bold;
               font-size: 1rem !important;
@@ -393,6 +407,25 @@ const TreinamentosCracha = () => {
       }
     }
   };
+
+  if (userCCAs.length === 0) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center">
+          <Button variant="ghost" size="sm" className="mr-2" asChild>
+            <Link to="/treinamentos/dashboard">
+              <ArrowLeft className="h-4 w-4 mr-1" />
+              Voltar
+            </Link>
+          </Button>
+          <h1 className="text-3xl font-bold tracking-tight">Emissão de Crachá de Capacitação</h1>
+        </div>
+        <div className="text-center py-8">
+          <p className="text-muted-foreground">Você não possui acesso a nenhum CCA.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

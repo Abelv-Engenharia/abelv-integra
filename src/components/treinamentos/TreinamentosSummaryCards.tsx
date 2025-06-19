@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
@@ -7,6 +8,7 @@ import {
   Users
 } from "lucide-react";
 import { fetchTreinamentosStats } from "@/services/treinamentos/treinamentosStatsService";
+import { useUserCCAs } from "@/hooks/useUserCCAs";
 
 export const TreinamentosSummaryCards = () => {
   const [loading, setLoading] = useState(true);
@@ -22,13 +24,15 @@ export const TreinamentosSummaryCards = () => {
     percentualHorasInvestidas: 0,
     metaAtingida: false
   });
+  const { data: userCCAs = [] } = useUserCCAs();
 
   useEffect(() => {
     const loadStats = async () => {
       try {
         setLoading(true);
-        console.log('Loading training stats...');
-        const data = await fetchTreinamentosStats();
+        console.log('Loading training stats for CCAs:', userCCAs);
+        const userCCAIds = userCCAs.map(cca => cca.id);
+        const data = await fetchTreinamentosStats(userCCAIds);
         console.log('Loaded training stats:', data);
         setStats(data);
       } catch (error) {
@@ -39,7 +43,7 @@ export const TreinamentosSummaryCards = () => {
     };
 
     loadStats();
-  }, []);
+  }, [userCCAs]);
 
   return (
     <div className="space-y-6">
