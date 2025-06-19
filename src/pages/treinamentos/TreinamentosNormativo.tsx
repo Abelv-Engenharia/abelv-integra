@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
@@ -88,6 +89,26 @@ const TreinamentosNormativo = () => {
 
     loadFuncionarios();
   }, [selectedCcaId]);
+
+  // Efeito para calcular automaticamente a data de validade
+  useEffect(() => {
+    const treinamentoId = form.watch("treinamento_id");
+    const dataRealizacao = form.watch("data_realizacao");
+
+    if (treinamentoId && dataRealizacao) {
+      const treinamentoSelecionado = treinamentosDisponiveis.find(t => t.id === treinamentoId);
+      
+      if (treinamentoSelecionado && treinamentoSelecionado.validade_dias) {
+        const dataRealizacaoObj = new Date(dataRealizacao);
+        const dataValidade = new Date(dataRealizacaoObj);
+        dataValidade.setDate(dataValidade.getDate() + treinamentoSelecionado.validade_dias);
+        
+        // Formatando para YYYY-MM-DD para o input date
+        const dataValidadeFormatada = dataValidade.toISOString().split('T')[0];
+        form.setValue('data_validade', dataValidadeFormatada);
+      }
+    }
+  }, [form.watch("treinamento_id"), form.watch("data_realizacao"), treinamentosDisponiveis, form]);
 
   const handleCcaChange = (ccaId: string) => {
     setSelectedCcaId(ccaId);
@@ -393,9 +414,9 @@ const TreinamentosNormativo = () => {
                     name="data_validade"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Data de validade</FormLabel>
+                        <FormLabel>Data de validade (calculada automaticamente)</FormLabel>
                         <FormControl>
-                          <Input type="date" {...field} />
+                          <Input type="date" {...field} readOnly className="bg-muted" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
