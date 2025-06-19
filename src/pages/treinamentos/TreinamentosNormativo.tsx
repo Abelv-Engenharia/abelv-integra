@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
@@ -11,10 +12,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, Upload } from "lucide-react";
 import { Link } from "react-router-dom";
 import { listaTreinamentosNormativosService } from "@/services/treinamentos/listaTreinamentosNormativosService";
-import { FuncionarioAutocomplete } from "@/components/admin/funcionarios/FuncionarioAutocomplete";
 import { useUserCCAs } from "@/hooks/useUserCCAs";
 
 interface TreinamentoNormativoForm {
+  cca_id: string;
   funcionario_id: string;
   treinamento_id: string;
   tipo: "Formação" | "Reciclagem";
@@ -28,10 +29,12 @@ const TreinamentosNormativo = () => {
   const [treinamentosDisponiveis, setTreinamentosDisponiveis] = useState<any[]>([]);
   const [funcionarios, setFuncionarios] = useState<any[]>([]);
   const [certificadoFile, setCertificadoFile] = useState<File | null>(null);
+  const [selectedCcaId, setSelectedCcaId] = useState<string>("");
   const { data: userCCAs = [] } = useUserCCAs();
 
   const form = useForm<TreinamentoNormativoForm>({
     defaultValues: {
+      cca_id: "",
       funcionario_id: "",
       treinamento_id: "",
       tipo: "Formação",
@@ -42,40 +45,56 @@ const TreinamentosNormativo = () => {
   });
 
   useEffect(() => {
-    const loadData = async () => {
+    const loadTreinamentos = async () => {
       try {
-        // Carregar treinamentos normativos disponíveis
         const treinamentos = await listaTreinamentosNormativosService.getAll();
         setTreinamentosDisponiveis(treinamentos);
-
-        // Carregar funcionários apenas dos CCAs permitidos
-        if (userCCAs.length > 0) {
-          const userCCAIds = userCCAs.map(cca => cca.id);
-          const { data: funcionariosData, error } = await supabase
-            .from('funcionarios')
-            .select('id, nome, matricula, funcao, cca_id')
-            .in('cca_id', userCCAIds)
-            .eq('ativo', true)
-            .order('nome');
-
-          if (error) {
-            console.error('Erro ao carregar funcionários:', error);
-          } else {
-            setFuncionarios(funcionariosData || []);
-          }
-        }
       } catch (error) {
-        console.error('Erro ao carregar dados:', error);
+        console.error('Erro ao carregar treinamentos:', error);
         toast({
           title: "Erro",
-          description: "Não foi possível carregar os dados necessários",
+          description: "Não foi possível carregar os treinamentos",
           variant: "destructive",
         });
       }
     };
 
-    loadData();
-  }, [userCCAs]);
+    loadTreinamentos();
+  }, []);
+
+  useEffect(() => {
+    const loadFuncionarios = async () => {
+      if (!selectedCcaId) {
+        setFuncionarios([]);
+        return;
+      }
+
+      try {
+        const { data: funcionariosData, error } = await supabase
+          .from('funcionarios')
+          .select('id, nome, matricula, funcao')
+          .eq('cca_id', parseInt(selectedCcaId))
+          .eq('ativo', true)
+          .order('nome');
+
+        if (error) {
+          console.error('Erro ao carregar funcionários:', error);
+        } else {
+          setFuncionarios(funcionariosData || []);
+        }
+      } catch (error) {
+        console.error('Erro ao carregar funcionários:', error);
+      }
+    };
+
+    loadFuncionarios();
+  }, [selectedCcaId]);
+
+  const handleCcaChange = (ccaId: string) => {
+    setSelectedCcaId(ccaId);
+    form.setValue('cca_id', ccaId);
+    form.setValue('funcionario_id', ''); // Reset funcionário quando mudar CCA
+  };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -171,6 +190,7 @@ const TreinamentosNormativo = () => {
 
       form.reset();
       setCertificadoFile(null);
+      setSelectedCcaId("");
     } catch (error) {
       console.error('Erro ao salvar treinamento normativo:', error);
       toast({
@@ -211,12 +231,15 @@ const TreinamentosNormativo = () => {
             Voltar
           </Link>
         </Button>
-        <h1 className="text-3xl font-bold tracking-tight">Treinamentos Normativos</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Registro de Treinamentos Normativos</h1>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Registrar Treinamento Normativo</CardTitle>
+          <CardTitle>Informações do Treinamento Normativo</CardTitle>
+          <p className="text-sm text-muted-foreground">
+            Preencha os campos abaixo para registrar um treinamento normativo
+          </p>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -224,28 +247,84 @@ const TreinamentosNormativo = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <FormField
                   control={form.control}
-                  name="funcionario_id"
+                  name="cca_id"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Funcionário</FormLabel>
-                      <FormControl>
-                        <FuncionarioAutocomplete
-                          funcionarios={funcionarios}
-                          onSelect={(funcionario) => field.onChange(funcionario.id)}
-                          className=""
-                        />
-                      </FormControl>
+                      <FormLabel>CCA</FormLabel>
+                      <Select onValueChange={handleCcaChange} value={selectedCcaId}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione o CCA" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {userCCAs.map((cca) => (
+                            <SelectItem key={cca.id} value={cca.id.toString()}>
+                              {cca.codigo} - {cca.nome}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
+
+                <div className="grid grid-cols-3 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="funcionario_id"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Funcionário</FormLabel>
+                        <Select 
+                          onValueChange={field.onChange} 
+                          value={field.value}
+                          disabled={!selectedCcaId}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder={selectedCcaId ? "Selecione o funcionário" : "Selecione o CCA primeiro"} />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {funcionarios.map((funcionario) => (
+                              <SelectItem key={funcionario.id} value={funcionario.id}>
+                                {funcionario.nome}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <div>
+                    <FormLabel>Função</FormLabel>
+                    <div className="mt-2 p-2 border rounded-md bg-muted min-h-[40px]">
+                      {selectedCcaId && form.watch("funcionario_id") ? (
+                        funcionarios.find(f => f.id === form.watch("funcionario_id"))?.funcao || "---"
+                      ) : "---"}
+                    </div>
+                  </div>
+
+                  <div>
+                    <FormLabel>Matrícula</FormLabel>
+                    <div className="mt-2 p-2 border rounded-md bg-muted min-h-[40px]">
+                      {selectedCcaId && form.watch("funcionario_id") ? (
+                        funcionarios.find(f => f.id === form.watch("funcionario_id"))?.matricula || "---"
+                      ) : "---"}
+                    </div>
+                  </div>
+                </div>
 
                 <FormField
                   control={form.control}
                   name="treinamento_id"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Treinamento</FormLabel>
+                      <FormLabel>Treinamento realizado</FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger>
@@ -270,7 +349,7 @@ const TreinamentosNormativo = () => {
                   name="tipo"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Tipo</FormLabel>
+                      <FormLabel>Tipo de treinamento</FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger>
@@ -292,7 +371,7 @@ const TreinamentosNormativo = () => {
                   name="data_realizacao"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Data de Realização</FormLabel>
+                      <FormLabel>Data da realização</FormLabel>
                       <FormControl>
                         <Input type="date" {...field} />
                       </FormControl>
@@ -306,7 +385,7 @@ const TreinamentosNormativo = () => {
                   name="data_validade"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Data de Validade</FormLabel>
+                      <FormLabel>Data de validade</FormLabel>
                       <FormControl>
                         <Input type="date" {...field} />
                       </FormControl>
@@ -316,7 +395,7 @@ const TreinamentosNormativo = () => {
                 />
 
                 <div className="space-y-2">
-                  <FormLabel>Certificado (opcional)</FormLabel>
+                  <FormLabel>Anexar certificado (PDF, máx. 2MB)</FormLabel>
                   <div className="flex items-center space-x-2">
                     <Input
                       type="file"
@@ -331,12 +410,23 @@ const TreinamentosNormativo = () => {
                       Arquivo selecionado: {certificadoFile.name}
                     </p>
                   )}
+                  <p className="text-xs text-muted-foreground">
+                    Apenas arquivos PDF, máximo 2MB.
+                  </p>
                 </div>
               </div>
 
-              <Button type="submit" disabled={isLoading} className="w-full">
-                {isLoading ? "Registrando..." : "Registrar Treinamento"}
-              </Button>
+              <div className="flex gap-4">
+                <Button variant="outline" asChild>
+                  <Link to="/treinamentos/dashboard">
+                    <ArrowLeft className="h-4 w-4 mr-1" />
+                    Voltar
+                  </Link>
+                </Button>
+                <Button type="submit" disabled={isLoading} className="flex-1">
+                  {isLoading ? "Salvando registro..." : "Salvar registro"}
+                </Button>
+              </div>
             </form>
           </Form>
         </CardContent>
