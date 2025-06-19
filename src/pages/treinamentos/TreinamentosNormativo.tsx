@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
@@ -244,33 +243,37 @@ const TreinamentosNormativo = () => {
         <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <FormField
-                  control={form.control}
-                  name="cca_id"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>CCA</FormLabel>
-                      <Select onValueChange={handleCcaChange} value={selectedCcaId}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecione o CCA" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {userCCAs.map((cca) => (
-                            <SelectItem key={cca.id} value={cca.id.toString()}>
-                              {cca.codigo} - {cca.nome}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+              <div className="space-y-6">
+                {/* Primeira linha - CCA */}
+                <div className="grid grid-cols-1">
+                  <FormField
+                    control={form.control}
+                    name="cca_id"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>CCA</FormLabel>
+                        <Select onValueChange={handleCcaChange} value={selectedCcaId}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecione o CCA" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {userCCAs.map((cca) => (
+                              <SelectItem key={cca.id} value={cca.id.toString()}>
+                                {cca.codigo} - {cca.nome}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
 
-                <div className="grid grid-cols-3 gap-4">
+                {/* Segunda linha - Funcionário, Função e Matrícula */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <FormField
                     control={form.control}
                     name="funcionario_id"
@@ -302,7 +305,7 @@ const TreinamentosNormativo = () => {
 
                   <div>
                     <FormLabel>Função</FormLabel>
-                    <div className="mt-2 p-2 border rounded-md bg-muted min-h-[40px]">
+                    <div className="mt-2 p-2 border rounded-md bg-muted min-h-[40px] flex items-center">
                       {selectedCcaId && form.watch("funcionario_id") ? (
                         funcionarios.find(f => f.id === form.watch("funcionario_id"))?.funcao || "---"
                       ) : "---"}
@@ -311,7 +314,7 @@ const TreinamentosNormativo = () => {
 
                   <div>
                     <FormLabel>Matrícula</FormLabel>
-                    <div className="mt-2 p-2 border rounded-md bg-muted min-h-[40px]">
+                    <div className="mt-2 p-2 border rounded-md bg-muted min-h-[40px] flex items-center">
                       {selectedCcaId && form.watch("funcionario_id") ? (
                         funcionarios.find(f => f.id === form.watch("funcionario_id"))?.matricula || "---"
                       ) : "---"}
@@ -319,81 +322,88 @@ const TreinamentosNormativo = () => {
                   </div>
                 </div>
 
-                <FormField
-                  control={form.control}
-                  name="treinamento_id"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Treinamento realizado</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
+                {/* Terceira linha - Treinamento e Tipo */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <FormField
+                    control={form.control}
+                    name="treinamento_id"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Treinamento realizado</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecione o treinamento" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {treinamentosDisponiveis.map((treinamento) => (
+                              <SelectItem key={treinamento.id} value={treinamento.id}>
+                                {treinamento.nome}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="tipo"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Tipo de treinamento</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecione o tipo" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="Formação">Formação</SelectItem>
+                            <SelectItem value="Reciclagem">Reciclagem</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                {/* Quarta linha - Datas */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <FormField
+                    control={form.control}
+                    name="data_realizacao"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Data da realização</FormLabel>
                         <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecione o treinamento" />
-                          </SelectTrigger>
+                          <Input type="date" {...field} />
                         </FormControl>
-                        <SelectContent>
-                          {treinamentosDisponiveis.map((treinamento) => (
-                            <SelectItem key={treinamento.id} value={treinamento.id}>
-                              {treinamento.nome}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                <FormField
-                  control={form.control}
-                  name="tipo"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Tipo de treinamento</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
+                  <FormField
+                    control={form.control}
+                    name="data_validade"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Data de validade</FormLabel>
                         <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecione o tipo" />
-                          </SelectTrigger>
+                          <Input type="date" {...field} />
                         </FormControl>
-                        <SelectContent>
-                          <SelectItem value="Formação">Formação</SelectItem>
-                          <SelectItem value="Reciclagem">Reciclagem</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
 
-                <FormField
-                  control={form.control}
-                  name="data_realizacao"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Data da realização</FormLabel>
-                      <FormControl>
-                        <Input type="date" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="data_validade"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Data de validade</FormLabel>
-                      <FormControl>
-                        <Input type="date" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
+                {/* Quinta linha - Upload de certificado */}
                 <div className="space-y-2">
                   <FormLabel>Anexar certificado (PDF, máx. 2MB)</FormLabel>
                   <div className="flex items-center space-x-2">
