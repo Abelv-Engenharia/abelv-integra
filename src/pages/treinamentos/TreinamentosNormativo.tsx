@@ -12,7 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, Upload } from "lucide-react";
 import { Link } from "react-router-dom";
 import { listaTreinamentosNormativosService } from "@/services/treinamentos/listaTreinamentosNormativosService";
-import FuncionarioAutocomplete from "@/components/admin/funcionarios/FuncionarioAutocomplete";
+import { FuncionarioAutocomplete } from "@/components/admin/funcionarios/FuncionarioAutocomplete";
 import { useUserCCAs } from "@/hooks/useUserCCAs";
 
 interface TreinamentoNormativoForm {
