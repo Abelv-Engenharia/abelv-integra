@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
@@ -232,9 +231,8 @@ const TreinamentosNormativo = () => {
                       <FormControl>
                         <FuncionarioAutocomplete
                           funcionarios={funcionarios}
-                          value={field.value}
-                          onChange={field.onChange}
-                          placeholder="Selecione um funcionário"
+                          onSelect={(funcionario) => field.onChange(funcionario.id)}
+                          className=""
                         />
                       </FormControl>
                       <FormMessage />
