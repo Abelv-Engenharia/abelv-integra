@@ -2,18 +2,21 @@
 import React, { useState, useEffect } from "react";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 import { fetchTreinamentosNormativosData } from "@/services/treinamentosDashboardService";
+import { useUserCCAs } from "@/hooks/useUserCCAs";
 
 const COLORS = ["#10b981", "#f59e0b", "#ef4444"];
 
 export const TreinamentosNormativosChart = () => {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const { data: userCCAs = [] } = useUserCCAs();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const chartData = await fetchTreinamentosNormativosData();
+        const userCCAIds = userCCAs.map(cca => cca.id);
+        const chartData = await fetchTreinamentosNormativosData(userCCAIds);
         setData(chartData);
       } catch (error) {
         console.error("Error loading normative training data:", error);
@@ -23,7 +26,7 @@ export const TreinamentosNormativosChart = () => {
     };
 
     fetchData();
-  }, []);
+  }, [userCCAs]);
 
   if (loading) {
     return (

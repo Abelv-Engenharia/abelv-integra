@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useQuery } from "@tanstack/react-query";
@@ -6,11 +7,13 @@ import { ccaService } from "@/services/treinamentos/ccaService";
 import { processoTreinamentoService } from "@/services/treinamentos/processoTreinamentoService";
 import { tipoTreinamentoService } from "@/services/treinamentos/tipoTreinamentoService";
 import { treinamentosService } from "@/services/treinamentos/treinamentosService";
+import { useUserCCAs } from "@/hooks/useUserCCAs";
 
 export const useTreinamentoForm = () => {
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const { data: userCCAs = [] } = useUserCCAs();
 
   const form = useForm<TreinamentoFormValues>({
     defaultValues: {
@@ -36,10 +39,15 @@ export const useTreinamentoForm = () => {
     queryFn: treinamentosService.getAll,
   });
 
-  const { data: ccaOptions = [] } = useQuery({
+  // Filtrar CCAs baseado nos CCAs permitidos para o usuário
+  const { data: allCcaOptions = [] } = useQuery({
     queryKey: ['ccas'],
     queryFn: ccaService.getAll,
   });
+
+  const ccaOptions = allCcaOptions.filter(cca => 
+    userCCAs.some(userCca => userCca.id === cca.id)
+  );
 
   const { data: processoOptions = [] } = useQuery({
     queryKey: ['processo-treinamento'],

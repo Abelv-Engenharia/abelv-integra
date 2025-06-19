@@ -1,11 +1,38 @@
 
 import { supabase } from "@/integrations/supabase/client";
 
-export const fetchTreinamentosNormativosData = async () => {
-  // Get normative training data
+export const fetchTreinamentosNormativosData = async (userCCAIds: number[] = []) => {
+  // Se não tem CCAs permitidos, retorna dados vazios
+  if (userCCAIds.length === 0) {
+    return [
+      { name: "Válido", value: 0 },
+      { name: "Próximo ao vencimento", value: 0 },
+      { name: "Vencido", value: 0 }
+    ];
+  }
+
+  // Get funcionários from allowed CCAs
+  const { data: funcionarios } = await supabase
+    .from('funcionarios')
+    .select('id')
+    .in('cca_id', userCCAIds)
+    .eq('ativo', true);
+
+  if (!funcionarios || funcionarios.length === 0) {
+    return [
+      { name: "Válido", value: 0 },
+      { name: "Próximo ao vencimento", value: 0 },
+      { name: "Vencido", value: 0 }
+    ];
+  }
+
+  const funcionarioIds = funcionarios.map(f => f.id);
+
+  // Get normative training data for funcionários from allowed CCAs
   const { data: trainings } = await supabase
     .from('treinamentos_normativos')
     .select('status')
+    .in('funcionario_id', funcionarioIds)
     .eq('arquivado', false)
     .limit(1000);
   

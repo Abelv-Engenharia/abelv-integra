@@ -2,16 +2,19 @@
 import React, { useState, useEffect } from "react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { fetchTreinamentosExecucaoData } from "@/services/treinamentosDashboardService";
+import { useUserCCAs } from "@/hooks/useUserCCAs";
 
 export const TreinamentosExecucaoChart = () => {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const { data: userCCAs = [] } = useUserCCAs();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
+        const userCCAIds = userCCAs.map(cca => cca.id);
         const chartData = await fetchTreinamentosExecucaoData();
         setData(chartData);
       } catch (error) {
@@ -22,8 +25,13 @@ export const TreinamentosExecucaoChart = () => {
       }
     };
 
-    fetchData();
-  }, []);
+    if (userCCAs.length > 0) {
+      fetchData();
+    } else {
+      setData([]);
+      setLoading(false);
+    }
+  }, [userCCAs]);
 
   if (loading) {
     return (

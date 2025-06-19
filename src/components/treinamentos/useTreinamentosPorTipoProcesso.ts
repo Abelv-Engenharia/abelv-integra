@@ -1,6 +1,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useUserCCAs } from "@/hooks/useUserCCAs";
 
 export interface ProcessoGeralChartData {
   name: string;
@@ -11,12 +12,21 @@ export interface ProcessoGeralChartData {
 
 // Hook para buscar e agregar os dados para o gráfico de processo geral
 export function useTreinamentosPorTipoProcesso() {
+  const { data: userCCAs = [] } = useUserCCAs();
+
   return useQuery<ProcessoGeralChartData[]>({
-    queryKey: ["treinamentos-por-processo-tipo-treinamento-grafico"],
+    queryKey: ["treinamentos-por-processo-tipo-treinamento-grafico", userCCAs],
     async queryFn() {
+      if (userCCAs.length === 0) {
+        return [];
+      }
+
+      const allowedCcaIds = userCCAs.map(cca => cca.id);
+
       const { data, error } = await supabase
         .from("execucao_treinamentos")
-        .select("tipo_treinamento, carga_horaria, efetivo_mod, efetivo_moi");
+        .select("tipo_treinamento, carga_horaria, efetivo_mod, efetivo_moi, cca_id")
+        .in('cca_id', allowedCcaIds);
 
       if (error) throw new Error("Erro ao buscar execucao_treinamentos: " + error.message);
 
@@ -42,6 +52,7 @@ export function useTreinamentosPorTipoProcesso() {
         horasTotais,
         percentual: totalGeral ? (horasTotais / totalGeral) * 100 : 0,
       }));
-    }
+    },
+    enabled: userCCAs.length > 0
   });
 }

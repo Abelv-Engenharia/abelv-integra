@@ -1,11 +1,17 @@
 
 import { supabase } from "@/integrations/supabase/client";
 
-export const fetchTreinamentosExecucaoData = async () => {
-  // Get training execution data for the last 6 months
+export const fetchTreinamentosExecucaoData = async (userCCAIds: number[] = []) => {
+  // Se não tem CCAs permitidos, retorna vazio
+  if (userCCAIds.length === 0) {
+    return [];
+  }
+
+  // Get training execution data for the last 6 months, filtered by user CCAs
   const { data } = await supabase
     .from('execucao_treinamentos')
-    .select('mes, ano, carga_horaria')
+    .select('mes, ano, carga_horaria, cca_id')
+    .in('cca_id', userCCAIds)
     .order('ano', { ascending: true })
     .order('mes', { ascending: true })
     .limit(100);

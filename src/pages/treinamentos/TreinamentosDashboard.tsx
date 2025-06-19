@@ -15,11 +15,13 @@ import ProcessoGeralPieChart from "@/components/treinamentos/ProcessoGeralPieCha
 import { DonutSubprocessoChart } from "@/components/treinamentos/DonutSubprocessoChart";
 import { fetchProcessosTreinamento } from "@/services/treinamentos/processoTreinamentoService";
 import { TabelaTreinamentosNormativosVencidos } from "@/components/treinamentos/TabelaTreinamentosNormativosVencidos";
+import { useUserCCAs } from "@/hooks/useUserCCAs";
 
 const TreinamentosDashboard = () => {
   const [year, setYear] = useState<string>("todos");
   const [month, setMonth] = useState<string>("todos");
   const [ccaId, setCcaId] = useState<string>("todos");
+  const { data: userCCAs = [] } = useUserCCAs();
 
   // Opções de processo treinamento para o seletor
   const [processos, setProcessos] = useState<any[]>([]);
@@ -27,6 +29,17 @@ const TreinamentosDashboard = () => {
   useEffect(() => {
     fetchProcessosTreinamento().then(setProcessos);
   }, []);
+
+  if (userCCAs.length === 0) {
+    return (
+      <div className="space-y-6">
+        <div className="text-center py-8">
+          <p className="text-muted-foreground">Você não possui acesso a nenhum CCA.</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <TreinamentosDashboardFilters year={year} setYear={setYear} month={month} setMonth={setMonth} ccaId={ccaId} setCcaId={setCcaId} />

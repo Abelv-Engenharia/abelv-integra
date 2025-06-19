@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useUserCCAs } from "@/hooks/useUserCCAs";
 
 interface CCA {
   id: number;
@@ -21,23 +22,7 @@ interface Props {
 const TreinamentosDashboardFilters = ({
   year, setYear, month, setMonth, ccaId, setCcaId
 }: Props) => {
-  const [ccas, setCcas] = useState<CCA[]>([]);
-
-  useEffect(() => {
-    // Buscar CCAs ativos ordenados por código
-    const fetchCcas = async () => {
-      const { data } = await import("@/integrations/supabase/client")
-        .then(({ supabase }) =>
-          supabase
-            .from('ccas')
-            .select('id, codigo, nome')
-            .eq('ativo', true)
-            .order('codigo')
-        );
-      if (data) setCcas(data as CCA[]);
-    };
-    fetchCcas();
-  }, []);
+  const { data: userCCAs = [] } = useUserCCAs();
 
   return (
     <Card>
@@ -100,7 +85,7 @@ const TreinamentosDashboardFilters = ({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="todos">Todos</SelectItem>
-                {ccas.map((cca) => (
+                {userCCAs.map((cca) => (
                   <SelectItem key={cca.id} value={cca.id.toString()}>
                     {`${cca.codigo} - ${cca.nome}`}
                   </SelectItem>

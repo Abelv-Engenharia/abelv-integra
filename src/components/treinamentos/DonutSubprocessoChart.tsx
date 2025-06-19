@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { PieChart, Pie, Cell, Tooltip, PieLabelRenderProps } from "recharts";
 import { fetchDonutSubprocessoData } from "@/services/treinamentos/treinamentosSubprocessoService";
+import { useUserCCAs } from "@/hooks/useUserCCAs";
 
 const COLORS = ["#F59E0B", "#2563EB", "#6B7280", "#FAA43A", "#60A5FA"];
 
@@ -42,13 +43,15 @@ const renderCustomLabel = (props: PieLabelRenderProps) => {
 export const DonutSubprocessoChart: React.FC = () => {
   const [data, setData] = useState<Array<{ name: string; value: number; percent: number }>>([]);
   const [loading, setLoading] = useState(false);
+  const { data: userCCAs = [] } = useUserCCAs();
 
   useEffect(() => {
     setLoading(true);
-    fetchDonutSubprocessoData(null)
+    const userCCAIds = userCCAs.map(cca => cca.id);
+    fetchDonutSubprocessoData(null, userCCAIds)
       .then(result => setData(result))
       .finally(() => setLoading(false));
-  }, []);
+  }, [userCCAs]);
 
   if (loading) {
     return (
