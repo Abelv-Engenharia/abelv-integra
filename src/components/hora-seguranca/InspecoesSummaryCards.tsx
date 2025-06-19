@@ -45,6 +45,8 @@ const InspecoesSummaryCards = () => {
             programadas: 0,
             naoProgramadas: 0,
             desviosIdentificados: 0,
+            realizadas: 0,
+            canceladas: 0,
           });
           setLoading(false);
           return;
