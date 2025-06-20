@@ -125,8 +125,21 @@ const TreinamentosNormativo = () => {
 
   const uploadCertificado = async (file: File): Promise<string | null> => {
     try {
+      // Obter dados para nomenclatura
+      const funcionarioSelecionado = funcionarios.find(f => f.id === form.getValues('funcionario_id'));
+      const treinamentoSelecionado = treinamentosDisponiveis.find(t => t.id === form.getValues('treinamento_id'));
+      
+      if (!funcionarioSelecionado || !treinamentoSelecionado) {
+        console.error('Funcionário ou treinamento não encontrado para nomenclatura');
+        return null;
+      }
+
+      // Extrair nome do treinamento até o hífen (ou nome completo se não houver hífen)
+      const nomeBase = treinamentoSelecionado.nome.split(' -')[0].trim();
+      
+      // Criar nomenclatura: NOME_TREINAMENTO_MATRICULA_FUNCIONARIO
       const fileExt = file.name.split('.').pop();
-      const fileName = `${Date.now()}_${Math.random().toString(36).substring(2)}.${fileExt}`;
+      const fileName = `${nomeBase}_${funcionarioSelecionado.matricula}.${fileExt}`;
       const filePath = `certificados/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
@@ -442,20 +455,20 @@ const TreinamentosNormativo = () => {
                     </p>
                   )}
                   <p className="text-xs text-muted-foreground">
-                    Apenas arquivos PDF, máximo 2MB.
+                    Apenas arquivos PDF, máximo 2MB. Nome será automaticamente formatado como: TREINAMENTO_MATRÍCULA
                   </p>
                 </div>
               </div>
 
-              <div className="flex gap-4">
+              <div className="flex justify-between items-center">
                 <Button variant="outline" asChild>
                   <Link to="/treinamentos/dashboard">
                     <ArrowLeft className="h-4 w-4 mr-1" />
                     Voltar
                   </Link>
                 </Button>
-                <Button type="submit" disabled={isLoading} className="flex-1">
-                  {isLoading ? "Salvando registro..." : "Salvar registro"}
+                <Button type="submit" disabled={isLoading} size="sm">
+                  {isLoading ? "Salvando..." : "Salvar registro"}
                 </Button>
               </div>
             </form>
