@@ -18,24 +18,7 @@ export const fetchTreinamentosStats = async (userCCAIds: number[] = []) => {
     };
   }
 
-  // Fetch total number of trainings (normative and execution) filtered by user CCAs
-  const { count: totalTreinamentosNormativos } = await supabase
-    .from('treinamentos_normativos')
-    .select('funcionario_id', { count: 'exact', head: true })
-    .in('funcionario_id', 
-      await supabase
-        .from('funcionarios')
-        .select('id')
-        .in('cca_id', userCCAIds)
-        .then(res => (res.data || []).map(f => f.id))
-    );
-
-  const { count: totalTreinamentosExecutados } = await supabase
-    .from('execucao_treinamentos')
-    .select('*', { count: 'exact', head: true })
-    .in('cca_id', userCCAIds);
-
-  // Fetch funcionarios with valid trainings from allowed CCAs
+  // Fetch funcionarios from allowed CCAs
   const { data: funcionariosPermitidos } = await supabase
     .from('funcionarios')
     .select('id')
@@ -44,6 +27,18 @@ export const fetchTreinamentosStats = async (userCCAIds: number[] = []) => {
 
   const funcionariosPermitidosIds = funcionariosPermitidos?.map(f => f.id) || [];
 
+  // Fetch total number of trainings (normative and execution) filtered by user CCAs
+  const { count: totalTreinamentosNormativos } = await supabase
+    .from('treinamentos_normativos')
+    .select('funcionario_id', { count: 'exact', head: true })
+    .in('funcionario_id', funcionariosPermitidosIds);
+
+  const { count: totalTreinamentosExecutados } = await supabase
+    .from('execucao_treinamentos')
+    .select('*', { count: 'exact', head: true })
+    .in('cca_id', userCCAIds);
+
+  // Fetch funcionarios with valid trainings from allowed CCAs
   const { data: funcionariosComTreinamentos } = await supabase
     .from('treinamentos_normativos')
     .select('funcionario_id')

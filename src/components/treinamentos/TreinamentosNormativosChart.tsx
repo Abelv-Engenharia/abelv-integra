@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from "react";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
-import { fetchTreinamentosNormativosData } from "@/services/treinamentosDashboardService";
+import { fetchTreinamentosNormativosData } from "@/services/treinamentos/treinamentosNormativosDataService";
 import { useUserCCAs } from "@/hooks/useUserCCAs";
 
 const COLORS = ["#10b981", "#f59e0b", "#ef4444"];
@@ -63,7 +63,6 @@ export const TreinamentosNormativosChart = () => {
               border: "1px solid rgba(229, 231, 235, 1)"
             }}
           />
-          {/* Legenda removida */}
         </PieChart>
       </ResponsiveContainer>
     </div>
