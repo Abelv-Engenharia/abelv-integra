@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, Upload } from "lucide-react";
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { listaTreinamentosNormativosService } from "@/services/treinamentos/listaTreinamentosNormativosService";
 import { useUserCCAs } from "@/hooks/useUserCCAs";
 
@@ -31,7 +31,6 @@ const TreinamentosNormativo = () => {
   const [certificadoFile, setCertificadoFile] = useState<File | null>(null);
   const [selectedCcaId, setSelectedCcaId] = useState<string>("");
   const { data: userCCAs = [] } = useUserCCAs();
-  const location = useLocation();
 
   const form = useForm<TreinamentoNormativoForm>({
     defaultValues: {
@@ -44,20 +43,6 @@ const TreinamentosNormativo = () => {
       certificado_url: "",
     },
   });
-
-  // Preencher dados do state se vier da renovação
-  useEffect(() => {
-    if (location.state) {
-      const { ccaId, funcionarioId, treinamentoId, tipo } = location.state;
-      if (ccaId) {
-        setSelectedCcaId(ccaId);
-        form.setValue('cca_id', ccaId);
-      }
-      if (funcionarioId) form.setValue('funcionario_id', funcionarioId);
-      if (treinamentoId) form.setValue('treinamento_id', treinamentoId);
-      if (tipo) form.setValue('tipo', tipo);
-    }
-  }, [location.state, form]);
 
   useEffect(() => {
     const loadTreinamentos = async () => {
@@ -138,30 +123,10 @@ const TreinamentosNormativo = () => {
     }
   };
 
-  const generateFileName = (): string => {
-    const treinamentoId = form.watch("treinamento_id");
-    const funcionarioId = form.watch("funcionario_id");
-    
-    const treinamentoSelecionado = treinamentosDisponiveis.find(t => t.id === treinamentoId);
-    const funcionarioSelecionado = funcionarios.find(f => f.id === funcionarioId);
-    
-    if (treinamentoSelecionado && funcionarioSelecionado) {
-      // Extrair nome do treinamento até o hífen (se houver)
-      const nomeBase = treinamentoSelecionado.nome.split(' - ')[0] || treinamentoSelecionado.nome;
-      const matricula = funcionarioSelecionado.matricula;
-      const funcionarioNome = funcionarioSelecionado.nome.replace(/\s+/g, '_');
-      
-      return `${nomeBase}_${matricula}_${funcionarioNome}`;
-    }
-    
-    return `certificado_${Date.now()}`;
-  };
-
   const uploadCertificado = async (file: File): Promise<string | null> => {
     try {
       const fileExt = file.name.split('.').pop();
-      const baseFileName = generateFileName();
-      const fileName = `${baseFileName}.${fileExt}`;
+      const fileName = `${Date.now()}_${Math.random().toString(36).substring(2)}.${fileExt}`;
       const filePath = `certificados/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
@@ -472,29 +437,24 @@ const TreinamentosNormativo = () => {
                     <Upload className="h-4 w-4 text-muted-foreground" />
                   </div>
                   {certificadoFile && (
-                    <div className="space-y-1">
-                      <p className="text-sm text-muted-foreground">
-                        Arquivo selecionado: {certificadoFile.name}
-                      </p>
-                      <p className="text-sm text-green-600">
-                        Nome do arquivo salvo: {generateFileName()}.{certificadoFile.name.split('.').pop()}
-                      </p>
-                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Arquivo selecionado: {certificadoFile.name}
+                    </p>
                   )}
                   <p className="text-xs text-muted-foreground">
-                    Apenas arquivos PDF, máximo 2MB. O arquivo será salvo com nomenclatura padrão.
+                    Apenas arquivos PDF, máximo 2MB.
                   </p>
                 </div>
               </div>
 
-              <div className="flex justify-between items-center">
+              <div className="flex gap-4">
                 <Button variant="outline" asChild>
                   <Link to="/treinamentos/dashboard">
                     <ArrowLeft className="h-4 w-4 mr-1" />
                     Voltar
                   </Link>
                 </Button>
-                <Button type="submit" disabled={isLoading} size="sm">
+                <Button type="submit" disabled={isLoading} className="flex-1">
                   {isLoading ? "Salvando registro..." : "Salvar registro"}
                 </Button>
               </div>

@@ -8,7 +8,6 @@ import { fetchFuncionarios } from "@/utils/treinamentosUtils";
 import { Button } from "@/components/ui/button";
 import { Trash } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useUserCCAs } from "@/hooks/useUserCCAs";
 
 export const TabelaTreinamentosNormativosVencidos: React.FC = () => {
   const [treinamentos, setTreinamentos] = useState<TreinamentoNormativo[]>([]);
@@ -18,46 +17,21 @@ export const TabelaTreinamentosNormativosVencidos: React.FC = () => {
   const [justificativa, setJustificativa] = useState("");
   const [treinamentoSelecionado, setTreinamentoSelecionado] = useState<TreinamentoNormativo | null>(null);
   const [excluindo, setExcluindo] = useState(false);
-  const { data: userCCAs = [] } = useUserCCAs();
 
   const navigate = useNavigate();
 
   useEffect(() => {
     carregarDados();
-  }, [userCCAs]);
+  }, []);
 
   const carregarDados = async () => {
     setLoading(true);
-    
-    if (userCCAs.length === 0) {
-      setTreinamentos([]);
-      setFuncionarios([]);
-      setLoading(false);
-      return;
-    }
-
-    const userCCAIds = userCCAs.map(cca => cca.id);
-    
-    const [allTreinamentos, allFuncionarios] = await Promise.all([
+    const [treinamentos, funcionarios] = await Promise.all([
       treinamentosNormativosService.getAll(),
       fetchFuncionarios()
     ]);
-
-    // Filtrar funcionários pelos CCAs permitidos
-    const funcionariosFiltrados = allFuncionarios.filter(f => 
-      f.cca_id && userCCAIds.includes(f.cca_id)
-    );
-    
-    // Obter IDs dos funcionários permitidos
-    const funcionariosPermitidosIds = funcionariosFiltrados.map(f => f.id);
-    
-    // Filtrar treinamentos apenas dos funcionários permitidos
-    const treinamentosFiltrados = allTreinamentos.filter(t => 
-      funcionariosPermitidosIds.includes(t.funcionario_id)
-    );
-
-    setTreinamentos(treinamentosFiltrados);
-    setFuncionarios(funcionariosFiltrados);
+    setTreinamentos(treinamentos);
+    setFuncionarios(funcionarios);
     setLoading(false);
   };
 
@@ -117,14 +91,6 @@ export const TabelaTreinamentosNormativosVencidos: React.FC = () => {
     return (
       <div className="flex items-center justify-center h-24 w-full">
         <p className="text-muted-foreground">Carregando registros...</p>
-      </div>
-    );
-  }
-
-  if (userCCAs.length === 0) {
-    return (
-      <div className="flex items-center justify-center h-24 w-full">
-        <p className="text-muted-foreground">Você não possui acesso a nenhum CCA.</p>
       </div>
     );
   }
