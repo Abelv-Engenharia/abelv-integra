@@ -4,18 +4,22 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend } from "recharts";
 import { fetchDesviosByProcesso } from "@/services/desviosDashboardService";
+import { useUserCCAs } from "@/hooks/useUserCCAs";
 
 const COLORS = ["#06b6d4", "#8b5cf6", "#10b981", "#f59e0b", "#ef4444", "#ec4899", "#3b82f6", "#84cc16"];
 
 const DesviosByProcessoChart = () => {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const { data: userCCAs = [] } = useUserCCAs();
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const chartData = await fetchDesviosByProcesso();
+        // Get CCA IDs that user has permission to
+        const allowedCcaIds = userCCAs.map(cca => cca.id.toString());
+        const chartData = await fetchDesviosByProcesso(allowedCcaIds);
         setData(chartData);
       } catch (error) {
         console.error("Error loading processo chart data:", error);
@@ -24,8 +28,10 @@ const DesviosByProcessoChart = () => {
       }
     };
 
-    fetchData();
-  }, []);
+    if (userCCAs.length > 0) {
+      fetchData();
+    }
+  }, [userCCAs]);
 
   const chartConfig = {
     value: {

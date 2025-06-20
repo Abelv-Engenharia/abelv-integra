@@ -4,16 +4,20 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Cell } from "recharts";
 import { fetchDesviosByClassification } from "@/services/desviosDashboardService";
+import { useUserCCAs } from "@/hooks/useUserCCAs";
 
 const DesviosClassificationChart = () => {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const { data: userCCAs = [] } = useUserCCAs();
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const chartData = await fetchDesviosByClassification();
+        // Get CCA IDs that user has permission to
+        const allowedCcaIds = userCCAs.map(cca => cca.id.toString());
+        const chartData = await fetchDesviosByClassification(allowedCcaIds);
         setData(chartData);
       } catch (error) {
         console.error("Error loading classification chart data:", error);
@@ -22,8 +26,10 @@ const DesviosClassificationChart = () => {
       }
     };
 
-    fetchData();
-  }, []);
+    if (userCCAs.length > 0) {
+      fetchData();
+    }
+  }, [userCCAs]);
 
   const chartConfig = {
     value: {

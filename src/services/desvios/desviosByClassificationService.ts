@@ -1,12 +1,19 @@
 
 import { supabase } from "@/integrations/supabase/client";
 
-export const fetchDesviosByClassification = async () => {
+export const fetchDesviosByClassification = async (ccaIds?: string[]) => {
   try {
-    const { data, error } = await supabase
+    let query = supabase
       .from('desvios_completos')
       .select('classificacao_risco')
       .not('classificacao_risco', 'is', null);
+
+    // Apply CCA filter if provided
+    if (ccaIds && ccaIds.length > 0) {
+      query = query.in('cca_id', ccaIds.map(id => parseInt(id)));
+    }
+
+    const { data, error } = await query;
     
     if (error) {
       console.error('Error fetching desvios by classification:', error);

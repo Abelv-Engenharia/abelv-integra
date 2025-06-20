@@ -1,15 +1,22 @@
 
 import { supabase } from "@/integrations/supabase/client";
 
-export const fetchDesviosByBaseLegal = async () => {
+export const fetchDesviosByBaseLegal = async (ccaIds?: string[]) => {
   try {
-    const { data, error } = await supabase
+    let query = supabase
       .from('desvios_completos')
       .select(`
         base_legal_opcao_id,
         base_legal_opcoes:base_legal_opcao_id(codigo, nome)
       `)
       .not('base_legal_opcao_id', 'is', null);
+
+    // Apply CCA filter if provided
+    if (ccaIds && ccaIds.length > 0) {
+      query = query.in('cca_id', ccaIds.map(id => parseInt(id)));
+    }
+
+    const { data, error } = await query;
     
     if (error) {
       console.error('Error fetching desvios by base legal:', error);

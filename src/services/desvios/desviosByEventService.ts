@@ -1,15 +1,22 @@
 
 import { supabase } from "@/integrations/supabase/client";
 
-export const fetchDesviosByEvent = async () => {
+export const fetchDesviosByEvent = async (ccaIds?: string[]) => {
   try {
-    const { data, error } = await supabase
+    let query = supabase
       .from('desvios_completos')
       .select(`
         evento_identificado_id,
         eventos_identificados:evento_identificado_id(codigo, nome)
       `)
       .not('evento_identificado_id', 'is', null);
+
+    // Apply CCA filter if provided
+    if (ccaIds && ccaIds.length > 0) {
+      query = query.in('cca_id', ccaIds.map(id => parseInt(id)));
+    }
+
+    const { data, error } = await query;
     
     if (error) {
       console.error('Error fetching desvios by event:', error);

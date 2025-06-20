@@ -2,15 +2,22 @@
 import { supabase } from "@/integrations/supabase/client";
 
 // Function to fetch data for pie chart (desvios by type)
-export const fetchDesviosByType = async () => {
+export const fetchDesviosByType = async (ccaIds?: string[]) => {
   try {
-    const { data, error } = await supabase
+    let query = supabase
       .from('desvios_completos')
       .select(`
         tipo_registro_id,
         tipos_registro:tipo_registro_id(codigo, nome)
       `)
       .not('tipo_registro_id', 'is', null);
+
+    // Apply CCA filter if provided
+    if (ccaIds && ccaIds.length > 0) {
+      query = query.in('cca_id', ccaIds.map(id => parseInt(id)));
+    }
+
+    const { data, error } = await query;
     
     if (error) {
       console.error('Error fetching desvios by type:', error);

@@ -4,16 +4,20 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer } from "recharts";
 import { fetchDesviosByCompany } from "@/services/desviosDashboardService";
+import { useUserCCAs } from "@/hooks/useUserCCAs";
 
 const DesviosByCompanyChart = () => {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const { data: userCCAs = [] } = useUserCCAs();
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const chartData = await fetchDesviosByCompany();
+        // Get CCA IDs that user has permission to
+        const allowedCcaIds = userCCAs.map(cca => cca.id.toString());
+        const chartData = await fetchDesviosByCompany(allowedCcaIds);
         setData(chartData);
       } catch (error) {
         console.error("Error loading company chart data:", error);
@@ -22,8 +26,10 @@ const DesviosByCompanyChart = () => {
       }
     };
 
-    fetchData();
-  }, []);
+    if (userCCAs.length > 0) {
+      fetchData();
+    }
+  }, [userCCAs]);
 
   const chartConfig = {
     value: {
