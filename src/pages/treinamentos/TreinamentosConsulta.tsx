@@ -19,11 +19,11 @@ import { FuncionarioPerfilCard } from "@/components/treinamentos/FuncionarioPerf
 import { TabelaTreinamentosNormativos } from "@/components/treinamentos/TabelaTreinamentosNormativos";
 import { TabelaHistoricoTreinamentos } from "@/components/treinamentos/TabelaHistoricoTreinamentos";
 import { supabase } from "@/integrations/supabase/client";
+import { useUserCCAs } from "@/hooks/useUserCCAs";
 
 // ---------------- Novo componente da aba 2 ----------------
 
 function TreinamentosNormativosPorFuncionarioTab() {
-  const [ccas, setCcas] = useState<{ id: number; codigo: string; nome: string }[]>([]);
   const [selectedCcaId, setSelectedCcaId] = useState<string | null>(null);
   const [funcionarios, setFuncionarios] = useState<Funcionario[]>([]);
   const [selectedFuncionarioId, setSelectedFuncionarioId] = useState<string | null>(null);
@@ -34,14 +34,7 @@ function TreinamentosNormativosPorFuncionarioTab() {
   const [abaInterna, setAbaInterna] = useState("treinamentos");
   const [treinamentosAtual, setTreinamentosAtual] = useState<any[]>([]);
   const [historicoReciclados, setHistoricoReciclados] = useState<any[]>([]);
-
-  useEffect(() => {
-    const fetchCcas = async () => {
-      const ccasData = await ccaService.getAll();
-      setCcas(ccasData);
-    };
-    fetchCcas();
-  }, []);
+  const { data: userCCAs = [] } = useUserCCAs();
 
   useEffect(() => {
     const carregarFuncionarios = async () => {
@@ -233,8 +226,8 @@ function TreinamentosNormativosPorFuncionarioTab() {
                 <SelectValue placeholder="Selecione o CCA" />
               </SelectTrigger>
               <SelectContent>
-                {/* Ordenar os CCAs do menor para o maior pelo código */}
-                {[...ccas]
+                {/* Filtrar apenas os CCAs que o usuário tem permissão */}
+                {userCCAs
                   .sort((a, b) => {
                     // Se código for numérico, comparar como número, senão string
                     const aNum = Number(a.codigo);
@@ -321,13 +314,14 @@ function TreinamentosNormativosPorFuncionarioTab() {
 // ------------------- ABA ORIGINAL -----------------------
 
 const TreinamentosConsulta = () => {
-  const [tab, setTab] = useState("realizados"); // <--- Nova aba
+  const [tab, setTab] = useState("realizados");
   const [execucoes, setExecucoes] = useState<any[]>([]);
   const [filteredExecucoes, setFilteredExecucoes] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterMes, setFilterMes] = useState("todos");
   const [filterAno, setFilterAno] = useState("todos");
   const [isLoading, setIsLoading] = useState(true);
+  const { data: userCCAs = [] } = useUserCCAs();
 
   // Exclusion modal state
   const [idParaExcluir, setIdParaExcluir] = useState<string | null>(null);
@@ -336,12 +330,24 @@ const TreinamentosConsulta = () => {
 
   useEffect(() => {
     loadExecucoes();
-  }, []);
+  }, [userCCAs]);
+
   const loadExecucoes = async () => {
     try {
       setIsLoading(true);
       const data = await execucaoTreinamentoService.getAll();
-      const execucoesProcessadas = data.map(item => ({
+      
+      // Filtrar apenas execuções dos CCAs que o usuário tem permissão
+      const userCCAIds = userCCAs.map(cca => cca.id);
+      const execucoesPermitidas = data.filter(item => {
+        // Se o item tem cca_id, verificar se está na lista de CCAs permitidos
+        if (item.cca_id) {
+          return userCCAIds.includes(item.cca_id);
+        }
+        return false;
+      });
+      
+      const execucoesProcessadas = execucoesPermitidas.map(item => ({
         ...item,
         id: item.id || crypto.randomUUID(),
         data: item.data,
@@ -357,6 +363,7 @@ const TreinamentosConsulta = () => {
       setIsLoading(false);
     }
   };
+
   const filterExecucoes = () => {
     let results = execucoes.filter(execucao => {
       const term = searchTerm.toLowerCase();
@@ -542,5 +549,3 @@ const TreinamentosConsulta = () => {
 };
 
 export default TreinamentosConsulta;
-
-// O arquivo está ficando longo; considere pedir refatoração em breve.
