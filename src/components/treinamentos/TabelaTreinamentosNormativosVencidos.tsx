@@ -8,6 +8,7 @@ import { fetchFuncionarios } from "@/utils/treinamentosUtils";
 import { Button } from "@/components/ui/button";
 import { Trash } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useUserCCAs } from "@/hooks/useUserCCAs";
 
 export const TabelaTreinamentosNormativosVencidos: React.FC = () => {
   const [treinamentos, setTreinamentos] = useState<TreinamentoNormativo[]>([]);
@@ -17,12 +18,13 @@ export const TabelaTreinamentosNormativosVencidos: React.FC = () => {
   const [justificativa, setJustificativa] = useState("");
   const [treinamentoSelecionado, setTreinamentoSelecionado] = useState<TreinamentoNormativo | null>(null);
   const [excluindo, setExcluindo] = useState(false);
+  const { data: userCCAs = [] } = useUserCCAs();
 
   const navigate = useNavigate();
 
   useEffect(() => {
     carregarDados();
-  }, []);
+  }, [userCCAs]);
 
   const carregarDados = async () => {
     setLoading(true);
@@ -30,8 +32,21 @@ export const TabelaTreinamentosNormativosVencidos: React.FC = () => {
       treinamentosNormativosService.getAll(),
       fetchFuncionarios()
     ]);
-    setTreinamentos(treinamentos);
-    setFuncionarios(funcionarios);
+    
+    // Filtrar funcionários apenas dos CCAs permitidos
+    const userCCAIds = userCCAs.map(cca => cca.id);
+    const funcionariosFiltrados = funcionarios.filter(funcionario => 
+      funcionario.cca_id && userCCAIds.includes(funcionario.cca_id)
+    );
+    
+    // Filtrar treinamentos apenas dos funcionários permitidos
+    const funcionariosPermitidosIds = funcionariosFiltrados.map(f => f.id);
+    const treinamentosFiltrados = treinamentos.filter(treinamento =>
+      funcionariosPermitidosIds.includes(treinamento.funcionario_id)
+    );
+    
+    setTreinamentos(treinamentosFiltrados);
+    setFuncionarios(funcionariosFiltrados);
     setLoading(false);
   };
 
