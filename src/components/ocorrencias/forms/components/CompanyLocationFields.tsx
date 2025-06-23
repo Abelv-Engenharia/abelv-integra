@@ -76,7 +76,7 @@ const CompanyLocationFields: React.FC<CompanyLocationFieldsProps> = ({
                     </SelectItem>
                   ))
                 ) : (
-                  <SelectItem value="" disabled>
+                  <SelectItem value="no-cca-available" disabled>
                     Nenhum CCA disponível
                   </SelectItem>
                 )}
@@ -131,7 +131,7 @@ const CompanyLocationFields: React.FC<CompanyLocationFieldsProps> = ({
                       </SelectItem>
                     ))
                   ) : (
-                    <SelectItem value="" disabled>
+                    <SelectItem value="no-empresa-available" disabled>
                       Nenhuma empresa disponível
                     </SelectItem>
                   )}
@@ -162,7 +162,7 @@ const CompanyLocationFields: React.FC<CompanyLocationFieldsProps> = ({
                       </SelectItem>
                     ))
                   ) : (
-                    <SelectItem value="" disabled>
+                    <SelectItem value="no-disciplina-available" disabled>
                       Nenhuma disciplina disponível
                     </SelectItem>
                   )}
