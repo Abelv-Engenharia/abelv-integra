@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 
 export interface OcorrenciaFormData {
@@ -262,9 +261,9 @@ export const getAllOcorrencias = async () => {
       return [];
     }
 
-    // Obter IDs únicos de empresas e CCAs
-    const empresaIds = [...new Set(ocorrencias.map(o => o.empresa).filter(id => id && !isNaN(Number(id))))];
-    const ccaIds = [...new Set(ocorrencias.map(o => o.cca).filter(id => id && !isNaN(Number(id))))];
+    // Obter IDs únicos de empresas e CCAs - convertendo para números
+    const empresaIds = [...new Set(ocorrencias.map(o => o.empresa).filter(id => id && !isNaN(Number(id))).map(id => Number(id)))];
+    const ccaIds = [...new Set(ocorrencias.map(o => o.cca).filter(id => id && !isNaN(Number(id))).map(id => Number(id)))];
 
     // Buscar dados das empresas
     let empresasMap = new Map();
@@ -326,9 +325,9 @@ export const getOcorrenciasRecentes = async (limit: number = 10) => {
       return [];
     }
 
-    // Obter IDs únicos de empresas e CCAs
-    const empresaIds = [...new Set(ocorrencias.map(o => o.empresa).filter(id => id && !isNaN(Number(id))))];
-    const ccaIds = [...new Set(ocorrencias.map(o => o.cca).filter(id => id && !isNaN(Number(id))))];
+    // Obter IDs únicos de empresas e CCAs - convertendo para números
+    const empresaIds = [...new Set(ocorrencias.map(o => o.empresa).filter(id => id && !isNaN(Number(id))).map(id => Number(id)))];
+    const ccaIds = [...new Set(ocorrencias.map(o => o.cca).filter(id => id && !isNaN(Number(id))).map(id => Number(id)))];
 
     // Buscar dados das empresas
     let empresasMap = new Map();
