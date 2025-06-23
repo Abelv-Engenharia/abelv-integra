@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Eye } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { getOcorrenciasRecentes } from "@/services/ocorrencias/ocorrenciasService";
+import { useUserCCAs } from "@/hooks/useUserCCAs";
 
 // Function to get the background and text colors for each risk classification
 const getRiscoClassColor = (classificacao: string) => {
@@ -36,6 +37,7 @@ const OcorrenciasTable = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+  const { data: userCCAs = [], isLoading: ccasLoading } = useUserCCAs();
 
   useEffect(() => {
     const loadData = async () => {
@@ -43,7 +45,19 @@ const OcorrenciasTable = () => {
         setLoading(true);
         const ocorrenciasData = await getOcorrenciasRecentes();
         console.log('Ocorrências recentes carregadas:', ocorrenciasData);
-        setData(ocorrenciasData);
+        
+        // Filtrar ocorrências baseado nos CCAs permitidos ao usuário
+        if (!ccasLoading && userCCAs.length > 0) {
+          const userCCAIds = userCCAs.map(cca => cca.id.toString());
+          const filteredData = ocorrenciasData.filter(ocorrencia => 
+            userCCAIds.includes(ocorrencia.cca)
+          );
+          console.log('Ocorrências filtradas por CCA do usuário:', filteredData);
+          setData(filteredData);
+        } else if (!ccasLoading) {
+          // Se o usuário não tem CCAs permitidos, não mostra nenhuma ocorrência
+          setData([]);
+        }
       } catch (err) {
         console.error("Error loading latest ocorrencias:", err);
         setError("Erro ao carregar ocorrências recentes");
@@ -52,14 +66,16 @@ const OcorrenciasTable = () => {
       }
     };
 
-    loadData();
-  }, []);
+    if (!ccasLoading) {
+      loadData();
+    }
+  }, [ccasLoading, userCCAs]);
 
   const handleViewOcorrencia = (id: string) => {
     navigate(`/ocorrencias/detalhes/${id}`);
   };
 
-  if (loading) {
+  if (loading || ccasLoading) {
     return (
       <div className="py-8 text-center">
         <p className="text-muted-foreground">Carregando dados...</p>
@@ -78,7 +94,7 @@ const OcorrenciasTable = () => {
   if (data.length === 0) {
     return (
       <div className="py-8 text-center">
-        <p className="text-muted-foreground">Nenhuma ocorrência encontrada</p>
+        <p className="text-muted-foreground">Nenhuma ocorrência encontrada para os CCAs autorizados</p>
       </div>
     );
   }
@@ -88,6 +104,7 @@ const OcorrenciasTable = () => {
       <TableHeader>
         <TableRow>
           <TableHead>Data</TableHead>
+          <TableHead>CCA</TableHead>
           <TableHead>Empresa</TableHead>
           <TableHead>Tipo de Ocorrência</TableHead>
           <TableHead className="hidden md:table-cell">Classificação de Risco</TableHead>
@@ -100,6 +117,11 @@ const OcorrenciasTable = () => {
           <TableRow key={ocorrencia.id}>
             <TableCell>
               {ocorrencia.data ? new Date(ocorrencia.data).toLocaleDateString() : '-'}
+            </TableCell>
+            <TableCell>
+              {ocorrencia.cca_codigo && ocorrencia.cca_nome 
+                ? `${ocorrencia.cca_codigo} - ${ocorrencia.cca_nome}`
+                : ocorrencia.cca || '-'}
             </TableCell>
             <TableCell>{ocorrencia.empresa || '-'}</TableCell>
             <TableCell>{ocorrencia.tipo_ocorrencia || '-'}</TableCell>

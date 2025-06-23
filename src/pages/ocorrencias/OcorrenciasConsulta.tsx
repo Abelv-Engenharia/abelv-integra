@@ -1,10 +1,10 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Plus, Eye, Edit, RefreshCw, Trash2 } from "lucide-react";
 import { getAllOcorrencias, deleteOcorrencia } from "@/services/ocorrencias/ocorrenciasService";
+import { useUserCCAs } from "@/hooks/useUserCCAs";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -23,14 +23,29 @@ const OcorrenciasConsulta = () => {
   const [deleteConfirmationOpen, setDeleteConfirmationOpen] = useState(false);
   const [ocorrenciaToDeleteId, setOcorrenciaToDeleteId] = useState<string | null>(null);
   const navigate = useNavigate();
+  const { data: userCCAs = [], isLoading: ccasLoading } = useUserCCAs();
 
   useEffect(() => {
     const loadOcorrencias = async () => {
+      if (ccasLoading) return;
+      
       setLoading(true);
       try {
         const data = await getAllOcorrencias();
         console.log('Ocorrências carregadas:', data);
-        setOcorrencias(data);
+        
+        // Filtrar ocorrências baseado nos CCAs permitidos ao usuário
+        if (userCCAs.length > 0) {
+          const userCCAIds = userCCAs.map(cca => cca.id.toString());
+          const filteredData = data.filter(ocorrencia => 
+            userCCAIds.includes(ocorrencia.cca)
+          );
+          console.log('Ocorrências filtradas por CCA do usuário:', filteredData);
+          setOcorrencias(filteredData);
+        } else {
+          // Se o usuário não tem CCAs permitidos, não mostra nenhuma ocorrência
+          setOcorrencias([]);
+        }
       } catch (error) {
         console.error('Erro ao buscar ocorrências:', error);
         toast.error("Erro ao carregar ocorrências");
@@ -40,7 +55,7 @@ const OcorrenciasConsulta = () => {
     };
 
     loadOcorrencias();
-  }, []);
+  }, [userCCAs, ccasLoading]);
 
   const handleView = (id: string) => {
     navigate(`/ocorrencias/visualizar/${id}`);
@@ -96,7 +111,7 @@ const OcorrenciasConsulta = () => {
             </div>
           ) : ocorrencias.length === 0 ? (
             <p className="text-center text-muted-foreground py-8">
-              Nenhuma ocorrência encontrada.
+              Nenhuma ocorrência encontrada para os CCAs autorizados.
             </p>
           ) : (
             <div className="overflow-x-auto">
@@ -104,6 +119,7 @@ const OcorrenciasConsulta = () => {
                 <thead>
                   <tr className="border-b">
                     <th className="text-left p-2">Data</th>
+                    <th className="text-left p-2">CCA</th>
                     <th className="text-left p-2">Empresa</th>
                     <th className="text-left p-2">Tipo</th>
                     <th className="text-left p-2">Status</th>
@@ -116,6 +132,11 @@ const OcorrenciasConsulta = () => {
                     <tr key={ocorrencia.id} className="border-b hover:bg-gray-50">
                       <td className="p-2">
                         {new Date(ocorrencia.data).toLocaleDateString('pt-BR')}
+                      </td>
+                      <td className="p-2">
+                        {ocorrencia.cca_codigo && ocorrencia.cca_nome 
+                          ? `${ocorrencia.cca_codigo} - ${ocorrencia.cca_nome}`
+                          : ocorrencia.cca || '-'}
                       </td>
                       <td className="p-2">{ocorrencia.empresa}</td>
                       <td className="p-2">{ocorrencia.tipo_ocorrencia}</td>
