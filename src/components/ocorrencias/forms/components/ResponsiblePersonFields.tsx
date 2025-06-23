@@ -31,6 +31,11 @@ const ResponsiblePersonFields: React.FC<ResponsiblePersonFieldsProps> = ({
 }) => {
   const { control } = useFormContext();
 
+  // Garantir que os arrays existem e filtrar itens inválidos
+  const safeEngenheiros = (engenheiros || []).filter(eng => eng && eng.engenheiros && eng.engenheiros.nome);
+  const safeSupervisores = (supervisores || []).filter(sup => sup && sup.supervisores && sup.supervisores.nome);
+  const safeEncarregados = (encarregados || []).filter(enc => enc && enc.nome);
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
       <FormField
@@ -46,11 +51,17 @@ const ResponsiblePersonFields: React.FC<ResponsiblePersonFieldsProps> = ({
                 </SelectTrigger>
               </FormControl>
               <SelectContent>
-                {engenheiros.map((engenheiro) => (
-                  <SelectItem key={engenheiro.engenheiro_id} value={engenheiro.engenheiros.nome}>
-                    {engenheiro.engenheiros.nome}
+                {safeEngenheiros.length > 0 ? (
+                  safeEngenheiros.map((engenheiro) => (
+                    <SelectItem key={engenheiro.engenheiro_id} value={engenheiro.engenheiros.nome}>
+                      {engenheiro.engenheiros.nome}
+                    </SelectItem>
+                  ))
+                ) : (
+                  <SelectItem value="no-engenheiro-available" disabled>
+                    {!selectedCcaId ? "Selecione um CCA primeiro" : "Nenhum engenheiro disponível"}
                   </SelectItem>
-                ))}
+                )}
               </SelectContent>
             </Select>
             <FormMessage />
@@ -71,11 +82,17 @@ const ResponsiblePersonFields: React.FC<ResponsiblePersonFieldsProps> = ({
                 </SelectTrigger>
               </FormControl>
               <SelectContent>
-                {supervisores.map((supervisor) => (
-                  <SelectItem key={supervisor.supervisor_id} value={supervisor.supervisores.nome}>
-                    {supervisor.supervisores.nome}
+                {safeSupervisores.length > 0 ? (
+                  safeSupervisores.map((supervisor) => (
+                    <SelectItem key={supervisor.supervisor_id} value={supervisor.supervisores.nome}>
+                      {supervisor.supervisores.nome}
+                    </SelectItem>
+                  ))
+                ) : (
+                  <SelectItem value="no-supervisor-available" disabled>
+                    {!selectedCcaId ? "Selecione um CCA primeiro" : "Nenhum supervisor disponível"}
                   </SelectItem>
-                ))}
+                )}
               </SelectContent>
             </Select>
             <FormMessage />
@@ -96,11 +113,17 @@ const ResponsiblePersonFields: React.FC<ResponsiblePersonFieldsProps> = ({
                 </SelectTrigger>
               </FormControl>
               <SelectContent>
-                {encarregados.map((encarregado) => (
-                  <SelectItem key={encarregado.id} value={encarregado.nome}>
-                    {encarregado.nome}
+                {safeEncarregados.length > 0 ? (
+                  safeEncarregados.map((encarregado) => (
+                    <SelectItem key={encarregado.id} value={encarregado.nome}>
+                      {encarregado.nome}
+                    </SelectItem>
+                  ))
+                ) : (
+                  <SelectItem value="no-encarregado-available" disabled>
+                    {!selectedCcaId ? "Selecione um CCA primeiro" : "Nenhum encarregado disponível"}
                   </SelectItem>
-                ))}
+                )}
               </SelectContent>
             </Select>
             <FormMessage />
