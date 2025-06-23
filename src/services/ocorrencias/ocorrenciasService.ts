@@ -252,11 +252,24 @@ export const getAllOcorrencias = async () => {
   try {
     const { data, error } = await supabase
       .from('ocorrencias')
-      .select('*')
+      .select(`
+        *,
+        empresas:empresa::integer(nome),
+        ccas:cca::integer(nome, codigo)
+      `)
       .order('data', { ascending: false });
 
     if (error) throw error;
-    return data || [];
+    
+    // Transformar os dados para incluir os nomes das empresas e CCAs
+    const transformedData = (data || []).map(ocorrencia => ({
+      ...ocorrencia,
+      empresa: ocorrencia.empresas?.nome || ocorrencia.empresa,
+      cca_nome: ocorrencia.ccas?.nome || ocorrencia.cca,
+      cca_codigo: ocorrencia.ccas?.codigo || ''
+    }));
+    
+    return transformedData;
   } catch (error) {
     console.error('Erro ao buscar ocorrências:', error);
     return [];
@@ -267,12 +280,25 @@ export const getOcorrenciasRecentes = async (limit: number = 10) => {
   try {
     const { data, error } = await supabase
       .from('ocorrencias')
-      .select('*')
+      .select(`
+        *,
+        empresas:empresa::integer(nome),
+        ccas:cca::integer(nome, codigo)
+      `)
       .order('data', { ascending: false })
       .limit(limit);
 
     if (error) throw error;
-    return data || [];
+    
+    // Transformar os dados para incluir os nomes das empresas e CCAs
+    const transformedData = (data || []).map(ocorrencia => ({
+      ...ocorrencia,
+      empresa: ocorrencia.empresas?.nome || ocorrencia.empresa,
+      cca_nome: ocorrencia.ccas?.nome || ocorrencia.cca,
+      cca_codigo: ocorrencia.ccas?.codigo || ''
+    }));
+    
+    return transformedData;
   } catch (error) {
     console.error('Erro ao buscar ocorrências recentes:', error);
     return [];

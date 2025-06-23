@@ -11,7 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Eye } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { fetchLatestOcorrencias } from "@/services/ocorrenciasDashboardService";
+import { getOcorrenciasRecentes } from "@/services/ocorrencias/ocorrenciasService";
 
 // Function to get the background and text colors for each risk classification
 const getRiscoClassColor = (classificacao: string) => {
@@ -41,7 +41,8 @@ const OcorrenciasTable = () => {
     const loadData = async () => {
       try {
         setLoading(true);
-        const ocorrenciasData = await fetchLatestOcorrencias();
+        const ocorrenciasData = await getOcorrenciasRecentes();
+        console.log('Ocorrências recentes carregadas:', ocorrenciasData);
         setData(ocorrenciasData);
       } catch (err) {
         console.error("Error loading latest ocorrencias:", err);

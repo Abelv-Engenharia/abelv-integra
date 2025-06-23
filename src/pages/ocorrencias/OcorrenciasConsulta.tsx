@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -28,6 +29,7 @@ const OcorrenciasConsulta = () => {
       setLoading(true);
       try {
         const data = await getAllOcorrencias();
+        console.log('Ocorrências carregadas:', data);
         setOcorrencias(data);
       } catch (error) {
         console.error('Erro ao buscar ocorrências:', error);
