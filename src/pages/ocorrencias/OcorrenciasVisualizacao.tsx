@@ -54,8 +54,8 @@ const OcorrenciasVisualizacao = () => {
         if (data.colaboradores_acidentados && Array.isArray(data.colaboradores_acidentados)) {
           const colaboradoresCompletos = [];
           for (const colaboradorData of data.colaboradores_acidentados) {
-            // Type cast para garantir que temos o formato correto
-            const colaborador = colaboradorData as ColaboradorAcidentado;
+            // Type cast através de unknown para garantir que temos o formato correto
+            const colaborador = colaboradorData as unknown as ColaboradorAcidentado;
             
             if (colaborador.colaborador && !isNaN(Number(colaborador.colaborador))) {
               const { data: funcionario } = await supabase
