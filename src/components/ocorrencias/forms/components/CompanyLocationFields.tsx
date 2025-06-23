@@ -16,15 +16,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-/**
- * Atualizado: O value da empresa agora é SEMPRE o empresa_id.
- *
- * Isso evita problemas de unicidade e compatibilidade com banco.
- * O form armazena empresa como string (empresa_id).
- *
- * O onValueChange e value são ajustados.
- */
-
 interface CompanyLocationFieldsProps {
   ccas: any[];
   empresas: any[];
@@ -44,6 +35,11 @@ const CompanyLocationFields: React.FC<CompanyLocationFieldsProps> = ({
 
   // Empresa obrigatória: destaca caso <string vazia>
   const empresaObrigatoria = !empresaValue && !!ccaValue;
+
+  // Garantir que os arrays existem
+  const safeCcas = ccas || [];
+  const safeEmpresas = empresas || [];
+  const safeDisciplinas = disciplinas || [];
 
   return (
     <div className="space-y-4">
@@ -73,11 +69,17 @@ const CompanyLocationFields: React.FC<CompanyLocationFieldsProps> = ({
                 </SelectTrigger>
               </FormControl>
               <SelectContent>
-                {ccas.map((cca) => (
-                  <SelectItem key={cca.id} value={cca.id.toString()}>
-                    {cca.codigo} - {cca.nome}
+                {safeCcas.length > 0 ? (
+                  safeCcas.map((cca) => (
+                    <SelectItem key={cca.id} value={cca.id.toString()}>
+                      {cca.codigo} - {cca.nome}
+                    </SelectItem>
+                  ))
+                ) : (
+                  <SelectItem value="" disabled>
+                    Nenhum CCA disponível
                   </SelectItem>
-                ))}
+                )}
               </SelectContent>
             </Select>
             <FormMessage />
@@ -103,24 +105,36 @@ const CompanyLocationFields: React.FC<CompanyLocationFieldsProps> = ({
                   console.log("Empresa selecionada (empresa_id):", value);
                 }}
                 value={field.value || ""}
-                disabled={!selectedCcaId}
+                disabled={!selectedCcaId || safeEmpresas.length === 0}
               >
                 <FormControl>
                   <SelectTrigger
                     className={empresaObrigatoria ? "border-destructive ring-destructive" : ""}
                   >
-                    <SelectValue placeholder={!selectedCcaId ? "Selecione um CCA primeiro" : "Selecione a empresa"} />
+                    <SelectValue placeholder={
+                      !selectedCcaId 
+                        ? "Selecione um CCA primeiro" 
+                        : safeEmpresas.length === 0 
+                          ? "Nenhuma empresa disponível" 
+                          : "Selecione a empresa"
+                    } />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {empresas.map((empresa) => (
-                    <SelectItem
-                      key={empresa.empresa_id?.toString()}
-                      value={empresa.empresa_id?.toString()}
-                    >
-                      {empresa.empresas?.nome || empresa.nome}
+                  {safeEmpresas.length > 0 ? (
+                    safeEmpresas.map((empresa) => (
+                      <SelectItem
+                        key={empresa.empresa_id?.toString()}
+                        value={empresa.empresa_id?.toString()}
+                      >
+                        {empresa.empresas?.nome || empresa.nome}
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <SelectItem value="" disabled>
+                      Nenhuma empresa disponível
                     </SelectItem>
-                  ))}
+                  )}
                 </SelectContent>
               </Select>
               <FormMessage />
@@ -141,11 +155,17 @@ const CompanyLocationFields: React.FC<CompanyLocationFieldsProps> = ({
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {disciplinas.map((disciplina) => (
-                    <SelectItem key={disciplina.id} value={disciplina.nome}>
-                      {disciplina.nome}
+                  {safeDisciplinas.length > 0 ? (
+                    safeDisciplinas.map((disciplina) => (
+                      <SelectItem key={disciplina.id} value={disciplina.nome}>
+                        {disciplina.nome}
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <SelectItem value="" disabled>
+                      Nenhuma disciplina disponível
                     </SelectItem>
-                  ))}
+                  )}
                 </SelectContent>
               </Select>
               <FormMessage />

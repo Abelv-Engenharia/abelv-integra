@@ -13,25 +13,41 @@ export const useOcorrenciasFormData = ({ selectedCcaId }: UseOcorrenciasFormData
   const basicData = useOcorrenciasBasicData();
   const personnelData = useOcorrenciasPersonnelData();
   const referenceData = useOcorrenciasReferenceData();
-  const { data: userCCAs = [] } = useUserCCAs();
+  const { data: userCCAs = [], isLoading: ccasLoading } = useUserCCAs();
   
   const filteredData = useFilteredPersonnelData({
     selectedCcaId,
     ...personnelData,
   });
 
+  // Se ainda está carregando os CCAs, retorna dados vazios mas estruturados
+  if (ccasLoading) {
+    return {
+      ccas: [],
+      empresas: [],
+      disciplinas: [],
+      engenheiros: [],
+      supervisores: [],
+      encarregados: [],
+      funcionarios: [],
+      tiposOcorrencia: [],
+      tiposEvento: [],
+      classificacoesOcorrencia: [],
+    };
+  }
+
   return {
     ...basicData,
     ...referenceData,
-    ccas: userCCAs, // Usa apenas os CCAs permitidos ao usuário
-    empresas: filteredData.empresas,
-    engenheiros: filteredData.engenheiros,
-    supervisores: filteredData.supervisores,
-    encarregados: filteredData.encarregados,
-    funcionarios: filteredData.funcionarios,
-    disciplinas: basicData.disciplinas, // Disciplinas não são filtradas por CCA
-    tiposOcorrencia: basicData.tiposOcorrencia,
-    tiposEvento: basicData.tiposEvento,
-    classificacoesOcorrencia: basicData.classificacoesOcorrencia,
+    ccas: userCCAs || [], // Usa apenas os CCAs permitidos ao usuário
+    empresas: filteredData.empresas || [],
+    engenheiros: filteredData.engenheiros || [],
+    supervisores: filteredData.supervisores || [],
+    encarregados: filteredData.encarregados || [],
+    funcionarios: filteredData.funcionarios || [],
+    disciplinas: basicData.disciplinas || [], // Disciplinas não são filtradas por CCA
+    tiposOcorrencia: basicData.tiposOcorrencia || [],
+    tiposEvento: basicData.tiposEvento || [],
+    classificacoesOcorrencia: basicData.classificacoesOcorrencia || [],
   };
 };

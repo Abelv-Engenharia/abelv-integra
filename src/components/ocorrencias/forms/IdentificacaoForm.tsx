@@ -33,6 +33,7 @@ const IdentificacaoForm = () => {
 
   console.log('Current CCA:', watchedCca);
   console.log('Selected CCA ID:', selectedCcaId);
+  console.log('Available ccas:', ccas);
   console.log('Available empresas:', empresas);
   console.log('Available engenheiros:', engenheiros);
   console.log('Available supervisores:', supervisores);
@@ -50,7 +51,7 @@ const IdentificacaoForm = () => {
   // Auto-popular função e matrícula quando colaborador for selecionado
   const watchColaborador = watch("colaboradores_acidentados.0.colaborador");
   React.useEffect(() => {
-    if (watchColaborador) {
+    if (watchColaborador && funcionarios.length > 0) {
       const funcionario = funcionarios.find(f => f.id.toString() === watchColaborador);
       if (funcionario) {
         setValue("colaboradores_acidentados.0.funcao", funcionario.funcao || "");
@@ -58,6 +59,19 @@ const IdentificacaoForm = () => {
       }
     }
   }, [watchColaborador, funcionarios, setValue]);
+
+  // Verificar se há CCAs disponíveis
+  if (!ccas || ccas.length === 0) {
+    return (
+      <div className="space-y-6">
+        <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-md">
+          <p className="text-yellow-800">
+            Nenhum CCA disponível para este usuário. Entre em contato com o administrador do sistema.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
