@@ -250,23 +250,58 @@ export const getOcorrenciaById = async (id: string) => {
 
 export const getAllOcorrencias = async () => {
   try {
-    const { data, error } = await supabase
+    // Buscar todas as ocorrências primeiro
+    const { data: ocorrencias, error: ocorrenciasError } = await supabase
       .from('ocorrencias')
-      .select(`
-        *,
-        empresas:empresa::integer(nome),
-        ccas:cca::integer(nome, codigo)
-      `)
+      .select('*')
       .order('data', { ascending: false });
 
-    if (error) throw error;
+    if (ocorrenciasError) throw ocorrenciasError;
+    
+    if (!ocorrencias || ocorrencias.length === 0) {
+      return [];
+    }
+
+    // Obter IDs únicos de empresas e CCAs
+    const empresaIds = [...new Set(ocorrencias.map(o => o.empresa).filter(id => id && !isNaN(Number(id))))];
+    const ccaIds = [...new Set(ocorrencias.map(o => o.cca).filter(id => id && !isNaN(Number(id))))];
+
+    // Buscar dados das empresas
+    let empresasMap = new Map();
+    if (empresaIds.length > 0) {
+      const { data: empresas } = await supabase
+        .from('empresas')
+        .select('id, nome')
+        .in('id', empresaIds);
+      
+      if (empresas) {
+        empresas.forEach(empresa => {
+          empresasMap.set(empresa.id.toString(), empresa.nome);
+        });
+      }
+    }
+
+    // Buscar dados dos CCAs
+    let ccasMap = new Map();
+    if (ccaIds.length > 0) {
+      const { data: ccas } = await supabase
+        .from('ccas')
+        .select('id, nome, codigo')
+        .in('id', ccaIds);
+      
+      if (ccas) {
+        ccas.forEach(cca => {
+          ccasMap.set(cca.id.toString(), { nome: cca.nome, codigo: cca.codigo });
+        });
+      }
+    }
     
     // Transformar os dados para incluir os nomes das empresas e CCAs
-    const transformedData = (data || []).map(ocorrencia => ({
+    const transformedData = ocorrencias.map(ocorrencia => ({
       ...ocorrencia,
-      empresa: ocorrencia.empresas?.nome || ocorrencia.empresa,
-      cca_nome: ocorrencia.ccas?.nome || ocorrencia.cca,
-      cca_codigo: ocorrencia.ccas?.codigo || ''
+      empresa: empresasMap.get(ocorrencia.empresa) || ocorrencia.empresa,
+      cca_nome: ccasMap.get(ocorrencia.cca)?.nome || ocorrencia.cca,
+      cca_codigo: ccasMap.get(ocorrencia.cca)?.codigo || ''
     }));
     
     return transformedData;
@@ -278,24 +313,59 @@ export const getAllOcorrencias = async () => {
 
 export const getOcorrenciasRecentes = async (limit: number = 10) => {
   try {
-    const { data, error } = await supabase
+    // Buscar ocorrências recentes primeiro
+    const { data: ocorrencias, error: ocorrenciasError } = await supabase
       .from('ocorrencias')
-      .select(`
-        *,
-        empresas:empresa::integer(nome),
-        ccas:cca::integer(nome, codigo)
-      `)
+      .select('*')
       .order('data', { ascending: false })
       .limit(limit);
 
-    if (error) throw error;
+    if (ocorrenciasError) throw ocorrenciasError;
+    
+    if (!ocorrencias || ocorrencias.length === 0) {
+      return [];
+    }
+
+    // Obter IDs únicos de empresas e CCAs
+    const empresaIds = [...new Set(ocorrencias.map(o => o.empresa).filter(id => id && !isNaN(Number(id))))];
+    const ccaIds = [...new Set(ocorrencias.map(o => o.cca).filter(id => id && !isNaN(Number(id))))];
+
+    // Buscar dados das empresas
+    let empresasMap = new Map();
+    if (empresaIds.length > 0) {
+      const { data: empresas } = await supabase
+        .from('empresas')
+        .select('id, nome')
+        .in('id', empresaIds);
+      
+      if (empresas) {
+        empresas.forEach(empresa => {
+          empresasMap.set(empresa.id.toString(), empresa.nome);
+        });
+      }
+    }
+
+    // Buscar dados dos CCAs
+    let ccasMap = new Map();
+    if (ccaIds.length > 0) {
+      const { data: ccas } = await supabase
+        .from('ccas')
+        .select('id, nome, codigo')
+        .in('id', ccaIds);
+      
+      if (ccas) {
+        ccas.forEach(cca => {
+          ccasMap.set(cca.id.toString(), { nome: cca.nome, codigo: cca.codigo });
+        });
+      }
+    }
     
     // Transformar os dados para incluir os nomes das empresas e CCAs
-    const transformedData = (data || []).map(ocorrencia => ({
+    const transformedData = ocorrencias.map(ocorrencia => ({
       ...ocorrencia,
-      empresa: ocorrencia.empresas?.nome || ocorrencia.empresa,
-      cca_nome: ocorrencia.ccas?.nome || ocorrencia.cca,
-      cca_codigo: ocorrencia.ccas?.codigo || ''
+      empresa: empresasMap.get(ocorrencia.empresa) || ocorrencia.empresa,
+      cca_nome: ccasMap.get(ocorrencia.cca)?.nome || ocorrencia.cca,
+      cca_codigo: ccasMap.get(ocorrencia.cca)?.codigo || ''
     }));
     
     return transformedData;
