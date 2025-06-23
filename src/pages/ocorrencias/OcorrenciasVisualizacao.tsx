@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -7,6 +6,12 @@ import { ArrowLeft, Printer, Edit } from "lucide-react";
 import { getOcorrenciaById } from "@/services/ocorrencias/ocorrenciasService";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+
+interface ColaboradorAcidentado {
+  colaborador: string;
+  funcao: string;
+  matricula: string;
+}
 
 const OcorrenciasVisualizacao = () => {
   const { id } = useParams<{ id: string }>();
@@ -48,7 +53,10 @@ const OcorrenciasVisualizacao = () => {
         // Buscar informações dos colaboradores acidentados
         if (data.colaboradores_acidentados && Array.isArray(data.colaboradores_acidentados)) {
           const colaboradoresCompletos = [];
-          for (const colaborador of data.colaboradores_acidentados) {
+          for (const colaboradorData of data.colaboradores_acidentados) {
+            // Type cast para garantir que temos o formato correto
+            const colaborador = colaboradorData as ColaboradorAcidentado;
+            
             if (colaborador.colaborador && !isNaN(Number(colaborador.colaborador))) {
               const { data: funcionario } = await supabase
                 .from('funcionarios')
