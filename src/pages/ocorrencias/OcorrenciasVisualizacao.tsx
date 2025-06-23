@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -66,9 +67,10 @@ const OcorrenciasVisualizacao = () => {
               
               colaboradoresCompletos.push({
                 ...colaborador,
-                nome: funcionario?.nome || colaborador.colaborador
+                nome: funcionario?.nome || `Funcionário ID: ${colaborador.colaborador}`
               });
             } else {
+              // Se colaborador não é um ID válido, trata como nome direto
               colaboradoresCompletos.push({
                 ...colaborador,
                 nome: colaborador.colaborador || '-'
@@ -388,6 +390,14 @@ const OcorrenciasVisualizacao = () => {
       </Card>
     </div>
   );
+
+  const handlePrint = () => {
+    window.print();
+  };
+
+  const handleEdit = () => {
+    navigate(`/ocorrencias/editar/${id}`);
+  };
 };
 
 export default OcorrenciasVisualizacao;
