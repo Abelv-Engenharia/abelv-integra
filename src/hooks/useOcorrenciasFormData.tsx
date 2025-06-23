@@ -33,6 +33,11 @@ export const useOcorrenciasFormData = ({ selectedCcaId }: UseOcorrenciasFormData
       tiposOcorrencia: [],
       tiposEvento: [],
       classificacoesOcorrencia: [],
+      partesCorpo: [],
+      lateralidades: [],
+      agentesCausadores: [],
+      situacoesGeradoras: [],
+      naturezasLesao: [],
     };
   }
 
@@ -49,5 +54,11 @@ export const useOcorrenciasFormData = ({ selectedCcaId }: UseOcorrenciasFormData
     tiposOcorrencia: basicData.tiposOcorrencia || [],
     tiposEvento: basicData.tiposEvento || [],
     classificacoesOcorrencia: basicData.classificacoesOcorrencia || [],
+    // Adicionar os dados de referência que estavam faltando
+    partesCorpo: referenceData.partesCorpo || [],
+    lateralidades: referenceData.lateralidades || [],
+    agentesCausadores: referenceData.agentesCausadores || [],
+    situacoesGeradoras: referenceData.situacoesGeradoras || [],
+    naturezasLesao: referenceData.naturezasLesao || [],
   };
 };
