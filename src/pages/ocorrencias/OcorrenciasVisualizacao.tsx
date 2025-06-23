@@ -6,12 +6,16 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, Printer, Edit } from "lucide-react";
 import { getOcorrenciaById } from "@/services/ocorrencias/ocorrenciasService";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 const OcorrenciasVisualizacao = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [ocorrencia, setOcorrencia] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [ccaInfo, setCcaInfo] = useState<any>(null);
+  const [empresaInfo, setEmpresaInfo] = useState<any>(null);
+  const [colaboradoresInfo, setColaboradoresInfo] = useState<any[]>([]);
 
   useEffect(() => {
     const loadOcorrencia = async () => {
@@ -20,6 +24,52 @@ const OcorrenciasVisualizacao = () => {
       try {
         const data = await getOcorrenciaById(id);
         setOcorrencia(data);
+        
+        // Buscar informações do CCA
+        if (data.cca && !isNaN(Number(data.cca))) {
+          const { data: cca } = await supabase
+            .from('ccas')
+            .select('codigo, nome')
+            .eq('id', Number(data.cca))
+            .single();
+          if (cca) setCcaInfo(cca);
+        }
+        
+        // Buscar informações da empresa
+        if (data.empresa && !isNaN(Number(data.empresa))) {
+          const { data: empresa } = await supabase
+            .from('empresas')
+            .select('nome')
+            .eq('id', Number(data.empresa))
+            .single();
+          if (empresa) setEmpresaInfo(empresa);
+        }
+        
+        // Buscar informações dos colaboradores acidentados
+        if (data.colaboradores_acidentados && Array.isArray(data.colaboradores_acidentados)) {
+          const colaboradoresCompletos = [];
+          for (const colaborador of data.colaboradores_acidentados) {
+            if (colaborador.colaborador && !isNaN(Number(colaborador.colaborador))) {
+              const { data: funcionario } = await supabase
+                .from('funcionarios')
+                .select('nome')
+                .eq('id', colaborador.colaborador)
+                .single();
+              
+              colaboradoresCompletos.push({
+                ...colaborador,
+                nome: funcionario?.nome || colaborador.colaborador
+              });
+            } else {
+              colaboradoresCompletos.push({
+                ...colaborador,
+                nome: colaborador.colaborador || '-'
+              });
+            }
+          }
+          setColaboradoresInfo(colaboradoresCompletos);
+        }
+        
       } catch (error) {
         console.error('Erro ao carregar ocorrência:', error);
         toast.error("Erro ao carregar dados da ocorrência");
@@ -112,11 +162,15 @@ const OcorrenciasVisualizacao = () => {
           </div>
           <div>
             <label className="text-sm font-semibold text-gray-700 block mb-1">CCA</label>
-            <p className="text-base font-medium border-b border-gray-200 pb-1">{ocorrencia.cca || '-'}</p>
+            <p className="text-base font-medium border-b border-gray-200 pb-1">
+              {ccaInfo ? `${ccaInfo.codigo} - ${ccaInfo.nome}` : (ocorrencia.cca || '-')}
+            </p>
           </div>
           <div>
             <label className="text-sm font-semibold text-gray-700 block mb-1">Empresa</label>
-            <p className="text-base font-medium border-b border-gray-200 pb-1">{ocorrencia.empresa || '-'}</p>
+            <p className="text-base font-medium border-b border-gray-200 pb-1">
+              {empresaInfo ? empresaInfo.nome : (ocorrencia.empresa || '-')}
+            </p>
           </div>
           <div>
             <label className="text-sm font-semibold text-gray-700 block mb-1">Disciplina</label>
@@ -137,10 +191,10 @@ const OcorrenciasVisualizacao = () => {
         </CardContent>
       </Card>
 
-      {/* 2. RESPONSÁVEIS */}
+      {/* 2. LIDERANÇA DA OBRA E DISCIPLINA */}
       <Card className="print:shadow-none print:border-2">
         <CardHeader className="bg-green-50 print:bg-gray-100">
-          <CardTitle className="text-xl">2. RESPONSÁVEIS PELO REGISTRO</CardTitle>
+          <CardTitle className="text-xl">2. LIDERANÇA DA OBRA E DISCIPLINA</CardTitle>
         </CardHeader>
         <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-6 p-6">
           <div>
@@ -159,18 +213,18 @@ const OcorrenciasVisualizacao = () => {
       </Card>
 
       {/* 3. COLABORADORES ACIDENTADOS */}
-      {ocorrencia.colaboradores_acidentados && Array.isArray(ocorrencia.colaboradores_acidentados) && ocorrencia.colaboradores_acidentados.length > 0 && (
+      {colaboradoresInfo.length > 0 && (
         <Card className="print:shadow-none print:border-2">
           <CardHeader className="bg-red-50 print:bg-gray-100">
             <CardTitle className="text-xl">3. COLABORADORES ACIDENTADOS</CardTitle>
           </CardHeader>
           <CardContent className="p-6">
             <div className="space-y-4">
-              {ocorrencia.colaboradores_acidentados.map((colaborador: any, index: number) => (
+              {colaboradoresInfo.map((colaborador: any, index: number) => (
                 <div key={index} className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 border-2 border-gray-200 rounded-lg">
                   <div>
                     <label className="text-sm font-semibold text-gray-700 block mb-1">Nome do Colaborador</label>
-                    <p className="text-base font-medium border-b border-gray-200 pb-1">{colaborador.colaborador || '-'}</p>
+                    <p className="text-base font-medium border-b border-gray-200 pb-1">{colaborador.nome || '-'}</p>
                   </div>
                   <div>
                     <label className="text-sm font-semibold text-gray-700 block mb-1">Função</label>
@@ -193,6 +247,16 @@ const OcorrenciasVisualizacao = () => {
           <CardTitle className="text-xl">4. INFORMAÇÕES DA OCORRÊNCIA</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6 p-6">
+          {/* Descrição da ocorrência - primeira linha */}
+          {ocorrencia.descricao_ocorrencia && (
+            <div className="mb-6">
+              <label className="text-sm font-semibold text-gray-700 block mb-2">Descrição da Ocorrência</label>
+              <div className="p-4 bg-gray-50 rounded border-2 border-gray-200 min-h-[100px]">
+                <p className="text-base whitespace-pre-wrap">{ocorrencia.descricao_ocorrencia}</p>
+              </div>
+            </div>
+          )}
+          
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
               <label className="text-sm font-semibold text-gray-700 block mb-1">Houve Afastamento</label>
@@ -235,15 +299,6 @@ const OcorrenciasVisualizacao = () => {
               <p className="text-base font-medium border-b border-gray-200 pb-1">{ocorrencia.cid || '-'}</p>
             </div>
           </div>
-          
-          {ocorrencia.descricao_ocorrencia && (
-            <div className="mt-6">
-              <label className="text-sm font-semibold text-gray-700 block mb-2">Descrição da Ocorrência</label>
-              <div className="p-4 bg-gray-50 rounded border-2 border-gray-200 min-h-[100px]">
-                <p className="text-base whitespace-pre-wrap">{ocorrencia.descricao_ocorrencia}</p>
-              </div>
-            </div>
-          )}
         </CardContent>
       </Card>
 
@@ -274,9 +329,6 @@ const OcorrenciasVisualizacao = () => {
               <label className="text-sm font-semibold text-gray-700 block mb-1">Impacto</label>
               <p className="text-base font-medium border-b border-gray-200 pb-1">{ocorrencia.impacto || '-'}</p>
             </div>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
             <div>
               <label className="text-sm font-semibold text-gray-700 block mb-1">Probabilidade</label>
               <p className="text-base font-medium border-b border-gray-200 pb-1">{ocorrencia.probabilidade || '-'}</p>
@@ -289,13 +341,13 @@ const OcorrenciasVisualizacao = () => {
               <label className="text-sm font-semibold text-gray-700 block mb-1">Classificação de Risco</label>
               <p className="text-base font-medium">
                 {ocorrencia.classificacao_risco && (
-                  <span className={`px-3 py-1 rounded-full text-sm font-bold print:border-2 ${
-                    ocorrencia.classificacao_risco === 'TRIVIAL' ? 'bg-blue-100 text-blue-800 print:border-blue-800' :
-                    ocorrencia.classificacao_risco === 'TOLERÁVEL' ? 'bg-green-100 text-green-800 print:border-green-800' :
-                    ocorrencia.classificacao_risco === 'MODERADO' ? 'bg-yellow-100 text-yellow-800 print:border-yellow-800' :
-                    ocorrencia.classificacao_risco === 'SUBSTANCIAL' ? 'bg-orange-100 text-orange-800 print:border-orange-800' :
-                    ocorrencia.classificacao_risco === 'INTOLERÁVEL' ? 'bg-red-100 text-red-800 print:border-red-800' :
-                    'bg-gray-100 text-gray-800 print:border-gray-800'
+                  <span className={`px-2 py-1 rounded-full text-xs ${
+                    ocorrencia.classificacao_risco === 'TRIVIAL' ? 'bg-blue-100 text-blue-800' :
+                    ocorrencia.classificacao_risco === 'TOLERÁVEL' ? 'bg-green-100 text-green-800' :
+                    ocorrencia.classificacao_risco === 'MODERADO' ? 'bg-yellow-100 text-yellow-800' :
+                    ocorrencia.classificacao_risco === 'SUBSTANCIAL' ? 'bg-orange-100 text-orange-800' :
+                    ocorrencia.classificacao_risco === 'INTOLERÁVEL' ? 'bg-red-100 text-red-800' :
+                    'bg-gray-100 text-gray-800'
                   }`}>
                     {ocorrencia.classificacao_risco}
                   </span>
@@ -306,124 +358,26 @@ const OcorrenciasVisualizacao = () => {
         </CardContent>
       </Card>
 
-      {/* 6. PLANO DE AÇÃO */}
-      {ocorrencia.acoes && Array.isArray(ocorrencia.acoes) && ocorrencia.acoes.length > 0 && (
-        <Card className="print:shadow-none print:border-2">
-          <CardHeader className="bg-indigo-50 print:bg-gray-100">
-            <CardTitle className="text-xl">6. PLANO DE AÇÃO</CardTitle>
-          </CardHeader>
-          <CardContent className="p-6">
-            <div className="space-y-6">
-              {ocorrencia.acoes.map((acao: any, index: number) => (
-                <div key={index} className="border-2 border-gray-200 rounded-lg p-4">
-                  <h4 className="font-bold text-lg mb-4 text-gray-800">Ação {index + 1}</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="md:col-span-2">
-                      <label className="text-sm font-semibold text-gray-700 block mb-1">Tratativa Aplicada</label>
-                      <div className="p-3 bg-gray-50 rounded border min-h-[60px]">
-                        <p className="text-base">{acao.tratativa_aplicada || '-'}</p>
-                      </div>
-                    </div>
-                    <div>
-                      <label className="text-sm font-semibold text-gray-700 block mb-1">Responsável pela Ação</label>
-                      <p className="text-base font-medium border-b border-gray-200 pb-1">{acao.responsavel_acao || '-'}</p>
-                    </div>
-                    <div>
-                      <label className="text-sm font-semibold text-gray-700 block mb-1">Função do Responsável</label>
-                      <p className="text-base font-medium border-b border-gray-200 pb-1">{acao.funcao_responsavel || '-'}</p>
-                    </div>
-                    <div>
-                      <label className="text-sm font-semibold text-gray-700 block mb-1">Data de Adequação</label>
-                      <p className="text-base font-medium border-b border-gray-200 pb-1">
-                        {acao.data_adequacao ? new Date(acao.data_adequacao).toLocaleDateString('pt-BR') : '-'}
-                      </p>
-                    </div>
-                    <div>
-                      <label className="text-sm font-semibold text-gray-700 block mb-1">Situação</label>
-                      <p className="text-base font-medium">
-                        <span className={`px-2 py-1 rounded text-sm font-medium print:border ${
-                          acao.situacao === 'Concluída' ? 'bg-green-100 text-green-800 print:border-green-800' :
-                          acao.situacao === 'Em andamento' ? 'bg-blue-100 text-blue-800 print:border-blue-800' :
-                          acao.situacao === 'Pendente' ? 'bg-yellow-100 text-yellow-800 print:border-yellow-800' :
-                          acao.situacao === 'Cancelada' ? 'bg-red-100 text-red-800 print:border-red-800' :
-                          'bg-gray-100 text-gray-800 print:border-gray-800'
-                        }`}>
-                          {acao.situacao || '-'}
-                        </span>
-                      </p>
-                    </div>
-                    <div>
-                      <label className="text-sm font-semibold text-gray-700 block mb-1">Status</label>
-                      <p className="text-base font-medium">
-                        <span className={`px-2 py-1 rounded text-sm font-medium print:border ${
-                          acao.status === 'Concluído' ? 'bg-green-100 text-green-800 print:border-green-800' :
-                          acao.status === 'Em execução' ? 'bg-blue-100 text-blue-800 print:border-blue-800' :
-                          acao.status === 'Aberto' ? 'bg-yellow-100 text-yellow-800 print:border-yellow-800' :
-                          acao.status === 'Atrasado' ? 'bg-red-100 text-red-800 print:border-red-800' :
-                          acao.status === 'Cancelado' ? 'bg-gray-100 text-gray-800 print:border-gray-800' :
-                          'bg-gray-100 text-gray-800 print:border-gray-800'
-                        }`}>
-                          {acao.status || '-'}
-                        </span>
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* 7. FECHAMENTO */}
+      {/* 6. STATUS */}
       <Card className="print:shadow-none print:border-2">
-        <CardHeader className="bg-teal-50 print:bg-gray-100">
-          <CardTitle className="text-xl">7. FECHAMENTO E INVESTIGAÇÃO</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6 p-6">
-          <div>
-            <label className="text-sm font-semibold text-gray-700 block mb-1">Investigação Realizada</label>
-            <p className="text-base font-medium border-b border-gray-200 pb-1">{ocorrencia.investigacao_realizada || '-'}</p>
-          </div>
-          <div>
-            <label className="text-sm font-semibold text-gray-700 block mb-1">Lições Aprendidas Enviadas</label>
-            <p className="text-base font-medium border-b border-gray-200 pb-1">{ocorrencia.licoes_aprendidas_enviada || '-'}</p>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* 8. STATUS ATUAL */}
-      <Card className="print:shadow-none print:border-2">
-        <CardHeader className="bg-gray-50">
-          <CardTitle className="text-xl">8. STATUS ATUAL</CardTitle>
+        <CardHeader className="bg-gray-50 print:bg-gray-100">
+          <CardTitle className="text-xl">6. STATUS</CardTitle>
         </CardHeader>
         <CardContent className="p-6">
-          <div className="flex justify-between items-center">
-            <div>
-              <label className="text-sm font-semibold text-gray-700 block mb-1">Status da Ocorrência</label>
-              <span className={`px-4 py-2 rounded-full text-lg font-bold print:border-2 ${
-                ocorrencia.status === 'Fechado' 
-                  ? 'bg-green-100 text-green-800 print:border-green-800' 
-                  : 'bg-orange-100 text-orange-800 print:border-orange-800'
+          <div>
+            <label className="text-sm font-semibold text-gray-700 block mb-1">Status Atual</label>
+            <p className="text-base font-medium">
+              <span className={`px-2 py-1 rounded-full text-xs ${
+                ocorrencia.status === 'Em tratativa' 
+                  ? 'bg-orange-100 text-orange-800' 
+                  : 'bg-green-100 text-green-800'
               }`}>
                 {ocorrencia.status || 'Em tratativa'}
               </span>
-            </div>
-            <div className="text-right">
-              <label className="text-sm font-semibold text-gray-700 block mb-1">Data de Registro</label>
-              <p className="text-base font-medium">
-                {ocorrencia.created_at ? new Date(ocorrencia.created_at).toLocaleDateString('pt-BR') : '-'}
-              </p>
-            </div>
+            </p>
           </div>
         </CardContent>
       </Card>
-
-      {/* Footer para impressão */}
-      <div className="hidden print:block mt-8 pt-4 border-t-2 border-gray-300 text-center text-sm text-gray-600">
-        <p>Este documento foi gerado automaticamente pelo Sistema de Gestão de SMS</p>
-        <p>Data: {new Date().toLocaleDateString('pt-BR')} | Hora: {new Date().toLocaleTimeString('pt-BR')}</p>
-      </div>
     </div>
   );
 };
