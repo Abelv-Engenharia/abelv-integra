@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -390,14 +391,7 @@ const OcorrenciasVisualizacao = () => {
       </Card>
     </div>
   );
-
-  const handlePrint = () => {
-    window.print();
-  };
-
-  const handleEdit = () => {
-    navigate(`/ocorrencias/editar/${id}`);
-  };
 };
 
 export default OcorrenciasVisualizacao;
+
