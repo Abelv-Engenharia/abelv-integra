@@ -5,11 +5,18 @@ import { InspecoesByStatus } from './types';
 /**
  * Fetch inspeções by status directly from execucao_hsa
  */
-export async function fetchInspecoesByStatus(): Promise<InspecoesByStatus[]> {
+export async function fetchInspecoesByStatus(ccaIds?: number[]): Promise<InspecoesByStatus[]> {
   try {
-    const { data, error } = await supabase
+    let query = supabase
       .from('execucao_hsa')
       .select('status');
+
+    // Aplicar filtro de CCAs se fornecido
+    if (ccaIds && ccaIds.length > 0) {
+      query = query.in('cca_id', ccaIds);
+    }
+
+    const { data, error } = await query;
 
     if (error) throw error;
 

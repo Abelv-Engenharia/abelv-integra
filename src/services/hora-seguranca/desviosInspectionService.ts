@@ -9,11 +9,18 @@ export interface DesviosByInspectionType {
 /**
  * Fetch desvios by inspection type from execucao_hsa table
  */
-export async function fetchDesviosByInspectionType(): Promise<DesviosByInspectionType[]> {
+export async function fetchDesviosByInspectionType(ccaIds?: number[]): Promise<DesviosByInspectionType[]> {
   try {
-    const { data, error } = await supabase
+    let query = supabase
       .from('execucao_hsa')
       .select('inspecao_programada, desvios_identificados');
+
+    // Aplicar filtro de CCAs se fornecido
+    if (ccaIds && ccaIds.length > 0) {
+      query = query.in('cca_id', ccaIds);
+    }
+
+    const { data, error } = await query;
 
     if (error) throw error;
 

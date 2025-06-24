@@ -5,11 +5,18 @@ import { InspecoesByResponsavel } from './types';
 /**
  * Fetch inspeções by responsável direto do execucao_hsa
  */
-export async function fetchInspecoesByResponsavel(): Promise<InspecoesByResponsavel[]> {
+export async function fetchInspecoesByResponsavel(ccaIds?: number[]): Promise<InspecoesByResponsavel[]> {
   try {
-    const { data, error } = await supabase
+    let query = supabase
       .from('execucao_hsa')
       .select('responsavel_inspecao, status');
+
+    // Aplicar filtro de CCAs se fornecido
+    if (ccaIds && ccaIds.length > 0) {
+      query = query.in('cca_id', ccaIds);
+    }
+
+    const { data, error } = await query;
 
     if (error) throw error;
 

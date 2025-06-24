@@ -5,12 +5,18 @@ import { InspecoesSummary } from './types';
 /**
  * Fetch inspeções summary data from execucao_hsa
  */
-export async function fetchInspecoesSummary(): Promise<InspecoesSummary> {
+export async function fetchInspecoesSummary(ccaIds?: number[]): Promise<InspecoesSummary> {
   try {
-    // Corrige o select removendo sintaxe inválida
-    const { data: rows, error } = await supabase
+    let query = supabase
       .from('execucao_hsa')
       .select('id, inspecao_programada, desvios_identificados, status');
+
+    // Aplicar filtro de CCAs se fornecido
+    if (ccaIds && ccaIds.length > 0) {
+      query = query.in('cca_id', ccaIds);
+    }
+
+    const { data: rows, error } = await query;
 
     if (error || !rows) throw error;
 

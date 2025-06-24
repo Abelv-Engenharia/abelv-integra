@@ -1,6 +1,8 @@
+
 import { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { fetchInspecoesByMonth } from '@/services/hora-seguranca';
+import { fetchInspecoesByResponsavel } from '@/services/hora-seguranca';
+import { useUserCCAs } from '@/hooks/useUserCCAs';
 
 interface InspecoesBarChartProps {
   dataType: 'cca' | 'responsible';
@@ -10,26 +12,47 @@ export function InspecoesBarChart({ dataType }: InspecoesBarChartProps) {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const { data: userCCAs = [] } = useUserCCAs();
 
   useEffect(() => {
     const loadData = async () => {
       try {
         setLoading(true);
-        const chartData = await fetchInspecoesByMonth();
         
-        // This is a placeholder as we're using the same data source for both types
-        // In a real implementation, we'd have different queries for CCA vs responsible
-        setData(chartData);
+        if (userCCAs.length === 0) {
+          setData([]);
+          setLoading(false);
+          return;
+        }
+        
+        // Aplicar filtro por CCAs permitidos
+        const ccaIds = userCCAs.map(cca => cca.id);
+        
+        if (dataType === 'responsible') {
+          const chartData = await fetchInspecoesByResponsavel(ccaIds);
+          setData(chartData);
+        } else if (dataType === 'cca') {
+          // Para dados por CCA, vamos mostrar apenas os CCAs permitidos
+          const ccaData = userCCAs.map(cca => ({
+            name: `${cca.codigo} - ${cca.nome}`,
+            "A Realizar": 0,
+            "Realizada": 0,
+            "Não Realizada": 0,
+            "Realizada (Não Programada)": 0,
+            "Cancelada": 0,
+          }));
+          setData(ccaData);
+        }
       } catch (err) {
-        console.error(`Error loading inspection data for ${dataType}:`, err);
-        setError(`Não foi possível carregar os dados de inspeções por ${dataType === 'cca' ? 'CCA' : 'responsável'}`);
+        console.error("Error loading inspection data:", err);
+        setError("Não foi possível carregar os dados de inspeções");
       } finally {
         setLoading(false);
       }
     };
 
     loadData();
-  }, [dataType]);
+  }, [dataType, userCCAs]);
 
   if (loading) {
     return (
@@ -47,14 +70,21 @@ export function InspecoesBarChart({ dataType }: InspecoesBarChartProps) {
     );
   }
 
-  // If we have no data, show a message
   if (data.length === 0) {
     return (
       <div className="h-[400px] w-full flex items-center justify-center">
-        <p className="text-muted-foreground">Nenhum dado disponível</p>
+        <p className="text-muted-foreground">Nenhum dado de inspeção disponível</p>
       </div>
     );
   }
+
+  const getChartTitle = () => {
+    return dataType === 'cca' ? 'Inspeções por CCA' : 'Inspeções por Responsável';
+  };
+
+  const getDataKey = () => {
+    return dataType === 'cca' ? 'nome' : 'responsavel';
+  };
 
   return (
     <div className="h-[400px] w-full">
@@ -70,7 +100,7 @@ export function InspecoesBarChart({ dataType }: InspecoesBarChartProps) {
         >
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis 
-            dataKey="name" 
+            dataKey={getDataKey()} 
             angle={-45} 
             textAnchor="end" 
             height={80}
@@ -78,9 +108,11 @@ export function InspecoesBarChart({ dataType }: InspecoesBarChartProps) {
           <YAxis />
           <Tooltip />
           <Legend />
-          <Bar dataKey="Concluída" name="Realizadas" fill="#22c55e" />
-          <Bar dataKey="Pendente" name="Pendentes" fill="#facc15" />
-          <Bar dataKey="Cancelada" name="Canceladas" fill="#94a3b8" />
+          <Bar dataKey="A Realizar" name="A Realizar" fill="#4285F4" />
+          <Bar dataKey="Realizada" name="Realizada" fill="#43A047" />
+          <Bar dataKey="Não Realizada" name="Não Realizada" fill="#E53935" />
+          <Bar dataKey="Realizada (Não Programada)" name="Realizada (Não Programada)" fill="#FFA000" />
+          <Bar dataKey="Cancelada" name="Cancelada" fill="#757575" />
         </BarChart>
       </ResponsiveContainer>
     </div>

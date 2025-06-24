@@ -2,17 +2,28 @@
 import { useState, useEffect } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 import { fetchInspecoesByStatus } from '@/services/hora-seguranca';
+import { useUserCCAs } from '@/hooks/useUserCCAs';
 
 export function InspecaoStatusDonutChart() {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const { data: userCCAs = [] } = useUserCCAs();
 
   useEffect(() => {
     const loadData = async () => {
       try {
         setLoading(true);
-        const statusData = await fetchInspecoesByStatus();
+        
+        if (userCCAs.length === 0) {
+          setData([]);
+          setLoading(false);
+          return;
+        }
+        
+        // Aplicar filtro por CCAs permitidos
+        const ccaIds = userCCAs.map(cca => cca.id);
+        const statusData = await fetchInspecoesByStatus(ccaIds);
         setData(statusData);
       } catch (err) {
         console.error("Error loading inspection status data:", err);
@@ -23,7 +34,7 @@ export function InspecaoStatusDonutChart() {
     };
 
     loadData();
-  }, []);
+  }, [userCCAs]);
 
   if (loading) {
     return (

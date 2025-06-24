@@ -2,18 +2,36 @@
 import { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { fetchDesviosByInspectionType } from '@/services/hora-seguranca';
+import { useUserCCAs } from '@/hooks/useUserCCAs';
 
 export function DesviosTipoInspecaoChart() {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const { data: userCCAs = [] } = useUserCCAs();
 
   useEffect(() => {
     const loadData = async () => {
       try {
         setLoading(true);
-        const chartData = await fetchDesviosByInspectionType();
-        setData(chartData);
+        
+        if (userCCAs.length === 0) {
+          setData([]);
+          setLoading(false);
+          return;
+        }
+        
+        // Aplicar filtro por CCAs permitidos
+        const ccaIds = userCCAs.map(cca => cca.id);
+        const chartData = await fetchDesviosByInspectionType(ccaIds);
+        
+        // Formatar dados para o gráfico
+        const formattedData = chartData.map(item => ({
+          name: item.tipo,
+          desvios: item.quantidade
+        }));
+        
+        setData(formattedData);
       } catch (err) {
         console.error("Error loading desvios by inspection type:", err);
         setError("Não foi possível carregar os dados de desvios por tipo de inspeção");
@@ -23,7 +41,7 @@ export function DesviosTipoInspecaoChart() {
     };
 
     loadData();
-  }, []);
+  }, [userCCAs]);
 
   if (loading) {
     return (
@@ -50,16 +68,11 @@ export function DesviosTipoInspecaoChart() {
     );
   }
 
-  const formattedData = data.map(item => ({
-    name: item.name,
-    desvios: item.value
-  }));
-
   return (
     <div className="h-[400px] w-full">
       <ResponsiveContainer width="100%" height="100%">
         <BarChart
-          data={formattedData}
+          data={data}
           margin={{
             top: 20,
             right: 30,

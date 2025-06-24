@@ -52,9 +52,9 @@ const InspecoesSummaryCards = () => {
           return;
         }
         
-        // TODO: Implementar filtro por CCAs permitidos no serviço
-        // Por enquanto, buscar todos os dados
-        const summary = await fetchInspecoesSummary();
+        // Aplicar filtro por CCAs permitidos
+        const ccaIds = userCCAs.map(cca => cca.id);
+        const summary = await fetchInspecoesSummary(ccaIds);
         setData(summary);
       } catch (error) {
         console.error("Error loading inspeções summary:", error);

@@ -9,11 +9,18 @@ export interface DesviosByResponsavel {
 /**
  * Fetch desvios by responsável from execucao_hsa table
  */
-export async function fetchDesviosByResponsavel(): Promise<DesviosByResponsavel[]> {
+export async function fetchDesviosByResponsavel(ccaIds?: number[]): Promise<DesviosByResponsavel[]> {
   try {
-    const { data, error } = await supabase
+    let query = supabase
       .from('execucao_hsa')
       .select('responsavel_inspecao, desvios_identificados');
+
+    // Aplicar filtro de CCAs se fornecido
+    if (ccaIds && ccaIds.length > 0) {
+      query = query.in('cca_id', ccaIds);
+    }
+
+    const { data, error } = await query;
 
     if (error) throw error;
 
