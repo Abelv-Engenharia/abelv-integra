@@ -2,11 +2,13 @@
 import { useState, useEffect } from "react";
 import { ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from "recharts";
 import { fetchTaxaGravidadePorMes, fetchMetaIndicador } from "@/services/ocorrencias/ocorrenciasStatsService";
+import { useUserCCAs } from "@/hooks/useUserCCAs";
 
 const TaxaGravidadeChart = () => {
   const [data, setData] = useState<any[]>([]);
   const [meta, setMeta] = useState<number>(0);
   const [loading, setLoading] = useState(true);
+  const { data: userCCAs = [] } = useUserCCAs();
 
   useEffect(() => {
     const loadData = async () => {
@@ -16,12 +18,15 @@ const TaxaGravidadeChart = () => {
         
         console.log('Carregando dados de gravidade para o ano:', anoAtual);
         
+        // Aplicar filtro por CCAs do usuário
+        const ccaIds = userCCAs.length > 0 ? userCCAs.map(cca => cca.id) : undefined;
+        
         const [dadosMensais, metaAnual] = await Promise.all([
-          fetchTaxaGravidadePorMes(anoAtual),
+          fetchTaxaGravidadePorMes(anoAtual, ccaIds),
           fetchMetaIndicador(anoAtual, 'meta_taxa_gravidade')
         ]);
 
-        console.log('Dados mensais de gravidade carregados:', dadosMensais);
+        console.log('Dados mensais de gravidade carregados (filtrado):', dadosMensais);
         console.log('Meta de gravidade carregada:', metaAnual);
 
         // Filtrar apenas meses com dados válidos ou que já passaram
@@ -39,8 +44,11 @@ const TaxaGravidadeChart = () => {
       }
     };
 
-    loadData();
-  }, []);
+    // Só carrega se já temos dados dos CCAs ou se não há CCAs (para mostrar vazio)
+    if (userCCAs.length > 0 || userCCAs.length === 0) {
+      loadData();
+    }
+  }, [userCCAs]);
 
   if (loading) {
     return (

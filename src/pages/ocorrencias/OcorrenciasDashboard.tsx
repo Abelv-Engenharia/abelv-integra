@@ -26,7 +26,9 @@ const OcorrenciasDashboard = () => {
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <h2 className="text-3xl font-bold tracking-tight">Dashboard de Ocorrências</h2>
-        <OcorrenciasFiltros onFilter={() => setFiltroAtivo(true)} />
+        {userCCAs.length > 0 && (
+          <OcorrenciasFiltros onFilter={() => setFiltroAtivo(true)} />
+        )}
       </div>
       
       {filtroAtivo && (
@@ -39,7 +41,7 @@ const OcorrenciasDashboard = () => {
 
       {userCCAs.length === 0 ? (
         <div className="text-center py-8">
-          <p className="text-muted-foreground">Você não possui acesso a nenhum CCA.</p>
+          <p className="text-yellow-600">Você não possui acesso a nenhum CCA.</p>
         </div>
       ) : (
         <>

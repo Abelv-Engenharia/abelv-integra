@@ -2,11 +2,13 @@
 import { useState, useEffect } from "react";
 import { Line, LineChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { supabase } from '@/integrations/supabase/client';
+import { useUserCCAs } from "@/hooks/useUserCCAs";
 
 const OcorrenciasTimelineChart = () => {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const { data: userCCAs = [] } = useUserCCAs();
 
   useEffect(() => {
     const loadData = async () => {
@@ -14,14 +16,31 @@ const OcorrenciasTimelineChart = () => {
         setLoading(true);
         console.log('Carregando dados de timeline...');
         
-        const { data: ocorrencias, error } = await supabase
+        let query = supabase
           .from('ocorrencias')
           .select('data, mes, ano')
           .order('data', { ascending: true });
 
+        // Aplicar filtro por CCAs do usuário
+        if (userCCAs.length > 0) {
+          // Como a tabela ocorrencias tem o campo 'cca' como texto, 
+          // precisamos buscar os códigos dos CCAs permitidos
+          const { data: ccasData } = await supabase
+            .from('ccas')
+            .select('codigo')
+            .in('id', userCCAs.map(cca => cca.id));
+          
+          if (ccasData && ccasData.length > 0) {
+            const ccaCodigos = ccasData.map(cca => cca.codigo);
+            query = query.in('cca', ccaCodigos);
+          }
+        }
+
+        const { data: ocorrencias, error } = await query;
+
         if (error) throw error;
 
-        console.log('Dados de timeline:', ocorrencias);
+        console.log('Dados de timeline (filtrado):', ocorrencias);
 
         const monthlyCount = (ocorrencias || []).reduce((acc: Record<string, number>, curr) => {
           if (curr.mes && curr.ano) {
@@ -38,7 +57,7 @@ const OcorrenciasTimelineChart = () => {
             ocorrencias: count
           }));
 
-        console.log('Dados do gráfico de timeline:', timelineData);
+        console.log('Dados do gráfico de timeline (filtrado):', timelineData);
         setData(timelineData);
       } catch (err) {
         console.error("Error loading timeline data:", err);
@@ -48,8 +67,11 @@ const OcorrenciasTimelineChart = () => {
       }
     };
 
-    loadData();
-  }, []);
+    // Só carrega se já temos dados dos CCAs ou se não há CCAs (para mostrar vazio)
+    if (userCCAs.length > 0 || userCCAs.length === 0) {
+      loadData();
+    }
+  }, [userCCAs]);
 
   if (loading) {
     return (

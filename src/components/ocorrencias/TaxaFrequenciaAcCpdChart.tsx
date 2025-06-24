@@ -2,11 +2,13 @@
 import { useState, useEffect } from "react";
 import { ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from "recharts";
 import { fetchTaxaFrequenciaAcCpdPorMes, fetchMetaIndicador } from "@/services/ocorrencias/ocorrenciasStatsService";
+import { useUserCCAs } from "@/hooks/useUserCCAs";
 
 const TaxaFrequenciaAcCpdChart = () => {
   const [data, setData] = useState<any[]>([]);
   const [meta, setMeta] = useState<number>(0);
   const [loading, setLoading] = useState(true);
+  const { data: userCCAs = [] } = useUserCCAs();
 
   useEffect(() => {
     const loadData = async () => {
@@ -16,12 +18,15 @@ const TaxaFrequenciaAcCpdChart = () => {
         
         console.log('Carregando dados AC CPD para o ano:', anoAtual);
         
+        // Aplicar filtro por CCAs do usuário
+        const ccaIds = userCCAs.length > 0 ? userCCAs.map(cca => cca.id) : undefined;
+        
         const [dadosMensais, metaAnual] = await Promise.all([
-          fetchTaxaFrequenciaAcCpdPorMes(anoAtual),
+          fetchTaxaFrequenciaAcCpdPorMes(anoAtual, ccaIds),
           fetchMetaIndicador(anoAtual, 'meta_taxa_frequencia_ac_cpd')
         ]);
 
-        console.log('Dados mensais AC CPD carregados:', dadosMensais);
+        console.log('Dados mensais AC CPD carregados (filtrado):', dadosMensais);
         console.log('Meta AC CPD carregada:', metaAnual);
 
         // Filtrar apenas meses com dados válidos ou que já passaram
@@ -39,8 +44,11 @@ const TaxaFrequenciaAcCpdChart = () => {
       }
     };
 
-    loadData();
-  }, []);
+    // Só carrega se já temos dados dos CCAs ou se não há CCAs (para mostrar vazio)
+    if (userCCAs.length > 0 || userCCAs.length === 0) {
+      loadData();
+    }
+  }, [userCCAs]);
 
   if (loading) {
     return (

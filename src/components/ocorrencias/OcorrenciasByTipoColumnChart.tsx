@@ -2,18 +2,24 @@
 import { useState, useEffect } from "react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { fetchOcorrenciasByTipo } from "@/services/ocorrencias/ocorrenciasByTipoService";
+import { useUserCCAs } from "@/hooks/useUserCCAs";
 
 const OcorrenciasByTipoColumnChart = () => {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const { data: userCCAs = [] } = useUserCCAs();
 
   useEffect(() => {
     const loadData = async () => {
       try {
         setLoading(true);
         console.log('Carregando dados do gráfico por tipo...');
-        const chartData = await fetchOcorrenciasByTipo();
-        console.log('Dados carregados:', chartData);
+        
+        // Aplicar filtro por CCAs do usuário
+        const ccaIds = userCCAs.length > 0 ? userCCAs.map(cca => cca.id) : undefined;
+        const chartData = await fetchOcorrenciasByTipo(ccaIds);
+        
+        console.log('Dados carregados (filtrado):', chartData);
         setData(chartData);
       } catch (error) {
         console.error("Error loading chart data:", error);
@@ -22,8 +28,11 @@ const OcorrenciasByTipoColumnChart = () => {
       }
     };
 
-    loadData();
-  }, []);
+    // Só carrega se já temos dados dos CCAs ou se não há CCAs (para mostrar vazio)
+    if (userCCAs.length > 0 || userCCAs.length === 0) {
+      loadData();
+    }
+  }, [userCCAs]);
 
   if (loading) {
     return (

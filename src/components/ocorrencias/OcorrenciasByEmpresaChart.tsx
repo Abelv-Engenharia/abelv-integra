@@ -2,11 +2,13 @@
 import { useState, useEffect } from "react";
 import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { supabase } from '@/integrations/supabase/client';
+import { useUserCCAs } from "@/hooks/useUserCCAs";
 
 const OcorrenciasByEmpresaChart = () => {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const { data: userCCAs = [] } = useUserCCAs();
 
   useEffect(() => {
     const loadData = async () => {
@@ -14,13 +16,30 @@ const OcorrenciasByEmpresaChart = () => {
         setLoading(true);
         console.log('Carregando dados por empresa...');
         
-        const { data: ocorrencias, error } = await supabase
+        let query = supabase
           .from('ocorrencias')
           .select('empresa');
 
+        // Aplicar filtro por CCAs do usuário
+        if (userCCAs.length > 0) {
+          // Como a tabela ocorrencias tem o campo 'cca' como texto, 
+          // precisamos buscar os códigos dos CCAs permitidos
+          const { data: ccasData } = await supabase
+            .from('ccas')
+            .select('codigo')
+            .in('id', userCCAs.map(cca => cca.id));
+          
+          if (ccasData && ccasData.length > 0) {
+            const ccaCodigos = ccasData.map(cca => cca.codigo);
+            query = query.in('cca', ccaCodigos);
+          }
+        }
+
+        const { data: ocorrencias, error } = await query;
+
         if (error) throw error;
 
-        console.log('Dados de ocorrências por empresa:', ocorrencias);
+        console.log('Dados de ocorrências por empresa (filtrado):', ocorrencias);
 
         const empresaCount = (ocorrencias || []).reduce((acc: Record<string, number>, curr) => {
           const empresa = curr.empresa || 'Não definido';
@@ -33,7 +52,7 @@ const OcorrenciasByEmpresaChart = () => {
           value
         }));
 
-        console.log('Dados do gráfico por empresa:', chartData);
+        console.log('Dados do gráfico por empresa (filtrado):', chartData);
         setData(chartData);
       } catch (err) {
         console.error("Error loading ocorrencias by empresa:", err);
@@ -43,8 +62,11 @@ const OcorrenciasByEmpresaChart = () => {
       }
     };
 
-    loadData();
-  }, []);
+    // Só carrega se já temos dados dos CCAs ou se não há CCAs (para mostrar vazio)
+    if (userCCAs.length > 0 || userCCAs.length === 0) {
+      loadData();
+    }
+  }, [userCCAs]);
 
   if (loading) {
     return (
