@@ -14,17 +14,32 @@ import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { useUserCCAs } from "@/hooks/useUserCCAs";
 
-// Hooks para buscar dados
+// Hooks para buscar dados (filtrado pelos CCAs permitidos)
 const useCCAs = () => {
   const [ccas, setCcas] = React.useState([]);
+  const { data: userCCAs = [] } = useUserCCAs();
+  
   React.useEffect(() => {
-    supabase.from("ccas").select("id, codigo, nome, ativo").eq("ativo", true).order("codigo").then(({
-      data
-    }) => setCcas(data || []));
-  }, []);
+    if (userCCAs.length === 0) {
+      setCcas([]);
+      return;
+    }
+    
+    const ccaIds = userCCAs.map(cca => cca.id);
+    supabase
+      .from("ccas")
+      .select("id, codigo, nome, ativo")
+      .eq("ativo", true)
+      .in("id", ccaIds)
+      .order("codigo")
+      .then(({ data }) => setCcas(data || []));
+  }, [userCCAs]);
+  
   return ccas;
 };
+
 const useTiposInspecao = () => {
   const [tipos, setTipos] = React.useState([]);
   React.useEffect(() => {
@@ -34,6 +49,7 @@ const useTiposInspecao = () => {
   }, []);
   return tipos;
 };
+
 const useFuncionarios = (ccaCodigo?: string) => {
   const [funcionarios, setFuncionarios] = React.useState([]);
   React.useEffect(() => {
@@ -62,6 +78,7 @@ const useFuncionarios = (ccaCodigo?: string) => {
   }, [ccaCodigo]);
   return funcionarios;
 };
+
 const formSchema = z.object({
   data: z.date({
     required_error: "A data da inspeção é obrigatória."
@@ -78,10 +95,14 @@ const formSchema = z.object({
   responsavelFuncao: z.string().optional(),
   desviosIdentificados: z.number().int("Insira um número inteiro.").min(0, "Não pode ser negativo").default(0)
 });
+
 type FormType = z.infer<typeof formSchema>;
+
 const InspecaoNaoProgramadaHSA = () => {
   const ccas = useCCAs(); // [{ id, codigo, nome }]
   const tiposInspecao = useTiposInspecao();
+  const { data: userCCAs = [] } = useUserCCAs();
+  
   const form = useForm<FormType>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -101,6 +122,26 @@ const InspecaoNaoProgramadaHSA = () => {
   const {
     toast
   } = useToast();
+
+  // Verificar se o usuário tem permissão para acessar
+  if (userCCAs.length === 0) {
+    return (
+      <div className="w-full px-2 sm:px-4 md:px-8 py-6 flex justify-center">
+        <Card className="w-full max-w-2xl mx-auto">
+          <CardContent className="pt-6 flex flex-col items-center gap-6">
+            <h2 className="text-2xl font-bold text-center">Acesso Negado</h2>
+            <p className="text-center text-yellow-600">
+              Você não possui permissão para cadastrar inspeções em nenhum CCA.
+            </p>
+            <Button variant="outline" asChild>
+              <Link to="/hora-seguranca/dashboard">Voltar ao Dashboard</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   const handleSubmit = async (values: FormType) => {
     setIsSaving(true);
 
@@ -209,6 +250,7 @@ const InspecaoNaoProgramadaHSA = () => {
       description: "Inspeção não programada cadastrada com sucesso!"
     });
   };
+  
   if (success) {
     return <div className="w-full px-2 sm:px-4 md:px-8 py-6 flex justify-center">
         <Card className="w-full max-w-2xl mx-auto">
@@ -232,6 +274,7 @@ const InspecaoNaoProgramadaHSA = () => {
         </Card>
       </div>;
   }
+
   return <div className="w-full px-2 sm:px-4 md:px-8 py-6 flex justify-center text-black text-left">
       <Card className="w-full max-w-4xl border bg-card shadow-md">
         <CardContent className="pt-6 pb-8 space-y-6">
@@ -395,4 +438,5 @@ const InspecaoNaoProgramadaHSA = () => {
       </Card>
     </div>;
 };
+
 export default InspecaoNaoProgramadaHSA;

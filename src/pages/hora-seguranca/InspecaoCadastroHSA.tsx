@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { DatePickerWithManualInput } from "@/components/ui/date-picker-with-manual-input";
+import { useUserCCAs } from "@/hooks/useUserCCAs";
 
 // Define types for our data
 interface Cca {
@@ -30,14 +31,27 @@ interface TipoInspecao {
   nome: string;
 }
 
-// Busca CCAs ativos
+// Busca CCAs ativos (filtrado pelos CCAs permitidos do usuário)
 const useCCAs = () => {
   const [ccas, setCcas] = React.useState<Cca[]>([]);
+  const { data: userCCAs = [] } = useUserCCAs();
+  
   React.useEffect(() => {
-    supabase.from("ccas").select("id, codigo, nome").eq("ativo", true).order("codigo").then(({
-      data
-    }) => setCcas(data as Cca[] || []));
-  }, []);
+    if (userCCAs.length === 0) {
+      setCcas([]);
+      return;
+    }
+    
+    const ccaIds = userCCAs.map(cca => cca.id);
+    supabase
+      .from("ccas")
+      .select("id, codigo, nome")
+      .eq("ativo", true)
+      .in("id", ccaIds)
+      .order("codigo")
+      .then(({ data }) => setCcas(data as Cca[] || []));
+  }, [userCCAs]);
+  
   return ccas;
 };
 
@@ -89,6 +103,7 @@ const useTiposInspecao = () => {
   }, []);
   return tipos;
 };
+
 const formSchema = z.object({
   data: z.date({
     required_error: "A data da inspeção é obrigatória."
@@ -104,9 +119,12 @@ const formSchema = z.object({
     required_error: "Inspeção programada é obrigatória."
   })
 });
+
 type FormType = z.infer<typeof formSchema>;
+
 const InspecaoCadastroHSA = () => {
   const ccas = useCCAs();
+  const { data: userCCAs = [] } = useUserCCAs();
 
   // Pega o valor de CCA selecionado e atualiza o hook de funcionários para filtrar corretamente
   const form = useForm<FormType>({
@@ -128,6 +146,26 @@ const InspecaoCadastroHSA = () => {
   const mes = watchData ? format(watchData, "MM") : "";
   const watchResponsavelTipo = form.watch("responsavelTipo");
   const [isSaving, setIsSaving] = useState(false);
+
+  // Verificar se o usuário tem permissão para acessar
+  if (userCCAs.length === 0) {
+    return (
+      <div className="w-full px-2 sm:px-4 md:px-8 py-6 flex justify-center">
+        <Card className="w-full max-w-2xl mx-auto">
+          <CardContent className="pt-6 flex flex-col items-center gap-6">
+            <h2 className="text-2xl font-bold text-center">Acesso Negado</h2>
+            <p className="text-center text-yellow-600">
+              Você não possui permissão para cadastrar inspeções em nenhum CCA.
+            </p>
+            <Button variant="outline" asChild>
+              <Link to="/hora-seguranca/dashboard">Voltar ao Dashboard</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   const handleSubmit = async (values: FormType) => {
     setIsSaving(true);
     let responsavel_nome: string | undefined = "";
@@ -226,6 +264,7 @@ const InspecaoCadastroHSA = () => {
 
   // Remove a segunda declaração duplicada de watchCCA e usa apenas a original declarada acima.
   const ccaSelecionado = !!watchCCA;
+  
   if (success) {
     return <div className="w-full px-2 sm:px-4 md:px-8 py-6 flex justify-center">
         <Card className="w-full max-w-2xl mx-auto">
@@ -247,6 +286,7 @@ const InspecaoCadastroHSA = () => {
         </Card>
       </div>;
   }
+
   return <div className="w-full px-2 sm:px-4 md:px-8 py-6 flex justify-center">
       <Card className="w-full max-w-4xl border bg-card shadow-md">
         <CardContent className="pt-6 pb-8 space-y-6">
@@ -378,4 +418,5 @@ const InspecaoCadastroHSA = () => {
       </Card>
     </div>;
 };
+
 export default InspecaoCadastroHSA;

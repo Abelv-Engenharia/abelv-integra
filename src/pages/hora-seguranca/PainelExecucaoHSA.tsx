@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -9,7 +10,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent, type ChartConfig } from "@/components/ui/chart";
+import { useUserCCAs } from "@/hooks/useUserCCAs";
+
 const COLORS = ["#4285F4", "#34A853", "#FBBC05", "#EA4335", "#8D6E63", "#FF9800", "#7E57C2"];
+
 export default function PainelExecucaoHSA() {
   const [summary, setSummary] = useState<any>(null);
   const [statusData, setStatusData] = useState<any[]>([]);
@@ -18,16 +22,27 @@ export default function PainelExecucaoHSA() {
   const [desvioRespData, setDesvioRespData] = useState<any[]>([]);
   const [pieData, setPieData] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const { data: userCCAs = [] } = useUserCCAs();
 
-  // Carregar lista de CCAs (para rótulos e filtros)
+  // Carregar lista de CCAs (filtrado pelos CCAs permitidos)
   const [ccas, setCcas] = useState<{ id: number; codigo: string; nome: string }[]>([]);
   useEffect(() => {
     async function getCcas() {
-      const { data } = await supabase.from("ccas").select("id,codigo,nome").order("codigo");
+      if (userCCAs.length === 0) {
+        setCcas([]);
+        return;
+      }
+      
+      const ccaIds = userCCAs.map(cca => cca.id);
+      const { data } = await supabase
+        .from("ccas")
+        .select("id,codigo,nome")
+        .in("id", ccaIds)
+        .order("codigo");
       setCcas(data || []);
     }
     getCcas();
-  }, []);
+  }, [userCCAs]);
 
   // Filtros - estão apenas visuais por enquanto!
   const [ano, setAno] = useState("todos");
@@ -35,18 +50,37 @@ export default function PainelExecucaoHSA() {
   const [cca, setCca] = useState("todos");
   const [responsavel, setResponsavel] = useState("todos");
   const navigate = useNavigate();
+
   useEffect(() => {
     async function loadData() {
       setIsLoading(true);
+      
+      if (userCCAs.length === 0) {
+        // Se o usuário não tem CCAs permitidos, não carregar dados
+        setSummary({ totalInspecoes: 0, programadas: 0, naoProgramadas: 0, desviosIdentificados: 0, realizadas: 0, canceladas: 0 });
+        setStatusData([]);
+        setMonthData([]);
+        setRespData([]);
+        setDesvioRespData([]);
+        setPieData([]);
+        setIsLoading(false);
+        return;
+      }
+
+      // Aplicar filtro por CCAs permitidos
+      const ccaIds = userCCAs.map(cca => cca.id);
+
       // Resumo KPIs
-      const resumo = await fetchInspecoesSummary();
+      const resumo = await fetchInspecoesSummary(ccaIds);
       setSummary(resumo);
+      
       // Execução HSA Status
-      const status = await fetchInspecoesByStatus();
+      const status = await fetchInspecoesByStatus(ccaIds);
       setStatusData(status.map((s: any) => ({
         name: s.status,
         value: s.quantidade ?? s.value ?? 0
       })));
+      
       // Evolução Mensal
       const monthly = await fetchInspecoesByMonth();
       setMonthData(monthly.map((s: any, i: number) => ({
@@ -54,9 +88,9 @@ export default function PainelExecucaoHSA() {
         "ACC PREV": s.previsto ?? s.quantidade,
         "ACC REAL": s.realizado ?? s.quantidade
       })));
+      
       // Execução por Responsável - garantir todas as chaves
-      const responsaveis = await fetchInspecoesByResponsavel();
-      // LOG DEBUG para ver os dados recebidos
+      const responsaveis = await fetchInspecoesByResponsavel(ccaIds);
       console.log('[HSA][PainelExecucaoHSA] respData (por responsável):', responsaveis);
       setRespData(
         responsaveis.map((d: any) => ({
@@ -68,8 +102,9 @@ export default function PainelExecucaoHSA() {
           "Cancelada": d.cancelada ?? 0,
         }))
       );
+      
       // Desvios Identificados por Responsável - agora usa dados reais
-      const desviosReais = await fetchDesviosByResponsavel();
+      const desviosReais = await fetchDesviosByResponsavel(ccaIds);
       console.log('[HSA][PainelExecucaoHSA] desviosReais:', desviosReais);
       setDesvioRespData(
         desviosReais.map((d: any) => ({
@@ -77,17 +112,36 @@ export default function PainelExecucaoHSA() {
           desvios: d.desvios
         }))
       );
+      
       // Desvios por Atividade Crítica (pie) - agora usa dados reais da execucao_hsa
-      const desviosPorTipo = await fetchDesviosByInspectionType();
+      const desviosPorTipo = await fetchDesviosByInspectionType(ccaIds);
       console.log('[HSA][PainelExecucaoHSA] desviosPorTipo:', desviosPorTipo);
       setPieData(desviosPorTipo.map((d: any) => ({
         name: d.tipo,
         value: d.quantidade
       })));
+      
       setIsLoading(false);
     }
     loadData();
-  }, []);
+  }, [userCCAs]);
+
+  // Verificar se o usuário tem permissão para acessar
+  if (userCCAs.length === 0) {
+    return (
+      <div className="max-w-7xl mx-auto py-8 animate-fade-in">
+        <div className="flex flex-col items-center justify-center py-20">
+          <h1 className="text-3xl font-bold tracking-tight mb-4">Dashboard Hora da Segurança</h1>
+          <p className="text-yellow-600 text-center">
+            Você não possui permissão para visualizar dados de nenhum CCA.
+          </p>
+          <Button variant="outline" className="mt-4" onClick={() => navigate("/")}>
+            Voltar ao Início
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   // Cálculos dos cards
   const statusProgramada = ["A REALIZAR", "REALIZADA", "NÃO REALIZADA"];
@@ -391,8 +445,6 @@ export default function PainelExecucaoHSA() {
       {/* GRÁFICOS e restante do painel */}
       {/* Mantém o restante igual, apenas adicionando espaçamento */}
       <div className="px-2 space-y-6">
-        {/* Gauge/Velocímetro */}
-        
         {/* Execução HSA por responsável */}
         <Card>
           <CardHeader>

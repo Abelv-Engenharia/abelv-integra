@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardTitle, CardHeader } from "@/components/ui/card";
@@ -5,6 +6,7 @@ import { format, isSameDay } from "date-fns";
 import { ptBR } from "date-fns/locale/pt-BR";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
+import { useUserCCAs } from "@/hooks/useUserCCAs";
 
 interface InspecaoAgenda {
   id: string;
@@ -43,20 +45,33 @@ export default function AgendaHSA() {
   const [inspecoes, setInspecoes] = useState<InspecaoAgenda[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(true);
+  const { data: userCCAs = [] } = useUserCCAs();
 
   useEffect(() => {
     const fetchInspecoes = async () => {
       setIsLoading(true);
+      
+      if (userCCAs.length === 0) {
+        setInspecoes([]);
+        setIsLoading(false);
+        return;
+      }
+
+      // Aplicar filtro por CCAs permitidos
+      const ccaIds = userCCAs.map(cca => cca.id);
+      
       const { data, error } = await supabase
         .from("execucao_hsa")
-        .select("id, data, responsavel_inspecao, status, inspecao_programada");
+        .select("id, data, responsavel_inspecao, status, inspecao_programada")
+        .in('cca_id', ccaIds);
+        
       setIsLoading(false);
       if (data) {
         setInspecoes(data as InspecaoAgenda[]);
       }
     };
     fetchInspecoes();
-  }, []);
+  }, [userCCAs]);
 
   // Agrupa inspeções por data no formato yyyy-MM-dd
   const groupedByDay: Record<string, InspecaoAgenda[]> = {};
@@ -97,6 +112,23 @@ export default function AgendaHSA() {
         <Loader2 className="animate-spin w-8 h-8 text-muted-foreground" />
       </div>
     );
+
+  if (userCCAs.length === 0) {
+    return (
+      <div className="container max-w-7xl mx-auto py-6 animate-fade-in">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-2xl">Agenda HSA</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-yellow-600">
+              Você não possui permissão para visualizar dados de nenhum CCA.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="container max-w-7xl mx-auto py-6 animate-fade-in">

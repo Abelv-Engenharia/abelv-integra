@@ -32,6 +32,11 @@ const HoraSegurancaDashboard = () => {
           <p className="text-muted-foreground">
             Dashboard de acompanhamento de inspeções de segurança
           </p>
+          {userCCAs.length === 0 && (
+            <p className="text-yellow-600">
+              Você não possui permissão para visualizar dados de nenhum CCA.
+            </p>
+          )}
         </div>
 
         <Tabs defaultValue="overview" className="space-y-4" value={tab} onValueChange={setTab}>
@@ -40,107 +45,113 @@ const HoraSegurancaDashboard = () => {
           </TabsList>
           
           <TabsContent value="overview" className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-3">
-              <Select value={filterCCA} onValueChange={setFilterCCA}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Filtrar por CCA" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="todos">Todos</SelectItem>
-                  {userCCAs.map(cca => (
-                    <SelectItem key={cca.id} value={cca.id.toString()}>
-                      {cca.codigo} - {cca.nome}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            {userCCAs.length > 0 && (
+              <div className="grid gap-4 md:grid-cols-3">
+                <Select value={filterCCA} onValueChange={setFilterCCA}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Filtrar por CCA" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="todos">Todos</SelectItem>
+                    {userCCAs.map(cca => (
+                      <SelectItem key={cca.id} value={cca.id.toString()}>
+                        {cca.codigo} - {cca.nome}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
 
-              <Select value={filterResponsavel} onValueChange={setFilterResponsavel}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Filtrar por Responsável" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="todos">Todos</SelectItem>
-                  <SelectItem value="RESP001">João Silva</SelectItem>
-                  <SelectItem value="RESP002">Maria Oliveira</SelectItem>
-                  <SelectItem value="RESP003">Carlos Santos</SelectItem>
-                </SelectContent>
-              </Select>
+                <Select value={filterResponsavel} onValueChange={setFilterResponsavel}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Filtrar por Responsável" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="todos">Todos</SelectItem>
+                    <SelectItem value="RESP001">João Silva</SelectItem>
+                    <SelectItem value="RESP002">Maria Oliveira</SelectItem>
+                    <SelectItem value="RESP003">Carlos Santos</SelectItem>
+                  </SelectContent>
+                </Select>
 
-              <Select value={filterPeriodo} onValueChange={setFilterPeriodo}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Filtrar por Período" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="todos">Todos</SelectItem>
-                  <SelectItem value="7">Últimos 7 dias</SelectItem>
-                  <SelectItem value="30">Últimos 30 dias</SelectItem>
-                  <SelectItem value="90">Últimos 90 dias</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+                <Select value={filterPeriodo} onValueChange={setFilterPeriodo}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Filtrar por Período" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="todos">Todos</SelectItem>
+                    <SelectItem value="7">Últimos 7 dias</SelectItem>
+                    <SelectItem value="30">Últimos 30 dias</SelectItem>
+                    <SelectItem value="90">Últimos 90 dias</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
 
-            <InspecoesSummaryCards />
-            
-            <Card className="col-span-full">
-              <CardHeader>
-                <CardTitle>Distribuição por Status</CardTitle>
-                <CardDescription>
-                  Visão geral do status das inspeções
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="pl-2">
-                <InspecaoStatusDonutChart />
-              </CardContent>
-            </Card>
+            {userCCAs.length > 0 && (
+              <>
+                <InspecoesSummaryCards />
+                
+                <Card className="col-span-full">
+                  <CardHeader>
+                    <CardTitle>Distribuição por Status</CardTitle>
+                    <CardDescription>
+                      Visão geral do status das inspeções
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="pl-2">
+                    <InspecaoStatusDonutChart />
+                  </CardContent>
+                </Card>
 
-            <Card className="col-span-full">
-              <CardHeader>
-                <CardTitle>Inspeções por CCA</CardTitle>
-                <CardDescription>
-                  Distribuição de inspeções por centro de custo
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="pl-2">
-                <InspecoesBarChart dataType="cca" />
-              </CardContent>
-            </Card>
+                <Card className="col-span-full">
+                  <CardHeader>
+                    <CardTitle>Inspeções por CCA</CardTitle>
+                    <CardDescription>
+                      Distribuição de inspeções por centro de custo
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="pl-2">
+                    <InspecoesBarChart dataType="cca" />
+                  </CardContent>
+                </Card>
 
-            <Card className="col-span-full">
-              <CardHeader>
-                <CardTitle>Inspeções por Responsável</CardTitle>
-                <CardDescription>
-                  Distribuição de inspeções por responsável
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="pl-2">
-                <InspecoesBarChart dataType="responsible" />
-              </CardContent>
-            </Card>
+                <Card className="col-span-full">
+                  <CardHeader>
+                    <CardTitle>Inspeções por Responsável</CardTitle>
+                    <CardDescription>
+                      Distribuição de inspeções por responsável
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="pl-2">
+                    <InspecoesBarChart dataType="responsible" />
+                  </CardContent>
+                </Card>
 
-            <Card className="col-span-full">
-              <CardHeader>
-                <CardTitle>Desvios por Responsável</CardTitle>
-                <CardDescription>
-                  Quantidade de desvios identificados por responsável
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="pl-2">
-                <DesviosResponsaveisChart />
-              </CardContent>
-            </Card>
+                <Card className="col-span-full">
+                  <CardHeader>
+                    <CardTitle>Desvios por Responsável</CardTitle>
+                    <CardDescription>
+                      Quantidade de desvios identificados por responsável
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="pl-2">
+                    <DesviosResponsaveisChart />
+                  </CardContent>
+                </Card>
 
-            <Card className="col-span-full">
-              <CardHeader>
-                <CardTitle>Desvios por Tipo de Inspeção</CardTitle>
-                <CardDescription>
-                  Quantidade de desvios identificados por tipo de inspeção
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="pl-2">
-                <DesviosTipoInspecaoChart />
-              </CardContent>
-            </Card>
+                <Card className="col-span-full">
+                  <CardHeader>
+                    <CardTitle>Desvios por Tipo de Inspeção</CardTitle>
+                    <CardDescription>
+                      Quantidade de desvios identificados por tipo de inspeção
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="pl-2">
+                    <DesviosTipoInspecaoChart />
+                  </CardContent>
+                </Card>
+              </>
+            )}
           </TabsContent>
         </Tabs>
       </div>
