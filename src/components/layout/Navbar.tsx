@@ -1,110 +1,115 @@
-import React from "react";
-import { Bell, Settings, User, LogOut, Image as ImageIcon } from "lucide-react";
+
+import { Bell, User, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
-import NotificacoesDropdown from "@/components/notificacoes/NotificacoesDropdown";
-import { useAuth } from "@/contexts/AuthContext";
+import { Badge } from "@/components/ui/badge";
 import { useProfile } from "@/hooks/useProfile";
 import { useProfileAvatarUrl } from "@/hooks/useProfileAvatarUrl";
-import { cleanupAuthState } from "@/utils/authUtils";
-
-// Utilitário para pegar as iniciais do nome
-function getInitials(name?: string) {
-  if (!name) return "U";
-  return name
-    .split(' ')
-    .map(n => n[0])
-    .join('')
-    .toUpperCase()
-    .slice(0, 2);
-}
+import { Link, useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
+import NotificacoesDropdown from "@/components/notificacoes/NotificacoesDropdown";
+import SystemLogo from "@/components/common/SystemLogo";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 
 const Navbar = () => {
+  const { userName, userEmail } = useProfile();
+  const { avatarUrl } = useProfileAvatarUrl();
   const navigate = useNavigate();
-  const { user } = useAuth();
-  const { profile } = useProfile();
-  const { url: avatarUrl } = useProfileAvatarUrl(profile?.avatar_url);
-
-  // Estado local para detectar se a imagem deu erro ao carregar
-  const [imgError, setImgError] = React.useState(false);
-
-  // Limpa o erro caso o avatarUrl mude (ex: user troca de imagem)
-  React.useEffect(() => {
-    setImgError(false);
-  }, [avatarUrl]);
 
   const handleLogout = async () => {
     try {
-      // Limpa o estado de autenticação
-      cleanupAuthState();
-      // Logout global do Supabase
-      try {
-        await supabase.auth.signOut({ scope: "global" });
-      } catch (err) {
-        // Se falhar, continua mesmo assim
-        console.error("Erro no signOut global:", err);
-      }
-      // Força reload na rota de login para garantir sessão limpa
-      window.location.href = "/login";
-      // toast.success("Logout realizado com sucesso!"); // Não mostramos toast pois a página será recarregada.
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      
+      toast({
+        title: "Logout realizado com sucesso",
+        description: "Você foi desconectado do sistema.",
+      });
+      
+      navigate('/login');
     } catch (error) {
-      console.error("Erro ao fazer logout:", error);
-      // O toast aqui não aparece, mas deixamos para debugging
-      toast.error("Erro ao fazer logout");
+      console.error('Erro no logout:', error);
+      toast({
+        title: "Erro no logout",
+        description: "Ocorreu um erro ao tentar fazer logout.",
+        variant: "destructive",
+      });
     }
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-14 items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <h1 className="text-xl font-semibold">GESTÃO DE SMS ABELV</h1>
+    <nav className="bg-white border-b border-gray-200 px-4 py-3">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          {/* Botão de toggle da sidebar - visível em telas pequenas */}
+          <div className="md:hidden">
+            <SidebarTrigger />
+          </div>
+          
+          <div className="flex items-center gap-2">
+            <SystemLogo className="h-8" />
+            <h1 className="text-xl font-bold text-gray-900 hidden sm:block">
+              GESTÃO DE SMS ABELV
+            </h1>
+            <h1 className="text-lg font-bold text-gray-900 sm:hidden">
+              SMS ABELV
+            </h1>
+          </div>
         </div>
-        <div className="flex items-center space-x-4">
+
+        <div className="flex items-center gap-3">
           <NotificacoesDropdown />
+          
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+              <Button variant="ghost" className="flex items-center gap-2 h-auto p-2">
                 <Avatar className="h-8 w-8">
-                  {/* Se der erro ou não houver url, mostra fallback! */}
-                  {avatarUrl && !imgError ? (
-                    <AvatarImage
-                      src={avatarUrl}
-                      alt={profile?.nome || "avatar"}
-                      onError={() => setImgError(true)}
-                    />
-                  ) : (
-                    <AvatarFallback className="bg-primary text-primary-foreground flex items-center justify-center">
-                      <ImageIcon size={16} className="mr-1" />
-                      {getInitials(profile?.nome)}
-                    </AvatarFallback>
-                  )}
+                  <AvatarImage src={avatarUrl || undefined} alt={userName || "User"} />
+                  <AvatarFallback>
+                    <User className="h-4 w-4" />
+                  </AvatarFallback>
                 </Avatar>
+                <div className="hidden sm:block text-left">
+                  <p className="text-sm font-medium text-gray-900">
+                    {userName || "Usuário"}
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    {userEmail || "email@exemplo.com"}
+                  </p>
+                </div>
+                <ChevronDown className="h-4 w-4 text-gray-500" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56" align="end" forceMount>
-              <DropdownMenuItem onClick={() => navigate("/account/profile")}>
-                <User className="mr-2 h-4 w-4" />
-                <span>Perfil</span>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuItem asChild>
+                <Link to="/account/profile" className="cursor-pointer">
+                  <User className="mr-2 h-4 w-4" />
+                  Perfil
+                </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => navigate("/account/settings")}>
-                <Settings className="mr-2 h-4 w-4" />
-                <span>Configurações</span>
+              <DropdownMenuItem asChild>
+                <Link to="/account/settings" className="cursor-pointer">
+                  <Bell className="mr-2 h-4 w-4" />
+                  Configurações
+                </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleLogout}>
-                <LogOut className="mr-2 h-4 w-4" />
-                <span>Sair</span>
+              <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
+                Sair
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
       </div>
-    </header>
+    </nav>
   );
 };
 
