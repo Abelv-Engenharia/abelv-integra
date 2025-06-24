@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
@@ -14,6 +15,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { InspecaoAcompanhamentoCard } from "@/components/hora-seguranca/InspecaoAcompanhamentoCard";
+import { useUserCCAs } from "@/hooks/useUserCCAs";
 
 const statusOptions: string[] = ["REALIZADA", "NÃO REALIZADA", "CANCELADA"];
 
@@ -66,6 +68,7 @@ export default function InspecoesAcompanhamento() {
   const [busca, setBusca] = useState("");
   const { toast } = useToast();
   const [ccas, setCcas] = useState<{ id: number; codigo: string; nome: string }[]>([]);
+  const { data: userCCAs = [] } = useUserCCAs();
 
   // Load all CCA info for mapping IDs to labels
   useEffect(() => {
@@ -74,27 +77,41 @@ export default function InspecoesAcompanhamento() {
     });
   }, []);
 
-  // Load all inspections with join de CCA
+  // Load inspections filtered by user's allowed CCAs
   useEffect(() => {
-    setIsLoading(true);
-    supabase
-      .from("execucao_hsa")
-      .select("*, cca:ccas(id, codigo, nome)")
-      .order("data", { ascending: false })
-      .then(({ data, error }) => {
-        if (error) {
-          toast({
-            title: "Erro ao carregar inspeções",
-            description: error.message,
-            variant: "destructive",
-          });
-          setIsLoading(false);
-        } else {
-          setInspecoes(data || []);
-          setIsLoading(false);
-        }
-      });
-  }, []);
+    const loadInspections = async () => {
+      setIsLoading(true);
+      
+      if (userCCAs.length === 0) {
+        setInspecoes([]);
+        setIsLoading(false);
+        return;
+      }
+
+      // Filtrar por CCAs permitidos
+      const ccaIds = userCCAs.map(cca => cca.id);
+      
+      const { data, error } = await supabase
+        .from("execucao_hsa")
+        .select("*, cca:ccas(id, codigo, nome)")
+        .in('cca_id', ccaIds)
+        .order("data", { ascending: false });
+
+      if (error) {
+        toast({
+          title: "Erro ao carregar inspeções",
+          description: error.message,
+          variant: "destructive",
+        });
+        setIsLoading(false);
+      } else {
+        setInspecoes(data || []);
+        setIsLoading(false);
+      }
+    };
+
+    loadInspections();
+  }, [userCCAs, toast]);
 
   // Função auxiliar: filtra inspeções conforme o texto de busca
   const filtrarInspecoes = (lista: any[], termo: string) => {
@@ -185,6 +202,18 @@ export default function InspecoesAcompanhamento() {
     setUpdateDialogOpen(false);
     setSelectedInspecao(null);
   };
+
+  // Verificar se o usuário tem permissão para acessar
+  if (userCCAs.length === 0) {
+    return (
+      <div className="container mx-auto py-4">
+        <h2 className="text-2xl font-bold tracking-tight mb-4">Acompanhamento de Inspeções HSA</h2>
+        <div className="text-yellow-600">
+          Você não possui permissão para visualizar dados de nenhum CCA.
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto py-4">
