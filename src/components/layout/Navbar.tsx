@@ -20,8 +20,8 @@ import SystemLogo from "@/components/common/SystemLogo";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 
 const Navbar = () => {
-  const { userName, userEmail } = useProfile();
-  const { avatarUrl } = useProfileAvatarUrl();
+  const { profile } = useProfile();
+  const { url: avatarUrl } = useProfileAvatarUrl(profile?.avatar_url);
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -72,17 +72,17 @@ const Navbar = () => {
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="flex items-center gap-2 h-auto p-2">
                 <Avatar className="h-8 w-8">
-                  <AvatarImage src={avatarUrl || undefined} alt={userName || "User"} />
+                  <AvatarImage src={avatarUrl || undefined} alt={profile?.nome || "User"} />
                   <AvatarFallback>
                     <User className="h-4 w-4" />
                   </AvatarFallback>
                 </Avatar>
                 <div className="hidden sm:block text-left">
                   <p className="text-sm font-medium text-gray-900">
-                    {userName || "Usuário"}
+                    {profile?.nome || "Usuário"}
                   </p>
                   <p className="text-xs text-gray-500">
-                    {userEmail || "email@exemplo.com"}
+                    {profile?.email || "email@exemplo.com"}
                   </p>
                 </div>
                 <ChevronDown className="h-4 w-4 text-gray-500" />
