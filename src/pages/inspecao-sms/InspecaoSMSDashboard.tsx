@@ -1,9 +1,8 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar, CheckCircle, XCircle, Clock, FileSearch } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { DatePicker } from "@/components/ui/date-picker-with-manual-input";
+import { DatePickerWithManualInput } from "@/components/ui/date-picker-with-manual-input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserCCAs } from "@/hooks/useUserCCAs";
@@ -136,18 +135,16 @@ const InspecaoSMSDashboard = () => {
             </div>
             <div>
               <label className="text-sm font-medium">Data Início</label>
-              <DatePicker
-                date={dataInicio}
-                onDateChange={setDataInicio}
-                placeholder="Selecione a data"
+              <DatePickerWithManualInput
+                value={dataInicio}
+                onChange={setDataInicio}
               />
             </div>
             <div>
               <label className="text-sm font-medium">Data Fim</label>
-              <DatePicker
-                date={dataFim}
-                onDateChange={setDataFim}
-                placeholder="Selecione a data"
+              <DatePickerWithManualInput
+                value={dataFim}
+                onChange={setDataFim}
               />
             </div>
             <div className="flex items-end">

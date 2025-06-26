@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { DatePicker } from "@/components/ui/date-picker-with-manual-input";
+import { DatePickerWithManualInput } from "@/components/ui/date-picker-with-manual-input";
 import { Search, Download, Eye, FileSearch, CheckCircle, XCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserCCAs } from "@/hooks/useUserCCAs";
@@ -222,19 +221,17 @@ const ConsultarInspecoes = () => {
 
             <div>
               <Label>Data Início</Label>
-              <DatePicker
-                date={filtros.data_inicio}
-                onDateChange={(date) => setFiltros({...filtros, data_inicio: date})}
-                placeholder="Data inicial"
+              <DatePickerWithManualInput
+                value={filtros.data_inicio}
+                onChange={(date) => setFiltros({...filtros, data_inicio: date})}
               />
             </div>
 
             <div>
               <Label>Data Fim</Label>
-              <DatePicker
-                date={filtros.data_fim}
-                onDateChange={(date) => setFiltros({...filtros, data_fim: date})}
-                placeholder="Data final"
+              <DatePickerWithManualInput
+                value={filtros.data_fim}
+                onChange={(date) => setFiltros({...filtros, data_fim: date})}
               />
             </div>
 

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -119,12 +118,40 @@ const AdminPerfis = () => {
       setLoading(true);
       try {
         const data = await fetchPerfis();
-        // Converter Json para Permissoes de forma segura
-        const perfisFormatados = data.map(perfil => ({
-          ...perfil,
-          permissoes: perfil.permissoes as Permissoes,
-          ccas_permitidas: Array.isArray(perfil.ccas_permitidas) ? perfil.ccas_permitidas : []
-        }));
+        // Safe type conversion with proper validation
+        const perfisFormatados = data.map(perfil => {
+          // Safe conversion of permissoes from Json to Permissoes
+          let permissoes: Permissoes;
+          try {
+            if (typeof perfil.permissoes === 'object' && perfil.permissoes !== null) {
+              permissoes = perfil.permissoes as unknown as Permissoes;
+            } else {
+              permissoes = permissoesIniciais;
+            }
+          } catch (error) {
+            console.warn('Error parsing permissoes for perfil:', perfil.id, error);
+            permissoes = permissoesIniciais;
+          }
+
+          // Safe conversion of ccas_permitidas from Json to number[]
+          let ccas_permitidas: number[];
+          try {
+            if (Array.isArray(perfil.ccas_permitidas)) {
+              ccas_permitidas = (perfil.ccas_permitidas as unknown[]).map(id => Number(id)).filter(id => !isNaN(id));
+            } else {
+              ccas_permitidas = [];
+            }
+          } catch (error) {
+            console.warn('Error parsing ccas_permitidas for perfil:', perfil.id, error);
+            ccas_permitidas = [];
+          }
+
+          return {
+            ...perfil,
+            permissoes,
+            ccas_permitidas
+          } as Perfil;
+        });
         setPerfis(perfisFormatados);
       } catch (error) {
         console.error('Erro ao carregar perfis:', error);
@@ -172,13 +199,36 @@ const AdminPerfis = () => {
           description: "Perfil atualizado com sucesso"
         });
 
-        // Atualizar o estado local
+        // Atualizar o estado local com conversão segura de tipos
         setPerfis(prevPerfis =>
-          prevPerfis.map(p =>
-            p.id === perfilSelecionado.id
-              ? { ...updatedPerfil, permissoes: updatedPerfil.permissoes as Permissoes }
-              : p
-          )
+          prevPerfis.map(p => {
+            if (p.id === perfilSelecionado.id) {
+              // Safe conversion
+              let convertedPermissoes: Permissoes;
+              let convertedCcas: number[];
+              
+              try {
+                convertedPermissoes = updatedPerfil.permissoes as unknown as Permissoes;
+              } catch {
+                convertedPermissoes = permissoes;
+              }
+              
+              try {
+                convertedCcas = Array.isArray(updatedPerfil.ccas_permitidas) 
+                  ? (updatedPerfil.ccas_permitidas as unknown[]).map(id => Number(id)).filter(id => !isNaN(id))
+                  : ccas_permitidas;
+              } catch {
+                convertedCcas = ccas_permitidas;
+              }
+
+              return {
+                ...updatedPerfil,
+                permissoes: convertedPermissoes,
+                ccas_permitidas: convertedCcas
+              } as Perfil;
+            }
+            return p;
+          })
         );
       } else {
         // Criar novo perfil
@@ -195,8 +245,31 @@ const AdminPerfis = () => {
             description: "Perfil criado com sucesso"
           });
 
-          // Adicionar o novo perfil ao estado local
-          setPerfis([...perfis, { ...novoPerfil, permissoes: novoPerfil.permissoes as Permissoes }]);
+          // Safe conversion for new profile
+          let convertedPermissoes: Permissoes;
+          let convertedCcas: number[];
+          
+          try {
+            convertedPermissoes = novoPerfil.permissoes as unknown as Permissoes;
+          } catch {
+            convertedPermissoes = permissoes;
+          }
+          
+          try {
+            convertedCcas = Array.isArray(novoPerfil.ccas_permitidas) 
+              ? (novoPerfil.ccas_permitidas as unknown[]).map(id => Number(id)).filter(id => !isNaN(id))
+              : ccas_permitidas;
+          } catch {
+            convertedCcas = ccas_permitidas;
+          }
+
+          const newPerfilFormatted: Perfil = {
+            ...novoPerfil,
+            permissoes: convertedPermissoes,
+            ccas_permitidas: convertedCcas
+          };
+
+          setPerfis([...perfis, newPerfilFormatted]);
         }
       }
 
