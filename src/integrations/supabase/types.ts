@@ -1028,6 +1028,76 @@ export type Database = {
         }
         Relationships: []
       }
+      inspecoes_sms: {
+        Row: {
+          cca_id: number | null
+          created_at: string
+          dados_preenchidos: Json
+          data_inspecao: string
+          id: string
+          local: string
+          modelo_id: string
+          observacoes: string | null
+          pdf_gerado_url: string | null
+          responsavel_id: string
+          status: string
+          tem_nao_conformidade: boolean
+          updated_at: string
+        }
+        Insert: {
+          cca_id?: number | null
+          created_at?: string
+          dados_preenchidos?: Json
+          data_inspecao: string
+          id?: string
+          local: string
+          modelo_id: string
+          observacoes?: string | null
+          pdf_gerado_url?: string | null
+          responsavel_id: string
+          status?: string
+          tem_nao_conformidade?: boolean
+          updated_at?: string
+        }
+        Update: {
+          cca_id?: number | null
+          created_at?: string
+          dados_preenchidos?: Json
+          data_inspecao?: string
+          id?: string
+          local?: string
+          modelo_id?: string
+          observacoes?: string | null
+          pdf_gerado_url?: string | null
+          responsavel_id?: string
+          status?: string
+          tem_nao_conformidade?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inspecoes_sms_cca_id_fkey"
+            columns: ["cca_id"]
+            isOneToOne: false
+            referencedRelation: "ccas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inspecoes_sms_modelo_id_fkey"
+            columns: ["modelo_id"]
+            isOneToOne: false
+            referencedRelation: "modelos_inspecao_sms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inspecoes_sms_responsavel_id_fkey"
+            columns: ["responsavel_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lateralidade: {
         Row: {
           ativo: boolean | null
@@ -1165,6 +1235,47 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      modelos_inspecao_sms: {
+        Row: {
+          arquivo_modelo_url: string
+          ativo: boolean
+          campos_substituicao: Json
+          created_at: string
+          id: string
+          nome: string
+          tipo_inspecao_id: string
+          updated_at: string
+        }
+        Insert: {
+          arquivo_modelo_url: string
+          ativo?: boolean
+          campos_substituicao?: Json
+          created_at?: string
+          id?: string
+          nome: string
+          tipo_inspecao_id: string
+          updated_at?: string
+        }
+        Update: {
+          arquivo_modelo_url?: string
+          ativo?: boolean
+          campos_substituicao?: Json
+          created_at?: string
+          id?: string
+          nome?: string
+          tipo_inspecao_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "modelos_inspecao_sms_tipo_inspecao_id_fkey"
+            columns: ["tipo_inspecao_id"]
+            isOneToOne: false
+            referencedRelation: "tipos_inspecao_sms"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       natureza_lesao: {
         Row: {
@@ -1892,6 +2003,33 @@ export type Database = {
           id?: number
           nome?: string
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      tipos_inspecao_sms: {
+        Row: {
+          ativo: boolean
+          created_at: string
+          descricao: string | null
+          id: string
+          nome: string
+          updated_at: string
+        }
+        Insert: {
+          ativo?: boolean
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          nome: string
+          updated_at?: string
+        }
+        Update: {
+          ativo?: boolean
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          nome?: string
+          updated_at?: string
         }
         Relationships: []
       }

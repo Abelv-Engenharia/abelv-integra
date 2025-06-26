@@ -52,6 +52,7 @@ export function AppSidebar() {
     if (currentPath.startsWith("/desvios")) return "desvios";
     if (currentPath.startsWith("/treinamentos")) return "treinamentos";
     if (currentPath.startsWith("/medidas-disciplinares")) return "medidas-disciplinares";
+    if (currentPath.startsWith("/inspecao-sms")) return "inspecao-sms";
     if (currentPath.startsWith("/tarefas")) return "tarefas";
     if (currentPath.startsWith("/relatorios")) return "relatorios";
     if (currentPath.startsWith("/idsms")) return "idsms";
@@ -86,6 +87,7 @@ export function AppSidebar() {
           "treinamentos_dashboard", "treinamentos_normativo", "treinamentos_consulta", "treinamentos_execucao", "treinamentos_cracha",
           "hora_seguranca_cadastro", "hora_seguranca_cadastro_inspecao", "hora_seguranca_cadastro_nao_programada", 
           "hora_seguranca_dashboard", "hora_seguranca_agenda", "hora_seguranca_acompanhamento",
+          "inspecao_sms_dashboard", "inspecao_sms_cadastro", "inspecao_sms_consulta",
           "medidas_disciplinares_dashboard", "medidas_disciplinares_cadastro", "medidas_disciplinares_consulta",
           "ocorrencias_dashboard", "ocorrencias_cadastro", "ocorrencias_consulta"].some(menu =>
           podeVerMenu(menu, menusSidebar)
@@ -117,7 +119,8 @@ export function AppSidebar() {
           "admin_hht",
           "admin_metas_indicadores",
           "admin_templates",
-          "admin_logo"
+          "admin_logo",
+          "admin_modelos_inspecao"
         ].some(menu => podeVerMenu(menu, menusSidebar)) && (
           <SidebarSectionAdministracao openMenu={openMenu} toggleMenu={toggleMenu} />
         )}

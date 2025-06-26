@@ -8,6 +8,7 @@ import {
   List,
   ShieldCheck,
   ClipboardList,
+  FileSearch,
 } from "lucide-react";
 import {
   SidebarGroup,
@@ -237,6 +238,53 @@ export default function SidebarSectionSMS({ openMenu, toggleMenu }: Props) {
                         <SidebarMenuButton asChild>
                           <Link to="/hora-seguranca/cadastro-inspecao-nao-planejada">
                             <span className="text-xs leading-tight">Cadastro de Inspeção Não Planejada</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    )}
+                  </SidebarMenuSub>
+                </CollapsibleContent>
+              </Collapsible>
+            </SidebarMenuItem>
+          )}
+
+          {/* Inspeção SMS - NOVO */}
+          {["inspecao_sms_dashboard", "inspecao_sms_cadastro", "inspecao_sms_consulta"].some(menu =>
+            podeVerMenu(menu, menusSidebar)
+          ) && (
+            <SidebarMenuItem>
+              <Collapsible open={openMenu === "inspecao-sms"}>
+                <CollapsibleTrigger asChild>
+                  <SidebarMenuButton onClick={() => toggleMenu("inspecao-sms")}>
+                    <FileSearch className="h-4 w-4" />
+                    <span>Inspeção SMS</span>
+                  </SidebarMenuButton>
+                </CollapsibleTrigger>
+                <CollapsibleContent asChild>
+                  <SidebarMenuSub>
+                    {podeVerMenu("inspecao_sms_dashboard", menusSidebar) && (
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                          <Link to="/inspecao-sms/dashboard">
+                            <span className="text-xs leading-tight">Dashboard</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    )}
+                    {podeVerMenu("inspecao_sms_cadastro", menusSidebar) && (
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                          <Link to="/inspecao-sms/cadastro">
+                            <span className="text-xs leading-tight">Cadastrar Inspeção</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    )}
+                    {podeVerMenu("inspecao_sms_consulta", menusSidebar) && (
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                          <Link to="/inspecao-sms/consulta">
+                            <span className="text-xs leading-tight">Consultar Inspeções</span>
                           </Link>
                         </SidebarMenuButton>
                       </SidebarMenuItem>
