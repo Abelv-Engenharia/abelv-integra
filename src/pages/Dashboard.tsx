@@ -413,13 +413,19 @@ const Dashboard = () => {
           title="Evolução de Desvios"
           data={areaData}
           dataKey="value"
-          color="#8884d8"
+          strokeColor="#8884d8"
+          fillColor="#3B82F6"
         />
         <BarChart
           title="Treinamentos por CCA"
           data={barData}
-          dataKey="value"
-          color="#82ca9d"
+          categories={[
+            {
+              dataKey: "value",
+              name: "Treinamentos",
+              color: "#82ca9d"
+            }
+          ]}
         />
       </div>
 
