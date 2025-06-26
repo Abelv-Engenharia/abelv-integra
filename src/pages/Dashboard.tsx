@@ -4,12 +4,9 @@ import {
   Activity,
   AlertTriangle,
   Calendar,
-  CheckCircle,
   ClipboardList,
 } from "lucide-react";
 import StatCard from "@/components/dashboard/StatCard";
-import AreaChart from "@/components/dashboard/AreaChart";
-import BarChart from "@/components/dashboard/BarChart";
 import RecentActivitiesList from "@/components/dashboard/RecentActivitiesList";
 import PendingTasksList from "@/components/dashboard/PendingTasksList";
 import SystemLogo from "@/components/common/SystemLogo";
@@ -118,74 +115,6 @@ function useTotalTarefasPendentes() {
   }, [userCCAs]);
   
   return total;
-}
-
-// Hook para buscar dados dos gráficos
-function useChartData() {
-  const [areaData, setAreaData] = useState<any[]>([]);
-  const [barData, setBarData] = useState<any[]>([]);
-  const { data: userCCAs = [] } = useUserCCAs();
-
-  useEffect(() => {
-    if (userCCAs.length === 0) return;
-
-    const fetchChartData = async () => {
-      try {
-        const allowedCcaIds = userCCAs.map(cca => cca.id);
-        
-        // Dados para o gráfico de área (desvios por mês)
-        const { data: desviosData } = await supabase
-          .from("desvios_completos")
-          .select("data_desvio")
-          .in('cca_id', allowedCcaIds);
-
-        if (desviosData) {
-          const monthlyData = desviosData.reduce((acc: Record<string, number>, desvio) => {
-            const date = new Date(desvio.data_desvio);
-            const monthKey = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
-            acc[monthKey] = (acc[monthKey] || 0) + 1;
-            return acc;
-          }, {});
-
-          const chartData = Object.entries(monthlyData)
-            .sort(([a], [b]) => a.localeCompare(b))
-            .slice(-6)
-            .map(([month, value]) => ({
-              name: month,
-              value
-            }));
-
-          setAreaData(chartData);
-        }
-
-        // Dados para o gráfico de barras (treinamentos por CCA)
-        const { data: treinamentosData } = await supabase
-          .from("execucao_treinamentos")
-          .select("cca_id, cca")
-          .in('cca_id', allowedCcaIds);
-
-        if (treinamentosData) {
-          const ccaData = treinamentosData.reduce((acc: Record<string, number>, treinamento) => {
-            const cca = treinamento.cca || 'Não definido';
-            acc[cca] = (acc[cca] || 0) + 1;
-            return acc;
-          }, {});
-
-          const chartData = Object.entries(ccaData)
-            .map(([name, value]) => ({ name, value }))
-            .slice(0, 5);
-
-          setBarData(chartData);
-        }
-      } catch (error) {
-        console.error('Erro ao carregar dados dos gráficos:', error);
-      }
-    };
-
-    fetchChartData();
-  }, [userCCAs]);
-
-  return { areaData, barData };
 }
 
 // Hook para buscar atividades recentes usando "desvios_completos" filtrado por CCAs
@@ -329,7 +258,6 @@ const Dashboard = () => {
   const totalTreinamentos = useTotalTreinamentosMes();
   const totalOcorrencias = useTotalOcorrenciasMes();
   const totalTarefas = useTotalTarefasPendentes();
-  const { areaData, barData } = useChartData();
 
   const { activities, loading: loadingActivities } = useRecentActivitiesFromDesvios();
   const { tasks, loading: loadingTasks, setTasks } = usePendingTasksFromSupabase();
@@ -405,27 +333,6 @@ const Dashboard = () => {
           trend="neutral"
           trendValue="2%"
           loading={totalTarefas === null}
-        />
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-2">
-        <AreaChart
-          title="Evolução de Desvios"
-          data={areaData}
-          dataKey="value"
-          strokeColor="#8884d8"
-          fillColor="#3B82F6"
-        />
-        <BarChart
-          title="Treinamentos por CCA"
-          data={barData}
-          categories={[
-            {
-              dataKey: "value",
-              name: "Treinamentos",
-              color: "#82ca9d"
-            }
-          ]}
         />
       </div>
 
