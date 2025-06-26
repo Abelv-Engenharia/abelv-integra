@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -67,6 +68,9 @@ const AdminPerfis = () => {
       "medidas_disciplinares_dashboard",
       "medidas_disciplinares_cadastro",
       "medidas_disciplinares_consulta",
+      "inspecao_sms_dashboard",
+      "inspecao_sms_cadastro",
+      "inspecao_sms_consulta",
       "tarefas_dashboard",
       "tarefas_minhas_tarefas",
       "tarefas_cadastro",
@@ -81,6 +85,7 @@ const AdminPerfis = () => {
       "admin_funcionarios",
       "admin_hht",
       "admin_metas_indicadores",
+      "admin_modelos_inspecao",
       "admin_templates",
       "admin_logo",
       "idsms_dashboard",
@@ -114,7 +119,13 @@ const AdminPerfis = () => {
       setLoading(true);
       try {
         const data = await fetchPerfis();
-        setPerfis(data);
+        // Converter Json para Permissoes de forma segura
+        const perfisFormatados = data.map(perfil => ({
+          ...perfil,
+          permissoes: perfil.permissoes as Permissoes,
+          ccas_permitidas: Array.isArray(perfil.ccas_permitidas) ? perfil.ccas_permitidas : []
+        }));
+        setPerfis(perfisFormatados);
       } catch (error) {
         console.error('Erro ao carregar perfis:', error);
         toast({
@@ -149,7 +160,7 @@ const AdminPerfis = () => {
     try {
       if (perfilSelecionado) {
         // Atualizar perfil existente
-        await updatePerfil(perfilSelecionado.id, {
+        const updatedPerfil = await updatePerfil(perfilSelecionado.id, {
           nome,
           descricao,
           permissoes,
@@ -165,7 +176,7 @@ const AdminPerfis = () => {
         setPerfis(prevPerfis =>
           prevPerfis.map(p =>
             p.id === perfilSelecionado.id
-              ? { ...p, nome, descricao, permissoes, ccas_permitidas }
+              ? { ...updatedPerfil, permissoes: updatedPerfil.permissoes as Permissoes }
               : p
           )
         );
@@ -185,7 +196,7 @@ const AdminPerfis = () => {
           });
 
           // Adicionar o novo perfil ao estado local
-          setPerfis([...perfis, novoPerfil]);
+          setPerfis([...perfis, { ...novoPerfil, permissoes: novoPerfil.permissoes as Permissoes }]);
         }
       }
 

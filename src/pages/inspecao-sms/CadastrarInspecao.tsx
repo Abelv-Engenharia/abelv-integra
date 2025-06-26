@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { DatePicker } from "@/components/ui/date-picker-with-manual-input";
+import { DatePickerWithManualInput } from "@/components/ui/date-picker-with-manual-input";
 import { ChevronLeft, ChevronRight, FileSearch, Send } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useProfile } from "@/hooks/useProfile";
@@ -109,7 +109,7 @@ const CadastrarInspecao = () => {
         responsavel_id: profile?.id,
         data_inspecao: format(dadosInspecao.data_inspecao, 'yyyy-MM-dd'),
         local: dadosInspecao.local,
-        cca_id: dadosInspecao.cca_id || null,
+        cca_id: dadosInspecao.cca_id ? parseInt(dadosInspecao.cca_id) : null,
         observacoes: dadosInspecao.observacoes,
         dados_preenchidos: {
           itens: itensInspecao,
@@ -270,9 +270,9 @@ const CadastrarInspecao = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <Label>Data da Inspeção *</Label>
-                <DatePicker
-                  date={dadosInspecao.data_inspecao}
-                  onDateChange={(date) => 
+                <DatePickerWithManualInput
+                  value={dadosInspecao.data_inspecao}
+                  onChange={(date) => 
                     setDadosInspecao({...dadosInspecao, data_inspecao: date || new Date()})
                   }
                 />

@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -18,21 +19,21 @@ import Index from "@/pages/Index";
 import Dashboard from "@/pages/Dashboard";
 import NotFound from "@/pages/NotFound";
 
-// SMS pages
-import DesviosDashboard from "@/pages/sms/desvios/DesviosDashboard";
-import DesviosCadastro from "@/pages/sms/desvios/DesviosCadastro";
-import DesviosConsulta from "@/pages/sms/desvios/DesviosConsulta";
-import DesviosNaoConformidade from "@/pages/sms/desvios/DesviosNaoConformidade";
-import TreinamentosDashboard from "@/pages/sms/treinamentos/TreinamentosDashboard";
-import TreinamentosNormativo from "@/pages/sms/treinamentos/TreinamentosNormativo";
-import TreinamentosConsulta from "@/pages/sms/treinamentos/TreinamentosConsulta";
-import TreinamentosExecucao from "@/pages/sms/treinamentos/TreinamentosExecucao";
-import TreinamentosCracha from "@/pages/sms/treinamentos/TreinamentosCracha";
-import HoraSegurancaDashboard from "@/pages/sms/hora-seguranca/HoraSegurancaDashboard";
-import HoraSegurancaAgenda from "@/pages/sms/hora-seguranca/HoraSegurancaAgenda";
-import HoraSegurancaCadastroInspecao from "@/pages/sms/hora-seguranca/HoraSegurancaCadastroInspecao";
-import HoraSegurancaAcompanhamento from "@/pages/sms/hora-seguranca/HoraSegurancaAcompanhamento";
-import HoraSegurancaCadastroInspecaoNaoPlanejada from "@/pages/sms/hora-seguranca/HoraSegurancaCadastroInspecaoNaoPlanejada";
+// SMS pages - corrigindo imports para caminhos corretos
+import DesviosDashboard from "@/pages/DesviosDashboard";
+import DesviosForm from "@/pages/DesviosForm";
+import DesviosConsulta from "@/pages/DesviosConsulta";
+import DesviosNaoConformidade from "@/pages/DesviosNaoConformidade";
+import TreinamentosDashboard from "@/pages/treinamentos/TreinamentosDashboard";
+import TreinamentosNormativo from "@/pages/treinamentos/TreinamentosNormativo";
+import TreinamentosConsulta from "@/pages/treinamentos/TreinamentosConsulta";
+import TreinamentosExecucao from "@/pages/treinamentos/TreinamentosExecucao";
+import TreinamentosCracha from "@/pages/treinamentos/TreinamentosCracha";
+import HoraSegurancaDashboard from "@/pages/hora-seguranca/HoraSegurancaDashboard";
+import AgendaHSA from "@/pages/hora-seguranca/AgendaHSA";
+import InspecaoCadastroHSA from "@/pages/hora-seguranca/InspecaoCadastroHSA";
+import InspecoesAcompanhamento from "@/pages/hora-seguranca/InspecoesAcompanhamento";
+import InspecaoNaoProgramadaHSA from "@/pages/hora-seguranca/InspecaoNaoProgramadaHSA";
 import OcorrenciasDashboard from "@/pages/ocorrencias/OcorrenciasDashboard";
 import OcorrenciasCadastro from "@/pages/ocorrencias/OcorrenciasCadastro";
 import OcorrenciasConsulta from "@/pages/ocorrencias/OcorrenciasConsulta";
@@ -42,31 +43,28 @@ import MedidasDisciplinaresConsulta from "@/pages/medidas-disciplinares/MedidasD
 
 // Tarefas pages
 import TarefasDashboard from "@/pages/tarefas/TarefasDashboard";
-import TarefasMinhasTarefas from "@/pages/tarefas/TarefasMinhasTarefas";
-import TarefasCadastro from "@/pages/tarefas/TarefasCadastro";
+import MinhasTarefas from "@/pages/tarefas/MinhasTarefas";
+import CadastroTarefas from "@/pages/tarefas/CadastroTarefas";
 
 // Relatorios pages
-import Relatorios from "@/pages/relatorios/Relatorios";
+import RelatoriosDashboard from "@/pages/relatorios/RelatoriosDashboard";
 import RelatoriosIDSMS from "@/pages/relatorios/RelatoriosIDSMS";
 
 // IDSMS pages
 import IDSMSDashboard from "@/pages/idsms/IDSMSDashboard";
 import IDSMSIndicadores from "@/pages/idsms/IDSMSIndicadores";
-import IDSMSIID from "@/pages/idsms/IDSMSIID";
-import IDSMSHSA from "@/pages/idsms/IDSMSHSA";
-import IDSMSHT from "@/pages/idsms/IDSMSHT";
-import IDSMSIPOM from "@/pages/idsms/IDSMSIPOM";
-import IDSMSInspecaoAltaLideranca from "@/pages/idsms/IDSMSInspecaoAltaLideranca";
-import IDSMSInspecaoGestaoSMS from "@/pages/idsms/IDSMSInspecaoGestaoSMS";
-import IDSMSIndiceReativo from "@/pages/idsms/IDSMSIndiceReativo";
+import IIDForm from "@/pages/idsms/IIDForm";
+import HSAForm from "@/pages/idsms/HSAForm";
+import HTForm from "@/pages/idsms/HTForm";
+import IPOMForm from "@/pages/idsms/IPOMForm";
+import InspecaoAltaLiderancaForm from "@/pages/idsms/InspecaoAltaLiderancaForm";
+import InspecaoGestaoSMSForm from "@/pages/idsms/InspecaoGestaoSMSForm";
+import IndiceReativoForm from "@/pages/idsms/IndiceReativoForm";
 
 // GRO pages
-import GRODashboard from "@/pages/gro/GRODashboard";
-import GROPerigos from "@/pages/gro/GROPerigos";
-import GROAvaliacao from "@/pages/gro/GROAvaliacao";
-import GROPGR from "@/pages/gro/GROPGR";
-import GRORevisao from "@/pages/gro/GRORevisao";
-import GRORelatorios from "@/pages/gro/GRORelatorios";
+import GroCadastroPerigos from "@/pages/gro/GroCadastroPerigos";
+import GroAvaliacaoRiscos from "@/pages/gro/GroAvaliacaoRiscos";
+import GroPGR from "@/pages/gro/GroPGR";
 
 // Admin pages
 import AdminUsuarios from "@/pages/admin/AdminUsuarios";
@@ -75,15 +73,15 @@ import AdminEmpresas from "@/pages/admin/AdminEmpresas";
 import AdminCCAs from "@/pages/admin/AdminCCAs";
 import AdminEngenheiros from "@/pages/admin/AdminEngenheiros";
 import AdminSupervisores from "@/pages/admin/AdminSupervisores";
-import AdminFuncionarios from "@/pages/admin/AdminFuncionarios";
-import AdminHHT from "@/pages/admin/AdminHHT";
-import AdminMetasIndicadores from "@/pages/admin/AdminMetasIndicadores";
-import AdminTemplates from "@/pages/admin/AdminTemplates";
+import CadastroFuncionarios from "@/pages/admin/CadastroFuncionarios";
+import RegistroHHT from "@/pages/admin/RegistroHHT";
+import MetasIndicadores from "@/pages/admin/MetasIndicadores";
+import AdminTemplates from "@/pages/AdminTemplates";
 import AdminLogo from "@/pages/admin/AdminLogo";
 
 // Account pages
-import AccountProfile from "@/pages/account/AccountProfile";
-import AccountSettings from "@/pages/account/AccountSettings";
+import Profile from "@/pages/account/Profile";
+import Settings from "@/pages/account/Settings";
 
 // New Inspeção SMS pages
 import InspecaoSMSDashboard from "@/pages/inspecao-sms/InspecaoSMSDashboard";
@@ -114,7 +112,7 @@ const App = () => (
               
               {/* SMS routes */}
               <Route path="desvios/dashboard" element={<DesviosDashboard />} />
-              <Route path="desvios/cadastro" element={<DesviosCadastro />} />
+              <Route path="desvios/cadastro" element={<DesviosForm />} />
               <Route path="desvios/consulta" element={<DesviosConsulta />} />
               <Route path="desvios/nao-conformidade" element={<DesviosNaoConformidade />} />
               <Route path="treinamentos/dashboard" element={<TreinamentosDashboard />} />
@@ -123,10 +121,10 @@ const App = () => (
               <Route path="treinamentos/execucao" element={<TreinamentosExecucao />} />
               <Route path="treinamentos/cracha" element={<TreinamentosCracha />} />
               <Route path="hora-seguranca/dashboard" element={<HoraSegurancaDashboard />} />
-              <Route path="hora-seguranca/agenda-hsa" element={<HoraSegurancaAgenda />} />
-              <Route path="hora-seguranca/cadastro-inspecao" element={<HoraSegurancaCadastroInspecao />} />
-              <Route path="hora-seguranca/acompanhamento" element={<HoraSegurancaAcompanhamento />} />
-              <Route path="hora-seguranca/cadastro-inspecao-nao-planejada" element={<HoraSegurancaCadastroInspecaoNaoPlanejada />} />
+              <Route path="hora-seguranca/agenda-hsa" element={<AgendaHSA />} />
+              <Route path="hora-seguranca/cadastro-inspecao" element={<InspecaoCadastroHSA />} />
+              <Route path="hora-seguranca/acompanhamento" element={<InspecoesAcompanhamento />} />
+              <Route path="hora-seguranca/cadastro-inspecao-nao-planejada" element={<InspecaoNaoProgramadaHSA />} />
               <Route path="ocorrencias/dashboard" element={<OcorrenciasDashboard />} />
               <Route path="ocorrencias/cadastro" element={<OcorrenciasCadastro />} />
               <Route path="ocorrencias/consulta" element={<OcorrenciasConsulta />} />
@@ -141,31 +139,28 @@ const App = () => (
               
               {/* Tarefas routes */}
               <Route path="tarefas/dashboard" element={<TarefasDashboard />} />
-              <Route path="tarefas/minhas-tarefas" element={<TarefasMinhasTarefas />} />
-              <Route path="tarefas/cadastro" element={<TarefasCadastro />} />
+              <Route path="tarefas/minhas-tarefas" element={<MinhasTarefas />} />
+              <Route path="tarefas/cadastro" element={<CadastroTarefas />} />
 
               {/* Relatorios routes */}
-              <Route path="relatorios" element={<Relatorios />} />
+              <Route path="relatorios" element={<RelatoriosDashboard />} />
               <Route path="relatorios/idsms" element={<RelatoriosIDSMS />} />
 
               {/* IDSMS routes */}
               <Route path="idsms/dashboard" element={<IDSMSDashboard />} />
               <Route path="idsms/indicadores" element={<IDSMSIndicadores />} />
-              <Route path="idsms/iid" element={<IDSMSIID />} />
-              <Route path="idsms/hsa" element={<IDSMSHSA />} />
-              <Route path="idsms/ht" element={<IDSMSHT />} />
-              <Route path="idsms/ipom" element={<IDSMSIPOM />} />
-              <Route path="idsms/inspecao-alta-lideranca" element={<IDSMSInspecaoAltaLideranca />} />
-              <Route path="idsms/inspecao-gestao-sms" element={<IDSMSInspecaoGestaoSMS />} />
-              <Route path="idsms/indice-reativo" element={<IDSMSIndiceReativo />} />
+              <Route path="idsms/iid" element={<IIDForm />} />
+              <Route path="idsms/hsa" element={<HSAForm />} />
+              <Route path="idsms/ht" element={<HTForm />} />
+              <Route path="idsms/ipom" element={<IPOMForm />} />
+              <Route path="idsms/inspecao-alta-lideranca" element={<InspecaoAltaLiderancaForm />} />
+              <Route path="idsms/inspecao-gestao-sms" element={<InspecaoGestaoSMSForm />} />
+              <Route path="idsms/indice-reativo" element={<IndiceReativoForm />} />
 
               {/* GRO routes */}
-              <Route path="gro/dashboard" element={<GRODashboard />} />
-              <Route path="gro/perigos" element={<GROPerigos />} />
-              <Route path="gro/avaliacao" element={<GROAvaliacao />} />
-              <Route path="gro/pgr" element={<GROPGR />} />
-              <Route path="gro/revisao" element={<GRORevisao />} />
-              <Route path="gro/relatorios" element={<GRORelatorios />} />
+              <Route path="gro/perigos" element={<GroCadastroPerigos />} />
+              <Route path="gro/avaliacao" element={<GroAvaliacaoRiscos />} />
+              <Route path="gro/pgr" element={<GroPGR />} />
               
               {/* Admin routes */}
               <Route path="admin/usuarios" element={<AdminUsuarios />} />
@@ -174,17 +169,17 @@ const App = () => (
               <Route path="admin/ccas" element={<AdminCCAs />} />
               <Route path="admin/engenheiros" element={<AdminEngenheiros />} />
               <Route path="admin/supervisores" element={<AdminSupervisores />} />
-              <Route path="admin/funcionarios" element={<AdminFuncionarios />} />
-              <Route path="admin/hht" element={<AdminHHT />} />
-              <Route path="admin/metas-indicadores" element={<AdminMetasIndicadores />} />
+              <Route path="admin/funcionarios" element={<CadastroFuncionarios />} />
+              <Route path="admin/hht" element={<RegistroHHT />} />
+              <Route path="admin/metas-indicadores" element={<MetasIndicadores />} />
               {/* Admin routes - Add new model route */}
               <Route path="admin/modelos-inspecao" element={<AdminModelosInspecao />} />
               <Route path="admin/templates" element={<AdminTemplates />} />
               <Route path="admin/logo" element={<AdminLogo />} />
 
               {/* Account routes */}
-              <Route path="account/profile" element={<AccountProfile />} />
-              <Route path="account/settings" element={<AccountSettings />} />
+              <Route path="account/profile" element={<Profile />} />
+              <Route path="account/settings" element={<Settings />} />
             </Route>
             
             {/* 404 route */}
