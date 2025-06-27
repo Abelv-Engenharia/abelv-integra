@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Home } from "lucide-react";
 import {
@@ -73,7 +72,7 @@ export function AppSidebar() {
           {podeVerMenu("dashboard", menusSidebar) && (
             <SidebarMenuItem>
               <SidebarMenuButton asChild>
-                <Link to="/">
+                <Link to="/dashboard">
                   <Home className="h-4 w-4" />
                   <span>Dashboard</span>
                 </Link>

@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -107,7 +106,7 @@ const App = () => (
             
             {/* Protected routes */}
             <Route path="/" element={<AuthGuard><Layout /></AuthGuard>}>
-              <Route index element={<Index />} />
+              <Route index element={<Dashboard />} />
               <Route path="dashboard" element={<Dashboard />} />
               
               {/* SMS routes */}
@@ -172,7 +171,6 @@ const App = () => (
               <Route path="admin/funcionarios" element={<CadastroFuncionarios />} />
               <Route path="admin/hht" element={<RegistroHHT />} />
               <Route path="admin/metas-indicadores" element={<MetasIndicadores />} />
-              {/* Admin routes - Add new model route */}
               <Route path="admin/modelos-inspecao" element={<AdminModelosInspecao />} />
               <Route path="admin/templates" element={<AdminTemplates />} />
               <Route path="admin/logo" element={<AdminLogo />} />
