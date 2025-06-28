@@ -36,8 +36,8 @@ export default function SidebarSectionRelatorios({ openMenu, toggleMenu }: Props
                   onClick={() => toggleMenu("relatorios")}
                   className="text-white hover:bg-slate-600"
                 >
-                  <FileText className="h-4 w-4" />
-                  <span>Relatórios</span>
+                  <FileText className="h-4 w-4 flex-shrink-0" />
+                  <span className="break-words">Relatórios</span>
                 </SidebarMenuButton>
               </CollapsibleTrigger>
               <CollapsibleContent asChild>
@@ -47,8 +47,8 @@ export default function SidebarSectionRelatorios({ openMenu, toggleMenu }: Props
                       asChild
                       className={currentPath === "/relatorios" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
                     >
-                      <Link to="/relatorios">
-                        <span className="text-xs leading-tight">Relatórios</span>
+                      <Link to="/relatorios" className="flex items-center gap-2">
+                        <span className="text-xs leading-tight break-words min-w-0">Relatórios</span>
                       </Link>
                     </SidebarMenuSubButton>
                   </SidebarMenuSubItem>

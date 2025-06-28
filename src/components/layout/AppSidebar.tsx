@@ -76,9 +76,9 @@ export function AppSidebar() {
                 asChild 
                 className={currentPath === "/dashboard" || currentPath === "/" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
               >
-                <Link to="/dashboard">
-                  <Home className="h-4 w-4" />
-                  <span>Dashboard</span>
+                <Link to="/dashboard" className="flex items-center gap-2">
+                  <Home className="h-4 w-4 flex-shrink-0" />
+                  <span className="break-words">Dashboard</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>

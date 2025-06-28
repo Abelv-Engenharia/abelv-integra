@@ -20,8 +20,10 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
   SidebarMenuSub,
+  SidebarMenuSubItem,
+  SidebarMenuSubButton,
 } from "@/components/ui/sidebar";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useProfile } from "@/hooks/useProfile";
 import { getAllMenusSidebar } from "@/services/perfisService";
@@ -38,6 +40,8 @@ type Props = {
 };
 
 export default function SidebarSectionAdministracao({ openMenu, toggleMenu }: Props) {
+  const location = useLocation();
+  const currentPath = location.pathname;
   const { userPermissoes, userRole } = useProfile();
 
   // Garantir fallback para admins
@@ -60,138 +64,177 @@ export default function SidebarSectionAdministracao({ openMenu, toggleMenu }: Pr
 
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>Administração</SidebarGroupLabel>
+      <SidebarGroupLabel className="text-white">Administração</SidebarGroupLabel>
       <SidebarGroupContent>
         <SidebarMenu>
           <SidebarMenuItem>
             <Collapsible open={openMenu === "admin"}>
               <CollapsibleTrigger asChild>
-                <SidebarMenuButton onClick={() => toggleMenu("admin")}>
-                  <Settings className="h-4 w-4" />
-                  <span>Configurações</span>
+                <SidebarMenuButton 
+                  onClick={() => toggleMenu("admin")}
+                  className="text-white hover:bg-slate-600"
+                >
+                  <Settings className="h-4 w-4 flex-shrink-0" />
+                  <span className="break-words">Configurações</span>
                 </SidebarMenuButton>
               </CollapsibleTrigger>
               <CollapsibleContent asChild>
                 <SidebarMenuSub>
                   {podeVerMenu("admin_usuarios", menusSidebar) && (
-                    <SidebarMenuItem>
-                      <SidebarMenuButton asChild>
-                        <Link to="/admin/usuarios">
-                          <Users className="h-4 w-4 mr-2" />
-                          <span className="text-xs leading-tight">Usuários</span>
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton 
+                        asChild
+                        className={currentPath === "/admin/usuarios" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
+                      >
+                        <Link to="/admin/usuarios" className="flex items-center gap-2">
+                          <Users className="h-4 w-4 flex-shrink-0" />
+                          <span className="text-xs leading-tight break-words min-w-0">Usuários</span>
                         </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
                   )}
                   {podeVerMenu("admin_perfis", menusSidebar) && (
-                    <SidebarMenuItem>
-                      <SidebarMenuButton asChild>
-                        <Link to="/admin/perfis">
-                          <UserCheck className="h-4 w-4 mr-2" />
-                          <span className="text-xs leading-tight">Perfis</span>
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton 
+                        asChild
+                        className={currentPath === "/admin/perfis" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
+                      >
+                        <Link to="/admin/perfis" className="flex items-center gap-2">
+                          <UserCheck className="h-4 w-4 flex-shrink-0" />
+                          <span className="text-xs leading-tight break-words min-w-0">Perfis</span>
                         </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
                   )}
                   {podeVerMenu("admin_empresas", menusSidebar) && (
-                    <SidebarMenuItem>
-                      <SidebarMenuButton asChild>
-                        <Link to="/admin/empresas">
-                          <Building2 className="h-4 w-4 mr-2" />
-                          <span className="text-xs leading-tight">Empresas</span>
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton 
+                        asChild
+                        className={currentPath === "/admin/empresas" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
+                      >
+                        <Link to="/admin/empresas" className="flex items-center gap-2">
+                          <Building2 className="h-4 w-4 flex-shrink-0" />
+                          <span className="text-xs leading-tight break-words min-w-0">Empresas</span>
                         </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
                   )}
                   {podeVerMenu("admin_ccas", menusSidebar) && (
-                    <SidebarMenuItem>
-                      <SidebarMenuButton asChild>
-                        <Link to="/admin/ccas">
-                          <MapPin className="h-4 w-4 mr-2" />
-                          <span className="text-xs leading-tight">CCAs</span>
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton 
+                        asChild
+                        className={currentPath === "/admin/ccas" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
+                      >
+                        <Link to="/admin/ccas" className="flex items-center gap-2">
+                          <MapPin className="h-4 w-4 flex-shrink-0" />
+                          <span className="text-xs leading-tight break-words min-w-0">CCAs</span>
                         </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
                   )}
                   {podeVerMenu("admin_engenheiros", menusSidebar) && (
-                    <SidebarMenuItem>
-                      <SidebarMenuButton asChild>
-                        <Link to="/admin/engenheiros">
-                          <UserCog className="h-4 w-4 mr-2" />
-                          <span className="text-xs leading-tight">Engenheiros</span>
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton 
+                        asChild
+                        className={currentPath === "/admin/engenheiros" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
+                      >
+                        <Link to="/admin/engenheiros" className="flex items-center gap-2">
+                          <UserCog className="h-4 w-4 flex-shrink-0" />
+                          <span className="text-xs leading-tight break-words min-w-0">Engenheiros</span>
                         </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
                   )}
                   {podeVerMenu("admin_supervisores", menusSidebar) && (
-                    <SidebarMenuItem>
-                      <SidebarMenuButton asChild>
-                        <Link to="/admin/supervisores">
-                          <UserCog className="h-4 w-4 mr-2" />
-                          <span className="text-xs leading-tight">Supervisores</span>
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton 
+                        asChild
+                        className={currentPath === "/admin/supervisores" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
+                      >
+                        <Link to="/admin/supervisores" className="flex items-center gap-2">
+                          <UserCog className="h-4 w-4 flex-shrink-0" />
+                          <span className="text-xs leading-tight break-words min-w-0">Supervisores</span>
                         </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
                   )}
                   {podeVerMenu("admin_funcionarios", menusSidebar) && (
-                    <SidebarMenuItem>
-                      <SidebarMenuButton asChild>
-                        <Link to="/admin/funcionarios">
-                          <Users className="h-4 w-4 mr-2" />
-                          <span className="text-xs leading-tight">Funcionários</span>
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton 
+                        asChild
+                        className={currentPath === "/admin/funcionarios" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
+                      >
+                        <Link to="/admin/funcionarios" className="flex items-center gap-2">
+                          <Users className="h-4 w-4 flex-shrink-0" />
+                          <span className="text-xs leading-tight break-words min-w-0">Funcionários</span>
                         </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
                   )}
                   {podeVerMenu("admin_hht", menusSidebar) && (
-                    <SidebarMenuItem>
-                      <SidebarMenuButton asChild>
-                        <Link to="/admin/hht">
-                          <Clock className="h-4 w-4 mr-2" />
-                          <span className="text-xs leading-tight">Registro HHT</span>
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton 
+                        asChild
+                        className={currentPath === "/admin/hht" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
+                      >
+                        <Link to="/admin/hht" className="flex items-center gap-2">
+                          <Clock className="h-4 w-4 flex-shrink-0" />
+                          <span className="text-xs leading-tight break-words min-w-0">Registro HHT</span>
                         </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
                   )}
                   {podeVerMenu("admin_metas_indicadores", menusSidebar) && (
-                    <SidebarMenuItem>
-                      <SidebarMenuButton asChild>
-                        <Link to="/admin/metas-indicadores">
-                          <Target className="h-4 w-4 mr-2" />
-                          <span className="text-xs leading-tight">Metas e Indicadores</span>
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton 
+                        asChild
+                        className={currentPath === "/admin/metas-indicadores" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
+                      >
+                        <Link to="/admin/metas-indicadores" className="flex items-center gap-2">
+                          <Target className="h-4 w-4 flex-shrink-0" />
+                          <span className="text-xs leading-tight break-words min-w-0">Metas e Indicadores</span>
                         </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
                   )}
                   {podeVerMenu("admin_modelos_inspecao", menusSidebar) && (
-                    <SidebarMenuItem>
-                      <SidebarMenuButton asChild>
-                        <Link to="/admin/modelos-inspecao">
-                          <FileText className="h-4 w-4 mr-2" />
-                          <span className="text-xs leading-tight">Modelos de Inspeção</span>
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton 
+                        asChild
+                        className={currentPath === "/admin/modelos-inspecao" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
+                      >
+                        <Link to="/admin/modelos-inspecao" className="flex items-center gap-2">
+                          <FileText className="h-4 w-4 flex-shrink-0" />
+                          <span className="text-xs leading-tight break-words min-w-0">Modelos de Inspeção</span>
                         </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
                   )}
                   {podeVerMenu("admin_templates", menusSidebar) && (
-                    <SidebarMenuItem>
-                      <SidebarMenuButton asChild>
-                        <Link to="/admin/templates">
-                          <FileText className="h-4 w-4 mr-2" />
-                          <span className="text-xs leading-tight">Templates</span>
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton 
+                        asChild
+                        className={currentPath === "/admin/templates" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
+                      >
+                        <Link to="/admin/templates" className="flex items-center gap-2">
+                          <FileText className="h-4 w-4 flex-shrink-0" />
+                          <span className="text-xs leading-tight break-words min-w-0">Templates</span>
                         </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
                   )}
                   {podeVerMenu("admin_logo", menusSidebar) && (
-                    <SidebarMenuItem>
-                      <SidebarMenuButton asChild>
-                        <Link to="/admin/logo">
-                          <ImageIcon className="h-4 w-4 mr-2" />
-                          <span className="text-xs leading-tight">Logo do Sistema</span>
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton 
+                        asChild
+                        className={currentPath === "/admin/logo" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
+                      >
+                        <Link to="/admin/logo" className="flex items-center gap-2">
+                          <ImageIcon className="h-4 w-4 flex-shrink-0" />
+                          <span className="text-xs leading-tight break-words min-w-0">Logo do Sistema</span>
                         </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
                   )}
                 </SidebarMenuSub>
               </CollapsibleContent>

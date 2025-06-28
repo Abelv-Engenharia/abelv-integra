@@ -36,8 +36,8 @@ export default function SidebarSectionTarefas({ openMenu, toggleMenu }: Props) {
                   onClick={() => toggleMenu("tarefas")}
                   className="text-white hover:bg-slate-600"
                 >
-                  <ClipboardList className="h-4 w-4" />
-                  <span>Tarefas</span>
+                  <ClipboardList className="h-4 w-4 flex-shrink-0" />
+                  <span className="break-words">Tarefas</span>
                 </SidebarMenuButton>
               </CollapsibleTrigger>
               <CollapsibleContent asChild>
@@ -47,8 +47,8 @@ export default function SidebarSectionTarefas({ openMenu, toggleMenu }: Props) {
                       asChild
                       className={currentPath === "/tarefas/dashboard" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
                     >
-                      <Link to="/tarefas/dashboard">
-                        <span className="text-xs leading-tight">Dashboard</span>
+                      <Link to="/tarefas/dashboard" className="flex items-center gap-2">
+                        <span className="text-xs leading-tight break-words min-w-0">Dashboard</span>
                       </Link>
                     </SidebarMenuSubButton>
                   </SidebarMenuSubItem>
@@ -57,8 +57,8 @@ export default function SidebarSectionTarefas({ openMenu, toggleMenu }: Props) {
                       asChild
                       className={currentPath === "/tarefas/minhas-tarefas" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
                     >
-                      <Link to="/tarefas/minhas-tarefas">
-                        <span className="text-xs leading-tight">Minhas Tarefas</span>
+                      <Link to="/tarefas/minhas-tarefas" className="flex items-center gap-2">
+                        <span className="text-xs leading-tight break-words min-w-0">Minhas Tarefas</span>
                       </Link>
                     </SidebarMenuSubButton>
                   </SidebarMenuSubItem>
@@ -67,8 +67,8 @@ export default function SidebarSectionTarefas({ openMenu, toggleMenu }: Props) {
                       asChild
                       className={currentPath === "/tarefas/cadastro" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
                     >
-                      <Link to="/tarefas/cadastro">
-                        <span className="text-xs leading-tight">Cadastro de Tarefas</span>
+                      <Link to="/tarefas/cadastro" className="flex items-center gap-2">
+                        <span className="text-xs leading-tight break-words min-w-0">Cadastro de Tarefas</span>
                       </Link>
                     </SidebarMenuSubButton>
                   </SidebarMenuSubItem>
