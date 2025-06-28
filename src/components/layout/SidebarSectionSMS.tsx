@@ -1,14 +1,12 @@
 
 import React from "react";
 import {
-  Calendar,
-  ShieldAlert,
-  Clipboard,
-  BarChart3,
-  List,
-  ShieldCheck,
-  ClipboardList,
-  FileSearch,
+  Shield,
+  AlertTriangle,
+  GraduationCap,
+  Clock,
+  FileWarning,
+  Search,
 } from "lucide-react";
 import {
   SidebarGroup,
@@ -18,8 +16,10 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
   SidebarMenuSub,
+  SidebarMenuSubItem,
+  SidebarMenuSubButton,
 } from "@/components/ui/sidebar";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useProfile } from "@/hooks/useProfile";
 import { getAllMenusSidebar } from "@/services/perfisService";
@@ -36,6 +36,8 @@ type Props = {
 };
 
 export default function SidebarSectionSMS({ openMenu, toggleMenu }: Props) {
+  const location = useLocation();
+  const currentPath = location.pathname;
   const { userPermissoes, userRole } = useProfile();
 
   // Garantir fallback para admins
@@ -58,7 +60,7 @@ export default function SidebarSectionSMS({ openMenu, toggleMenu }: Props) {
 
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>Gestão de SMS</SidebarGroupLabel>
+      <SidebarGroupLabel className="text-white">SMS</SidebarGroupLabel>
       <SidebarGroupContent>
         <SidebarMenu>
           {/* Desvios */}
@@ -68,48 +70,63 @@ export default function SidebarSectionSMS({ openMenu, toggleMenu }: Props) {
             <SidebarMenuItem>
               <Collapsible open={openMenu === "desvios"}>
                 <CollapsibleTrigger asChild>
-                  <SidebarMenuButton onClick={() => toggleMenu("desvios")}>
-                    <ShieldAlert className="h-4 w-4" />
-                    <span>Desvios</span>
+                  <SidebarMenuButton 
+                    onClick={() => toggleMenu("desvios")}
+                    className="text-white hover:bg-slate-600"
+                  >
+                    <AlertTriangle className="h-4 w-4 flex-shrink-0" />
+                    <span className="break-words whitespace-normal leading-tight">Desvios</span>
                   </SidebarMenuButton>
                 </CollapsibleTrigger>
                 <CollapsibleContent asChild>
                   <SidebarMenuSub>
                     {podeVerMenu("desvios_dashboard", menusSidebar) && (
-                      <SidebarMenuItem>
-                        <SidebarMenuButton asChild>
-                          <Link to="/desvios/dashboard">
-                            <span className="text-xs leading-tight">Dashboard de Desvios</span>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton 
+                          asChild
+                          className={currentPath === "/desvios/dashboard" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
+                        >
+                          <Link to="/desvios/dashboard" className="flex items-center gap-2">
+                            <span className="text-xs leading-tight break-words whitespace-normal min-w-0">Dashboard</span>
                           </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
                     )}
                     {podeVerMenu("desvios_cadastro", menusSidebar) && (
-                      <SidebarMenuItem>
-                        <SidebarMenuButton asChild>
-                          <Link to="/desvios/cadastro">
-                            <span className="text-xs leading-tight">Cadastro de Desvios</span>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton 
+                          asChild
+                          className={currentPath === "/desvios/cadastro" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
+                        >
+                          <Link to="/desvios/cadastro" className="flex items-center gap-2">
+                            <span className="text-xs leading-tight break-words whitespace-normal min-w-0">Cadastro</span>
                           </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
                     )}
                     {podeVerMenu("desvios_consulta", menusSidebar) && (
-                      <SidebarMenuItem>
-                        <SidebarMenuButton asChild>
-                          <Link to="/desvios/consulta">
-                            <span className="text-xs leading-tight">Consulta de Desvios</span>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton 
+                          asChild
+                          className={currentPath === "/desvios/consulta" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
+                        >
+                          <Link to="/desvios/consulta" className="flex items-center gap-2">
+                            <span className="text-xs leading-tight break-words whitespace-normal min-w-0">Consulta</span>
                           </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
                     )}
                     {podeVerMenu("desvios_nao_conformidade", menusSidebar) && (
-                      <SidebarMenuItem>
-                        <SidebarMenuButton asChild>
-                          <Link to="/desvios/nao-conformidade">
-                            <span className="text-xs leading-tight">Emissão de Não Conformidade</span>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton 
+                          asChild
+                          className={currentPath === "/desvios/nao-conformidade" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
+                        >
+                          <Link to="/desvios/nao-conformidade" className="flex items-center gap-2">
+                            <span className="text-xs leading-tight break-words whitespace-normal min-w-0 max-w-[140px]">Emissão de Não Conformidade</span>
                           </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
                     )}
                   </SidebarMenuSub>
                 </CollapsibleContent>
@@ -124,57 +141,75 @@ export default function SidebarSectionSMS({ openMenu, toggleMenu }: Props) {
             <SidebarMenuItem>
               <Collapsible open={openMenu === "treinamentos"}>
                 <CollapsibleTrigger asChild>
-                  <SidebarMenuButton onClick={() => toggleMenu("treinamentos")}>
-                    <Calendar className="h-4 w-4" />
-                    <span>Treinamentos</span>
+                  <SidebarMenuButton 
+                    onClick={() => toggleMenu("treinamentos")}
+                    className="text-white hover:bg-slate-600"
+                  >
+                    <GraduationCap className="h-4 w-4 flex-shrink-0" />
+                    <span className="break-words whitespace-normal leading-tight">Treinamentos</span>
                   </SidebarMenuButton>
                 </CollapsibleTrigger>
                 <CollapsibleContent asChild>
                   <SidebarMenuSub>
                     {podeVerMenu("treinamentos_dashboard", menusSidebar) && (
-                      <SidebarMenuItem>
-                        <SidebarMenuButton asChild>
-                          <Link to="/treinamentos/dashboard">
-                            <span className="text-xs leading-tight">Dashboard de Treinamentos</span>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton 
+                          asChild
+                          className={currentPath === "/treinamentos/dashboard" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
+                        >
+                          <Link to="/treinamentos/dashboard" className="flex items-center gap-2">
+                            <span className="text-xs leading-tight break-words whitespace-normal min-w-0 max-w-[140px]">Dashboard de Treinamentos</span>
                           </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
                     )}
                     {podeVerMenu("treinamentos_normativo", menusSidebar) && (
-                      <SidebarMenuItem>
-                        <SidebarMenuButton asChild>
-                          <Link to="/treinamentos/normativo">
-                            <span className="text-xs leading-tight">Treinamento Normativo</span>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton 
+                          asChild
+                          className={currentPath === "/treinamentos/normativo" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
+                        >
+                          <Link to="/treinamentos/normativo" className="flex items-center gap-2">
+                            <span className="text-xs leading-tight break-words whitespace-normal min-w-0">Normativos</span>
                           </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
                     )}
                     {podeVerMenu("treinamentos_consulta", menusSidebar) && (
-                      <SidebarMenuItem>
-                        <SidebarMenuButton asChild>
-                          <Link to="/treinamentos/consulta">
-                            <span className="text-xs leading-tight">Consulta de Treinamento</span>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton 
+                          asChild
+                          className={currentPath === "/treinamentos/consulta" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
+                        >
+                          <Link to="/treinamentos/consulta" className="flex items-center gap-2">
+                            <span className="text-xs leading-tight break-words whitespace-normal min-w-0">Consulta</span>
                           </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
                     )}
                     {podeVerMenu("treinamentos_execucao", menusSidebar) && (
-                      <SidebarMenuItem>
-                        <SidebarMenuButton asChild>
-                          <Link to="/treinamentos/execucao">
-                            <span className="text-xs leading-tight">Execução de Treinamentos</span>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton 
+                          asChild
+                          className={currentPath === "/treinamentos/execucao" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
+                        >
+                          <Link to="/treinamentos/execucao" className="flex items-center gap-2">
+                            <span className="text-xs leading-tight break-words whitespace-normal min-w-0">Execução</span>
                           </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
                     )}
                     {podeVerMenu("treinamentos_cracha", menusSidebar) && (
-                      <SidebarMenuItem>
-                        <SidebarMenuButton asChild>
-                          <Link to="/treinamentos/cracha">
-                            <span className="text-xs leading-tight">Emissão de Crachá</span>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton 
+                          asChild
+                          className={currentPath === "/treinamentos/cracha" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
+                        >
+                          <Link to="/treinamentos/cracha" className="flex items-center gap-2">
+                            <span className="text-xs leading-tight break-words whitespace-normal min-w-0">Crachá</span>
                           </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
                     )}
                   </SidebarMenuSub>
                 </CollapsibleContent>
@@ -182,7 +217,7 @@ export default function SidebarSectionSMS({ openMenu, toggleMenu }: Props) {
             </SidebarMenuItem>
           )}
 
-          {/* Hora da Segurança */}
+          {/* Hora Segurança */}
           {["hora_seguranca_cadastro", "hora_seguranca_cadastro_inspecao", "hora_seguranca_cadastro_nao_programada", 
             "hora_seguranca_dashboard", "hora_seguranca_agenda", "hora_seguranca_acompanhamento"].some(menu =>
             podeVerMenu(menu, menusSidebar)
@@ -190,104 +225,75 @@ export default function SidebarSectionSMS({ openMenu, toggleMenu }: Props) {
             <SidebarMenuItem>
               <Collapsible open={openMenu === "hora-seguranca"}>
                 <CollapsibleTrigger asChild>
-                  <SidebarMenuButton onClick={() => toggleMenu("hora-seguranca")}>
-                    <ShieldAlert className="h-4 w-4" />
-                    <span>Hora da Segurança</span>
+                  <SidebarMenuButton 
+                    onClick={() => toggleMenu("hora-seguranca")}
+                    className="text-white hover:bg-slate-600"
+                  >
+                    <Clock className="h-4 w-4 flex-shrink-0" />
+                    <span className="break-words whitespace-normal leading-tight">Hora Segurança</span>
                   </SidebarMenuButton>
                 </CollapsibleTrigger>
                 <CollapsibleContent asChild>
                   <SidebarMenuSub>
                     {podeVerMenu("hora_seguranca_dashboard", menusSidebar) && (
-                      <SidebarMenuItem>
-                        <SidebarMenuButton asChild>
-                          <Link to="/hora-seguranca/dashboard">
-                            <span className="text-xs leading-tight">Dashboard</span>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton 
+                          asChild
+                          className={currentPath === "/hora-seguranca/dashboard" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
+                        >
+                          <Link to="/hora-seguranca/dashboard" className="flex items-center gap-2">
+                            <span className="text-xs leading-tight break-words whitespace-normal min-w-0">Dashboard</span>
                           </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
                     )}
                     {podeVerMenu("hora_seguranca_agenda", menusSidebar) && (
-                      <SidebarMenuItem>
-                        <SidebarMenuButton asChild>
-                          <Link to="/hora-seguranca/agenda-hsa">
-                            <span className="text-xs leading-tight">Agenda HSA</span>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton 
+                          asChild
+                          className={currentPath === "/hora-seguranca/agenda-hsa" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
+                        >
+                          <Link to="/hora-seguranca/agenda-hsa" className="flex items-center gap-2">
+                            <span className="text-xs leading-tight break-words whitespace-normal min-w-0">Agenda HSA</span>
                           </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
                     )}
                     {podeVerMenu("hora_seguranca_cadastro_inspecao", menusSidebar) && (
-                      <SidebarMenuItem>
-                        <SidebarMenuButton asChild>
-                          <Link to="/hora-seguranca/cadastro-inspecao">
-                            <span className="text-xs leading-tight">Cadastro de Inspeção</span>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton 
+                          asChild
+                          className={currentPath === "/hora-seguranca/cadastro-inspecao" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
+                        >
+                          <Link to="/hora-seguranca/cadastro-inspecao" className="flex items-center gap-2">
+                            <span className="text-xs leading-tight break-words whitespace-normal min-w-0">Cadastro Inspeção</span>
                           </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
                     )}
                     {podeVerMenu("hora_seguranca_acompanhamento", menusSidebar) && (
-                      <SidebarMenuItem>
-                        <SidebarMenuButton asChild>
-                          <Link to="/hora-seguranca/acompanhamento">
-                            <span className="text-xs leading-tight">Acompanhamento</span>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton 
+                          asChild
+                          className={currentPath === "/hora-seguranca/acompanhamento" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
+                        >
+                          <Link to="/hora-seguranca/acompanhamento" className="flex items-center gap-2">
+                            <span className="text-xs leading-tight break-words whitespace-normal min-w-0">Acompanhamento</span>
                           </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
                     )}
                     {podeVerMenu("hora_seguranca_cadastro_nao_programada", menusSidebar) && (
-                      <SidebarMenuItem>
-                        <SidebarMenuButton asChild>
-                          <Link to="/hora-seguranca/cadastro-inspecao-nao-planejada">
-                            <span className="text-xs leading-tight">Cadastro de Inspeção Não Planejada</span>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton 
+                          asChild
+                          className={currentPath === "/hora-seguranca/cadastro-inspecao-nao-planejada" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
+                        >
+                          <Link to="/hora-seguranca/cadastro-inspecao-nao-planejada" className="flex items-center gap-2">
+                            <span className="text-xs leading-tight break-words whitespace-normal min-w-0 max-w-[140px]">Cadastro de Inspeção Não Programada</span>
                           </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                    )}
-                  </SidebarMenuSub>
-                </CollapsibleContent>
-              </Collapsible>
-            </SidebarMenuItem>
-          )}
-
-          {/* Inspeção SMS - NOVO */}
-          {["inspecao_sms_dashboard", "inspecao_sms_cadastro", "inspecao_sms_consulta"].some(menu =>
-            podeVerMenu(menu, menusSidebar)
-          ) && (
-            <SidebarMenuItem>
-              <Collapsible open={openMenu === "inspecao-sms"}>
-                <CollapsibleTrigger asChild>
-                  <SidebarMenuButton onClick={() => toggleMenu("inspecao-sms")}>
-                    <FileSearch className="h-4 w-4" />
-                    <span>Inspeção SMS</span>
-                  </SidebarMenuButton>
-                </CollapsibleTrigger>
-                <CollapsibleContent asChild>
-                  <SidebarMenuSub>
-                    {podeVerMenu("inspecao_sms_dashboard", menusSidebar) && (
-                      <SidebarMenuItem>
-                        <SidebarMenuButton asChild>
-                          <Link to="/inspecao-sms/dashboard">
-                            <span className="text-xs leading-tight">Dashboard</span>
-                          </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                    )}
-                    {podeVerMenu("inspecao_sms_cadastro", menusSidebar) && (
-                      <SidebarMenuItem>
-                        <SidebarMenuButton asChild>
-                          <Link to="/inspecao-sms/cadastro">
-                            <span className="text-xs leading-tight">Cadastrar Inspeção</span>
-                          </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                    )}
-                    {podeVerMenu("inspecao_sms_consulta", menusSidebar) && (
-                      <SidebarMenuItem>
-                        <SidebarMenuButton asChild>
-                          <Link to="/inspecao-sms/consulta">
-                            <span className="text-xs leading-tight">Consultar Inspeções</span>
-                          </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
                     )}
                   </SidebarMenuSub>
                 </CollapsibleContent>
@@ -302,39 +308,110 @@ export default function SidebarSectionSMS({ openMenu, toggleMenu }: Props) {
             <SidebarMenuItem>
               <Collapsible open={openMenu === "ocorrencias"}>
                 <CollapsibleTrigger asChild>
-                  <SidebarMenuButton onClick={() => toggleMenu("ocorrencias")}>
-                    <ClipboardList className="h-4 w-4" />
-                    <span className="text-sm leading-tight">Ocorrências</span>
+                  <SidebarMenuButton 
+                    onClick={() => toggleMenu("ocorrencias")}
+                    className="text-white hover:bg-slate-600"
+                  >
+                    <FileWarning className="h-4 w-4 flex-shrink-0" />
+                    <span className="break-words whitespace-normal leading-tight">Ocorrências</span>
                   </SidebarMenuButton>
                 </CollapsibleTrigger>
                 <CollapsibleContent asChild>
                   <SidebarMenuSub>
                     {podeVerMenu("ocorrencias_dashboard", menusSidebar) && (
-                      <SidebarMenuItem>
-                        <SidebarMenuButton asChild>
-                          <Link to="/ocorrencias/dashboard">
-                            <span className="text-xs leading-tight">Dashboard</span>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton 
+                          asChild
+                          className={currentPath === "/ocorrencias/dashboard" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
+                        >
+                          <Link to="/ocorrencias/dashboard" className="flex items-center gap-2">
+                            <span className="text-xs leading-tight break-words whitespace-normal min-w-0">Dashboard</span>
                           </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
                     )}
                     {podeVerMenu("ocorrencias_cadastro", menusSidebar) && (
-                      <SidebarMenuItem>
-                        <SidebarMenuButton asChild>
-                          <Link to="/ocorrencias/cadastro">
-                            <span className="text-xs leading-tight">Cadastro</span>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton 
+                          asChild
+                          className={currentPath === "/ocorrencias/cadastro" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
+                        >
+                          <Link to="/ocorrencias/cadastro" className="flex items-center gap-2">
+                            <span className="text-xs leading-tight break-words whitespace-normal min-w-0">Cadastro</span>
                           </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
                     )}
                     {podeVerMenu("ocorrencias_consulta", menusSidebar) && (
-                      <SidebarMenuItem>
-                        <SidebarMenuButton asChild>
-                          <Link to="/ocorrencias/consulta">
-                            <span className="text-xs leading-tight">Consulta</span>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton 
+                          asChild
+                          className={currentPath === "/ocorrencias/consulta" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
+                        >
+                          <Link to="/ocorrencias/consulta" className="flex items-center gap-2">
+                            <span className="text-xs leading-tight break-words whitespace-normal min-w-0">Consulta</span>
                           </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                    )}
+                  </SidebarMenuSub>
+                </CollapsibleContent>
+              </Collapsible>
+            </SidebarMenuItem>
+          )}
+
+          {/* Inspeção SMS */}
+          {["inspecao_sms_dashboard", "inspecao_sms_cadastro", "inspecao_sms_consulta"].some(menu =>
+            podeVerMenu(menu, menusSidebar)
+          ) && (
+            <SidebarMenuItem>
+              <Collapsible open={openMenu === "inspecao-sms"}>
+                <CollapsibleTrigger asChild>
+                  <SidebarMenuButton 
+                    onClick={() => toggleMenu("inspecao-sms")}
+                    className="text-white hover:bg-slate-600"
+                  >
+                    <Search className="h-4 w-4 flex-shrink-0" />
+                    <span className="break-words whitespace-normal leading-tight">Inspeção SMS</span>
+                  </SidebarMenuButton>
+                </CollapsibleTrigger>
+                <CollapsibleContent asChild>
+                  <SidebarMenuSub>
+                    {podeVerMenu("inspecao_sms_dashboard", menusSidebar) && (
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton 
+                          asChild
+                          className={currentPath === "/inspecao-sms/dashboard" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
+                        >
+                          <Link to="/inspecao-sms/dashboard" className="flex items-center gap-2">
+                            <span className="text-xs leading-tight break-words whitespace-normal min-w-0">Dashboard</span>
+                          </Link>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                    )}
+                    {podeVerMenu("inspecao_sms_cadastro", menusSidebar) && (
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton 
+                          asChild
+                          className={currentPath === "/inspecao-sms/cadastro" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
+                        >
+                          <Link to="/inspecao-sms/cadastro" className="flex items-center gap-2">
+                            <span className="text-xs leading-tight break-words whitespace-normal min-w-0">Cadastrar</span>
+                          </Link>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                    )}
+                    {podeVerMenu("inspecao_sms_consulta", menusSidebar) && (
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton 
+                          asChild
+                          className={currentPath === "/inspecao-sms/consulta" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
+                        >
+                          <Link to="/inspecao-sms/consulta" className="flex items-center gap-2">
+                            <span className="text-xs leading-tight break-words whitespace-normal min-w-0">Consultar</span>
+                          </Link>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
                     )}
                   </SidebarMenuSub>
                 </CollapsibleContent>
@@ -349,211 +426,52 @@ export default function SidebarSectionSMS({ openMenu, toggleMenu }: Props) {
             <SidebarMenuItem>
               <Collapsible open={openMenu === "medidas-disciplinares"}>
                 <CollapsibleTrigger asChild>
-                  <SidebarMenuButton onClick={() => toggleMenu("medidas-disciplinares")}>
-                    <Clipboard className="h-4 w-4" />
-                    <span className="text-sm leading-tight">Medidas Disciplinares</span>
+                  <SidebarMenuButton 
+                    onClick={() => toggleMenu("medidas-disciplinares")}
+                    className="text-white hover:bg-slate-600"
+                  >
+                    <Shield className="h-4 w-4 flex-shrink-0" />
+                    <span className="break-words whitespace-normal leading-tight">Medidas Disciplinares</span>
                   </SidebarMenuButton>
                 </CollapsibleTrigger>
                 <CollapsibleContent asChild>
                   <SidebarMenuSub>
                     {podeVerMenu("medidas_disciplinares_dashboard", menusSidebar) && (
-                      <SidebarMenuItem>
-                        <SidebarMenuButton asChild>
-                          <Link to="/medidas-disciplinares/dashboard">
-                            <span className="text-xs leading-tight">Dashboard de Medidas</span>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton 
+                          asChild
+                          className={currentPath === "/medidas-disciplinares/dashboard" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
+                        >
+                          <Link to="/medidas-disciplinares/dashboard" className="flex items-center gap-2">
+                            <span className="text-xs leading-tight break-words whitespace-normal min-w-0">Dashboard</span>
                           </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
                     )}
                     {podeVerMenu("medidas_disciplinares_cadastro", menusSidebar) && (
-                      <SidebarMenuItem>
-                        <SidebarMenuButton asChild>
-                          <Link to="/medidas-disciplinares/cadastro">
-                            <span className="text-xs leading-tight">Cadastro de Aplicação</span>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton 
+                          asChild
+                          className={currentPath === "/medidas-disciplinares/cadastro" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
+                        >
+                          <Link to="/medidas-disciplinares/cadastro" className="flex items-center gap-2">
+                            <span className="text-xs leading-tight break-words whitespace-normal min-w-0">Cadastro</span>
                           </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
                     )}
                     {podeVerMenu("medidas_disciplinares_consulta", menusSidebar) && (
-                      <SidebarMenuItem>
-                        <SidebarMenuButton asChild>
-                          <Link to="/medidas-disciplinares/consulta">
-                            <span className="text-xs leading-tight">Consulta de Medidas</span>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton 
+                          asChild
+                          className={currentPath === "/medidas-disciplinares/consulta" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
+                        >
+                          <Link to="/medidas-disciplinares/consulta" className="flex items-center gap-2">
+                            <span className="text-xs leading-tight break-words whitespace-normal min-w-0">Consulta</span>
                           </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
                     )}
-                  </SidebarMenuSub>
-                </CollapsibleContent>
-              </Collapsible>
-            </SidebarMenuItem>
-          )}
-
-          {/* IDSMS - só renderiza se tiver permissão */}
-          {["idsms_dashboard", "idsms_indicadores", "idsms_iid", "idsms_hsa", "idsms_ht", "idsms_ipom", 
-            "idsms_inspecao_alta_lideranca", "idsms_inspecao_gestao_sms", "idsms_indice_reativo"].some(menu =>
-            podeVerMenu(menu, menusSidebar)
-          ) && (
-            <SidebarMenuItem>
-              <Collapsible open={openMenu === "idsms"}>
-                <CollapsibleTrigger asChild>
-                  <SidebarMenuButton onClick={() => toggleMenu("idsms")}>
-                    <BarChart3 className="h-4 w-4" />
-                    <span>IDSMS</span>
-                  </SidebarMenuButton>
-                </CollapsibleTrigger>
-                <CollapsibleContent asChild>
-                  <SidebarMenuSub>
-                    {podeVerMenu("idsms_dashboard", menusSidebar) && (
-                      <SidebarMenuItem>
-                        <SidebarMenuButton asChild>
-                          <Link to="/idsms/dashboard">
-                            <span className="text-xs leading-tight">Dashboard</span>
-                          </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                    )}
-                    {podeVerMenu("idsms_indicadores", menusSidebar) && (
-                      <SidebarMenuItem>
-                        <SidebarMenuButton asChild>
-                          <Link to="/idsms/indicadores">
-                            <List className="h-4 w-4 mr-2" />
-                            <span className="text-xs leading-tight">Lista de Indicadores</span>
-                          </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                    )}
-                    {podeVerMenu("idsms_iid", menusSidebar) && (
-                      <SidebarMenuItem>
-                        <SidebarMenuButton asChild>
-                          <Link to="/idsms/iid">
-                            <span className="text-xs leading-tight">IID</span>
-                          </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                    )}
-                    {podeVerMenu("idsms_hsa", menusSidebar) && (
-                      <SidebarMenuItem>
-                        <SidebarMenuButton asChild>
-                          <Link to="/idsms/hsa">
-                            <span className="text-xs leading-tight">HSA</span>
-                          </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                    )}
-                    {podeVerMenu("idsms_ht", menusSidebar) && (
-                      <SidebarMenuItem>
-                        <SidebarMenuButton asChild>
-                          <Link to="/idsms/ht">
-                            <span className="text-xs leading-tight">HT</span>
-                          </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                    )}
-                    {podeVerMenu("idsms_ipom", menusSidebar) && (
-                      <SidebarMenuItem>
-                        <SidebarMenuButton asChild>
-                          <Link to="/idsms/ipom">
-                            <span className="text-xs leading-tight">IPOM</span>
-                          </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                    )}
-                    {podeVerMenu("idsms_inspecao_alta_lideranca", menusSidebar) && (
-                      <SidebarMenuItem>
-                        <SidebarMenuButton asChild>
-                          <Link to="/idsms/inspecao-alta-lideranca">
-                            <span className="text-xs leading-tight">Inspeção Alta Liderança</span>
-                          </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                    )}
-                    {podeVerMenu("idsms_inspecao_gestao_sms", menusSidebar) && (
-                      <SidebarMenuItem>
-                        <SidebarMenuButton asChild>
-                          <Link to="/idsms/inspecao-gestao-sms">
-                            <span className="text-xs leading-tight">Inspeção Gestão SMS</span>
-                          </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                    )}
-                    {podeVerMenu("idsms_indice_reativo", menusSidebar) && (
-                      <SidebarMenuItem>
-                        <SidebarMenuButton asChild>
-                          <Link to="/idsms/indice-reativo">
-                            <span className="text-xs leading-tight">Índice Reativo</span>
-                          </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                    )}
-                  </SidebarMenuSub>
-                </CollapsibleContent>
-              </Collapsible>
-            </SidebarMenuItem>
-          )}
-
-          {/* GRO - só renderiza se tiver permissão */}
-          {["gro_perigos", "gro_avaliacao", "gro_pgr"].some(menu =>
-            podeVerMenu(menu, menusSidebar)
-          ) && (
-            <SidebarMenuItem>
-              <Collapsible open={openMenu === "gro"}>
-                <CollapsibleTrigger asChild>
-                  <SidebarMenuButton onClick={() => toggleMenu("gro")}>
-                    <ShieldCheck className="h-4 w-4" />
-                    <span className="text-sm leading-tight">GRO</span>
-                  </SidebarMenuButton>
-                </CollapsibleTrigger>
-                <CollapsibleContent asChild>
-                  <SidebarMenuSub>
-                    <SidebarMenuItem>
-                      <SidebarMenuButton asChild>
-                        <Link to="/gro/dashboard">
-                          <span className="text-xs leading-tight">Dashboard do GRO</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                    {podeVerMenu("gro_perigos", menusSidebar) && (
-                      <SidebarMenuItem>
-                        <SidebarMenuButton asChild>
-                          <Link to="/gro/perigos">
-                            <span className="text-xs leading-tight">Cadastro/Perigos</span>
-                          </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                    )}
-                    {podeVerMenu("gro_avaliacao", menusSidebar) && (
-                      <SidebarMenuItem>
-                        <SidebarMenuButton asChild>
-                          <Link to="/gro/avaliacao">
-                            <span className="text-xs leading-tight">Avaliação de Riscos</span>
-                          </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                    )}
-                    {podeVerMenu("gro_pgr", menusSidebar) && (
-                      <SidebarMenuItem>
-                        <SidebarMenuButton asChild>
-                          <Link to="/gro/pgr">
-                            <span className="text-xs leading-tight">PGR – Plano de Ação</span>
-                          </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                    )}
-                    <SidebarMenuItem>
-                      <SidebarMenuButton asChild>
-                        <Link to="/gro/revisao">
-                          <span className="text-xs leading-tight">Monitoramento & Revisão</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                    <SidebarMenuItem>
-                      <SidebarMenuButton asChild>
-                        <Link to="/gro/relatorios">
-                          <span className="text-xs leading-tight">Relatórios & IRO</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
                   </SidebarMenuSub>
                 </CollapsibleContent>
               </Collapsible>
