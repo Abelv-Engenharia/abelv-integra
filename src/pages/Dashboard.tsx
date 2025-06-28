@@ -7,6 +7,7 @@ import {
   ClipboardList,
 } from "lucide-react";
 import StatCard from "@/components/dashboard/StatCard";
+import DashboardTopStats from "@/components/dashboard/DashboardTopStats";
 import RecentActivitiesList from "@/components/dashboard/RecentActivitiesList";
 import PendingTasksList from "@/components/dashboard/PendingTasksList";
 import SystemLogo from "@/components/common/SystemLogo";
@@ -296,6 +297,9 @@ const Dashboard = () => {
           Visão geral de indicadores e métricas do sistema de Gestão de SMS Abelv.
         </p>
       </div>
+
+      {/* New top stats cards */}
+      <DashboardTopStats />
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatCard
