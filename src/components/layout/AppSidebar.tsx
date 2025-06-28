@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Home } from "lucide-react";
 import {
@@ -71,7 +72,10 @@ export function AppSidebar() {
         <SidebarMenu>
           {podeVerMenu("dashboard", menusSidebar) && (
             <SidebarMenuItem>
-              <SidebarMenuButton asChild>
+              <SidebarMenuButton 
+                asChild 
+                className={currentPath === "/dashboard" || currentPath === "/" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
+              >
                 <Link to="/dashboard">
                   <Home className="h-4 w-4" />
                   <span>Dashboard</span>
