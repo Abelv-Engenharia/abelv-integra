@@ -5,26 +5,26 @@ import { useUserCCAs } from "@/hooks/useUserCCAs";
 
 interface CCASelectorProps {
   selectedCCAs: number[];
-  onSelectionChange: (ccaIds: number[]) => void;
+  onChange: (ccaIds: number[]) => void;
 }
 
-export const CCASelector = ({ selectedCCAs, onSelectionChange }: CCASelectorProps) => {
+export const CCASelector = ({ selectedCCAs, onChange }: CCASelectorProps) => {
   const { data: userCCAs, isLoading } = useUserCCAs();
 
   const handleToggleCCA = (ccaId: number) => {
     if (selectedCCAs.includes(ccaId)) {
-      onSelectionChange(selectedCCAs.filter(id => id !== ccaId));
+      onChange(selectedCCAs.filter(id => id !== ccaId));
     } else {
-      onSelectionChange([...selectedCCAs, ccaId]);
+      onChange([...selectedCCAs, ccaId]);
     }
   };
 
   const handleSelectAll = () => {
     if (userCCAs) {
       if (selectedCCAs.length === userCCAs.length) {
-        onSelectionChange([]);
+        onChange([]);
       } else {
-        onSelectionChange(userCCAs.map(cca => cca.id));
+        onChange(userCCAs.map(cca => cca.id));
       }
     }
   };
