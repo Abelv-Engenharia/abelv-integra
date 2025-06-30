@@ -1,12 +1,14 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Perfil, Permissoes } from "@/types/users";
-import { getAllMenusSidebar } from "@/services/perfisService";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { CCASelector } from "./CCASelector";
+import { Permissoes } from "@/types/users";
+import { PerfilPasswordFields } from "./PerfilPasswordFields";
 
 interface PerfilFormProps {
   initialData: {
@@ -16,226 +18,300 @@ interface PerfilFormProps {
     ccas_permitidas: number[];
   };
   onCancel: () => void;
-  onSave: (nome: string, descricao: string, permissoes: Permissoes, ccas_permitidas: number[]) => void;
+  onSave: (nome: string, descricao: string, permissoes: Permissoes, ccas_permitidas: number[], password?: string) => void;
   loading: boolean;
 }
 
 export const PerfilForm = ({ initialData, onCancel, onSave, loading }: PerfilFormProps) => {
-  const [nome, setNome] = useState<string>(initialData.nome);
-  const [descricao, setDescricao] = useState<string>(initialData.descricao);
+  const [nome, setNome] = useState(initialData.nome);
+  const [descricao, setDescricao] = useState(initialData.descricao);
   const [permissoes, setPermissoes] = useState<Permissoes>(initialData.permissoes);
-  const [ccasPermitidas, setCcasPermitidas] = useState<number[]>(initialData.ccas_permitidas || []);
+  const [ccasSelecionadas, setCcasSelecionadas] = useState<number[]>(initialData.ccas_permitidas);
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [passwordError, setPasswordError] = useState("");
+  const [confirmPasswordError, setConfirmPasswordError] = useState("");
 
-  // Obter menus definidos globalmente
-  const menusSidebar = getAllMenusSidebar();
+  const isCreating = !initialData.nome;
 
-  // Agrupamento dos módulos principais para exibir como checkboxes
-  const modulosPrincipais: { key: keyof Permissoes; label: string }[] = [
-    { key: 'desvios', label: 'Desvios' },
-    { key: 'treinamentos', label: 'Treinamentos' },
-    { key: 'ocorrencias', label: 'Ocorrências' },
-    { key: 'tarefas', label: 'Tarefas' },
-    { key: 'relatorios', label: 'Relatórios' },
-    { key: 'hora_seguranca', label: 'Hora de Segurança' },
-    { key: 'medidas_disciplinares', label: 'Medidas Disciplinares' },
-    { key: 'idsms_dashboard', label: 'IDSMS Dashboard' },
-    { key: 'idsms_formularios', label: 'IDSMS Formulários' },
-  ];
+  const validatePasswords = () => {
+    let valid = true;
+    setPasswordError("");
+    setConfirmPasswordError("");
 
-  const administrativos: { key: keyof Permissoes; label: string }[] = [
-    { key: 'admin_usuarios', label: 'Admin: Usuários' },
-    { key: 'admin_perfis', label: 'Admin: Perfis' },
-    { key: 'admin_funcionarios', label: 'Admin: Funcionários' },
-    { key: 'admin_hht', label: 'Admin: HHT' },
-    { key: 'admin_templates', label: 'Admin: Templates' },
-    { key: 'admin_empresas', label: 'Admin: Empresas' },
-    { key: 'admin_supervisores', label: 'Admin: Supervisores' },
-    { key: 'admin_engenheiros', label: 'Admin: Engenheiros' },
-    { key: 'admin_ccas', label: 'Admin: CCAs' }
-  ];
+    if (isCreating && !password) {
+      setPasswordError("Senha é obrigatória para novos perfis");
+      valid = false;
+    }
 
-  const permissoesEspecificas: { key: keyof Permissoes; label: string }[] = [
-    { key: 'pode_editar_desvios', label: 'Pode Editar Desvios' },
-    { key: 'pode_excluir_desvios', label: 'Pode Excluir Desvios' },
-    { key: 'pode_editar_ocorrencias', label: 'Pode Editar Ocorrências' },
-    { key: 'pode_excluir_ocorrencias', label: 'Pode Excluir Ocorrências' },
-    { key: 'pode_editar_treinamentos', label: 'Pode Editar Treinamentos' },
-    { key: 'pode_excluir_treinamentos', label: 'Pode Excluir Treinamentos' },
-    { key: 'pode_editar_tarefas', label: 'Pode Editar Tarefas' },
-    { key: 'pode_excluir_tarefas', label: 'Pode Excluir Tarefas' },
-    { key: 'pode_aprovar_tarefas', label: 'Pode Aprovar Tarefas' },
-    { key: 'pode_visualizar_relatorios_completos', label: 'Relatórios Completos' },
-    { key: 'pode_exportar_dados', label: 'Pode Exportar Dados' },
-  ];
+    if (password && password.length < 6) {
+      setPasswordError("A senha deve ter pelo menos 6 caracteres");
+      valid = false;
+    }
 
-  // Handler para checkboxes comuns
-  const handleChangePermissao = (key: keyof Permissoes, value: boolean) => {
+    if (password !== confirmPassword) {
+      setConfirmPasswordError("As senhas não coincidem");
+      valid = false;
+    }
+
+    return valid;
+  };
+
+  const handlePermissaoChange = (key: keyof Permissoes, value: boolean) => {
     setPermissoes(prev => ({
       ...prev,
       [key]: value
     }));
   };
 
-  // Handler para seleção dos menus da sidebar
-  const handleToggleSidebarMenu = (menu: string) => {
-    setPermissoes(prev => {
-      const atual = prev.menus_sidebar ? prev.menus_sidebar : [];
-      if (atual.includes(menu)) {
-        return { ...prev, menus_sidebar: atual.filter((m) => m !== menu) }
-      } else {
-        return { ...prev, menus_sidebar: [...atual, menu] }
+  const handleMenuSidebarChange = (menu: string, checked: boolean) => {
+    const currentMenus = permissoes.menus_sidebar || [];
+    if (checked) {
+      if (!currentMenus.includes(menu)) {
+        setPermissoes(prev => ({
+          ...prev,
+          menus_sidebar: [...currentMenus, menu]
+        }));
       }
-    });
+    } else {
+      setPermissoes(prev => ({
+        ...prev,
+        menus_sidebar: currentMenus.filter(m => m !== menu)
+      }));
+    }
   };
 
-  const handleSave = () => {
-    onSave(nome, descricao, permissoes, ccasPermitidas);
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!validatePasswords()) {
+      return;
+    }
+
+    onSave(nome, descricao, permissoes, ccasSelecionadas, password || undefined);
   };
 
   return (
-    <div className="space-y-6 max-h-[70vh] overflow-y-auto">
+    <form onSubmit={handleSubmit} className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="nome">Nome</Label>
-          <Input 
-            id="nome" 
-            value={nome} 
-            onChange={(e) => setNome(e.target.value)} 
-            placeholder="Nome do perfil" 
+          <Label htmlFor="nome">Nome do Perfil</Label>
+          <Input
+            id="nome"
+            value={nome}
+            onChange={(e) => setNome(e.target.value)}
+            placeholder="Digite o nome do perfil"
+            required
           />
         </div>
+        
         <div className="space-y-2">
           <Label htmlFor="descricao">Descrição</Label>
-          <Input 
-            id="descricao" 
-            value={descricao} 
-            onChange={(e) => setDescricao(e.target.value)} 
-            placeholder="Descrição do perfil" 
+          <Textarea
+            id="descricao"
+            value={descricao}
+            onChange={(e) => setDescricao(e.target.value)}
+            placeholder="Digite uma descrição para o perfil"
+            className="min-h-[40px]"
           />
         </div>
       </div>
 
-      {/* CCAs Permitidas */}
-      <div className="space-y-2 pt-4">
-        <h4 className="text-md font-semibold text-red-700">CCAs Permitidas</h4>
-        <p className="text-sm text-muted-foreground">
-          Selecione quais CCAs este perfil pode visualizar e editar
-        </p>
-        <CCASelector
-          selectedCCAs={ccasPermitidas}
-          onSelectionChange={setCcasPermitidas}
-        />
-      </div>
-      
-      {/* Módulos Principais */}
-      <div className="space-y-2 pt-4">
-        <h4 className="text-md font-semibold text-blue-700">Módulos do Sistema</h4>
-        <div className="flex flex-wrap gap-4">
-          {modulosPrincipais.map((modulo) => (
-            <PermissaoCheckbox
-              key={modulo.key}
-              id={modulo.key}
-              label={modulo.label}
-              checked={!!permissoes[modulo.key]}
-              onChange={(checked) => handleChangePermissao(modulo.key, checked)}
-            />
-          ))}
-        </div>
-      </div>
+      <PerfilPasswordFields
+        isEditing={isCreating}
+        password={password}
+        confirmPassword={confirmPassword}
+        onPasswordChange={setPassword}
+        onConfirmPasswordChange={setConfirmPassword}
+        showPassword={showPassword}
+        showConfirmPassword={showConfirmPassword}
+        onToggleShowPassword={() => setShowPassword(!showPassword)}
+        onToggleShowConfirmPassword={() => setShowConfirmPassword(!showConfirmPassword)}
+        passwordError={passwordError}
+        confirmPasswordError={confirmPasswordError}
+      />
 
-      {/* Administração */}
-      <div className="space-y-2 pt-2">
-        <h4 className="text-md font-semibold text-green-700">Administração</h4>
-        <div className="flex flex-wrap gap-4">
-          {administrativos.map((adm) => (
-            <PermissaoCheckbox
-              key={adm.key}
-              id={adm.key}
-              label={adm.label}
-              checked={!!permissoes[adm.key]}
-              onChange={(checked) => handleChangePermissao(adm.key, checked)}
-            />
-          ))}
-        </div>
-      </div>
+      <Tabs defaultValue="permissoes" className="w-full">
+        <TabsList>
+          <TabsTrigger value="permissoes">Permissões</TabsTrigger>
+          <TabsTrigger value="ccas">CCAs Permitidas</TabsTrigger>
+        </TabsList>
 
-      {/* Permissões Específicas */}
-      <div className="space-y-2 pt-2">
-        <h4 className="text-md font-semibold text-purple-700">Permissões Específicas</h4>
-        <div className="flex flex-wrap gap-4">
-          {permissoesEspecificas.map((per) => (
-            <PermissaoCheckbox
-              key={per.key}
-              id={per.key}
-              label={per.label}
-              checked={!!permissoes[per.key]}
-              onChange={(checked) => handleChangePermissao(per.key, checked)}
-            />
-          ))}
-        </div>
-      </div>
+        <TabsContent value="permissoes" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Permissões do Perfil</CardTitle>
+              <CardDescription>Defina as permissões para este perfil</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Checkbox
+                  checked={permissoes.desvios || false}
+                  onCheckedChange={(checked) => handlePermissaoChange("desvios", !!checked)}
+                  id="desvios"
+                >
+                  Acesso a Desvios
+                </Checkbox>
+                <Checkbox
+                  checked={permissoes.treinamentos || false}
+                  onCheckedChange={(checked) => handlePermissaoChange("treinamentos", !!checked)}
+                  id="treinamentos"
+                >
+                  Acesso a Treinamentos
+                </Checkbox>
+                <Checkbox
+                  checked={permissoes.ocorrencias || false}
+                  onCheckedChange={(checked) => handlePermissaoChange("ocorrencias", !!checked)}
+                  id="ocorrencias"
+                >
+                  Acesso a Ocorrências
+                </Checkbox>
+                <Checkbox
+                  checked={permissoes.tarefas || false}
+                  onCheckedChange={(checked) => handlePermissaoChange("tarefas", !!checked)}
+                  id="tarefas"
+                >
+                  Acesso a Tarefas
+                </Checkbox>
+                <Checkbox
+                  checked={permissoes.relatorios || false}
+                  onCheckedChange={(checked) => handlePermissaoChange("relatorios", !!checked)}
+                  id="relatorios"
+                >
+                  Acesso a Relatórios
+                </Checkbox>
+                <Checkbox
+                  checked={permissoes.hora_seguranca || false}
+                  onCheckedChange={(checked) => handlePermissaoChange("hora_seguranca", !!checked)}
+                  id="hora_seguranca"
+                >
+                  Acesso a Hora Segurança
+                </Checkbox>
+                <Checkbox
+                  checked={permissoes.medidas_disciplinares || false}
+                  onCheckedChange={(checked) => handlePermissaoChange("medidas_disciplinares", !!checked)}
+                  id="medidas_disciplinares"
+                >
+                  Acesso a Medidas Disciplinares
+                </Checkbox>
+                <Checkbox
+                  checked={permissoes.admin_usuarios || false}
+                  onCheckedChange={(checked) => handlePermissaoChange("admin_usuarios", !!checked)}
+                  id="admin_usuarios"
+                >
+                  Administração de Usuários
+                </Checkbox>
+                <Checkbox
+                  checked={permissoes.admin_perfis || false}
+                  onCheckedChange={(checked) => handlePermissaoChange("admin_perfis", !!checked)}
+                  id="admin_perfis"
+                >
+                  Administração de Perfis
+                </Checkbox>
+                {/* Adicione mais permissões conforme necessário */}
+              </div>
 
-      {/* Menus da Sidebar */}
-      <div className="space-y-2 pt-2">
-        <h4 className="text-md font-semibold text-orange-700">Menus e Itens da Sidebar</h4>
-        <p className="text-sm text-muted-foreground">
-          Selecione os menus e submenus da sidebar que este perfil pode visualizar/acessar
-        </p>
-        <div className="flex flex-wrap gap-3 max-h-48 overflow-y-auto border p-2 rounded bg-orange-50">
-          {menusSidebar.map((menu) => (
-            <SidebarMenuCheckbox
-              key={menu}
-              id={menu}
-              label={menu}
-              checked={!!(permissoes.menus_sidebar && permissoes.menus_sidebar.includes(menu))}
-              onChange={() => handleToggleSidebarMenu(menu)}
-            />
-          ))}
-        </div>
-      </div>
+              <div className="mt-6">
+                <CardTitle>Menus Sidebar Permitidos</CardTitle>
+                <CardDescription>Selecione os menus que este perfil pode acessar</CardDescription>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2 max-h-48 overflow-y-auto border rounded p-2">
+                  {[
+                    "dashboard",
+                    "desvios_dashboard",
+                    "desvios_cadastro",
+                    "desvios_consulta",
+                    "desvios_nao_conformidade",
+                    "treinamentos_dashboard",
+                    "treinamentos_normativo",
+                    "treinamentos_consulta",
+                    "treinamentos_execucao",
+                    "treinamentos_cracha",
+                    "medidas_disciplinares_dashboard",
+                    "medidas_disciplinares_cadastro",
+                    "medidas_disciplinares_consulta",
+                    "inspecao_sms_dashboard",
+                    "inspecao_sms_cadastro",
+                    "inspecao_sms_consulta",
+                    "tarefas_dashboard",
+                    "tarefas_minhas_tarefas",
+                    "tarefas_cadastro",
+                    "relatorios",
+                    "relatorios_idsms",
+                    "admin_usuarios",
+                    "admin_perfis",
+                    "admin_empresas",
+                    "admin_ccas",
+                    "admin_engenheiros",
+                    "admin_supervisores",
+                    "admin_funcionarios",
+                    "admin_hht",
+                    "admin_metas_indicadores",
+                    "admin_modelos_inspecao",
+                    "admin_templates",
+                    "admin_logo",
+                    "idsms_dashboard",
+                    "idsms_indicadores",
+                    "idsms_iid",
+                    "idsms_hsa",
+                    "idsms_ht",
+                    "idsms_ipom",
+                    "idsms_inspecao_alta_lideranca",
+                    "idsms_inspecao_gestao_sms",
+                    "idsms_indice_reativo",
+                    "hora_seguranca_cadastro",
+                    "hora_seguranca_cadastro_inspecao",
+                    "hora_seguranca_cadastro_nao_programada",
+                    "hora_seguranca_dashboard",
+                    "hora_seguranca_agenda",
+                    "hora_seguranca_acompanhamento",
+                    "gro_perigos",
+                    "gro_avaliacao",
+                    "gro_pgr",
+                    "ocorrencias_dashboard",
+                    "ocorrencias_cadastro",
+                    "ocorrencias_consulta",
+                  ].map(menu => (
+                    <Checkbox
+                      key={menu}
+                      checked={permissoes.menus_sidebar?.includes(menu) || false}
+                      onCheckedChange={(checked) => handleMenuSidebarChange(menu, !!checked)}
+                      id={`menu-${menu}`}
+                    >
+                      {menu}
+                    </Checkbox>
+                  ))}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-      <div className="flex justify-end space-x-2 pt-4 border-t">
-        <Button variant="outline" onClick={onCancel}>Cancelar</Button>
-        <Button onClick={handleSave} disabled={loading}>
+        <TabsContent value="ccas" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>CCAs Permitidas</CardTitle>
+              <CardDescription>Selecione os CCAs que este perfil pode acessar</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <CCASelector
+                selectedCCAs={ccasSelecionadas}
+                onChange={setCcasSelecionadas}
+              />
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+
+      <div className="flex justify-end gap-2">
+        <Button type="button" variant="outline" onClick={onCancel}>
+          Cancelar
+        </Button>
+        <Button type="submit" disabled={loading}>
           {loading ? "Salvando..." : "Salvar"}
         </Button>
       </div>
-    </div>
+    </form>
   );
 };
-
-// Componente para checkbox de permissão comum
-interface PermissaoCheckboxProps {
-  id: string;
-  label: string;
-  checked: boolean;
-  onChange: (checked: boolean) => void;
-}
-
-const PermissaoCheckbox = ({ id, label, checked, onChange }: PermissaoCheckboxProps) => (
-  <div className="flex items-center space-x-2">
-    <Checkbox 
-      id={id} 
-      checked={checked} 
-      onCheckedChange={(checked) => onChange(checked === true)}
-    />
-    <Label htmlFor={id} className="text-sm">{label}</Label>
-  </div>
-);
-
-interface SidebarMenuCheckboxProps {
-  id: string;
-  label: string;
-  checked: boolean;
-  onChange: () => void;
-}
-const SidebarMenuCheckbox = ({ id, label, checked, onChange }: SidebarMenuCheckboxProps) => (
-  <div className="flex items-center space-x-2 min-w-[200px]">
-    <Checkbox 
-      id={id + "-sidebar"} 
-      checked={checked}
-      onCheckedChange={onChange}
-    />
-    <Label htmlFor={id + "-sidebar"} className="text-xs">{label}</Label>
-  </div>
-);

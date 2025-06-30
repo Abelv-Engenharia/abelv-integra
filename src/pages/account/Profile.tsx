@@ -12,7 +12,6 @@ import { useProfileAvatarUrl } from "@/hooks/useProfileAvatarUrl";
 import { uploadAvatarToBucket } from "@/utils/uploadAvatarToBucket";
 import { useToast } from "@/hooks/use-toast";
 import { Image } from "lucide-react";
-import ChangePasswordForm from "@/components/account/ChangePasswordForm";
 
 const Profile = () => {
   const { user } = useAuth();
@@ -392,11 +391,6 @@ const Profile = () => {
             </form>
           </CardContent>
         </Card>
-      </div>
-
-      {/* Seção de alteração de senha */}
-      <div className="max-w-2xl">
-        <ChangePasswordForm />
       </div>
     </div>
   );
