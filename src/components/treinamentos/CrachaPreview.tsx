@@ -82,9 +82,9 @@ const CrachaPreview: React.FC<Props> = ({
         .print-cracha .rounded-t-md { border-radius: 2px 2px 0 0;  }
         .print-cracha h3 { margin: 0; font-size: 9px; font-weight: bold; padding: 3px 0; }
         .print-cracha h4, .print-cracha h5 { margin: 0; }
-        .print-cracha .w-28, .print-cracha .h-28 { width: 35px !important; height: 35px !important;}
+        .print-cracha .w-28, .print-cracha .h-28 { width: 25px !important; height: 25px !important;}
         .print-cracha .rounded-full { border-radius: 50%; }
-        .print-cracha img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+        .print-cracha img { width: 100%; height: 100%; object-fit: contain; border-radius: 50%; background: white; padding: 1px; }
         .print-cracha .funcionario-info { flex: 1; min-width: 0; }
         .print-cracha .funcionario-nome { font-size: 9px; font-weight: bold; margin-bottom: 1px; line-height: 1.1; }
         .print-cracha .funcionario-funcao { font-size: 7px; margin-bottom: 1px; color: #333; line-height: 1.1; }
@@ -108,6 +108,7 @@ const CrachaPreview: React.FC<Props> = ({
         .print-cracha .certificacoes-section { flex: 1; }
         .print-cracha .certificacoes-title { font-size: 8px; font-weight: bold; text-align: center; margin: 3px 0 2px 0; }
         .print-cracha .emissao { font-size: 6px; text-align: center; margin-top: auto; padding-top: 2px; color: #666; }
+        .print-cracha .logo-container { width: 25px; height: 25px; background: #f5f5f5; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; overflow: hidden; }
       </style>
     `;
 
@@ -151,15 +152,15 @@ const CrachaPreview: React.FC<Props> = ({
               </div>
 
               <div className="header-info flex items-start gap-2 my-2">
-                <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden">
+                <div className="w-6 h-6 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden">
                   {logoUrl ? (
                     <img
                       src={logoUrl}
                       alt="Logo"
-                      className="w-full h-full object-contain p-1 rounded-full bg-white"
+                      className="w-full h-full object-contain p-0.5 rounded-full bg-white"
                     />
                   ) : (
-                    <User className="w-4 h-4 text-gray-400" />
+                    <User className="w-3 h-3 text-gray-400" />
                   )}
                 </div>
 
