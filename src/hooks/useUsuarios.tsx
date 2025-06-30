@@ -1,22 +1,21 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
-import { User, AuthUserCreateValues, UserFormValues, Permissoes } from "@/types/users";
+import { User, UserFormValues, Permissoes } from "@/types/users";
 import { 
-  fetchUsers, 
-  createAuthUser, 
   updateUser, 
   deleteUser, 
-  updateUserRole 
 } from "@/services/authAdminService";
 import { fetchProfiles } from "@/services/usuariosService";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { useCreateUser } from "@/hooks/useCreateUser";
 
 export const useUsuarios = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { user } = useAuth();
+  const createUserHook = useCreateUser();
 
   // Verificar permissões do usuário atual através do perfil
   const { data: userPermissions } = useQuery({
@@ -135,122 +134,6 @@ export const useUsuarios = () => {
     staleTime: 10 * 60 * 1000
   });
 
-  // Mutation para criar usuário melhorada
-  const createUsuarioMutation = useMutation({
-    mutationFn: async (userData: AuthUserCreateValues) => {
-      if (!canManageUsers) {
-        throw new Error("Você não tem permissão para criar usuários");
-      }
-
-      try {
-        console.log("Iniciando criação de usuário:", userData);
-        
-        // Verificar se o email já existe
-        const { data: existingProfile, error: checkError } = await supabase
-          .from('profiles')
-          .select('email')
-          .eq('email', userData.email)
-          .maybeSingle();
-
-        if (checkError && checkError.code !== 'PGRST116') {
-          console.error("Erro ao verificar email existente:", checkError);
-          throw new Error("Erro ao verificar email existente");
-        }
-
-        if (existingProfile) {
-          throw new Error("Este email já está sendo usado por outro usuário");
-        }
-
-        // Criar usuário usando signup
-        const { data: authData, error: signUpError } = await supabase.auth.signUp({
-          email: userData.email,
-          password: userData.password,
-          options: {
-            data: {
-              nome: userData.nome
-            },
-            emailRedirectTo: undefined // Evitar redirecionamento automático
-          }
-        });
-
-        if (signUpError) {
-          console.error("Erro no signup:", signUpError);
-          
-          // Tratar erros específicos
-          if (signUpError.message.includes('rate limit')) {
-            throw new Error("Limite de criação de usuários atingido. Tente novamente em alguns minutos.");
-          } else if (signUpError.message.includes('already registered')) {
-            throw new Error("Este email já está registrado no sistema.");
-          } else {
-            throw new Error(`Erro ao criar usuário: ${signUpError.message}`);
-          }
-        }
-
-        if (!authData?.user?.id) {
-          throw new Error("Falha ao criar usuário: ID não retornado");
-        }
-
-        console.log("Usuário criado no auth, ID:", authData.user.id);
-
-        // Aguardar um pouco para garantir que o usuário foi criado
-        await new Promise(resolve => setTimeout(resolve, 1000));
-
-        // Criar perfil na tabela profiles
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .insert({
-            id: authData.user.id,
-            nome: userData.nome,
-            email: userData.email
-          });
-
-        if (profileError) {
-          console.error("Erro ao criar perfil:", profileError);
-          // Se o perfil já existe, não é um erro fatal
-          if (!profileError.message.includes('duplicate key')) {
-            throw new Error("Erro ao criar perfil do usuário");
-          }
-        }
-
-        // Associar o perfil de acesso
-        const perfilId = parseInt(userData.perfil);
-        const { error: userPerfilError } = await supabase
-          .from('usuario_perfis')
-          .insert({
-            usuario_id: authData.user.id,
-            perfil_id: perfilId
-          });
-
-        if (userPerfilError) {
-          console.error("Erro ao associar perfil:", userPerfilError);
-          throw new Error("Erro ao associar perfil de acesso");
-        }
-
-        console.log("Usuário criado com sucesso!");
-        return authData;
-      } catch (error) {
-        console.error("Erro na mutation de criação:", error);
-        throw error;
-      }
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-usuarios'] });
-      toast({
-        title: "Sucesso",
-        description: "Usuário criado com sucesso! O usuário receberá um email de confirmação.",
-      });
-    },
-    onError: (error: any) => {
-      console.error("Erro ao criar usuário:", error);
-      const errorMessage = error?.message || "Erro ao criar usuário";
-      toast({
-        title: "Erro ao criar usuário",
-        description: errorMessage,
-        variant: "destructive",
-      });
-    }
-  });
-
   // Mutation para atualizar usuário
   const updateUsuarioMutation = useMutation({
     mutationFn: async ({ userId, userData }: { userId: string; userData: UserFormValues }) => {
@@ -341,7 +224,12 @@ export const useUsuarios = () => {
     usersError,
     canManageUsers,
     userPermissions,
-    createUsuarioMutation,
+    createUsuarioMutation: {
+      mutate: createUserHook.createUser,
+      isPending: createUserHook.isCreating,
+      error: createUserHook.error,
+      isSuccess: createUserHook.isSuccess
+    },
     updateUsuarioMutation,
     deleteUsuarioMutation,
     refetchUsers
