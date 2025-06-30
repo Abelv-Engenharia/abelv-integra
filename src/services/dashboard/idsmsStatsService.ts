@@ -5,8 +5,8 @@ export async function fetchIDSMSPercentage(ccaIds?: number[]): Promise<number> {
   try {
     console.log('fetchIDSMSPercentage - CCAs filtradas:', ccaIds);
     
-    // Usar exatamente a mesma query do IDSMSDashboard
-    let query = supabase
+    // Buscar dados usando a mesma query do IDSMSDashboard
+    const { data: dashboardData, error } = await supabase
       .from('idsms_indicadores')
       .select(`
         cca_id,
@@ -15,27 +15,20 @@ export async function fetchIDSMSPercentage(ccaIds?: number[]): Promise<number> {
         ccas!inner(codigo, nome)
       `);
 
-    // Aplicar filtro de CCAs se fornecido
-    if (ccaIds && ccaIds.length > 0) {
-      query = query.in('cca_id', ccaIds);
-    }
-
-    const { data, error } = await query;
-
     if (error) {
       console.error('Erro ao buscar dados do IDSMS:', error);
       return 0;
     }
 
-    if (!data || data.length === 0) {
+    if (!dashboardData || dashboardData.length === 0) {
       console.log('Nenhum dado de IDSMS encontrado');
       return 0;
     }
 
-    console.log('Dados brutos do IDSMS:', data);
+    console.log('Dados brutos do IDSMS:', dashboardData);
 
     // Agrupar por CCA - EXATAMENTE igual ao IDSMSDashboard
-    const ccaGroups = data.reduce((acc: any, item: any) => {
+    const ccaGroups = dashboardData.reduce((acc: any, item: any) => {
       const ccaId = item.cca_id;
       if (!acc[ccaId]) {
         acc[ccaId] = {
@@ -100,18 +93,30 @@ export async function fetchIDSMSPercentage(ccaIds?: number[]): Promise<number> {
 
     console.log('CCAs com IDSMS calculado:', ccasWithIDSMS);
 
-    if (ccasWithIDSMS.length === 0) {
+    // Aplicar filtro de CCAs APÓS o cálculo, se fornecido
+    let filteredCCAs = ccasWithIDSMS;
+    if (ccaIds && ccaIds.length > 0) {
+      filteredCCAs = ccasWithIDSMS.filter((cca: any) => {
+        const ccaIdFromGroup = Object.keys(ccaGroups).find(id => 
+          ccaGroups[id].cca_codigo === cca.cca_codigo
+        );
+        return ccaIds.includes(Number(ccaIdFromGroup));
+      });
+    }
+
+    if (filteredCCAs.length === 0) {
       return 0;
     }
 
-    // Calcular média - EXATAMENTE igual ao IDSMSDashboard
-    const somaTotal = ccasWithIDSMS.reduce((sum: number, cca: any) => sum + cca.idsms_total, 0);
-    const media = somaTotal / ccasWithIDSMS.length;
+    // Calcular média igual ao IDSMSDashboard
+    const idsmsMedia = filteredCCAs.length > 0 
+      ? filteredCCAs.reduce((sum, item) => sum + item.idsms_total, 0) / filteredCCAs.length 
+      : 0;
     
-    console.log('Cálculo final - Soma total:', somaTotal, 'Quantidade de CCAs:', ccasWithIDSMS.length, 'Média:', media);
+    console.log('Cálculo final do IDSMS - Total CCAs:', filteredCCAs.length, 'Média:', idsmsMedia);
     
     // Retornar com toFixed(1) convertido para number - igual ao IDSMSDashboard
-    const resultado = Number(media.toFixed(1));
+    const resultado = Number(idsmsMedia.toFixed(1));
     console.log('Resultado final do IDSMS:', resultado);
     
     return resultado;
