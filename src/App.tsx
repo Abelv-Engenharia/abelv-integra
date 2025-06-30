@@ -63,60 +63,58 @@ function App() {
                 element={
                   <AuthGuard>
                     <SidebarProvider>
-                      <Layout>
-                        <Routes>
-                          <Route path="/" element={<Index />} />
-                          <Route path="/dashboard" element={<Dashboard />} />
-                          
-                          {/* Account routes */}
-                          <Route path="/account/profile" element={<Profile />} />
-                          <Route path="/account/settings" element={<Settings />} />
-                          <Route path="/account/change-password" element={<ChangePassword />} />
-                          <Route path="/account/support" element={<Support />} />
-                          
-                          {/* SMS routes - using placeholder for now */}
-                          <Route path="/hora-seguranca/*" element={<PlaceholderPage />} />
-                          <Route path="/desvios/*" element={<PlaceholderPage />} />
-                          <Route path="/treinamentos/*" element={<PlaceholderPage />} />
-                          <Route path="/medidas-disciplinares/*" element={<PlaceholderPage />} />
-                          <Route path="/inspecao-sms/*" element={<PlaceholderPage />} />
-                          <Route path="/ocorrencias/*" element={<PlaceholderPage />} />
-
-                          {/* Tarefas routes */}
-                          <Route path="/tarefas/*" element={<PlaceholderPage />} />
-
-                          {/* Relatorios routes */}
-                          <Route path="/relatorios/*" element={<PlaceholderPage />} />
-                          <Route path="/idsms/*" element={<PlaceholderPage />} />
-
-                          {/* Admin routes */}
-                          <Route path="/admin/usuarios" element={<AdminUsuarios />} />
-                          <Route path="/admin/usuarios/criar" element={<CriarUsuario />} />
-                          <Route path="/admin/usuarios/editar/:id" element={<PlaceholderPage />} />
-                          <Route path="/admin/perfis" element={<AdminPerfis />} />
-                          <Route path="/admin/empresas" element={<AdminEmpresas />} />
-                          <Route path="/admin/ccas" element={<AdminCCAs />} />
-                          <Route path="/admin/engenheiros" element={<AdminEngenheiros />} />
-                          <Route path="/admin/supervisores" element={<AdminSupervisores />} />
-                          <Route path="/admin/funcionarios" element={<PlaceholderPage />} />
-                          <Route path="/admin/hht" element={<PlaceholderPage />} />
-                          <Route path="/admin/metas-indicadores" element={<PlaceholderPage />} />
-                          <Route path="/admin/templates" element={<PlaceholderPage />} />
-                          <Route path="/admin/logo" element={<AdminLogo />} />
-                          <Route path="/admin/modelos-inspecao" element={<AdminModelosInspecao />} />
-
-                          {/* GRO routes */}
-                          <Route path="/gro/perigos" element={<PlaceholderPage />} />
-                          <Route path="/gro/avaliacao" element={<PlaceholderPage />} />
-                          <Route path="/gro/pgr" element={<PlaceholderPage />} />
-                          
-                          <Route path="*" element={<NotFound />} />
-                        </Routes>
-                      </Layout>
+                      <Layout />
                     </SidebarProvider>
                   </AuthGuard>
                 }
-              />
+              >
+                <Route path="/" element={<Index />} />
+                <Route path="/dashboard" element={<Dashboard />} />
+                
+                {/* Account routes */}
+                <Route path="/account/profile" element={<Profile />} />
+                <Route path="/account/settings" element={<Settings />} />
+                <Route path="/account/change-password" element={<ChangePassword />} />
+                <Route path="/account/support" element={<Support />} />
+                
+                {/* SMS routes - using placeholder for now */}
+                <Route path="/hora-seguranca/*" element={<PlaceholderPage />} />
+                <Route path="/desvios/*" element={<PlaceholderPage />} />
+                <Route path="/treinamentos/*" element={<PlaceholderPage />} />
+                <Route path="/medidas-disciplinares/*" element={<PlaceholderPage />} />
+                <Route path="/inspecao-sms/*" element={<PlaceholderPage />} />
+                <Route path="/ocorrencias/*" element={<PlaceholderPage />} />
+
+                {/* Tarefas routes */}
+                <Route path="/tarefas/*" element={<PlaceholderPage />} />
+
+                {/* Relatorios routes */}
+                <Route path="/relatorios/*" element={<PlaceholderPage />} />
+                <Route path="/idsms/*" element={<PlaceholderPage />} />
+
+                {/* Admin routes */}
+                <Route path="/admin/usuarios" element={<AdminUsuarios />} />
+                <Route path="/admin/usuarios/criar" element={<CriarUsuario />} />
+                <Route path="/admin/usuarios/editar/:id" element={<PlaceholderPage />} />
+                <Route path="/admin/perfis" element={<AdminPerfis />} />
+                <Route path="/admin/empresas" element={<AdminEmpresas />} />
+                <Route path="/admin/ccas" element={<AdminCCAs />} />
+                <Route path="/admin/engenheiros" element={<AdminEngenheiros />} />
+                <Route path="/admin/supervisores" element={<AdminSupervisores />} />
+                <Route path="/admin/funcionarios" element={<PlaceholderPage />} />
+                <Route path="/admin/hht" element={<PlaceholderPage />} />
+                <Route path="/admin/metas-indicadores" element={<PlaceholderPage />} />
+                <Route path="/admin/templates" element={<PlaceholderPage />} />
+                <Route path="/admin/logo" element={<AdminLogo />} />
+                <Route path="/admin/modelos-inspecao" element={<AdminModelosInspecao />} />
+
+                {/* GRO routes */}
+                <Route path="/gro/perigos" element={<PlaceholderPage />} />
+                <Route path="/gro/avaliacao" element={<PlaceholderPage />} />
+                <Route path="/gro/pgr" element={<PlaceholderPage />} />
+                
+                <Route path="*" element={<NotFound />} />
+              </Route>
             </Routes>
           </AuthProvider>
         </BrowserRouter>
