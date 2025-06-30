@@ -3,7 +3,9 @@ import { supabase } from '@/integrations/supabase/client';
 
 export async function fetchIDSMSPercentage(ccaIds?: number[]): Promise<number> {
   try {
-    // Usar a mesma lógica do dashboard IDSMS para buscar dados consolidados
+    console.log('fetchIDSMSPercentage - CCAs filtradas:', ccaIds);
+    
+    // Usar exatamente a mesma query do IDSMSDashboard
     let query = supabase
       .from('idsms_indicadores')
       .select(`
@@ -20,14 +22,19 @@ export async function fetchIDSMSPercentage(ccaIds?: number[]): Promise<number> {
 
     const { data, error } = await query;
 
-    if (error || !data || data.length === 0) {
+    if (error) {
+      console.error('Erro ao buscar dados do IDSMS:', error);
+      return 0;
+    }
+
+    if (!data || data.length === 0) {
       console.log('Nenhum dado de IDSMS encontrado');
       return 0;
     }
 
-    console.log('Dados do IDSMS encontrados:', data);
+    console.log('Dados brutos do IDSMS:', data);
 
-    // Agrupar por CCA para calcular IDSMS total de cada CCA (mesma lógica do IDSMSDashboard)
+    // Agrupar por CCA - EXATAMENTE igual ao IDSMSDashboard
     const ccaGroups = data.reduce((acc: any, item: any) => {
       const ccaId = item.cca_id;
       if (!acc[ccaId]) {
@@ -44,7 +51,7 @@ export async function fetchIDSMSPercentage(ccaIds?: number[]): Promise<number> {
         };
       }
 
-      // Mapear tipos de indicadores
+      // Mapear tipos de indicadores - EXATAMENTE igual ao IDSMSDashboard
       switch (item.tipo) {
         case 'IID':
           acc[ccaId].iid = item.resultado;
@@ -72,7 +79,9 @@ export async function fetchIDSMSPercentage(ccaIds?: number[]): Promise<number> {
       return acc;
     }, {});
 
-    // Calcular IDSMS total para cada CCA (mesma lógica do IDSMSDashboard)
+    console.log('Grupos de CCAs após agrupamento:', ccaGroups);
+
+    // Calcular IDSMS total para cada CCA - EXATAMENTE igual ao IDSMSDashboard
     const ccasWithIDSMS = Object.values(ccaGroups).map((cca: any) => {
       const idsms_total = 
         cca.iid + 
@@ -95,14 +104,17 @@ export async function fetchIDSMSPercentage(ccaIds?: number[]): Promise<number> {
       return 0;
     }
 
-    // Calcular a média dos IDSMS totais (mesma lógica do IDSMSDashboard)
+    // Calcular média - EXATAMENTE igual ao IDSMSDashboard
     const somaTotal = ccasWithIDSMS.reduce((sum: number, cca: any) => sum + cca.idsms_total, 0);
     const media = somaTotal / ccasWithIDSMS.length;
     
-    console.log('Soma total:', somaTotal, 'Quantidade de CCAs:', ccasWithIDSMS.length, 'Média:', media);
+    console.log('Cálculo final - Soma total:', somaTotal, 'Quantidade de CCAs:', ccasWithIDSMS.length, 'Média:', media);
     
-    // Retornar o mesmo valor que é calculado no IDSMSDashboard
-    return Number(media.toFixed(1));
+    // Retornar com toFixed(1) convertido para number - igual ao IDSMSDashboard
+    const resultado = Number(media.toFixed(1));
+    console.log('Resultado final do IDSMS:', resultado);
+    
+    return resultado;
   } catch (error) {
     console.error('Erro ao buscar dados do IDSMS:', error);
     return 0;
