@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
@@ -137,9 +136,9 @@ const TreinamentosNormativo = () => {
       // Extrair nome do treinamento até o hífen (ou nome completo se não houver hífen)
       const nomeBase = treinamentoSelecionado.nome.split(' -')[0].trim();
       
-      // Criar nomenclatura: NOME_TREINAMENTO_MATRICULA_FUNCIONARIO
+      // Criar nomenclatura: NOME_TREINAMENTO_MATRICULA_FUNCIONÁRIO
       const fileExt = file.name.split('.').pop();
-      const fileName = `${nomeBase}_${funcionarioSelecionado.matricula}.${fileExt}`;
+      const fileName = `${nomeBase}_${funcionarioSelecionado.matricula}_${funcionarioSelecionado.nome.replace(/\s+/g, '_').toUpperCase()}.${fileExt}`;
       const filePath = `certificados/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
@@ -455,7 +454,7 @@ const TreinamentosNormativo = () => {
                     </p>
                   )}
                   <p className="text-xs text-muted-foreground">
-                    Apenas arquivos PDF, máximo 2MB. Nome será automaticamente formatado como: TREINAMENTO_MATRÍCULA
+                    Apenas arquivos PDF, máximo 2MB. Nome será automaticamente formatado como: TREINAMENTO_MATRÍCULA_FUNCIONÁRIO
                   </p>
                 </div>
               </div>
