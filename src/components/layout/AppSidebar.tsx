@@ -1,14 +1,18 @@
 
 import React, { useState } from "react";
-import { Home } from "lucide-react";
+import { Home, Settings, User } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubItem,
+  SidebarMenuSubButton,
 } from "@/components/ui/sidebar";
 import { Link, useLocation } from "react-router-dom";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import SidebarSectionSMS from "./SidebarSectionSMS";
 import SidebarSectionTarefas from "./SidebarSectionTarefas";
 import SidebarSectionRelatorios from "./SidebarSectionRelatorios";
@@ -58,6 +62,7 @@ export function AppSidebar() {
     if (currentPath.startsWith("/idsms")) return "idsms";
     if (currentPath.startsWith("/admin")) return "admin";
     if (currentPath.startsWith("/gro")) return "gro";
+    if (currentPath.startsWith("/account")) return "account";
     return null;
   });
 
@@ -127,6 +132,48 @@ export function AppSidebar() {
         ].some(menu => podeVerMenu(menu, menusSidebar)) && (
           <SidebarSectionAdministracao openMenu={openMenu} toggleMenu={toggleMenu} />
         )}
+
+        {/* Seção de Conta - sempre visível para usuários autenticados */}
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <Collapsible open={openMenu === "account"}>
+              <CollapsibleTrigger asChild>
+                <SidebarMenuButton 
+                  onClick={() => toggleMenu("account")}
+                  className="text-white hover:bg-slate-600"
+                >
+                  <User className="h-4 w-4 flex-shrink-0" />
+                  <span className="break-words">Conta</span>
+                </SidebarMenuButton>
+              </CollapsibleTrigger>
+              <CollapsibleContent asChild>
+                <SidebarMenuSub>
+                  <SidebarMenuSubItem>
+                    <SidebarMenuSubButton 
+                      asChild
+                      className={currentPath === "/account/profile" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
+                    >
+                      <Link to="/account/profile" className="flex items-center gap-2">
+                        <span className="text-xs leading-tight break-words min-w-0">Perfil</span>
+                      </Link>
+                    </SidebarMenuSubButton>
+                  </SidebarMenuSubItem>
+                  <SidebarMenuSubItem>
+                    <SidebarMenuSubButton 
+                      asChild
+                      className={currentPath === "/account/settings" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
+                    >
+                      <Link to="/account/settings" className="flex items-center gap-2">
+                        <Settings className="h-3 w-3 flex-shrink-0" />
+                        <span className="text-xs leading-tight break-words min-w-0">Configurações</span>
+                      </Link>
+                    </SidebarMenuSubButton>
+                  </SidebarMenuSubItem>
+                </SidebarMenuSub>
+              </CollapsibleContent>
+            </Collapsible>
+          </SidebarMenuItem>
+        </SidebarMenu>
       </SidebarContent>
     </Sidebar>
   );
