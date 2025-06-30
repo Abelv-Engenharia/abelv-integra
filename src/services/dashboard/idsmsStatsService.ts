@@ -90,11 +90,11 @@ export async function fetchIDSMSPercentage(ccaIds?: number[]): Promise<number> {
       return 0;
     }
 
-    // Somar todos os IDSMS totais e dividir pelo número de CCAs
+    // Calcular a média dos IDSMS totais
     const somaTotal = ccasWithIDSMS.reduce((sum: number, cca: any) => sum + cca.idsms_total, 0);
     const media = somaTotal / ccasWithIDSMS.length;
     
-    return Math.round(media * 100) / 100; // Arredondar para 2 casas decimais
+    return Math.round(media * 10) / 10; // Arredondar para 1 casa decimal
   } catch (error) {
     console.error('Erro ao buscar dados do IDSMS:', error);
     return 0;
