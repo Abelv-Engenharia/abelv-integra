@@ -28,6 +28,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Profile, AuthUserCreateValues, authUserCreateSchema } from "@/types/users";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 
 interface CreateUserDialogProps {
   open: boolean;
@@ -79,6 +81,14 @@ export const CreateUserDialog = ({
             Preencha as informações para criar um novo usuário.
           </DialogDescription>
         </DialogHeader>
+
+        <Alert>
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            O usuário receberá um email de confirmação para ativar sua conta.
+          </AlertDescription>
+        </Alert>
+
         <Form {...userForm}>
           <form onSubmit={userForm.handleSubmit(handleSubmit)} className="space-y-4">
             <FormField
@@ -88,7 +98,11 @@ export const CreateUserDialog = ({
                 <FormItem>
                   <FormLabel>Nome</FormLabel>
                   <FormControl>
-                    <Input placeholder="Nome do usuário" {...field} />
+                    <Input 
+                      placeholder="Nome do usuário" 
+                      {...field} 
+                      disabled={isSubmitting}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -101,7 +115,12 @@ export const CreateUserDialog = ({
                 <FormItem>
                   <FormLabel>E-mail</FormLabel>
                   <FormControl>
-                    <Input placeholder="email@example.com" {...field} />
+                    <Input 
+                      placeholder="email@example.com" 
+                      type="email"
+                      {...field} 
+                      disabled={isSubmitting}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -114,7 +133,12 @@ export const CreateUserDialog = ({
                 <FormItem>
                   <FormLabel>Senha</FormLabel>
                   <FormControl>
-                    <Input type="password" placeholder="******" {...field} />
+                    <Input 
+                      type="password" 
+                      placeholder="Mínimo 6 caracteres" 
+                      {...field} 
+                      disabled={isSubmitting}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -129,6 +153,7 @@ export const CreateUserDialog = ({
                   <Select 
                     onValueChange={field.onChange} 
                     value={field.value}
+                    disabled={isSubmitting}
                   >
                     <FormControl>
                       <SelectTrigger>
@@ -156,8 +181,11 @@ export const CreateUserDialog = ({
               >
                 Cancelar
               </Button>
-              <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? 'Criando...' : 'Criar Usuário'}
+              <Button 
+                type="submit" 
+                disabled={isSubmitting || profiles.length === 0}
+              >
+                {isSubmitting ? 'Criando usuário...' : 'Criar Usuário'}
               </Button>
             </DialogFooter>
           </form>

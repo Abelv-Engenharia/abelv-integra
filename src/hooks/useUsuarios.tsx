@@ -135,7 +135,7 @@ export const useUsuarios = () => {
     staleTime: 10 * 60 * 1000
   });
 
-  // Mutation para criar usuário usando signup direto
+  // Mutation para criar usuário melhorada
   const createUsuarioMutation = useMutation({
     mutationFn: async (userData: AuthUserCreateValues) => {
       if (!canManageUsers) {
@@ -143,8 +143,24 @@ export const useUsuarios = () => {
       }
 
       try {
-        console.log("Criando usuário:", userData);
+        console.log("Iniciando criação de usuário:", userData);
         
+        // Verificar se o email já existe
+        const { data: existingProfile, error: checkError } = await supabase
+          .from('profiles')
+          .select('email')
+          .eq('email', userData.email)
+          .maybeSingle();
+
+        if (checkError && checkError.code !== 'PGRST116') {
+          console.error("Erro ao verificar email existente:", checkError);
+          throw new Error("Erro ao verificar email existente");
+        }
+
+        if (existingProfile) {
+          throw new Error("Este email já está sendo usado por outro usuário");
+        }
+
         // Criar usuário usando signup
         const { data: authData, error: signUpError } = await supabase.auth.signUp({
           email: userData.email,
@@ -152,17 +168,32 @@ export const useUsuarios = () => {
           options: {
             data: {
               nome: userData.nome
-            }
+            },
+            emailRedirectTo: undefined // Evitar redirecionamento automático
           }
         });
 
         if (signUpError) {
-          throw new Error(signUpError.message);
+          console.error("Erro no signup:", signUpError);
+          
+          // Tratar erros específicos
+          if (signUpError.message.includes('rate limit')) {
+            throw new Error("Limite de criação de usuários atingido. Tente novamente em alguns minutos.");
+          } else if (signUpError.message.includes('already registered')) {
+            throw new Error("Este email já está registrado no sistema.");
+          } else {
+            throw new Error(`Erro ao criar usuário: ${signUpError.message}`);
+          }
         }
 
         if (!authData?.user?.id) {
           throw new Error("Falha ao criar usuário: ID não retornado");
         }
+
+        console.log("Usuário criado no auth, ID:", authData.user.id);
+
+        // Aguardar um pouco para garantir que o usuário foi criado
+        await new Promise(resolve => setTimeout(resolve, 1000));
 
         // Criar perfil na tabela profiles
         const { error: profileError } = await supabase
@@ -175,6 +206,10 @@ export const useUsuarios = () => {
 
         if (profileError) {
           console.error("Erro ao criar perfil:", profileError);
+          // Se o perfil já existe, não é um erro fatal
+          if (!profileError.message.includes('duplicate key')) {
+            throw new Error("Erro ao criar perfil do usuário");
+          }
         }
 
         // Associar o perfil de acesso
@@ -191,6 +226,7 @@ export const useUsuarios = () => {
           throw new Error("Erro ao associar perfil de acesso");
         }
 
+        console.log("Usuário criado com sucesso!");
         return authData;
       } catch (error) {
         console.error("Erro na mutation de criação:", error);
@@ -201,14 +237,14 @@ export const useUsuarios = () => {
       queryClient.invalidateQueries({ queryKey: ['admin-usuarios'] });
       toast({
         title: "Sucesso",
-        description: "Usuário criado com sucesso!",
+        description: "Usuário criado com sucesso! O usuário receberá um email de confirmação.",
       });
     },
     onError: (error: any) => {
       console.error("Erro ao criar usuário:", error);
       const errorMessage = error?.message || "Erro ao criar usuário";
       toast({
-        title: "Erro",
+        title: "Erro ao criar usuário",
         description: errorMessage,
         variant: "destructive",
       });
