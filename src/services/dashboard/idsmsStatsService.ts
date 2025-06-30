@@ -21,8 +21,11 @@ export async function fetchIDSMSPercentage(ccaIds?: number[]): Promise<number> {
     const { data, error } = await query;
 
     if (error || !data || data.length === 0) {
+      console.log('Nenhum dado de IDSMS encontrado');
       return 0;
     }
+
+    console.log('Dados do IDSMS encontrados:', data);
 
     // Agrupar por CCA para calcular IDSMS total de cada CCA
     const ccaGroups = data.reduce((acc: any, item: any) => {
@@ -86,6 +89,8 @@ export async function fetchIDSMSPercentage(ccaIds?: number[]): Promise<number> {
       };
     });
 
+    console.log('CCAs com IDSMS calculado:', ccasWithIDSMS);
+
     if (ccasWithIDSMS.length === 0) {
       return 0;
     }
@@ -93,6 +98,8 @@ export async function fetchIDSMSPercentage(ccaIds?: number[]): Promise<number> {
     // Calcular a média dos IDSMS totais
     const somaTotal = ccasWithIDSMS.reduce((sum: number, cca: any) => sum + cca.idsms_total, 0);
     const media = somaTotal / ccasWithIDSMS.length;
+    
+    console.log('Soma total:', somaTotal, 'Quantidade de CCAs:', ccasWithIDSMS.length, 'Média:', media);
     
     return Math.round(media * 10) / 10; // Arredondar para 1 casa decimal
   } catch (error) {

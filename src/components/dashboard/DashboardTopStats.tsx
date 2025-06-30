@@ -18,11 +18,17 @@ const DashboardTopStats = () => {
       const ccaIds = userCCAs.length > 0 ? userCCAs.map(cca => cca.id) : undefined;
       
       try {
+        console.log('Carregando estatísticas para CCAs:', ccaIds);
+        
         const [idsms, hsa, treinamento] = await Promise.all([
           fetchIDSMSPercentage(ccaIds),
           fetchHSAPercentage(ccaIds),
           fetchTreinamentoInvestmentPercentage(ccaIds)
         ]);
+
+        console.log('Resultado IDSMS:', idsms);
+        console.log('Resultado HSA:', hsa);
+        console.log('Resultado Treinamento:', treinamento);
 
         setIdsmsPercentage(idsms);
         setHsaPercentage(hsa);
@@ -44,7 +50,7 @@ const DashboardTopStats = () => {
     <div className="grid gap-4 md:grid-cols-3 mb-6">
       <StatCard
         title="IDSMS"
-        value={idsmsPercentage === null ? "..." : `${idsmsPercentage}%`}
+        value={idsmsPercentage === null ? "..." : `${idsmsPercentage}`}
         icon={<TrendingUp className="h-4 w-4" />}
         description="Percentual médio do IDSMS"
         trend={idsmsPercentage && idsmsPercentage > 75 ? "up" : idsmsPercentage && idsmsPercentage < 50 ? "down" : "neutral"}
