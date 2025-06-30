@@ -76,6 +76,7 @@ const CrachaPreview: React.FC<Props> = ({
           flex-direction: column;
           box-shadow: none;
           font-size: 8px;
+          border: 1px solid #000;
         }
         .print-cracha .bg-primary { background: hsl(222.2, 47.4%, 11.2%) !important; color: #fff; }
         .print-cracha .rounded-t-md { border-radius: 2px 2px 0 0;  }
