@@ -5,7 +5,7 @@ export async function fetchIDSMSPercentage(ccaIds?: number[]): Promise<number> {
   try {
     console.log('fetchIDSMSPercentage - CCAs filtradas:', ccaIds);
     
-    // Buscar dados usando a mesma query do IDSMSDashboard
+    // Buscar TODOS os dados primeiro, sem filtro
     const { data: dashboardData, error } = await supabase
       .from('idsms_indicadores')
       .select(`
@@ -75,7 +75,8 @@ export async function fetchIDSMSPercentage(ccaIds?: number[]): Promise<number> {
     console.log('Grupos de CCAs após agrupamento:', ccaGroups);
 
     // Calcular IDSMS total para cada CCA - EXATAMENTE igual ao IDSMSDashboard
-    const ccasWithIDSMS = Object.values(ccaGroups).map((cca: any) => {
+    const ccasWithIDSMS = Object.keys(ccaGroups).map((ccaId) => {
+      const cca = ccaGroups[ccaId];
       const idsms_total = 
         cca.iid + 
         cca.hsa + 
@@ -86,6 +87,7 @@ export async function fetchIDSMSPercentage(ccaIds?: number[]): Promise<number> {
         cca.indice_reativo;
       
       return {
+        cca_id: Number(ccaId),
         ...cca,
         idsms_total
       };
@@ -93,27 +95,22 @@ export async function fetchIDSMSPercentage(ccaIds?: number[]): Promise<number> {
 
     console.log('CCAs com IDSMS calculado:', ccasWithIDSMS);
 
-    // Aplicar filtro de CCAs APÓS o cálculo, se fornecido
+    // Aplicar filtro de CCAs APENAS para a média final
     let filteredCCAs = ccasWithIDSMS;
     if (ccaIds && ccaIds.length > 0) {
-      filteredCCAs = ccasWithIDSMS.filter((cca: any) => {
-        const ccaIdFromGroup = Object.keys(ccaGroups).find(id => 
-          ccaGroups[id].cca_codigo === cca.cca_codigo
-        );
-        return ccaIds.includes(Number(ccaIdFromGroup));
-      });
+      filteredCCAs = ccasWithIDSMS.filter((cca: any) => ccaIds.includes(cca.cca_id));
+      console.log('CCAs após filtro:', filteredCCAs);
     }
 
     if (filteredCCAs.length === 0) {
+      console.log('Nenhum CCA encontrado após filtro');
       return 0;
     }
 
-    // Calcular média igual ao IDSMSDashboard
-    const idsmsMedia = filteredCCAs.length > 0 
-      ? filteredCCAs.reduce((sum, item) => sum + item.idsms_total, 0) / filteredCCAs.length 
-      : 0;
+    // Calcular média APENAS dos valores de IDSMS Total
+    const idsmsMedia = filteredCCAs.reduce((sum, cca) => sum + cca.idsms_total, 0) / filteredCCAs.length;
     
-    console.log('Cálculo final do IDSMS - Total CCAs:', filteredCCAs.length, 'Média:', idsmsMedia);
+    console.log('Cálculo final do IDSMS - CCAs utilizados:', filteredCCAs.length, 'Média:', idsmsMedia);
     
     // Retornar com toFixed(1) convertido para number - igual ao IDSMSDashboard
     const resultado = Number(idsmsMedia.toFixed(1));
