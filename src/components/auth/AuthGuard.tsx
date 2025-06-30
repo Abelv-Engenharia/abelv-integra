@@ -34,7 +34,7 @@ const AuthGuard = ({ children }: AuthGuardProps) => {
     // Redirect to login page with the return url
     return (
       <Navigate
-        to="/auth"
+        to={`/login`}
         state={{ from: location.pathname }}
         replace
       />

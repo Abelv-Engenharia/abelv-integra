@@ -149,8 +149,9 @@ const Profile = () => {
   }
 
   const handleSave = async () => {
-    let avatar_url = formData.avatar_url;
+    let avatar_url = formData.avatar_url; // path do avatar que vai para o banco
 
+    // Caso imagem foi selecionada
     if (avatarFile) {
       if (!user?.id) {
         toast({
@@ -173,6 +174,7 @@ const Profile = () => {
       }
     }
 
+    // Salva as outras alterações no perfil, incluindo avatar_url atualizado se houver
     updateProfileMutation.mutate({
       ...formData,
       avatar_url
@@ -196,12 +198,11 @@ const Profile = () => {
   };
 
   return (
-    <div className="container mx-auto py-6 space-y-6">
-      <h1 className="text-2xl font-bold">Meu Perfil</h1>
+    <div className="container mx-auto py-6">
+      <h1 className="text-2xl font-bold mb-6">Meu Perfil</h1>
       
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Informações pessoais */}
-        <Card className="lg:col-span-1">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Card className="md:col-span-1">
           <CardHeader>
             <CardTitle>Informações Pessoais</CardTitle>
             <CardDescription>Visualize e edite suas informações pessoais</CardDescription>
@@ -220,6 +221,7 @@ const Profile = () => {
                   </AvatarFallback>
                 )}
               </Avatar>
+              {/* Apenas durante edição, mostra botão de input da foto */}
               {isEditing && (
                 <label
                   htmlFor="avatar-upload"
@@ -236,6 +238,7 @@ const Profile = () => {
                   <Image size={20} />
                 </label>
               )}
+              {/* Botão remover foto */}
               {isEditing && (avatarPreview || formData.avatar_url) && (
                 <Button
                   type="button"
@@ -265,8 +268,7 @@ const Profile = () => {
           </CardContent>
         </Card>
         
-        {/* Editar perfil */}
-        <Card className="lg:col-span-2">
+        <Card className="md:col-span-2">
           <CardHeader>
             <div className="flex justify-between items-center">
               <CardTitle>Editar Perfil</CardTitle>
@@ -292,6 +294,7 @@ const Profile = () => {
           </CardHeader>
           <CardContent>
             <form className="space-y-4">
+              {/* Adiciona seletor de foto de perfil em modo edição (mobile/desktop) */}
               {isEditing && (
                 <div className="space-y-2 flex flex-col">
                   <Label>Foto do Perfil</Label>
