@@ -82,13 +82,13 @@ const CrachaPreview: React.FC<Props> = ({
         .print-cracha .rounded-t-md { border-radius: 2px 2px 0 0;  }
         .print-cracha h3 { margin: 0; font-size: 9px; font-weight: bold; padding: 3px 0; }
         .print-cracha h4, .print-cracha h5 { margin: 0; }
-        .print-cracha .w-28, .print-cracha .h-28 { width: 25px !important; height: 25px !important;}
+        .print-cracha .w-28, .print-cracha .h-28 { width: 20px !important; height: 20px !important;}
         .print-cracha .rounded-full { border-radius: 50%; }
         .print-cracha img { width: 100%; height: 100%; object-fit: contain; border-radius: 50%; background: white; padding: 1px; }
         .print-cracha .funcionario-info { flex: 1; min-width: 0; }
-        .print-cracha .funcionario-nome { font-size: 9px; font-weight: bold; margin-bottom: 1px; line-height: 1.1; }
-        .print-cracha .funcionario-funcao { font-size: 7px; margin-bottom: 1px; color: #333; line-height: 1.1; }
-        .print-cracha .funcionario-matricula { font-size: 6px; color: #666; }
+        .print-cracha .funcionario-nome { font-size: 8px; font-weight: bold; margin-bottom: 1px; line-height: 1.1; }
+        .print-cracha .funcionario-funcao { font-size: 6px; margin-bottom: 1px; color: #333; line-height: 1.1; }
+        .print-cracha .funcionario-matricula { font-size: 5px; color: #666; }
         .print-cracha table { width: 100%; font-size: 6px; border-collapse: collapse; margin-top: 2px; }
         .print-cracha th, .print-cracha td { padding: 1px 2px; }
         .print-cracha th { text-align: left; font-weight: bold; font-size: 7px; }
@@ -104,11 +104,11 @@ const CrachaPreview: React.FC<Props> = ({
         .print-cracha .text-xs { font-size: 6px; }
         .print-cracha .text-sm { font-size: 7px; }
         .print-cracha .mb-2 { margin-bottom: 2px; }
-        .print-cracha .header-info { display: flex; align-items: flex-start; gap: 4px; margin: 3px 0; }
+        .print-cracha .header-info { display: flex; align-items: flex-start; gap: 3px; margin: 3px 0; }
         .print-cracha .certificacoes-section { flex: 1; }
         .print-cracha .certificacoes-title { font-size: 8px; font-weight: bold; text-align: center; margin: 3px 0 2px 0; }
         .print-cracha .emissao { font-size: 6px; text-align: center; margin-top: auto; padding-top: 2px; color: #666; }
-        .print-cracha .logo-container { width: 25px; height: 25px; background: #f5f5f5; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; overflow: hidden; }
+        .print-cracha .logo-container { width: 20px; height: 20px; background: #f5f5f5; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; overflow: hidden; }
       </style>
     `;
 
@@ -152,7 +152,7 @@ const CrachaPreview: React.FC<Props> = ({
               </div>
 
               <div className="header-info flex items-start gap-2 my-2">
-                <div className="w-6 h-6 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden">
+                <div className="w-5 h-5 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden">
                   {logoUrl ? (
                     <img
                       src={logoUrl}
@@ -160,14 +160,14 @@ const CrachaPreview: React.FC<Props> = ({
                       className="w-full h-full object-contain p-0.5 rounded-full bg-white"
                     />
                   ) : (
-                    <User className="w-3 h-3 text-gray-400" />
+                    <User className="w-2.5 h-2.5 text-gray-400" />
                   )}
                 </div>
 
                 <div className="funcionario-info flex-1 min-w-0">
-                  <h4 className="funcionario-nome text-[9px] font-bold leading-tight">{funcionario.nome}</h4>
-                  <p className="funcionario-funcao text-[7px] text-gray-600 leading-tight">{funcionario.funcao}</p>
-                  <p className="funcionario-matricula text-[6px] text-gray-500">Mat: {funcionario.matricula}</p>
+                  <h4 className="funcionario-nome text-[8px] font-bold leading-tight">{funcionario.nome}</h4>
+                  <p className="funcionario-funcao text-[6px] text-gray-600 leading-tight">{funcionario.funcao}</p>
+                  <p className="funcionario-matricula text-[5px] text-gray-500">Mat: {funcionario.matricula}</p>
                 </div>
               </div>
 
