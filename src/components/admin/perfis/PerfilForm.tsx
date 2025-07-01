@@ -93,32 +93,34 @@ export const PerfilForm = ({ initialData, onCancel, onSave, loading }: PerfilFor
   };
 
   return (
-    <div className="space-y-6 max-h-[70vh] overflow-y-auto">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div className="section-spacing max-h-[70vh] overflow-y-auto">
+      <div className="form-grid mb-4 sm:mb-6">
         <div className="space-y-2">
-          <Label htmlFor="nome">Nome</Label>
+          <Label htmlFor="nome" className="text-sm sm:text-base">Nome</Label>
           <Input 
             id="nome" 
             value={nome} 
             onChange={(e) => setNome(e.target.value)} 
-            placeholder="Nome do perfil" 
+            placeholder="Nome do perfil"
+            className="text-sm sm:text-base"
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="descricao">Descrição</Label>
+          <Label htmlFor="descricao" className="text-sm sm:text-base">Descrição</Label>
           <Input 
             id="descricao" 
             value={descricao} 
             onChange={(e) => setDescricao(e.target.value)} 
-            placeholder="Descrição do perfil" 
+            placeholder="Descrição do perfil"
+            className="text-sm sm:text-base"
           />
         </div>
       </div>
 
       {/* CCAs Permitidas */}
-      <div className="space-y-2 pt-4">
-        <h4 className="text-md font-semibold text-red-700">CCAs Permitidas</h4>
-        <p className="text-sm text-muted-foreground">
+      <div className="section-spacing pt-4 border-t">
+        <h4 className="text-sm sm:text-base font-semibold text-red-700">CCAs Permitidas</h4>
+        <p className="text-xs sm:text-sm text-muted-foreground">
           Selecione quais CCAs este perfil pode visualizar e editar
         </p>
         <CCASelector
@@ -128,9 +130,9 @@ export const PerfilForm = ({ initialData, onCancel, onSave, loading }: PerfilFor
       </div>
       
       {/* Módulos Principais */}
-      <div className="space-y-2 pt-4">
-        <h4 className="text-md font-semibold text-blue-700">Módulos do Sistema</h4>
-        <div className="flex flex-wrap gap-4">
+      <div className="section-spacing pt-4 border-t">
+        <h4 className="text-sm sm:text-base font-semibold text-blue-700">Módulos do Sistema</h4>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
           {modulosPrincipais.map((modulo) => (
             <PermissaoCheckbox
               key={modulo.key}
@@ -144,9 +146,9 @@ export const PerfilForm = ({ initialData, onCancel, onSave, loading }: PerfilFor
       </div>
 
       {/* Administração */}
-      <div className="space-y-2 pt-2">
-        <h4 className="text-md font-semibold text-green-700">Administração</h4>
-        <div className="flex flex-wrap gap-4">
+      <div className="section-spacing pt-4 border-t">
+        <h4 className="text-sm sm:text-base font-semibold text-green-700">Administração</h4>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
           {administrativos.map((adm) => (
             <PermissaoCheckbox
               key={adm.key}
@@ -160,9 +162,9 @@ export const PerfilForm = ({ initialData, onCancel, onSave, loading }: PerfilFor
       </div>
 
       {/* Permissões Específicas */}
-      <div className="space-y-2 pt-2">
-        <h4 className="text-md font-semibold text-purple-700">Permissões Específicas</h4>
-        <div className="flex flex-wrap gap-4">
+      <div className="section-spacing pt-4 border-t">
+        <h4 className="text-sm sm:text-base font-semibold text-purple-700">Permissões Específicas</h4>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
           {permissoesEspecificas.map((per) => (
             <PermissaoCheckbox
               key={per.key}
@@ -176,12 +178,12 @@ export const PerfilForm = ({ initialData, onCancel, onSave, loading }: PerfilFor
       </div>
 
       {/* Menus da Sidebar */}
-      <div className="space-y-2 pt-2">
-        <h4 className="text-md font-semibold text-orange-700">Menus e Itens da Sidebar</h4>
-        <p className="text-sm text-muted-foreground">
+      <div className="section-spacing pt-4 border-t">
+        <h4 className="text-sm sm:text-base font-semibold text-orange-700">Menus e Itens da Sidebar</h4>
+        <p className="text-xs sm:text-sm text-muted-foreground">
           Selecione os menus e submenus da sidebar que este perfil pode visualizar/acessar
         </p>
-        <div className="flex flex-wrap gap-3 max-h-48 overflow-y-auto border p-2 rounded bg-orange-50">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 max-h-32 sm:max-h-48 overflow-y-auto border p-2 rounded bg-orange-50">
           {menusSidebar.map((menu) => (
             <SidebarMenuCheckbox
               key={menu}
@@ -194,9 +196,9 @@ export const PerfilForm = ({ initialData, onCancel, onSave, loading }: PerfilFor
         </div>
       </div>
 
-      <div className="flex justify-end space-x-2 pt-4 border-t">
-        <Button variant="outline" onClick={onCancel}>Cancelar</Button>
-        <Button onClick={handleSave} disabled={loading}>
+      <div className="button-group-end pt-4 border-t">
+        <Button variant="outline" onClick={onCancel} className="w-full sm:w-auto">Cancelar</Button>
+        <Button onClick={handleSave} disabled={loading} className="w-full sm:w-auto">
           {loading ? "Salvando..." : "Salvar"}
         </Button>
       </div>
@@ -219,7 +221,7 @@ const PermissaoCheckbox = ({ id, label, checked, onChange }: PermissaoCheckboxPr
       checked={checked} 
       onCheckedChange={(checked) => onChange(checked === true)}
     />
-    <Label htmlFor={id} className="text-sm">{label}</Label>
+    <Label htmlFor={id} className="text-xs sm:text-sm break-words min-w-0">{label}</Label>
   </div>
 );
 
@@ -230,12 +232,12 @@ interface SidebarMenuCheckboxProps {
   onChange: () => void;
 }
 const SidebarMenuCheckbox = ({ id, label, checked, onChange }: SidebarMenuCheckboxProps) => (
-  <div className="flex items-center space-x-2 min-w-[200px]">
+  <div className="flex items-center space-x-2 min-w-0">
     <Checkbox 
       id={id + "-sidebar"} 
       checked={checked}
       onCheckedChange={onChange}
     />
-    <Label htmlFor={id + "-sidebar"} className="text-xs">{label}</Label>
+    <Label htmlFor={id + "-sidebar"} className="text-xs break-words min-w-0">{label}</Label>
   </div>
 );

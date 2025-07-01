@@ -135,11 +135,11 @@ const ChangePasswordForm = () => {
   };
 
   return (
-    <Card>
-      <CardContent className="pt-6">
-        <form onSubmit={handleSubmit} className="space-y-4">
+    <CardContent className="form-section">
+      <form onSubmit={handleSubmit} className="section-spacing">
+        <div className="form-grid-full space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="current-password">Senha Atual</Label>
+            <Label htmlFor="current-password" className="text-sm sm:text-base">Senha Atual</Label>
             <div className="relative">
               <Input
                 id="current-password"
@@ -147,7 +147,7 @@ const ChangePasswordForm = () => {
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
                 placeholder="Digite sua senha atual"
-                className="pr-10"
+                className="pr-10 text-sm sm:text-base"
               />
               <Button
                 type="button"
@@ -157,16 +157,16 @@ const ChangePasswordForm = () => {
                 onClick={() => togglePasswordVisibility('current')}
               >
                 {showCurrentPassword ? (
-                  <EyeOff className="h-4 w-4" />
+                  <EyeOff className="h-3 w-3 sm:h-4 sm:w-4" />
                 ) : (
-                  <Eye className="h-4 w-4" />
+                  <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
                 )}
               </Button>
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="new-password">Nova Senha</Label>
+            <Label htmlFor="new-password" className="text-sm sm:text-base">Nova Senha</Label>
             <div className="relative">
               <Input
                 id="new-password"
@@ -174,7 +174,7 @@ const ChangePasswordForm = () => {
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 placeholder="Digite sua nova senha (mín. 6 caracteres)"
-                className="pr-10"
+                className="pr-10 text-sm sm:text-base"
               />
               <Button
                 type="button"
@@ -184,16 +184,16 @@ const ChangePasswordForm = () => {
                 onClick={() => togglePasswordVisibility('new')}
               >
                 {showNewPassword ? (
-                  <EyeOff className="h-4 w-4" />
+                  <EyeOff className="h-3 w-3 sm:h-4 sm:w-4" />
                 ) : (
-                  <Eye className="h-4 w-4" />
+                  <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
                 )}
               </Button>
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="confirm-password">Confirmar Nova Senha</Label>
+            <Label htmlFor="confirm-password" className="text-sm sm:text-base">Confirmar Nova Senha</Label>
             <div className="relative">
               <Input
                 id="confirm-password"
@@ -201,7 +201,7 @@ const ChangePasswordForm = () => {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="Confirme sua nova senha"
-                className="pr-10"
+                className="pr-10 text-sm sm:text-base"
               />
               <Button
                 type="button"
@@ -211,27 +211,27 @@ const ChangePasswordForm = () => {
                 onClick={() => togglePasswordVisibility('confirm')}
               >
                 {showConfirmPassword ? (
-                  <EyeOff className="h-4 w-4" />
+                  <EyeOff className="h-3 w-3 sm:h-4 sm:w-4" />
                 ) : (
-                  <Eye className="h-4 w-4" />
+                  <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
                 )}
               </Button>
             </div>
           </div>
 
-          <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-            <Lock className="h-4 w-4" />
+          <div className="flex items-center space-x-2 text-xs sm:text-sm text-muted-foreground p-3 bg-muted/30 rounded-md">
+            <Lock className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
             <span>Sua senha deve ter pelo menos 6 caracteres</span>
           </div>
 
-          <div className="flex justify-end pt-4">
-            <Button type="submit" disabled={isLoading}>
+          <div className="button-group-end pt-4 border-t">
+            <Button type="submit" disabled={isLoading} className="w-full sm:w-auto">
               {isLoading ? "Alterando..." : "Alterar Senha"}
             </Button>
           </div>
-        </form>
-      </CardContent>
-    </Card>
+        </div>
+      </form>
+    </CardContent>
   );
 };
 

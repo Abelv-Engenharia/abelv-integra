@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -108,9 +109,9 @@ const DesviosTable = () => {
 
   if (userCCAs.length === 0 && !isLoading) {
     return (
-      <div className="bg-white rounded-md border shadow-sm">
-        <div className="flex justify-center items-center p-8">
-          <p className="text-muted-foreground">Você não tem acesso a nenhum CCA.</p>
+      <div className="table-container">
+        <div className="flex justify-center items-center p-6 sm:p-8">
+          <p className="text-muted-foreground text-sm sm:text-base">Você não tem acesso a nenhum CCA.</p>
         </div>
       </div>
     );
@@ -118,23 +119,23 @@ const DesviosTable = () => {
 
   return (
     <>
-      <div className="bg-white rounded-md border shadow-sm">
+      <div className="table-container">
         <div className="relative w-full overflow-auto">
           {isLoading ? (
-            <div className="flex justify-center items-center p-8">
-              <p>Carregando desvios...</p>
+            <div className="flex justify-center items-center p-6 sm:p-8">
+              <p className="text-sm sm:text-base">Carregando desvios...</p>
             </div>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>ID</TableHead>
-                  <TableHead>Data</TableHead>
-                  <TableHead className="max-w-[250px]">Descrição</TableHead>
-                  <TableHead>CCA</TableHead>
-                  <TableHead>Risco</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Ações</TableHead>
+                  <TableHead className="text-xs sm:text-sm">ID</TableHead>
+                  <TableHead className="text-xs sm:text-sm">Data</TableHead>
+                  <TableHead className="max-w-[150px] sm:max-w-[250px] text-xs sm:text-sm">Descrição</TableHead>
+                  <TableHead className="text-xs sm:text-sm">CCA</TableHead>
+                  <TableHead className="text-xs sm:text-sm">Risco</TableHead>
+                  <TableHead className="text-xs sm:text-sm">Status</TableHead>
+                  <TableHead className="text-right text-xs sm:text-sm">Ações</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -154,8 +155,8 @@ const DesviosTable = () => {
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={7} className="h-24 text-center">
-                      Nenhum desvio encontrado para os CCAs permitidos.
+                    <TableCell colSpan={7} className="h-16 sm:h-24 text-center">
+                      <span className="text-sm sm:text-base">Nenhum desvio encontrado para os CCAs permitidos.</span>
                     </TableCell>
                   </TableRow>
                 )}
@@ -163,15 +164,15 @@ const DesviosTable = () => {
             </Table>
           )}
         </div>
-        <div className="flex items-center justify-between p-4 border-t">
-          <div className="text-sm text-muted-foreground">
+        <div className="flex flex-col sm:flex-row items-center justify-between p-3 sm:p-4 border-t gap-3">
+          <div className="text-xs sm:text-sm text-muted-foreground">
             Mostrando {desvios.length} de {desvios.length} desvios dos CCAs permitidos
           </div>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" disabled>
+          <div className="button-group">
+            <Button variant="outline" disabled size="sm">
               Anterior
             </Button>
-            <Button variant="outline" disabled>
+            <Button variant="outline" disabled size="sm">
               Próximo
             </Button>
           </div>

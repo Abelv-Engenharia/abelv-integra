@@ -52,10 +52,10 @@ const Settings = () => {
 
   if (isLoading) {
     return (
-      <div className="container mx-auto py-6">
-        <h1 className="text-2xl font-bold mb-6">Configurações</h1>
+      <div className="content-padding">
+        <h1 className="heading-responsive mb-4 sm:mb-6">Configurações</h1>
         <Card>
-          <CardContent>
+          <CardContent className="pt-6">
             <div className="my-6 space-y-2">
               <div className="h-4 w-2/3 bg-muted rounded animate-pulse" />
               <div className="h-8 w-full bg-muted rounded animate-pulse" />
@@ -67,27 +67,27 @@ const Settings = () => {
   }
 
   return (
-    <div className="container mx-auto py-6">
-      <h1 className="text-2xl font-bold mb-6">Configurações</h1>
+    <div className="content-padding">
+      <h1 className="heading-responsive mb-4 sm:mb-6">Configurações</h1>
       
       <Tabs defaultValue="preferences" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="preferences">Preferências</TabsTrigger>
-          <TabsTrigger value="security">Segurança</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-2 mb-4 sm:mb-6">
+          <TabsTrigger value="preferences" className="text-xs sm:text-sm">Preferências</TabsTrigger>
+          <TabsTrigger value="security" className="text-xs sm:text-sm">Segurança</TabsTrigger>
         </TabsList>
         
-        <TabsContent value="preferences" className="space-y-6">
-          <div className="grid grid-cols-1 gap-6">
-            <Card>
+        <TabsContent value="preferences" className="section-spacing">
+          <div className="card-grid">
+            <Card className="md:col-span-2">
               <CardHeader>
-                <CardTitle>Notificações</CardTitle>
-                <CardDescription>Configure como você recebe notificações</CardDescription>
+                <CardTitle className="text-lg sm:text-xl">Notificações</CardTitle>
+                <CardDescription className="text-sm sm:text-base">Configure como você recebe notificações</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <Label htmlFor="email-notifications" className="text-base">Notificações por Email</Label>
-                    <p className="text-sm text-muted-foreground">
+              <CardContent className="space-y-4 sm:space-y-6">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                  <div className="min-w-0">
+                    <Label htmlFor="email-notifications" className="text-sm sm:text-base font-medium">Notificações por Email</Label>
+                    <p className="text-xs sm:text-sm text-muted-foreground mt-1">
                       Receba notificações sobre atualizações e tarefas por email
                     </p>
                   </div>
@@ -95,12 +95,13 @@ const Settings = () => {
                     id="email-notifications"
                     checked={form.email_notifications}
                     onCheckedChange={() => handleToggleChange('email_notifications')}
+                    className="flex-shrink-0"
                   />
                 </div>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <Label htmlFor="sms-notifications" className="text-base">Notificações por SMS</Label>
-                    <p className="text-sm text-muted-foreground">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                  <div className="min-w-0">
+                    <Label htmlFor="sms-notifications" className="text-sm sm:text-base font-medium">Notificações por SMS</Label>
+                    <p className="text-xs sm:text-sm text-muted-foreground mt-1">
                       Receba notificações sobre atualizações e tarefas por SMS
                     </p>
                   </div>
@@ -108,6 +109,7 @@ const Settings = () => {
                     id="sms-notifications"
                     checked={form.sms_notifications}
                     onCheckedChange={() => handleToggleChange('sms_notifications')}
+                    className="flex-shrink-0"
                   />
                 </div>
               </CardContent>
@@ -115,14 +117,14 @@ const Settings = () => {
             
             <Card>
               <CardHeader>
-                <CardTitle>Aparência</CardTitle>
-                <CardDescription>Personalize a aparência do sistema</CardDescription>
+                <CardTitle className="text-lg sm:text-xl">Aparência</CardTitle>
+                <CardDescription className="text-sm sm:text-base">Personalize a aparência do sistema</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <Label htmlFor="dark-mode" className="text-base">Modo Escuro</Label>
-                    <p className="text-sm text-muted-foreground">
+              <CardContent>
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                  <div className="min-w-0">
+                    <Label htmlFor="dark-mode" className="text-sm sm:text-base font-medium">Modo Escuro</Label>
+                    <p className="text-xs sm:text-sm text-muted-foreground mt-1">
                       Utilize o tema escuro para reduzir o cansaço visual
                     </p>
                   </div>
@@ -130,20 +132,21 @@ const Settings = () => {
                     id="dark-mode"
                     checked={form.dark_mode}
                     onCheckedChange={() => handleToggleChange('dark_mode')}
+                    className="flex-shrink-0"
                   />
                 </div>
               </CardContent>
             </Card>
             
-            <Card>
+            <Card className="md:col-span-2">
               <CardHeader>
-                <CardTitle>Preferências Regionais</CardTitle>
-                <CardDescription>Configure suas preferências de idioma e fuso horário</CardDescription>
+                <CardTitle className="text-lg sm:text-xl">Preferências Regionais</CardTitle>
+                <CardDescription className="text-sm sm:text-base">Configure suas preferências de idioma e fuso horário</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <CardContent>
+                <div className="form-grid">
                   <div className="space-y-2">
-                    <Label htmlFor="language">Idioma</Label>
+                    <Label htmlFor="language" className="text-sm sm:text-base">Idioma</Label>
                     <Select
                       value={form.language}
                       onValueChange={(value) => handleSelectChange('language', value)}
@@ -159,7 +162,7 @@ const Settings = () => {
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="timezone">Fuso Horário</Label>
+                    <Label htmlFor="timezone" className="text-sm sm:text-base">Fuso Horário</Label>
                     <Select
                       value={form.timezone}
                       onValueChange={(value) => handleSelectChange('timezone', value)}
@@ -178,23 +181,22 @@ const Settings = () => {
                 </div>
               </CardContent>
             </Card>
-            <div className="flex justify-end">
-              <Button onClick={handleSave} disabled={saveSettingsMutation.isPending}>
+            
+            <div className="md:col-span-2 button-group-end">
+              <Button onClick={handleSave} disabled={saveSettingsMutation.isPending} className="w-full sm:w-auto">
                 {saveSettingsMutation.isPending ? "Salvando..." : "Salvar Configurações"}
               </Button>
             </div>
           </div>
         </TabsContent>
         
-        <TabsContent value="security" className="space-y-6">
+        <TabsContent value="security" className="section-spacing">
           <Card>
             <CardHeader>
-              <CardTitle>Alterar Senha</CardTitle>
-              <CardDescription>Atualize sua senha de acesso</CardDescription>
+              <CardTitle className="text-lg sm:text-xl">Alterar Senha</CardTitle>
+              <CardDescription className="text-sm sm:text-base">Atualize sua senha de acesso</CardDescription>
             </CardHeader>
-            <CardContent>
-              <ChangePasswordForm />
-            </CardContent>
+            <ChangePasswordForm />
           </Card>
         </TabsContent>
       </Tabs>

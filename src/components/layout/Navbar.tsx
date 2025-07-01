@@ -46,49 +46,47 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="bg-white border-b border-gray-200 px-4 py-3">
+    <nav className="bg-white border-b border-gray-200 px-2 sm:px-4 py-2 sm:py-3">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
           {/* Botão de toggle da sidebar - visível em telas pequenas */}
           <div className="md:hidden">
-            <SidebarTrigger />
+            <SidebarTrigger className="h-8 w-8" />
           </div>
           
-          <div className="flex items-center gap-2">
-            <SystemLogo className="h-8" />
-            <h1 className="text-xl font-bold text-gray-900 hidden sm:block">
-              GESTÃO DE SMS ABELV
-            </h1>
-            <h1 className="text-lg font-bold text-gray-900 sm:hidden">
-              SMS ABELV
+          <div className="flex items-center gap-1 sm:gap-2 min-w-0">
+            <SystemLogo className="h-6 sm:h-8 flex-shrink-0" />
+            <h1 className="text-sm sm:text-lg lg:text-xl font-bold text-gray-900 truncate">
+              <span className="hidden sm:inline">GESTÃO DE SMS ABELV</span>
+              <span className="sm:hidden">SMS ABELV</span>
             </h1>
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-1 sm:gap-3">
           <NotificacoesDropdown />
           
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="flex items-center gap-2 h-auto p-2">
-                <Avatar className="h-8 w-8">
+              <Button variant="ghost" className="flex items-center gap-1 sm:gap-2 h-auto p-1 sm:p-2">
+                <Avatar className="h-6 w-6 sm:h-8 sm:w-8">
                   <AvatarImage src={avatarUrl || undefined} alt={profile?.nome || "User"} />
                   <AvatarFallback>
-                    <User className="h-4 w-4" />
+                    <User className="h-3 w-3 sm:h-4 sm:w-4" />
                   </AvatarFallback>
                 </Avatar>
-                <div className="hidden sm:block text-left">
-                  <p className="text-sm font-medium text-gray-900">
+                <div className="hidden lg:block text-left min-w-0">
+                  <p className="text-xs sm:text-sm font-medium text-gray-900 truncate">
                     {profile?.nome || "Usuário"}
                   </p>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-gray-500 truncate">
                     {profile?.email || "email@exemplo.com"}
                   </p>
                 </div>
-                <ChevronDown className="h-4 w-4 text-gray-500" />
+                <ChevronDown className="h-3 w-3 sm:h-4 sm:w-4 text-gray-500 flex-shrink-0" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuContent align="end" className="w-48 sm:w-56">
               <DropdownMenuItem asChild>
                 <Link to="/account/profile" className="cursor-pointer">
                   <User className="mr-2 h-4 w-4" />
