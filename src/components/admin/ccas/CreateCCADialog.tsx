@@ -1,8 +1,9 @@
-
 import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import { useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   Dialog,
   DialogContent,
@@ -43,6 +44,9 @@ export const CreateCCADialog: React.FC<CreateCCADialogProps> = ({
   onOpenChange,
   onSuccess,
 }) => {
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
+  
   const form = useForm<CCAFormData>({
     resolver: zodResolver(ccaSchema),
     defaultValues: {
@@ -67,6 +71,17 @@ export const CreateCCADialog: React.FC<CreateCCADialogProps> = ({
           title: "Sucesso",
           description: "CCA criado com sucesso!",
         });
+        
+        // Invalidate user CCAs cache to refresh all CCA lists
+        queryClient.invalidateQueries({
+          queryKey: ['user-ccas', user?.id]
+        });
+        
+        // Also invalidate admin CCAs cache
+        queryClient.invalidateQueries({
+          queryKey: ['admin-ccas']
+        });
+        
         form.reset();
         onSuccess();
       } else {
