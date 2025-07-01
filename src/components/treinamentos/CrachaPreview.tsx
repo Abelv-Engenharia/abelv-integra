@@ -80,18 +80,18 @@ const CrachaPreview: React.FC<Props> = ({
         }
         .print-cracha .bg-primary { background: hsl(222.2, 47.4%, 11.2%) !important; color: #fff; }
         .print-cracha .rounded-t-md { border-radius: 2px 2px 0 0;  }
-        .print-cracha h3 { margin: 0; font-size: 9px; font-weight: bold; padding: 3px 0; }
+        .print-cracha h3 { margin: 0; font-size: 8px; font-weight: bold; padding: 3px 0; }
         .print-cracha h4, .print-cracha h5 { margin: 0; }
-        .print-cracha .w-28, .print-cracha .h-28 { width: 20px !important; height: 20px !important;}
+        .print-cracha .logo-size { width: 18px !important; height: 18px !important;}
         .print-cracha .rounded-full { border-radius: 50%; }
         .print-cracha img { width: 100%; height: 100%; object-fit: contain; border-radius: 50%; background: white; padding: 1px; }
         .print-cracha .funcionario-info { flex: 1; min-width: 0; }
-        .print-cracha .funcionario-nome { font-size: 8px; font-weight: bold; margin-bottom: 1px; line-height: 1.1; }
+        .print-cracha .funcionario-nome { font-size: 7px; font-weight: bold; margin-bottom: 1px; line-height: 1.1; }
         .print-cracha .funcionario-funcao { font-size: 6px; margin-bottom: 1px; color: #333; line-height: 1.1; }
         .print-cracha .funcionario-matricula { font-size: 5px; color: #666; }
         .print-cracha table { width: 100%; font-size: 6px; border-collapse: collapse; margin-top: 2px; }
         .print-cracha th, .print-cracha td { padding: 1px 2px; }
-        .print-cracha th { text-align: left; font-weight: bold; font-size: 7px; }
+        .print-cracha th { text-align: left; font-weight: bold; font-size: 6px; }
         .print-cracha th:last-child, .print-cracha td:last-child { text-align: right;}
         .print-cracha .border-t { border-top: 1px solid #eee; }
         .print-cracha .border-b { border-bottom: 1px solid #eee; }
@@ -101,14 +101,14 @@ const CrachaPreview: React.FC<Props> = ({
         .print-cracha .font-bold { font-weight: bold; }
         .print-cracha .font-semibold { font-weight: 600; }
         .print-cracha .text-center { text-align: center; }
-        .print-cracha .text-xs { font-size: 6px; }
-        .print-cracha .text-sm { font-size: 7px; }
+        .print-cracha .text-xs { font-size: 5px; }
+        .print-cracha .text-sm { font-size: 6px; }
         .print-cracha .mb-2 { margin-bottom: 2px; }
-        .print-cracha .header-info { display: flex; align-items: flex-start; gap: 3px; margin: 3px 0; }
+        .print-cracha .header-info { display: flex; align-items: flex-start; gap: 2px; margin: 3px 0; }
         .print-cracha .certificacoes-section { flex: 1; }
-        .print-cracha .certificacoes-title { font-size: 8px; font-weight: bold; text-align: center; margin: 3px 0 2px 0; }
-        .print-cracha .emissao { font-size: 6px; text-align: center; margin-top: auto; padding-top: 2px; color: #666; }
-        .print-cracha .logo-container { width: 20px; height: 20px; background: #f5f5f5; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; overflow: hidden; }
+        .print-cracha .certificacoes-title { font-size: 7px; font-weight: bold; text-align: center; margin: 3px 0 2px 0; }
+        .print-cracha .emissao { font-size: 5px; text-align: center; margin-top: auto; padding-top: 2px; color: #666; }
+        .print-cracha .logo-container { width: 18px; height: 18px; background: #f5f5f5; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; overflow: hidden; }
       </style>
     `;
 
@@ -148,11 +148,11 @@ const CrachaPreview: React.FC<Props> = ({
           {funcionario ? (
             <div className="flex flex-col h-full text-xs">
               <div className="bg-primary text-white text-center py-1 rounded-t-md">
-                <h3 className="font-bold uppercase text-[9px]">Crachá de Capacitação</h3>
+                <h3 className="font-bold uppercase text-[8px]">Crachá de Capacitação</h3>
               </div>
 
               <div className="header-info flex items-start gap-2 my-2">
-                <div className="w-5 h-5 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden">
+                <div className="logo-size w-4 h-4 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden">
                   {logoUrl ? (
                     <img
                       src={logoUrl}
@@ -160,38 +160,38 @@ const CrachaPreview: React.FC<Props> = ({
                       className="w-full h-full object-contain p-0.5 rounded-full bg-white"
                     />
                   ) : (
-                    <User className="w-2.5 h-2.5 text-gray-400" />
+                    <User className="w-2 h-2 text-gray-400" />
                   )}
                 </div>
 
                 <div className="funcionario-info flex-1 min-w-0">
-                  <h4 className="funcionario-nome text-[8px] font-bold leading-tight">{funcionario.nome}</h4>
+                  <h4 className="funcionario-nome text-[7px] font-bold leading-tight">{funcionario.nome}</h4>
                   <p className="funcionario-funcao text-[6px] text-gray-600 leading-tight">{funcionario.funcao}</p>
                   <p className="funcionario-matricula text-[5px] text-gray-500">Mat: {funcionario.matricula}</p>
                 </div>
               </div>
 
               <div className="certificacoes-section border-t pt-1 flex-1">
-                <h5 className="certificacoes-title text-[8px] font-semibold">Certificações Válidas</h5>
+                <h5 className="certificacoes-title text-[7px] font-semibold">Certificações Válidas</h5>
 
                 {isLoading ? (
-                  <p className="text-center text-[6px] text-muted-foreground">Carregando...</p>
+                  <p className="text-center text-[5px] text-muted-foreground">Carregando...</p>
                 ) : treinamentosFiltrados.length > 0 ? (
                   <div>
-                    <table className="text-[6px] w-full">
+                    <table className="text-[5px] w-full">
                       <thead>
                         <tr className="border-b">
-                          <th className="text-left py-1 text-[7px]">Treinamento</th>
-                          <th className="text-right py-1 text-[7px]">Validade</th>
+                          <th className="text-left py-1 text-[6px]">Treinamento</th>
+                          <th className="text-right py-1 text-[6px]">Validade</th>
                         </tr>
                       </thead>
                       <tbody>
                         {treinamentosFiltrados.map(treinamento => (
                           <tr key={treinamento.id} className="border-b">
-                            <td className="py-1 text-left text-[6px] leading-tight">
+                            <td className="py-1 text-left text-[5px] leading-tight">
                               {treinamento.treinamentoNome}
                             </td>
-                            <td className="py-1 text-right text-[6px]">
+                            <td className="py-1 text-right text-[5px]">
                               {formatarData(treinamento.data_validade)}
                             </td>
                           </tr>
@@ -200,14 +200,14 @@ const CrachaPreview: React.FC<Props> = ({
                     </table>
                   </div>
                 ) : (
-                  <p className="text-center text-[6px] text-muted-foreground">
+                  <p className="text-center text-[5px] text-muted-foreground">
                     Sem treinamentos válidos
                   </p>
                 )}
               </div>
 
               <div className="emissao mt-auto border-t pt-1">
-                <p className="text-center text-[6px] text-gray-500">
+                <p className="text-center text-[5px] text-gray-500">
                   Emitido em {format(new Date(), "dd/MM/yyyy")}
                 </p>
               </div>
