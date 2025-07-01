@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -72,14 +73,27 @@ export const CreateCCADialog: React.FC<CreateCCADialogProps> = ({
           description: "CCA criado com sucesso!",
         });
         
-        // Invalidate user CCAs cache to refresh all CCA lists
-        queryClient.invalidateQueries({
-          queryKey: ['user-ccas', user?.id]
+        // Invalidate all CCAs related queries to ensure all lists are updated
+        await queryClient.invalidateQueries({
+          queryKey: ['user-ccas']
         });
         
-        // Also invalidate admin CCAs cache
-        queryClient.invalidateQueries({
+        await queryClient.invalidateQueries({
           queryKey: ['admin-ccas']
+        });
+        
+        // Also invalidate any other CCA-related queries
+        await queryClient.invalidateQueries({
+          predicate: (query) => {
+            return query.queryKey.some(key => 
+              typeof key === 'string' && key.includes('cca')
+            );
+          }
+        });
+        
+        // Force refetch to ensure immediate update
+        await queryClient.refetchQueries({
+          queryKey: ['user-ccas', user?.id]
         });
         
         form.reset();
