@@ -25,12 +25,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { fetchCCAs, CCAOption } from "@/services/treinamentos/ccaService";
 import { createHorasTrabalhadas } from "@/services/horaSegurancaService";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { HHTTable } from "@/components/hora-seguranca/HHTTable";
 import { HHTMonthChart } from "@/components/hora-seguranca/HHTMonthChart";
+import { useUserCCAs } from "@/hooks/useUserCCAs";
+import { InlineLoader } from "@/components/common/PageLoader";
 
 // Get current year and past 3 years for the year options
 const getCurrentYear = () => {
@@ -85,30 +86,10 @@ const RegistroHHT = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [ccaOptions, setCcaOptions] = useState<CCAOption[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("registro");
-
-  // Load CCA options from Supabase
-  useEffect(() => {
-    const loadCCAs = async () => {
-      try {
-        setIsLoading(true);
-        const data = await fetchCCAs();
-        setCcaOptions(data);
-      } catch (error) {
-        console.error("Error loading CCAs:", error);
-        toast({
-          title: "Erro ao carregar CCAs",
-          description: "Não foi possível carregar a lista de CCAs. Tente novamente mais tarde.",
-          variant: "destructive",
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    loadCCAs();
-  }, [toast]);
+  
+  // Use user CCAs hook
+  const { data: userCCAs = [], isLoading: isLoadingCCAs } = useUserCCAs();
 
   // Initialize form with default values
   const form = useForm<HHTFormValues>({
@@ -138,7 +119,7 @@ const RegistroHHT = () => {
       
       if (result) {
         // Find the selected CCA to get its full name
-        const selectedCca = ccaOptions.find(cca => cca.id.toString() === data.cca);
+        const selectedCca = userCCAs.find(cca => cca.id.toString() === data.cca);
         
         toast({
           title: "Registro de HHT salvo com sucesso",
@@ -280,15 +261,15 @@ const RegistroHHT = () => {
                         <Select
                           onValueChange={field.onChange}
                           defaultValue={field.value}
-                          disabled={isLoading}
+                          disabled={isLoadingCCAs}
                         >
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder={isLoading ? "Carregando CCAs..." : "Selecione o CCA"} />
+                              <SelectValue placeholder={isLoadingCCAs ? "Carregando CCAs..." : "Selecione o CCA"} />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {ccaOptions.map((cca) => (
+                            {userCCAs.map((cca) => (
                               <SelectItem key={cca.id} value={cca.id.toString()}>
                                 {cca.codigo} - {cca.nome}
                               </SelectItem>
@@ -299,6 +280,12 @@ const RegistroHHT = () => {
                       </FormItem>
                     )}
                   />
+
+                  {isLoadingCCAs && (
+                    <div className="text-center">
+                      <InlineLoader text="Carregando CCAs permitidos..." />
+                    </div>
+                  )}
 
                   <FormField
                     control={form.control}
@@ -347,7 +334,7 @@ const RegistroHHT = () => {
                     >
                       Cancelar
                     </Button>
-                    <Button type="submit" disabled={isSubmitting || isLoading}>
+                    <Button type="submit" disabled={isSubmitting || isLoadingCCAs}>
                       {isSubmitting ? "Salvando..." : "Salvar registro"}
                     </Button>
                   </div>
