@@ -2,6 +2,8 @@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { useUserCCAs } from "@/hooks/useUserCCAs";
+import { LoadingSkeleton, InlineLoader } from "@/components/ui/loading-skeleton";
+import { AlertCircle } from "lucide-react";
 
 interface CCASelectorProps {
   selectedCCAs: number[];
@@ -30,16 +32,35 @@ export const CCASelector = ({ selectedCCAs, onSelectionChange }: CCASelectorProp
   };
 
   if (isLoading) {
-    return <div className="text-xs sm:text-sm text-gray-500">Carregando CCAs...</div>;
+    return (
+      <div className="section-spacing">
+        <LoadingSkeleton variant="form" lines={2} />
+        <div className="mt-4">
+          <InlineLoader text="Carregando CCAs..." size="sm" />
+        </div>
+      </div>
+    );
   }
 
   if (!userCCAs || userCCAs.length === 0) {
-    return <div className="text-xs sm:text-sm text-gray-500">Nenhum CCA disponível para seu perfil</div>;
+    return (
+      <div className="section-spacing">
+        <div className="flex flex-col items-center justify-center p-6 sm:p-8 space-y-4 border rounded-lg bg-muted/20">
+          <AlertCircle className="h-8 w-8 text-muted-foreground/50" />
+          <div className="text-center space-y-2">
+            <p className="text-sm sm:text-base font-medium">Nenhum CCA disponível</p>
+            <p className="text-xs sm:text-sm text-muted-foreground">
+              Não há CCAs disponíveis para seu perfil no momento.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
     <div className="section-spacing">
-      <div className="flex items-center space-x-2">
+      <div className="flex items-center space-x-2 mb-4">
         <Checkbox
           id="select-all-ccas"
           checked={selectedCCAs.length === userCCAs.length && userCCAs.length > 0}
@@ -50,22 +71,28 @@ export const CCASelector = ({ selectedCCAs, onSelectionChange }: CCASelectorProp
         </Label>
       </div>
       
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 max-h-32 sm:max-h-48 overflow-y-auto border rounded p-2 sm:p-3 bg-gray-50">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 max-h-32 sm:max-h-48 lg:max-h-64 overflow-y-auto border rounded p-2 sm:p-3 bg-gray-50">
         {userCCAs.map((cca) => (
-          <div key={cca.id} className="flex items-center space-x-2">
+          <div key={cca.id} className="flex items-center space-x-2 min-w-0">
             <Checkbox
               id={`cca-${cca.id}`}
               checked={selectedCCAs.includes(cca.id)}
               onCheckedChange={() => handleToggleCCA(cca.id)}
+              className="flex-shrink-0"
             />
-            <Label htmlFor={`cca-${cca.id}`} className="text-xs break-words min-w-0">
-              {cca.codigo} - {cca.nome}
+            <Label 
+              htmlFor={`cca-${cca.id}`} 
+              className="text-xs break-words min-w-0 cursor-pointer hover:text-primary transition-colors"
+              title={`${cca.codigo} - ${cca.nome}`}
+            >
+              <span className="block sm:hidden">{cca.codigo}</span>
+              <span className="hidden sm:block">{cca.codigo} - {cca.nome}</span>
             </Label>
           </div>
         ))}
       </div>
       
-      <div className="text-xs text-gray-500">
+      <div className="text-xs text-gray-500 mt-2 text-center sm:text-left">
         {selectedCCAs.length} de {userCCAs.length} CCAs selecionados
       </div>
     </div>

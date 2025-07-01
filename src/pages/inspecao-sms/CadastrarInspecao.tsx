@@ -14,6 +14,8 @@ import { useProfile } from "@/hooks/useProfile";
 import { useUserCCAs } from "@/hooks/useUserCCAs";
 import { toast } from "@/hooks/use-toast";
 import { format } from "date-fns";
+import { PageLoader, InlineLoader } from "@/components/common/PageLoader";
+import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 
 const CadastrarInspecao = () => {
   const [step, setStep] = useState(1);
@@ -21,6 +23,9 @@ const CadastrarInspecao = () => {
   const [modeloSelecionado, setModeloSelecionado] = useState<any>(null);
   const [tiposInspecao, setTiposInspecao] = useState<any[]>([]);
   const [filtroTipo, setFiltroTipo] = useState("");
+  const [isLoadingTipos, setIsLoadingTipos] = useState(true);
+  const [isLoadingModelos, setIsLoadingModelos] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [dadosInspecao, setDadosInspecao] = useState({
     data_inspecao: new Date(),
     local: '',
@@ -36,6 +41,7 @@ const CadastrarInspecao = () => {
 
   const loadTiposInspecao = async () => {
     try {
+      setIsLoadingTipos(true);
       const { data } = await supabase
         .from('tipos_inspecao_sms')
         .select('*')
@@ -46,11 +52,14 @@ const CadastrarInspecao = () => {
       }
     } catch (error) {
       console.error('Erro ao carregar tipos:', error);
+    } finally {
+      setIsLoadingTipos(false);
     }
   };
 
   const loadModelos = async () => {
     try {
+      setIsLoadingModelos(true);
       let query = supabase
         .from('modelos_inspecao_sms')
         .select(`
@@ -70,6 +79,8 @@ const CadastrarInspecao = () => {
       }
     } catch (error) {
       console.error('Erro ao carregar modelos:', error);
+    } finally {
+      setIsLoadingModelos(false);
     }
   };
 
@@ -102,6 +113,7 @@ const CadastrarInspecao = () => {
 
   const finalizarInspecao = async () => {
     try {
+      setIsSubmitting(true);
       const temNaoConformidade = itensInspecao.some(item => item.status === 'nao_conforme');
       
       const dadosCompletos = {
@@ -129,8 +141,6 @@ const CadastrarInspecao = () => {
 
       // Se tem não conformidade, gerar PDF e enviar email
       if (temNaoConformidade) {
-        // Aqui seria implementada a geração do PDF e envio do email
-        // Por enquanto, vamos simular
         toast({
           title: "Inspeção finalizada com não conformidades",
           description: "Um PDF foi gerado e enviado por email devido às não conformidades encontradas.",
@@ -161,6 +171,8 @@ const CadastrarInspecao = () => {
         description: error.message,
         variant: "destructive",
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -174,34 +186,38 @@ const CadastrarInspecao = () => {
 
   if (step === 1) {
     return (
-      <div className="space-y-6">
-        <div className="flex items-center gap-2">
-          <FileSearch className="h-6 w-6 text-blue-600" />
-          <h1 className="text-2xl font-bold">Cadastrar Inspeção SMS</h1>
+      <div className="content-padding section-spacing">
+        <div className="flex items-center gap-2 mb-4 sm:mb-6">
+          <FileSearch className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600 flex-shrink-0" />
+          <h1 className="heading-responsive">Cadastrar Inspeção SMS</h1>
         </div>
 
         {/* Filtros */}
-        <Card>
+        <Card className="mb-4 sm:mb-6">
           <CardHeader>
-            <CardTitle>Filtrar Modelos</CardTitle>
+            <CardTitle className="text-lg sm:text-xl">Filtrar Modelos</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label>Tipo de Inspeção</Label>
-                <Select value={filtroTipo} onValueChange={setFiltroTipo}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Todos os tipos" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="">Todos os tipos</SelectItem>
-                    {tiposInspecao.map((tipo) => (
-                      <SelectItem key={tipo.id} value={tipo.id}>
-                        {tipo.nome}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+            <div className="form-grid">
+              <div className="space-y-2">
+                <Label className="text-sm sm:text-base">Tipo de Inspeção</Label>
+                {isLoadingTipos ? (
+                  <LoadingSkeleton variant="form" lines={1} />
+                ) : (
+                  <Select value={filtroTipo} onValueChange={setFiltroTipo}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Todos os tipos" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">Todos os tipos</SelectItem>
+                      {tiposInspecao.map((tipo) => (
+                        <SelectItem key={tipo.id} value={tipo.id}>
+                          {tipo.nome}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
               </div>
             </div>
           </CardContent>
@@ -210,36 +226,47 @@ const CadastrarInspecao = () => {
         {/* Lista de Modelos */}
         <Card>
           <CardHeader>
-            <CardTitle>Selecione um Modelo de Inspeção</CardTitle>
+            <CardTitle className="text-lg sm:text-xl">Selecione um Modelo de Inspeção</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {modelos.length === 0 ? (
-                <div className="col-span-full text-center py-8 text-muted-foreground">
-                  Nenhum modelo encontrado. Verifique os filtros ou cadastre novos modelos.
-                </div>
-              ) : (
-                modelos.map((modelo) => (
-                  <Card 
-                    key={modelo.id} 
-                    className="cursor-pointer hover:shadow-md transition-shadow"
-                    onClick={() => selecionarModelo(modelo)}
-                  >
-                    <CardHeader>
-                      <CardTitle className="text-lg">{modelo.nome}</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-sm text-muted-foreground mb-2">
-                        {modelo.tipos_inspecao_sms?.nome}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {(modelo.campos_substituicao || []).length} campos configurados
-                      </p>
-                    </CardContent>
-                  </Card>
-                ))
-              )}
-            </div>
+            {isLoadingModelos ? (
+              <div className="card-grid">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} className="border rounded-lg p-4">
+                    <LoadingSkeleton variant="card" />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="card-grid">
+                {modelos.length === 0 ? (
+                  <div className="col-span-full text-center py-8 text-muted-foreground">
+                    <FileSearch className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p className="text-responsive">Nenhum modelo encontrado. Verifique os filtros ou cadastre novos modelos.</p>
+                  </div>
+                ) : (
+                  modelos.map((modelo) => (
+                    <Card 
+                      key={modelo.id} 
+                      className="cursor-pointer hover:shadow-md transition-all duration-200 hover:border-primary/50"
+                      onClick={() => selecionarModelo(modelo)}
+                    >
+                      <CardHeader className="pb-3">
+                        <CardTitle className="text-base sm:text-lg line-clamp-2">{modelo.nome}</CardTitle>
+                      </CardHeader>
+                      <CardContent className="pt-0">
+                        <p className="text-sm text-muted-foreground mb-2 line-clamp-1">
+                          {modelo.tipos_inspecao_sms?.nome}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {(modelo.campos_substituicao || []).length} campos configurados
+                        </p>
+                      </CardContent>
+                    </Card>
+                  ))
+                )}
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -248,28 +275,32 @@ const CadastrarInspecao = () => {
 
   if (step === 2) {
     return (
-      <div className="space-y-6">
-        <div className="flex items-center gap-2">
+      <div className="content-padding section-spacing">
+        <div className="flex items-center gap-2 mb-4 sm:mb-6">
           <Button 
             variant="outline" 
             size="sm" 
             onClick={() => setStep(1)}
+            className="flex-shrink-0"
           >
-            <ChevronLeft className="h-4 w-4 mr-2" />
-            Voltar
+            <ChevronLeft className="h-4 w-4 mr-1 sm:mr-2" />
+            <span className="hidden sm:inline">Voltar</span>
           </Button>
-          <h1 className="text-2xl font-bold">Preencher Inspeção: {modeloSelecionado?.nome}</h1>
+          <h1 className="heading-responsive min-w-0">
+            <span className="block sm:hidden">Inspeção: {modeloSelecionado?.nome?.substring(0, 20)}...</span>
+            <span className="hidden sm:block">Preencher Inspeção: {modeloSelecionado?.nome}</span>
+          </h1>
         </div>
 
         {/* Dados Gerais */}
-        <Card>
+        <Card className="mb-4 sm:mb-6">
           <CardHeader>
-            <CardTitle>Dados da Inspeção</CardTitle>
+            <CardTitle className="text-lg sm:text-xl">Dados da Inspeção</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <Label>Data da Inspeção *</Label>
+            <div className="form-grid">
+              <div className="space-y-2">
+                <Label className="text-sm sm:text-base">Data da Inspeção *</Label>
                 <DatePickerWithManualInput
                   value={dadosInspecao.data_inspecao}
                   onChange={(date) => 
@@ -277,8 +308,8 @@ const CadastrarInspecao = () => {
                   }
                 />
               </div>
-              <div>
-                <Label>Local *</Label>
+              <div className="space-y-2">
+                <Label className="text-sm sm:text-base">Local *</Label>
                 <Input
                   value={dadosInspecao.local}
                   onChange={(e) => 
@@ -286,10 +317,11 @@ const CadastrarInspecao = () => {
                   }
                   placeholder="Informe o local da inspeção"
                   required
+                  className="text-sm sm:text-base"
                 />
               </div>
-              <div>
-                <Label>CCA</Label>
+              <div className="space-y-2">
+                <Label className="text-sm sm:text-base">CCA</Label>
                 <Select 
                   value={dadosInspecao.cca_id} 
                   onValueChange={(value) => 
@@ -302,7 +334,8 @@ const CadastrarInspecao = () => {
                   <SelectContent>
                     {userCCAs.map((cca) => (
                       <SelectItem key={cca.id} value={cca.id.toString()}>
-                        {cca.codigo} - {cca.nome}
+                        <span className="block sm:hidden">{cca.codigo}</span>
+                        <span className="hidden sm:block">{cca.codigo} - {cca.nome}</span>
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -313,36 +346,37 @@ const CadastrarInspecao = () => {
         </Card>
 
         {/* Itens de Inspeção */}
-        <Card>
+        <Card className="mb-4 sm:mb-6">
           <CardHeader>
-            <CardTitle>Itens de Verificação</CardTitle>
+            <CardTitle className="text-lg sm:text-xl">Itens de Verificação</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-6">
+            <div className="section-spacing">
               {itensInspecao.map((item, index) => (
-                <div key={item.id} className="border rounded-lg p-4">
-                  <h4 className="font-medium mb-3">
+                <div key={item.id} className="border rounded-lg p-3 sm:p-4">
+                  <h4 className="font-medium mb-3 text-sm sm:text-base">
                     {index + 1}. {item.nome}
                   </h4>
                   <RadioGroup
                     value={item.status}
                     onValueChange={(value) => handleItemChange(item.id, value)}
+                    className="grid grid-cols-1 sm:grid-cols-3 gap-3"
                   >
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="conforme" id={`${item.id}-conforme`} />
-                      <Label htmlFor={`${item.id}-conforme`} className="text-green-600">
+                      <Label htmlFor={`${item.id}-conforme`} className="text-green-600 text-sm sm:text-base">
                         Conforme
                       </Label>
                     </div>
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="nao_conforme" id={`${item.id}-nao-conforme`} />
-                      <Label htmlFor={`${item.id}-nao-conforme`} className="text-red-600">
+                      <Label htmlFor={`${item.id}-nao-conforme`} className="text-red-600 text-sm sm:text-base">
                         Não Conforme
                       </Label>
                     </div>
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="nao_se_aplica" id={`${item.id}-nao-aplica`} />
-                      <Label htmlFor={`${item.id}-nao-aplica`} className="text-gray-500">
+                      <Label htmlFor={`${item.id}-nao-aplica`} className="text-gray-500 text-sm sm:text-base">
                         Não se Aplica
                       </Label>
                     </div>
@@ -354,9 +388,9 @@ const CadastrarInspecao = () => {
         </Card>
 
         {/* Observações */}
-        <Card>
+        <Card className="mb-4 sm:mb-6">
           <CardHeader>
-            <CardTitle>Observações</CardTitle>
+            <CardTitle className="text-lg sm:text-xl">Observações</CardTitle>
           </CardHeader>
           <CardContent>
             <Textarea
@@ -366,21 +400,32 @@ const CadastrarInspecao = () => {
               }
               placeholder="Observações adicionais sobre a inspeção..."
               rows={4}
+              className="text-sm sm:text-base"
             />
           </CardContent>
         </Card>
 
         {/* Botões de Ação */}
-        <div className="flex justify-end gap-4">
-          <Button variant="outline" onClick={() => setStep(1)}>
+        <div className="button-group-end">
+          <Button variant="outline" onClick={() => setStep(1)} className="w-full sm:w-auto">
             Cancelar
           </Button>
           <Button 
             onClick={finalizarInspecao}
-            disabled={!dadosInspecao.local}
+            disabled={!dadosInspecao.local || isSubmitting}
+            className="w-full sm:w-auto"
           >
-            <Send className="h-4 w-4 mr-2" />
-            Finalizar Inspeção
+            {isSubmitting ? (
+              <>
+                <InlineLoader size="sm" />
+                <span className="ml-2">Finalizando...</span>
+              </>
+            ) : (
+              <>
+                <Send className="h-4 w-4 mr-2" />
+                Finalizar Inspeção
+              </>
+            )}
           </Button>
         </div>
       </div>

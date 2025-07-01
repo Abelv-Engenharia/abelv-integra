@@ -14,10 +14,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { useUserCCAs } from "@/hooks/useUserCCAs";
 import DesviosTableRow from "./DesviosTableRow";
 import { DesvioCompleto } from "@/services/desvios/desviosCompletosService";
+import { TableLoadingSkeleton, InlineLoader } from "@/components/ui/loading-skeleton";
+import { AlertCircle } from "lucide-react";
 
 const DesviosTable = () => {
   const { toast } = useToast();
-  const { data: userCCAs = [] } = useUserCCAs();
+  const { data: userCCAs = [], isLoading: isLoadingCCAs } = useUserCCAs();
   const [desvios, setDesvios] = useState<DesvioCompleto[]>([]);
   const [editDesvio, setEditDesvio] = useState<DesvioCompleto | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -30,7 +32,7 @@ const DesviosTable = () => {
   const fetchDesvios = async () => {
     setIsLoading(true);
     try {
-      if (allowedCcaIds.length === 0) {
+      if (allowedCcaIds.length === 0 && !isLoadingCCAs) {
         setDesvios([]);
         return;
       }
@@ -60,13 +62,15 @@ const DesviosTable = () => {
   };
 
   useEffect(() => {
-    if (allowedCcaIds.length > 0) {
-      fetchDesvios();
-    } else {
-      setDesvios([]);
-      setIsLoading(false);
+    if (!isLoadingCCAs) {
+      if (allowedCcaIds.length > 0) {
+        fetchDesvios();
+      } else {
+        setDesvios([]);
+        setIsLoading(false);
+      }
     }
-  }, [allowedCcaIds.join(',')]);
+  }, [allowedCcaIds.join(','), isLoadingCCAs]);
 
   const handleStatusUpdated = (id: string, newStatus: string) => {
     setDesvios(desvios.map(d =>
@@ -107,11 +111,25 @@ const DesviosTable = () => {
     }
   };
 
-  if (userCCAs.length === 0 && !isLoading) {
+  if (isLoadingCCAs) {
     return (
       <div className="table-container">
-        <div className="flex justify-center items-center p-6 sm:p-8">
-          <p className="text-muted-foreground text-sm sm:text-base">Você não tem acesso a nenhum CCA.</p>
+        <div className="p-4 sm:p-6">
+          <InlineLoader text="Carregando permissões..." />
+        </div>
+      </div>
+    );
+  }
+
+  if (userCCAs.length === 0) {
+    return (
+      <div className="table-container">
+        <div className="flex flex-col items-center justify-center p-6 sm:p-8 space-y-4">
+          <AlertCircle className="h-12 w-12 text-muted-foreground/50" />
+          <div className="text-center space-y-2">
+            <p className="text-responsive font-medium">Acesso Restrito</p>
+            <p className="text-sm text-muted-foreground">Você não tem acesso a nenhum CCA.</p>
+          </div>
         </div>
       </div>
     );
@@ -122,20 +140,20 @@ const DesviosTable = () => {
       <div className="table-container">
         <div className="relative w-full overflow-auto">
           {isLoading ? (
-            <div className="flex justify-center items-center p-6 sm:p-8">
-              <p className="text-sm sm:text-base">Carregando desvios...</p>
+            <div className="p-4 sm:p-6">
+              <TableLoadingSkeleton rows={8} />
             </div>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="text-xs sm:text-sm">ID</TableHead>
-                  <TableHead className="text-xs sm:text-sm">Data</TableHead>
-                  <TableHead className="max-w-[150px] sm:max-w-[250px] text-xs sm:text-sm">Descrição</TableHead>
-                  <TableHead className="text-xs sm:text-sm">CCA</TableHead>
-                  <TableHead className="text-xs sm:text-sm">Risco</TableHead>
-                  <TableHead className="text-xs sm:text-sm">Status</TableHead>
-                  <TableHead className="text-right text-xs sm:text-sm">Ações</TableHead>
+                  <TableHead className="text-xs sm:text-sm w-16 sm:w-20">ID</TableHead>
+                  <TableHead className="text-xs sm:text-sm w-24 sm:w-32">Data</TableHead>
+                  <TableHead className="text-xs sm:text-sm min-w-[200px] max-w-[250px]">Descrição</TableHead>
+                  <TableHead className="text-xs sm:text-sm w-20 sm:w-24">CCA</TableHead>
+                  <TableHead className="text-xs sm:text-sm w-16 sm:w-20">Risco</TableHead>
+                  <TableHead className="text-xs sm:text-sm w-20 sm:w-24">Status</TableHead>
+                  <TableHead className="text-right text-xs sm:text-sm w-24 sm:w-32">Ações</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -155,8 +173,16 @@ const DesviosTable = () => {
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={7} className="h-16 sm:h-24 text-center">
-                      <span className="text-sm sm:text-base">Nenhum desvio encontrado para os CCAs permitidos.</span>
+                    <TableCell colSpan={7} className="h-24 sm:h-32">
+                      <div className="flex flex-col items-center justify-center space-y-3">
+                        <AlertCircle className="h-8 w-8 text-muted-foreground/50" />
+                        <div className="text-center space-y-1">
+                          <p className="text-responsive font-medium">Nenhum desvio encontrado</p>
+                          <p className="text-xs sm:text-sm text-muted-foreground">
+                            Não há desvios cadastrados para os CCAs permitidos.
+                          </p>
+                        </div>
+                      </div>
                     </TableCell>
                   </TableRow>
                 )}
@@ -165,14 +191,14 @@ const DesviosTable = () => {
           )}
         </div>
         <div className="flex flex-col sm:flex-row items-center justify-between p-3 sm:p-4 border-t gap-3">
-          <div className="text-xs sm:text-sm text-muted-foreground">
+          <div className="text-xs sm:text-sm text-muted-foreground order-2 sm:order-1">
             Mostrando {desvios.length} de {desvios.length} desvios dos CCAs permitidos
           </div>
-          <div className="button-group">
-            <Button variant="outline" disabled size="sm">
+          <div className="button-group order-1 sm:order-2">
+            <Button variant="outline" disabled size="sm" className="text-xs sm:text-sm">
               Anterior
             </Button>
-            <Button variant="outline" disabled size="sm">
+            <Button variant="outline" disabled size="sm" className="text-xs sm:text-sm">
               Próximo
             </Button>
           </div>
