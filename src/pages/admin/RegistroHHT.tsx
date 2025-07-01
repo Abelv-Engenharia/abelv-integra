@@ -91,6 +91,9 @@ const RegistroHHT = () => {
   // Use user CCAs hook
   const { data: userCCAs = [], isLoading: isLoadingCCAs } = useUserCCAs();
 
+  // Sort CCAs by codigo in ascending order
+  const sortedCCAs = [...userCCAs].sort((a, b) => a.codigo.localeCompare(b.codigo));
+
   // Initialize form with default values
   const form = useForm<HHTFormValues>({
     resolver: zodResolver(hhtFormSchema),
@@ -269,7 +272,7 @@ const RegistroHHT = () => {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {userCCAs.map((cca) => (
+                            {sortedCCAs.map((cca) => (
                               <SelectItem key={cca.id} value={cca.id.toString()}>
                                 {cca.codigo} - {cca.nome}
                               </SelectItem>
