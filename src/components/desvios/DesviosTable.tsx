@@ -14,7 +14,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useUserCCAs } from "@/hooks/useUserCCAs";
 import DesviosTableRow from "./DesviosTableRow";
 import { DesvioCompleto } from "@/services/desvios/desviosCompletosService";
-import { TableLoadingSkeleton, InlineLoader } from "@/components/ui/loading-skeleton";
+import { TableLoadingSkeleton } from "@/components/ui/loading-skeleton";
+import { InlineLoader } from "@/components/common/PageLoader";
 import { AlertCircle } from "lucide-react";
 
 const DesviosTable = () => {

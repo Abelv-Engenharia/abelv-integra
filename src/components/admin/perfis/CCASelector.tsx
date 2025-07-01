@@ -2,7 +2,8 @@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { useUserCCAs } from "@/hooks/useUserCCAs";
-import { LoadingSkeleton, InlineLoader } from "@/components/ui/loading-skeleton";
+import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
+import { InlineLoader } from "@/components/common/PageLoader";
 import { AlertCircle } from "lucide-react";
 
 interface CCASelectorProps {
