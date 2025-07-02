@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,11 +11,13 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { tarefasService, TarefaUpdateData } from "@/services/tarefasService";
+import { notificacoesService } from "@/services/notificacoesService";
+import { useSignedUrl } from "@/hooks/useSignedUrl";
 import { getStatusColor, getCriticidadeColor } from "@/utils/tarefasUtils";
 import { Tarefa } from "@/types/tarefas";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { ArrowLeft, Check, Clock, AlertTriangle, FileText, Calendar, Upload, Play } from "lucide-react";
+import { ArrowLeft, Check, Clock, AlertTriangle, FileText, Calendar, Upload, Play, Eye, Download } from "lucide-react";
 import { toast } from "sonner";
 
 const DetalheTarefa = () => {
@@ -26,6 +29,7 @@ const DetalheTarefa = () => {
   const [showProgressDialog, setShowProgressDialog] = useState(false);
   const [progressNotes, setProgressNotes] = useState("");
   const [attachmentFile, setAttachmentFile] = useState<File | null>(null);
+  const { url: fileUrl, loading: urlLoading, error: urlError, generate: generateUrl } = useSignedUrl();
   
   useEffect(() => {
     const fetchTarefa = async () => {
@@ -91,9 +95,13 @@ const DetalheTarefa = () => {
         console.log("Arquivo anexado:", attachmentFile.name);
       }
       
+      // Determinar o status baseado na necessidade de validação
+      const novoStatus = tarefa.configuracao.requerValidacao ? 'aguardando-validacao' : 'concluida';
+      
       const updateData: TarefaUpdateData = {
-        status: 'concluida',
-        anexo: anexoUrl
+        status: novoStatus,
+        anexo: anexoUrl,
+        data_real_conclusao: new Date().toISOString()
       };
       
       const success = await tarefasService.updateStatus(tarefa.id, updateData);
@@ -101,21 +109,69 @@ const DetalheTarefa = () => {
       if (success) {
         setTarefa({
           ...tarefa,
-          status: 'concluida',
-          anexo: anexoUrl
+          status: novoStatus,
+          anexo: anexoUrl,
+          data_real_conclusao: new Date().toISOString()
         });
+        
+        // Se requer validação, enviar notificação para o criador da tarefa
+        if (tarefa.configuracao.requerValidacao) {
+          try {
+            await notificacoesService.criarNotificacao({
+              usuario_id: tarefa.responsavel.id, // Assumindo que o criador é o responsável por ora
+              titulo: 'Tarefa aguarda validação',
+              mensagem: `A tarefa "${tarefa.descricao}" foi concluída e aguarda sua validação.`,
+              tipo: 'validacao',
+              tarefa_id: tarefa.id
+            });
+          } catch (notifError) {
+            console.error("Erro ao enviar notificação:", notifError);
+          }
+        }
         
         setShowProgressDialog(false);
         setProgressNotes("");
         setAttachmentFile(null);
         
-        toast.success("Tarefa concluída com sucesso!");
+        const mensagem = novoStatus === 'aguardando-validacao' 
+          ? "Tarefa concluída! Aguardando validação." 
+          : "Tarefa concluída com sucesso!";
+        toast.success(mensagem);
       } else {
         toast.error("Erro ao concluir tarefa");
       }
     } catch (error) {
       console.error("Erro ao concluir tarefa:", error);
       toast.error("Erro ao concluir tarefa");
+    } finally {
+      setUpdating(false);
+    }
+  };
+  
+  const handleValidarTarefa = async () => {
+    if (!tarefa) return;
+    
+    setUpdating(true);
+    try {
+      const updateData: TarefaUpdateData = {
+        status: 'concluida'
+      };
+      
+      const success = await tarefasService.updateStatus(tarefa.id, updateData);
+      
+      if (success) {
+        setTarefa({
+          ...tarefa,
+          status: 'concluida'
+        });
+        
+        toast.success("Tarefa validada com sucesso!");
+      } else {
+        toast.error("Erro ao validar tarefa");
+      }
+    } catch (error) {
+      console.error("Erro ao validar tarefa:", error);
+      toast.error("Erro ao validar tarefa");
     } finally {
       setUpdating(false);
     }
@@ -161,6 +217,36 @@ const DetalheTarefa = () => {
       setUpdating(false);
     }
   };
+
+  const handleViewAttachment = async () => {
+    if (!tarefa?.anexo) return;
+    
+    try {
+      // Para este exemplo, vamos simular a visualização do anexo
+      // Em produção, você usaria o Supabase Storage para gerar signed URLs
+      await generateUrl('anexos-tarefas', tarefa.anexo, 300); // 5 minutos
+    } catch (error) {
+      console.error("Erro ao gerar URL do arquivo:", error);
+      toast.error("Erro ao visualizar anexo");
+    }
+  };
+
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'programada':
+        return 'Programada';
+      case 'em-andamento':
+        return 'Em andamento';
+      case 'pendente':
+        return 'Pendente';
+      case 'concluida':
+        return 'Concluída';
+      case 'aguardando-validacao':
+        return 'Aguardando validação';
+      default:
+        return status.replace('-', ' ');
+    }
+  };
   
   if (loading) {
     return (
@@ -204,7 +290,7 @@ const DetalheTarefa = () => {
                   <CardTitle className="text-2xl">{tarefa.descricao}</CardTitle>
                 </div>
                 <Badge className={getStatusColor(tarefa.status)} variant="outline">
-                  {tarefa.status.replace('-', ' ')}
+                  {getStatusLabel(tarefa.status)}
                 </Badge>
               </div>
             </CardHeader>
@@ -236,12 +322,21 @@ const DetalheTarefa = () => {
                     </p>
                   </div>
                   <div>
-                    <h3 className="text-sm font-medium text-muted-foreground mb-1">Data de Conclusão</h3>
+                    <h3 className="text-sm font-medium text-muted-foreground mb-1">Prazo para Conclusão</h3>
                     <p className="flex items-center">
                       <Clock className="h-4 w-4 mr-1" />
                       {format(new Date(tarefa.dataConclusao), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
                     </p>
                   </div>
+                  {tarefa.data_real_conclusao && (
+                    <div className="col-span-2">
+                      <h3 className="text-sm font-medium text-muted-foreground mb-1">Data de Conclusão Efetiva</h3>
+                      <p className="flex items-center">
+                        <Check className="h-4 w-4 mr-1 text-green-600" />
+                        {format(new Date(tarefa.data_real_conclusao), "dd 'de' MMMM 'de' yyyy 'às' HH:mm", { locale: ptBR })}
+                      </p>
+                    </div>
+                  )}
                 </div>
                 
                 {tarefa.anexo && (
@@ -249,10 +344,30 @@ const DetalheTarefa = () => {
                     <Separator />
                     <div>
                       <h3 className="text-lg font-semibold mb-2">Anexo</h3>
-                      <Button variant="outline" className="flex items-center">
-                        <FileText className="h-4 w-4 mr-2" />
-                        {tarefa.anexo}
-                      </Button>
+                      <div className="flex gap-2">
+                        <Button variant="outline" className="flex items-center" onClick={handleViewAttachment}>
+                          <Eye className="h-4 w-4 mr-2" />
+                          Visualizar
+                        </Button>
+                        <Button variant="outline" className="flex items-center">
+                          <Download className="h-4 w-4 mr-2" />
+                          {tarefa.anexo}
+                        </Button>
+                      </div>
+                      {fileUrl && (
+                        <div className="mt-4">
+                          <iframe 
+                            src={fileUrl} 
+                            width="100%" 
+                            height="400px" 
+                            className="border rounded"
+                            title="Visualização do anexo"
+                          />
+                        </div>
+                      )}
+                      {urlError && (
+                        <p className="text-red-500 mt-2">Erro ao carregar anexo: {urlError}</p>
+                      )}
                     </div>
                   </>
                 )}
@@ -261,7 +376,7 @@ const DetalheTarefa = () => {
           </Card>
           
           <div className="flex flex-col sm:flex-row gap-4">
-            {!tarefa.iniciada && tarefa.status !== 'concluida' && (
+            {!tarefa.iniciada && tarefa.status !== 'concluida' && tarefa.status !== 'aguardando-validacao' && (
               <Button 
                 className="flex-1" 
                 onClick={handleIniciarTarefa}
@@ -272,7 +387,7 @@ const DetalheTarefa = () => {
               </Button>
             )}
 
-            {(tarefa.iniciada || tarefa.status === 'em-andamento') && tarefa.status !== 'concluida' && (
+            {(tarefa.iniciada || tarefa.status === 'em-andamento') && tarefa.status !== 'concluida' && tarefa.status !== 'aguardando-validacao' && (
               <>
                 <Dialog open={showProgressDialog} onOpenChange={setShowProgressDialog}>
                   <DialogTrigger asChild>
@@ -331,10 +446,14 @@ const DetalheTarefa = () => {
               </>
             )}
 
-            {tarefa.configuracao.requerValidacao && (
-              <Button variant="outline" className="flex-1" disabled={tarefa.status !== 'concluida'}>
+            {tarefa.status === 'aguardando-validacao' && (
+              <Button 
+                onClick={handleValidarTarefa}
+                disabled={updating}
+                className="flex-1"
+              >
                 <Check className="h-4 w-4 mr-2" />
-                Validar Conclusão
+                {updating ? "Validando..." : "Validar Conclusão"}
               </Button>
             )}
           </div>

@@ -77,5 +77,29 @@ export const notificacoesService = {
       console.error("Exceção ao contar notificações não lidas:", error);
       return 0;
     }
+  },
+
+  async criarNotificacao(notificacao: {
+    usuario_id: string;
+    titulo: string;
+    mensagem: string;
+    tipo: string;
+    tarefa_id?: string;
+  }): Promise<boolean> {
+    try {
+      const { error } = await supabase
+        .from('notificacoes')
+        .insert(notificacao);
+
+      if (error) {
+        console.error("Erro ao criar notificação:", error);
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      console.error("Exceção ao criar notificação:", error);
+      return false;
+    }
   }
 };
