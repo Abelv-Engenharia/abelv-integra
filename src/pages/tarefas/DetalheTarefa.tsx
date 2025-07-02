@@ -17,7 +17,7 @@ import { Tarefa } from "@/types/tarefas";
 import { TarefaAnexo } from "@/components/tarefas/TarefaAnexo";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { ArrowLeft, Check, Clock, AlertTriangle, FileText, Calendar, Upload, Play } from "lucide-react";
+import { ArrowLeft, Check, Clock, AlertTriangle, FileText, Calendar, Upload, Play, X } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -25,10 +25,13 @@ const DetalheTarefa = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [tarefa, setTarefa] = useState<Tarefa | null>(null);
+  const [tarefaBanco, setTarefaBanco] = useState<any>(null); // Para dados adicionais do banco
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
   const [showProgressDialog, setShowProgressDialog] = useState(false);
+  const [showRejectDialog, setShowRejectDialog] = useState(false);
   const [progressNotes, setProgressNotes] = useState("");
+  const [rejectNotes, setRejectNotes] = useState("");
   const [attachmentFile, setAttachmentFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   
@@ -40,6 +43,15 @@ const DetalheTarefa = () => {
       try {
         const data = await tarefasService.getById(id);
         setTarefa(data);
+        
+        // Buscar dados adicionais do banco (observações de progresso e reprovação)
+        const { data: tarefaCompleta } = await supabase
+          .from('tarefas')
+          .select('observacoes_progresso, observacoes_reprovacao, criado_por')
+          .eq('id', id)
+          .single();
+        
+        setTarefaBanco(tarefaCompleta);
       } catch (error) {
         console.error("Erro ao carregar tarefa:", error);
         toast.error("Erro ao carregar detalhes da tarefa");
@@ -104,7 +116,7 @@ const DetalheTarefa = () => {
   };
   
   const handleConcluirTarefa = async () => {
-    if (!tarefa) return;
+    if (!tarefa || !tarefaBanco) return;
     
     setUpdating(true);
     try {
@@ -135,11 +147,11 @@ const DetalheTarefa = () => {
           data_real_conclusao: new Date().toISOString()
         });
         
-        // Se requer validação, enviar notificação para o criador da tarefa
-        if (tarefa.configuracao.requerValidacao) {
+        // Se requer validação, enviar notificação para o CRIADOR da tarefa (não o responsável)
+        if (tarefa.configuracao.requerValidacao && tarefaBanco.criado_por) {
           try {
             await notificacoesService.criarNotificacao({
-              usuario_id: tarefa.responsavel.id,
+              usuario_id: tarefaBanco.criado_por, // Usar criado_por ao invés de responsavel_id
               titulo: 'Tarefa aguarda validação',
               mensagem: `A tarefa "${tarefa.descricao}" foi concluída e aguarda sua validação.`,
               tipo: 'validacao',
@@ -197,6 +209,55 @@ const DetalheTarefa = () => {
       setUpdating(false);
     }
   };
+
+  const handleReprovarTarefa = async () => {
+    if (!tarefa || !rejectNotes.trim()) {
+      toast.error("Por favor, informe o motivo da reprovação");
+      return;
+    }
+    
+    setUpdating(true);
+    try {
+      const updateData: TarefaUpdateData = {
+        status: 'pendente',
+        observacoes_reprovacao: rejectNotes
+      };
+      
+      const success = await tarefasService.updateStatus(tarefa.id, updateData);
+      
+      if (success) {
+        setTarefa({
+          ...tarefa,
+          status: 'pendente'
+        });
+        
+        // Notificar o responsável pela tarefa sobre a reprovação
+        try {
+          await notificacoesService.criarNotificacao({
+            usuario_id: tarefa.responsavel.id,
+            titulo: 'Tarefa reprovada',
+            mensagem: `Sua tarefa "${tarefa.descricao}" foi reprovada. Motivo: ${rejectNotes}`,
+            tipo: 'reprovacao',
+            tarefa_id: tarefa.id
+          });
+        } catch (notifError) {
+          console.error("Erro ao enviar notificação:", notifError);
+        }
+        
+        setShowRejectDialog(false);
+        setRejectNotes("");
+        
+        toast.success("Tarefa reprovada. O responsável foi notificado.");
+      } else {
+        toast.error("Erro ao reprovar tarefa");
+      }
+    } catch (error) {
+      console.error("Erro ao reprovar tarefa:", error);
+      toast.error("Erro ao reprovar tarefa");
+    } finally {
+      setUpdating(false);
+    }
+  };
   
   const handleProgressUpdate = async () => {
     if (!tarefa || !progressNotes.trim()) {
@@ -224,6 +285,12 @@ const DetalheTarefa = () => {
         setTarefa({
           ...tarefa,
           anexo: anexoPath
+        });
+        
+        // Atualizar dados do banco local
+        setTarefaBanco({
+          ...tarefaBanco,
+          observacoes_progresso: progressNotes
         });
         
         setShowProgressDialog(false);
@@ -349,6 +416,32 @@ const DetalheTarefa = () => {
                     </div>
                   )}
                 </div>
+
+                {/* Observações de Progresso */}
+                {tarefaBanco?.observacoes_progresso && (
+                  <>
+                    <Separator />
+                    <div>
+                      <h3 className="text-lg font-semibold mb-2">Observações de Progresso</h3>
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <p className="text-blue-900">{tarefaBanco.observacoes_progresso}</p>
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                {/* Observações de Reprovação */}
+                {tarefaBanco?.observacoes_reprovacao && (
+                  <>
+                    <Separator />
+                    <div>
+                      <h3 className="text-lg font-semibold mb-2">Motivo da Reprovação</h3>
+                      <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                        <p className="text-red-900">{tarefaBanco.observacoes_reprovacao}</p>
+                      </div>
+                    </div>
+                  </>
+                )}
                 
                 {tarefa.anexo && (
                   <>
@@ -436,14 +529,65 @@ const DetalheTarefa = () => {
             )}
 
             {tarefa.status === 'aguardando-validacao' && (
-              <Button 
-                onClick={handleValidarTarefa}
-                disabled={updating}
-                className="flex-1"
-              >
-                <Check className="h-4 w-4 mr-2" />
-                {updating ? "Validando..." : "Validar Conclusão"}
-              </Button>
+              <div className="flex gap-2">
+                <Button 
+                  onClick={handleValidarTarefa}
+                  disabled={updating}
+                  className="flex-1"
+                >
+                  <Check className="h-4 w-4 mr-2" />
+                  {updating ? "Validando..." : "Validar Conclusão"}
+                </Button>
+
+                <Dialog open={showRejectDialog} onOpenChange={setShowRejectDialog}>
+                  <DialogTrigger asChild>
+                    <Button 
+                      variant="destructive"
+                      disabled={updating}
+                      className="flex-1"
+                    >
+                      <X className="h-4 w-4 mr-2" />
+                      Reprovar
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                      <DialogTitle>Reprovar Conclusão da Tarefa</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                      <div>
+                        <Label htmlFor="reject-notes">Motivo da reprovação *</Label>
+                        <Textarea
+                          id="reject-notes"
+                          placeholder="Informe o motivo da reprovação..."
+                          value={rejectNotes}
+                          onChange={(e) => setRejectNotes(e.target.value)}
+                          required
+                        />
+                      </div>
+                      
+                      <div className="flex gap-2">
+                        <Button 
+                          onClick={handleReprovarTarefa}
+                          disabled={updating || !rejectNotes.trim()}
+                          variant="destructive"
+                          className="flex-1"
+                        >
+                          <X className="h-4 w-4 mr-2" />
+                          {updating ? "Reprovando..." : "Reprovar Tarefa"}
+                        </Button>
+                        <Button 
+                          onClick={() => setShowRejectDialog(false)}
+                          variant="outline"
+                          className="flex-1"
+                        >
+                          Cancelar
+                        </Button>
+                      </div>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </div>
             )}
           </div>
         </div>
