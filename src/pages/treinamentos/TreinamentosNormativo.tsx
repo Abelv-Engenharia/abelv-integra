@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
@@ -175,18 +174,27 @@ const TreinamentosNormativo = () => {
       // Extrair nome do treinamento até o hífen (ou nome completo se não houver hífen)
       const nomeBaseTreinamento = treinamentoSelecionado.nome.split(' -')[0].trim();
       
-      // Criar nomenclatura: NOME_TREINAMENTO_MATRICULA_NOME COMPLETO
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${nomeBaseTreinamento}_${funcionarioSelecionado.matricula}_${funcionarioSelecionado.nome.toUpperCase()}.${fileExt}`;
-      const filePath = fileName;
+      // Sanitizar nome do arquivo removendo caracteres especiais
+      const sanitizeFileName = (str: string) => {
+        return str
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '') // Remove acentos
+          .replace(/[^a-zA-Z0-9_\-]/g, '_') // Substitui caracteres especiais por underscore
+          .replace(/_+/g, '_') // Remove underscores duplos
+          .replace(/^_|_$/g, ''); // Remove underscores no início e fim
+      };
 
-      console.log('Nome do arquivo:', fileName);
+      // Criar nomenclatura sanitizada
+      const fileExt = file.name.split('.').pop();
+      const nomeArquivoSanitizado = `${sanitizeFileName(nomeBaseTreinamento)}_${sanitizeFileName(funcionarioSelecionado.matricula)}_${sanitizeFileName(funcionarioSelecionado.nome)}.${fileExt}`;
+      
+      console.log('Nome do arquivo sanitizado:', nomeArquivoSanitizado);
       console.log('Tamanho do arquivo:', file.size);
 
       // Tentar fazer upload para o bucket certificados-treinamentos-normativos
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('certificados-treinamentos-normativos')
-        .upload(filePath, file, {
+        .upload(nomeArquivoSanitizado, file, {
           cacheControl: '3600',
           upsert: true,
           contentType: file.type,
@@ -207,7 +215,7 @@ const TreinamentosNormativo = () => {
       // Obter URL pública do arquivo
       const { data: urlData } = supabase.storage
         .from('certificados-treinamentos-normativos')
-        .getPublicUrl(filePath);
+        .getPublicUrl(nomeArquivoSanitizado);
 
       console.log('URL pública gerada:', urlData.publicUrl);
       return urlData.publicUrl;
