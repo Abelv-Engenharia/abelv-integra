@@ -209,8 +209,8 @@ const InspecaoNaoProgramadaHSA = () => {
       return;
     }
 
-    // Formatar data corretamente para evitar problemas de fuso horário
-    const dataFormatada = format(values.data, "yyyy-MM-dd");
+    // Formatar data usando toISOString e pegando apenas a parte da data
+    const dataFormatada = values.data.toISOString().split('T')[0];
 
     // Debug: conferir o que vai para o Supabase
     console.log("[SUBMIT NÃO PROGRAMADA] Dados enviados:", {

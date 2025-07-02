@@ -233,8 +233,8 @@ const InspecaoCadastroHSA = () => {
     // Nome do tipo de inspeção
     const tipoInspecaoLabel = tiposInspecao.find(t => t.id === values.tipoInspecao)?.nome || "";
 
-    // Formatar data corretamente para evitar problemas de fuso horário
-    const dataFormatada = format(values.data, "yyyy-MM-dd");
+    // Formatar data usando toISOString e pegando apenas a parte da data
+    const dataFormatada = values.data.toISOString().split('T')[0];
 
     // Insert só com cca_id e campos obrigatórios
     const { error } = await supabase.from("execucao_hsa").insert({
