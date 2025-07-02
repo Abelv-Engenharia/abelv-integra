@@ -1,221 +1,155 @@
 
-import React, { useEffect, useState } from "react";
-import { Table, TableHeader, TableBody, TableRow, TableCell, TableHead } from "@/components/ui/table";
-import { treinamentosNormativosService } from "@/services/treinamentos/treinamentosNormativosService";
-import { Funcionario, TreinamentoNormativo } from "@/types/treinamentos";
-import { format } from "date-fns";
-import { fetchFuncionarios } from "@/utils/treinamentosUtils";
-import { Button } from "@/components/ui/button";
-import { Trash } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import React from "react";
+import { useQuery } from "@tanstack/react-query";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { supabase } from "@/integrations/supabase/client";
 import { useUserCCAs } from "@/hooks/useUserCCAs";
 
-export const TabelaTreinamentosNormativosVencidos: React.FC = () => {
-  const [treinamentos, setTreinamentos] = useState<TreinamentoNormativo[]>([]);
-  const [funcionarios, setFuncionarios] = useState<Funcionario[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [justificativa, setJustificativa] = useState("");
-  const [treinamentoSelecionado, setTreinamentoSelecionado] = useState<TreinamentoNormativo | null>(null);
-  const [excluindo, setExcluindo] = useState(false);
+interface TabelaTreinamentosNormativosVencidosProps {
+  filters?: {
+    year?: number;
+    month?: number;
+    ccaId?: number;
+  };
+}
+
+const TabelaTreinamentosNormativosVencidos = ({ filters }: TabelaTreinamentosNormativosVencidosProps) => {
   const { data: userCCAs = [] } = useUserCCAs();
+  const userCCAIds = userCCAs.map(cca => cca.id);
+  
+  // Aplicar filtros de CCA se especificado
+  const filteredCCAIds = filters?.ccaId ? [filters.ccaId] : userCCAIds;
 
-  const navigate = useNavigate();
+  const { data: treinamentosVencidos = [], isLoading } = useQuery({
+    queryKey: ['treinamentos-normativos-vencidos', filteredCCAIds, filters],
+    queryFn: async () => {
+      if (filteredCCAIds.length === 0) return [];
 
-  useEffect(() => {
-    carregarDados();
-  }, [userCCAs]);
+      // Buscar funcionários dos CCAs permitidos
+      const { data: funcionarios } = await supabase
+        .from('funcionarios')
+        .select('id, nome, ccas!inner(codigo, nome)')
+        .in('cca_id', filteredCCAIds)
+        .eq('ativo', true);
 
-  const carregarDados = async () => {
-    setLoading(true);
-    const [treinamentos, funcionarios] = await Promise.all([
-      treinamentosNormativosService.getAll(),
-      fetchFuncionarios()
-    ]);
-    
-    // Filtrar funcionários apenas dos CCAs permitidos
-    const userCCAIds = userCCAs.map(cca => cca.id);
-    const funcionariosFiltrados = funcionarios.filter(funcionario => 
-      funcionario.cca_id && userCCAIds.includes(funcionario.cca_id)
-    );
-    
-    // Filtrar treinamentos apenas dos funcionários permitidos
-    const funcionariosPermitidosIds = funcionariosFiltrados.map(f => f.id);
-    const treinamentosFiltrados = treinamentos.filter(treinamento =>
-      funcionariosPermitidosIds.includes(treinamento.funcionario_id)
-    );
-    
-    setTreinamentos(treinamentosFiltrados);
-    setFuncionarios(funcionariosFiltrados);
-    setLoading(false);
+      if (!funcionarios || funcionarios.length === 0) return [];
+
+      const funcionarioIds = funcionarios.map(f => f.id);
+
+      // Buscar treinamentos vencidos
+      const { data: treinamentos } = await supabase
+        .from('treinamentos_normativos')
+        .select(`
+          id,
+          funcionario_id,
+          data_validade,
+          status,
+          treinamentos!inner(nome)
+        `)
+        .in('funcionario_id', funcionarioIds)
+        .eq('arquivado', false)
+        .in('status', ['Vencido', 'Próximo ao vencimento'])
+        .order('data_validade', { ascending: true })
+        .limit(10);
+
+      if (!treinamentos) return [];
+
+      // Combinar dados
+      return treinamentos.map(treinamento => {
+        const funcionario = funcionarios.find(f => f.id === treinamento.funcionario_id);
+        return {
+          id: treinamento.id,
+          funcionario: funcionario?.nome || 'N/A',
+          cca: funcionario?.ccas?.codigo || 'N/A',
+          treinamento: treinamento.treinamentos?.nome || 'N/A',
+          dataValidade: treinamento.data_validade,
+          status: treinamento.status,
+        };
+      });
+    },
+    enabled: filteredCCAIds.length > 0,
+  });
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'Vencido':
+        return 'bg-red-100 text-red-800';
+      case 'Próximo ao vencimento':
+        return 'bg-yellow-100 text-yellow-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
   };
 
-  // Filtra vencidos e próximos ao vencimento, e ordena pela data_validade (menor -> maior)
-  const treinamentosFiltrados = treinamentos
-    .filter(t => (t.status === "Vencido" || t.status === "Próximo ao vencimento") && !t.arquivado)
-    .sort((a, b) => {
-      const dataA = a.data_validade ? new Date(a.data_validade).getTime() : 0;
-      const dataB = b.data_validade ? new Date(b.data_validade).getTime() : 0;
-      return dataA - dataB;
-    });
-
-  function getFuncionarioInfo(id: string) {
-    return funcionarios.find(f => f.id === id);
-  }
-
-  const handleOpenModal = (treinamento: TreinamentoNormativo) => {
-    setTreinamentoSelecionado(treinamento);
-    setJustificativa("");
-    setModalOpen(true);
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('pt-BR');
   };
 
-  const handleCloseModal = () => {
-    setModalOpen(false);
-    setTreinamentoSelecionado(null);
-    setJustificativa("");
-  };
-
-  const handleExcluir = async () => {
-    if (!treinamentoSelecionado || justificativa.trim().length < 5) return;
-    setExcluindo(true);
-    await treinamentosNormativosService.arquivar(treinamentoSelecionado.id, justificativa);
-    setExcluindo(false);
-    setModalOpen(false);
-    setTreinamentoSelecionado(null);
-    setJustificativa("");
-    carregarDados();
-  };
-
-  const handleRenovar = (treinamento: TreinamentoNormativo) => {
-    const funcionario = getFuncionarioInfo(treinamento.funcionario_id);
-    if (!funcionario) return;
-    // Inclui o campo tipo como "Reciclagem"
-    navigate("/treinamentos/normativo", {
-      state: {
-        ccaId: funcionario.cca_id ? String(funcionario.cca_id) : "",
-        funcionarioId: funcionario.id,
-        funcao: funcionario.funcao,
-        matricula: funcionario.matricula,
-        treinamentoId: treinamento.treinamento_id,
-        tipo: "Reciclagem", // novo campo!
-      },
-    });
-  };
-
-  if (loading) {
+  if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-24 w-full">
-        <p className="text-muted-foreground">Carregando registros...</p>
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>Treinamentos Normativos Vencidos</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-center py-8">
+            <p className="text-muted-foreground">Carregando...</p>
+          </div>
+        </CardContent>
+      </Card>
     );
   }
 
   return (
-    <div className="mt-4 w-full overflow-x-auto">
-      <h3 className="font-semibold text-lg mb-2 px-6 pt-6">
-        Treinamentos Vencidos e Próximos ao Vencimento
-      </h3>
-      <div className="min-w-[700px] max-w-full">
-        <Table className="w-full">
-          <TableHeader>
-            <TableRow>
-              <TableHead>Funcionário</TableHead>
-              <TableHead>Matrícula</TableHead>
-              <TableHead>Treinamento</TableHead>
-              <TableHead>Tipo</TableHead>
-              <TableHead>Data de Validade</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Ações</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {treinamentosFiltrados.length > 0 ? (
-              treinamentosFiltrados.map((t) => {
-                const funcionario = getFuncionarioInfo(t.funcionario_id);
-                return (
-                  <TableRow key={t.id}>
-                    <TableCell>{funcionario?.nome || "-"}</TableCell>
-                    <TableCell>{funcionario?.matricula || "-"}</TableCell>
-                    <TableCell>{t.treinamentoNome || "-"}</TableCell>
-                    <TableCell>{t.tipo || "-"}</TableCell>
-                    <TableCell>
-                      {t.data_validade
-                        ? format(new Date(t.data_validade), "dd/MM/yyyy")
-                        : "-"}
-                    </TableCell>
-                    <TableCell>
-                      <span
-                        className={
-                          t.status === "Vencido"
-                            ? "text-red-600 font-semibold"
-                            : "text-amber-600 font-semibold"
-                        }
-                      >
-                        {t.status}
-                      </span>
-                    </TableCell>
-                    <TableCell className="flex gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleRenovar(t)}
-                        title="Renovar treinamento"
-                      >
-                        Renovar
-                      </Button>
-                      <Button
-                        variant="destructive"
-                        size="icon"
-                        onClick={() => handleOpenModal(t)}
-                        title="Excluir trein. vencido"
-                      >
-                        <Trash className="w-4 h-4" />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                );
-              })
-            ) : (
-              <TableRow>
-                <TableCell colSpan={7} className="h-16 text-center text-muted-foreground">
-                  Nenhum treinamento vencido ou próximo ao vencimento encontrado.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
-      {/* Modal de justificativa para exclusão */}
-      {modalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-white rounded-lg p-6 max-w-sm w-full shadow-lg flex flex-col gap-4">
-            <h4 className="text-lg font-semibold">Justificativa para exclusão</h4>
-            <textarea
-              className="w-full min-h-[80px] border rounded px-2 py-1"
-              placeholder="Insira a justificativa (mínimo 5 caracteres)"
-              value={justificativa}
-              onChange={e => setJustificativa(e.target.value)}
-              disabled={excluindo}
-            />
-            <div className="flex gap-2 justify-end">
-              <Button
-                variant="outline"
-                onClick={handleCloseModal}
-                disabled={excluindo}
-              >
-                Cancelar
-              </Button>
-              <Button
-                variant="destructive"
-                onClick={handleExcluir}
-                disabled={excluindo || justificativa.trim().length < 5}
-              >
-                {excluindo ? "Excluindo..." : "Confirmar Exclusão"}
-              </Button>
-            </div>
+    <Card>
+      <CardHeader>
+        <CardTitle>Treinamentos Normativos Vencidos</CardTitle>
+      </CardHeader>
+      <CardContent>
+        {treinamentosVencidos.length === 0 ? (
+          <div className="flex items-center justify-center py-8">
+            <p className="text-muted-foreground">Nenhum treinamento vencido encontrado</p>
           </div>
-        </div>
-      )}
-    </div>
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Funcionário</TableHead>
+                <TableHead>CCA</TableHead>
+                <TableHead>Treinamento</TableHead>
+                <TableHead>Data Validade</TableHead>
+                <TableHead>Status</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {treinamentosVencidos.map((item) => (
+                <TableRow key={item.id}>
+                  <TableCell className="font-medium">{item.funcionario}</TableCell>
+                  <TableCell>{item.cca}</TableCell>
+                  <TableCell>{item.treinamento}</TableCell>
+                  <TableCell>{formatDate(item.dataValidade)}</TableCell>
+                  <TableCell>
+                    <Badge className={getStatusColor(item.status)}>
+                      {item.status}
+                    </Badge>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
+      </CardContent>
+    </Card>
   );
 };
+
+export { TabelaTreinamentosNormativosVencidos };

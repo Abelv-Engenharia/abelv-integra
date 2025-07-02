@@ -1,7 +1,13 @@
 
 import { supabase } from "@/integrations/supabase/client";
 
-export const fetchTreinamentosStats = async (userCCAIds: number[] = []) => {
+interface Filters {
+  year?: number;
+  month?: number;
+  ccaId?: number;
+}
+
+export const fetchTreinamentosStats = async (userCCAIds: number[] = [], filters?: Filters) => {
   // Se não tem CCAs permitidos, retorna dados vazios
   if (userCCAIds.length === 0) {
     return {
@@ -18,6 +24,9 @@ export const fetchTreinamentosStats = async (userCCAIds: number[] = []) => {
     };
   }
 
+  // Aplicar filtros de CCA se especificado
+  const filteredCCAIds = filters?.ccaId ? [filters.ccaId] : userCCAIds;
+
   // Fetch total number of trainings (normative and execution) filtered by user CCAs
   const { count: totalTreinamentosNormativos } = await supabase
     .from('treinamentos_normativos')
@@ -26,20 +35,30 @@ export const fetchTreinamentosStats = async (userCCAIds: number[] = []) => {
       await supabase
         .from('funcionarios')
         .select('id')
-        .in('cca_id', userCCAIds)
+        .in('cca_id', filteredCCAIds)
         .then(res => (res.data || []).map(f => f.id))
     );
 
-  const { count: totalTreinamentosExecutados } = await supabase
+  // Query para treinamentos executados com filtros
+  let execucaoQuery = supabase
     .from('execucao_treinamentos')
     .select('*', { count: 'exact', head: true })
-    .in('cca_id', userCCAIds);
+    .in('cca_id', filteredCCAIds);
+
+  if (filters?.year) {
+    execucaoQuery = execucaoQuery.eq('ano', filters.year);
+  }
+  if (filters?.month) {
+    execucaoQuery = execucaoQuery.eq('mes', filters.month);
+  }
+
+  const { count: totalTreinamentosExecutados } = await execucaoQuery;
 
   // Fetch funcionarios with valid trainings from allowed CCAs
   const { data: funcionariosPermitidos } = await supabase
     .from('funcionarios')
     .select('id')
-    .in('cca_id', userCCAIds)
+    .in('cca_id', filteredCCAIds)
     .eq('ativo', true);
 
   const funcionariosPermitidosIds = funcionariosPermitidos?.map(f => f.id) || [];
@@ -60,7 +79,7 @@ export const fetchTreinamentosStats = async (userCCAIds: number[] = []) => {
   const { count: totalFuncionarios } = await supabase
     .from('funcionarios')
     .select('*', { count: 'exact', head: true })
-    .in('cca_id', userCCAIds)
+    .in('cca_id', filteredCCAIds)
     .eq('ativo', true);
 
   // Fetch valid trainings from funcionarios in allowed CCAs
@@ -76,25 +95,25 @@ export const fetchTreinamentosStats = async (userCCAIds: number[] = []) => {
 
   // Fetch HHT (Horas Homem Trabalhadas) for current month/year from allowed CCAs
   const currentDate = new Date();
-  const currentMonth = currentDate.getMonth() + 1;
-  const currentYear = currentDate.getFullYear();
+  const targetMonth = filters?.month || currentDate.getMonth() + 1;
+  const targetYear = filters?.year || currentDate.getFullYear();
 
   const { data: hhtData } = await supabase
     .from('horas_trabalhadas')
     .select('horas_trabalhadas')
-    .in('cca_id', userCCAIds)
-    .eq('mes', currentMonth)
-    .eq('ano', currentYear);
+    .in('cca_id', filteredCCAIds)
+    .eq('mes', targetMonth)
+    .eq('ano', targetYear);
 
   const totalHHT = hhtData?.reduce((sum, item) => sum + Number(item.horas_trabalhadas), 0) || 0;
 
-  // Fetch total training hours from execucao_treinamentos for current month/year from allowed CCAs
+  // Fetch total training hours from execucao_treinamentos for target month/year from allowed CCAs
   const { data: horasTreinamento } = await supabase
     .from('execucao_treinamentos')
     .select('horas_totais')
-    .in('cca_id', userCCAIds)
-    .eq('mes', currentMonth)
-    .eq('ano', currentYear);
+    .in('cca_id', filteredCCAIds)
+    .eq('mes', targetMonth)
+    .eq('ano', targetYear);
 
   const totalHorasTreinamento = horasTreinamento?.reduce((sum, item) => sum + Number(item.horas_totais || 0), 0) || 0;
 
@@ -104,14 +123,15 @@ export const fetchTreinamentosStats = async (userCCAIds: number[] = []) => {
   const metaAtingida = percentualHorasInvestidas >= 2.5;
 
   console.log('Debug training stats with CCA filter:', {
-    userCCAIds,
+    filteredCCAIds,
     totalHHT,
     totalHorasTreinamento,
     percentualHorasInvestidas,
     metaHoras,
     metaAtingida,
-    currentMonth,
-    currentYear
+    targetMonth,
+    targetYear,
+    filters
   });
 
   return {

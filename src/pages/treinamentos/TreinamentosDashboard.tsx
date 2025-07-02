@@ -30,6 +30,13 @@ const TreinamentosDashboard = () => {
     fetchProcessosTreinamento().then(setProcessos);
   }, []);
 
+  // Criar objeto de filtros para passar para os componentes
+  const filters = {
+    year: year !== "todos" ? parseInt(year) : undefined,
+    month: month !== "todos" ? parseInt(month) : undefined,
+    ccaId: ccaId !== "todos" ? parseInt(ccaId) : undefined,
+  };
+
   if (userCCAs.length === 0) {
     return (
       <div className="space-y-6">
@@ -42,7 +49,14 @@ const TreinamentosDashboard = () => {
 
   return (
     <div className="space-y-6">
-      <TreinamentosDashboardFilters year={year} setYear={setYear} month={month} setMonth={setMonth} ccaId={ccaId} setCcaId={setCcaId} />
+      <TreinamentosDashboardFilters 
+        year={year} 
+        setYear={setYear} 
+        month={month} 
+        setMonth={setMonth} 
+        ccaId={ccaId} 
+        setCcaId={setCcaId} 
+      />
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Dashboard de Treinamentos</h1>
@@ -66,9 +80,9 @@ const TreinamentosDashboard = () => {
         </div>
       </div>
 
-      <TreinamentosSummaryCards />
+      <TreinamentosSummaryCards filters={filters} />
 
-      <TreinamentosPorProcessoTable />
+      <TreinamentosPorProcessoTable filters={filters} />
 
       <Tabs defaultValue="execucao" className="space-y-4">
         <TabsList>
@@ -87,7 +101,7 @@ const TreinamentosDashboard = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent className="h-[400px] flex items-center justify-center">
-                <ProcessoGeralPieChart />
+                <ProcessoGeralPieChart filters={filters} />
               </CardContent>
             </Card>
           </div>
@@ -120,13 +134,13 @@ const TreinamentosDashboard = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="h-[320px]">
-                  <TreinamentosNormativosChart />
+                  <TreinamentosNormativosChart filters={filters} />
                 </CardContent>
               </Card>
               {/* Card da tabela vencidos */}
               <Card className="w-full max-w-full">
                 <CardContent className="p-0">
-                  <TabelaTreinamentosNormativosVencidos />
+                  <TabelaTreinamentosNormativosVencidos filters={filters} />
                 </CardContent>
               </Card>
             </div>
