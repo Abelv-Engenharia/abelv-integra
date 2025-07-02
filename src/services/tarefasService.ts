@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { Tarefa, TarefaStatus, TarefaCriticidade } from "@/types/tarefas";
 
@@ -153,7 +152,7 @@ export const tarefasService = {
           *,
           profiles!inner(id, nome)
         `)
-        .eq('responsavel_id', user.id)
+        .or(`responsavel_id.eq.${user.id},criado_por.eq.${user.id}`)
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -213,6 +212,13 @@ export const tarefasService = {
         return false;
       }
 
+      // Obter usuário atual para definir como criador
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        console.error("Usuário não autenticado");
+        return false;
+      }
+
       const { error } = await supabase
         .from('tarefas')
         .insert({
@@ -222,6 +228,7 @@ export const tarefasService = {
           data_conclusao: dadosTarefa.data_conclusao,
           descricao: dadosTarefa.descricao,
           responsavel_id: dadosTarefa.responsavel_id,
+          criado_por: user.id,
           status: 'programada',
           iniciada: false,
           configuracao: dadosTarefa.configuracao

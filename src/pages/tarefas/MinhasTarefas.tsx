@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
@@ -91,7 +90,7 @@ const MinhasTarefas = () => {
         <div className="flex flex-col gap-2">
           <h1 className="text-3xl font-bold">Minhas Tarefas</h1>
           <p className="text-muted-foreground">
-            Carregando suas tarefas atribuídas...
+            Carregando suas tarefas...
           </p>
         </div>
         <div className="flex justify-center items-center p-8">
@@ -106,7 +105,7 @@ const MinhasTarefas = () => {
       <div className="flex flex-col gap-2">
         <h1 className="text-3xl font-bold">Minhas Tarefas</h1>
         <p className="text-muted-foreground">
-          Acompanhe e gerencie suas tarefas atribuídas
+          Acompanhe e gerencie suas tarefas atribuídas ou criadas por você
         </p>
       </div>
 
@@ -148,7 +147,7 @@ const MinhasTarefas = () => {
           <div className="text-center p-8">
             <p className="text-muted-foreground">
               {tarefas.length === 0 
-                ? "Nenhuma tarefa atribuída a você." 
+                ? "Nenhuma tarefa encontrada para você." 
                 : "Nenhuma tarefa corresponde aos filtros aplicados."
               }
             </p>

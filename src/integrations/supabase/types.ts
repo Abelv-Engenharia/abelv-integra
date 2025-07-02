@@ -1848,6 +1848,7 @@ export type Database = {
           cca: string
           configuracao: Json
           created_at: string | null
+          criado_por: string
           data_cadastro: string | null
           data_conclusao: string | null
           data_real_conclusao: string | null
@@ -1865,6 +1866,7 @@ export type Database = {
           cca: string
           configuracao?: Json
           created_at?: string | null
+          criado_por: string
           data_cadastro?: string | null
           data_conclusao?: string | null
           data_real_conclusao?: string | null
@@ -1882,6 +1884,7 @@ export type Database = {
           cca?: string
           configuracao?: Json
           created_at?: string | null
+          criado_por?: string
           data_cadastro?: string | null
           data_conclusao?: string | null
           data_real_conclusao?: string | null
