@@ -1,6 +1,8 @@
+
 import React from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { getStatusColor } from "@/utils/treinamentosUtils";
+import { CertificadoLink } from "./CertificadoLink";
 
 interface TreinamentoNormativo {
   id: string;
@@ -69,18 +71,7 @@ export const TabelaTreinamentosNormativos: React.FC<Props> = ({ treinamentos }) 
                 </span>
               </TableCell>
               <TableCell className="text-center">
-                {tr.certificado_url ? (
-                  <a
-                    href={tr.certificado_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-600 underline"
-                  >
-                    Visualizar certificado
-                  </a>
-                ) : (
-                  <span className="text-muted-foreground text-xs">-</span>
-                )}
+                <CertificadoLink certificadoUrl={tr.certificado_url} />
               </TableCell>
             </TableRow>
           ))

@@ -36,6 +36,9 @@ function TreinamentosNormativosPorFuncionarioTab() {
   const [historicoReciclados, setHistoricoReciclados] = useState<any[]>([]);
   const { data: userCCAs = [] } = useUserCCAs();
 
+  // Ordenar CCAs do menor para o maior
+  const sortedCCAs = [...userCCAs].sort((a, b) => a.codigo.localeCompare(b.codigo, undefined, { numeric: true }));
+
   useEffect(() => {
     const carregarFuncionarios = async () => {
       if (selectedCcaId) {
@@ -226,21 +229,11 @@ function TreinamentosNormativosPorFuncionarioTab() {
                 <SelectValue placeholder="Selecione o CCA" />
               </SelectTrigger>
               <SelectContent>
-                {/* Filtrar apenas os CCAs que o usuário tem permissão */}
-                {userCCAs
-                  .sort((a, b) => {
-                    // Se código for numérico, comparar como número, senão string
-                    const aNum = Number(a.codigo);
-                    const bNum = Number(b.codigo);
-                    if (!isNaN(aNum) && !isNaN(bNum)) {
-                      return aNum - bNum;
-                    }
-                    return (a.codigo || "").localeCompare(b.codigo || "");
-                  })
-                  .map((cca) => (
-                    <SelectItem key={cca.id} value={String(cca.id)}>
-                      {cca.codigo} - {cca.nome}
-                    </SelectItem>
+                {/* Usar CCAs ordenados */}
+                {sortedCCAs.map((cca) => (
+                  <SelectItem key={cca.id} value={String(cca.id)}>
+                    {cca.codigo} - {cca.nome}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
