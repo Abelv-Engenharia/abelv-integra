@@ -12,6 +12,8 @@ export interface CCA {
 export const useCCAs = () => {
   const { data: userCCAs = [], isLoading, error } = useUserCCAs();
 
+  console.log('useCCAs - CCAs disponíveis:', userCCAs.length, userCCAs.map(c => c.codigo));
+
   return {
     data: userCCAs,
     isLoading,

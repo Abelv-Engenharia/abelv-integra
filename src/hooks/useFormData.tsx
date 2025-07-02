@@ -12,8 +12,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { useUserCCAs } from "./useUserCCAs";
 
 export const useFormData = () => {
-  const { data: userCCAs = [] } = useUserCCAs();
+  const { data: userCCAs = [], isLoading: ccasLoading } = useUserCCAs();
   const allowedCcaIds = userCCAs.map(cca => cca.id);
+
+  console.log('useFormData - CCAs do usuário:', userCCAs.length, userCCAs.map(c => c.codigo));
 
   const { data: tiposRegistro = [] } = useQuery({
     queryKey: ['tipos-registro'],
@@ -38,8 +40,12 @@ export const useFormData = () => {
   const { data: empresas = [] } = useQuery({
     queryKey: ['empresas-with-ccas', allowedCcaIds],
     queryFn: async () => {
-      if (allowedCcaIds.length === 0) return [];
+      if (allowedCcaIds.length === 0) {
+        console.log('useFormData - Nenhum CCA permitido para empresas');
+        return [];
+      }
       
+      console.log('useFormData - Buscando empresas para CCAs:', allowedCcaIds);
       const { data } = await supabase
         .from('empresas')
         .select(`
@@ -55,9 +61,11 @@ export const useFormData = () => {
         .eq('ativo', true)
         .in('empresa_ccas.cca_id', allowedCcaIds)
         .order('nome');
+      
+      console.log('useFormData - Empresas encontradas:', data?.length || 0);
       return data || [];
     },
-    enabled: allowedCcaIds.length > 0,
+    enabled: allowedCcaIds.length > 0 && !ccasLoading,
   });
 
   const { data: disciplinas = [] } = useQuery({
@@ -68,8 +76,12 @@ export const useFormData = () => {
   const { data: engenheiros = [] } = useQuery({
     queryKey: ['engenheiros-with-ccas', allowedCcaIds],
     queryFn: async () => {
-      if (allowedCcaIds.length === 0) return [];
+      if (allowedCcaIds.length === 0) {
+        console.log('useFormData - Nenhum CCA permitido para engenheiros');
+        return [];
+      }
       
+      console.log('useFormData - Buscando engenheiros para CCAs:', allowedCcaIds);
       const { data } = await supabase
         .from('engenheiros')
         .select(`
@@ -87,9 +99,11 @@ export const useFormData = () => {
         .eq('ativo', true)
         .in('engenheiro_ccas.cca_id', allowedCcaIds)
         .order('nome');
+      
+      console.log('useFormData - Engenheiros encontrados:', data?.length || 0);
       return data || [];
     },
-    enabled: allowedCcaIds.length > 0,
+    enabled: allowedCcaIds.length > 0 && !ccasLoading,
   });
 
   const { data: baseLegalOpcoes = [] } = useQuery({
@@ -100,8 +114,12 @@ export const useFormData = () => {
   const { data: supervisores = [] } = useQuery({
     queryKey: ['supervisores-with-ccas', allowedCcaIds],
     queryFn: async () => {
-      if (allowedCcaIds.length === 0) return [];
+      if (allowedCcaIds.length === 0) {
+        console.log('useFormData - Nenhum CCA permitido para supervisores');
+        return [];
+      }
       
+      console.log('useFormData - Buscando supervisores para CCAs:', allowedCcaIds);
       const { data } = await supabase
         .from('supervisores')
         .select(`
@@ -119,16 +137,22 @@ export const useFormData = () => {
         .eq('ativo', true)
         .in('supervisor_ccas.cca_id', allowedCcaIds)
         .order('nome');
+      
+      console.log('useFormData - Supervisores encontrados:', data?.length || 0);
       return data || [];
     },
-    enabled: allowedCcaIds.length > 0,
+    enabled: allowedCcaIds.length > 0 && !ccasLoading,
   });
 
   const { data: encarregados = [] } = useQuery({
     queryKey: ['encarregados-with-cca', allowedCcaIds],
     queryFn: async () => {
-      if (allowedCcaIds.length === 0) return [];
+      if (allowedCcaIds.length === 0) {
+        console.log('useFormData - Nenhum CCA permitido para encarregados');
+        return [];
+      }
       
+      console.log('useFormData - Buscando encarregados para CCAs:', allowedCcaIds);
       const { data } = await supabase
         .from('encarregados')
         .select(`
@@ -144,16 +168,22 @@ export const useFormData = () => {
         .eq('ativo', true)
         .in('cca_id', allowedCcaIds)
         .order('nome');
+      
+      console.log('useFormData - Encarregados encontrados:', data?.length || 0);
       return data || [];
     },
-    enabled: allowedCcaIds.length > 0,
+    enabled: allowedCcaIds.length > 0 && !ccasLoading,
   });
 
   const { data: funcionarios = [] } = useQuery({
     queryKey: ['funcionarios-with-cca', allowedCcaIds],
     queryFn: async () => {
-      if (allowedCcaIds.length === 0) return [];
+      if (allowedCcaIds.length === 0) {
+        console.log('useFormData - Nenhum CCA permitido para funcionários');
+        return [];
+      }
       
+      console.log('useFormData - Buscando funcionários para CCAs:', allowedCcaIds);
       const { data } = await supabase
         .from('funcionarios')
         .select(`
@@ -169,9 +199,11 @@ export const useFormData = () => {
         .eq('ativo', true)
         .in('cca_id', allowedCcaIds)
         .order('nome');
+      
+      console.log('useFormData - Funcionários encontrados:', data?.length || 0);
       return data || [];
     },
-    enabled: allowedCcaIds.length > 0,
+    enabled: allowedCcaIds.length > 0 && !ccasLoading,
   });
 
   return {

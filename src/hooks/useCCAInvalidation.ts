@@ -7,48 +7,49 @@ export const useCCAInvalidation = () => {
   const { user } = useAuth();
 
   const invalidateAllCCAQueries = async () => {
-    // Invalidate all CCA-related queries
-    const queriesToInvalidate = [
-      ['user-ccas'],
-      ['admin-ccas'],
-      ['ccas'],
-      ['user-ccas', user?.id],
-    ];
-
-    // Invalidate specific queries
-    for (const queryKey of queriesToInvalidate) {
-      await queryClient.invalidateQueries({ queryKey });
-    }
-
-    // Invalidate any query that might contain CCA data
-    await queryClient.invalidateQueries({
+    console.log('Iniciando invalidação de todas as queries relacionadas a CCAs...');
+    
+    // Invalidar todas as queries que podem conter dados de CCAs
+    await queryClient.invalidateQueries({ 
       predicate: (query) => {
-        return query.queryKey.some(key => 
-          typeof key === 'string' && (
-            key.toLowerCase().includes('cca') || 
-            key.includes('funcionarios') ||
-            key.includes('empresas') ||
-            key.includes('engenheiros') ||
-            key.includes('supervisores') ||
-            key.includes('encarregados') ||
-            key.includes('ocorrencias') ||
-            key.includes('desvios') ||
-            key.includes('treinamentos')
-          )
-        );
+        const queryKey = query.queryKey;
+        if (!queryKey || queryKey.length === 0) return false;
+        
+        const keyString = JSON.stringify(queryKey).toLowerCase();
+        return keyString.includes('cca') || 
+               keyString.includes('user-ccas') ||
+               keyString.includes('admin-ccas') ||
+               keyString.includes('ccas') ||
+               keyString.includes('funcionarios') ||
+               keyString.includes('empresas') ||
+               keyString.includes('engenheiros') ||
+               keyString.includes('supervisores') ||
+               keyString.includes('encarregados') ||
+               keyString.includes('form-data') ||
+               keyString.includes('filtered-form-data');
       }
     });
 
-    // Force refetch critical queries for immediate update
-    await queryClient.refetchQueries({
-      queryKey: ['user-ccas', user?.id]
-    });
+    // Invalidar queries específicas importantes
+    const specificQueries = [
+      ['user-ccas'],
+      ['admin-ccas'], 
+      ['ccas'],
+      ['user-ccas', user?.id],
+      ['form-data'],
+      ['filtered-form-data']
+    ];
 
-    await queryClient.refetchQueries({
-      queryKey: ['ccas']
-    });
+    for (const queryKey of specificQueries) {
+      await queryClient.invalidateQueries({ queryKey });
+      console.log(`Query invalidada: ${JSON.stringify(queryKey)}`);
+    }
 
-    console.log('Todas as queries relacionadas a CCAs foram invalidadas e atualizadas');
+    // Refetch imediato das queries críticas
+    await queryClient.refetchQueries({ queryKey: ['user-ccas', user?.id] });
+    await queryClient.refetchQueries({ queryKey: ['admin-ccas'] });
+    
+    console.log('Invalidação concluída. Todas as queries de CCAs foram atualizadas.');
   };
 
   return { invalidateAllCCAQueries };
