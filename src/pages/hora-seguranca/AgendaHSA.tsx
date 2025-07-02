@@ -73,12 +73,19 @@ export default function AgendaHSA() {
     fetchInspecoes();
   }, [userCCAs]);
 
+  // Função para formatar a data corretamente, evitando problemas de timezone
+  const formatDateSafely = (dateString: string) => {
+    if (!dateString) return "";
+    // Adiciona 'T00:00:00' para garantir que seja tratada como data local
+    return format(new Date(dateString + 'T00:00:00'), "yyyy-MM-dd");
+  };
+
   // Agrupa inspeções por data no formato yyyy-MM-dd
   const groupedByDay: Record<string, InspecaoAgenda[]> = {};
   inspecoes.forEach((inspecao) => {
-    const day = format(new Date(inspecao.data), "yyyy-MM-dd");
-    if (!groupedByDay[day]) groupedByDay[day] = [];
-    groupedByDay[day].push(inspecao);
+    const day = formatDateSafely(inspecao.data);
+    if (day && !groupedByDay[day]) groupedByDay[day] = [];
+    if (day) groupedByDay[day].push(inspecao);
   });
 
   // Componente personalizado para o conteúdo do dia
