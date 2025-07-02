@@ -30,3 +30,54 @@ export const getCriticidadeColor = (criticidade: string) => {
       return 'text-gray-700 bg-gray-50 border-gray-200';
   }
 };
+
+// Mock data para desenvolvimento e testes
+export const mockUsuarios = [
+  {
+    id: '1',
+    nome: 'João Silva',
+    email: 'joao@exemplo.com',
+    cargo: 'Engenheiro',
+    departamento: 'SMS'
+  },
+  {
+    id: '2',
+    nome: 'Maria Santos',
+    email: 'maria@exemplo.com',
+    cargo: 'Supervisora',
+    departamento: 'Operações'
+  },
+  {
+    id: '3',
+    nome: 'Pedro Costa',
+    email: 'pedro@exemplo.com',
+    cargo: 'Técnico',
+    departamento: 'Manutenção'
+  }
+];
+
+export const mockTarefas = [
+  {
+    id: '1',
+    cca: 'CCA-001 - Linha Principal',
+    tipoCca: 'linha-inteira' as const,
+    dataCadastro: '2024-01-15',
+    dataConclusao: '2024-02-15',
+    descricao: 'Realizar inspeção completa da linha',
+    responsavel: {
+      id: '1',
+      nome: 'João Silva'
+    },
+    status: 'em-andamento' as const,
+    iniciada: true,
+    configuracao: {
+      criticidade: 'alta' as const,
+      requerValidacao: true,
+      notificarUsuario: true,
+      recorrencia: {
+        ativa: false,
+        frequencia: 'mensal' as const
+      }
+    }
+  }
+];

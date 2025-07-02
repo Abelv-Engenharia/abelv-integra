@@ -1,5 +1,5 @@
 
-export type TarefaStatus = 'programada' | 'concluida' | 'em-andamento' | 'pendente';
+export type TarefaStatus = 'programada' | 'concluida' | 'em-andamento' | 'pendente' | 'aguardando-validacao';
 export type TarefaCriticidade = 'baixa' | 'media' | 'alta' | 'critica';
 export type TipoCCA = 'linha-inteira' | 'parcial' | 'equipamento' | 'especifica';
 
