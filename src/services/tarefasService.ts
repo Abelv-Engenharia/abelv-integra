@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { Tarefa, TarefaStatus, TarefaCriticidade } from "@/types/tarefas";
 
@@ -152,7 +153,7 @@ export const tarefasService = {
           *,
           profiles!inner(id, nome)
         `)
-        .or(`responsavel_id.eq.${user.id},criado_por.eq.${user.id}`)
+        .eq('responsavel_id', user.id)
         .order('created_at', { ascending: false });
 
       if (error) {

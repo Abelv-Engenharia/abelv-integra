@@ -106,7 +106,7 @@ const MinhasTarefas = () => {
       <div className="flex flex-col gap-2">
         <h1 className="text-3xl font-bold">Minhas Tarefas</h1>
         <p className="text-muted-foreground">
-          Acompanhe e gerencie suas tarefas atribuídas ou criadas por você
+          Acompanhe e gerencie suas tarefas atribuídas
         </p>
       </div>
 
@@ -148,7 +148,7 @@ const MinhasTarefas = () => {
           <div className="text-center p-8">
             <p className="text-muted-foreground">
               {tarefas.length === 0 
-                ? "Nenhuma tarefa encontrada para você." 
+                ? "Nenhuma tarefa atribuída a você." 
                 : "Nenhuma tarefa corresponde aos filtros aplicados."
               }
             </p>
