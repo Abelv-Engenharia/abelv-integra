@@ -31,6 +31,9 @@ const TreinamentosNormativo = () => {
   const [selectedCcaId, setSelectedCcaId] = useState<string>("");
   const { data: userCCAs = [] } = useUserCCAs();
 
+  // Ordenar CCAs do menor para o maior
+  const sortedCCAs = [...userCCAs].sort((a, b) => a.codigo.localeCompare(b.codigo, undefined, { numeric: true }));
+
   const form = useForm<TreinamentoNormativoForm>({
     defaultValues: {
       cca_id: "",
@@ -345,7 +348,7 @@ const TreinamentosNormativo = () => {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {userCCAs.map((cca) => (
+                            {sortedCCAs.map((cca) => (
                               <SelectItem key={cca.id} value={cca.id.toString()}>
                                 {cca.codigo} - {cca.nome}
                               </SelectItem>
