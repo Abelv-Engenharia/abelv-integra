@@ -1,14 +1,14 @@
 
 import React, { useEffect, useState } from "react";
 import { fetchInspecoesSummary } from "@/services/hora-seguranca";
-import { Activity, Calendar, CheckSquare, FileWarning } from "lucide-react";
+import { Activity, Calendar, CheckSquare, FileWarning, Target, TrendingUp } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { InspecoesSummary } from "@/services/hora-seguranca/types";
 import { useUserCCAs } from "@/hooks/useUserCCAs";
 
 interface StatCardProps {
   title: string;
-  value: number;
+  value: number | string;
   description?: string;
   icon: React.ReactNode;
   className?: string;
@@ -68,8 +68,8 @@ const InspecoesSummaryCards = () => {
 
   if (loading) {
     return (
-      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-        {[...Array(4)].map((_, i) => (
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-6">
+        {[...Array(6)].map((_, i) => (
           <Card key={i} className="animate-pulse">
             <CardContent className="p-6">
               <div className="h-16 bg-muted/50 rounded"></div>
@@ -80,31 +80,63 @@ const InspecoesSummaryCards = () => {
     );
   }
 
+  // Cálculos para os novos cards
+  const inspecoesProgramadas = (data?.programadas || 0) + (data?.realizadas || 0) + (data?.canceladas || 0); // A REALIZAR + REALIZADA + NÃO REALIZADA
+  const inspecoesRealizadas = data?.realizadas || 0; // REALIZADA
+  const inspecoesNaoProgramadas = data?.naoProgramadas || 0; // REALIZADA (NÃO PROGRAMADA)
+  const inspecoesNaoRealizadas = data?.canceladas || 0; // NÃO REALIZADA
+  
+  // Aderência HSA (real) = REALIZADA / (A REALIZAR + REALIZADA + NÃO REALIZADA) * 100
+  const aderenciaReal = inspecoesProgramadas > 0 ? Math.round((inspecoesRealizadas / inspecoesProgramadas) * 100) : 0;
+  
+  // Aderência HSA (ajustada) = (REALIZADA + REALIZADA NÃO PROGRAMADA) / (A REALIZAR + REALIZADA + REALIZADA NÃO PROGRAMADA + NÃO REALIZADA) * 100
+  const totalAjustado = inspecoesProgramadas + inspecoesNaoProgramadas;
+  const realizadasAjustadas = inspecoesRealizadas + inspecoesNaoProgramadas;
+  const aderenciaAjustada = totalAjustado > 0 ? Math.round((realizadasAjustadas / totalAjustado) * 100) : 0;
+
   return (
-    <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+    <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-6">
       <StatCard
-        title="Total de Inspeções"
-        value={data?.totalInspecoes || 0}
-        icon={<Activity className="h-5 w-5" />}
-        className="border-l-4 border-blue-500"
+        title="Aderência HSA (real)"
+        value={`${aderenciaReal}%`}
+        icon={<Target className="h-5 w-5" />}
+        className="border-l-4 border-green-500"
+        description="Realizadas vs Programadas"
       />
       <StatCard
-        title="Programadas"
-        value={data?.programadas || 0}
-        icon={<Calendar className="h-5 w-5" />}
+        title="Aderência HSA (ajustada)"
+        value={`${aderenciaAjustada}%`}
+        icon={<TrendingUp className="h-5 w-5" />}
+        className="border-l-4 border-blue-500"
+        description="Incluindo não programadas"
+      />
+      <StatCard
+        title="Inspeções Programadas"
+        value={inspecoesProgramadas}
+        icon={<Activity className="h-5 w-5" />}
+        className="border-l-4 border-purple-500"
+        description="A realizar + Realizadas + Não realizadas"
+      />
+      <StatCard
+        title="Inspeções Realizadas"
+        value={inspecoesRealizadas}
+        icon={<CheckSquare className="h-5 w-5" />}
         className="border-l-4 border-green-500"
+        description="Inspeções concluídas"
       />
       <StatCard
         title="Não Programadas"
-        value={data?.naoProgramadas || 0}
-        icon={<CheckSquare className="h-5 w-5" />}
+        value={inspecoesNaoProgramadas}
+        icon={<Calendar className="h-5 w-5" />}
         className="border-l-4 border-amber-500"
+        description="Realizadas não programadas"
       />
       <StatCard
-        title="Desvios Identificados"
-        value={data?.desviosIdentificados || 0}
+        title="Não Realizadas"
+        value={inspecoesNaoRealizadas}
         icon={<FileWarning className="h-5 w-5" />}
         className="border-l-4 border-red-500"
+        description="Inspeções não executadas"
       />
     </div>
   );
