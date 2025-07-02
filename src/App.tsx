@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -81,6 +82,7 @@ import AdminSupervisores from "@/pages/admin/AdminSupervisores";
 import CadastroFuncionarios from "@/pages/admin/CadastroFuncionarios";
 import RegistroHHT from "@/pages/admin/RegistroHHT";
 import MetasIndicadores from "@/pages/admin/MetasIndicadores";
+import AdminModelosInspecao from "@/pages/admin/AdminModelosInspecao";
 import AdminTemplates from "@/pages/AdminTemplates";
 import AdminLogo from "@/pages/admin/AdminLogo";
 
