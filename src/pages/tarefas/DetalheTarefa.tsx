@@ -12,7 +12,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { tarefasService, TarefaUpdateData } from "@/services/tarefasService";
 import { notificacoesService } from "@/services/notificacoesService";
-import { useSignedUrl } from "@/hooks/useSignedUrl";
 import { getStatusColor, getCriticidadeColor } from "@/utils/tarefasUtils";
 import { Tarefa } from "@/types/tarefas";
 import { format } from "date-fns";
@@ -29,7 +28,6 @@ const DetalheTarefa = () => {
   const [showProgressDialog, setShowProgressDialog] = useState(false);
   const [progressNotes, setProgressNotes] = useState("");
   const [attachmentFile, setAttachmentFile] = useState<File | null>(null);
-  const { url: fileUrl, loading: urlLoading, error: urlError, generate: generateUrl } = useSignedUrl();
   
   useEffect(() => {
     const fetchTarefa = async () => {
@@ -101,7 +99,8 @@ const DetalheTarefa = () => {
       const updateData: TarefaUpdateData = {
         status: novoStatus,
         anexo: anexoUrl,
-        data_real_conclusao: new Date().toISOString()
+        data_real_conclusao: new Date().toISOString(),
+        observacoes_progresso: progressNotes || undefined
       };
       
       const success = await tarefasService.updateStatus(tarefa.id, updateData);
@@ -178,7 +177,10 @@ const DetalheTarefa = () => {
   };
   
   const handleProgressUpdate = async () => {
-    if (!tarefa) return;
+    if (!tarefa || !progressNotes.trim()) {
+      toast.error("Por favor, adicione observações sobre o progresso");
+      return;
+    }
     
     setUpdating(true);
     try {
@@ -191,7 +193,8 @@ const DetalheTarefa = () => {
       }
       
       const updateData: TarefaUpdateData = {
-        anexo: anexoUrl
+        anexo: anexoUrl,
+        observacoes_progresso: progressNotes
       };
       
       const success = await tarefasService.updateStatus(tarefa.id, updateData);
@@ -218,17 +221,13 @@ const DetalheTarefa = () => {
     }
   };
 
-  const handleViewAttachment = async () => {
+  const handleViewAttachment = () => {
     if (!tarefa?.anexo) return;
     
-    try {
-      // Para este exemplo, vamos simular a visualização do anexo
-      // Em produção, você usaria o Supabase Storage para gerar signed URLs
-      await generateUrl('anexos-tarefas', tarefa.anexo, 300); // 5 minutos
-    } catch (error) {
-      console.error("Erro ao gerar URL do arquivo:", error);
-      toast.error("Erro ao visualizar anexo");
-    }
+    // Por enquanto, vamos apenas mostrar o nome do arquivo
+    // Em produção, isso deveria abrir o arquivo ou gerar um signed URL
+    toast.info(`Visualizando anexo: ${tarefa.anexo}`);
+    console.log("Tentando visualizar anexo:", tarefa.anexo);
   };
 
   const getStatusLabel = (status: string) => {
@@ -354,20 +353,6 @@ const DetalheTarefa = () => {
                           {tarefa.anexo}
                         </Button>
                       </div>
-                      {fileUrl && (
-                        <div className="mt-4">
-                          <iframe 
-                            src={fileUrl} 
-                            width="100%" 
-                            height="400px" 
-                            className="border rounded"
-                            title="Visualização do anexo"
-                          />
-                        </div>
-                      )}
-                      {urlError && (
-                        <p className="text-red-500 mt-2">Erro ao carregar anexo: {urlError}</p>
-                      )}
                     </div>
                   </>
                 )}
@@ -402,12 +387,13 @@ const DetalheTarefa = () => {
                     </DialogHeader>
                     <div className="space-y-4">
                       <div>
-                        <Label htmlFor="progress-notes">Observações do progresso</Label>
+                        <Label htmlFor="progress-notes">Observações do progresso *</Label>
                         <Textarea
                           id="progress-notes"
                           placeholder="Descreva o andamento da tarefa..."
                           value={progressNotes}
                           onChange={(e) => setProgressNotes(e.target.value)}
+                          required
                         />
                       </div>
                       
@@ -424,7 +410,7 @@ const DetalheTarefa = () => {
                       <div className="flex gap-2">
                         <Button 
                           onClick={handleProgressUpdate}
-                          disabled={updating}
+                          disabled={updating || !progressNotes.trim()}
                           className="flex-1"
                         >
                           <Upload className="h-4 w-4 mr-2" />

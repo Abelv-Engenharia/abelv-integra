@@ -23,6 +23,7 @@ export interface TarefaUpdateData {
   iniciada?: boolean;
   anexo?: string;
   data_real_conclusao?: string | null;
+  observacoes_progresso?: string;
 }
 
 export const tarefasService = {
