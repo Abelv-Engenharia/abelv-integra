@@ -1855,6 +1855,7 @@ export type Database = {
           descricao: string
           id: string
           iniciada: boolean | null
+          observacoes_progresso: string | null
           responsavel_id: string | null
           status: string
           tipo_cca: string
@@ -1873,6 +1874,7 @@ export type Database = {
           descricao: string
           id?: string
           iniciada?: boolean | null
+          observacoes_progresso?: string | null
           responsavel_id?: string | null
           status: string
           tipo_cca: string
@@ -1891,6 +1893,7 @@ export type Database = {
           descricao?: string
           id?: string
           iniciada?: boolean | null
+          observacoes_progresso?: string | null
           responsavel_id?: string | null
           status?: string
           tipo_cca?: string
