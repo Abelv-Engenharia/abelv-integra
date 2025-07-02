@@ -80,8 +80,6 @@ export default function InspecoesAcompanhamento() {
   // Load inspections filtered by user's allowed CCAs
   useEffect(() => {
     const loadInspections = async () => {
-      setIsLoading(true);
-      
       if (userCCAs.length === 0) {
         setInspecoes([]);
         setIsLoading(false);
@@ -103,11 +101,10 @@ export default function InspecoesAcompanhamento() {
           description: error.message,
           variant: "destructive",
         });
-        setIsLoading(false);
       } else {
         setInspecoes(data || []);
-        setIsLoading(false);
       }
+      setIsLoading(false);
     };
 
     loadInspections();
@@ -260,7 +257,10 @@ export default function InspecoesAcompanhamento() {
                   </FormItem>
                   <FormItem>
                     <FormLabel>Data</FormLabel>
-                    <Input value={selectedInspecao.data ? format(new Date(selectedInspecao.data), "dd/MM/yyyy") : ""} disabled />
+                    <Input 
+                      value={selectedInspecao.data ? format(new Date(selectedInspecao.data + 'T00:00:00'), "dd/MM/yyyy") : ""} 
+                      disabled 
+                    />
                   </FormItem>
                 </div>
                 <FormItem>

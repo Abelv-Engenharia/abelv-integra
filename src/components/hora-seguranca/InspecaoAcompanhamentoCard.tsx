@@ -16,6 +16,13 @@ export function InspecaoAcompanhamentoCard({
   onUpdateStatus,
   onDelete
 }: InspecaoAcompanhamentoCardProps) {
+  // Função para formatar a data corretamente, evitando problemas de timezone
+  const formatDateSafely = (dateString: string) => {
+    if (!dateString) return "--";
+    // Adiciona 'T00:00:00' para garantir que seja tratada como data local
+    return format(new Date(dateString + 'T00:00:00'), "dd/MM/yyyy");
+  };
+
   return (
     <Card className="animate-fade-in relative min-h-[72px] p-1.5">
       {/* Status badge canto superior direito */}
@@ -30,7 +37,7 @@ export function InspecaoAcompanhamentoCard({
               : "CCA não definido"}
           </span>
           <span className="font-bold text-[11px] mt-0.5">
-            {inspecao.data ? format(new Date(inspecao.data), "dd/MM/yyyy") : "--"}
+            {formatDateSafely(inspecao.data)}
           </span>
         </CardTitle>
       </CardHeader>
