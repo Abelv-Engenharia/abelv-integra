@@ -1,13 +1,7 @@
 
 import { supabase } from "@/integrations/supabase/client";
 
-interface Filters {
-  year?: number;
-  month?: number;
-  ccaId?: number;
-}
-
-export const fetchTreinamentosNormativosData = async (userCCAIds: number[] = [], filters?: Filters) => {
+export const fetchTreinamentosNormativosData = async (userCCAIds: number[] = []) => {
   // Se não tem CCAs permitidos, retorna dados vazios
   if (userCCAIds.length === 0) {
     return [
@@ -17,14 +11,11 @@ export const fetchTreinamentosNormativosData = async (userCCAIds: number[] = [],
     ];
   }
 
-  // Aplicar filtros de CCA se especificado
-  const filteredCCAIds = filters?.ccaId ? [filters.ccaId] : userCCAIds;
-
   // Get funcionários from allowed CCAs
   const { data: funcionarios } = await supabase
     .from('funcionarios')
     .select('id')
-    .in('cca_id', filteredCCAIds)
+    .in('cca_id', userCCAIds)
     .eq('ativo', true);
 
   if (!funcionarios || funcionarios.length === 0) {
@@ -38,31 +29,12 @@ export const fetchTreinamentosNormativosData = async (userCCAIds: number[] = [],
   const funcionarioIds = funcionarios.map(f => f.id);
 
   // Get normative training data for funcionários from allowed CCAs
-  let query = supabase
+  const { data: trainings } = await supabase
     .from('treinamentos_normativos')
-    .select('status, data_realizacao')
+    .select('status')
     .in('funcionario_id', funcionarioIds)
     .eq('arquivado', false)
     .limit(1000);
-
-  // Se há filtros de ano ou mês, aplicar na data de realização
-  if (filters?.year || filters?.month) {
-    if (filters.year && filters.month) {
-      const startDate = new Date(filters.year, filters.month - 1, 1);
-      const endDate = new Date(filters.year, filters.month, 0);
-      query = query
-        .gte('data_realizacao', startDate.toISOString().split('T')[0])
-        .lte('data_realizacao', endDate.toISOString().split('T')[0]);
-    } else if (filters.year) {
-      const startDate = new Date(filters.year, 0, 1);
-      const endDate = new Date(filters.year, 11, 31);
-      query = query
-        .gte('data_realizacao', startDate.toISOString().split('T')[0])
-        .lte('data_realizacao', endDate.toISOString().split('T')[0]);
-    }
-  }
-
-  const { data: trainings } = await query;
   
   // Count trainings by status
   const statusCount = (trainings || []).reduce((acc, training) => {

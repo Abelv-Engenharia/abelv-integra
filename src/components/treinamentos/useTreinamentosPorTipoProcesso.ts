@@ -10,40 +10,23 @@ export interface ProcessoGeralChartData {
   horasTotais: number; // alias pra value para facilitar nas labels
 }
 
-interface Filters {
-  year?: number;
-  month?: number;
-  ccaId?: number;
-}
-
 // Hook para buscar e agregar os dados para o gráfico de processo geral
-export function useTreinamentosPorTipoProcesso(filters?: Filters) {
+export function useTreinamentosPorTipoProcesso() {
   const { data: userCCAs = [] } = useUserCCAs();
 
   return useQuery<ProcessoGeralChartData[]>({
-    queryKey: ["treinamentos-por-processo-tipo-treinamento-grafico", userCCAs, filters],
+    queryKey: ["treinamentos-por-processo-tipo-treinamento-grafico", userCCAs],
     async queryFn() {
       if (userCCAs.length === 0) {
         return [];
       }
 
-      // Aplicar filtros de CCA se especificado
-      const allowedCcaIds = filters?.ccaId ? [filters.ccaId] : userCCAs.map(cca => cca.id);
+      const allowedCcaIds = userCCAs.map(cca => cca.id);
 
-      let query = supabase
+      const { data, error } = await supabase
         .from("execucao_treinamentos")
-        .select("tipo_treinamento, carga_horaria, efetivo_mod, efetivo_moi, cca_id, ano, mes")
+        .select("tipo_treinamento, carga_horaria, efetivo_mod, efetivo_moi, cca_id")
         .in('cca_id', allowedCcaIds);
-
-      // Aplicar filtros de ano e mês se especificados
-      if (filters?.year) {
-        query = query.eq('ano', filters.year);
-      }
-      if (filters?.month) {
-        query = query.eq('mes', filters.month);
-      }
-
-      const { data, error } = await query;
 
       if (error) throw new Error("Erro ao buscar execucao_treinamentos: " + error.message);
 

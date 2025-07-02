@@ -1,86 +1,71 @@
 
-import React from "react";
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts";
-import { useQuery } from "@tanstack/react-query";
+import React, { useState, useEffect } from "react";
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 import { fetchTreinamentosNormativosData } from "@/services/treinamentos/treinamentosNormativosDataService";
 import { useUserCCAs } from "@/hooks/useUserCCAs";
 
-interface TreinamentosNormativosChartProps {
-  filters?: {
-    year?: number;
-    month?: number;
-    ccaId?: number;
-  };
-}
+const COLORS = ["#10b981", "#f59e0b", "#ef4444"];
 
-const COLORS = ['#10b981', '#f59e0b', '#ef4444'];
-
-const TreinamentosNormativosChart = ({ filters }: TreinamentosNormativosChartProps) => {
+export const TreinamentosNormativosChart = () => {
+  const [data, setData] = useState<any[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
   const { data: userCCAs = [] } = useUserCCAs();
-  const userCCAIds = userCCAs.map(cca => cca.id);
-  
-  // Aplicar filtros de CCA se especificado
-  const filteredCCAIds = filters?.ccaId ? [filters.ccaId] : userCCAIds;
 
-  const { data: chartData = [], isLoading } = useQuery({
-    queryKey: ['treinamentos-normativos-chart', filteredCCAIds, filters],
-    queryFn: () => fetchTreinamentosNormativosData(filteredCCAIds),
-    enabled: filteredCCAIds.length > 0,
-  });
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const userCCAIds = userCCAs.map(cca => cca.id);
+        const chartData = await fetchTreinamentosNormativosData(userCCAIds);
+        setData(chartData);
+      } catch (error) {
+        console.error("Error loading normative training data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  if (isLoading) {
+    fetchData();
+  }, [userCCAs]);
+
+  if (loading) {
     return (
-      <div className="w-full h-full flex items-center justify-center">
+      <div className="flex items-center justify-center h-full">
         <p className="text-muted-foreground">Carregando dados...</p>
       </div>
     );
   }
 
-  if (chartData.length === 0 || chartData.every(item => item.value === 0)) {
-    return (
-      <div className="w-full h-full flex items-center justify-center">
-        <p className="text-muted-foreground">Nenhum dado disponível para o período selecionado</p>
-      </div>
-    );
-  }
-
-  const CustomTooltip = ({ active, payload }: any) => {
-    if (active && payload && payload.length) {
-      const data = payload[0];
-      return (
-        <div className="bg-white p-3 border rounded shadow-lg">
-          <p className="font-semibold">{data.name}</p>
-          <p className="text-blue-600">
-            Quantidade: {data.value.toLocaleString()}
-          </p>
-        </div>
-      );
-    }
-    return null;
-  };
-
   return (
-    <ResponsiveContainer width="100%" height="100%">
-      <PieChart>
-        <Pie
-          data={chartData}
-          cx="50%"
-          cy="50%"
-          labelLine={false}
-          label={({ name, value }) => `${name}: ${value}`}
-          outerRadius={100}
-          fill="#8884d8"
-          dataKey="value"
-        >
-          {chartData.map((entry, index) => (
-            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-          ))}
-        </Pie>
-        <Tooltip content={<CustomTooltip />} />
-        <Legend />
-      </PieChart>
-    </ResponsiveContainer>
+    <div className="w-full h-full flex items-center justify-center">
+      <ResponsiveContainer width="100%" height="95%">
+        <PieChart>
+          <Pie
+            data={data}
+            cx="50%"
+            cy="50%"
+            labelLine={false}
+            outerRadius={140}
+            fill="#8884d8"
+            dataKey="value"
+            label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+          >
+            {data.map((entry, index) => (
+              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+            ))}
+          </Pie>
+          <Tooltip 
+            formatter={(value) => [`${value} treinamentos`, 'Quantidade']}
+            contentStyle={{ 
+              backgroundColor: "white",
+              borderRadius: "0.375rem",
+              boxShadow: "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
+              border: "1px solid rgba(229, 231, 235, 1)"
+            }}
+          />
+          {/* Legenda removida */}
+        </PieChart>
+      </ResponsiveContainer>
+    </div>
   );
 };
-
-export { TreinamentosNormativosChart };

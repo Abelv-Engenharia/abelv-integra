@@ -1,82 +1,47 @@
-
 import React from "react";
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts";
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 import { useTreinamentosPorTipoProcesso } from "./useTreinamentosPorTipoProcesso";
 
-interface ProcessoGeralPieChartProps {
-  filters?: {
-    year?: number;
-    month?: number;
-    ccaId?: number;
-  };
-}
+const COLORS = ["#F59E0B", "#2563EB", "#6B7280", "#FAA43A", "#34D399", "#DB2777", "#60A5FA"];
 
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D'];
-
-const ProcessoGeralPieChart = ({ filters }: ProcessoGeralPieChartProps) => {
-  const { data: chartData = [], isLoading, error } = useTreinamentosPorTipoProcesso(filters);
+export const ProcessoGeralPieChart = () => {
+  const { data = [], isLoading, error } = useTreinamentosPorTipoProcesso();
 
   if (isLoading) {
     return (
-      <div className="w-full h-full flex items-center justify-center">
-        <p className="text-muted-foreground">Carregando dados...</p>
+      <div className="w-full flex items-center justify-center h-full">
+        <span className="text-muted-foreground">Carregando...</span>
       </div>
     );
   }
-
-  if (error) {
+  if (error || data.length === 0) {
     return (
-      <div className="w-full h-full flex items-center justify-center">
-        <p className="text-red-500">Erro ao carregar dados do gráfico</p>
+      <div className="w-full flex items-center justify-center h-full">
+        <span className="text-red-600">Não há dados para exibir.</span>
       </div>
     );
   }
-
-  if (chartData.length === 0) {
-    return (
-      <div className="w-full h-full flex items-center justify-center">
-        <p className="text-muted-foreground">Nenhum dado disponível para o período selecionado</p>
-      </div>
-    );
-  }
-
-  const CustomTooltip = ({ active, payload }: any) => {
-    if (active && payload && payload.length) {
-      const data = payload[0].payload;
-      return (
-        <div className="bg-white p-3 border rounded shadow-lg">
-          <p className="font-semibold">{data.name}</p>
-          <p className="text-blue-600">
-            Horas: {data.horasTotais.toLocaleString()}
-          </p>
-          <p className="text-green-600">
-            Percentual: {data.percentual.toFixed(1)}%
-          </p>
-        </div>
-      );
-    }
-    return null;
-  };
 
   return (
     <ResponsiveContainer width="100%" height="100%">
       <PieChart>
         <Pie
-          data={chartData}
+          data={data}
+          dataKey="horasTotais"
+          nameKey="name"
           cx="50%"
           cy="50%"
-          labelLine={false}
-          label={({ name, percentual }) => `${name}: ${percentual.toFixed(1)}%`}
           outerRadius={120}
-          fill="#8884d8"
-          dataKey="value"
+          labelLine={false}
+          label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
         >
-          {chartData.map((entry, index) => (
-            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+          {data.map((entry, index) => (
+            <Cell key={entry.name} fill={COLORS[index % COLORS.length]} />
           ))}
         </Pie>
-        <Tooltip content={<CustomTooltip />} />
-        <Legend />
+        <Tooltip
+          formatter={(value: any, name: string, props: any) => [`${Number(value).toFixed(1)} horas`, `Percentual: ${props.payload.percentual.toFixed(1)}%`]}
+        />
       </PieChart>
     </ResponsiveContainer>
   );
