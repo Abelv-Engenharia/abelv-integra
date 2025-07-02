@@ -80,7 +80,7 @@ export function InspecoesByCCAChart() {
             top: 20,
             right: 30,
             left: 20,
-            bottom: 120,
+            bottom: 80,
           }}
         >
           <CartesianGrid strokeDasharray="3 3" />
@@ -88,12 +88,20 @@ export function InspecoesByCCAChart() {
             dataKey="name" 
             angle={-45} 
             textAnchor="end" 
-            height={100}
+            height={60}
             interval={0}
           />
           <YAxis />
           <Tooltip />
-          <Legend wrapperStyle={{ paddingTop: '30px' }} />
+          <Legend 
+            verticalAlign="bottom" 
+            align="center"
+            wrapperStyle={{ 
+              paddingTop: '10px',
+              position: 'relative',
+              bottom: '0px'
+            }} 
+          />
           <Bar dataKey="A Realizar" name="A Realizar" fill="#4285F4" />
           <Bar dataKey="Realizada" name="Realizada" fill="#43A047" />
           <Bar dataKey="Não Realizada" name="Não Realizada" fill="#E53935" />
