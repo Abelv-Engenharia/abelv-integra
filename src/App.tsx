@@ -40,10 +40,16 @@ import MedidasDisciplinaresDashboard from "@/pages/medidas-disciplinares/Medidas
 import MedidasDisciplinaresCadastro from "@/pages/medidas-disciplinares/MedidasDisciplinaresCadastro";
 import MedidasDisciplinaresConsulta from "@/pages/medidas-disciplinares/MedidasDisciplinaresConsulta";
 
+// New Inspeção SMS pages
+import InspecaoSMSDashboard from "@/pages/inspecao-sms/InspecaoSMSDashboard";
+import CadastrarInspecao from "@/pages/inspecao-sms/CadastrarInspecao";
+import ConsultarInspecoes from "@/pages/inspecao-sms/ConsultarInspecoes";
+
 // Tarefas pages
 import TarefasDashboard from "@/pages/tarefas/TarefasDashboard";
 import MinhasTarefas from "@/pages/tarefas/MinhasTarefas";
 import CadastroTarefas from "@/pages/tarefas/CadastroTarefas";
+import DetalheTarefa from "@/pages/tarefas/DetalheTarefa";
 
 // Relatorios pages
 import RelatoriosDashboard from "@/pages/relatorios/RelatoriosDashboard";
@@ -81,12 +87,6 @@ import AdminLogo from "@/pages/admin/AdminLogo";
 // Account pages
 import Profile from "@/pages/account/Profile";
 import Settings from "@/pages/account/Settings";
-
-// New Inspeção SMS pages
-import InspecaoSMSDashboard from "@/pages/inspecao-sms/InspecaoSMSDashboard";
-import CadastrarInspecao from "@/pages/inspecao-sms/CadastrarInspecao";
-import ConsultarInspecoes from "@/pages/inspecao-sms/ConsultarInspecoes";
-import AdminModelosInspecao from "@/pages/admin/AdminModelosInspecao";
 
 const queryClient = new QueryClient();
 
@@ -140,6 +140,7 @@ const App = () => (
               <Route path="tarefas/dashboard" element={<TarefasDashboard />} />
               <Route path="tarefas/minhas-tarefas" element={<MinhasTarefas />} />
               <Route path="tarefas/cadastro" element={<CadastroTarefas />} />
+              <Route path="tarefas/detalhe/:id" element={<DetalheTarefa />} />
 
               {/* Relatorios routes */}
               <Route path="relatorios" element={<RelatoriosDashboard />} />
