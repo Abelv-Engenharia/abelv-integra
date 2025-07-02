@@ -118,45 +118,97 @@ const TreinamentosNormativo = () => {
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+      // Validar tipo e tamanho do arquivo
+      const allowedTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
+      const maxSize = 2 * 1024 * 1024; // 2MB
+      
+      if (!allowedTypes.includes(file.type)) {
+        toast({
+          title: "Erro",
+          description: "Tipo de arquivo não permitido. Use PDF, JPG, JPEG ou PNG.",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      if (file.size > maxSize) {
+        toast({
+          title: "Erro",
+          description: "Arquivo muito grande. Máximo permitido: 2MB.",
+          variant: "destructive",
+        });
+        return;
+      }
+      
       setCertificadoFile(file);
     }
   };
 
   const uploadCertificado = async (file: File): Promise<string | null> => {
     try {
+      console.log('Iniciando upload do certificado...');
+      
       // Obter dados para nomenclatura
       const funcionarioSelecionado = funcionarios.find(f => f.id === form.getValues('funcionario_id'));
       const treinamentoSelecionado = treinamentosDisponiveis.find(t => t.id === form.getValues('treinamento_id'));
       
       if (!funcionarioSelecionado || !treinamentoSelecionado) {
         console.error('Funcionário ou treinamento não encontrado para nomenclatura');
+        toast({
+          title: "Erro",
+          description: "Dados do funcionário ou treinamento não encontrados.",
+          variant: "destructive",
+        });
         return null;
       }
 
       // Extrair nome do treinamento até o hífen (ou nome completo se não houver hífen)
-      const nomeBase = treinamentoSelecionado.nome.split(' -')[0].trim();
+      const nomeBase = treinamentoSelecionado.nome.split(' -')[0].trim().replace(/[^a-zA-Z0-9]/g, '_');
+      const nomeFunc = funcionarioSelecionado.nome.replace(/\s+/g, '_').toUpperCase().replace(/[^a-zA-Z0-9_]/g, '');
       
       // Criar nomenclatura: NOME_TREINAMENTO_MATRICULA_FUNCIONÁRIO
       const fileExt = file.name.split('.').pop();
-      const fileName = `${nomeBase}_${funcionarioSelecionado.matricula}_${funcionarioSelecionado.nome.replace(/\s+/g, '_').toUpperCase()}.${fileExt}`;
-      const filePath = `certificados/${fileName}`;
+      const fileName = `${nomeBase}_${funcionarioSelecionado.matricula}_${nomeFunc}.${fileExt}`;
+      const filePath = fileName;
 
-      const { error: uploadError } = await supabase.storage
-        .from('treinamentos')
-        .upload(filePath, file);
+      console.log('Nome do arquivo:', fileName);
+      console.log('Tamanho do arquivo:', file.size);
+
+      // Tentar fazer upload para o bucket certificados-treinamentos-normativos
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('certificados-treinamentos-normativos')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: true,
+          contentType: file.type,
+        });
 
       if (uploadError) {
         console.error('Erro no upload:', uploadError);
+        toast({
+          title: "Erro no upload",
+          description: `Erro ao fazer upload: ${uploadError.message}`,
+          variant: "destructive",
+        });
         return null;
       }
 
+      console.log('Upload realizado com sucesso:', uploadData);
+
+      // Obter URL pública do arquivo
       const { data: urlData } = supabase.storage
-        .from('treinamentos')
+        .from('certificados-treinamentos-normativos')
         .getPublicUrl(filePath);
 
+      console.log('URL pública gerada:', urlData.publicUrl);
       return urlData.publicUrl;
     } catch (error) {
-      console.error('Erro ao fazer upload do certificado:', error);
+      console.error('Exceção ao fazer upload do certificado:', error);
+      toast({
+        title: "Erro",
+        description: "Erro interno ao fazer upload do certificado. Tente novamente.",
+        variant: "destructive",
+      });
       return null;
     }
   };
@@ -177,13 +229,10 @@ const TreinamentosNormativo = () => {
 
       // Upload do certificado se houver arquivo
       if (certificadoFile) {
+        console.log('Fazendo upload do certificado...');
         certificadoUrl = await uploadCertificado(certificadoFile);
         if (!certificadoUrl) {
-          toast({
-            title: "Erro",
-            description: "Não foi possível fazer upload do certificado",
-            variant: "destructive",
-          });
+          setIsLoading(false);
           return;
         }
       }
@@ -200,6 +249,7 @@ const TreinamentosNormativo = () => {
         status = "Próximo ao vencimento";
       }
 
+      console.log('Inserindo dados no banco...');
       const { error } = await supabase
         .from('treinamentos_normativos')
         .insert({
@@ -213,7 +263,10 @@ const TreinamentosNormativo = () => {
           arquivado: false,
         });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Erro ao inserir no banco:', error);
+        throw error;
+      }
 
       toast({
         title: "Sucesso",
@@ -438,7 +491,7 @@ const TreinamentosNormativo = () => {
 
                 {/* Quinta linha - Upload de certificado */}
                 <div className="space-y-2">
-                  <FormLabel>Anexar certificado (PDF, máx. 2MB)</FormLabel>
+                  <FormLabel>Anexar certificado (PDF, JPG, PNG - máx. 2MB)</FormLabel>
                   <div className="flex items-center space-x-2">
                     <Input
                       type="file"
@@ -454,7 +507,7 @@ const TreinamentosNormativo = () => {
                     </p>
                   )}
                   <p className="text-xs text-muted-foreground">
-                    Apenas arquivos PDF, máximo 2MB. Nome será automaticamente formatado como: TREINAMENTO_MATRÍCULA_FUNCIONÁRIO
+                    Apenas arquivos PDF, JPG, PNG, máximo 2MB. Nome será automaticamente formatado como: TREINAMENTO_MATRÍCULA_FUNCIONÁRIO
                   </p>
                 </div>
               </div>
