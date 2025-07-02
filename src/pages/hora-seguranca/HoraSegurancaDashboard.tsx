@@ -9,8 +9,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { InspecaoStatusDonutChart } from "@/components/hora-seguranca/InspecaoStatusDonutChart";
 import { InspecoesBarChart } from "@/components/hora-seguranca/InspecoesBarChart";
+import { InspecoesByCCAChart } from "@/components/hora-seguranca/InspecoesByCCAChart";
 import InspecoesSummaryCards from "@/components/hora-seguranca/InspecoesSummaryCards";
 import { RecentInspectionsList } from "@/components/hora-seguranca/RecentInspectionsList";
 import { DesviosResponsaveisChart } from "@/components/hora-seguranca/DesviosResponsaveisChart";
@@ -90,28 +90,16 @@ const HoraSegurancaDashboard = () => {
             {userCCAs.length > 0 && (
               <>
                 <InspecoesSummaryCards />
-                
-                <Card className="col-span-full">
-                  <CardHeader>
-                    <CardTitle>Distribuição por Status</CardTitle>
-                    <CardDescription>
-                      Visão geral do status das inspeções
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="pl-2">
-                    <InspecaoStatusDonutChart />
-                  </CardContent>
-                </Card>
 
                 <Card className="col-span-full">
                   <CardHeader>
                     <CardTitle>Inspeções por CCA</CardTitle>
                     <CardDescription>
-                      Distribuição de inspeções por centro de custo
+                      Distribuição de inspeções por centro de custo e status
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="pl-2">
-                    <InspecoesBarChart dataType="cca" />
+                    <InspecoesByCCAChart />
                   </CardContent>
                 </Card>
 
@@ -122,8 +110,10 @@ const HoraSegurancaDashboard = () => {
                       Distribuição de inspeções por responsável
                     </CardDescription>
                   </CardHeader>
-                  <CardContent className="pl-2">
-                    <InspecoesBarChart dataType="responsible" />
+                  <CardContent className="pl-2 pb-8">
+                    <div className="h-[500px]">
+                      <InspecoesBarChart dataType="responsible" />
+                    </div>
                   </CardContent>
                 </Card>
 

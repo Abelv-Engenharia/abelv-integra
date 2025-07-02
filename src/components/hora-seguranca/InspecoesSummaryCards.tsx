@@ -47,6 +47,9 @@ const InspecoesSummaryCards = () => {
             desviosIdentificados: 0,
             realizadas: 0,
             canceladas: 0,
+            aRealizar: 0,
+            naoRealizadas: 0,
+            realizadasNaoProgramadas: 0
           });
           setLoading(false);
           return;
@@ -80,11 +83,11 @@ const InspecoesSummaryCards = () => {
     );
   }
 
-  // Cálculos para os novos cards
-  const inspecoesProgramadas = (data?.programadas || 0) + (data?.realizadas || 0) + (data?.canceladas || 0); // A REALIZAR + REALIZADA + NÃO REALIZADA
-  const inspecoesRealizadas = data?.realizadas || 0; // REALIZADA
-  const inspecoesNaoProgramadas = data?.naoProgramadas || 0; // REALIZADA (NÃO PROGRAMADA)
-  const inspecoesNaoRealizadas = data?.canceladas || 0; // NÃO REALIZADA
+  // Cálculos corrigidos usando os dados reais do serviço
+  const inspecoesProgramadas = (data?.aRealizar || 0) + (data?.realizadas || 0) + (data?.naoRealizadas || 0);
+  const inspecoesRealizadas = data?.realizadas || 0;
+  const inspecoesNaoProgramadas = data?.realizadasNaoProgramadas || 0;
+  const inspecoesNaoRealizadas = data?.naoRealizadas || 0;
   
   // Aderência HSA (real) = REALIZADA / (A REALIZAR + REALIZADA + NÃO REALIZADA) * 100
   const aderenciaReal = inspecoesProgramadas > 0 ? Math.round((inspecoesRealizadas / inspecoesProgramadas) * 100) : 0;

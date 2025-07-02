@@ -1,54 +1,4 @@
 
-export interface InspecoesByTipo {
-  tipo: string;
-  quantidade: number;
-}
-
-export interface RPCInspecoesByTipoResult {
-  tipo: string;
-  quantidade: number;
-}
-
-export interface RPCDesviosByInspectionTypeResult {
-  tipo: string;
-  quantidade: number;
-}
-
-export interface InspecoesByResponsavel {
-  responsavel: string;
-  quantidade: number;
-}
-
-export interface RPCInspecoesByResponsavelResult {
-  responsavel: string;
-  quantidade: number;
-}
-
-export interface InspecoesByStatus {
-  status?: string;
-  quantidade?: number;
-  cor?: string;
-  name: string;
-  value: number;
-}
-
-export interface RPCInspecoesByStatusResult {
-  status: string;
-  quantidade: number;
-}
-
-export interface InspecoesStats {
-  periodo: string;
-  quantidade: number;
-}
-
-export interface RPCInspecoesStatsResult {
-  total: number;
-  concluidas: number;
-  em_andamento: number;
-  pendentes: number;
-}
-
 export interface InspecoesSummary {
   totalInspecoes: number;
   programadas: number;
@@ -56,18 +6,64 @@ export interface InspecoesSummary {
   desviosIdentificados: number;
   realizadas: number;
   canceladas: number;
+  aRealizar?: number;
+  naoRealizadas?: number;
+  realizadasNaoProgramadas?: number;
 }
 
-export interface RPCInspecoesSummaryResult {
-  planejadas: number;
-  realizadas: number;
-  meta: number;
-}
-
-export interface RecentInspection {
+export interface InspecaoRecentData {
   id: string;
   tipo: string;
+  data: string;
   responsavel: string;
   status: string;
-  data: string;
+}
+
+export interface HorasTrabalhadasData {
+  mes: number;
+  ano: number;
+  total_horas: number;
+}
+
+export interface HorasTrabalhadasByMonth {
+  month: string;
+  horas: number;
+}
+
+export interface InspecoesByStatus {
+  status: string;
+  quantidade: number;
+}
+
+export interface InspecoesByMonth {
+  mes: string;
+  quantidade: number;
+}
+
+export interface InspecoesByResponsavel {
+  responsavel: string;
+  "A Realizar": number;
+  "Realizada": number;
+  "Não Realizada": number;
+  "Realizada (Não Programada)": number;
+  "Cancelada": number;
+}
+
+export interface DesviosByResponsavel {
+  responsavel: string;
+  desvios: number;
+}
+
+export interface DesviosByInspectionType {
+  tipo: string;
+  quantidade: number;
+}
+
+export interface InspecoesByCCA {
+  cca: string;
+  "A Realizar": number;
+  "Realizada": number;
+  "Não Realizada": number;
+  "Realizada (Não Programada)": number;
+  "Cancelada": number;
 }

@@ -20,13 +20,18 @@ export async function fetchInspecoesSummary(ccaIds?: number[]): Promise<Inspecoe
 
     if (error || !rows) throw error;
 
+    // Contagem por status específico
+    const aRealizar = rows.filter(r => (r.status || '').toUpperCase() === 'A REALIZAR').length;
+    const realizadas = rows.filter(r => (r.status || '').toUpperCase() === 'REALIZADA').length;
+    const naoRealizadas = rows.filter(r => (r.status || '').toUpperCase() === 'NÃO REALIZADA').length;
+    const realizadasNaoProgramadas = rows.filter(r => (r.status || '').toUpperCase() === 'REALIZADA (NÃO PROGRAMADA)').length;
+    const canceladas = rows.filter(r => (r.status || '').toUpperCase() === 'CANCELADA').length;
+
     // Totais
     const totalInspecoes = rows.length;
-    const programadas = rows.filter(r => (r.inspecao_programada || '').toUpperCase() === 'PROGRAMADA').length;
-    const naoProgramadas = rows.filter(r => (r.inspecao_programada || '').toUpperCase() !== 'PROGRAMADA').length;
+    const programadas = aRealizar + realizadas + naoRealizadas; // A REALIZAR + REALIZADA + NÃO REALIZADA
+    const naoProgramadas = realizadasNaoProgramadas; // REALIZADA (NÃO PROGRAMADA)
     const desviosIdentificados = rows.reduce((acc, r) => acc + (r.desvios_identificados || 0), 0);
-    const realizadas = rows.filter(r => (r.status || '').toUpperCase().includes('REALIZADA')).length;
-    const canceladas = rows.filter(r => (r.status || '').toUpperCase().includes('CANCELADA')).length;
     
     return {
       totalInspecoes,
@@ -34,7 +39,10 @@ export async function fetchInspecoesSummary(ccaIds?: number[]): Promise<Inspecoe
       naoProgramadas,
       desviosIdentificados,
       realizadas,
-      canceladas
+      canceladas,
+      aRealizar,
+      naoRealizadas,
+      realizadasNaoProgramadas
     };
   } catch (error) {
     console.error("Erro ao buscar resumo de inspeções:", error);
@@ -44,7 +52,10 @@ export async function fetchInspecoesSummary(ccaIds?: number[]): Promise<Inspecoe
       naoProgramadas: 0,
       desviosIdentificados: 0,
       realizadas: 0,
-      canceladas: 0
+      canceladas: 0,
+      aRealizar: 0,
+      naoRealizadas: 0,
+      realizadasNaoProgramadas: 0
     };
   }
 }
