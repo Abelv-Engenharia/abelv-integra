@@ -49,7 +49,7 @@ export function InspecoesByCCAChart() {
 
   if (loading) {
     return (
-      <div className="h-[500px] w-full flex items-center justify-center">
+      <div className="h-[600px] w-full flex items-center justify-center">
         <p className="text-muted-foreground">Carregando dados...</p>
       </div>
     );
@@ -57,7 +57,7 @@ export function InspecoesByCCAChart() {
 
   if (error) {
     return (
-      <div className="h-[500px] w-full flex items-center justify-center">
+      <div className="h-[600px] w-full flex items-center justify-center">
         <p className="text-red-500">{error}</p>
       </div>
     );
@@ -65,14 +65,14 @@ export function InspecoesByCCAChart() {
 
   if (data.length === 0) {
     return (
-      <div className="h-[500px] w-full flex items-center justify-center">
+      <div className="h-[600px] w-full flex items-center justify-center">
         <p className="text-muted-foreground">Nenhum dado de inspeção disponível</p>
       </div>
     );
   }
 
   return (
-    <div className="h-[500px] w-full">
+    <div className="h-[600px] w-full">
       <ResponsiveContainer width="100%" height="100%">
         <BarChart
           data={data}
