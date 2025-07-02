@@ -209,10 +209,13 @@ const InspecaoNaoProgramadaHSA = () => {
       return;
     }
 
+    // Formatar data corretamente para evitar problemas de fuso horário
+    const dataFormatada = format(values.data, "yyyy-MM-dd");
+
     // Debug: conferir o que vai para o Supabase
     console.log("[SUBMIT NÃO PROGRAMADA] Dados enviados:", {
       cca_id,
-      data: format(values.data, "yyyy-MM-dd"),
+      data: dataFormatada,
       ano: parseInt(ano),
       mes: parseInt(mes),
       inspecao_programada: tipoInspecaoLabel,
@@ -221,11 +224,9 @@ const InspecaoNaoProgramadaHSA = () => {
       desvios_identificados: values.desviosIdentificados,
       status: "REALIZADA (NÃO PROGRAMADA)"
     });
-    const {
-      error
-    } = await supabase.from("execucao_hsa").insert({
+    const { error } = await supabase.from("execucao_hsa").insert({
       cca_id,
-      data: format(values.data, "yyyy-MM-dd"),
+      data: dataFormatada,
       ano: parseInt(ano),
       mes: parseInt(mes),
       inspecao_programada: tipoInspecaoLabel,
