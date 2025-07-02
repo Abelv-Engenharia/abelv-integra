@@ -50,7 +50,7 @@ export const tarefasService = {
         tipoCca: 'linha-inteira' as const,
         dataCadastro: data.data_cadastro,
         dataConclusao: data.data_conclusao,
-        data_real_conclusao: data.data_real_conclusao ?? null, // <-- garantir que o campo vai pro front
+        data_real_conclusao: data.data_real_conclusao ?? null,
         descricao: data.descricao,
         titulo: data.titulo ?? "",
         responsavel: {
@@ -119,7 +119,7 @@ export const tarefasService = {
         tipoCca: 'linha-inteira' as const,
         dataCadastro: tarefa.data_cadastro,
         dataConclusao: tarefa.data_conclusao,
-        data_real_conclusao: tarefa.data_real_conclusao ?? null, // <-- garantir que o campo vai pro front
+        data_real_conclusao: tarefa.data_real_conclusao ?? null,
         descricao: tarefa.descricao,
         titulo: tarefa.titulo ?? "",
         responsavel: {
@@ -133,6 +133,53 @@ export const tarefasService = {
       }));
     } catch (error) {
       console.error("Exceção ao buscar tarefas:", error);
+      return [];
+    }
+  },
+
+  async getMyTasks(): Promise<Tarefa[]> {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        console.error("Usuário não autenticado");
+        return [];
+      }
+
+      const { data, error } = await supabase
+        .from('tarefas')
+        .select(`
+          *,
+          profiles!inner(id, nome)
+        `)
+        .or(`responsavel_id.eq.${user.id},criado_por.eq.${user.id}`)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error("Erro ao buscar minhas tarefas:", error);
+        return [];
+      }
+
+      return (data || []).map(tarefa => ({
+        id: tarefa.id,
+        cca: tarefa.cca,
+        tipoCca: 'linha-inteira' as const,
+        dataCadastro: tarefa.data_cadastro,
+        dataConclusao: tarefa.data_conclusao,
+        data_real_conclusao: tarefa.data_real_conclusao ?? null,
+        descricao: tarefa.descricao,
+        titulo: tarefa.titulo ?? "",
+        responsavel: {
+          id: tarefa.responsavel_id || '',
+          nome: tarefa.profiles?.nome || 'Não atribuído'
+        },
+        anexo: tarefa.anexo,
+        status: tarefa.status as TarefaStatus,
+        iniciada: tarefa.iniciada,
+        configuracao: tarefa.configuracao as any
+      }));
+    } catch (error) {
+      console.error("Exceção ao buscar minhas tarefas:", error);
       return [];
     }
   },
