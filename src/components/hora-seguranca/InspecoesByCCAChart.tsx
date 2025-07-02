@@ -49,7 +49,7 @@ export function InspecoesByCCAChart() {
 
   if (loading) {
     return (
-      <div className="h-[600px] w-full flex items-center justify-center">
+      <div className="h-[700px] w-full flex items-center justify-center">
         <p className="text-muted-foreground">Carregando dados...</p>
       </div>
     );
@@ -57,7 +57,7 @@ export function InspecoesByCCAChart() {
 
   if (error) {
     return (
-      <div className="h-[600px] w-full flex items-center justify-center">
+      <div className="h-[700px] w-full flex items-center justify-center">
         <p className="text-red-500">{error}</p>
       </div>
     );
@@ -65,14 +65,14 @@ export function InspecoesByCCAChart() {
 
   if (data.length === 0) {
     return (
-      <div className="h-[600px] w-full flex items-center justify-center">
+      <div className="h-[700px] w-full flex items-center justify-center">
         <p className="text-muted-foreground">Nenhum dado de inspeção disponível</p>
       </div>
     );
   }
 
   return (
-    <div className="h-[600px] w-full">
+    <div className="h-[700px] w-full">
       <ResponsiveContainer width="100%" height="100%">
         <BarChart
           data={data}
@@ -80,7 +80,7 @@ export function InspecoesByCCAChart() {
             top: 20,
             right: 30,
             left: 20,
-            bottom: 80,
+            bottom: 120,
           }}
         >
           <CartesianGrid strokeDasharray="3 3" />
@@ -88,7 +88,7 @@ export function InspecoesByCCAChart() {
             dataKey="name" 
             angle={-45} 
             textAnchor="end" 
-            height={60}
+            height={80}
             interval={0}
           />
           <YAxis />
@@ -97,9 +97,9 @@ export function InspecoesByCCAChart() {
             verticalAlign="bottom" 
             align="center"
             wrapperStyle={{ 
-              paddingTop: '10px',
+              paddingTop: '20px',
               position: 'relative',
-              bottom: '0px'
+              bottom: '10px'
             }} 
           />
           <Bar dataKey="A Realizar" name="A Realizar" fill="#4285F4" />
