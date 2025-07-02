@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
@@ -101,12 +102,18 @@ const TreinamentosNormativo = () => {
       const treinamentoSelecionado = treinamentosDisponiveis.find(t => t.id === treinamentoId);
       
       if (treinamentoSelecionado && treinamentoSelecionado.validade_dias) {
-        const dataRealizacaoObj = new Date(dataRealizacao);
+        // Criar data sem problemas de fuso horário
+        const [ano, mes, dia] = dataRealizacao.split('-');
+        const dataRealizacaoObj = new Date(parseInt(ano), parseInt(mes) - 1, parseInt(dia));
         const dataValidade = new Date(dataRealizacaoObj);
         dataValidade.setDate(dataValidade.getDate() + treinamentoSelecionado.validade_dias);
         
         // Formatando para YYYY-MM-DD para o input date
-        const dataValidadeFormatada = dataValidade.toISOString().split('T')[0];
+        const year = dataValidade.getFullYear();
+        const month = String(dataValidade.getMonth() + 1).padStart(2, '0');
+        const day = String(dataValidade.getDate()).padStart(2, '0');
+        const dataValidadeFormatada = `${year}-${month}-${day}`;
+        
         form.setValue('data_validade', dataValidadeFormatada);
       }
     }
@@ -239,9 +246,13 @@ const TreinamentosNormativo = () => {
         }
       }
 
-      // Calcular status baseado na data de validade
+      // Criar data sem problemas de fuso horário para cálculo do status
+      const [anoValidade, mesValidade, diaValidade] = data.data_validade.split('-');
+      const dataValidade = new Date(parseInt(anoValidade), parseInt(mesValidade) - 1, parseInt(diaValidade));
       const hoje = new Date();
-      const dataValidade = new Date(data.data_validade);
+      hoje.setHours(0, 0, 0, 0); // Reset para início do dia
+      dataValidade.setHours(0, 0, 0, 0); // Reset para início do dia
+      
       const diasParaVencimento = Math.ceil((dataValidade.getTime() - hoje.getTime()) / (1000 * 3600 * 24));
 
       let status = "Válido";
