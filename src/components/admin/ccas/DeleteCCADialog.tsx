@@ -1,17 +1,18 @@
 
 import React from "react";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { ccaService, CCA } from "@/services/admin/ccaService";
 import { toast } from "@/hooks/use-toast";
+import { useCCAInvalidation } from "@/hooks/useCCAInvalidation";
 
 interface DeleteCCADialogProps {
   cca: CCA;
@@ -26,15 +27,21 @@ export const DeleteCCADialog: React.FC<DeleteCCADialogProps> = ({
   onOpenChange,
   onSuccess,
 }) => {
-  const handleInactivate = async () => {
+  const { invalidateAllCCAQueries } = useCCAInvalidation();
+
+  const handleDelete = async () => {
     try {
-      const result = await ccaService.delete(cca.id);
+      const success = await ccaService.delete(cca.id);
       
-      if (result) {
+      if (success) {
         toast({
           title: "Sucesso",
-          description: "CCA inativado com sucesso!",
+          description: "CCA inativado com sucesso! Todas as listas foram atualizadas.",
         });
+        
+        // Invalidate all CCA-related queries across the application
+        await invalidateAllCCAQueries();
+        
         onSuccess();
       } else {
         toast({
@@ -53,96 +60,23 @@ export const DeleteCCADialog: React.FC<DeleteCCADialogProps> = ({
     }
   };
 
-  const handleActivate = async () => {
-    try {
-      const result = await ccaService.activate(cca.id);
-      
-      if (result) {
-        toast({
-          title: "Sucesso",
-          description: "CCA ativado com sucesso!",
-        });
-        onSuccess();
-      } else {
-        toast({
-          title: "Erro",
-          description: "Erro ao ativar CCA. Tente novamente.",
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
-      console.error("Erro ao ativar CCA:", error);
-      toast({
-        title: "Erro",
-        description: "Erro interno. Tente novamente.",
-        variant: "destructive",
-      });
-    }
-  };
-
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
-          <DialogTitle>
-            {cca.ativo ? "Inativar CCA" : "Ativar CCA"}
-          </DialogTitle>
-          <DialogDescription>
-            {cca.ativo 
-              ? "Tem certeza que deseja inativar este CCA? Ele ficará indisponível para uso no sistema."
-              : "Tem certeza que deseja ativar este CCA? Ele ficará disponível para uso no sistema."
-            }
-          </DialogDescription>
-        </DialogHeader>
-
-        <div className="space-y-4">
-          <div className="rounded-lg border p-4 bg-muted/50">
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="font-medium">Código:</span>
-                <span>{cca.codigo}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="font-medium">Nome:</span>
-                <span>{cca.nome}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="font-medium">Tipo:</span>
-                <Badge variant="secondary">{cca.tipo}</Badge>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="font-medium">Status Atual:</span>
-                <Badge variant={cca.ativo ? "default" : "destructive"}>
-                  {cca.ativo ? "Ativo" : "Inativo"}
-                </Badge>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <DialogFooter>
-          <Button
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-          >
-            Cancelar
-          </Button>
-          {cca.ativo ? (
-            <Button
-              variant="destructive"
-              onClick={handleInactivate}
-            >
-              Inativar CCA
-            </Button>
-          ) : (
-            <Button
-              onClick={handleActivate}
-            >
-              Ativar CCA
-            </Button>
-          )}
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    <AlertDialog open={open} onOpenChange={onOpenChange}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Confirmar Inativação</AlertDialogTitle>
+          <AlertDialogDescription>
+            Tem certeza que deseja inativar o CCA "{cca.codigo} - {cca.nome}"?
+            Esta ação não pode ser desfeita e o CCA será removido de todas as listas da aplicação.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+          <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+            Inativar CCA
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 };

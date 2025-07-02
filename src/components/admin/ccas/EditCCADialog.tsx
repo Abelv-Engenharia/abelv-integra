@@ -20,9 +20,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
 import { ccaService, CCA } from "@/services/admin/ccaService";
 import { toast } from "@/hooks/use-toast";
+import { useCCAInvalidation } from "@/hooks/useCCAInvalidation";
 
 const ccaSchema = z.object({
   codigo: z.string().min(1, "Código é obrigatório"),
@@ -46,6 +46,8 @@ export const EditCCADialog: React.FC<EditCCADialogProps> = ({
   onOpenChange,
   onSuccess,
 }) => {
+  const { invalidateAllCCAQueries } = useCCAInvalidation();
+  
   const form = useForm<CCAFormData>({
     resolver: zodResolver(ccaSchema),
     defaultValues: {
@@ -57,25 +59,32 @@ export const EditCCADialog: React.FC<EditCCADialogProps> = ({
   });
 
   useEffect(() => {
-    if (cca) {
-      form.reset({
-        codigo: cca.codigo,
-        nome: cca.nome,
-        tipo: cca.tipo,
-        ativo: cca.ativo,
-      });
-    }
+    form.reset({
+      codigo: cca.codigo,
+      nome: cca.nome,
+      tipo: cca.tipo,
+      ativo: cca.ativo,
+    });
   }, [cca, form]);
 
   const onSubmit = async (data: CCAFormData) => {
     try {
-      const result = await ccaService.update(cca.id, data);
+      const result = await ccaService.update(cca.id, {
+        codigo: data.codigo,
+        nome: data.nome,
+        tipo: data.tipo,
+        ativo: data.ativo,
+      });
       
       if (result) {
         toast({
           title: "Sucesso",
-          description: "CCA atualizado com sucesso!",
+          description: "CCA atualizado com sucesso! Todas as listas foram atualizadas.",
         });
+        
+        // Invalidate all CCA-related queries across the application
+        await invalidateAllCCAQueries();
+        
         onSuccess();
       } else {
         toast({
@@ -149,27 +158,6 @@ export const EditCCADialog: React.FC<EditCCADialogProps> = ({
                     </SelectContent>
                   </Select>
                   <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="ativo"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
-                  <div className="space-y-0.5">
-                    <FormLabel>Status Ativo</FormLabel>
-                    <div className="text-sm text-muted-foreground">
-                      CCA ativo no sistema
-                    </div>
-                  </div>
-                  <FormControl>
-                    <Switch
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  </FormControl>
                 </FormItem>
               )}
             />

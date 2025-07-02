@@ -3,8 +3,6 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { useQueryClient } from "@tanstack/react-query";
-import { useAuth } from "@/contexts/AuthContext";
 import {
   Dialog,
   DialogContent,
@@ -24,6 +22,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ccaService } from "@/services/admin/ccaService";
 import { toast } from "@/hooks/use-toast";
+import { useCCAInvalidation } from "@/hooks/useCCAInvalidation";
 
 const ccaSchema = z.object({
   codigo: z.string().min(1, "Código é obrigatório"),
@@ -45,8 +44,7 @@ export const CreateCCADialog: React.FC<CreateCCADialogProps> = ({
   onOpenChange,
   onSuccess,
 }) => {
-  const queryClient = useQueryClient();
-  const { user } = useAuth();
+  const { invalidateAllCCAQueries } = useCCAInvalidation();
   
   const form = useForm<CCAFormData>({
     resolver: zodResolver(ccaSchema),
@@ -70,31 +68,11 @@ export const CreateCCADialog: React.FC<CreateCCADialogProps> = ({
       if (result) {
         toast({
           title: "Sucesso",
-          description: "CCA criado com sucesso!",
+          description: "CCA criado com sucesso! Todas as listas foram atualizadas.",
         });
         
-        // Invalidate all CCAs related queries to ensure all lists are updated
-        await queryClient.invalidateQueries({
-          queryKey: ['user-ccas']
-        });
-        
-        await queryClient.invalidateQueries({
-          queryKey: ['admin-ccas']
-        });
-        
-        // Also invalidate any other CCA-related queries
-        await queryClient.invalidateQueries({
-          predicate: (query) => {
-            return query.queryKey.some(key => 
-              typeof key === 'string' && key.includes('cca')
-            );
-          }
-        });
-        
-        // Force refetch to ensure immediate update
-        await queryClient.refetchQueries({
-          queryKey: ['user-ccas', user?.id]
-        });
+        // Invalidate all CCA-related queries across the application
+        await invalidateAllCCAQueries();
         
         form.reset();
         onSuccess();
