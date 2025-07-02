@@ -26,10 +26,10 @@ export async function fetchInspecoesByStatus(ccaIds?: number[]): Promise<Inspeco
       const st = (row.status || 'Indefinido');
       grouped[st] = (grouped[st] || 0) + 1;
     });
+    
     return Object.keys(grouped).map((status) => ({
-      name: status,
-      value: grouped[status],
       status,
+      quantidade: grouped[status],
     }));
   } catch (error) {
     console.error("Erro ao buscar inspeções por status:", error);

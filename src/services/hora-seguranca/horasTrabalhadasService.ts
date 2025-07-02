@@ -81,3 +81,29 @@ export async function fetchHHTByCCA() {
     return [];
   }
 }
+
+/**
+ * Fetch horas trabalhadas by month
+ */
+export async function fetchHorasTrabalhadasByMonth() {
+  try {
+    const { data, error } = await supabase.rpc('get_hht_by_month');
+
+    if (error) {
+      console.error("Erro ao buscar horas trabalhadas por mês:", error);
+      return [];
+    }
+
+    if (!data || !data.length) {
+      return [];
+    }
+
+    return data.map((item: any) => ({
+      month: `${item.mes}/${item.ano}`,
+      horas: item.total_horas
+    }));
+  } catch (error) {
+    console.error("Exceção ao buscar horas trabalhadas por mês:", error);
+    return [];
+  }
+}

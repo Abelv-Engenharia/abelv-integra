@@ -19,6 +19,14 @@ export interface InspecaoRecentData {
   status: string;
 }
 
+export interface RecentInspection {
+  id: string;
+  tipo: string;
+  data: string;
+  responsavel: string;
+  status: string;
+}
+
 export interface HorasTrabalhadasData {
   mes: number;
   ano: number;
@@ -32,6 +40,16 @@ export interface HorasTrabalhadasByMonth {
 
 export interface InspecoesByStatus {
   status: string;
+  quantidade: number;
+}
+
+export interface InspecoesByTipo {
+  tipo: string;
+  quantidade: number;
+}
+
+export interface InspecoesStats {
+  periodo: string;
   quantidade: number;
 }
 
