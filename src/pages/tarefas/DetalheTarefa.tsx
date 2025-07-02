@@ -14,10 +14,12 @@ import { tarefasService, TarefaUpdateData } from "@/services/tarefasService";
 import { notificacoesService } from "@/services/notificacoesService";
 import { getStatusColor, getCriticidadeColor } from "@/utils/tarefasUtils";
 import { Tarefa } from "@/types/tarefas";
+import { TarefaAnexo } from "@/components/tarefas/TarefaAnexo";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { ArrowLeft, Check, Clock, AlertTriangle, FileText, Calendar, Upload, Play, Eye, Download } from "lucide-react";
+import { ArrowLeft, Check, Clock, AlertTriangle, FileText, Calendar, Upload, Play } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 const DetalheTarefa = () => {
   const { id } = useParams();
@@ -28,6 +30,7 @@ const DetalheTarefa = () => {
   const [showProgressDialog, setShowProgressDialog] = useState(false);
   const [progressNotes, setProgressNotes] = useState("");
   const [attachmentFile, setAttachmentFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
   
   useEffect(() => {
     const fetchTarefa = async () => {
@@ -47,6 +50,27 @@ const DetalheTarefa = () => {
     
     fetchTarefa();
   }, [id]);
+
+  const uploadFile = async (file: File): Promise<string> => {
+    setUploading(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+      const filePath = `tarefa_${id}/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('tarefas-anexos')
+        .upload(filePath, file);
+
+      if (uploadError) {
+        throw uploadError;
+      }
+
+      return filePath;
+    } finally {
+      setUploading(false);
+    }
+  };
   
   const handleIniciarTarefa = async () => {
     if (!tarefa) return;
@@ -84,13 +108,11 @@ const DetalheTarefa = () => {
     
     setUpdating(true);
     try {
-      let anexoUrl = tarefa.anexo;
+      let anexoPath = tarefa.anexo;
       
-      // Se há um arquivo anexado, simular upload (aqui você integraria com storage)
+      // Se há um arquivo anexado, fazer upload
       if (attachmentFile) {
-        // Simulação do upload - em produção, usar Supabase Storage
-        anexoUrl = `anexo_${Date.now()}_${attachmentFile.name}`;
-        console.log("Arquivo anexado:", attachmentFile.name);
+        anexoPath = await uploadFile(attachmentFile);
       }
       
       // Determinar o status baseado na necessidade de validação
@@ -98,7 +120,7 @@ const DetalheTarefa = () => {
       
       const updateData: TarefaUpdateData = {
         status: novoStatus,
-        anexo: anexoUrl,
+        anexo: anexoPath,
         data_real_conclusao: new Date().toISOString(),
         observacoes_progresso: progressNotes || undefined
       };
@@ -109,7 +131,7 @@ const DetalheTarefa = () => {
         setTarefa({
           ...tarefa,
           status: novoStatus,
-          anexo: anexoUrl,
+          anexo: anexoPath,
           data_real_conclusao: new Date().toISOString()
         });
         
@@ -117,7 +139,7 @@ const DetalheTarefa = () => {
         if (tarefa.configuracao.requerValidacao) {
           try {
             await notificacoesService.criarNotificacao({
-              usuario_id: tarefa.responsavel.id, // Assumindo que o criador é o responsável por ora
+              usuario_id: tarefa.responsavel.id,
               titulo: 'Tarefa aguarda validação',
               mensagem: `A tarefa "${tarefa.descricao}" foi concluída e aguarda sua validação.`,
               tipo: 'validacao',
@@ -184,16 +206,15 @@ const DetalheTarefa = () => {
     
     setUpdating(true);
     try {
-      let anexoUrl = tarefa.anexo;
+      let anexoPath = tarefa.anexo;
       
-      // Se há um arquivo anexado, simular upload
+      // Se há um arquivo anexado, fazer upload
       if (attachmentFile) {
-        anexoUrl = `anexo_${Date.now()}_${attachmentFile.name}`;
-        console.log("Arquivo anexado:", attachmentFile.name);
+        anexoPath = await uploadFile(attachmentFile);
       }
       
       const updateData: TarefaUpdateData = {
-        anexo: anexoUrl,
+        anexo: anexoPath,
         observacoes_progresso: progressNotes
       };
       
@@ -202,7 +223,7 @@ const DetalheTarefa = () => {
       if (success) {
         setTarefa({
           ...tarefa,
-          anexo: anexoUrl
+          anexo: anexoPath
         });
         
         setShowProgressDialog(false);
@@ -219,15 +240,6 @@ const DetalheTarefa = () => {
     } finally {
       setUpdating(false);
     }
-  };
-
-  const handleViewAttachment = () => {
-    if (!tarefa?.anexo) return;
-    
-    // Por enquanto, vamos apenas mostrar o nome do arquivo
-    // Em produção, isso deveria abrir o arquivo ou gerar um signed URL
-    toast.info(`Visualizando anexo: ${tarefa.anexo}`);
-    console.log("Tentando visualizar anexo:", tarefa.anexo);
   };
 
   const getStatusLabel = (status: string) => {
@@ -343,16 +355,7 @@ const DetalheTarefa = () => {
                     <Separator />
                     <div>
                       <h3 className="text-lg font-semibold mb-2">Anexo</h3>
-                      <div className="flex gap-2">
-                        <Button variant="outline" className="flex items-center" onClick={handleViewAttachment}>
-                          <Eye className="h-4 w-4 mr-2" />
-                          Visualizar
-                        </Button>
-                        <Button variant="outline" className="flex items-center">
-                          <Download className="h-4 w-4 mr-2" />
-                          {tarefa.anexo}
-                        </Button>
-                      </div>
+                      <TarefaAnexo anexo={tarefa.anexo} />
                     </div>
                   </>
                 )}
@@ -410,20 +413,20 @@ const DetalheTarefa = () => {
                       <div className="flex gap-2">
                         <Button 
                           onClick={handleProgressUpdate}
-                          disabled={updating || !progressNotes.trim()}
+                          disabled={updating || uploading || !progressNotes.trim()}
                           className="flex-1"
                         >
                           <Upload className="h-4 w-4 mr-2" />
-                          {updating ? "Atualizando..." : "Atualizar Progresso"}
+                          {updating || uploading ? "Atualizando..." : "Atualizar Progresso"}
                         </Button>
                         <Button 
                           onClick={handleConcluirTarefa}
-                          disabled={updating}
+                          disabled={updating || uploading}
                           variant="secondary"
                           className="flex-1"
                         >
                           <Check className="h-4 w-4 mr-2" />
-                          {updating ? "Concluindo..." : "Concluir Tarefa"}
+                          {updating || uploading ? "Concluindo..." : "Concluir Tarefa"}
                         </Button>
                       </div>
                     </div>
