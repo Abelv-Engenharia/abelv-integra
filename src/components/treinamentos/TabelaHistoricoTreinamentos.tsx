@@ -18,6 +18,13 @@ interface Props {
   historico: HistoricoTreinamento[];
 }
 
+// Função para formatar data sem problemas de fuso horário
+const formatarData = (dateString: string) => {
+  if (!dateString) return "";
+  const [ano, mes, dia] = dateString.split('-');
+  return `${dia}/${mes}/${ano}`;
+};
+
 export const TabelaHistoricoTreinamentos: React.FC<Props> = ({ historico }) => (
   <div className="rounded-md border">
     <Table>
@@ -43,8 +50,8 @@ export const TabelaHistoricoTreinamentos: React.FC<Props> = ({ historico }) => (
             <TableRow key={item.id}>
               <TableCell>{item.treinamento_nome}</TableCell>
               <TableCell>{item.tipo}</TableCell>
-              <TableCell>{new Date(item.data_realizacao).toLocaleDateString("pt-BR")}</TableCell>
-              <TableCell>{new Date(item.data_validade).toLocaleDateString("pt-BR")}</TableCell>
+              <TableCell>{formatarData(item.data_realizacao)}</TableCell>
+              <TableCell>{formatarData(item.data_validade)}</TableCell>
               <TableCell>
                 <span
                   className={`font-semibold px-3 py-1 rounded-full ${getStatusColor(item.status || "")}`}

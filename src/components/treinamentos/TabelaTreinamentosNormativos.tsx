@@ -18,6 +18,13 @@ interface Props {
   treinamentos: TreinamentoNormativo[];
 }
 
+// Função para formatar data sem problemas de fuso horário
+const formatarData = (dateString: string) => {
+  if (!dateString) return "";
+  const [ano, mes, dia] = dateString.split('-');
+  return `${dia}/${mes}/${ano}`;
+};
+
 export const TabelaTreinamentosNormativos: React.FC<Props> = ({ treinamentos }) => (
   <div className="rounded-md border">
     <Table>
@@ -43,8 +50,8 @@ export const TabelaTreinamentosNormativos: React.FC<Props> = ({ treinamentos }) 
             <TableRow key={tr.id}>
               <TableCell>{tr.treinamento_nome}</TableCell>
               <TableCell>{tr.tipo}</TableCell>
-              <TableCell>{new Date(tr.data_realizacao).toLocaleDateString("pt-BR")}</TableCell>
-              <TableCell>{new Date(tr.data_validade).toLocaleDateString("pt-BR")}</TableCell>
+              <TableCell>{formatarData(tr.data_realizacao)}</TableCell>
+              <TableCell>{formatarData(tr.data_validade)}</TableCell>
               <TableCell>
                 <span
                   className={`font-semibold px-3 py-1 rounded-full ${getStatusColor(tr.status || "")}`}
