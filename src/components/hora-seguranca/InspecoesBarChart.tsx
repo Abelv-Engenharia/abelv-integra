@@ -56,7 +56,7 @@ export function InspecoesBarChart({ dataType }: InspecoesBarChartProps) {
 
   if (loading) {
     return (
-      <div className="h-[450px] w-full flex items-center justify-center">
+      <div className="h-[600px] w-full flex items-center justify-center">
         <p className="text-muted-foreground">Carregando dados...</p>
       </div>
     );
@@ -64,7 +64,7 @@ export function InspecoesBarChart({ dataType }: InspecoesBarChartProps) {
 
   if (error) {
     return (
-      <div className="h-[450px] w-full flex items-center justify-center">
+      <div className="h-[600px] w-full flex items-center justify-center">
         <p className="text-red-500">{error}</p>
       </div>
     );
@@ -72,22 +72,18 @@ export function InspecoesBarChart({ dataType }: InspecoesBarChartProps) {
 
   if (data.length === 0) {
     return (
-      <div className="h-[450px] w-full flex items-center justify-center">
+      <div className="h-[600px] w-full flex items-center justify-center">
         <p className="text-muted-foreground">Nenhum dado de inspeção disponível</p>
       </div>
     );
   }
-
-  const getChartTitle = () => {
-    return dataType === 'cca' ? 'Inspeções por CCA' : 'Inspeções por Responsável';
-  };
 
   const getDataKey = () => {
     return dataType === 'cca' ? 'nome' : 'responsavel';
   };
 
   return (
-    <div className="h-[450px] w-full">
+    <div className="h-[600px] w-full">
       <ResponsiveContainer width="100%" height="100%">
         <BarChart
           data={data}
@@ -95,7 +91,7 @@ export function InspecoesBarChart({ dataType }: InspecoesBarChartProps) {
             top: 20,
             right: 30,
             left: 20,
-            bottom: 120,
+            bottom: 150,
           }}
         >
           <CartesianGrid strokeDasharray="3 3" />
@@ -104,10 +100,11 @@ export function InspecoesBarChart({ dataType }: InspecoesBarChartProps) {
             angle={-45} 
             textAnchor="end" 
             height={120}
+            interval={0}
           />
           <YAxis />
           <Tooltip />
-          <Legend wrapperStyle={{ paddingTop: '20px' }} />
+          <Legend wrapperStyle={{ paddingTop: '40px' }} />
           <Bar dataKey="A Realizar" name="A Realizar" fill="#4285F4" />
           <Bar dataKey="Realizada" name="Realizada" fill="#43A047" />
           <Bar dataKey="Não Realizada" name="Não Realizada" fill="#E53935" />
