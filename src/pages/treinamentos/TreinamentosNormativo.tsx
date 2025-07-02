@@ -166,12 +166,11 @@ const TreinamentosNormativo = () => {
       }
 
       // Extrair nome do treinamento até o hífen (ou nome completo se não houver hífen)
-      const nomeBase = treinamentoSelecionado.nome.split(' -')[0].trim().replace(/[^a-zA-Z0-9]/g, '_');
-      const nomeFunc = funcionarioSelecionado.nome.replace(/\s+/g, '_').toUpperCase().replace(/[^a-zA-Z0-9_]/g, '');
+      const nomeBaseTreinamento = treinamentoSelecionado.nome.split(' -')[0].trim();
       
-      // Criar nomenclatura: NOME_TREINAMENTO_MATRICULA_FUNCIONÁRIO
+      // Criar nomenclatura: NOME_TREINAMENTO_MATRICULA_NOME COMPLETO
       const fileExt = file.name.split('.').pop();
-      const fileName = `${nomeBase}_${funcionarioSelecionado.matricula}_${nomeFunc}.${fileExt}`;
+      const fileName = `${nomeBaseTreinamento}_${funcionarioSelecionado.matricula}_${funcionarioSelecionado.nome.toUpperCase()}.${fileExt}`;
       const filePath = fileName;
 
       console.log('Nome do arquivo:', fileName);
@@ -510,7 +509,7 @@ const TreinamentosNormativo = () => {
                     </p>
                   )}
                   <p className="text-xs text-muted-foreground">
-                    Apenas arquivos PDF, JPG, PNG, máximo 2MB. Nome será automaticamente formatado como: TREINAMENTO_MATRÍCULA_FUNCIONÁRIO
+                    Apenas arquivos PDF, JPG, PNG, máximo 2MB. Nome será automaticamente formatado como: TREINAMENTO_MATRÍCULA_NOME COMPLETO
                   </p>
                 </div>
               </div>
