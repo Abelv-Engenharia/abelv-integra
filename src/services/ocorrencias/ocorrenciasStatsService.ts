@@ -3,325 +3,104 @@ import { supabase } from '@/integrations/supabase/client';
 
 export async function fetchOcorrenciasStats(ccaIds?: number[]) {
   try {
-    let ocorrenciasQuery = supabase
-      .from('ocorrencias')
-      .select('id, classificacao_ocorrencia, status');
+    console.log('Buscando estatísticas de ocorrências...');
     
-    // Aplicar filtro de CCAs se fornecido
+    let query = supabase
+      .from('ocorrencias')
+      .select('classificacao_ocorrencia, dias_perdidos, dias_debitados, acoes');
+
+    // Aplicar filtro por CCAs se fornecido
     if (ccaIds && ccaIds.length > 0) {
-      // Como a tabela ocorrencias tem o campo 'cca' como texto, 
-      // precisamos buscar os códigos dos CCAs permitidos
+      // Como não temos cca_id na tabela ocorrencias, vamos filtrar pelo campo 'cca'
       const { data: ccasData } = await supabase
         .from('ccas')
-        .select('codigo')
+        .select('nome')
         .in('id', ccaIds);
       
       if (ccasData && ccasData.length > 0) {
-        const ccaCodigos = ccasData.map(cca => cca.codigo);
-        ocorrenciasQuery = ocorrenciasQuery.in('cca', ccaCodigos);
+        const ccaNomes = ccasData.map(cca => cca.nome);
+        query = query.in('cca', ccaNomes);
       }
     }
 
-    const { data: ocorrencias, error: ocorrenciasError } = await ocorrenciasQuery;
+    const { data: ocorrencias, error } = await query;
 
-    if (ocorrenciasError) throw ocorrenciasError;
+    if (error) throw error;
 
-    console.log('Ocorrências filtradas por CCA:', ocorrencias);
+    console.log('Ocorrências carregadas:', ocorrencias);
 
-    // Contar por tipo
-    const totalOcorrencias = ocorrencias?.length || 0;
-    const acCpd = ocorrencias?.filter(o => o.classificacao_ocorrencia === 'Acidente com Afastamento').length || 0;
-    const acSpd = ocorrencias?.filter(o => o.classificacao_ocorrencia === 'Acidente sem Afastamento').length || 0;
-    const inc = ocorrencias?.filter(o => o.classificacao_ocorrencia === 'Quase Acidente').length || 0;
+    // Classificar ocorrências por tipo
+    const ocorrenciasComPerdaDias = ocorrencias?.filter(o => 
+      o.classificacao_ocorrencia === 'AC CPD - ACIDENTE COM PERDA DE DIAS'
+    ).length || 0;
 
-    // Buscar ações relacionadas às ocorrências (se necessário)
-    let acoesQuery = supabase
-      .from('ocorrencias')
-      .select('acoes');
-    
-    if (ccaIds && ccaIds.length > 0) {
-      const { data: ccasData } = await supabase
-        .from('ccas')
-        .select('codigo')
-        .in('id', ccaIds);
-      
-      if (ccasData && ccasData.length > 0) {
-        const ccaCodigos = ccasData.map(cca => cca.codigo);
-        acoesQuery = acoesQuery.in('cca', ccaCodigos);
-      }
-    }
+    const ocorrenciasSemPerdaDias = ocorrencias?.filter(o => 
+      o.classificacao_ocorrencia === 'AC SPD - ACIDENTE SEM PERDA DE DIAS' ||
+      o.classificacao_ocorrencia === 'AC SPD CRT - ACIDENTE SEM PERDA DE DIAS COM LIMITAÇÃO DE TAREFA'
+    ).length || 0;
 
-    const { data: acoesData, error: acoesError } = await acoesQuery;
+    const incidentes = ocorrencias?.filter(o => 
+      o.classificacao_ocorrencia === 'INC AMB - INCIDENTE AMBIENTAL' ||
+      o.classificacao_ocorrencia === 'INC DM - INCIDENTE COM DANOS MATERIAIS' ||
+      o.classificacao_ocorrencia === 'INC SDM - INCIDENTE SEM DANOS MATERIAIS'
+    ).length || 0;
 
-    if (acoesError) {
-      console.error('Erro ao buscar ações:', acoesError);
-    }
+    const desviosAltoPotencial = ocorrencias?.filter(o => 
+      o.classificacao_ocorrencia === 'DAP - DESVIO DE ALTO POTENCIAL'
+    ).length || 0;
 
-    // Processar ações
+    // Calcular dias perdidos e debitados
+    const totalDiasPerdidos = ocorrencias?.reduce((sum, o) => sum + (o.dias_perdidos || 0), 0) || 0;
+    const totalDiasDebitados = ocorrencias?.reduce((sum, o) => sum + (o.dias_debitados || 0), 0) || 0;
+
+    // Calcular estatísticas de ações
     let totalAcoes = 0;
     let acoesConcluidas = 0;
     let acoesAndamento = 0;
     let acoesPendentes = 0;
 
-    if (acoesData) {
-      acoesData.forEach((item: any) => {
-        if (item.acoes && Array.isArray(item.acoes)) {
-          item.acoes.forEach((acao: any) => {
-            totalAcoes++;
-            if (acao.status === 'Concluída') {
-              acoesConcluidas++;
-            } else if (acao.status === 'Em andamento') {
-              acoesAndamento++;
-            } else {
-              acoesPendentes++;
-            }
-          });
-        }
-      });
-    }
+    ocorrencias?.forEach(ocorrencia => {
+      if (ocorrencia.acoes && Array.isArray(ocorrencia.acoes)) {
+        const acoes = ocorrencia.acoes;
+        totalAcoes += acoes.length;
+        
+        acoes.forEach((acao: any) => {
+          if (acao.status === 'Concluída') {
+            acoesConcluidas++;
+          } else if (acao.status === 'Em andamento') {
+            acoesAndamento++;
+          } else {
+            acoesPendentes++;
+          }
+        });
+      }
+    });
 
     return {
-      totalOcorrencias,
-      acCpd,
-      acSpd,
-      inc,
+      ocorrenciasComPerdaDias,
+      ocorrenciasSemPerdaDias,
+      incidentes,
+      desviosAltoPotencial,
+      totalDiasPerdidos,
+      totalDiasDebitados,
       totalAcoes,
       acoesConcluidas,
       acoesAndamento,
       acoesPendentes
     };
   } catch (error) {
-    console.error('Erro ao buscar estatísticas das ocorrências:', error);
+    console.error('Erro ao carregar estatísticas de ocorrências:', error);
     return {
-      totalOcorrencias: 0,
-      acCpd: 0,
-      acSpd: 0,
-      inc: 0,
+      ocorrenciasComPerdaDias: 0,
+      ocorrenciasSemPerdaDias: 0,
+      incidentes: 0,
+      desviosAltoPotencial: 0,
+      totalDiasPerdidos: 0,
+      totalDiasDebitados: 0,
       totalAcoes: 0,
       acoesConcluidas: 0,
       acoesAndamento: 0,
       acoesPendentes: 0
     };
-  }
-}
-
-export async function fetchTaxaFrequenciaAcCpdPorMes(ano: number, ccaIds?: number[]) {
-  try {
-    let ocorrenciasQuery = supabase
-      .from('ocorrencias')
-      .select('mes, classificacao_ocorrencia')
-      .eq('ano', ano)
-      .eq('classificacao_ocorrencia', 'Acidente com Afastamento');
-
-    // Aplicar filtro de CCAs se fornecido
-    if (ccaIds && ccaIds.length > 0) {
-      const { data: ccasData } = await supabase
-        .from('ccas')
-        .select('codigo')
-        .in('id', ccaIds);
-      
-      if (ccasData && ccasData.length > 0) {
-        const ccaCodigos = ccasData.map(cca => cca.codigo);
-        ocorrenciasQuery = ocorrenciasQuery.in('cca', ccaCodigos);
-      }
-    }
-
-    const { data: ocorrencias, error: ocorrenciasError } = await ocorrenciasQuery;
-    if (ocorrenciasError) throw ocorrenciasError;
-
-    // Buscar horas trabalhadas filtradas
-    let hhtQuery = supabase
-      .from('horas_trabalhadas')
-      .select('mes, horas_trabalhadas')
-      .eq('ano', ano);
-
-    if (ccaIds && ccaIds.length > 0) {
-      hhtQuery = hhtQuery.in('cca_id', ccaIds);
-    }
-
-    const { data: horasTrabalhadas, error: hhtError } = await hhtQuery;
-    if (hhtError) throw hhtError;
-
-    // Processar dados mensais
-    const dadosMensais = [];
-    for (let mes = 1; mes <= 12; mes++) {
-      const ocorrenciasMes = ocorrencias?.filter(o => o.mes === mes).length || 0;
-      const horasMes = horasTrabalhadas?.filter(h => h.mes === mes)
-        .reduce((total, h) => total + (Number(h.horas_trabalhadas) || 0), 0) || 0;
-      
-      const horasAcumuladas = horasTrabalhadas?.filter(h => h.mes <= mes)
-        .reduce((total, h) => total + (Number(h.horas_trabalhadas) || 0), 0) || 0;
-      
-      const ocorrenciasAcumuladas = ocorrencias?.filter(o => o.mes <= mes).length || 0;
-
-      const taxaMensal = horasMes > 0 ? (ocorrenciasMes * 1000000) / horasMes : 0;
-      const taxaAcumulada = horasAcumuladas > 0 ? (ocorrenciasAcumuladas * 1000000) / horasAcumuladas : 0;
-
-      dadosMensais.push({
-        mes,
-        mensal: taxaMensal,
-        acumulada: taxaAcumulada
-      });
-    }
-
-    return dadosMensais;
-  } catch (error) {
-    console.error('Erro ao buscar taxa de frequência AC CPD:', error);
-    return [];
-  }
-}
-
-export async function fetchTaxaFrequenciaAcSpdPorMes(ano: number, ccaIds?: number[]) {
-  try {
-    let ocorrenciasQuery = supabase
-      .from('ocorrencias')
-      .select('mes, classificacao_ocorrencia')
-      .eq('ano', ano)
-      .eq('classificacao_ocorrencia', 'Acidente sem Afastamento');
-
-    // Aplicar filtro de CCAs se fornecido
-    if (ccaIds && ccaIds.length > 0) {
-      const { data: ccasData } = await supabase
-        .from('ccas')
-        .select('codigo')
-        .in('id', ccaIds);
-      
-      if (ccasData && ccasData.length > 0) {
-        const ccaCodigos = ccasData.map(cca => cca.codigo);
-        ocorrenciasQuery = ocorrenciasQuery.in('cca', ccaCodigos);
-      }
-    }
-
-    const { data: ocorrencias, error: ocorrenciasError } = await ocorrenciasQuery;
-    if (ocorrenciasError) throw ocorrenciasError;
-
-    // Buscar horas trabalhadas filtradas
-    let hhtQuery = supabase
-      .from('horas_trabalhadas')
-      .select('mes, horas_trabalhadas')
-      .eq('ano', ano);
-
-    if (ccaIds && ccaIds.length > 0) {
-      hhtQuery = hhtQuery.in('cca_id', ccaIds);
-    }
-
-    const { data: horasTrabalhadas, error: hhtError } = await hhtQuery;
-    if (hhtError) throw hhtError;
-
-    // Processar dados mensais
-    const dadosMensais = [];
-    for (let mes = 1; mes <= 12; mes++) {
-      const ocorrenciasMes = ocorrencias?.filter(o => o.mes === mes).length || 0;
-      const horasMes = horasTrabalhadas?.filter(h => h.mes === mes)
-        .reduce((total, h) => total + (Number(h.horas_trabalhadas) || 0), 0) || 0;
-      
-      const horasAcumuladas = horasTrabalhadas?.filter(h => h.mes <= mes)
-        .reduce((total, h) => total + (Number(h.horas_trabalhadas) || 0), 0) || 0;
-      
-      const ocorrenciasAcumuladas = ocorrencias?.filter(o => o.mes <= mes).length || 0;
-
-      const taxaMensal = horasMes > 0 ? (ocorrenciasMes * 1000000) / horasMes : 0;
-      const taxaAcumulada = horasAcumuladas > 0 ? (ocorrenciasAcumuladas * 1000000) / horasAcumuladas : 0;
-
-      dadosMensais.push({
-        mes,
-        mensal: taxaMensal,
-        acumulada: taxaAcumulada
-      });
-    }
-
-    return dadosMensais;
-  } catch (error) {
-    console.error('Erro ao buscar taxa de frequência AC SPD:', error);
-    return [];
-  }
-}
-
-export async function fetchTaxaGravidadePorMes(ano: number, ccaIds?: number[]) {
-  try {
-    let ocorrenciasQuery = supabase
-      .from('ocorrencias')
-      .select('mes, dias_perdidos, classificacao_ocorrencia')
-      .eq('ano', ano)
-      .eq('classificacao_ocorrencia', 'Acidente com Afastamento');
-
-    // Aplicar filtro de CCAs se fornecido
-    if (ccaIds && ccaIds.length > 0) {
-      const { data: ccasData } = await supabase
-        .from('ccas')
-        .select('codigo')
-        .in('id', ccaIds);
-      
-      if (ccasData && ccasData.length > 0) {
-        const ccaCodigos = ccasData.map(cca => cca.codigo);
-        ocorrenciasQuery = ocorrenciasQuery.in('cca', ccaCodigos);
-      }
-    }
-
-    const { data: ocorrencias, error: ocorrenciasError } = await ocorrenciasQuery;
-    if (ocorrenciasError) throw ocorrenciasError;
-
-    // Buscar horas trabalhadas filtradas
-    let hhtQuery = supabase
-      .from('horas_trabalhadas')
-      .select('mes, horas_trabalhadas')
-      .eq('ano', ano);
-
-    if (ccaIds && ccaIds.length > 0) {
-      hhtQuery = hhtQuery.in('cca_id', ccaIds);
-    }
-
-    const { data: horasTrabalhadas, error: hhtError } = await hhtQuery;
-    if (hhtError) throw hhtError;
-
-    // Processar dados mensais
-    const dadosMensais = [];
-    for (let mes = 1; mes <= 12; mes++) {
-      const ocorrenciasMes = ocorrencias?.filter(o => o.mes === mes) || [];
-      const diasPerdidosMes = ocorrenciasMes.reduce((total, o) => total + (Number(o.dias_perdidos) || 0), 0);
-      
-      const horasMes = horasTrabalhadas?.filter(h => h.mes === mes)
-        .reduce((total, h) => total + (Number(h.horas_trabalhadas) || 0), 0) || 0;
-      
-      const horasAcumuladas = horasTrabalhadas?.filter(h => h.mes <= mes)
-        .reduce((total, h) => total + (Number(h.horas_trabalhadas) || 0), 0) || 0;
-      
-      const ocorrenciasAcumuladas = ocorrencias?.filter(o => o.mes <= mes) || [];
-      const diasPerdidosAcumulados = ocorrenciasAcumuladas.reduce((total, o) => total + (Number(o.dias_perdidos) || 0), 0);
-
-      const taxaMensal = horasMes > 0 ? (diasPerdidosMes * 1000000) / horasMes : 0;
-      const taxaAcumulada = horasAcumuladas > 0 ? (diasPerdidosAcumulados * 1000000) / horasAcumuladas : 0;
-
-      dadosMensais.push({
-        mes,
-        mensal: taxaMensal,
-        acumulada: taxaAcumulada
-      });
-    }
-
-    return dadosMensais;
-  } catch (error) {
-    console.error('Erro ao buscar taxa de gravidade:', error);
-    return [];
-  }
-}
-
-export async function fetchMetaIndicador(ano: number, tipoMeta: string) {
-  try {
-    const { data, error } = await supabase
-      .from('metas_indicadores')
-      .select(tipoMeta)
-      .eq('ano', ano)
-      .single();
-
-    if (error) {
-      console.log('Meta não encontrada para o ano:', ano);
-      return 0;
-    }
-
-    return Number(data?.[tipoMeta]) || 0;
-  } catch (error) {
-    console.error('Erro ao buscar meta do indicador:', error);
-    return 0;
   }
 }
