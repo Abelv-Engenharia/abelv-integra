@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -18,14 +19,14 @@ import RelatoriosTreinamentos from "./pages/relatorios/RelatoriosTreinamentos";
 import RelatoriosOcorrencias from "./pages/relatorios/RelatoriosOcorrencias";
 import RelatoriosIDSMS from "./pages/relatorios/RelatoriosIDSMS";
 import RelatoriosHSA from "./pages/relatorios/RelatoriosHSA";
-import DesviosForm from "./pages/desvios/DesviosForm";
-import DesviosDashboard from "./pages/desvios/DesviosDashboard";
+import DesviosForm from "./pages/DesviosForm";
+import DesviosDashboard from "./pages/DesviosDashboard";
 import TreinamentosDashboard from "./pages/treinamentos/TreinamentosDashboard";
 import TreinamentosForm from "./pages/treinamentos/TreinamentosForm";
 import OcorrenciasDashboard from "./pages/ocorrencias/OcorrenciasDashboard";
-import OcorrenciasForm from "./pages/ocorrencias/OcorrenciasForm";
-import UsuariosDashboard from "./pages/usuarios/UsuariosDashboard";
-import UsuariosForm from "./pages/usuarios/UsuariosForm";
+import OcorrenciasForm from "./pages/ocorrencias/OcorrenciasCadastro";
+import UsuariosDashboard from "./pages/admin/AdminUsuarios";
+import UsuariosForm from "./pages/admin/CriarUsuario";
 import HoraSegurancaDashboard from "./pages/hora-seguranca/HoraSegurancaDashboard";
 import IDSMSDashboard from "./pages/idsms/IDSMSDashboard";
 

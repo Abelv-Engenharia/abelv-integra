@@ -7,7 +7,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { CalendarIcon, Download, Mail, FileSpreadsheet } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
-import { InspecoesSummaryCards } from "@/components/hora-seguranca/InspecoesSummaryCards";
+import InspecoesSummaryCards from "@/components/hora-seguranca/InspecoesSummaryCards";
 import { InspecoesByCCAChart } from "@/components/hora-seguranca/InspecoesByCCAChart";
 import { InspecoesBarChart } from "@/components/hora-seguranca/InspecoesBarChart";
 import { DesviosResponsaveisChart } from "@/components/hora-seguranca/DesviosResponsaveisChart";
@@ -165,24 +165,14 @@ const RelatoriosHSA = () => {
 
         {/* Conteúdo do Relatório */}
         <div className="space-y-6">
-          <InspecoesSummaryCards 
-            filterCCA={filterCCA}
-            filterResponsavel={filterResponsavel}
-            dataInicial={dataInicial}
-            dataFinal={dataFinal}
-          />
+          <InspecoesSummaryCards />
 
           <Card>
             <CardHeader>
               <CardTitle>Inspeções por CCA</CardTitle>
             </CardHeader>
             <CardContent>
-              <InspecoesByCCAChart 
-                filterCCA={filterCCA}
-                filterResponsavel={filterResponsavel}
-                dataInicial={dataInicial}
-                dataFinal={dataFinal}
-              />
+              <InspecoesByCCAChart />
             </CardContent>
           </Card>
 
@@ -192,13 +182,7 @@ const RelatoriosHSA = () => {
             </CardHeader>
             <CardContent>
               <div className="h-[500px]">
-                <InspecoesBarChart 
-                  dataType="responsible"
-                  filterCCA={filterCCA}
-                  filterResponsavel={filterResponsavel}
-                  dataInicial={dataInicial}
-                  dataFinal={dataFinal}
-                />
+                <InspecoesBarChart dataType="responsible" />
               </div>
             </CardContent>
           </Card>
@@ -208,12 +192,7 @@ const RelatoriosHSA = () => {
               <CardTitle>Desvios por Responsável</CardTitle>
             </CardHeader>
             <CardContent>
-              <DesviosResponsaveisChart 
-                filterCCA={filterCCA}
-                filterResponsavel={filterResponsavel}
-                dataInicial={dataInicial}
-                dataFinal={dataFinal}
-              />
+              <DesviosResponsaveisChart />
             </CardContent>
           </Card>
 
@@ -222,12 +201,7 @@ const RelatoriosHSA = () => {
               <CardTitle>Desvios por Tipo de Inspeção</CardTitle>
             </CardHeader>
             <CardContent>
-              <DesviosTipoInspecaoChart 
-                filterCCA={filterCCA}
-                filterResponsavel={filterResponsavel}
-                dataInicial={dataInicial}
-                dataFinal={dataFinal}
-              />
+              <DesviosTipoInspecaoChart />
             </CardContent>
           </Card>
         </div>
