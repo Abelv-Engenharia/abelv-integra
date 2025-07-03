@@ -1,4 +1,3 @@
-
 import React, { useCallback, useEffect, useState } from "react";
 import {
   Activity,
@@ -30,12 +29,20 @@ function useTotalDesvios() {
     
     const allowedCcaIds = userCCAs.map(cca => cca.id);
     
-    supabase
-      .from("desvios_completos")
-      .select("*", { count: "exact", head: true })
-      .in('cca_id', allowedCcaIds)
-      .then(({ count }) => setTotal(count || 0))
-      .catch(() => setTotal(0));
+    const fetchDesvios = async () => {
+      try {
+        const { count } = await supabase
+          .from("desvios_completos")
+          .select("*", { count: "exact", head: true })
+          .in('cca_id', allowedCcaIds);
+        setTotal(count || 0);
+      } catch (error) {
+        console.error('Error fetching desvios:', error);
+        setTotal(0);
+      }
+    };
+    
+    fetchDesvios();
   }, [userCCAs, isLoading]);
   
   return total;
@@ -59,14 +66,22 @@ function useTotalTreinamentosMes() {
     const ano = dt.getFullYear();
     const allowedCcaIds = userCCAs.map(cca => cca.id);
     
-    supabase
-      .from("execucao_treinamentos")
-      .select("*", { count: "exact", head: true })
-      .eq("mes", mes)
-      .eq("ano", ano)
-      .in('cca_id', allowedCcaIds)
-      .then(({ count }) => setTotal(count || 0))
-      .catch(() => setTotal(0));
+    const fetchTreinamentos = async () => {
+      try {
+        const { count } = await supabase
+          .from("execucao_treinamentos")
+          .select("*", { count: "exact", head: true })
+          .eq("mes", mes)
+          .eq("ano", ano)
+          .in('cca_id', allowedCcaIds);
+        setTotal(count || 0);
+      } catch (error) {
+        console.error('Error fetching treinamentos:', error);
+        setTotal(0);
+      }
+    };
+    
+    fetchTreinamentos();
   }, [userCCAs, isLoading]);
   
   return total;
@@ -90,14 +105,22 @@ function useTotalOcorrenciasMes() {
     const ano = dt.getFullYear();
     const allowedCcaNames = userCCAs.map(cca => cca.codigo);
     
-    supabase
-      .from("ocorrencias")
-      .select("id", { count: "exact", head: true })
-      .eq("mes", mes)
-      .eq("ano", ano)
-      .in('cca', allowedCcaNames)
-      .then(({ count }) => setTotal(count || 0))
-      .catch(() => setTotal(0));
+    const fetchOcorrencias = async () => {
+      try {
+        const { count } = await supabase
+          .from("ocorrencias")
+          .select("id", { count: "exact", head: true })
+          .eq("mes", mes)
+          .eq("ano", ano)
+          .in('cca', allowedCcaNames);
+        setTotal(count || 0);
+      } catch (error) {
+        console.error('Error fetching ocorrencias:', error);
+        setTotal(0);
+      }
+    };
+    
+    fetchOcorrencias();
   }, [userCCAs, isLoading]);
   
   return total;
@@ -118,13 +141,21 @@ function useTotalTarefasPendentes() {
     
     const allowedCcaNames = userCCAs.map(cca => cca.codigo);
     
-    supabase
-      .from("tarefas")
-      .select("id", { count: "exact", head: true })
-      .in("status", ["pendente", "em_andamento"])
-      .in('cca', allowedCcaNames)
-      .then(({ count }) => setTotal(count || 0))
-      .catch(() => setTotal(0));
+    const fetchTarefas = async () => {
+      try {
+        const { count } = await supabase
+          .from("tarefas")
+          .select("id", { count: "exact", head: true })
+          .in("status", ["pendente", "em_andamento"])
+          .in('cca', allowedCcaNames);
+        setTotal(count || 0);
+      } catch (error) {
+        console.error('Error fetching tarefas:', error);
+        setTotal(0);
+      }
+    };
+    
+    fetchTarefas();
   }, [userCCAs, isLoading]);
   
   return total;
