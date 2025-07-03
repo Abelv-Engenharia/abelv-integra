@@ -60,7 +60,7 @@ export function AppSidebar() {
     if (currentPath.startsWith("/tarefas")) return "tarefas";
     if (currentPath.startsWith("/relatorios")) return "relatorios";
     if (currentPath.startsWith("/idsms")) return "idsms";
-    if (currentPath.startsWith("/admin") || currentPath.startsWith("/usuarios")) return "admin";
+    if (currentPath.startsWith("/admin")) return "admin";
     if (currentPath.startsWith("/gro")) return "gro";
     if (currentPath.startsWith("/account")) return "account";
     return null;

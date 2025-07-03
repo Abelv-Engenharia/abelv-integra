@@ -31,7 +31,7 @@ const Login = () => {
           title: "Login realizado com sucesso",
           description: "Bem-vindo ao sistema"
         });
-        window.location.href = "/dashboard";
+        window.location.href = "/";
       }
     } catch (error: any) {
       let errorMessage = "Erro ao fazer login";
@@ -79,7 +79,7 @@ const Login = () => {
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <Label htmlFor="password">Senha</Label>
-                  <Button variant="link" className="p-0 text-sm" type="button" onClick={() => navigate("/forgot-password")}>
+                  <Button variant="link" className="p-0 text-sm" type="button" onClick={() => navigate("/auth/forgot-password")}>
                     Esqueceu a senha?
                   </Button>
                 </div>
