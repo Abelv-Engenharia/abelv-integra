@@ -18,24 +18,21 @@ export async function fetchHSAPercentage(ccaIds?: number[]): Promise<number> {
       return 0;
     }
 
-    // Filtrar apenas as inspeções programadas
-    const inspecoesProgramadas = data.filter(item => 
-      (item.inspecao_programada || '').toUpperCase() === 'PROGRAMADA'
-    );
+    // Contar por status específico
+    const aRealizar = data.filter(r => (r.status || '').toUpperCase() === 'A REALIZAR').length;
+    const realizadas = data.filter(r => (r.status || '').toUpperCase() === 'REALIZADA').length;
+    const naoRealizadas = data.filter(r => (r.status || '').toUpperCase() === 'NÃO REALIZADA').length;
+    const realizadasNaoProgramadas = data.filter(r => (r.status || '').toUpperCase() === 'REALIZADA (NÃO PROGRAMADA)').length;
 
-    if (inspecoesProgramadas.length === 0) {
-      return 0;
-    }
+    // Totais para aderência ajustada
+    const programadas = aRealizar + realizadas + naoRealizadas; // A REALIZAR + REALIZADA + NÃO REALIZADA
+    const totalAjustado = programadas + realizadasNaoProgramadas;
+    const realizadasAjustadas = realizadas + realizadasNaoProgramadas;
 
-    // Contar as realizadas (status contém "REALIZADA")
-    const realizadas = inspecoesProgramadas.filter(item => 
-      (item.status || '').toUpperCase().includes('REALIZADA')
-    ).length;
-
-    // Calcular percentual
-    const percentual = (realizadas / inspecoesProgramadas.length) * 100;
+    // Calcular aderência ajustada = (REALIZADA + REALIZADA NÃO PROGRAMADA) / (PROGRAMADAS + REALIZADA NÃO PROGRAMADA) * 100
+    const aderenciaAjustada = totalAjustado > 0 ? (realizadasAjustadas / totalAjustado) * 100 : 0;
     
-    return Math.round(percentual * 100) / 100; // Arredondar para 2 casas decimais
+    return Math.round(aderenciaAjustada * 100) / 100; // Arredondar para 2 casas decimais
   } catch (error) {
     console.error('Erro ao buscar dados do HSA:', error);
     return 0;

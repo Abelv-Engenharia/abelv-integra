@@ -27,7 +27,7 @@ const DashboardTopStats = () => {
         ]);
 
         console.log('Resultado IDSMS:', idsms);
-        console.log('Resultado HSA:', hsa);
+        console.log('Resultado HSA (Aderência Ajustada):', hsa);
         console.log('Resultado Treinamento:', treinamento);
 
         setIdsmsPercentage(idsms);
@@ -58,10 +58,10 @@ const DashboardTopStats = () => {
         className="border-l-4 border-blue-500"
       />
       <StatCard
-        title="HSA"
+        title="HSA (Ajustada)"
         value={hsaPercentage === null ? "..." : `${hsaPercentage}%`}
         icon={<CheckCircle2 className="h-4 w-4" />}
-        description="Percentual de inspeções realizadas"
+        description="Aderência HSA incluindo não programadas"
         trend={hsaPercentage && hsaPercentage > 80 ? "up" : hsaPercentage && hsaPercentage < 60 ? "down" : "neutral"}
         loading={hsaPercentage === null}
         className="border-l-4 border-green-500"
