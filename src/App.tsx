@@ -22,7 +22,7 @@ import RelatoriosHSA from "./pages/relatorios/RelatoriosHSA";
 import DesviosForm from "./pages/DesviosForm";
 import DesviosDashboard from "./pages/DesviosDashboard";
 import TreinamentosDashboard from "./pages/treinamentos/TreinamentosDashboard";
-import TreinamentosForm from "./pages/treinamentos/TreinamentosForm";
+import TreinamentosForm from "./pages/treinamentos/TreinamentosExecucao";
 import OcorrenciasDashboard from "./pages/ocorrencias/OcorrenciasDashboard";
 import OcorrenciasForm from "./pages/ocorrencias/OcorrenciasCadastro";
 import UsuariosDashboard from "./pages/admin/AdminUsuarios";
