@@ -28,6 +28,13 @@ import { DesviosTipoInspecaoChart } from "@/components/hora-seguranca/DesviosTip
 import { useUserCCAs } from "@/hooks/useUserCCAs";
 import { supabase } from "@/integrations/supabase/client";
 
+export interface FilterOptions {
+  ccaId?: string;
+  responsavel?: string;
+  dataInicial?: Date;
+  dataFinal?: Date;
+}
+
 const HoraSegurancaDashboard = () => {
   const [tab, setTab] = useState("overview");
   const [filterCCA, setFilterCCA] = useState("");
@@ -71,6 +78,14 @@ const HoraSegurancaDashboard = () => {
 
     fetchResponsaveis();
   }, [userCCAs]);
+
+  // Criar objeto com filtros para passar aos componentes
+  const filters: FilterOptions = {
+    ccaId: filterCCA === "todos" || filterCCA === "" ? undefined : filterCCA,
+    responsavel: filterResponsavel === "todos" || filterResponsavel === "" ? undefined : filterResponsavel,
+    dataInicial,
+    dataFinal,
+  };
 
   return (
     <div className="container mx-auto py-6">
@@ -173,7 +188,7 @@ const HoraSegurancaDashboard = () => {
 
             {userCCAs.length > 0 && (
               <>
-                <InspecoesSummaryCards />
+                <InspecoesSummaryCards filters={filters} />
 
                 <Card className="col-span-full">
                   <CardHeader>
@@ -183,7 +198,7 @@ const HoraSegurancaDashboard = () => {
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="pl-2">
-                    <InspecoesByCCAChart />
+                    <InspecoesByCCAChart filters={filters} />
                   </CardContent>
                 </Card>
 
@@ -196,7 +211,7 @@ const HoraSegurancaDashboard = () => {
                   </CardHeader>
                   <CardContent className="pl-2 pb-8">
                     <div className="h-[500px]">
-                      <InspecoesBarChart dataType="responsible" />
+                      <InspecoesBarChart dataType="responsible" filters={filters} />
                     </div>
                   </CardContent>
                 </Card>
@@ -209,7 +224,7 @@ const HoraSegurancaDashboard = () => {
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="pl-2">
-                    <DesviosResponsaveisChart />
+                    <DesviosResponsaveisChart filters={filters} />
                   </CardContent>
                 </Card>
 
@@ -221,7 +236,7 @@ const HoraSegurancaDashboard = () => {
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="pl-2">
-                    <DesviosTipoInspecaoChart />
+                    <DesviosTipoInspecaoChart filters={filters} />
                   </CardContent>
                 </Card>
               </>

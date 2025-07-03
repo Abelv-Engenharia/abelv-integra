@@ -5,6 +5,7 @@ import { Activity, Calendar, CheckSquare, FileWarning, Target, TrendingUp } from
 import { Card, CardContent } from "@/components/ui/card";
 import { InspecoesSummary } from "@/services/hora-seguranca/types";
 import { useUserCCAs } from "@/hooks/useUserCCAs";
+import { FilterOptions } from "@/pages/hora-seguranca/HoraSegurancaDashboard";
 
 interface StatCardProps {
   title: string;
@@ -29,7 +30,11 @@ const StatCard = ({ title, value, description, icon, className }: StatCardProps)
   </Card>
 );
 
-const InspecoesSummaryCards = () => {
+interface InspecoesSummaryCardsProps {
+  filters?: FilterOptions;
+}
+
+const InspecoesSummaryCards = ({ filters }: InspecoesSummaryCardsProps) => {
   const [data, setData] = useState<InspecoesSummary | null>(null);
   const [loading, setLoading] = useState(true);
   const { data: userCCAs = [] } = useUserCCAs();
@@ -57,7 +62,7 @@ const InspecoesSummaryCards = () => {
         
         // Aplicar filtro por CCAs permitidos
         const ccaIds = userCCAs.map(cca => cca.id);
-        const summary = await fetchInspecoesSummary(ccaIds);
+        const summary = await fetchInspecoesSummary(ccaIds, filters);
         setData(summary);
       } catch (error) {
         console.error("Error loading inspeções summary:", error);
@@ -67,7 +72,7 @@ const InspecoesSummaryCards = () => {
     };
 
     loadData();
-  }, [userCCAs]);
+  }, [userCCAs, filters]);
 
   if (loading) {
     return (

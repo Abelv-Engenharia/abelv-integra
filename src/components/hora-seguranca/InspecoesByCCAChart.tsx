@@ -3,8 +3,13 @@ import { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { fetchInspecoesByCCA } from '@/services/hora-seguranca/inspecoesByCCAService';
 import { useUserCCAs } from '@/hooks/useUserCCAs';
+import { FilterOptions } from '@/pages/hora-seguranca/HoraSegurancaDashboard';
 
-export function InspecoesByCCAChart() {
+interface InspecoesByCCAChartProps {
+  filters?: FilterOptions;
+}
+
+export function InspecoesByCCAChart({ filters }: InspecoesByCCAChartProps) {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -23,7 +28,7 @@ export function InspecoesByCCAChart() {
         
         // Aplicar filtro por CCAs permitidos
         const ccaIds = userCCAs.map(cca => cca.id);
-        const chartData = await fetchInspecoesByCCA(ccaIds);
+        const chartData = await fetchInspecoesByCCA(ccaIds, filters);
         
         // Formatar dados para o gráfico
         const formattedData = chartData.map(item => ({
@@ -45,7 +50,7 @@ export function InspecoesByCCAChart() {
     };
 
     loadData();
-  }, [userCCAs]);
+  }, [userCCAs, filters]);
 
   if (loading) {
     return (

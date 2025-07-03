@@ -3,8 +3,13 @@ import { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { fetchDesviosByInspectionType } from '@/services/hora-seguranca';
 import { useUserCCAs } from '@/hooks/useUserCCAs';
+import { FilterOptions } from '@/pages/hora-seguranca/HoraSegurancaDashboard';
 
-export function DesviosTipoInspecaoChart() {
+interface DesviosTipoInspecaoChartProps {
+  filters?: FilterOptions;
+}
+
+export function DesviosTipoInspecaoChart({ filters }: DesviosTipoInspecaoChartProps) {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -23,7 +28,7 @@ export function DesviosTipoInspecaoChart() {
         
         // Aplicar filtro por CCAs permitidos
         const ccaIds = userCCAs.map(cca => cca.id);
-        const chartData = await fetchDesviosByInspectionType(ccaIds);
+        const chartData = await fetchDesviosByInspectionType(ccaIds, filters);
         
         // Formatar dados para o gráfico
         const formattedData = chartData.map(item => ({
@@ -41,7 +46,7 @@ export function DesviosTipoInspecaoChart() {
     };
 
     loadData();
-  }, [userCCAs]);
+  }, [userCCAs, filters]);
 
   if (loading) {
     return (

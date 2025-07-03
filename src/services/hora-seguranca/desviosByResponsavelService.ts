@@ -1,5 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
+import { FilterOptions } from '@/pages/hora-seguranca/HoraSegurancaDashboard';
 
 export interface DesviosByResponsavel {
   responsavel: string;
@@ -7,9 +8,9 @@ export interface DesviosByResponsavel {
 }
 
 /**
- * Fetch desvios by responsável from execucao_hsa table
+ * Fetch desvios by responsável from execucao_hsa table with filters
  */
-export async function fetchDesviosByResponsavel(ccaIds?: number[]): Promise<DesviosByResponsavel[]> {
+export async function fetchDesviosByResponsavel(ccaIds?: number[], filters?: FilterOptions): Promise<DesviosByResponsavel[]> {
   try {
     let query = supabase
       .from('execucao_hsa')
@@ -18,6 +19,26 @@ export async function fetchDesviosByResponsavel(ccaIds?: number[]): Promise<Desv
     // Aplicar filtro de CCAs se fornecido
     if (ccaIds && ccaIds.length > 0) {
       query = query.in('cca_id', ccaIds);
+    }
+
+    // Aplicar filtro de CCA específico
+    if (filters?.ccaId) {
+      query = query.eq('cca_id', parseInt(filters.ccaId));
+    }
+
+    // Aplicar filtro de responsável
+    if (filters?.responsavel) {
+      query = query.eq('responsavel_inspecao', filters.responsavel);
+    }
+
+    // Aplicar filtro de data inicial
+    if (filters?.dataInicial) {
+      query = query.gte('data', filters.dataInicial.toISOString().split('T')[0]);
+    }
+
+    // Aplicar filtro de data final
+    if (filters?.dataFinal) {
+      query = query.lte('data', filters.dataFinal.toISOString().split('T')[0]);
     }
 
     const { data, error } = await query;

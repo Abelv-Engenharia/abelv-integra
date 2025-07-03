@@ -1,67 +1,75 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { InspecoesByCCA } from './types';
+import { FilterOptions } from '@/pages/hora-seguranca/HoraSegurancaDashboard';
 
-export async function fetchInspecoesByCCA(ccaIds?: number[]): Promise<InspecoesByCCA[]> {
+/**
+ * Fetch inspeções by CCA directly from execucao_hsa with filters
+ */
+export async function fetchInspecoesByCCA(ccaIds: number[], filters?: FilterOptions): Promise<any[]> {
   try {
     let query = supabase
       .from('execucao_hsa')
       .select(`
-        status,
         cca_id,
+        status,
         ccas!inner(codigo, nome)
       `);
 
-    // Aplicar filtro de CCAs se fornecido
+    // Aplicar filtro de CCAs
     if (ccaIds && ccaIds.length > 0) {
       query = query.in('cca_id', ccaIds);
     }
 
-    const { data: rows, error } = await query;
-
-    if (error || !rows) {
-      console.error("Erro ao buscar inspeções por CCA:", error);
-      return [];
+    // Aplicar filtro de CCA específico
+    if (filters?.ccaId) {
+      query = query.eq('cca_id', parseInt(filters.ccaId));
     }
 
-    // Agrupar por CCA e contar por status
-    const ccaMap: Record<string, InspecoesByCCA> = {};
+    // Aplicar filtro de responsável
+    if (filters?.responsavel) {
+      query = query.eq('responsavel_inspecao', filters.responsavel);
+    }
 
-    rows.forEach((row: any) => {
-      const ccaKey = `${row.ccas.codigo} - ${row.ccas.nome}`;
-      const status = (row.status || '').toUpperCase();
+    // Aplicar filtro de data inicial
+    if (filters?.dataInicial) {
+      query = query.gte('data', filters.dataInicial.toISOString().split('T')[0]);
+    }
 
-      if (!ccaMap[ccaKey]) {
-        ccaMap[ccaKey] = {
-          cca: ccaKey,
-          "A Realizar": 0,
-          "Realizada": 0,
-          "Não Realizada": 0,
-          "Realizada (Não Programada)": 0,
-          "Cancelada": 0,
+    // Aplicar filtro de data final
+    if (filters?.dataFinal) {
+      query = query.lte('data', filters.dataFinal.toISOString().split('T')[0]);
+    }
+
+    const { data, error } = await query;
+
+    if (error) throw error;
+
+    // Agrupar por CCA
+    const grouped: Record<string, any> = {};
+    
+    data.forEach((row: any) => {
+      const ccaName = `${row.ccas.codigo} - ${row.ccas.nome}`;
+      const status = row.status || 'Indefinido';
+      
+      if (!grouped[ccaName]) {
+        grouped[ccaName] = {
+          'A Realizar': 0,
+          'Realizada': 0,
+          'Não Realizada': 0,
+          'Realizada (Não Programada)': 0,
+          'Cancelada': 0
         };
       }
-
-      switch (status) {
-        case 'A REALIZAR':
-          ccaMap[ccaKey]["A Realizar"]++;
-          break;
-        case 'REALIZADA':
-          ccaMap[ccaKey]["Realizada"]++;
-          break;
-        case 'NÃO REALIZADA':
-          ccaMap[ccaKey]["Não Realizada"]++;
-          break;
-        case 'REALIZADA (NÃO PROGRAMADA)':
-          ccaMap[ccaKey]["Realizada (Não Programada)"]++;
-          break;
-        case 'CANCELADA':
-          ccaMap[ccaKey]["Cancelada"]++;
-          break;
+      
+      if (grouped[ccaName][status] !== undefined) {
+        grouped[ccaName][status]++;
       }
     });
 
-    return Object.values(ccaMap);
+    return Object.entries(grouped).map(([cca, values]) => ({
+      cca,
+      ...values
+    }));
   } catch (error) {
     console.error("Erro ao buscar inspeções por CCA:", error);
     return [];
