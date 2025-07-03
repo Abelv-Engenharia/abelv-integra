@@ -1,62 +1,97 @@
 
 import React from "react";
-import { useFormContext } from "react-hook-form";
-import {
-  FormField,
-  FormItem,
-  FormLabel,
-  FormControl,
-  FormMessage
-} from "@/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { UseFormReturn } from "react-hook-form";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useFilteredFormData } from "@/hooks/useFilteredFormData";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { DesvioFormData } from "@/types/desvios";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 interface NovasInformacoesFormProps {
-  context: {
-    baseLegalOpcoes: any[];
-    supervisores: any[];
-    encarregados: any[];
-    funcionarios: any[];
-  };
+  form: UseFormReturn<DesvioFormData>;
 }
 
-const NovasInformacoesForm = ({ context }: NovasInformacoesFormProps) => {
-  const { control, watch } = useFormContext();
-  const { baseLegalOpcoes } = context;
+const NovasInformacoesForm = ({ form }: NovasInformacoesFormProps) => {
+  // Buscar opções de base legal
+  const { data: baseLegalOpcoes = [] } = useQuery({
+    queryKey: ['base-legal-opcoes'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('base_legal_opcoes')
+        .select('*')
+        .eq('ativo', true)
+        .order('nome');
+      
+      if (error) throw error;
+      return data || [];
+    }
+  });
 
-  // Watch do CCA selecionado para filtrar os outros campos
-  const selectedCcaId = watch("ccaId");
-  
-  // Usar dados filtrados baseados no CCA selecionado
-  const filteredData = useFilteredFormData({ selectedCcaId });
+  // Buscar supervisores
+  const { data: supervisores = [] } = useQuery({
+    queryKey: ['supervisores'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('supervisores')
+        .select('*')
+        .eq('ativo', true)
+        .order('nome');
+      
+      if (error) throw error;
+      return data || [];
+    }
+  });
+
+  // Buscar encarregados
+  const { data: encarregados = [] } = useQuery({
+    queryKey: ['encarregados'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('encarregados')
+        .select('*')
+        .eq('ativo', true)
+        .order('nome');
+      
+      if (error) throw error;
+      return data || [];
+    }
+  });
+
+  // Buscar funcionários
+  const { data: funcionarios = [] } = useQuery({
+    queryKey: ['funcionarios'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('funcionarios')
+        .select('*')
+        .eq('ativo', true)
+        .order('nome');
+      
+      if (error) throw error;
+      return data || [];
+    }
+  });
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Informações do Desvio</CardTitle>
+        <CardTitle>Novas Informações</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-4">
         <FormField
-          control={control}
+          control={form.control}
           name="descricaoDesvio"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Descrição do Desvio*</FormLabel>
+              <FormLabel>Descrição do Desvio</FormLabel>
               <FormControl>
                 <Textarea 
-                  placeholder="Descreva o desvio identificado..."
-                  className="min-h-[100px]"
-                  {...field}
-                  onChange={(e) => field.onChange(e.target.value.toUpperCase())}
+                  placeholder="Descreva o desvio identificado..." 
+                  {...field} 
+                  rows={4}
                 />
               </FormControl>
               <FormMessage />
@@ -65,12 +100,12 @@ const NovasInformacoesForm = ({ context }: NovasInformacoesFormProps) => {
         />
 
         <FormField
-          control={control}
+          control={form.control}
           name="baseLegal"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Base Legal*</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <FormLabel>Base Legal</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione a base legal" />
@@ -89,74 +124,22 @@ const NovasInformacoesForm = ({ context }: NovasInformacoesFormProps) => {
           )}
         />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <FormField
-            control={control}
-            name="supervisorResponsavel"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Supervisor Responsável</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder={selectedCcaId ? "Selecione o supervisor" : "Primeiro selecione um CCA"} />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {filteredData.supervisores.map((supervisor) => (
-                      <SelectItem key={supervisor.id} value={supervisor.id}>
-                        {supervisor.nome}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={control}
-            name="encarregadoResponsavel"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Encarregado Responsável</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder={selectedCcaId ? "Selecione o encarregado" : "Primeiro selecione um CCA"} />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {filteredData.encarregados.map((encarregado) => (
-                      <SelectItem key={encarregado.id} value={encarregado.id}>
-                        {encarregado.nome}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
         <FormField
-          control={control}
-          name="colaboradorInfrator"
+          control={form.control}
+          name="supervisorResponsavel"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Colaborador Infrator</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <FormLabel>Supervisor Responsável</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder={selectedCcaId ? "Selecione o colaborador" : "Primeiro selecione um CCA"} />
+                    <SelectValue placeholder="Selecione o supervisor" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {filteredData.funcionarios.map((funcionario) => (
-                    <SelectItem key={funcionario.id} value={funcionario.id}>
-                      {funcionario.nome} - {funcionario.matricula}
+                  {supervisores.map((supervisor) => (
+                    <SelectItem key={supervisor.id} value={supervisor.id.toString()}>
+                      {supervisor.nome}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -166,15 +149,65 @@ const NovasInformacoesForm = ({ context }: NovasInformacoesFormProps) => {
           )}
         />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <FormField
+          control={form.control}
+          name="encarregadoResponsavel"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Encarregado Responsável</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione o encarregado" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {encarregados.map((encarregado) => (
+                    <SelectItem key={encarregado.id} value={encarregado.id.toString()}>
+                      {encarregado.nome}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="colaboradorInfrator"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Colaborador Infrator</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione o colaborador" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {funcionarios.map((funcionario) => (
+                    <SelectItem key={funcionario.id} value={funcionario.id.toString()}>
+                      {funcionario.nome}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
-            control={control}
+            control={form.control}
             name="funcao"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Função</FormLabel>
                 <FormControl>
-                  <Input {...field} readOnly />
+                  <Input placeholder="Função do colaborador" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -182,13 +215,13 @@ const NovasInformacoesForm = ({ context }: NovasInformacoesFormProps) => {
           />
 
           <FormField
-            control={control}
+            control={form.control}
             name="matricula"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Matrícula</FormLabel>
                 <FormControl>
-                  <Input {...field} readOnly />
+                  <Input placeholder="Matrícula do colaborador" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>

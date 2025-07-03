@@ -49,8 +49,8 @@ const DashboardTopStats = () => {
   return (
     <div className="grid gap-4 md:grid-cols-3 mb-6">
       <StatCard
-        title="IDSMS"
-        value={idsmsPercentage === null ? "..." : `${idsmsPercentage}`}
+        title="IDSMS Médio"
+        value={idsmsPercentage === null ? "..." : `${idsmsPercentage}%`}
         icon={<TrendingUp className="h-4 w-4" />}
         description="Percentual médio do IDSMS"
         trend={idsmsPercentage && idsmsPercentage > 75 ? "up" : idsmsPercentage && idsmsPercentage < 50 ? "down" : "neutral"}
