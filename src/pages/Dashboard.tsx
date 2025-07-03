@@ -18,9 +18,11 @@ import { useUserCCAs } from "@/hooks/useUserCCAs";
 // Hook para buscar contagem de desvios filtrado por CCAs permitidos
 function useTotalDesvios() {
   const [total, setTotal] = useState<number | null>(null);
-  const { data: userCCAs = [] } = useUserCCAs();
+  const { data: userCCAs = [], isLoading } = useUserCCAs();
   
   useEffect(() => {
+    if (isLoading) return;
+    
     if (userCCAs.length === 0) {
       setTotal(0);
       return;
@@ -32,8 +34,9 @@ function useTotalDesvios() {
       .from("desvios_completos")
       .select("*", { count: "exact", head: true })
       .in('cca_id', allowedCcaIds)
-      .then(({ count }) => setTotal(count || 0));
-  }, [userCCAs]);
+      .then(({ count }) => setTotal(count || 0))
+      .catch(() => setTotal(0));
+  }, [userCCAs, isLoading]);
   
   return total;
 }
@@ -41,9 +44,11 @@ function useTotalDesvios() {
 // Hook para buscar contagem de treinamentos do mês atual filtrado por CCAs
 function useTotalTreinamentosMes() {
   const [total, setTotal] = useState<number | null>(null);
-  const { data: userCCAs = [] } = useUserCCAs();
+  const { data: userCCAs = [], isLoading } = useUserCCAs();
   
   useEffect(() => {
+    if (isLoading) return;
+    
     if (userCCAs.length === 0) {
       setTotal(0);
       return;
@@ -60,8 +65,9 @@ function useTotalTreinamentosMes() {
       .eq("mes", mes)
       .eq("ano", ano)
       .in('cca_id', allowedCcaIds)
-      .then(({ count }) => setTotal(count || 0));
-  }, [userCCAs]);
+      .then(({ count }) => setTotal(count || 0))
+      .catch(() => setTotal(0));
+  }, [userCCAs, isLoading]);
   
   return total;
 }
@@ -69,9 +75,11 @@ function useTotalTreinamentosMes() {
 // Hook para buscar número de ocorrências do mês atual filtrado por CCAs
 function useTotalOcorrenciasMes() {
   const [total, setTotal] = useState<number | null>(null);
-  const { data: userCCAs = [] } = useUserCCAs();
+  const { data: userCCAs = [], isLoading } = useUserCCAs();
   
   useEffect(() => {
+    if (isLoading) return;
+    
     if (userCCAs.length === 0) {
       setTotal(0);
       return;
@@ -88,8 +96,9 @@ function useTotalOcorrenciasMes() {
       .eq("mes", mes)
       .eq("ano", ano)
       .in('cca', allowedCcaNames)
-      .then(({ count }) => setTotal(count || 0));
-  }, [userCCAs]);
+      .then(({ count }) => setTotal(count || 0))
+      .catch(() => setTotal(0));
+  }, [userCCAs, isLoading]);
   
   return total;
 }
@@ -97,9 +106,11 @@ function useTotalOcorrenciasMes() {
 // Hook para buscar número de tarefas pendentes filtrado por CCAs
 function useTotalTarefasPendentes() {
   const [total, setTotal] = useState<number | null>(null);
-  const { data: userCCAs = [] } = useUserCCAs();
+  const { data: userCCAs = [], isLoading } = useUserCCAs();
   
   useEffect(() => {
+    if (isLoading) return;
+    
     if (userCCAs.length === 0) {
       setTotal(0);
       return;
@@ -112,8 +123,9 @@ function useTotalTarefasPendentes() {
       .select("id", { count: "exact", head: true })
       .in("status", ["pendente", "em_andamento"])
       .in('cca', allowedCcaNames)
-      .then(({ count }) => setTotal(count || 0));
-  }, [userCCAs]);
+      .then(({ count }) => setTotal(count || 0))
+      .catch(() => setTotal(0));
+  }, [userCCAs, isLoading]);
   
   return total;
 }
@@ -122,10 +134,12 @@ function useTotalTarefasPendentes() {
 function useRecentActivitiesFromDesvios() {
   const [activities, setActivities] = React.useState<any[]>([]);
   const [loading, setLoading] = React.useState(true);
-  const { data: userCCAs = [] } = useUserCCAs();
+  const { data: userCCAs = [], isLoading: ccasLoading } = useUserCCAs();
 
   React.useEffect(() => {
     async function fetchActivities() {
+      if (ccasLoading) return;
+      
       setLoading(true);
       
       if (userCCAs.length === 0) {
@@ -136,46 +150,52 @@ function useRecentActivitiesFromDesvios() {
       
       const allowedCcaIds = userCCAs.map(cca => cca.id);
       
-      const { data, error } = await supabase
-        .from("desvios_completos")
-        .select("id, descricao_desvio, data_desvio, status")
-        .in('cca_id', allowedCcaIds)
-        .order("created_at", { ascending: false })
-        .limit(10);
+      try {
+        const { data, error } = await supabase
+          .from("desvios_completos")
+          .select("id, descricao_desvio, data_desvio, status")
+          .in('cca_id', allowedCcaIds)
+          .order("created_at", { ascending: false })
+          .limit(10);
 
-      if (error) {
+        if (error) {
+          setActivities([]);
+          setLoading(false);
+          return;
+        }
+
+        // Mapear status para tipos de atividades
+        const statusMap: Record<string, any> = {
+          "Aberto": "warning",
+          "Fechado": "success",
+          "Concluido": "success",
+          "Concluída": "success",
+          "Em Andamento": "info",
+          "Pendente": "warning",
+          "Intolerável": "error",
+          "Intoleravel": "error",
+        };
+
+        setActivities(
+          (data || []).map((desvio) => ({
+            id: desvio.id,
+            title: "Novo desvio registrado",
+            description: desvio.descricao_desvio?.slice(0, 60) ?? "",
+            timestamp: desvio.data_desvio
+              ? new Date(desvio.data_desvio).toLocaleDateString("pt-BR")
+              : "",
+            status: statusMap[desvio.status || ""] || "info",
+          }))
+        );
+      } catch (error) {
+        console.error('Error fetching activities:', error);
         setActivities([]);
+      } finally {
         setLoading(false);
-        return;
       }
-
-      // Mapear status para tipos de atividades
-      const statusMap: Record<string, any> = {
-        "Aberto": "warning",
-        "Fechado": "success",
-        "Concluido": "success",
-        "Concluída": "success",
-        "Em Andamento": "info",
-        "Pendente": "warning",
-        "Intolerável": "error",
-        "Intoleravel": "error",
-      };
-
-      setActivities(
-        (data || []).map((desvio) => ({
-          id: desvio.id,
-          title: "Novo desvio registrado",
-          description: desvio.descricao_desvio?.slice(0, 60) ?? "",
-          timestamp: desvio.data_desvio
-            ? new Date(desvio.data_desvio).toLocaleDateString("pt-BR")
-            : "",
-          status: statusMap[desvio.status || ""] || "info",
-        }))
-      );
-      setLoading(false);
     }
     fetchActivities();
-  }, [userCCAs]);
+  }, [userCCAs, ccasLoading]);
   
   return { activities, loading };
 }
@@ -184,10 +204,12 @@ function useRecentActivitiesFromDesvios() {
 function usePendingTasksFromSupabase() {
   const [tasks, setTasks] = React.useState<any[]>([]);
   const [loading, setLoading] = React.useState(true);
-  const { data: userCCAs = [] } = useUserCCAs();
+  const { data: userCCAs = [], isLoading: ccasLoading } = useUserCCAs();
 
   React.useEffect(() => {
     async function fetchTasks() {
+      if (ccasLoading) return;
+      
       setLoading(true);
       
       if (userCCAs.length === 0) {
@@ -198,58 +220,64 @@ function usePendingTasksFromSupabase() {
       
       const allowedCcaNames = userCCAs.map(cca => cca.codigo);
       
-      const { data, error } = await supabase
-        .from("tarefas")
-        .select(
-          `
-            id,
-            titulo,
-            descricao,
-            data_conclusao,
-            status,
-            configuracao,
-            responsavel_id,
-            profiles!inner(id, nome)
-          `
-        )
-        .in("status", ["pendente", "em_andamento"])
-        .in('cca', allowedCcaNames)
-        .order("created_at", { ascending: false })
-        .limit(10);
+      try {
+        const { data, error } = await supabase
+          .from("tarefas")
+          .select(
+            `
+              id,
+              titulo,
+              descricao,
+              data_conclusao,
+              status,
+              configuracao,
+              responsavel_id,
+              profiles!inner(id, nome)
+            `
+          )
+          .in("status", ["pendente", "em_andamento"])
+          .in('cca', allowedCcaNames)
+          .order("created_at", { ascending: false })
+          .limit(10);
 
-      if (error) {
+        if (error) {
+          setTasks([]);
+          setLoading(false);
+          return;
+        }
+
+        setTasks(
+          (data || []).map((t: any) => ({
+            id: t.id,
+            title: t.titulo || t.descricao?.slice(0, 40) || "Tarefa sem título",
+            dueDate: t.data_conclusao
+              ? new Date(t.data_conclusao).toLocaleDateString("pt-BR")
+              : "",
+            priority:
+              t?.configuracao?.criticidade ||
+              (t?.configuracao && t.configuracao["criticidade"]) ||
+              "media",
+            status:
+              t.status === "em_andamento"
+                ? "in-progress"
+                : t.status === "pendente"
+                ? "pending"
+                : t.status === "concluida"
+                ? "completed"
+                : t.status || "pending",
+            responsavel:
+              t.profiles?.nome || "Não atribuído",
+          }))
+        );
+      } catch (error) {
+        console.error('Error fetching tasks:', error);
         setTasks([]);
+      } finally {
         setLoading(false);
-        return;
       }
-
-      setTasks(
-        (data || []).map((t: any) => ({
-          id: t.id,
-          title: t.titulo || t.descricao?.slice(0, 40) || "Tarefa sem título",
-          dueDate: t.data_conclusao
-            ? new Date(t.data_conclusao).toLocaleDateString("pt-BR")
-            : "",
-          priority:
-            t?.configuracao?.criticidade ||
-            (t?.configuracao && t.configuracao["criticidade"]) ||
-            "media",
-          status:
-            t.status === "em_andamento"
-              ? "in-progress"
-              : t.status === "pendente"
-              ? "pending"
-              : t.status === "concluida"
-              ? "completed"
-              : t.status || "pending",
-          responsavel:
-            t.profiles?.nome || "Não atribuído",
-        }))
-      );
-      setLoading(false);
     }
     fetchTasks();
-  }, [userCCAs]);
+  }, [userCCAs, ccasLoading]);
 
   return { tasks, loading, setTasks };
 }
@@ -266,24 +294,33 @@ const Dashboard = () => {
   // Função para concluir tarefa via Supabase
   const handleMarkTaskComplete = useCallback(
     async (taskId: string) => {
-      const { error } = await supabase
-        .from("tarefas")
-        .update({ status: "concluida", data_real_conclusao: new Date().toISOString() })
-        .eq("id", taskId);
-      if (error) {
+      try {
+        const { error } = await supabase
+          .from("tarefas")
+          .update({ status: "concluida", data_real_conclusao: new Date().toISOString() })
+          .eq("id", taskId);
+        if (error) {
+          toast({
+            title: "Erro ao concluir tarefa",
+            description: error.message,
+            variant: "destructive",
+          });
+          return;
+        }
+        // Remover do state para um refresh rápido, sem recarregar tudo
+        setTasks((prev) => prev.filter((t) => t.id !== taskId));
+        toast({
+          title: "Tarefa concluída",
+          description: "Tarefa marcada como concluída com sucesso",
+        });
+      } catch (error) {
+        console.error('Error completing task:', error);
         toast({
           title: "Erro ao concluir tarefa",
-          description: error.message,
+          description: "Erro inesperado ao concluir tarefa",
           variant: "destructive",
         });
-        return;
       }
-      // Remover do state para um refresh rápido, sem recarregar tudo
-      setTasks((prev) => prev.filter((t) => t.id !== taskId));
-      toast({
-        title: "Tarefa concluída",
-        description: "Tarefa marcada como concluída com sucesso",
-      });
     },
     [setTasks]
   );

@@ -14,18 +14,21 @@ const AuthGuard = ({ children }: AuthGuardProps) => {
   const [isChecking, setIsChecking] = useState(true);
 
   useEffect(() => {
-    // Wait a short time to avoid flashing redirects during quick auth checks
+    // Reduced timeout for faster loading
     const timer = setTimeout(() => {
       setIsChecking(false);
-    }, 500);
+    }, 200);
 
     return () => clearTimeout(timer);
   }, [loading]);
 
   if (loading || isChecking) {
     return (
-      <div className="flex h-screen w-full items-center justify-center">
-        <Loader2 className="h-10 w-10 animate-spin text-primary" />
+      <div className="flex h-screen w-full items-center justify-center bg-background">
+        <div className="flex flex-col items-center space-y-4">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <p className="text-sm text-muted-foreground">Carregando...</p>
+        </div>
       </div>
     );
   }

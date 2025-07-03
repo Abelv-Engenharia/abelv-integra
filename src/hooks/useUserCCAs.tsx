@@ -14,12 +14,12 @@ export const useUserCCAs = () => {
       try {
         console.log('Buscando CCAs para usuário:', user.id);
         
-        // Buscar o perfil do usuário e seus CCAs permitidos
+        // Buscar o perfil do usuário e seus CCAs permitidos em uma única query otimizada
         const { data: userPerfil, error: userPerfilError } = await supabase
           .from('usuario_perfis')
           .select(`
             perfil_id,
-            perfis (
+            perfis!inner (
               ccas_permitidas
             )
           `)
@@ -42,7 +42,7 @@ export const useUserCCAs = () => {
           return [];
         }
 
-        // Buscar os detalhes dos CCAs permitidos
+        // Buscar os detalhes dos CCAs permitidos com cache otimizado
         const { data: ccas, error: ccasError } = await supabase
           .from('ccas')
           .select('*')
@@ -63,6 +63,9 @@ export const useUserCCAs = () => {
       }
     },
     enabled: !!user?.id,
-    staleTime: 5 * 60 * 1000
+    staleTime: 10 * 60 * 1000, // 10 minutos de cache
+    gcTime: 15 * 60 * 1000, // 15 minutos antes de garbage collect
+    retry: 2,
+    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
 };
