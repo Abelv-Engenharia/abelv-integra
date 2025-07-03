@@ -19,10 +19,10 @@ export function InspecoesByCCAChart({ filters }: InspecoesByCCAChartProps) {
     const loadData = async () => {
       try {
         setLoading(true);
+        setError(null);
         
         if (userCCAs.length === 0) {
           setData([]);
-          setLoading(false);
           return;
         }
         

@@ -58,37 +58,31 @@ export async function fetchInspecoesSummary(ccaIds: number[], filters?: FilterOp
     data.forEach((row: any) => {
       summary.totalInspecoes++;
       
-      const status = (row.status || '').toUpperCase();
-      const inspecaoProgramada = (row.inspecao_programada || '').toUpperCase();
+      const status = (row.status || '').toLowerCase();
+      const inspecaoProgramada = (row.inspecao_programada || '').toLowerCase();
       
       // Contar desvios
       summary.desviosIdentificados += row.desvios_identificados || 0;
       
       // Classificar por status
-      if (status === 'A REALIZAR') {
+      if (status === 'a realizar') {
         summary.aRealizar++;
-      } else if (status === 'REALIZADA') {
-        if (inspecaoProgramada === 'PROGRAMADA') {
+      } else if (status === 'realizada') {
+        if (inspecaoProgramada === 'programada') {
           summary.realizadas++;
-          summary.programadas++;
         } else {
           summary.realizadasNaoProgramadas++;
-          summary.naoProgramadas++;
         }
-      } else if (status === 'NÃO REALIZADA') {
+      } else if (status === 'não realizada') {
         summary.naoRealizadas++;
-        summary.programadas++;
-      } else if (status === 'CANCELADA') {
+      } else if (status === 'cancelada') {
         summary.canceladas++;
       }
-      
-      // Contar programadas (inclui A REALIZAR, REALIZADA programada, NÃO REALIZADA)
-      if (inspecaoProgramada === 'PROGRAMADA') {
-        if (status !== 'REALIZADA') { // Realizada programada já foi contada acima
-          summary.programadas++;
-        }
-      }
     });
+
+    // Calcular programadas e não programadas
+    summary.programadas = summary.aRealizar + summary.realizadas + summary.naoRealizadas;
+    summary.naoProgramadas = summary.realizadasNaoProgramadas;
 
     return summary;
   } catch (error) {

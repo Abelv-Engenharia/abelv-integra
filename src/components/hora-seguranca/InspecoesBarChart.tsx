@@ -20,10 +20,10 @@ export function InspecoesBarChart({ dataType, filters }: InspecoesBarChartProps)
     const loadData = async () => {
       try {
         setLoading(true);
+        setError(null);
         
         if (userCCAs.length === 0) {
           setData([]);
-          setLoading(false);
           return;
         }
         
@@ -33,10 +33,10 @@ export function InspecoesBarChart({ dataType, filters }: InspecoesBarChartProps)
         if (dataType === 'responsible') {
           const chartData = await fetchInspecoesByResponsavel(ccaIds, filters);
           setData(chartData);
-        } else if (dataType === 'cca') {
+        } else {
           // Para dados por CCA, vamos mostrar apenas os CCAs permitidos
           const ccaData = userCCAs.map(cca => ({
-            name: `${cca.codigo} - ${cca.nome}`,
+            cca: `${cca.codigo} - ${cca.nome}`,
             "A Realizar": 0,
             "Realizada": 0,
             "Não Realizada": 0,
@@ -81,7 +81,7 @@ export function InspecoesBarChart({ dataType, filters }: InspecoesBarChartProps)
   }
 
   const getDataKey = () => {
-    return dataType === 'cca' ? 'nome' : 'responsavel';
+    return dataType === 'cca' ? 'cca' : 'responsavel';
   };
 
   return (
