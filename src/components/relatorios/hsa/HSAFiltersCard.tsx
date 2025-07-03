@@ -105,7 +105,7 @@ export function HSAFiltersCard({
                 <SelectValue placeholder="Todos os CCAs" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Todos</SelectItem>
+                <SelectItem value="all">Todos</SelectItem>
                 {userCCAs.map(cca => (
                   <SelectItem key={cca.id} value={cca.id.toString()}>
                     {cca.codigo} - {cca.nome}
@@ -122,7 +122,7 @@ export function HSAFiltersCard({
                 <SelectValue placeholder="Todos" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Todos</SelectItem>
+                <SelectItem value="all">Todos</SelectItem>
               </SelectContent>
             </Select>
           </div>

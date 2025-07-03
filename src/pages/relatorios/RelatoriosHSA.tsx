@@ -7,8 +7,8 @@ import { HSAChartsSection } from "@/components/relatorios/hsa/HSAChartsSection";
 const RelatoriosHSA = () => {
   const [dataInicial, setDataInicial] = useState<Date>();
   const [dataFinal, setDataFinal] = useState<Date>();
-  const [filterCCA, setFilterCCA] = useState("");
-  const [filterResponsavel, setFilterResponsavel] = useState("");
+  const [filterCCA, setFilterCCA] = useState("all");
+  const [filterResponsavel, setFilterResponsavel] = useState("all");
 
   const handleExportPDF = () => {
     toast({
