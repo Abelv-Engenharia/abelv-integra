@@ -3,14 +3,12 @@ import { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { fetchInspecoesByResponsavel } from '@/services/hora-seguranca';
 import { useUserCCAs } from '@/hooks/useUserCCAs';
-import { FilterOptions } from '@/pages/hora-seguranca/HoraSegurancaDashboard';
 
 interface InspecoesBarChartProps {
   dataType: 'cca' | 'responsible';
-  filters?: FilterOptions;
 }
 
-export function InspecoesBarChart({ dataType, filters }: InspecoesBarChartProps) {
+export function InspecoesBarChart({ dataType }: InspecoesBarChartProps) {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -20,10 +18,10 @@ export function InspecoesBarChart({ dataType, filters }: InspecoesBarChartProps)
     const loadData = async () => {
       try {
         setLoading(true);
-        setError(null);
         
         if (userCCAs.length === 0) {
           setData([]);
+          setLoading(false);
           return;
         }
         
@@ -31,12 +29,12 @@ export function InspecoesBarChart({ dataType, filters }: InspecoesBarChartProps)
         const ccaIds = userCCAs.map(cca => cca.id);
         
         if (dataType === 'responsible') {
-          const chartData = await fetchInspecoesByResponsavel(ccaIds, filters);
+          const chartData = await fetchInspecoesByResponsavel(ccaIds);
           setData(chartData);
-        } else {
+        } else if (dataType === 'cca') {
           // Para dados por CCA, vamos mostrar apenas os CCAs permitidos
           const ccaData = userCCAs.map(cca => ({
-            cca: `${cca.codigo} - ${cca.nome}`,
+            name: `${cca.codigo} - ${cca.nome}`,
             "A Realizar": 0,
             "Realizada": 0,
             "Não Realizada": 0,
@@ -54,7 +52,7 @@ export function InspecoesBarChart({ dataType, filters }: InspecoesBarChartProps)
     };
 
     loadData();
-  }, [dataType, userCCAs, filters]);
+  }, [dataType, userCCAs]);
 
   if (loading) {
     return (
@@ -81,7 +79,7 @@ export function InspecoesBarChart({ dataType, filters }: InspecoesBarChartProps)
   }
 
   const getDataKey = () => {
-    return dataType === 'cca' ? 'cca' : 'responsavel';
+    return dataType === 'cca' ? 'nome' : 'responsavel';
   };
 
   return (

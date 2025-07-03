@@ -5,7 +5,6 @@ import { Activity, Calendar, CheckSquare, FileWarning, Target, TrendingUp } from
 import { Card, CardContent } from "@/components/ui/card";
 import { InspecoesSummary } from "@/services/hora-seguranca/types";
 import { useUserCCAs } from "@/hooks/useUserCCAs";
-import { FilterOptions } from "@/pages/hora-seguranca/HoraSegurancaDashboard";
 
 interface StatCardProps {
   title: string;
@@ -30,11 +29,7 @@ const StatCard = ({ title, value, description, icon, className }: StatCardProps)
   </Card>
 );
 
-interface InspecoesSummaryCardsProps {
-  filters?: FilterOptions;
-}
-
-const InspecoesSummaryCards = ({ filters }: InspecoesSummaryCardsProps) => {
+const InspecoesSummaryCards = () => {
   const [data, setData] = useState<InspecoesSummary | null>(null);
   const [loading, setLoading] = useState(true);
   const { data: userCCAs = [] } = useUserCCAs();
@@ -56,12 +51,13 @@ const InspecoesSummaryCards = ({ filters }: InspecoesSummaryCardsProps) => {
             naoRealizadas: 0,
             realizadasNaoProgramadas: 0
           });
+          setLoading(false);
           return;
         }
         
         // Aplicar filtro por CCAs permitidos
         const ccaIds = userCCAs.map(cca => cca.id);
-        const summary = await fetchInspecoesSummary(ccaIds, filters);
+        const summary = await fetchInspecoesSummary(ccaIds);
         setData(summary);
       } catch (error) {
         console.error("Error loading inspeções summary:", error);
@@ -71,7 +67,7 @@ const InspecoesSummaryCards = ({ filters }: InspecoesSummaryCardsProps) => {
     };
 
     loadData();
-  }, [userCCAs, filters]);
+  }, [userCCAs]);
 
   if (loading) {
     return (
@@ -87,21 +83,11 @@ const InspecoesSummaryCards = ({ filters }: InspecoesSummaryCardsProps) => {
     );
   }
 
-  if (!data) {
-    return (
-      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-6">
-        <div className="col-span-full text-center text-muted-foreground">
-          Nenhum dado disponível
-        </div>
-      </div>
-    );
-  }
-
-  // Cálculos usando os dados reais do serviço
-  const inspecoesProgramadas = data.programadas;
-  const inspecoesRealizadas = data.realizadas;
-  const inspecoesNaoProgramadas = data.naoProgramadas;
-  const inspecoesNaoRealizadas = data.naoRealizadas;
+  // Cálculos corrigidos usando os dados reais do serviço
+  const inspecoesProgramadas = (data?.aRealizar || 0) + (data?.realizadas || 0) + (data?.naoRealizadas || 0);
+  const inspecoesRealizadas = data?.realizadas || 0;
+  const inspecoesNaoProgramadas = data?.realizadasNaoProgramadas || 0;
+  const inspecoesNaoRealizadas = data?.naoRealizadas || 0;
   
   // Aderência HSA (real) = REALIZADA / (A REALIZAR + REALIZADA + NÃO REALIZADA) * 100
   const aderenciaReal = inspecoesProgramadas > 0 ? Math.round((inspecoesRealizadas / inspecoesProgramadas) * 100) : 0;

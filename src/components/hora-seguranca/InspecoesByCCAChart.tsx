@@ -3,13 +3,8 @@ import { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { fetchInspecoesByCCA } from '@/services/hora-seguranca/inspecoesByCCAService';
 import { useUserCCAs } from '@/hooks/useUserCCAs';
-import { FilterOptions } from '@/pages/hora-seguranca/HoraSegurancaDashboard';
 
-interface InspecoesByCCAChartProps {
-  filters?: FilterOptions;
-}
-
-export function InspecoesByCCAChart({ filters }: InspecoesByCCAChartProps) {
+export function InspecoesByCCAChart() {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -19,16 +14,16 @@ export function InspecoesByCCAChart({ filters }: InspecoesByCCAChartProps) {
     const loadData = async () => {
       try {
         setLoading(true);
-        setError(null);
         
         if (userCCAs.length === 0) {
           setData([]);
+          setLoading(false);
           return;
         }
         
         // Aplicar filtro por CCAs permitidos
         const ccaIds = userCCAs.map(cca => cca.id);
-        const chartData = await fetchInspecoesByCCA(ccaIds, filters);
+        const chartData = await fetchInspecoesByCCA(ccaIds);
         
         // Formatar dados para o gráfico
         const formattedData = chartData.map(item => ({
@@ -50,7 +45,7 @@ export function InspecoesByCCAChart({ filters }: InspecoesByCCAChartProps) {
     };
 
     loadData();
-  }, [userCCAs, filters]);
+  }, [userCCAs]);
 
   if (loading) {
     return (

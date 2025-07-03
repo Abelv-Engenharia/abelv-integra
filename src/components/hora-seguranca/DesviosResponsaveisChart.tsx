@@ -3,13 +3,8 @@ import { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { fetchDesviosByResponsavel } from '@/services/hora-seguranca';
 import { useUserCCAs } from '@/hooks/useUserCCAs';
-import { FilterOptions } from '@/pages/hora-seguranca/HoraSegurancaDashboard';
 
-interface DesviosResponsaveisChartProps {
-  filters?: FilterOptions;
-}
-
-export function DesviosResponsaveisChart({ filters }: DesviosResponsaveisChartProps) {
+export function DesviosResponsaveisChart() {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -28,7 +23,7 @@ export function DesviosResponsaveisChart({ filters }: DesviosResponsaveisChartPr
         
         // Aplicar filtro por CCAs permitidos
         const ccaIds = userCCAs.map(cca => cca.id);
-        const chartData = await fetchDesviosByResponsavel(ccaIds, filters);
+        const chartData = await fetchDesviosByResponsavel(ccaIds);
         
         // Formatar dados para o gráfico
         const formattedData = chartData.map(item => ({
@@ -46,7 +41,7 @@ export function DesviosResponsaveisChart({ filters }: DesviosResponsaveisChartPr
     };
 
     loadData();
-  }, [userCCAs, filters]);
+  }, [userCCAs]);
 
   if (loading) {
     return (
