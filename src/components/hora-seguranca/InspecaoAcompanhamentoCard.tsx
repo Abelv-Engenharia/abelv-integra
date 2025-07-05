@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { InspecaoStatusBadge } from "./InspecaoStatusBadge";
 import { format } from "date-fns";
 import { FileText } from "lucide-react";
+import { useSignedUrl } from "@/hooks/useSignedUrl";
+import { useToast } from "@/hooks/use-toast";
 
 interface InspecaoAcompanhamentoCardProps {
   inspecao: any;
@@ -17,6 +19,9 @@ export function InspecaoAcompanhamentoCard({
   onUpdateStatus,
   onDelete
 }: InspecaoAcompanhamentoCardProps) {
+  const { generate, loading, error } = useSignedUrl();
+  const { toast } = useToast();
+
   // Função para formatar a data corretamente, evitando problemas de timezone
   const formatDateSafely = (dateString: string) => {
     if (!dateString) return "--";
@@ -24,9 +29,44 @@ export function InspecaoAcompanhamentoCard({
     return format(new Date(dateString + 'T00:00:00'), "dd/MM/yyyy");
   };
 
-  const handleViewReport = () => {
-    if (inspecao.relatorio_url) {
-      window.open(inspecao.relatorio_url, '_blank');
+  const handleViewReport = async () => {
+    if (!inspecao.relatorio_url) return;
+    
+    try {
+      // Extrai o path do arquivo da URL completa
+      const url = new URL(inspecao.relatorio_url);
+      const pathParts = url.pathname.split('/');
+      const fileName = pathParts[pathParts.length - 1];
+      
+      // Gera signed URL válida por 2 minutos
+      await generate('relatorios-inspecao-hsa', fileName, 120);
+      
+      if (error) {
+        toast({
+          title: "Erro ao abrir relatório",
+          description: error,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Aguarda um pouco para garantir que a URL foi gerada
+      setTimeout(async () => {
+        const { data } = await supabase.storage
+          .from('relatorios-inspecao-hsa')
+          .createSignedUrl(fileName, 120);
+          
+        if (data?.signedUrl) {
+          window.open(data.signedUrl, '_blank');
+        }
+      }, 100);
+      
+    } catch (err) {
+      toast({
+        title: "Erro ao abrir relatório",
+        description: "Não foi possível acessar o arquivo",
+        variant: "destructive",
+      });
     }
   };
 
@@ -74,10 +114,11 @@ export function InspecaoAcompanhamentoCard({
               variant="outline"
               size="sm"
               onClick={handleViewReport}
+              disabled={loading}
               className="flex items-center gap-1 px-2 py-0.5 h-6 min-h-0 text-[10px] leading-none"
             >
               <FileText className="h-3 w-3" />
-              Relatório
+              {loading ? "Carregando..." : "Relatório"}
             </Button>
           )}
           <Button
