@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
@@ -16,6 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { InspecaoAcompanhamentoCard } from "@/components/hora-seguranca/InspecaoAcompanhamentoCard";
 import { useUserCCAs } from "@/hooks/useUserCCAs";
+import { PdfUpload } from "@/components/ui/pdf-upload";
 
 const statusOptions: string[] = ["REALIZADA", "NÃO REALIZADA", "CANCELADA"];
 
@@ -66,6 +66,7 @@ export default function InspecoesAcompanhamento() {
   const [selectedInspecao, setSelectedInspecao] = useState<any | null>(null);
   const [updateDialogOpen, setUpdateDialogOpen] = useState(false);
   const [busca, setBusca] = useState("");
+  const [relatorioUrl, setRelatorioUrl] = useState<string>("");
   const { toast } = useToast();
   const [ccas, setCcas] = useState<{ id: number; codigo: string; nome: string }[]>([]);
   const { data: userCCAs = [] } = useUserCCAs();
@@ -159,6 +160,7 @@ export default function InspecoesAcompanhamento() {
 
   const openUpdateDialog = (inspecao: any) => {
     setSelectedInspecao(inspecao);
+    setRelatorioUrl(inspecao.relatorio_url || "");
     updateForm.reset({
       status: (inspecao.status === "REALIZADA (NÃO PROGRAMADA)")
         ? "REALIZADA"
@@ -170,13 +172,16 @@ export default function InspecoesAcompanhamento() {
 
   const handleUpdate = async (values: z.infer<typeof formSchema>) => {
     if (!selectedInspecao) return;
+    
     const { error } = await supabase
       .from("execucao_hsa")
       .update({
         status: values.status,
         desvios_identificados: values.desviosIdentificados,
+        relatorio_url: relatorioUrl || null,
       })
       .eq("id", selectedInspecao.id);
+      
     if (error) {
       toast({
         title: "Erro ao atualizar status",
@@ -185,19 +190,36 @@ export default function InspecoesAcompanhamento() {
       });
       return;
     }
+    
     setInspecoes((prev) =>
       prev.map((insp) =>
         insp.id === selectedInspecao.id
-          ? { ...insp, status: values.status, desvios_identificados: values.desviosIdentificados }
+          ? { 
+              ...insp, 
+              status: values.status, 
+              desvios_identificados: values.desviosIdentificados,
+              relatorio_url: relatorioUrl 
+            }
           : insp
       )
     );
+    
     toast({
       title: "Status atualizado!",
       description: "O status da inspeção foi alterado.",
     });
+    
     setUpdateDialogOpen(false);
     setSelectedInspecao(null);
+    setRelatorioUrl("");
+  };
+
+  const handleFileUploaded = (url: string) => {
+    setRelatorioUrl(url);
+  };
+
+  const handleFileRemoved = () => {
+    setRelatorioUrl("");
   };
 
   // Verificar se o usuário tem permissão para acessar
@@ -309,6 +331,13 @@ export default function InspecoesAcompanhamento() {
                     </FormItem>
                   )}
                 />
+                
+                <PdfUpload
+                  onFileUploaded={handleFileUploaded}
+                  currentFile={relatorioUrl}
+                  onFileRemoved={handleFileRemoved}
+                />
+                
                 <DialogFooter>
                   <Button variant="outline" type="button" onClick={() => setUpdateDialogOpen(false)} className="text-[12px] h-8 px-3">
                     Cancelar

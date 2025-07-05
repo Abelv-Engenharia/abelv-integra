@@ -682,6 +682,7 @@ export type Database = {
           inspecao_programada: string | null
           mes: number
           observacao: string | null
+          relatorio_url: string | null
           responsavel_inspecao: string
           status: string
           updated_at: string | null
@@ -697,6 +698,7 @@ export type Database = {
           inspecao_programada?: string | null
           mes: number
           observacao?: string | null
+          relatorio_url?: string | null
           responsavel_inspecao: string
           status: string
           updated_at?: string | null
@@ -712,6 +714,7 @@ export type Database = {
           inspecao_programada?: string | null
           mes?: number
           observacao?: string | null
+          relatorio_url?: string | null
           responsavel_inspecao?: string
           status?: string
           updated_at?: string | null
