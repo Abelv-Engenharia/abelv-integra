@@ -7,6 +7,7 @@ import { format } from "date-fns";
 import { FileText } from "lucide-react";
 import { useSignedUrl } from "@/hooks/useSignedUrl";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface InspecaoAcompanhamentoCardProps {
   inspecao: any;
