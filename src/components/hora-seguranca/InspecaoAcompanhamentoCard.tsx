@@ -4,6 +4,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { Button } from "@/components/ui/button";
 import { InspecaoStatusBadge } from "./InspecaoStatusBadge";
 import { format } from "date-fns";
+import { FileText } from "lucide-react";
 
 interface InspecaoAcompanhamentoCardProps {
   inspecao: any;
@@ -21,6 +22,12 @@ export function InspecaoAcompanhamentoCard({
     if (!dateString) return "--";
     // Adiciona 'T00:00:00' para garantir que seja tratada como data local
     return format(new Date(dateString + 'T00:00:00'), "dd/MM/yyyy");
+  };
+
+  const handleViewReport = () => {
+    if (inspecao.relatorio_url) {
+      window.open(inspecao.relatorio_url, '_blank');
+    }
   };
 
   return (
@@ -62,6 +69,17 @@ export function InspecaoAcompanhamentoCard({
       {/* Botões canto inferior direito, menores */}
       <CardFooter className="pt-0 px-2 pb-2 justify-end">
         <div className="flex gap-1">
+          {inspecao.relatorio_url && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleViewReport}
+              className="flex items-center gap-1 px-2 py-0.5 h-6 min-h-0 text-[10px] leading-none"
+            >
+              <FileText className="h-3 w-3" />
+              Relatório
+            </Button>
+          )}
           <Button
             variant="outline"
             size="sm"
