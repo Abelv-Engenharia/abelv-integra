@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Link, useLocation } from "react-router-dom";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import SidebarSectionSMS from "./SidebarSectionSMS";
+import SidebarSectionGestaoSMS from "./SidebarSectionGestaoSMS";
 import SidebarSectionTarefas from "./SidebarSectionTarefas";
 import SidebarSectionRelatorios from "./SidebarSectionRelatorios";
 import SidebarSectionAdministracao from "./SidebarSectionAdministracao";
@@ -52,11 +52,12 @@ export function AppSidebar() {
 
   // Defina o menu principal aberto inicialmente
   const [openMenu, setOpenMenu] = useState<string | null>(() => {
-    if (currentPath.startsWith("/hora-seguranca")) return "hora-seguranca";
-    if (currentPath.startsWith("/desvios")) return "desvios";
-    if (currentPath.startsWith("/treinamentos")) return "treinamentos";
-    if (currentPath.startsWith("/medidas-disciplinares")) return "medidas-disciplinares";
-    if (currentPath.startsWith("/inspecao-sms")) return "inspecao-sms";
+    if (currentPath.startsWith("/hora-seguranca") || 
+        currentPath.startsWith("/desvios") || 
+        currentPath.startsWith("/treinamentos") || 
+        currentPath.startsWith("/medidas-disciplinares") || 
+        currentPath.startsWith("/inspecao-sms") || 
+        currentPath.startsWith("/ocorrencias")) return "gestao-sms";
     if (currentPath.startsWith("/tarefas")) return "tarefas";
     if (currentPath.startsWith("/relatorios")) return "relatorios";
     if (currentPath.startsWith("/idsms")) return "idsms";
@@ -90,7 +91,7 @@ export function AppSidebar() {
           )}
         </SidebarMenu>
 
-        {/* Render SMS se tiver acesso a pelo menos 1 menu dele */}
+        {/* Render Gestão de SMS se tiver acesso a pelo menos 1 menu SMS */}
         {["desvios_dashboard", "desvios_cadastro", "desvios_consulta", "desvios_nao_conformidade", 
           "treinamentos_dashboard", "treinamentos_normativo", "treinamentos_consulta", "treinamentos_execucao", "treinamentos_cracha",
           "hora_seguranca_cadastro", "hora_seguranca_cadastro_inspecao", "hora_seguranca_cadastro_nao_programada", 
@@ -100,7 +101,7 @@ export function AppSidebar() {
           "ocorrencias_dashboard", "ocorrencias_cadastro", "ocorrencias_consulta"].some(menu =>
           podeVerMenu(menu, menusSidebar)
         ) && (
-          <SidebarSectionSMS openMenu={openMenu} toggleMenu={toggleMenu} />
+          <SidebarSectionGestaoSMS openMenu={openMenu} toggleMenu={toggleMenu} />
         )}
 
         {/* Render Tarefas */}
