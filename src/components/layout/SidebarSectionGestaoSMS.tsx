@@ -34,7 +34,7 @@ const SidebarSectionGestaoSMS = ({ openMenu, toggleMenu }: SidebarSectionGestaoS
               <ChevronDown className={`h-4 w-4 ml-auto transition-transform ${openMenu === "gestao-sms" ? "rotate-180" : ""}`} />
             </SidebarMenuButton>
           </CollapsibleTrigger>
-          <CollapsibleContent asChild>
+          <CollapsibleContent>
             <SidebarMenuSub>
               {/* Desvios */}
               <SidebarMenuSubItem>
@@ -48,7 +48,7 @@ const SidebarSectionGestaoSMS = ({ openMenu, toggleMenu }: SidebarSectionGestaoS
                       <ChevronDown className={`h-3 w-3 ml-auto transition-transform ${openMenu === "desvios" ? "rotate-180" : ""}`} />
                     </SidebarMenuSubButton>
                   </CollapsibleTrigger>
-                  <CollapsibleContent asChild>
+                  <CollapsibleContent>
                     <SidebarMenuSub>
                       <SidebarMenuSubItem>
                         <SidebarMenuSubButton 
@@ -107,7 +107,7 @@ const SidebarSectionGestaoSMS = ({ openMenu, toggleMenu }: SidebarSectionGestaoS
                       <ChevronDown className={`h-3 w-3 ml-auto transition-transform ${openMenu === "treinamentos" ? "rotate-180" : ""}`} />
                     </SidebarMenuSubButton>
                   </CollapsibleTrigger>
-                  <CollapsibleContent asChild>
+                  <CollapsibleContent>
                     <SidebarMenuSub>
                       <SidebarMenuSubItem>
                         <SidebarMenuSubButton 
@@ -176,7 +176,7 @@ const SidebarSectionGestaoSMS = ({ openMenu, toggleMenu }: SidebarSectionGestaoS
                       <ChevronDown className={`h-3 w-3 ml-auto transition-transform ${openMenu === "hora-seguranca" ? "rotate-180" : ""}`} />
                     </SidebarMenuSubButton>
                   </CollapsibleTrigger>
-                  <CollapsibleContent asChild>
+                  <CollapsibleContent>
                     <SidebarMenuSub>
                       <SidebarMenuSubItem>
                         <SidebarMenuSubButton 
@@ -235,7 +235,7 @@ const SidebarSectionGestaoSMS = ({ openMenu, toggleMenu }: SidebarSectionGestaoS
                       <ChevronDown className={`h-3 w-3 ml-auto transition-transform ${openMenu === "inspecao-sms" ? "rotate-180" : ""}`} />
                     </SidebarMenuSubButton>
                   </CollapsibleTrigger>
-                  <CollapsibleContent asChild>
+                  <CollapsibleContent>
                     <SidebarMenuSub>
                       <SidebarMenuSubItem>
                         <SidebarMenuSubButton 
@@ -284,7 +284,7 @@ const SidebarSectionGestaoSMS = ({ openMenu, toggleMenu }: SidebarSectionGestaoS
                       <ChevronDown className={`h-3 w-3 ml-auto transition-transform ${openMenu === "ocorrencias" ? "rotate-180" : ""}`} />
                     </SidebarMenuSubButton>
                   </CollapsibleTrigger>
-                  <CollapsibleContent asChild>
+                  <CollapsibleContent>
                     <SidebarMenuSub>
                       <SidebarMenuSubItem>
                         <SidebarMenuSubButton 
@@ -333,7 +333,7 @@ const SidebarSectionGestaoSMS = ({ openMenu, toggleMenu }: SidebarSectionGestaoS
                       <ChevronDown className={`h-3 w-3 ml-auto transition-transform ${openMenu === "medidas-disciplinares" ? "rotate-180" : ""}`} />
                     </SidebarMenuSubButton>
                   </CollapsibleTrigger>
-                  <CollapsibleContent asChild>
+                  <CollapsibleContent>
                     <SidebarMenuSub>
                       <SidebarMenuSubItem>
                         <SidebarMenuSubButton 
