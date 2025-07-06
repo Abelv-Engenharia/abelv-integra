@@ -209,7 +209,7 @@ const CadastrarInspecao = () => {
                       <SelectValue placeholder="Todos os tipos" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Todos os tipos</SelectItem>
+                      <SelectItem value="todos">Todos os tipos</SelectItem>
                       {tiposInspecao.map((tipo) => (
                         <SelectItem key={tipo.id} value={tipo.id}>
                           {tipo.nome}
