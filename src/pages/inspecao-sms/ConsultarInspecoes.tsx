@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -14,8 +13,10 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Badge } from "@/components/ui/badge";
 import { PageLoader } from "@/components/common/PageLoader";
+import { useNavigate } from "react-router-dom";
 
 const ConsultarInspecoes = () => {
+  const navigate = useNavigate();
   const [inspecoes, setInspecoes] = useState<any[]>([]);
   const [filteredInspecoes, setFilteredInspecoes] = useState<any[]>([]);
   const [tiposInspecao, setTiposInspecao] = useState<any[]>([]);
@@ -173,6 +174,21 @@ const ConsultarInspecoes = () => {
         {temNaoConformidade ? "Não Conforme" : "Conforme"}
       </Badge>
     );
+  };
+
+  const handleViewInspecao = (inspecao: any) => {
+    navigate(`/inspecao-sms/visualizar/${inspecao.id}`);
+  };
+
+  const handleDownloadPDF = async (inspecao: any) => {
+    if (!inspecao.pdf_gerado_url) return;
+    
+    try {
+      // Implementar download do PDF
+      window.open(inspecao.pdf_gerado_url, '_blank');
+    } catch (error) {
+      console.error('Erro ao baixar PDF:', error);
+    }
   };
 
   useEffect(() => {
@@ -357,12 +373,20 @@ const ConsultarInspecoes = () => {
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
-                          <Button variant="outline" size="sm">
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => handleViewInspecao(inspecao)}
+                          >
                             <Eye className="h-4 w-4" />
                             <span className="sr-only">Visualizar</span>
                           </Button>
                           {inspecao.pdf_gerado_url && (
-                            <Button variant="outline" size="sm">
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => handleDownloadPDF(inspecao)}
+                            >
                               <Download className="h-4 w-4" />
                               <span className="sr-only">Download PDF</span>
                             </Button>

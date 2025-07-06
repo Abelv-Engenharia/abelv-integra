@@ -1,207 +1,702 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
-import AuthGuard from "@/components/auth/AuthGuard";
+import { AuthGuard } from "@/components/auth/AuthGuard";
 import Layout from "@/components/layout/Layout";
 
+// Import pages
+import Index from "./pages/Index";
+import Dashboard from "./pages/Dashboard";
+import NotFound from "./pages/NotFound";
+
 // Auth pages
-import Login from "@/pages/auth/Login";
-import SignUp from "@/pages/auth/SignUp";
-import ForgotPassword from "@/pages/auth/ForgotPassword";
-import ResetPassword from "@/pages/auth/ResetPassword";
-
-// Main pages
-import Index from "@/pages/Index";
-import Dashboard from "@/pages/Dashboard";
-import NotFound from "@/pages/NotFound";
-
-// SMS pages - corrigindo imports para caminhos corretos
-import DesviosDashboard from "@/pages/DesviosDashboard";
-import DesviosForm from "@/pages/DesviosForm";
-import DesviosConsulta from "@/pages/DesviosConsulta";
-import DesviosNaoConformidade from "@/pages/DesviosNaoConformidade";
-import TreinamentosDashboard from "@/pages/treinamentos/TreinamentosDashboard";
-import TreinamentosNormativo from "@/pages/treinamentos/TreinamentosNormativo";
-import TreinamentosConsulta from "@/pages/treinamentos/TreinamentosConsulta";
-import TreinamentosExecucao from "@/pages/treinamentos/TreinamentosExecucao";
-import TreinamentosCracha from "@/pages/treinamentos/TreinamentosCracha";
-import HoraSegurancaDashboard from "@/pages/hora-seguranca/HoraSegurancaDashboard";
-import AgendaHSA from "@/pages/hora-seguranca/AgendaHSA";
-import InspecaoCadastroHSA from "@/pages/hora-seguranca/InspecaoCadastroHSA";
-import InspecoesAcompanhamento from "@/pages/hora-seguranca/InspecoesAcompanhamento";
-import InspecaoNaoProgramadaHSA from "@/pages/hora-seguranca/InspecaoNaoProgramadaHSA";
-import OcorrenciasDashboard from "@/pages/ocorrencias/OcorrenciasDashboard";
-import OcorrenciasCadastro from "@/pages/ocorrencias/OcorrenciasCadastro";
-import OcorrenciasConsulta from "@/pages/ocorrencias/OcorrenciasConsulta";
-import MedidasDisciplinaresDashboard from "@/pages/medidas-disciplinares/MedidasDisciplinaresDashboard";
-import MedidasDisciplinaresCadastro from "@/pages/medidas-disciplinares/MedidasDisciplinaresCadastro";
-import MedidasDisciplinaresConsulta from "@/pages/medidas-disciplinares/MedidasDisciplinaresConsulta";
-
-// New Inspeção SMS pages
-import InspecaoSMSDashboard from "@/pages/inspecao-sms/InspecaoSMSDashboard";
-import CadastrarInspecao from "@/pages/inspecao-sms/CadastrarInspecao";
-import ConsultarInspecoes from "@/pages/inspecao-sms/ConsultarInspecoes";
-
-// Tarefas pages
-import TarefasDashboard from "@/pages/tarefas/TarefasDashboard";
-import MinhasTarefas from "@/pages/tarefas/MinhasTarefas";
-import CadastroTarefas from "@/pages/tarefas/CadastroTarefas";
-import DetalheTarefa from "@/pages/tarefas/DetalheTarefa";
-
-// Relatorios pages
-import RelatoriosDashboard from "@/pages/relatorios/RelatoriosDashboard";
-import RelatoriosIDSMS from "@/pages/relatorios/RelatoriosIDSMS";
-
-// IDSMS pages
-import IDSMSDashboard from "@/pages/idsms/IDSMSDashboard";
-import IDSMSIndicadores from "@/pages/idsms/IDSMSIndicadores";
-import IIDForm from "@/pages/idsms/IIDForm";
-import HSAForm from "@/pages/idsms/HSAForm";
-import HTForm from "@/pages/idsms/HTForm";
-import IPOMForm from "@/pages/idsms/IPOMForm";
-import InspecaoAltaLiderancaForm from "@/pages/idsms/InspecaoAltaLiderancaForm";
-import InspecaoGestaoSMSForm from "@/pages/idsms/InspecaoGestaoSMSForm";
-import IndiceReativoForm from "@/pages/idsms/IndiceReativoForm";
-
-// GRO pages
-import GroCadastroPerigos from "@/pages/gro/GroCadastroPerigos";
-import GroAvaliacaoRiscos from "@/pages/gro/GroAvaliacaoRiscos";
-import GroPGR from "@/pages/gro/GroPGR";
-
-// Admin pages
-import AdminUsuarios from "@/pages/admin/AdminUsuarios";
-import AdminPerfis from "@/pages/admin/AdminPerfis";
-import AdminEmpresas from "@/pages/admin/AdminEmpresas";
-import AdminCCAs from "@/pages/admin/AdminCCAs";
-import AdminEngenheiros from "@/pages/admin/AdminEngenheiros";
-import AdminSupervisores from "@/pages/admin/AdminSupervisores";
-import CadastroFuncionarios from "@/pages/admin/CadastroFuncionarios";
-import RegistroHHT from "@/pages/admin/RegistroHHT";
-import MetasIndicadores from "@/pages/admin/MetasIndicadores";
-import AdminModelosInspecao from "@/pages/admin/AdminModelosInspecao";
-import AdminTemplates from "@/pages/AdminTemplates";
-import AdminLogo from "@/pages/admin/AdminLogo";
+import Login from "./pages/auth/Login";
+import SignUp from "./pages/auth/SignUp";
+import ForgotPassword from "./pages/auth/ForgotPassword";
+import ResetPassword from "./pages/auth/ResetPassword";
 
 // Account pages
-import Profile from "@/pages/account/Profile";
-import Settings from "@/pages/account/Settings";
+import Profile from "./pages/account/Profile";
+import Settings from "./pages/account/Settings";
+import Support from "./pages/account/Support";
 
-// Optimized QueryClient configuration for better performance
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 5 * 60 * 1000, // 5 minutes
-      gcTime: 10 * 60 * 1000, // 10 minutes
-      retry: 2,
-      retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
-      refetchOnWindowFocus: false,
-      refetchOnMount: true,
-      refetchOnReconnect: true,
-    },
-  },
-});
+// Admin pages
+import AdminUsuarios from "./pages/admin/AdminUsuarios";
+import AdminUsuariosAuth from "./pages/admin/AdminUsuariosAuth";
+import AdminCCAs from "./pages/admin/AdminCCAs";
+import AdminPerfis from "./pages/admin/AdminPerfis";
+import AdminEmpresas from "./pages/admin/AdminEmpresas";
+import AdminEngenheiros from "./pages/admin/AdminEngenheiros";
+import AdminSupervisores from "./pages/admin/AdminSupervisores";
+import AdminLogo from "./pages/admin/AdminLogo";
+import AdminTemplates from "./pages/AdminTemplates";
+import AdminModelosInspecao from "./pages/admin/AdminModelosInspecao";
+import CadastroFuncionarios from "./pages/admin/CadastroFuncionarios";
+import CriarUsuario from "./pages/admin/CriarUsuario";
+import MetasIndicadores from "./pages/admin/MetasIndicadores";
+import RegistroHHT from "./pages/admin/RegistroHHT";
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
+// Tarefas pages
+import TarefasDashboard from "./pages/tarefas/TarefasDashboard";
+import CadastroTarefas from "./pages/tarefas/CadastroTarefas";
+import MinhasTarefas from "./pages/tarefas/MinhasTarefas";
+import DetalheTarefa from "./pages/tarefas/DetalheTarefa";
+import EditarTarefa from "./pages/tarefas/EditarTarefa";
+
+// Treinamentos pages
+import TreinamentosDashboard from "./pages/treinamentos/TreinamentosDashboard";
+import TreinamentosExecucao from "./pages/treinamentos/TreinamentosExecucao";
+import TreinamentosConsulta from "./pages/treinamentos/TreinamentosConsulta";
+import TreinamentosCracha from "./pages/treinamentos/TreinamentosCracha";
+import TreinamentosNormativo from "./pages/treinamentos/TreinamentosNormativo";
+import EditarExecucaoTreinamento from "./pages/treinamentos/EditarExecucaoTreinamento";
+import VisualizarExecucaoTreinamento from "./pages/treinamentos/VisualizarExecucaoTreinamento";
+
+// Ocorrências pages
+import OcorrenciasDashboard from "./pages/ocorrencias/OcorrenciasDashboard";
+import OcorrenciasCadastro from "./pages/ocorrencias/OcorrenciasCadastro";
+import OcorrenciasConsulta from "./pages/ocorrencias/OcorrenciasConsulta";
+import OcorrenciasVisualizacao from "./pages/ocorrencias/OcorrenciasVisualizacao";
+import OcorrenciasDetalhes from "./pages/ocorrencias/OcorrenciasDetalhes";
+import OcorrenciasEdicao from "./pages/ocorrencias/OcorrenciasEdicao";
+import OcorrenciasAtualizarStatus from "./pages/ocorrencias/OcorrenciasAtualizarStatus";
+
+// Desvios pages
+import DesviosDashboard from "./pages/DesviosDashboard";
+import DesviosForm from "./pages/DesviosForm";
+import DesviosConsulta from "./pages/DesviosConsulta";
+import DesviosNaoConformidade from "./pages/DesviosNaoConformidade";
+
+// Hora da Segurança pages
+import HoraSegurancaDashboard from "./pages/hora-seguranca/HoraSegurancaDashboard";
+import InspecoesCadastro from "./pages/hora-seguranca/InspecoesCadastro";
+import InspecoesAcompanhamento from "./pages/hora-seguranca/InspecoesAcompanhamento";
+import InspecoesNaoProgramadas from "./pages/hora-seguranca/InspecoesNaoProgramadas";
+import InspecaoCadastroHSA from "./pages/hora-seguranca/InspecaoCadastroHSA";
+import InspecaoNaoProgramadaHSA from "./pages/hora-seguranca/InspecaoNaoProgramadaHSA";
+import PainelExecucaoHSA from "./pages/hora-seguranca/PainelExecucaoHSA";
+import AgendaHSA from "./pages/hora-seguranca/AgendaHSA";
+
+// IDSMS pages
+import IDSMSDashboard from "./pages/idsms/IDSMSDashboard";
+import IDSMSIndicadores from "./pages/idsms/IDSMSIndicadores";
+import HTForm from "./pages/idsms/HTForm";
+import HSAForm from "./pages/idsms/HSAForm";
+import IIDForm from "./pages/idsms/IIDForm";
+import IPOMForm from "./pages/idsms/IPOMForm";
+import IndiceReativoForm from "./pages/idsms/IndiceReativoForm";
+import InspecaoAltaLiderancaForm from "./pages/idsms/InspecaoAltaLiderancaForm";
+import InspecaoGestaoSMSForm from "./pages/idsms/InspecaoGestaoSMSForm";
+
+// GRO pages
+import GroAvaliacaoRiscos from "./pages/gro/GroAvaliacaoRiscos";
+import GroCadastroPerigos from "./pages/gro/GroCadastroPerigos";
+import GroPGR from "./pages/gro/GroPGR";
+
+// Medidas Disciplinares pages
+import MedidasDisciplinaresDashboard from "./pages/medidas-disciplinares/MedidasDisciplinaresDashboard";
+import MedidasDisciplinaresCadastro from "./pages/medidas-disciplinares/MedidasDisciplinaresCadastro";
+import MedidasDisciplinaresConsulta from "./pages/medidas-disciplinares/MedidasDisciplinaresConsulta";
+
+// Relatórios pages
+import RelatoriosDashboard from "./pages/relatorios/RelatoriosDashboard";
+import RelatoriosOcorrencias from "./pages/relatorios/RelatoriosOcorrencias";
+import RelatoriosDesvios from "./pages/relatorios/RelatoriosDesvios";
+import RelatoriosTreinamentos from "./pages/relatorios/RelatoriosTreinamentos";
+import RelatoriosIDSMS from "./pages/relatorios/RelatoriosIDSMS";
+
+// Inspeção SMS pages
+import CadastrarInspecao from "./pages/inspecao-sms/CadastrarInspecao";
+import ConsultarInspecoes from "./pages/inspecao-sms/ConsultarInspecoes";
+import InspecaoSMSDashboard from "./pages/inspecao-sms/InspecaoSMSDashboard";
+import VisualizarInspecao from "./pages/inspecao-sms/VisualizarInspecao";
+
+// Placeholder page
+import PlaceholderPage from "./pages/PlaceholderPage";
+
+const queryClient = new QueryClient();
+
+function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
         <AuthProvider>
-          <Routes>
-            {/* Auth routes */}
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<SignUp />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/reset-password" element={<ResetPassword />} />
-            
-            {/* Protected routes */}
-            <Route path="/" element={<AuthGuard><Layout /></AuthGuard>}>
-              <Route index element={<Dashboard />} />
-              <Route path="dashboard" element={<Dashboard />} />
+          <BrowserRouter>
+            <Routes>
+              {/* Public routes */}
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<SignUp />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
               
-              {/* SMS routes */}
-              <Route path="desvios/dashboard" element={<DesviosDashboard />} />
-              <Route path="desvios/cadastro" element={<DesviosForm />} />
-              <Route path="desvios/consulta" element={<DesviosConsulta />} />
-              <Route path="desvios/nao-conformidade" element={<DesviosNaoConformidade />} />
-              <Route path="treinamentos/dashboard" element={<TreinamentosDashboard />} />
-              <Route path="treinamentos/normativo" element={<TreinamentosNormativo />} />
-              <Route path="treinamentos/consulta" element={<TreinamentosConsulta />} />
-              <Route path="treinamentos/execucao" element={<TreinamentosExecucao />} />
-              <Route path="treinamentos/cracha" element={<TreinamentosCracha />} />
-              <Route path="hora-seguranca/dashboard" element={<HoraSegurancaDashboard />} />
-              <Route path="hora-seguranca/agenda-hsa" element={<AgendaHSA />} />
-              <Route path="hora-seguranca/cadastro-inspecao" element={<InspecaoCadastroHSA />} />
-              <Route path="hora-seguranca/acompanhamento" element={<InspecoesAcompanhamento />} />
-              <Route path="hora-seguranca/cadastro-inspecao-nao-planejada" element={<InspecaoNaoProgramadaHSA />} />
-              <Route path="ocorrencias/dashboard" element={<OcorrenciasDashboard />} />
-              <Route path="ocorrencias/cadastro" element={<OcorrenciasCadastro />} />
-              <Route path="ocorrencias/consulta" element={<OcorrenciasConsulta />} />
-              <Route path="medidas-disciplinares/dashboard" element={<MedidasDisciplinaresDashboard />} />
-              <Route path="medidas-disciplinares/cadastro" element={<MedidasDisciplinaresCadastro />} />
-              <Route path="medidas-disciplinares/consulta" element={<MedidasDisciplinaresConsulta />} />
+              {/* Protected routes */}
+              <Route path="/" element={
+                <AuthGuard>
+                  <Layout>
+                    <Index />
+                  </Layout>
+                </AuthGuard>
+              } />
               
-              {/* New Inspeção SMS routes */}
-              <Route path="inspecao-sms/dashboard" element={<InspecaoSMSDashboard />} />
-              <Route path="inspecao-sms/cadastro" element={<CadastrarInspecao />} />
-              <Route path="inspecao-sms/consulta" element={<ConsultarInspecoes />} />
-              
-              {/* Tarefas routes */}
-              <Route path="tarefas/dashboard" element={<TarefasDashboard />} />
-              <Route path="tarefas/minhas-tarefas" element={<MinhasTarefas />} />
-              <Route path="tarefas/cadastro" element={<CadastroTarefas />} />
-              <Route path="tarefas/detalhe/:id" element={<DetalheTarefa />} />
-
-              {/* Relatorios routes */}
-              <Route path="relatorios" element={<RelatoriosDashboard />} />
-              <Route path="relatorios/idsms" element={<RelatoriosIDSMS />} />
-
-              {/* IDSMS routes */}
-              <Route path="idsms/dashboard" element={<IDSMSDashboard />} />
-              <Route path="idsms/indicadores" element={<IDSMSIndicadores />} />
-              <Route path="idsms/iid" element={<IIDForm />} />
-              <Route path="idsms/hsa" element={<HSAForm />} />
-              <Route path="idsms/ht" element={<HTForm />} />
-              <Route path="idsms/ipom" element={<IPOMForm />} />
-              <Route path="idsms/inspecao-alta-lideranca" element={<InspecaoAltaLiderancaForm />} />
-              <Route path="idsms/inspecao-gestao-sms" element={<InspecaoGestaoSMSForm />} />
-              <Route path="idsms/indice-reativo" element={<IndiceReativoForm />} />
-
-              {/* GRO routes */}
-              <Route path="gro/perigos" element={<GroCadastroPerigos />} />
-              <Route path="gro/avaliacao" element={<GroAvaliacaoRiscos />} />
-              <Route path="gro/pgr" element={<GroPGR />} />
-              
-              {/* Admin routes */}
-              <Route path="admin/usuarios" element={<AdminUsuarios />} />
-              <Route path="admin/perfis" element={<AdminPerfis />} />
-              <Route path="admin/empresas" element={<AdminEmpresas />} />
-              <Route path="admin/ccas" element={<AdminCCAs />} />
-              <Route path="admin/engenheiros" element={<AdminEngenheiros />} />
-              <Route path="admin/supervisores" element={<AdminSupervisores />} />
-              <Route path="admin/funcionarios" element={<CadastroFuncionarios />} />
-              <Route path="admin/hht" element={<RegistroHHT />} />
-              <Route path="admin/metas-indicadores" element={<MetasIndicadores />} />
-              <Route path="admin/modelos-inspecao" element={<AdminModelosInspecao />} />
-              <Route path="admin/templates" element={<AdminTemplates />} />
-              <Route path="admin/logo" element={<AdminLogo />} />
+              <Route path="/dashboard" element={
+                <AuthGuard>
+                  <Layout>
+                    <Dashboard />
+                  </Layout>
+                </AuthGuard>
+              } />
 
               {/* Account routes */}
-              <Route path="account/profile" element={<Profile />} />
-              <Route path="account/settings" element={<Settings />} />
-            </Route>
-            
-            {/* 404 route */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+              <Route path="/account/profile" element={
+                <AuthGuard>
+                  <Layout>
+                    <Profile />
+                  </Layout>
+                </AuthGuard>
+              } />
+              <Route path="/account/settings" element={
+                <AuthGuard>
+                  <Layout>
+                    <Settings />
+                  </Layout>
+                </AuthGuard>
+              } />
+              <Route path="/account/support" element={
+                <AuthGuard>
+                  <Layout>
+                    <Support />
+                  </Layout>
+                </AuthGuard>
+              } />
+
+              {/* Admin routes */}
+              <Route path="/admin/usuarios" element={
+                <AuthGuard>
+                  <Layout>
+                    <AdminUsuarios />
+                  </Layout>
+                </AuthGuard>
+              } />
+              <Route path="/admin/usuarios-auth" element={
+                <AuthGuard>
+                  <Layout>
+                    <AdminUsuariosAuth />
+                  </Layout>
+                </AuthGuard>
+              } />
+              <Route path="/admin/ccas" element={
+                <AuthGuard>
+                  <Layout>
+                    <AdminCCAs />
+                  </Layout>
+                </AuthGuard>
+              } />
+              <Route path="/admin/perfis" element={
+                <AuthGuard>
+                  <Layout>
+                    <AdminPerfis />
+                  </Layout>
+                </AuthGuard>
+              } />
+              <Route path="/admin/empresas" element={
+                <AuthGuard>
+                  <Layout>
+                    <AdminEmpresas />
+                  </Layout>
+                </AuthGuard>
+              } />
+              <Route path="/admin/engenheiros" element={
+                <AuthGuard>
+                  <Layout>
+                    <AdminEngenheiros />
+                  </Layout>
+                </AuthGuard>
+              } />
+              <Route path="/admin/supervisores" element={
+                <AuthGuard>
+                  <Layout>
+                    <AdminSupervisores />
+                  </Layout>
+                </AuthGuard>
+              } />
+              <Route path="/admin/logo" element={
+                <AuthGuard>
+                  <Layout>
+                    <AdminLogo />
+                  </Layout>
+                </AuthGuard>
+              } />
+              <Route path="/admin/templates" element={
+                <AuthGuard>
+                  <Layout>
+                    <AdminTemplates />
+                  </Layout>
+                </AuthGuard>
+              } />
+              <Route path="/admin/modelos-inspecao" element={
+                <AuthGuard>
+                  <Layout>
+                    <AdminModelosInspecao />
+                  </Layout>
+                </AuthGuard>
+              } />
+              <Route path="/admin/funcionarios" element={
+                <AuthGuard>
+                  <Layout>
+                    <CadastroFuncionarios />
+                  </Layout>
+                </AuthGuard>
+              } />
+              <Route path="/admin/criar-usuario" element={
+                <AuthGuard>
+                  <Layout>
+                    <CriarUsuario />
+                  </Layout>
+                </AuthGuard>
+              } />
+              <Route path="/admin/metas-indicadores" element={
+                <AuthGuard>
+                  <Layout>
+                    <MetasIndicadores />
+                  </Layout>
+                </AuthGuard>
+              } />
+              <Route path="/admin/registro-hht" element={
+                <AuthGuard>
+                  <Layout>
+                    <RegistroHHT />
+                  </Layout>
+                </AuthGuard>
+              } />
+
+              {/* Tarefas routes */}
+              <Route path="/tarefas/dashboard" element={
+                <AuthGuard>
+                  <Layout>
+                    <TarefasDashboard />
+                  </Layout>
+                </AuthGuard>
+              } />
+              <Route path="/tarefas/cadastro" element={
+                <AuthGuard>
+                  <Layout>
+                    <CadastroTarefas />
+                  </Layout>
+                </AuthGuard>
+              } />
+              <Route path="/tarefas/minhas" element={
+                <AuthGuard>
+                  <Layout>
+                    <MinhasTarefas />
+                  </Layout>
+                </AuthGuard>
+              } />
+              <Route path="/tarefas/:id" element={
+                <AuthGuard>
+                  <Layout>
+                    <DetalheTarefa />
+                  </Layout>
+                </AuthGuard>
+              } />
+              <Route path="/tarefas/:id/editar" element={
+                <AuthGuard>
+                  <Layout>
+                    <EditarTarefa />
+                  </Layout>
+                </AuthGuard>
+              } />
+
+              {/* Treinamentos routes */}
+              <Route path="/treinamentos/dashboard" element={
+                <AuthGuard>
+                  <Layout>
+                    <TreinamentosDashboard />
+                  </Layout>
+                </AuthGuard>
+              } />
+              <Route path="/treinamentos/execucao" element={
+                <AuthGuard>
+                  <Layout>
+                    <TreinamentosExecucao />
+                  </Layout>
+                </AuthGuard>
+              } />
+              <Route path="/treinamentos/consulta" element={
+                <AuthGuard>
+                  <Layout>
+                    <TreinamentosConsulta />
+                  </Layout>
+                </AuthGuard>
+              } />
+              <Route path="/treinamentos/cracha" element={
+                <AuthGuard>
+                  <Layout>
+                    <TreinamentosCracha />
+                  </Layout>
+                </AuthGuard>
+              } />
+              <Route path="/treinamentos/normativo" element={
+                <AuthGuard>
+                  <Layout>
+                    <TreinamentosNormativo />
+                  </Layout>
+                </AuthGuard>
+              } />
+              <Route path="/treinamentos/execucao/:id/editar" element={
+                <AuthGuard>
+                  <Layout>
+                    <EditarExecucaoTreinamento />
+                  </Layout>
+                </AuthGuard>
+              } />
+              <Route path="/treinamentos/execucao/:id/visualizar" element={
+                <AuthGuard>
+                  <Layout>
+                    <VisualizarExecucaoTreinamento />
+                  </Layout>
+                </AuthGuard>
+              } />
+
+              {/* Ocorrências routes */}
+              <Route path="/ocorrencias/dashboard" element={
+                <AuthGuard>
+                  <Layout>
+                    <OcorrenciasDashboard />
+                  </Layout>
+                </AuthGuard>
+              } />
+              <Route path="/ocorrencias/cadastro" element={
+                <AuthGuard>
+                  <Layout>
+                    <OcorrenciasCadastro />
+                  </Layout>
+                </AuthGuard>
+              } />
+              <Route path="/ocorrencias/consulta" element={
+                <AuthGuard>
+                  <Layout>
+                    <OcorrenciasConsulta />
+                  </Layout>
+                </AuthGuard>
+              } />
+              <Route path="/ocorrencias/visualizacao" element={
+                <AuthGuard>
+                  <Layout>
+                    <OcorrenciasVisualizacao />
+                  </Layout>
+                </AuthGuard>
+              } />
+              <Route path="/ocorrencias/:id" element={
+                <AuthGuard>
+                  <Layout>
+                    <OcorrenciasDetalhes />
+                  </Layout>
+                </AuthGuard>
+              } />
+              <Route path="/ocorrencias/:id/editar" element={
+                <AuthGuard>
+                  <Layout>
+                    <OcorrenciasEdicao />
+                  </Layout>
+                </AuthGuard>
+              } />
+              <Route path="/ocorrencias/:id/atualizar-status" element={
+                <AuthGuard>
+                  <Layout>
+                    <OcorrenciasAtualizarStatus />
+                  </Layout>
+                </AuthGuard>
+              } />
+
+              {/* Desvios routes */}
+              <Route path="/desvios/dashboard" element={
+                <AuthGuard>
+                  <Layout>
+                    <DesviosDashboard />
+                  </Layout>
+                </AuthGuard>
+              } />
+              <Route path="/desvios/cadastro" element={
+                <AuthGuard>
+                  <Layout>
+                    <DesviosForm />
+                  </Layout>
+                </AuthGuard>
+              } />
+              <Route path="/desvios/consulta" element={
+                <AuthGuard>
+                  <Layout>
+                    <DesviosConsulta />
+                  </Layout>
+                </AuthGuard>
+              } />
+              <Route path="/desvios/nao-conformidade" element={
+                <AuthGuard>
+                  <Layout>
+                    <DesviosNaoConformidade />
+                  </Layout>
+                </AuthGuard>
+              } />
+
+              {/* Hora da Segurança routes */}
+              <Route path="/hora-seguranca/dashboard" element={
+                <AuthGuard>
+                  <Layout>
+                    <HoraSegurancaDashboard />
+                  </Layout>
+                </AuthGuard>
+              } />
+              <Route path="/hora-seguranca/inspecoes-cadastro" element={
+                <AuthGuard>
+                  <Layout>
+                    <InspecoesCadastro />
+                  </Layout>
+                </AuthGuard>
+              } />
+              <Route path="/hora-seguranca/inspecoes-acompanhamento" element={
+                <AuthGuard>
+                  <Layout>
+                    <InspecoesAcompanhamento />
+                  </Layout>
+                </AuthGuard>
+              } />
+              <Route path="/hora-seguranca/inspecoes-nao-programadas" element={
+                <AuthGuard>
+                  <Layout>
+                    <InspecoesNaoProgramadas />
+                  </Layout>
+                </AuthGuard>
+              } />
+              <Route path="/hora-seguranca/inspecao-cadastro-hsa" element={
+                <AuthGuard>
+                  <Layout>
+                    <InspecaoCadastroHSA />
+                  </Layout>
+                </AuthGuard>
+              } />
+              <Route path="/hora-seguranca/inspecao-nao-programada-hsa" element={
+                <AuthGuard>
+                  <Layout>
+                    <InspecaoNaoProgramadaHSA />
+                  </Layout>
+                </AuthGuard>
+              } />
+              <Route path="/hora-seguranca/painel-execucao-hsa" element={
+                <AuthGuard>
+                  <Layout>
+                    <PainelExecucaoHSA />
+                  </Layout>
+                </AuthGuard>
+              } />
+              <Route path="/hora-seguranca/agenda-hsa" element={
+                <AuthGuard>
+                  <Layout>
+                    <AgendaHSA />
+                  </Layout>
+                </AuthGuard>
+              } />
+
+              {/* IDSMS routes */}
+              <Route path="/idsms/dashboard" element={
+                <AuthGuard>
+                  <Layout>
+                    <IDSMSDashboard />
+                  </Layout>
+                </AuthGuard>
+              } />
+              <Route path="/idsms/indicadores" element={
+                <AuthGuard>
+                  <Layout>
+                    <IDSMSIndicadores />
+                  </Layout>
+                </AuthGuard>
+              } />
+              <Route path="/idsms/ht" element={
+                <AuthGuard>
+                  <Layout>
+                    <HTForm />
+                  </Layout>
+                </AuthGuard>
+              } />
+              <Route path="/idsms/hsa" element={
+                <AuthGuard>
+                  <Layout>
+                    <HSAForm />
+                  </Layout>
+                </AuthGuard>
+              } />
+              <Route path="/idsms/iid" element={
+                <AuthGuard>
+                  <Layout>
+                    <IIDForm />
+                  </Layout>
+                </AuthGuard>
+              } />
+              <Route path="/idsms/ipom" element={
+                <AuthGuard>
+                  <Layout>
+                    <IPOMForm />
+                  </Layout>
+                </AuthGuard>
+              } />
+              <Route path="/idsms/indice-reativo" element={
+                <AuthGuard>
+                  <Layout>
+                    <IndiceReativoForm />
+                  </Layout>
+                </AuthGuard>
+              } />
+              <Route path="/idsms/inspecao-alta-lideranca" element={
+                <AuthGuard>
+                  <Layout>
+                    <InspecaoAltaLiderancaForm />
+                  </Layout>
+                </AuthGuard>
+              } />
+              <Route path="/idsms/inspecao-gestao-sms" element={
+                <AuthGuard>
+                  <Layout>
+                    <InspecaoGestaoSMSForm />
+                  </Layout>
+                </AuthGuard>
+              } />
+
+              {/* GRO routes */}
+              <Route path="/gro/avaliacao-riscos" element={
+                <AuthGuard>
+                  <Layout>
+                    <GroAvaliacaoRiscos />
+                  </Layout>
+                </AuthGuard>
+              } />
+              <Route path="/gro/cadastro-perigos" element={
+                <AuthGuard>
+                  <Layout>
+                    <GroCadastroPerigos />
+                  </Layout>
+                </AuthGuard>
+              } />
+              <Route path="/gro/pgr" element={
+                <AuthGuard>
+                  <Layout>
+                    <GroPGR />
+                  </Layout>
+                </AuthGuard>
+              } />
+
+              {/* Medidas Disciplinares routes */}
+              <Route path="/medidas-disciplinares/dashboard" element={
+                <AuthGuard>
+                  <Layout>
+                    <MedidasDisciplinaresDashboard />
+                  </Layout>
+                </AuthGuard>
+              } />
+              <Route path="/medidas-disciplinares/cadastro" element={
+                <AuthGuard>
+                  <Layout>
+                    <MedidasDisciplinaresCadastro />
+                  </Layout>
+                </AuthGuard>
+              } />
+              <Route path="/medidas-disciplinares/consulta" element={
+                <AuthGuard>
+                  <Layout>
+                    <MedidasDisciplinaresConsulta />
+                  </Layout>
+                </AuthGuard>
+              } />
+
+              {/* Relatórios routes */}
+              <Route path="/relatorios/dashboard" element={
+                <AuthGuard>
+                  <Layout>
+                    <RelatoriosDashboard />
+                  </Layout>
+                </AuthGuard>
+              } />
+              <Route path="/relatorios/ocorrencias" element={
+                <AuthGuard>
+                  <Layout>
+                    <RelatoriosOcorrencias />
+                  </Layout>
+                </AuthGuard>
+              } />
+              <Route path="/relatorios/desvios" element={
+                <AuthGuard>
+                  <Layout>
+                    <RelatoriosDesvios />
+                  </Layout>
+                </AuthGuard>
+              } />
+              <Route path="/relatorios/treinamentos" element={
+                <AuthGuard>
+                  <Layout>
+                    <RelatoriosTreinamentos />
+                  </Layout>
+                </AuthGuard>
+              } />
+              <Route path="/relatorios/idsms" element={
+                <AuthGuard>
+                  <Layout>
+                    <RelatoriosIDSMS />
+                  </Layout>
+                </AuthGuard>
+              } />
+
+              {/* Inspeção SMS routes */}
+              <Route path="/inspecao-sms/cadastrar" element={
+                <AuthGuard>
+                  <Layout>
+                    <CadastrarInspecao />
+                  </Layout>
+                </AuthGuard>
+              } />
+              <Route path="/inspecao-sms/consulta" element={
+                <AuthGuard>
+                  <Layout>
+                    <ConsultarInspecoes />
+                  </Layout>
+                </AuthGuard>
+              } />
+              <Route path="/inspecao-sms/dashboard" element={
+                <AuthGuard>
+                  <Layout>
+                    <InspecaoSMSDashboard />
+                  </Layout>
+                </AuthGuard>
+              } />
+              <Route path="/inspecao-sms/visualizar/:id" element={
+                <AuthGuard>
+                  <Layout>
+                    <VisualizarInspecao />
+                  </Layout>
+                </AuthGuard>
+              } />
+
+              {/* Placeholder routes */}
+              <Route path="/placeholder" element={
+                <AuthGuard>
+                  <Layout>
+                    <PlaceholderPage />
+                  </Layout>
+                </AuthGuard>
+              } />
+
+              {/* 404 route */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
         </AuthProvider>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+      </TooltipProvider>
+    </QueryClientProvider>
+  );
+}
 
 export default App;
