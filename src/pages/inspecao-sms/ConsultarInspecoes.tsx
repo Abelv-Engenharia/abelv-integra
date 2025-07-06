@@ -1,33 +1,34 @@
+
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
 import { DatePickerWithManualInput } from "@/components/ui/date-picker-with-manual-input";
-import { Search, Download, Eye, FileSearch, CheckCircle, XCircle } from "lucide-react";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { FileSearch, Eye, Download, Filter, Search } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserCCAs } from "@/hooks/useUserCCAs";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
+import { PageLoader } from "@/components/common/PageLoader";
 
 const ConsultarInspecoes = () => {
   const [inspecoes, setInspecoes] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [filteredInspecoes, setFilteredInspecoes] = useState<any[]>([]);
   const [tiposInspecao, setTiposInspecao] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [filtros, setFiltros] = useState({
-    tipo_inspecao: '',
-    situacao: '',
-    responsavel: '',
-    data_inicio: undefined as Date | undefined,
-    data_fim: undefined as Date | undefined,
-    local: ''
+    dataInicio: null as Date | null,
+    dataFim: null as Date | null,
+    tipoInspecao: "",
+    ccaId: "",
+    status: "",
+    temNaoConformidade: "",
+    busca: ""
   });
-  const [inspecaoDetalhes, setInspecaoDetalhes] = useState<any>(null);
-  const [dialogDetalhesOpen, setDialogDetalhesOpen] = useState(false);
   
   const { data: userCCAs = [] } = useUserCCAs();
 
@@ -42,13 +43,14 @@ const ConsultarInspecoes = () => {
         setTiposInspecao(data);
       }
     } catch (error) {
-      console.error('Erro ao carregar tipos:', error);
+      console.error('Erro ao carregar tipos de inspeção:', error);
     }
   };
 
   const loadInspecoes = async () => {
     try {
-      setLoading(true);
+      setIsLoading(true);
+      const ccaIds = userCCAs.length > 0 ? userCCAs.map(cca => cca.id) : [];
       
       let query = supabase
         .from('inspecoes_sms')
@@ -56,106 +58,121 @@ const ConsultarInspecoes = () => {
           *,
           modelos_inspecao_sms(
             nome,
-            tipos_inspecao_sms(nome)
-          ),
-          profiles(nome)
-        `)
-        .order('data_inspecao', { ascending: false });
-
-      // Aplicar filtro por CCAs do usuário
-      const ccaIds = userCCAs.length > 0 ? userCCAs.map(cca => cca.id) : [];
-      if (ccaIds.length > 0) {
-        query = query.in('cca_id', ccaIds);
-      }
-
-      // Aplicar filtros
-      if (filtros.tipo_inspecao) {
-        const { data: modelosDoTipo } = await supabase
-          .from('modelos_inspecao_sms')
-          .select('id')
-          .eq('tipo_inspecao_id', filtros.tipo_inspecao);
-        
-        if (modelosDoTipo) {
-          const modeloIds = modelosDoTipo.map(m => m.id);
-          query = query.in('modelo_id', modeloIds);
-        }
-      }
-
-      if (filtros.situacao) {
-        if (filtros.situacao === 'com_nao_conformidade') {
-          query = query.eq('tem_nao_conformidade', true);
-        } else if (filtros.situacao === 'sem_nao_conformidade') {
-          query = query.eq('tem_nao_conformidade', false);
-        }
-      }
-
-      if (filtros.data_inicio) {
-        query = query.gte('data_inspecao', format(filtros.data_inicio, 'yyyy-MM-dd'));
-      }
-
-      if (filtros.data_fim) {
-        query = query.lte('data_inspecao', format(filtros.data_fim, 'yyyy-MM-dd'));
-      }
-
-      if (filtros.local) {
-        query = query.ilike('local', `%${filtros.local}%`);
-      }
-
-      const { data } = await query;
-      
-      if (data) {
-        setInspecoes(data);
-      }
-    } catch (error) {
-      console.error('Erro ao carregar inspeções:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const visualizarDetalhes = async (inspecaoId: string) => {
-    try {
-      const { data } = await supabase
-        .from('inspecoes_sms')
-        .select(`
-          *,
-          modelos_inspecao_sms(
-            nome,
-            tipos_inspecao_sms(nome)
+            tipos_inspecao_sms(id, nome)
           ),
           profiles(nome),
           ccas(codigo, nome)
         `)
-        .eq('id', inspecaoId)
-        .single();
-      
+        .order('created_at', { ascending: false });
+
+      if (ccaIds.length > 0) {
+        query = query.in('cca_id', ccaIds);
+      }
+
+      const { data } = await query;
+
       if (data) {
-        setInspecaoDetalhes(data);
-        setDialogDetalhesOpen(true);
+        setInspecoes(data);
+        setFilteredInspecoes(data);
       }
     } catch (error) {
-      console.error('Erro ao carregar detalhes:', error);
+      console.error('Erro ao carregar inspeções:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const baixarPDF = (inspecao: any) => {
-    if (inspecao.pdf_gerado_url) {
-      window.open(inspecao.pdf_gerado_url, '_blank');
-    } else {
-      // Simular geração de PDF
-      alert('PDF não disponível. Gerando PDF...');
+  const aplicarFiltros = () => {
+    let filtered = [...inspecoes];
+
+    // Filtro por data
+    if (filtros.dataInicio) {
+      filtered = filtered.filter(i => 
+        new Date(i.data_inspecao) >= filtros.dataInicio!
+      );
     }
+
+    if (filtros.dataFim) {
+      filtered = filtered.filter(i => 
+        new Date(i.data_inspecao) <= filtros.dataFim!
+      );
+    }
+
+    // Filtro por tipo de inspeção
+    if (filtros.tipoInspecao && filtros.tipoInspecao !== "todos") {
+      filtered = filtered.filter(i => 
+        i.modelos_inspecao_sms?.tipos_inspecao_sms?.id === filtros.tipoInspecao
+      );
+    }
+
+    // Filtro por CCA
+    if (filtros.ccaId && filtros.ccaId !== "todos") {
+      filtered = filtered.filter(i => 
+        i.cca_id?.toString() === filtros.ccaId
+      );
+    }
+
+    // Filtro por status
+    if (filtros.status && filtros.status !== "todos") {
+      filtered = filtered.filter(i => i.status === filtros.status);
+    }
+
+    // Filtro por não conformidade
+    if (filtros.temNaoConformidade && filtros.temNaoConformidade !== "todos") {
+      const temNC = filtros.temNaoConformidade === "sim";
+      filtered = filtered.filter(i => i.tem_nao_conformidade === temNC);
+    }
+
+    // Filtro por busca de texto
+    if (filtros.busca.trim()) {
+      const searchTerm = filtros.busca.toLowerCase();
+      filtered = filtered.filter(i => 
+        i.local?.toLowerCase().includes(searchTerm) ||
+        i.modelos_inspecao_sms?.nome?.toLowerCase().includes(searchTerm) ||
+        i.profiles?.nome?.toLowerCase().includes(searchTerm) ||
+        i.ccas?.nome?.toLowerCase().includes(searchTerm)
+      );
+    }
+
+    setFilteredInspecoes(filtered);
   };
 
   const limparFiltros = () => {
     setFiltros({
-      tipo_inspecao: '',
-      situacao: '',
-      responsavel: '',
-      data_inicio: undefined,
-      data_fim: undefined,
-      local: ''
+      dataInicio: null,
+      dataFim: null,
+      tipoInspecao: "",
+      ccaId: "",
+      status: "",
+      temNaoConformidade: "",
+      busca: ""
     });
+    setFilteredInspecoes(inspecoes);
+  };
+
+  const getStatusBadge = (status: string) => {
+    const statusMap = {
+      'concluida': { label: 'Concluída', variant: 'default' as const },
+      'em_andamento': { label: 'Em Andamento', variant: 'secondary' as const },
+      'pendente': { label: 'Pendente', variant: 'outline' as const }
+    };
+    
+    const statusInfo = statusMap[status as keyof typeof statusMap] || 
+      { label: status, variant: 'outline' as const };
+    
+    return (
+      <Badge variant={statusInfo.variant}>
+        {statusInfo.label}
+      </Badge>
+    );
+  };
+
+  const getConformidadeBadge = (temNaoConformidade: boolean) => {
+    return (
+      <Badge variant={temNaoConformidade ? "destructive" : "default"}>
+        {temNaoConformidade ? "Não Conforme" : "Conforme"}
+      </Badge>
+    );
   };
 
   useEffect(() => {
@@ -166,33 +183,70 @@ const ConsultarInspecoes = () => {
     if (userCCAs.length >= 0) {
       loadInspecoes();
     }
-  }, [userCCAs, filtros]);
+  }, [userCCAs]);
+
+  useEffect(() => {
+    aplicarFiltros();
+  }, [filtros, inspecoes]);
+
+  if (isLoading) {
+    return <PageLoader />;
+  }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-2">
-        <FileSearch className="h-6 w-6 text-blue-600" />
-        <h1 className="text-2xl font-bold">Consultar Inspeções SMS</h1>
+    <div className="content-padding section-spacing">
+      <div className="flex items-center gap-2 mb-4 sm:mb-6">
+        <FileSearch className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600 flex-shrink-0" />
+        <h1 className="heading-responsive">Consultar Inspeções SMS</h1>
       </div>
 
       {/* Filtros */}
-      <Card>
+      <Card className="mb-4 sm:mb-6">
         <CardHeader>
-          <CardTitle>Filtros de Pesquisa</CardTitle>
+          <CardTitle className="text-lg sm:text-xl flex items-center gap-2">
+            <Filter className="h-4 w-4" />
+            Filtros
+          </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            <div>
-              <Label>Tipo de Inspeção</Label>
-              <Select 
-                value={filtros.tipo_inspecao} 
-                onValueChange={(value) => setFiltros({...filtros, tipo_inspecao: value})}
-              >
+          <div className="form-grid">
+            <div className="space-y-2">
+              <Label className="text-sm sm:text-base">Buscar</Label>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Local, modelo, responsável..."
+                  value={filtros.busca}
+                  onChange={(e) => setFiltros({...filtros, busca: e.target.value})}
+                  className="pl-10"
+                />
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <Label className="text-sm sm:text-base">Data Início</Label>
+              <DatePickerWithManualInput
+                value={filtros.dataInicio}
+                onChange={(date) => setFiltros({...filtros, dataInicio: date})}
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label className="text-sm sm:text-base">Data Fim</Label>
+              <DatePickerWithManualInput
+                value={filtros.dataFim}
+                onChange={(date) => setFiltros({...filtros, dataFim: date})}
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label className="text-sm sm:text-base">Tipo de Inspeção</Label>
+              <Select value={filtros.tipoInspecao} onValueChange={(value) => setFiltros({...filtros, tipoInspecao: value})}>
                 <SelectTrigger>
                   <SelectValue placeholder="Todos os tipos" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todos os tipos</SelectItem>
+                  <SelectItem value="todos">Todos os tipos</SelectItem>
                   {tiposInspecao.map((tipo) => (
                     <SelectItem key={tipo.id} value={tipo.id}>
                       {tipo.nome}
@@ -201,243 +255,128 @@ const ConsultarInspecoes = () => {
                 </SelectContent>
               </Select>
             </div>
-
-            <div>
-              <Label>Situação</Label>
-              <Select 
-                value={filtros.situacao} 
-                onValueChange={(value) => setFiltros({...filtros, situacao: value})}
-              >
+            
+            <div className="space-y-2">
+              <Label className="text-sm sm:text-base">CCA</Label>
+              <Select value={filtros.ccaId} onValueChange={(value) => setFiltros({...filtros, ccaId: value})}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Todas as situações" />
+                  <SelectValue placeholder="Todos os CCAs" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todas as situações</SelectItem>
-                  <SelectItem value="com_nao_conformidade">Com Não Conformidade</SelectItem>
-                  <SelectItem value="sem_nao_conformidade">Sem Não Conformidade</SelectItem>
+                  <SelectItem value="todos">Todos os CCAs</SelectItem>
+                  {userCCAs.map((cca) => (
+                    <SelectItem key={cca.id} value={cca.id.toString()}>
+                      {cca.codigo} - {cca.nome}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
-
-            <div>
-              <Label>Data Início</Label>
-              <DatePickerWithManualInput
-                value={filtros.data_inicio}
-                onChange={(date) => setFiltros({...filtros, data_inicio: date})}
-              />
+            
+            <div className="space-y-2">
+              <Label className="text-sm sm:text-base">Conformidade</Label>
+              <Select value={filtros.temNaoConformidade} onValueChange={(value) => setFiltros({...filtros, temNaoConformidade: value})}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Todas" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="todos">Todas</SelectItem>
+                  <SelectItem value="sim">Não Conforme</SelectItem>
+                  <SelectItem value="nao">Conforme</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-
-            <div>
-              <Label>Data Fim</Label>
-              <DatePickerWithManualInput
-                value={filtros.data_fim}
-                onChange={(date) => setFiltros({...filtros, data_fim: date})}
-              />
-            </div>
-
-            <div>
-              <Label>Local</Label>
-              <Input
-                value={filtros.local}
-                onChange={(e) => setFiltros({...filtros, local: e.target.value})}
-                placeholder="Filtrar por local"
-              />
-            </div>
-
-            <div className="flex items-end gap-2">
-              <Button onClick={loadInspecoes} disabled={loading}>
-                <Search className="h-4 w-4 mr-2" />
-                Pesquisar
-              </Button>
-              <Button variant="outline" onClick={limparFiltros}>
-                Limpar
-              </Button>
-            </div>
+          </div>
+          
+          <div className="button-group-end mt-4">
+            <Button variant="outline" onClick={limparFiltros}>
+              Limpar Filtros
+            </Button>
           </div>
         </CardContent>
       </Card>
 
-      {/* Resultados */}
+      {/* Tabela de Resultados */}
       <Card>
         <CardHeader>
-          <CardTitle>
-            Inspeções Encontradas ({inspecoes.length})
+          <CardTitle className="text-lg sm:text-xl">
+            Inspeções Encontradas ({filteredInspecoes.length})
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {loading ? (
-            <div className="text-center py-4">
-              <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary mx-auto"></div>
-              <p className="mt-2 text-muted-foreground">Carregando inspeções...</p>
+          {filteredInspecoes.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              <FileSearch className="h-12 w-12 mx-auto mb-4 opacity-50" />
+              <p className="text-responsive">Nenhuma inspeção encontrada com os filtros aplicados.</p>
             </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Data</TableHead>
-                  <TableHead>Tipo</TableHead>
-                  <TableHead>Local</TableHead>
-                  <TableHead>Responsável</TableHead>
-                  <TableHead>Situação</TableHead>
-                  <TableHead className="text-right">Ações</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {inspecoes.length === 0 ? (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center py-4">
-                      Nenhuma inspeção encontrada com os filtros aplicados.
-                    </TableCell>
+                    <TableHead>Data</TableHead>
+                    <TableHead>Tipo/Modelo</TableHead>
+                    <TableHead>Local</TableHead>
+                    <TableHead>CCA</TableHead>
+                    <TableHead>Responsável</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Conformidade</TableHead>
+                    <TableHead>Ações</TableHead>
                   </TableRow>
-                ) : (
-                  inspecoes.map((inspecao) => (
+                </TableHeader>
+                <TableBody>
+                  {filteredInspecoes.map((inspecao) => (
                     <TableRow key={inspecao.id}>
                       <TableCell>
                         {format(new Date(inspecao.data_inspecao), 'dd/MM/yyyy', { locale: ptBR })}
                       </TableCell>
                       <TableCell>
-                        <div>
-                          <p className="font-medium">
-                            {inspecao.modelos_inspecao_sms?.tipos_inspecao_sms?.nome}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            {inspecao.modelos_inspecao_sms?.nome}
-                          </p>
+                        <div className="space-y-1">
+                          <div className="text-sm font-medium">
+                            {inspecao.modelos_inspecao_sms?.tipos_inspecao_sms?.nome || 'N/A'}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            {inspecao.modelos_inspecao_sms?.nome || 'N/A'}
+                          </div>
                         </div>
                       </TableCell>
-                      <TableCell>{inspecao.local}</TableCell>
-                      <TableCell>{inspecao.profiles?.nome}</TableCell>
-                      <TableCell>
-                        {inspecao.tem_nao_conformidade ? (
-                          <Badge variant="destructive" className="flex items-center gap-1 w-fit">
-                            <XCircle className="h-3 w-3" />
-                            Não Conforme
-                          </Badge>
-                        ) : (
-                          <Badge variant="default" className="flex items-center gap-1 w-fit bg-green-600">
-                            <CheckCircle className="h-3 w-3" />
-                            Conforme
-                          </Badge>
-                        )}
+                      <TableCell className="max-w-xs truncate" title={inspecao.local}>
+                        {inspecao.local}
                       </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
-                          <Button 
-                            size="sm" 
-                            variant="outline"
-                            onClick={() => visualizarDetalhes(inspecao.id)}
-                          >
+                      <TableCell>
+                        {inspecao.ccas ? `${inspecao.ccas.codigo} - ${inspecao.ccas.nome}` : 'N/A'}
+                      </TableCell>
+                      <TableCell>
+                        {inspecao.profiles?.nome || 'N/A'}
+                      </TableCell>
+                      <TableCell>
+                        {getStatusBadge(inspecao.status)}
+                      </TableCell>
+                      <TableCell>
+                        {getConformidadeBadge(inspecao.tem_nao_conformidade)}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <Button variant="outline" size="sm">
                             <Eye className="h-4 w-4" />
+                            <span className="sr-only">Visualizar</span>
                           </Button>
-                          {inspecao.tem_nao_conformidade && (
-                            <Button 
-                              size="sm" 
-                              variant="outline"
-                              onClick={() => baixarPDF(inspecao)}
-                            >
+                          {inspecao.pdf_gerado_url && (
+                            <Button variant="outline" size="sm">
                               <Download className="h-4 w-4" />
+                              <span className="sr-only">Download PDF</span>
                             </Button>
                           )}
                         </div>
                       </TableCell>
                     </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           )}
         </CardContent>
       </Card>
-
-      {/* Dialog de Detalhes */}
-      <Dialog open={dialogDetalhesOpen} onOpenChange={setDialogDetalhesOpen}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Detalhes da Inspeção</DialogTitle>
-          </DialogHeader>
-          
-          {inspecaoDetalhes && (
-            <div className="space-y-4">
-              {/* Informações Gerais */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Informações Gerais</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label className="text-sm font-medium">Data da Inspeção</Label>
-                      <p>{format(new Date(inspecaoDetalhes.data_inspecao), 'dd/MM/yyyy', { locale: ptBR })}</p>
-                    </div>
-                    <div>
-                      <Label className="text-sm font-medium">Responsável</Label>
-                      <p>{inspecaoDetalhes.profiles?.nome}</p>
-                    </div>
-                    <div>
-                      <Label className="text-sm font-medium">Local</Label>
-                      <p>{inspecaoDetalhes.local}</p>
-                    </div>
-                    <div>
-                      <Label className="text-sm font-medium">CCA</Label>
-                      <p>{inspecaoDetalhes.ccas ? `${inspecaoDetalhes.ccas.codigo} - ${inspecaoDetalhes.ccas.nome}` : 'Não informado'}</p>
-                    </div>
-                    <div>
-                      <Label className="text-sm font-medium">Tipo</Label>
-                      <p>{inspecaoDetalhes.modelos_inspecao_sms?.tipos_inspecao_sms?.nome}</p>
-                    </div>
-                    <div>
-                      <Label className="text-sm font-medium">Modelo</Label>
-                      <p>{inspecaoDetalhes.modelos_inspecao_sms?.nome}</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Itens Verificados */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Itens Verificados</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {(inspecaoDetalhes.dados_preenchidos?.itens || []).map((item: any, index: number) => (
-                      <div key={item.id} className="flex items-center justify-between p-3 border rounded">
-                        <span className="font-medium">{index + 1}. {item.nome}</span>
-                        <Badge 
-                          variant={
-                            item.status === 'conforme' ? 'default' :
-                            item.status === 'nao_conforme' ? 'destructive' : 
-                            'secondary'
-                          }
-                          className={
-                            item.status === 'conforme' ? 'bg-green-600' : ''
-                          }
-                        >
-                          {item.status === 'conforme' ? 'Conforme' :
-                           item.status === 'nao_conforme' ? 'Não Conforme' :
-                           'Não se Aplica'}
-                        </Badge>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Observações */}
-              {inspecaoDetalhes.observacoes && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg">Observações</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm">{inspecaoDetalhes.observacoes}</p>
-                  </CardContent>
-                </Card>
-              )}
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };

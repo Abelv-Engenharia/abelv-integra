@@ -1,6 +1,7 @@
+
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar, CheckCircle, XCircle, Clock, FileSearch } from "lucide-react";
+import { Calendar, CheckCircle, XCircle, Clock, FileSearch, TrendingUp, AlertTriangle, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DatePickerWithManualInput } from "@/components/ui/date-picker-with-manual-input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -8,22 +9,35 @@ import { supabase } from "@/integrations/supabase/client";
 import { useUserCCAs } from "@/hooks/useUserCCAs";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 
 const InspecaoSMSDashboard = () => {
-  const [totalInspecoes, setTotalInspecoes] = useState(0);
-  const [conformes, setConformes] = useState(0);
-  const [naoConformes, setNaoConformes] = useState(0);
+  const [stats, setStats] = useState({
+    totalInspecoes: 0,
+    conformes: 0,
+    naoConformes: 0,
+    pendentes: 0,
+    esteMes: 0,
+    mesAnterior: 0
+  });
   const [ultimasInspecoes, setUltimasInspecoes] = useState<any[]>([]);
+  const [inspecoesPorTipo, setInspecoesPorTipo] = useState<any[]>([]);
+  const [inspecoesPorCCA, setInspecoesPorCCA] = useState<any[]>([]);
   const [tiposInspecao, setTiposInspecao] = useState<any[]>([]);
   const [filtroTipo, setFiltroTipo] = useState<string>("");
   const [dataInicio, setDataInicio] = useState<Date>();
   const [dataFim, setDataFim] = useState<Date>();
+  const [isLoading, setIsLoading] = useState(true);
   const { data: userCCAs = [] } = useUserCCAs();
 
-  const loadData = async () => {
+  const loadStats = async () => {
     try {
-      const mesAtual = new Date().getMonth() + 1;
-      const anoAtual = new Date().getFullYear();
+      const now = new Date();
+      const mesAtual = now.getMonth() + 1;
+      const anoAtual = now.getFullYear();
+      const mesAnterior = mesAtual === 1 ? 12 : mesAtual - 1;
+      const anoMesAnterior = mesAtual === 1 ? anoAtual - 1 : anoAtual;
       
       // Filtrar por CCAs do usuário
       const ccaIds = userCCAs.length > 0 ? userCCAs.map(cca => cca.id) : [];
@@ -34,17 +48,27 @@ const InspecaoSMSDashboard = () => {
           *,
           modelos_inspecao_sms(
             nome,
-            tipos_inspecao_sms(nome)
+            tipos_inspecao_sms(id, nome)
           ),
-          profiles(nome)
+          profiles(nome),
+          ccas(codigo, nome)
         `)
-        .gte('created_at', `${anoAtual}-${mesAtual.toString().padStart(2, '0')}-01`)
         .order('created_at', { ascending: false });
 
       if (ccaIds.length > 0) {
         query = query.in('cca_id', ccaIds);
       }
 
+      // Aplicar filtros de data se definidos
+      if (dataInicio) {
+        query = query.gte('data_inspecao', format(dataInicio, 'yyyy-MM-dd'));
+      }
+
+      if (dataFim) {
+        query = query.lte('data_inspecao', format(dataFim, 'yyyy-MM-dd'));
+      }
+
+      // Aplicar filtro de tipo se definido
       if (filtroTipo) {
         const { data: modelosDoTipo } = await supabase
           .from('modelos_inspecao_sms')
@@ -57,24 +81,64 @@ const InspecaoSMSDashboard = () => {
         }
       }
 
-      if (dataInicio) {
-        query = query.gte('data_inspecao', format(dataInicio, 'yyyy-MM-dd'));
-      }
-
-      if (dataFim) {
-        query = query.lte('data_inspecao', format(dataFim, 'yyyy-MM-dd'));
-      }
-
       const { data: inspecoes } = await query;
 
       if (inspecoes) {
-        setTotalInspecoes(inspecoes.length);
-        setConformes(inspecoes.filter(i => !i.tem_nao_conformidade).length);
-        setNaoConformes(inspecoes.filter(i => i.tem_nao_conformidade).length);
-        setUltimasInspecoes(inspecoes.slice(0, 10));
+        // Calcular estatísticas gerais
+        const totalInspecoes = inspecoes.length;
+        const conformes = inspecoes.filter(i => !i.tem_nao_conformidade).length;
+        const naoConformes = inspecoes.filter(i => i.tem_nao_conformidade).length;
+        const pendentes = inspecoes.filter(i => i.status === 'pendente').length;
+
+        // Inspeções deste mês
+        const esteMes = inspecoes.filter(i => {
+          const dataInsp = new Date(i.data_inspecao);
+          return dataInsp.getMonth() + 1 === mesAtual && dataInsp.getFullYear() === anoAtual;
+        }).length;
+
+        // Inspeções do mês anterior
+        const mesAnteriorCount = inspecoes.filter(i => {
+          const dataInsp = new Date(i.data_inspecao);
+          return dataInsp.getMonth() + 1 === mesAnterior && dataInsp.getFullYear() === anoMesAnterior;
+        }).length;
+
+        setStats({
+          totalInspecoes,
+          conformes,
+          naoConformes,
+          pendentes,
+          esteMes,
+          mesAnterior: mesAnteriorCount
+        });
+
+        setUltimasInspecoes(inspecoes.slice(0, 8));
+
+        // Agrupar por tipo de inspeção
+        const tiposCount = inspecoes.reduce((acc: any, insp) => {
+          const tipo = insp.modelos_inspecao_sms?.tipos_inspecao_sms?.nome || 'Sem tipo';
+          acc[tipo] = (acc[tipo] || 0) + 1;
+          return acc;
+        }, {});
+
+        setInspecoesPorTipo(
+          Object.entries(tiposCount).map(([tipo, count]) => ({ tipo, count }))
+        );
+
+        // Agrupar por CCA
+        const ccasCount = inspecoes.reduce((acc: any, insp) => {
+          const cca = insp.ccas ? `${insp.ccas.codigo} - ${insp.ccas.nome}` : 'Sem CCA';
+          acc[cca] = (acc[cca] || 0) + 1;
+          return acc;
+        }, {});
+
+        setInspecoesPorCCA(
+          Object.entries(ccasCount).map(([cca, count]) => ({ cca, count }))
+        );
       }
     } catch (error) {
       console.error('Erro ao carregar dados:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -93,31 +157,65 @@ const InspecaoSMSDashboard = () => {
     }
   };
 
+  const getStatusBadge = (status: string) => {
+    const statusMap = {
+      'concluida': { label: 'Concluída', variant: 'default' as const },
+      'em_andamento': { label: 'Em Andamento', variant: 'secondary' as const },
+      'pendente': { label: 'Pendente', variant: 'outline' as const }
+    };
+    
+    const statusInfo = statusMap[status as keyof typeof statusMap] || 
+      { label: status, variant: 'outline' as const };
+    
+    return (
+      <Badge variant={statusInfo.variant} className="text-xs">
+        {statusInfo.label}
+      </Badge>
+    );
+  };
+
+  const getConformidadeBadge = (temNaoConformidade: boolean) => {
+    return (
+      <Badge variant={temNaoConformidade ? "destructive" : "default"} className="text-xs">
+        {temNaoConformidade ? "NC" : "OK"}
+      </Badge>
+    );
+  };
+
+  const calcularTendencia = () => {
+    if (stats.mesAnterior === 0) return stats.esteMes > 0 ? 100 : 0;
+    return ((stats.esteMes - stats.mesAnterior) / stats.mesAnterior) * 100;
+  };
+
+  const taxaConformidade = stats.totalInspecoes > 0 
+    ? ((stats.conformes / stats.totalInspecoes) * 100) 
+    : 0;
+
   useEffect(() => {
     loadTiposInspecao();
   }, []);
 
   useEffect(() => {
     if (userCCAs.length >= 0) {
-      loadData();
+      loadStats();
     }
   }, [userCCAs, filtroTipo, dataInicio, dataFim]);
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-2">
-        <FileSearch className="h-6 w-6 text-blue-600" />
-        <h1 className="text-2xl font-bold">Dashboard - Inspeção SMS</h1>
+    <div className="content-padding section-spacing">
+      <div className="flex items-center gap-2 mb-4 sm:mb-6">
+        <FileSearch className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600 flex-shrink-0" />
+        <h1 className="heading-responsive">Dashboard - Inspeção SMS</h1>
       </div>
 
       {/* Filtros */}
-      <Card>
+      <Card className="mb-4 sm:mb-6">
         <CardHeader>
-          <CardTitle>Filtros</CardTitle>
+          <CardTitle className="text-lg sm:text-xl">Filtros</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div>
+          <div className="form-grid">
+            <div className="space-y-2">
               <label className="text-sm font-medium">Tipo de Inspeção</label>
               <Select value={filtroTipo} onValueChange={setFiltroTipo}>
                 <SelectTrigger>
@@ -133,14 +231,14 @@ const InspecaoSMSDashboard = () => {
                 </SelectContent>
               </Select>
             </div>
-            <div>
+            <div className="space-y-2">
               <label className="text-sm font-medium">Data Início</label>
               <DatePickerWithManualInput
                 value={dataInicio}
                 onChange={setDataInicio}
               />
             </div>
-            <div>
+            <div className="space-y-2">
               <label className="text-sm font-medium">Data Fim</label>
               <DatePickerWithManualInput
                 value={dataFim}
@@ -148,7 +246,7 @@ const InspecaoSMSDashboard = () => {
               />
             </div>
             <div className="flex items-end">
-              <Button onClick={loadData} className="w-full">
+              <Button onClick={loadStats} className="w-full">
                 Aplicar Filtros
               </Button>
             </div>
@@ -157,17 +255,18 @@ const InspecaoSMSDashboard = () => {
       </Card>
 
       {/* Cards de Estatísticas */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total de Inspeções</CardTitle>
             <Calendar className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totalInspecoes}</div>
-            <p className="text-xs text-muted-foreground">
-              No período selecionado
-            </p>
+            <div className="text-2xl font-bold">{stats.totalInspecoes}</div>
+            <div className="flex items-center text-xs text-muted-foreground mt-1">
+              <TrendingUp className="h-3 w-3 mr-1" />
+              {stats.esteMes} este mês
+            </div>
           </CardContent>
         </Card>
 
@@ -177,10 +276,10 @@ const InspecaoSMSDashboard = () => {
             <CheckCircle className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">{conformes}</div>
-            <p className="text-xs text-muted-foreground">
-              {totalInspecoes > 0 ? `${((conformes / totalInspecoes) * 100).toFixed(1)}%` : '0%'} do total
-            </p>
+            <div className="text-2xl font-bold text-green-600">{stats.conformes}</div>
+            <div className="text-xs text-muted-foreground">
+              {stats.totalInspecoes > 0 ? `${((stats.conformes / stats.totalInspecoes) * 100).toFixed(1)}%` : '0%'} do total
+            </div>
           </CardContent>
         </Card>
 
@@ -190,25 +289,94 @@ const InspecaoSMSDashboard = () => {
             <XCircle className="h-4 w-4 text-red-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-red-600">{naoConformes}</div>
-            <p className="text-xs text-muted-foreground">
-              {totalInspecoes > 0 ? `${((naoConformes / totalInspecoes) * 100).toFixed(1)}%` : '0%'} do total
-            </p>
+            <div className="text-2xl font-bold text-red-600">{stats.naoConformes}</div>
+            <div className="text-xs text-muted-foreground">
+              {stats.totalInspecoes > 0 ? `${((stats.naoConformes / stats.totalInspecoes) * 100).toFixed(1)}%` : '0%'} do total
+            </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Taxa de Conformidade</CardTitle>
-            <Clock className="h-4 w-4 text-blue-600" />
+            <AlertTriangle className="h-4 w-4 text-blue-600" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-blue-600">
-              {totalInspecoes > 0 ? `${((conformes / totalInspecoes) * 100).toFixed(1)}%` : '0%'}
+              {taxaConformidade.toFixed(1)}%
             </div>
-            <p className="text-xs text-muted-foreground">
+            <Progress value={taxaConformidade} className="mt-2" />
+            <p className="text-xs text-muted-foreground mt-1">
               Meta: 90%
             </p>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        {/* Inspeções por Tipo */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg sm:text-xl">Inspeções por Tipo</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {inspecoesPorTipo.length === 0 ? (
+                <p className="text-muted-foreground text-center py-4">
+                  Nenhum dado encontrado
+                </p>
+              ) : (
+                inspecoesPorTipo.map((item, index) => (
+                  <div key={index} className="flex items-center justify-between">
+                    <span className="text-sm font-medium truncate mr-2">{item.tipo}</span>
+                    <div className="flex items-center gap-2">
+                      <div className="w-16 bg-muted rounded-full h-2 overflow-hidden">
+                        <div 
+                          className="h-full bg-blue-600 transition-all"
+                          style={{ 
+                            width: `${(item.count / stats.totalInspecoes) * 100}%` 
+                          }}
+                        />
+                      </div>
+                      <span className="text-sm font-bold w-8 text-right">{item.count}</span>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Inspeções por CCA */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg sm:text-xl">Inspeções por CCA</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {inspecoesPorCCA.length === 0 ? (
+                <p className="text-muted-foreground text-center py-4">
+                  Nenhum dado encontrado
+                </p>
+              ) : (
+                inspecoesPorCCA.slice(0, 6).map((item, index) => (
+                  <div key={index} className="flex items-center justify-between">
+                    <span className="text-sm font-medium truncate mr-2">{item.cca}</span>
+                    <div className="flex items-center gap-2">
+                      <div className="w-16 bg-muted rounded-full h-2 overflow-hidden">
+                        <div 
+                          className="h-full bg-green-600 transition-all"
+                          style={{ 
+                            width: `${(item.count / stats.totalInspecoes) * 100}%` 
+                          }}
+                        />
+                      </div>
+                      <span className="text-sm font-bold w-8 text-right">{item.count}</span>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -216,7 +384,7 @@ const InspecaoSMSDashboard = () => {
       {/* Lista das Últimas Inspeções */}
       <Card>
         <CardHeader>
-          <CardTitle>Últimas Inspeções Realizadas</CardTitle>
+          <CardTitle className="text-lg sm:text-xl">Últimas Inspeções Realizadas</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -226,35 +394,34 @@ const InspecaoSMSDashboard = () => {
               </p>
             ) : (
               ultimasInspecoes.map((inspecao) => (
-                <div key={inspecao.id} className="flex items-center justify-between p-3 border rounded-lg">
-                  <div className="flex-1">
-                    <h4 className="font-medium">
-                      {inspecao.modelos_inspecao_sms?.tipos_inspecao_sms?.nome || 'Tipo não definido'}
-                    </h4>
-                    <p className="text-sm text-muted-foreground">
+                <div key={inspecao.id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h4 className="font-medium text-sm truncate">
+                        {inspecao.modelos_inspecao_sms?.tipos_inspecao_sms?.nome || 'Tipo não definido'}
+                      </h4>
+                      {getStatusBadge(inspecao.status)}
+                      {getConformidadeBadge(inspecao.tem_nao_conformidade)}
+                    </div>
+                    <p className="text-sm text-muted-foreground truncate">
                       {inspecao.modelos_inspecao_sms?.nome || 'Modelo não definido'}
                     </p>
-                    <p className="text-xs text-muted-foreground">
-                      Local: {inspecao.local} | Responsável: {inspecao.profiles?.nome}
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Local: {inspecao.local} | Responsável: {inspecao.profiles?.nome || 'N/A'}
                     </p>
+                    {inspecao.ccas && (
+                      <p className="text-xs text-muted-foreground">
+                        CCA: {inspecao.ccas.codigo} - {inspecao.ccas.nome}
+                      </p>
+                    )}
                   </div>
-                  <div className="text-right">
+                  <div className="text-right ml-4">
                     <p className="text-sm font-medium">
                       {format(new Date(inspecao.data_inspecao), 'dd/MM/yyyy', { locale: ptBR })}
                     </p>
-                    <div className="flex items-center gap-1">
-                      {inspecao.tem_nao_conformidade ? (
-                        <>
-                          <XCircle className="h-4 w-4 text-red-600" />
-                          <span className="text-xs text-red-600">Não Conforme</span>
-                        </>
-                      ) : (
-                        <>
-                          <CheckCircle className="h-4 w-4 text-green-600" />
-                          <span className="text-xs text-green-600">Conforme</span>
-                        </>
-                      )}
-                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      {format(new Date(inspecao.created_at), 'HH:mm', { locale: ptBR })}
+                    </p>
                   </div>
                 </div>
               ))
