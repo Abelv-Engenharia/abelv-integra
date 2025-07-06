@@ -135,559 +135,114 @@ function App() {
               <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/reset-password" element={<ResetPassword />} />
               
-              {/* Protected routes */}
+              {/* Protected routes with layout */}
               <Route path="/" element={
                 <AuthGuard>
-                  <Layout>
-                    <Index />
-                  </Layout>
+                  <Layout />
                 </AuthGuard>
-              } />
-              
-              <Route path="/dashboard" element={
-                <AuthGuard>
-                  <Layout>
-                    <Dashboard />
-                  </Layout>
-                </AuthGuard>
-              } />
+              }>
+                <Route index element={<Index />} />
+                <Route path="dashboard" element={<Dashboard />} />
 
-              {/* Account routes */}
-              <Route path="/account/profile" element={
-                <AuthGuard>
-                  <Layout>
-                    <Profile />
-                  </Layout>
-                </AuthGuard>
-              } />
-              <Route path="/account/settings" element={
-                <AuthGuard>
-                  <Layout>
-                    <Settings />
-                  </Layout>
-                </AuthGuard>
-              } />
-              <Route path="/account/support" element={
-                <AuthGuard>
-                  <Layout>
-                    <Support />
-                  </Layout>
-                </AuthGuard>
-              } />
+                {/* Account routes */}
+                <Route path="account/profile" element={<Profile />} />
+                <Route path="account/settings" element={<Settings />} />
+                <Route path="account/support" element={<Support />} />
 
-              {/* Admin routes */}
-              <Route path="/admin/usuarios" element={
-                <AuthGuard>
-                  <Layout>
-                    <AdminUsuarios />
-                  </Layout>
-                </AuthGuard>
-              } />
-              <Route path="/admin/usuarios-auth" element={
-                <AuthGuard>
-                  <Layout>
-                    <AdminUsuariosAuth />
-                  </Layout>
-                </AuthGuard>
-              } />
-              <Route path="/admin/ccas" element={
-                <AuthGuard>
-                  <Layout>
-                    <AdminCCAs />
-                  </Layout>
-                </AuthGuard>
-              } />
-              <Route path="/admin/perfis" element={
-                <AuthGuard>
-                  <Layout>
-                    <AdminPerfis />
-                  </Layout>
-                </AuthGuard>
-              } />
-              <Route path="/admin/empresas" element={
-                <AuthGuard>
-                  <Layout>
-                    <AdminEmpresas />
-                  </Layout>
-                </AuthGuard>
-              } />
-              <Route path="/admin/engenheiros" element={
-                <AuthGuard>
-                  <Layout>
-                    <AdminEngenheiros />
-                  </Layout>
-                </AuthGuard>
-              } />
-              <Route path="/admin/supervisores" element={
-                <AuthGuard>
-                  <Layout>
-                    <AdminSupervisores />
-                  </Layout>
-                </AuthGuard>
-              } />
-              <Route path="/admin/logo" element={
-                <AuthGuard>
-                  <Layout>
-                    <AdminLogo />
-                  </Layout>
-                </AuthGuard>
-              } />
-              <Route path="/admin/templates" element={
-                <AuthGuard>
-                  <Layout>
-                    <AdminTemplates />
-                  </Layout>
-                </AuthGuard>
-              } />
-              <Route path="/admin/modelos-inspecao" element={
-                <AuthGuard>
-                  <Layout>
-                    <AdminModelosInspecao />
-                  </Layout>
-                </AuthGuard>
-              } />
-              <Route path="/admin/funcionarios" element={
-                <AuthGuard>
-                  <Layout>
-                    <CadastroFuncionarios />
-                  </Layout>
-                </AuthGuard>
-              } />
-              <Route path="/admin/criar-usuario" element={
-                <AuthGuard>
-                  <Layout>
-                    <CriarUsuario />
-                  </Layout>
-                </AuthGuard>
-              } />
-              <Route path="/admin/metas-indicadores" element={
-                <AuthGuard>
-                  <Layout>
-                    <MetasIndicadores />
-                  </Layout>
-                </AuthGuard>
-              } />
-              <Route path="/admin/registro-hht" element={
-                <AuthGuard>
-                  <Layout>
-                    <RegistroHHT />
-                  </Layout>
-                </AuthGuard>
-              } />
+                {/* Admin routes */}
+                <Route path="admin/usuarios" element={<AdminUsuarios />} />
+                <Route path="admin/usuarios-auth" element={<AdminUsuariosAuth />} />
+                <Route path="admin/ccas" element={<AdminCCAs />} />
+                <Route path="admin/perfis" element={<AdminPerfis />} />
+                <Route path="admin/empresas" element={<AdminEmpresas />} />
+                <Route path="admin/engenheiros" element={<AdminEngenheiros />} />
+                <Route path="admin/supervisores" element={<AdminSupervisores />} />
+                <Route path="admin/logo" element={<AdminLogo />} />
+                <Route path="admin/templates" element={<AdminTemplates />} />
+                <Route path="admin/modelos-inspecao" element={<AdminModelosInspecao />} />
+                <Route path="admin/funcionarios" element={<CadastroFuncionarios />} />
+                <Route path="admin/criar-usuario" element={<CriarUsuario />} />
+                <Route path="admin/metas-indicadores" element={<MetasIndicadores />} />
+                <Route path="admin/registro-hht" element={<RegistroHHT />} />
 
-              {/* Tarefas routes */}
-              <Route path="/tarefas/dashboard" element={
-                <AuthGuard>
-                  <Layout>
-                    <TarefasDashboard />
-                  </Layout>
-                </AuthGuard>
-              } />
-              <Route path="/tarefas/cadastro" element={
-                <AuthGuard>
-                  <Layout>
-                    <CadastroTarefas />
-                  </Layout>
-                </AuthGuard>
-              } />
-              <Route path="/tarefas/minhas" element={
-                <AuthGuard>
-                  <Layout>
-                    <MinhasTarefas />
-                  </Layout>
-                </AuthGuard>
-              } />
-              <Route path="/tarefas/:id" element={
-                <AuthGuard>
-                  <Layout>
-                    <DetalheTarefa />
-                  </Layout>
-                </AuthGuard>
-              } />
-              <Route path="/tarefas/:id/editar" element={
-                <AuthGuard>
-                  <Layout>
-                    <EditarTarefa />
-                  </Layout>
-                </AuthGuard>
-              } />
+                {/* Tarefas routes */}
+                <Route path="tarefas/dashboard" element={<TarefasDashboard />} />
+                <Route path="tarefas/cadastro" element={<CadastroTarefas />} />
+                <Route path="tarefas/minhas" element={<MinhasTarefas />} />
+                <Route path="tarefas/:id" element={<DetalheTarefa />} />
+                <Route path="tarefas/:id/editar" element={<EditarTarefa />} />
 
-              {/* Treinamentos routes */}
-              <Route path="/treinamentos/dashboard" element={
-                <AuthGuard>
-                  <Layout>
-                    <TreinamentosDashboard />
-                  </Layout>
-                </AuthGuard>
-              } />
-              <Route path="/treinamentos/execucao" element={
-                <AuthGuard>
-                  <Layout>
-                    <TreinamentosExecucao />
-                  </Layout>
-                </AuthGuard>
-              } />
-              <Route path="/treinamentos/consulta" element={
-                <AuthGuard>
-                  <Layout>
-                    <TreinamentosConsulta />
-                  </Layout>
-                </AuthGuard>
-              } />
-              <Route path="/treinamentos/cracha" element={
-                <AuthGuard>
-                  <Layout>
-                    <TreinamentosCracha />
-                  </Layout>
-                </AuthGuard>
-              } />
-              <Route path="/treinamentos/normativo" element={
-                <AuthGuard>
-                  <Layout>
-                    <TreinamentosNormativo />
-                  </Layout>
-                </AuthGuard>
-              } />
-              <Route path="/treinamentos/execucao/:id/editar" element={
-                <AuthGuard>
-                  <Layout>
-                    <EditarExecucaoTreinamento />
-                  </Layout>
-                </AuthGuard>
-              } />
-              <Route path="/treinamentos/execucao/:id/visualizar" element={
-                <AuthGuard>
-                  <Layout>
-                    <VisualizarExecucaoTreinamento />
-                  </Layout>
-                </AuthGuard>
-              } />
+                {/* Treinamentos routes */}
+                <Route path="treinamentos/dashboard" element={<TreinamentosDashboard />} />
+                <Route path="treinamentos/execucao" element={<TreinamentosExecucao />} />
+                <Route path="treinamentos/consulta" element={<TreinamentosConsulta />} />
+                <Route path="treinamentos/cracha" element={<TreinamentosCracha />} />
+                <Route path="treinamentos/normativo" element={<TreinamentosNormativo />} />
+                <Route path="treinamentos/execucao/:id/editar" element={<EditarExecucaoTreinamento />} />
+                <Route path="treinamentos/execucao/:id/visualizar" element={<VisualizarExecucaoTreinamento />} />
 
-              {/* Ocorrências routes */}
-              <Route path="/ocorrencias/dashboard" element={
-                <AuthGuard>
-                  <Layout>
-                    <OcorrenciasDashboard />
-                  </Layout>
-                </AuthGuard>
-              } />
-              <Route path="/ocorrencias/cadastro" element={
-                <AuthGuard>
-                  <Layout>
-                    <OcorrenciasCadastro />
-                  </Layout>
-                </AuthGuard>
-              } />
-              <Route path="/ocorrencias/consulta" element={
-                <AuthGuard>
-                  <Layout>
-                    <OcorrenciasConsulta />
-                  </Layout>
-                </AuthGuard>
-              } />
-              <Route path="/ocorrencias/visualizacao" element={
-                <AuthGuard>
-                  <Layout>
-                    <OcorrenciasVisualizacao />
-                  </Layout>
-                </AuthGuard>
-              } />
-              <Route path="/ocorrencias/:id" element={
-                <AuthGuard>
-                  <Layout>
-                    <OcorrenciasDetalhes />
-                  </Layout>
-                </AuthGuard>
-              } />
-              <Route path="/ocorrencias/:id/editar" element={
-                <AuthGuard>
-                  <Layout>
-                    <OcorrenciasEdicao />
-                  </Layout>
-                </AuthGuard>
-              } />
-              <Route path="/ocorrencias/:id/atualizar-status" element={
-                <AuthGuard>
-                  <Layout>
-                    <OcorrenciasAtualizarStatus />
-                  </Layout>
-                </AuthGuard>
-              } />
+                {/* Ocorrências routes */}
+                <Route path="ocorrencias/dashboard" element={<OcorrenciasDashboard />} />
+                <Route path="ocorrencias/cadastro" element={<OcorrenciasCadastro />} />
+                <Route path="ocorrencias/consulta" element={<OcorrenciasConsulta />} />
+                <Route path="ocorrencias/visualizacao" element={<OcorrenciasVisualizacao />} />
+                <Route path="ocorrencias/:id" element={<OcorrenciasDetalhes />} />
+                <Route path="ocorrencias/:id/editar" element={<OcorrenciasEdicao />} />
+                <Route path="ocorrencias/:id/atualizar-status" element={<OcorrenciasAtualizarStatus />} />
 
-              {/* Desvios routes */}
-              <Route path="/desvios/dashboard" element={
-                <AuthGuard>
-                  <Layout>
-                    <DesviosDashboard />
-                  </Layout>
-                </AuthGuard>
-              } />
-              <Route path="/desvios/cadastro" element={
-                <AuthGuard>
-                  <Layout>
-                    <DesviosForm />
-                  </Layout>
-                </AuthGuard>
-              } />
-              <Route path="/desvios/consulta" element={
-                <AuthGuard>
-                  <Layout>
-                    <DesviosConsulta />
-                  </Layout>
-                </AuthGuard>
-              } />
-              <Route path="/desvios/nao-conformidade" element={
-                <AuthGuard>
-                  <Layout>
-                    <DesviosNaoConformidade />
-                  </Layout>
-                </AuthGuard>
-              } />
+                {/* Desvios routes */}
+                <Route path="desvios/dashboard" element={<DesviosDashboard />} />
+                <Route path="desvios/cadastro" element={<DesviosForm />} />
+                <Route path="desvios/consulta" element={<DesviosConsulta />} />
+                <Route path="desvios/nao-conformidade" element={<DesviosNaoConformidade />} />
 
-              {/* Hora da Segurança routes */}
-              <Route path="/hora-seguranca/dashboard" element={
-                <AuthGuard>
-                  <Layout>
-                    <HoraSegurancaDashboard />
-                  </Layout>
-                </AuthGuard>
-              } />
-              <Route path="/hora-seguranca/inspecoes-cadastro" element={
-                <AuthGuard>
-                  <Layout>
-                    <InspecoesCadastro />
-                  </Layout>
-                </AuthGuard>
-              } />
-              <Route path="/hora-seguranca/inspecoes-acompanhamento" element={
-                <AuthGuard>
-                  <Layout>
-                    <InspecoesAcompanhamento />
-                  </Layout>
-                </AuthGuard>
-              } />
-              <Route path="/hora-seguranca/inspecoes-nao-programadas" element={
-                <AuthGuard>
-                  <Layout>
-                    <InspecoesNaoProgramadas />
-                  </Layout>
-                </AuthGuard>
-              } />
-              <Route path="/hora-seguranca/inspecao-cadastro-hsa" element={
-                <AuthGuard>
-                  <Layout>
-                    <InspecaoCadastroHSA />
-                  </Layout>
-                </AuthGuard>
-              } />
-              <Route path="/hora-seguranca/inspecao-nao-programada-hsa" element={
-                <AuthGuard>
-                  <Layout>
-                    <InspecaoNaoProgramadaHSA />
-                  </Layout>
-                </AuthGuard>
-              } />
-              <Route path="/hora-seguranca/painel-execucao-hsa" element={
-                <AuthGuard>
-                  <Layout>
-                    <PainelExecucaoHSA />
-                  </Layout>
-                </AuthGuard>
-              } />
-              <Route path="/hora-seguranca/agenda-hsa" element={
-                <AuthGuard>
-                  <Layout>
-                    <AgendaHSA />
-                  </Layout>
-                </AuthGuard>
-              } />
+                {/* Hora da Segurança routes */}
+                <Route path="hora-seguranca/dashboard" element={<HoraSegurancaDashboard />} />
+                <Route path="hora-seguranca/inspecoes-cadastro" element={<InspecoesCadastro />} />
+                <Route path="hora-seguranca/inspecoes-acompanhamento" element={<InspecoesAcompanhamento />} />
+                <Route path="hora-seguranca/inspecoes-nao-programadas" element={<InspecoesNaoProgramadas />} />
+                <Route path="hora-seguranca/inspecao-cadastro-hsa" element={<InspecaoCadastroHSA />} />
+                <Route path="hora-seguranca/inspecao-nao-programada-hsa" element={<InspecaoNaoProgramadaHSA />} />
+                <Route path="hora-seguranca/painel-execucao-hsa" element={<PainelExecucaoHSA />} />
+                <Route path="hora-seguranca/agenda-hsa" element={<AgendaHSA />} />
 
-              {/* IDSMS routes */}
-              <Route path="/idsms/dashboard" element={
-                <AuthGuard>
-                  <Layout>
-                    <IDSMSDashboard />
-                  </Layout>
-                </AuthGuard>
-              } />
-              <Route path="/idsms/indicadores" element={
-                <AuthGuard>
-                  <Layout>
-                    <IDSMSIndicadores />
-                  </Layout>
-                </AuthGuard>
-              } />
-              <Route path="/idsms/ht" element={
-                <AuthGuard>
-                  <Layout>
-                    <HTForm />
-                  </Layout>
-                </AuthGuard>
-              } />
-              <Route path="/idsms/hsa" element={
-                <AuthGuard>
-                  <Layout>
-                    <HSAForm />
-                  </Layout>
-                </AuthGuard>
-              } />
-              <Route path="/idsms/iid" element={
-                <AuthGuard>
-                  <Layout>
-                    <IIDForm />
-                  </Layout>
-                </AuthGuard>
-              } />
-              <Route path="/idsms/ipom" element={
-                <AuthGuard>
-                  <Layout>
-                    <IPOMForm />
-                  </Layout>
-                </AuthGuard>
-              } />
-              <Route path="/idsms/indice-reativo" element={
-                <AuthGuard>
-                  <Layout>
-                    <IndiceReativoForm />
-                  </Layout>
-                </AuthGuard>
-              } />
-              <Route path="/idsms/inspecao-alta-lideranca" element={
-                <AuthGuard>
-                  <Layout>
-                    <InspecaoAltaLiderancaForm />
-                  </Layout>
-                </AuthGuard>
-              } />
-              <Route path="/idsms/inspecao-gestao-sms" element={
-                <AuthGuard>
-                  <Layout>
-                    <InspecaoGestaoSMSForm />
-                  </Layout>
-                </AuthGuard>
-              } />
+                {/* IDSMS routes */}
+                <Route path="idsms/dashboard" element={<IDSMSDashboard />} />
+                <Route path="idsms/indicadores" element={<IDSMSIndicadores />} />
+                <Route path="idsms/ht" element={<HTForm />} />
+                <Route path="idsms/hsa" element={<HSAForm />} />
+                <Route path="idsms/iid" element={<IIDForm />} />
+                <Route path="idsms/ipom" element={<IPOMForm />} />
+                <Route path="idsms/indice-reativo" element={<IndiceReativoForm />} />
+                <Route path="idsms/inspecao-alta-lideranca" element={<InspecaoAltaLiderancaForm />} />
+                <Route path="idsms/inspecao-gestao-sms" element={<InspecaoGestaoSMSForm />} />
 
-              {/* GRO routes */}
-              <Route path="/gro/avaliacao-riscos" element={
-                <AuthGuard>
-                  <Layout>
-                    <GroAvaliacaoRiscos />
-                  </Layout>
-                </AuthGuard>
-              } />
-              <Route path="/gro/cadastro-perigos" element={
-                <AuthGuard>
-                  <Layout>
-                    <GroCadastroPerigos />
-                  </Layout>
-                </AuthGuard>
-              } />
-              <Route path="/gro/pgr" element={
-                <AuthGuard>
-                  <Layout>
-                    <GroPGR />
-                  </Layout>
-                </AuthGuard>
-              } />
+                {/* GRO routes */}
+                <Route path="gro/avaliacao-riscos" element={<GroAvaliacaoRiscos />} />
+                <Route path="gro/cadastro-perigos" element={<GroCadastroPerigos />} />
+                <Route path="gro/pgr" element={<GroPGR />} />
 
-              {/* Medidas Disciplinares routes */}
-              <Route path="/medidas-disciplinares/dashboard" element={
-                <AuthGuard>
-                  <Layout>
-                    <MedidasDisciplinaresDashboard />
-                  </Layout>
-                </AuthGuard>
-              } />
-              <Route path="/medidas-disciplinares/cadastro" element={
-                <AuthGuard>
-                  <Layout>
-                    <MedidasDisciplinaresCadastro />
-                  </Layout>
-                </AuthGuard>
-              } />
-              <Route path="/medidas-disciplinares/consulta" element={
-                <AuthGuard>
-                  <Layout>
-                    <MedidasDisciplinaresConsulta />
-                  </Layout>
-                </AuthGuard>
-              } />
+                {/* Medidas Disciplinares routes */}
+                <Route path="medidas-disciplinares/dashboard" element={<MedidasDisciplinaresDashboard />} />
+                <Route path="medidas-disciplinares/cadastro" element={<MedidasDisciplinaresCadastro />} />
+                <Route path="medidas-disciplinares/consulta" element={<MedidasDisciplinaresConsulta />} />
 
-              {/* Relatórios routes */}
-              <Route path="/relatorios/dashboard" element={
-                <AuthGuard>
-                  <Layout>
-                    <RelatoriosDashboard />
-                  </Layout>
-                </AuthGuard>
-              } />
-              <Route path="/relatorios/ocorrencias" element={
-                <AuthGuard>
-                  <Layout>
-                    <RelatoriosOcorrencias />
-                  </Layout>
-                </AuthGuard>
-              } />
-              <Route path="/relatorios/desvios" element={
-                <AuthGuard>
-                  <Layout>
-                    <RelatoriosDesvios />
-                  </Layout>
-                </AuthGuard>
-              } />
-              <Route path="/relatorios/treinamentos" element={
-                <AuthGuard>
-                  <Layout>
-                    <RelatoriosTreinamentos />
-                  </Layout>
-                </AuthGuard>
-              } />
-              <Route path="/relatorios/idsms" element={
-                <AuthGuard>
-                  <Layout>
-                    <RelatoriosIDSMS />
-                  </Layout>
-                </AuthGuard>
-              } />
+                {/* Relatórios routes */}
+                <Route path="relatorios/dashboard" element={<RelatoriosDashboard />} />
+                <Route path="relatorios/ocorrencias" element={<RelatoriosOcorrencias />} />
+                <Route path="relatorios/desvios" element={<RelatoriosDesvios />} />
+                <Route path="relatorios/treinamentos" element={<RelatoriosTreinamentos />} />
+                <Route path="relatorios/idsms" element={<RelatoriosIDSMS />} />
 
-              {/* Inspeção SMS routes */}
-              <Route path="/inspecao-sms/cadastrar" element={
-                <AuthGuard>
-                  <Layout>
-                    <CadastrarInspecao />
-                  </Layout>
-                </AuthGuard>
-              } />
-              <Route path="/inspecao-sms/consulta" element={
-                <AuthGuard>
-                  <Layout>
-                    <ConsultarInspecoes />
-                  </Layout>
-                </AuthGuard>
-              } />
-              <Route path="/inspecao-sms/dashboard" element={
-                <AuthGuard>
-                  <Layout>
-                    <InspecaoSMSDashboard />
-                  </Layout>
-                </AuthGuard>
-              } />
-              <Route path="/inspecao-sms/visualizar/:id" element={
-                <AuthGuard>
-                  <Layout>
-                    <VisualizarInspecao />
-                  </Layout>
-                </AuthGuard>
-              } />
+                {/* Inspeção SMS routes */}
+                <Route path="inspecao-sms/cadastrar" element={<CadastrarInspecao />} />
+                <Route path="inspecao-sms/consulta" element={<ConsultarInspecoes />} />
+                <Route path="inspecao-sms/dashboard" element={<InspecaoSMSDashboard />} />
+                <Route path="inspecao-sms/visualizar/:id" element={<VisualizarInspecao />} />
 
-              {/* Placeholder routes */}
-              <Route path="/placeholder" element={
-                <AuthGuard>
-                  <Layout>
-                    <PlaceholderPage />
-                  </Layout>
-                </AuthGuard>
-              } />
+                {/* Placeholder routes */}
+                <Route path="placeholder" element={<PlaceholderPage />} />
+              </Route>
 
               {/* 404 route */}
               <Route path="*" element={<NotFound />} />
