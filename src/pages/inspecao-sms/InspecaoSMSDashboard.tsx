@@ -25,7 +25,7 @@ const InspecaoSMSDashboard = () => {
   const [inspecoesPorTipo, setInspecoesPorTipo] = useState<any[]>([]);
   const [inspecoesPorCCA, setInspecoesPorCCA] = useState<any[]>([]);
   const [tiposInspecao, setTiposInspecao] = useState<any[]>([]);
-  const [filtroTipo, setFiltroTipo] = useState<string>("");
+  const [filtroTipo, setFiltroTipo] = useState<string>("todos");
   const [dataInicio, setDataInicio] = useState<Date>();
   const [dataFim, setDataFim] = useState<Date>();
   const [isLoading, setIsLoading] = useState(true);
@@ -69,7 +69,7 @@ const InspecaoSMSDashboard = () => {
       }
 
       // Aplicar filtro de tipo se definido
-      if (filtroTipo) {
+      if (filtroTipo && filtroTipo !== "todos") {
         const { data: modelosDoTipo } = await supabase
           .from('modelos_inspecao_sms')
           .select('id')
@@ -222,7 +222,7 @@ const InspecaoSMSDashboard = () => {
                   <SelectValue placeholder="Todos os tipos" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todos os tipos</SelectItem>
+                  <SelectItem value="todos">Todos os tipos</SelectItem>
                   {tiposInspecao.map((tipo) => (
                     <SelectItem key={tipo.id} value={tipo.id}>
                       {tipo.nome}
