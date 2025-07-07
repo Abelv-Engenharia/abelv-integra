@@ -17,7 +17,6 @@ import SidebarSectionGestaoSMS from "./SidebarSectionGestaoSMS";
 import SidebarSectionTarefas from "./SidebarSectionTarefas";
 import SidebarSectionRelatorios from "./SidebarSectionRelatorios";
 import SidebarSectionAdministracao from "./SidebarSectionAdministracao";
-import SidebarSectionTerceiros from "./SidebarSectionTerceiros";
 import { useProfile } from "@/hooks/useProfile";
 import { getAllMenusSidebar } from "@/services/perfisService";
 
@@ -51,12 +50,6 @@ export function AppSidebar() {
         : []
       );
 
-  // Debug log para verificar permissões
-  console.log("Debug Sidebar - isAdmin:", isAdmin);
-  console.log("Debug Sidebar - menusSidebar:", menusSidebar);
-  console.log("Debug Sidebar - userPermissoes:", userPermissoes);
-  console.log("Debug Sidebar - userRole:", userRole);
-
   // Defina o menu principal aberto inicialmente
   const [openMenu, setOpenMenu] = useState<string | null>(() => {
     if (currentPath.startsWith("/desvios") || 
@@ -71,7 +64,6 @@ export function AppSidebar() {
     if (currentPath.startsWith("/admin")) return "admin";
     if (currentPath.startsWith("/gro")) return "gro";
     if (currentPath.startsWith("/account")) return "account";
-    if (currentPath.startsWith("/terceiros")) return "terceiros";
     return null;
   });
 
@@ -79,22 +71,11 @@ export function AppSidebar() {
     setOpenMenu(openMenu === menuName ? null : menuName);
   };
 
-  // Verificar se tem acesso a terceiros
-  const hasTerceirosAccess = isAdmin || [
-    "terceiros_dashboard", 
-    "terceiros_funcionarios", 
-    "terceiros_documentos", 
-    "terceiros_relatorios", 
-    "terceiros_configuracoes"
-  ].some(menu => podeVerMenu(menu, menusSidebar));
-
-  console.log("Debug Sidebar - hasTerceirosAccess:", hasTerceirosAccess);
-
   return (
     <Sidebar>
       <SidebarContent>
         <SidebarMenu>
-          {(isAdmin || podeVerMenu("dashboard", menusSidebar)) && (
+          {podeVerMenu("dashboard", menusSidebar) && (
             <SidebarMenuItem>
               <SidebarMenuButton 
                 asChild 
@@ -110,7 +91,7 @@ export function AppSidebar() {
         </SidebarMenu>
 
         {/* Render Gestão de SMS se tiver acesso a pelo menos 1 menu dos agrupados */}
-        {(isAdmin || ["desvios_dashboard", "desvios_cadastro", "desvios_consulta", "desvios_nao_conformidade", 
+        {["desvios_dashboard", "desvios_cadastro", "desvios_consulta", "desvios_nao_conformidade", 
           "treinamentos_dashboard", "treinamentos_normativo", "treinamentos_consulta", "treinamentos_execucao", "treinamentos_cracha",
           "hora_seguranca_cadastro", "hora_seguranca_cadastro_inspecao", "hora_seguranca_cadastro_nao_programada", 
           "hora_seguranca_dashboard", "hora_seguranca_agenda", "hora_seguranca_acompanhamento",
@@ -118,29 +99,24 @@ export function AppSidebar() {
           "medidas_disciplinares_dashboard", "medidas_disciplinares_cadastro", "medidas_disciplinares_consulta",
           "ocorrencias_dashboard", "ocorrencias_cadastro", "ocorrencias_consulta"].some(menu =>
           podeVerMenu(menu, menusSidebar)
-        )) && (
+        ) && (
           <SidebarSectionGestaoSMS openMenu={openMenu} toggleMenu={toggleMenu} />
         )}
 
         {/* Render Tarefas */}
-        {(isAdmin || ["tarefas_dashboard", "tarefas_minhas_tarefas", "tarefas_cadastro"].some(menu =>
+        {["tarefas_dashboard", "tarefas_minhas_tarefas", "tarefas_cadastro"].some(menu =>
           podeVerMenu(menu, menusSidebar)
-        )) && (
+        ) && (
           <SidebarSectionTarefas openMenu={openMenu} toggleMenu={toggleMenu} />
         )}
 
-        {/* Render Gestão de Terceiros - sempre mostrar se for admin ou tiver acesso */}
-        {hasTerceirosAccess && (
-          <SidebarSectionTerceiros openMenu={openMenu} toggleMenu={toggleMenu} />
-        )}
-
         {/* Render Relatórios */}
-        {(isAdmin || ["relatorios", "relatorios_idsms"].some(menu => podeVerMenu(menu, menusSidebar))) && (
+        {["relatorios", "relatorios_idsms"].some(menu => podeVerMenu(menu, menusSidebar)) && (
           <SidebarSectionRelatorios openMenu={openMenu} toggleMenu={toggleMenu} />
         )}
 
         {/* Render Administração */}
-        {(isAdmin || [
+        {[
           "admin_usuarios",
           "admin_perfis",
           "admin_empresas",
@@ -153,7 +129,7 @@ export function AppSidebar() {
           "admin_templates",
           "admin_logo",
           "admin_modelos_inspecao"
-        ].some(menu => podeVerMenu(menu, menusSidebar))) && (
+        ].some(menu => podeVerMenu(menu, menusSidebar)) && (
           <SidebarSectionAdministracao openMenu={openMenu} toggleMenu={toggleMenu} />
         )}
 
