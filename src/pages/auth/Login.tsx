@@ -31,7 +31,7 @@ const Login = () => {
           title: "Login realizado com sucesso",
           description: "Bem-vindo ao sistema"
         });
-        window.location.href = "/";
+        window.location.href = "/dashboard";
       }
     } catch (error: any) {
       let errorMessage = "Erro ao fazer login";
