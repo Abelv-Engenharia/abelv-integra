@@ -114,9 +114,9 @@ import ConsultarInspecoes from "./pages/inspecao-sms/ConsultarInspecoes";
 import InspecaoSMSDashboard from "./pages/inspecao-sms/InspecaoSMSDashboard";
 import VisualizarInspecao from "./pages/inspecao-sms/VisualizarInspecao";
 
-// Funcionários pages
+// Funcionários pages (novo sistema)
 import ListaFuncionarios from "./pages/funcionarios/ListaFuncionarios";
-import CadastroFuncionarios from "./pages/funcionarios/CadastroFuncionarios";
+import CadastroFuncionariosNovo from "./pages/funcionarios/CadastroFuncionarios";
 import VisualizarFuncionario from "./pages/funcionarios/VisualizarFuncionario";
 import EditarFuncionario from "./pages/funcionarios/EditarFuncionario";
 
@@ -166,9 +166,9 @@ function App() {
                 <Route path="account/settings" element={<Settings />} />
                 <Route path="account/support" element={<Support />} />
 
-                {/* Funcionários routes */}
+                {/* Funcionários routes (novo sistema) */}
                 <Route path="funcionarios" element={<ListaFuncionarios />} />
-                <Route path="funcionarios/cadastro" element={<CadastroFuncionarios />} />
+                <Route path="funcionarios/cadastro" element={<CadastroFuncionariosNovo />} />
                 <Route path="funcionarios/visualizar/:id" element={<VisualizarFuncionario />} />
                 <Route path="funcionarios/editar/:id" element={<EditarFuncionario />} />
 
