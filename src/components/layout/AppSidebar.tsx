@@ -17,6 +17,7 @@ import SidebarSectionGestaoSMS from "./SidebarSectionGestaoSMS";
 import SidebarSectionTarefas from "./SidebarSectionTarefas";
 import SidebarSectionRelatorios from "./SidebarSectionRelatorios";
 import SidebarSectionAdministracao from "./SidebarSectionAdministracao";
+import SidebarSectionTerceiros from "./SidebarSectionTerceiros";
 import { useProfile } from "@/hooks/useProfile";
 import { getAllMenusSidebar } from "@/services/perfisService";
 
@@ -64,6 +65,7 @@ export function AppSidebar() {
     if (currentPath.startsWith("/admin")) return "admin";
     if (currentPath.startsWith("/gro")) return "gro";
     if (currentPath.startsWith("/account")) return "account";
+    if (currentPath.startsWith("/terceiros")) return "terceiros";
     return null;
   });
 
@@ -108,6 +110,13 @@ export function AppSidebar() {
           podeVerMenu(menu, menusSidebar)
         ) && (
           <SidebarSectionTarefas openMenu={openMenu} toggleMenu={toggleMenu} />
+        )}
+
+        {/* Render Gestão de Terceiros */}
+        {["terceiros_dashboard", "terceiros_funcionarios", "terceiros_documentos", "terceiros_relatorios", "terceiros_configuracoes"].some(menu =>
+          podeVerMenu(menu, menusSidebar)
+        ) && (
+          <SidebarSectionTerceiros openMenu={openMenu} toggleMenu={toggleMenu} />
         )}
 
         {/* Render Relatórios */}

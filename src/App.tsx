@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -114,6 +113,22 @@ import CadastrarInspecao from "./pages/inspecao-sms/CadastrarInspecao";
 import ConsultarInspecoes from "./pages/inspecao-sms/ConsultarInspecoes";
 import InspecaoSMSDashboard from "./pages/inspecao-sms/InspecaoSMSDashboard";
 import VisualizarInspecao from "./pages/inspecao-sms/VisualizarInspecao";
+
+// Terceiros pages
+import TerceirosDashboard from "./pages/terceiros/TerceirosDashboard";
+import TerceirosListaFuncionarios from "./pages/terceiros/funcionarios/ListaFuncionarios";
+import TerceirosCadastroFuncionarios from "./pages/terceiros/funcionarios/CadastroFuncionarios";
+import TerceirosVisualizarFuncionario from "./pages/terceiros/funcionarios/VisualizarFuncionario";
+import TerceirosEditarFuncionario from "./pages/terceiros/funcionarios/EditarFuncionario";
+import TerceirosDocumentos from "./pages/terceiros/documentos/Documentos";
+import TerceirosMinhaDocumentacao from "./pages/terceiros/documentos/MinhaDocumentacao";
+import TerceirosCadastroDocumentos from "./pages/terceiros/documentos/CadastroDocumentos";
+import TerceirosVincularDocumentosEmpresa from "./pages/terceiros/documentos/VincularDocumentosEmpresa";
+import TerceirosVincularDocumentosFuncoes from "./pages/terceiros/documentos/VincularDocumentosFuncoes";
+import TerceirosRelatorios from "./pages/terceiros/relatorios/Relatorios";
+import TerceirosEmpresas from "./pages/terceiros/configuracoes/Empresas";
+import TerceirosUsuarios from "./pages/terceiros/configuracoes/Usuarios";
+import TerceirosPerfis from "./pages/terceiros/configuracoes/Perfis";
 
 // Placeholder page
 import PlaceholderPage from "./pages/PlaceholderPage";
@@ -239,6 +254,22 @@ function App() {
                 <Route path="inspecao-sms/consulta" element={<ConsultarInspecoes />} />
                 <Route path="inspecao-sms/dashboard" element={<InspecaoSMSDashboard />} />
                 <Route path="inspecao-sms/visualizar/:id" element={<VisualizarInspecao />} />
+
+                {/* Terceiros routes */}
+                <Route path="terceiros/dashboard" element={<TerceirosDashboard />} />
+                <Route path="terceiros/funcionarios" element={<TerceirosListaFuncionarios />} />
+                <Route path="terceiros/funcionarios/cadastro" element={<TerceirosCadastroFuncionarios />} />
+                <Route path="terceiros/funcionarios/visualizar/:id" element={<TerceirosVisualizarFuncionario />} />
+                <Route path="terceiros/funcionarios/editar/:id" element={<TerceirosEditarFuncionario />} />
+                <Route path="terceiros/documentos" element={<TerceirosDocumentos />} />
+                <Route path="terceiros/minha-documentacao" element={<TerceirosMinhaDocumentacao />} />
+                <Route path="terceiros/relatorios" element={<TerceirosRelatorios />} />
+                <Route path="terceiros/configuracoes/empresas" element={<TerceirosEmpresas />} />
+                <Route path="terceiros/configuracoes/usuarios" element={<TerceirosUsuarios />} />
+                <Route path="terceiros/configuracoes/perfis" element={<TerceirosPerfis />} />
+                <Route path="terceiros/configuracoes/documentos" element={<TerceirosCadastroDocumentos />} />
+                <Route path="terceiros/configuracoes/vincular-empresas" element={<TerceirosVincularDocumentosEmpresa />} />
+                <Route path="terceiros/configuracoes/vincular-funcoes" element={<TerceirosVincularDocumentosFuncoes />} />
 
                 {/* Placeholder routes */}
                 <Route path="placeholder" element={<PlaceholderPage />} />
