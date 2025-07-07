@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -115,6 +114,24 @@ import ConsultarInspecoes from "./pages/inspecao-sms/ConsultarInspecoes";
 import InspecaoSMSDashboard from "./pages/inspecao-sms/InspecaoSMSDashboard";
 import VisualizarInspecao from "./pages/inspecao-sms/VisualizarInspecao";
 
+// Funcionários pages
+import ListaFuncionarios from "./pages/funcionarios/ListaFuncionarios";
+import CadastroFuncionarios from "./pages/funcionarios/CadastroFuncionarios";
+import VisualizarFuncionario from "./pages/funcionarios/VisualizarFuncionario";
+import EditarFuncionario from "./pages/funcionarios/EditarFuncionario";
+
+// Documentos pages
+import Documentos from "./pages/documentos/Documentos";
+import MinhaDocumentacao from "./pages/documentos/MinhaDocumentacao";
+import CadastroDocumentos from "./pages/documentos/CadastroDocumentos";
+import VincularDocumentosEmpresa from "./pages/documentos/VincularDocumentosEmpresa";
+import VincularDocumentosFuncoes from "./pages/documentos/VincularDocumentosFuncoes";
+
+// Configurações pages
+import Empresas from "./pages/configuracoes/Empresas";
+import UsuariosConfig from "./pages/configuracoes/Usuarios";
+import PerfisConfig from "./pages/configuracoes/Perfis";
+
 // Placeholder page
 import PlaceholderPage from "./pages/PlaceholderPage";
 
@@ -148,6 +165,24 @@ function App() {
                 <Route path="account/profile" element={<Profile />} />
                 <Route path="account/settings" element={<Settings />} />
                 <Route path="account/support" element={<Support />} />
+
+                {/* Funcionários routes */}
+                <Route path="funcionarios" element={<ListaFuncionarios />} />
+                <Route path="funcionarios/cadastro" element={<CadastroFuncionarios />} />
+                <Route path="funcionarios/visualizar/:id" element={<VisualizarFuncionario />} />
+                <Route path="funcionarios/editar/:id" element={<EditarFuncionario />} />
+
+                {/* Documentos routes */}
+                <Route path="documentos" element={<Documentos />} />
+                <Route path="minha-documentacao" element={<MinhaDocumentacao />} />
+
+                {/* Configurações routes */}
+                <Route path="configuracoes/empresas" element={<Empresas />} />
+                <Route path="configuracoes/usuarios" element={<UsuariosConfig />} />
+                <Route path="configuracoes/perfis" element={<PerfisConfig />} />
+                <Route path="configuracoes/documentos" element={<CadastroDocumentos />} />
+                <Route path="configuracoes/vincular-empresas" element={<VincularDocumentosEmpresa />} />
+                <Route path="configuracoes/vincular-funcoes" element={<VincularDocumentosFuncoes />} />
 
                 {/* Admin routes */}
                 <Route path="admin/usuarios" element={<AdminUsuarios />} />

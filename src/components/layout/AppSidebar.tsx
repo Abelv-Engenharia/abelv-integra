@@ -17,6 +17,7 @@ import SidebarSectionGestaoSMS from "./SidebarSectionGestaoSMS";
 import SidebarSectionTarefas from "./SidebarSectionTarefas";
 import SidebarSectionRelatorios from "./SidebarSectionRelatorios";
 import SidebarSectionAdministracao from "./SidebarSectionAdministracao";
+import SidebarSectionFuncionarios from "./SidebarSectionFuncionarios";
 import { useProfile } from "@/hooks/useProfile";
 import { getAllMenusSidebar } from "@/services/perfisService";
 
@@ -58,10 +59,14 @@ export function AppSidebar() {
         currentPath.startsWith("/inspecao-sms") || 
         currentPath.startsWith("/ocorrencias") || 
         currentPath.startsWith("/medidas-disciplinares")) return "gestao-sms";
+    if (currentPath.startsWith("/funcionarios") || 
+        currentPath.startsWith("/documentos") || 
+        currentPath.startsWith("/minha-documentacao") || 
+        currentPath.startsWith("/configuracoes")) return "funcionarios";
     if (currentPath.startsWith("/tarefas")) return "tarefas";
     if (currentPath.startsWith("/relatorios")) return "relatorios";
     if (currentPath.startsWith("/idsms")) return "idsms";
-    if (currentPath.startsWith("/admin")) return "admin";
+    if (currentPath.startsWith("/admin")) return "admin";  
     if (currentPath.startsWith("/gro")) return "gro";
     if (currentPath.startsWith("/account")) return "account";
     return null;
@@ -102,6 +107,9 @@ export function AppSidebar() {
         ) && (
           <SidebarSectionGestaoSMS openMenu={openMenu} toggleMenu={toggleMenu} />
         )}
+
+        {/* Render Gestão de Funcionários - sempre visível para teste */}
+        <SidebarSectionFuncionarios openMenu={openMenu} toggleMenu={toggleMenu} />
 
         {/* Render Tarefas */}
         {["tarefas_dashboard", "tarefas_minhas_tarefas", "tarefas_cadastro"].some(menu =>
