@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ChevronDown, ChevronRight, ShieldAlert, GraduationCap, Clock, ClipboardCheck, AlertTriangle, Gavel } from "lucide-react";
 import {
   SidebarMenu,
@@ -21,14 +21,39 @@ export default function SidebarSectionGestaoSMS({ openMenu, toggleMenu }: Sideba
   const location = useLocation();
   const currentPath = location.pathname;
   
-  // Estado local para controlar os submenus
+  // Estado local para controlar os submenus - agora com lógica para manter apenas um aberto
   const [openSubMenus, setOpenSubMenus] = useState<{[key: string]: boolean}>({});
 
+  // Função para determinar qual submenu deve estar aberto baseado na rota atual
+  const getActiveSubmenu = (path: string) => {
+    if (path.startsWith("/desvios")) return "desvios";
+    if (path.startsWith("/treinamentos")) return "treinamentos";
+    if (path.startsWith("/hora-seguranca")) return "hora-seguranca";
+    if (path.startsWith("/inspecao-sms")) return "inspecao-sms";
+    if (path.startsWith("/ocorrencias")) return "ocorrencias";
+    if (path.startsWith("/medidas-disciplinares")) return "medidas-disciplinares";
+    return null;
+  };
+
+  // Effect para definir qual submenu deve estar aberto baseado na rota atual
+  useEffect(() => {
+    const activeSubmenu = getActiveSubmenu(currentPath);
+    if (activeSubmenu) {
+      setOpenSubMenus({ [activeSubmenu]: true });
+    } else {
+      setOpenSubMenus({});
+    }
+  }, [currentPath]);
+
   const toggleSubMenu = (subMenuName: string) => {
-    setOpenSubMenus(prev => ({
-      ...prev,
-      [subMenuName]: !prev[subMenuName]
-    }));
+    setOpenSubMenus(prev => {
+      // Se o submenu clicado já está aberto, fecha ele
+      if (prev[subMenuName]) {
+        return {};
+      }
+      // Senão, abre apenas o submenu clicado e fecha todos os outros
+      return { [subMenuName]: true };
+    });
   };
 
   const isGestaoSMSOpen = openMenu === "gestao-sms";
