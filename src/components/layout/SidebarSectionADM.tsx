@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Settings, Users, Building, Shield, Wrench } from "lucide-react";
+import { HardHat, Users, Building, Shield, Wrench } from "lucide-react";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import {
   SidebarMenu,
@@ -32,7 +32,7 @@ export default function SidebarSectionADM({ openMenu, toggleMenu }: Props) {
               onClick={() => toggleMenu("adm")}
               className="text-white hover:bg-slate-600"
             >
-              <Settings className="h-4 w-4 flex-shrink-0" />
+              <HardHat className="h-4 w-4 flex-shrink-0" />
               <span className="break-words">ADM MATRICIAL</span>
               {isAdmOpen ? <ChevronDown className="h-4 w-4 ml-auto" /> : <ChevronRight className="h-4 w-4 ml-auto" />}
             </SidebarMenuButton>

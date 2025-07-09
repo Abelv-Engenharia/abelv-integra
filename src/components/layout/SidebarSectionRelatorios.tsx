@@ -1,10 +1,8 @@
 
 import React from "react";
 import { FileText } from "lucide-react";
+import { ChevronDown, ChevronRight } from "lucide-react";
 import {
-  SidebarGroup,
-  SidebarGroupLabel,
-  SidebarGroupContent,
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
@@ -23,41 +21,48 @@ type Props = {
 export default function SidebarSectionRelatorios({ openMenu, toggleMenu }: Props) {
   const location = useLocation();
   const currentPath = location.pathname;
+  const isRelatoriosOpen = openMenu === "relatorios";
 
   return (
-    <SidebarGroup>
-      <SidebarGroupLabel className="text-white">Relatórios</SidebarGroupLabel>
-      <SidebarGroupContent>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <Collapsible open={openMenu === "relatorios"}>
-              <CollapsibleTrigger asChild>
-                <SidebarMenuButton 
-                  onClick={() => toggleMenu("relatorios")}
-                  className="text-white hover:bg-slate-600"
+    <SidebarMenu>
+      <SidebarMenuItem>
+        <Collapsible open={isRelatoriosOpen}>
+          <CollapsibleTrigger asChild>
+            <SidebarMenuButton 
+              onClick={() => toggleMenu("relatorios")}
+              className="text-white hover:bg-slate-600"
+            >
+              <FileText className="h-4 w-4 flex-shrink-0" />
+              <span className="break-words">RELATÓRIOS</span>
+              {isRelatoriosOpen ? <ChevronDown className="h-4 w-4 ml-auto" /> : <ChevronRight className="h-4 w-4 ml-auto" />}
+            </SidebarMenuButton>
+          </CollapsibleTrigger>
+          <CollapsibleContent asChild>
+            <SidebarMenuSub>
+              <SidebarMenuSubItem>
+                <SidebarMenuSubButton 
+                  asChild
+                  className={currentPath === "/relatorios/dashboard" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
                 >
-                  <FileText className="h-4 w-4 flex-shrink-0" />
-                  <span className="break-words">Relatórios</span>
-                </SidebarMenuButton>
-              </CollapsibleTrigger>
-              <CollapsibleContent asChild>
-                <SidebarMenuSub>
-                  <SidebarMenuSubItem>
-                    <SidebarMenuSubButton 
-                      asChild
-                      className={currentPath === "/relatorios/dashboard" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
-                    >
-                      <Link to="/relatorios/dashboard" className="flex items-center gap-2">
-                        <span className="text-xs leading-tight break-words min-w-0">Relatórios</span>
-                      </Link>
-                    </SidebarMenuSubButton>
-                  </SidebarMenuSubItem>
-                </SidebarMenuSub>
-              </CollapsibleContent>
-            </Collapsible>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarGroupContent>
-    </SidebarGroup>
+                  <Link to="/relatorios/dashboard" className="flex items-center gap-2">
+                    <span className="text-xs leading-tight break-words min-w-0">Dashboard</span>
+                  </Link>
+                </SidebarMenuSubButton>
+              </SidebarMenuSubItem>
+              <SidebarMenuSubItem>
+                <SidebarMenuSubButton 
+                  asChild
+                  className={currentPath === "/relatorios/idsms" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
+                >
+                  <Link to="/relatorios/idsms" className="flex items-center gap-2">
+                    <span className="text-xs leading-tight break-words min-w-0">ID SMS</span>
+                  </Link>
+                </SidebarMenuSubButton>
+              </SidebarMenuSubItem>
+            </SidebarMenuSub>
+          </CollapsibleContent>
+        </Collapsible>
+      </SidebarMenuItem>
+    </SidebarMenu>
   );
 }
