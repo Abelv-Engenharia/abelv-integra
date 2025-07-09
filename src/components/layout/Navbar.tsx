@@ -1,13 +1,6 @@
-
 import { Bell, User, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { useProfile } from "@/hooks/useProfile";
@@ -18,35 +11,35 @@ import { toast } from "@/hooks/use-toast";
 import NotificacoesDropdown from "@/components/notificacoes/NotificacoesDropdown";
 import SystemLogo from "@/components/common/SystemLogo";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-
 const Navbar = () => {
-  const { profile } = useProfile();
-  const { url: avatarUrl } = useProfileAvatarUrl(profile?.avatar_url);
+  const {
+    profile
+  } = useProfile();
+  const {
+    url: avatarUrl
+  } = useProfileAvatarUrl(profile?.avatar_url);
   const navigate = useNavigate();
-
   const handleLogout = async () => {
     try {
-      const { error } = await supabase.auth.signOut();
+      const {
+        error
+      } = await supabase.auth.signOut();
       if (error) throw error;
-      
       toast({
         title: "Logout realizado com sucesso",
-        description: "Você foi desconectado do sistema.",
+        description: "Você foi desconectado do sistema."
       });
-      
       navigate('/login');
     } catch (error) {
       console.error('Erro no logout:', error);
       toast({
         title: "Erro no logout",
         description: "Ocorreu um erro ao tentar fazer logout.",
-        variant: "destructive",
+        variant: "destructive"
       });
     }
   };
-
-  return (
-    <nav className="bg-white border-b border-gray-200 px-2 sm:px-4 py-2 sm:py-3">
+  return <nav className="bg-white border-b border-gray-200 px-2 sm:px-4 py-2 sm:py-3">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 sm:gap-3 min-w-0">
           {/* Botão de toggle da sidebar - visível em telas pequenas */}
@@ -57,7 +50,7 @@ const Navbar = () => {
           <div className="flex items-center gap-1 sm:gap-2 min-w-0">
             <SystemLogo className="h-6 sm:h-8 flex-shrink-0" />
             <h1 className="text-sm sm:text-lg lg:text-xl font-bold text-gray-900 truncate">
-              <span className="hidden sm:inline">GESTÃO DE SMS ABELV</span>
+              <span className="hidden sm:inline">INTEGRA ABELV</span>
               <span className="sm:hidden">SMS ABELV</span>
             </h1>
           </div>
@@ -107,8 +100,6 @@ const Navbar = () => {
           </DropdownMenu>
         </div>
       </div>
-    </nav>
-  );
+    </nav>;
 };
-
 export default Navbar;
