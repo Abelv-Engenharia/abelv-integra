@@ -49,7 +49,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
               return;
             }
             
-            if (!profile.ativo) {
+            if (!profile?.ativo) {
               console.log("User is inactive, signing out");
               await supabase.auth.signOut();
               setSession(null);
@@ -90,7 +90,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 .eq('id', session.user.id)
                 .single();
               
-              if (profileError || !profile.ativo) {
+              if (profileError || !profile?.ativo) {
                 console.log("User is inactive during initialization");
                 await supabase.auth.signOut();
                 setSession(null);

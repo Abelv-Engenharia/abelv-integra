@@ -36,7 +36,7 @@ export const signIn = async (email: string, password: string) => {
         throw new Error("Erro ao verificar perfil do usuário");
       }
       
-      if (!profile.ativo) {
+      if (!profile?.ativo) {
         // Sign out the user if they're inactive
         await supabase.auth.signOut();
         throw new Error("Seu perfil encontra-se bloqueado. Consulte o administrador do sistema.");
