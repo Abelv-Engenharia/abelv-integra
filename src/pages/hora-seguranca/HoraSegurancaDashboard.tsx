@@ -18,6 +18,7 @@ import { useUserCCAs } from "@/hooks/useUserCCAs";
 import { supabase } from "@/integrations/supabase/client";
 import { ResponsiveContainer, BarChart as ReBarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from "recharts";
 import { fetchInspecoesByResponsavel } from "@/services/hora-seguranca/inspecoesByResponsavelService";
+
 const HoraSegurancaDashboard = () => {
   const [tab, setTab] = useState("overview");
   const [filterCCA, setFilterCCA] = useState("");
@@ -30,7 +31,6 @@ const HoraSegurancaDashboard = () => {
     data: userCCAs = []
   } = useUserCCAs();
 
-  // Buscar responsáveis reais da tabela execucao_hsa
   useEffect(() => {
     const fetchResponsaveis = async () => {
       if (userCCAs.length === 0) return;
@@ -45,7 +45,6 @@ const HoraSegurancaDashboard = () => {
           return;
         }
 
-        // Extrair valores únicos e filtrar vazios
         const responsaveisUnicos = [...new Set(data.map(item => item.responsavel_inspecao).filter(Boolean))].sort();
         setResponsaveis(responsaveisUnicos);
       } catch (error) {
@@ -55,7 +54,6 @@ const HoraSegurancaDashboard = () => {
     fetchResponsaveis();
   }, [userCCAs]);
 
-  // Buscar dados das inspeções por responsável
   useEffect(() => {
     const loadRespData = async () => {
       if (userCCAs.length === 0) {
@@ -75,6 +73,7 @@ const HoraSegurancaDashboard = () => {
     };
     loadRespData();
   }, [userCCAs]);
+
   return <div className="container mx-auto py-6">
       <div className="flex flex-col space-y-6">
         <div className="flex flex-col space-y-2">
@@ -168,25 +167,29 @@ const HoraSegurancaDashboard = () => {
                   <CardContent className="pl-2 pb-8">
                     <div className="h-[500px]">
                       <ResponsiveContainer width="100%" height={400}>
-                        <ReBarChart layout="vertical" data={respData} margin={{
+                        <ReBarChart data={respData} margin={{
                       top: 20,
                       right: 30,
-                      left: 160,
-                      bottom: 20
+                      left: 20,
+                      bottom: 80
                     }}>
                           <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis type="number" />
-                          <YAxis type="category" dataKey="name" width={160} tick={{
-                        fontSize: 12
-                      }} />
+                          <XAxis 
+                            dataKey="name" 
+                            angle={-45} 
+                            textAnchor="end"
+                            height={80}
+                            interval={0}
+                          />
+                          <YAxis allowDecimals={false} />
                           <Tooltip />
-                          <Legend verticalAlign="bottom" height={36} />
+                          <Legend />
                           
-                          <Bar dataKey="A Realizar" stackId="a" fill="#4285F4" />
-                          <Bar dataKey="Realizada" stackId="a" fill="#34A853" />
-                          <Bar dataKey="Não Realizada" stackId="a" fill="#EA4335" />
-                          <Bar dataKey="Realizada (Não Programada)" stackId="a" fill="#FBBC05" />
-                          <Bar dataKey="Cancelada" stackId="a" fill="#9E9E9E" />
+                          <Bar dataKey="A Realizar" fill="#4285F4" />
+                          <Bar dataKey="Realizada" fill="#34A853" />
+                          <Bar dataKey="Não Realizada" fill="#EA4335" />
+                          <Bar dataKey="Realizada (Não Programada)" fill="#FBBC05" />
+                          <Bar dataKey="Cancelada" fill="#9E9E9E" />
                         </ReBarChart>
                       </ResponsiveContainer>
                     </div>
@@ -222,4 +225,5 @@ const HoraSegurancaDashboard = () => {
       </div>
     </div>;
 };
+
 export default HoraSegurancaDashboard;
