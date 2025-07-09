@@ -17,6 +17,7 @@ interface ProcessoData {
   horasMOD: number;
   totalHoras: number;
   percentualMOD: number;
+  percentualMOI: number;
 }
 
 interface TreinamentosPorProcessoTableProps {
@@ -51,6 +52,7 @@ export const TreinamentosPorProcessoTable: React.FC<TreinamentosPorProcessoTable
 
   const totalHorasMOD = data.reduce((sum, item) => sum + item.horasMOD, 0);
   const totalHorasMOI = data.reduce((sum, item) => sum + (item.totalHoras - item.horasMOD), 0);
+  const totalHorasGeral = totalHorasMOD + totalHorasMOI;
 
   if (loading) {
     return (
@@ -98,7 +100,6 @@ export const TreinamentosPorProcessoTable: React.FC<TreinamentosPorProcessoTable
               <>
                 {data.map((item, index) => {
                   const horasMOI = item.totalHoras - item.horasMOD;
-                  const percentualMOI = totalHorasMOI > 0 ? (horasMOI / totalHorasMOI) * 100 : 0;
                   
                   return (
                     <TableRow key={index} className={index % 2 === 0 ? "bg-gray-50" : "bg-white"}>
@@ -106,16 +107,16 @@ export const TreinamentosPorProcessoTable: React.FC<TreinamentosPorProcessoTable
                       <TableCell className="text-center">{Math.round(item.horasMOD)}</TableCell>
                       <TableCell className="text-center">{item.percentualMOD.toFixed(1)}%</TableCell>
                       <TableCell className="text-center">{Math.round(horasMOI)}</TableCell>
-                      <TableCell className="text-center">{percentualMOI.toFixed(1)}%</TableCell>
+                      <TableCell className="text-center">{item.percentualMOI.toFixed(1)}%</TableCell>
                     </TableRow>
                   );
                 })}
                 <TableRow className="bg-primary text-white font-bold">
                   <TableCell className="text-center">HORAS TOTAIS POR MÃO DE OBRA</TableCell>
                   <TableCell className="text-center">{Math.round(totalHorasMOD)}</TableCell>
-                  <TableCell className="text-center">100%</TableCell>
+                  <TableCell className="text-center">{totalHorasGeral > 0 ? ((totalHorasMOD / totalHorasGeral) * 100).toFixed(1) : 0}%</TableCell>
                   <TableCell className="text-center">{Math.round(totalHorasMOI)}</TableCell>
-                  <TableCell className="text-center">100%</TableCell>
+                  <TableCell className="text-center">{totalHorasGeral > 0 ? ((totalHorasMOI / totalHorasGeral) * 100).toFixed(1) : 0}%</TableCell>
                 </TableRow>
               </>
             )}

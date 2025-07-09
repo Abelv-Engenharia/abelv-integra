@@ -32,31 +32,7 @@ export const fetchTreinamentosStats = async (userCCAIds: number[] = [], filters?
     allowedCCAIds = [parseInt(filters.ccaId)];
   }
 
-  // Fetch total number of trainings (normative and execution) filtered by user CCAs
-  const { count: totalTreinamentosNormativos } = await supabase
-    .from('treinamentos_normativos')
-    .select('funcionario_id', { count: 'exact', head: true })
-    .in('funcionario_id', 
-      await supabase
-        .from('funcionarios')
-        .select('id')
-        .in('cca_id', allowedCCAIds)
-        .then(res => (res.data || []).map(f => f.id))
-    );
-
-  let execucaoQuery = supabase
-    .from('execucao_treinamentos')
-    .select('*', { count: 'exact', head: true })
-    .in('cca_id', allowedCCAIds)
-    .eq('ano', targetYear);
-
-  if (targetMonth) {
-    execucaoQuery = execucaoQuery.eq('mes', targetMonth);
-  }
-
-  const { count: totalTreinamentosExecutados } = await execucaoQuery;
-
-  // Fetch funcionarios with valid trainings from allowed CCAs
+  // Buscar dados dos funcionários dos CCAs permitidos
   const { data: funcionariosPermitidos } = await supabase
     .from('funcionarios')
     .select('id')
@@ -65,51 +41,19 @@ export const fetchTreinamentosStats = async (userCCAIds: number[] = [], filters?
 
   const funcionariosPermitidosIds = funcionariosPermitidos?.map(f => f.id) || [];
 
-  const { data: funcionariosComTreinamentos } = await supabase
-    .from('treinamentos_normativos')
-    .select('funcionario_id')
-    .in('funcionario_id', funcionariosPermitidosIds)
-    .eq('arquivado', false)
-    .in('status', ['Válido', 'Próximo ao vencimento'])
-    .limit(1000);
-
-  const uniqueFuncionariosIds = new Set(
-    funcionariosComTreinamentos?.map(item => item.funcionario_id) || []
-  );
-
-  // Fetch total number of funcionarios from allowed CCAs
-  const { count: totalFuncionarios } = await supabase
-    .from('funcionarios')
+  // Construir consultas com filtros apropriados
+  let execucaoQuery = supabase
+    .from('execucao_treinamentos')
     .select('*', { count: 'exact', head: true })
     .in('cca_id', allowedCCAIds)
-    .eq('ativo', true);
+    .eq('ano', targetYear);
 
-  // Fetch valid trainings from funcionarios in allowed CCAs
-  const { data: treinamentosStatus } = await supabase
-    .from('treinamentos_normativos')
-    .select('status')
-    .in('funcionario_id', funcionariosPermitidosIds)
-    .eq('arquivado', false)
-    .limit(1000);
-
-  const treinamentosValidos = treinamentosStatus?.filter(t => t.status === 'Válido')?.length || 0;
-  const treinamentosVencendo = treinamentosStatus?.filter(t => t.status === 'Próximo ao vencimento')?.length || 0;
-
-  // Fetch HHT (Horas Homem Trabalhadas) for the specified period
   let hhtQuery = supabase
     .from('horas_trabalhadas')
     .select('horas_trabalhadas')
     .in('cca_id', allowedCCAIds)
     .eq('ano', targetYear);
 
-  if (targetMonth) {
-    hhtQuery = hhtQuery.eq('mes', targetMonth);
-  }
-
-  const { data: hhtData } = await hhtQuery;
-  const totalHHT = hhtData?.reduce((sum, item) => sum + Number(item.horas_trabalhadas), 0) || 0;
-
-  // Fetch total training hours from execucao_treinamentos for the specified period
   let horasTreinamentoQuery = supabase
     .from('execucao_treinamentos')
     .select('horas_totais')
@@ -117,11 +61,43 @@ export const fetchTreinamentosStats = async (userCCAIds: number[] = [], filters?
     .eq('ano', targetYear);
 
   if (targetMonth) {
+    execucaoQuery = execucaoQuery.eq('mes', targetMonth);
+    hhtQuery = hhtQuery.eq('mes', targetMonth);
     horasTreinamentoQuery = horasTreinamentoQuery.eq('mes', targetMonth);
   }
 
-  const { data: horasTreinamento } = await horasTreinamentoQuery;
-  const totalHorasTreinamento = horasTreinamento?.reduce((sum, item) => sum + Number(item.horas_totais || 0), 0) || 0;
+  // Executar consultas em paralelo para otimizar performance
+  const [
+    execucaoResult,
+    hhtResult,
+    horasTreinamentoResult,
+    treinamentosNormativosResult
+  ] = await Promise.all([
+    execucaoQuery,
+    hhtQuery,
+    horasTreinamentoQuery,
+    supabase
+      .from('treinamentos_normativos')
+      .select('funcionario_id, status')
+      .in('funcionario_id', funcionariosPermitidosIds)
+      .eq('arquivado', false)
+  ]);
+
+  const totalTreinamentosExecutados = execucaoResult.count || 0;
+  const totalHHT = hhtResult.data?.reduce((sum, item) => sum + Number(item.horas_trabalhadas), 0) || 0;
+  const totalHorasTreinamento = horasTreinamentoResult.data?.reduce((sum, item) => sum + Number(item.horas_totais || 0), 0) || 0;
+  
+  const treinamentosNormativos = treinamentosNormativosResult.data || [];
+  const treinamentosValidos = treinamentosNormativos.filter(t => t.status === 'Válido').length;
+  const treinamentosVencendo = treinamentosNormativos.filter(t => t.status === 'Próximo ao vencimento').length;
+  
+  const uniqueFuncionariosIds = new Set(
+    treinamentosNormativos
+      .filter(t => ['Válido', 'Próximo ao vencimento'].includes(t.status))
+      .map(item => item.funcionario_id)
+  );
+
+  const totalFuncionarios = funcionariosPermitidos?.length || 0;
 
   // Calculate percentages and goals
   const metaHoras = totalHHT * 0.025; // 2.5% meta
@@ -141,9 +117,9 @@ export const fetchTreinamentosStats = async (userCCAIds: number[] = [], filters?
   });
 
   return {
-    totalFuncionarios: totalFuncionarios || 0,
+    totalFuncionarios,
     funcionariosComTreinamentos: uniqueFuncionariosIds.size,
-    totalTreinamentosExecutados: totalTreinamentosExecutados || 0,
+    totalTreinamentosExecutados,
     treinamentosValidos,
     treinamentosVencendo,
     totalHHT,

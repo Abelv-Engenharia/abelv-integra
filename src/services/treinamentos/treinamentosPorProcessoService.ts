@@ -53,12 +53,16 @@ export const fetchTreinamentosPorProcesso = async (userCCAIds: number[] = [], fi
     return acc;
   }, {} as Record<string, { processo: string; horasMOD: number; totalHoras: number }>);
 
-  // Calculate total MOD hours for percentage calculation
-  const totalHorasMOD = Object.values(processoStats).reduce((sum, item) => sum + item.horasMOD, 0);
+  // Calculate total hours (MOD + MOI) for percentage calculation
+  const totalHorasGeral = Object.values(processoStats).reduce((sum, item) => sum + item.totalHoras, 0);
 
-  // Convert to array with percentages
-  return Object.values(processoStats).map(item => ({
-    ...item,
-    percentualMOD: totalHorasMOD > 0 ? (item.horasMOD / totalHorasMOD) * 100 : 0
-  }));
+  // Convert to array with percentages based on total hours
+  return Object.values(processoStats).map(item => {
+    const horasMOI = item.totalHoras - item.horasMOD;
+    return {
+      ...item,
+      percentualMOD: totalHorasGeral > 0 ? (item.horasMOD / totalHorasGeral) * 100 : 0,
+      percentualMOI: totalHorasGeral > 0 ? (horasMOI / totalHorasGeral) * 100 : 0
+    };
+  });
 };
