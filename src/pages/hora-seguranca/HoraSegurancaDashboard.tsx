@@ -208,28 +208,33 @@ const HoraSegurancaDashboard = () => {
                     <div className="h-[500px]">
                       <ResponsiveContainer width="100%" height={400}>
                         <ReBarChart
-                          layout="vertical"
                           data={respData}
-                          margin={{ top: 20, right: 30, left: 160, bottom: 20 }}
-                        >
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis type="number" />
-                          <YAxis
-                            type="category"
-                            dataKey="name"
-                            width={160}
-                            tick={{ fontSize: 12 }}
-                          />
-                          <Tooltip />
-                          <Legend verticalAlign="bottom" height={36} />
-                          
-                          <Bar dataKey="A Realizar" stackId="a" fill="#4285F4" />
-                          <Bar dataKey="Realizada" stackId="a" fill="#34A853" />
-                          <Bar dataKey="Não Realizada" stackId="a" fill="#EA4335" />
-                          <Bar dataKey="Realizada (Não Programada)" stackId="a" fill="#FBBC05" />
-                          <Bar dataKey="Cancelada" stackId="a" fill="#9E9E9E" />
-                        </ReBarChart>
-                      </ResponsiveContainer>
+                          margin={{ top: 20, right: 30, left: 20, bottom: 100 }} // espaço extra no bottom
+                          >
+                            <CartesianGrid strokeDasharray="3 3" />
+                            
+                            {/* Nomes no eixo X, rotacionados suavemente */}
+                            <XAxis
+                              type="category"
+                              dataKey="name"
+                              tick={{ angle: -25, textAnchor: 'end', fontSize: 12, fill: '#555' }}
+                              interval={0}
+                              height={80}
+                            />
+                        
+                            <YAxis type="number" />
+                            <Tooltip />
+                        
+                            {/* Agora a legenda vai para baixo */}
+                            <Legend verticalAlign="bottom" height={50} />
+                        
+                            <Bar dataKey="A Realizar" stackId="a" fill="#4285F4" />
+                            <Bar dataKey="Realizada" stackId="a" fill="#34A853" />
+                            <Bar dataKey="Não Realizada" stackId="a" fill="#EA4335" />
+                            <Bar dataKey="Realizada (Não Programada)" stackId="a" fill="#FBBC05" />
+                            <Bar dataKey="Cancelada" stackId="a" fill="#9E9E9E" />
+                          </ReBarChart>
+                        </ResponsiveContainer>
                     </div>
                   </CardContent>
                 </Card>
