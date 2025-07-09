@@ -416,18 +416,18 @@ export default function PainelExecucaoHSA() {
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={400}>
-              <ReBarChart 
+              <ReBarChart
                 layout="vertical"
                 data={respData}
                 margin={{ top: 20, right: 30, left: 160, bottom: 20 }}
               >
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis type="number" />
-                <YAxis 
-                  type="category" 
-                  dataKey="name" 
-                  width={160} 
-                  tick={{ fontSize: 12 }} 
+                <YAxis
+                  type="category"
+                  dataKey="name"
+                  width={160}
+                  tick={{ fontSize: 12 }}
                 />
                 <Tooltip />
                 <Legend verticalAlign="bottom" height={36} />
