@@ -1,7 +1,7 @@
 
 import { supabase } from "@/integrations/supabase/client";
 
-export const fetchTreinamentosNormativosData = async (userCCAIds: number[] = []) => {
+export const fetchTreinamentosNormativosData = async (userCCAIds: number[] = [], filters?: { year?: string; month?: string; ccaId?: string }) => {
   // Se não tem CCAs permitidos, retorna dados vazios
   if (userCCAIds.length === 0) {
     return [
@@ -11,11 +11,17 @@ export const fetchTreinamentosNormativosData = async (userCCAIds: number[] = [])
     ];
   }
 
+  // Filtrar CCAs se especificado
+  let allowedCCAIds = userCCAIds;
+  if (filters?.ccaId && filters.ccaId !== "todos") {
+    allowedCCAIds = [parseInt(filters.ccaId)];
+  }
+
   // Get funcionários from allowed CCAs
   const { data: funcionarios } = await supabase
     .from('funcionarios')
     .select('id')
-    .in('cca_id', userCCAIds)
+    .in('cca_id', allowedCCAIds)
     .eq('ativo', true);
 
   if (!funcionarios || funcionarios.length === 0) {

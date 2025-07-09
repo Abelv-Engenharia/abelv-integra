@@ -11,22 +11,38 @@ export interface ProcessoGeralChartData {
 }
 
 // Hook para buscar e agregar os dados para o gráfico de processo geral
-export function useTreinamentosPorTipoProcesso() {
+export function useTreinamentosPorTipoProcesso(filters?: { year?: string; month?: string; ccaId?: string }) {
   const { data: userCCAs = [] } = useUserCCAs();
 
   return useQuery<ProcessoGeralChartData[]>({
-    queryKey: ["treinamentos-por-processo-tipo-treinamento-grafico", userCCAs],
+    queryKey: ["treinamentos-por-processo-tipo-treinamento-grafico", userCCAs, filters],
     async queryFn() {
       if (userCCAs.length === 0) {
         return [];
       }
 
-      const allowedCcaIds = userCCAs.map(cca => cca.id);
+      // Definir período baseado nos filtros ou ano atual
+      const currentYear = new Date().getFullYear();
+      const targetYear = filters?.year && filters.year !== "todos" ? parseInt(filters.year) : currentYear;
 
-      const { data, error } = await supabase
+      // Filtrar CCAs se especificado
+      let allowedCcaIds = userCCAs.map(cca => cca.id);
+      if (filters?.ccaId && filters.ccaId !== "todos") {
+        allowedCcaIds = [parseInt(filters.ccaId)];
+      }
+
+      let query = supabase
         .from("execucao_treinamentos")
         .select("tipo_treinamento, carga_horaria, efetivo_mod, efetivo_moi, cca_id")
-        .in('cca_id', allowedCcaIds);
+        .in('cca_id', allowedCcaIds)
+        .eq('ano', targetYear);
+
+      // Aplicar filtro de mês se especificado
+      if (filters?.month && filters.month !== "todos") {
+        query = query.eq('mes', parseInt(filters.month));
+      }
+
+      const { data, error } = await query;
 
       if (error) throw new Error("Erro ao buscar execucao_treinamentos: " + error.message);
 

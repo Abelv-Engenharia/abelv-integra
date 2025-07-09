@@ -6,7 +6,15 @@ import { useUserCCAs } from "@/hooks/useUserCCAs";
 
 const COLORS = ["#10b981", "#f59e0b", "#ef4444"];
 
-export const TreinamentosNormativosChart = () => {
+interface TreinamentosNormativosChartProps {
+  filters?: {
+    year: string;
+    month: string;
+    ccaId: string;
+  };
+}
+
+export const TreinamentosNormativosChart: React.FC<TreinamentosNormativosChartProps> = ({ filters }) => {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const { data: userCCAs = [] } = useUserCCAs();
@@ -16,7 +24,7 @@ export const TreinamentosNormativosChart = () => {
       try {
         setLoading(true);
         const userCCAIds = userCCAs.map(cca => cca.id);
-        const chartData = await fetchTreinamentosNormativosData(userCCAIds);
+        const chartData = await fetchTreinamentosNormativosData(userCCAIds, filters);
         setData(chartData);
       } catch (error) {
         console.error("Error loading normative training data:", error);
@@ -26,7 +34,7 @@ export const TreinamentosNormativosChart = () => {
     };
 
     fetchData();
-  }, [userCCAs]);
+  }, [userCCAs, filters]);
 
   if (loading) {
     return (
@@ -63,7 +71,6 @@ export const TreinamentosNormativosChart = () => {
               border: "1px solid rgba(229, 231, 235, 1)"
             }}
           />
-          {/* Legenda removida */}
         </PieChart>
       </ResponsiveContainer>
     </div>

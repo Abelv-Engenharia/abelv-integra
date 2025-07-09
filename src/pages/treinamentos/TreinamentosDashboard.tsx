@@ -18,7 +18,9 @@ import { TabelaTreinamentosNormativosVencidos } from "@/components/treinamentos/
 import { useUserCCAs } from "@/hooks/useUserCCAs";
 
 const TreinamentosDashboard = () => {
-  const [year, setYear] = useState<string>("todos");
+  // Inicializar com ano atual por padrão
+  const currentYear = new Date().getFullYear().toString();
+  const [year, setYear] = useState<string>(currentYear);
   const [month, setMonth] = useState<string>("todos");
   const [ccaId, setCcaId] = useState<string>("todos");
   const { data: userCCAs = [] } = useUserCCAs();
@@ -29,6 +31,9 @@ const TreinamentosDashboard = () => {
   useEffect(() => {
     fetchProcessosTreinamento().then(setProcessos);
   }, []);
+
+  // Criar objeto de filtros para passar aos componentes
+  const filters = { year, month, ccaId };
 
   if (userCCAs.length === 0) {
     return (
@@ -66,9 +71,9 @@ const TreinamentosDashboard = () => {
         </div>
       </div>
 
-      <TreinamentosSummaryCards />
+      <TreinamentosSummaryCards filters={filters} />
 
-      <TreinamentosPorProcessoTable />
+      <TreinamentosPorProcessoTable filters={filters} />
 
       <Tabs defaultValue="execucao" className="space-y-4">
         <TabsList>
@@ -87,7 +92,7 @@ const TreinamentosDashboard = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent className="h-[400px] flex items-center justify-center">
-                <ProcessoGeralPieChart />
+                <ProcessoGeralPieChart filters={filters} />
               </CardContent>
             </Card>
           </div>
@@ -120,7 +125,7 @@ const TreinamentosDashboard = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="h-[320px]">
-                  <TreinamentosNormativosChart />
+                  <TreinamentosNormativosChart filters={filters} />
                 </CardContent>
               </Card>
               {/* Card da tabela vencidos */}

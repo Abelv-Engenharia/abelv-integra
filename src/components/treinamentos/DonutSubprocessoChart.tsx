@@ -39,8 +39,15 @@ const renderCustomLabel = (props: PieLabelRenderProps) => {
   );
 };
 
-// Remover obrigatoriedade do id
-export const DonutSubprocessoChart: React.FC = () => {
+interface DonutSubprocessoChartProps {
+  filters?: {
+    year: string;
+    month: string;
+    ccaId: string;
+  };
+}
+
+export const DonutSubprocessoChart: React.FC<DonutSubprocessoChartProps> = ({ filters }) => {
   const [data, setData] = useState<Array<{ name: string; value: number; percent: number }>>([]);
   const [loading, setLoading] = useState(false);
   const { data: userCCAs = [] } = useUserCCAs();
@@ -48,10 +55,10 @@ export const DonutSubprocessoChart: React.FC = () => {
   useEffect(() => {
     setLoading(true);
     const userCCAIds = userCCAs.map(cca => cca.id);
-    fetchDonutSubprocessoData(null, userCCAIds)
+    fetchDonutSubprocessoData(null, userCCAIds, filters)
       .then(result => setData(result))
       .finally(() => setLoading(false));
-  }, [userCCAs]);
+  }, [userCCAs, filters]);
 
   if (loading) {
     return (

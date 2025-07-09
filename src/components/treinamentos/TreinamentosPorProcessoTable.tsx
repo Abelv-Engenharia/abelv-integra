@@ -19,7 +19,15 @@ interface ProcessoData {
   percentualMOD: number;
 }
 
-export const TreinamentosPorProcessoTable = () => {
+interface TreinamentosPorProcessoTableProps {
+  filters?: {
+    year: string;
+    month: string;
+    ccaId: string;
+  };
+}
+
+export const TreinamentosPorProcessoTable: React.FC<TreinamentosPorProcessoTableProps> = ({ filters }) => {
   const [data, setData] = useState<ProcessoData[]>([]);
   const [loading, setLoading] = useState(true);
   const { data: userCCAs = [] } = useUserCCAs();
@@ -29,7 +37,7 @@ export const TreinamentosPorProcessoTable = () => {
       try {
         setLoading(true);
         const userCCAIds = userCCAs.map(cca => cca.id);
-        const processData = await fetchTreinamentosPorProcesso(userCCAIds);
+        const processData = await fetchTreinamentosPorProcesso(userCCAIds, filters);
         setData(processData);
       } catch (error) {
         console.error("Error loading training process data:", error);
@@ -39,7 +47,7 @@ export const TreinamentosPorProcessoTable = () => {
     };
 
     loadData();
-  }, [userCCAs]);
+  }, [userCCAs, filters]);
 
   const totalHorasMOD = data.reduce((sum, item) => sum + item.horasMOD, 0);
   const totalHorasMOI = data.reduce((sum, item) => sum + (item.totalHoras - item.horasMOD), 0);

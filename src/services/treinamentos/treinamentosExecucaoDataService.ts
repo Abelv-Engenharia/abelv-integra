@@ -1,20 +1,37 @@
 
 import { supabase } from "@/integrations/supabase/client";
 
-export const fetchTreinamentosExecucaoData = async (userCCAIds: number[] = []) => {
+export const fetchTreinamentosExecucaoData = async (userCCAIds: number[] = [], filters?: { year?: string; month?: string; ccaId?: string }) => {
   // Se não tem CCAs permitidos, retorna vazio
   if (userCCAIds.length === 0) {
     return [];
   }
 
-  // Get training execution data for the last 6 months, filtered by user CCAs
-  const { data } = await supabase
+  // Definir período baseado nos filtros ou ano atual
+  const currentYear = new Date().getFullYear();
+  const targetYear = filters?.year && filters.year !== "todos" ? parseInt(filters.year) : currentYear;
+  
+  // Filtrar CCAs se especificado
+  let allowedCCAIds = userCCAIds;
+  if (filters?.ccaId && filters.ccaId !== "todos") {
+    allowedCCAIds = [parseInt(filters.ccaId)];
+  }
+
+  let query = supabase
     .from('execucao_treinamentos')
     .select('mes, ano, carga_horaria, cca_id')
-    .in('cca_id', userCCAIds)
+    .in('cca_id', allowedCCAIds)
+    .eq('ano', targetYear)
     .order('ano', { ascending: true })
     .order('mes', { ascending: true })
     .limit(100);
+
+  // Aplicar filtro de mês se especificado
+  if (filters?.month && filters.month !== "todos") {
+    query = query.eq('mes', parseInt(filters.month));
+  }
+
+  const { data } = await query;
 
   // Group trainings by month and year
   const monthsData = (data || []).reduce((acc, training) => {

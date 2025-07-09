@@ -10,7 +10,15 @@ import {
 import { fetchTreinamentosStats } from "@/services/treinamentos/treinamentosStatsService";
 import { useUserCCAs } from "@/hooks/useUserCCAs";
 
-export const TreinamentosSummaryCards = () => {
+interface TreinamentosSummaryCardsProps {
+  filters?: {
+    year: string;
+    month: string;
+    ccaId: string;
+  };
+}
+
+export const TreinamentosSummaryCards: React.FC<TreinamentosSummaryCardsProps> = ({ filters }) => {
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
     totalFuncionarios: 0,
@@ -30,9 +38,9 @@ export const TreinamentosSummaryCards = () => {
     const loadStats = async () => {
       try {
         setLoading(true);
-        console.log('Loading training stats for CCAs:', userCCAs);
+        console.log('Loading training stats for CCAs:', userCCAs, 'with filters:', filters);
         const userCCAIds = userCCAs.map(cca => cca.id);
-        const data = await fetchTreinamentosStats(userCCAIds);
+        const data = await fetchTreinamentosStats(userCCAIds, filters);
         console.log('Loaded training stats:', data);
         setStats(data);
       } catch (error) {
@@ -43,7 +51,7 @@ export const TreinamentosSummaryCards = () => {
     };
 
     loadStats();
-  }, [userCCAs]);
+  }, [userCCAs, filters]);
 
   return (
     <div className="space-y-6">
@@ -73,7 +81,7 @@ export const TreinamentosSummaryCards = () => {
               {loading ? "..." : stats.totalHHT.toLocaleString('pt-BR')}
             </div>
             <p className="text-xs text-muted-foreground">
-              Total do mês atual
+              Total do período selecionado
             </p>
           </CardContent>
         </Card>
@@ -88,7 +96,7 @@ export const TreinamentosSummaryCards = () => {
               {loading ? "..." : stats.metaHoras.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}
             </div>
             <p className="text-xs text-muted-foreground">
-              Meta mensal de treinamentos
+              Meta de treinamentos
             </p>
           </CardContent>
         </Card>
@@ -103,7 +111,7 @@ export const TreinamentosSummaryCards = () => {
               {loading ? "..." : stats.totalHorasTreinamento.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}
             </div>
             <p className="text-xs text-muted-foreground">
-              Realizadas no mês atual
+              Realizadas no período
             </p>
           </CardContent>
         </Card>

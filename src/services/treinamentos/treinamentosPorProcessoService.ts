@@ -1,23 +1,38 @@
 
 import { supabase } from "@/integrations/supabase/client";
 
-export const fetchTreinamentosPorProcesso = async (userCCAIds: number[] = []) => {
+export const fetchTreinamentosPorProcesso = async (userCCAIds: number[] = [], filters?: { year?: string; month?: string; ccaId?: string }) => {
   // Se não tem CCAs permitidos, retorna vazio
   if (userCCAIds.length === 0) {
     return [];
   }
 
+  // Definir período baseado nos filtros ou ano atual
   const currentDate = new Date();
-  const currentMonth = currentDate.getMonth() + 1;
   const currentYear = currentDate.getFullYear();
+  const currentMonth = currentDate.getMonth() + 1;
 
-  // Fetch training data grouped by processo, filtered by user CCAs
-  const { data: treinamentosData } = await supabase
+  const targetYear = filters?.year && filters.year !== "todos" ? parseInt(filters.year) : currentYear;
+  const targetMonth = filters?.month && filters.month !== "todos" ? parseInt(filters.month) : null;
+
+  // Filtrar CCAs se especificado
+  let allowedCCAIds = userCCAIds;
+  if (filters?.ccaId && filters.ccaId !== "todos") {
+    allowedCCAIds = [parseInt(filters.ccaId)];
+  }
+
+  // Fetch training data grouped by processo, filtered by user CCAs and period
+  let query = supabase
     .from('execucao_treinamentos')
     .select('processo_treinamento, efetivo_mod, efetivo_moi, horas_totais, cca_id')
-    .in('cca_id', userCCAIds)
-    .eq('mes', currentMonth)
-    .eq('ano', currentYear);
+    .in('cca_id', allowedCCAIds)
+    .eq('ano', targetYear);
+
+  if (targetMonth) {
+    query = query.eq('mes', targetMonth);
+  }
+
+  const { data: treinamentosData } = await query;
 
   // Group by processo and calculate totals
   const processoStats = (treinamentosData || []).reduce((acc, item) => {

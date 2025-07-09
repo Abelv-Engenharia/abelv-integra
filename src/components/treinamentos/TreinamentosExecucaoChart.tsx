@@ -1,10 +1,18 @@
 
 import React, { useState, useEffect } from "react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
-import { fetchTreinamentosExecucaoData } from "@/services/treinamentosDashboardService";
+import { fetchTreinamentosExecucaoData } from "@/services/treinamentos/treinamentosExecucaoDataService";
 import { useUserCCAs } from "@/hooks/useUserCCAs";
 
-export const TreinamentosExecucaoChart = () => {
+interface TreinamentosExecucaoChartProps {
+  filters?: {
+    year: string;
+    month: string;
+    ccaId: string;
+  };
+}
+
+export const TreinamentosExecucaoChart: React.FC<TreinamentosExecucaoChartProps> = ({ filters }) => {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -15,7 +23,7 @@ export const TreinamentosExecucaoChart = () => {
       try {
         setLoading(true);
         const userCCAIds = userCCAs.map(cca => cca.id);
-        const chartData = await fetchTreinamentosExecucaoData();
+        const chartData = await fetchTreinamentosExecucaoData(userCCAIds, filters);
         setData(chartData);
       } catch (error) {
         console.error("Error loading training execution data:", error);
@@ -31,7 +39,7 @@ export const TreinamentosExecucaoChart = () => {
       setData([]);
       setLoading(false);
     }
-  }, [userCCAs]);
+  }, [userCCAs, filters]);
 
   if (loading) {
     return (

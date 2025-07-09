@@ -1,11 +1,20 @@
+
 import React from "react";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 import { useTreinamentosPorTipoProcesso } from "./useTreinamentosPorTipoProcesso";
 
 const COLORS = ["#F59E0B", "#2563EB", "#6B7280", "#FAA43A", "#34D399", "#DB2777", "#60A5FA"];
 
-export const ProcessoGeralPieChart = () => {
-  const { data = [], isLoading, error } = useTreinamentosPorTipoProcesso();
+interface ProcessoGeralPieChartProps {
+  filters?: {
+    year: string;
+    month: string;
+    ccaId: string;
+  };
+}
+
+export const ProcessoGeralPieChart: React.FC<ProcessoGeralPieChartProps> = ({ filters }) => {
+  const { data = [], isLoading, error } = useTreinamentosPorTipoProcesso(filters);
 
   if (isLoading) {
     return (

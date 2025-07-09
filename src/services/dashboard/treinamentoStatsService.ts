@@ -1,14 +1,20 @@
 
 import { supabase } from '@/integrations/supabase/client';
 
-export async function fetchTreinamentoInvestmentPercentage(ccaIds?: number[]): Promise<number> {
+export async function fetchTreinamentoInvestmentPercentage(ccaIds?: number[], filters?: { year?: string; month?: string }): Promise<number> {
   try {
     const currentYear = new Date().getFullYear();
+    const targetYear = filters?.year && filters.year !== "todos" ? parseInt(filters.year) : currentYear;
 
     let query = supabase
       .from('execucao_treinamentos')
       .select('horas_totais')
-      .eq('ano', currentYear);
+      .eq('ano', targetYear);
+
+    // Aplicar filtro de mês se especificado
+    if (filters?.month && filters.month !== "todos") {
+      query = query.eq('mes', parseInt(filters.month));
+    }
 
     // Aplicar filtro de CCAs se fornecido
     if (ccaIds && ccaIds.length > 0) {
@@ -27,11 +33,16 @@ export async function fetchTreinamentoInvestmentPercentage(ccaIds?: number[]): P
       0
     );
 
-    // Buscar total de horas trabalhadas do mesmo ano
+    // Buscar total de horas trabalhadas do mesmo período
     let queryHHT = supabase
       .from('horas_trabalhadas')
       .select('horas_trabalhadas')
-      .eq('ano', currentYear);
+      .eq('ano', targetYear);
+
+    // Aplicar filtro de mês se especificado
+    if (filters?.month && filters.month !== "todos") {
+      queryHHT = queryHHT.eq('mes', parseInt(filters.month));
+    }
 
     if (ccaIds && ccaIds.length > 0) {
       queryHHT = queryHHT.in('cca_id', ccaIds);
