@@ -63,7 +63,7 @@ export function AppSidebar() {
         {["tarefas_dashboard", "tarefas_minhas_tarefas", "tarefas_cadastro"].some(menu => podeVerMenu(menu, menusSidebar)) && <SidebarSectionTarefas openMenu={openMenu} toggleMenu={toggleMenu} />}
 
         {/* Render Relatórios */}
-        {["relatorios", "relatorios_idsms"].some(menu => podeVerMenu(menu, menusSidebar)) && <SidebarSectionRelatorios openMenu={openMenu} toggleMenu={toggleMenu} />}
+        {["relatorios_dashboard", "relatorios_idsms"].some(menu => podeVerMenu(menu, menusSidebar)) && <SidebarSectionRelatorios openMenu={openMenu} toggleMenu={toggleMenu} />}
 
         {/* Render Administração */}
         {["admin_usuarios", "admin_perfis", "admin_empresas", "admin_ccas", "admin_engenheiros", "admin_supervisores", "admin_funcionarios", "admin_hht", "admin_metas_indicadores", "admin_templates", "admin_logo", "admin_modelos_inspecao"].some(menu => podeVerMenu(menu, menusSidebar)) && <SidebarSectionAdministracao openMenu={openMenu} toggleMenu={toggleMenu} />}
