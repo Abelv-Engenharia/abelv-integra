@@ -80,7 +80,7 @@ export const useGerenciarUsuarios = () => {
             nome: profile.nome || 'Sem nome',
             email: profile.email || '',
             perfil: perfilNome,
-            status: 'Ativo'
+            status: profile.ativo ? 'Ativo' : 'Inativo'
           };
         });
       } catch (error) {
@@ -179,7 +179,8 @@ export const useGerenciarUsuarios = () => {
         .insert({
           id: authData.user.id,
           nome: userData.nome,
-          email: userData.email
+          email: userData.email,
+          ativo: true
         });
 
       if (profileError) {
@@ -240,21 +241,27 @@ export const useGerenciarUsuarios = () => {
 
   // Mutation para atualizar usuário
   const updateUserMutation = useMutation({
-    mutationFn: async ({ userId, userData }: { userId: string; userData: { nome: string; email: string; perfil: string } }) => {
+    mutationFn: async ({ userId, userData }: { userId: string; userData: { nome: string; email: string; perfil: string; status: boolean } }) => {
       if (!canManageUsers) {
         throw new Error("Você não tem permissão para editar usuários");
       }
+
+      console.log("Atualizando usuário:", { userId, userData });
 
       // Atualizar profile
       const { error: profileError } = await supabase
         .from('profiles')
         .update({
           nome: userData.nome,
-          email: userData.email
+          email: userData.email,
+          ativo: userData.status
         })
         .eq('id', userId);
 
-      if (profileError) throw new Error("Erro ao atualizar perfil do usuário");
+      if (profileError) {
+        console.error("Erro ao atualizar perfil:", profileError);
+        throw new Error("Erro ao atualizar perfil do usuário");
+      }
 
       // Atualizar perfil de acesso
       const profileId = perfis.find(p => p.nome === userData.perfil)?.id;
@@ -273,8 +280,13 @@ export const useGerenciarUsuarios = () => {
             perfil_id: profileId
           });
 
-        if (userPerfilError) throw new Error("Erro ao atualizar perfil de acesso");
+        if (userPerfilError) {
+          console.error("Erro ao atualizar perfil de acesso:", userPerfilError);
+          throw new Error("Erro ao atualizar perfil de acesso");
+        }
       }
+
+      console.log("Usuário atualizado com sucesso!");
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['usuarios-gerenciamento'] });
@@ -284,6 +296,7 @@ export const useGerenciarUsuarios = () => {
       });
     },
     onError: (error: any) => {
+      console.error("Erro ao atualizar usuário:", error);
       toast({
         title: "Erro",
         description: error.message || "Erro ao atualizar usuário",

@@ -22,6 +22,27 @@ export const signIn = async (email: string, password: string) => {
     });
     
     if (error) throw error;
+    
+    // Check if user is active
+    if (data.user) {
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('ativo')
+        .eq('id', data.user.id)
+        .single();
+      
+      if (profileError) {
+        console.error("Error fetching user profile:", profileError);
+        throw new Error("Erro ao verificar perfil do usuário");
+      }
+      
+      if (!profile.ativo) {
+        // Sign out the user if they're inactive
+        await supabase.auth.signOut();
+        throw new Error("Seu perfil encontra-se bloqueado. Consulte o administrador do sistema.");
+      }
+    }
+    
     return { data, error: null };
   } catch (error) {
     console.error("Login error:", error);
