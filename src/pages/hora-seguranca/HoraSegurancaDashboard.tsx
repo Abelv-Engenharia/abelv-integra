@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -209,23 +208,23 @@ const HoraSegurancaDashboard = () => {
                       <ResponsiveContainer width="100%" height={400}>
                         <ReBarChart
                           data={respData}
-                          margin={{ top: 20, right: 30, left: 20, bottom: 100 }} // espaço extra no bottom
+                          margin={{ top: 20, right: 30, left: 20, bottom: 100 }}
                           >
                             <CartesianGrid strokeDasharray="3 3" />
                             
-                            {/* Nomes no eixo X, rotacionados suavemente */}
                             <XAxis
                               type="category"
                               dataKey="name"
-                              tick={{ angle: -25, textAnchor: 'end', fontSize: 12, fill: '#555' }}
-                              interval={0}
+                              angle={-25}
+                              textAnchor="end"
                               height={80}
+                              interval={0}
+                              tick={{ fontSize: 12, fill: '#555' }}
                             />
                         
                             <YAxis type="number" />
                             <Tooltip />
                         
-                            {/* Agora a legenda vai para baixo */}
                             <Legend verticalAlign="bottom" height={50} />
                         
                             <Bar dataKey="A Realizar" stackId="a" fill="#4285F4" />
