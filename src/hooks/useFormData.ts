@@ -46,6 +46,126 @@ export const useFormData = () => {
     staleTime: 5 * 60 * 1000, // 5 minutos
   });
 
+  // Buscar empresas com relacionamento aos CCAs do usuário
+  const { data: empresas = [] } = useQuery({
+    queryKey: ['form-data-empresas', userCCAs.map(c => c.id)],
+    queryFn: async () => {
+      if (!userCCAs || userCCAs.length === 0) return [];
+      
+      const ccaIds = userCCAs.map(cca => cca.id);
+      const { data, error } = await supabase
+        .from('empresas')
+        .select('*')
+        .in('cca_id', ccaIds)
+        .eq('ativo', true)
+        .order('nome');
+      
+      if (error) {
+        console.error("Erro ao buscar empresas:", error);
+        return [];
+      }
+      return data || [];
+    },
+    enabled: !!user?.id && userCCAs.length > 0,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  // Buscar engenheiros
+  const { data: engenheiros = [] } = useQuery({
+    queryKey: ['form-data-engenheiros', userCCAs.map(c => c.id)],
+    queryFn: async () => {
+      if (!userCCAs || userCCAs.length === 0) return [];
+      
+      const ccaIds = userCCAs.map(cca => cca.id);
+      const { data, error } = await supabase
+        .from('engenheiros')
+        .select('*')
+        .in('cca_id', ccaIds)
+        .eq('ativo', true)
+        .order('nome');
+      
+      if (error) {
+        console.error("Erro ao buscar engenheiros:", error);
+        return [];
+      }
+      return data || [];
+    },
+    enabled: !!user?.id && userCCAs.length > 0,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  // Buscar supervisores
+  const { data: supervisores = [] } = useQuery({
+    queryKey: ['form-data-supervisores', userCCAs.map(c => c.id)],
+    queryFn: async () => {
+      if (!userCCAs || userCCAs.length === 0) return [];
+      
+      const ccaIds = userCCAs.map(cca => cca.id);
+      const { data, error } = await supabase
+        .from('supervisores')
+        .select('*')
+        .in('cca_id', ccaIds)
+        .eq('ativo', true)
+        .order('nome');
+      
+      if (error) {
+        console.error("Erro ao buscar supervisores:", error);
+        return [];
+      }
+      return data || [];
+    },
+    enabled: !!user?.id && userCCAs.length > 0,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  // Buscar encarregados
+  const { data: encarregados = [] } = useQuery({
+    queryKey: ['form-data-encarregados', userCCAs.map(c => c.id)],
+    queryFn: async () => {
+      if (!userCCAs || userCCAs.length === 0) return [];
+      
+      const ccaIds = userCCAs.map(cca => cca.id);
+      const { data, error } = await supabase
+        .from('encarregados')
+        .select('*')
+        .in('cca_id', ccaIds)
+        .eq('ativo', true)
+        .order('nome');
+      
+      if (error) {
+        console.error("Erro ao buscar encarregados:", error);
+        return [];
+      }
+      return data || [];
+    },
+    enabled: !!user?.id && userCCAs.length > 0,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  // Buscar funcionários
+  const { data: funcionarios = [] } = useQuery({
+    queryKey: ['form-data-funcionarios', userCCAs.map(c => c.id)],
+    queryFn: async () => {
+      if (!userCCAs || userCCAs.length === 0) return [];
+      
+      const ccaIds = userCCAs.map(cca => cca.id);
+      const { data, error } = await supabase
+        .from('funcionarios')
+        .select('*')
+        .in('cca_id', ccaIds)
+        .eq('ativo', true)
+        .order('nome');
+      
+      if (error) {
+        console.error("Erro ao buscar funcionários:", error);
+        return [];
+      }
+      return data || [];
+    },
+    enabled: !!user?.id && userCCAs.length > 0,
+    staleTime: 5 * 60 * 1000,
+  });
+
   // Outros dados básicos
   const { data: tiposRegistro = [] } = useQuery({
     queryKey: ['tipos-registro'],
@@ -252,8 +372,13 @@ export const useFormData = () => {
     processos,
     eventosIdentificados,
     causasProvaveis,
+    empresas,
     disciplinas,
+    engenheiros,
     baseLegalOpcoes,
+    supervisores,
+    encarregados,
+    funcionarios,
     exposicaoOpcoes,
     controleOpcoes,
     deteccaoOpcoes,

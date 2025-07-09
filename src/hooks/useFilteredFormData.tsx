@@ -1,24 +1,20 @@
 
 import { useMemo } from "react";
 import { useFormData } from "@/hooks/useFormData";
-import { useUserCCAs } from "@/hooks/useUserCCAs";
 
 interface UseFilteredFormDataProps {
   selectedCcaId?: string;
 }
 
 export const useFilteredFormData = ({ selectedCcaId }: UseFilteredFormDataProps) => {
-  const allData = useFormData();
-  const { data: userCCAs = [] } = useUserCCAs();
+  // Get all the basic form data first
+  const formData = useFormData();
 
   const filteredData = useMemo(() => {
-    // IDs dos CCAs que o usuário tem acesso
-    const allowedCcaIds = userCCAs.map(cca => cca.id);
-
     if (!selectedCcaId) {
+      // If no CCA selected, return basic data with empty filtered arrays
       return {
-        ...allData,
-        ccas: userCCAs, // Mostra apenas os CCAs permitidos
+        ...formData,
         empresas: [],
         engenheiros: [],
         supervisores: [],
@@ -29,44 +25,39 @@ export const useFilteredFormData = ({ selectedCcaId }: UseFilteredFormDataProps)
 
     const ccaIdNumber = parseInt(selectedCcaId);
 
-    // Verifica se o CCA selecionado é permitido para o usuário
-    if (!allowedCcaIds.includes(ccaIdNumber)) {
-      return {
-        ...allData,
-        ccas: userCCAs,
-        empresas: [],
-        engenheiros: [],
-        supervisores: [],
-        encarregados: [],
-        funcionarios: [],
-      };
-    }
+    // Filter empresas that have relationship with the selected CCA
+    const filteredEmpresas = formData.empresas ? formData.empresas.filter((empresa: any) => 
+      empresa.cca_id === ccaIdNumber
+    ) : [];
 
-    // Filtrar empresas que têm relacionamento com o CCA selecionado
-    const filteredEmpresas = allData.empresas.filter(empresa => 
-      empresa.empresa_ccas?.some((ec: any) => ec.cca_id === ccaIdNumber)
-    );
+    // Filter engenheiros that have relationship with the selected CCA
+    const filteredEngenheiros = formData.engenheiros ? formData.engenheiros.filter((engenheiro: any) => 
+      engenheiro.cca_id === ccaIdNumber
+    ) : [];
 
-    // Filtrar engenheiros que têm relacionamento com o CCA selecionado
-    const filteredEngenheiros = allData.engenheiros.filter(engenheiro => 
-      engenheiro.engenheiro_ccas?.some((ec: any) => ec.cca_id === ccaIdNumber)
-    );
+    // Filter supervisores that have relationship with the selected CCA
+    const filteredSupervisores = formData.supervisores ? formData.supervisores.filter((supervisor: any) => 
+      supervisor.cca_id === ccaIdNumber
+    ) : [];
 
-    // Filtrar supervisores que têm relacionamento com o CCA selecionado
-    const filteredSupervisores = allData.supervisores.filter(supervisor => 
-      supervisor.supervisor_ccas?.some((sc: any) => sc.cca_id === ccaIdNumber)
-    );
+    // Filter encarregados and funcionarios by cca_id
+    const filteredEncarregados = formData.encarregados ? formData.encarregados.filter((encarregado: any) => 
+      encarregado.cca_id === ccaIdNumber
+    ) : [];
+
+    const filteredFuncionarios = formData.funcionarios ? formData.funcionarios.filter((funcionario: any) => 
+      funcionario.cca_id === ccaIdNumber
+    ) : [];
 
     return {
-      ...allData,
-      ccas: userCCAs, // Sempre mostra apenas os CCAs permitidos
+      ...formData,
       empresas: filteredEmpresas,
       engenheiros: filteredEngenheiros,
       supervisores: filteredSupervisores,
-      encarregados: allData.encarregados.filter(encarregado => encarregado.cca_id === ccaIdNumber),
-      funcionarios: allData.funcionarios.filter(funcionario => funcionario.cca_id === ccaIdNumber),
+      encarregados: filteredEncarregados,
+      funcionarios: filteredFuncionarios,
     };
-  }, [allData, selectedCcaId, userCCAs]);
+  }, [formData, selectedCcaId]);
 
   return filteredData;
 };
