@@ -39,7 +39,7 @@ const Navbar = () => {
       });
     }
   };
-  return <nav className="border-b border-gray-200 px-2 sm:px-4 py-2 sm:py-3 bg-sky-900">
+  return <nav className="bg-white border-b border-gray-200 px-2 sm:px-4 py-2 sm:py-3">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 sm:gap-3 min-w-0">
           {/* Botão de toggle da sidebar - visível em telas pequenas */}
@@ -50,7 +50,7 @@ const Navbar = () => {
           <div className="flex items-center gap-1 sm:gap-2 min-w-0">
             <SystemLogo className="h-6 sm:h-8 flex-shrink-0" />
             <h1 className="text-sm sm:text-lg lg:text-xl font-bold text-gray-900 truncate">
-              <span className="hidden sm:inline text-white">INTEGRA ABELV</span>
+              <span className="hidden sm:inline">INTEGRA ABELV</span>
               <span className="sm:hidden">SMS ABELV</span>
             </h1>
           </div>
