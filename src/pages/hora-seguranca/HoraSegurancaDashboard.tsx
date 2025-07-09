@@ -206,11 +206,11 @@ const HoraSegurancaDashboard = () => {
                   </CardHeader>
                   <CardContent className="pl-2 pb-8">
                     <div className="h-[500px]">
-                      <ResponsiveContainer width="100%" height={500}>
+                      <ResponsiveContainer width="100%" height={400}>
                         <ReBarChart
                           layout="vertical"
                           data={respData}
-                          margin={{ top: 20, right: 30, left: 160, bottom: 20 }}
+                          margin={{ top: 20, right: 30, left: 160, bottom: 100 }}
                         >
                           <CartesianGrid strokeDasharray="3 3" />
                           <XAxis type="number" />
