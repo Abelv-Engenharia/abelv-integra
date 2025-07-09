@@ -10,7 +10,7 @@ export interface CCAOption {
 }
 
 /**
- * Busca todas as opções de CCA ativas
+ * Busca todas as opções de CCA ativas ordenadas por código
  */
 export async function fetchCCAs(): Promise<CCAOption[]> {
   try {
@@ -18,7 +18,7 @@ export async function fetchCCAs(): Promise<CCAOption[]> {
       .from('ccas')
       .select('id, codigo, nome, tipo')
       .eq('ativo', true)
-      .order('nome');
+      .order('codigo', { ascending: true }); // Ordenar por código (menor para maior)
 
     if (error) {
       console.error("Erro ao buscar CCAs:", error);

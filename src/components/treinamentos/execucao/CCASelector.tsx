@@ -24,7 +24,7 @@ interface CCASelectorProps {
 }
 
 const CCASelector = ({ form, ccaOptions }: CCASelectorProps) => {
-  // Ordenar as opções de CCA por código (menor para maior)
+  // Garantir ordenação por código (menor para maior)
   const sortedCcaOptions = [...ccaOptions].sort((a, b) => 
     a.codigo.localeCompare(b.codigo, undefined, { numeric: true })
   );

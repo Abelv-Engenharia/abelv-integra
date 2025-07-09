@@ -21,9 +21,15 @@ const AdminCCAs = () => {
     queryKey: ['admin-ccas'],
     queryFn: ccaService.getAll,
     refetchOnWindowFocus: false,
+    staleTime: 0, // Sempre buscar dados frescos
   });
 
-  const filteredCCAs = ccas.filter(cca =>
+  // Ordenar os CCAs por código (garantindo ordenação mesmo após filtragem)
+  const sortedCCAs = [...ccas].sort((a, b) => 
+    a.codigo.localeCompare(b.codigo, undefined, { numeric: true })
+  );
+
+  const filteredCCAs = sortedCCAs.filter(cca =>
     cca.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
     cca.codigo.toLowerCase().includes(searchTerm.toLowerCase()) ||
     cca.tipo.toLowerCase().includes(searchTerm.toLowerCase())
@@ -38,7 +44,7 @@ const AdminCCAs = () => {
   };
 
   const handleSuccess = () => {
-    refetch();
+    refetch(); // Força atualização imediata da lista
     setCreateDialogOpen(false);
     setEditCCA(null);
     setDeleteCCA(null);

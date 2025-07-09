@@ -17,7 +17,7 @@ export const ccaService = {
       const { data, error } = await supabase
         .from('ccas')
         .select('*')
-        .order('nome');
+        .order('codigo', { ascending: true }); // Ordenar por código (menor para maior)
 
       if (error) {
         console.error("Erro ao buscar CCAs:", error);
