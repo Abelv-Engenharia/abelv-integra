@@ -50,7 +50,7 @@ const Navbar = () => {
           <div className="flex items-center gap-1 sm:gap-2 min-w-0">
             <SystemLogo className="h-6 sm:h-8 flex-shrink-0" />
             <h1 className="text-sm sm:text-lg lg:text-xl font-bold text-gray-900 truncate">
-              <span className="hidden sm:inline">INTEGRA ABELV</span>
+              <span className="hidden sm:inline">ABELV</span>
               <span className="sm:hidden">SMS ABELV</span>
             </h1>
           </div>
