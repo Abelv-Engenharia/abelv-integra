@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -215,11 +216,14 @@ const HoraSegurancaDashboard = () => {
                             <XAxis
                               type="category"
                               dataKey="name"
-                              angle={-25}
-                              textAnchor="end"
-                              height={80}
                               interval={0}
-                              tick={{ fontSize: 12, fill: '#555' }}
+                              tick={{
+                                angle: 90,
+                                textAnchor: 'start',
+                                fontSize: 12,
+                              }}
+                              height={120}
+                              tickFormatter={(value) => value.split(' ').join('\n')}
                             />
                         
                             <YAxis type="number" />
