@@ -27,7 +27,7 @@ export const getAllMenusSidebar = () => {
     "hora_seguranca_agenda",
     "hora_seguranca_acompanhamento",
     
-    // Inspeção SMS - NOVO
+    // Inspeção SMS
     "inspecao_sms_dashboard",
     "inspecao_sms_cadastro",
     "inspecao_sms_consulta",
@@ -67,7 +67,49 @@ export const getAllMenusSidebar = () => {
     "gro_avaliacao",
     "gro_pgr",
     
-    // Admin
+    // ADM
+    "adm_dashboard",
+    "adm_configuracoes",
+    "adm_usuarios",
+    "adm_perfis",
+    "adm_empresas",
+    "adm_ccas",
+    "adm_engenheiros",
+    "adm_supervisores",
+    "adm_funcionarios",
+    "adm_hht",
+    "adm_metas_indicadores",
+    "adm_modelos_inspecao",
+    "adm_templates",
+    "adm_logo",
+    
+    // SUPRIMENTOS
+    "suprimentos_dashboard",
+    "suprimentos_fornecedores",
+    "suprimentos_materiais",
+    "suprimentos_compras",
+    "suprimentos_estoque",
+    "suprimentos_pedidos",
+    "suprimentos_contratos",
+    
+    // PRODUÇÃO
+    "producao_dashboard",
+    "producao_planejamento",
+    "producao_ordens_producao",
+    "producao_controle_qualidade",
+    "producao_manutencao",
+    "producao_recursos",
+    "producao_indicadores",
+    
+    // ORÇAMENTOS
+    "orcamentos_dashboard",
+    "orcamentos_projetos",
+    "orcamentos_custos",
+    "orcamentos_analises",
+    "orcamentos_aprovacoes",
+    "orcamentos_historico",
+    
+    // Admin (mantendo compatibilidade)
     "admin_usuarios",
     "admin_perfis",
     "admin_empresas",
@@ -77,7 +119,7 @@ export const getAllMenusSidebar = () => {
     "admin_funcionarios",
     "admin_hht",
     "admin_metas_indicadores",
-    "admin_modelos_inspecao", // NOVO
+    "admin_modelos_inspecao",
     "admin_templates",
     "admin_logo"
   ];
