@@ -32,15 +32,29 @@ export const CriarUsuarioForm = ({ perfis, onSubmit, isSubmitting }: CriarUsuari
     handleSubmit,
     formState: { errors },
     setValue,
-    reset
+    reset,
+    watch
   } = useForm<CriarUsuarioFormData>({
     resolver: zodResolver(criarUsuarioSchema),
   });
 
-  const handleFormSubmit = (data: CriarUsuarioFormData) => {
-    onSubmit(data);
-    reset();
-    setSelectedPerfil("");
+  const handleFormSubmit = async (data: CriarUsuarioFormData) => {
+    console.log("Formulário enviado com dados:", data);
+    
+    // Validação adicional
+    if (!data.perfil) {
+      console.error("Perfil não selecionado");
+      return;
+    }
+
+    try {
+      await onSubmit(data);
+      console.log("Usuário criado com sucesso, resetando formulário");
+      reset();
+      setSelectedPerfil("");
+    } catch (error) {
+      console.error("Erro ao criar usuário:", error);
+    }
   };
 
   return (
@@ -78,7 +92,7 @@ export const CriarUsuarioForm = ({ perfis, onSubmit, isSubmitting }: CriarUsuari
           id="password"
           type="password"
           {...register("password")}
-          placeholder="Digite a senha"
+          placeholder="Digite a senha (mínimo 6 caracteres)"
           disabled={isSubmitting}
         />
         {errors.password && (
@@ -91,10 +105,11 @@ export const CriarUsuarioForm = ({ perfis, onSubmit, isSubmitting }: CriarUsuari
         <Select
           value={selectedPerfil}
           onValueChange={(value) => {
+            console.log("Perfil selecionado:", value);
             setSelectedPerfil(value);
-            setValue("perfil", value);
+            setValue("perfil", value, { shouldValidate: true });
           }}
-          disabled={isSubmitting}
+          disabled={isSubmitting || perfis.length === 0}
         >
           <SelectTrigger>
             <SelectValue placeholder="Selecione um perfil" />
@@ -110,12 +125,26 @@ export const CriarUsuarioForm = ({ perfis, onSubmit, isSubmitting }: CriarUsuari
         {errors.perfil && (
           <p className="text-sm text-destructive">{errors.perfil.message}</p>
         )}
+        {perfis.length === 0 && (
+          <p className="text-sm text-yellow-600">Carregando perfis...</p>
+        )}
       </div>
 
       <div className="flex justify-end space-x-2 pt-4">
         <Button
-          type="submit"
+          type="button"
+          variant="outline"
+          onClick={() => {
+            reset();
+            setSelectedPerfil("");
+          }}
           disabled={isSubmitting}
+        >
+          Cancelar
+        </Button>
+        <Button
+          type="submit"
+          disabled={isSubmitting || perfis.length === 0}
         >
           {isSubmitting ? "Criando..." : "Criar Usuário"}
         </Button>
