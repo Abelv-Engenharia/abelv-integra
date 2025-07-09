@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { Loader2 } from "lucide-react";
+import { PageLoader } from "@/components/common/PageLoader";
 
 interface AuthGuardProps {
   children: React.ReactNode;
@@ -17,20 +17,13 @@ const AuthGuard = ({ children }: AuthGuardProps) => {
     // Reduced timeout for faster loading
     const timer = setTimeout(() => {
       setIsChecking(false);
-    }, 200);
+    }, 100);
 
     return () => clearTimeout(timer);
   }, [loading]);
 
   if (loading || isChecking) {
-    return (
-      <div className="flex h-screen w-full items-center justify-center bg-background">
-        <div className="flex flex-col items-center space-y-4">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Carregando...</p>
-        </div>
-      </div>
-    );
+    return <PageLoader text="Carregando..." size="md" />;
   }
 
   if (!user) {

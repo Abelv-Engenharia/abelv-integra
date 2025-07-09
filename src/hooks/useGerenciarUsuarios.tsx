@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
@@ -11,11 +10,16 @@ export const useGerenciarUsuarios = () => {
   const queryClient = useQueryClient();
   const { user } = useAuth();
   const [canManageUsers, setCanManageUsers] = useState(false);
+  const [permissionsLoaded, setPermissionsLoaded] = useState(false);
 
   // Verificar permissões do usuário
   useEffect(() => {
     const checkPermissions = async () => {
-      if (!user?.id) return;
+      if (!user?.id) {
+        setCanManageUsers(false);
+        setPermissionsLoaded(true);
+        return;
+      }
 
       try {
         const { data: userPerfil } = await supabase
@@ -32,10 +36,14 @@ export const useGerenciarUsuarios = () => {
         if (userPerfil?.perfis?.permissoes) {
           const permissoes = userPerfil.perfis.permissoes as unknown as Permissoes;
           setCanManageUsers(permissoes.admin_usuarios === true);
+        } else {
+          setCanManageUsers(false);
         }
       } catch (error) {
         console.error("Erro ao verificar permissões:", error);
         setCanManageUsers(false);
+      } finally {
+        setPermissionsLoaded(true);
       }
     };
 
@@ -88,7 +96,7 @@ export const useGerenciarUsuarios = () => {
         return [];
       }
     },
-    enabled: canManageUsers,
+    enabled: canManageUsers && permissionsLoaded,
     staleTime: 2 * 60 * 1000,
   });
 

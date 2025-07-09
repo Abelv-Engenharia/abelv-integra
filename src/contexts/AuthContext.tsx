@@ -33,41 +33,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         
         console.log('Auth state change:', event, session?.user?.id);
         
-        if (session?.user) {
-          // Check if user is still active
-          try {
-            const { data: profile, error: profileError } = await supabase
-              .from('profiles')
-              .select('ativo')
-              .eq('id', session.user.id)
-              .single();
-            
-            if (profileError) {
-              console.error("Error fetching user profile:", profileError);
-              setSession(null);
-              setUser(null);
-              return;
-            }
-            
-            if (!profile?.ativo) {
-              console.log("User is inactive, signing out");
-              await supabase.auth.signOut();
-              setSession(null);
-              setUser(null);
-              return;
-            }
-          } catch (error) {
-            console.error("Error checking user status:", error);
-            setSession(null);
-            setUser(null);
-            return;
-          }
-        }
-        
+        // Only do basic auth state updates here
         setSession(session);
         setUser(session?.user ?? null);
         
-        // Only set loading to false after we have processed the auth state
+        // Set loading to false after we have processed the auth state
         if (event === 'SIGNED_IN' || event === 'SIGNED_OUT' || event === 'TOKEN_REFRESHED') {
           setTimeout(() => {
             if (mounted) setLoading(false);
@@ -81,32 +51,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       try {
         const { session } = await getCurrentSession();
         if (mounted) {
-          if (session?.user) {
-            // Check if user is active
-            try {
-              const { data: profile, error: profileError } = await supabase
-                .from('profiles')
-                .select('ativo')
-                .eq('id', session.user.id)
-                .single();
-              
-              if (profileError || !profile?.ativo) {
-                console.log("User is inactive during initialization");
-                await supabase.auth.signOut();
-                setSession(null);
-                setUser(null);
-                setLoading(false);
-                return;
-              }
-            } catch (error) {
-              console.error("Error checking user status during init:", error);
-              setSession(null);
-              setUser(null);
-              setLoading(false);
-              return;
-            }
-          }
-          
           setSession(session);
           setUser(session?.user ?? null);
           setLoading(false);
