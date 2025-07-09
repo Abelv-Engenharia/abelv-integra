@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { ChevronDown, ChevronRight, ShieldAlert, GraduationCap, Clock, ClipboardCheck, AlertTriangle, Gavel } from "lucide-react";
 import { SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarMenuSub, SidebarMenuSubItem, SidebarMenuSubButton } from "@/components/ui/sidebar";
@@ -137,14 +138,17 @@ export default function SidebarSectionGestaoSMS({
                       <SidebarMenuSubButton asChild className={currentPath === "/hora-seguranca/dashboard" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
                         <Link to="/hora-seguranca/dashboard">Dashboard</Link>
                       </SidebarMenuSubButton>
-                      <SidebarMenuSubButton asChild className={currentPath === "/hora-seguranca/inspecoes-cadastro" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
-                        <Link to="/hora-seguranca/inspecoes-cadastro">Cadastro</Link>
+                      <SidebarMenuSubButton asChild className={currentPath === "/hora-seguranca/inspecao-cadastro-hsa" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
+                        <Link to="/hora-seguranca/inspecao-cadastro-hsa">Cadastro</Link>
                       </SidebarMenuSubButton>
                       <SidebarMenuSubButton asChild className={currentPath === "/hora-seguranca/agenda-hsa" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
                         <Link to="/hora-seguranca/agenda-hsa">Agenda</Link>
                       </SidebarMenuSubButton>
                       <SidebarMenuSubButton asChild className={currentPath === "/hora-seguranca/inspecoes-acompanhamento" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
                         <Link to="/hora-seguranca/inspecoes-acompanhamento">Acompanhamento</Link>
+                      </SidebarMenuSubButton>
+                      <SidebarMenuSubButton asChild className={currentPath === "/hora-seguranca/inspecao-nao-programada-hsa" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
+                        <Link to="/hora-seguranca/inspecao-nao-programada-hsa">Inspeção Não Programada</Link>
                       </SidebarMenuSubButton>
                     </div>}
                 </div>
