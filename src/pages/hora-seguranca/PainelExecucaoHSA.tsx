@@ -1,10 +1,9 @@
-
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { fetchInspecoesSummary, fetchInspecoesByStatus, fetchInspecoesByMonth, fetchInspecoesByResponsavel, fetchDesviosByInspectionType, fetchDesviosByResponsavel } from "@/services/horaSegurancaService";
 import { Gauge, Check, Clock, AlertTriangle, Search, Plus } from "lucide-react";
-import { ResponsiveContainer, BarChart as ReBarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, LineChart as ReLineChart, Line, Pie as RePie, PieChart as RePieChart, Cell } from "recharts";
+import { ResponsiveContainer, BarChart as ReBarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, LineChart as ReLineChart, Line, Pie as RePie, PieChart as RePieChart, Cell, Legend } from "recharts";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useNavigate } from "react-router-dom";
@@ -457,7 +456,7 @@ export default function PainelExecucaoHSA() {
                 <XAxis dataKey="name" />
                 <YAxis allowDecimals={false} />
                 <Tooltip />
-                <ChartLegend />
+                <Legend />
                 <Bar dataKey="A Realizar" fill="#4285F4" />
                 <Bar dataKey="Realizada" fill="#43A047" />
                 <Bar dataKey="Não Realizada" fill="#E53935" />
@@ -480,7 +479,7 @@ export default function PainelExecucaoHSA() {
                 <XAxis type="number" />
                 <YAxis dataKey="name" type="category" width={160} tick={{fontSize: 12}} />
                 <Tooltip />
-                <Legend verticalAlign= "bottom" height={36} />
+                <Legend verticalAlign="bottom" height={36} />
                 <Bar dataKey="desvios" fill="#4285F4" />
               </ReBarChart>
             </ResponsiveContainer>
