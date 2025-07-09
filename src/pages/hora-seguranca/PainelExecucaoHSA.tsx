@@ -475,7 +475,7 @@ export default function PainelExecucaoHSA() {
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={220}>
-              <ReBarChart data={desvioRespData} layout="vertical">
+              <ReBarChart data={desvioRespData} layout="horizontal">
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis type="number" />
                 <YAxis dataKey="name" type="category" width={140} />
