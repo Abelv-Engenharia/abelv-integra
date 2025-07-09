@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -19,7 +18,6 @@ import { useUserCCAs } from "@/hooks/useUserCCAs";
 import { supabase } from "@/integrations/supabase/client";
 import { ResponsiveContainer, BarChart as ReBarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from "recharts";
 import { fetchInspecoesByResponsavel } from "@/services/hora-seguranca/inspecoesByResponsavelService";
-
 const HoraSegurancaDashboard = () => {
   const [tab, setTab] = useState("overview");
   const [filterCCA, setFilterCCA] = useState("");
@@ -28,7 +26,9 @@ const HoraSegurancaDashboard = () => {
   const [dataFinal, setDataFinal] = useState<Date>();
   const [responsaveis, setResponsaveis] = useState<string[]>([]);
   const [respData, setRespData] = useState<any[]>([]);
-  const { data: userCCAs = [] } = useUserCCAs();
+  const {
+    data: userCCAs = []
+  } = useUserCCAs();
 
   // Buscar responsáveis reais da tabela execucao_hsa
   useEffect(() => {
@@ -36,12 +36,10 @@ const HoraSegurancaDashboard = () => {
       if (userCCAs.length === 0) return;
       const ccaIds = userCCAs.map(cca => cca.id);
       try {
-        const { data, error } = await supabase
-          .from('execucao_hsa')
-          .select('responsavel_inspecao')
-          .in('cca_id', ccaIds)
-          .not('responsavel_inspecao', 'is', null);
-        
+        const {
+          data,
+          error
+        } = await supabase.from('execucao_hsa').select('responsavel_inspecao').in('cca_id', ccaIds).not('responsavel_inspecao', 'is', null);
         if (error) {
           console.error('Erro ao buscar responsáveis:', error);
           return;
@@ -64,37 +62,29 @@ const HoraSegurancaDashboard = () => {
         setRespData([]);
         return;
       }
-
       const ccaIds = userCCAs.map(cca => cca.id);
       const responsaveis = await fetchInspecoesByResponsavel(ccaIds);
-      
-      setRespData(
-        responsaveis.map((d: any) => ({
-          name: d.responsavel,
-          "A Realizar": d["A Realizar"] ?? 0,
-          "Realizada": d.realizada ?? 0,
-          "Não Realizada": d.nao_realizada ?? 0,
-          "Realizada (Não Programada)": d["realizada (não programada)"] ?? 0,
-          "Cancelada": d.cancelada ?? 0,
-        }))
-      );
+      setRespData(responsaveis.map((d: any) => ({
+        name: d.responsavel,
+        "A Realizar": d["A Realizar"] ?? 0,
+        "Realizada": d.realizada ?? 0,
+        "Não Realizada": d.nao_realizada ?? 0,
+        "Realizada (Não Programada)": d["realizada (não programada)"] ?? 0,
+        "Cancelada": d.cancelada ?? 0
+      })));
     };
     loadRespData();
   }, [userCCAs]);
-
-  return (
-    <div className="container mx-auto py-6">
+  return <div className="container mx-auto py-6">
       <div className="flex flex-col space-y-6">
         <div className="flex flex-col space-y-2">
           <h2 className="text-3xl font-bold tracking-tight">Hora da Segurança</h2>
           <p className="text-muted-foreground">
             Dashboard de acompanhamento de inspeções de segurança
           </p>
-          {userCCAs.length === 0 && (
-            <p className="text-yellow-600">
+          {userCCAs.length === 0 && <p className="text-yellow-600">
               Você não possui permissão para visualizar dados de nenhum CCA.
-            </p>
-          )}
+            </p>}
         </div>
 
         <Tabs defaultValue="overview" className="space-y-4" value={tab} onValueChange={setTab}>
@@ -103,19 +93,16 @@ const HoraSegurancaDashboard = () => {
           </TabsList>
           
           <TabsContent value="overview" className="space-y-4">
-            {userCCAs.length > 0 && (
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            {userCCAs.length > 0 && <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                 <Select value={filterCCA} onValueChange={setFilterCCA}>
                   <SelectTrigger>
                     <SelectValue placeholder="Filtrar por CCA" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="todos">Todos</SelectItem>
-                    {userCCAs.map(cca => (
-                      <SelectItem key={cca.id} value={cca.id.toString()}>
+                    {userCCAs.map(cca => <SelectItem key={cca.id} value={cca.id.toString()}>
                         {cca.codigo} - {cca.nome}
-                      </SelectItem>
-                    ))}
+                      </SelectItem>)}
                   </SelectContent>
                 </Select>
 
@@ -125,64 +112,38 @@ const HoraSegurancaDashboard = () => {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="todos">Todos</SelectItem>
-                    {responsaveis.map(responsavel => (
-                      <SelectItem key={responsavel} value={responsavel}>
+                    {responsaveis.map(responsavel => <SelectItem key={responsavel} value={responsavel}>
                         {responsavel}
-                      </SelectItem>
-                    ))}
+                      </SelectItem>)}
                   </SelectContent>
                 </Select>
 
                 <Popover>
                   <PopoverTrigger asChild>
-                    <Button
-                      variant={"outline"}
-                      className={cn(
-                        "justify-start text-left font-normal",
-                        !dataInicial && "text-muted-foreground"
-                      )}
-                    >
+                    <Button variant={"outline"} className={cn("justify-start text-left font-normal", !dataInicial && "text-muted-foreground")}>
                       <CalendarIcon className="mr-2 h-4 w-4" />
                       {dataInicial ? format(dataInicial, "dd/MM/yyyy") : "Data Inicial"}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={dataInicial}
-                      onSelect={setDataInicial}
-                      initialFocus
-                    />
+                    <Calendar mode="single" selected={dataInicial} onSelect={setDataInicial} initialFocus />
                   </PopoverContent>
                 </Popover>
 
                 <Popover>
                   <PopoverTrigger asChild>
-                    <Button
-                      variant={"outline"}
-                      className={cn(
-                        "justify-start text-left font-normal",
-                        !dataFinal && "text-muted-foreground"
-                      )}
-                    >
+                    <Button variant={"outline"} className={cn("justify-start text-left font-normal", !dataFinal && "text-muted-foreground")}>
                       <CalendarIcon className="mr-2 h-4 w-4" />
                       {dataFinal ? format(dataFinal, "dd/MM/yyyy") : "Data Final"}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={dataFinal}
-                      onSelect={setDataFinal}
-                      initialFocus
-                    />
+                    <Calendar mode="single" selected={dataFinal} onSelect={setDataFinal} initialFocus />
                   </PopoverContent>
                 </Popover>
-              </div>
-            )}
+              </div>}
 
-            {userCCAs.length > 0 && (
-              <>
+            {userCCAs.length > 0 && <>
                 <InspecoesSummaryCards />
 
                 <Card className="col-span-full">
@@ -206,20 +167,18 @@ const HoraSegurancaDashboard = () => {
                   </CardHeader>
                   <CardContent className="pl-2 pb-8">
                     <div className="h-[500px]">
-                      <ResponsiveContainer width="100%" height= "100%">
-                        <ReBarChart
-                          layout="vertical"
-                          data={respData}
-                          margin={{ top: 20, right: 30, left: 160, bottom: 20 }}
-                        >
+                      <ResponsiveContainer width="100%" height={400}>
+                        <ReBarChart layout="vertical" data={respData} margin={{
+                      top: 20,
+                      right: 30,
+                      left: 160,
+                      bottom: 20
+                    }}>
                           <CartesianGrid strokeDasharray="3 3" />
                           <XAxis type="number" />
-                          <YAxis
-                            type="category"
-                            dataKey="name"
-                            width={160}
-                            tick={{ fontSize: 12 }}
-                          />
+                          <YAxis type="category" dataKey="name" width={160} tick={{
+                        fontSize: 12
+                      }} />
                           <Tooltip />
                           <Legend verticalAlign="bottom" height={36} />
                           
@@ -253,17 +212,14 @@ const HoraSegurancaDashboard = () => {
                       Quantidade de desvios identificados por tipo de inspeção
                     </CardDescription>
                   </CardHeader>
-                  <CardContent className="pl-2 py-[200px]">
+                  <CardContent className="pl-2 px-0 py-[130px]">
                     <DesviosTipoInspecaoChart />
                   </CardContent>
                 </Card>
-              </>
-            )}
+              </>}
           </TabsContent>
         </Tabs>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default HoraSegurancaDashboard;
