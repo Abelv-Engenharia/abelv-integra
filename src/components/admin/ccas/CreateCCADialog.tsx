@@ -1,37 +1,19 @@
 
-import React from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Form } from "@/components/ui/form";
+import { useToast } from "@/hooks/use-toast";
 import { ccaService } from "@/services/admin/ccaService";
-import { toast } from "@/hooks/use-toast";
 import { useCCAInvalidation } from "@/hooks/useCCAInvalidation";
-
-const ccaSchema = z.object({
-  codigo: z.string().min(1, "Código é obrigatório"),
-  nome: z.string().min(1, "Nome é obrigatório"),
-  tipo: z.string().min(1, "Tipo é obrigatório"),
-  ativo: z.boolean().default(true),
-});
-
-type CCAFormData = z.infer<typeof ccaSchema>;
+import { CCAFormFields } from "./CCAFormFields";
 
 interface CreateCCADialogProps {
   open: boolean;
@@ -39,15 +21,12 @@ interface CreateCCADialogProps {
   onSuccess: () => void;
 }
 
-export const CreateCCADialog: React.FC<CreateCCADialogProps> = ({
-  open,
-  onOpenChange,
-  onSuccess,
-}) => {
+const CreateCCADialog = ({ open, onOpenChange, onSuccess }: CreateCCADialogProps) => {
+  const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(false);
   const { invalidateAllCCAQueries } = useCCAInvalidation();
   
-  const form = useForm<CCAFormData>({
-    resolver: zodResolver(ccaSchema),
+  const form = useForm({
     defaultValues: {
       codigo: "",
       nome: "",
@@ -56,112 +35,60 @@ export const CreateCCADialog: React.FC<CreateCCADialogProps> = ({
     },
   });
 
-  const onSubmit = async (data: CCAFormData) => {
+  const onSubmit = async (data: any) => {
+    setIsLoading(true);
     try {
-      const result = await ccaService.create({
-        codigo: data.codigo,
-        nome: data.nome,
-        tipo: data.tipo,
-        ativo: data.ativo,
-      });
+      const newCCA = await ccaService.create(data);
       
-      if (result) {
+      if (newCCA) {
         toast({
-          title: "Sucesso",
-          description: "CCA criado com sucesso! Todas as listas foram atualizadas.",
+          title: "CCA criado",
+          description: "O CCA foi criado com sucesso.",
         });
         
-        // Invalidate all CCA-related queries across the application
+        // Invalidar todas as queries relacionadas a CCAs para atualização imediata
         await invalidateAllCCAQueries();
         
         form.reset();
         onSuccess();
-      } else {
-        toast({
-          title: "Erro",
-          description: "Erro ao criar CCA. Tente novamente.",
-          variant: "destructive",
-        });
+        onOpenChange(false);
       }
     } catch (error) {
-      console.error("Erro ao criar CCA:", error);
+      console.error('Erro ao criar CCA:', error);
       toast({
-        title: "Erro",
-        description: "Erro interno. Tente novamente.",
+        title: "Erro ao criar",
+        description: "Ocorreu um erro ao criar o CCA.",
         variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Criar Novo CCA</DialogTitle>
+          <DialogDescription>
+            Preencha as informações do novo CCA.
+          </DialogDescription>
         </DialogHeader>
-
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="codigo"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Código *</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Digite o código do CCA" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="nome"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nome *</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Digite o nome do CCA" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="tipo"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Tipo *</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione o tipo" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="Sede">Sede</SelectItem>
-                      <SelectItem value="Obra">Obra</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <div className="flex justify-end space-x-2 pt-4">
+            <CCAFormFields />
+            
+            <div className="flex justify-end gap-3 pt-4">
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => onOpenChange(false)}
+                disabled={isLoading}
               >
                 Cancelar
               </Button>
-              <Button type="submit">
-                Criar CCA
+              <Button type="submit" disabled={isLoading}>
+                {isLoading ? "Criando..." : "Criar CCA"}
               </Button>
             </div>
           </form>
@@ -170,3 +97,5 @@ export const CreateCCADialog: React.FC<CreateCCADialogProps> = ({
     </Dialog>
   );
 };
+
+export { CreateCCADialog };
