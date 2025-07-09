@@ -217,12 +217,12 @@ const HoraSegurancaDashboard = () => {
                               type="category"
                               dataKey="name"
                               interval={0}
+                              angle={90}
+                              textAnchor="start"
+                              height={120}
                               tick={{
-                                angle: 90,
-                                textAnchor: 'start',
                                 fontSize: 12,
                               }}
-                              height={120}
                               tickFormatter={(value) => value.split(' ').join('\n')}
                             />
                         
