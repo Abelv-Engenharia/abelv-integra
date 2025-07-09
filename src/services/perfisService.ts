@@ -1,73 +1,35 @@
-
 import { supabase } from '@/integrations/supabase/client';
 
-export const getAllMenusSidebar = () => {
+export function getAllMenusSidebar(): string[] {
   return [
-    // Dashboard
     "dashboard",
-    
-    // Desvios
+    // SMS menus
     "desvios_dashboard",
-    "desvios_cadastro", 
+    "desvios_cadastro",
     "desvios_consulta",
     "desvios_nao_conformidade",
-    
-    // Treinamentos
     "treinamentos_dashboard",
     "treinamentos_normativo",
-    "treinamentos_consulta", 
+    "treinamentos_consulta",
     "treinamentos_execucao",
     "treinamentos_cracha",
-    
-    // Hora da Segurança
     "hora_seguranca_cadastro",
     "hora_seguranca_cadastro_inspecao",
     "hora_seguranca_cadastro_nao_programada",
     "hora_seguranca_dashboard",
     "hora_seguranca_agenda",
     "hora_seguranca_acompanhamento",
-    
-    // Inspeção SMS
     "inspecao_sms_dashboard",
     "inspecao_sms_cadastro",
     "inspecao_sms_consulta",
-    
-    // Ocorrências
+    "medidas_disciplinares_dashboard",
+    "medidas_disciplinares_cadastro",
+    "medidas_disciplinares_consulta",
     "ocorrencias_dashboard",
     "ocorrencias_cadastro",
     "ocorrencias_consulta",
     
-    // Medidas Disciplinares
-    "medidas_disciplinares_dashboard",
-    "medidas_disciplinares_cadastro",
-    "medidas_disciplinares_consulta",
-    
-    // Tarefas
-    "tarefas_dashboard",
-    "tarefas_minhas_tarefas",
-    "tarefas_cadastro",
-    
-    // Relatórios
-    "relatorios",
-    "relatorios_idsms",
-    
-    // IDSMS
-    "idsms_dashboard",
-    "idsms_indicadores",
-    "idsms_iid",
-    "idsms_hsa",
-    "idsms_ht",
-    "idsms_ipom",
-    "idsms_inspecao_alta_lideranca",
-    "idsms_inspecao_gestao_sms",
-    "idsms_indice_reativo",
-    
-    // GRO
-    "gro_perigos",
-    "gro_avaliacao",
-    "gro_pgr",
-    
-    // ADM
+    // ADM MATRICIAL menus
     "adm_dashboard",
     "adm_configuracoes",
     "adm_usuarios",
@@ -82,17 +44,16 @@ export const getAllMenusSidebar = () => {
     "adm_modelos_inspecao",
     "adm_templates",
     "adm_logo",
-    
-    // SUPRIMENTOS
-    "suprimentos_dashboard",
-    "suprimentos_fornecedores",
-    "suprimentos_materiais",
-    "suprimentos_compras",
-    "suprimentos_estoque",
-    "suprimentos_pedidos",
-    "suprimentos_contratos",
-    
-    // PRODUÇÃO
+
+    // ORÇAMENTOS menus
+    "orcamentos_dashboard",
+    "orcamentos_projetos",
+    "orcamentos_custos",
+    "orcamentos_analises",
+    "orcamentos_aprovacoes",
+    "orcamentos_historico",
+
+    // PRODUÇÃO menus
     "producao_dashboard",
     "producao_planejamento",
     "producao_ordens_producao",
@@ -100,16 +61,34 @@ export const getAllMenusSidebar = () => {
     "producao_manutencao",
     "producao_recursos",
     "producao_indicadores",
-    
-    // ORÇAMENTOS
-    "orcamentos_dashboard",
-    "orcamentos_projetos",
-    "orcamentos_custos",
-    "orcamentos_analises",
-    "orcamentos_aprovacoes",
-    "orcamentos_historico",
-    
-    // Admin (mantendo compatibilidade)
+
+    // QUALIDADE menus
+    "qualidade_dashboard",
+    "qualidade_controle",
+    "qualidade_auditorias",
+    "qualidade_indicadores",
+    "qualidade_equipe",
+    "qualidade_configuracoes",
+
+    // SUPRIMENTOS menus
+    "suprimentos_dashboard",
+    "suprimentos_fornecedores",
+    "suprimentos_materiais",
+    "suprimentos_compras",
+    "suprimentos_estoque",
+    "suprimentos_pedidos",
+    "suprimentos_contratos",
+
+    // TAREFAS menus
+    "tarefas_dashboard",
+    "tarefas_minhas_tarefas",
+    "tarefas_cadastro",
+
+    // RELATÓRIOS menus
+    "relatorios_dashboard",
+    "relatorios_idsms",
+
+    // ADMINISTRAÇÃO menus (mantendo compatibilidade)
     "admin_usuarios",
     "admin_perfis",
     "admin_empresas",
@@ -119,11 +98,11 @@ export const getAllMenusSidebar = () => {
     "admin_funcionarios",
     "admin_hht",
     "admin_metas_indicadores",
-    "admin_modelos_inspecao",
     "admin_templates",
-    "admin_logo"
+    "admin_logo",
+    "admin_modelos_inspecao",
   ];
-};
+}
 
 export async function fetchPerfis() {
   const { data, error } = await supabase
