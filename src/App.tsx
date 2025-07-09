@@ -24,8 +24,8 @@ import Profile from "./pages/account/Profile";
 import Settings from "./pages/account/Settings";
 import Support from "./pages/account/Support";
 
-// Admin pages
-import AdminUsuarios from "./pages/admin/AdminUsuarios";
+// Admin pages - NEW USER MANAGEMENT PAGE
+import GerenciarUsuarios from "./pages/admin/GerenciarUsuarios";
 import AdminUsuariosAuth from "./pages/admin/AdminUsuariosAuth";
 import AdminCCAs from "./pages/admin/AdminCCAs";
 import AdminPerfis from "./pages/admin/AdminPerfis";
@@ -149,8 +149,8 @@ function App() {
                 <Route path="account/settings" element={<Settings />} />
                 <Route path="account/support" element={<Support />} />
 
-                {/* Admin routes */}
-                <Route path="admin/usuarios" element={<AdminUsuarios />} />
+                {/* Admin routes - NEW USER MANAGEMENT */}
+                <Route path="admin/usuarios" element={<GerenciarUsuarios />} />
                 <Route path="admin/usuarios-auth" element={<AdminUsuariosAuth />} />
                 <Route path="admin/ccas" element={<AdminCCAs />} />
                 <Route path="admin/perfis" element={<AdminPerfis />} />
