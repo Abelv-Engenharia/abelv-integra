@@ -177,7 +177,7 @@ export default function SidebarSectionAdministracao({ openMenu, toggleMenu }: Pr
                         asChild
                         className={currentPath === "/admin/hht" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
                       >
-                        <Link to="/admin/hht" className="flex items-center gap-2">
+                        <Link to="/admin/registro-hht" className="flex items-center gap-2">
                           <Clock className="h-4 w-4 flex-shrink-0" />
                           <span className="text-xs leading-tight break-words min-w-0">Registro HHT</span>
                         </Link>
