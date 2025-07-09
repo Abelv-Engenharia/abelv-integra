@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { fetchInspecoesSummary, fetchInspecoesByStatus, fetchInspecoesByMonth, fetchInspecoesByResponsavel, fetchDesviosByInspectionType, fetchDesviosByResponsavel } from "@/services/horaSegurancaService";
 import { Gauge, Check, Clock, AlertTriangle, Search, Plus } from "lucide-react";
-import { ResponsiveContainer, BarChart as ReBarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, LineChart as ReLineChart, Line, Pie as RePie, PieChart as RePieChart, Cell, Legend } from "recharts";
+import { ResponsiveContainer, BarChart as ReBarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, LineChart as ReLineChart, Line, Pie as RePie, PieChart as RePieChart, Cell } from "recharts";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useNavigate } from "react-router-dom";
@@ -474,18 +474,13 @@ export default function PainelExecucaoHSA() {
             <CardTitle>Desvios Identificados</CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={250}>
-              <ReBarChart data={desvioRespData} layout="vertical" margin={{ top: 10, right: 30, left: 150, bottom: 10 }}>
+            <ResponsiveContainer width="100%" height={400}>
+              <ReBarChart data={desvioRespData} layout="vertical" margin={{ top: 20, right: 30, left: 160, bottom: 20 }} >
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis type="number" />
-                <YAxis
-                  dataKey="name"
-                  type="category"
-                  width={160}
-                  tick={{ textAnchor: 'end' }}
-                />
+                <YAxis dataKey="name" type="category" width={160} tick={{fontSize: 12}} />
                 <Tooltip />
-                <Legend verticalAlign="bottom" height={36} />
+                <Legend verticalAlign= "bottom" height={36} />
                 <Bar dataKey="desvios" fill="#4285F4" />
               </ReBarChart>
             </ResponsiveContainer>
