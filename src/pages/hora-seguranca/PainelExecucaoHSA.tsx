@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { fetchInspecoesSummary, fetchInspecoesByStatus, fetchInspecoesByMonth, fetchInspecoesByResponsavel, fetchDesviosByInspectionType, fetchDesviosByResponsavel } from "@/services/horaSegurancaService";
 import { Gauge, Check, Clock, AlertTriangle, Search, Plus } from "lucide-react";
-import { ResponsiveContainer, BarChart as ReBarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, LineChart as ReLineChart, Line, Pie as RePie, PieChart as RePieChart, Cell } from "recharts";
+import { ResponsiveContainer, BarChart as ReBarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, LineChart as ReLineChart, Line, Pie as RePie, PieChart as RePieChart, Cell, Legend } from "recharts";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useNavigate } from "react-router-dom";
@@ -475,20 +475,20 @@ export default function PainelExecucaoHSA() {
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={250}>
-  <ReBarChart data={desvioRespData} layout="vertical" margin={{ top: 10, right: 30, left: 150, bottom: 10 }}>
-    <CartesianGrid strokeDasharray="3 3" />
-    <XAxis type="number" />
-    <YAxis
-      dataKey="name"
-      type="category"
-      width={160} // ⬅️ aumenta a largura para caber os nomes
-      tick={{ angle: 0, textAnchor: 'end' }} // ⬅️ remove rotação
-    />
-    <Tooltip />
-    <Legend verticalAlign="bottom" height={36} /> {/* ⬅️ Move a legenda para baixo */}
-    <Bar dataKey="desvios" fill="#4285F4" />
-  </ReBarChart>
-</ResponsiveContainer>
+              <ReBarChart data={desvioRespData} layout="vertical" margin={{ top: 10, right: 30, left: 150, bottom: 10 }}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis type="number" />
+                <YAxis
+                  dataKey="name"
+                  type="category"
+                  width={160}
+                  tick={{ textAnchor: 'end' }}
+                />
+                <Tooltip />
+                <Legend verticalAlign="bottom" height={36} />
+                <Bar dataKey="desvios" fill="#4285F4" />
+              </ReBarChart>
+            </ResponsiveContainer>
           </CardContent>
         </Card>
 
