@@ -79,17 +79,7 @@ export function AppSidebar() {
           <SidebarSectionGestaoSMS openMenu={openMenu} toggleMenu={toggleMenu} />
         )}
 
-        {/* Render Tarefas */}
-        {["tarefas_dashboard", "tarefas_minhas_tarefas", "tarefas_cadastro"].some(menu => podeVerMenu(menu, menusSidebar)) && (
-          <SidebarSectionTarefas openMenu={openMenu} toggleMenu={toggleMenu} />
-        )}
-
-        {/* Render Relatórios */}
-        {["relatorios_dashboard", "relatorios_idsms"].some(menu => podeVerMenu(menu, menusSidebar)) && (
-          <SidebarSectionRelatorios openMenu={openMenu} toggleMenu={toggleMenu} />
-        )}
-
-        {/* Render ADM */}
+        {/* Render ADM MATRICIAL */}
         {["adm_dashboard", "adm_configuracoes", "adm_usuarios", "adm_perfis", "adm_empresas", "adm_ccas", "adm_engenheiros", "adm_supervisores", "adm_funcionarios", "adm_hht", "adm_metas_indicadores", "adm_modelos_inspecao", "adm_templates", "adm_logo"].some(menu => podeVerMenu(menu, menusSidebar)) && (
           <SidebarSectionADM openMenu={openMenu} toggleMenu={toggleMenu} />
         )}
@@ -107,6 +97,16 @@ export function AppSidebar() {
         {/* Render Orçamentos */}
         {["orcamentos_dashboard", "orcamentos_projetos", "orcamentos_custos", "orcamentos_analises", "orcamentos_aprovacoes", "orcamentos_historico"].some(menu => podeVerMenu(menu, menusSidebar)) && (
           <SidebarSectionOrcamentos openMenu={openMenu} toggleMenu={toggleMenu} />
+        )}
+
+        {/* Render Tarefas */}
+        {["tarefas_dashboard", "tarefas_minhas_tarefas", "tarefas_cadastro"].some(menu => podeVerMenu(menu, menusSidebar)) && (
+          <SidebarSectionTarefas openMenu={openMenu} toggleMenu={toggleMenu} />
+        )}
+
+        {/* Render Relatórios */}
+        {["relatorios_dashboard", "relatorios_idsms"].some(menu => podeVerMenu(menu, menusSidebar)) && (
+          <SidebarSectionRelatorios openMenu={openMenu} toggleMenu={toggleMenu} />
         )}
 
         {/* Render Administração (mantendo compatibilidade) */}

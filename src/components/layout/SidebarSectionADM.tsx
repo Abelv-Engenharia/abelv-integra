@@ -26,7 +26,7 @@ export default function SidebarSectionADM({ openMenu, toggleMenu }: Props) {
 
   return (
     <SidebarGroup>
-      <SidebarGroupLabel className="text-white">ADM</SidebarGroupLabel>
+      <SidebarGroupLabel className="text-white">ADM MATRICIAL</SidebarGroupLabel>
       <SidebarGroupContent>
         <SidebarMenu>
           <SidebarMenuItem>
@@ -37,7 +37,7 @@ export default function SidebarSectionADM({ openMenu, toggleMenu }: Props) {
                   className="text-white hover:bg-slate-600"
                 >
                   <Settings className="h-4 w-4 flex-shrink-0" />
-                  <span className="break-words">ADM</span>
+                  <span className="break-words">ADM MATRICIAL</span>
                 </SidebarMenuButton>
               </CollapsibleTrigger>
               <CollapsibleContent asChild>
