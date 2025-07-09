@@ -13,7 +13,7 @@ export const useCreateUser = () => {
       console.log("Iniciando criação de usuário:", userData);
       
       try {
-        // Primeiro, verificar se o email já existe
+        // Primeiro, verificar se o email já existe na tabela profiles
         const { data: existingProfile, error: checkError } = await supabase
           .from('profiles')
           .select('email')
@@ -29,58 +29,27 @@ export const useCreateUser = () => {
           throw new Error("Este email já está sendo usado por outro usuário");
         }
 
-        // Tentar criar o usuário com retry em caso de timeout
-        let authData;
-        let attempts = 0;
-        const maxAttempts = 3;
+        // Criar o usuário no auth do Supabase
+        console.log("Criando usuário na autenticação...");
+        const { data: authData, error: authError } = await supabase.auth.signUp({
+          email: userData.email,
+          password: userData.password,
+          options: {
+            data: {
+              nome: userData.nome
+            },
+            emailRedirectTo: `${window.location.origin}/`
+          }
+        });
 
-        while (attempts < maxAttempts) {
-          try {
-            const { data, error } = await supabase.auth.signUp({
-              email: userData.email,
-              password: userData.password,
-              options: {
-                data: {
-                  nome: userData.nome
-                },
-                emailRedirectTo: undefined
-              }
-            });
-
-            if (error) {
-              // Tratar erros específicos
-              if (error.message.includes('rate limit') || error.message.includes('429')) {
-                throw new Error("Limite de criação de usuários atingido. Aguarde alguns minutos antes de tentar novamente.");
-              } else if (error.message.includes('already registered')) {
-                throw new Error("Este email já está registrado no sistema.");
-              } else if (error.message.includes('timeout') || error.message.includes('504')) {
-                attempts++;
-                if (attempts >= maxAttempts) {
-                  throw new Error("Timeout na criação do usuário. Tente novamente em alguns minutos.");
-                }
-                // Aguardar antes de tentar novamente
-                await new Promise(resolve => setTimeout(resolve, 2000 * attempts));
-                continue;
-              } else {
-                throw new Error(`Erro ao criar usuário: ${error.message}`);
-              }
-            }
-
-            authData = data;
-            break;
-          } catch (retryError: any) {
-            if (retryError.message.includes('Limite de criação') || 
-                retryError.message.includes('já está registrado') ||
-                !retryError.message.includes('timeout')) {
-              throw retryError;
-            }
-            
-            attempts++;
-            if (attempts >= maxAttempts) {
-              throw new Error("Falha na criação após múltiplas tentativas. Tente novamente mais tarde.");
-            }
-            
-            await new Promise(resolve => setTimeout(resolve, 2000 * attempts));
+        if (authError) {
+          console.error("Erro ao criar usuário na autenticação:", authError);
+          if (authError.message.includes('rate limit') || authError.message.includes('429')) {
+            throw new Error("Limite de criação de usuários atingido. Aguarde alguns minutos antes de tentar novamente.");
+          } else if (authError.message.includes('already registered')) {
+            throw new Error("Este email já está registrado no sistema.");
+          } else {
+            throw new Error(`Erro ao criar usuário: ${authError.message}`);
           }
         }
 
@@ -91,40 +60,27 @@ export const useCreateUser = () => {
         console.log("Usuário criado no auth, ID:", authData.user.id);
 
         // Aguardar para garantir consistência
-        await new Promise(resolve => setTimeout(resolve, 1500));
+        await new Promise(resolve => setTimeout(resolve, 1000));
 
-        // Criar perfil na tabela profiles
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .upsert({
-            id: authData.user.id,
-            nome: userData.nome,
-            email: userData.email
-          }, { 
-            onConflict: 'id',
-            ignoreDuplicates: false 
+        // Usar função security definer para criar perfil e associar perfil de acesso
+        console.log("Criando perfil e associando perfil de acesso...");
+        const { error: createProfileError } = await supabase
+          .rpc('create_user_with_profile', {
+            user_uuid: authData.user.id,
+            user_nome: userData.nome,
+            user_email: userData.email,
+            profile_id: parseInt(userData.perfil)
           });
 
-        if (profileError) {
-          console.error("Erro ao criar perfil:", profileError);
-          throw new Error("Usuário criado, mas houve erro ao configurar o perfil. Contate o administrador.");
-        }
-
-        // Associar o perfil de acesso
-        const perfilId = parseInt(userData.perfil);
-        const { error: userPerfilError } = await supabase
-          .from('usuario_perfis')
-          .upsert({
-            usuario_id: authData.user.id,
-            perfil_id: perfilId
-          }, {
-            onConflict: 'usuario_id,perfil_id',
-            ignoreDuplicates: true
-          });
-
-        if (userPerfilError) {
-          console.error("Erro ao associar perfil:", userPerfilError);
-          throw new Error("Usuário criado, mas houve erro ao definir permissões. Contate o administrador.");
+        if (createProfileError) {
+          console.error("Erro ao criar perfil e associar perfil de acesso:", createProfileError);
+          // Tentar limpar o usuário criado no auth
+          try {
+            await supabase.auth.admin.deleteUser(authData.user.id);
+          } catch (cleanupError) {
+            console.error("Erro ao limpar usuário após falha:", cleanupError);
+          }
+          throw new Error("Erro ao configurar perfil do usuário. Usuário foi removido.");
         }
 
         console.log("Usuário criado com sucesso!");

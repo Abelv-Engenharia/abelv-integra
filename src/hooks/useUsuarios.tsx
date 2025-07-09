@@ -2,10 +2,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { User, UserFormValues, Permissoes } from "@/types/users";
-import { 
-  updateUser, 
-  deleteUser, 
-} from "@/services/authAdminService";
 import { fetchProfiles } from "@/services/usuariosService";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -17,43 +13,37 @@ export const useUsuarios = () => {
   const { user } = useAuth();
   const createUserHook = useCreateUser();
 
-  // Verificar permissões do usuário atual através do perfil
+  // Verificar permissões do usuário atual através de uma função security definer
   const { data: userPermissions } = useQuery({
     queryKey: ['user-permissions', user?.id],
     queryFn: async () => {
       if (!user?.id) return null;
       
       try {
+        // Usar a função security definer para evitar recursão RLS
         const { data, error } = await supabase
-          .from('usuario_perfis')
-          .select(`
-            perfil_id,
-            perfis (
-              permissoes
-            )
-          `)
-          .eq('usuario_id', user.id)
-          .single();
+          .rpc('get_user_permissions', { user_uuid: user.id });
 
         if (error) {
           console.error("Erro ao buscar permissões:", error);
           return null;
         }
 
-        return (data?.perfis?.permissoes as unknown) as Permissoes || null;
+        return data?.permissoes as Permissoes || null;
       } catch (error) {
         console.error("Erro ao verificar permissões:", error);
         return null;
       }
     },
     enabled: !!user?.id,
-    staleTime: 5 * 60 * 1000
+    staleTime: 5 * 60 * 1000,
+    retry: 1
   });
 
   // Verificar se o usuário pode administrar usuários
   const canManageUsers = userPermissions?.admin_usuarios === true;
 
-  // Buscar usuários usando a tabela profiles em vez da Admin API
+  // Buscar usuários usando função security definer
   const { 
     data: usersData, 
     isLoading: loadingUsuarios,
@@ -68,48 +58,27 @@ export const useUsuarios = () => {
       }
 
       try {
-        // Buscar usuários através da tabela profiles e relacionamentos
-        const { data: profiles, error: profilesError } = await supabase
-          .from('profiles')
-          .select(`
-            id,
-            nome,
-            email,
-            created_at
-          `);
+        console.log("Buscando usuários através de função security definer...");
+        
+        // Usar função security definer para buscar usuários
+        const { data: userData, error: userError } = await supabase
+          .rpc('get_all_users_with_profiles');
 
-        if (profilesError) {
-          console.error("Erro ao buscar perfis:", profilesError);
+        if (userError) {
+          console.error("Erro ao buscar usuários:", userError);
           return { users: [], total: 0, count: 0 };
         }
 
-        // Buscar as relações de perfis de usuários
-        const { data: userPerfis, error: userPerfilsError } = await supabase
-          .from('usuario_perfis')
-          .select(`
-            usuario_id,
-            perfis (
-              nome
-            )
-          `);
-
-        if (userPerfilsError) {
-          console.error("Erro ao buscar perfis de usuários:", userPerfilsError);
-        }
+        console.log("Usuários encontrados:", userData);
 
         // Mapear os dados para o formato esperado
-        const users = profiles?.map(profile => {
-          const userPerfil = userPerfis?.find(up => up.usuario_id === profile.id);
-          const perfilNome = userPerfil?.perfis?.nome || 'Usuário';
-
-          return {
-            id: profile.id,
-            nome: profile.nome || 'Sem nome',
-            email: profile.email || '',
-            perfil: perfilNome,
-            status: "Ativo"
-          };
-        }) || [];
+        const users = userData?.map((item: any) => ({
+          id: item.user_id,
+          nome: item.nome || 'Sem nome',
+          email: item.email || '',
+          perfil: item.perfil_nome || 'Usuário',
+          status: "Ativo"
+        })) || [];
 
         return {
           users,
@@ -122,7 +91,7 @@ export const useUsuarios = () => {
       }
     },
     enabled: !!user && canManageUsers !== undefined,
-    retry: false,
+    retry: 1,
     staleTime: 5 * 60 * 1000,
     refetchOnWindowFocus: false
   });
@@ -141,6 +110,8 @@ export const useUsuarios = () => {
         throw new Error("Você não tem permissão para editar usuários");
       }
 
+      console.log("Atualizando usuário:", { userId, userData });
+
       // Atualizar na tabela profiles
       const { error: profileError } = await supabase
         .from('profiles')
@@ -151,21 +122,26 @@ export const useUsuarios = () => {
         .eq('id', userId);
 
       if (profileError) {
+        console.error("Erro ao atualizar perfil:", profileError);
         throw new Error("Erro ao atualizar perfil do usuário");
       }
 
-      // Atualizar perfil de acesso
+      // Atualizar perfil de acesso usando função security definer
       const profileId = profiles.find(p => p.nome === userData.perfil)?.id;
       if (profileId) {
         const { error: userPerfilError } = await supabase
-          .from('usuario_perfis')
-          .update({ perfil_id: profileId })
-          .eq('usuario_id', userId);
+          .rpc('update_user_profile', { 
+            user_uuid: userId, 
+            new_profile_id: profileId 
+          });
 
         if (userPerfilError) {
+          console.error("Erro ao atualizar perfil de acesso:", userPerfilError);
           throw new Error("Erro ao atualizar perfil de acesso");
         }
       }
+
+      console.log("Usuário atualizado com sucesso");
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-usuarios'] });
@@ -175,6 +151,7 @@ export const useUsuarios = () => {
       });
     },
     onError: (error: any) => {
+      console.error("Erro ao atualizar usuário:", error);
       toast({
         title: "Erro",
         description: error.message || "Erro ao atualizar usuário",
@@ -190,15 +167,18 @@ export const useUsuarios = () => {
         throw new Error("Você não tem permissão para excluir usuários");
       }
       
-      // Deletar da tabela profiles (cascade deve cuidar do resto)
+      console.log("Excluindo usuário:", userId);
+
+      // Usar função security definer para excluir usuário
       const { error } = await supabase
-        .from('profiles')
-        .delete()
-        .eq('id', userId);
+        .rpc('delete_user_and_profile', { user_uuid: userId });
 
       if (error) {
+        console.error("Erro ao excluir usuário:", error);
         throw new Error("Erro ao excluir usuário");
       }
+
+      console.log("Usuário excluído com sucesso");
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-usuarios'] });
@@ -208,6 +188,7 @@ export const useUsuarios = () => {
       });
     },
     onError: (error: any) => {
+      console.error("Erro ao excluir usuário:", error);
       toast({
         title: "Erro",
         description: error.message || "Erro ao excluir usuário",
