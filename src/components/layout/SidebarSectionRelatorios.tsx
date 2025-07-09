@@ -45,9 +45,9 @@ export default function SidebarSectionRelatorios({ openMenu, toggleMenu }: Props
                   <SidebarMenuSubItem>
                     <SidebarMenuSubButton 
                       asChild
-                      className={currentPath === "/relatorios" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
+                      className={currentPath === "/relatorios/dashboard" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
                     >
-                      <Link to="/relatorios" className="flex items-center gap-2">
+                      <Link to="/relatorios/dashboard" className="flex items-center gap-2">
                         <span className="text-xs leading-tight break-words min-w-0">Relatórios</span>
                       </Link>
                     </SidebarMenuSubButton>
