@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -205,11 +204,11 @@ const HoraSegurancaDashboard = () => {
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="pl-2 pb-8">
-                    <div className="h-[500px]">
-                      <ResponsiveContainer width="100%" height={400}>
+                    <div className="h-[600px]">
+                      <ResponsiveContainer width="100%" height="100%">
                         <ReBarChart
                           data={respData}
-                          margin={{ top: 20, right: 30, left: 20, bottom: 100 }}
+                          margin={{ top: 20, right: 30, left: 20, bottom: 160 }}
                           >
                             <CartesianGrid strokeDasharray="3 3" />
                             
@@ -217,19 +216,24 @@ const HoraSegurancaDashboard = () => {
                               type="category"
                               dataKey="name"
                               interval={0}
-                              angle={90}
-                              textAnchor="start"
-                              height={120}
+                              angle={-45}
+                              textAnchor="end"
+                              height={140}
                               tick={{
                                 fontSize: 12,
                               }}
-                              tickFormatter={(value) => value.split(' ').join('\n')}
                             />
                         
                             <YAxis type="number" />
                             <Tooltip />
                         
-                            <Legend verticalAlign="bottom" height={50} />
+                            <Legend 
+                              verticalAlign="bottom" 
+                              height={36}
+                              wrapperStyle={{
+                                paddingTop: '20px'
+                              }}
+                            />
                         
                             <Bar dataKey="A Realizar" stackId="a" fill="#4285F4" />
                             <Bar dataKey="Realizada" stackId="a" fill="#34A853" />
