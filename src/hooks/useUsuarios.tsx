@@ -39,10 +39,16 @@ export const useUsuarios = () => {
           return null;
         }
 
-        const permissoes = userPerfil?.perfis?.permissoes as Permissoes;
-        console.log("Permissões encontradas:", permissoes);
-        
-        return permissoes || null;
+        // Conversão segura de tipos com validação
+        const rawPermissoes = userPerfil?.perfis?.permissoes;
+        if (rawPermissoes && typeof rawPermissoes === 'object' && !Array.isArray(rawPermissoes)) {
+          const permissoes = rawPermissoes as unknown as Permissoes;
+          console.log("Permissões encontradas:", permissoes);
+          return permissoes;
+        }
+
+        console.warn("Permissões não encontradas ou inválidas");
+        return null;
       } catch (error) {
         console.error("Erro ao verificar permissões:", error);
         return null;
