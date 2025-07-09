@@ -30,8 +30,15 @@ const AdminUsuarios = () => {
     deleteUsuarioMutation
   } = useUsuarios();
 
+  // Debug logs
+  console.log("AdminUsuarios - usuarios:", usuarios);
+  console.log("AdminUsuarios - loadingUsuarios:", loadingUsuarios);
+  console.log("AdminUsuarios - canManageUsers:", canManageUsers);
+  console.log("AdminUsuarios - usersError:", usersError);
+
   // Update filtered users when usuarios data changes
   useEffect(() => {
+    console.log("AdminUsuarios - useEffect - usuarios:", usuarios);
     if (usuarios && usuarios.length >= 0) {
       setFilteredUsers(usuarios);
     }

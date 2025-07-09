@@ -62,67 +62,82 @@ export const useUsuarios = () => {
   // Verificar se o usuário pode administrar usuários
   const canManageUsers = userPermissions?.admin_usuarios === true;
 
-  // Buscar usuários
+  // Buscar usuários - simplificado e corrigido
   const { 
-    data: usersData, 
+    data: usuarios = [], 
     isLoading: loadingUsuarios,
     refetch: refetchUsers,
     error: usersError
   } = useQuery({
     queryKey: ['admin-usuarios'],
-    queryFn: async () => {
+    queryFn: async (): Promise<User[]> => {
       if (!canManageUsers) {
         console.log("Usuário não tem permissão para administrar usuários");
-        return { users: [], total: 0, count: 0 };
+        return [];
       }
 
       try {
         console.log("Buscando usuários...");
         
-        // Buscar usuários com seus perfis
-        const { data: userData, error: userError } = await supabase
+        // Buscar todos os profiles
+        const { data: profiles, error: profilesError } = await supabase
           .from('profiles')
+          .select('*')
+          .order('nome');
+
+        if (profilesError) {
+          console.error("Erro ao buscar profiles:", profilesError);
+          throw new Error("Erro ao buscar usuários");
+        }
+
+        if (!profiles || profiles.length === 0) {
+          console.log("Nenhum perfil encontrado");
+          return [];
+        }
+
+        // Buscar todos os relacionamentos usuario_perfis
+        const { data: userPerfis, error: userPerfilError } = await supabase
+          .from('usuario_perfis')
           .select(`
-            id,
-            nome,
-            email,
-            usuario_perfis!inner (
-              perfil_id,
-              perfis!inner (
-                nome
-              )
+            usuario_id,
+            perfil_id,
+            perfis!inner (
+              nome
             )
           `);
 
-        if (userError) {
-          console.error("Erro ao buscar usuários:", userError);
-          return { users: [], total: 0, count: 0 };
+        if (userPerfilError) {
+          console.error("Erro ao buscar usuario_perfis:", userPerfilError);
         }
 
-        console.log("Usuários encontrados:", userData);
+        console.log("Profiles encontrados:", profiles.length);
+        console.log("UserPerfis encontrados:", userPerfis?.length || 0);
 
-        // Mapear os dados para o formato esperado
-        const users = userData?.map((item: any) => ({
-          id: item.id,
-          nome: item.nome || 'Sem nome',
-          email: item.email || '',
-          perfil: item.usuario_perfis?.perfis?.nome || 'Usuário',
-          status: "Ativo"
-        })) || [];
+        // Mapear os dados para o formato User
+        const users: User[] = profiles.map((profile: any) => {
+          // Encontrar o perfil de acesso do usuário
+          const userPerfil = userPerfis?.find((up: any) => up.usuario_id === profile.id);
+          const perfilNome = userPerfil?.perfis?.nome || 'Usuário';
 
-        return {
-          users,
-          total: users.length,
-          count: users.length
-        };
+          return {
+            id: profile.id,
+            nome: profile.nome || 'Sem nome',
+            email: profile.email || '',
+            perfil: perfilNome,
+            status: "Ativo"
+          };
+        });
+
+        console.log("Usuários mapeados:", users.length);
+        return users;
       } catch (error) {
         console.error("Erro ao buscar usuários:", error);
-        return { users: [], total: 0, count: 0 };
+        throw error;
       }
     },
     enabled: !!user && canManageUsers !== undefined,
-    retry: 1,
-    staleTime: 5 * 60 * 1000,
+    retry: 2,
+    staleTime: 2 * 60 * 1000,
     refetchOnWindowFocus: false
   });
 
@@ -249,8 +264,8 @@ export const useUsuarios = () => {
   });
 
   return {
-    usuarios: usersData?.users || [],
-    totalUsuarios: usersData?.total || 0,
+    usuarios,
+    totalUsuarios: usuarios.length,
     profiles,
     loadingUsuarios,
     usersError,

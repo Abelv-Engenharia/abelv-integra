@@ -19,10 +19,15 @@ interface UsersTableProps {
 }
 
 export const UsersTable = ({ users, isLoading, onEditClick, onDeleteClick }: UsersTableProps) => {
+  console.log("UsersTable - users:", users, "isLoading:", isLoading);
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center p-8">
-        <p>Carregando usuários...</p>
+        <div className="flex items-center space-x-2">
+          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+          <p>Carregando usuários...</p>
+        </div>
       </div>
     );
   }
@@ -39,7 +44,7 @@ export const UsersTable = ({ users, isLoading, onEditClick, onDeleteClick }: Use
         </TableRow>
       </TableHeader>
       <TableBody>
-        {users.length > 0 ? (
+        {users && users.length > 0 ? (
           users.map((user) => (
             <TableRow key={user.id.toString()}>
               <TableCell className="font-medium">{user.nome}</TableCell>
@@ -76,7 +81,12 @@ export const UsersTable = ({ users, isLoading, onEditClick, onDeleteClick }: Use
         ) : (
           <TableRow>
             <TableCell colSpan={5} className="h-24 text-center">
-              Nenhum usuário encontrado.
+              <div className="flex flex-col items-center space-y-2">
+                <p className="text-muted-foreground">Nenhum usuário encontrado.</p>
+                <p className="text-sm text-muted-foreground">
+                  Verifique se há usuários cadastrados no sistema.
+                </p>
+              </div>
             </TableCell>
           </TableRow>
         )}
