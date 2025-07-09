@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, UserPlus, Search, Edit, Trash2, Eye } from "lucide-react";
@@ -69,13 +68,13 @@ const GerenciarUsuarios = () => {
     }
   };
 
-  const openEditDialog = (userId: string) => {
-    setSelectedUserId(userId);
+  const openEditDialog = (userId: string | number) => {
+    setSelectedUserId(userId.toString());
     setIsEditDialogOpen(true);
   };
 
-  const openDeleteDialog = (userId: string) => {
-    setSelectedUserId(userId);
+  const openDeleteDialog = (userId: string | number) => {
+    setSelectedUserId(userId.toString());
     setIsDeleteDialogOpen(true);
   };
 
