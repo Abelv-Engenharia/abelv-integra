@@ -23,7 +23,6 @@ export default function PainelExecucaoHSA() {
   const [isLoading, setIsLoading] = useState(true);
   const { data: userCCAs = [] } = useUserCCAs();
 
-  // Carregar lista de CCAs (filtrado pelos CCAs permitidos)
   const [ccas, setCcas] = useState<{ id: number; codigo: string; nome: string }[]>([]);
   useEffect(() => {
     async function getCcas() {
@@ -43,7 +42,6 @@ export default function PainelExecucaoHSA() {
     getCcas();
   }, [userCCAs]);
 
-  // Filtros - estão apenas visuais por enquanto!
   const [ano, setAno] = useState("todos");
   const [mes, setMes] = useState("todos");
   const [cca, setCca] = useState("todos");
@@ -55,7 +53,6 @@ export default function PainelExecucaoHSA() {
       setIsLoading(true);
       
       if (userCCAs.length === 0) {
-        // Se o usuário não tem CCAs permitidos, não carregar dados
         setSummary({ totalInspecoes: 0, programadas: 0, naoProgramadas: 0, desviosIdentificados: 0, realizadas: 0, canceladas: 0 });
         setStatusData([]);
         setMonthData([]);
@@ -66,21 +63,17 @@ export default function PainelExecucaoHSA() {
         return;
       }
 
-      // Aplicar filtro por CCAs permitidos
       const ccaIds = userCCAs.map(cca => cca.id);
 
-      // Resumo KPIs
       const resumo = await fetchInspecoesSummary(ccaIds);
       setSummary(resumo);
       
-      // Execução HSA Status
       const status = await fetchInspecoesByStatus(ccaIds);
       setStatusData(status.map((s: any) => ({
         name: s.status,
         value: s.quantidade ?? s.value ?? 0
       })));
       
-      // Evolução Mensal
       const monthly = await fetchInspecoesByMonth();
       setMonthData(monthly.map((s: any, i: number) => ({
         name: `S-${i + 1}`,
@@ -88,7 +81,6 @@ export default function PainelExecucaoHSA() {
         "ACC REAL": s.realizado ?? s.quantidade
       })));
       
-      // Execução por Responsável - garantir todas as chaves
       const responsaveis = await fetchInspecoesByResponsavel(ccaIds);
       console.log('[HSA][PainelExecucaoHSA] respData (por responsável):', responsaveis);
       setRespData(
@@ -102,7 +94,6 @@ export default function PainelExecucaoHSA() {
         }))
       );
       
-      // Desvios Identificados por Responsável - agora usa dados reais
       const desviosReais = await fetchDesviosByResponsavel(ccaIds);
       console.log('[HSA][PainelExecucaoHSA] desviosReais:', desviosReais);
       setDesvioRespData(
@@ -112,7 +103,6 @@ export default function PainelExecucaoHSA() {
         }))
       );
       
-      // Desvios por Atividade Crítica (pie) - agora usa dados reais da execucao_hsa
       const desviosPorTipo = await fetchDesviosByInspectionType(ccaIds);
       console.log('[HSA][PainelExecucaoHSA] desviosPorTipo:', desviosPorTipo);
       setPieData(desviosPorTipo.map((d: any) => ({
@@ -125,7 +115,6 @@ export default function PainelExecucaoHSA() {
     loadData();
   }, [userCCAs]);
 
-  // Verificar se o usuário tem permissão para acessar
   if (userCCAs.length === 0) {
     return (
       <div className="max-w-7xl mx-auto py-8 animate-fade-in">
@@ -142,39 +131,32 @@ export default function PainelExecucaoHSA() {
     );
   }
 
-  // Cálculos dos cards
   const statusProgramada = ["A REALIZAR", "REALIZADA", "NÃO REALIZADA"];
   const programadasCard = statusData
     .filter((s) => statusProgramada.includes((s.name || "").toUpperCase()))
     .reduce((acc, cur) => acc + (cur.value ?? 0), 0);
 
-  // Inspeções Realizadas = status "REALIZADA"
   const realizadasCard = statusData
     .filter((s) => (s.name || "").toUpperCase() === "REALIZADA")
     .reduce((acc, cur) => acc + (cur.value ?? 0), 0);
 
-  // Inspeções Não Realizadas = status "NÃO REALIZADA"
   const naoRealizadaCard = statusData
     .filter((s) => (s.name || "").toUpperCase() === "NÃO REALIZADA")
     .reduce((acc, cur) => acc + (cur.value ?? 0), 0);
 
-  // Inspeções Realizadas Não Programadas = status "REALIZADA (NÃO PROGRAMADA)"
   const realizadasNaoProgramadaCard = statusData
     .filter((s) => (s.name || "").toUpperCase() === "REALIZADA (NÃO PROGRAMADA)")
     .reduce((acc, cur) => acc + (cur.value ?? 0), 0);
 
-  // Inspeções a Realizar = status "A REALIZAR"
   const aRealizarCard = statusData
     .filter((s) => (s.name || "").toUpperCase() === "A REALIZAR")
     .reduce((acc, cur) => acc + (cur.value ?? 0), 0);
 
-  // Aderência Real HSA
   const aderenciaPerc =
     programadasCard > 0
-      ? Math.round((realizadasCard / programadasCard) * 1000) / 10 // 1 decimal
+      ? Math.round((realizadasCard / programadasCard) * 1000) / 10
       : 0;
 
-  // Aderência HSA Ajustada
   const aderenciaAjustadaNum = realizadasCard + realizadasNaoProgramadaCard;
   const aderenciaAjustadaPerc = 
     programadasCard > 0
@@ -204,7 +186,6 @@ export default function PainelExecucaoHSA() {
 
   return (
     <div className="max-w-7xl mx-auto py-8 animate-fade-in">
-      {/* HEADER */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 px-2">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Dashboard Hora da Segurança</h1>
@@ -224,7 +205,6 @@ export default function PainelExecucaoHSA() {
         </div>
       </div>
 
-      {/* FILTROS */}
       <Card className="mt-6 mb-6 mx-2 p-0 bg-white">
         <CardHeader className="pb-2 border-b">
           <CardTitle className="text-base">Filtros</CardTitle>
@@ -306,16 +286,12 @@ export default function PainelExecucaoHSA() {
         </CardContent>
       </Card>
       
-      {/* CARDS KPIs - NOVA ORGANIZAÇÃO */}
-      {/* Linha de aderência: agora divide igualmente a largura */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 px-2 pb-2">
-        {/* Aderência real HSA */}
         <Card className="bg-white border border-gray-200 shadow-none w-full">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
                 <div className="text-sm text-gray-500 font-bold">
-                  {/* Título alterado para negrito e texto solicitado */}
                   Aderência HSA real
                 </div>
                 <div className={`text-3xl font-bold mt-2 ${aderenciaColor}`}>
@@ -336,13 +312,11 @@ export default function PainelExecucaoHSA() {
             </div>
           </CardContent>
         </Card>
-        {/* Aderência HSA Ajustada */}
         <Card className="bg-white border border-blue-400 shadow-none w-full">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
                 <div className="text-sm text-gray-500 font-bold">
-                  {/* Título agora em negrito */}
                   Aderência HSA Ajustada
                 </div>
                 <div className={`text-3xl font-bold mt-2 ${aderenciaAjustadaColor}`}>
@@ -353,7 +327,6 @@ export default function PainelExecucaoHSA() {
                         maximumFractionDigits: 1,
                       })}%`}
                 </div>
-                {/* Rótulos simplificados conforme solicitado */}
                 <div className="mt-2 text-xs text-gray-400">
                   Inspeções programadas: {isLoading ? "..." : programadasCard}
                 </div>
@@ -369,9 +342,7 @@ export default function PainelExecucaoHSA() {
         </Card>
       </div>
 
-      {/* CARDS KPIs NOVA ORGANIZAÇÃO */}
       <div className="grid gap-4 md:grid-cols-4 px-2 pb-6">
-        {/* Inspeções a realizar */}
         <Card className="bg-white border border-blue-500 shadow-none">
           <CardContent className="p-4">
             <div className="flex flex-col items-start">
@@ -388,7 +359,6 @@ export default function PainelExecucaoHSA() {
             </div>
           </CardContent>
         </Card>
-        {/* Inspeções Realizadas */}
         <Card className="bg-white border border-green-500 shadow-none">
           <CardContent className="p-4">
             <div className="flex flex-col items-start">
@@ -405,7 +375,6 @@ export default function PainelExecucaoHSA() {
             </div>
           </CardContent>
         </Card>
-        {/* Inspeções Não Realizadas */}
         <Card className="bg-white border border-red-500 shadow-none">
           <CardContent className="p-4">
             <div className="flex flex-col items-start">
@@ -422,7 +391,6 @@ export default function PainelExecucaoHSA() {
             </div>
           </CardContent>
         </Card>
-        {/* Inspeções Realizadas Não Programadas */}
         <Card className="bg-white border border-yellow-500 shadow-none">
           <CardContent className="p-4">
             <div className="flex flex-col items-start">
@@ -441,33 +409,39 @@ export default function PainelExecucaoHSA() {
         </Card>
       </div>
 
-      {/* GRÁFICOS e restante do painel */}
-      {/* Mantém o restante igual, apenas adicionando espaçamento */}
       <div className="px-2 space-y-6">
-        {/* Execução HSA por responsável */}
         <Card>
           <CardHeader>
             <CardTitle>Execução HSA por Responsável</CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={225}>
-              <ReBarChart data={respData}>
+            <ResponsiveContainer width="100%" height={400}>
+              <ReBarChart 
+                layout="vertical"
+                data={respData}
+                margin={{ top: 20, right: 30, left: 160, bottom: 20 }}
+              >
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis allowDecimals={false} />
+                <XAxis type="number" />
+                <YAxis 
+                  type="category" 
+                  dataKey="name" 
+                  width={160} 
+                  tick={{ fontSize: 12 }} 
+                />
                 <Tooltip />
-                <Legend />
-                <Bar dataKey="A Realizar" fill="#4285F4" />
-                <Bar dataKey="Realizada" fill="#43A047" />
-                <Bar dataKey="Não Realizada" fill="#E53935" />
-                <Bar dataKey="Realizada (Não Programada)" fill="#FFA000" />
-                <Bar dataKey="Cancelada" fill="#757575" />
+                <Legend verticalAlign="bottom" height={36} />
+                
+                <Bar dataKey="A Realizar" stackId="a" fill="#4285F4" />
+                <Bar dataKey="Realizada" stackId="a" fill="#34A853" />
+                <Bar dataKey="Não Realizada" stackId="a" fill="#EA4335" />
+                <Bar dataKey="Realizada (Não Programada)" stackId="a" fill="#FBBC05" />
+                <Bar dataKey="Cancelada" stackId="a" fill="#9E9E9E" />
               </ReBarChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
 
-        {/* Desvios identificados por responsável */}
         <Card>
           <CardHeader>
             <CardTitle>Desvios Identificados</CardTitle>
@@ -486,7 +460,6 @@ export default function PainelExecucaoHSA() {
           </CardContent>
         </Card>
 
-        {/* Desvios por atividade crítica */}
         <Card>
           <CardHeader>
             <CardTitle>Desvios por Atividade Crítica</CardTitle>
