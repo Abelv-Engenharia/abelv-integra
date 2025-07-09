@@ -15,100 +15,40 @@ const AdminPerfis = () => {
   const [buscar, setBuscar] = useState<string>('');
   const { toast } = useToast();
   
-  // Definir permissões iniciais completas (Admin tudo liberado)
+  // Definir permissões iniciais simplificadas - apenas estrutura básica
   const permissoesIniciais: Permissoes = {
-    // Módulos principais
-    desvios: true,
-    treinamentos: true,
-    ocorrencias: true,
-    tarefas: true,
-    relatorios: true,
-    hora_seguranca: true,
-    medidas_disciplinares: true,
-    
-    // Administração
-    admin_usuarios: true,
-    admin_perfis: true,
-    admin_funcionarios: true,
-    admin_hht: true,
-    admin_templates: true,
-    admin_empresas: true,
-    admin_supervisores: true,
-    admin_engenheiros: true,
-    admin_ccas: true,
-    
-    // IDSMS
-    idsms_dashboard: true,
-    idsms_formularios: true,
-    
-    // Configurações específicas de permissões
-    pode_editar_desvios: true,
-    pode_excluir_desvios: true,
-    pode_editar_ocorrencias: true,
-    pode_excluir_ocorrencias: true,
-    pode_editar_treinamentos: true,
-    pode_excluir_treinamentos: true,
-    pode_editar_tarefas: true,
-    pode_excluir_tarefas: true,
-    pode_aprovar_tarefas: true,
-    pode_visualizar_relatorios_completos: true,
-    pode_exportar_dados: true,
-    menus_sidebar: [
-      "dashboard",
-      "desvios_dashboard",
-      "desvios_cadastro",
-      "desvios_consulta",
-      "desvios_nao_conformidade",
-      "treinamentos_dashboard",
-      "treinamentos_normativo",
-      "treinamentos_consulta",
-      "treinamentos_execucao",
-      "treinamentos_cracha",
-      "medidas_disciplinares_dashboard",
-      "medidas_disciplinares_cadastro",
-      "medidas_disciplinares_consulta",
-      "inspecao_sms_dashboard",
-      "inspecao_sms_cadastro",
-      "inspecao_sms_consulta",
-      "tarefas_dashboard",
-      "tarefas_minhas_tarefas",
-      "tarefas_cadastro",
-      "relatorios",
-      "relatorios_idsms",
-      "admin_usuarios",
-      "admin_perfis",
-      "admin_empresas",
-      "admin_ccas",
-      "admin_engenheiros",
-      "admin_supervisores",
-      "admin_funcionarios",
-      "admin_hht",
-      "admin_metas_indicadores",
-      "admin_modelos_inspecao",
-      "admin_templates",
-      "admin_logo",
-      "idsms_dashboard",
-      "idsms_indicadores",
-      "idsms_iid",
-      "idsms_hsa",
-      "idsms_ht",
-      "idsms_ipom",
-      "idsms_inspecao_alta_lideranca",
-      "idsms_inspecao_gestao_sms",
-      "idsms_indice_reativo",
-      "hora_seguranca_cadastro",
-      "hora_seguranca_cadastro_inspecao",
-      "hora_seguranca_cadastro_nao_programada",
-      "hora_seguranca_dashboard",
-      "hora_seguranca_agenda",
-      "hora_seguranca_acompanhamento",
-      "gro_perigos",
-      "gro_avaliacao",
-      "gro_pgr",
-      "ocorrencias_dashboard",
-      "ocorrencias_cadastro",
-      "ocorrencias_consulta",
-    ]
+    // Valores padrão para compatibilidade (todos falsos por padrão)
+    desvios: false,
+    treinamentos: false,
+    ocorrencias: false,
+    tarefas: false,
+    relatorios: false,
+    hora_seguranca: false,
+    medidas_disciplinares: false,
+    admin_usuarios: false,
+    admin_perfis: false,
+    admin_funcionarios: false,
+    admin_hht: false,
+    admin_templates: false,
+    admin_empresas: false,
+    admin_supervisores: false,
+    admin_engenheiros: false,
+    admin_ccas: false,
+    idsms_dashboard: false,
+    idsms_formularios: false,
+    pode_editar_desvios: false,
+    pode_excluir_desvios: false,
+    pode_editar_ocorrencias: false,
+    pode_excluir_ocorrencias: false,
+    pode_editar_treinamentos: false,
+    pode_excluir_treinamentos: false,
+    pode_editar_tarefas: false,
+    pode_excluir_tarefas: false,
+    pode_aprovar_tarefas: false,
+    pode_visualizar_relatorios_completos: false,
+    pode_exportar_dados: false,
+    // O foco principal são os menus da sidebar
+    menus_sidebar: []
   };
   
   const [perfilSelecionado, setPerfilSelecionado] = useState<Perfil | null>(null);
@@ -323,7 +263,7 @@ const AdminPerfis = () => {
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
             <CardTitle>Perfis de Acesso</CardTitle>
-            <CardDescription>Gerencie os perfis de acesso dos usuários com todas as permissões do sistema e CCAs permitidas</CardDescription>
+            <CardDescription>Gerencie os perfis de acesso dos usuários definindo CCAs permitidas e menus da sidebar</CardDescription>
           </div>
           <Button onClick={handleNovoPerfil}>Novo Perfil</Button>
         </CardHeader>
