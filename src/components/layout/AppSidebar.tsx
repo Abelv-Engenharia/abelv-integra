@@ -1,16 +1,6 @@
-
 import React, { useState } from "react";
 import { Home, Settings, User } from "lucide-react";
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarMenuSub,
-  SidebarMenuSubItem,
-  SidebarMenuSubButton,
-} from "@/components/ui/sidebar";
+import { Sidebar, SidebarContent, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarMenuSub, SidebarMenuSubItem, SidebarMenuSubButton } from "@/components/ui/sidebar";
 import { Link, useLocation } from "react-router-dom";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import SidebarSectionGestaoSMS from "./SidebarSectionGestaoSMS";
@@ -25,39 +15,23 @@ function podeVerMenu(menu: string, menusSidebar?: string[]) {
   if (!menusSidebar || !Array.isArray(menusSidebar)) return false;
   return menusSidebar.includes(menu);
 }
-
 export function AppSidebar() {
   const location = useLocation();
   const currentPath = location.pathname;
-  const { userPermissoes, userRole } = useProfile();
+  const {
+    userPermissoes,
+    userRole
+  } = useProfile();
 
   // Garantir fallback para admins
-  const isAdmin =
-    (userRole && typeof userRole === "string" && userRole.toLowerCase().startsWith("admin")) ||
-    // fallback extra: talvez userPermissoes tenha perfil admin
-    (userPermissoes &&
-      typeof userPermissoes === "object" &&
-      typeof (userPermissoes as any).nome === "string" &&
-      (userPermissoes as any).nome.toLowerCase().startsWith("admin"));
-
-  const menusSidebar = isAdmin
-    ? getAllMenusSidebar()
-    : (
-        userPermissoes &&
-        typeof userPermissoes === "object" &&
-        Array.isArray((userPermissoes as any).menus_sidebar)
-        ? (userPermissoes as any).menus_sidebar
-        : []
-      );
+  const isAdmin = userRole && typeof userRole === "string" && userRole.toLowerCase().startsWith("admin") ||
+  // fallback extra: talvez userPermissoes tenha perfil admin
+  userPermissoes && typeof userPermissoes === "object" && typeof (userPermissoes as any).nome === "string" && (userPermissoes as any).nome.toLowerCase().startsWith("admin");
+  const menusSidebar = isAdmin ? getAllMenusSidebar() : userPermissoes && typeof userPermissoes === "object" && Array.isArray((userPermissoes as any).menus_sidebar) ? (userPermissoes as any).menus_sidebar : [];
 
   // Defina o menu principal aberto inicialmente
   const [openMenu, setOpenMenu] = useState<string | null>(() => {
-    if (currentPath.startsWith("/desvios") || 
-        currentPath.startsWith("/treinamentos") || 
-        currentPath.startsWith("/hora-seguranca") || 
-        currentPath.startsWith("/inspecao-sms") || 
-        currentPath.startsWith("/ocorrencias") || 
-        currentPath.startsWith("/medidas-disciplinares")) return "gestao-sms";
+    if (currentPath.startsWith("/desvios") || currentPath.startsWith("/treinamentos") || currentPath.startsWith("/hora-seguranca") || currentPath.startsWith("/inspecao-sms") || currentPath.startsWith("/ocorrencias") || currentPath.startsWith("/medidas-disciplinares")) return "gestao-sms";
     if (currentPath.startsWith("/tarefas")) return "tarefas";
     if (currentPath.startsWith("/relatorios")) return "relatorios";
     if (currentPath.startsWith("/idsms")) return "idsms";
@@ -66,82 +40,40 @@ export function AppSidebar() {
     if (currentPath.startsWith("/account")) return "account";
     return null;
   });
-
   const toggleMenu = (menuName: string) => {
     setOpenMenu(openMenu === menuName ? null : menuName);
   };
-
-  return (
-    <Sidebar>
-      <SidebarContent>
+  return <Sidebar>
+      <SidebarContent className="bg-sky-900">
         <SidebarMenu>
-          {podeVerMenu("dashboard", menusSidebar) && (
-            <SidebarMenuItem>
-              <SidebarMenuButton 
-                asChild 
-                className={currentPath === "/dashboard" || currentPath === "/" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
-              >
+          {podeVerMenu("dashboard", menusSidebar) && <SidebarMenuItem>
+              <SidebarMenuButton asChild className={currentPath === "/dashboard" || currentPath === "/" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
                 <Link to="/dashboard" className="flex items-center gap-2">
                   <Home className="h-4 w-4 flex-shrink-0" />
                   <span className="break-words">Dashboard</span>
                 </Link>
               </SidebarMenuButton>
-            </SidebarMenuItem>
-          )}
+            </SidebarMenuItem>}
         </SidebarMenu>
 
         {/* Render Gestão de SMS se tiver acesso a pelo menos 1 menu dos agrupados */}
-        {["desvios_dashboard", "desvios_cadastro", "desvios_consulta", "desvios_nao_conformidade", 
-          "treinamentos_dashboard", "treinamentos_normativo", "treinamentos_consulta", "treinamentos_execucao", "treinamentos_cracha",
-          "hora_seguranca_cadastro", "hora_seguranca_cadastro_inspecao", "hora_seguranca_cadastro_nao_programada", 
-          "hora_seguranca_dashboard", "hora_seguranca_agenda", "hora_seguranca_acompanhamento",
-          "inspecao_sms_dashboard", "inspecao_sms_cadastro", "inspecao_sms_consulta",
-          "medidas_disciplinares_dashboard", "medidas_disciplinares_cadastro", "medidas_disciplinares_consulta",
-          "ocorrencias_dashboard", "ocorrencias_cadastro", "ocorrencias_consulta"].some(menu =>
-          podeVerMenu(menu, menusSidebar)
-        ) && (
-          <SidebarSectionGestaoSMS openMenu={openMenu} toggleMenu={toggleMenu} />
-        )}
+        {["desvios_dashboard", "desvios_cadastro", "desvios_consulta", "desvios_nao_conformidade", "treinamentos_dashboard", "treinamentos_normativo", "treinamentos_consulta", "treinamentos_execucao", "treinamentos_cracha", "hora_seguranca_cadastro", "hora_seguranca_cadastro_inspecao", "hora_seguranca_cadastro_nao_programada", "hora_seguranca_dashboard", "hora_seguranca_agenda", "hora_seguranca_acompanhamento", "inspecao_sms_dashboard", "inspecao_sms_cadastro", "inspecao_sms_consulta", "medidas_disciplinares_dashboard", "medidas_disciplinares_cadastro", "medidas_disciplinares_consulta", "ocorrencias_dashboard", "ocorrencias_cadastro", "ocorrencias_consulta"].some(menu => podeVerMenu(menu, menusSidebar)) && <SidebarSectionGestaoSMS openMenu={openMenu} toggleMenu={toggleMenu} />}
 
         {/* Render Tarefas */}
-        {["tarefas_dashboard", "tarefas_minhas_tarefas", "tarefas_cadastro"].some(menu =>
-          podeVerMenu(menu, menusSidebar)
-        ) && (
-          <SidebarSectionTarefas openMenu={openMenu} toggleMenu={toggleMenu} />
-        )}
+        {["tarefas_dashboard", "tarefas_minhas_tarefas", "tarefas_cadastro"].some(menu => podeVerMenu(menu, menusSidebar)) && <SidebarSectionTarefas openMenu={openMenu} toggleMenu={toggleMenu} />}
 
         {/* Render Relatórios */}
-        {["relatorios", "relatorios_idsms"].some(menu => podeVerMenu(menu, menusSidebar)) && (
-          <SidebarSectionRelatorios openMenu={openMenu} toggleMenu={toggleMenu} />
-        )}
+        {["relatorios", "relatorios_idsms"].some(menu => podeVerMenu(menu, menusSidebar)) && <SidebarSectionRelatorios openMenu={openMenu} toggleMenu={toggleMenu} />}
 
         {/* Render Administração */}
-        {[
-          "admin_usuarios",
-          "admin_perfis",
-          "admin_empresas",
-          "admin_ccas",
-          "admin_engenheiros",
-          "admin_supervisores",
-          "admin_funcionarios",
-          "admin_hht",
-          "admin_metas_indicadores",
-          "admin_templates",
-          "admin_logo",
-          "admin_modelos_inspecao"
-        ].some(menu => podeVerMenu(menu, menusSidebar)) && (
-          <SidebarSectionAdministracao openMenu={openMenu} toggleMenu={toggleMenu} />
-        )}
+        {["admin_usuarios", "admin_perfis", "admin_empresas", "admin_ccas", "admin_engenheiros", "admin_supervisores", "admin_funcionarios", "admin_hht", "admin_metas_indicadores", "admin_templates", "admin_logo", "admin_modelos_inspecao"].some(menu => podeVerMenu(menu, menusSidebar)) && <SidebarSectionAdministracao openMenu={openMenu} toggleMenu={toggleMenu} />}
 
         {/* Seção de Conta - sempre visível para usuários autenticados */}
         <SidebarMenu>
           <SidebarMenuItem>
             <Collapsible open={openMenu === "account"}>
               <CollapsibleTrigger asChild>
-                <SidebarMenuButton 
-                  onClick={() => toggleMenu("account")}
-                  className="text-white hover:bg-slate-600"
-                >
+                <SidebarMenuButton onClick={() => toggleMenu("account")} className="text-white hover:bg-slate-600">
                   <User className="h-4 w-4 flex-shrink-0" />
                   <span className="break-words">Conta</span>
                 </SidebarMenuButton>
@@ -149,20 +81,14 @@ export function AppSidebar() {
               <CollapsibleContent asChild>
                 <SidebarMenuSub>
                   <SidebarMenuSubItem>
-                    <SidebarMenuSubButton 
-                      asChild
-                      className={currentPath === "/account/profile" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
-                    >
+                    <SidebarMenuSubButton asChild className={currentPath === "/account/profile" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
                       <Link to="/account/profile" className="flex items-center gap-2">
                         <span className="text-xs leading-tight break-words min-w-0">Perfil</span>
                       </Link>
                     </SidebarMenuSubButton>
                   </SidebarMenuSubItem>
                   <SidebarMenuSubItem>
-                    <SidebarMenuSubButton 
-                      asChild
-                      className={currentPath === "/account/settings" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
-                    >
+                    <SidebarMenuSubButton asChild className={currentPath === "/account/settings" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
                       <Link to="/account/settings" className="flex items-center gap-2">
                         <Settings className="h-3 w-3 flex-shrink-0" />
                         <span className="text-xs leading-tight break-words min-w-0">Configurações</span>
@@ -175,6 +101,5 @@ export function AppSidebar() {
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarContent>
-    </Sidebar>
-  );
+    </Sidebar>;
 }
