@@ -62,25 +62,46 @@ export const useCreateUser = () => {
         // Aguardar para garantir consistência
         await new Promise(resolve => setTimeout(resolve, 1000));
 
-        // Usar função security definer para criar perfil e associar perfil de acesso
-        console.log("Criando perfil e associando perfil de acesso...");
-        const { error: createProfileError } = await supabase
-          .rpc('create_user_with_profile', {
-            user_uuid: authData.user.id,
-            user_nome: userData.nome,
-            user_email: userData.email,
-            profile_id: parseInt(userData.perfil)
+        // Criar perfil na tabela profiles
+        console.log("Criando perfil...");
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .insert({
+            id: authData.user.id,
+            nome: userData.nome,
+            email: userData.email
           });
 
-        if (createProfileError) {
-          console.error("Erro ao criar perfil e associar perfil de acesso:", createProfileError);
+        if (profileError) {
+          console.error("Erro ao criar perfil:", profileError);
           // Tentar limpar o usuário criado no auth
           try {
             await supabase.auth.admin.deleteUser(authData.user.id);
           } catch (cleanupError) {
             console.error("Erro ao limpar usuário após falha:", cleanupError);
           }
-          throw new Error("Erro ao configurar perfil do usuário. Usuário foi removido.");
+          throw new Error("Erro ao criar perfil do usuário. Usuário foi removido.");
+        }
+
+        // Associar perfil de acesso
+        console.log("Associando perfil de acesso...");
+        const { error: userPerfilError } = await supabase
+          .from('usuario_perfis')
+          .insert({
+            usuario_id: authData.user.id,
+            perfil_id: parseInt(userData.perfil)
+          });
+
+        if (userPerfilError) {
+          console.error("Erro ao associar perfil de acesso:", userPerfilError);
+          // Tentar limpar dados criados
+          try {
+            await supabase.from('profiles').delete().eq('id', authData.user.id);
+            await supabase.auth.admin.deleteUser(authData.user.id);
+          } catch (cleanupError) {
+            console.error("Erro ao limpar dados após falha:", cleanupError);
+          }
+          throw new Error("Erro ao associar perfil de acesso. Usuário foi removido.");
         }
 
         console.log("Usuário criado com sucesso!");

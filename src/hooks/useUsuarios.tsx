@@ -13,23 +13,36 @@ export const useUsuarios = () => {
   const { user } = useAuth();
   const createUserHook = useCreateUser();
 
-  // Verificar permissões do usuário atual através de uma função security definer
+  // Verificar permissões do usuário atual
   const { data: userPermissions } = useQuery({
     queryKey: ['user-permissions', user?.id],
     queryFn: async () => {
       if (!user?.id) return null;
       
       try {
-        // Usar a função security definer para evitar recursão RLS
-        const { data, error } = await supabase
-          .rpc('get_user_permissions', { user_uuid: user.id });
+        console.log("Buscando permissões para usuário:", user.id);
+        
+        // Buscar o perfil do usuário e suas permissões
+        const { data: userPerfil, error: userPerfilError } = await supabase
+          .from('usuario_perfis')
+          .select(`
+            perfil_id,
+            perfis!inner (
+              permissoes
+            )
+          `)
+          .eq('usuario_id', user.id)
+          .single();
 
-        if (error) {
-          console.error("Erro ao buscar permissões:", error);
+        if (userPerfilError) {
+          console.error("Erro ao buscar permissões:", userPerfilError);
           return null;
         }
 
-        return data?.permissoes as Permissoes || null;
+        const permissoes = userPerfil?.perfis?.permissoes as Permissoes;
+        console.log("Permissões encontradas:", permissoes);
+        
+        return permissoes || null;
       } catch (error) {
         console.error("Erro ao verificar permissões:", error);
         return null;
@@ -43,7 +56,7 @@ export const useUsuarios = () => {
   // Verificar se o usuário pode administrar usuários
   const canManageUsers = userPermissions?.admin_usuarios === true;
 
-  // Buscar usuários usando função security definer
+  // Buscar usuários
   const { 
     data: usersData, 
     isLoading: loadingUsuarios,
@@ -58,11 +71,22 @@ export const useUsuarios = () => {
       }
 
       try {
-        console.log("Buscando usuários através de função security definer...");
+        console.log("Buscando usuários...");
         
-        // Usar função security definer para buscar usuários
+        // Buscar usuários com seus perfis
         const { data: userData, error: userError } = await supabase
-          .rpc('get_all_users_with_profiles');
+          .from('profiles')
+          .select(`
+            id,
+            nome,
+            email,
+            usuario_perfis!inner (
+              perfil_id,
+              perfis!inner (
+                nome
+              )
+            )
+          `);
 
         if (userError) {
           console.error("Erro ao buscar usuários:", userError);
@@ -73,10 +97,10 @@ export const useUsuarios = () => {
 
         // Mapear os dados para o formato esperado
         const users = userData?.map((item: any) => ({
-          id: item.user_id,
+          id: item.id,
           nome: item.nome || 'Sem nome',
           email: item.email || '',
-          perfil: item.perfil_nome || 'Usuário',
+          perfil: item.usuario_perfis?.perfis?.nome || 'Usuário',
           status: "Ativo"
         })) || [];
 
@@ -126,13 +150,21 @@ export const useUsuarios = () => {
         throw new Error("Erro ao atualizar perfil do usuário");
       }
 
-      // Atualizar perfil de acesso usando função security definer
+      // Atualizar perfil de acesso
       const profileId = profiles.find(p => p.nome === userData.perfil)?.id;
       if (profileId) {
+        // Primeiro, remover associação existente
+        await supabase
+          .from('usuario_perfis')
+          .delete()
+          .eq('usuario_id', userId);
+
+        // Depois, criar nova associação
         const { error: userPerfilError } = await supabase
-          .rpc('update_user_profile', { 
-            user_uuid: userId, 
-            new_profile_id: profileId 
+          .from('usuario_perfis')
+          .insert({
+            usuario_id: userId,
+            perfil_id: profileId
           });
 
         if (userPerfilError) {
@@ -169,13 +201,26 @@ export const useUsuarios = () => {
       
       console.log("Excluindo usuário:", userId);
 
-      // Usar função security definer para excluir usuário
-      const { error } = await supabase
-        .rpc('delete_user_and_profile', { user_uuid: userId });
+      // Excluir da tabela usuario_perfis primeiro
+      const { error: userPerfilError } = await supabase
+        .from('usuario_perfis')
+        .delete()
+        .eq('usuario_id', userId);
 
-      if (error) {
-        console.error("Erro ao excluir usuário:", error);
-        throw new Error("Erro ao excluir usuário");
+      if (userPerfilError) {
+        console.error("Erro ao excluir perfil de usuário:", userPerfilError);
+        throw new Error("Erro ao excluir perfil de usuário");
+      }
+
+      // Excluir da tabela profiles
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .delete()
+        .eq('id', userId);
+
+      if (profileError) {
+        console.error("Erro ao excluir perfil:", profileError);
+        throw new Error("Erro ao excluir perfil");
       }
 
       console.log("Usuário excluído com sucesso");
