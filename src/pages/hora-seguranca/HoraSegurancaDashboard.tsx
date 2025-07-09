@@ -198,41 +198,35 @@ const HoraSegurancaDashboard = () => {
                 </Card>
 
                 <Card className="col-span-full">
-                  <CardHeader>
-                    <CardTitle>Inspeções por Responsável</CardTitle>
-                    <CardDescription>
-                      Distribuição de inspeções por responsável
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="pl-2 pb-8">
-                    <div className="h-[500px]">
-                      <ResponsiveContainer width="100%" height={400}>
-                        <ReBarChart
-                          layout="vertical"
-                          data={respData}
-                          margin={{ top: 20, right: 30, left: 160, bottom: 20 }}
-                        >
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis type="number" />
-                          <YAxis
-                            type="category"
-                            dataKey="name"
-                            width={160}
-                            tick={{ fontSize: 12 }}
-                          />
-                          <Tooltip />
-                          <Legend verticalAlign="bottom" height={36} />
-                          
-                          <Bar dataKey="A Realizar" stackId="a" fill="#4285F4" />
-                          <Bar dataKey="Realizada" stackId="a" fill="#34A853" />
-                          <Bar dataKey="Não Realizada" stackId="a" fill="#EA4335" />
-                          <Bar dataKey="Realizada (Não Programada)" stackId="a" fill="#FBBC05" />
-                          <Bar dataKey="Cancelada" stackId="a" fill="#9E9E9E" />
-                        </ReBarChart>
-                      </ResponsiveContainer>
-                    </div>
-                  </CardContent>
-                </Card>
+  <CardHeader>
+    <CardTitle>Inspeções por Responsável</CardTitle>
+    <CardDescription>
+      Distribuição de inspeções por responsável
+    </CardDescription>
+  </CardHeader>
+  <CardContent className="pl-2 pb-8">
+    <div className="h-[500px]">
+      <ResponsiveContainer width="100%" height={400}>
+        <ReBarChart
+          data={respData}
+          margin={{ top: 20, right: 30, left: 20, bottom: 80 }}
+        >
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis type="category" dataKey="name" tick={{ angle: -45, fontSize: 12 }} height={100} interval={0} />
+          <YAxis type="number" />
+          <Tooltip />
+          <Legend verticalAlign="top" height={40} />
+          
+          <Bar dataKey="A Realizar" stackId="a" fill="#4285F4" />
+          <Bar dataKey="Realizada" stackId="a" fill="#34A853" />
+          <Bar dataKey="Não Realizada" stackId="a" fill="#EA4335" />
+          <Bar dataKey="Realizada (Não Programada)" stackId="a" fill="#FBBC05" />
+          <Bar dataKey="Cancelada" stackId="a" fill="#9E9E9E" />
+        </ReBarChart>
+      </ResponsiveContainer>
+    </div>
+  </CardContent>
+</Card>
 
                 <Card className="col-span-full">
                   <CardHeader>
