@@ -208,28 +208,36 @@ const HoraSegurancaDashboard = () => {
                     <div className="h-[500px]">
                       <ResponsiveContainer width="100%" height={400}>
                         <ReBarChart
-                          layout="vertical"
                           data={respData}
-                          margin={{ top: 20, right: 30, left: 160, bottom: 100 }}
-                        >
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis type="number" />
-                          <YAxis
-                            type="category"
-                            dataKey="name"
-                            width={160}
-                            tick={{ fontSize: 12 }}
-                          />
-                          <Tooltip />
-                          <Legend verticalAlign="bottom" height={36} />
-                          
-                          <Bar dataKey="A Realizar" stackId="a" fill="#4285F4" />
-                          <Bar dataKey="Realizada" stackId="a" fill="#34A853" />
-                          <Bar dataKey="Não Realizada" stackId="a" fill="#EA4335" />
-                          <Bar dataKey="Realizada (Não Programada)" stackId="a" fill="#FBBC05" />
-                          <Bar dataKey="Cancelada" stackId="a" fill="#9E9E9E" />
-                        </ReBarChart>
-                      </ResponsiveContainer>
+                          margin={{ top: 20, right: 30, left: 20, bottom: 100 }}
+                          >
+                            <CartesianGrid strokeDasharray="3 3" />
+                            
+                            <XAxis
+                              type="category"
+                              dataKey="name"
+                              interval={0}
+                              angle={90}
+                              textAnchor="start"
+                              height={120}
+                              tick={{
+                                fontSize: 12,
+                              }}
+                              tickFormatter={(value) => value.split(' ').join('\n')}
+                            />
+                        
+                            <YAxis type="number" />
+                            <Tooltip />
+                        
+                            <Legend verticalAlign="bottom" height={50} />
+                        
+                            <Bar dataKey="A Realizar" stackId="a" fill="#4285F4" />
+                            <Bar dataKey="Realizada" stackId="a" fill="#34A853" />
+                            <Bar dataKey="Não Realizada" stackId="a" fill="#EA4335" />
+                            <Bar dataKey="Realizada (Não Programada)" stackId="a" fill="#FBBC05" />
+                            <Bar dataKey="Cancelada" stackId="a" fill="#9E9E9E" />
+                          </ReBarChart>
+                        </ResponsiveContainer>
                     </div>
                   </CardContent>
                 </Card>
