@@ -474,15 +474,21 @@ export default function PainelExecucaoHSA() {
             <CardTitle>Desvios Identificados</CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={220}>
-              <ReBarChart data={desvioRespData} layout="vertical">
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis type="number" />
-                <YAxis dataKey="name" type="category" width={140} />
-                <Tooltip />
-                <Bar dataKey="desvios" fill="#4285F4" />
-              </ReBarChart>
-            </ResponsiveContainer>
+            <ResponsiveContainer width="100%" height={250}>
+  <ReBarChart data={desvioRespData} layout="vertical" margin={{ top: 10, right: 30, left: 150, bottom: 10 }}>
+    <CartesianGrid strokeDasharray="3 3" />
+    <XAxis type="number" />
+    <YAxis
+      dataKey="name"
+      type="category"
+      width={160} // ⬅️ aumenta a largura para caber os nomes
+      tick={{ angle: 0, textAnchor: 'end' }} // ⬅️ remove rotação
+    />
+    <Tooltip />
+    <Legend verticalAlign="bottom" height={36} /> {/* ⬅️ Move a legenda para baixo */}
+    <Bar dataKey="desvios" fill="#4285F4" />
+  </ReBarChart>
+</ResponsiveContainer>
           </CardContent>
         </Card>
 
@@ -497,53 +503,33 @@ export default function PainelExecucaoHSA() {
               className="mx-auto aspect-square h-[300px]"
             >
               <RePieChart>
-  <ChartTooltip
-    content={<ChartTooltipContent nameKey="name" />}
-  />
-  <RePie
-    data={pieData}
-    dataKey="value"
-    nameKey="name"
-    cx="50%"
-    cy="40%" // <-- move o gráfico para cima
-    outerRadius={80}
-    fill="#1565C0"
-    labelLine={false}
-    label={({ cx, cy, midAngle, innerRadius, outerRadius, percent }) => {
-      if (percent < 0.05) {
-        return null;
-      }
-      const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
-      const x = cx + radius * Math.cos(-midAngle * Math.PI / 180);
-      const y = cy + radius * Math.sin(-midAngle * Math.PI / 180);
-      return (
-        <text
-          x={x}
-          y={y}
-          fill="white"
-          className="text-xs font-bold"
-          textAnchor="middle"
-          dominantBaseline="central"
-        >
-          {`${(percent * 100).toFixed(0)}%`}
-        </text>
-      );
-    }}
-  >
-    {pieData.map((entry, index) => (
-      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-    ))}
-  </RePie>
-  
-  {/* 🧭 Mova a legenda para baixo e centralize */}
-  <ChartLegend
-    layout="vertical"
-    verticalAlign="bottom"
-    align="center"
-    content={<ChartLegendContent nameKey="name" />}
-  />
-</RePieChart>
-
+                <ChartTooltip
+                  content={<ChartTooltipContent nameKey="name" />}
+                />
+                <RePie data={pieData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} fill="#1565C0" labelLine={false} label={({
+                cx,
+                cy,
+                midAngle,
+                innerRadius,
+                outerRadius,
+                percent,
+              }) => {
+                if (percent < 0.05) {
+                  return null
+                }
+                const radius = innerRadius + (outerRadius - innerRadius) * 0.5
+                const x = cx + radius * Math.cos(-midAngle * Math.PI / 180)
+                const y = cy + radius * Math.sin(-midAngle * Math.PI / 180)
+                return (
+                  <text x={x} y={y} fill="white" className="text-xs font-bold" textAnchor="middle" dominantBaseline="central">
+                    {`${(percent * 100).toFixed(0)}%`}
+                  </text>
+                )
+              }}>
+                  {pieData.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
+                </RePie>
+                <ChartLegend content={<ChartLegendContent nameKey="name" />} />
+              </RePieChart>
             </ChartContainer>
           </CardContent>
         </Card>
