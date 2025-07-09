@@ -37,6 +37,52 @@ export async function createHorasTrabalhadas(data: Omit<HorasTrabalhadas, 'id' |
 }
 
 /**
+ * Update an existing HHT record
+ */
+export async function updateHorasTrabalhadas(id: string, data: Partial<HorasTrabalhadas>): Promise<HorasTrabalhadas | null> {
+  try {
+    const { data: record, error } = await supabase
+      .from('horas_trabalhadas')
+      .update(data)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error("Erro ao atualizar registro de HHT:", error);
+      return null;
+    }
+
+    return record as HorasTrabalhadas;
+  } catch (error) {
+    console.error("Exceção ao atualizar registro de HHT:", error);
+    return null;
+  }
+}
+
+/**
+ * Delete an HHT record
+ */
+export async function deleteHorasTrabalhadas(id: string): Promise<boolean> {
+  try {
+    const { error } = await supabase
+      .from('horas_trabalhadas')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      console.error("Erro ao deletar registro de HHT:", error);
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    console.error("Exceção ao deletar registro de HHT:", error);
+    return false;
+  }
+}
+
+/**
  * Fetch HHT by month
  */
 export async function fetchHHTByMonth() {
@@ -60,11 +106,27 @@ export async function fetchHHTByMonth() {
 }
 
 /**
- * Fetch HHT by CCA
+ * Fetch HHT by CCA with detailed information
  */
 export async function fetchHHTByCCA() {
   try {
-    const { data, error } = await supabase.rpc('get_hht_by_cca');
+    const { data, error } = await supabase
+      .from('horas_trabalhadas')
+      .select(`
+        id,
+        mes,
+        ano,
+        horas_trabalhadas,
+        observacoes,
+        cca_id,
+        ccas (
+          id,
+          codigo,
+          nome
+        )
+      `)
+      .order('ano', { ascending: false })
+      .order('mes', { ascending: false });
 
     if (error) {
       console.error("Erro ao buscar HHT por CCA:", error);
@@ -75,7 +137,16 @@ export async function fetchHHTByCCA() {
       return [];
     }
 
-    return data;
+    return data.map((item: any) => ({
+      id: item.id,
+      mes: item.mes,
+      ano: item.ano,
+      horas_trabalhadas: item.horas_trabalhadas,
+      observacoes: item.observacoes,
+      cca_id: item.cca_id,
+      codigo: item.ccas.codigo,
+      nome: item.ccas.nome
+    }));
   } catch (error) {
     console.error("Exceção ao buscar HHT por CCA:", error);
     return [];
