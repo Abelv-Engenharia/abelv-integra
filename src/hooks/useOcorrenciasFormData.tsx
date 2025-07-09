@@ -20,6 +20,9 @@ export const useOcorrenciasFormData = ({ selectedCcaId }: UseOcorrenciasFormData
     ...personnelData,
   });
 
+  console.log('useOcorrenciasFormData - Selected CCA ID:', selectedCcaId);
+  console.log('useOcorrenciasFormData - Filtered data:', filteredData);
+
   // Se ainda está carregando os CCAs, retorna dados vazios mas estruturados
   if (ccasLoading) {
     return {

@@ -33,6 +33,8 @@ export const useFilteredPersonnelData = ({
 
     console.log('=== FILTERING DATA ===');
     console.log('Selected CCA ID:', ccaIdNumber);
+    console.log('All Engenheiros before filtering:', allEngenheiros);
+    console.log('All Supervisores before filtering:', allSupervisores);
 
     // Filtrar empresas que têm relacionamento com o CCA selecionado
     const filteredEmpresas = allEmpresas
@@ -42,13 +44,19 @@ export const useFilteredPersonnelData = ({
 
     // Filtrar engenheiros que têm relacionamento com o CCA selecionado
     const filteredEngenheiros = allEngenheiros
-      .filter(item => item.cca_id === ccaIdNumber)
+      .filter(item => {
+        console.log('Checking engenheiro CCA ID:', item.cca_id, 'against selected:', ccaIdNumber);
+        return item.cca_id === ccaIdNumber;
+      })
       .map(item => item.engenheiros)
       .filter(Boolean);
 
     // Filtrar supervisores que têm relacionamento com o CCA selecionado
     const filteredSupervisores = allSupervisores
-      .filter(item => item.cca_id === ccaIdNumber)
+      .filter(item => {
+        console.log('Checking supervisor CCA ID:', item.cca_id, 'against selected:', ccaIdNumber);
+        return item.cca_id === ccaIdNumber;
+      })
       .map(item => item.supervisores)
       .filter(Boolean);
 
