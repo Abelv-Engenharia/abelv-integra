@@ -208,14 +208,14 @@ const EditarEncarregado = () => {
             <div>
               <Label htmlFor="cca">CCA</Label>
               <Select 
-                value={formData.cca_id?.toString() || ""} 
-                onValueChange={(value) => setFormData(prev => ({ ...prev, cca_id: value ? parseInt(value) : null }))}
+                value={formData.cca_id?.toString() || "sem-cca"} 
+                onValueChange={(value) => setFormData(prev => ({ ...prev, cca_id: value === "sem-cca" ? null : parseInt(value) }))}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione um CCA" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Nenhum CCA</SelectItem>
+                  <SelectItem value="sem-cca">Nenhum CCA</SelectItem>
                   {ccas.map((cca) => (
                     <SelectItem key={cca.id} value={cca.id.toString()}>
                       {cca.codigo} - {cca.nome}
