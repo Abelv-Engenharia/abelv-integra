@@ -3,10 +3,12 @@ import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserCCAs } from "./useUserCCAs";
+import { useFuncionariosData } from "./useFuncionariosData";
 
 export const useFormData = () => {
   const { user } = useAuth();
   const { data: userCCAs = [] } = useUserCCAs();
+  const { data: funcionarios = [] } = useFuncionariosData();
 
   // Buscar dados básicos que não dependem de CCA
   const { data: ccas = [] } = useQuery({
@@ -137,52 +139,6 @@ export const useFormData = () => {
         return [];
       }
       return data || [];
-    },
-    enabled: !!user?.id && userCCAs.length > 0,
-    staleTime: 5 * 60 * 1000,
-  });
-
-  // Buscar funcionários - simplificado para evitar type instantiation issues
-  const { data: funcionarios = [] } = useQuery({
-    queryKey: ['form-data-funcionarios', userCCAs.map(c => c.id)],
-    queryFn: async (): Promise<any[]> => {
-      if (!userCCAs || userCCAs.length === 0) return [];
-      
-      const ccaIds = userCCAs.map(cca => cca.id);
-      
-      // Buscar funcionários básicos primeiro
-      const { data: funcionariosData, error: funcionariosError } = await supabase
-        .from('funcionarios')
-        .select('id, nome, funcao, matricula, ativo, foto, data_admissao')
-        .eq('ativo', true)
-        .order('nome');
-      
-      if (funcionariosError) {
-        console.error("Erro ao buscar funcionários:", funcionariosError);
-        return [];
-      }
-      
-      if (!funcionariosData || funcionariosData.length === 0) {
-        return [];
-      }
-      
-      // Buscar relacionamentos separadamente
-      const { data: relacionamentos, error: relError } = await supabase
-        .from('funcionario_ccas')
-        .select('funcionario_id, cca_id')
-        .in('cca_id', ccaIds);
-      
-      if (relError) {
-        console.error("Erro ao buscar relacionamentos:", relError);
-        return funcionariosData;
-      }
-      
-      // Filtrar e mapear funcionários que têm relacionamento com CCAs do usuário
-      const funcionariosPermitidos = funcionariosData.filter(funcionario => 
-        relacionamentos?.some(rel => rel.funcionario_id === funcionario.id)
-      );
-      
-      return funcionariosPermitidos;
     },
     enabled: !!user?.id && userCCAs.length > 0,
     staleTime: 5 * 60 * 1000,
