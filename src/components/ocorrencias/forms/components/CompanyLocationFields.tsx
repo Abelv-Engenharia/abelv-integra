@@ -33,17 +33,38 @@ const CompanyLocationFields: React.FC<CompanyLocationFieldsProps> = ({
   const empresaValue = watch("empresa");
   const ccaValue = watch("cca");
 
-  // Empresa obrigatória: destaca caso <string vazia>
+  // Empresa obrigatória: destaca caso vazia
   const empresaObrigatoria = !empresaValue && !!ccaValue;
 
   // Garantir que os arrays existem e ordenar CCAs do menor para o maior
   const safeCcas = ccas ? [...ccas].sort((a, b) => 
     a.codigo.localeCompare(b.codigo, undefined, { numeric: true })
   ) : [];
-  const safeEmpresas = empresas || [];
+  
+  // Tratar adequadamente os dados das empresas
+  const safeEmpresas = React.useMemo(() => {
+    if (!empresas || !Array.isArray(empresas)) {
+      return [];
+    }
+    
+    return empresas.map(empresa => {
+      // Se a empresa tem a estrutura aninhada (empresa_ccas)
+      if (empresa.empresas && empresa.empresa_id) {
+        return {
+          id: empresa.empresa_id,
+          nome: empresa.empresas.nome,
+          cnpj: empresa.empresas.cnpj,
+          cca_id: empresa.cca_id
+        };
+      }
+      // Se a empresa já tem a estrutura direta
+      return empresa;
+    }).filter(empresa => empresa && empresa.id && empresa.nome);
+  }, [empresas]);
+  
   const safeDisciplinas = disciplinas || [];
 
-  console.log('CompanyLocationFields - Empresas recebidas:', safeEmpresas);
+  console.log('CompanyLocationFields - Empresas processadas:', safeEmpresas);
   console.log('CompanyLocationFields - Selected CCA ID:', selectedCcaId);
 
   return (
@@ -127,14 +148,21 @@ const CompanyLocationFields: React.FC<CompanyLocationFieldsProps> = ({
                 </FormControl>
                 <SelectContent>
                   {safeEmpresas.length > 0 ? (
-                    safeEmpresas.map((empresa) => (
-                      <SelectItem
-                        key={empresa.id}
-                        value={empresa.id.toString()}
-                      >
-                        {empresa.nome}
-                      </SelectItem>
-                    ))
+                    safeEmpresas.map((empresa) => {
+                      // Verificar se empresa e empresa.id existem antes de renderizar
+                      if (!empresa || !empresa.id) {
+                        return null;
+                      }
+                      
+                      return (
+                        <SelectItem
+                          key={empresa.id.toString()}
+                          value={empresa.id.toString()}
+                        >
+                          {empresa.nome}
+                        </SelectItem>
+                      );
+                    }).filter(Boolean)
                   ) : (
                     <SelectItem value="no-empresa-available" disabled>
                       Nenhuma empresa disponível
