@@ -144,7 +144,7 @@ export const useFormData = () => {
   });
 
   const { data: encarregados = [] } = useQuery({
-    queryKey: ['encarregados-with-cca', allowedCcaIds],
+    queryKey: ['encarregados-with-ccas', allowedCcaIds],
     queryFn: async () => {
       if (allowedCcaIds.length === 0) {
         console.log('useFormData - Nenhum CCA permitido para encarregados');
@@ -161,11 +161,13 @@ export const useFormData = () => {
           matricula,
           email,
           ativo,
-          cca_id,
-          ccas:cca_id(id, codigo, nome)
+          encarregado_ccas!inner(
+            cca_id,
+            ccas:cca_id(id, codigo, nome)
+          )
         `)
         .eq('ativo', true)
-        .in('cca_id', allowedCcaIds)
+        .in('encarregado_ccas.cca_id', allowedCcaIds)
         .order('nome');
       
       console.log('useFormData - Encarregados encontrados:', data?.length || 0);
