@@ -1,15 +1,12 @@
 
-import React, { useState } from "react";
+import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Trash2, Edit, Plus } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useNavigate } from "react-router-dom";
 
 interface Encarregado {
   id: string;
@@ -22,24 +19,10 @@ interface Encarregado {
   cca?: { id: number; codigo: string; nome: string };
 }
 
-interface CCA {
-  id: number;
-  codigo: string;
-  nome: string;
-}
-
 const AdminEncarregados = () => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingEncarregado, setEditingEncarregado] = useState<Encarregado | null>(null);
-  const [formData, setFormData] = useState({
-    nome: "",
-    funcao: "",
-    matricula: "",
-    email: "",
-    cca_id: null as number | null
-  });
 
   // Buscar encarregados
   const { data: encarregados = [], isLoading: loadingEncarregados } = useQuery({
@@ -63,71 +46,6 @@ const AdminEncarregados = () => {
     }
   });
 
-  // Buscar CCAs
-  const { data: ccas = [] } = useQuery({
-    queryKey: ['ccas-admin'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('ccas')
-        .select('id, codigo, nome')
-        .eq('ativo', true)
-        .order('codigo');
-      if (error) throw error;
-      return data || [];
-    }
-  });
-
-  // Mutation para criar/editar encarregado
-  const createEncarregadoMutation = useMutation({
-    mutationFn: async (encarregado: { nome: string; funcao: string; matricula: string; email: string; cca_id: number | null }) => {
-      if (editingEncarregado) {
-        // Atualizar encarregado
-        const { error } = await supabase
-          .from('encarregados')
-          .update({ 
-            nome: encarregado.nome, 
-            funcao: encarregado.funcao,
-            matricula: encarregado.matricula,
-            email: encarregado.email,
-            cca_id: encarregado.cca_id
-          })
-          .eq('id', editingEncarregado.id);
-        
-        if (error) throw error;
-      } else {
-        // Criar novo encarregado
-        const { error } = await supabase
-          .from('encarregados')
-          .insert({ 
-            nome: encarregado.nome, 
-            funcao: encarregado.funcao,
-            matricula: encarregado.matricula,
-            email: encarregado.email,
-            cca_id: encarregado.cca_id
-          });
-        
-        if (error) throw error;
-      }
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-encarregados'] });
-      toast({
-        title: "Sucesso",
-        description: editingEncarregado ? "Encarregado atualizado com sucesso!" : "Encarregado criado com sucesso!",
-      });
-      setIsDialogOpen(false);
-      resetForm();
-    },
-    onError: (error) => {
-      toast({
-        title: "Erro",
-        description: "Erro ao salvar encarregado",
-        variant: "destructive",
-      });
-      console.error('Erro:', error);
-    }
-  });
-
   // Mutation para deletar encarregado
   const deleteEncarregadoMutation = useMutation({
     mutationFn: async (id: string) => {
@@ -146,111 +64,18 @@ const AdminEncarregados = () => {
     }
   });
 
-  const resetForm = () => {
-    setFormData({ nome: "", funcao: "", matricula: "", email: "", cca_id: null });
-    setEditingEncarregado(null);
-  };
-
   const handleEdit = (encarregado: Encarregado) => {
-    setEditingEncarregado(encarregado);
-    setFormData({
-      nome: encarregado.nome,
-      funcao: encarregado.funcao,
-      matricula: encarregado.matricula || "",
-      email: encarregado.email || "",
-      cca_id: encarregado.cca_id
-    });
-    setIsDialogOpen(true);
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    createEncarregadoMutation.mutate(formData);
+    navigate(`/admin/encarregados/${encarregado.id}/editar`);
   };
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Administração de Encarregados</h1>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button onClick={resetForm}>
-              <Plus className="h-4 w-4 mr-2" />
-              Novo Encarregado
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>
-                {editingEncarregado ? "Editar Encarregado" : "Novo Encarregado"}
-              </DialogTitle>
-            </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <Label htmlFor="nome">Nome</Label>
-                <Input
-                  id="nome"
-                  value={formData.nome}
-                  onChange={(e) => setFormData(prev => ({ ...prev, nome: e.target.value }))}
-                  required
-                />
-              </div>
-              <div>
-                <Label htmlFor="funcao">Função</Label>
-                <Input
-                  id="funcao"
-                  value={formData.funcao}
-                  onChange={(e) => setFormData(prev => ({ ...prev, funcao: e.target.value }))}
-                  required
-                />
-              </div>
-              <div>
-                <Label htmlFor="matricula">Matrícula</Label>
-                <Input
-                  id="matricula"
-                  value={formData.matricula}
-                  onChange={(e) => setFormData(prev => ({ ...prev, matricula: e.target.value }))}
-                />
-              </div>
-              <div>
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-                />
-              </div>
-              <div>
-                <Label htmlFor="cca">CCA</Label>
-                <Select 
-                  value={formData.cca_id?.toString() || ""} 
-                  onValueChange={(value) => setFormData(prev => ({ ...prev, cca_id: value ? parseInt(value) : null }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione um CCA" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="">Nenhum CCA</SelectItem>
-                    {ccas.map((cca) => (
-                      <SelectItem key={cca.id} value={cca.id.toString()}>
-                        {cca.codigo} - {cca.nome}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex justify-end space-x-2">
-                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
-                  Cancelar
-                </Button>
-                <Button type="submit" disabled={createEncarregadoMutation.isPending}>
-                  {createEncarregadoMutation.isPending ? "Salvando..." : "Salvar"}
-                </Button>
-              </div>
-            </form>
-          </DialogContent>
-        </Dialog>
+        <Button onClick={() => navigate('/admin/encarregados/novo')}>
+          <Plus className="h-4 w-4 mr-2" />
+          Novo Encarregado
+        </Button>
       </div>
 
       <Card>

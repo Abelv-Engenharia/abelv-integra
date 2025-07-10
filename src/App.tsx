@@ -32,6 +32,8 @@ import AdminEmpresas from "./pages/admin/AdminEmpresas";
 import AdminEngenheiros from "./pages/admin/AdminEngenheiros";
 import AdminSupervisores from "./pages/admin/AdminSupervisores";
 import AdminEncarregados from "./pages/admin/AdminEncarregados";
+import CadastroEncarregados from "./pages/admin/CadastroEncarregados";
+import EditarEncarregado from "./pages/admin/EditarEncarregado";
 import AdminLogo from "./pages/admin/AdminLogo";
 import AdminTemplates from "./pages/AdminTemplates";
 import AdminModelosInspecao from "./pages/admin/AdminModelosInspecao";
@@ -158,6 +160,8 @@ function App() {
                 <Route path="admin/engenheiros" element={<AdminEngenheiros />} />
                 <Route path="admin/supervisores" element={<AdminSupervisores />} />
                 <Route path="admin/encarregados" element={<AdminEncarregados />} />
+                <Route path="admin/encarregados/novo" element={<CadastroEncarregados />} />
+                <Route path="admin/encarregados/:id/editar" element={<EditarEncarregado />} />
                 <Route path="admin/logo" element={<AdminLogo />} />
                 <Route path="admin/templates" element={<AdminTemplates />} />
                 <Route path="admin/modelos-inspecao" element={<AdminModelosInspecao />} />
