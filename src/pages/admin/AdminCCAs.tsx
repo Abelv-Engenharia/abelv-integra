@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -24,7 +23,7 @@ const AdminCCAs = () => {
     staleTime: 0, // Sempre buscar dados frescos
   });
 
-  // Ordenar os CCAs por código (garantindo ordenação mesmo após filtragem)
+  // Ordenar os CCAs por código do menor para o maior (garantindo ordenação mesmo após filtragem)
   const sortedCCAs = [...ccas].sort((a, b) => 
     a.codigo.localeCompare(b.codigo, undefined, { numeric: true })
   );

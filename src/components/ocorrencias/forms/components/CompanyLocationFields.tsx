@@ -36,8 +36,10 @@ const CompanyLocationFields: React.FC<CompanyLocationFieldsProps> = ({
   // Empresa obrigatória: destaca caso <string vazia>
   const empresaObrigatoria = !empresaValue && !!ccaValue;
 
-  // Garantir que os arrays existem
-  const safeCcas = ccas || [];
+  // Garantir que os arrays existem e ordenar CCAs do menor para o maior
+  const safeCcas = ccas ? [...ccas].sort((a, b) => 
+    a.codigo.localeCompare(b.codigo, undefined, { numeric: true })
+  ) : [];
   const safeEmpresas = empresas || [];
   const safeDisciplinas = disciplinas || [];
 

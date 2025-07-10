@@ -12,10 +12,15 @@ export interface CCA {
 export const useCCAs = () => {
   const { data: userCCAs = [], isLoading, error } = useUserCCAs();
 
-  console.log('useCCAs - CCAs disponíveis:', userCCAs.length, userCCAs.map(c => c.codigo));
+  // Ordenar CCAs do menor para o maior
+  const sortedCCAs = [...userCCAs].sort((a, b) => 
+    a.codigo.localeCompare(b.codigo, undefined, { numeric: true })
+  );
+
+  console.log('useCCAs - CCAs disponíveis:', sortedCCAs.length, sortedCCAs.map(c => c.codigo));
 
   return {
-    data: userCCAs,
+    data: sortedCCAs,
     isLoading,
     error
   };

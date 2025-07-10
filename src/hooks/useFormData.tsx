@@ -1,4 +1,3 @@
-
 import { useQuery } from "@tanstack/react-query";
 import {
   fetchTiposRegistro,
@@ -206,8 +205,13 @@ export const useFormData = () => {
     enabled: allowedCcaIds.length > 0 && !ccasLoading,
   });
 
+  // Ordenar CCAs do menor para o maior no retorno
+  const sortedUserCCAs = [...userCCAs].sort((a, b) => 
+    a.codigo.localeCompare(b.codigo, undefined, { numeric: true })
+  );
+
   return {
-    ccas: userCCAs.sort((a, b) => a.codigo.localeCompare(b.codigo)),
+    ccas: sortedUserCCAs,
     tiposRegistro,
     processos,
     eventosIdentificados,

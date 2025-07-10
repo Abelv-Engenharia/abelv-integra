@@ -14,6 +14,11 @@ interface CCASelectorProps {
 export const CCASelector = ({ selectedCCAs, onSelectionChange }: CCASelectorProps) => {
   const { data: userCCAs, isLoading } = useUserCCAs();
 
+  // Ordenar CCAs do menor para o maior
+  const sortedCCAs = userCCAs ? [...userCCAs].sort((a, b) => 
+    a.codigo.localeCompare(b.codigo, undefined, { numeric: true })
+  ) : [];
+
   const handleToggleCCA = (ccaId: number) => {
     if (selectedCCAs.includes(ccaId)) {
       onSelectionChange(selectedCCAs.filter(id => id !== ccaId));
@@ -23,11 +28,11 @@ export const CCASelector = ({ selectedCCAs, onSelectionChange }: CCASelectorProp
   };
 
   const handleSelectAll = () => {
-    if (userCCAs) {
-      if (selectedCCAs.length === userCCAs.length) {
+    if (sortedCCAs) {
+      if (selectedCCAs.length === sortedCCAs.length) {
         onSelectionChange([]);
       } else {
-        onSelectionChange(userCCAs.map(cca => cca.id));
+        onSelectionChange(sortedCCAs.map(cca => cca.id));
       }
     }
   };
@@ -43,7 +48,7 @@ export const CCASelector = ({ selectedCCAs, onSelectionChange }: CCASelectorProp
     );
   }
 
-  if (!userCCAs || userCCAs.length === 0) {
+  if (!sortedCCAs || sortedCCAs.length === 0) {
     return (
       <div className="section-spacing">
         <div className="flex flex-col items-center justify-center p-6 sm:p-8 space-y-4 border rounded-lg bg-muted/20">
@@ -64,16 +69,16 @@ export const CCASelector = ({ selectedCCAs, onSelectionChange }: CCASelectorProp
       <div className="flex items-center space-x-2 mb-4">
         <Checkbox
           id="select-all-ccas"
-          checked={selectedCCAs.length === userCCAs.length && userCCAs.length > 0}
+          checked={selectedCCAs.length === sortedCCAs.length && sortedCCAs.length > 0}
           onCheckedChange={handleSelectAll}
         />
         <Label htmlFor="select-all-ccas" className="text-xs sm:text-sm font-semibold">
-          Selecionar Todos ({userCCAs.length})
+          Selecionar Todos ({sortedCCAs.length})
         </Label>
       </div>
       
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 max-h-32 sm:max-h-48 lg:max-h-64 overflow-y-auto border rounded p-2 sm:p-3 bg-gray-50">
-        {userCCAs.map((cca) => (
+        {sortedCCAs.map((cca) => (
           <div key={cca.id} className="flex items-center space-x-2 min-w-0">
             <Checkbox
               id={`cca-${cca.id}`}
@@ -94,7 +99,7 @@ export const CCASelector = ({ selectedCCAs, onSelectionChange }: CCASelectorProp
       </div>
       
       <div className="text-xs text-gray-500 mt-2 text-center sm:text-left">
-        {selectedCCAs.length} de {userCCAs.length} CCAs selecionados
+        {selectedCCAs.length} de {sortedCCAs.length} CCAs selecionados
       </div>
     </div>
   );
