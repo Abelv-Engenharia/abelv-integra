@@ -1,4 +1,3 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -142,7 +141,7 @@ export const useFormData = () => {
     staleTime: 5 * 60 * 1000,
   });
 
-  // Buscar funcionários through the new relationship
+  // Buscar funcionários - usando query mais simples para evitar type instantiation issues
   const { data: funcionarios = [] } = useQuery({
     queryKey: ['form-data-funcionarios', userCCAs.map(c => c.id)],
     queryFn: async () => {
@@ -150,40 +149,38 @@ export const useFormData = () => {
       
       const ccaIds = userCCAs.map(cca => cca.id);
       
-      // Get funcionários through the new many-to-many relationship
-      const { data: funcionariosComCCAs, error } = await supabase
-        .from('funcionario_ccas')
-        .select(`
-          funcionario_id,
-          cca_id,
-          funcionarios!inner(
-            id,
-            nome,
-            funcao,
-            matricula,
-            ativo,
-            foto,
-            data_admissao
-          )
-        `)
-        .in('cca_id', ccaIds)
-        .eq('funcionarios.ativo', true)
-        .order('funcionarios(nome)');
+      const { data: funcionariosData, error } = await supabase
+        .from('funcionarios')
+        .select('id, nome, funcao, matricula, ativo, foto, data_admissao')
+        .eq('ativo', true)
+        .order('nome');
       
       if (error) {
         console.error("Erro ao buscar funcionários:", error);
         return [];
       }
       
-      // Transform to legacy format for compatibility - just return the funcionarios data
-      const uniqueFuncionarios = new Map();
-      funcionariosComCCAs?.forEach(item => {
-        if (!uniqueFuncionarios.has(item.funcionarios.id)) {
-          uniqueFuncionarios.set(item.funcionarios.id, item.funcionarios);
-        }
-      });
+      // Get funcionario_ccas relationships
+      const { data: relacionamentos, error: relError } = await supabase
+        .from('funcionario_ccas')
+        .select(`
+          funcionario_id,
+          cca_id,
+          ccas!inner(id, codigo, nome)
+        `)
+        .in('cca_id', ccaIds);
       
-      return Array.from(uniqueFuncionarios.values());
+      if (relError) {
+        console.error("Erro ao buscar relacionamentos:", relError);
+        return funcionariosData || [];
+      }
+      
+      // Filter only funcionarios that have relationships with user's CCAs
+      const funcionariosComCCAs = funcionariosData?.filter(funcionario => 
+        relacionamentos?.some(rel => rel.funcionario_id === funcionario.id)
+      ) || [];
+      
+      return funcionariosComCCAs;
     },
     enabled: !!user?.id && userCCAs.length > 0,
     staleTime: 5 * 60 * 1000,
