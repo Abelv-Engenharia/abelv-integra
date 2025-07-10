@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import TarefasSummaryCards from "@/components/tarefas/TarefasSummaryCards";
@@ -7,8 +7,42 @@ import TarefasBarChart from "@/components/tarefas/TarefasBarChart";
 import TarefasPieChart from "@/components/tarefas/TarefasPieChart";
 import TarefasCriticidadeChart from "@/components/tarefas/TarefasCriticidadeChart";
 import TarefasRecentTable from "@/components/tarefas/TarefasRecentTable";
+import { useAuth } from "@/contexts/AuthContext";
 
 const TarefasDashboard = () => {
+  const { user, loading } = useAuth();
+
+  useEffect(() => {
+    console.log("TarefasDashboard - Component mounted");
+    console.log("TarefasDashboard - User:", user?.id);
+    console.log("TarefasDashboard - Loading:", loading);
+  }, [user, loading]);
+
+  if (loading) {
+    console.log("TarefasDashboard - Showing loading state");
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4"></div>
+          <p>Carregando dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    console.log("TarefasDashboard - No user found");
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <p>Usuário não encontrado</p>
+        </div>
+      </div>
+    );
+  }
+
+  console.log("TarefasDashboard - Rendering main content");
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-2">
@@ -16,6 +50,7 @@ const TarefasDashboard = () => {
         <p className="text-muted-foreground">
           Visão geral das tarefas e indicadores de desempenho
         </p>
+        <p className="text-xs text-gray-500">Debug: Usuário {user.id} logado</p>
       </div>
 
       <TarefasSummaryCards />
