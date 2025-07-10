@@ -58,15 +58,15 @@ const OcorrenciasConsulta = () => {
   }, [userCCAs, ccasLoading]);
 
   const handleView = (id: string) => {
-    navigate(`/ocorrencias/visualizar/${id}`);
+    navigate(`/ocorrencias/${id}`);
   };
 
   const handleEdit = (id: string) => {
-    navigate(`/ocorrencias/editar/${id}`);
+    navigate(`/ocorrencias/${id}/editar`);
   };
 
   const handleUpdateStatus = (id: string) => {
-    navigate(`/ocorrencias/atualizar-status/${id}`);
+    navigate(`/ocorrencias/${id}/atualizar-status`);
   };
 
   const handleDelete = (id: string) => {
