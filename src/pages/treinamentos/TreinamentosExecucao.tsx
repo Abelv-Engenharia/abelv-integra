@@ -1,5 +1,5 @@
-
 import { useState } from "react";
+import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Form } from "@/components/ui/form";
@@ -76,8 +76,8 @@ const TreinamentosExecucao = () => {
 
       const execucaoData = {
         data: formData.data,
-        mes: formData.mes || dataExecucao.getMonth() + 1,
-        ano: formData.ano || dataExecucao.getFullYear(),
+        mes: formData.mes,
+        ano: formData.ano,
         cca: selectedCCA ? `${selectedCCA.codigo} - ${selectedCCA.nome}` : '',
         cca_id: Number(formData.cca_id),
         processo_treinamento: selectedProcesso?.nome || '',
@@ -148,10 +148,13 @@ const TreinamentosExecucao = () => {
                 <ProcessoTipoFields form={form} processoOptions={processoOptions} tipoOptions={tipoOptions} />
                 <TreinamentoSelector form={form} treinamentoOptions={treinamentoOptions} />
                 <CargaHorariaEfetivoFields form={form} calculateHorasTotais={calculateHorasTotais} />
+                {/* ---------------------------------- */}
+                {/* Observações e Anexo */}
                 <ObservacoesAnexoFields
                   form={form}
                   onListaPresencaFileChange={setListaPresencaFile}
                 />
+                {/* ---------------------------------- */}
                 <div className="flex justify-end gap-2 pt-6 border-t">
                   <Button
                     type="button"

@@ -1,5 +1,7 @@
 
 import React from "react";
+import { ProcessoTreinamentoOption } from "@/services/treinamentos/processoTreinamentoService";
+import { TipoTreinamentoOption } from "@/services/treinamentos/tipoTreinamentoService";
 import {
   FormField,
   FormItem,
@@ -15,12 +17,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { UseFormReturn } from "react-hook-form";
-import { TreinamentoFormValues } from "@/types/treinamentos";
+import { TreinamentoFormValues } from "@/hooks/useTreinamentoForm";
 
 interface ProcessoTipoFieldsProps {
   form: UseFormReturn<TreinamentoFormValues>;
-  processoOptions: Array<{ id: string; nome: string; codigo: string; }>;
-  tipoOptions: Array<{ id: string; nome: string; codigo: string; }>;
+  processoOptions: ProcessoTreinamentoOption[];
+  tipoOptions: TipoTreinamentoOption[];
 }
 
 const ProcessoTipoFields = ({ form, processoOptions, tipoOptions }: ProcessoTipoFieldsProps) => {

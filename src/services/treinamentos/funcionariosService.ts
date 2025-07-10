@@ -16,9 +16,7 @@ export async function fetchFuncionarios(): Promise<Funcionario[]> {
         funcao,
         ativo,
         foto,
-        data_admissao,
-        cca_id,
-        ccas:cca_id(id, codigo, nome)
+        data_admissao
       `)
       .eq('ativo', true)
       .order('nome');

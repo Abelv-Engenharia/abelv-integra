@@ -17,34 +17,53 @@ import {
 } from "@/components/ui/select";
 
 interface ResponsiblePersonFieldsProps {
-  funcionarios: any[];
+  engenheiros: any[];
+  supervisores: any[];
+  encarregados: any[];
   selectedCcaId?: string;
 }
 
 const ResponsiblePersonFields: React.FC<ResponsiblePersonFieldsProps> = ({
-  funcionarios,
+  engenheiros,
+  supervisores,
+  encarregados,
   selectedCcaId
 }) => {
   const { control } = useFormContext();
 
-  console.log('ResponsiblePersonFields - Funcionários recebidos:', funcionarios);
+  console.log('ResponsiblePersonFields - Engenheiros recebidos:', engenheiros);
+  console.log('ResponsiblePersonFields - Supervisores recebidos:', supervisores);
+  console.log('ResponsiblePersonFields - Encarregados recebidos:', encarregados);
 
-  // Filtrar funcionários por função e CCA selecionado
-  const filtrarPorFuncao = (funcao: string) => {
-    return funcionarios.filter(func => {
-      const funcaoMatch = func.funcao?.toLowerCase().includes(funcao.toLowerCase());
-      const ccaMatch = !selectedCcaId || func.cca_id === parseInt(selectedCcaId);
-      return funcaoMatch && ccaMatch;
-    });
-  };
+  // Garantir que os arrays existem e filtrar itens inválidos
+  const safeEngenheiros = (engenheiros || []).filter(eng => {
+    // Verificar se o item tem a estrutura correta
+    if (eng && eng.engenheiros && eng.engenheiros.nome) {
+      return true;
+    }
+    // Verificar se é um objeto direto (sem aninhamento)
+    if (eng && eng.nome && typeof eng.nome === 'string') {
+      return true;
+    }
+    return false;
+  });
 
-  const engenheiros = filtrarPorFuncao('engenheiro');
-  const supervisores = filtrarPorFuncao('supervisor');
-  const encarregados = filtrarPorFuncao('encarregado');
+  const safeSupervisores = (supervisores || []).filter(sup => {
+    // Verificar se o item tem a estrutura correta
+    if (sup && sup.supervisores && sup.supervisores.nome) {
+      return true;
+    }
+    // Verificar se é um objeto direto (sem aninhamento)
+    if (sup && sup.nome && typeof sup.nome === 'string') {
+      return true;
+    }
+    return false;
+  });
 
-  console.log('ResponsiblePersonFields - Engenheiros filtrados:', engenheiros);
-  console.log('ResponsiblePersonFields - Supervisores filtrados:', supervisores);
-  console.log('ResponsiblePersonFields - Encarregados filtrados:', encarregados);
+  const safeEncarregados = (encarregados || []).filter(enc => enc && enc.nome);
+
+  console.log('ResponsiblePersonFields - Safe Engenheiros:', safeEngenheiros);
+  console.log('ResponsiblePersonFields - Safe Supervisores:', safeSupervisores);
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -61,12 +80,18 @@ const ResponsiblePersonFields: React.FC<ResponsiblePersonFieldsProps> = ({
                 </SelectTrigger>
               </FormControl>
               <SelectContent>
-                {engenheiros.length > 0 ? (
-                  engenheiros.map((funcionario) => (
-                    <SelectItem key={funcionario.id} value={funcionario.nome}>
-                      {funcionario.nome}
-                    </SelectItem>
-                  ))
+                {safeEngenheiros.length > 0 ? (
+                  safeEngenheiros.map((engenheiro) => {
+                    // Determinar a estrutura do objeto
+                    const engenheiroData = engenheiro.engenheiros || engenheiro;
+                    const key = engenheiro.engenheiro_id || engenheiro.id;
+                    
+                    return (
+                      <SelectItem key={key} value={engenheiroData.nome}>
+                        {engenheiroData.nome}
+                      </SelectItem>
+                    );
+                  })
                 ) : (
                   <SelectItem value="no-engenheiro-available" disabled>
                     {!selectedCcaId ? "Selecione um CCA primeiro" : "Nenhum engenheiro disponível"}
@@ -92,12 +117,18 @@ const ResponsiblePersonFields: React.FC<ResponsiblePersonFieldsProps> = ({
                 </SelectTrigger>
               </FormControl>
               <SelectContent>
-                {supervisores.length > 0 ? (
-                  supervisores.map((funcionario) => (
-                    <SelectItem key={funcionario.id} value={funcionario.nome}>
-                      {funcionario.nome}
-                    </SelectItem>
-                  ))
+                {safeSupervisores.length > 0 ? (
+                  safeSupervisores.map((supervisor) => {
+                    // Determinar a estrutura do objeto
+                    const supervisorData = supervisor.supervisores || supervisor;
+                    const key = supervisor.supervisor_id || supervisor.id;
+                    
+                    return (
+                      <SelectItem key={key} value={supervisorData.nome}>
+                        {supervisorData.nome}
+                      </SelectItem>
+                    );
+                  })
                 ) : (
                   <SelectItem value="no-supervisor-available" disabled>
                     {!selectedCcaId ? "Selecione um CCA primeiro" : "Nenhum supervisor disponível"}
@@ -123,10 +154,10 @@ const ResponsiblePersonFields: React.FC<ResponsiblePersonFieldsProps> = ({
                 </SelectTrigger>
               </FormControl>
               <SelectContent>
-                {encarregados.length > 0 ? (
-                  encarregados.map((funcionario) => (
-                    <SelectItem key={funcionario.id} value={funcionario.nome}>
-                      {funcionario.nome}
+                {safeEncarregados.length > 0 ? (
+                  safeEncarregados.map((encarregado) => (
+                    <SelectItem key={encarregado.id} value={encarregado.nome}>
+                      {encarregado.nome}
                     </SelectItem>
                   ))
                 ) : (

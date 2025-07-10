@@ -161,13 +161,11 @@ export const useFormData = () => {
           matricula,
           email,
           ativo,
-          encarregado_ccas!inner(
-            cca_id,
-            ccas:cca_id(id, codigo, nome)
-          )
+          cca_id,
+          ccas:cca_id(id, codigo, nome)
         `)
         .eq('ativo', true)
-        .in('encarregado_ccas.cca_id', allowedCcaIds)
+        .in('cca_id', allowedCcaIds)
         .order('nome');
       
       console.log('useFormData - Encarregados encontrados:', data?.length || 0);

@@ -539,45 +539,10 @@ export type Database = {
           },
         ]
       }
-      encarregado_ccas: {
-        Row: {
-          cca_id: number
-          created_at: string | null
-          encarregado_id: string
-          id: string
-        }
-        Insert: {
-          cca_id: number
-          created_at?: string | null
-          encarregado_id: string
-          id?: string
-        }
-        Update: {
-          cca_id?: number
-          created_at?: string | null
-          encarregado_id?: string
-          id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "encarregado_ccas_cca_id_fkey"
-            columns: ["cca_id"]
-            isOneToOne: false
-            referencedRelation: "ccas"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "encarregado_ccas_encarregado_id_fkey"
-            columns: ["encarregado_id"]
-            isOneToOne: false
-            referencedRelation: "encarregados"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       encarregados: {
         Row: {
           ativo: boolean | null
+          cca_id: number | null
           email: string | null
           funcao: string
           id: string
@@ -586,6 +551,7 @@ export type Database = {
         }
         Insert: {
           ativo?: boolean | null
+          cca_id?: number | null
           email?: string | null
           funcao: string
           id?: string
@@ -594,13 +560,22 @@ export type Database = {
         }
         Update: {
           ativo?: boolean | null
+          cca_id?: number | null
           email?: string | null
           funcao?: string
           id?: string
           matricula?: string | null
           nome?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "encarregados_cca_id_fkey"
+            columns: ["cca_id"]
+            isOneToOne: false
+            referencedRelation: "ccas"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       engenheiro_ccas: {
         Row: {

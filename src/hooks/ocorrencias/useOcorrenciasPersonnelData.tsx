@@ -73,23 +73,18 @@ export const useOcorrenciasPersonnelData = () => {
     enabled: allowedCcaIds.length > 0,
   });
 
-  // Encarregados com CCAs
+  // Encarregados
   const { data: allEncarregados = [] } = useQuery({
-    queryKey: ['encarregados-ccas-ocorrencias', allowedCcaIds],
+    queryKey: ['encarregados-ocorrencias', allowedCcaIds],
     queryFn: async () => {
       if (allowedCcaIds.length === 0) return [];
       
       const { data } = await supabase
-        .from('encarregado_ccas')
-        .select(`
-          encarregado_id,
-          cca_id,
-          encarregados!inner(id, nome, funcao, matricula, email, ativo)
-        `)
-        .eq('encarregados.ativo', true)
-        .in('cca_id', allowedCcaIds);
-      
-      console.log('Encarregados filtrados por CCA:', data);
+        .from('encarregados')
+        .select('id, nome, funcao, matricula, email, cca_id')
+        .eq('ativo', true)
+        .in('cca_id', allowedCcaIds)
+        .order('nome');
       return data || [];
     },
     enabled: allowedCcaIds.length > 0,

@@ -178,8 +178,8 @@ export const OcorrenciasFiltros = ({ onFilter }: OcorrenciasFiltrosProps) => {
                 <SelectContent>
                   <SelectItem value="Todas">Todas</SelectItem>
                   {empresas.map((empresaItem) => (
-                    <SelectItem key={empresaItem.id} value={empresaItem.nome}>
-                      {empresaItem.nome}
+                    <SelectItem key={empresaItem.empresa_id} value={empresaItem.empresas.nome}>
+                      {empresaItem.empresas.nome}
                     </SelectItem>
                   ))}
                 </SelectContent>

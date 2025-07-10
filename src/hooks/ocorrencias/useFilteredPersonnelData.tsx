@@ -59,8 +59,7 @@ export const useFilteredPersonnelData = ({
       .map(item => item.supervisores)
       .filter(Boolean);
 
-    // Filtrar encarregados que têm relacionamento com o CCA selecionado
-    // Como agora usamos encarregado_ccas, precisamos filtrar pela estrutura correta
+    // Filtrar encarregados e funcionários pelo CCA
     const filteredEncarregados = allEncarregados.filter(item => {
       console.log('Checking encarregado CCA ID:', item.cca_id, 'against selected:', ccaIdNumber);
       return item.cca_id === ccaIdNumber;

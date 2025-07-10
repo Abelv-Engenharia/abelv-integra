@@ -4,7 +4,7 @@ import { Table, TableHeader, TableBody, TableRow, TableCell, TableHead } from "@
 import { treinamentosNormativosService } from "@/services/treinamentos/treinamentosNormativosService";
 import { Funcionario, TreinamentoNormativo } from "@/types/treinamentos";
 import { format } from "date-fns";
-import { funcionariosService } from "@/services/treinamentos/funcionariosService";
+import { fetchFuncionarios } from "@/utils/treinamentosUtils";
 import { Button } from "@/components/ui/button";
 import { Trash } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -30,7 +30,7 @@ export const TabelaTreinamentosNormativosVencidos: React.FC = () => {
     setLoading(true);
     const [treinamentos, funcionarios] = await Promise.all([
       treinamentosNormativosService.getAll(),
-      funcionariosService.getAll()
+      fetchFuncionarios()
     ]);
     
     // Filtrar funcionários apenas dos CCAs permitidos

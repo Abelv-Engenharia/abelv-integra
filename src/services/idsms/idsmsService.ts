@@ -3,15 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { IDSMSIndicador, IDSMSDashboardData } from "@/types/treinamentos";
 
 export const idsmsService = {
-  async createIndicador(indicador: {
-    data: string;
-    mes: number;
-    ano: number;
-    cca_id: number;
-    resultado: number;
-    tipo: string;
-    motivo?: string;
-  }): Promise<IDSMSIndicador | null> {
+  async createIndicador(indicador: Omit<IDSMSIndicador, 'id' | 'created_at' | 'updated_at'>): Promise<IDSMSIndicador | null> {
     try {
       const { data, error } = await supabase
         .from('idsms_indicadores')
@@ -31,15 +23,7 @@ export const idsmsService = {
     }
   },
 
-  async updateIndicador(id: string, indicador: {
-    cca_id?: number;
-    tipo?: string;
-    data?: string;
-    ano?: number;
-    mes?: number;
-    resultado?: number;
-    motivo?: string | null;
-  }): Promise<IDSMSIndicador | null> {
+  async updateIndicador(id: string, indicador: Partial<Omit<IDSMSIndicador, 'id' | 'created_at' | 'updated_at'>>): Promise<IDSMSIndicador | null> {
     try {
       const { data, error } = await supabase
         .from('idsms_indicadores')
@@ -357,4 +341,3 @@ export const idsmsService = {
     }
   }
 };
-
