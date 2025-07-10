@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { useNavigate, useParams } from "react-router-dom";
 
 interface Encarregado {
@@ -38,6 +39,7 @@ const EditarEncarregado = () => {
     funcao: "",
     matricula: "",
     email: "",
+    ativo: true,
     cca_id: null as number | null
   });
 
@@ -88,6 +90,7 @@ const EditarEncarregado = () => {
         funcao: encarregado.funcao,
         matricula: encarregado.matricula || "",
         email: encarregado.email || "",
+        ativo: encarregado.ativo,
         cca_id: encarregado.cca_id
       });
     }
@@ -95,7 +98,7 @@ const EditarEncarregado = () => {
 
   // Mutation para atualizar encarregado
   const updateEncarregadoMutation = useMutation({
-    mutationFn: async (encarregado: { nome: string; funcao: string; matricula: string; email: string; cca_id: number | null }) => {
+    mutationFn: async (encarregado: { nome: string; funcao: string; matricula: string; email: string; ativo: boolean; cca_id: number | null }) => {
       if (!id) throw new Error('ID não fornecido');
       const { error } = await supabase
         .from('encarregados')
@@ -104,6 +107,7 @@ const EditarEncarregado = () => {
           funcao: encarregado.funcao,
           matricula: encarregado.matricula,
           email: encarregado.email,
+          ativo: encarregado.ativo,
           cca_id: encarregado.cca_id
         })
         .eq('id', id);
@@ -223,6 +227,15 @@ const EditarEncarregado = () => {
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+            
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="ativo"
+                checked={formData.ativo}
+                onCheckedChange={(checked) => setFormData(prev => ({ ...prev, ativo: checked }))}
+              />
+              <Label htmlFor="ativo">Ativo</Label>
             </div>
             
             <div className="flex justify-end space-x-2 pt-4">
