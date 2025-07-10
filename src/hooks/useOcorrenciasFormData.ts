@@ -114,6 +114,76 @@ export const useOcorrenciasFormData = ({ selectedCcaId }: UseOcorrenciasFormData
     }
   });
 
+  // Fetch partes do corpo
+  const { data: partesCorpo = [] } = useQuery({
+    queryKey: ['partes-corpo'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('parte_corpo_atingida')
+        .select('id, codigo, nome')
+        .eq('ativo', true)
+        .order('nome');
+      if (error) throw error;
+      return data || [];
+    }
+  });
+
+  // Fetch lateralidades
+  const { data: lateralidades = [] } = useQuery({
+    queryKey: ['lateralidades'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('lateralidade')
+        .select('id, codigo, nome')
+        .eq('ativo', true)
+        .order('nome');
+      if (error) throw error;
+      return data || [];
+    }
+  });
+
+  // Fetch agentes causadores
+  const { data: agentesCausadores = [] } = useQuery({
+    queryKey: ['agentes-causadores'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('agente_causador')
+        .select('id, codigo, nome')
+        .eq('ativo', true)
+        .order('nome');
+      if (error) throw error;
+      return data || [];
+    }
+  });
+
+  // Fetch situações geradoras
+  const { data: situacoesGeradoras = [] } = useQuery({
+    queryKey: ['situacoes-geradoras'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('situacao_geradora')
+        .select('id, codigo, nome')
+        .eq('ativo', true)
+        .order('nome');
+      if (error) throw error;
+      return data || [];
+    }
+  });
+
+  // Fetch naturezas de lesão
+  const { data: naturezasLesao = [] } = useQuery({
+    queryKey: ['naturezas-lesao'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('natureza_lesao')
+        .select('id, codigo, nome')
+        .eq('ativo', true)
+        .order('nome');
+      if (error) throw error;
+      return data || [];
+    }
+  });
+
   return {
     ccas,
     empresas,
@@ -121,6 +191,12 @@ export const useOcorrenciasFormData = ({ selectedCcaId }: UseOcorrenciasFormData
     funcionarios,
     tiposOcorrencia,
     tiposEvento,
-    classificacoesOcorrencia
+    classificacoesOcorrencia,
+    partesCorpo,
+    lateralidades,
+    agentesCausadores,
+    situacoesGeradoras,
+    naturezasLesao
   };
 };
+

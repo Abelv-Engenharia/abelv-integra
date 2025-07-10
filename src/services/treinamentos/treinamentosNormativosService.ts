@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { TreinamentoNormativo } from "@/types/treinamentos";
 
@@ -8,28 +9,45 @@ export const treinamentosNormativosService = {
         .from('treinamentos_normativos')
         .select(`
           *,
-          lista_treinamentos_normativos(nome)
+          funcionarios:funcionario_id (
+            nome,
+            matricula,
+            funcao,
+            cca_id,
+            ccas:cca_id (
+              codigo,
+              nome
+            )
+          ),
+          treinamentos:treinamento_id (
+            nome
+          )
         `)
-        .order('data_realizacao', { ascending: false });
-      
+        .eq('arquivado', false)
+        .order('data_validade', { ascending: true });
+
       if (error) {
         console.error('Erro ao buscar treinamentos normativos:', error);
         return [];
       }
-      
-      return (data || []).map(item => ({
-        ...item,
-        data_realizacao: typeof item.data_realizacao === 'string' ? item.data_realizacao : new Date(item.data_realizacao).toISOString().split('T')[0],
-        data_validade: typeof item.data_validade === 'string' ? item.data_validade : new Date(item.data_validade).toISOString().split('T')[0],
-        treinamentoNome: item.lista_treinamentos_normativos?.nome || 'N/A'
-      }));
+
+      return data || [];
     } catch (error) {
-      console.error('Exceção ao buscar treinamentos normativos:', error);
+      console.error('Erro ao buscar treinamentos normativos:', error);
       return [];
     }
   },
 
-  async create(treinamento: Omit<TreinamentoNormativo, 'id' | 'created_at' | 'updated_at'>): Promise<TreinamentoNormativo | null> {
+  async create(treinamento: {
+    funcionario_id: string;
+    treinamento_id: string;
+    data_realizacao: string;
+    data_validade?: string;
+    certificado_url?: string;
+    observacoes?: string;
+    status: string;
+    tipo?: string;
+  }): Promise<TreinamentoNormativo | null> {
     try {
       const { data, error } = await supabase
         .from('treinamentos_normativos')
@@ -42,11 +60,7 @@ export const treinamentosNormativosService = {
         return null;
       }
       
-      return {
-        ...data,
-        data_realizacao: typeof data.data_realizacao === 'string' ? data.data_realizacao : new Date(data.data_realizacao).toISOString().split('T')[0],
-        data_validade: typeof data.data_validade === 'string' ? data.data_validade : new Date(data.data_validade).toISOString().split('T')[0],
-      };
+      return data as TreinamentoNormativo;
     } catch (error) {
       console.error('Exceção ao criar treinamento normativo:', error);
       return null;
@@ -69,3 +83,4 @@ export const treinamentosNormativosService = {
     }
   }
 };
+

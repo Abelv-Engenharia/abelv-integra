@@ -177,7 +177,7 @@ const IDSMSIndicadores = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Todos os CCAs</SelectItem>
-                  {filterOptions.ccas.map(cca => (
+                  {Array.isArray(filterOptions.ccas) && filterOptions.ccas.map(cca => (
                     <SelectItem key={cca.id} value={cca.id.toString()}>
                       {cca.codigo} - {cca.nome}
                     </SelectItem>
@@ -194,7 +194,7 @@ const IDSMSIndicadores = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Todos os anos</SelectItem>
-                  {filterOptions.anos.map(ano => (
+                  {Array.isArray(filterOptions.anos) && filterOptions.anos.map(ano => (
                     <SelectItem key={ano} value={ano.toString()}>{ano}</SelectItem>
                   ))}
                 </SelectContent>
@@ -209,7 +209,7 @@ const IDSMSIndicadores = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Todos os meses</SelectItem>
-                  {filterOptions.meses.map(mes => (
+                  {Array.isArray(filterOptions.meses) && filterOptions.meses.map(mes => (
                     <SelectItem key={mes} value={mes.toString()}>
                       {mesesNomes[mes as keyof typeof mesesNomes]}
                     </SelectItem>
@@ -221,7 +221,7 @@ const IDSMSIndicadores = () => {
           
           <div className="mt-4 text-sm text-gray-600">
             Filtros aplicados: 
-            {selectedCCA !== "all" && ` CCA: ${filterOptions.ccas.find(c => c.id.toString() === selectedCCA)?.codigo}`}
+            {selectedCCA !== "all" && ` CCA: ${Array.isArray(filterOptions.ccas) ? filterOptions.ccas.find(c => c.id.toString() === selectedCCA)?.codigo : ''}`}
             {selectedYear !== "all" && ` | Ano: ${selectedYear}`}
             {selectedMonth !== "all" && ` | Mês: ${mesesNomes[parseInt(selectedMonth) as keyof typeof mesesNomes]}`}
             {selectedCCA === "all" && selectedYear === "all" && selectedMonth === "all" && " Nenhum filtro aplicado"}
@@ -409,7 +409,7 @@ const IDSMSIndicadores = () => {
           open={isEditDialogOpen}
           onOpenChange={setIsEditDialogOpen}
           onSuccess={handleEditSuccess}
-          ccas={filterOptions.ccas}
+          ccas={Array.isArray(filterOptions.ccas) ? filterOptions.ccas : []}
         />
       )}
 
