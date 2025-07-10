@@ -16,10 +16,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { UseFormReturn } from "react-hook-form";
-import { TreinamentoFormValues } from "@/hooks/useTreinamentoForm";
+import { TreinamentoExecucaoFormValues } from "@/hooks/useTreinamentoForm";
 
 interface CCASelectorProps {
-  form: UseFormReturn<TreinamentoFormValues>;
+  form: UseFormReturn<TreinamentoExecucaoFormValues>;
   ccaOptions: CCAOption[];
 }
 

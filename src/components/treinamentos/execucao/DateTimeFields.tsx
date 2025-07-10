@@ -3,10 +3,10 @@ import React, { useEffect } from "react";
 import { UseFormReturn } from "react-hook-form";
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { TreinamentoFormValues } from "@/hooks/useTreinamentoForm";
+import { TreinamentoExecucaoFormValues } from "@/hooks/useTreinamentoForm";
 
 interface DateTimeFieldsProps {
-  form: UseFormReturn<TreinamentoFormValues>;
+  form: UseFormReturn<TreinamentoExecucaoFormValues>;
 }
 
 const DateTimeFields = ({ form }: DateTimeFieldsProps) => {
@@ -49,6 +49,7 @@ const DateTimeFields = ({ form }: DateTimeFieldsProps) => {
                 disabled 
                 className="bg-gray-100"
                 value={field.value || ""}
+                onChange={(e) => field.onChange(Number(e.target.value))}
               />
             </FormControl>
             <FormMessage />
@@ -69,6 +70,7 @@ const DateTimeFields = ({ form }: DateTimeFieldsProps) => {
                 disabled 
                 className="bg-gray-100"
                 value={field.value || ""}
+                onChange={(e) => field.onChange(Number(e.target.value))}
               />
             </FormControl>
             <FormMessage />

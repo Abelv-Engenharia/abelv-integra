@@ -11,7 +11,6 @@ import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import { ccaService } from "@/services/treinamentos/ccaService";
 import { idsmsService } from "@/services/idsms/idsmsService";
-import { IDSMSFormValues } from "@/types/treinamentos";
 import { CheckCircle } from "lucide-react";
 
 interface IndicadorFormProps {
@@ -19,6 +18,13 @@ interface IndicadorFormProps {
   titulo: string;
   descricao?: string;
   showMotivo?: boolean;
+}
+
+interface IDSMSFormValues {
+  data: string;
+  cca_id: string; // Mantém como string para o form
+  resultado: number;
+  motivo?: string;
 }
 
 const IndicadorForm: React.FC<IndicadorFormProps> = ({ tipo, titulo, descricao, showMotivo = false }) => {
@@ -52,7 +58,7 @@ const IndicadorForm: React.FC<IndicadorFormProps> = ({ tipo, titulo, descricao, 
         data: data.data,
         mes: currentDate.getMonth() + 1,
         ano: currentDate.getFullYear(),
-        cca_id: parseInt(data.cca_id),
+        cca_id: parseInt(data.cca_id), // Converte para number aqui
         resultado: data.resultado,
         tipo,
         motivo: showMotivo ? data.motivo : undefined,
@@ -166,7 +172,8 @@ const IndicadorForm: React.FC<IndicadorFormProps> = ({ tipo, titulo, descricao, 
                   className="h-9"
                   {...form.register("resultado", { 
                     required: "Resultado é obrigatório",
-                    min: { value: 0, message: "Resultado não pode ser negativo" }
+                    min: { value: 0, message: "Resultado não pode ser negativo" },
+                    valueAsNumber: true // Converte automaticamente para number
                   })}
                 />
                 {form.formState.errors.resultado && (

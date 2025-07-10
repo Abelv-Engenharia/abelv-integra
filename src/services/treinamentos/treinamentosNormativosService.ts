@@ -45,3 +45,27 @@ export async function fetchTreinamentoNormativoById(id: string): Promise<Treinam
     return null;
   }
 }
+
+export async function arquivarTreinamento(id: string, justificativa: string): Promise<void> {
+  try {
+    const { error } = await supabase
+      .from('treinamentos_normativos')
+      .update({ 
+        arquivado: true,
+        observacoes: justificativa
+      })
+      .eq('id', id);
+
+    if (error) throw error;
+  } catch (error) {
+    console.error('Erro ao arquivar treinamento:', error);
+    throw error;
+  }
+}
+
+// Export service object to match the import pattern
+export const treinamentosNormativosService = {
+  getAll: fetchTreinamentosNormativos,
+  getById: fetchTreinamentoNormativoById,
+  arquivar: arquivarTreinamento
+};

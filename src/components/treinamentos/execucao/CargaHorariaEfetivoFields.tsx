@@ -9,10 +9,10 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { UseFormReturn } from "react-hook-form";
-import { TreinamentoFormValues } from "@/hooks/useTreinamentoForm";
+import { TreinamentoExecucaoFormValues } from "@/hooks/useTreinamentoForm";
 
 interface CargaHorariaEfetivoFieldsProps {
-  form: UseFormReturn<TreinamentoFormValues>;
+  form: UseFormReturn<TreinamentoExecucaoFormValues>;
   calculateHorasTotais: () => number;
 }
 
@@ -36,9 +36,10 @@ const CargaHorariaEfetivoFields = ({
               <Input
                 type="number"
                 {...field}
+                value={field.value || 0}
                 onChange={(e) => {
-                  const value = e.target.value === '' ? '0' : e.target.value;
-                  field.onChange(Number(value));
+                  const value = e.target.value === '' ? 0 : Number(e.target.value);
+                  field.onChange(value);
                 }}
                 disabled={!isOutroTreinamento && !!treinamentoSelecionado && treinamentoSelecionado !== "outro"}
               />
@@ -59,9 +60,10 @@ const CargaHorariaEfetivoFields = ({
                 type="number" 
                 {...field} 
                 min="0" 
+                value={field.value || 0}
                 onChange={(e) => {
-                  const value = e.target.value === '' ? '0' : e.target.value;
-                  field.onChange(Number(value));
+                  const value = e.target.value === '' ? 0 : Number(e.target.value);
+                  field.onChange(value);
                 }}
               />
             </FormControl>
@@ -81,9 +83,10 @@ const CargaHorariaEfetivoFields = ({
                 type="number" 
                 {...field} 
                 min="0"
+                value={field.value || 0}
                 onChange={(e) => {
-                  const value = e.target.value === '' ? '0' : e.target.value;
-                  field.onChange(Number(value));
+                  const value = e.target.value === '' ? 0 : Number(e.target.value);
+                  field.onChange(value);
                 }}
               />
             </FormControl>
