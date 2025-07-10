@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
@@ -76,8 +77,8 @@ const TreinamentosExecucao = () => {
 
       const execucaoData = {
         data: formData.data,
-        mes: formData.mes,
-        ano: formData.ano,
+        mes: formData.mes || dataExecucao.getMonth() + 1,
+        ano: formData.ano || dataExecucao.getFullYear(),
         cca: selectedCCA ? `${selectedCCA.codigo} - ${selectedCCA.nome}` : '',
         cca_id: Number(formData.cca_id),
         processo_treinamento: selectedProcesso?.nome || '',

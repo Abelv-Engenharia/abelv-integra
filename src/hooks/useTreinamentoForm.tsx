@@ -1,109 +1,100 @@
 
-import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { useQuery } from "@tanstack/react-query";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { TreinamentoFormValues } from "@/types/treinamentos";
-import { ccaService } from "@/services/treinamentos/ccaService";
-import { processoTreinamentoService } from "@/services/treinamentos/processoTreinamentoService";
-import { tipoTreinamentoService } from "@/services/treinamentos/tipoTreinamentoService";
-import { treinamentosService } from "@/services/treinamentos/treinamentosService";
-import { useUserCCAs } from "@/hooks/useUserCCAs";
+import { useSimpleFormData } from "./useSimpleFormData";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+
+const treinamentoFormSchema = z.object({
+  data: z.string().min(1, "Data é obrigatória"),
+  cca_id: z.string().min(1, "CCA é obrigatório"),
+  tipo_treinamento_id: z.string().min(1, "Tipo de treinamento é obrigatório"),
+  processo_treinamento_id: z.string().min(1, "Processo de treinamento é obrigatório"),
+  treinamento_id: z.string().optional(),
+  treinamento_nome: z.string().optional(),
+  carga_horaria: z.number().min(1, "Carga horária deve ser maior que 0"),
+  efetivo_mod: z.number().min(0, "Efetivo MOD deve ser maior ou igual a 0"),
+  efetivo_moi: z.number().min(0, "Efetivo MOI deve ser maior ou igual a 0"),
+  observacoes: z.string().optional(),
+  ano: z.number().optional(),
+  mes: z.number().optional(),
+  lista_presenca: z.any().optional(),
+  lista_presenca_url: z.string().optional(),
+});
 
 export const useTreinamentoForm = () => {
-  const [submitSuccess, setSubmitSuccess] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const { data: userCCAs = [] } = useUserCCAs();
-
   const form = useForm<TreinamentoFormValues>({
+    resolver: zodResolver(treinamentoFormSchema),
     defaultValues: {
       data: "",
-      ano: 0,
-      mes: 0,
-      carga_horaria: 0,
       cca_id: "",
-      efetivo_mod: 0,
-      efetivo_moi: 0,
-      processo_treinamento_id: "",
       tipo_treinamento_id: "",
+      processo_treinamento_id: "",
       treinamento_id: "",
       treinamento_nome: "",
+      carga_horaria: 0,
+      efetivo_mod: 0,
+      efetivo_moi: 0,
       observacoes: "",
-      lista_presenca: "",
-      lista_presenca_url: "",
+      lista_presenca: null,
     },
   });
 
-  const { data: treinamentoOptions = [] } = useQuery({
-    queryKey: ['treinamentos'],
-    queryFn: treinamentosService.getAll,
-  });
+  const { ccas } = useSimpleFormData();
 
-  // Filtrar CCAs baseado nos CCAs permitidos para o usuário
-  const { data: allCcaOptions = [] } = useQuery({
-    queryKey: ['ccas'],
-    queryFn: ccaService.getAll,
-  });
-
-  const ccaOptions = allCcaOptions.filter(cca => 
-    userCCAs.some(userCca => userCca.id === cca.id)
-  );
-
+  // Processos de treinamento
   const { data: processoOptions = [] } = useQuery({
     queryKey: ['processo-treinamento'],
-    queryFn: processoTreinamentoService.getAll,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('processo_treinamento')
+        .select('id, nome, codigo')
+        .eq('ativo', true)
+        .order('nome');
+      return data || [];
+    },
   });
 
+  // Tipos de treinamento
   const { data: tipoOptions = [] } = useQuery({
-    queryKey: ['tipo-treinamento'],
-    queryFn: tipoTreinamentoService.getAll,
+    queryKey: ['tipos-treinamento'],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('tipos_treinamento')
+        .select('id, nome, codigo')
+        .eq('ativo', true)
+        .order('nome');
+      return data || [];
+    },
   });
 
-  // Preencher a carga horária automaticamente ao selecionar um treinamento
-  useEffect(() => {
-    const idSelecionado = form.watch("treinamento_id");
-    if (
-      idSelecionado &&
-      idSelecionado !== "outro" &&
-      treinamentoOptions.length > 0
-    ) {
-      const treinamentoSelecionado = treinamentoOptions.find((t) => t.id === idSelecionado);
-      if (treinamentoSelecionado && treinamentoSelecionado.carga_horaria != null) {
-        // Atualiza o campo se for diferente
-        if (form.getValues("carga_horaria") !== treinamentoSelecionado.carga_horaria) {
-          form.setValue("carga_horaria", treinamentoSelecionado.carga_horaria);
-        }
-      }
-    } else if (idSelecionado === "outro") {
-      // Limpa a carga horária para permitir edição livre
-      if (form.getValues("carga_horaria") !== 0) {
-        form.setValue("carga_horaria", 0);
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [form.watch("treinamento_id"), treinamentoOptions]);
+  // Treinamentos
+  const { data: treinamentoOptions = [] } = useQuery({
+    queryKey: ['treinamentos'],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('treinamentos')
+        .select('id, nome')
+        .order('nome');
+      return data || [];
+    },
+  });
 
   const calculateHorasTotais = () => {
-    const cargaHoraria = form.watch("carga_horaria") || 0;
-    const efetivo = (form.watch("efetivo_mod") || 0) + (form.watch("efetivo_moi") || 0);
-    return cargaHoraria * efetivo;
+    const carga = form.watch("carga_horaria") || 0;
+    const mod = form.watch("efetivo_mod") || 0;
+    const moi = form.watch("efetivo_moi") || 0;
+    return carga * (mod + moi);
   };
 
   return {
     form,
-    submitSuccess,
-    setSubmitSuccess,
-    showSuccess,
-    setShowSuccess,
-    isLoading,
-    setIsLoading,
-    treinamentoOptions,
-    ccaOptions,
+    ccaOptions: ccas,
     processoOptions,
     tipoOptions,
+    treinamentoOptions,
     calculateHorasTotais,
   };
 };
-
-// Exportar o tipo para uso externo
-export type { TreinamentoFormValues };

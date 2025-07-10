@@ -109,9 +109,13 @@ export interface TreinamentoFormValues {
   tipo_treinamento_id: string;
   processo_treinamento_id: string;
   treinamento_id?: string;
+  treinamento_nome?: string;
   carga_horaria: number;
   efetivo_mod: number;
   efetivo_moi: number;
   observacoes?: string;
+  ano?: number;
+  mes?: number;
+  lista_presenca?: FileList | null;
+  lista_presenca_url?: string;
 }
-
