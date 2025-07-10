@@ -1,14 +1,13 @@
-
 import React, { useEffect, useState } from "react";
 import { Table, TableHeader, TableBody, TableRow, TableCell, TableHead } from "@/components/ui/table";
 import { treinamentosNormativosService } from "@/services/treinamentos/treinamentosNormativosService";
 import { Funcionario, TreinamentoNormativo } from "@/types/treinamentos";
 import { format } from "date-fns";
-import { fetchFuncionarios } from "@/utils/treinamentosUtils";
 import { Button } from "@/components/ui/button";
 import { Trash } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useUserCCAs } from "@/hooks/useUserCCAs";
+import { supabase } from "@/integrations/supabase/client";
 
 export const TabelaTreinamentosNormativosVencidos: React.FC = () => {
   const [treinamentos, setTreinamentos] = useState<TreinamentoNormativo[]>([]);
@@ -28,29 +27,66 @@ export const TabelaTreinamentosNormativosVencidos: React.FC = () => {
 
   const carregarDados = async () => {
     setLoading(true);
-    const [treinamentos, funcionarios] = await Promise.all([
-      treinamentosNormativosService.getAll(),
-      fetchFuncionarios()
-    ]);
     
-    // Filtrar funcionários apenas dos CCAs permitidos
+    // Get funcionários with their CCAs through the new relationship
+    const { data: funcionariosComCCAs, error: funcionariosError } = await supabase
+      .from('funcionario_ccas')
+      .select(`
+        funcionario_id,
+        cca_id,
+        funcionarios!inner(
+          id,
+          nome,
+          funcao,
+          matricula,
+          ativo,
+          foto,
+          data_admissao
+        ),
+        ccas!inner(
+          id,
+          codigo,
+          nome
+        )
+      `)
+      .eq('funcionarios.ativo', true);
+
+    if (funcionariosError) {
+      console.error("Erro ao buscar funcionários:", funcionariosError);
+      setLoading(false);
+      return;
+    }
+
+    // Filter funcionários by user's allowed CCAs
     const userCCAIds = userCCAs.map(cca => cca.id);
-    const funcionariosFiltrados = funcionarios.filter(funcionario => 
-      funcionario.cca_id && userCCAIds.includes(funcionario.cca_id)
-    );
+    const funcionariosFiltrados = funcionariosComCCAs?.filter(item => 
+      userCCAIds.includes(item.cca_id)
+    ) || [];
+
+    // Transform data to match expected structure
+    const funcionariosProcessados: Funcionario[] = funcionariosFiltrados.map(item => ({
+      ...item.funcionarios,
+      funcionario_ccas: [{
+        id: crypto.randomUUID(),
+        cca_id: item.cca_id,
+        ccas: item.ccas
+      }]
+    }));
+
+    // Get treinamentos
+    const treinamentos = await treinamentosNormativosService.getAll();
     
-    // Filtrar treinamentos apenas dos funcionários permitidos
-    const funcionariosPermitidosIds = funcionariosFiltrados.map(f => f.id);
+    // Filter treinamentos by funcionários permitidos
+    const funcionariosPermitidosIds = funcionariosProcessados.map(f => f.id);
     const treinamentosFiltrados = treinamentos.filter(treinamento =>
       funcionariosPermitidosIds.includes(treinamento.funcionario_id)
     );
     
     setTreinamentos(treinamentosFiltrados);
-    setFuncionarios(funcionariosFiltrados);
+    setFuncionarios(funcionariosProcessados);
     setLoading(false);
   };
 
-  // Filtra vencidos e próximos ao vencimento, e ordena pela data_validade (menor -> maior)
   const treinamentosFiltrados = treinamentos
     .filter(t => (t.status === "Vencido" || t.status === "Próximo ao vencimento") && !t.arquivado)
     .sort((a, b) => {
@@ -89,15 +125,18 @@ export const TabelaTreinamentosNormativosVencidos: React.FC = () => {
   const handleRenovar = (treinamento: TreinamentoNormativo) => {
     const funcionario = getFuncionarioInfo(treinamento.funcionario_id);
     if (!funcionario) return;
-    // Inclui o campo tipo como "Reciclagem"
+    
+    // Get the first CCA from the funcionario_ccas relationship
+    const ccaId = funcionario.funcionario_ccas?.[0]?.cca_id;
+    
     navigate("/treinamentos/normativo", {
       state: {
-        ccaId: funcionario.cca_id ? String(funcionario.cca_id) : "",
+        ccaId: ccaId ? String(ccaId) : "",
         funcionarioId: funcionario.id,
         funcao: funcionario.funcao,
         matricula: funcionario.matricula,
         treinamentoId: treinamento.treinamento_id,
-        tipo: "Reciclagem", // novo campo!
+        tipo: "Reciclagem",
       },
     });
   };

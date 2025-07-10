@@ -17,14 +17,17 @@ export const fetchTreinamentosNormativosData = async (userCCAIds: number[] = [],
     allowedCCAIds = [parseInt(filters.ccaId)];
   }
 
-  // Get funcionários from allowed CCAs
-  const { data: funcionarios } = await supabase
-    .from('funcionarios')
-    .select('id')
+  // Get funcionários from allowed CCAs through the new relationship
+  const { data: funcionariosComCCAs } = await supabase
+    .from('funcionario_ccas')
+    .select(`
+      funcionario_id,
+      funcionarios!inner(id, ativo)
+    `)
     .in('cca_id', allowedCCAIds)
-    .eq('ativo', true);
+    .eq('funcionarios.ativo', true);
 
-  if (!funcionarios || funcionarios.length === 0) {
+  if (!funcionariosComCCAs || funcionariosComCCAs.length === 0) {
     return [
       { name: "Válido", value: 0 },
       { name: "Próximo ao vencimento", value: 0 },
@@ -32,7 +35,7 @@ export const fetchTreinamentosNormativosData = async (userCCAIds: number[] = [],
     ];
   }
 
-  const funcionarioIds = funcionarios.map(f => f.id);
+  const funcionarioIds = funcionariosComCCAs.map(fc => fc.funcionario_id);
 
   // Get normative training data for funcionários from allowed CCAs
   const { data: trainings } = await supabase

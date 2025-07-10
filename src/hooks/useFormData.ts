@@ -1,4 +1,3 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -142,25 +141,41 @@ export const useFormData = () => {
     staleTime: 5 * 60 * 1000,
   });
 
-  // Buscar funcionários
+  // Buscar funcionários through the new relationship
   const { data: funcionarios = [] } = useQuery({
     queryKey: ['form-data-funcionarios', userCCAs.map(c => c.id)],
     queryFn: async () => {
       if (!userCCAs || userCCAs.length === 0) return [];
       
       const ccaIds = userCCAs.map(cca => cca.id);
-      const { data, error } = await supabase
-        .from('funcionarios')
-        .select('*')
+      
+      // Get funcionários through the new many-to-many relationship
+      const { data: funcionariosComCCAs, error } = await supabase
+        .from('funcionario_ccas')
+        .select(`
+          funcionario_id,
+          cca_id,
+          funcionarios!inner(
+            id,
+            nome,
+            funcao,
+            matricula,
+            ativo,
+            foto,
+            data_admissao
+          )
+        `)
         .in('cca_id', ccaIds)
-        .eq('ativo', true)
-        .order('nome');
+        .eq('funcionarios.ativo', true)
+        .order('funcionarios(nome)');
       
       if (error) {
         console.error("Erro ao buscar funcionários:", error);
         return [];
       }
-      return data || [];
+      
+      // Transform to legacy format for compatibility
+      return funcionariosComCCAs?.map(item => item.funcionarios) || [];
     },
     enabled: !!user?.id && userCCAs.length > 0,
     staleTime: 5 * 60 * 1000,

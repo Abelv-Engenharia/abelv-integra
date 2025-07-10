@@ -8,7 +8,7 @@ import {
   TreinamentoNormativo,
   Treinamento
 } from "@/types/treinamentos";
-import { calcularStatusTreinamento, formatarData, fetchFuncionarios, fetchTreinamentos, getNomeTreinamento } from "@/utils/treinamentosUtils";
+import { calcularStatusTreinamento, formatarData, fetchTreinamentos, getNomeTreinamento } from "@/utils/treinamentosUtils";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 
@@ -47,20 +47,51 @@ const TreinamentosCracha = () => {
           return;
         }
 
-        const [funcionariosData, treinamentosData] = await Promise.all([
-          fetchFuncionarios(),
-          fetchTreinamentos(),
-        ]);
-
-        // Filtrar funcionários apenas dos CCAs permitidos
         const userCCAIds = userCCAs.map(cca => cca.id);
-        const funcionariosFiltrados = funcionariosData.filter(f => 
-          userCCAIds.includes(f.cca_id)
-        );
+        
+        // Get funcionários through the new relationship
+        const { data: funcionariosComCCAs, error: funcionariosError } = await supabase
+          .from('funcionario_ccas')
+          .select(`
+            funcionario_id,
+            cca_id,
+            funcionarios!inner(
+              id,
+              nome,
+              funcao,
+              matricula,
+              ativo,
+              foto,
+              data_admissao
+            ),
+            ccas!inner(
+              id,
+              codigo,
+              nome
+            )
+          `)
+          .eq('funcionarios.ativo', true)
+          .in('cca_id', userCCAIds);
+
+        if (funcionariosError) {
+          console.error("Erro ao buscar funcionários:", funcionariosError);
+        }
+
+        // Transform data to match expected structure
+        const funcionariosFiltrados: Funcionario[] = funcionariosComCCAs?.map(item => ({
+          ...item.funcionarios,
+          funcionario_ccas: [{
+            id: crypto.randomUUID(),
+            cca_id: item.cca_id,
+            ccas: item.ccas
+          }]
+        })) || [];
+
+        const treinamentosData = await fetchTreinamentos();
 
         setFuncionarios(funcionariosFiltrados);
         setTreinamentosInfo(treinamentosData);
-        setCcas(userCCAs); // Usar apenas os CCAs do usuário
+        setCcas(userCCAs);
       } catch (error) {
         console.error("Erro ao carregar dados:", error);
         toast({
@@ -78,7 +109,6 @@ const TreinamentosCracha = () => {
   // Ordenar CCAs pelo campo 'codigo' em ordem crescente antes de mostrar as opções
   const ccasOrdenados = [...ccas].sort((a, b) => {
     if (!a.codigo || !b.codigo) return 0;
-    // Se for numérico, compara como número. Se não, compara como string.
     const numA = Number(a.codigo);
     const numB = Number(b.codigo);
     if (!isNaN(numA) && !isNaN(numB)) {
@@ -90,7 +120,7 @@ const TreinamentosCracha = () => {
 
   // Lista de funcionários filtrada por CCA selecionado
   const funcionariosFiltrados = selectedCcaId
-    ? funcionarios.filter((f) => f.cca_id === selectedCcaId)
+    ? funcionarios.filter((f) => f.funcionario_ccas?.some(fc => fc.cca_id === selectedCcaId))
     : [];
 
   // Ao trocar o CCA, limpa seleção de funcionário e info dependentes
