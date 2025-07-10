@@ -43,6 +43,9 @@ const CompanyLocationFields: React.FC<CompanyLocationFieldsProps> = ({
   const safeEmpresas = empresas || [];
   const safeDisciplinas = disciplinas || [];
 
+  console.log('CompanyLocationFields - Empresas recebidas:', safeEmpresas);
+  console.log('CompanyLocationFields - Selected CCA ID:', selectedCcaId);
+
   return (
     <div className="space-y-4">
       <FormField
@@ -104,7 +107,7 @@ const CompanyLocationFields: React.FC<CompanyLocationFieldsProps> = ({
               <Select
                 onValueChange={value => {
                   field.onChange(value);
-                  console.log("Empresa selecionada (empresa_id):", value);
+                  console.log("Empresa selecionada (ID):", value);
                 }}
                 value={field.value || ""}
                 disabled={!selectedCcaId || safeEmpresas.length === 0}
@@ -126,10 +129,10 @@ const CompanyLocationFields: React.FC<CompanyLocationFieldsProps> = ({
                   {safeEmpresas.length > 0 ? (
                     safeEmpresas.map((empresa) => (
                       <SelectItem
-                        key={empresa.empresa_id?.toString()}
-                        value={empresa.empresa_id?.toString()}
+                        key={empresa.id}
+                        value={empresa.id.toString()}
                       >
-                        {empresa.empresas?.nome || empresa.nome}
+                        {empresa.nome}
                       </SelectItem>
                     ))
                   ) : (

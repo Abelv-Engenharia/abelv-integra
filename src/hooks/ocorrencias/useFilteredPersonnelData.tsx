@@ -33,14 +33,13 @@ export const useFilteredPersonnelData = ({
 
     console.log('=== FILTERING DATA ===');
     console.log('Selected CCA ID:', ccaIdNumber);
-    console.log('All Engenheiros before filtering:', allEngenheiros);
-    console.log('All Supervisores before filtering:', allSupervisores);
+    console.log('All Empresas before filtering:', allEmpresas);
 
     // Filtrar empresas que têm relacionamento com o CCA selecionado
-    const filteredEmpresas = allEmpresas
-      .filter(item => item.cca_id === ccaIdNumber)
-      .map(item => item.empresas)
-      .filter(Boolean);
+    const filteredEmpresas = allEmpresas.filter(empresa => {
+      console.log('Checking empresa CCA ID:', empresa.cca_id, 'against selected:', ccaIdNumber);
+      return empresa.cca_id === ccaIdNumber;
+    });
 
     // Filtrar engenheiros que têm relacionamento com o CCA selecionado
     const filteredEngenheiros = allEngenheiros
