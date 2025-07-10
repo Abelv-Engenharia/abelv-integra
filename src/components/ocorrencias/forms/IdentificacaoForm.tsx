@@ -22,9 +22,6 @@ const IdentificacaoForm = () => {
     ccas, 
     empresas, 
     disciplinas, 
-    engenheiros, 
-    supervisores, 
-    encarregados, 
     funcionarios,
     tiposOcorrencia,
     tiposEvento,
@@ -35,8 +32,7 @@ const IdentificacaoForm = () => {
   console.log('Selected CCA ID:', selectedCcaId);
   console.log('Available ccas:', ccas);
   console.log('Available empresas:', empresas);
-  console.log('Available engenheiros:', engenheiros);
-  console.log('Available supervisores:', supervisores);
+  console.log('Available funcionarios:', funcionarios);
 
   // Auto-popular ano e mês quando a data for selecionada
   const watchData = watch("data");
@@ -85,9 +81,7 @@ const IdentificacaoForm = () => {
       />
 
       <ResponsiblePersonFields
-        engenheiros={engenheiros}
-        supervisores={supervisores}
-        encarregados={encarregados}
+        funcionarios={funcionarios}
         selectedCcaId={selectedCcaId}
       />
 

@@ -893,6 +893,7 @@ export type Database = {
       funcionarios: {
         Row: {
           ativo: boolean | null
+          cca_id: number | null
           created_at: string | null
           data_admissao: string | null
           foto: string | null
@@ -904,6 +905,7 @@ export type Database = {
         }
         Insert: {
           ativo?: boolean | null
+          cca_id?: number | null
           created_at?: string | null
           data_admissao?: string | null
           foto?: string | null
@@ -915,6 +917,7 @@ export type Database = {
         }
         Update: {
           ativo?: boolean | null
+          cca_id?: number | null
           created_at?: string | null
           data_admissao?: string | null
           foto?: string | null
@@ -924,7 +927,15 @@ export type Database = {
           nome?: string
           updated_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "funcionarios_cca_id_fkey"
+            columns: ["cca_id"]
+            isOneToOne: false
+            referencedRelation: "ccas"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       horas_trabalhadas: {
         Row: {
