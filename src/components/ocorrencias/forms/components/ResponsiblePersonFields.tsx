@@ -60,10 +60,22 @@ const ResponsiblePersonFields: React.FC<ResponsiblePersonFieldsProps> = ({
     return false;
   });
 
-  const safeEncarregados = (encarregados || []).filter(enc => enc && enc.nome);
+  // Para encarregados, agora temos a estrutura: { encarregado_id, cca_id, encarregados: {...} }
+  const safeEncarregados = (encarregados || []).filter(enc => {
+    // Verificar se o item tem a estrutura correta da nova tabela de relacionamento
+    if (enc && enc.encarregados && enc.encarregados.nome) {
+      return true;
+    }
+    // Verificar se é um objeto direto (compatibilidade)
+    if (enc && enc.nome && typeof enc.nome === 'string') {
+      return true;
+    }
+    return false;
+  });
 
   console.log('ResponsiblePersonFields - Safe Engenheiros:', safeEngenheiros);
   console.log('ResponsiblePersonFields - Safe Supervisores:', safeSupervisores);
+  console.log('ResponsiblePersonFields - Safe Encarregados:', safeEncarregados);
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -155,11 +167,17 @@ const ResponsiblePersonFields: React.FC<ResponsiblePersonFieldsProps> = ({
               </FormControl>
               <SelectContent>
                 {safeEncarregados.length > 0 ? (
-                  safeEncarregados.map((encarregado) => (
-                    <SelectItem key={encarregado.id} value={encarregado.nome}>
-                      {encarregado.nome}
-                    </SelectItem>
-                  ))
+                  safeEncarregados.map((encarregado) => {
+                    // Determinar a estrutura do objeto - nova estrutura da tabela de relacionamento
+                    const encarregadoData = encarregado.encarregados || encarregado;
+                    const key = encarregado.encarregado_id || encarregado.id;
+                    
+                    return (
+                      <SelectItem key={key} value={encarregadoData.nome}>
+                        {encarregadoData.nome}
+                      </SelectItem>
+                    );
+                  })
                 ) : (
                   <SelectItem value="no-encarregado-available" disabled>
                     {!selectedCcaId ? "Selecione um CCA primeiro" : "Nenhum encarregado disponível"}
