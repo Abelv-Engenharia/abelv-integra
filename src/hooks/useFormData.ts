@@ -1,3 +1,4 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -174,8 +175,15 @@ export const useFormData = () => {
         return [];
       }
       
-      // Transform to legacy format for compatibility
-      return funcionariosComCCAs?.map(item => item.funcionarios) || [];
+      // Transform to legacy format for compatibility - just return the funcionarios data
+      const uniqueFuncionarios = new Map();
+      funcionariosComCCAs?.forEach(item => {
+        if (!uniqueFuncionarios.has(item.funcionarios.id)) {
+          uniqueFuncionarios.set(item.funcionarios.id, item.funcionarios);
+        }
+      });
+      
+      return Array.from(uniqueFuncionarios.values());
     },
     enabled: !!user?.id && userCCAs.length > 0,
     staleTime: 5 * 60 * 1000,
