@@ -33,7 +33,7 @@ export const useFilteredPersonnelData = ({
 
     console.log('=== FILTERING DATA ===');
     console.log('Selected CCA ID:', ccaIdNumber);
-    console.log('All Funcionarios before filtering:', allFuncionarios);
+    console.log('All Empresas before filtering:', allEmpresas);
 
     // Filtrar empresas que têm relacionamento com o CCA selecionado
     const filteredEmpresas = allEmpresas.filter(empresa => {
@@ -60,22 +60,16 @@ export const useFilteredPersonnelData = ({
       .filter(Boolean);
 
     // Filtrar encarregados que têm relacionamento com o CCA selecionado
+    // Como agora usamos encarregado_ccas, precisamos filtrar pela estrutura correta
     const filteredEncarregados = allEncarregados.filter(item => {
       console.log('Checking encarregado CCA ID:', item.cca_id, 'against selected:', ccaIdNumber);
       return item.cca_id === ccaIdNumber;
     });
 
-    // Filtrar funcionários que têm relacionamento com o CCA selecionado
-    const filteredFuncionarios = allFuncionarios
-      .filter(item => {
-        console.log('Checking funcionario CCA ID:', item.cca_id, 'against selected:', ccaIdNumber);
-        return item.cca_id === ccaIdNumber;
-      })
-      .map(item => ({
-        ...item.funcionarios,
-        funcionario_cca_id: item.funcionario_id
-      }))
-      .filter(Boolean);
+    const filteredFuncionarios = allFuncionarios.filter(item => {
+      console.log('Checking funcionario CCA ID:', item.cca_id, 'against selected:', ccaIdNumber);
+      return item.cca_id === ccaIdNumber;
+    });
 
     console.log('=== FILTERED RESULTS ===');
     console.log('Filtered empresas:', filteredEmpresas);

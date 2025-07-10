@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { PhotoUpload } from "./PhotoUpload";
 import { Funcionario, CCA, FuncionarioFormData } from "@/types/funcionarios";
 
@@ -29,26 +29,23 @@ export const FuncionarioForm: React.FC<FuncionarioFormProps> = ({
     nome: "",
     funcao: "",
     matricula: "",
-    cca_ids: [],
+    cca_id: "none",
     data_admissao: ""
   });
 
   useEffect(() => {
     if (editingFuncionario) {
-      // Extrair CCAs do funcionário
-      const ccaIds = editingFuncionario.funcionario_ccas?.map(fc => fc.cca_id.toString()) || [];
-      
       setFormData({
         nome: editingFuncionario.nome,
         funcao: editingFuncionario.funcao,
         matricula: editingFuncionario.matricula,
-        cca_ids: ccaIds,
+        cca_id: editingFuncionario.cca_id?.toString() || "none",
         data_admissao: editingFuncionario.data_admissao ?? ""
       });
       setPhotoPreview(editingFuncionario.foto || null);
       setPhotoRemoved(false);
     } else {
-      setFormData({ nome: "", funcao: "", matricula: "", cca_ids: [], data_admissao: "" });
+      setFormData({ nome: "", funcao: "", matricula: "", cca_id: "none", data_admissao: "" });
       setPhotoPreview(null);
       setPhotoFile(null);
       setPhotoRemoved(false);
@@ -71,15 +68,6 @@ export const FuncionarioForm: React.FC<FuncionarioFormProps> = ({
     setPhotoPreview(null);
     setPhotoFile(null);
     setPhotoRemoved(true);
-  };
-
-  const handleCcaChange = (ccaId: string, checked: boolean) => {
-    setFormData(prev => ({
-      ...prev,
-      cca_ids: checked 
-        ? [...prev.cca_ids, ccaId]
-        : prev.cca_ids.filter(id => id !== ccaId)
-    }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -118,6 +106,7 @@ export const FuncionarioForm: React.FC<FuncionarioFormProps> = ({
         </div>
       </div>
 
+      {/* Matrícula e Data de Admissão lado a lado */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <Label htmlFor="matricula">Matrícula</Label>
@@ -144,22 +133,25 @@ export const FuncionarioForm: React.FC<FuncionarioFormProps> = ({
         </div>
       </div>
 
+      {/* CCA logo abaixo */}
       <div>
-        <Label>CCAs (selecione um ou mais)</Label>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mt-2">
-          {ccas.map((cca) => (
-            <div key={cca.id} className="flex items-center space-x-2">
-              <Checkbox
-                id={`cca-${cca.id}`}
-                checked={formData.cca_ids.includes(cca.id.toString())}
-                onCheckedChange={(checked) => handleCcaChange(cca.id.toString(), checked as boolean)}
-              />
-              <Label htmlFor={`cca-${cca.id}`} className="text-sm">
+        <Label htmlFor="cca">CCA</Label>
+        <Select
+          value={formData.cca_id}
+          onValueChange={(value) => setFormData(prev => ({ ...prev, cca_id: value }))}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Selecione um CCA" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="none">Nenhum CCA</SelectItem>
+            {ccas.map((cca) => (
+              <SelectItem key={cca.id} value={cca.id.toString()}>
                 {cca.codigo} - {cca.nome}
-              </Label>
-            </div>
-          ))}
-        </div>
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="flex justify-end space-x-2">

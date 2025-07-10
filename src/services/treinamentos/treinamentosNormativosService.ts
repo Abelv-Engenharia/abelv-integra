@@ -1,71 +1,71 @@
+import { supabase } from "@/integrations/supabase/client";
+import { TreinamentoNormativo } from "@/types/treinamentos";
 
-import { supabase } from '@/integrations/supabase/client';
-import { TreinamentoNormativo } from '@/types/treinamentos';
-
-export async function fetchTreinamentosNormativos(): Promise<TreinamentoNormativo[]> {
-  try {
-    const { data, error } = await supabase
-      .from('treinamentos_normativos')
-      .select(`
-        *,
-        lista_treinamentos_normativos(nome)
-      `)
-      .eq('arquivado', false)
-      .order('data_validade', { ascending: true });
-
-    if (error) throw error;
-
-    return (data || []).map(item => ({
-      ...item,
-      tipo: item.tipo as 'Formação' | 'Reciclagem',
-      treinamentoNome: item.lista_treinamentos_normativos?.nome || ''
-    }));
-  } catch (error) {
-    console.error('Erro ao buscar treinamentos normativos:', error);
-    return [];
-  }
-}
-
-export async function fetchTreinamentoNormativoById(id: string): Promise<TreinamentoNormativo | null> {
-  try {
-    const { data, error } = await supabase
-      .from('treinamentos_normativos')
-      .select('*')
-      .eq('id', id)
-      .single();
-
-    if (error) throw error;
-
-    return {
-      ...data,
-      tipo: data.tipo as 'Formação' | 'Reciclagem'
-    };
-  } catch (error) {
-    console.error('Erro ao buscar treinamento normativo:', error);
-    return null;
-  }
-}
-
-export async function arquivarTreinamento(id: string, justificativa: string): Promise<void> {
-  try {
-    const { error } = await supabase
-      .from('treinamentos_normativos')
-      .update({ 
-        arquivado: true,
-        observacoes: justificativa
-      })
-      .eq('id', id);
-
-    if (error) throw error;
-  } catch (error) {
-    console.error('Erro ao arquivar treinamento:', error);
-    throw error;
-  }
-}
-
-// Export service object to match the import pattern
 export const treinamentosNormativosService = {
-  getAll: fetchTreinamentosNormativos,
-  getById: fetchTreinamentoNormativoById,
-  arquivar: arquivarTreinamento
+  async getAll(): Promise<TreinamentoNormativo[]> {
+    try {
+      const { data, error } = await supabase
+        .from('treinamentos_normativos')
+        .select(`
+          *,
+          lista_treinamentos_normativos(nome)
+        `)
+        .order('data_realizacao', { ascending: false });
+      
+      if (error) {
+        console.error('Erro ao buscar treinamentos normativos:', error);
+        return [];
+      }
+      
+      return (data || []).map(item => ({
+        ...item,
+        data_realizacao: typeof item.data_realizacao === 'string' ? item.data_realizacao : new Date(item.data_realizacao).toISOString().split('T')[0],
+        data_validade: typeof item.data_validade === 'string' ? item.data_validade : new Date(item.data_validade).toISOString().split('T')[0],
+        treinamentoNome: item.lista_treinamentos_normativos?.nome || 'N/A'
+      }));
+    } catch (error) {
+      console.error('Exceção ao buscar treinamentos normativos:', error);
+      return [];
+    }
+  },
+
+  async create(treinamento: Omit<TreinamentoNormativo, 'id' | 'created_at' | 'updated_at'>): Promise<TreinamentoNormativo | null> {
+    try {
+      const { data, error } = await supabase
+        .from('treinamentos_normativos')
+        .insert(treinamento)
+        .select()
+        .single();
+      
+      if (error) {
+        console.error('Erro ao criar treinamento normativo:', error);
+        return null;
+      }
+      
+      return {
+        ...data,
+        data_realizacao: typeof data.data_realizacao === 'string' ? data.data_realizacao : new Date(data.data_realizacao).toISOString().split('T')[0],
+        data_validade: typeof data.data_validade === 'string' ? data.data_validade : new Date(data.data_validade).toISOString().split('T')[0],
+      };
+    } catch (error) {
+      console.error('Exceção ao criar treinamento normativo:', error);
+      return null;
+    }
+  },
+
+  async arquivar(id: string, justificativa?: string): Promise<void> {
+    try {
+      // No momento não existe campo para justificativa de exclusão, apenas arquiva.
+      const { error } = await supabase
+        .from('treinamentos_normativos')
+        .update({ arquivado: true /*, justificativa_exclusao: justificativa */ })
+        .eq('id', id);
+
+      if (error) {
+        console.error('Erro ao arquivar treinamento normativo:', error);
+      }
+    } catch (error) {
+      console.error('Exceção ao arquivar treinamento normativo:', error);
+    }
+  }
 };

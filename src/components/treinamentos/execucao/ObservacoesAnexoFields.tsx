@@ -1,4 +1,3 @@
-
 import React from "react";
 import {
   FormField,
@@ -10,10 +9,10 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { UseFormReturn } from "react-hook-form";
-import { TreinamentoExecucaoFormValues } from "@/types/treinamentos";
+import { TreinamentoFormValues } from "@/hooks/useTreinamentoForm";
 
 interface ObservacoesAnexoFieldsProps {
-  form: UseFormReturn<TreinamentoExecucaoFormValues>;
+  form: UseFormReturn<TreinamentoFormValues>;
   onListaPresencaFileChange?: (file: File | null) => void;
 }
 
@@ -44,7 +43,7 @@ const ObservacoesAnexoFields = ({ form, onListaPresencaFileChange }: Observacoes
 
       <FormField
         control={form.control}
-        name="lista_presenca_url"
+        name="lista_presenca"
         render={({ field: { value, onChange, ...field } }) => (
           <FormItem>
             <FormLabel>Anexar lista de presença (PDF, máx. 2MB)</FormLabel>
@@ -54,7 +53,7 @@ const ObservacoesAnexoFields = ({ form, onListaPresencaFileChange }: Observacoes
                 accept=".pdf"
                 onChange={(e) => {
                   const file = e.target.files && e.target.files[0] ? e.target.files[0] : null;
-                  onChange(file ? file.name : "");
+                  onChange(e.target.files);
                   if (onListaPresencaFileChange) onListaPresencaFileChange(file);
                 }}
                 {...field}

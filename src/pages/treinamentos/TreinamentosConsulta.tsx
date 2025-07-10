@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Search, Filter, Download, Eye, Edit, Trash2 } from "lucide-react";
 import { execucaoTreinamentoService } from "@/services/treinamentos/execucaoTreinamentoService";
 import { listaTreinamentosNormativosService } from "@/services/treinamentos/listaTreinamentosNormativosService";
+import { fetchFuncionarios } from "@/utils/treinamentosUtils";
 import { useNavigate } from "react-router-dom";
 import ConfirmacaoExclusaoModal from "@/components/treinamentos/ConfirmacaoExclusaoModal";
 import { toast } from "@/hooks/use-toast";
@@ -44,45 +44,10 @@ function TreinamentosNormativosPorFuncionarioTab() {
       if (selectedCcaId) {
         setLoading(true);
         try {
-          // Get funcionários through the new relationship
-          const { data: funcionariosComCCAs, error } = await supabase
-            .from('funcionario_ccas')
-            .select(`
-              funcionario_id,
-              cca_id,
-              funcionarios!inner(
-                id,
-                nome,
-                funcao,
-                matricula,
-                ativo,
-                foto,
-                data_admissao
-              ),
-              ccas!inner(
-                id,
-                codigo,
-                nome
-              )
-            `)
-            .eq('funcionarios.ativo', true)
-            .eq('cca_id', parseInt(selectedCcaId));
-
-          if (error) {
-            throw error;
-          }
-
-          // Transform data to match expected structure
-          const funcionariosProcessados: Funcionario[] = funcionariosComCCAs?.map(item => ({
-            ...item.funcionarios,
-            funcionario_ccas: [{
-              id: crypto.randomUUID(),
-              cca_id: item.cca_id,
-              ccas: item.ccas
-            }]
-          })) || [];
-
-          setFuncionarios(funcionariosProcessados);
+          const todos = await fetchFuncionarios();
+          setFuncionarios(
+            todos.filter(f => f.cca_id && String(f.cca_id) === selectedCcaId)
+          );
         } catch {
           toast({
             title: "Erro",
@@ -110,6 +75,7 @@ function TreinamentosNormativosPorFuncionarioTab() {
     fetchTreinamentos();
   }, []);
 
+  // Quando seleciona funcionário, busca histórico desse funcionário na base (pelo id)
   useEffect(() => {
     const buscarHistoricoFuncionario = async () => {
       if (!selectedFuncionarioId) {
@@ -118,7 +84,16 @@ function TreinamentosNormativosPorFuncionarioTab() {
       }
       setLoading(true);
       try {
+        // Supondo que há um service: fetch histórico de treinamentos normativos do funcionário
+        // (aqui idealmente deveria ser um método próprio, mas usaremos utilitário fetchFuncionarios() p/ demo)
+        // O fetchFuncionarios traz todos, então fazemos o filtro só do selecionado:
+        // Este dado deveria idealmente vir da tabela histórica de execuções normativas. Aqui apenas exibe placeholder.
+        // Você pode conectar ao endpoint real facilmente.
+        // Vamos buscar e simular o array [{treinamento_nome, data_realizacao, data_validade, tipo, certificado_url}]
+        // Suponha que há um endpoint/função: funcionario.normativosRealizados[]
+        // Aqui mostramos um exemplo mock:
         setHistoricoFuncionario([
+          // Exemplo
           {
             treinamento_nome: "NR 35",
             data_realizacao: "2024-05-01",
@@ -127,6 +102,7 @@ function TreinamentosNormativosPorFuncionarioTab() {
             certificado_url: null,
           },
         ]);
+        // Para usar dados reais, substitua pelo endpoint correto.
       } catch {
         toast({
           title: "Erro",
@@ -149,6 +125,7 @@ function TreinamentosNormativosPorFuncionarioTab() {
     }
   }, [selectedFuncionarioId, funcionarios]);
 
+  // Buscar treinamentos normativos por funcionário
   useEffect(() => {
     const buscarTreinamentosNormativosFuncionario = async () => {
       if (!selectedFuncionarioId) {
@@ -158,6 +135,7 @@ function TreinamentosNormativosPorFuncionarioTab() {
       }
       setLoading(true);
       try {
+        // Corrigido: NÃO ordenar por campo relacionado, só por data
         const { data, error } = await supabase
           .from('treinamentos_normativos')
           .select(`
@@ -189,6 +167,7 @@ function TreinamentosNormativosPorFuncionarioTab() {
           return;
         }
 
+        // Se desejar ordenar por nome, faça aqui no JS:
         let normativos: any[] = (data || []).map(row => ({
           id: row.id,
           treinamento_nome: row.lista_treinamentos_normativos?.nome || "-",
@@ -200,10 +179,12 @@ function TreinamentosNormativosPorFuncionarioTab() {
           arquivado: row.arquivado,
         }));
 
+        // Ordena por nome se desejar:
         normativos = normativos.sort((a, b) =>
           (a.treinamento_nome || "").localeCompare(b.treinamento_nome || "")
         );
 
+        // Agrupar por treinamento_nome e filtrar o mais atual para "Treinamentos" e antigos para "Histórico"
         const agrupados: { [nome: string]: any[] } = {};
         normativos.forEach(t => {
           if (!agrupados[t.treinamento_nome]) agrupados[t.treinamento_nome] = [];
@@ -248,6 +229,7 @@ function TreinamentosNormativosPorFuncionarioTab() {
                 <SelectValue placeholder="Selecione o CCA" />
               </SelectTrigger>
               <SelectContent>
+                {/* Usar CCAs ordenados */}
                 {sortedCCAs.map((cca) => (
                   <SelectItem key={cca.id} value={String(cca.id)}>
                     {cca.codigo} - {cca.nome}
@@ -348,8 +330,10 @@ const TreinamentosConsulta = () => {
       setIsLoading(true);
       const data = await execucaoTreinamentoService.getAll();
       
+      // Filtrar apenas execuções dos CCAs que o usuário tem permissão
       const userCCAIds = userCCAs.map(cca => cca.id);
       const execucoesPermitidas = data.filter(item => {
+        // Se o item tem cca_id, verificar se está na lista de CCAs permitidos
         if (item.cca_id) {
           return userCCAIds.includes(item.cca_id);
         }
@@ -394,6 +378,7 @@ const TreinamentosConsulta = () => {
     const d = new Date(date);
     return d.toLocaleDateString("pt-BR");
   };
+  // Opções de ação
   const handleView = (execucao: any) => {
     if (execucao.id) {
       navigate(`/treinamentos/execucao/visualizar/${execucao.id}`);
@@ -481,6 +466,7 @@ const TreinamentosConsulta = () => {
                     <Download className="h-4 w-4" />
                   </Button>
                 </div>
+                {/* Tabela */}
                 <div className="rounded-md border">
                   <Table>
                     <TableHeader>

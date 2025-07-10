@@ -17,10 +17,10 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { UseFormReturn } from "react-hook-form";
-import { TreinamentoExecucaoFormValues } from "@/types/treinamentos";
+import { TreinamentoFormValues } from "@/hooks/useTreinamentoForm";
 
 interface TreinamentoSelectorProps {
-  form: UseFormReturn<TreinamentoExecucaoFormValues>;
+  form: UseFormReturn<TreinamentoFormValues>;
   treinamentoOptions: Treinamento[];
 }
 
@@ -87,3 +87,4 @@ const TreinamentoSelector = ({
 };
 
 export default TreinamentoSelector;
+

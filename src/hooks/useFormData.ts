@@ -3,12 +3,10 @@ import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserCCAs } from "./useUserCCAs";
-import { useFuncionariosData } from "./useFuncionariosData";
 
 export const useFormData = () => {
   const { user } = useAuth();
   const { data: userCCAs = [] } = useUserCCAs();
-  const { data: funcionarios = [] } = useFuncionariosData();
 
   // Buscar dados básicos que não dependem de CCA
   const { data: ccas = [] } = useQuery({
@@ -136,6 +134,30 @@ export const useFormData = () => {
       
       if (error) {
         console.error("Erro ao buscar encarregados:", error);
+        return [];
+      }
+      return data || [];
+    },
+    enabled: !!user?.id && userCCAs.length > 0,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  // Buscar funcionários
+  const { data: funcionarios = [] } = useQuery({
+    queryKey: ['form-data-funcionarios', userCCAs.map(c => c.id)],
+    queryFn: async () => {
+      if (!userCCAs || userCCAs.length === 0) return [];
+      
+      const ccaIds = userCCAs.map(cca => cca.id);
+      const { data, error } = await supabase
+        .from('funcionarios')
+        .select('*')
+        .in('cca_id', ccaIds)
+        .eq('ativo', true)
+        .order('nome');
+      
+      if (error) {
+        console.error("Erro ao buscar funcionários:", error);
         return [];
       }
       return data || [];
