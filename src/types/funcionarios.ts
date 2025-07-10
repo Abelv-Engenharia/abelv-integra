@@ -1,3 +1,4 @@
+
 export interface Funcionario {
   id: string;
   nome: string;
@@ -5,9 +6,9 @@ export interface Funcionario {
   matricula: string;
   foto?: string;
   ativo: boolean;
-  cca_id?: number;
-  ccas?: { id: number; codigo: string; nome: string };
   data_admissao?: string | null;
+  // Remover cca_id e ccas, agora será através do relacionamento
+  funcionario_ccas?: { id: string; cca_id: number; ccas: { id: number; codigo: string; nome: string } }[];
 }
 
 export interface CCA {
@@ -20,6 +21,6 @@ export interface FuncionarioFormData {
   nome: string;
   funcao: string;
   matricula: string;
-  cca_id: string;
+  cca_ids: string[]; // Agora aceita múltiplos CCAs
   data_admissao?: string | null;
 }

@@ -890,10 +890,45 @@ export type Database = {
         }
         Relationships: []
       }
+      funcionario_ccas: {
+        Row: {
+          cca_id: number
+          created_at: string | null
+          funcionario_id: string
+          id: string
+        }
+        Insert: {
+          cca_id: number
+          created_at?: string | null
+          funcionario_id: string
+          id?: string
+        }
+        Update: {
+          cca_id?: number
+          created_at?: string | null
+          funcionario_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "funcionario_ccas_cca_id_fkey"
+            columns: ["cca_id"]
+            isOneToOne: false
+            referencedRelation: "ccas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "funcionario_ccas_funcionario_id_fkey"
+            columns: ["funcionario_id"]
+            isOneToOne: false
+            referencedRelation: "funcionarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       funcionarios: {
         Row: {
           ativo: boolean | null
-          cca_id: number | null
           created_at: string | null
           data_admissao: string | null
           foto: string | null
@@ -905,7 +940,6 @@ export type Database = {
         }
         Insert: {
           ativo?: boolean | null
-          cca_id?: number | null
           created_at?: string | null
           data_admissao?: string | null
           foto?: string | null
@@ -917,7 +951,6 @@ export type Database = {
         }
         Update: {
           ativo?: boolean | null
-          cca_id?: number | null
           created_at?: string | null
           data_admissao?: string | null
           foto?: string | null
@@ -927,15 +960,7 @@ export type Database = {
           nome?: string
           updated_at?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "funcionarios_cca_id_fkey"
-            columns: ["cca_id"]
-            isOneToOne: false
-            referencedRelation: "ccas"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       horas_trabalhadas: {
         Row: {

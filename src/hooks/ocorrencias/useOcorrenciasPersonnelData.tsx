@@ -95,18 +95,23 @@ export const useOcorrenciasPersonnelData = () => {
     enabled: allowedCcaIds.length > 0,
   });
 
-  // Funcionários
+  // Funcionários com CCAs através da nova tabela de relacionamento
   const { data: allFuncionarios = [] } = useQuery({
     queryKey: ['funcionarios-ocorrencias', allowedCcaIds],
     queryFn: async () => {
       if (allowedCcaIds.length === 0) return [];
       
       const { data } = await supabase
-        .from('funcionarios')
-        .select('id, nome, funcao, matricula, cca_id')
-        .eq('ativo', true)
-        .in('cca_id', allowedCcaIds)
-        .order('nome');
+        .from('funcionario_ccas')
+        .select(`
+          funcionario_id,
+          cca_id,
+          funcionarios!inner(id, nome, funcao, matricula, ativo)
+        `)
+        .eq('funcionarios.ativo', true)
+        .in('cca_id', allowedCcaIds);
+      
+      console.log('Funcionários filtrados por CCA:', data);
       return data || [];
     },
     enabled: allowedCcaIds.length > 0,

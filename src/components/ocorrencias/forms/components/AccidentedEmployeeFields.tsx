@@ -28,7 +28,23 @@ const AccidentedEmployeeFields: React.FC<AccidentedEmployeeFieldsProps> = ({
   selectedCcaId,
   namePrefix = "colaboradores_acidentados",
 }) => {
-  const { control } = useFormContext();
+  const { control, watch, setValue } = useFormContext();
+
+  console.log('AccidentedEmployeeFields - Funcionarios recebidos:', funcionarios);
+  console.log('AccidentedEmployeeFields - Selected CCA ID:', selectedCcaId);
+
+  // Auto-popular função e matrícula quando colaborador for selecionado
+  const watchColaborador = watch(`${namePrefix}.0.colaborador`);
+  
+  React.useEffect(() => {
+    if (watchColaborador && funcionarios.length > 0) {
+      const funcionario = funcionarios.find(f => f.id.toString() === watchColaborador);
+      if (funcionario) {
+        setValue(`${namePrefix}.0.funcao`, funcionario.funcao || "");
+        setValue(`${namePrefix}.0.matricula`, funcionario.matricula || "");
+      }
+    }
+  }, [watchColaborador, funcionarios, setValue, namePrefix]);
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -45,11 +61,17 @@ const AccidentedEmployeeFields: React.FC<AccidentedEmployeeFieldsProps> = ({
                 </SelectTrigger>
               </FormControl>
               <SelectContent>
-                {funcionarios.map((funcionario) => (
-                  <SelectItem key={funcionario.id} value={funcionario.id.toString()}>
-                    {funcionario.nome}
+                {funcionarios && funcionarios.length > 0 ? (
+                  funcionarios.map((funcionario) => (
+                    <SelectItem key={funcionario.id} value={funcionario.id.toString()}>
+                      {funcionario.nome}
+                    </SelectItem>
+                  ))
+                ) : (
+                  <SelectItem value="no-funcionario-available" disabled>
+                    {!selectedCcaId ? "Selecione um CCA primeiro" : "Nenhum funcionário disponível para este CCA"}
                   </SelectItem>
-                ))}
+                )}
               </SelectContent>
             </Select>
             <FormMessage />

@@ -21,36 +21,27 @@ interface FuncionariosTableProps {
   onDelete: (id: string) => void;
 }
 
-// Novo componente para renderizar Avatar de funcionário com signedURL
 const FuncionarioAvatar: React.FC<{ funcionario: Funcionario }> = ({ funcionario }) => {
   const { url, loading, error, generate } = useSignedUrl();
 
   React.useEffect(() => {
-    // Gera a signed URL sempre que houver foto e id
     if (funcionario.foto) {
-      // Espera que foto seja do tipo "funcionarios/xxx.jpg" ou só caminho do arquivo
       let filePath = funcionario.foto;
-      // Em alguns casos, pode vir a URL completa, extraímos o path relativo se for
       if (/^https?:\/\//.test(filePath)) {
-        // Remove supabase host, pega só o path no storage
         const match = filePath.match(/\/storage\/v1\/object\/sign\/([^?]+)/);
         if (match) {
           filePath = decodeURIComponent(match[1]);
         } else {
-          // Alternadamente, tenta pegar após 'funcionarios-fotos/' como fallback
           const idx = filePath.indexOf('funcionarios-fotos/');
           if (idx >= 0) filePath = filePath.slice(idx + 'funcionarios-fotos/'.length);
         }
       } else if (filePath.startsWith('funcionarios/')) {
         // OK!
       } else {
-        // Se vier só 'abc.jpg', prefixa corretamente
         filePath = `funcionarios/${filePath}`;
       }
       generate('funcionarios-fotos', filePath, 300);
     }
-    // Não colocar dependência em generate para evitar loop
-    // eslint-disable-next-line
   }, [funcionario.foto]);
 
   if (!funcionario.foto) {
@@ -65,7 +56,6 @@ const FuncionarioAvatar: React.FC<{ funcionario: Funcionario }> = ({ funcionario
 
   return (
     <Avatar className="size-8">
-      {/* Mostra imagem quando a signed url está disponível */}
       {url ? (
         <AvatarImage src={url} />
       ) : (
@@ -97,7 +87,7 @@ export const FuncionariosTable: React.FC<FuncionariosTableProps> = ({
             <th className="border border-gray-300 p-2 text-left">Função</th>
             <th className="border border-gray-300 p-2 text-left">Matrícula</th>
             <th className="border border-gray-300 p-2 text-left">Data de admissão</th>
-            <th className="border border-gray-300 p-2 text-left">CCA</th>
+            <th className="border border-gray-300 p-2 text-left">CCAs</th>
             <th className="border border-gray-300 p-2 text-left">Status</th>
             <th className="border border-gray-300 p-2 text-center">Ações</th>
           </tr>
@@ -115,7 +105,10 @@ export const FuncionariosTable: React.FC<FuncionariosTableProps> = ({
                 {formatDateBR(funcionario.data_admissao)}
               </td>
               <td className="border border-gray-300 p-2">
-                {funcionario.ccas ? `${funcionario.ccas.codigo} - ${funcionario.ccas.nome}` : "Nenhum"}
+                {funcionario.funcionario_ccas && funcionario.funcionario_ccas.length > 0 
+                  ? funcionario.funcionario_ccas.map(fc => `${fc.ccas.codigo}`).join(', ')
+                  : "Nenhum"
+                }
               </td>
               <td className="border border-gray-300 p-2">
                 <span className={`px-2 py-1 rounded text-xs ${funcionario.ativo ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>

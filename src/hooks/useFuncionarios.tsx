@@ -1,3 +1,4 @@
+
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -7,7 +8,7 @@ export const useFuncionarios = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Buscar funcionários
+  // Buscar funcionários com seus CCAs
   const { data: funcionarios = [], isLoading: loadingFuncionarios } = useQuery({
     queryKey: ['admin-funcionarios'],
     queryFn: async () => {
@@ -20,10 +21,13 @@ export const useFuncionarios = () => {
           matricula,
           foto,
           ativo,
-          cca_id,
-          ccas:cca_id(id, codigo, nome),
           updated_at,
-          data_admissao
+          data_admissao,
+          funcionario_ccas!inner(
+            id,
+            cca_id,
+            ccas!inner(id, codigo, nome)
+          )
         `)
         .order('nome');
       if (error) throw error;
@@ -83,14 +87,12 @@ export const useFuncionarios = () => {
       photoFile, 
       photoRemoved 
     }: {
-      funcionario: { nome: string; funcao: string; matricula: string; cca_id: string; data_admissao?: string | null };
+      funcionario: { nome: string; funcao: string; matricula: string; cca_ids: string[]; data_admissao?: string | null };
       editingFuncionario?: Funcionario | null;
       photoFile?: File | null;
       photoRemoved?: boolean;
     }) => {
-      const ccaId = funcionario.cca_id === "none" ? null : parseInt(funcionario.cca_id);
-
-      // Preparar campo data_admissao corretamente (null ou string ISO yyyy-mm-dd)
+      // Preparar campo data_admissao corretamente
       let dataAdmissao: string | null = null;
       if (funcionario.data_admissao) {
         dataAdmissao = funcionario.data_admissao || null;
@@ -107,16 +109,16 @@ export const useFuncionarios = () => {
             fotoUrl = uploadedUrl;
           }
         }
-        // Adicionando log para checagem
+
         console.log('[Editar] id:', editingFuncionario.id, 'nome:', funcionario.nome, 'fotoUrl:', fotoUrl, 'data_admissao:', dataAdmissao);
 
+        // Atualizar dados básicos do funcionário
         const { error: updateError } = await supabase
           .from('funcionarios')
           .update({ 
             nome: funcionario.nome, 
             funcao: funcionario.funcao,
             matricula: funcionario.matricula,
-            cca_id: ccaId,
             foto: fotoUrl,
             data_admissao: dataAdmissao
           })
@@ -126,14 +128,37 @@ export const useFuncionarios = () => {
           console.error('Erro ao atualizar funcionário:', updateError);
           throw updateError;
         }
+
+        // Remover relacionamentos antigos
+        await supabase
+          .from('funcionario_ccas')
+          .delete()
+          .eq('funcionario_id', editingFuncionario.id);
+
+        // Adicionar novos relacionamentos
+        if (funcionario.cca_ids.length > 0) {
+          const relacionamentos = funcionario.cca_ids.map(ccaId => ({
+            funcionario_id: editingFuncionario.id,
+            cca_id: parseInt(ccaId)
+          }));
+
+          const { error: relationshipError } = await supabase
+            .from('funcionario_ccas')
+            .insert(relacionamentos);
+
+          if (relationshipError) {
+            console.error('Erro ao criar relacionamentos:', relationshipError);
+            throw relationshipError;
+          }
+        }
       } else {
+        // Criar novo funcionário
         const { data: novoFuncionario, error: createError } = await supabase
           .from('funcionarios')
           .insert({ 
             nome: funcionario.nome, 
             funcao: funcionario.funcao,
             matricula: funcionario.matricula,
-            cca_id: ccaId,
             data_admissao: dataAdmissao
           })
           .select()
@@ -144,6 +169,24 @@ export const useFuncionarios = () => {
           throw createError;
         }
 
+        // Adicionar relacionamentos com CCAs
+        if (funcionario.cca_ids.length > 0 && novoFuncionario) {
+          const relacionamentos = funcionario.cca_ids.map(ccaId => ({
+            funcionario_id: novoFuncionario.id,
+            cca_id: parseInt(ccaId)
+          }));
+
+          const { error: relationshipError } = await supabase
+            .from('funcionario_ccas')
+            .insert(relacionamentos);
+
+          if (relationshipError) {
+            console.error('Erro ao criar relacionamentos:', relationshipError);
+            throw relationshipError;
+          }
+        }
+
+        // Upload da foto se fornecida
         if (photoFile && novoFuncionario) {
           const uploadedUrl = await uploadFoto(photoFile, novoFuncionario.id);
           if (uploadedUrl) {
@@ -160,8 +203,8 @@ export const useFuncionarios = () => {
       }
     },
     onSuccess: (_, { editingFuncionario }) => {
-      // Forçar refetch
       queryClient.invalidateQueries({ queryKey: ['admin-funcionarios'] });
+      queryClient.invalidateQueries({ queryKey: ['funcionarios-ocorrencias'] });
       queryClient.refetchQueries({ queryKey: ['admin-funcionarios'] });
       toast({
         title: "Sucesso",
