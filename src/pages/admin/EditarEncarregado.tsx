@@ -8,7 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft } from "lucide-react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
 import { useNavigate, useParams } from "react-router-dom";
 
@@ -19,8 +19,7 @@ interface Encarregado {
   matricula: string;
   email: string;
   ativo: boolean;
-  cca_id: number | null;
-  cca?: { id: number; codigo: string; nome: string };
+  encarregado_ccas?: { cca: { id: number; codigo: string; nome: string } }[];
 }
 
 interface CCA {
@@ -40,10 +39,10 @@ const EditarEncarregado = () => {
     matricula: "",
     email: "",
     ativo: true,
-    cca_id: null as number | null
+    cca_ids: [] as number[]
   });
 
-  // Buscar encarregado específico
+  // Buscar encarregado específico com CCAs
   const { data: encarregado, isLoading: loadingEncarregado } = useQuery({
     queryKey: ['encarregado', id],
     queryFn: async () => {
@@ -57,8 +56,9 @@ const EditarEncarregado = () => {
           matricula,
           email,
           ativo,
-          cca_id,
-          cca:cca_id(id, codigo, nome)
+          encarregado_ccas(
+            cca:ccas(id, codigo, nome)
+          )
         `)
         .eq('id', id)
         .single();
@@ -85,34 +85,58 @@ const EditarEncarregado = () => {
   // Preencher formulário quando dados são carregados
   useEffect(() => {
     if (encarregado) {
+      const ccaIds = encarregado.encarregado_ccas?.map(ec => ec.cca.id) || [];
       setFormData({
         nome: encarregado.nome,
         funcao: encarregado.funcao,
         matricula: encarregado.matricula || "",
         email: encarregado.email || "",
         ativo: encarregado.ativo,
-        cca_id: encarregado.cca_id
+        cca_ids: ccaIds
       });
     }
   }, [encarregado]);
 
   // Mutation para atualizar encarregado
   const updateEncarregadoMutation = useMutation({
-    mutationFn: async (encarregado: { nome: string; funcao: string; matricula: string; email: string; ativo: boolean; cca_id: number | null }) => {
+    mutationFn: async (encarregado: { nome: string; funcao: string; matricula: string; email: string; ativo: boolean; cca_ids: number[] }) => {
       if (!id) throw new Error('ID não fornecido');
-      const { error } = await supabase
+      
+      // Atualizar dados do encarregado
+      const { error: updateError } = await supabase
         .from('encarregados')
         .update({ 
           nome: encarregado.nome, 
           funcao: encarregado.funcao,
           matricula: encarregado.matricula,
           email: encarregado.email,
-          ativo: encarregado.ativo,
-          cca_id: encarregado.cca_id
+          ativo: encarregado.ativo
         })
         .eq('id', id);
       
-      if (error) throw error;
+      if (updateError) throw updateError;
+
+      // Remover relacionamentos existentes
+      const { error: deleteError } = await supabase
+        .from('encarregado_ccas')
+        .delete()
+        .eq('encarregado_id', id);
+
+      if (deleteError) throw deleteError;
+
+      // Criar novos relacionamentos se houver CCAs selecionados
+      if (encarregado.cca_ids.length > 0) {
+        const relacionamentos = encarregado.cca_ids.map(ccaId => ({
+          encarregado_id: id,
+          cca_id: ccaId
+        }));
+
+        const { error: insertError } = await supabase
+          .from('encarregado_ccas')
+          .insert(relacionamentos);
+
+        if (insertError) throw insertError;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-encarregados'] });
@@ -144,6 +168,15 @@ const EditarEncarregado = () => {
       return;
     }
     updateEncarregadoMutation.mutate(formData);
+  };
+
+  const handleCcaChange = (ccaId: number, checked: boolean) => {
+    setFormData(prev => ({
+      ...prev,
+      cca_ids: checked 
+        ? [...prev.cca_ids, ccaId]
+        : prev.cca_ids.filter(id => id !== ccaId)
+    }));
   };
 
   if (loadingEncarregado) {
@@ -210,23 +243,21 @@ const EditarEncarregado = () => {
             </div>
             
             <div>
-              <Label htmlFor="cca">CCA</Label>
-              <Select 
-                value={formData.cca_id?.toString() || "sem-cca"} 
-                onValueChange={(value) => setFormData(prev => ({ ...prev, cca_id: value === "sem-cca" ? null : parseInt(value) }))}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione um CCA" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="sem-cca">Nenhum CCA</SelectItem>
-                  {ccas.map((cca) => (
-                    <SelectItem key={cca.id} value={cca.id.toString()}>
+              <Label>CCAs</Label>
+              <div className="mt-2 space-y-2 max-h-48 overflow-y-auto border rounded p-3">
+                {ccas.map((cca) => (
+                  <div key={cca.id} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`cca-${cca.id}`}
+                      checked={formData.cca_ids.includes(cca.id)}
+                      onCheckedChange={(checked) => handleCcaChange(cca.id, checked as boolean)}
+                    />
+                    <Label htmlFor={`cca-${cca.id}`} className="text-sm">
                       {cca.codigo} - {cca.nome}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                    </Label>
+                  </div>
+                ))}
+              </div>
             </div>
             
             <div className="flex items-center space-x-2">

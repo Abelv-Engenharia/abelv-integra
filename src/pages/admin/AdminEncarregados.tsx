@@ -15,8 +15,7 @@ interface Encarregado {
   matricula: string;
   email: string;
   ativo: boolean;
-  cca_id: number | null;
-  cca?: { id: number; codigo: string; nome: string };
+  encarregado_ccas?: { cca: { id: number; codigo: string; nome: string } }[];
 }
 
 const AdminEncarregados = () => {
@@ -24,7 +23,7 @@ const AdminEncarregados = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  // Buscar encarregados
+  // Buscar encarregados com seus CCAs relacionados
   const { data: encarregados = [], isLoading: loadingEncarregados } = useQuery({
     queryKey: ['admin-encarregados'],
     queryFn: async () => {
@@ -37,8 +36,9 @@ const AdminEncarregados = () => {
           matricula,
           email,
           ativo,
-          cca_id,
-          cca:cca_id(id, codigo, nome)
+          encarregado_ccas!inner(
+            cca:ccas(id, codigo, nome)
+          )
         `)
         .order('nome');
       if (error) throw error;
@@ -94,7 +94,7 @@ const AdminEncarregados = () => {
                     <th className="border border-gray-300 p-2 text-left">Função</th>
                     <th className="border border-gray-300 p-2 text-left">Matrícula</th>
                     <th className="border border-gray-300 p-2 text-left">Email</th>
-                    <th className="border border-gray-300 p-2 text-left">CCA</th>
+                    <th className="border border-gray-300 p-2 text-left">CCAs</th>
                     <th className="border border-gray-300 p-2 text-left">Status</th>
                     <th className="border border-gray-300 p-2 text-center">Ações</th>
                   </tr>
@@ -107,7 +107,14 @@ const AdminEncarregados = () => {
                       <td className="border border-gray-300 p-2">{encarregado.matricula || "-"}</td>
                       <td className="border border-gray-300 p-2">{encarregado.email || "-"}</td>
                       <td className="border border-gray-300 p-2">
-                        {encarregado.cca ? `${encarregado.cca.codigo} - ${encarregado.cca.nome}` : "Nenhum"}
+                        {encarregado.encarregado_ccas && encarregado.encarregado_ccas.length > 0
+                          ? encarregado.encarregado_ccas.map((ec, index) => (
+                              <span key={ec.cca.id} className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded mr-1 mb-1">
+                                {ec.cca.codigo} - {ec.cca.nome}
+                              </span>
+                            ))
+                          : "Nenhum CCA"
+                        }
                       </td>
                       <td className="border border-gray-300 p-2">
                         <span className={`px-2 py-1 rounded text-xs ${encarregado.ativo ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
