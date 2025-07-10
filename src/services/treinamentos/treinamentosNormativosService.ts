@@ -26,7 +26,7 @@ export const treinamentosNormativosService = {
       data_realizacao: item.data_realizacao,
       data_validade: item.data_validade,
       certificado_url: item.certificado_url,
-      observacoes: item.observacoes || '',
+      observacoes: '', // observacoes field doesn't exist in database
       status: item.status,
       tipo: item.tipo,
       arquivado: item.arquivado || false

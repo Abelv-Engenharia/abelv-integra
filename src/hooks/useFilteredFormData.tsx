@@ -27,22 +27,22 @@ export const useFilteredFormData = ({ selectedCcaId }: UseFilteredFormDataProps)
 
     // Filter empresas that have relationship with the selected CCA
     const filteredEmpresas = formData.empresas ? formData.empresas.filter((empresa: any) => 
-      empresa.cca_id === ccaIdNumber
+      empresa.empresa_ccas?.some((ec: any) => ec.cca_id === ccaIdNumber)
     ) : [];
 
     // Filter engenheiros that have relationship with the selected CCA
     const filteredEngenheiros = formData.engenheiros ? formData.engenheiros.filter((engenheiro: any) => 
-      engenheiro.cca_id === ccaIdNumber
+      engenheiro.engenheiro_ccas?.some((ec: any) => ec.cca_id === ccaIdNumber)
     ) : [];
 
     // Filter supervisores that have relationship with the selected CCA
     const filteredSupervisores = formData.supervisores ? formData.supervisores.filter((supervisor: any) => 
-      supervisor.cca_id === ccaIdNumber
+      supervisor.supervisor_ccas?.some((sc: any) => sc.cca_id === ccaIdNumber)
     ) : [];
 
     // Filter encarregados and funcionarios by cca_id
     const filteredEncarregados = formData.encarregados ? formData.encarregados.filter((encarregado: any) => 
-      encarregado.cca_id === ccaIdNumber
+      encarregado.encarregado_ccas?.some((ec: any) => ec.cca_id === ccaIdNumber)
     ) : [];
 
     const filteredFuncionarios = formData.funcionarios ? formData.funcionarios.filter((funcionario: any) => 
