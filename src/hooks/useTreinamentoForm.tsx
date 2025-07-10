@@ -38,7 +38,10 @@ export const useTreinamentoForm = () => {
       efetivo_mod: 0,
       efetivo_moi: 0,
       observacoes: "",
+      ano: new Date().getFullYear(),
+      mes: new Date().getMonth() + 1,
       lista_presenca: null,
+      lista_presenca_url: "",
     },
   });
 
@@ -57,12 +60,12 @@ export const useTreinamentoForm = () => {
     },
   });
 
-  // Tipos de treinamento
+  // Tipos de treinamento - usando nome correto da tabela
   const { data: tipoOptions = [] } = useQuery({
     queryKey: ['tipos-treinamento'],
     queryFn: async () => {
       const { data } = await supabase
-        .from('tipos_treinamento')
+        .from('tipo_treinamento')
         .select('id, nome, codigo')
         .eq('ativo', true)
         .order('nome');
@@ -98,3 +101,6 @@ export const useTreinamentoForm = () => {
     calculateHorasTotais,
   };
 };
+
+// Export TreinamentoFormValues for component use
+export type { TreinamentoFormValues };

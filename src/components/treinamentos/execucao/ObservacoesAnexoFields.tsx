@@ -1,3 +1,4 @@
+
 import React from "react";
 import {
   FormField,
@@ -9,7 +10,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { UseFormReturn } from "react-hook-form";
-import { TreinamentoFormValues } from "@/hooks/useTreinamentoForm";
+import { TreinamentoFormValues } from "@/types/treinamentos";
 
 interface ObservacoesAnexoFieldsProps {
   form: UseFormReturn<TreinamentoFormValues>;

@@ -1,6 +1,5 @@
 
 import React from "react";
-import { Treinamento } from "@/types/treinamentos";
 import {
   FormField,
   FormItem,
@@ -17,7 +16,12 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { UseFormReturn } from "react-hook-form";
-import { TreinamentoFormValues } from "@/hooks/useTreinamentoForm";
+import { TreinamentoFormValues } from "@/types/treinamentos";
+
+interface Treinamento {
+  id: string;
+  nome: string;
+}
 
 interface TreinamentoSelectorProps {
   form: UseFormReturn<TreinamentoFormValues>;
@@ -87,4 +91,3 @@ const TreinamentoSelector = ({
 };
 
 export default TreinamentoSelector;
-

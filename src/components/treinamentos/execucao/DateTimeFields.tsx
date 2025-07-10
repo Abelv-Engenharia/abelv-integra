@@ -3,7 +3,7 @@ import React, { useEffect } from "react";
 import { UseFormReturn } from "react-hook-form";
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { TreinamentoFormValues } from "@/hooks/useTreinamentoForm";
+import { TreinamentoFormValues } from "@/types/treinamentos";
 
 interface DateTimeFieldsProps {
   form: UseFormReturn<TreinamentoFormValues>;

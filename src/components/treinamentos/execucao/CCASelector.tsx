@@ -1,6 +1,5 @@
 
 import React from "react";
-import { CCAOption } from "@/services/treinamentos/ccaService";
 import {
   FormField,
   FormItem,
@@ -16,11 +15,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { UseFormReturn } from "react-hook-form";
-import { TreinamentoFormValues } from "@/hooks/useTreinamentoForm";
+import { TreinamentoFormValues } from "@/types/treinamentos";
 
 interface CCASelectorProps {
   form: UseFormReturn<TreinamentoFormValues>;
-  ccaOptions: CCAOption[];
+  ccaOptions: Array<{ id: number; codigo: string; nome: string; }>;
 }
 
 const CCASelector = ({ form, ccaOptions }: CCASelectorProps) => {
@@ -37,8 +36,8 @@ const CCASelector = ({ form, ccaOptions }: CCASelectorProps) => {
         <FormItem>
           <FormLabel>CCA</FormLabel>
           <Select 
-            onValueChange={(value) => field.onChange(parseInt(value))} 
-            value={field.value ? field.value.toString() : ""}
+            onValueChange={(value) => field.onChange(value)} 
+            value={field.value}
           >
             <FormControl>
               <SelectTrigger>

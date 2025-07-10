@@ -33,13 +33,16 @@ export const treinamentosNormativosService = {
     })) || [];
   },
 
+  async getAll(): Promise<TreinamentoNormativo[]> {
+    return this.fetchAll();
+  },
+
   async create(data: Partial<TreinamentoNormativo>): Promise<TreinamentoNormativo> {
-    // Ensure data_validade is provided as string if it exists
     const insertData = {
       funcionario_id: data.funcionario_id!,
       treinamento_id: data.treinamento_id!,
       data_realizacao: data.data_realizacao!,
-      data_validade: data.data_validade || null, // Allow null for optional field
+      data_validade: data.data_validade || null,
       certificado_url: data.certificado_url || null,
       observacoes: data.observacoes || null,
       status: data.status || 'VÁLIDO',
@@ -61,7 +64,6 @@ export const treinamentosNormativosService = {
   },
 
   async update(id: string, updateData: Partial<TreinamentoNormativo>): Promise<TreinamentoNormativo> {
-    // Prepare update data, allowing null values
     const dataToUpdate = {
       ...(updateData.funcionario_id && { funcionario_id: updateData.funcionario_id }),
       ...(updateData.treinamento_id && { treinamento_id: updateData.treinamento_id }),
@@ -97,6 +99,21 @@ export const treinamentosNormativosService = {
 
     if (error) {
       console.error('Erro ao excluir treinamento normativo:', error);
+      throw error;
+    }
+  },
+
+  async arquivar(id: string, justificativa: string): Promise<void> {
+    const { error } = await supabase
+      .from('treinamentos_normativos')
+      .update({ 
+        arquivado: true,
+        observacoes: justificativa
+      })
+      .eq('id', id);
+
+    if (error) {
+      console.error('Erro ao arquivar treinamento normativo:', error);
       throw error;
     }
   }

@@ -1,6 +1,5 @@
 
 import { useState } from "react";
-import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Form } from "@/components/ui/form";
@@ -149,13 +148,10 @@ const TreinamentosExecucao = () => {
                 <ProcessoTipoFields form={form} processoOptions={processoOptions} tipoOptions={tipoOptions} />
                 <TreinamentoSelector form={form} treinamentoOptions={treinamentoOptions} />
                 <CargaHorariaEfetivoFields form={form} calculateHorasTotais={calculateHorasTotais} />
-                {/* ---------------------------------- */}
-                {/* Observações e Anexo */}
                 <ObservacoesAnexoFields
                   form={form}
                   onListaPresencaFileChange={setListaPresencaFile}
                 />
-                {/* ---------------------------------- */}
                 <div className="flex justify-end gap-2 pt-6 border-t">
                   <Button
                     type="button"
