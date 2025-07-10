@@ -59,6 +59,23 @@ export interface TreinamentoFormValues {
   certificadoFile?: File;
 }
 
+// Training execution specific types
+export interface TreinamentoExecucaoFormValues {
+  data: string;
+  mes: number;
+  ano: number;
+  cca_id: number;
+  processo_treinamento_id: string;
+  tipo_treinamento_id: string;
+  treinamento_id: string;
+  treinamento_nome: string;
+  carga_horaria: number;
+  efetivo_mod: number;
+  efetivo_moi: number;
+  observacoes: string;
+  lista_presenca_url: string;
+}
+
 export interface ExecucaoTreinamento {
   id: string;
   cca: string;
@@ -82,7 +99,7 @@ export interface ExecucaoTreinamento {
 
 export interface IDSMSIndicador {
   id: string;
-  tipo: string;
+  tipo: 'IID' | 'HSA' | 'HT' | 'IPOM' | 'INSPECAO_ALTA_LIDERANCA' | 'INSPECAO_GESTAO_SMS' | 'INDICE_REATIVO';
   resultado: number;
   data: string;
   cca_id: number;
@@ -101,7 +118,17 @@ export interface IDSMSFormValues {
   motivo?: string;
 }
 
+// Correct structure for IDSMS Dashboard Data
 export interface IDSMSDashboardData {
-  indicadores: IDSMSIndicador[];
-  graficos: any[];
+  cca_id: number;
+  cca_codigo: string;
+  cca_nome: string;
+  iid: number;
+  hsa: number;
+  ht: number;
+  ipom: number;
+  inspecao_alta_lideranca: number;
+  inspecao_gestao_sms: number;
+  indice_reativo: number;
+  idsms_total: number;
 }

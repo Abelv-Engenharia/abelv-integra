@@ -17,10 +17,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { UseFormReturn } from "react-hook-form";
-import { TreinamentoFormValues } from "@/hooks/useTreinamentoForm";
+import { TreinamentoExecucaoFormValues } from "@/types/treinamentos";
 
 interface ProcessoTipoFieldsProps {
-  form: UseFormReturn<TreinamentoFormValues>;
+  form: UseFormReturn<TreinamentoExecucaoFormValues>;
   processoOptions: ProcessoTreinamentoOption[];
   tipoOptions: TipoTreinamentoOption[];
 }

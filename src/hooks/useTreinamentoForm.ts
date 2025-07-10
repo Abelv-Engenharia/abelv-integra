@@ -5,23 +5,7 @@ import { ccaService } from "@/services/treinamentos/ccaService";
 import { processoTreinamentoService } from "@/services/treinamentos/processoTreinamentoService";
 import { tipoTreinamentoService } from "@/services/treinamentos/tipoTreinamentoService";
 import { treinamentosService } from "@/services/treinamentos/treinamentosService";
-
-// Tipo específico para execução de treinamentos
-export interface TreinamentoExecucaoFormValues {
-  data: string;
-  mes: number;
-  ano: number;
-  cca_id: number;
-  processo_treinamento_id: string;
-  tipo_treinamento_id: string;
-  treinamento_id: string;
-  treinamento_nome: string;
-  carga_horaria: number;
-  efetivo_mod: number;
-  efetivo_moi: number;
-  observacoes: string;
-  lista_presenca_url: string;
-}
+import { TreinamentoExecucaoFormValues } from "@/types/treinamentos";
 
 export const useTreinamentoForm = () => {
   const form = useForm<TreinamentoExecucaoFormValues>({
@@ -81,3 +65,6 @@ export const useTreinamentoForm = () => {
     calculateHorasTotais,
   };
 };
+
+// Export both types for compatibility
+export type { TreinamentoExecucaoFormValues };

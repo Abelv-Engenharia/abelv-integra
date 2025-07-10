@@ -141,7 +141,7 @@ export const useFormData = () => {
     staleTime: 5 * 60 * 1000,
   });
 
-  // Buscar funcionários - usando query mais simples para evitar type instantiation issues
+  // Buscar funcionários - simplificado para evitar type instantiation issues
   const { data: funcionarios = [] } = useQuery({
     queryKey: ['form-data-funcionarios', userCCAs.map(c => c.id)],
     queryFn: async () => {
@@ -149,6 +149,7 @@ export const useFormData = () => {
       
       const ccaIds = userCCAs.map(cca => cca.id);
       
+      // Buscar funcionários ativos
       const { data: funcionariosData, error } = await supabase
         .from('funcionarios')
         .select('id, nome, funcao, matricula, ativo, foto, data_admissao')
@@ -160,14 +161,10 @@ export const useFormData = () => {
         return [];
       }
       
-      // Get funcionario_ccas relationships
+      // Buscar relacionamentos separadamente
       const { data: relacionamentos, error: relError } = await supabase
         .from('funcionario_ccas')
-        .select(`
-          funcionario_id,
-          cca_id,
-          ccas!inner(id, codigo, nome)
-        `)
+        .select('funcionario_id, cca_id')
         .in('cca_id', ccaIds);
       
       if (relError) {
@@ -175,7 +172,7 @@ export const useFormData = () => {
         return funcionariosData || [];
       }
       
-      // Filter only funcionarios that have relationships with user's CCAs
+      // Filtrar funcionários que têm relacionamento com CCAs do usuário
       const funcionariosComCCAs = funcionariosData?.filter(funcionario => 
         relacionamentos?.some(rel => rel.funcionario_id === funcionario.id)
       ) || [];
