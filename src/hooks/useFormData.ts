@@ -1,3 +1,4 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -144,20 +145,24 @@ export const useFormData = () => {
   // Buscar funcionários - simplificado para evitar type instantiation issues
   const { data: funcionarios = [] } = useQuery({
     queryKey: ['form-data-funcionarios', userCCAs.map(c => c.id)],
-    queryFn: async () => {
+    queryFn: async (): Promise<any[]> => {
       if (!userCCAs || userCCAs.length === 0) return [];
       
       const ccaIds = userCCAs.map(cca => cca.id);
       
-      // Buscar funcionários ativos
-      const { data: funcionariosData, error } = await supabase
+      // Buscar funcionários básicos primeiro
+      const { data: funcionariosData, error: funcionariosError } = await supabase
         .from('funcionarios')
         .select('id, nome, funcao, matricula, ativo, foto, data_admissao')
         .eq('ativo', true)
         .order('nome');
       
-      if (error) {
-        console.error("Erro ao buscar funcionários:", error);
+      if (funcionariosError) {
+        console.error("Erro ao buscar funcionários:", funcionariosError);
+        return [];
+      }
+      
+      if (!funcionariosData || funcionariosData.length === 0) {
         return [];
       }
       
@@ -169,15 +174,15 @@ export const useFormData = () => {
       
       if (relError) {
         console.error("Erro ao buscar relacionamentos:", relError);
-        return funcionariosData || [];
+        return funcionariosData;
       }
       
-      // Filtrar funcionários que têm relacionamento com CCAs do usuário
-      const funcionariosComCCAs = funcionariosData?.filter(funcionario => 
+      // Filtrar e mapear funcionários que têm relacionamento com CCAs do usuário
+      const funcionariosPermitidos = funcionariosData.filter(funcionario => 
         relacionamentos?.some(rel => rel.funcionario_id === funcionario.id)
-      ) || [];
+      );
       
-      return funcionariosComCCAs;
+      return funcionariosPermitidos;
     },
     enabled: !!user?.id && userCCAs.length > 0,
     staleTime: 5 * 60 * 1000,
