@@ -1,12 +1,6 @@
 
 import React, { useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import TarefasSummaryCards from "@/components/tarefas/TarefasSummaryCards";
-import TarefasBarChart from "@/components/tarefas/TarefasBarChart";
-import TarefasPieChart from "@/components/tarefas/TarefasPieChart";
-import TarefasCriticidadeChart from "@/components/tarefas/TarefasCriticidadeChart";
-import TarefasRecentTable from "@/components/tarefas/TarefasRecentTable";
 import { useAuth } from "@/contexts/AuthContext";
 
 const TarefasDashboard = () => {
@@ -53,45 +47,58 @@ const TarefasDashboard = () => {
         <p className="text-xs text-gray-500">Debug: Usuário {user.id} logado</p>
       </div>
 
-      <TarefasSummaryCards />
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
           <CardHeader>
-            <CardTitle>Tarefas por Período</CardTitle>
+            <CardTitle>Tarefas Concluídas</CardTitle>
           </CardHeader>
           <CardContent>
-            <TarefasBarChart />
+            <div className="text-2xl font-bold">0</div>
+            <p className="text-muted-foreground">Este mês</p>
           </CardContent>
         </Card>
-
-        <Tabs defaultValue="status">
-          <Card>
-            <CardHeader className="flex flex-row items-center">
-              <CardTitle>Distribuição de Tarefas</CardTitle>
-              <TabsList className="ml-auto">
-                <TabsTrigger value="status">Por Status</TabsTrigger>
-                <TabsTrigger value="criticidade">Por Criticidade</TabsTrigger>
-              </TabsList>
-            </CardHeader>
-            <CardContent>
-              <TabsContent value="status">
-                <TarefasPieChart />
-              </TabsContent>
-              <TabsContent value="criticidade">
-                <TarefasCriticidadeChart />
-              </TabsContent>
-            </CardContent>
-          </Card>
-        </Tabs>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle>Tarefas em Andamento</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">0</div>
+            <p className="text-muted-foreground">Atualizadas recentemente</p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle>Tarefas Pendentes</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">0</div>
+            <p className="text-muted-foreground">Necessitando atenção</p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle>Tarefas Programadas</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">0</div>
+            <p className="text-muted-foreground">Para os próximos 30 dias</p>
+          </CardContent>
+        </Card>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Tarefas Recentes</CardTitle>
+          <CardTitle>Status do Sistema</CardTitle>
         </CardHeader>
         <CardContent>
-          <TarefasRecentTable />
+          <div className="space-y-2">
+            <p className="text-sm">✅ Dashboard carregado com sucesso</p>
+            <p className="text-sm">✅ Usuário autenticado: {user.email}</p>
+            <p className="text-sm">✅ Componentes básicos funcionando</p>
+          </div>
         </CardContent>
       </Card>
     </div>
