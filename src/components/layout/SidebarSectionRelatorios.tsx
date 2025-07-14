@@ -63,6 +63,18 @@ export default function SidebarSectionRelatorios({ openMenu, toggleMenu }: Props
           </CollapsibleContent>
         </Collapsible>
       </SidebarMenuItem>
+      
+      {/* Menu Suporte - sempre visível */}
+      <SidebarMenuItem>
+        <SidebarMenuButton 
+          asChild 
+          className={currentPath === "/suporte" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
+        >
+          <Link to="/suporte" className="flex items-center gap-2">
+            <span className="text-xs leading-tight break-words min-w-0">SUPORTE</span>
+          </Link>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
     </SidebarMenu>
   );
 }

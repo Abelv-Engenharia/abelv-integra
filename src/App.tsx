@@ -23,6 +23,7 @@ import ResetPassword from "./pages/auth/ResetPassword";
 import Profile from "./pages/account/Profile";
 import Settings from "./pages/account/Settings";
 import Support from "./pages/account/Support";
+import Suporte from "./pages/Suporte";
 
 // Admin pages - NEW USER MANAGEMENT PAGE
 import GerenciarUsuarios from "./pages/admin/GerenciarUsuarios";
@@ -148,6 +149,9 @@ function App() {
                 <Route path="account/profile" element={<Profile />} />
                 <Route path="account/settings" element={<Settings />} />
                 <Route path="account/support" element={<Support />} />
+                
+                {/* Support route */}
+                <Route path="suporte" element={<Suporte />} />
 
                 {/* Admin routes - NEW USER MANAGEMENT */}
                 <Route path="admin/usuarios" element={<GerenciarUsuarios />} />

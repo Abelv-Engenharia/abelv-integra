@@ -2216,6 +2216,42 @@ export type Database = {
           },
         ]
       }
+      tutoriais: {
+        Row: {
+          ativo: boolean
+          categoria: string
+          created_at: string
+          descricao: string | null
+          id: string
+          titulo: string
+          updated_at: string
+          usuario_id: string | null
+          video_url: string
+        }
+        Insert: {
+          ativo?: boolean
+          categoria?: string
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          titulo: string
+          updated_at?: string
+          usuario_id?: string | null
+          video_url: string
+        }
+        Update: {
+          ativo?: boolean
+          categoria?: string
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          titulo?: string
+          updated_at?: string
+          usuario_id?: string | null
+          video_url?: string
+        }
+        Relationships: []
+      }
       user_settings: {
         Row: {
           created_at: string
