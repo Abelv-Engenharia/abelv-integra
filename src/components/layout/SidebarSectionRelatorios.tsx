@@ -1,6 +1,6 @@
 
 import React from "react";
-import { FileText } from "lucide-react";
+import { FileText, HelpCircle } from "lucide-react";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import {
   SidebarMenu,
@@ -71,7 +71,8 @@ export default function SidebarSectionRelatorios({ openMenu, toggleMenu }: Props
           className={currentPath === "/suporte" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
         >
           <Link to="/suporte" className="flex items-center gap-2">
-            <span className="text-xs leading-tight break-words min-w-0">SUPORTE</span>
+            <HelpCircle className="h-4 w-4 flex-shrink-0" />
+            <span className="break-words">SUPORTE</span>
           </Link>
         </SidebarMenuButton>
       </SidebarMenuItem>
