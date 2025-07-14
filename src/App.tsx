@@ -124,13 +124,12 @@ const queryClient = new QueryClient();
 
 function App() {
   return (
-    <React.StrictMode>
-      <QueryClientProvider client={queryClient}>
-        <AuthProvider>
-          <BrowserRouter>
-            <TooltipProvider>
-              <Toaster />
-              <Sonner />
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <BrowserRouter>
+          <Toaster />
+          <Sonner />
+          <TooltipProvider>
             <Routes>
               {/* Public routes */}
               <Route path="/login" element={<Login />} />
@@ -253,11 +252,10 @@ function App() {
               {/* 404 route */}
               <Route path="*" element={<NotFound />} />
             </Routes>
-            </TooltipProvider>
-          </BrowserRouter>
-        </AuthProvider>
-      </QueryClientProvider>
-    </React.StrictMode>
+          </TooltipProvider>
+        </BrowserRouter>
+      </AuthProvider>
+    </QueryClientProvider>
   );
 }
 
