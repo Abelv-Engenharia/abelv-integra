@@ -46,6 +46,7 @@ export function AppSidebar() {
     if (currentPath.startsWith("/orcamentos")) return "orcamentos";
     if (currentPath.startsWith("/qualidade")) return "qualidade";
     if (currentPath.startsWith("/gro")) return "gro";
+    if (currentPath.startsWith("/tutoriais")) return "configuracoes";
     if (currentPath.startsWith("/account")) return "account";
     return null;
   });
@@ -121,6 +122,50 @@ export function AppSidebar() {
           <SidebarSectionAdministracao openMenu={openMenu} toggleMenu={toggleMenu} />
         )}
 
+        {/* Seção de Configurações - sempre visível para usuários autenticados */}
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <Collapsible open={openMenu === "configuracoes"}>
+              <CollapsibleTrigger asChild>
+                <SidebarMenuButton 
+                  onClick={() => toggleMenu("configuracoes")} 
+                  className="text-white hover:bg-slate-600"
+                >
+                  <Settings className="h-4 w-4 flex-shrink-0" />
+                  <span className="break-words">CONFIGURAÇÕES</span>
+                  {openMenu === "configuracoes" ? <ChevronDown className="h-4 w-4 ml-auto" /> : <ChevronRight className="h-4 w-4 ml-auto" />}
+                </SidebarMenuButton>
+              </CollapsibleTrigger>
+              <CollapsibleContent asChild>
+                <SidebarMenuSub>
+                  <SidebarMenuSubItem>
+                    <SidebarMenuSubButton 
+                      asChild 
+                      className={currentPath === "/account/settings" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
+                    >
+                      <Link to="/account/settings" className="flex items-center gap-2">
+                        <Settings className="h-3 w-3 flex-shrink-0" />
+                        <span className="text-xs leading-tight break-words min-w-0">Configurações Gerais</span>
+                      </Link>
+                    </SidebarMenuSubButton>
+                  </SidebarMenuSubItem>
+                  <SidebarMenuSubItem>
+                    <SidebarMenuSubButton 
+                      asChild 
+                      className={currentPath === "/tutoriais/upload" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
+                    >
+                      <Link to="/tutoriais/upload" className="flex items-center gap-2">
+                        <Upload className="h-3 w-3 flex-shrink-0" />
+                        <span className="text-xs leading-tight break-words min-w-0">Upload de Tutoriais</span>
+                      </Link>
+                    </SidebarMenuSubButton>
+                  </SidebarMenuSubItem>
+                </SidebarMenuSub>
+              </CollapsibleContent>
+            </Collapsible>
+          </SidebarMenuItem>
+        </SidebarMenu>
+
         {/* Seção de Conta - sempre visível para usuários autenticados */}
         <SidebarMenu>
           <SidebarMenuItem>
@@ -144,17 +189,6 @@ export function AppSidebar() {
                     >
                       <Link to="/account/profile" className="flex items-center gap-2">
                         <span className="text-xs leading-tight break-words min-w-0">Perfil</span>
-                      </Link>
-                    </SidebarMenuSubButton>
-                  </SidebarMenuSubItem>
-                  <SidebarMenuSubItem>
-                    <SidebarMenuSubButton 
-                      asChild 
-                      className={currentPath === "/account/settings" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
-                    >
-                      <Link to="/account/settings" className="flex items-center gap-2">
-                        <Settings className="h-3 w-3 flex-shrink-0" />
-                        <span className="text-xs leading-tight break-words min-w-0">Configurações</span>
                       </Link>
                     </SidebarMenuSubButton>
                   </SidebarMenuSubItem>
