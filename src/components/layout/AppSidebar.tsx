@@ -1,6 +1,6 @@
 
 import React, { useState } from "react";
-import { Home, Settings, User } from "lucide-react";
+import { Home, Settings, User, Upload } from "lucide-react";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { Sidebar, SidebarContent, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarMenuSub, SidebarMenuSubItem, SidebarMenuSubButton } from "@/components/ui/sidebar";
 import { Link, useLocation } from "react-router-dom";
