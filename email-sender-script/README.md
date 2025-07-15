@@ -20,6 +20,26 @@ cp .env.example .env
 - `SMTP_USER`: sms@abelv.com.br
 - `SMTP_PASS`: sfdtzbxvnhyrxqhk (senha de app)
 
+## ✨ Funcionalidades Implementadas
+
+### 📧 Envio de E-mails
+- Suporte a anexos automáticos
+- Tentativas de reenvio em caso de falha
+- Logs detalhados de todas as operações
+- Validação de conexões SMTP e Supabase
+
+### 📊 Relatórios Automáticos
+- **Relatório de Ocorrências**: Resumo e detalhes das ocorrências por período
+- **Relatório de Desvios**: Estatísticas de desvios e status
+- **Relatório de Treinamentos**: Horas e participantes por tipo
+- **Relatório de Horas Trabalhadas**: Distribuição por CCA e período
+- **Relatório de Indicadores**: Métricas SMS com médias e detalhes
+
+### 🔧 Configuração Automática
+- Processamento de configurações de emails programados
+- Suporte a diferentes periodicidades (diário, semanal, quinzenal, mensal)
+- Geração automática de relatórios baseada em período configurável
+
 ## Uso
 
 ### Execução manual:
@@ -53,31 +73,75 @@ npm run dev
 - `tentativas`: Contador de tentativas de envio
 - `criado_em`: Timestamp de criação
 
-## Configuração do Cron Job
+## 🔄 Configuração de Produção
 
-Para executar automaticamente a cada 5 minutos:
+### Opção 1: Cron Jobs (Recomendado)
 
+#### Para processar configurações de emails:
 ```bash
-# Editar crontab
-crontab -e
+# Executar a cada hora para processar configurações
+0 * * * * psql "postgresql://postgres:[password]@[host]:5432/postgres" -c "SELECT public.processar_configuracoes_emails();" >> /var/log/email-config.log 2>&1
 
-# Adicionar linha:
-*/5 * * * * cd /caminho/para/email-sender-script && /usr/bin/node index.js >> /var/log/email-sender.log 2>&1
+# Ou usando supabase CLI
+0 * * * * supabase functions invoke processar_configuracoes_emails >> /var/log/email-config.log 2>&1
 ```
 
-## Inserindo e-mails na fila
+#### Para processar fila de emails pendentes:
+```bash
+# Executar a cada 15 minutos para processar emails pendentes
+*/15 * * * * cd /caminho/para/email-sender-script && npm start >> /var/log/email-sender.log 2>&1
 
-Exemplo de inserção via SQL:
+# Ou executar a cada hora
+0 * * * * cd /caminho/para/email-sender-script && npm start >> /var/log/email-sender.log 2>&1
+```
+
+### Opção 2: Supabase Cron (Recomendado para configurações)
+
+Você pode configurar cron jobs diretamente no Supabase para processar as configurações automaticamente:
+
 ```sql
-INSERT INTO emails_pendentes (destinatario, assunto, corpo, anexos) 
-VALUES (
-  'destinatario@email.com',
-  'Assunto do e-mail',
-  '<h1>Título</h1><p>Conteúdo do e-mail em HTML</p>',
-  '[
-    {"nome_arquivo": "documento.pdf", "url": "https://projeto.supabase.co/storage/v1/object/public/bucket/arquivo.pdf"},
-    {"nome_arquivo": "planilha.xlsx", "url": "https://projeto.supabase.co/storage/v1/object/public/bucket/planilha.xlsx"}
-  ]'::jsonb
+-- Agendar processamento de configurações de emails para cada hora
+SELECT cron.schedule('process-email-configs', '0 * * * *', 'SELECT public.processar_configuracoes_emails();');
+
+-- Verificar jobs agendados
+SELECT * FROM cron.job;
+```
+
+## 📋 Como Inserir Configurações de E-mail
+
+### Via Interface Web
+1. Acesse `/configuracao-emails` no sistema
+2. Clique em "Nova Configuração"
+3. Configure os detalhes do envio:
+   - **Assunto**: Título do e-mail
+   - **Destinatários**: Lista de e-mails
+   - **Mensagem**: Corpo do e-mail
+   - **Anexo**: Arquivo opcional
+   - **Tipo de Relatório**: Escolha um relatório automático
+   - **Período**: Dias de dados para o relatório
+   - **Periodicidade**: Frequência de envio
+   - **Horário**: Hora específica para envio
+
+### Via SQL (Exemplo)
+```sql
+INSERT INTO configuracoes_emails (
+  assunto, 
+  destinatarios, 
+  mensagem, 
+  tipo_relatorio,
+  periodo_dias,
+  periodicidade, 
+  hora_envio, 
+  ativo
+) VALUES (
+  'Relatório Semanal de Ocorrências',
+  ARRAY['gestor@empresa.com', 'supervisor@empresa.com'],
+  '<p>Segue relatório semanal de ocorrências.</p>',
+  'ocorrencias',
+  7,
+  'semanal',
+  '09:00',
+  true
 );
 ```
 
@@ -86,7 +150,7 @@ VALUES (
 O script gera logs detalhados incluindo:
 - Início e fim do processamento
 - Sucessos e falhas de envio
-- Detalhes de erros
+- **Geração automática de relatórios**: O sistema gera relatórios em HTML baseados nos dados do período configurado
 - Status de conexão SMTP e Supabase
 
 ## Troubleshooting

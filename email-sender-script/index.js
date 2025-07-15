@@ -70,32 +70,93 @@ async function processAttachments(anexos) {
   return attachments;
 }
 
+// Função para gerar relatório automático
+async function generateReport(tipoRelatorio, periodoDias) {
+  try {
+    log(`Gerando relatório automático: ${tipoRelatorio} (${periodoDias} dias)`);
+    
+    const { data, error } = await supabase.functions.invoke('generate-report', {
+      body: {
+        tipo_relatorio: tipoRelatorio,
+        periodo_dias: periodoDias,
+        data_referencia: new Date().toISOString()
+      }
+    });
+
+    if (error) {
+      log(`Erro ao gerar relatório: ${error.message}`, 'ERROR');
+      return null;
+    }
+
+    if (data && data.success) {
+      log(`Relatório gerado com sucesso: ${tipoRelatorio}`);
+      return data.html;
+    } else {
+      log(`Falha ao gerar relatório: ${data?.error || 'Erro desconhecido'}`, 'ERROR');
+      return null;
+    }
+  } catch (error) {
+    log(`Erro ao chamar função de relatório: ${error.message}`, 'ERROR');
+    return null;
+  }
+}
+
 // Função para enviar um e-mail
 async function sendEmail(emailData) {
   try {
-    log(`Processando e-mail para: ${emailData.destinatario}`);
+    log(`Enviando e-mail para ${emailData.destinatario} - Assunto: ${emailData.assunto}`);
+    
+    // Buscar configuração completa para verificar se precisa gerar relatório
+    let corpoFinal = emailData.corpo;
+    
+    // Verificar se existe configuração com relatório automático
+    const { data: configs, error: configError } = await supabase
+      .from('configuracoes_emails')
+      .select('tipo_relatorio, periodo_dias')
+      .eq('assunto', emailData.assunto)
+      .eq('ativo', true)
+      .not('tipo_relatorio', 'is', null)
+      .limit(1);
+    
+    if (!configError && configs && configs.length > 0) {
+      const config = configs[0];
+      log(`Configuração encontrada com relatório: ${config.tipo_relatorio}`);
+      
+      // Gerar relatório automático
+      const relatorioHtml = await generateReport(config.tipo_relatorio, config.periodo_dias || 30);
+      
+      if (relatorioHtml) {
+        // Adicionar relatório ao corpo do email
+        corpoFinal += '<br><br><hr><br>' + relatorioHtml;
+        log(`Relatório adicionado ao e-mail: ${config.tipo_relatorio}`);
+      } else {
+        log(`Falha ao gerar relatório: ${config.tipo_relatorio}`, 'WARN');
+      }
+    }
 
     // Processar anexos
-    const attachments = await processAttachments(emailData.anexos);
+    const attachments = await processAttachments(emailData.anexos || []);
 
-    // Configurar opções do e-mail
+    // Configurar o e-mail
     const mailOptions = {
       from: process.env.SMTP_USER,
       to: emailData.destinatario,
       subject: emailData.assunto,
-      html: emailData.corpo,
+      html: corpoFinal,
       attachments: attachments
     };
 
     // Enviar e-mail
-    const result = await transporter.sendMail(mailOptions);
-    
-    log(`E-mail enviado com sucesso para ${emailData.destinatario}. MessageId: ${result.messageId}`);
-    
+    await transporter.sendMail(mailOptions);
+    log(`E-mail enviado com sucesso para ${emailData.destinatario}`);
+
     // Atualizar status no banco
     await supabase
       .from('emails_pendentes')
-      .update({ enviado: true, updated_at: new Date().toISOString() })
+      .update({ 
+        enviado: true,
+        updated_at: new Date().toISOString()
+      })
       .eq('id', emailData.id);
 
     return true;
