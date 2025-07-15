@@ -21,6 +21,8 @@ interface ConfiguracaoEmail {
   mensagem: string;
   anexo_url?: string;
   relatorio_id?: string;
+  tipo_relatorio?: 'ocorrencias' | 'desvios' | 'treinamentos' | 'horas_trabalhadas' | 'indicadores' | null;
+  periodo_dias?: number;
   periodicidade: 'diario' | 'semanal' | 'quinzenal' | 'mensal';
   dia_semana?: string;
   hora_envio: string;
@@ -41,6 +43,8 @@ const ConfiguracaoEmails = () => {
     mensagem: "",
     anexo_url: "",
     relatorio_id: "",
+    tipo_relatorio: null,
+    periodo_dias: 30,
     periodicidade: "diario",
     dia_semana: "",
     hora_envio: "09:00",
@@ -57,6 +61,14 @@ const ConfiguracaoEmails = () => {
     { value: "quinta", label: "Quinta-feira" },
     { value: "sexta", label: "Sexta-feira" },
     { value: "sabado", label: "Sábado" },
+  ];
+
+  const tiposRelatorio = [
+    { value: "ocorrencias", label: "Relatório de Ocorrências" },
+    { value: "desvios", label: "Relatório de Desvios" },
+    { value: "treinamentos", label: "Relatório de Treinamentos" },
+    { value: "horas_trabalhadas", label: "Relatório de Horas Trabalhadas" },
+    { value: "indicadores", label: "Relatório de Indicadores" },
   ];
 
   const loadConfiguracoes = async () => {
@@ -90,6 +102,9 @@ const ConfiguracaoEmails = () => {
       const dataToSave = {
         ...formData,
         dia_semana: formData.periodicidade === "semanal" ? formData.dia_semana : null,
+        relatorio_id: formData.relatorio_id && formData.relatorio_id.trim() !== "" ? formData.relatorio_id : null,
+        tipo_relatorio: formData.tipo_relatorio || null,
+        anexo_url: formData.anexo_url && formData.anexo_url.trim() !== "" ? formData.anexo_url : null,
       };
 
       if (editingConfig?.id) {
@@ -252,6 +267,52 @@ const ConfiguracaoEmails = () => {
                 />
               </div>
 
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="tipo_relatorio">Tipo de Relatório (opcional)</Label>
+                  <Select
+                    value={formData.tipo_relatorio || ""}
+                    onValueChange={(value) => setFormData({ 
+                      ...formData, 
+                      tipo_relatorio: value === "" ? null : value as ConfiguracaoEmail['tipo_relatorio'] 
+                    })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione um relatório" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">Nenhum relatório</SelectItem>
+                      {tiposRelatorio.map((tipo) => (
+                        <SelectItem key={tipo.value} value={tipo.value}>
+                          {tipo.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {formData.tipo_relatorio && (
+                  <div className="space-y-2">
+                    <Label htmlFor="periodo_dias">Período (dias)</Label>
+                    <Input
+                      id="periodo_dias"
+                      type="number"
+                      min="1"
+                      max="365"
+                      value={formData.periodo_dias}
+                      onChange={(e) => setFormData({ 
+                        ...formData, 
+                        periodo_dias: parseInt(e.target.value) || 30 
+                      })}
+                      placeholder="30"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Dados dos últimos {formData.periodo_dias} dias anteriores ao envio
+                    </p>
+                  </div>
+                )}
+              </div>
+
               <div className="space-y-3">
                 <Label>Periodicidade *</Label>
                 <RadioGroup
@@ -344,6 +405,12 @@ const ConfiguracaoEmails = () => {
                   <p className="text-sm">
                     <strong>Horário:</strong> {config.hora_envio}
                   </p>
+                  {config.tipo_relatorio && (
+                    <p className="text-sm">
+                      <strong>Relatório:</strong> {tiposRelatorio.find(t => t.value === config.tipo_relatorio)?.label}
+                      {config.periodo_dias && ` (${config.periodo_dias} dias)`}
+                    </p>
+                  )}
                 </div>
                 <div className="flex gap-2">
                   <Button
