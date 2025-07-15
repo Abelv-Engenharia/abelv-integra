@@ -487,7 +487,8 @@ serve(async (req) => {
         html: reportHtml,
         tipo_relatorio,
         periodo_dias,
-        data_referencia: dataRef 
+        data_referencia: dataRef,
+        cca_id: cca_id || null 
       }),
       {
         headers: {
