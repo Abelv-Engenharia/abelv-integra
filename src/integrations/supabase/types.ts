@@ -164,7 +164,9 @@ export type Database = {
           id: string
           mensagem: string
           periodicidade: string
+          periodo_dias: number | null
           relatorio_id: string | null
+          tipo_relatorio: string | null
           updated_at: string
         }
         Insert: {
@@ -178,7 +180,9 @@ export type Database = {
           id?: string
           mensagem: string
           periodicidade: string
+          periodo_dias?: number | null
           relatorio_id?: string | null
+          tipo_relatorio?: string | null
           updated_at?: string
         }
         Update: {
@@ -192,7 +196,9 @@ export type Database = {
           id?: string
           mensagem?: string
           periodicidade?: string
+          periodo_dias?: number | null
           relatorio_id?: string | null
+          tipo_relatorio?: string | null
           updated_at?: string
         }
         Relationships: []
