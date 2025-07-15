@@ -23,6 +23,7 @@ interface ConfiguracaoEmail {
   relatorio_id?: string;
   tipo_relatorio?: 'ocorrencias' | 'desvios' | 'treinamentos' | 'horas_trabalhadas' | 'indicadores' | null;
   periodo_dias?: number;
+  cca_id?: number;
   periodicidade: 'diario' | 'semanal' | 'quinzenal' | 'mensal';
   dia_semana?: string;
   hora_envio: string;
@@ -31,6 +32,7 @@ interface ConfiguracaoEmail {
 
 const ConfiguracaoEmails = () => {
   const [configuracoes, setConfiguracoes] = useState<ConfiguracaoEmail[]>([]);
+  const [ccas, setCcas] = useState<Array<{ id: number; nome: string; codigo: string }>>([]);
   const [showForm, setShowForm] = useState(false);
   const [editingConfig, setEditingConfig] = useState<ConfiguracaoEmail | null>(null);
   const [deleteConfig, setDeleteConfig] = useState<string | null>(null);
@@ -45,6 +47,7 @@ const ConfiguracaoEmails = () => {
     relatorio_id: "",
     tipo_relatorio: null,
     periodo_dias: 30,
+    cca_id: undefined,
     periodicidade: "diario",
     dia_semana: "",
     hora_envio: "09:00",
@@ -75,7 +78,14 @@ const ConfiguracaoEmails = () => {
     try {
       const { data, error } = await supabase
         .from("configuracoes_emails")
-        .select("*")
+        .select(`
+          *,
+          ccas (
+            id,
+            nome,
+            codigo
+          )
+        `)
         .order("criado_em", { ascending: false });
 
       if (error) throw error;
@@ -90,8 +100,29 @@ const ConfiguracaoEmails = () => {
     }
   };
 
+  const loadCcas = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("ccas")
+        .select("id, nome, codigo")
+        .eq("ativo", true)
+        .order("nome");
+
+      if (error) throw error;
+      setCcas(data || []);
+    } catch (error) {
+      console.error("Erro ao carregar CCAs:", error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível carregar os CCAs",
+        variant: "destructive",
+      });
+    }
+  };
+
   useEffect(() => {
     loadConfiguracoes();
+    loadCcas();
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -313,6 +344,34 @@ const ConfiguracaoEmails = () => {
                 )}
               </div>
 
+              {formData.tipo_relatorio && (
+                <div className="space-y-2">
+                  <Label htmlFor="cca_id">CCA (opcional)</Label>
+                  <Select
+                    value={formData.cca_id?.toString() || "none"}
+                    onValueChange={(value) => setFormData({ 
+                      ...formData, 
+                      cca_id: value === "none" ? undefined : parseInt(value) 
+                    })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione um CCA ou deixe vazio para todos" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">Todos os CCAs</SelectItem>
+                      {ccas.map((cca) => (
+                        <SelectItem key={cca.id} value={cca.id.toString()}>
+                          {cca.codigo} - {cca.nome}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground">
+                    Se nenhum CCA for selecionado, o relatório incluirá dados de todos os CCAs
+                  </p>
+                </div>
+              )}
+
               <div className="space-y-3">
                 <Label>Periodicidade *</Label>
                 <RadioGroup
@@ -405,12 +464,17 @@ const ConfiguracaoEmails = () => {
                   <p className="text-sm">
                     <strong>Horário:</strong> {config.hora_envio}
                   </p>
-                  {config.tipo_relatorio && (
-                    <p className="text-sm">
-                      <strong>Relatório:</strong> {tiposRelatorio.find(t => t.value === config.tipo_relatorio)?.label}
-                      {config.periodo_dias && ` (${config.periodo_dias} dias)`}
-                    </p>
-                  )}
+                   {config.tipo_relatorio && (
+                     <p className="text-sm">
+                       <strong>Relatório:</strong> {tiposRelatorio.find(t => t.value === config.tipo_relatorio)?.label}
+                       {config.periodo_dias && ` (${config.periodo_dias} dias)`}
+                     </p>
+                   )}
+                   {config.cca_id && (
+                     <p className="text-sm">
+                       <strong>CCA:</strong> {ccas.find(c => c.id === config.cca_id)?.codigo} - {ccas.find(c => c.id === config.cca_id)?.nome}
+                     </p>
+                   )}
                 </div>
                 <div className="flex gap-2">
                   <Button

@@ -71,15 +71,16 @@ async function processAttachments(anexos) {
 }
 
 // Função para gerar relatório automático
-async function generateReport(tipoRelatorio, periodoDias) {
+async function generateReport(tipoRelatorio, periodoDias, ccaId = null) {
   try {
-    log(`Gerando relatório automático: ${tipoRelatorio} (${periodoDias} dias)`);
+    log(`Gerando relatório automático: ${tipoRelatorio} (${periodoDias} dias)${ccaId ? ` para CCA ${ccaId}` : ''}`);
     
     const { data, error } = await supabase.functions.invoke('generate-report', {
       body: {
         tipo_relatorio: tipoRelatorio,
         periodo_dias: periodoDias,
-        data_referencia: new Date().toISOString()
+        data_referencia: new Date().toISOString(),
+        cca_id: ccaId
       }
     });
 
@@ -112,7 +113,7 @@ async function sendEmail(emailData) {
     // Verificar se existe configuração com relatório automático
     const { data: configs, error: configError } = await supabase
       .from('configuracoes_emails')
-      .select('tipo_relatorio, periodo_dias')
+      .select('tipo_relatorio, periodo_dias, cca_id')
       .eq('assunto', emailData.assunto)
       .eq('ativo', true)
       .not('tipo_relatorio', 'is', null)
@@ -120,10 +121,10 @@ async function sendEmail(emailData) {
     
     if (!configError && configs && configs.length > 0) {
       const config = configs[0];
-      log(`Configuração encontrada com relatório: ${config.tipo_relatorio}`);
+      log(`Configuração encontrada com relatório: ${config.tipo_relatorio}${config.cca_id ? ` para CCA ${config.cca_id}` : ''}`);
       
       // Gerar relatório automático
-      const relatorioHtml = await generateReport(config.tipo_relatorio, config.periodo_dias || 30);
+      const relatorioHtml = await generateReport(config.tipo_relatorio, config.periodo_dias || 30, config.cca_id);
       
       if (relatorioHtml) {
         // Adicionar relatório ao corpo do email

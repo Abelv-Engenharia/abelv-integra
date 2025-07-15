@@ -157,6 +157,7 @@ export type Database = {
           anexo_url: string | null
           assunto: string
           ativo: boolean
+          cca_id: number | null
           criado_em: string
           destinatarios: string[]
           dia_semana: string | null
@@ -173,6 +174,7 @@ export type Database = {
           anexo_url?: string | null
           assunto: string
           ativo?: boolean
+          cca_id?: number | null
           criado_em?: string
           destinatarios: string[]
           dia_semana?: string | null
@@ -189,6 +191,7 @@ export type Database = {
           anexo_url?: string | null
           assunto?: string
           ativo?: boolean
+          cca_id?: number | null
           criado_em?: string
           destinatarios?: string[]
           dia_semana?: string | null
@@ -201,7 +204,15 @@ export type Database = {
           tipo_relatorio?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "configuracoes_emails_cca_id_fkey"
+            columns: ["cca_id"]
+            isOneToOne: false
+            referencedRelation: "ccas"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       controle_opcoes: {
         Row: {

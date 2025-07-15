@@ -10,6 +10,7 @@ interface ReportRequest {
   tipo_relatorio: string
   periodo_dias: number
   data_referencia?: string
+  cca_id?: number
 }
 
 const supabase = createClient(
@@ -17,13 +18,13 @@ const supabase = createClient(
   Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
 )
 
-async function generateOcorrenciasReport(periodoDias: number, dataReferencia: string) {
-  console.log(`Gerando relatório de ocorrências para ${periodoDias} dias até ${dataReferencia}`)
+async function generateOcorrenciasReport(periodoDias: number, dataReferencia: string, ccaId?: number) {
+  console.log(`Gerando relatório de ocorrências para ${periodoDias} dias até ${dataReferencia}${ccaId ? ` para CCA ${ccaId}` : ''}`)
   
   const dataInicio = new Date(dataReferencia)
   dataInicio.setDate(dataInicio.getDate() - periodoDias)
   
-  const { data, error } = await supabase
+  let query = supabase
     .from('ocorrencias')
     .select(`
       id,
@@ -38,6 +39,21 @@ async function generateOcorrenciasReport(periodoDias: number, dataReferencia: st
     .gte('data', dataInicio.toISOString())
     .lte('data', dataReferencia)
     .order('data', { ascending: false })
+
+  // Filtrar por CCA se especificado
+  if (ccaId) {
+    const { data: ccaData } = await supabase
+      .from('ccas')
+      .select('nome')
+      .eq('id', ccaId)
+      .single()
+    
+    if (ccaData) {
+      query = query.eq('cca', ccaData.nome)
+    }
+  }
+  
+  const { data, error } = await query
   
   if (error) throw error
   
@@ -91,13 +107,13 @@ async function generateOcorrenciasReport(periodoDias: number, dataReferencia: st
   return html
 }
 
-async function generateDesviosReport(periodoDias: number, dataReferencia: string) {
-  console.log(`Gerando relatório de desvios para ${periodoDias} dias até ${dataReferencia}`)
+async function generateDesviosReport(periodoDias: number, dataReferencia: string, ccaId?: number) {
+  console.log(`Gerando relatório de desvios para ${periodoDias} dias até ${dataReferencia}${ccaId ? ` para CCA ${ccaId}` : ''}`)
   
   const dataInicio = new Date(dataReferencia)
   dataInicio.setDate(dataInicio.getDate() - periodoDias)
   
-  const { data, error } = await supabase
+  let query = supabase
     .from('desvios_completos')
     .select(`
       id,
@@ -106,11 +122,19 @@ async function generateDesviosReport(periodoDias: number, dataReferencia: string
       classificacao_risco,
       local,
       status,
-      situacao
+      situacao,
+      cca_id
     `)
     .gte('data_desvio', dataInicio.toISOString().split('T')[0])
     .lte('data_desvio', dataReferencia.split('T')[0])
     .order('data_desvio', { ascending: false })
+
+  // Filtrar por CCA se especificado
+  if (ccaId) {
+    query = query.eq('cca_id', ccaId)
+  }
+  
+  const { data, error } = await query
   
   if (error) throw error
   
@@ -162,18 +186,19 @@ async function generateDesviosReport(periodoDias: number, dataReferencia: string
   return html
 }
 
-async function generateTreinamentosReport(periodoDias: number, dataReferencia: string) {
-  console.log(`Gerando relatório de treinamentos para ${periodoDias} dias até ${dataReferencia}`)
+async function generateTreinamentosReport(periodoDias: number, dataReferencia: string, ccaId?: number) {
+  console.log(`Gerando relatório de treinamentos para ${periodoDias} dias até ${dataReferencia}${ccaId ? ` para CCA ${ccaId}` : ''}`)
   
   const dataInicio = new Date(dataReferencia)
   dataInicio.setDate(dataInicio.getDate() - periodoDias)
   
-  const { data, error } = await supabase
+  let query = supabase
     .from('execucao_treinamentos')
     .select(`
       id,
       data,
       cca,
+      cca_id,
       processo_treinamento,
       tipo_treinamento,
       carga_horaria,
@@ -184,6 +209,13 @@ async function generateTreinamentosReport(periodoDias: number, dataReferencia: s
     .gte('data', dataInicio.toISOString().split('T')[0])
     .lte('data', dataReferencia.split('T')[0])
     .order('data', { ascending: false })
+
+  // Filtrar por CCA se especificado
+  if (ccaId) {
+    query = query.eq('cca_id', ccaId)
+  }
+  
+  const { data, error } = await query
   
   if (error) throw error
   
@@ -249,8 +281,8 @@ async function generateTreinamentosReport(periodoDias: number, dataReferencia: s
   return html
 }
 
-async function generateHorasTrabalhadasReport(periodoDias: number, dataReferencia: string) {
-  console.log(`Gerando relatório de horas trabalhadas para ${periodoDias} dias até ${dataReferencia}`)
+async function generateHorasTrabalhadasReport(periodoDias: number, dataReferencia: string, ccaId?: number) {
+  console.log(`Gerando relatório de horas trabalhadas para ${periodoDias} dias até ${dataReferencia}${ccaId ? ` para CCA ${ccaId}` : ''}`)
   
   const dataRef = new Date(dataReferencia)
   const mesAtual = dataRef.getMonth() + 1
@@ -259,7 +291,7 @@ async function generateHorasTrabalhadasReport(periodoDias: number, dataReferenci
   // Buscar dados dos últimos meses baseado no período
   const mesesPeriodo = Math.ceil(periodoDias / 30)
   
-  const { data, error } = await supabase
+  let query = supabase
     .from('horas_trabalhadas')
     .select(`
       id,
@@ -273,6 +305,13 @@ async function generateHorasTrabalhadasReport(periodoDias: number, dataReferenci
     .order('ano', { ascending: false })
     .order('mes', { ascending: false })
     .limit(mesesPeriodo)
+
+  // Filtrar por CCA se especificado
+  if (ccaId) {
+    query = query.eq('cca_id', ccaId)
+  }
+  
+  const { data, error } = await query
   
   if (error) throw error
   
@@ -327,13 +366,13 @@ async function generateHorasTrabalhadasReport(periodoDias: number, dataReferenci
   return html
 }
 
-async function generateIndicadoresReport(periodoDias: number, dataReferencia: string) {
-  console.log(`Gerando relatório de indicadores para ${periodoDias} dias até ${dataReferencia}`)
+async function generateIndicadoresReport(periodoDias: number, dataReferencia: string, ccaId?: number) {
+  console.log(`Gerando relatório de indicadores para ${periodoDias} dias até ${dataReferencia}${ccaId ? ` para CCA ${ccaId}` : ''}`)
   
   const dataInicio = new Date(dataReferencia)
   dataInicio.setDate(dataInicio.getDate() - periodoDias)
   
-  const { data, error } = await supabase
+  let query = supabase
     .from('idsms_indicadores')
     .select(`
       id,
@@ -341,11 +380,19 @@ async function generateIndicadoresReport(periodoDias: number, dataReferencia: st
       tipo,
       resultado,
       motivo,
+      cca_id,
       ccas!inner(nome, codigo)
     `)
     .gte('data', dataInicio.toISOString().split('T')[0])
     .lte('data', dataReferencia.split('T')[0])
     .order('data', { ascending: false })
+
+  // Filtrar por CCA se especificado
+  if (ccaId) {
+    query = query.eq('cca_id', ccaId)
+  }
+  
+  const { data, error } = await query
   
   if (error) throw error
   
@@ -407,28 +454,28 @@ serve(async (req) => {
   }
 
   try {
-    const { tipo_relatorio, periodo_dias, data_referencia }: ReportRequest = await req.json()
+    const { tipo_relatorio, periodo_dias, data_referencia, cca_id }: ReportRequest = await req.json()
     
-    console.log(`Gerando relatório: ${tipo_relatorio} para ${periodo_dias} dias`)
+    console.log(`Gerando relatório: ${tipo_relatorio} para ${periodo_dias} dias${cca_id ? ` para CCA ${cca_id}` : ''}`)
     
     const dataRef = data_referencia || new Date().toISOString()
     let reportHtml = ''
     
     switch (tipo_relatorio) {
       case 'ocorrencias':
-        reportHtml = await generateOcorrenciasReport(periodo_dias, dataRef)
+        reportHtml = await generateOcorrenciasReport(periodo_dias, dataRef, cca_id)
         break
       case 'desvios':
-        reportHtml = await generateDesviosReport(periodo_dias, dataRef)
+        reportHtml = await generateDesviosReport(periodo_dias, dataRef, cca_id)
         break
       case 'treinamentos':
-        reportHtml = await generateTreinamentosReport(periodo_dias, dataRef)
+        reportHtml = await generateTreinamentosReport(periodo_dias, dataRef, cca_id)
         break
       case 'horas_trabalhadas':
-        reportHtml = await generateHorasTrabalhadasReport(periodo_dias, dataRef)
+        reportHtml = await generateHorasTrabalhadasReport(periodo_dias, dataRef, cca_id)
         break
       case 'indicadores':
-        reportHtml = await generateIndicadoresReport(periodo_dias, dataRef)
+        reportHtml = await generateIndicadoresReport(periodo_dias, dataRef, cca_id)
         break
       default:
         throw new Error(`Tipo de relatório não suportado: ${tipo_relatorio}`)
