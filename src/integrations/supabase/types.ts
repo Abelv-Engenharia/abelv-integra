@@ -152,6 +152,51 @@ export type Database = {
         }
         Relationships: []
       }
+      configuracoes_emails: {
+        Row: {
+          anexo_url: string | null
+          assunto: string
+          ativo: boolean
+          criado_em: string
+          destinatarios: string[]
+          dia_semana: string | null
+          hora_envio: string
+          id: string
+          mensagem: string
+          periodicidade: string
+          relatorio_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          anexo_url?: string | null
+          assunto: string
+          ativo?: boolean
+          criado_em?: string
+          destinatarios: string[]
+          dia_semana?: string | null
+          hora_envio: string
+          id?: string
+          mensagem: string
+          periodicidade: string
+          relatorio_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          anexo_url?: string | null
+          assunto?: string
+          ativo?: boolean
+          criado_em?: string
+          destinatarios?: string[]
+          dia_semana?: string | null
+          hora_envio?: string
+          id?: string
+          mensagem?: string
+          periodicidade?: string
+          relatorio_id?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       controle_opcoes: {
         Row: {
           ativo: boolean | null
@@ -2378,6 +2423,10 @@ export type Database = {
           ano: number
           total_horas: number
         }[]
+      }
+      processar_configuracoes_emails: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
       }
     }
     Enums: {

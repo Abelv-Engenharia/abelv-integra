@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import { useUserSettings, UserSettings } from "@/hooks/useUserSettings";
 import ChangePasswordForm from "@/components/account/ChangePasswordForm";
 import UploadTutoriais from "@/components/account/UploadTutoriais";
+import ConfiguracaoEmails from "@/components/account/ConfiguracaoEmails";
 
 const Settings = () => {
   const { settings, isLoading, saveSettingsMutation } = useUserSettings();
@@ -72,9 +73,10 @@ const Settings = () => {
       <h1 className="heading-responsive mb-4 sm:mb-6">Configurações</h1>
       
       <Tabs defaultValue="preferences" className="w-full">
-        <TabsList className="grid w-full grid-cols-3 mb-4 sm:mb-6">
+        <TabsList className="grid w-full grid-cols-4 mb-4 sm:mb-6">
           <TabsTrigger value="preferences" className="text-xs sm:text-sm">Preferências</TabsTrigger>
           <TabsTrigger value="security" className="text-xs sm:text-sm">Segurança</TabsTrigger>
+          <TabsTrigger value="emails" className="text-xs sm:text-sm">E-mails</TabsTrigger>
           <TabsTrigger value="tutoriais" className="text-xs sm:text-sm">Upload Tutoriais</TabsTrigger>
         </TabsList>
         
@@ -200,6 +202,10 @@ const Settings = () => {
             </CardHeader>
             <ChangePasswordForm />
           </Card>
+        </TabsContent>
+        
+        <TabsContent value="emails" className="section-spacing">
+          <ConfiguracaoEmails />
         </TabsContent>
         
         <TabsContent value="tutoriais" className="section-spacing">
