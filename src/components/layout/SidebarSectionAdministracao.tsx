@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Settings, Users, Building, Shield, Wrench, UserCheck, UserCog, Clock, Target, FileText, Image, Upload } from "lucide-react";
+import { Settings, Users, Building, Shield, Wrench, UserCheck, UserCog, Clock, Target, FileText, Image, Upload, Mail } from "lucide-react";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import {
   SidebarMenu,
@@ -179,6 +179,17 @@ export default function SidebarSectionAdministracao({ openMenu, toggleMenu }: Pr
                     <Link to="/tutoriais/upload" className="flex items-center gap-2">
                       <Upload className="h-3 w-3 flex-shrink-0" />
                       <span className="text-xs leading-tight break-words min-w-0">Upload de Tutoriais</span>
+                    </Link>
+                  </SidebarMenuSubButton>
+                </SidebarMenuSubItem>
+                <SidebarMenuSubItem>
+                  <SidebarMenuSubButton 
+                    asChild
+                    className={currentPath === "/configuracao-emails" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
+                  >
+                    <Link to="/configuracao-emails" className="flex items-center gap-2">
+                      <Mail className="h-3 w-3 flex-shrink-0" />
+                      <span className="text-xs leading-tight break-words min-w-0">Configuração de E-mails</span>
                     </Link>
                   </SidebarMenuSubButton>
                 </SidebarMenuSubItem>

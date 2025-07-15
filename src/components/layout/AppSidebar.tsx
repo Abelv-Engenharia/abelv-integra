@@ -156,7 +156,7 @@ export function AppSidebar() {
                     >
                       <Link to="/account/settings" className="flex items-center gap-2">
                         <Settings className="h-3 w-3 flex-shrink-0" />
-                        <span className="text-xs leading-tight break-words min-w-0">Configurações</span>
+                        <span className="text-xs leading-tight break-words min-w-0">Configuração da conta</span>
                       </Link>
                     </SidebarMenuSubButton>
                   </SidebarMenuSubItem>
