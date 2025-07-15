@@ -174,9 +174,9 @@ export default function SidebarSectionAdministracao({ openMenu, toggleMenu }: Pr
                 <SidebarMenuSubItem>
                   <SidebarMenuSubButton 
                     asChild
-                    className={currentPath === "/tutoriais/upload" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
+                    className={currentPath === "/upload-tutoriais" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
                   >
-                    <Link to="/tutoriais/upload" className="flex items-center gap-2">
+                    <Link to="/upload-tutoriais" className="flex items-center gap-2">
                       <Upload className="h-3 w-3 flex-shrink-0" />
                       <span className="text-xs leading-tight break-words min-w-0">Upload de Tutoriais</span>
                     </Link>

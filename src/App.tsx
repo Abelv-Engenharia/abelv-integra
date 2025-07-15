@@ -25,6 +25,7 @@ import Profile from "./pages/account/Profile";
 import Settings from "./pages/account/Settings";
 import Support from "./pages/account/Support";
 import ConfiguracaoEmailsPage from "./pages/configuracao-emails/ConfiguracaoEmails";
+import UploadTutoriaisPage from "./pages/configuracao-emails/UploadTutoriais";
 import Suporte from "./pages/Suporte";
 
 // Admin pages - NEW USER MANAGEMENT PAGE
@@ -171,6 +172,7 @@ function App() {
                 <Route path="admin/metas-indicadores" element={<MetasIndicadores />} />
                 <Route path="admin/registro-hht" element={<RegistroHHT />} />
                 <Route path="configuracao-emails" element={<ConfiguracaoEmailsPage />} />
+                <Route path="upload-tutoriais" element={<UploadTutoriaisPage />} />
 
                 {/* Tarefas routes */}
                 <Route path="tarefas/dashboard" element={<TarefasDashboard />} />
