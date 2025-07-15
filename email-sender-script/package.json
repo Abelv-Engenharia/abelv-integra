@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "dev": "nodemon index.js"
+    "dev": "nodemon index.js",
+    "setup": "node setup.js",
+    "test": "npm run setup && npm start"
   },
   "dependencies": {
     "nodemailer": "^6.9.7",

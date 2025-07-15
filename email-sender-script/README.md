@@ -14,11 +14,11 @@ npm install
 cp .env.example .env
 ```
 
-3. Edite o arquivo `.env` com suas credenciais:
-- `SUPABASE_URL`: URL do seu projeto Supabase
-- `SUPABASE_SERVICE_ROLE_KEY`: Service Role Key do Supabase
-- `SMTP_USER`: Seu e-mail do Office365
-- `SMTP_PASS`: Senha do e-mail ou senha de app
+3. O arquivo `.env` já está configurado com:
+- `SUPABASE_URL`: https://xexgdtlctyuycohzhmuu.supabase.co
+- `SUPABASE_SERVICE_ROLE_KEY`: Configurado automaticamente
+- `SMTP_USER`: sms@abelv.com.br
+- `SMTP_PASS`: sfdtzbxvnhyrxqhk (senha de app)
 
 ## Uso
 
