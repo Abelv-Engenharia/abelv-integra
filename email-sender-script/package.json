@@ -1,0 +1,21 @@
+{
+  "name": "email-sender-script",
+  "version": "1.0.0",
+  "description": "Script para envio automático de e-mails via Office365 SMTP",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "dependencies": {
+    "nodemailer": "^6.9.7",
+    "@supabase/supabase-js": "^2.38.4",
+    "dotenv": "^16.3.1",
+    "axios": "^1.6.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "author": "",
+  "license": "ISC"
+}

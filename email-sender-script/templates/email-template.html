@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ASSUNTO}}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .header h1 {
+            color: #2c3e50;
+            margin: 0;
+            font-size: 24px;
+        }
+        .content {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .footer {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+        }
+        .button {
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .button:hover {
+            background-color: #0056b3;
+        }
+        .info-box {
+            background-color: #e9ecef;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            border-left: 4px solid #007bff;
+        }
+        .warning-box {
+            background-color: #fff3cd;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            border-left: 4px solid #ffc107;
+        }
+        .success-box {
+            background-color: #d4edda;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            border-left: 4px solid #28a745;
+        }
+        .attachments {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+        .attachments h3 {
+            margin-top: 0;
+            color: #495057;
+        }
+        .attachment-item {
+            padding: 5px 0;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .attachment-item:last-child {
+            border-bottom: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>{{TITULO}}</h1>
+    </div>
+    
+    <div class="content">
+        <p>Olá {{DESTINATARIO}},</p>
+        
+        <p>{{MENSAGEM}}</p>
+        
+        <!-- Exemplo de caixa informativa -->
+        <div class="info-box">
+            <strong>Informação:</strong> {{INFO_ADICIONAL}}
+        </div>
+        
+        <!-- Exemplo de botão -->
+        <a href="{{LINK_ACAO}}" class="button">{{TEXTO_BOTAO}}</a>
+        
+        <!-- Lista de anexos (se houver) -->
+        {{#ANEXOS}}
+        <div class="attachments">
+            <h3>📎 Anexos</h3>
+            {{#LISTA_ANEXOS}}
+            <div class="attachment-item">
+                <strong>{{NOME_ARQUIVO}}</strong>
+            </div>
+            {{/LISTA_ANEXOS}}
+        </div>
+        {{/ANEXOS}}
+        
+        <p>Atenciosamente,<br>
+        <strong>{{REMETENTE}}</strong></p>
+    </div>
+    
+    <div class="footer">
+        <p>Este é um e-mail automático. Por favor, não responda.</p>
+        <p>{{DATA_ENVIO}}</p>
+    </div>
+</body>
+</html>

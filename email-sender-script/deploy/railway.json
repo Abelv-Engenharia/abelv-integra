@@ -1,0 +1,36 @@
+{
+  "name": "email-sender-script",
+  "description": "Script para envio automático de e-mails via Office365 SMTP",
+  "build": {
+    "builder": "dockerfile"
+  },
+  "deploy": {
+    "restartPolicy": "always",
+    "healthcheck": {
+      "path": "/health",
+      "port": 3000
+    }
+  },
+  "env": {
+    "SUPABASE_URL": {
+      "description": "URL do projeto Supabase",
+      "required": true
+    },
+    "SUPABASE_SERVICE_ROLE_KEY": {
+      "description": "Service Role Key do Supabase",
+      "required": true
+    },
+    "SMTP_USER": {
+      "description": "E-mail do Office365",
+      "required": true
+    },
+    "SMTP_PASS": {
+      "description": "Senha do e-mail Office365",
+      "required": true
+    },
+    "CRON_SCHEDULE": {
+      "description": "Agendamento cron (padrão: */5 * * * *)",
+      "default": "*/5 * * * *"
+    }
+  }
+}

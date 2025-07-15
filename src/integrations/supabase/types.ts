@@ -471,6 +471,42 @@ export type Database = {
         }
         Relationships: []
       }
+      emails_pendentes: {
+        Row: {
+          anexos: Json | null
+          assunto: string
+          corpo: string
+          criado_em: string
+          destinatario: string
+          enviado: boolean
+          id: string
+          tentativas: number
+          updated_at: string
+        }
+        Insert: {
+          anexos?: Json | null
+          assunto: string
+          corpo: string
+          criado_em?: string
+          destinatario: string
+          enviado?: boolean
+          id?: string
+          tentativas?: number
+          updated_at?: string
+        }
+        Update: {
+          anexos?: Json | null
+          assunto?: string
+          corpo?: string
+          criado_em?: string
+          destinatario?: string
+          enviado?: boolean
+          id?: string
+          tentativas?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       empresa_ccas: {
         Row: {
           cca_id: number
