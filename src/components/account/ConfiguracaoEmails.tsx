@@ -271,17 +271,17 @@ const ConfiguracaoEmails = () => {
                 <div className="space-y-2">
                   <Label htmlFor="tipo_relatorio">Tipo de Relatório (opcional)</Label>
                   <Select
-                    value={formData.tipo_relatorio || ""}
+                    value={formData.tipo_relatorio || "none"}
                     onValueChange={(value) => setFormData({ 
                       ...formData, 
-                      tipo_relatorio: value === "" ? null : value as ConfiguracaoEmail['tipo_relatorio'] 
+                      tipo_relatorio: value === "none" ? null : value as ConfiguracaoEmail['tipo_relatorio'] 
                     })}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Selecione um relatório" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Nenhum relatório</SelectItem>
+                      <SelectItem value="none">Nenhum relatório</SelectItem>
                       {tiposRelatorio.map((tipo) => (
                         <SelectItem key={tipo.value} value={tipo.value}>
                           {tipo.label}
