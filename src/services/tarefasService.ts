@@ -148,11 +148,14 @@ export const tarefasService = {
         return [];
       }
 
+      console.log("Buscando tarefas para o usuário:", user.id);
+
+      // Buscar tarefas onde o usuário é responsável OU criador
       const { data, error } = await supabase
         .from('tarefas')
         .select(`
           *,
-          profiles!inner(id, nome)
+          profiles!tarefas_responsavel_id_fkey(id, nome)
         `)
         .or(`responsavel_id.eq.${user.id},criado_por.eq.${user.id}`)
         .order('created_at', { ascending: false });
@@ -162,24 +165,36 @@ export const tarefasService = {
         return [];
       }
 
-      return (data || []).map(tarefa => ({
-        id: tarefa.id,
-        cca: tarefa.cca,
-        tipoCca: 'linha-inteira' as const,
-        dataCadastro: tarefa.data_cadastro,
-        dataConclusao: tarefa.data_conclusao,
-        data_real_conclusao: tarefa.data_real_conclusao ?? null,
-        descricao: tarefa.descricao,
-        titulo: tarefa.titulo ?? "",
-        responsavel: {
-          id: tarefa.responsavel_id || '',
-          nome: tarefa.profiles?.nome || 'Não atribuído'
-        },
-        anexo: tarefa.anexo,
-        status: tarefa.status as TarefaStatus,
-        iniciada: tarefa.iniciada,
-        configuracao: tarefa.configuracao as any
-      }));
+      console.log("Tarefas encontradas:", data?.length || 0);
+
+      return (data || []).map(tarefa => {
+        console.log("Processando tarefa:", {
+          id: tarefa.id,
+          titulo: tarefa.titulo,
+          responsavel_id: tarefa.responsavel_id,
+          criado_por: tarefa.criado_por,
+          usuario_atual: user.id
+        });
+
+        return {
+          id: tarefa.id,
+          cca: tarefa.cca,
+          tipoCca: 'linha-inteira' as const,
+          dataCadastro: tarefa.data_cadastro,
+          dataConclusao: tarefa.data_conclusao,
+          data_real_conclusao: tarefa.data_real_conclusao ?? null,
+          descricao: tarefa.descricao,
+          titulo: tarefa.titulo ?? "",
+          responsavel: {
+            id: tarefa.responsavel_id || '',
+            nome: tarefa.profiles?.nome || 'Não atribuído'
+          },
+          anexo: tarefa.anexo,
+          status: tarefa.status as TarefaStatus,
+          iniciada: tarefa.iniciada,
+          configuracao: tarefa.configuracao as any
+        };
+      });
     } catch (error) {
       console.error("Exceção ao buscar minhas tarefas:", error);
       return [];
@@ -241,6 +256,7 @@ export const tarefasService = {
         return false;
       }
 
+      console.log("Tarefa criada com sucesso");
       return true;
     } catch (error) {
       console.error("Exceção ao criar tarefa:", error);
