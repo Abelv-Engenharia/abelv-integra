@@ -1,8 +1,9 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileText, BarChart3, Shield } from "lucide-react";
 import { Link } from "react-router-dom";
+import { relatoriosService } from "@/services/relatoriosService";
 
 const RelatoriosDashboard = () => {
   const reportCards = [
@@ -37,6 +38,20 @@ const RelatoriosDashboard = () => {
       link: "/relatorios/hsa",
     },
   ];
+
+  // Registra automaticamente os relatórios no serviço
+  useEffect(() => {
+    reportCards.forEach(card => {
+      const linkParts = card.link.split('/');
+      const value = linkParts[linkParts.length - 1];
+      
+      relatoriosService.registrarRelatorio({
+        value,
+        label: card.title,
+        path: card.link,
+      });
+    });
+  }, []);
 
   return (
     <div className="space-y-6">

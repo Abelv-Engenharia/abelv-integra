@@ -13,6 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Trash2, Plus, Edit3 } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { useRelatoriosDisponiveis } from "@/hooks/useRelatoriosDisponiveis";
 
 interface ConfiguracaoEmail {
   id?: string;
@@ -21,7 +22,7 @@ interface ConfiguracaoEmail {
   mensagem: string;
   anexo_url?: string;
   relatorio_id?: string;
-  tipo_relatorio?: 'ocorrencias' | 'desvios' | 'treinamentos' | 'horas_trabalhadas' | 'indicadores' | null;
+  tipo_relatorio?: 'ocorrencias' | 'desvios' | 'treinamentos' | 'horas_trabalhadas' | 'indicadores' | 'idsms' | 'hsa' | null;
   periodo_dias?: number;
   cca_id?: number;
   periodicidade: 'diario' | 'semanal' | 'quinzenal' | 'mensal';
@@ -38,6 +39,7 @@ const ConfiguracaoEmails = () => {
   const [deleteConfig, setDeleteConfig] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
+  const { relatorios } = useRelatoriosDisponiveis();
 
   const initialFormData: ConfiguracaoEmail = {
     assunto: "",
@@ -66,13 +68,11 @@ const ConfiguracaoEmails = () => {
     { value: "sabado", label: "Sábado" },
   ];
 
-  const tiposRelatorio = [
-    { value: "ocorrencias", label: "Relatório de Ocorrências" },
-    { value: "desvios", label: "Relatório de Desvios" },
-    { value: "treinamentos", label: "Relatório de Treinamentos" },
-    { value: "horas_trabalhadas", label: "Relatório de Horas Trabalhadas" },
-    { value: "indicadores", label: "Relatório de Indicadores" },
-  ];
+  // Tipos de relatório agora são dinâmicos baseados no serviço
+  const tiposRelatorio = relatorios.map(rel => ({
+    value: rel.value,
+    label: rel.label
+  }));
 
   const loadConfiguracoes = async () => {
     try {
