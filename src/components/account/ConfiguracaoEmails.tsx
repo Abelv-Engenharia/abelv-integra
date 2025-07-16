@@ -1,178 +1,123 @@
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { FileUpload } from "@/components/ui/file-upload";
-import { EmailInput } from "@/components/ui/email-input";
-import { supabase } from "@/integrations/supabase/client";
+import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
-import { Trash2, Plus, Edit3, TestTube } from "lucide-react";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Plus, Trash2, Settings } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { useRelatoriosDisponiveis } from "@/hooks/useRelatoriosDisponiveis";
 import EmailTestPanel from "./EmailTestPanel";
+import EmailQueueStatus from "./EmailQueueStatus";
 
 interface ConfiguracaoEmail {
-  id?: string;
+  id: string;
   assunto: string;
   destinatarios: string[];
   mensagem: string;
-  anexo_url?: string;
-  relatorio_id?: string;
-  tipo_relatorio?: 'ocorrencias' | 'desvios' | 'treinamentos' | 'horas_trabalhadas' | 'indicadores' | 'idsms' | 'hsa' | null;
-  periodo_dias?: number;
-  cca_id?: number;
-  periodicidade: 'diario' | 'semanal' | 'quinzenal' | 'mensal';
-  dia_semana?: string;
+  periodicidade: string;
+  dia_semana: string | null;
   hora_envio: string;
   ativo: boolean;
+  tipo_relatorio: string | null;
+  periodo_dias: number | null;
+  anexo_url: string | null;
+  cca_id: string | null;
 }
 
-const ConfiguracaoEmails = () => {
-  const [configuracoes, setConfiguracoes] = useState<ConfiguracaoEmail[]>([]);
-  const [ccas, setCcas] = useState<Array<{ id: number; nome: string; codigo: string }>>([]);
-  const [showForm, setShowForm] = useState(false);
-  const [showTestPanel, setShowTestPanel] = useState(false);
-  const [editingConfig, setEditingConfig] = useState<ConfiguracaoEmail | null>(null);
-  const [deleteConfig, setDeleteConfig] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+const ConfiguracaoEmailsForm = ({
+  configuracao,
+  onClose,
+}: {
+  configuracao?: ConfiguracaoEmail;
+  onClose: () => void;
+}) => {
+  const queryClient = useQueryClient();
   const { toast } = useToast();
+  const [assunto, setAssunto] = useState(configuracao?.assunto || "");
+  const [destinatarios, setDestinatarios] = useState(
+    configuracao?.destinatarios.join(", ") || ""
+  );
+  const [mensagem, setMensagem] = useState(configuracao?.mensagem || "");
+  const [periodicidade, setPeriodicidade] = useState(
+    configuracao?.periodicidade || "diario"
+  );
+  const [diaSemana, setDiaSemana] = useState(configuracao?.dia_semana || null);
+  const [horaEnvio, setHoraEnvio] = useState(configuracao?.hora_envio || "08:00");
+  const [ativo, setAtivo] = useState(configuracao?.ativo || true);
+  const [tipoRelatorio, setTipoRelatorio] = useState(configuracao?.tipo_relatorio || null);
+  const [periodoDias, setPeriodoDias] = useState(configuracao?.periodo_dias || 30);
+  const [anexoUrl, setAnexoUrl] = useState(configuracao?.anexo_url || null);
+  const [ccaId, setCcaId] = useState(configuracao?.cca_id || null);
+  const [loading, setLoading] = useState(false);
+
   const { relatorios } = useRelatoriosDisponiveis();
 
-  const initialFormData: ConfiguracaoEmail = {
-    assunto: "",
-    destinatarios: [],
-    mensagem: "",
-    anexo_url: "",
-    relatorio_id: "",
-    tipo_relatorio: null,
-    periodo_dias: 30,
-    cca_id: undefined,
-    periodicidade: "diario",
-    dia_semana: "",
-    hora_envio: "09:00",
-    ativo: true,
-  };
-
-  const [formData, setFormData] = useState<ConfiguracaoEmail>(initialFormData);
-
-  const diasSemana = [
-    { value: "domingo", label: "Domingo" },
-    { value: "segunda", label: "Segunda-feira" },
-    { value: "terca", label: "Terça-feira" },
-    { value: "quarta", label: "Quarta-feira" },
-    { value: "quinta", label: "Quinta-feira" },
-    { value: "sexta", label: "Sexta-feira" },
-    { value: "sabado", label: "Sábado" },
-  ];
-
-  const tiposRelatorio = relatorios.map(rel => ({
-    value: rel.value,
-    label: rel.label
-  }));
-
-  const loadConfiguracoes = async () => {
-    try {
-      const { data, error } = await supabase
-        .from("configuracoes_emails")
-        .select(`
-          *,
-          ccas (
-            id,
-            nome,
-            codigo
-          )
-        `)
-        .order("criado_em", { ascending: false });
-
-      if (error) throw error;
-      setConfiguracoes((data || []) as ConfiguracaoEmail[]);
-    } catch (error) {
-      console.error("Erro ao carregar configurações:", error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível carregar as configurações de e-mail",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const loadCcas = async () => {
-    try {
-      const { data, error } = await supabase
-        .from("ccas")
-        .select("id, nome, codigo")
-        .eq("ativo", true)
-        .order("nome");
-
-      if (error) throw error;
-      setCcas(data || []);
-    } catch (error) {
-      console.error("Erro ao carregar CCAs:", error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível carregar os CCAs",
-        variant: "destructive",
-      });
-    }
-  };
-
-  useEffect(() => {
-    loadConfiguracoes();
-    loadCcas();
-  }, []);
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: any) => {
     e.preventDefault();
     setLoading(true);
 
-    try {
-      const dataToSave = {
-        ...formData,
-        dia_semana: formData.periodicidade === "semanal" ? formData.dia_semana : null,
-        relatorio_id: formData.relatorio_id && formData.relatorio_id.trim() !== "" ? formData.relatorio_id : null,
-        tipo_relatorio: formData.tipo_relatorio || null,
-        anexo_url: formData.anexo_url && formData.anexo_url.trim() !== "" ? formData.anexo_url : null,
-      };
+    const destinatariosArray = destinatarios
+      .split(",")
+      .map((email) => email.trim())
+      .filter(Boolean);
 
-      if (editingConfig?.id) {
+    const dataToSubmit = {
+      assunto,
+      destinatarios: destinatariosArray,
+      mensagem,
+      periodicidade,
+      dia_semana: periodicidade === "semanal" ? diaSemana : null,
+      hora_envio: horaEnvio,
+      ativo,
+      tipo_relatorio: tipoRelatorio,
+      periodo_dias: tipoRelatorio ? periodoDias : null,
+      anexo_url: anexoUrl,
+      cca_id: ccaId,
+    };
+
+    try {
+      if (configuracao) {
+        // Atualizar configuração existente
         const { error } = await supabase
           .from("configuracoes_emails")
-          .update(dataToSave)
-          .eq("id", editingConfig.id);
+          .update(dataToSubmit)
+          .eq("id", configuracao.id);
 
         if (error) throw error;
-        
+
         toast({
           title: "Sucesso",
-          description: "Configuração atualizada com sucesso",
+          description: "Configuração de email atualizada com sucesso!",
         });
       } else {
+        // Criar nova configuração
         const { error } = await supabase
           .from("configuracoes_emails")
-          .insert([dataToSave]);
+          .insert([dataToSubmit]);
 
         if (error) throw error;
-        
+
         toast({
           title: "Sucesso",
-          description: "Configuração criada com sucesso",
+          description: "Configuração de email criada com sucesso!",
         });
       }
 
-      setFormData(initialFormData);
-      setShowForm(false);
-      setEditingConfig(null);
-      loadConfiguracoes();
-    } catch (error) {
+      // Invalidate cache and refetch
+      await queryClient.invalidateQueries("configuracoes-emails");
+      onClose();
+    } catch (error: any) {
       console.error("Erro ao salvar configuração:", error);
       toast({
         title: "Erro",
-        description: "Não foi possível salvar a configuração",
+        description:
+          error.message || "Não foi possível salvar a configuração do email.",
         variant: "destructive",
       });
     } finally {
@@ -180,13 +125,192 @@ const ConfiguracaoEmails = () => {
     }
   };
 
-  const handleEdit = (config: ConfiguracaoEmail) => {
-    setEditingConfig(config);
-    setFormData(config);
-    setShowForm(true);
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div>
+        <Label htmlFor="assunto">Assunto</Label>
+        <Input
+          type="text"
+          id="assunto"
+          value={assunto}
+          onChange={(e) => setAssunto(e.target.value)}
+          required
+        />
+      </div>
+
+      <div>
+        <Label htmlFor="destinatarios">Destinatários (separados por vírgula)</Label>
+        <Input
+          type="email"
+          id="destinatarios"
+          value={destinatarios}
+          onChange={(e) => setDestinatarios(e.target.value)}
+          required
+        />
+      </div>
+
+      <div>
+        <Label htmlFor="mensagem">Mensagem</Label>
+        <Textarea
+          id="mensagem"
+          value={mensagem}
+          onChange={(e) => setMensagem(e.target.value)}
+          rows={5}
+          required
+        />
+      </div>
+
+      <div>
+        <Label htmlFor="periodicidade">Periodicidade</Label>
+        <Select value={periodicidade} onValueChange={setPeriodicidade}>
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Selecione a periodicidade" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="diario">Diário</SelectItem>
+            <SelectItem value="semanal">Semanal</SelectItem>
+            <SelectItem value="quinzenal">Quinzenal</SelectItem>
+            <SelectItem value="mensal">Mensal</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      {periodicidade === "semanal" && (
+        <div>
+          <Label htmlFor="diaSemana">Dia da Semana</Label>
+          <Select value={diaSemana} onValueChange={setDiaSemana}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Selecione o dia da semana" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="domingo">Domingo</SelectItem>
+              <SelectItem value="segunda">Segunda</SelectItem>
+              <SelectItem value="terca">Terça</SelectItem>
+              <SelectItem value="quarta">Quarta</SelectItem>
+              <SelectItem value="quinta">Quinta</SelectItem>
+              <SelectItem value="sexta">Sexta</SelectItem>
+              <SelectItem value="sabado">Sábado</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      )}
+
+      <div>
+        <Label htmlFor="horaEnvio">Hora de Envio</Label>
+        <Input
+          type="time"
+          id="horaEnvio"
+          value={horaEnvio}
+          onChange={(e) => setHoraEnvio(e.target.value)}
+          required
+        />
+      </div>
+
+      <div>
+        <Label htmlFor="tipoRelatorio">Tipo de Relatório (Opcional)</Label>
+        <Select value={tipoRelatorio || ""} onValueChange={(value) => setTipoRelatorio(value === "" ? null : value)}>
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Nenhum" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="">Nenhum</SelectItem>
+            {relatorios.map((relatorio) => (
+              <SelectItem key={relatorio.value} value={relatorio.value}>
+                {relatorio.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      {tipoRelatorio && (
+        <div>
+          <Label htmlFor="periodoDias">Período do Relatório (em dias)</Label>
+          <Input
+            type="number"
+            id="periodoDias"
+            value={periodoDias}
+            onChange={(e) => setPeriodoDias(Number(e.target.value))}
+            required
+            min="1"
+            max="365"
+          />
+        </div>
+      )}
+
+      <div>
+        <Label htmlFor="anexoUrl">URL do Anexo (Opcional)</Label>
+        <Input
+          type="url"
+          id="anexoUrl"
+          value={anexoUrl || ""}
+          onChange={(e) => setAnexoUrl(e.target.value === "" ? null : e.target.value)}
+          placeholder="URL do arquivo para anexar"
+        />
+      </div>
+
+      <div>
+        <Label htmlFor="ccaId">CCA ID (Opcional)</Label>
+        <Input
+          type="text"
+          id="ccaId"
+          value={ccaId || ""}
+          onChange={(e) => setCcaId(e.target.value === "" ? null : e.target.value)}
+          placeholder="ID do CCA"
+        />
+      </div>
+
+      <div className="flex items-center space-x-2">
+        <Label htmlFor="ativo">Ativo</Label>
+        <Switch id="ativo" checked={ativo} onCheckedChange={setAtivo} />
+      </div>
+
+      <div className="flex justify-end space-x-2">
+        <Button type="button" variant="ghost" onClick={onClose}>
+          Cancelar
+        </Button>
+        <Button type="submit" disabled={loading}>
+          {loading ? "Salvando..." : "Salvar"}
+        </Button>
+      </div>
+    </form>
+  );
+};
+
+const ConfiguracaoEmails = () => {
+  const [open, setOpen] = useState(false);
+  const [selectedConfiguracao, setSelectedConfiguracao] = useState<
+    ConfiguracaoEmail | null
+  >(null);
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  const { data: configuracoes, isLoading } = useQuery(
+    "configuracoes-emails",
+    async () => {
+      const { data, error } = await supabase
+        .from("configuracoes_emails")
+        .select("*")
+        .order("criado_em", { ascending: false });
+
+      if (error) throw error;
+      return data as ConfiguracaoEmail[];
+    }
+  );
+
+  const handleEdit = (configuracao: ConfiguracaoEmail) => {
+    setSelectedConfiguracao(configuracao);
+    setOpen(true);
   };
 
   const handleDelete = async (id: string) => {
+    if (
+      !window.confirm(
+        "Tem certeza que deseja excluir esta configuração de email?"
+      )
+    )
+      return;
+
     try {
       const { error } = await supabase
         .from("configuracoes_emails")
@@ -197,338 +321,137 @@ const ConfiguracaoEmails = () => {
 
       toast({
         title: "Sucesso",
-        description: "Configuração excluída com sucesso",
+        description: "Configuração de email excluída com sucesso!",
       });
 
-      loadConfiguracoes();
-    } catch (error) {
+      // Invalidate cache and refetch
+      await queryClient.invalidateQueries("configuracoes-emails");
+    } catch (error: any) {
       console.error("Erro ao excluir configuração:", error);
       toast({
         title: "Erro",
-        description: "Não foi possível excluir a configuração",
+        description:
+          error.message || "Não foi possível excluir a configuração do email.",
         variant: "destructive",
       });
     }
-    setDeleteConfig(null);
-  };
-
-  const handleCancel = () => {
-    setFormData(initialFormData);
-    setShowForm(false);
-    setEditingConfig(null);
   };
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-2xl font-bold">Configuração de E-mails</h2>
-          <p className="text-muted-foreground">
-            Configure o envio automático de e-mails com base em relatórios
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <Button 
-            variant="outline"
-            onClick={() => setShowTestPanel(!showTestPanel)}
-            className="flex items-center gap-2"
-          >
-            <TestTube className="h-4 w-4" />
-            {showTestPanel ? "Ocultar Testes" : "Testes"}
-          </Button>
-          <Button 
-            onClick={() => setShowForm(true)}
-            className="flex items-center gap-2"
-          >
-            <Plus className="h-4 w-4" />
-            Nova Configuração
-          </Button>
-        </div>
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight">Configuração de E-mails</h1>
+        <p className="text-muted-foreground">
+          Configure envios automáticos de e-mails com relatórios personalizados
+        </p>
       </div>
 
-      {showTestPanel && (
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <EmailQueueStatus />
         <EmailTestPanel />
-      )}
+      </div>
 
-      {showForm && (
-        <Card>
-          <CardHeader>
-            <CardTitle>
-              {editingConfig ? "Editar Configuração" : "Nova Configuração"}
-            </CardTitle>
-            <CardDescription>
-              Configure os detalhes do envio automático de e-mails
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="assunto">Assunto do E-mail *</Label>
-                  <Input
-                    id="assunto"
-                    value={formData.assunto}
-                    onChange={(e) => setFormData({ ...formData, assunto: e.target.value })}
-                    required
-                  />
-                </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>Lista de Configurações</CardTitle>
+          <CardDescription>
+            Gerencie as configurações de envio de e-mails automáticos
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="mb-4">
+            <Button onClick={() => {
+              setSelectedConfiguracao(null);
+              setOpen(true);
+            }}>
+              <Plus className="w-4 h-4 mr-2" />
+              Adicionar Configuração
+            </Button>
+          </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="hora_envio">Horário de Envio *</Label>
-                  <Input
-                    id="hora_envio"
-                    type="time"
-                    value={formData.hora_envio}
-                    onChange={(e) => setFormData({ ...formData, hora_envio: e.target.value })}
-                    required
-                  />
-                </div>
-              </div>
+          {isLoading ? (
+            <div>Carregando configurações...</div>
+          ) : configuracoes?.length === 0 ? (
+            <div>Nenhuma configuração encontrada.</div>
+          ) : (
+            <div className="grid gap-4">
+              {configuracoes?.map((configuracao) => (
+                <Card key={configuracao.id}>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">
+                      {configuracao.assunto}
+                    </CardTitle>
+                    <Settings className="w-4 h-4 text-gray-500" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-sm text-muted-foreground">
+                      <p>
+                        <strong>Destinatários:</strong>{" "}
+                        {configuracao.destinatarios.join(", ")}
+                      </p>
+                      <p>
+                        <strong>Periodicidade:</strong> {configuracao.periodicidade}
+                        {configuracao.dia_semana &&
+                          ` (${configuracao.dia_semana})`}
+                      </p>
+                      <p>
+                        <strong>Hora de Envio:</strong> {configuracao.hora_envio}
+                      </p>
+                      <p>
+                        <strong>Status:</strong>{" "}
+                        {configuracao.ativo ? (
+                          <Badge variant="outline">Ativo</Badge>
+                        ) : (
+                          <Badge variant="secondary">Inativo</Badge>
+                        )}
+                      </p>
+                    </div>
+                    <div className="flex justify-end space-x-2 mt-4">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleEdit(configuracao)}
+                      >
+                        Editar
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => handleDelete(configuracao.id)}
+                      >
+                        <Trash2 className="w-4 h-4 mr-2" />
+                        Excluir
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
-              <div className="space-y-2">
-                <Label>Destinatários *</Label>
-                <EmailInput
-                  emails={formData.destinatarios}
-                  onEmailsChange={(emails) => setFormData({ ...formData, destinatarios: emails })}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="mensagem">Mensagem do E-mail *</Label>
-                <Textarea
-                  id="mensagem"
-                  value={formData.mensagem}
-                  onChange={(e) => setFormData({ ...formData, mensagem: e.target.value })}
-                  rows={4}
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label>Anexo (opcional)</Label>
-                <FileUpload
-                  currentFile={formData.anexo_url}
-                  onFileUpload={(url) => setFormData({ ...formData, anexo_url: url })}
-                  onRemove={() => setFormData({ ...formData, anexo_url: "" })}
-                />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="tipo_relatorio">Tipo de Relatório (opcional)</Label>
-                  <Select
-                    value={formData.tipo_relatorio || "none"}
-                    onValueChange={(value) => setFormData({ 
-                      ...formData, 
-                      tipo_relatorio: value === "none" ? null : value as ConfiguracaoEmail['tipo_relatorio'] 
-                    })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione um relatório" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">Nenhum relatório</SelectItem>
-                      {tiposRelatorio.map((tipo) => (
-                        <SelectItem key={tipo.value} value={tipo.value}>
-                          {tipo.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {formData.tipo_relatorio && (
-                  <div className="space-y-2">
-                    <Label htmlFor="periodo_dias">Período (dias)</Label>
-                    <Input
-                      id="periodo_dias"
-                      type="number"
-                      min="1"
-                      max="365"
-                      value={formData.periodo_dias}
-                      onChange={(e) => setFormData({ 
-                        ...formData, 
-                        periodo_dias: parseInt(e.target.value) || 30 
-                      })}
-                      placeholder="30"
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      Dados dos últimos {formData.periodo_dias} dias anteriores ao envio
-                    </p>
-                  </div>
-                )}
-              </div>
-
-              {formData.tipo_relatorio && (
-                <div className="space-y-2">
-                  <Label htmlFor="cca_id">CCA (opcional)</Label>
-                  <Select
-                    value={formData.cca_id?.toString() || "none"}
-                    onValueChange={(value) => setFormData({ 
-                      ...formData, 
-                      cca_id: value === "none" ? undefined : parseInt(value) 
-                    })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione um CCA ou deixe vazio para todos" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">Todos os CCAs</SelectItem>
-                      {ccas.map((cca) => (
-                        <SelectItem key={cca.id} value={cca.id.toString()}>
-                          {cca.codigo} - {cca.nome}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <p className="text-xs text-muted-foreground">
-                    Se nenhum CCA for selecionado, o relatório incluirá dados de todos os CCAs
-                  </p>
-                </div>
-              )}
-
-              <div className="space-y-3">
-                <Label>Periodicidade *</Label>
-                <RadioGroup
-                  value={formData.periodicidade}
-                  onValueChange={(value) => setFormData({ 
-                    ...formData, 
-                    periodicidade: value as ConfiguracaoEmail['periodicidade'],
-                    dia_semana: value === 'semanal' ? formData.dia_semana : ''
-                  })}
-                >
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="diario" id="diario" />
-                    <Label htmlFor="diario">Diário</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="semanal" id="semanal" />
-                    <Label htmlFor="semanal">Semanal</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="quinzenal" id="quinzenal" />
-                    <Label htmlFor="quinzenal">Quinzenal</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="mensal" id="mensal" />
-                    <Label htmlFor="mensal">Mensal</Label>
-                  </div>
-                </RadioGroup>
-              </div>
-
-              {formData.periodicidade === "semanal" && (
-                <div className="space-y-2">
-                  <Label htmlFor="dia_semana">Dia da Semana</Label>
-                  <Select
-                    value={formData.dia_semana}
-                    onValueChange={(value) => setFormData({ ...formData, dia_semana: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione o dia" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {diasSemana.map((dia) => (
-                        <SelectItem key={dia.value} value={dia.value}>
-                          {dia.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
-
-              <div className="flex items-center space-x-2">
-                <Switch
-                  id="ativo"
-                  checked={formData.ativo}
-                  onCheckedChange={(checked) => setFormData({ ...formData, ativo: checked })}
-                />
-                <Label htmlFor="ativo">Ativo</Label>
-              </div>
-
-              <div className="flex gap-2">
-                <Button type="submit" disabled={loading}>
-                  {loading ? "Salvando..." : editingConfig ? "Atualizar" : "Criar"}
-                </Button>
-                <Button type="button" variant="outline" onClick={handleCancel}>
-                  Cancelar
-                </Button>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
-      )}
-
-      <div className="grid gap-4">
-        {configuracoes.map((config) => (
-          <Card key={config.id}>
-            <CardContent className="pt-6">
-              <div className="flex justify-between items-start">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-2">
-                    <h3 className="font-semibold">{config.assunto}</h3>
-                    <Switch checked={config.ativo} disabled />
-                  </div>
-                  <p className="text-sm text-muted-foreground mb-2">
-                    {config.destinatarios.join(", ")}
-                  </p>
-                  <p className="text-sm">
-                    <strong>Periodicidade:</strong> {config.periodicidade}
-                    {config.dia_semana && ` (${config.dia_semana})`}
-                  </p>
-                  <p className="text-sm">
-                    <strong>Horário:</strong> {config.hora_envio}
-                  </p>
-                   {config.tipo_relatorio && (
-                     <p className="text-sm">
-                       <strong>Relatório:</strong> {tiposRelatorio.find(t => t.value === config.tipo_relatorio)?.label}
-                       {config.periodo_dias && ` (${config.periodo_dias} dias)`}
-                     </p>
-                   )}
-                   {config.cca_id && (
-                     <p className="text-sm">
-                       <strong>CCA:</strong> {ccas.find(c => c.id === config.cca_id)?.codigo} - {ccas.find(c => c.id === config.cca_id)?.nome}
-                     </p>
-                   )}
-                </div>
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleEdit(config)}
-                  >
-                    <Edit3 className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setDeleteConfig(config.id!)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
+      {open && (
+        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center">
+          <Card className="max-w-2xl w-full">
+            <CardHeader>
+              <CardTitle>
+                {selectedConfiguracao ? "Editar" : "Adicionar"} Configuração de
+                Email
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ConfiguracaoEmailsForm
+                configuracao={selectedConfiguracao || undefined}
+                onClose={() => {
+                  setOpen(false);
+                  setSelectedConfiguracao(null);
+                }}
+              />
             </CardContent>
           </Card>
-        ))}
-      </div>
-
-      <AlertDialog open={!!deleteConfig} onOpenChange={() => setDeleteConfig(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
-            <AlertDialogDescription>
-              Tem certeza que deseja excluir esta configuração de e-mail? Esta ação não pode ser desfeita.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={() => deleteConfig && handleDelete(deleteConfig)}>
-              Excluir
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        </div>
+      )}
     </div>
   );
 };
