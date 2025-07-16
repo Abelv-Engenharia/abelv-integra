@@ -27,6 +27,8 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
+    console.log('Iniciando processamento da fila de emails...')
+
     // Buscar emails pendentes
     const { data: emails, error: fetchError } = await supabaseClient
       .from('emails_pendentes')
@@ -41,6 +43,8 @@ serve(async (req) => {
       throw fetchError
     }
 
+    console.log(`Encontrados ${emails?.length || 0} emails pendentes`)
+
     if (!emails || emails.length === 0) {
       return new Response(JSON.stringify({ 
         success: true, 
@@ -51,8 +55,6 @@ serve(async (req) => {
         status: 200,
       })
     }
-
-    console.log(`Processando ${emails.length} emails...`)
 
     let sucessos = 0
     let falhas = 0
@@ -90,7 +92,8 @@ serve(async (req) => {
     console.error('Erro no processamento da fila:', error)
     return new Response(JSON.stringify({ 
       success: false, 
-      error: error.message 
+      error: error.message,
+      details: 'Verifique os logs da função para mais detalhes'
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 500,
@@ -100,22 +103,35 @@ serve(async (req) => {
 
 async function sendEmail(emailData: EmailData, supabaseClient: any): Promise<boolean> {
   try {
-    console.log(`Enviando email para ${emailData.destinatario} - Assunto: ${emailData.assunto}`)
+    console.log(`Tentando enviar email para ${emailData.destinatario} - Assunto: ${emailData.assunto}`)
     
-    // Usar Resend para enviar o email
+    // Verificar se a chave do Resend existe
     const resendApiKey = Deno.env.get('RESEND_API_KEY')
     if (!resendApiKey) {
       console.error('RESEND_API_KEY não configurada')
+      
+      // Incrementar tentativas mesmo com erro de configuração
+      await supabaseClient
+        .from('emails_pendentes')
+        .update({ 
+          tentativas: emailData.tentativas + 1,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', emailData.id)
+      
       return false
     }
 
+    // Preparar payload do email
     const emailPayload = {
-      from: 'Sistema SMS <noreply@yourdomain.com>',
+      from: 'Sistema SMS <noreply@yourdomain.com>', // Será necessário alterar para domínio verificado
       to: [emailData.destinatario],
       subject: emailData.assunto,
       html: emailData.corpo,
     }
 
+    console.log('Enviando email via Resend...')
+    
     const response = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
@@ -125,8 +141,11 @@ async function sendEmail(emailData: EmailData, supabaseClient: any): Promise<boo
       body: JSON.stringify(emailPayload),
     })
 
+    const responseText = await response.text()
+    
     if (response.ok) {
       console.log(`Email enviado com sucesso para ${emailData.destinatario}`)
+      console.log('Resposta do Resend:', responseText)
       
       // Marcar como enviado no banco
       await supabaseClient
@@ -139,8 +158,8 @@ async function sendEmail(emailData: EmailData, supabaseClient: any): Promise<boo
 
       return true
     } else {
-      const errorText = await response.text()
-      console.error(`Erro ao enviar email para ${emailData.destinatario}:`, errorText)
+      console.error(`Erro ao enviar email para ${emailData.destinatario}:`, responseText)
+      console.error('Status:', response.status)
       
       // Incrementar tentativas
       await supabaseClient

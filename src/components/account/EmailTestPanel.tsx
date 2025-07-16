@@ -64,21 +64,33 @@ const EmailTestPanel = () => {
   const handleManualProcessing = async () => {
     setProcessingManual(true);
     try {
-      // Chamar função de processamento manual
-      const { error } = await supabase
-        .rpc('processar_configuracoes_emails');
+      // Primeiro, executar a função RPC para processar configurações
+      const { error: rpcError } = await supabase.rpc('processar_configuracoes_emails');
+      
+      if (rpcError) {
+        console.error("Erro na função RPC:", rpcError);
+        // Continuar mesmo com erro na RPC, pois pode ser que já existam emails pendentes
+      }
 
-      if (error) throw error;
+      // Depois, chamar a edge function para processar a fila
+      const { data, error } = await supabase.functions.invoke('process-email-queue');
+
+      if (error) {
+        console.error("Erro na edge function:", error);
+        throw error;
+      }
+
+      console.log("Resultado do processamento:", data);
 
       toast({
         title: "Sucesso",
-        description: "Processamento manual executado com sucesso",
+        description: data?.message || "Processamento manual executado com sucesso",
       });
     } catch (error) {
       console.error("Erro no processamento manual:", error);
       toast({
         title: "Erro",
-        description: "Não foi possível executar o processamento manual",
+        description: error.message || "Não foi possível executar o processamento manual",
         variant: "destructive",
       });
     } finally {
@@ -153,12 +165,12 @@ const EmailTestPanel = () => {
           <div className="space-y-2">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <AlertCircle className="h-4 w-4" />
-              Este botão executa a mesma função que o cron job automático
+              Este botão processa configurações ativas e envia emails pendentes
             </div>
             
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <CheckCircle className="h-4 w-4" />
-              Verifica configurações ativas e cria emails pendentes
+              Verifica configurações e cria emails pendentes, depois os envia
             </div>
           </div>
           
@@ -168,7 +180,7 @@ const EmailTestPanel = () => {
             variant="outline"
             className="w-full"
           >
-            {processingManual ? "Processando..." : "Executar Processamento"}
+            {processingManual ? "Processando..." : "Executar Processamento Completo"}
           </Button>
         </CardContent>
       </Card>
