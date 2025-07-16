@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { FileText, BarChart3 } from "lucide-react";
+import { FileText, BarChart3, Shield } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const RelatoriosDashboard = () => {
@@ -29,6 +29,12 @@ const RelatoriosDashboard = () => {
       description: "Análise de indicadores IDSMS por período, CCA e tipo de indicador",
       icon: <BarChart3 className="h-8 w-8" />,
       link: "/relatorios/idsms",
+    },
+    {
+      title: "Relatórios de Execução HSA",
+      description: "Análise de inspeções de segurança por CCA, responsável e desvios",
+      icon: <Shield className="h-8 w-8" />,
+      link: "/relatorios/hsa",
     },
   ];
 

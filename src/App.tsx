@@ -112,6 +112,7 @@ import RelatoriosOcorrencias from "./pages/relatorios/RelatoriosOcorrencias";
 import RelatoriosDesvios from "./pages/relatorios/RelatoriosDesvios";
 import RelatoriosTreinamentos from "./pages/relatorios/RelatoriosTreinamentos";
 import RelatoriosIDSMS from "./pages/relatorios/RelatoriosIDSMS";
+import RelatoriosHSA from "./pages/relatorios/RelatoriosHSA";
 
 // Inspeção SMS pages
 import CadastrarInspecao from "./pages/inspecao-sms/CadastrarInspecao";
@@ -242,6 +243,7 @@ function App() {
                 <Route path="relatorios/desvios" element={<RelatoriosDesvios />} />
                 <Route path="relatorios/treinamentos" element={<RelatoriosTreinamentos />} />
                 <Route path="relatorios/idsms" element={<RelatoriosIDSMS />} />
+                <Route path="relatorios/hsa" element={<RelatoriosHSA />} />
 
                 {/* Inspeção SMS routes */}
                 <Route path="inspecao-sms/cadastrar" element={<CadastrarInspecao />} />
