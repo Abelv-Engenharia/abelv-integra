@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -27,7 +28,7 @@ interface ConfiguracaoEmail {
   tipo_relatorio: string | null;
   periodo_dias: number | null;
   anexo_url: string | null;
-  cca_id: string | null;
+  cca_id: number | null;
 }
 
 const ConfiguracaoEmailsForm = ({
@@ -53,7 +54,7 @@ const ConfiguracaoEmailsForm = ({
   const [tipoRelatorio, setTipoRelatorio] = useState(configuracao?.tipo_relatorio || null);
   const [periodoDias, setPeriodoDias] = useState(configuracao?.periodo_dias || 30);
   const [anexoUrl, setAnexoUrl] = useState(configuracao?.anexo_url || null);
-  const [ccaId, setCcaId] = useState(configuracao?.cca_id || null);
+  const [ccaId, setCcaId] = useState<number | null>(configuracao?.cca_id || null);
   const [loading, setLoading] = useState(false);
 
   const { relatorios } = useRelatoriosDisponiveis();
@@ -110,7 +111,7 @@ const ConfiguracaoEmailsForm = ({
       }
 
       // Invalidate cache and refetch
-      await queryClient.invalidateQueries("configuracoes-emails");
+      await queryClient.invalidateQueries({ queryKey: ["configuracoes-emails"] });
       onClose();
     } catch (error: any) {
       console.error("Erro ao salvar configuração:", error);
@@ -252,10 +253,10 @@ const ConfiguracaoEmailsForm = ({
       <div>
         <Label htmlFor="ccaId">CCA ID (Opcional)</Label>
         <Input
-          type="text"
+          type="number"
           id="ccaId"
           value={ccaId || ""}
-          onChange={(e) => setCcaId(e.target.value === "" ? null : e.target.value)}
+          onChange={(e) => setCcaId(e.target.value === "" ? null : Number(e.target.value))}
           placeholder="ID do CCA"
         />
       </div>
@@ -285,9 +286,9 @@ const ConfiguracaoEmails = () => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  const { data: configuracoes, isLoading } = useQuery(
-    "configuracoes-emails",
-    async () => {
+  const { data: configuracoes, isLoading } = useQuery({
+    queryKey: ["configuracoes-emails"],
+    queryFn: async () => {
       const { data, error } = await supabase
         .from("configuracoes_emails")
         .select("*")
@@ -296,7 +297,7 @@ const ConfiguracaoEmails = () => {
       if (error) throw error;
       return data as ConfiguracaoEmail[];
     }
-  );
+  });
 
   const handleEdit = (configuracao: ConfiguracaoEmail) => {
     setSelectedConfiguracao(configuracao);
@@ -325,7 +326,7 @@ const ConfiguracaoEmails = () => {
       });
 
       // Invalidate cache and refetch
-      await queryClient.invalidateQueries("configuracoes-emails");
+      await queryClient.invalidateQueries({ queryKey: ["configuracoes-emails"] });
     } catch (error: any) {
       console.error("Erro ao excluir configuração:", error);
       toast({
@@ -371,11 +372,11 @@ const ConfiguracaoEmails = () => {
 
           {isLoading ? (
             <div>Carregando configurações...</div>
-          ) : configuracoes?.length === 0 ? (
+          ) : !configuracoes || configuracoes.length === 0 ? (
             <div>Nenhuma configuração encontrada.</div>
           ) : (
             <div className="grid gap-4">
-              {configuracoes?.map((configuracao) => (
+              {configuracoes.map((configuracao) => (
                 <Card key={configuracao.id}>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium">
