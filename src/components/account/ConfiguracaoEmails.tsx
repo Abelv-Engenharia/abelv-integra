@@ -11,9 +11,10 @@ import { FileUpload } from "@/components/ui/file-upload";
 import { EmailInput } from "@/components/ui/email-input";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Trash2, Plus, Edit3 } from "lucide-react";
+import { Trash2, Plus, Edit3, TestTube } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { useRelatoriosDisponiveis } from "@/hooks/useRelatoriosDisponiveis";
+import EmailTestPanel from "./EmailTestPanel";
 
 interface ConfiguracaoEmail {
   id?: string;
@@ -35,6 +36,7 @@ const ConfiguracaoEmails = () => {
   const [configuracoes, setConfiguracoes] = useState<ConfiguracaoEmail[]>([]);
   const [ccas, setCcas] = useState<Array<{ id: number; nome: string; codigo: string }>>([]);
   const [showForm, setShowForm] = useState(false);
+  const [showTestPanel, setShowTestPanel] = useState(false);
   const [editingConfig, setEditingConfig] = useState<ConfiguracaoEmail | null>(null);
   const [deleteConfig, setDeleteConfig] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -68,7 +70,6 @@ const ConfiguracaoEmails = () => {
     { value: "sabado", label: "Sábado" },
   ];
 
-  // Tipos de relatório agora são dinâmicos baseados no serviço
   const tiposRelatorio = relatorios.map(rel => ({
     value: rel.value,
     label: rel.label
@@ -226,14 +227,28 @@ const ConfiguracaoEmails = () => {
             Configure o envio automático de e-mails com base em relatórios
           </p>
         </div>
-        <Button 
-          onClick={() => setShowForm(true)}
-          className="flex items-center gap-2"
-        >
-          <Plus className="h-4 w-4" />
-          Nova Configuração
-        </Button>
+        <div className="flex gap-2">
+          <Button 
+            variant="outline"
+            onClick={() => setShowTestPanel(!showTestPanel)}
+            className="flex items-center gap-2"
+          >
+            <TestTube className="h-4 w-4" />
+            {showTestPanel ? "Ocultar Testes" : "Testes"}
+          </Button>
+          <Button 
+            onClick={() => setShowForm(true)}
+            className="flex items-center gap-2"
+          >
+            <Plus className="h-4 w-4" />
+            Nova Configuração
+          </Button>
+        </div>
       </div>
+
+      {showTestPanel && (
+        <EmailTestPanel />
+      )}
 
       {showForm && (
         <Card>
