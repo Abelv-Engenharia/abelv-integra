@@ -65,14 +65,14 @@ const EmailTestPanel = () => {
     setProcessingManual(true);
     try {
       // Chamar função de processamento manual
-      const { data, error } = await supabase
-        .rpc('executar_processamento_manual');
+      const { error } = await supabase
+        .rpc('processar_configuracoes_emails');
 
       if (error) throw error;
 
       toast({
         title: "Sucesso",
-        description: "Processamento manual executado: " + data,
+        description: "Processamento manual executado com sucesso",
       });
     } catch (error) {
       console.error("Erro no processamento manual:", error);
