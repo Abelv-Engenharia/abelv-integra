@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -50,7 +49,7 @@ const ConfiguracaoEmailsForm = ({
   );
   const [diaSemana, setDiaSemana] = useState(configuracao?.dia_semana || null);
   const [horaEnvio, setHoraEnvio] = useState(configuracao?.hora_envio || "08:00");
-  const [ativo, setAtivo] = useState(configuracao?.ativo || true);
+  const [ativo, setAtivo] = useState<boolean>(configuracao?.ativo ?? true);
   const [tipoRelatorio, setTipoRelatorio] = useState(configuracao?.tipo_relatorio || null);
   const [periodoDias, setPeriodoDias] = useState(configuracao?.periodo_dias || 30);
   const [anexoUrl, setAnexoUrl] = useState(configuracao?.anexo_url || null);
@@ -179,7 +178,7 @@ const ConfiguracaoEmailsForm = ({
       {periodicidade === "semanal" && (
         <div>
           <Label htmlFor="diaSemana">Dia da Semana</Label>
-          <Select value={diaSemana} onValueChange={setDiaSemana}>
+          <Select value={diaSemana || ""} onValueChange={setDiaSemana}>
             <SelectTrigger className="w-full">
               <SelectValue placeholder="Selecione o dia da semana" />
             </SelectTrigger>
