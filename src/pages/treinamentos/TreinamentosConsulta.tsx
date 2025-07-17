@@ -381,12 +381,12 @@ const TreinamentosConsulta = () => {
   // Opções de ação
   const handleView = (execucao: any) => {
     if (execucao.id) {
-      navigate(`/treinamentos/execucao/visualizar/${execucao.id}`);
+      navigate(`/treinamentos/visualizar-execucao/${execucao.id}`);
     }
   };
   const handleEdit = (execucao: any) => {
     if (execucao.id) {
-      navigate(`/treinamentos/execucao/editar/${execucao.id}`);
+      navigate(`/treinamentos/editar-execucao/${execucao.id}`);
     }
   };
   const handleDelete = (execucao: any) => {
