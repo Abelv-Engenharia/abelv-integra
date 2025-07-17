@@ -11,7 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 
 export function useCcas() {
-  return useQuery({ queryKey: ["ccas"], queryFn: listarCCAs });
+  return useQuery({ queryKey: ["ccas-ativas"], queryFn: listarCCAs });
 }
 
 export function useFuncionarios(cca_id?: string) {

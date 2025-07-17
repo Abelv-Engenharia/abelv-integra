@@ -41,7 +41,7 @@ export const useTreinamentoForm = () => {
 
   // Filtrar CCAs baseado nos CCAs permitidos para o usuário
   const { data: allCcaOptions = [] } = useQuery({
-    queryKey: ['ccas'],
+    queryKey: ['ccas-ativas'],
     queryFn: ccaService.getAll,
   });
 

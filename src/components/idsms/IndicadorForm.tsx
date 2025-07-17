@@ -27,7 +27,7 @@ const IndicadorForm: React.FC<IndicadorFormProps> = ({ tipo, titulo, descricao, 
   const [showSuccess, setShowSuccess] = useState(false);
 
   const { data: ccaOptions = [] } = useQuery({
-    queryKey: ['ccas'],
+    queryKey: ['ccas-ativas'],
     queryFn: async () => {
       const ccas = await ccaService.getAll();
       return ccas.sort((a, b) => a.codigo.localeCompare(b.codigo));

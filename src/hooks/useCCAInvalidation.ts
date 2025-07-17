@@ -36,6 +36,7 @@ export const useCCAInvalidation = () => {
         ['user-ccas'],
         ['admin-ccas'], 
         ['ccas'],
+        ['ccas-ativas'],
         ['user-ccas', user?.id],
         ['form-data'],
         ['filtered-form-data'],
@@ -74,6 +75,7 @@ export const useCCAInvalidation = () => {
         queryClient.refetchQueries({ queryKey: ['user-ccas', user?.id] }),
         queryClient.refetchQueries({ queryKey: ['admin-ccas'] }),
         queryClient.refetchQueries({ queryKey: ['ccas'] }),
+        queryClient.refetchQueries({ queryKey: ['ccas-ativas'] }),
         queryClient.refetchQueries({ queryKey: ['funcionarios'] }),
         queryClient.refetchQueries({ queryKey: ['empresas'] })
       ]);

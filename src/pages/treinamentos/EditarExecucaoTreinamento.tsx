@@ -36,7 +36,7 @@ const EditarExecucaoTreinamento = () => {
 
   // Carregar opções usando React Query
   const { data: ccaOptions = [] } = useQuery({
-    queryKey: ['ccas'],
+    queryKey: ['ccas-ativas'],
     queryFn: ccaService.getAll,
   });
 
