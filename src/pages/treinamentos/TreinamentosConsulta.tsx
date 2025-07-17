@@ -21,8 +21,6 @@ import { TabelaHistoricoTreinamentos } from "@/components/treinamentos/TabelaHis
 import { supabase } from "@/integrations/supabase/client";
 import { useUserCCAs } from "@/hooks/useUserCCAs";
 
-// ---------------- Novo componente da aba 2 ----------------
-
 function TreinamentosNormativosPorFuncionarioTab() {
   const [selectedCcaId, setSelectedCcaId] = useState<string | null>(null);
   const [funcionarios, setFuncionarios] = useState<Funcionario[]>([]);
@@ -36,7 +34,6 @@ function TreinamentosNormativosPorFuncionarioTab() {
   const [historicoReciclados, setHistoricoReciclados] = useState<any[]>([]);
   const { data: userCCAs = [] } = useUserCCAs();
 
-  // Ordenar CCAs do menor para o maior
   const sortedCCAs = [...userCCAs].sort((a, b) => a.codigo.localeCompare(b.codigo, undefined, { numeric: true }));
 
   useEffect(() => {
@@ -66,7 +63,6 @@ function TreinamentosNormativosPorFuncionarioTab() {
     setHistoricoFuncionario([]);
   }, [selectedCcaId]);
 
-  // Pega todos os treinamentos normativos disponíveis (nome)
   useEffect(() => {
     const fetchTreinamentos = async () => {
       const tr = await listaTreinamentosNormativosService.getAll();
@@ -75,7 +71,6 @@ function TreinamentosNormativosPorFuncionarioTab() {
     fetchTreinamentos();
   }, []);
 
-  // Quando seleciona funcionário, busca histórico desse funcionário na base (pelo id)
   useEffect(() => {
     const buscarHistoricoFuncionario = async () => {
       if (!selectedFuncionarioId) {
@@ -84,16 +79,7 @@ function TreinamentosNormativosPorFuncionarioTab() {
       }
       setLoading(true);
       try {
-        // Supondo que há um service: fetch histórico de treinamentos normativos do funcionário
-        // (aqui idealmente deveria ser um método próprio, mas usaremos utilitário fetchFuncionarios() p/ demo)
-        // O fetchFuncionarios traz todos, então fazemos o filtro só do selecionado:
-        // Este dado deveria idealmente vir da tabela histórica de execuções normativas. Aqui apenas exibe placeholder.
-        // Você pode conectar ao endpoint real facilmente.
-        // Vamos buscar e simular o array [{treinamento_nome, data_realizacao, data_validade, tipo, certificado_url}]
-        // Suponha que há um endpoint/função: funcionario.normativosRealizados[]
-        // Aqui mostramos um exemplo mock:
         setHistoricoFuncionario([
-          // Exemplo
           {
             treinamento_nome: "NR 35",
             data_realizacao: "2024-05-01",
@@ -102,7 +88,6 @@ function TreinamentosNormativosPorFuncionarioTab() {
             certificado_url: null,
           },
         ]);
-        // Para usar dados reais, substitua pelo endpoint correto.
       } catch {
         toast({
           title: "Erro",
@@ -125,7 +110,6 @@ function TreinamentosNormativosPorFuncionarioTab() {
     }
   }, [selectedFuncionarioId, funcionarios]);
 
-  // Buscar treinamentos normativos por funcionário
   useEffect(() => {
     const buscarTreinamentosNormativosFuncionario = async () => {
       if (!selectedFuncionarioId) {
@@ -135,7 +119,6 @@ function TreinamentosNormativosPorFuncionarioTab() {
       }
       setLoading(true);
       try {
-        // Corrigido: NÃO ordenar por campo relacionado, só por data
         const { data, error } = await supabase
           .from('treinamentos_normativos')
           .select(`
@@ -167,7 +150,6 @@ function TreinamentosNormativosPorFuncionarioTab() {
           return;
         }
 
-        // Se desejar ordenar por nome, faça aqui no JS:
         let normativos: any[] = (data || []).map(row => ({
           id: row.id,
           treinamento_nome: row.lista_treinamentos_normativos?.nome || "-",
@@ -179,12 +161,10 @@ function TreinamentosNormativosPorFuncionarioTab() {
           arquivado: row.arquivado,
         }));
 
-        // Ordena por nome se desejar:
         normativos = normativos.sort((a, b) =>
           (a.treinamento_nome || "").localeCompare(b.treinamento_nome || "")
         );
 
-        // Agrupar por treinamento_nome e filtrar o mais atual para "Treinamentos" e antigos para "Histórico"
         const agrupados: { [nome: string]: any[] } = {};
         normativos.forEach(t => {
           if (!agrupados[t.treinamento_nome]) agrupados[t.treinamento_nome] = [];
@@ -229,7 +209,6 @@ function TreinamentosNormativosPorFuncionarioTab() {
                 <SelectValue placeholder="Selecione o CCA" />
               </SelectTrigger>
               <SelectContent>
-                {/* Usar CCAs ordenados */}
                 {sortedCCAs.map((cca) => (
                   <SelectItem key={cca.id} value={String(cca.id)}>
                     {cca.codigo} - {cca.nome}
@@ -304,8 +283,6 @@ function TreinamentosNormativosPorFuncionarioTab() {
   );
 }
 
-// ------------------- ABA ORIGINAL -----------------------
-
 const TreinamentosConsulta = () => {
   const [tab, setTab] = useState("realizados");
   const [execucoes, setExecucoes] = useState<any[]>([]);
@@ -316,7 +293,6 @@ const TreinamentosConsulta = () => {
   const [isLoading, setIsLoading] = useState(true);
   const { data: userCCAs = [] } = useUserCCAs();
 
-  // Exclusion modal state
   const [idParaExcluir, setIdParaExcluir] = useState<string | null>(null);
   const [modalAberto, setModalAberto] = useState(false);
   const navigate = useNavigate();
@@ -330,10 +306,8 @@ const TreinamentosConsulta = () => {
       setIsLoading(true);
       const data = await execucaoTreinamentoService.getAll();
       
-      // Filtrar apenas execuções dos CCAs que o usuário tem permissão
       const userCCAIds = userCCAs.map(cca => cca.id);
       const execucoesPermitidas = data.filter(item => {
-        // Se o item tem cca_id, verificar se está na lista de CCAs permitidos
         if (item.cca_id) {
           return userCCAIds.includes(item.cca_id);
         }
@@ -370,29 +344,34 @@ const TreinamentosConsulta = () => {
     }
     setFilteredExecucoes(results);
   };
+
   useEffect(() => {
     filterExecucoes();
   }, [searchTerm, filterMes, filterAno, execucoes]);
+
   const formatDate = (date: string) => {
     if (!date) return "";
     const d = new Date(date);
     return d.toLocaleDateString("pt-BR");
   };
-  // Opções de ação
+
   const handleView = (execucao: any) => {
     if (execucao.id) {
       navigate(`/treinamentos/visualizar-execucao/${execucao.id}`);
     }
   };
+
   const handleEdit = (execucao: any) => {
     if (execucao.id) {
       navigate(`/treinamentos/editar-execucao/${execucao.id}`);
     }
   };
+
   const handleDelete = (execucao: any) => {
     setIdParaExcluir(execucao.id || "");
     setModalAberto(true);
   };
+
   const confirmarExclusao = async () => {
     if (!idParaExcluir) return;
     try {
@@ -466,7 +445,6 @@ const TreinamentosConsulta = () => {
                     <Download className="h-4 w-4" />
                   </Button>
                 </div>
-                {/* Tabela */}
                 <div className="rounded-md border">
                   <Table>
                     <TableHeader>
