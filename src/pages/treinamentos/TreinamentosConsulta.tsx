@@ -357,13 +357,13 @@ const TreinamentosConsulta = () => {
 
   const handleView = (execucao: any) => {
     if (execucao.id) {
-      navigate(`/treinamentos/visualizar-execucao/${execucao.id}`);
+      navigate(`/treinamentos/execucao/${execucao.id}/visualizar`);
     }
   };
 
   const handleEdit = (execucao: any) => {
     if (execucao.id) {
-      navigate(`/treinamentos/editar-execucao/${execucao.id}`);
+      navigate(`/treinamentos/execucao/${execucao.id}/editar`);
     }
   };
 
