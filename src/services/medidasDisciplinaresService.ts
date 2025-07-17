@@ -11,8 +11,9 @@ import {
 export async function listarCCAs() {
   const { data, error } = await supabase
     .from("ccas")
-    .select("id, codigo, nome")
-    .order("nome", { ascending: true });
+    .select("id, codigo, nome, tipo")
+    .eq("ativo", true)
+    .order("codigo", { ascending: true });
   if (error) throw error;
   return data;
 }

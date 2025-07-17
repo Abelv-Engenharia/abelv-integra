@@ -31,26 +31,51 @@ export const useCCAInvalidation = () => {
         }
       });
 
-      // Invalidar queries específicas importantes
+      // Lista completa de queries específicas para invalidar
       const specificQueries = [
         ['user-ccas'],
         ['admin-ccas'], 
         ['ccas'],
         ['user-ccas', user?.id],
         ['form-data'],
-        ['filtered-form-data']
+        ['filtered-form-data'],
+        ['processo-treinamento'],
+        ['tipo-treinamento'],
+        ['funcionarios'],
+        ['empresas'],
+        ['engenheiros'],
+        ['supervisores'],
+        ['encarregados']
       ];
 
+      // Invalidar queries específicas
       for (const queryKey of specificQueries) {
         await queryClient.invalidateQueries({ queryKey });
         console.log(`Query invalidada: ${JSON.stringify(queryKey)}`);
       }
 
+      // Invalidar queries com patterns variados
+      await queryClient.invalidateQueries({ 
+        predicate: (query) => {
+          const queryKey = query.queryKey;
+          if (!queryKey || queryKey.length === 0) return false;
+          
+          // Invalidar queries de funcionários por CCA
+          if (queryKey[0] === 'funcionarios' && queryKey.length > 1) {
+            return true;
+          }
+          
+          return false;
+        }
+      });
+
       // Refetch imediato das queries críticas para garantir atualização imediata
       await Promise.allSettled([
         queryClient.refetchQueries({ queryKey: ['user-ccas', user?.id] }),
         queryClient.refetchQueries({ queryKey: ['admin-ccas'] }),
-        queryClient.refetchQueries({ queryKey: ['ccas'] })
+        queryClient.refetchQueries({ queryKey: ['ccas'] }),
+        queryClient.refetchQueries({ queryKey: ['funcionarios'] }),
+        queryClient.refetchQueries({ queryKey: ['empresas'] })
       ]);
       
       console.log('Invalidação concluída. Todas as queries de CCAs foram atualizadas.');

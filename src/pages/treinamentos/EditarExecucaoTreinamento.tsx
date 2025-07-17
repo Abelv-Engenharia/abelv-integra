@@ -20,6 +20,7 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
 
 const BUCKET_NAME = "treinamentos-anexos";
 
@@ -30,30 +31,29 @@ const EditarExecucaoTreinamento = () => {
   const [saving, setSaving] = useState(false);
   const navigate = useNavigate();
 
-  const [ccaOptions, setCcaOptions] = useState<any[]>([]);
-  const [treinamentoOptions, setTreinamentoOptions] = useState<Treinamento[]>([]);
-  const [processoOptions, setProcessoOptions] = useState<any[]>([]);
-  const [tipoOptions, setTipoOptions] = useState<any[]>([]);
-
   // Novo estado para arquivo lista de presença
   const [listaPresencaFile, setListaPresencaFile] = useState<File | null>(null);
 
-  useEffect(() => {
-    // Carregar opções
-    const loadOptions = async () => {
-      const [ccas, treins, processos, tipos] = await Promise.all([
-        ccaService.getAll(),
-        treinamentosService.getAll(),
-        processoTreinamentoService.getAll(),
-        tipoTreinamentoService.getAll(),
-      ]);
-      setCcaOptions(ccas);
-      setTreinamentoOptions(treins);
-      setProcessoOptions(processos);
-      setTipoOptions(tipos);
-    };
-    loadOptions();
-  }, []);
+  // Carregar opções usando React Query
+  const { data: ccaOptions = [] } = useQuery({
+    queryKey: ['ccas'],
+    queryFn: ccaService.getAll,
+  });
+
+  const { data: treinamentoOptions = [] } = useQuery({
+    queryKey: ['treinamentos'],
+    queryFn: treinamentosService.getAll,
+  });
+
+  const { data: processoOptions = [] } = useQuery({
+    queryKey: ['processo-treinamento'],
+    queryFn: processoTreinamentoService.getAll,
+  });
+
+  const { data: tipoOptions = [] } = useQuery({
+    queryKey: ['tipo-treinamento'],
+    queryFn: tipoTreinamentoService.getAll,
+  });
 
   useEffect(() => {
     if (!id) return;
