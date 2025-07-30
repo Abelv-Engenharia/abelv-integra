@@ -31,8 +31,8 @@ const OcorrenciasByEmpresaChart = () => {
       }
     };
 
-    // Só carrega se já temos dados dos CCAs ou se não há CCAs (para mostrar vazio)
-    if (userCCAs.length > 0 || userCCAs.length === 0) {
+    // Só carrega se já temos dados dos CCAs
+    if (userCCAs.length >= 0) {
       loadData();
     }
   }, [userCCAs]);

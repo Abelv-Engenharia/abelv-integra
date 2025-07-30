@@ -13,17 +13,9 @@ export async function fetchOcorrenciasByEmpresa(ccaIds?: number[]): Promise<Ocor
 
     // Aplicar filtro de CCAs se fornecido
     if (ccaIds && ccaIds.length > 0) {
-      // Como a tabela ocorrencias tem o campo 'cca' como texto, 
-      // precisamos buscar os códigos dos CCAs permitidos
-      const { data: ccasData } = await supabase
-        .from('ccas')
-        .select('codigo')
-        .in('id', ccaIds);
-      
-      if (ccasData && ccasData.length > 0) {
-        const ccaCodigos = ccasData.map(cca => cca.codigo);
-        query = query.in('cca', ccaCodigos);
-      }
+      // Converter ccaIds para string e filtrar diretamente
+      const ccaIdsAsString = ccaIds.map(id => id.toString());
+      query = query.in('cca', ccaIdsAsString);
     }
 
     const { data, error } = await query.order('empresa');
