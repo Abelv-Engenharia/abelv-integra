@@ -30,16 +30,22 @@ export function InspecoesBarChart({ dataType }: InspecoesBarChartProps) {
         
         if (dataType === 'responsible') {
           const chartData = await fetchInspecoesByResponsavel(ccaIds);
+          console.log('[InspecoesBarChart] chartData from service:', chartData);
+          
           // Formatar dados para mostrar apenas primeiro nome no eixo X
-          const formattedData = chartData.map(item => ({
-            name: item.primeiroNome,
-            nomeCompleto: item.nomeCompleto,
-            "A Realizar": item["A Realizar"],
-            "Realizada": item["Realizada"],
-            "Não Realizada": item["Não Realizada"],
-            "Realizada (Não Programada)": item["Realizada (Não Programada)"],
-            "Cancelada": item["Cancelada"]
-          }));
+          const formattedData = chartData.map(item => {
+            console.log('[InspecoesBarChart] processing item:', item);
+            return {
+              name: item.primeiroNome || item.responsavel?.split(' ')[0] || item.responsavel,
+              nomeCompleto: item.nomeCompleto || item.responsavel,
+              "A Realizar": item["A Realizar"],
+              "Realizada": item["Realizada"],
+              "Não Realizada": item["Não Realizada"],
+              "Realizada (Não Programada)": item["Realizada (Não Programada)"],
+              "Cancelada": item["Cancelada"]
+            };
+          });
+          console.log('[InspecoesBarChart] formattedData:', formattedData);
           setData(formattedData);
         } else if (dataType === 'cca') {
           // Para dados por CCA, vamos mostrar apenas os CCAs permitidos

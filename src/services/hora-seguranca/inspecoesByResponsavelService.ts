@@ -44,9 +44,9 @@ export async function fetchInspecoesByResponsavel(ccaIds?: number[]): Promise<In
     // DEBUG: log agrupamento final
     console.log('[HSA][fetchInspecoesByResponsavel] grouped:', grouped);
 
-    return Object.entries(grouped).map(([responsavel, qtds]) => {
+    const result = Object.entries(grouped).map(([responsavel, qtds]) => {
       const primeiroNome = responsavel.split(' ')[0];
-      return {
+      const data = {
         responsavel,
         primeiroNome,
         nomeCompleto: responsavel,
@@ -61,7 +61,12 @@ export async function fetchInspecoesByResponsavel(ccaIds?: number[]): Promise<In
         "Cancelada": qtds.cancelada,
         "realizada (não programada)": qtds.realizada_np // compatibilidade
       };
+      console.log('[fetchInspecoesByResponsavel] mapped data:', data);
+      return data;
     });
+    
+    console.log('[fetchInspecoesByResponsavel] final result:', result);
+    return result;
   } catch (error) {
     console.error("Erro ao buscar inspeções por responsável:", error);
     return [];
