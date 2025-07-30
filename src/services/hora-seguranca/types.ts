@@ -79,6 +79,8 @@ export interface DesviosByInspectionType {
 
 export interface InspecoesByCCA {
   cca: string;
+  codigo: string;
+  nomeCompleto: string;
   "A Realizar": number;
   "Realizada": number;
   "Não Realizada": number;

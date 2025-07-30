@@ -34,6 +34,8 @@ export async function fetchInspecoesByCCA(ccaIds?: number[]): Promise<InspecoesB
       if (!ccaMap[ccaKey]) {
         ccaMap[ccaKey] = {
           cca: ccaKey,
+          codigo: row.ccas.codigo,
+          nomeCompleto: `${row.ccas.codigo} - ${row.ccas.nome}`,
           "A Realizar": 0,
           "Realizada": 0,
           "Não Realizada": 0,

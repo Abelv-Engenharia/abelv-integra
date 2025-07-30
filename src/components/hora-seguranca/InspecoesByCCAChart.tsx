@@ -27,7 +27,8 @@ export function InspecoesByCCAChart() {
         
         // Formatar dados para o gráfico
         const formattedData = chartData.map(item => ({
-          name: item.cca,
+          name: item.codigo,
+          nomeCompleto: item.nomeCompleto,
           "A Realizar": item["A Realizar"],
           "Realizada": item["Realizada"],
           "Não Realizada": item["Não Realizada"],
@@ -93,7 +94,14 @@ export function InspecoesByCCAChart() {
             interval={0}
           />
           <YAxis />
-          <Tooltip />
+          <Tooltip 
+            labelFormatter={(label, payload) => {
+              if (payload && payload.length > 0) {
+                return payload[0]?.payload?.nomeCompleto || label;
+              }
+              return label;
+            }}
+          />
           <Legend 
             verticalAlign="top" 
             align="center"
