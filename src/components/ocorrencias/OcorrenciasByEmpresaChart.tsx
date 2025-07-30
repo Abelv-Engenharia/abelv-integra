@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { supabase } from '@/integrations/supabase/client';
 import { useUserCCAs } from "@/hooks/useUserCCAs";
+import { fetchOcorrenciasByEmpresa } from "@/services/ocorrencias/ocorrenciasByEmpresaService";
 
 const OcorrenciasByEmpresaChart = () => {
   const [data, setData] = useState<any[]>([]);
@@ -16,41 +17,9 @@ const OcorrenciasByEmpresaChart = () => {
         setLoading(true);
         console.log('Carregando dados por empresa...');
         
-        let query = supabase
-          .from('ocorrencias')
-          .select('empresa');
-
-        // Aplicar filtro por CCAs do usuário
-        if (userCCAs.length > 0) {
-          // Como a tabela ocorrencias tem o campo 'cca' como texto, 
-          // precisamos buscar os códigos dos CCAs permitidos
-          const { data: ccasData } = await supabase
-            .from('ccas')
-            .select('codigo')
-            .in('id', userCCAs.map(cca => cca.id));
-          
-          if (ccasData && ccasData.length > 0) {
-            const ccaCodigos = ccasData.map(cca => cca.codigo);
-            query = query.in('cca', ccaCodigos);
-          }
-        }
-
-        const { data: ocorrencias, error } = await query;
-
-        if (error) throw error;
-
-        console.log('Dados de ocorrências por empresa (filtrado):', ocorrencias);
-
-        const empresaCount = (ocorrencias || []).reduce((acc: Record<string, number>, curr) => {
-          const empresa = curr.empresa || 'Não definido';
-          acc[empresa] = (acc[empresa] || 0) + 1;
-          return acc;
-        }, {});
-
-        const chartData = Object.entries(empresaCount).map(([name, value]) => ({
-          name,
-          value
-        }));
+        // Get CCA IDs that user has permission to
+        const allowedCcaIds = userCCAs.map(cca => cca.id);
+        const chartData = await fetchOcorrenciasByEmpresa(allowedCcaIds);
 
         console.log('Dados do gráfico por empresa (filtrado):', chartData);
         setData(chartData);
