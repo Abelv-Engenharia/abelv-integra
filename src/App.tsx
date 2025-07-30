@@ -36,6 +36,7 @@ import AdminPerfis from "./pages/admin/AdminPerfis";
 import AdminEmpresas from "./pages/admin/AdminEmpresas";
 import AdminEngenheiros from "./pages/admin/AdminEngenheiros";
 import AdminSupervisores from "./pages/admin/AdminSupervisores";
+import AdminEncarregados from "./pages/admin/AdminEncarregados";
 import AdminLogo from "./pages/admin/AdminLogo";
 import AdminTemplates from "./pages/AdminTemplates";
 import AdminModelosInspecao from "./pages/admin/AdminModelosInspecao";
@@ -165,6 +166,7 @@ function App() {
                 <Route path="admin/empresas" element={<AdminEmpresas />} />
                 <Route path="admin/engenheiros" element={<AdminEngenheiros />} />
                 <Route path="admin/supervisores" element={<AdminSupervisores />} />
+                <Route path="admin/encarregados" element={<AdminEncarregados />} />
                 <Route path="admin/logo" element={<AdminLogo />} />
                 <Route path="admin/templates" element={<AdminTemplates />} />
                 <Route path="admin/modelos-inspecao" element={<AdminModelosInspecao />} />
