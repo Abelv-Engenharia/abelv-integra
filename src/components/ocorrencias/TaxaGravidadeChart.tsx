@@ -119,7 +119,17 @@ const TaxaGravidadeChart = () => {
             y={meta} 
             stroke="#059669" 
             strokeDasharray="5 5"
-            label={{ value: `Meta: ${meta.toFixed(2)}`, position: "top" }}
+            strokeWidth={2}
+            label={{ 
+              value: `Meta: ${meta.toFixed(2)}`, 
+              position: "top",
+              offset: 10,
+              style: { 
+                fontSize: '12px', 
+                fontWeight: 'bold',
+                fill: '#059669'
+              }
+            }}
           />
         )}
       </ComposedChart>
