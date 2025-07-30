@@ -113,7 +113,7 @@ Deno.serve(async (req) => {
         if (todasConcluidas) {
           statusGeral = 'Concluído';
         } else if (algumaAtrasada) {
-          statusGeral = 'Pendente';
+          statusGeral = 'Em tratativa'; // Manter como tratativa, mas com indicação visual
         } else if (algumaEmExecucao) {
           statusGeral = 'Em execução';
         }

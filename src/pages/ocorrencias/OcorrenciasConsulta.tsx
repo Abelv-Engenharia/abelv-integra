@@ -178,17 +178,35 @@ const OcorrenciasConsulta = () => {
                       <td className="p-2">{ocorrencia.empresa}</td>
                       <td className="p-2">{ocorrencia.tipo_ocorrencia}</td>
                       <td className="p-2">
-                        <span className={`px-2 py-1 rounded-full text-xs ${
-                          ocorrencia.status === 'Concluído' 
-                            ? 'bg-green-100 text-green-800' 
-                            : ocorrencia.status === 'Em execução'
-                            ? 'bg-blue-100 text-blue-800'
-                            : ocorrencia.status === 'Pendente'
-                            ? 'bg-red-100 text-red-800'
-                            : 'bg-orange-100 text-orange-800'
-                        }`}>
-                          {ocorrencia.status || 'Em tratativa'}
-                        </span>
+                        {/* Verificar se há ações atrasadas para mostrar indicador visual */}
+                        {(() => {
+                          const temAcoesAtrasadas = ocorrencia.acoes && 
+                            Array.isArray(ocorrencia.acoes) && 
+                            ocorrencia.acoes.some((acao: any) => 
+                              acao.status?.toUpperCase() === 'ATRASADO'
+                            );
+                          
+                          return (
+                            <div className="flex items-center gap-2">
+                              <span className={`px-2 py-1 rounded-full text-xs ${
+                                ocorrencia.status === 'Concluído' 
+                                  ? 'bg-green-100 text-green-800' 
+                                  : ocorrencia.status === 'Em execução'
+                                  ? 'bg-blue-100 text-blue-800'
+                                  : temAcoesAtrasadas
+                                  ? 'bg-red-100 text-red-800'
+                                  : 'bg-orange-100 text-orange-800'
+                              }`}>
+                                {temAcoesAtrasadas ? 'Pendente' : (ocorrencia.status || 'Em tratativa')}
+                              </span>
+                              {temAcoesAtrasadas && (
+                                <span className="text-red-600 text-xs" title="Contém ações em atraso">
+                                  ⚠️
+                                </span>
+                              )}
+                            </div>
+                          );
+                        })()}
                       </td>
                       <td className="p-2">
                         {ocorrencia.classificacao_risco && (

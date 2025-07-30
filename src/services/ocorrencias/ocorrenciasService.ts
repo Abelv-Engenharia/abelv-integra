@@ -213,7 +213,7 @@ export const updateOcorrencia = async (id: string, formData: any) => {
         if (todasConcluidas) {
           updateData.status = 'Concluído';
         } else if (algumaAtrasada) {
-          updateData.status = 'Pendente';
+          updateData.status = 'Em tratativa'; // Manter como tratativa quando há ações atrasadas
         } else if (algumaEmExecucao) {
           updateData.status = 'Em execução';
         } else {
