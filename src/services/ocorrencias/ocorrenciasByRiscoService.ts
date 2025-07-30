@@ -2,7 +2,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import { OcorrenciasByRisco } from './types';
 
-export async function fetchOcorrenciasByRisco(ccaIds?: number[]): Promise<OcorrenciasByRisco[]> {
+export async function fetchOcorrenciasByRisco(ccaIds?: number[], year?: string, month?: string): Promise<OcorrenciasByRisco[]> {
   try {
     let query = supabase
       .from('ocorrencias')
@@ -16,6 +16,16 @@ export async function fetchOcorrenciasByRisco(ccaIds?: number[]): Promise<Ocorre
       // Converter ccaIds para string e filtrar diretamente
       const ccaIdsAsString = ccaIds.map(id => id.toString());
       query = query.in('cca', ccaIdsAsString);
+    }
+
+    // Aplicar filtro de ano se fornecido
+    if (year && year !== 'todos') {
+      query = query.eq('ano', parseInt(year));
+    }
+
+    // Aplicar filtro de mês se fornecido
+    if (month && month !== 'todos') {
+      query = query.eq('mes', parseInt(month));
     }
 
     const { data, error } = await query.order('classificacao_risco');

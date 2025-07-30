@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 import { useUserCCAs } from "@/hooks/useUserCCAs";
 import { fetchOcorrenciasByRisco } from "@/services/ocorrencias/ocorrenciasByRiscoService";
+import { useOcorrenciasFilter } from "@/contexts/OcorrenciasFilterContext";
 
 const colorMap: Record<string, string> = {
   "TRIVIAL": "#3b82f6", // Blue
@@ -18,6 +19,7 @@ const OcorrenciasByEmpresaChart = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const { data: userCCAs = [] } = useUserCCAs();
+  const { year, month, ccaId } = useOcorrenciasFilter();
 
   useEffect(() => {
     const loadData = async () => {
@@ -26,8 +28,14 @@ const OcorrenciasByEmpresaChart = () => {
         console.log('Carregando dados por classificação de risco...');
         
         // Get CCA IDs that user has permission to
-        const allowedCcaIds = userCCAs.map(cca => cca.id);
-        const chartData = await fetchOcorrenciasByRisco(allowedCcaIds);
+        let allowedCcaIds = userCCAs.map(cca => cca.id);
+        
+        // Se um CCA específico foi selecionado, usar apenas ele
+        if (ccaId !== 'todos') {
+          allowedCcaIds = [parseInt(ccaId)];
+        }
+        
+        const chartData = await fetchOcorrenciasByRisco(allowedCcaIds, year, month);
 
         // Add colors to each data item
         const dataWithColors = chartData.map(item => ({
@@ -49,7 +57,7 @@ const OcorrenciasByEmpresaChart = () => {
     if (userCCAs.length >= 0) {
       loadData();
     }
-  }, [userCCAs]);
+  }, [userCCAs, year, month, ccaId]);
 
   if (loading) {
     return (

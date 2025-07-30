@@ -3,12 +3,14 @@ import { useState, useEffect } from "react";
 import { BarChart, Bar, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis, Legend } from "recharts";
 import { supabase } from '@/integrations/supabase/client';
 import { useUserCCAs } from "@/hooks/useUserCCAs";
+import { useOcorrenciasFilter } from "@/contexts/OcorrenciasFilterContext";
 
 const OcorrenciasTimelineChart = () => {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const { data: userCCAs = [] } = useUserCCAs();
+  const { year, month, ccaId } = useOcorrenciasFilter();
 
   useEffect(() => {
     const loadData = async () => {
@@ -26,9 +28,33 @@ const OcorrenciasTimelineChart = () => {
           ccaMap.set(cca.id.toString(), { codigo: cca.codigo, nome: cca.nome });
         });
 
-        const { data: ocorrencias, error } = await supabase
+        // Construir query com filtros
+        let query = supabase
           .from('ocorrencias')
           .select('cca, classificacao_ocorrencia_codigo');
+
+        // Aplicar filtro de CCA
+        if (ccaId !== 'todos') {
+          query = query.eq('cca', ccaId);
+        } else {
+          // Filtrar pelos CCAs que o usuário tem acesso
+          const allowedCcaIds = userCCAs.map(cca => cca.id.toString());
+          if (allowedCcaIds.length > 0) {
+            query = query.in('cca', allowedCcaIds);
+          }
+        }
+
+        // Aplicar filtro de ano se fornecido
+        if (year && year !== 'todos') {
+          query = query.eq('ano', parseInt(year));
+        }
+
+        // Aplicar filtro de mês se fornecido
+        if (month && month !== 'todos') {
+          query = query.eq('mes', parseInt(month));
+        }
+
+        const { data: ocorrencias, error } = await query;
 
         if (error) throw error;
 
@@ -93,7 +119,7 @@ const OcorrenciasTimelineChart = () => {
     };
 
     loadData();
-  }, [userCCAs]);
+  }, [userCCAs, year, month, ccaId]);
 
   if (loading) {
     return (

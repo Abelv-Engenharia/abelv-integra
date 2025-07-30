@@ -32,7 +32,7 @@ const OcorrenciasByTipoChart = () => {
           allowedCcaIds = [parseInt(ccaId)];
         }
         
-        const chartData = await fetchOcorrenciasByTipo(allowedCcaIds);
+        const chartData = await fetchOcorrenciasByTipo(allowedCcaIds, year, month);
         
         // Add colors to each data item
         const dataWithColors = chartData.map(item => ({

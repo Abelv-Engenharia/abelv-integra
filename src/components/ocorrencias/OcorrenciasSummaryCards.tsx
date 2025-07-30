@@ -35,7 +35,7 @@ const OcorrenciasSummaryCards = () => {
           ccaIds = [parseInt(ccaId)];
         }
         
-        const data = await fetchOcorrenciasStats(ccaIds);
+        const data = await fetchOcorrenciasStats(ccaIds, year, month);
         
         console.log('Estatísticas carregadas:', data);
         setStats(data);

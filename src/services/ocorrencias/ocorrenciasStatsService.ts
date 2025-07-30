@@ -1,20 +1,29 @@
 
 import { supabase } from '@/integrations/supabase/client';
 
-export async function fetchOcorrenciasStats(ccaIds?: number[]) {
+export async function fetchOcorrenciasStats(ccaIds?: number[], year?: string, month?: string) {
   try {
     console.log('Buscando estatísticas de ocorrências...');
     
+    // Construir query base
     let query = supabase
       .from('ocorrencias')
-      .select('classificacao_ocorrencia, classificacao_ocorrencia_codigo, dias_perdidos, dias_debitados, status');
+      .select('classificacao_ocorrencia_codigo, dias_perdidos, dias_debitados, status');
 
     // Aplicar filtro por CCAs se fornecido
     if (ccaIds && ccaIds.length > 0) {
-      // O campo 'cca' na tabela ocorrencias é um ID numérico que pode ser string
-      // Converter os IDs para string para comparação
-      const ccaStringIds = ccaIds.map(id => id.toString());
-      query = query.in('cca', ccaStringIds);
+      const ccaIdsAsString = ccaIds.map(id => id.toString());
+      query = query.in('cca', ccaIdsAsString);
+    }
+
+    // Aplicar filtro de ano se fornecido
+    if (year && year !== 'todos') {
+      query = query.eq('ano', parseInt(year));
+    }
+
+    // Aplicar filtro de mês se fornecido
+    if (month && month !== 'todos') {
+      query = query.eq('mes', parseInt(month));
     }
 
     const { data: ocorrencias, error } = await query;
@@ -94,6 +103,7 @@ export async function fetchTaxaFrequenciaAcCpdPorMes(ano: number, ccaIds?: numbe
 
     // Aplicar filtro por CCAs se fornecido
     if (ccaIds && ccaIds.length > 0) {
+      // Para ocorrências, o campo CCA é string
       const ccaStringIds = ccaIds.map(id => id.toString());
       ocorrenciasQuery = ocorrenciasQuery.in('cca', ccaStringIds);
     }
@@ -107,6 +117,7 @@ export async function fetchTaxaFrequenciaAcCpdPorMes(ano: number, ccaIds?: numbe
       .eq('ano', ano);
 
     if (ccaIds && ccaIds.length > 0) {
+      // Para horas_trabalhadas, o campo é cca_id como inteiro
       horasQuery = horasQuery.in('cca_id', ccaIds);
     }
 
