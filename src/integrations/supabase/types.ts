@@ -1499,6 +1499,7 @@ export type Database = {
           cca: string
           cid: string | null
           classificacao_ocorrencia: string | null
+          classificacao_ocorrencia_codigo: string | null
           classificacao_risco: string
           colaboradores_acidentados: Json | null
           controle: string | null
@@ -1549,6 +1550,7 @@ export type Database = {
           cca: string
           cid?: string | null
           classificacao_ocorrencia?: string | null
+          classificacao_ocorrencia_codigo?: string | null
           classificacao_risco: string
           colaboradores_acidentados?: Json | null
           controle?: string | null
@@ -1599,6 +1601,7 @@ export type Database = {
           cca?: string
           cid?: string | null
           classificacao_ocorrencia?: string | null
+          classificacao_ocorrencia_codigo?: string | null
           classificacao_risco?: string
           colaboradores_acidentados?: Json | null
           controle?: string | null
