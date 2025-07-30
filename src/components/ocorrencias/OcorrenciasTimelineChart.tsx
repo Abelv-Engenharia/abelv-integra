@@ -18,11 +18,7 @@ const OcorrenciasTimelineChart = () => {
         
         let query = supabase
           .from('ocorrencias')
-          .select(`
-            cca, 
-            classificacao_ocorrencia_codigo,
-            ccas!inner(codigo, nome)
-          `);
+          .select('cca, classificacao_ocorrencia_codigo');
 
         // Aplicar filtro por CCAs do usuário
         if (userCCAs.length > 0) {
@@ -40,13 +36,26 @@ const OcorrenciasTimelineChart = () => {
         const ccaClassificacaoCount: Record<string, Record<string, number>> = {};
         const ccaNomes: Record<string, string> = {};
 
+        // Buscar nomes dos CCAs
+        const ccaCodigos = [...new Set((ocorrencias || []).map((ocorrencia: any) => ocorrencia.cca))];
+        if (ccaCodigos.length > 0) {
+          const { data: ccasData } = await supabase
+            .from('ccas')
+            .select('codigo, nome')
+            .in('codigo', ccaCodigos);
+          
+          ccasData?.forEach((cca: any) => {
+            ccaNomes[cca.codigo] = `${cca.codigo} - ${cca.nome}`;
+          });
+        }
+
         (ocorrencias || []).forEach((ocorrencia: any) => {
           const ccaCodigo = ocorrencia.cca;
           const classificacao = ocorrencia.classificacao_ocorrencia_codigo || 'Não definido';
           
-          // Armazenar nome completo do CCA
-          if (ocorrencia.ccas) {
-            ccaNomes[ccaCodigo] = `${ocorrencia.ccas.codigo} - ${ocorrencia.ccas.nome}`;
+          // Usar nome completo do CCA se disponível
+          if (!ccaNomes[ccaCodigo]) {
+            ccaNomes[ccaCodigo] = ccaCodigo;
           }
 
           if (!ccaClassificacaoCount[ccaCodigo]) {
