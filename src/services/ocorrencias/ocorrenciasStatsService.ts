@@ -7,7 +7,7 @@ export async function fetchOcorrenciasStats(ccaIds?: number[]) {
     
     let query = supabase
       .from('ocorrencias')
-      .select('classificacao_ocorrencia, classificacao_ocorrencia_codigo, dias_perdidos, dias_debitados, acoes');
+      .select('classificacao_ocorrencia, classificacao_ocorrencia_codigo, dias_perdidos, dias_debitados, status');
 
     // Aplicar filtro por CCAs se fornecido
     if (ccaIds && ccaIds.length > 0) {
@@ -47,28 +47,14 @@ export async function fetchOcorrenciasStats(ccaIds?: number[]) {
     const totalDiasPerdidos = ocorrencias?.reduce((sum, o) => sum + (o.dias_perdidos || 0), 0) || 0;
     const totalDiasDebitados = ocorrencias?.reduce((sum, o) => sum + (o.dias_debitados || 0), 0) || 0;
 
-    // Calcular estatísticas de ações
-    let totalAcoes = 0;
-    let acoesConcluidas = 0;
-    let acoesAndamento = 0;
-    let acoesPendentes = 0;
+    // Calcular estatísticas de status das ocorrências
+    const ocorrenciasConcluidas = ocorrencias?.filter(o => 
+      o.status === 'Concluída' || o.status === 'Fechada'
+    ).length || 0;
 
-    ocorrencias?.forEach(ocorrencia => {
-      if (ocorrencia.acoes && Array.isArray(ocorrencia.acoes)) {
-        const acoes = ocorrencia.acoes;
-        totalAcoes += acoes.length;
-        
-        acoes.forEach((acao: any) => {
-          if (acao.status === 'Concluída') {
-            acoesConcluidas++;
-          } else if (acao.status === 'Em andamento') {
-            acoesAndamento++;
-          } else {
-            acoesPendentes++;
-          }
-        });
-      }
-    });
+    const ocorrenciasPendentes = ocorrencias?.filter(o => 
+      o.status === 'Aberta' || o.status === 'Em andamento' || o.status === 'Pendente'
+    ).length || 0;
 
     return {
       ocorrenciasComPerdaDias,
@@ -77,10 +63,8 @@ export async function fetchOcorrenciasStats(ccaIds?: number[]) {
       desviosAltoPotencial,
       totalDiasPerdidos,
       totalDiasDebitados,
-      totalAcoes,
-      acoesConcluidas,
-      acoesAndamento,
-      acoesPendentes
+      ocorrenciasConcluidas,
+      ocorrenciasPendentes
     };
   } catch (error) {
     console.error('Erro ao carregar estatísticas de ocorrências:', error);
@@ -91,10 +75,8 @@ export async function fetchOcorrenciasStats(ccaIds?: number[]) {
       desviosAltoPotencial: 0,
       totalDiasPerdidos: 0,
       totalDiasDebitados: 0,
-      totalAcoes: 0,
-      acoesConcluidas: 0,
-      acoesAndamento: 0,
-      acoesPendentes: 0
+      ocorrenciasConcluidas: 0,
+      ocorrenciasPendentes: 0
     };
   }
 }

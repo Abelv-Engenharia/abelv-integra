@@ -13,10 +13,8 @@ const OcorrenciasSummaryCards = () => {
     desviosAltoPotencial: 0,
     totalDiasPerdidos: 0,
     totalDiasDebitados: 0,
-    totalAcoes: 0,
-    acoesConcluidas: 0,
-    acoesAndamento: 0,
-    acoesPendentes: 0
+    ocorrenciasConcluidas: 0,
+    ocorrenciasPendentes: 0
   });
   const [loading, setLoading] = useState(true);
   const { data: userCCAs = [] } = useUserCCAs();
@@ -134,8 +132,8 @@ const OcorrenciasSummaryCards = () => {
         </Card>
       </div>
 
-      {/* Segunda linha - Dias e ações */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-6">
+      {/* Segunda linha - Dias e status de ocorrências */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Dias Perdidos</CardTitle>
@@ -164,48 +162,26 @@ const OcorrenciasSummaryCards = () => {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Ações Concluídas</CardTitle>
+            <CardTitle className="text-sm font-medium">Ocorrências Concluídas</CardTitle>
             <CheckCircle className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.acoesConcluidas}</div>
+            <div className="text-2xl font-bold">{stats.ocorrenciasConcluidas}</div>
             <p className="text-xs text-muted-foreground">
-              {stats.totalAcoes > 0 ? 
-                `${Math.round((stats.acoesConcluidas / stats.totalAcoes) * 100)}% do total` 
-                : 'Nenhuma ação cadastrada'
-              }
+              Ocorrências com status concluído
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Ações em Andamento</CardTitle>
-            <Clock className="h-4 w-4 text-yellow-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.acoesAndamento}</div>
-            <p className="text-xs text-muted-foreground">
-              {stats.totalAcoes > 0 ? 
-                `${Math.round((stats.acoesAndamento / stats.totalAcoes) * 100)}% do total` 
-                : 'Nenhuma ação cadastrada'
-              }
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Ações Pendentes</CardTitle>
+            <CardTitle className="text-sm font-medium">Ocorrências Pendentes</CardTitle>
             <AlertTriangle className="h-4 w-4 text-red-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.acoesPendentes}</div>
+            <div className="text-2xl font-bold">{stats.ocorrenciasPendentes}</div>
             <p className="text-xs text-muted-foreground">
-              {stats.totalAcoes > 0 ? 
-                `${Math.round((stats.acoesPendentes / stats.totalAcoes) * 100)}% do total` 
-                : 'Nenhuma ação cadastrada'
-              }
+              Ocorrências com status pendente
             </p>
           </CardContent>
         </Card>
