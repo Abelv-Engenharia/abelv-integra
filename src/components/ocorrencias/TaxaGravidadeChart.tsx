@@ -85,7 +85,7 @@ const TaxaGravidadeChart = () => {
             return meses[value - 1] || value;
           }}
         />
-        <YAxis />
+        <YAxis domain={[0, (dataMax: number) => Math.max(dataMax * 1.1, meta * 1.1)]} />
         <Tooltip 
           contentStyle={{
             backgroundColor: '#fff',
