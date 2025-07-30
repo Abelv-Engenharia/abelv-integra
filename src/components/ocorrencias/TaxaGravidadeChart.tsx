@@ -92,7 +92,7 @@ const TaxaGravidadeChart = () => {
           }}
           formatter={(value: any, name: string) => [
             Number(value).toFixed(2), 
-            name === 'mensal' ? 'Taxa do Mês' : 'Taxa Acumulada'
+            name === 'Taxa Mensal' ? 'Taxa do Mês' : 'Taxa Acumulada'
           ]}
         />
         <Bar 
