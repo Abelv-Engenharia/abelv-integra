@@ -69,7 +69,8 @@ const HoraSegurancaDashboard = () => {
       
       setRespData(
         responsaveis.map((d: any) => ({
-          name: d.responsavel,
+          name: d.primeiroNome || d.responsavel?.split(' ')[0] || d.responsavel,
+          nomeCompleto: d.nomeCompleto || d.responsavel,
           "A Realizar": d["A Realizar"] ?? 0,
           "Realizada": d.realizada ?? 0,
           "Não Realizada": d.nao_realizada ?? 0,
@@ -225,7 +226,14 @@ const HoraSegurancaDashboard = () => {
                             />
                         
                             <YAxis type="number" />
-                            <Tooltip />
+                            <Tooltip 
+                              labelFormatter={(label, payload) => {
+                                if (payload && payload.length > 0) {
+                                  return payload[0]?.payload?.nomeCompleto || label;
+                                }
+                                return label;
+                              }}
+                            />
                         
                             <Legend 
                               verticalAlign="bottom" 
