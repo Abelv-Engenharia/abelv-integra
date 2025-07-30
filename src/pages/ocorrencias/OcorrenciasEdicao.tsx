@@ -39,7 +39,18 @@ const OcorrenciasEdicao = () => {
       if (!id) return;
       
       try {
+        console.log('=== CARREGANDO OCORRÊNCIA ===');
         const data = await getOcorrenciaById(id);
+        console.log('Dados recebidos do banco:', data);
+        console.log('Campos específicos do banco:');
+        console.log('- houve_afastamento:', data.houve_afastamento);
+        console.log('- dias_perdidos:', data.dias_perdidos);
+        console.log('- dias_debitados:', data.dias_debitados);
+        console.log('- parte_corpo_atingida:', data.parte_corpo_atingida);
+        console.log('- lateralidade:', data.lateralidade);
+        console.log('- agente_causador:', data.agente_causador);
+        console.log('- situacao_geradora:', data.situacao_geradora);
+        console.log('- natureza_lesao:', data.natureza_lesao);
         
         // Safely handle colaboradores_acidentados data
         const colaboradores = Array.isArray(data.colaboradores_acidentados) 
@@ -105,6 +116,18 @@ const OcorrenciasEdicao = () => {
           arquivo_licoes_aprendidas: data.arquivo_licoes_aprendidas || null,
         };
         
+        console.log('=== DADOS CONVERTIDOS PARA O FORMULÁRIO ===');
+        console.log('formData convertido:', formData);
+        console.log('Campos específicos convertidos:');
+        console.log('- houve_afastamento:', formData.houve_afastamento);
+        console.log('- dias_perdidos:', formData.dias_perdidos);
+        console.log('- dias_debitados:', formData.dias_debitados);
+        console.log('- parte_corpo_atingida:', formData.parte_corpo_atingida);
+        console.log('- lateralidade:', formData.lateralidade);
+        console.log('- agente_causador:', formData.agente_causador);
+        console.log('- situacao_geradora:', formData.situacao_geradora);
+        console.log('- natureza_lesao:', formData.natureza_lesao);
+        
         form.reset(formData);
       } catch (error) {
         console.error('Erro ao carregar ocorrência:', error);
@@ -127,7 +150,9 @@ const OcorrenciasEdicao = () => {
     setIsSubmitting(true);
 
     try {
+      console.log('=== INÍCIO DO PROCESSO DE ATUALIZAÇÃO ===');
       const formData = form.getValues();
+      console.log('Dados do formulário antes da conversão:', formData);
       
       // Validate form
       const isValid = await form.trigger();
@@ -190,6 +215,17 @@ const OcorrenciasEdicao = () => {
         licoes_aprendidas_enviada: formData.licoes_aprendidas_enviada,
         arquivo_licoes_aprendidas: formData.arquivo_licoes_aprendidas,
       };
+
+      console.log('=== CAMPOS ESPECÍFICOS ANTES DE ENVIAR ===');
+      console.log('houve_afastamento:', updateData.houve_afastamento);
+      console.log('dias_perdidos:', updateData.dias_perdidos);
+      console.log('dias_debitados:', updateData.dias_debitados);
+      console.log('parte_corpo_atingida:', updateData.parte_corpo_atingida);
+      console.log('lateralidade:', updateData.lateralidade);
+      console.log('agente_causador:', updateData.agente_causador);
+      console.log('situacao_geradora:', updateData.situacao_geradora);
+      console.log('natureza_lesao:', updateData.natureza_lesao);
+      console.log('updateData completo:', updateData);
 
       await updateOcorrencia(id, updateData);
       toast.success("Ocorrência atualizada com sucesso!");

@@ -172,7 +172,9 @@ export const createOcorrencia = async (data: any) => {
 
 export const updateOcorrencia = async (id: string, formData: any) => {
   try {
-    console.log('Updating ocorrencia with data:', formData);
+    console.log('=== SERVIÇO updateOcorrencia ===');
+    console.log('ID da ocorrência:', id);
+    console.log('Dados recebidos no serviço:', formData);
     
     // Converter os dados do formulário para o formato do banco
     const updateData: any = { ...formData };
@@ -237,6 +239,15 @@ export const updateOcorrencia = async (id: string, formData: any) => {
       updateData.descricao = formData.descricao_ocorrencia;
     }
 
+    console.log('=== CAMPOS ESPECÍFICOS NO SERVIÇO ===');
+    console.log('houve_afastamento recebido:', updateData.houve_afastamento);
+    console.log('dias_perdidos recebido:', updateData.dias_perdidos);
+    console.log('dias_debitados recebido:', updateData.dias_debitados);
+    console.log('parte_corpo_atingida recebido:', updateData.parte_corpo_atingida);
+    console.log('lateralidade recebido:', updateData.lateralidade);
+    console.log('agente_causador recebido:', updateData.agente_causador);
+    console.log('situacao_geradora recebido:', updateData.situacao_geradora);
+    console.log('natureza_lesao recebido:', updateData.natureza_lesao);
     console.log('Update data for database:', updateData);
 
     const { data: result, error } = await supabase
