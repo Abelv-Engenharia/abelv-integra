@@ -5,7 +5,7 @@ export async function fetchOcorrenciasByTipo(ccaIds?: number[]) {
   try {
     let query = supabase
       .from('ocorrencias')
-      .select('classificacao_ocorrencia');
+      .select('classificacao_ocorrencia_codigo');
 
     // Aplicar filtro de CCAs se fornecido
     if (ccaIds && ccaIds.length > 0) {
@@ -29,7 +29,7 @@ export async function fetchOcorrenciasByTipo(ccaIds?: number[]) {
     console.log('Dados de ocorrências por tipo (filtrado):', data);
 
     const tipoCount = (data || []).reduce((acc: Record<string, number>, curr) => {
-      const tipo = curr.classificacao_ocorrencia || 'Não definido';
+      const tipo = curr.classificacao_ocorrencia_codigo || 'Não definido';
       acc[tipo] = (acc[tipo] || 0) + 1;
       return acc;
     }, {});

@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
-import { fetchOcorrenciasByTipo } from "@/services/ocorrenciasDashboardService";
+import { fetchOcorrenciasByTipo } from "@/services/ocorrencias/ocorrenciasByTipoService";
 
 const colorMap: Record<string, string> = {
   "Acidente com Afastamento": "#ef4444", // Red
@@ -22,8 +22,9 @@ const OcorrenciasByTipoChart = () => {
         
         // Add colors to each data item
         const dataWithColors = chartData.map(item => ({
-          ...item,
-          color: colorMap[item.name] || "#9ca3af" // Default gray color if no matching color
+          name: item.tipo,
+          value: item.count,
+          color: colorMap[item.tipo] || "#9ca3af" // Default gray color if no matching color
         }));
         
         setData(dataWithColors);
