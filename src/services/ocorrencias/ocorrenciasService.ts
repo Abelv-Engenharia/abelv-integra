@@ -55,10 +55,12 @@ export interface OcorrenciaFormData {
 }
 
 // Função para converter acoes com Date para formato JSON
-const convertAcoesForDatabase = (acoes: OcorrenciaFormData['acoes']) => {
+const convertAcoesForDatabase = (acoes: any[]) => {
   return acoes.map(acao => ({
     ...acao,
-    data_adequacao: acao.data_adequacao ? acao.data_adequacao.toISOString() : null
+    data_adequacao: acao.data_adequacao ? 
+      (typeof acao.data_adequacao === 'string' ? acao.data_adequacao : acao.data_adequacao.toISOString()) 
+      : null
   }));
 };
 
