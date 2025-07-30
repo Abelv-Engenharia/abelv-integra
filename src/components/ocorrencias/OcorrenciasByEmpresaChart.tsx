@@ -5,8 +5,8 @@ import { useUserCCAs } from "@/hooks/useUserCCAs";
 import { fetchOcorrenciasByRisco } from "@/services/ocorrencias/ocorrenciasByRiscoService";
 
 const colorMap: Record<string, string> = {
-  "TRIVIAL": "#10b981", // Green
-  "TOLERÁVEL": "#3b82f6", // Blue  
+  "TRIVIAL": "#3b82f6", // Blue
+  "TOLERÁVEL": "#10b981", // Green  
   "MODERADO": "#f59e0b", // Yellow
   "SUBSTANCIAL": "#f97316", // Orange
   "INTOLERÁVEL": "#ef4444", // Red
