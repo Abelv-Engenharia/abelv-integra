@@ -204,7 +204,7 @@ export const updateOcorrencia = async (id: string, formData: any) => {
         );
         
         if (todasConcluidas) {
-          updateData.status = 'Fechado';
+          updateData.status = 'Concluído';
         } else if (algumaEmExecucao) {
           updateData.status = 'Em execução';
         } else {

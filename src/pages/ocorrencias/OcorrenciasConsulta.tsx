@@ -175,8 +175,10 @@ const OcorrenciasConsulta = () => {
                       <td className="p-2">{ocorrencia.tipo_ocorrencia}</td>
                       <td className="p-2">
                         <span className={`px-2 py-1 rounded-full text-xs ${
-                          ocorrencia.status === 'Fechado' 
+                          ocorrencia.status === 'Concluído' 
                             ? 'bg-green-100 text-green-800' 
+                            : ocorrencia.status === 'Em execução'
+                            ? 'bg-blue-100 text-blue-800'
                             : 'bg-orange-100 text-orange-800'
                         }`}>
                           {ocorrencia.status || 'Em tratativa'}
