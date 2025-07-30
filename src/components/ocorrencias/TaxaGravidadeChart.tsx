@@ -85,9 +85,14 @@ const TaxaGravidadeChart = () => {
             border: '1px solid #ccc',
             borderRadius: '4px'
           }}
+          labelFormatter={(value) => {
+            const meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
+                          'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+            return meses[Number(value) - 1] || value;
+          }}
           formatter={(value: any, name: string) => [
             Number(value).toFixed(2), 
-            name === 'mensal' ? 'Taxa Mensal' : 'Taxa Acumulada'
+            name === 'mensal' ? 'Taxa do Mês' : 'Taxa Acumulada'
           ]}
         />
         <Bar 
