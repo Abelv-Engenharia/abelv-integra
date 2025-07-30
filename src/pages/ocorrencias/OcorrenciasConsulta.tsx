@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Plus, Eye, Edit, RefreshCw, Trash2 } from "lucide-react";
 import { getAllOcorrencias, deleteOcorrencia } from "@/services/ocorrencias/ocorrenciasService";
 import { useUserCCAs } from "@/hooks/useUserCCAs";
+import useOverdueActionsMonitor from "@/hooks/useOverdueActionsMonitor";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -24,6 +25,9 @@ const OcorrenciasConsulta = () => {
   const [ocorrenciaToDeleteId, setOcorrenciaToDeleteId] = useState<string | null>(null);
   const navigate = useNavigate();
   const { data: userCCAs = [], isLoading: ccasLoading } = useUserCCAs();
+
+  // Ativar monitoramento de ações em atraso
+  useOverdueActionsMonitor();
 
   const loadOcorrencias = async () => {
     if (ccasLoading) return;

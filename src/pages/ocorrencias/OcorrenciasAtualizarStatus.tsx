@@ -3,9 +3,10 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, Save } from "lucide-react";
+import { ArrowLeft, Save, AlertTriangle, Clock } from "lucide-react";
 import { getOcorrenciaById, updateOcorrencia } from "@/services/ocorrencias/ocorrenciasService";
 import { toast } from "sonner";
+import { calcularStatusDinamico, getStatusColor, getSituacaoColor } from "@/utils/actionStatusUtils";
 
 const OcorrenciasAtualizarStatus = () => {
   const { id } = useParams<{ id: string }>();
@@ -23,9 +24,29 @@ const OcorrenciasAtualizarStatus = () => {
         const data = await getOcorrenciaById(id);
         setOcorrencia(data);
         
-        // Safely handle acoes data from database
+        // Safely handle acoes data from database and calculate dynamic status
         if (data.acoes && Array.isArray(data.acoes)) {
-          setAcoes(data.acoes);
+          const acoesComStatusDinamico = data.acoes.map((acao: any) => {
+            // Garantir que temos um objeto válido
+            const acaoObj = {
+              tratativa_aplicada: acao.tratativa_aplicada || '',
+              data_adequacao: acao.data_adequacao || null,
+              responsavel_acao: acao.responsavel_acao || '',
+              funcao_responsavel: acao.funcao_responsavel || '',
+              situacao: acao.situacao || '',
+              status: acao.status || ''
+            };
+            
+            const statusCalculado = calcularStatusDinamico(acaoObj);
+            return {
+              ...acaoObj,
+              statusOriginal: acao.status, // Preservar status original
+              situacaoOriginal: acao.situacao, // Preservar situação original
+              status: statusCalculado.status,
+              situacao: statusCalculado.situacao
+            };
+          });
+          setAcoes(acoesComStatusDinamico);
         } else {
           setAcoes([]);
         }
@@ -120,9 +141,29 @@ const OcorrenciasAtualizarStatus = () => {
             </p>
           ) : (
             <div className="space-y-6">
-              {acoes.map((acao, index) => (
-                <div key={index} className="border rounded-lg p-4 space-y-4">
-                  <h4 className="font-medium">Ação {index + 1}</h4>
+               {acoes.map((acao, index) => {
+                 const isAtrasada = acao.status === 'Atrasado';
+                 const isProximoVencimento = acao.situacao === 'Próximo ao vencimento';
+                 
+                 return (
+                 <div key={index} className={`border rounded-lg p-4 space-y-4 ${isAtrasada ? 'border-red-300 bg-red-50' : isProximoVencimento ? 'border-yellow-300 bg-yellow-50' : ''}`}>
+                   <div className="flex items-center justify-between">
+                     <h4 className="font-medium">Ação {index + 1}</h4>
+                     <div className="flex gap-2">
+                       {isAtrasada && (
+                         <div className="flex items-center gap-1 text-red-600 text-sm">
+                           <AlertTriangle className="h-4 w-4" />
+                           <span>Atrasada</span>
+                         </div>
+                       )}
+                       {isProximoVencimento && (
+                         <div className="flex items-center gap-1 text-yellow-600 text-sm">
+                           <Clock className="h-4 w-4" />
+                           <span>Próximo ao vencimento</span>
+                         </div>
+                       )}
+                     </div>
+                   </div>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
@@ -203,8 +244,9 @@ const OcorrenciasAtualizarStatus = () => {
                     </div>
                   </div>
                 </div>
-              ))}
-            </div>
+                 );
+               })}
+             </div>
           )}
         </CardContent>
       </Card>
