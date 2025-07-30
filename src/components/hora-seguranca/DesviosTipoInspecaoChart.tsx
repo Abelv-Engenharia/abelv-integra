@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { fetchDesviosByInspectionType } from '@/services/hora-seguranca';
 import { useUserCCAs } from '@/hooks/useUserCCAs';
 
@@ -30,7 +30,7 @@ export function DesviosTipoInspecaoChart() {
         const formattedData = chartData.map((item, index) => ({
           name: item.tipo,
           value: item.quantidade,
-          fill: `hsl(${220 + index * 40}, 70%, 50%)`
+          fill: `hsl(${210 + index * 20}, 20%, ${50 + index * 10}%)`
         }));
         
         setData(formattedData);
@@ -80,7 +80,7 @@ export function DesviosTipoInspecaoChart() {
             cy="50%"
             labelLine={false}
             label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-            outerRadius={120}
+            outerRadius={150}
             fill="#8884d8"
             dataKey="value"
           >
@@ -89,7 +89,6 @@ export function DesviosTipoInspecaoChart() {
             ))}
           </Pie>
           <Tooltip />
-          <Legend />
         </PieChart>
       </ResponsiveContainer>
     </div>
