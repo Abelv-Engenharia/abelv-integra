@@ -49,11 +49,11 @@ export async function fetchOcorrenciasStats(ccaIds?: number[]) {
 
     // Calcular estatísticas de status das ocorrências
     const ocorrenciasConcluidas = ocorrencias?.filter(o => 
-      o.status === 'Concluída' || o.status === 'Fechada'
+      o.status === 'Concluído' || o.status === 'Concluída' || o.status === 'Fechada' || o.status === 'Fechado'
     ).length || 0;
 
     const ocorrenciasPendentes = ocorrencias?.filter(o => 
-      o.status === 'Aberta' || o.status === 'Em andamento' || o.status === 'Pendente'
+      o.status === 'Aberta' || o.status === 'Aberto' || o.status === 'Em andamento' || o.status === 'Pendente'
     ).length || 0;
 
     return {
