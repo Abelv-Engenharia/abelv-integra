@@ -34,7 +34,7 @@ const DesviosByBaseLegalChart = () => {
   const chartConfig = {
     value: {
       label: "Desvios",
-      color: "#f59e0b",
+      color: "#3b82f6",
     },
   };
 

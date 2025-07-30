@@ -34,7 +34,7 @@ const DesviosByCompanyChart = () => {
   const chartConfig = {
     value: {
       label: "Desvios",
-      color: "#10b981",
+      color: "#3b82f6",
     },
   };
 
