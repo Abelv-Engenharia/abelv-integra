@@ -1,10 +1,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 
-export interface DesviosByResponsavel {
-  responsavel: string;
-  desvios: number;
-}
+import { DesviosByResponsavel } from './types';
 
 /**
  * Fetch desvios by responsável from execucao_hsa table
@@ -42,10 +39,15 @@ export async function fetchDesviosByResponsavel(ccaIds?: number[]): Promise<Desv
 
     return Object.entries(grouped)
       .filter(([_, desvios]) => desvios > 0) // Só mostra responsáveis com desvios
-      .map(([responsavel, desvios]) => ({
-        responsavel,
-        desvios
-      }))
+      .map(([responsavel, desvios]) => {
+        const primeiroNome = responsavel.split(' ')[0];
+        return {
+          responsavel,
+          primeiroNome,
+          nomeCompleto: responsavel,
+          desvios
+        };
+      })
       .sort((a, b) => b.desvios - a.desvios); // Ordena por quantidade de desvios (decrescente)
       
   } catch (error) {

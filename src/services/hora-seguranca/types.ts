@@ -71,6 +71,8 @@ export interface InspecoesByResponsavel {
 
 export interface DesviosByResponsavel {
   responsavel: string;
+  primeiroNome: string;
+  nomeCompleto: string;
   desvios: number;
 }
 

@@ -27,7 +27,8 @@ export function DesviosResponsaveisChart() {
         
         // Formatar dados para o gráfico
         const formattedData = chartData.map(item => ({
-          name: item.responsavel,
+          name: item.primeiroNome || item.responsavel?.split(' ')[0] || item.responsavel,
+          nomeCompleto: item.nomeCompleto || item.responsavel,
           desvios: item.desvios
         }));
         
@@ -88,7 +89,14 @@ export function DesviosResponsaveisChart() {
             height={80}
           />
           <YAxis />
-          <Tooltip />
+          <Tooltip 
+            labelFormatter={(label, payload) => {
+              if (payload && payload.length > 0) {
+                return payload[0]?.payload?.nomeCompleto || label;
+              }
+              return label;
+            }}
+          />
           <Legend />
           <Bar dataKey="desvios" name="Desvios Identificados" fill="#3b82f6" />
         </BarChart>
