@@ -85,7 +85,14 @@ export const useCCAInvalidation = () => {
         queryClient.refetchQueries({ queryKey: ['ccas'] }),
         queryClient.refetchQueries({ queryKey: ['ccas-ativas'] }),
         queryClient.refetchQueries({ queryKey: ['funcionarios'] }),
-        queryClient.refetchQueries({ queryKey: ['empresas'] })
+        queryClient.refetchQueries({ queryKey: ['empresas'] }),
+        // Forçar refetch das queries de user-ccas para todos os usuários
+        queryClient.refetchQueries({ 
+          predicate: (query) => {
+            const queryKey = query.queryKey;
+            return queryKey && queryKey[0] === 'user-ccas';
+          }
+        })
       ]);
       
       console.log('Invalidação concluída. Todas as queries de CCAs foram atualizadas.');
