@@ -8,7 +8,7 @@ import {
   TabsTrigger 
 } from "@/components/ui/tabs";
 import OcorrenciasSummaryCards from "@/components/ocorrencias/OcorrenciasSummaryCards";
-import OcorrenciasByTipoColumnChart from "@/components/ocorrencias/OcorrenciasByTipoColumnChart";
+import OcorrenciasByTipoChart from "@/components/ocorrencias/OcorrenciasByTipoChart";
 import OcorrenciasByEmpresaChart from "@/components/ocorrencias/OcorrenciasByEmpresaChart";
 import OcorrenciasTimelineChart from "@/components/ocorrencias/OcorrenciasTimelineChart";
 import TaxaFrequenciaAcCpdChart from "@/components/ocorrencias/TaxaFrequenciaAcCpdChart";
@@ -60,7 +60,7 @@ const OcorrenciasDashboard = () => {
                     <CardTitle>Ocorrências por Tipo</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <OcorrenciasByTipoColumnChart />
+                    <OcorrenciasByTipoChart />
                   </CardContent>
                 </Card>
                 
