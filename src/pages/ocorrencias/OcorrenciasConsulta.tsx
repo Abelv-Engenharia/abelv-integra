@@ -25,37 +25,64 @@ const OcorrenciasConsulta = () => {
   const navigate = useNavigate();
   const { data: userCCAs = [], isLoading: ccasLoading } = useUserCCAs();
 
-  useEffect(() => {
-    const loadOcorrencias = async () => {
-      if (ccasLoading) return;
+  const loadOcorrencias = async () => {
+    if (ccasLoading) return;
+    
+    setLoading(true);
+    try {
+      const data = await getAllOcorrencias();
+      console.log('Ocorrências carregadas:', data);
       
-      setLoading(true);
-      try {
-        const data = await getAllOcorrencias();
-        console.log('Ocorrências carregadas:', data);
-        
-        // Filtrar ocorrências baseado nos CCAs permitidos ao usuário
-        if (userCCAs.length > 0) {
-          const userCCAIds = userCCAs.map(cca => cca.id.toString());
-          const filteredData = data.filter(ocorrencia => 
-            userCCAIds.includes(ocorrencia.cca)
-          );
-          console.log('Ocorrências filtradas por CCA do usuário:', filteredData);
-          setOcorrencias(filteredData);
-        } else {
-          // Se o usuário não tem CCAs permitidos, não mostra nenhuma ocorrência
-          setOcorrencias([]);
-        }
-      } catch (error) {
-        console.error('Erro ao buscar ocorrências:', error);
-        toast.error("Erro ao carregar ocorrências");
-      } finally {
-        setLoading(false);
+      // Filtrar ocorrências baseado nos CCAs permitidos ao usuário
+      if (userCCAs.length > 0) {
+        const userCCAIds = userCCAs.map(cca => cca.id.toString());
+        const filteredData = data.filter(ocorrencia => 
+          userCCAIds.includes(ocorrencia.cca)
+        );
+        console.log('Ocorrências filtradas por CCA do usuário:', filteredData);
+        setOcorrencias(filteredData);
+      } else {
+        // Se o usuário não tem CCAs permitidos, não mostra nenhuma ocorrência
+        setOcorrencias([]);
+      }
+    } catch (error) {
+      console.error('Erro ao buscar ocorrências:', error);
+      toast.error("Erro ao carregar ocorrências");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadOcorrencias();
+  }, [userCCAs, ccasLoading]);
+
+  // Recarregar dados quando a página recebe foco (útil quando volta de outras páginas)
+  useEffect(() => {
+    const handleFocus = () => {
+      if (!ccasLoading) {
+        loadOcorrencias();
       }
     };
 
+    const handleVisibilityChange = () => {
+      if (!document.hidden && !ccasLoading) {
+        loadOcorrencias();
+      }
+    };
+
+    window.addEventListener('focus', handleFocus);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [ccasLoading]);
+
+  const handleRefresh = () => {
     loadOcorrencias();
-  }, [userCCAs, ccasLoading]);
+  };
 
   const handleView = (id: string) => {
     navigate(`/ocorrencias/${id}`);
@@ -94,10 +121,16 @@ const OcorrenciasConsulta = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-3xl font-bold tracking-tight">Consulta de Ocorrências</h2>
-        <Button onClick={() => navigate("/ocorrencias/cadastro")}>
-          <Plus className="mr-2 h-4 w-4" />
-          Cadastrar Ocorrência
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={handleRefresh} disabled={loading}>
+            <RefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+            Atualizar
+          </Button>
+          <Button onClick={() => navigate("/ocorrencias/cadastro")}>
+            <Plus className="mr-2 h-4 w-4" />
+            Cadastrar Ocorrência
+          </Button>
+        </div>
       </div>
 
       <Card>
