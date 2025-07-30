@@ -7,7 +7,7 @@ export async function fetchOcorrenciasStats(ccaIds?: number[]) {
     
     let query = supabase
       .from('ocorrencias')
-      .select('classificacao_ocorrencia, dias_perdidos, dias_debitados, acoes');
+      .select('classificacao_ocorrencia, classificacao_ocorrencia_codigo, dias_perdidos, dias_debitados, acoes');
 
     // Aplicar filtro por CCAs se fornecido
     if (ccaIds && ccaIds.length > 0) {
@@ -29,24 +29,24 @@ export async function fetchOcorrenciasStats(ccaIds?: number[]) {
 
     console.log('Ocorrências carregadas:', ocorrencias);
 
-    // Classificar ocorrências por tipo
+    // Classificar ocorrências por tipo usando classificacao_ocorrencia_codigo
     const ocorrenciasComPerdaDias = ocorrencias?.filter(o => 
-      o.classificacao_ocorrencia === 'AC CPD - ACIDENTE COM PERDA DE DIAS'
+      o.classificacao_ocorrencia_codigo === 'AC CPD'
     ).length || 0;
 
     const ocorrenciasSemPerdaDias = ocorrencias?.filter(o => 
-      o.classificacao_ocorrencia === 'AC SPD - ACIDENTE SEM PERDA DE DIAS' ||
-      o.classificacao_ocorrencia === 'AC SPD CRT - ACIDENTE SEM PERDA DE DIAS COM LIMITAÇÃO DE TAREFA'
+      o.classificacao_ocorrencia_codigo === 'AC SPD' ||
+      o.classificacao_ocorrencia_codigo === 'AC SPD CRT'
     ).length || 0;
 
     const incidentes = ocorrencias?.filter(o => 
-      o.classificacao_ocorrencia === 'INC AMB - INCIDENTE AMBIENTAL' ||
-      o.classificacao_ocorrencia === 'INC DM - INCIDENTE COM DANOS MATERIAIS' ||
-      o.classificacao_ocorrencia === 'INC SDM - INCIDENTE SEM DANOS MATERIAIS'
+      o.classificacao_ocorrencia_codigo === 'INC DM' ||
+      o.classificacao_ocorrencia_codigo === 'INC SDM' ||
+      o.classificacao_ocorrencia_codigo === 'INC AMB'
     ).length || 0;
 
     const desviosAltoPotencial = ocorrencias?.filter(o => 
-      o.classificacao_ocorrencia === 'DAP - DESVIO DE ALTO POTENCIAL'
+      o.classificacao_ocorrencia_codigo === 'DAP'
     ).length || 0;
 
     // Calcular dias perdidos e debitados
@@ -112,9 +112,9 @@ export async function fetchTaxaFrequenciaAcCpdPorMes(ano: number, ccaIds?: numbe
     // Buscar ocorrências AC CPD por mês
     let ocorrenciasQuery = supabase
       .from('ocorrencias')
-      .select('mes, classificacao_ocorrencia')
+      .select('mes, classificacao_ocorrencia_codigo')
       .eq('ano', ano)
-      .eq('classificacao_ocorrencia', 'AC CPD - ACIDENTE COM PERDA DE DIAS');
+      .eq('classificacao_ocorrencia_codigo', 'AC CPD');
 
     // Aplicar filtro por CCAs se fornecido
     if (ccaIds && ccaIds.length > 0) {
@@ -177,11 +177,11 @@ export async function fetchTaxaFrequenciaAcSpdPorMes(ano: number, ccaIds?: numbe
     // Buscar ocorrências AC SPD por mês
     let ocorrenciasQuery = supabase
       .from('ocorrencias')
-      .select('mes, classificacao_ocorrencia')
+      .select('mes, classificacao_ocorrencia_codigo')
       .eq('ano', ano)
-      .in('classificacao_ocorrencia', [
-        'AC SPD - ACIDENTE SEM PERDA DE DIAS',
-        'AC SPD CRT - ACIDENTE SEM PERDA DE DIAS COM LIMITAÇÃO DE TAREFA'
+      .in('classificacao_ocorrencia_codigo', [
+        'AC SPD',
+        'AC SPD CRT'
       ]);
 
     // Aplicar filtro por CCAs se fornecido
