@@ -70,11 +70,22 @@ const OcorrenciasSimpleFilters = () => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="todos">Todos</SelectItem>
-                {userCCAs.map((cca) => (
-                  <SelectItem key={cca.id} value={cca.id.toString()}>
-                    {`${cca.codigo} - ${cca.nome}`}
-                  </SelectItem>
-                ))}
+                {userCCAs
+                  .sort((a, b) => {
+                    // Ordenar por código do CCA (numéricamente se possível, senão alfabeticamente)
+                    const aNum = parseInt(a.codigo);
+                    const bNum = parseInt(b.codigo);
+                    
+                    if (!isNaN(aNum) && !isNaN(bNum)) {
+                      return aNum - bNum; // Ordenação numérica
+                    }
+                    return a.codigo.localeCompare(b.codigo); // Ordenação alfabética
+                  })
+                  .map((cca) => (
+                    <SelectItem key={cca.id} value={cca.id.toString()}>
+                      {`${cca.codigo} - ${cca.nome}`}
+                    </SelectItem>
+                  ))}
               </SelectContent>
             </Select>
           </div>
