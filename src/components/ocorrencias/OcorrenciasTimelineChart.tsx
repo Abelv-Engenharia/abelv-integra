@@ -146,7 +146,7 @@ const OcorrenciasTimelineChart = () => {
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis 
             dataKey="name" 
-            tick={{ fontSize: 11 }}
+            tick={{ fontSize: 13 }}
             angle={-45}
             textAnchor="end"
             height={60}
