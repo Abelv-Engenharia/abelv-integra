@@ -94,6 +94,10 @@ export const useCCAInvalidation = () => {
           }
         })
       ]);
+
+      // Forçar uma invalidação manual adicional para garantir
+      console.log('Forçando invalidação manual adicional...');
+      await queryClient.invalidateQueries();
       
       console.log('Invalidação concluída. Todas as queries de CCAs foram atualizadas.');
     } catch (error) {
