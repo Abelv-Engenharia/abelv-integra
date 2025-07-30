@@ -16,6 +16,16 @@ const OcorrenciasTimelineChart = () => {
         setLoading(true);
         console.log('Carregando dados de ocorrências por CCA...');
         
+        // Primeiro buscar os CCAs para mapear ID para código
+        const { data: ccasData } = await supabase
+          .from('ccas')
+          .select('id, codigo, nome');
+
+        const ccaMap = new Map();
+        ccasData?.forEach(cca => {
+          ccaMap.set(cca.id.toString(), { codigo: cca.codigo, nome: cca.nome });
+        });
+
         const { data: ocorrencias, error } = await supabase
           .from('ocorrencias')
           .select('cca, classificacao_ocorrencia_codigo');
@@ -28,27 +38,19 @@ const OcorrenciasTimelineChart = () => {
         const ccaClassificacaoCount: Record<string, Record<string, number>> = {};
         const ccaNomes: Record<string, string> = {};
 
-        // Buscar nomes dos CCAs
-        const ccaCodigos = [...new Set((ocorrencias || []).map((ocorrencia: any) => ocorrencia.cca))];
-        if (ccaCodigos.length > 0) {
-          const { data: ccasData } = await supabase
-            .from('ccas')
-            .select('codigo, nome')
-            .in('codigo', ccaCodigos);
-          
-          ccasData?.forEach((cca: any) => {
-            ccaNomes[cca.codigo] = `${cca.codigo} - ${cca.nome}`;
-          });
-        }
-
         (ocorrencias || []).forEach((ocorrencia: any) => {
-          const ccaCodigo = ocorrencia.cca;
+          const ccaId = ocorrencia.cca;
           const classificacao = ocorrencia.classificacao_ocorrencia_codigo || 'Não definido';
           
-          // Usar nome completo do CCA se disponível
-          if (!ccaNomes[ccaCodigo]) {
-            ccaNomes[ccaCodigo] = ccaCodigo;
-          }
+          // Buscar código e nome do CCA pelo ID
+          const ccaInfo = ccaMap.get(ccaId);
+          if (!ccaInfo) return; // Pular se não encontrar o CCA
+          
+          const ccaCodigo = ccaInfo.codigo;
+          const ccaNomeCompleto = `${ccaInfo.codigo} - ${ccaInfo.nome}`;
+          
+          // Armazenar nome completo
+          ccaNomes[ccaCodigo] = ccaNomeCompleto;
 
           if (!ccaClassificacaoCount[ccaCodigo]) {
             ccaClassificacaoCount[ccaCodigo] = {};
@@ -69,8 +71,8 @@ const OcorrenciasTimelineChart = () => {
         // Converter para formato do gráfico
         const chartData = Object.entries(ccaClassificacaoCount).map(([ccaCodigo, classificacoes]) => {
           const item: any = {
-            name: ccaCodigo,
-            nomeCompleto: ccaNomes[ccaCodigo] || ccaCodigo
+            name: ccaCodigo, // Código do CCA no eixo X
+            nomeCompleto: ccaNomes[ccaCodigo] || ccaCodigo // Nome completo para tooltip
           };
           
           todasClassificacoes.forEach(classificacao => {
