@@ -191,6 +191,28 @@ export const updateOcorrencia = async (id: string, formData: any) => {
     
     if (formData.acoes) {
       updateData.acoes = convertAcoesForDatabase(formData.acoes);
+      
+      // Atualizar status geral da ocorrência baseado no status das ações
+      const acoes = formData.acoes;
+      if (acoes && acoes.length > 0) {
+        const todasConcluidas = acoes.every((acao: any) => 
+          acao.status === 'Concluído' || acao.status === 'Cancelado'
+        );
+        
+        const algumaEmExecucao = acoes.some((acao: any) => 
+          acao.status === 'Em execução'
+        );
+        
+        if (todasConcluidas) {
+          updateData.status = 'Fechado';
+        } else if (algumaEmExecucao) {
+          updateData.status = 'Em execução';
+        } else {
+          updateData.status = 'Em tratativa';
+        }
+        
+        console.log('Status geral atualizado para:', updateData.status);
+      }
     }
 
     if (formData.descricao_ocorrencia) {
