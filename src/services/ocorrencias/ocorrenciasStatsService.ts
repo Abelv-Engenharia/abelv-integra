@@ -11,16 +11,10 @@ export async function fetchOcorrenciasStats(ccaIds?: number[]) {
 
     // Aplicar filtro por CCAs se fornecido
     if (ccaIds && ccaIds.length > 0) {
-      // Como não temos cca_id na tabela ocorrencias, vamos filtrar pelo campo 'cca'
-      const { data: ccasData } = await supabase
-        .from('ccas')
-        .select('nome')
-        .in('id', ccaIds);
-      
-      if (ccasData && ccasData.length > 0) {
-        const ccaNomes = ccasData.map(cca => cca.nome);
-        query = query.in('cca', ccaNomes);
-      }
+      // O campo 'cca' na tabela ocorrencias é um ID numérico que pode ser string
+      // Converter os IDs para string para comparação
+      const ccaStringIds = ccaIds.map(id => id.toString());
+      query = query.in('cca', ccaStringIds);
     }
 
     const { data: ocorrencias, error } = await query;
@@ -118,15 +112,8 @@ export async function fetchTaxaFrequenciaAcCpdPorMes(ano: number, ccaIds?: numbe
 
     // Aplicar filtro por CCAs se fornecido
     if (ccaIds && ccaIds.length > 0) {
-      const { data: ccasData } = await supabase
-        .from('ccas')
-        .select('nome')
-        .in('id', ccaIds);
-      
-      if (ccasData && ccasData.length > 0) {
-        const ccaNomes = ccasData.map(cca => cca.nome);
-        ocorrenciasQuery = ocorrenciasQuery.in('cca', ccaNomes);
-      }
+      const ccaStringIds = ccaIds.map(id => id.toString());
+      ocorrenciasQuery = ocorrenciasQuery.in('cca', ccaStringIds);
     }
 
     const { data: ocorrencias } = await ocorrenciasQuery;
@@ -186,15 +173,8 @@ export async function fetchTaxaFrequenciaAcSpdPorMes(ano: number, ccaIds?: numbe
 
     // Aplicar filtro por CCAs se fornecido
     if (ccaIds && ccaIds.length > 0) {
-      const { data: ccasData } = await supabase
-        .from('ccas')
-        .select('nome')
-        .in('id', ccaIds);
-      
-      if (ccasData && ccasData.length > 0) {
-        const ccaNomes = ccasData.map(cca => cca.nome);
-        ocorrenciasQuery = ocorrenciasQuery.in('cca', ccaNomes);
-      }
+      const ccaStringIds = ccaIds.map(id => id.toString());
+      ocorrenciasQuery = ocorrenciasQuery.in('cca', ccaStringIds);
     }
 
     const { data: ocorrencias } = await ocorrenciasQuery;
@@ -251,15 +231,8 @@ export async function fetchTaxaGravidadePorMes(ano: number, ccaIds?: number[]) {
 
     // Aplicar filtro por CCAs se fornecido
     if (ccaIds && ccaIds.length > 0) {
-      const { data: ccasData } = await supabase
-        .from('ccas')
-        .select('nome')
-        .in('id', ccaIds);
-      
-      if (ccasData && ccasData.length > 0) {
-        const ccaNomes = ccasData.map(cca => cca.nome);
-        ocorrenciasQuery = ocorrenciasQuery.in('cca', ccaNomes);
-      }
+      const ccaStringIds = ccaIds.map(id => id.toString());
+      ocorrenciasQuery = ocorrenciasQuery.in('cca', ccaStringIds);
     }
 
     const { data: ocorrencias } = await ocorrenciasQuery;
