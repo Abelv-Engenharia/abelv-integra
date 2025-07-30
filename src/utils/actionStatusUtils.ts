@@ -14,9 +14,12 @@ export const calcularStatusDinamico = (acao: Acao): { status: string; situacao: 
   const hoje = new Date();
   hoje.setHours(0, 0, 0, 0); // Considerar apenas a data, não o horário
   
+  const statusUpper = acao.status?.toUpperCase() || '';
+  const situacaoUpper = acao.situacao?.toUpperCase() || '';
+  
   // Se já está concluída ou cancelada, manter como está
-  if (acao.status === 'Concluído' || acao.status === 'Cancelado' ||
-      acao.situacao === 'Concluída' || acao.situacao === 'Cancelada') {
+  if (['CONCLUÍDO', 'CONCLUIDO', 'CANCELADO'].includes(statusUpper) ||
+      ['CONCLUÍDA', 'CONCLUIDA', 'CANCELADA'].includes(situacaoUpper)) {
     return {
       status: acao.status,
       situacao: acao.situacao

@@ -195,16 +195,25 @@ export const updateOcorrencia = async (id: string, formData: any) => {
       // Atualizar status geral da ocorrência baseado no status das ações
       const acoes = formData.acoes;
       if (acoes && acoes.length > 0) {
-        const todasConcluidas = acoes.every((acao: any) => 
-          acao.status === 'Concluído' || acao.status === 'Cancelado'
+        const todasConcluidas = acoes.every((acao: any) => {
+          const statusUpper = acao.status.toUpperCase();
+          const situacaoUpper = acao.situacao.toUpperCase();
+          return ['CONCLUÍDO', 'CONCLUIDO', 'CANCELADO'].includes(statusUpper) ||
+                 ['CONCLUÍDA', 'CONCLUIDA', 'CANCELADA'].includes(situacaoUpper);
+        });
+        
+        const algumaAtrasada = acoes.some((acao: any) => 
+          acao.status.toUpperCase() === 'ATRASADO'
         );
         
         const algumaEmExecucao = acoes.some((acao: any) => 
-          acao.status === 'Em execução'
+          acao.status.toUpperCase().includes('EXECUÇÃO') || acao.status.toUpperCase().includes('EXECUCAO')
         );
         
         if (todasConcluidas) {
           updateData.status = 'Concluído';
+        } else if (algumaAtrasada) {
+          updateData.status = 'Pendente';
         } else if (algumaEmExecucao) {
           updateData.status = 'Em execução';
         } else {

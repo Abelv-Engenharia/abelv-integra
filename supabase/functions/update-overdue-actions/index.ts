@@ -60,11 +60,12 @@ Deno.serve(async (req) => {
       let acoesAtualizadas = false
       const acoesModificadas = ocorrencia.acoes.map((acao: Acao) => {
         // Verificar se a ação tem data de adequação e não está concluída
+        const statusUpper = acao.status.toUpperCase();
+        const situacaoUpper = acao.situacao.toUpperCase();
+        
         if (acao.data_adequacao && 
-            acao.status !== 'Concluído' && 
-            acao.status !== 'Cancelado' &&
-            acao.situacao !== 'Concluída' &&
-            acao.situacao !== 'Cancelada') {
+            !['CONCLUÍDO', 'CONCLUIDO', 'CANCELADO'].includes(statusUpper) &&
+            !['CONCLUÍDA', 'CONCLUIDA', 'CANCELADA'].includes(situacaoUpper)) {
           
           const dataAdequacao = new Date(acao.data_adequacao)
           dataAdequacao.setHours(0, 0, 0, 0)
@@ -92,16 +93,44 @@ Deno.serve(async (req) => {
 
       // Se houve mudanças, atualizar no banco
       if (acoesAtualizadas) {
+        // Calcular o status geral da ocorrência baseado nas ações
+        const todasConcluidas = acoesModificadas.every((acao: Acao) => {
+          const statusUpper = acao.status.toUpperCase();
+          const situacaoUpper = acao.situacao.toUpperCase();
+          return ['CONCLUÍDO', 'CONCLUIDO', 'CANCELADO'].includes(statusUpper) ||
+                 ['CONCLUÍDA', 'CONCLUIDA', 'CANCELADA'].includes(situacaoUpper);
+        });
+        
+        const algumaAtrasada = acoesModificadas.some((acao: Acao) => 
+          acao.status.toUpperCase() === 'ATRASADO'
+        );
+        
+        const algumaEmExecucao = acoesModificadas.some((acao: Acao) => 
+          acao.status.toUpperCase().includes('EXECUÇÃO') || acao.status.toUpperCase().includes('EXECUCAO')
+        );
+        
+        let statusGeral = 'Em tratativa';
+        if (todasConcluidas) {
+          statusGeral = 'Concluído';
+        } else if (algumaAtrasada) {
+          statusGeral = 'Pendente';
+        } else if (algumaEmExecucao) {
+          statusGeral = 'Em execução';
+        }
+
         const { error: updateError } = await supabase
           .from('ocorrencias')
-          .update({ acoes: acoesModificadas })
+          .update({ 
+            acoes: acoesModificadas,
+            status: statusGeral
+          })
           .eq('id', ocorrencia.id)
 
         if (updateError) {
           console.error(`Erro ao atualizar ocorrência ${ocorrencia.id}:`, updateError)
         } else {
           atualizacoesRealizadas++
-          console.log(`Ocorrência ${ocorrencia.id} atualizada com ações em atraso`)
+          console.log(`Ocorrência ${ocorrencia.id} atualizada - Status: ${statusGeral}`)
         }
       }
     }
