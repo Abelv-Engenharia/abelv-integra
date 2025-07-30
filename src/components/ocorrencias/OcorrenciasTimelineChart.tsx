@@ -16,17 +16,9 @@ const OcorrenciasTimelineChart = () => {
         setLoading(true);
         console.log('Carregando dados de ocorrências por CCA...');
         
-        let query = supabase
+        const { data: ocorrencias, error } = await supabase
           .from('ocorrencias')
           .select('cca, classificacao_ocorrencia_codigo');
-
-        // Aplicar filtro por CCAs do usuário
-        if (userCCAs.length > 0) {
-          const ccaCodigos = userCCAs.map(cca => cca.codigo);
-          query = query.in('cca', ccaCodigos);
-        }
-
-        const { data: ocorrencias, error } = await query;
 
         if (error) throw error;
 
