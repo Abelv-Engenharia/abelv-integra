@@ -87,20 +87,26 @@ const TaxaFrequenciaAcSpdChart = () => {
         />
         <YAxis />
         <Tooltip 
-          contentStyle={{
-            backgroundColor: '#fff',
-            border: '1px solid #ccc',
-            borderRadius: '4px'
+          content={({ active, payload, label }) => {
+            if (active && payload && payload.length) {
+              const meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
+                            'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+              return (
+                <div className="bg-white p-3 border border-gray-300 rounded shadow">
+                  <p className="font-medium">{meses[Number(label) - 1] || label}</p>
+                  {payload.map((entry, index) => (
+                    <p key={index} style={{ color: entry.color }}>
+                      {entry.dataKey === 'mensal' ? 'Taxa do Mês' : 'Taxa Acumulada'}: {Number(entry.value).toFixed(2)}
+                    </p>
+                  ))}
+                  {meta > 0 && (
+                    <p style={{ color: '#059669' }}>Meta: {meta.toFixed(2)}</p>
+                  )}
+                </div>
+              );
+            }
+            return null;
           }}
-          labelFormatter={(value) => {
-            const meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
-                          'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
-            return meses[Number(value) - 1] || value;
-          }}
-          formatter={(value: any, name: string) => [
-            Number(value).toFixed(2), 
-            name === 'Taxa Mensal' ? 'Taxa do Mês' : 'Taxa Acumulada'
-          ]}
         />
         <Bar 
           dataKey="mensal" 
