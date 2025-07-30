@@ -66,7 +66,7 @@ const OcorrenciasDashboard = () => {
                 
                 <Card>
                   <CardHeader>
-                    <CardTitle>Ocorrências por Empresa</CardTitle>
+                    <CardTitle>Ocorrências por Classificação de Risco</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <OcorrenciasByEmpresaChart />

@@ -2,14 +2,27 @@
 import { supabase } from '@/integrations/supabase/client';
 import { OcorrenciasByRisco } from './types';
 
-export async function fetchOcorrenciasByRisco(): Promise<OcorrenciasByRisco[]> {
+export async function fetchOcorrenciasByRisco(ccaIds?: number[]): Promise<OcorrenciasByRisco[]> {
   try {
-    const { data, error } = await supabase
+    let query = supabase
       .from('ocorrencias')
-      .select('classificacao_risco')
-      .order('classificacao_risco');
+      .select(`
+        classificacao_risco,
+        cca
+      `);
+
+    // Aplicar filtro de CCAs se fornecido
+    if (ccaIds && ccaIds.length > 0) {
+      // Converter ccaIds para string e filtrar diretamente
+      const ccaIdsAsString = ccaIds.map(id => id.toString());
+      query = query.in('cca', ccaIdsAsString);
+    }
+
+    const { data, error } = await query.order('classificacao_risco');
 
     if (error) throw error;
+
+    console.log('Dados de ocorrências por risco (filtrado):', data);
 
     // Agrupar e contar as ocorrências por classificação de risco
     const riscosContagem: Record<string, number> = {};
