@@ -5,6 +5,7 @@ import { fetchDesviosByInspectionType } from '@/services/hora-seguranca';
 import { useUserCCAs } from '@/hooks/useUserCCAs';
 
 export function DesviosTipoInspecaoChart() {
+  console.log('DesviosTipoInspecaoChart rendering with PieChart');
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
