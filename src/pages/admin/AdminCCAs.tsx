@@ -9,12 +9,14 @@ import { CreateCCADialog } from "@/components/admin/ccas/CreateCCADialog";
 import { EditCCADialog } from "@/components/admin/ccas/EditCCADialog";
 import { DeleteCCADialog } from "@/components/admin/ccas/DeleteCCADialog";
 import { ccaService } from "@/services/admin/ccaService";
+import { useCCAInvalidation } from "@/hooks/useCCAInvalidation";
 
 const AdminCCAs = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [editCCA, setEditCCA] = useState(null);
   const [deleteCCA, setDeleteCCA] = useState(null);
+  const { invalidateAllCCAQueries } = useCCAInvalidation();
 
   const { data: ccas = [], isLoading, refetch } = useQuery({
     queryKey: ['admin-ccas'],
@@ -42,8 +44,9 @@ const AdminCCAs = () => {
     setDeleteCCA(cca);
   };
 
-  const handleSuccess = () => {
-    refetch(); // Força atualização imediata da lista
+  const handleSuccess = async () => {
+    // Invalidar todas as queries relacionadas a CCAs para atualização em todo o sistema
+    await invalidateAllCCAQueries();
     setCreateDialogOpen(false);
     setEditCCA(null);
     setDeleteCCA(null);
