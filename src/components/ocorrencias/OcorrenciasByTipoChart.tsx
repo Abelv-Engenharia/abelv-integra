@@ -5,9 +5,11 @@ import { fetchOcorrenciasByTipo } from "@/services/ocorrencias/ocorrenciasByTipo
 import { useUserCCAs } from "@/hooks/useUserCCAs";
 
 const colorMap: Record<string, string> = {
-  "Acidente com Afastamento": "#ef4444", // Red
-  "Acidente sem Afastamento": "#f59e0b", // Yellow
-  "Quase Acidente": "#3b82f6",           // Blue
+  "AC CPD": "#ef4444", // Red - Acidente com Perda de Dias
+  "AC SPD": "#f59e0b", // Yellow - Acidente sem Perda de Dias  
+  "INC DM": "#3b82f6", // Blue - Incidente com Dano Material
+  "INC SDM": "#10b981", // Green - Incidente sem Dano Material
+  "QA": "#8b5cf6", // Purple - Quase Acidente
 };
 
 const OcorrenciasByTipoChart = () => {
@@ -71,24 +73,33 @@ const OcorrenciasByTipoChart = () => {
   }
 
   return (
-    <div className="h-[300px]">
+    <div className="h-[400px]">
       <ResponsiveContainer width="100%" height="100%">
-        <PieChart width={400} height={300}>
+        <PieChart>
           <Pie
             dataKey="value"
             isAnimationActive={true}
             data={data}
             cx="50%"
             cy="50%"
-            outerRadius={80}
-            label={(entry) => `${entry.name}: ${entry.value}`}
+            labelLine={false}
+            label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+            outerRadius={120}
+            fill="#8884d8"
           >
             {data.map((entry, index) => (
               <Cell key={`cell-${index}`} fill={entry.color} />
             ))}
           </Pie>
-          <Tooltip formatter={(value) => [`${value} ocorrências`, 'Quantidade']} />
-          <Legend />
+          <Tooltip 
+            formatter={(value, name) => [`${value} ocorrências`, name]}
+            labelFormatter={() => ''}
+          />
+          <Legend 
+            verticalAlign="bottom" 
+            height={36}
+            formatter={(value) => `${value}`}
+          />
         </PieChart>
       </ResponsiveContainer>
     </div>
