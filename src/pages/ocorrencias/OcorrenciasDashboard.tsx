@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
   Tabs, 
@@ -15,26 +15,27 @@ import TaxaFrequenciaAcCpdChart from "@/components/ocorrencias/TaxaFrequenciaAcC
 import TaxaFrequenciaAcSpdChart from "@/components/ocorrencias/TaxaFrequenciaAcSpdChart";
 import TaxaGravidadeChart from "@/components/ocorrencias/TaxaGravidadeChart";
 import OcorrenciasTable from "@/components/ocorrencias/OcorrenciasTable";
-import { OcorrenciasFiltros } from "@/components/ocorrencias/OcorrenciasFiltros";
+import OcorrenciasSimpleFilters from "@/components/ocorrencias/OcorrenciasSimpleFilters";
 import { useUserCCAs } from "@/hooks/useUserCCAs";
+import { OcorrenciasFilterProvider, useOcorrenciasFilter } from "@/contexts/OcorrenciasFilterContext";
 
-const OcorrenciasDashboard = () => {
-  const [filtroAtivo, setFiltroAtivo] = useState(false);
+const OcorrenciasDashboardContent = () => {
   const { data: userCCAs = [] } = useUserCCAs();
+  const { year, month, ccaId, clearFilters } = useOcorrenciasFilter();
+  
+  const hasActiveFilters = year !== 'todos' || month !== 'todos' || ccaId !== 'todos';
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col gap-4">
         <h2 className="text-3xl font-bold tracking-tight">Dashboard de Ocorrências</h2>
-        {userCCAs.length > 0 && (
-          <OcorrenciasFiltros onFilter={() => setFiltroAtivo(true)} />
-        )}
+        {userCCAs.length > 0 && <OcorrenciasSimpleFilters />}
       </div>
       
-      {filtroAtivo && (
+      {hasActiveFilters && (
         <div className="bg-slate-50 p-2 rounded-md border border-slate-200">
           <p className="text-sm text-muted-foreground">
-            Filtros aplicados - <button className="text-primary underline" onClick={() => setFiltroAtivo(false)}>Limpar filtros</button>
+            Filtros aplicados - <button className="text-primary underline" onClick={clearFilters}>Limpar filtros</button>
           </p>
         </div>
       )}
@@ -122,6 +123,14 @@ const OcorrenciasDashboard = () => {
         </>
       )}
     </div>
+  );
+};
+
+const OcorrenciasDashboard = () => {
+  return (
+    <OcorrenciasFilterProvider>
+      <OcorrenciasDashboardContent />
+    </OcorrenciasFilterProvider>
   );
 };
 

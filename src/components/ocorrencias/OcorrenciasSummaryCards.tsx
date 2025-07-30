@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Activity, AlertTriangle, CheckCircle, Clock, Calendar, CalendarDays, TrendingUp, Shield } from "lucide-react";
 import { fetchOcorrenciasStats } from "@/services/ocorrencias/ocorrenciasStatsService";
 import { useUserCCAs } from "@/hooks/useUserCCAs";
+import { useOcorrenciasFilter } from "@/contexts/OcorrenciasFilterContext";
 
 const OcorrenciasSummaryCards = () => {
   const [stats, setStats] = useState({
@@ -18,6 +19,7 @@ const OcorrenciasSummaryCards = () => {
   });
   const [loading, setLoading] = useState(true);
   const { data: userCCAs = [] } = useUserCCAs();
+  const { year, month, ccaId } = useOcorrenciasFilter();
 
   useEffect(() => {
     const loadStats = async () => {
@@ -25,8 +27,14 @@ const OcorrenciasSummaryCards = () => {
         setLoading(true);
         console.log('Carregando estatísticas das ocorrências...');
         
-        // Aplicar filtro por CCAs do usuário
-        const ccaIds = userCCAs.length > 0 ? userCCAs.map(cca => cca.id) : undefined;
+        // Aplicar filtros
+        let ccaIds = userCCAs.length > 0 ? userCCAs.map(cca => cca.id) : undefined;
+        
+        // Se um CCA específico foi selecionado, usar apenas ele
+        if (ccaId !== 'todos') {
+          ccaIds = [parseInt(ccaId)];
+        }
+        
         const data = await fetchOcorrenciasStats(ccaIds);
         
         console.log('Estatísticas carregadas:', data);
@@ -42,7 +50,7 @@ const OcorrenciasSummaryCards = () => {
     if (userCCAs.length > 0 || userCCAs.length === 0) {
       loadStats();
     }
-  }, [userCCAs]);
+  }, [userCCAs, year, month, ccaId]);
 
   if (loading) {
     return (
