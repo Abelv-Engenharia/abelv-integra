@@ -24,15 +24,25 @@ export const fetchDesviosByBaseLegal = async (ccaIds?: string[]) => {
     }
 
     // Count occurrences by base legal
-    const baseLegalCounts: Record<string, number> = {};
+    const baseLegalCounts: Record<string, { codigo: string; nome: string; count: number }> = {};
     data?.forEach(desvio => {
-      const baseLegal = desvio.base_legal_opcoes?.nome || "OUTROS";
-      baseLegalCounts[baseLegal] = (baseLegalCounts[baseLegal] || 0) + 1;
+      const codigo = desvio.base_legal_opcoes?.codigo || "OUTROS";
+      const nome = desvio.base_legal_opcoes?.nome || "OUTROS";
+      const key = `${codigo}_${nome}`;
+      
+      if (!baseLegalCounts[key]) {
+        baseLegalCounts[key] = { codigo, nome, count: 0 };
+      }
+      baseLegalCounts[key].count += 1;
     });
 
     // Convert to array format for the chart
-    return Object.entries(baseLegalCounts)
-      .map(([name, value]) => ({ name, value }))
+    return Object.values(baseLegalCounts)
+      .map(({ codigo, nome, count }) => ({ 
+        name: codigo, 
+        fullName: nome, 
+        value: count 
+      }))
       .sort((a, b) => b.value - a.value);
   } catch (error) {
     console.error('Exception fetching desvios by base legal:', error);

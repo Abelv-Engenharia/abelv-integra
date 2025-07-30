@@ -54,7 +54,22 @@ const DesviosByBaseLegalChart = () => {
               <BarChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                 <XAxis dataKey="name" />
                 <YAxis />
-                <ChartTooltip content={<ChartTooltipContent />} />
+                <ChartTooltip 
+                  content={({ active, payload, label }) => {
+                    if (active && payload && payload.length) {
+                      const data = payload[0].payload;
+                      return (
+                        <div className="bg-background border border-border rounded-lg p-3 shadow-lg">
+                          <p className="font-medium">{data.fullName}</p>
+                          <p className="text-primary">
+                            Desvios: <span className="font-bold">{payload[0].value}</span>
+                          </p>
+                        </div>
+                      );
+                    }
+                    return null;
+                  }} 
+                />
                 <Bar dataKey="value" fill="var(--color-value)" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
