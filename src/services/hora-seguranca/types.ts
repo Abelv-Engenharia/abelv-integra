@@ -60,6 +60,8 @@ export interface InspecoesByMonth {
 
 export interface InspecoesByResponsavel {
   responsavel: string;
+  primeiroNome: string;
+  nomeCompleto: string;
   "A Realizar": number;
   "Realizada": number;
   "Não Realizada": number;

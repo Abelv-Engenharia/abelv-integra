@@ -44,19 +44,24 @@ export async function fetchInspecoesByResponsavel(ccaIds?: number[]): Promise<In
     // DEBUG: log agrupamento final
     console.log('[HSA][fetchInspecoesByResponsavel] grouped:', grouped);
 
-    return Object.entries(grouped).map(([responsavel, qtds]) => ({
-      responsavel,
-      quantidade: qtds.realizada,
-      cancelada: qtds.cancelada,
-      realizada: qtds.realizada,
-      nao_realizada: qtds.nao_realizada,
-      "A Realizar": qtds.a_realizar,
-      "Realizada": qtds.realizada,
-      "Não Realizada": qtds.nao_realizada,
-      "Realizada (Não Programada)": qtds.realizada_np,
-      "Cancelada": qtds.cancelada,
-      "realizada (não programada)": qtds.realizada_np // compatibilidade
-    }));
+    return Object.entries(grouped).map(([responsavel, qtds]) => {
+      const primeiroNome = responsavel.split(' ')[0];
+      return {
+        responsavel,
+        primeiroNome,
+        nomeCompleto: responsavel,
+        quantidade: qtds.realizada,
+        cancelada: qtds.cancelada,
+        realizada: qtds.realizada,
+        nao_realizada: qtds.nao_realizada,
+        "A Realizar": qtds.a_realizar,
+        "Realizada": qtds.realizada,
+        "Não Realizada": qtds.nao_realizada,
+        "Realizada (Não Programada)": qtds.realizada_np,
+        "Cancelada": qtds.cancelada,
+        "realizada (não programada)": qtds.realizada_np // compatibilidade
+      };
+    });
   } catch (error) {
     console.error("Erro ao buscar inspeções por responsável:", error);
     return [];

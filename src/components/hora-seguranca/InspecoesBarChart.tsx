@@ -30,7 +30,17 @@ export function InspecoesBarChart({ dataType }: InspecoesBarChartProps) {
         
         if (dataType === 'responsible') {
           const chartData = await fetchInspecoesByResponsavel(ccaIds);
-          setData(chartData);
+          // Formatar dados para mostrar apenas primeiro nome no eixo X
+          const formattedData = chartData.map(item => ({
+            name: item.primeiroNome,
+            nomeCompleto: item.nomeCompleto,
+            "A Realizar": item["A Realizar"],
+            "Realizada": item["Realizada"],
+            "Não Realizada": item["Não Realizada"],
+            "Realizada (Não Programada)": item["Realizada (Não Programada)"],
+            "Cancelada": item["Cancelada"]
+          }));
+          setData(formattedData);
         } else if (dataType === 'cca') {
           // Para dados por CCA, vamos mostrar apenas os CCAs permitidos
           const ccaData = userCCAs.map(cca => ({
@@ -79,7 +89,7 @@ export function InspecoesBarChart({ dataType }: InspecoesBarChartProps) {
   }
 
   const getDataKey = () => {
-    return dataType === 'cca' ? 'nome' : 'responsavel';
+    return 'name'; // Sempre usar 'name' para ambos os casos
   };
 
   return (
@@ -103,7 +113,14 @@ export function InspecoesBarChart({ dataType }: InspecoesBarChartProps) {
             interval={0}
           />
           <YAxis />
-          <Tooltip />
+          <Tooltip 
+            labelFormatter={(label, payload) => {
+              if (dataType === 'responsible' && payload && payload.length > 0) {
+                return payload[0]?.payload?.nomeCompleto || label;
+              }
+              return label;
+            }}
+          />
           <Legend wrapperStyle={{ paddingTop: '40px' }} />
           <Bar dataKey="A Realizar" name="A Realizar" fill="#4285F4" />
           <Bar dataKey="Realizada" name="Realizada" fill="#43A047" />
