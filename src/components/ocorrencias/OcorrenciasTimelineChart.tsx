@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { Line, LineChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { BarChart, Bar, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis, Legend } from "recharts";
 import { supabase } from '@/integrations/supabase/client';
 import { useUserCCAs } from "@/hooks/useUserCCAs";
 
@@ -14,54 +14,76 @@ const OcorrenciasTimelineChart = () => {
     const loadData = async () => {
       try {
         setLoading(true);
-        console.log('Carregando dados de timeline...');
+        console.log('Carregando dados de ocorrências por CCA...');
         
         let query = supabase
           .from('ocorrencias')
-          .select('data, mes, ano')
-          .order('data', { ascending: true });
+          .select(`
+            cca, 
+            classificacao_ocorrencia_codigo,
+            ccas!inner(codigo, nome)
+          `);
 
         // Aplicar filtro por CCAs do usuário
         if (userCCAs.length > 0) {
-          // Como a tabela ocorrencias tem o campo 'cca' como texto, 
-          // precisamos buscar os códigos dos CCAs permitidos
-          const { data: ccasData } = await supabase
-            .from('ccas')
-            .select('codigo')
-            .in('id', userCCAs.map(cca => cca.id));
-          
-          if (ccasData && ccasData.length > 0) {
-            const ccaCodigos = ccasData.map(cca => cca.codigo);
-            query = query.in('cca', ccaCodigos);
-          }
+          const ccaCodigos = userCCAs.map(cca => cca.codigo);
+          query = query.in('cca', ccaCodigos);
         }
 
         const { data: ocorrencias, error } = await query;
 
         if (error) throw error;
 
-        console.log('Dados de timeline (filtrado):', ocorrencias);
+        console.log('Dados de ocorrências por CCA (filtrado):', ocorrencias);
 
-        const monthlyCount = (ocorrencias || []).reduce((acc: Record<string, number>, curr) => {
-          if (curr.mes && curr.ano) {
-            const key = `${curr.ano}-${curr.mes.toString().padStart(2, '0')}`;
-            acc[key] = (acc[key] || 0) + 1;
+        // Agrupar por CCA e classificação
+        const ccaClassificacaoCount: Record<string, Record<string, number>> = {};
+        const ccaNomes: Record<string, string> = {};
+
+        (ocorrencias || []).forEach((ocorrencia: any) => {
+          const ccaCodigo = ocorrencia.cca;
+          const classificacao = ocorrencia.classificacao_ocorrencia_codigo || 'Não definido';
+          
+          // Armazenar nome completo do CCA
+          if (ocorrencia.ccas) {
+            ccaNomes[ccaCodigo] = `${ocorrencia.ccas.codigo} - ${ocorrencia.ccas.nome}`;
           }
-          return acc;
-        }, {});
 
-        const timelineData = Object.entries(monthlyCount)
-          .sort(([a], [b]) => a.localeCompare(b))
-          .map(([month, count]) => ({
-            month,
-            ocorrencias: count
-          }));
+          if (!ccaClassificacaoCount[ccaCodigo]) {
+            ccaClassificacaoCount[ccaCodigo] = {};
+          }
+          
+          ccaClassificacaoCount[ccaCodigo][classificacao] = 
+            (ccaClassificacaoCount[ccaCodigo][classificacao] || 0) + 1;
+        });
 
-        console.log('Dados do gráfico de timeline (filtrado):', timelineData);
-        setData(timelineData);
+        // Obter todas as classificações únicas
+        const todasClassificacoes = new Set<string>();
+        Object.values(ccaClassificacaoCount).forEach(classificacoes => {
+          Object.keys(classificacoes).forEach(classificacao => {
+            todasClassificacoes.add(classificacao);
+          });
+        });
+
+        // Converter para formato do gráfico
+        const chartData = Object.entries(ccaClassificacaoCount).map(([ccaCodigo, classificacoes]) => {
+          const item: any = {
+            name: ccaCodigo,
+            nomeCompleto: ccaNomes[ccaCodigo] || ccaCodigo
+          };
+          
+          todasClassificacoes.forEach(classificacao => {
+            item[classificacao] = classificacoes[classificacao] || 0;
+          });
+          
+          return item;
+        });
+
+        console.log('Dados do gráfico por CCA (filtrado):', chartData);
+        setData(chartData);
       } catch (err) {
-        console.error("Error loading timeline data:", err);
-        setError("Erro ao carregar dados de timeline");
+        console.error("Error loading CCA data:", err);
+        setError("Erro ao carregar dados por CCA");
       } finally {
         setLoading(false);
       }
@@ -97,28 +119,38 @@ const OcorrenciasTimelineChart = () => {
     );
   }
 
+  // Obter todas as classificações para criar as barras
+  const classificacoes = data.length > 0 ? 
+    Object.keys(data[0]).filter(key => key !== 'name' && key !== 'nomeCompleto') : [];
+
+  // Cores para as barras
+  const cores = [
+    '#4285F4', '#43A047', '#E53935', '#FFA000', '#757575', 
+    '#9C27B0', '#FF5722', '#607D8B', '#795548', '#009688'
+  ];
+
   return (
     <div className="h-[300px]">
       <ResponsiveContainer width="100%" height="100%">
-        <LineChart
+        <BarChart
           width={500}
           height={300}
           data={data}
           margin={{
-            top: 5,
+            top: 20,
             right: 30,
             left: 20,
-            bottom: 5,
+            bottom: 60,
           }}
         >
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis 
-            dataKey="month" 
+            dataKey="name" 
             tick={{ fontSize: 11 }}
-            tickFormatter={(value) => {
-              const [year, month] = value.split('-');
-              return `${month}/${year.slice(2)}`;
-            }}
+            angle={-45}
+            textAnchor="end"
+            height={60}
+            interval={0}
           />
           <YAxis />
           <Tooltip 
@@ -127,25 +159,32 @@ const OcorrenciasTimelineChart = () => {
               border: '1px solid #ccc',
               borderRadius: '4px'
             }}
-            labelFormatter={(value) => {
-              const [year, month] = value.toString().split('-');
-              const monthNames = [
-                'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun',
-                'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'
-              ];
-              return `${monthNames[parseInt(month) - 1]}/${year}`;
+            labelFormatter={(label, payload) => {
+              if (payload && payload.length > 0) {
+                return payload[0]?.payload?.nomeCompleto || label;
+              }
+              return label;
             }}
             formatter={(value) => [`${value} ocorrências`, 'Quantidade']}
           />
-          <Line 
-            type="monotone" 
-            dataKey="ocorrencias" 
-            stroke="#9b87f5" 
-            strokeWidth={2}
-            dot={{ fill: '#9b87f5', strokeWidth: 2, r: 4 }}
-            activeDot={{ r: 6, stroke: '#9b87f5', strokeWidth: 2 }}
+          <Legend 
+            verticalAlign="top" 
+            align="center"
+            wrapperStyle={{ 
+              paddingBottom: '10px',
+              position: 'relative',
+              top: '0px'
+            }}
           />
-        </LineChart>
+          {classificacoes.map((classificacao, index) => (
+            <Bar 
+              key={classificacao}
+              dataKey={classificacao} 
+              name={classificacao}
+              fill={cores[index % cores.length]}
+            />
+          ))}
+        </BarChart>
       </ResponsiveContainer>
     </div>
   );

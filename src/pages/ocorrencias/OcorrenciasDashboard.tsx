@@ -76,7 +76,7 @@ const OcorrenciasDashboard = () => {
 
               <Card>
                 <CardHeader>
-                  <CardTitle>Tendências de Ocorrências</CardTitle>
+                  <CardTitle>Ocorrências por CCA</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <OcorrenciasTimelineChart />
