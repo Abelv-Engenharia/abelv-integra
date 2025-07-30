@@ -49,6 +49,14 @@ export const useCCAInvalidation = () => {
         ['encarregados']
       ];
 
+      // Invalidar também todas as queries do tipo user-ccas independente do userId
+      await queryClient.invalidateQueries({ 
+        predicate: (query) => {
+          const queryKey = query.queryKey;
+          return queryKey && queryKey[0] === 'user-ccas';
+        }
+      });
+
       // Invalidar queries específicas
       for (const queryKey of specificQueries) {
         await queryClient.invalidateQueries({ queryKey });
