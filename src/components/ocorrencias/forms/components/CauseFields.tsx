@@ -34,7 +34,7 @@ const CauseFields: React.FC<CauseFieldsProps> = ({
       {/* Agente causador */}
       <FormField
         control={control}
-        name="agenteCausador"
+        name="agente_causador"
         render={({ field }) => (
           <FormItem>
             <FormLabel>Agente causador</FormLabel>
@@ -60,7 +60,7 @@ const CauseFields: React.FC<CauseFieldsProps> = ({
       {/* Situação geradora */}
       <FormField
         control={control}
-        name="situacaoGeradora"
+        name="situacao_geradora"
         render={({ field }) => (
           <FormItem>
             <FormLabel>Situação geradora</FormLabel>
@@ -86,7 +86,7 @@ const CauseFields: React.FC<CauseFieldsProps> = ({
       {/* Natureza da lesão */}
       <FormField
         control={control}
-        name="naturezaLesao"
+        name="natureza_lesao"
         render={({ field }) => (
           <FormItem>
             <FormLabel>Natureza da lesão</FormLabel>

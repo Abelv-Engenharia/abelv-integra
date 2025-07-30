@@ -19,13 +19,13 @@ import {
 
 const AbsenceFields = () => {
   const { control, watch } = useFormContext();
-  const houveAfastamento = watch("houveAfastamento");
+  const houveAfastamento = watch("houve_afastamento");
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
       <FormField
         control={control}
-        name="houveAfastamento"
+        name="houve_afastamento"
         render={({ field }) => (
           <FormItem>
             <FormLabel>Houve afastamento?</FormLabel>
@@ -47,7 +47,7 @@ const AbsenceFields = () => {
       
       <FormField
         control={control}
-        name="diasPerdidos"
+        name="dias_perdidos"
         render={({ field }) => (
           <FormItem>
             <FormLabel>Dias perdidos</FormLabel>
@@ -66,7 +66,7 @@ const AbsenceFields = () => {
       
       <FormField
         control={control}
-        name="diasDebitados"
+        name="dias_debitados"
         render={({ field }) => (
           <FormItem>
             <FormLabel>Dias debitados</FormLabel>

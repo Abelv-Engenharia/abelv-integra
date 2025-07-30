@@ -31,7 +31,7 @@ const BodyPartLateralityFields: React.FC<BodyPartLateralityFieldsProps> = ({
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
       <FormField
         control={control}
-        name="parteCorpoAtingida"
+        name="parte_corpo_atingida"
         render={({ field }) => (
           <FormItem>
             <FormLabel>Parte do corpo atingida</FormLabel>
