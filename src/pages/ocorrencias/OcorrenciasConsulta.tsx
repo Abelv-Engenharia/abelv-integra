@@ -176,7 +176,7 @@ const OcorrenciasConsulta = () => {
                           : ocorrencia.cca || '-'}
                       </td>
                       <td className="p-2">{ocorrencia.empresa}</td>
-                      <td className="p-2">{ocorrencia.tipo_ocorrencia}</td>
+                      <td className="p-2">{ocorrencia.classificacao_ocorrencia_codigo || ocorrencia.tipo_ocorrencia || '-'}</td>
                       <td className="p-2">
                         {/* Verificar se há ações atrasadas para mostrar indicador visual */}
                         {(() => {
