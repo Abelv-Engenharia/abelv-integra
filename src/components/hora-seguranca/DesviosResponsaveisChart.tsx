@@ -90,7 +90,7 @@ export function DesviosResponsaveisChart() {
           <YAxis />
           <Tooltip />
           <Legend />
-          <Bar dataKey="desvios" name="Desvios Identificados" fill="#f97316" />
+          <Bar dataKey="desvios" name="Desvios Identificados" fill="#3b82f6" />
         </BarChart>
       </ResponsiveContainer>
     </div>
