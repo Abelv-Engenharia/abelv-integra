@@ -121,8 +121,8 @@ export const createOcorrencia = async (data: any) => {
       encarregado_responsavel: data.encarregado_responsavel || '',
       colaboradores_acidentados: data.colaboradores_acidentados || [],
       houve_afastamento: data.houve_afastamento || '',
-      dias_perdidos: data.dias_perdidos || null,
-      dias_debitados: data.dias_debitados || null,
+      dias_perdidos: data.dias_perdidos ? Number(data.dias_perdidos) : null,
+      dias_debitados: data.dias_debitados ? Number(data.dias_debitados) : null,
       parte_corpo_atingida: data.parte_corpo_atingida || '',
       lateralidade: data.lateralidade || '',
       agente_causador: data.agente_causador || '',
@@ -187,6 +187,15 @@ export const updateOcorrencia = async (id: string, formData: any) => {
     
     if (formData.ano) {
       updateData.ano = parseInt(formData.ano);
+    }
+    
+    // Converter campos numéricos para number
+    if (formData.dias_perdidos !== undefined) {
+      updateData.dias_perdidos = formData.dias_perdidos ? Number(formData.dias_perdidos) : null;
+    }
+    
+    if (formData.dias_debitados !== undefined) {
+      updateData.dias_debitados = formData.dias_debitados ? Number(formData.dias_debitados) : null;
     }
     
     if (formData.acoes) {
