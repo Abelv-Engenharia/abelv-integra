@@ -3,6 +3,7 @@ import { useState } from "react";
 import { ArrowLeft, Download, Filter, Printer, Search } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { exportDesviosToExcel } from "@/services/desvios/exportService";
 import { 
   Card, 
   CardContent, 
@@ -63,6 +64,23 @@ const DesviosConsulta = () => {
     });
   };
 
+  const handleExport = async () => {
+    try {
+      await exportDesviosToExcel();
+      toast({
+        title: "Exportação concluída",
+        description: "Os dados foram exportados para Excel com sucesso.",
+      });
+    } catch (error) {
+      console.error('Erro na exportação:', error);
+      toast({
+        title: "Erro na exportação",
+        description: "Não foi possível exportar os dados. Tente novamente.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -98,7 +116,7 @@ const DesviosConsulta = () => {
             <Printer className="mr-2 h-4 w-4" />
             Imprimir
           </Button>
-          <Button variant="outline" onClick={() => toast({ title: "Exportação concluída", description: "Os dados foram exportados com sucesso." })}>
+          <Button variant="outline" onClick={handleExport}>
             <Download className="mr-2 h-4 w-4" />
             Exportar
           </Button>
