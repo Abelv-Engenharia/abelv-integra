@@ -79,6 +79,9 @@ const DesviosDashboard = () => {
   const handleFilterChange = async () => {
     setLoading(true);
     try {
+      console.log('Iniciando aplicação de filtros...');
+      console.log('Filtros atuais:', { year, month, ccaId, disciplinaId, empresaId });
+      
       // Sempre aplicar filtro por CCAs permitidos
       const allowedCcaIds = userCCAs.map(cca => cca.id.toString());
       const filters: FilterParams = {
@@ -96,10 +99,10 @@ const DesviosDashboard = () => {
       if (disciplinaId && disciplinaId !== "todos") filters.disciplinaId = disciplinaId;
       if (empresaId && empresaId !== "todos") filters.empresaId = empresaId;
 
-      console.log('Aplicando filtros:', filters);
+      console.log('Aplicando filtros aos cards:', filters);
       
       const filteredStats = await fetchFilteredDashboardStats(filters);
-      console.log('Estatísticas filtradas:', filteredStats);
+      console.log('Estatísticas filtradas recebidas:', filteredStats);
       setDashboardStats(filteredStats);
       setFiltersApplied(true);
       

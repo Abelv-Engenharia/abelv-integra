@@ -6,10 +6,14 @@ import { calculatePercentages, calculateRiskLevel } from "../calculations/statsC
 
 export const fetchFilteredDashboardStats = async (filters: FilterParams): Promise<DashboardStats> => {
   try {
+    console.log('fetchFilteredDashboardStats iniciado com filtros:', filters);
+    
     // Buscar total de desvios filtrados
     let totalQuery = createBaseQuery();
     totalQuery = applyFiltersToQuery(totalQuery, filters);
+    console.log('Query para total de desvios criada');
     const { count: totalDesvios } = await totalQuery;
+    console.log('Total de desvios encontrados:', totalDesvios);
 
     // Buscar ações completas filtradas
     let completasQuery = createBaseQuery().in('status', ['Fechado', 'CONCLUÍDO', 'TRATADO']);

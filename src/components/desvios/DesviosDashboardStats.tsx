@@ -18,6 +18,7 @@ interface DesviosDashboardStatsProps {
 
 const DesviosDashboardStats = ({ loading, stats }: DesviosDashboardStatsProps) => {
   console.log('DesviosDashboardStats renderizando com:', { loading, stats });
+  console.log('Stats recebidos:', JSON.stringify(stats, null, 2));
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
