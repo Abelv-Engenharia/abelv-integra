@@ -209,10 +209,29 @@ const DesviosDashboardFilters = ({
           </div>
         </div>
 
-        <div className="flex justify-end">
-          <Button onClick={onFilterChange}>
+        <div className="flex gap-2">
+          <Button 
+            onClick={onFilterChange}
+            className="flex-1"
+          >
             <Filter className="mr-2 h-4 w-4" />
             Aplicar Filtros
+          </Button>
+          <Button 
+            onClick={() => {
+              // Limpar todos os filtros
+              setYear("");
+              setMonth("");
+              setCcaId("");
+              setDisciplinaId("");
+              setEmpresaId("");
+              // Chamar a função de filtro para recarregar dados originais
+              onFilterChange();
+            }}
+            variant="outline"
+            className="flex-1"
+          >
+            Limpar Filtros
           </Button>
         </div>
       </CardContent>

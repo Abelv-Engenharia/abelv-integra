@@ -119,6 +119,37 @@ const DesviosDashboard = () => {
     }
   };
 
+  // Função para limpar filtros e recarregar dados originais
+  const handleClearFilters = async () => {
+    setYear("");
+    setMonth("");
+    setCcaId("");
+    setDisciplinaId("");
+    setEmpresaId("");
+    setFiltersApplied(false);
+    
+    setLoading(true);
+    try {
+      // Recarregar dados originais apenas com filtro de CCA
+      const allowedCcaIds = userCCAs.map(cca => cca.id.toString());
+      const filters: FilterParams = {
+        ccaIds: allowedCcaIds
+      };
+      
+      const stats = await fetchFilteredDashboardStats(filters);
+      setDashboardStats(stats);
+      
+      toast({
+        title: "Filtros limpos",
+        description: "Os dados foram restaurados para o estado original.",
+      });
+    } catch (error) {
+      console.error('Erro ao limpar filtros:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <DesviosDashboardHeader />
