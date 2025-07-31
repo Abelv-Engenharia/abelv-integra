@@ -7,6 +7,7 @@ import DesviosDashboardHeader from "@/components/desvios/DesviosDashboardHeader"
 import DesviosDashboardFilters from "@/components/desvios/DesviosDashboardFilters";
 import DesviosDashboardStats from "@/components/desvios/DesviosDashboardStats";
 import DesviosChartRows from "@/components/desvios/DesviosChartRows";
+import { DesviosFiltersProvider } from "@/components/desvios/DesviosFiltersProvider";
 
 const DesviosDashboard = () => {
   const { toast } = useToast();
@@ -16,6 +17,7 @@ const DesviosDashboard = () => {
   const [ccaId, setCcaId] = useState<string>("");
   const [disciplinaId, setDisciplinaId] = useState<string>("");
   const [empresaId, setEmpresaId] = useState<string>("");
+  const [filtersApplied, setFiltersApplied] = useState<boolean>(false);
   const [dashboardStats, setDashboardStats] = useState<DashboardStats>({
     totalDesvios: 0,
     acoesCompletas: 0,
@@ -99,6 +101,7 @@ const DesviosDashboard = () => {
       const filteredStats = await fetchFilteredDashboardStats(filters);
       console.log('Estatísticas filtradas:', filteredStats);
       setDashboardStats(filteredStats);
+      setFiltersApplied(true);
       
       toast({
         title: "Filtros aplicados",
@@ -133,7 +136,17 @@ const DesviosDashboard = () => {
         onFilterChange={handleFilterChange}
       />
       <DesviosDashboardStats loading={loading} stats={dashboardStats} />
-      <DesviosChartRows />
+      <DesviosFiltersProvider
+        year={year}
+        month={month}
+        ccaId={ccaId}
+        disciplinaId={disciplinaId}
+        empresaId={empresaId}
+        userCCAs={userCCAs}
+        filtersApplied={filtersApplied}
+      >
+        <DesviosChartRows />
+      </DesviosFiltersProvider>
     </div>
   );
 };
