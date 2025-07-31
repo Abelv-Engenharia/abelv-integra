@@ -65,7 +65,7 @@ const ExportacaoDados = () => {
       const filters = {
         dataInicial,
         dataFinal,
-        ccaId: ccaSelecionado || undefined
+        ccaId: ccaSelecionado && ccaSelecionado !== "todos" ? ccaSelecionado : undefined
       };
 
       let result;
@@ -167,7 +167,7 @@ const ExportacaoDados = () => {
                 <SelectValue placeholder="Todos os CCAs ou selecione um específico" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Todos os CCAs</SelectItem>
+                <SelectItem value="todos">Todos os CCAs</SelectItem>
                 {ccas.map((cca) => (
                   <SelectItem key={cca.id} value={cca.id.toString()}>
                     {cca.codigo} - {cca.nome}
