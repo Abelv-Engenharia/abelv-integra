@@ -1,14 +1,6 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableHead,
-  TableHeader,
-  TableRow,
-  TableCell,
-} from "@/components/ui/table";
+import { Table, TableBody, TableHead, TableHeader, TableRow, TableCell } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserCCAs } from "@/hooks/useUserCCAs";
@@ -17,16 +9,19 @@ import { DesvioCompleto } from "@/services/desvios/desviosCompletosService";
 import { TableLoadingSkeleton } from "@/components/ui/loading-skeleton";
 import { InlineLoader } from "@/components/common/PageLoader";
 import { AlertCircle } from "lucide-react";
-
 const DesviosTable = () => {
-  const { toast } = useToast();
-  const { data: userCCAs = [], isLoading: isLoadingCCAs } = useUserCCAs();
+  const {
+    toast
+  } = useToast();
+  const {
+    data: userCCAs = [],
+    isLoading: isLoadingCCAs
+  } = useUserCCAs();
   const [desvios, setDesvios] = useState<DesvioCompleto[]>([]);
   const [editDesvio, setEditDesvio] = useState<DesvioCompleto | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editDesvioId, setEditDesvioId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-
   const allowedCcaIds = userCCAs.map(cca => cca.id);
 
   // Recarrega desvios do backend filtrando pelos CCAs permitidos
@@ -37,16 +32,15 @@ const DesviosTable = () => {
         setDesvios([]);
         return;
       }
-
-      const { data, error } = await supabase
-        .from('desvios_completos')
-        .select(`
+      const {
+        data,
+        error
+      } = await supabase.from('desvios_completos').select(`
           *,
           ccas:cca_id(nome)
-        `)
-        .in('cca_id', allowedCcaIds)
-        .order('created_at', { ascending: false });
-
+        `).in('cca_id', allowedCcaIds).order('created_at', {
+        ascending: false
+      });
       if (error) {
         console.error('Erro ao buscar desvios:', error);
         setDesvios([]);
@@ -61,7 +55,6 @@ const DesviosTable = () => {
       setIsLoading(false);
     }
   };
-
   useEffect(() => {
     if (!isLoadingCCAs) {
       if (allowedCcaIds.length > 0) {
@@ -72,19 +65,17 @@ const DesviosTable = () => {
       }
     }
   }, [allowedCcaIds.join(','), isLoadingCCAs]);
-
   const handleStatusUpdated = (id: string, newStatus: string) => {
-    setDesvios(desvios.map(d =>
-      d.id === id ? { ...d, status: newStatus } : d
-    ));
+    setDesvios(desvios.map(d => d.id === id ? {
+      ...d,
+      status: newStatus
+    } : d));
   };
-
   const handleEditClick = (desvio: DesvioCompleto) => {
     setEditDesvio(desvio);
     setEditDesvioId(desvio.id || null);
     setEditDialogOpen(true);
   };
-
   const handleDesvioUpdated = () => {
     fetchDesvios();
     setEditDialogOpen(false);
@@ -95,36 +86,31 @@ const DesviosTable = () => {
   const handleDesvioDeleted = (id?: string, deleted?: boolean) => {
     if (deleted && id) {
       console.log("Removendo desvio da tabela na UI (otimista):", id);
-      setDesvios(prev => prev.filter((d) => d.id !== id));
+      setDesvios(prev => prev.filter(d => d.id !== id));
       fetchDesvios();
       toast({
         title: "Desvio excluído",
         description: "O desvio foi removido com sucesso.",
-        variant: "default",
+        variant: "default"
       });
     } else {
       toast({
         title: "Erro técnico ao excluir",
         description: "Não foi possível remover o desvio no servidor. Por favor, recarregue a página ou tente novamente.",
-        variant: "destructive",
+        variant: "destructive"
       });
       console.error("Falha no handleDesvioDeleted (deleted=false ou id indefinido):", id, deleted);
     }
   };
-
   if (isLoadingCCAs) {
-    return (
-      <div className="table-container">
+    return <div className="table-container">
         <div className="p-4 sm:p-6">
           <InlineLoader text="Carregando permissões..." />
         </div>
-      </div>
-    );
+      </div>;
   }
-
   if (userCCAs.length === 0) {
-    return (
-      <div className="table-container">
+    return <div className="table-container">
         <div className="flex flex-col items-center justify-center p-6 sm:p-8 space-y-4">
           <AlertCircle className="h-12 w-12 text-muted-foreground/50" />
           <div className="text-center space-y-2">
@@ -132,48 +118,27 @@ const DesviosTable = () => {
             <p className="text-sm text-muted-foreground">Você não tem acesso a nenhum CCA.</p>
           </div>
         </div>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <>
+  return <>
       <div className="table-container">
         <div className="relative w-full overflow-auto">
-          {isLoading ? (
-            <div className="p-4 sm:p-6">
+          {isLoading ? <div className="p-4 sm:p-6">
               <TableLoadingSkeleton rows={8} />
-            </div>
-          ) : (
-            <Table>
+            </div> : <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead className="text-xs sm:text-sm w-16 sm:w-20">ID</TableHead>
                   <TableHead className="text-xs sm:text-sm w-24 sm:w-32">Data</TableHead>
-                  <TableHead className="text-xs sm:text-sm min-w-[200px] max-w-[250px]">Descrição</TableHead>
-                  <TableHead className="text-xs sm:text-sm w-20 sm:w-24">CCA</TableHead>
+                  <TableHead className="text-xs sm:text-sm min-w-[200px] max-w-[250px] mx-0 py-0 my-[19px]">Descrição</TableHead>
+                  <TableHead className="text-xs sm:text-sm w-20 sm:w-24 px-[68px] py-0 mx-0 my-[83px]">CCA</TableHead>
                   <TableHead className="text-xs sm:text-sm w-16 sm:w-20">Risco</TableHead>
                   <TableHead className="text-xs sm:text-sm w-20 sm:w-24">Status</TableHead>
                   <TableHead className="text-right text-xs sm:text-sm w-24 sm:w-32">Ações</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {desvios.length > 0 ? (
-                  desvios.map((desvio) => (
-                    <DesviosTableRow
-                      key={desvio.id}
-                      desvio={desvio}
-                      onStatusUpdated={handleStatusUpdated}
-                      onEditClick={handleEditClick}
-                      onDesvioDeleted={handleDesvioDeleted}
-                      editDesvioId={editDesvioId}
-                      editDialogOpen={editDialogOpen}
-                      setEditDialogOpen={setEditDialogOpen}
-                      onDesvioUpdated={handleDesvioUpdated}
-                    />
-                  ))
-                ) : (
-                  <TableRow>
+                {desvios.length > 0 ? desvios.map(desvio => <DesviosTableRow key={desvio.id} desvio={desvio} onStatusUpdated={handleStatusUpdated} onEditClick={handleEditClick} onDesvioDeleted={handleDesvioDeleted} editDesvioId={editDesvioId} editDialogOpen={editDialogOpen} setEditDialogOpen={setEditDialogOpen} onDesvioUpdated={handleDesvioUpdated} />) : <TableRow>
                     <TableCell colSpan={7} className="h-24 sm:h-32">
                       <div className="flex flex-col items-center justify-center space-y-3">
                         <AlertCircle className="h-8 w-8 text-muted-foreground/50" />
@@ -185,11 +150,9 @@ const DesviosTable = () => {
                         </div>
                       </div>
                     </TableCell>
-                  </TableRow>
-                )}
+                  </TableRow>}
               </TableBody>
-            </Table>
-          )}
+            </Table>}
         </div>
         <div className="flex flex-col sm:flex-row items-center justify-between p-3 sm:p-4 border-t gap-3">
           <div className="text-xs sm:text-sm text-muted-foreground order-2 sm:order-1">
@@ -205,8 +168,6 @@ const DesviosTable = () => {
           </div>
         </div>
       </div>
-    </>
-  );
+    </>;
 };
-
 export default DesviosTable;
