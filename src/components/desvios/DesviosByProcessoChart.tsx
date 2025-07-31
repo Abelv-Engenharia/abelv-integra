@@ -4,22 +4,29 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend } from "recharts";
 import { fetchDesviosByProcesso } from "@/services/desviosDashboardService";
-import { useUserCCAs } from "@/hooks/useUserCCAs";
+import { useDesviosFilters } from "@/hooks/useDesviosFilters";
 
 const COLORS = ["#06b6d4", "#8b5cf6", "#10b981", "#f59e0b", "#ef4444", "#ec4899", "#3b82f6", "#84cc16"];
 
 const DesviosByProcessoChart = () => {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const { data: userCCAs = [] } = useUserCCAs();
+  const filters = useDesviosFilters();
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
         // Get CCA IDs that user has permission to
-        const allowedCcaIds = userCCAs.map(cca => cca.id.toString());
-        const chartData = await fetchDesviosByProcesso(allowedCcaIds);
+        const allowedCcaIds = filters.userCCAs.map(cca => cca.id.toString());
+        const chartData = await fetchDesviosByProcesso({
+          ccaIds: allowedCcaIds,
+          year: filters.year,
+          month: filters.month,
+          ccaId: filters.ccaId,
+          disciplinaId: filters.disciplinaId,
+          empresaId: filters.empresaId
+        });
         setData(chartData);
       } catch (error) {
         console.error("Error loading processo chart data:", error);
@@ -28,10 +35,10 @@ const DesviosByProcessoChart = () => {
       }
     };
 
-    if (userCCAs.length > 0) {
+    if (filters.userCCAs.length > 0) {
       fetchData();
     }
-  }, [userCCAs]);
+  }, [filters]);
 
   const chartConfig = {
     value: {
