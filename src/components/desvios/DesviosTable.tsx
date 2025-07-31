@@ -9,7 +9,19 @@ import { DesvioCompleto } from "@/services/desvios/desviosCompletosService";
 import { TableLoadingSkeleton } from "@/components/ui/loading-skeleton";
 import { InlineLoader } from "@/components/common/PageLoader";
 import { AlertCircle } from "lucide-react";
-const DesviosTable = () => {
+interface DesviosTableProps {
+  filters?: {
+    year?: string;
+    month?: string;
+    cca?: string;
+    company?: string;
+    status?: string;
+    risk?: string;
+  };
+  searchTerm?: string;
+}
+
+const DesviosTable = ({ filters, searchTerm }: DesviosTableProps) => {
   const {
     toast
   } = useToast();
@@ -24,7 +36,7 @@ const DesviosTable = () => {
   const [isLoading, setIsLoading] = useState(true);
   const allowedCcaIds = userCCAs.map(cca => cca.id);
 
-  // Recarrega desvios do backend filtrando pelos CCAs permitidos
+  // Recarrega desvios do backend filtrando pelos CCAs permitidos e filtros aplicados
   const fetchDesvios = async () => {
     setIsLoading(true);
     try {
@@ -32,20 +44,51 @@ const DesviosTable = () => {
         setDesvios([]);
         return;
       }
-      const {
-        data,
-        error
-      } = await supabase.from('desvios_completos').select(`
+
+      let query = supabase
+        .from('desvios_completos')
+        .select(`
           *,
-          ccas:cca_id(nome)
-        `).in('cca_id', allowedCcaIds).order('created_at', {
-        ascending: false
-      });
+          ccas:cca_id(nome, codigo),
+          empresas:empresa_id(nome),
+          disciplinas:disciplina_id(nome)
+        `)
+        .in('cca_id', allowedCcaIds);
+
+      // Aplicar filtros se fornecidos
+      if (filters?.year && filters.year !== "") {
+        query = query.gte('data_desvio', `${filters.year}-01-01`)
+                    .lte('data_desvio', `${filters.year}-12-31`);
+      }
+
+      if (filters?.month && filters.month !== "" && filters.month !== "todos") {
+        const monthStr = filters.month.padStart(2, '0');
+        if (filters?.year) {
+          query = query.gte('data_desvio', `${filters.year}-${monthStr}-01`)
+                      .lte('data_desvio', `${filters.year}-${monthStr}-31`);
+        }
+      }
+
+      if (filters?.status && filters.status !== "" && filters.status !== "todos") {
+        query = query.eq('status', filters.status);
+      }
+
+      if (filters?.risk && filters.risk !== "" && filters.risk !== "todos") {
+        query = query.eq('classificacao_risco', filters.risk);
+      }
+
+      // Aplicar busca por termo se fornecido
+      if (searchTerm && searchTerm.trim() !== "") {
+        query = query.or(`descricao_desvio.ilike.%${searchTerm}%,local.ilike.%${searchTerm}%`);
+      }
+
+      const { data, error } = await query.order('created_at', { ascending: false });
+
       if (error) {
         console.error('Erro ao buscar desvios:', error);
         setDesvios([]);
       } else {
-        console.log("Desvios filtrados por CCA carregados:", data);
+        console.log("Desvios filtrados carregados:", data);
         setDesvios(data || []);
       }
     } catch (error) {
@@ -64,7 +107,7 @@ const DesviosTable = () => {
         setIsLoading(false);
       }
     }
-  }, [allowedCcaIds.join(','), isLoadingCCAs]);
+  }, [allowedCcaIds.join(','), isLoadingCCAs, filters, searchTerm]);
   const handleStatusUpdated = (id: string, newStatus: string) => {
     setDesvios(desvios.map(d => d.id === id ? {
       ...d,

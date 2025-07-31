@@ -33,6 +33,15 @@ const DesviosConsulta = () => {
     status: "",
     risk: "",
   });
+  const [appliedFilters, setAppliedFilters] = useState({
+    year: currentYear.toString(),
+    month: "",
+    cca: "",
+    company: "",
+    status: "",
+    risk: "",
+  });
+  const [appliedSearchTerm, setAppliedSearchTerm] = useState("");
 
   const handleFilterChange = (field: string, value: string) => {
     setFilters({
@@ -42,6 +51,8 @@ const DesviosConsulta = () => {
   };
 
   const applyFilters = () => {
+    setAppliedFilters(filters);
+    setAppliedSearchTerm(searchTerm);
     toast({
       title: "Filtros aplicados",
       description: "Os resultados foram filtrados conforme solicitado.",
@@ -49,15 +60,18 @@ const DesviosConsulta = () => {
   };
 
   const clearFilters = () => {
-    setFilters({
+    const clearedFilters = {
       year: currentYear.toString(),
       month: "",
       cca: "",
       company: "",
       status: "",
       risk: "",
-    });
+    };
+    setFilters(clearedFilters);
+    setAppliedFilters(clearedFilters);
     setSearchTerm("");
+    setAppliedSearchTerm("");
     toast({
       title: "Filtros limpos",
       description: "Todos os filtros foram removidos.",
@@ -276,7 +290,7 @@ const DesviosConsulta = () => {
       </Card>
 
       {/* Deviations Table */}
-      <DesviosTable />
+      <DesviosTable filters={appliedFilters} searchTerm={appliedSearchTerm} />
     </div>
   );
 };
