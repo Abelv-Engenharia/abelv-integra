@@ -40,6 +40,7 @@ import AdminEncarregados from "./pages/admin/AdminEncarregados";
 import AdminLogo from "./pages/admin/AdminLogo";
 import AdminTemplates from "./pages/AdminTemplates";
 import AdminModelosInspecao from "./pages/admin/AdminModelosInspecao";
+import ExportacaoDados from "./pages/admin/ExportacaoDados";
 import CadastroFuncionarios from "./pages/admin/CadastroFuncionarios";
 import CriarUsuario from "./pages/admin/CriarUsuario";
 import MetasIndicadores from "./pages/admin/MetasIndicadores";
@@ -174,6 +175,7 @@ function App() {
                 <Route path="admin/criar-usuario" element={<CriarUsuario />} />
                 <Route path="admin/metas-indicadores" element={<MetasIndicadores />} />
                 <Route path="admin/registro-hht" element={<RegistroHHT />} />
+                <Route path="admin/exportacao-dados" element={<ExportacaoDados />} />
                 <Route path="configuracao-emails" element={<ConfiguracaoEmailsPage />} />
                 <Route path="upload-tutoriais" element={<UploadTutoriaisPage />} />
 

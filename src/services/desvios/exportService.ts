@@ -1,10 +1,16 @@
 import * as XLSX from 'xlsx';
 import { supabase } from '@/integrations/supabase/client';
 
-export const exportDesviosToExcel = async () => {
+interface ExportFilters {
+  dataInicial: string;
+  dataFinal: string;
+  ccaId?: string;
+}
+
+export const exportDesviosToExcel = async (filters?: ExportFilters) => {
   try {
     // Buscar todos os desvios com joins para obter dados completos
-    const { data: desvios, error } = await supabase
+    let query = supabase
       .from('desvios_completos')
       .select(`
         *,
@@ -20,8 +26,18 @@ export const exportDesviosToExcel = async () => {
         profiles_engenheiro:engenheiro_responsavel_id(nome),
         profiles_supervisor:supervisor_responsavel_id(nome),
         profiles_encarregado:encarregado_responsavel_id(nome)
-      `)
-      .order('created_at', { ascending: false });
+      `);
+
+    if (filters?.dataInicial && filters?.dataFinal) {
+      query = query.gte('data_desvio', filters.dataInicial)
+                  .lte('data_desvio', filters.dataFinal);
+    }
+
+    if (filters?.ccaId) {
+      query = query.eq('cca_id', parseInt(filters.ccaId));
+    }
+
+    const { data: desvios, error } = await query.order('created_at', { ascending: false });
 
     if (error) {
       console.error('Erro ao buscar desvios:', error);
