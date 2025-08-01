@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ArrowLeft, Download, Filter, Printer, Search } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import DesviosTable from "@/components/desvios/DesviosTable";
+import { supabase } from "@/integrations/supabase/client";
 
 // Mock data
 const currentYear = new Date().getFullYear();
@@ -42,6 +43,80 @@ const DesviosConsulta = () => {
     risk: "",
   });
   const [appliedSearchTerm, setAppliedSearchTerm] = useState("");
+  
+  // Estados para dados dinâmicos da base de dados
+  const [ccas, setCcas] = useState<Array<{codigo: string, nome: string}>>([]);
+  const [empresas, setEmpresas] = useState<Array<{nome: string}>>([]);
+  const [statusOptions, setStatusOptions] = useState<Array<{status: string}>>([]);
+  const [riskOptions, setRiskOptions] = useState<Array<{classificacao_risco: string}>>([]);
+
+  // Carregar dados da base de dados
+  useEffect(() => {
+    const loadFilterData = async () => {
+      try {
+        // Buscar CCAs únicos
+        const { data: ccasData } = await supabase
+          .from('desvios_completos')
+          .select(`
+            ccas!inner(codigo, nome)
+          `)
+          .not('ccas.codigo', 'is', null);
+        
+        // Buscar empresas únicas
+        const { data: empresasData } = await supabase
+          .from('desvios_completos')
+          .select(`
+            empresas!inner(nome)
+          `)
+          .not('empresas.nome', 'is', null);
+        
+        // Buscar status únicos
+        const { data: statusData } = await supabase
+          .from('desvios_completos')
+          .select('status')
+          .not('status', 'is', null);
+        
+        // Buscar classificações de risco únicas
+        const { data: riskData } = await supabase
+          .from('desvios_completos')
+          .select('classificacao_risco')
+          .not('classificacao_risco', 'is', null);
+
+        // Processar dados únicos
+        if (ccasData) {
+          const uniqueCcas = Array.from(new Map(
+            ccasData.map((item: any) => [item.ccas.codigo, item.ccas])
+          ).values());
+          setCcas(uniqueCcas.sort((a, b) => a.codigo.localeCompare(b.codigo)));
+        }
+
+        if (empresasData) {
+          const uniqueEmpresas = Array.from(new Set(
+            empresasData.map((item: any) => item.empresas.nome)
+          )).map(nome => ({ nome }));
+          setEmpresas(uniqueEmpresas.sort((a, b) => a.nome.localeCompare(b.nome)));
+        }
+
+        if (statusData) {
+          const uniqueStatus = Array.from(new Set(
+            statusData.map((item: any) => item.status)
+          )).map(status => ({ status }));
+          setStatusOptions(uniqueStatus.sort((a, b) => a.status.localeCompare(b.status)));
+        }
+
+        if (riskData) {
+          const uniqueRisk = Array.from(new Set(
+            riskData.map((item: any) => item.classificacao_risco)
+          )).map(classificacao_risco => ({ classificacao_risco }));
+          setRiskOptions(uniqueRisk.sort((a, b) => a.classificacao_risco.localeCompare(b.classificacao_risco)));
+        }
+      } catch (error) {
+        console.error('Erro ao carregar dados dos filtros:', error);
+      }
+    };
+
+    loadFilterData();
+  }, []);
 
   const handleFilterChange = (field: string, value: string) => {
     setFilters({
@@ -208,9 +283,11 @@ const DesviosConsulta = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="todos">Todos</SelectItem>
-                  <SelectItem value="CCA-001">CCA-001</SelectItem>
-                  <SelectItem value="CCA-002">CCA-002</SelectItem>
-                  <SelectItem value="CCA-003">CCA-003</SelectItem>
+                  {ccas.map((cca) => (
+                    <SelectItem key={cca.codigo} value={cca.codigo}>
+                      {cca.codigo} - {cca.nome}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -228,9 +305,11 @@ const DesviosConsulta = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="todas">Todas</SelectItem>
-                  <SelectItem value="Abelv">Abelv</SelectItem>
-                  <SelectItem value="Fornecedor A">Fornecedor A</SelectItem>
-                  <SelectItem value="Fornecedor B">Fornecedor B</SelectItem>
+                  {empresas.map((empresa) => (
+                    <SelectItem key={empresa.nome} value={empresa.nome}>
+                      {empresa.nome}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -248,9 +327,11 @@ const DesviosConsulta = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="todos">Todos</SelectItem>
-                  <SelectItem value="Concluído">Concluído</SelectItem>
-                  <SelectItem value="Em andamento">Em andamento</SelectItem>
-                  <SelectItem value="Pendente">Pendente</SelectItem>
+                  {statusOptions.map((status) => (
+                    <SelectItem key={status.status} value={status.status}>
+                      {status.status}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -268,11 +349,11 @@ const DesviosConsulta = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="todos">Todos</SelectItem>
-                  <SelectItem value="Trivial">Trivial</SelectItem>
-                  <SelectItem value="Tolerável">Tolerável</SelectItem>
-                  <SelectItem value="Moderado">Moderado</SelectItem>
-                  <SelectItem value="Substancial">Substancial</SelectItem>
-                  <SelectItem value="Intolerável">Intolerável</SelectItem>
+                  {riskOptions.map((risk) => (
+                    <SelectItem key={risk.classificacao_risco} value={risk.classificacao_risco}>
+                      {risk.classificacao_risco}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
