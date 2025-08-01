@@ -20,8 +20,10 @@ interface DesviosTableProps {
   };
   searchTerm?: string;
 }
-
-const DesviosTable = ({ filters, searchTerm }: DesviosTableProps) => {
+const DesviosTable = ({
+  filters,
+  searchTerm
+}: DesviosTableProps) => {
   const {
     toast
   } = useToast();
@@ -44,35 +46,26 @@ const DesviosTable = ({ filters, searchTerm }: DesviosTableProps) => {
         setDesvios([]);
         return;
       }
-
-      let query = supabase
-        .from('desvios_completos')
-        .select(`
+      let query = supabase.from('desvios_completos').select(`
           *,
           ccas:cca_id(nome, codigo),
           empresas:empresa_id(nome),
           disciplinas:disciplina_id(nome)
-        `)
-        .in('cca_id', allowedCcaIds);
+        `).in('cca_id', allowedCcaIds);
 
       // Aplicar filtros se fornecidos
       if (filters?.year && filters.year !== "") {
-        query = query.gte('data_desvio', `${filters.year}-01-01`)
-                    .lte('data_desvio', `${filters.year}-12-31`);
+        query = query.gte('data_desvio', `${filters.year}-01-01`).lte('data_desvio', `${filters.year}-12-31`);
       }
-
       if (filters?.month && filters.month !== "" && filters.month !== "todos") {
         const monthStr = filters.month.padStart(2, '0');
         if (filters?.year) {
-          query = query.gte('data_desvio', `${filters.year}-${monthStr}-01`)
-                      .lte('data_desvio', `${filters.year}-${monthStr}-31`);
+          query = query.gte('data_desvio', `${filters.year}-${monthStr}-01`).lte('data_desvio', `${filters.year}-${monthStr}-31`);
         }
       }
-
       if (filters?.status && filters.status !== "" && filters.status !== "todos") {
         query = query.eq('status', filters.status);
       }
-
       if (filters?.risk && filters.risk !== "" && filters.risk !== "todos") {
         query = query.eq('classificacao_risco', filters.risk);
       }
@@ -81,9 +74,12 @@ const DesviosTable = ({ filters, searchTerm }: DesviosTableProps) => {
       if (searchTerm && searchTerm.trim() !== "") {
         query = query.or(`descricao_desvio.ilike.%${searchTerm}%,local.ilike.%${searchTerm}%`);
       }
-
-      const { data, error } = await query.order('created_at', { ascending: false });
-
+      const {
+        data,
+        error
+      } = await query.order('created_at', {
+        ascending: false
+      });
       if (error) {
         console.error('Erro ao buscar desvios:', error);
         setDesvios([]);
@@ -173,7 +169,7 @@ const DesviosTable = ({ filters, searchTerm }: DesviosTableProps) => {
                 <TableRow>
                   <TableHead className="text-xs sm:text-sm w-16 sm:w-20">ID</TableHead>
                   <TableHead className="text-xs sm:text-sm w-24 sm:w-32">Data</TableHead>
-                  <TableHead className="text-xs sm:text-sm min-w-[200px] max-w-[250px] mx-0 py-0 my-[19px]">Descrição</TableHead>
+                  <TableHead className="text-xs sm:text-sm min-w-[200px] max-w-[250px] mx-0 py-[3px] my-[20px]">Descrição</TableHead>
                   <TableHead className="text-xs sm:text-sm w-20 sm:w-24 px-[68px] py-0 mx-0 my-[83px]">CCA</TableHead>
                   <TableHead className="text-xs sm:text-sm w-16 sm:w-20">Risco</TableHead>
                   <TableHead className="text-xs sm:text-sm w-20 sm:w-24">Status</TableHead>

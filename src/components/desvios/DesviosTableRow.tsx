@@ -34,7 +34,7 @@ const DesviosTableRow = ({
         {desvio.descricao_desvio?.substring(0, 60)}
         {desvio.descricao_desvio && desvio.descricao_desvio.length > 60 ? "..." : ""}
       </td>
-      <td>{(desvio as any).ccas?.nome || "N/A"}</td>
+      <td className="py-0 my-[9px] px-px mx-0">{(desvio as any).ccas?.nome || "N/A"}</td>
       <td>
         <RiskBadge risk={desvio.classificacao_risco} />
       </td>
