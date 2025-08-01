@@ -3,8 +3,20 @@ import { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { fetchInspecoesByCCA } from '@/services/hora-seguranca/inspecoesByCCAService';
 import { useUserCCAs } from '@/hooks/useUserCCAs';
+import { supabase } from "@/integrations/supabase/client";
 
-export function InspecoesByCCAChart() {
+interface Filters {
+  ccaId?: number;
+  responsavel?: string;
+  dataInicial?: string;
+  dataFinal?: string;
+}
+
+interface InspecoesByCCAChartProps {
+  filters?: Filters;
+}
+
+export function InspecoesByCCAChart({ filters }: InspecoesByCCAChartProps) {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -21,19 +33,92 @@ export function InspecoesByCCAChart() {
           return;
         }
         
-        // Aplicar filtro por CCAs permitidos
-        const ccaIds = userCCAs.map(cca => cca.id);
-        const chartData = await fetchInspecoesByCCA(ccaIds);
+        // Aplicar filtros na consulta
+        let query = supabase
+          .from('execucao_hsa')
+          .select(`
+            cca_id,
+            status,
+            ccas:cca_id(codigo, nome)
+          `)
+          .in('cca_id', userCCAs.map(cca => cca.id));
+
+        // Aplicar filtros adicionais
+        if (filters?.ccaId) {
+          query = query.eq('cca_id', filters.ccaId);
+        }
         
-        // Formatar dados para o gráfico
-        const formattedData = chartData.map(item => ({
-          name: item.codigo,
-          nomeCompleto: item.nomeCompleto,
-          "A Realizar": item["A Realizar"],
-          "Realizada": item["Realizada"],
-          "Não Realizada": item["Não Realizada"],
-          "Realizada (Não Programada)": item["Realizada (Não Programada)"],
-          "Cancelada": item["Cancelada"]
+        if (filters?.responsavel) {
+          query = query.eq('responsavel_inspecao', filters.responsavel);
+        }
+        
+        if (filters?.dataInicial) {
+          query = query.gte('data', filters.dataInicial);
+        }
+        
+        if (filters?.dataFinal) {
+          query = query.lte('data', filters.dataFinal);
+        }
+
+        const { data: execucoes, error } = await query;
+        
+        if (error) {
+          console.error('Erro ao buscar dados:', error);
+          setError("Não foi possível carregar os dados de inspeções por CCA");
+          return;
+        }
+
+        // Processar dados por CCA
+        const processedData: { [key: string]: any } = {};
+        
+        execucoes?.forEach(item => {
+          const ccaData = item.ccas as any;
+          const codigo = ccaData?.codigo;
+          const nome = ccaData?.nome;
+          
+          if (!codigo) return;
+          
+          if (!processedData[codigo]) {
+            processedData[codigo] = {
+              codigo,
+              nomeCompleto: `${codigo} - ${nome}`,
+              "A Realizar": 0,
+              "Realizada": 0,
+              "Não Realizada": 0,
+              "Realizada (Não Programada)": 0,
+              "Cancelada": 0
+            };
+          }
+          
+          const status = (item.status || '').toUpperCase();
+          switch (status) {
+            case 'A REALIZAR':
+              processedData[codigo]["A Realizar"]++;
+              break;
+            case 'REALIZADA':
+              processedData[codigo]["Realizada"]++;
+              break;
+            case 'NÃO REALIZADA':
+              processedData[codigo]["Não Realizada"]++;
+              break;
+            case 'REALIZADA (NÃO PROGRAMADA)':
+              processedData[codigo]["Realizada (Não Programada)"]++;
+              break;
+            case 'CANCELADA':
+              processedData[codigo]["Cancelada"]++;
+              break;
+          }
+        });
+
+        // Converter para formato do gráfico
+        const formattedData = Object.keys(processedData).map(codigo => ({
+          name: codigo,
+          nomeCompleto: processedData[codigo].nomeCompleto,
+          "A Realizar": processedData[codigo]["A Realizar"],
+          "Realizada": processedData[codigo]["Realizada"],
+          "Não Realizada": processedData[codigo]["Não Realizada"],
+          "Realizada (Não Programada)": processedData[codigo]["Realizada (Não Programada)"],
+          "Cancelada": processedData[codigo]["Cancelada"]
         }));
         
         setData(formattedData);
@@ -46,7 +131,7 @@ export function InspecoesByCCAChart() {
     };
 
     loadData();
-  }, [userCCAs]);
+  }, [userCCAs, filters]);
 
   if (loading) {
     return (

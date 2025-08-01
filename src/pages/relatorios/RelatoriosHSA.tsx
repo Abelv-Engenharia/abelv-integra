@@ -381,7 +381,7 @@ const RelatoriosHSA = () => {
           <div ref={reportRef}>
             {userCCAs.length > 0 && (
               <>
-                <InspecoesSummaryCards />
+                <InspecoesSummaryCards filters={getAppliedFilters()} />
 
                 <Card className="col-span-full">
                   <CardHeader>
@@ -391,7 +391,7 @@ const RelatoriosHSA = () => {
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="pl-2">
-                    <InspecoesByCCAChart />
+                    <InspecoesByCCAChart filters={getAppliedFilters()} />
                   </CardContent>
                 </Card>
 
@@ -453,7 +453,7 @@ const RelatoriosHSA = () => {
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="pl-2">
-                    <DesviosResponsaveisChart />
+                    <DesviosResponsaveisChart filters={getAppliedFilters()} />
                   </CardContent>
                 </Card>
 
@@ -465,7 +465,7 @@ const RelatoriosHSA = () => {
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="pl-2 py-[200px]">
-                    <DesviosTipoInspecaoChart />
+                    <DesviosTipoInspecaoChart filters={getAppliedFilters()} />
                   </CardContent>
                 </Card>
               </>

@@ -3,8 +3,20 @@ import { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { fetchDesviosByResponsavel } from '@/services/hora-seguranca';
 import { useUserCCAs } from '@/hooks/useUserCCAs';
+import { supabase } from "@/integrations/supabase/client";
 
-export function DesviosResponsaveisChart() {
+interface Filters {
+  ccaId?: number;
+  responsavel?: string;
+  dataInicial?: string;
+  dataFinal?: string;
+}
+
+interface DesviosResponsaveisChartProps {
+  filters?: Filters;
+}
+
+export function DesviosResponsaveisChart({ filters }: DesviosResponsaveisChartProps) {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -21,15 +33,56 @@ export function DesviosResponsaveisChart() {
           return;
         }
         
-        // Aplicar filtro por CCAs permitidos
-        const ccaIds = userCCAs.map(cca => cca.id);
-        const chartData = await fetchDesviosByResponsavel(ccaIds);
+        // Aplicar filtros na consulta
+        let query = supabase
+          .from('execucao_hsa')
+          .select('responsavel_inspecao, desvios_identificados')
+          .in('cca_id', userCCAs.map(cca => cca.id));
+
+        // Aplicar filtros adicionais
+        if (filters?.ccaId) {
+          query = query.eq('cca_id', filters.ccaId);
+        }
         
-        // Formatar dados para o gráfico
-        const formattedData = chartData.map(item => ({
-          name: item.primeiroNome || item.responsavel?.split(' ')[0] || item.responsavel,
-          nomeCompleto: item.nomeCompleto || item.responsavel,
-          desvios: item.desvios
+        if (filters?.responsavel) {
+          query = query.eq('responsavel_inspecao', filters.responsavel);
+        }
+        
+        if (filters?.dataInicial) {
+          query = query.gte('data', filters.dataInicial);
+        }
+        
+        if (filters?.dataFinal) {
+          query = query.lte('data', filters.dataFinal);
+        }
+
+        const { data: execucoes, error } = await query;
+        
+        if (error) {
+          console.error('Erro ao buscar dados:', error);
+          setError("Não foi possível carregar os dados de desvios por responsável");
+          return;
+        }
+
+        // Processar dados por responsável
+        const processedData: { [key: string]: number } = {};
+        
+        execucoes?.forEach(item => {
+          const responsavel = item.responsavel_inspecao;
+          if (!responsavel) return;
+          
+          if (!processedData[responsavel]) {
+            processedData[responsavel] = 0;
+          }
+          
+          processedData[responsavel] += item.desvios_identificados || 0;
+        });
+
+        // Converter para formato do gráfico
+        const formattedData = Object.keys(processedData).map(responsavel => ({
+          name: responsavel.split(' ')[0], // Primeiro nome
+          nomeCompleto: responsavel,
+          desvios: processedData[responsavel]
         }));
         
         setData(formattedData);
@@ -42,7 +95,7 @@ export function DesviosResponsaveisChart() {
     };
 
     loadData();
-  }, [userCCAs]);
+  }, [userCCAs, filters]);
 
   if (loading) {
     return (

@@ -3,8 +3,20 @@ import { useState, useEffect } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { fetchDesviosByInspectionType } from '@/services/hora-seguranca';
 import { useUserCCAs } from '@/hooks/useUserCCAs';
+import { supabase } from "@/integrations/supabase/client";
 
-export function DesviosTipoInspecaoChart() {
+interface Filters {
+  ccaId?: number;
+  responsavel?: string;
+  dataInicial?: string;
+  dataFinal?: string;
+}
+
+interface DesviosTipoInspecaoChartProps {
+  filters?: Filters;
+}
+
+export function DesviosTipoInspecaoChart({ filters }: DesviosTipoInspecaoChartProps) {
   console.log('DesviosTipoInspecaoChart rendering with PieChart');
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -22,14 +34,55 @@ export function DesviosTipoInspecaoChart() {
           return;
         }
         
-        // Aplicar filtro por CCAs permitidos
-        const ccaIds = userCCAs.map(cca => cca.id);
-        const chartData = await fetchDesviosByInspectionType(ccaIds);
+        // Aplicar filtros na consulta
+        let query = supabase
+          .from('execucao_hsa')
+          .select('inspecao_programada, desvios_identificados')
+          .in('cca_id', userCCAs.map(cca => cca.id))
+          .gt('desvios_identificados', 0);
+
+        // Aplicar filtros adicionais
+        if (filters?.ccaId) {
+          query = query.eq('cca_id', filters.ccaId);
+        }
         
-        // Formatar dados para o gráfico
-        const formattedData = chartData.map((item, index) => ({
-          name: item.tipo,
-          value: item.quantidade,
+        if (filters?.responsavel) {
+          query = query.eq('responsavel_inspecao', filters.responsavel);
+        }
+        
+        if (filters?.dataInicial) {
+          query = query.gte('data', filters.dataInicial);
+        }
+        
+        if (filters?.dataFinal) {
+          query = query.lte('data', filters.dataFinal);
+        }
+
+        const { data: execucoes, error } = await query;
+        
+        if (error) {
+          console.error('Erro ao buscar dados:', error);
+          setError("Não foi possível carregar os dados de desvios por tipo de inspeção");
+          return;
+        }
+
+        // Processar dados por tipo de inspeção
+        const processedData: { [key: string]: number } = {};
+        
+        execucoes?.forEach(item => {
+          const tipo = item.inspecao_programada || 'Tipo não informado';
+          
+          if (!processedData[tipo]) {
+            processedData[tipo] = 0;
+          }
+          
+          processedData[tipo] += item.desvios_identificados || 0;
+        });
+
+        // Converter para formato do gráfico
+        const formattedData = Object.keys(processedData).map((tipo, index) => ({
+          name: tipo,
+          value: processedData[tipo],
           fill: `hsl(${210 + index * 20}, 20%, ${50 + index * 10}%)`
         }));
         
@@ -43,7 +96,7 @@ export function DesviosTipoInspecaoChart() {
     };
 
     loadData();
-  }, [userCCAs]);
+  }, [userCCAs, filters]);
 
   if (loading) {
     return (

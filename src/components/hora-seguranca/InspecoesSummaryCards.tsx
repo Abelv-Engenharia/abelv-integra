@@ -5,6 +5,7 @@ import { Activity, Calendar, CheckSquare, FileWarning, Target, TrendingUp } from
 import { Card, CardContent } from "@/components/ui/card";
 import { InspecoesSummary } from "@/services/hora-seguranca/types";
 import { useUserCCAs } from "@/hooks/useUserCCAs";
+import { supabase } from "@/integrations/supabase/client";
 
 interface StatCardProps {
   title: string;
@@ -12,6 +13,17 @@ interface StatCardProps {
   description?: string;
   icon: React.ReactNode;
   className?: string;
+}
+
+interface Filters {
+  ccaId?: number;
+  responsavel?: string;
+  dataInicial?: string;
+  dataFinal?: string;
+}
+
+interface InspecoesSummaryCardsProps {
+  filters?: Filters;
 }
 
 const StatCard = ({ title, value, description, icon, className }: StatCardProps) => (
@@ -29,7 +41,7 @@ const StatCard = ({ title, value, description, icon, className }: StatCardProps)
   </Card>
 );
 
-const InspecoesSummaryCards = () => {
+const InspecoesSummaryCards = ({ filters }: InspecoesSummaryCardsProps) => {
   const [data, setData] = useState<InspecoesSummary | null>(null);
   const [loading, setLoading] = useState(true);
   const { data: userCCAs = [] } = useUserCCAs();
@@ -55,9 +67,70 @@ const InspecoesSummaryCards = () => {
           return;
         }
         
-        // Aplicar filtro por CCAs permitidos
-        const ccaIds = userCCAs.map(cca => cca.id);
-        const summary = await fetchInspecoesSummary(ccaIds);
+        // Aplicar filtros na consulta
+        let query = supabase
+          .from('execucao_hsa')
+          .select('status')
+          .in('cca_id', userCCAs.map(cca => cca.id));
+
+        // Aplicar filtros adicionais
+        if (filters?.ccaId) {
+          query = query.eq('cca_id', filters.ccaId);
+        }
+        
+        if (filters?.responsavel) {
+          query = query.eq('responsavel_inspecao', filters.responsavel);
+        }
+        
+        if (filters?.dataInicial) {
+          query = query.gte('data', filters.dataInicial);
+        }
+        
+        if (filters?.dataFinal) {
+          query = query.lte('data', filters.dataFinal);
+        }
+
+        const { data: execucoes, error } = await query;
+        
+        if (error) {
+          console.error('Erro ao buscar dados:', error);
+          return;
+        }
+
+        // Processar dados
+        const summary = {
+          totalInspecoes: execucoes?.length || 0,
+          programadas: 0,
+          naoProgramadas: 0,
+          desviosIdentificados: 0,
+          realizadas: 0,
+          canceladas: 0,
+          aRealizar: 0,
+          naoRealizadas: 0,
+          realizadasNaoProgramadas: 0
+        };
+
+        execucoes?.forEach(item => {
+          const status = (item.status || '').toUpperCase();
+          switch (status) {
+            case 'A REALIZAR':
+              summary.aRealizar++;
+              break;
+            case 'REALIZADA':
+              summary.realizadas++;
+              break;
+            case 'NÃO REALIZADA':
+              summary.naoRealizadas++;
+              break;
+            case 'REALIZADA (NÃO PROGRAMADA)':
+              summary.realizadasNaoProgramadas++;
+              break;
+            case 'CANCELADA':
+              summary.canceladas++;
+              break;
+          }
+        });
+
         setData(summary);
       } catch (error) {
         console.error("Error loading inspeções summary:", error);
@@ -67,7 +140,7 @@ const InspecoesSummaryCards = () => {
     };
 
     loadData();
-  }, [userCCAs]);
+  }, [userCCAs, filters]);
 
   if (loading) {
     return (
