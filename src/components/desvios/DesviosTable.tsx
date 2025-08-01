@@ -170,6 +170,8 @@ const DesviosTable = ({
                   <TableHead className="text-xs sm:text-sm w-24 sm:w-32">Data</TableHead>
                   <TableHead className="text-xs sm:text-sm w-56 sm:w-64">CCA</TableHead>
                   <TableHead className="text-xs sm:text-sm min-w-[200px] max-w-[250px]">Descrição</TableHead>
+                  <TableHead className="text-xs sm:text-sm w-32 sm:w-40">Empresa</TableHead>
+                  <TableHead className="text-xs sm:text-sm w-32 sm:w-40">Disciplina</TableHead>
                   <TableHead className="text-xs sm:text-sm w-16 sm:w-20">Risco</TableHead>
                   <TableHead className="text-xs sm:text-sm w-20 sm:w-24">Status</TableHead>
                   <TableHead className="text-right text-xs sm:text-sm w-24 sm:w-32">Ações</TableHead>
@@ -177,7 +179,7 @@ const DesviosTable = ({
               </TableHeader>
               <TableBody>
                 {desvios.length > 0 ? desvios.map(desvio => <DesviosTableRow key={desvio.id} desvio={desvio} onStatusUpdated={handleStatusUpdated} onEditClick={handleEditClick} onDesvioDeleted={handleDesvioDeleted} editDesvioId={editDesvioId} editDialogOpen={editDialogOpen} setEditDialogOpen={setEditDialogOpen} onDesvioUpdated={handleDesvioUpdated} />) : <TableRow>
-                    <TableCell colSpan={6} className="h-24 sm:h-32">
+                    <TableCell colSpan={8} className="h-24 sm:h-32">
                       <div className="flex flex-col items-center justify-center space-y-3">
                         <AlertCircle className="h-8 w-8 text-muted-foreground/50" />
                         <div className="text-center space-y-1">

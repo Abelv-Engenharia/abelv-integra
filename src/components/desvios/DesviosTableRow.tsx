@@ -36,6 +36,12 @@ const DesviosTableRow = ({
         {desvio.descricao_desvio?.substring(0, 60)}
         {desvio.descricao_desvio && desvio.descricao_desvio.length > 60 ? "..." : ""}
       </td>
+      <td className="max-w-[150px] truncate">
+        {(desvio as any).empresas?.nome || "N/A"}
+      </td>
+      <td className="max-w-[150px] truncate">
+        {(desvio as any).disciplinas?.nome || "N/A"}
+      </td>
       <td>
         <RiskBadge risk={desvio.classificacao_risco} />
       </td>
