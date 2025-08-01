@@ -29,7 +29,7 @@ const DesviosTableRow = ({
 }: Props) => {
   return <tr>
       <td>{formatDate(desvio.data_desvio)}</td>
-      <td className="my-[215px]">
+      <td className="my-[199px]">
         {(desvio as any).ccas?.codigo ? `${(desvio as any).ccas.codigo} - ${(desvio as any).ccas.nome}` : "N/A"}
       </td>
       <td className="max-w-[250px] truncate">
