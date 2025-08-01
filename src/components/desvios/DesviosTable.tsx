@@ -168,7 +168,7 @@ const DesviosTable = ({
               <TableHeader>
                 <TableRow>
                   <TableHead className="text-xs sm:text-sm w-24 sm:w-32">Data</TableHead>
-                  <TableHead className="text-xs sm:text-sm w-32 sm:w-40">CCA</TableHead>
+                  <TableHead className="text-xs sm:text-sm w-48 sm:w-56">CCA</TableHead>
                   <TableHead className="text-xs sm:text-sm min-w-[200px] max-w-[250px]">Descrição</TableHead>
                   <TableHead className="text-xs sm:text-sm w-16 sm:w-20">Risco</TableHead>
                   <TableHead className="text-xs sm:text-sm w-20 sm:w-24">Status</TableHead>
