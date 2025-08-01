@@ -28,13 +28,14 @@ const DesviosTableRow = ({
   onDesvioUpdated
 }: Props) => {
   return <tr>
-      <td className="font-medium">{desvio.id?.slice(0, 8)}...</td>
       <td>{formatDate(desvio.data_desvio)}</td>
-      <td className="max-w-[250px] truncate py-[20px] px-0 mx-0 my-[3px]">
+      <td>
+        {(desvio as any).ccas?.codigo ? `${(desvio as any).ccas.codigo} - ${(desvio as any).ccas.nome}` : "N/A"}
+      </td>
+      <td className="max-w-[250px] truncate">
         {desvio.descricao_desvio?.substring(0, 60)}
         {desvio.descricao_desvio && desvio.descricao_desvio.length > 60 ? "..." : ""}
       </td>
-      <td className="py-0 my-[9px] px-px mx-0">{(desvio as any).ccas?.nome || "N/A"}</td>
       <td>
         <RiskBadge risk={desvio.classificacao_risco} />
       </td>
