@@ -55,6 +55,7 @@ const DocumentosAnexados: React.FC<DocumentosAnexadosProps> = ({ ocorrencia }) =
   ];
 
   const documentosDisponiveis = documentos.filter(doc => doc.url);
+  const hasDocuments = documentosDisponiveis.length > 0;
 
   const handleViewDocument = async (url: string) => {
     setSelectedDoc(url);
@@ -78,17 +79,14 @@ const DocumentosAnexados: React.FC<DocumentosAnexadosProps> = ({ ocorrencia }) =
     }
   };
 
-  if (documentosDisponiveis.length === 0) {
-    return null;
-  }
-
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button
           variant="outline"
           size="sm"
-          title="Ver Documentos"
+          title={hasDocuments ? "Ver Documentos" : "Nenhum documento anexado"}
+          disabled={!hasDocuments}
         >
           <FileText className="h-4 w-4" />
         </Button>
@@ -98,39 +96,51 @@ const DocumentosAnexados: React.FC<DocumentosAnexadosProps> = ({ ocorrencia }) =
           <DialogTitle>Documentos Anexados</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
-          {documentosDisponiveis.map((documento, index) => (
-            <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
-              <div className="flex items-center space-x-3">
-                <FileText className="h-5 w-5 text-blue-500" />
-                <div>
-                  <p className="font-medium">{documento.nome}</p>
-                  <p className="text-sm text-muted-foreground">
-                    Documento anexado
-                  </p>
+          {!hasDocuments ? (
+            <div className="text-center py-8">
+              <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <p className="text-muted-foreground">
+                Nenhum documento foi anexado a esta ocorrência.
+              </p>
+              <p className="text-sm text-muted-foreground mt-2">
+                Os documentos (CAT, Informe Preliminar, RAI e Lições Aprendidas) aparecerão aqui quando forem anexados.
+              </p>
+            </div>
+          ) : (
+            documentosDisponiveis.map((documento, index) => (
+              <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
+                <div className="flex items-center space-x-3">
+                  <FileText className="h-5 w-5 text-blue-500" />
+                  <div>
+                    <p className="font-medium">{documento.nome}</p>
+                    <p className="text-sm text-muted-foreground">
+                      Documento anexado
+                    </p>
+                  </div>
+                </div>
+                <div className="flex space-x-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleViewDocument(documento.url!)}
+                    disabled={loading && selectedDoc === documento.url}
+                  >
+                    <Eye className="h-4 w-4 mr-1" />
+                    {loading && selectedDoc === documento.url ? "Carregando..." : "Visualizar"}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleDownload(documento.url!, documento.nome)}
+                    disabled={loading && selectedDoc === documento.url}
+                  >
+                    <Download className="h-4 w-4 mr-1" />
+                    Download
+                  </Button>
                 </div>
               </div>
-              <div className="flex space-x-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleViewDocument(documento.url!)}
-                  disabled={loading && selectedDoc === documento.url}
-                >
-                  <Eye className="h-4 w-4 mr-1" />
-                  {loading && selectedDoc === documento.url ? "Carregando..." : "Visualizar"}
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleDownload(documento.url!, documento.nome)}
-                  disabled={loading && selectedDoc === documento.url}
-                >
-                  <Download className="h-4 w-4 mr-1" />
-                  Download
-                </Button>
-              </div>
-            </div>
-          ))}
+            ))
+          )}
           
           {error && (
             <div className="text-red-600 text-sm mt-2">
