@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Plus, Eye, Edit, RefreshCw, Trash2 } from "lucide-react";
+import DocumentosAnexados from "@/components/ocorrencias/DocumentosAnexados";
 import { getAllOcorrencias, deleteOcorrencia } from "@/services/ocorrencias/ocorrenciasService";
 import { useUserCCAs } from "@/hooks/useUserCCAs";
 import useOverdueActionsMonitor from "@/hooks/useOverdueActionsMonitor";
@@ -248,6 +249,7 @@ const OcorrenciasConsulta = () => {
                           >
                             <RefreshCw className="h-4 w-4" />
                           </Button>
+                          <DocumentosAnexados ocorrencia={ocorrencia} />
                           <Button
                             variant="outline"
                             size="sm"
