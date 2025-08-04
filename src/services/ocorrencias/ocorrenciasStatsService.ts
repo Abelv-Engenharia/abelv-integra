@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 
 export async function fetchOcorrenciasStats(ccaIds?: number[], year?: string, month?: string) {
@@ -90,9 +89,9 @@ export async function fetchOcorrenciasStats(ccaIds?: number[], year?: string, mo
   }
 }
 
-export async function fetchTaxaFrequenciaAcCpdPorMes(ano: number, ccaIds?: number[]) {
+export async function fetchTaxaFrequenciaAcCpdPorMes(ano: number, ccaIds?: number[], mes?: number) {
   try {
-    console.log('Buscando dados de taxa de frequência AC CPD para o ano:', ano);
+    console.log('Buscando dados de taxa de frequência AC CPD para o ano:', ano, 'mês:', mes);
     
     // Buscar ocorrências AC CPD por mês
     let ocorrenciasQuery = supabase
@@ -108,6 +107,11 @@ export async function fetchTaxaFrequenciaAcCpdPorMes(ano: number, ccaIds?: numbe
       ocorrenciasQuery = ocorrenciasQuery.in('cca', ccaStringIds);
     }
 
+    // Aplicar filtro de mês se fornecido
+    if (mes) {
+      ocorrenciasQuery = ocorrenciasQuery.eq('mes', mes);
+    }
+
     const { data: ocorrencias } = await ocorrenciasQuery;
 
     // Buscar horas trabalhadas por mês
@@ -121,23 +125,36 @@ export async function fetchTaxaFrequenciaAcCpdPorMes(ano: number, ccaIds?: numbe
       horasQuery = horasQuery.in('cca_id', ccaIds);
     }
 
+    // Aplicar filtro de mês se fornecido
+    if (mes) {
+      horasQuery = horasQuery.eq('mes', mes);
+    }
+
     const { data: horas } = await horasQuery;
+
+    // Definir range de meses baseado no filtro
+    const mesesParaProcessar = mes ? [mes] : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 
     // Agrupar dados por mês
     const dadosMensais = [];
-    for (let mes = 1; mes <= 12; mes++) {
-      const ocorrenciasMes = ocorrencias?.filter(o => o.mes === mes).length || 0;
-      const horasMes = horas?.filter(h => h.mes === mes).reduce((sum, h) => sum + Number(h.horas_trabalhadas), 0) || 0;
+    for (const mesAtual of mesesParaProcessar) {
+      const ocorrenciasMes = ocorrencias?.filter(o => o.mes === mesAtual).length || 0;
+      const horasMes = horas?.filter(h => h.mes === mesAtual).reduce((sum, h) => sum + Number(h.horas_trabalhadas), 0) || 0;
       
       const taxaMensal = horasMes > 0 ? (ocorrenciasMes / horasMes) * 1000000 : 0;
       
-      // Calcular taxa acumulada
-      const ocorrenciasAcumuladas = ocorrencias?.filter(o => o.mes <= mes).length || 0;
-      const horasAcumuladas = horas?.filter(h => h.mes <= mes).reduce((sum, h) => sum + Number(h.horas_trabalhadas), 0) || 0;
-      const taxaAcumulada = horasAcumuladas > 0 ? (ocorrenciasAcumuladas / horasAcumuladas) * 1000000 : 0;
+      // Calcular taxa acumulada (apenas se não for filtro por mês específico)
+      let taxaAcumulada = 0;
+      if (!mes) {
+        const ocorrenciasAcumuladas = ocorrencias?.filter(o => o.mes <= mesAtual).length || 0;
+        const horasAcumuladas = horas?.filter(h => h.mes <= mesAtual).reduce((sum, h) => sum + Number(h.horas_trabalhadas), 0) || 0;
+        taxaAcumulada = horasAcumuladas > 0 ? (ocorrenciasAcumuladas / horasAcumuladas) * 1000000 : 0;
+      } else {
+        taxaAcumulada = taxaMensal; // Para mês específico, acumulada = mensal
+      }
 
       dadosMensais.push({
-        mes,
+        mes: mesAtual,
         mensal: Number(taxaMensal.toFixed(2)),
         acumulada: Number(taxaAcumulada.toFixed(2))
       });
@@ -150,9 +167,9 @@ export async function fetchTaxaFrequenciaAcCpdPorMes(ano: number, ccaIds?: numbe
   }
 }
 
-export async function fetchTaxaFrequenciaAcSpdPorMes(ano: number, ccaIds?: number[]) {
+export async function fetchTaxaFrequenciaAcSpdPorMes(ano: number, ccaIds?: number[], mes?: number) {
   try {
-    console.log('Buscando dados de taxa de frequência AC SPD para o ano:', ano);
+    console.log('Buscando dados de taxa de frequência AC SPD para o ano:', ano, 'mês:', mes);
     
     // Buscar ocorrências AC SPD por mês
     let ocorrenciasQuery = supabase
@@ -170,6 +187,11 @@ export async function fetchTaxaFrequenciaAcSpdPorMes(ano: number, ccaIds?: numbe
       ocorrenciasQuery = ocorrenciasQuery.in('cca', ccaStringIds);
     }
 
+    // Aplicar filtro de mês se fornecido
+    if (mes) {
+      ocorrenciasQuery = ocorrenciasQuery.eq('mes', mes);
+    }
+
     const { data: ocorrencias } = await ocorrenciasQuery;
 
     // Buscar horas trabalhadas por mês
@@ -182,23 +204,36 @@ export async function fetchTaxaFrequenciaAcSpdPorMes(ano: number, ccaIds?: numbe
       horasQuery = horasQuery.in('cca_id', ccaIds);
     }
 
+    // Aplicar filtro de mês se fornecido
+    if (mes) {
+      horasQuery = horasQuery.eq('mes', mes);
+    }
+
     const { data: horas } = await horasQuery;
+
+    // Definir range de meses baseado no filtro
+    const mesesParaProcessar = mes ? [mes] : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 
     // Agrupar dados por mês
     const dadosMensais = [];
-    for (let mes = 1; mes <= 12; mes++) {
-      const ocorrenciasMes = ocorrencias?.filter(o => o.mes === mes).length || 0;
-      const horasMes = horas?.filter(h => h.mes === mes).reduce((sum, h) => sum + Number(h.horas_trabalhadas), 0) || 0;
+    for (const mesAtual of mesesParaProcessar) {
+      const ocorrenciasMes = ocorrencias?.filter(o => o.mes === mesAtual).length || 0;
+      const horasMes = horas?.filter(h => h.mes === mesAtual).reduce((sum, h) => sum + Number(h.horas_trabalhadas), 0) || 0;
       
       const taxaMensal = horasMes > 0 ? (ocorrenciasMes / horasMes) * 1000000 : 0;
       
-      // Calcular taxa acumulada
-      const ocorrenciasAcumuladas = ocorrencias?.filter(o => o.mes <= mes).length || 0;
-      const horasAcumuladas = horas?.filter(h => h.mes <= mes).reduce((sum, h) => sum + Number(h.horas_trabalhadas), 0) || 0;
-      const taxaAcumulada = horasAcumuladas > 0 ? (ocorrenciasAcumuladas / horasAcumuladas) * 1000000 : 0;
+      // Calcular taxa acumulada (apenas se não for filtro por mês específico)
+      let taxaAcumulada = 0;
+      if (!mes) {
+        const ocorrenciasAcumuladas = ocorrencias?.filter(o => o.mes <= mesAtual).length || 0;
+        const horasAcumuladas = horas?.filter(h => h.mes <= mesAtual).reduce((sum, h) => sum + Number(h.horas_trabalhadas), 0) || 0;
+        taxaAcumulada = horasAcumuladas > 0 ? (ocorrenciasAcumuladas / horasAcumuladas) * 1000000 : 0;
+      } else {
+        taxaAcumulada = taxaMensal; // Para mês específico, acumulada = mensal
+      }
 
       dadosMensais.push({
-        mes,
+        mes: mesAtual,
         mensal: Number(taxaMensal.toFixed(2)),
         acumulada: Number(taxaAcumulada.toFixed(2))
       });
@@ -211,9 +246,9 @@ export async function fetchTaxaFrequenciaAcSpdPorMes(ano: number, ccaIds?: numbe
   }
 }
 
-export async function fetchTaxaGravidadePorMes(ano: number, ccaIds?: number[]) {
+export async function fetchTaxaGravidadePorMes(ano: number, ccaIds?: number[], mes?: number) {
   try {
-    console.log('Buscando dados de taxa de gravidade para o ano:', ano);
+    console.log('Buscando dados de taxa de gravidade para o ano:', ano, 'mês:', mes);
     
     // Buscar ocorrências com dias perdidos por mês
     let ocorrenciasQuery = supabase
@@ -228,6 +263,11 @@ export async function fetchTaxaGravidadePorMes(ano: number, ccaIds?: number[]) {
       ocorrenciasQuery = ocorrenciasQuery.in('cca', ccaStringIds);
     }
 
+    // Aplicar filtro de mês se fornecido
+    if (mes) {
+      ocorrenciasQuery = ocorrenciasQuery.eq('mes', mes);
+    }
+
     const { data: ocorrencias } = await ocorrenciasQuery;
 
     // Buscar horas trabalhadas por mês
@@ -240,23 +280,36 @@ export async function fetchTaxaGravidadePorMes(ano: number, ccaIds?: number[]) {
       horasQuery = horasQuery.in('cca_id', ccaIds);
     }
 
+    // Aplicar filtro de mês se fornecido
+    if (mes) {
+      horasQuery = horasQuery.eq('mes', mes);
+    }
+
     const { data: horas } = await horasQuery;
+
+    // Definir range de meses baseado no filtro
+    const mesesParaProcessar = mes ? [mes] : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 
     // Agrupar dados por mês
     const dadosMensais = [];
-    for (let mes = 1; mes <= 12; mes++) {
-      const diasPerdidosMes = ocorrencias?.filter(o => o.mes === mes).reduce((sum, o) => sum + (o.dias_perdidos || 0) + (o.dias_debitados || 0), 0) || 0;
-      const horasMes = horas?.filter(h => h.mes === mes).reduce((sum, h) => sum + Number(h.horas_trabalhadas), 0) || 0;
+    for (const mesAtual of mesesParaProcessar) {
+      const diasPerdidosMes = ocorrencias?.filter(o => o.mes === mesAtual).reduce((sum, o) => sum + (o.dias_perdidos || 0) + (o.dias_debitados || 0), 0) || 0;
+      const horasMes = horas?.filter(h => h.mes === mesAtual).reduce((sum, h) => sum + Number(h.horas_trabalhadas), 0) || 0;
       
       const taxaMensal = horasMes > 0 ? (diasPerdidosMes / horasMes) * 1000000 : 0;
       
-      // Calcular taxa acumulada
-      const diasPerdidosAcumulados = ocorrencias?.filter(o => o.mes <= mes).reduce((sum, o) => sum + (o.dias_perdidos || 0) + (o.dias_debitados || 0), 0) || 0;
-      const horasAcumuladas = horas?.filter(h => h.mes <= mes).reduce((sum, h) => sum + Number(h.horas_trabalhadas), 0) || 0;
-      const taxaAcumulada = horasAcumuladas > 0 ? (diasPerdidosAcumulados / horasAcumuladas) * 1000000 : 0;
+      // Calcular taxa acumulada (apenas se não for filtro por mês específico)
+      let taxaAcumulada = 0;
+      if (!mes) {
+        const diasPerdidosAcumulados = ocorrencias?.filter(o => o.mes <= mesAtual).reduce((sum, o) => sum + (o.dias_perdidos || 0) + (o.dias_debitados || 0), 0) || 0;
+        const horasAcumuladas = horas?.filter(h => h.mes <= mesAtual).reduce((sum, h) => sum + Number(h.horas_trabalhadas), 0) || 0;
+        taxaAcumulada = horasAcumuladas > 0 ? (diasPerdidosAcumulados / horasAcumuladas) * 1000000 : 0;
+      } else {
+        taxaAcumulada = taxaMensal; // Para mês específico, acumulada = mensal
+      }
 
       dadosMensais.push({
-        mes,
+        mes: mesAtual,
         mensal: Number(taxaMensal.toFixed(2)),
         acumulada: Number(taxaAcumulada.toFixed(2))
       });

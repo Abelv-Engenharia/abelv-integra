@@ -17,8 +17,9 @@ const TaxaFrequenciaAcCpdChart = () => {
       try {
         setLoading(true);
         const anoAtual = year !== 'todos' ? parseInt(year) : new Date().getFullYear();
+        const mesAtual = month !== 'todos' ? parseInt(month) : undefined;
         
-        console.log('Carregando dados AC CPD para o ano:', anoAtual);
+        console.log('Carregando dados AC CPD para o ano:', anoAtual, 'mês:', mesAtual);
         
         // Aplicar filtros
         let ccaIds = userCCAs.length > 0 ? userCCAs.map(cca => cca.id) : undefined;
@@ -29,20 +30,31 @@ const TaxaFrequenciaAcCpdChart = () => {
         }
         
         const [dadosMensais, metaAnual] = await Promise.all([
-          fetchTaxaFrequenciaAcCpdPorMes(anoAtual, ccaIds),
+          fetchTaxaFrequenciaAcCpdPorMes(anoAtual, ccaIds, mesAtual),
           fetchMetaIndicador(anoAtual, 'meta_taxa_frequencia_ac_cpd')
         ]);
 
         console.log('Dados mensais AC CPD carregados (filtrado):', dadosMensais);
         console.log('Meta AC CPD carregada:', metaAnual);
 
-        // Filtrar apenas meses com dados válidos ou que já passaram
-        const mesAtual = new Date().getMonth() + 1;
-        const dadosValidos = dadosMensais.filter(item => 
-          item.mes <= mesAtual || item.mensal > 0 || item.acumulada > 0
-        );
+        // Se um mês específico foi selecionado, mostrar apenas esse mês
+        let dadosParaExibir = dadosMensais;
+        if (mesAtual) {
+          dadosParaExibir = dadosMensais.filter(item => item.mes === mesAtual);
+        } else {
+          // Filtrar apenas meses com dados válidos ou que já passaram
+          const mesAtualReal = new Date().getMonth() + 1;
+          const anoAtualReal = new Date().getFullYear();
+          
+          // Se estamos vendo o ano atual, mostrar apenas meses que já passaram ou com dados
+          if (anoAtual === anoAtualReal) {
+            dadosParaExibir = dadosMensais.filter(item => 
+              item.mes <= mesAtualReal || item.mensal > 0 || item.acumulada > 0
+            );
+          }
+        }
 
-        setData(dadosValidos);
+        setData(dadosParaExibir);
         setMeta(metaAnual);
       } catch (error) {
         console.error("Erro ao carregar dados AC CPD:", error);
