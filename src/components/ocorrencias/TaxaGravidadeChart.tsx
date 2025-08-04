@@ -1,9 +1,9 @@
-
 import { useState, useEffect } from "react";
 import { ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from "recharts";
 import { fetchTaxaGravidadePorMes, fetchMetaIndicador } from "@/services/ocorrencias/ocorrenciasStatsService";
 import { useUserCCAs } from "@/hooks/useUserCCAs";
 import { useOcorrenciasFilter } from "@/contexts/OcorrenciasFilterContext";
+import { IndicadorFlag } from "./IndicadorFlag";
 
 const TaxaGravidadeChart = () => {
   const [data, setData] = useState<any[]>([]);
@@ -85,87 +85,100 @@ const TaxaGravidadeChart = () => {
     );
   }
 
+  // Obter a taxa acumulada mais recente
+  const ultimosDados = data[data.length - 1];
+  const taxaAcumuladaAtual = ultimosDados?.acumulada || 0;
+
   return (
-    <ResponsiveContainer width="100%" height={300}>
-      <ComposedChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
-        <CartesianGrid strokeDasharray="3 3" />
-        <XAxis 
-          dataKey="mes" 
-          tick={{ fontSize: 11 }}
-          tickFormatter={(value) => {
-            const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
-            return meses[value - 1] || value;
-          }}
-        />
-        <YAxis domain={[0, (dataMax: number) => Math.max(dataMax * 1.1, meta * 1.1)]} />
-        <Tooltip 
-          contentStyle={{
-            backgroundColor: '#fff',
-            border: '1px solid #ccc',
-            borderRadius: '4px'
-          }}
-          labelFormatter={(value) => {
-            const meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
-                          'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
-            return meses[Number(value) - 1] || value;
-          }}
-          formatter={(value: any, name: string) => [
-            Number(value).toFixed(2), 
-            name === 'mensal' ? 'Taxa do Mês' : 'Taxa Acumulada'
-          ]}
-          content={({ active, payload, label }) => {
-            if (active && payload && payload.length) {
-              const meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
-                            'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
-              return (
-                <div className="bg-white p-3 border border-gray-300 rounded shadow">
-                  <p className="font-medium">{meses[Number(label) - 1] || label}</p>
-                  {payload.map((entry, index) => (
-                    <p key={index} style={{ color: entry.color }}>
-                      {entry.dataKey === 'mensal' ? 'Taxa do Mês' : 'Taxa Acumulada'}: {Number(entry.value).toFixed(2)}
-                    </p>
-                  ))}
-                  {meta > 0 && (
-                    <p style={{ color: '#059669' }}>Meta: {meta.toFixed(2)}</p>
-                  )}
-                </div>
-              );
-            }
-            return null;
-          }}
-        />
-        <Bar 
-          dataKey="mensal" 
-          fill="#ea580c"
-          name="Taxa Mensal"
-        />
-        <Line 
-          type="monotone" 
-          dataKey="acumulada" 
-          stroke="#c2410c"
-          strokeWidth={2}
-          name="Taxa Acumulada"
-        />
-        {meta > 0 && (
-          <ReferenceLine 
-            y={meta} 
-            stroke="#059669" 
-            strokeDasharray="5 5"
-            strokeWidth={2}
-            label={{ 
-              value: `Meta: ${meta.toFixed(2)}`, 
-              position: "top",
-              offset: 10,
-              style: { 
-                fontSize: '12px', 
-                fontWeight: 'bold',
-                fill: '#059669'
-              }
+    <div className="relative">
+      {/* Flag do indicador no canto superior direito */}
+      <IndicadorFlag 
+        taxaAcumulada={taxaAcumuladaAtual}
+        meta={meta}
+        className="absolute top-2 right-2 z-10"
+      />
+      
+      <ResponsiveContainer width="100%" height={300}>
+        <ComposedChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis 
+            dataKey="mes" 
+            tick={{ fontSize: 11 }}
+            tickFormatter={(value) => {
+              const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+              return meses[value - 1] || value;
             }}
           />
-        )}
-      </ComposedChart>
-    </ResponsiveContainer>
+          <YAxis domain={[0, (dataMax: number) => Math.max(dataMax * 1.1, meta * 1.1)]} />
+          <Tooltip 
+            contentStyle={{
+              backgroundColor: '#fff',
+              border: '1px solid #ccc',
+              borderRadius: '4px'
+            }}
+            labelFormatter={(value) => {
+              const meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
+                            'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+              return meses[Number(value) - 1] || value;
+            }}
+            formatter={(value: any, name: string) => [
+              Number(value).toFixed(2), 
+              name === 'mensal' ? 'Taxa do Mês' : 'Taxa Acumulada'
+            ]}
+            content={({ active, payload, label }) => {
+              if (active && payload && payload.length) {
+                const meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
+                              'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+                return (
+                  <div className="bg-white p-3 border border-gray-300 rounded shadow">
+                    <p className="font-medium">{meses[Number(label) - 1] || label}</p>
+                    {payload.map((entry, index) => (
+                      <p key={index} style={{ color: entry.color }}>
+                        {entry.dataKey === 'mensal' ? 'Taxa do Mês' : 'Taxa Acumulada'}: {Number(entry.value).toFixed(2)}
+                      </p>
+                    ))}
+                    {meta > 0 && (
+                      <p style={{ color: '#059669' }}>Meta: {meta.toFixed(2)}</p>
+                    )}
+                  </div>
+                );
+              }
+              return null;
+            }}
+          />
+          <Bar 
+            dataKey="mensal" 
+            fill="#ea580c"
+            name="Taxa Mensal"
+          />
+          <Line 
+            type="monotone" 
+            dataKey="acumulada" 
+            stroke="#c2410c"
+            strokeWidth={2}
+            name="Taxa Acumulada"
+          />
+          {meta > 0 && (
+            <ReferenceLine 
+              y={meta} 
+              stroke="#059669" 
+              strokeDasharray="5 5"
+              strokeWidth={2}
+              label={{ 
+                value: `Meta: ${meta.toFixed(2)}`, 
+                position: "top",
+                offset: 10,
+                style: { 
+                  fontSize: '12px', 
+                  fontWeight: 'bold',
+                  fill: '#059669'
+                }
+              }}
+            />
+          )}
+        </ComposedChart>
+      </ResponsiveContainer>
+    </div>
   );
 };
 
