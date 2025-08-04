@@ -200,6 +200,23 @@ export const updateOcorrencia = async (id: string, formData: any) => {
       updateData.dias_debitados = formData.dias_debitados ? Number(formData.dias_debitados) : null;
     }
     
+    // Processar campos de arquivos/URLs de documentos
+    if (formData.arquivo_cat !== undefined) {
+      updateData.arquivo_cat = formData.arquivo_cat;
+    }
+    
+    if (formData.informe_preliminar !== undefined) {
+      updateData.informe_preliminar = formData.informe_preliminar;
+    }
+    
+    if (formData.relatorio_analise !== undefined) {
+      updateData.relatorio_analise = formData.relatorio_analise;
+    }
+    
+    if (formData.arquivo_licoes_aprendidas !== undefined) {
+      updateData.arquivo_licoes_aprendidas = formData.arquivo_licoes_aprendidas;
+    }
+    
     if (formData.acoes) {
       updateData.acoes = convertAcoesForDatabase(formData.acoes);
       
@@ -248,6 +265,10 @@ export const updateOcorrencia = async (id: string, formData: any) => {
     console.log('agente_causador recebido:', updateData.agente_causador);
     console.log('situacao_geradora recebido:', updateData.situacao_geradora);
     console.log('natureza_lesao recebido:', updateData.natureza_lesao);
+    console.log('arquivo_cat recebido:', updateData.arquivo_cat);
+    console.log('informe_preliminar recebido:', updateData.informe_preliminar);
+    console.log('relatorio_analise recebido:', updateData.relatorio_analise);
+    console.log('arquivo_licoes_aprendidas recebido:', updateData.arquivo_licoes_aprendidas);
     console.log('Update data for database:', updateData);
 
     const { data: result, error } = await supabase

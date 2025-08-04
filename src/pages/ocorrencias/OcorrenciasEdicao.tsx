@@ -110,10 +110,11 @@ const OcorrenciasEdicao = () => {
           classificacaoRisco: data.classificacao_risco || "",
           acoes: acoes,
           investigacao_realizada: data.investigacao_realizada || "",
-          informe_preliminar: data.informe_preliminar || null,
-          relatorio_analise: data.relatorio_analise || null,
+          informe_preliminar: data.informe_preliminar || "",
+          relatorio_analise: data.relatorio_analise || "",
           licoes_aprendidas_enviada: data.licoes_aprendidas_enviada || "",
-          arquivo_licoes_aprendidas: data.arquivo_licoes_aprendidas || null,
+          arquivo_licoes_aprendidas: data.arquivo_licoes_aprendidas || "",
+          arquivo_cat: data.arquivo_cat || "",
         };
         
         console.log('=== DADOS CONVERTIDOS PARA O FORMULÁRIO ===');
@@ -210,6 +211,7 @@ const OcorrenciasEdicao = () => {
           status: acao.status || ""
         })) || [],
         investigacao_realizada: formData.investigacao_realizada,
+        arquivo_cat: formData.arquivo_cat,
         informe_preliminar: formData.informe_preliminar,
         relatorio_analise: formData.relatorio_analise,
         licoes_aprendidas_enviada: formData.licoes_aprendidas_enviada,
