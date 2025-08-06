@@ -69,7 +69,7 @@ const BodyPartLateralityFields: React.FC<BodyPartLateralityFieldsProps> = ({
               <SelectContent>
                 {lateralidades.map((lateral) => (
                   <SelectItem key={lateral.id} value={lateral.nome}>
-                    {lateral.codigo} - {lateral.nome}
+                    {lateral.nome}
                   </SelectItem>
                 ))}
               </SelectContent>
