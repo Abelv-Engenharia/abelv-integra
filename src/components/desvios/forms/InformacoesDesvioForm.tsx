@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useFormContext } from "react-hook-form";
 import {
@@ -73,7 +72,7 @@ const InformacoesDesvioForm = ({ context }: InformacoesDesvioFormProps) => {
                 <SelectContent>
                   {(context.baseLegalOpcoes || []).map(item => (
                     <SelectItem key={item.id} value={item.id.toString()}>
-                      {`${item.codigo} - ${item.nome}`}
+                      {item.nome}
                     </SelectItem>
                   ))}
                 </SelectContent>
