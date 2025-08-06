@@ -29,28 +29,51 @@ export const useCreateUser = () => {
           throw new Error("Este email já está sendo usado por outro usuário");
         }
 
-        // Criar o usuário no auth do Supabase
+        // Criar o usuário no auth do Supabase com retry logic
         console.log("Criando usuário na autenticação...");
-        const { data: authData, error: authError } = await supabase.auth.signUp({
-          email: userData.email,
-          password: userData.password,
-          options: {
-            data: {
-              nome: userData.nome
-            },
-            emailRedirectTo: `${window.location.origin}/`
-          }
-        });
+        let authData, authError;
+        let retryCount = 0;
+        const maxRetries = 3;
 
-        if (authError) {
-          console.error("Erro ao criar usuário na autenticação:", authError);
+        while (retryCount < maxRetries) {
+          const response = await supabase.auth.signUp({
+            email: userData.email,
+            password: userData.password,
+            options: {
+              data: {
+                nome: userData.nome
+              },
+              emailRedirectTo: `${window.location.origin}/`
+            }
+          });
+
+          authData = response.data;
+          authError = response.error;
+
+          if (!authError) {
+            break;
+          }
+
+          // Verificar se é erro de rate limit
           if (authError.message.includes('rate limit') || authError.message.includes('429')) {
-            throw new Error("Limite de criação de usuários atingido. Aguarde alguns minutos antes de tentar novamente.");
+            retryCount++;
+            if (retryCount < maxRetries) {
+              console.log(`Rate limit atingido, tentativa ${retryCount}/${maxRetries}. Aguardando...`);
+              // Aguardar tempo crescente antes de tentar novamente
+              await new Promise(resolve => setTimeout(resolve, 2000 * retryCount));
+              continue;
+            } else {
+              throw new Error("Limite de criação de usuários atingido. Aguarde alguns minutos antes de tentar novamente.");
+            }
           } else if (authError.message.includes('already registered')) {
             throw new Error("Este email já está registrado no sistema.");
           } else {
             throw new Error(`Erro ao criar usuário: ${authError.message}`);
           }
+        }
+
+        if (authError) {
+          throw new Error(`Erro ao criar usuário: ${authError.message}`);
         }
 
         if (!authData?.user?.id) {
@@ -60,7 +83,7 @@ export const useCreateUser = () => {
         console.log("Usuário criado no auth, ID:", authData.user.id);
 
         // Aguardar para garantir consistência
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise(resolve => setTimeout(resolve, 1500));
 
         // Criar perfil na tabela profiles
         console.log("Criando perfil...");
@@ -121,13 +144,22 @@ export const useCreateUser = () => {
     },
     onError: (error: any) => {
       console.error("Erro ao criar usuário:", error);
-      const errorMessage = error?.message || "Erro desconhecido ao criar usuário";
+      let errorMessage = error?.message || "Erro desconhecido ao criar usuário";
+      
+      // Tratar mensagens de erro específicas
+      if (errorMessage.includes('rate limit')) {
+        errorMessage = "Limite de criação de usuários atingido. Aguarde alguns minutos antes de tentar novamente.";
+      } else if (errorMessage.includes('already registered')) {
+        errorMessage = "Este email já está registrado no sistema.";
+      } else if (errorMessage.includes('email já está sendo usado')) {
+        errorMessage = "Este email já está sendo usado por outro usuário.";
+      }
       
       toast({
         title: "❌ Erro ao criar usuário",
         description: errorMessage,
         variant: "destructive",
-        duration: 8000,
+        duration: 10000,
       });
     }
   });
