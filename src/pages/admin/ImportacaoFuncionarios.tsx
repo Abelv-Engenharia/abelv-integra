@@ -2,10 +2,12 @@
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Upload, Download, Users, AlertCircle, CheckCircle, Info } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Upload, Download, Users, AlertCircle, CheckCircle, Info, Code } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ExcelUpload } from "@/components/admin/funcionarios/ExcelUpload";
 import { ImportPreview } from "@/components/admin/funcionarios/ImportPreview";
+import { CCACodesTab } from "@/components/admin/funcionarios/CCACodesTab";
 import { useFuncionarioImport } from "@/hooks/useFuncionarioImport";
 import { FuncionarioImportData } from "@/types/funcionarios";
 import * as XLSX from "xlsx";
@@ -87,98 +89,117 @@ const ImportacaoFuncionarios = () => {
         </Button>
       </div>
 
-      <Alert>
-        <Info className="h-4 w-4" />
-        <AlertDescription>
-          <strong>Instruções:</strong>
-          <ul className="list-disc list-inside mt-2 space-y-1">
-            <li>Baixe o template Excel e preencha com os dados dos funcionários</li>
-            <li>O CPF será usado para identificar funcionários existentes (atualizações)</li>
-            <li>Campos obrigatórios: nome, funcao, matricula, cpf</li>
-            <li>Data de admissão deve estar no formato YYYY-MM-DD (ex: 2024-01-15)</li>
-            <li>CCA deve usar o código do CCA (opcional)</li>
-            <li>Utilize apenas arquivos .xlsx ou .xls</li>
-          </ul>
-        </AlertDescription>
-      </Alert>
+      <Tabs defaultValue="importacao" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="importacao" className="flex items-center gap-2">
+            <Upload className="h-4 w-4" />
+            Importação
+          </TabsTrigger>
+          <TabsTrigger value="codigos-cca" className="flex items-center gap-2">
+            <Code className="h-4 w-4" />
+            Códigos de CCA
+          </TabsTrigger>
+        </TabsList>
 
-      <div className="grid gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Upload className="h-5 w-5" />
-              Upload do Arquivo Excel
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ExcelUpload
-              onFileProcessed={handleFileProcessed}
-              isProcessing={isValidating}
-            />
-          </CardContent>
-        </Card>
+        <TabsContent value="importacao" className="space-y-6">
+          <Alert>
+            <Info className="h-4 w-4" />
+            <AlertDescription>
+              <strong>Instruções:</strong>
+              <ul className="list-disc list-inside mt-2 space-y-1">
+                <li>Baixe o template Excel e preencha com os dados dos funcionários</li>
+                <li>O CPF será usado para identificar funcionários existentes (atualizações)</li>
+                <li>Campos obrigatórios: nome, funcao, matricula, cpf</li>
+                <li>Data de admissão deve estar no formato YYYY-MM-DD (ex: 2024-01-15)</li>
+                <li>CCA deve usar o código do CCA (opcional) - veja a aba "Códigos de CCA"</li>
+                <li>Utilize apenas arquivos .xlsx ou .xls</li>
+              </ul>
+            </AlertDescription>
+          </Alert>
 
-        {validationResults && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Users className="h-5 w-5" />
-                Preview da Importação
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                <div className="flex items-center gap-2 p-3 bg-green-50 rounded-lg">
-                  <CheckCircle className="h-4 w-4 text-green-600" />
-                  <div>
-                    <p className="text-sm text-green-600">Válidos</p>
-                    <p className="font-semibold text-green-700">{validationResults.valid.length}</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-center gap-2 p-3 bg-blue-50 rounded-lg">
-                  <Users className="h-4 w-4 text-blue-600" />
-                  <div>
-                    <p className="text-sm text-blue-600">Atualizações</p>
-                    <p className="font-semibold text-blue-700">{validationResults.updates.length}</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-center gap-2 p-3 bg-red-50 rounded-lg">
-                  <AlertCircle className="h-4 w-4 text-red-600" />
-                  <div>
-                    <p className="text-sm text-red-600">Inválidos</p>
-                    <p className="font-semibold text-red-700">{validationResults.invalid.length}</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-center gap-2 p-3 bg-yellow-50 rounded-lg">
-                  <AlertCircle className="h-4 w-4 text-yellow-600" />
-                  <div>
-                    <p className="text-sm text-yellow-600">Duplicatas no arquivo</p>
-                    <p className="font-semibold text-yellow-700">{validationResults.duplicates.length}</p>
-                  </div>
-                </div>
-              </div>
+          <div className="grid gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Upload className="h-5 w-5" />
+                  Upload do Arquivo Excel
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ExcelUpload
+                  onFileProcessed={handleFileProcessed}
+                  isProcessing={isValidating}
+                />
+              </CardContent>
+            </Card>
 
-              <ImportPreview validationResults={validationResults} />
-              
-              {(validationResults.valid.length > 0 || validationResults.updates.length > 0) && (
-                <div className="mt-6 flex justify-end">
-                  <Button 
-                    onClick={handleImport}
-                    disabled={isImporting}
-                    className="flex items-center gap-2"
-                  >
-                    <Upload className="h-4 w-4" />
-                    {isImporting ? "Importando..." : `Importar ${validationResults.valid.length + validationResults.updates.length} Funcionários`}
-                  </Button>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        )}
-      </div>
+            {validationResults && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Users className="h-5 w-5" />
+                    Preview da Importação
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                    <div className="flex items-center gap-2 p-3 bg-green-50 rounded-lg">
+                      <CheckCircle className="h-4 w-4 text-green-600" />
+                      <div>
+                        <p className="text-sm text-green-600">Válidos</p>
+                        <p className="font-semibold text-green-700">{validationResults.valid.length}</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center gap-2 p-3 bg-blue-50 rounded-lg">
+                      <Users className="h-4 w-4 text-blue-600" />
+                      <div>
+                        <p className="text-sm text-blue-600">Atualizações</p>
+                        <p className="font-semibold text-blue-700">{validationResults.updates.length}</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center gap-2 p-3 bg-red-50 rounded-lg">
+                      <AlertCircle className="h-4 w-4 text-red-600" />
+                      <div>
+                        <p className="text-sm text-red-600">Inválidos</p>
+                        <p className="font-semibold text-red-700">{validationResults.invalid.length}</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center gap-2 p-3 bg-yellow-50 rounded-lg">
+                      <AlertCircle className="h-4 w-4 text-yellow-600" />
+                      <div>
+                        <p className="text-sm text-yellow-600">Duplicatas no arquivo</p>
+                        <p className="font-semibold text-yellow-700">{validationResults.duplicates.length}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <ImportPreview validationResults={validationResults} />
+                  
+                  {(validationResults.valid.length > 0 || validationResults.updates.length > 0) && (
+                    <div className="mt-6 flex justify-end">
+                      <Button 
+                        onClick={handleImport}
+                        disabled={isImporting}
+                        className="flex items-center gap-2"
+                      >
+                        <Upload className="h-4 w-4" />
+                        {isImporting ? "Importando..." : `Importar ${validationResults.valid.length + validationResults.updates.length} Funcionários`}
+                      </Button>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        </TabsContent>
+
+        <TabsContent value="codigos-cca">
+          <CCACodesTab />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
