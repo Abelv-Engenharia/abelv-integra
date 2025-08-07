@@ -1,101 +1,110 @@
 
-import React, { useEffect, useState } from "react";
-import { Card } from "@/components/ui/card";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
-import { supabase } from "@/integrations/supabase/client";
-import { Badge } from "@/components/ui/badge";
-import { Loader } from "lucide-react";
+import React from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
+import { TrendingUp, TrendingDown, AlertTriangle, CheckCircle } from 'lucide-react';
 
-type Plano = {
-  id: string;
-  nome: string;
-  criado_em: string;
+// Mock data - replace with real data later
+const indicadores = [
+  {
+    id: 1,
+    nome: 'Taxa de Frequência',
+    valor: 2.5,
+    meta: 3.0,
+    status: 'ok',
+    tendencia: 'down',
+    periodo: 'Últimos 12 meses'
+  },
+  {
+    id: 2,
+    nome: 'Taxa de Gravidade',
+    valor: 45.2,
+    meta: 50.0,
+    status: 'ok',
+    tendencia: 'up',
+    periodo: 'Últimos 12 meses'
+  },
+  {
+    id: 3,
+    nome: 'Desvios Abertos',
+    valor: 15,
+    meta: 10,
+    status: 'atencao',
+    tendencia: 'up',
+    periodo: 'Atual'
+  }
+];
+
+const getStatusBadge = (status: string) => {
+  switch (status) {
+    case 'ok':
+      return <Badge variant="default" className="bg-green-100 text-green-800">Dentro da Meta</Badge>;
+    case 'atencao':
+      return <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">Atenção</Badge>;
+    case 'critico':
+      return <Badge variant="destructive">Crítico</Badge>;
+    default:
+      return <Badge variant="outline">-</Badge>;
+  }
 };
 
-type Medida = {
-  id: string;
-  tipo: string;
-  status: string;
+const getStatusIcon = (status: string) => {
+  switch (status) {
+    case 'ok':
+      return <CheckCircle className="h-4 w-4 text-green-500" />;
+    case 'atencao':
+      return <AlertTriangle className="h-4 w-4 text-yellow-500" />;
+    case 'critico':
+      return <AlertTriangle className="h-4 w-4 text-red-500" />;
+    default:
+      return null;
+  }
 };
 
-const STATUS_LABELS: Record<string, string> = {
-  "pendente": "Pendente",
-  "em andamento": "Em Andamento",
-  "concluída": "Concluída",
-  "não eficaz": "Não Eficaz"
+const getTrendIcon = (tendencia: string) => {
+  return tendencia === 'up' ? 
+    <TrendingUp className="h-4 w-4 text-red-500" /> : 
+    <TrendingDown className="h-4 w-4 text-green-500" />;
 };
 
-export default function PGRDashboardIndicadores() {
-  const [planos, setPlanos] = useState<Plano[]>([]);
-  const [medidas, setMedidas] = useState<Medida[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    async function loadData() {
-      setLoading(true);
-      const planosRes = await supabase.from("pgr_planos").select("id, nome, criado_em");
-      const medidasRes = await supabase.from("pgr_medidas").select("id, tipo, status");
-      setPlanos(planosRes.data || []);
-      setMedidas(medidasRes.data || []);
-      setLoading(false);
-    }
-    loadData();
-  }, []);
-
-  // Calcular medidas por status
-  const statusData = Object.keys(STATUS_LABELS).map(status => ({
-    status: STATUS_LABELS[status],
-    total: medidas.filter(m => m.status === status).length
-  }));
-
-  // Total de bloqueios/pendências
-  const medidasPendentes = medidas.filter(m => m.status === "pendente" || m.status === "em andamento").length;
-  const medidasConcluidas = medidas.filter(m => m.status === "concluída").length;
-  const medidasNaoEficaz = medidas.filter(m => m.status === "não eficaz").length;
-
+export const PGRDashboardIndicadores = () => {
   return (
-    <Card className="p-4 mb-6">
-      <h3 className="font-semibold text-lg mb-3">Indicadores do PGR (Programa de Gerenciamento de Riscos)</h3>
-      {loading ? (
-        <div className="flex items-center gap-2 text-muted-foreground">
-          <Loader className="animate-spin" /> Carregando indicadores...
-        </div>
-      ) : (
-        <div className="flex flex-col md:flex-row gap-6">
-          <div className="flex-1 flex flex-col gap-2">
-            <div>
-              <span className="font-medium">Planos cadastrados:</span>
-              <Badge className="ml-2">{planos.length}</Badge>
-            </div>
-            <div>
-              <span className="font-medium">Medidas cadastradas:</span>
-              <Badge variant="secondary" className="ml-2">{medidas.length}</Badge>
-            </div>
-            <div>
-              <span className="font-medium">Medidas pendentes/em andamento:</span>
-              <Badge variant="destructive" className="ml-2">{medidasPendentes}</Badge>
-            </div>
-            <div>
-              <span className="font-medium">Concluídas:</span>
-              <Badge variant="success" className="ml-2">{medidasConcluidas}</Badge>
-            </div>
-            <div>
-              <span className="font-medium">Não eficaz:</span>
-              <Badge className="ml-2 bg-yellow-400">{medidasNaoEficaz}</Badge>
-            </div>
-          </div>
-          <div className="flex-1 min-w-[240px]">
-            <ResponsiveContainer width="100%" height={160}>
-              <BarChart data={statusData}>
-                <XAxis dataKey="status" />
-                <YAxis allowDecimals={false} />
-                <Tooltip />
-                <Bar dataKey="total" fill="#2563eb" radius={[4,4,0,0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-      )}
-    </Card>
+    <div className="space-y-6">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {indicadores.map((indicador) => (
+          <Card key={indicador.id}>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                {indicador.nome}
+              </CardTitle>
+              <div className="flex items-center gap-2">
+                {getStatusIcon(indicador.status)}
+                {getTrendIcon(indicador.tendencia)}
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{indicador.valor}</div>
+              <p className="text-xs text-muted-foreground">
+                Meta: {indicador.meta} | {indicador.periodo}
+              </p>
+              <div className="mt-4">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs">Progresso</span>
+                  <span className="text-xs">{Math.round((indicador.valor / indicador.meta) * 100)}%</span>
+                </div>
+                <Progress 
+                  value={(indicador.valor / indicador.meta) * 100} 
+                  className="w-full"
+                />
+              </div>
+              <div className="mt-3">
+                {getStatusBadge(indicador.status)}
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </div>
   );
-}
+};

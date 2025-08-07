@@ -63,7 +63,7 @@ export const desviosCompletosService = {
         return [];
       }
       
-      return (data || []).map(item => ({
+      return (data || []).map((item: any) => ({
         ...item,
         funcionarios_envolvidos: Array.isArray(item.funcionarios_envolvidos) ? item.funcionarios_envolvidos : [],
         acoes: Array.isArray(item.acoes) ? item.acoes : []

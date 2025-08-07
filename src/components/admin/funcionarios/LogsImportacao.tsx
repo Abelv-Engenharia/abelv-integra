@@ -22,7 +22,7 @@ interface LogImportacao {
   profiles?: {
     nome: string;
     email: string;
-  };
+  } | null;
 }
 
 const fetchLogsImportacao = async (): Promise<LogImportacao[]> => {
@@ -43,7 +43,10 @@ const fetchLogsImportacao = async (): Promise<LogImportacao[]> => {
     throw error;
   }
 
-  return data || [];
+  return (data || []).map(item => ({
+    ...item,
+    profiles: item.profiles || null
+  }));
 };
 
 export const LogsImportacao = () => {
@@ -151,7 +154,7 @@ export const LogsImportacao = () => {
                             {log.profiles?.nome || 'Usuário não encontrado'}
                           </div>
                           <div className="text-sm text-gray-500">
-                            {log.profiles?.email}
+                            {log.profiles?.email || ''}
                           </div>
                         </div>
                       </div>
