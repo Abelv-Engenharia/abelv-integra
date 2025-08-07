@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import PGRMedidasForm from "@/components/gro/PGRMedidasForm";
 import { toast } from "@/hooks/use-toast";
-import PGRDashboardIndicadores from "@/components/gro/PGRDashboardIndicadores";
+import { PGRDashboardIndicadores } from "@/components/gro/PGRDashboardIndicadores";
 
 type Plano = {
   id: string;

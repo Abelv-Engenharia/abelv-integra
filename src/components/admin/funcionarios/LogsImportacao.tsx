@@ -19,22 +19,14 @@ interface LogImportacao {
   status: string;
   detalhes_erro?: string;
   nome_arquivo?: string;
-  profiles?: {
-    nome: string;
-    email: string;
-  } | null;
+  usuario_id: string;
+  created_at: string;
 }
 
 const fetchLogsImportacao = async (): Promise<LogImportacao[]> => {
   const { data, error } = await supabase
     .from('logs_importacao_funcionarios')
-    .select(`
-      *,
-      profiles (
-        nome,
-        email
-      )
-    `)
+    .select('*')
     .order('data_importacao', { ascending: false })
     .limit(50);
 
@@ -43,10 +35,7 @@ const fetchLogsImportacao = async (): Promise<LogImportacao[]> => {
     throw error;
   }
 
-  return (data || []).map(item => ({
-    ...item,
-    profiles: item.profiles || null
-  }));
+  return data || [];
 };
 
 export const LogsImportacao = () => {
@@ -151,10 +140,7 @@ export const LogsImportacao = () => {
                         <User className="h-4 w-4 text-gray-400" />
                         <div>
                           <div className="font-medium">
-                            {log.profiles?.nome || 'Usuário não encontrado'}
-                          </div>
-                          <div className="text-sm text-gray-500">
-                            {log.profiles?.email || ''}
+                            {log.usuario_id}
                           </div>
                         </div>
                       </div>
