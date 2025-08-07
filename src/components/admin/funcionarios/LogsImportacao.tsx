@@ -21,10 +21,10 @@ interface LogImportacao {
   nome_arquivo?: string;
   usuario_id: string;
   created_at: string;
-  profiles?: {
+  profiles: {
     nome: string;
     email: string;
-  };
+  } | null;
 }
 
 const fetchLogsImportacao = async (): Promise<LogImportacao[]> => {
