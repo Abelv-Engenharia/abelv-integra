@@ -1,4 +1,3 @@
-
 import React, { useCallback, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,20 +20,78 @@ export const ExcelUpload: React.FC<ExcelUploadProps> = ({
   const [dragActive, setDragActive] = useState(false);
   const { toast } = useToast();
 
+  // Função para converter data do Excel para formato YYYY-MM-DD
+  const convertExcelDate = (value: any): string | undefined => {
+    if (!value) return undefined;
+    
+    // Se já é uma string no formato correto
+    if (typeof value === 'string') {
+      // Tentar diferentes formatos de data
+      const dateFormats = [
+        /^\d{4}-\d{2}-\d{2}$/,  // YYYY-MM-DD
+        /^\d{2}\/\d{2}\/\d{4}$/, // DD/MM/YYYY
+        /^\d{4}\/\d{2}\/\d{2}$/, // YYYY/MM/DD
+      ];
+      
+      if (dateFormats[0].test(value)) {
+        return value; // Já está correto
+      }
+      
+      if (dateFormats[1].test(value)) {
+        // DD/MM/YYYY para YYYY-MM-DD
+        const [day, month, year] = value.split('/');
+        return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+      }
+      
+      if (dateFormats[2].test(value)) {
+        // YYYY/MM/DD para YYYY-MM-DD
+        return value.replace(/\//g, '-');
+      }
+      
+      // Tentar parsear como data
+      const date = new Date(value);
+      if (!isNaN(date.getTime())) {
+        return date.toISOString().split('T')[0];
+      }
+    }
+    
+    // Se é um número (formato serial do Excel)
+    if (typeof value === 'number') {
+      const date = XLSX.SSF.parse_date_code(value);
+      if (date) {
+        const year = date.y;
+        const month = String(date.m).padStart(2, '0');
+        const day = String(date.d).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+      }
+    }
+    
+    // Se é uma instância de Date
+    if (value instanceof Date && !isNaN(value.getTime())) {
+      return value.toISOString().split('T')[0];
+    }
+    
+    return undefined;
+  };
+
   const processExcelFile = useCallback((file: File) => {
     const reader = new FileReader();
     
     reader.onload = (e) => {
       try {
         const data = new Uint8Array(e.target?.result as ArrayBuffer);
-        const workbook = XLSX.read(data, { type: 'array' });
+        const workbook = XLSX.read(data, { type: 'array', cellDates: true });
         
         // Usar a primeira planilha
         const firstSheetName = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[firstSheetName];
         
-        // Converter para JSON
-        const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+        // Converter para JSON mantendo os tipos originais
+        const jsonData = XLSX.utils.sheet_to_json(worksheet, { 
+          header: 1,
+          defval: '',
+          raw: false // Isso vai formatar as datas como strings
+        });
         
         if (jsonData.length < 2) {
           toast({
@@ -45,8 +102,12 @@ export const ExcelUpload: React.FC<ExcelUploadProps> = ({
           return;
         }
 
-        const headers = (jsonData[0] as string[]).map(h => h?.toString().trim().toLowerCase() || '');
+        const headers = (jsonData[0] as string[]).map(h => 
+          h?.toString().trim().toLowerCase().replace(/\s+/g, '_') || ''
+        );
         const funcionarios: FuncionarioImportData[] = [];
+
+        console.log('Headers encontrados:', headers);
 
         for (let i = 1; i < jsonData.length; i++) {
           const values = jsonData[i] as any[];
@@ -55,24 +116,39 @@ export const ExcelUpload: React.FC<ExcelUploadProps> = ({
 
           const rowData: any = {};
           headers.forEach((header, index) => {
-            rowData[header] = values[index]?.toString().trim() || '';
+            const value = values[index];
+            rowData[header] = value !== undefined && value !== null ? String(value).trim() : '';
           });
 
-          // Mapear campos
+          console.log('Dados da linha:', i, rowData);
+
+          // Processar data de admissão
+          let dataAdmissao: string | undefined;
+          if (rowData.data_admissao || rowData.data_de_admissao || rowData.admissao) {
+            const dateField = rowData.data_admissao || rowData.data_de_admissao || rowData.admissao;
+            dataAdmissao = convertExcelDate(dateField);
+            console.log('Data original:', dateField, 'Data convertida:', dataAdmissao);
+          }
+
+          // Mapear campos com mais flexibilidade
           const funcionario: FuncionarioImportData = {
             nome: rowData.nome || '',
-            funcao: rowData.funcao || '',
-            matricula: rowData.matricula || '',
+            funcao: rowData.funcao || rowData.função || '',
+            matricula: rowData.matricula || rowData.matrícula || '',
             cpf: rowData.cpf || '',
-            cca_codigo: rowData.cca_codigo || undefined,
-            data_admissao: rowData.data_admissao || undefined
+            cca_codigo: rowData.cca_codigo || rowData.cca_código || rowData.cca || undefined,
+            data_admissao: dataAdmissao
           };
+
+          console.log('Funcionário processado:', funcionario);
 
           // Só adicionar se pelo menos o nome estiver preenchido
           if (funcionario.nome.trim()) {
             funcionarios.push(funcionario);
           }
         }
+
+        console.log('Total de funcionários processados:', funcionarios.length);
 
         if (funcionarios.length > 0) {
           onFileProcessed(funcionarios);
