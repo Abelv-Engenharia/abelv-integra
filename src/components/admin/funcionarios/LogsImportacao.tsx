@@ -32,7 +32,7 @@ const fetchLogsImportacao = async (): Promise<LogImportacao[]> => {
     .from('logs_importacao_funcionarios')
     .select(`
       *,
-      profiles:usuario_id (
+      profiles!logs_importacao_funcionarios_usuario_id_fkey (
         nome,
         email
       )
@@ -45,11 +45,8 @@ const fetchLogsImportacao = async (): Promise<LogImportacao[]> => {
     throw error;
   }
 
-  // Process the data to handle potential null profiles
-  return (data || []).map(item => ({
-    ...item,
-    profiles: item.profiles || null
-  }));
+  // Return the data as is, since the foreign key relationship should now work correctly
+  return data || [];
 };
 
 export const LogsImportacao = () => {

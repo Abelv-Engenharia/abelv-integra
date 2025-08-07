@@ -1329,7 +1329,15 @@ export type Database = {
           updated_at?: string
           usuario_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "logs_importacao_funcionarios_usuario_id_fkey"
+            columns: ["usuario_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       medidas_disciplinares: {
         Row: {
@@ -2491,6 +2499,10 @@ export type Database = {
           ano: number
           total_horas: number
         }[]
+      }
+      populate_missing_profiles: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
       }
       processar_configuracoes_emails: {
         Args: Record<PropertyKey, never>
