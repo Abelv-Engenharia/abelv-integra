@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -49,7 +50,8 @@ export const useFuncionarioImport = () => {
       // Criar mapa de códigos CCA (case insensitive)
       const validCcaCodigos = new Map();
       ccas?.forEach(c => {
-        validCcaCodigos.set(c.codigo.toLowerCase().trim(), c.codigo);
+        const codigoLimpo = c.codigo.toLowerCase().trim();
+        validCcaCodigos.set(codigoLimpo, c.codigo);
       });
 
       console.log('CCAs válidos encontrados:', ccas?.map(c => c.codigo));
@@ -81,11 +83,14 @@ export const useFuncionarioImport = () => {
           }
         }
 
-        // Validar CCA se fornecido (case insensitive)
+        // Validar CCA se fornecido (case insensitive e trim)
         if (item.cca_codigo) {
           const ccaCodigoLower = item.cca_codigo.toLowerCase().trim();
           if (!validCcaCodigos.has(ccaCodigoLower)) {
             errors.push(`Código do CCA "${item.cca_codigo}" não encontrado. Códigos válidos: ${Array.from(validCcaCodigos.values()).join(', ')}`);
+          } else {
+            // Normalizar o código CCA para o valor correto
+            item.cca_codigo = validCcaCodigos.get(ccaCodigoLower);
           }
         }
 
@@ -167,12 +172,15 @@ export const useFuncionarioImport = () => {
 
       if (ccaError) throw ccaError;
 
-      const ccaMap = new Map(ccas?.map(c => [c.codigo, c.id]) || []);
+      const ccaMap = new Map(ccas?.map(c => [c.codigo.toLowerCase().trim(), c.id]) || []);
+      console.log('Mapa de CCAs para atualização:', Array.from(ccaMap.entries()));
 
       // Processar novos funcionários
       for (const funcionario of newFuncionarios) {
         try {
-          const ccaId = funcionario.cca_codigo ? ccaMap.get(funcionario.cca_codigo) : null;
+          const ccaId = funcionario.cca_codigo ? ccaMap.get(funcionario.cca_codigo.toLowerCase().trim()) : null;
+          
+          console.log('Criando funcionário:', funcionario.nome, 'CCA:', funcionario.cca_codigo, 'CCA ID:', ccaId);
           
           const { error } = await supabase
             .from('funcionarios')
@@ -187,11 +195,13 @@ export const useFuncionarioImport = () => {
             });
 
           if (error) {
+            console.error('Erro ao criar funcionário:', error);
             results.errors.push(`Erro ao criar ${funcionario.nome}: ${error.message}`);
           } else {
             results.created++;
           }
         } catch (error) {
+          console.error('Erro inesperado ao criar funcionário:', error);
           results.errors.push(`Erro ao criar ${funcionario.nome}: ${error}`);
         }
       }
@@ -199,29 +209,45 @@ export const useFuncionarioImport = () => {
       // Processar atualizações
       for (const funcionario of updateFuncionarios) {
         try {
-          const ccaId = funcionario.cca_codigo ? ccaMap.get(funcionario.cca_codigo) : null;
+          const ccaId = funcionario.cca_codigo ? ccaMap.get(funcionario.cca_codigo.toLowerCase().trim()) : null;
           
-          const { error } = await supabase
+          console.log('Atualizando funcionário:', funcionario.nome, 'CPF:', funcionario.cpf, 'CCA:', funcionario.cca_codigo, 'CCA ID:', ccaId);
+          
+          const updateData: any = {
+            nome: funcionario.nome,
+            funcao: funcionario.funcao,
+            matricula: funcionario.matricula,
+            data_admissao: funcionario.data_admissao || null
+          };
+
+          // Só adicionar cca_id se houver código CCA válido
+          if (funcionario.cca_codigo && ccaId) {
+            updateData.cca_id = ccaId;
+          }
+
+          const { error, data: updateResult } = await supabase
             .from('funcionarios')
-            .update({
-              nome: funcionario.nome,
-              funcao: funcionario.funcao,
-              matricula: funcionario.matricula,
-              cca_id: ccaId,
-              data_admissao: funcionario.data_admissao || null
-            })
-            .eq('cpf', funcionario.cpf);
+            .update(updateData)
+            .eq('cpf', funcionario.cpf)
+            .select();
 
           if (error) {
+            console.error('Erro ao atualizar funcionário:', error);
             results.errors.push(`Erro ao atualizar ${funcionario.nome}: ${error.message}`);
-          } else {
+          } else if (updateResult && updateResult.length > 0) {
+            console.log('Funcionário atualizado com sucesso:', updateResult[0]);
             results.updated++;
+          } else {
+            console.warn('Nenhum funcionário foi atualizado para CPF:', funcionario.cpf);
+            results.errors.push(`Funcionário ${funcionario.nome} com CPF ${funcionario.cpf} não foi encontrado para atualização`);
           }
         } catch (error) {
+          console.error('Erro inesperado ao atualizar funcionário:', error);
           results.errors.push(`Erro ao atualizar ${funcionario.nome}: ${error}`);
         }
       }
 
+      console.log('Resultado final da importação:', results);
       return results;
     },
     onSuccess: (results) => {
