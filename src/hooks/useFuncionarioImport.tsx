@@ -13,27 +13,38 @@ export const useFuncionarioImport = () => {
     setIsValidating(true);
     
     try {
+      console.log('Iniciando validação de', data.length, 'registros');
+      console.log('Dados recebidos:', data);
+
+      if (!data || data.length === 0) {
+        throw new Error('Nenhum dado foi encontrado no arquivo. Verifique se o arquivo está no formato correto.');
+      }
+
       const valid: FuncionarioImportData[] = [];
       const invalid: { data: FuncionarioImportData; errors: string[] }[] = [];
       const duplicates: FuncionarioImportData[] = [];
       const updates: FuncionarioImportData[] = [];
       const seenCpfs = new Set<string>();
 
-      console.log('Iniciando validação de', data.length, 'registros');
-
       // Buscar funcionários existentes por CPF
       const cpfs = data.filter(d => d.cpf).map(d => d.cpf);
-      const { data: existingFuncionarios, error } = await supabase
-        .from('funcionarios')
-        .select('cpf')
-        .in('cpf', cpfs);
+      console.log('CPFs para verificar:', cpfs);
+      
+      let existingCpfs = new Set<string>();
+      if (cpfs.length > 0) {
+        const { data: existingFuncionarios, error } = await supabase
+          .from('funcionarios')
+          .select('cpf')
+          .in('cpf', cpfs);
 
-      if (error) {
-        console.error('Erro ao buscar funcionários existentes:', error);
-        throw error;
+        if (error) {
+          console.error('Erro ao buscar funcionários existentes:', error);
+          throw new Error(`Erro ao verificar funcionários existentes: ${error.message}`);
+        }
+
+        existingCpfs = new Set(existingFuncionarios?.map(f => f.cpf) || []);
+        console.log('CPFs existentes encontrados:', Array.from(existingCpfs));
       }
-
-      const existingCpfs = new Set(existingFuncionarios?.map(f => f.cpf) || []);
 
       // Buscar CCAs válidos
       const { data: ccas, error: ccaError } = await supabase
@@ -43,7 +54,7 @@ export const useFuncionarioImport = () => {
 
       if (ccaError) {
         console.error('Erro ao buscar CCAs:', ccaError);
-        throw ccaError;
+        throw new Error(`Erro ao carregar códigos de CCA: ${ccaError.message}`);
       }
 
       // Criar mapa de códigos CCA (case insensitive)
@@ -56,22 +67,36 @@ export const useFuncionarioImport = () => {
       console.log('CCAs válidos encontrados:', ccas?.map(c => c.codigo));
 
       // Validar cada registro
-      for (const item of data) {
+      for (let i = 0; i < data.length; i++) {
+        const item = data[i];
         const errors: string[] = [];
 
-        console.log('Validando item:', item);
+        console.log(`Validando item ${i + 1}:`, item);
+
+        // Verificar se o item não está vazio
+        if (!item || Object.keys(item).length === 0) {
+          console.log(`Item ${i + 1} está vazio, pulando...`);
+          continue;
+        }
 
         // Validar campos obrigatórios
-        if (!item.nome?.trim()) errors.push('Nome é obrigatório');
-        if (!item.funcao?.trim()) errors.push('Função é obrigatória');
-        if (!item.matricula?.trim()) errors.push('Matrícula é obrigatória');
-        if (!item.cpf?.trim()) errors.push('CPF é obrigatório');
+        if (!item.nome || typeof item.nome !== 'string' || !item.nome.trim()) {
+          errors.push('Nome é obrigatório');
+        }
+        if (!item.funcao || typeof item.funcao !== 'string' || !item.funcao.trim()) {
+          errors.push('Função é obrigatória');
+        }
+        if (!item.matricula || typeof item.matricula !== 'string' || !item.matricula.trim()) {
+          errors.push('Matrícula é obrigatória');
+        }
+        if (!item.cpf || typeof item.cpf !== 'string' || !item.cpf.trim()) {
+          errors.push('CPF é obrigatório');
+        }
 
         // Validar formato do CPF
-        if (item.cpf) {
+        if (item.cpf && typeof item.cpf === 'string') {
           const cpfLimpo = item.cpf.replace(/\D/g, '');
           
-          // Aceitar CPF com ou sem formatação
           if (cpfLimpo.length !== 11) {
             errors.push('CPF deve conter 11 dígitos');
           } else {
@@ -83,7 +108,7 @@ export const useFuncionarioImport = () => {
         }
 
         // Validar CCA se fornecido (case insensitive e trim)
-        if (item.cca_codigo) {
+        if (item.cca_codigo && typeof item.cca_codigo === 'string') {
           const ccaCodigoLower = item.cca_codigo.toLowerCase().trim();
           if (!validCcaCodigos.has(ccaCodigoLower)) {
             errors.push(`Código do CCA "${item.cca_codigo}" não encontrado. Códigos válidos: ${Array.from(validCcaCodigos.values()).join(', ')}`);
@@ -95,21 +120,26 @@ export const useFuncionarioImport = () => {
 
         // Validar data de admissão se fornecida
         if (item.data_admissao) {
-          const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
-          if (!dateRegex.test(item.data_admissao)) {
-            errors.push(`Data de admissão "${item.data_admissao}" deve estar no formato YYYY-MM-DD (ex: 2024-01-15)`);
-          } else {
-            // Validar se é uma data válida
-            const date = new Date(item.data_admissao);
-            if (isNaN(date.getTime())) {
-              errors.push(`Data de admissão "${item.data_admissao}" não é uma data válida`);
+          if (typeof item.data_admissao === 'string') {
+            const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+            if (!dateRegex.test(item.data_admissao)) {
+              errors.push(`Data de admissão "${item.data_admissao}" deve estar no formato YYYY-MM-DD (ex: 2024-01-15)`);
+            } else {
+              // Validar se é uma data válida
+              const date = new Date(item.data_admissao);
+              if (isNaN(date.getTime())) {
+                errors.push(`Data de admissão "${item.data_admissao}" não é uma data válida`);
+              }
             }
+          } else {
+            errors.push(`Data de admissão deve ser uma string no formato YYYY-MM-DD`);
           }
         }
 
         // Verificar duplicatas no arquivo
         if (item.cpf && seenCpfs.has(item.cpf)) {
           duplicates.push(item);
+          console.log(`CPF duplicado encontrado no arquivo: ${item.cpf}`);
           continue;
         }
         
@@ -119,13 +149,13 @@ export const useFuncionarioImport = () => {
 
         if (errors.length > 0) {
           invalid.push({ data: item, errors });
-          console.log('Item inválido:', item, 'Erros:', errors);
+          console.log(`Item ${i + 1} inválido:`, item, 'Erros:', errors);
         } else if (item.cpf && existingCpfs.has(item.cpf)) {
           updates.push(item);
-          console.log('Item para atualização:', item);
+          console.log(`Item ${i + 1} para atualização:`, item);
         } else {
           valid.push(item);
-          console.log('Item válido:', item);
+          console.log(`Item ${i + 1} válido:`, item);
         }
       }
 
@@ -138,9 +168,16 @@ export const useFuncionarioImport = () => {
 
       return { valid, invalid, duplicates, updates };
     } catch (error) {
+      console.error('Erro detalhado na validação:', error);
+      
+      let errorMessage = 'Erro ao validar os dados importados.';
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+      
       toast({
         title: "Erro na validação",
-        description: "Erro ao validar os dados importados.",
+        description: errorMessage,
         variant: "destructive",
       });
       throw error;

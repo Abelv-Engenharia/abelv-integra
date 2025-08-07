@@ -1,9 +1,11 @@
+
 import React, { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Upload, FileSpreadsheet, X } from "lucide-react";
+import { Upload, FileSpreadsheet, X, AlertCircle } from "lucide-react";
 import { FuncionarioImportData } from "@/types/funcionarios";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import * as XLSX from "xlsx";
 
 interface ExcelUploadProps {
@@ -13,6 +15,7 @@ interface ExcelUploadProps {
 
 export const ExcelUpload = ({ onFileProcessed, isProcessing }: ExcelUploadProps) => {
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [processingError, setProcessingError] = useState<string | null>(null);
 
   const parseExcelDate = (excelDate: number): string | null => {
     if (typeof excelDate !== 'number') {
@@ -31,6 +34,7 @@ export const ExcelUpload = ({ onFileProcessed, isProcessing }: ExcelUploadProps)
     const file = acceptedFiles[0];
     if (file) {
       setUploadedFile(file);
+      setProcessingError(null);
       await processFile(file);
     }
   }, []);
@@ -38,45 +42,76 @@ export const ExcelUpload = ({ onFileProcessed, isProcessing }: ExcelUploadProps)
   const processFile = async (file: File) => {
     try {
       console.log('Processando arquivo:', file.name);
+      
+      // Verificar se o arquivo é válido
+      if (!file.name.match(/\.(xlsx|xls)$/i)) {
+        throw new Error('Arquivo deve ser do tipo Excel (.xlsx ou .xls)');
+      }
+
       const arrayBuffer = await file.arrayBuffer();
       const workbook = XLSX.read(arrayBuffer);
+      
+      if (!workbook.SheetNames || workbook.SheetNames.length === 0) {
+        throw new Error('O arquivo Excel não contém planilhas válidas');
+      }
+
       const worksheet = workbook.Sheets[workbook.SheetNames[0]];
       const rawData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
 
-      const headerMap: { [key: string]: string } = {
-        nome: 'nome',
-        funcao: 'funcao',
-        matricula: 'matricula',
-        cpf: 'cpf',
-        cca_codigo: 'cca_codigo',
-        data_admissao: 'data_admissao'
-      };
+      console.log('Dados brutos extraídos:', rawData);
 
-      const data: FuncionarioImportData[] = rawData.slice(1).map((row: any) => {
+      if (!rawData || rawData.length === 0) {
+        throw new Error('A planilha está vazia');
+      }
+
+      if (rawData.length < 2) {
+        throw new Error('A planilha deve conter pelo menos uma linha de cabeçalho e uma linha de dados');
+      }
+
+      // Verificar se há dados após o cabeçalho
+      const dataRows = rawData.slice(1).filter(row => row && Array.isArray(row) && row.some(cell => cell !== null && cell !== undefined && cell !== ''));
+      
+      if (dataRows.length === 0) {
+        throw new Error('Não foram encontradas linhas de dados válidas na planilha');
+      }
+
+      const data: FuncionarioImportData[] = dataRows.map((row: any, index: number) => {
+        console.log(`Processando linha ${index + 2}:`, row);
+        
         const item: FuncionarioImportData = {
-          nome: row[0],
-          funcao: row[1],
-          matricula: row[2],
-          cpf: row[3],
-          cca_codigo: row[4],
+          nome: row[0] ? String(row[0]).trim() : '',
+          funcao: row[1] ? String(row[1]).trim() : '',
+          matricula: row[2] ? String(row[2]).trim() : '',
+          cpf: row[3] ? String(row[3]).trim() : '',
+          cca_codigo: row[4] ? String(row[4]).trim() : '',
         };
 
+        // Processar data de admissão
         if (row[5]) {
           if (typeof row[5] === 'number') {
             const parsedDate = parseExcelDate(row[5]);
             item.data_admissao = parsedDate;
+          } else if (typeof row[5] === 'string') {
+            item.data_admissao = row[5].trim();
           } else {
-            item.data_admissao = row[5];
+            console.warn(`Data de admissão inválida na linha ${index + 2}:`, row[5]);
           }
         }
 
         return item;
       });
 
-      console.log('Dados processados com sucesso:', data.length, 'registros');
-      onFileProcessed(data, file.name); // Passar o nome do arquivo
+      console.log('Dados processados:', data);
+
+      if (data.length === 0) {
+        throw new Error('Nenhum registro válido foi encontrado no arquivo');
+      }
+
+      onFileProcessed(data, file.name);
     } catch (error) {
       console.error('Erro ao processar arquivo Excel:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido ao processar o arquivo';
+      setProcessingError(errorMessage);
     }
   };
 
@@ -92,6 +127,7 @@ export const ExcelUpload = ({ onFileProcessed, isProcessing }: ExcelUploadProps)
 
   const handleRemoveFile = () => {
     setUploadedFile(null);
+    setProcessingError(null);
   };
 
   return (
@@ -113,7 +149,16 @@ export const ExcelUpload = ({ onFileProcessed, isProcessing }: ExcelUploadProps)
         </div>
       </div>
 
-      {uploadedFile && (
+      {processingError && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            <strong>Erro ao processar arquivo:</strong> {processingError}
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {uploadedFile && !processingError && (
         <Card>
           <CardContent className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
