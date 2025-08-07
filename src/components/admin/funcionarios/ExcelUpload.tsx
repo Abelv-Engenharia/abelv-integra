@@ -1,301 +1,131 @@
 import React, { useCallback, useState } from "react";
+import { useDropzone } from "react-dropzone";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Upload, FileText, X } from "lucide-react";
+import { Upload, FileSpreadsheet, X } from "lucide-react";
 import { FuncionarioImportData } from "@/types/funcionarios";
-import { useToast } from "@/hooks/use-toast";
 import * as XLSX from "xlsx";
 
 interface ExcelUploadProps {
-  onFileProcessed: (data: FuncionarioImportData[]) => void;
-  isProcessing: boolean;
+  onFileProcessed: (data: FuncionarioImportData[], fileName?: string) => void;
+  isProcessing?: boolean;
 }
 
-export const ExcelUpload: React.FC<ExcelUploadProps> = ({
-  onFileProcessed,
-  isProcessing
-}) => {
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [dragActive, setDragActive] = useState(false);
-  const { toast } = useToast();
+export const ExcelUpload = ({ onFileProcessed, isProcessing }: ExcelUploadProps) => {
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
 
-  // Função para converter data do Excel para formato YYYY-MM-DD
-  const convertExcelDate = (value: any): string | undefined => {
-    if (!value) return undefined;
-    
-    // Se já é uma string no formato correto
-    if (typeof value === 'string') {
-      // Tentar diferentes formatos de data
-      const dateFormats = [
-        /^\d{4}-\d{2}-\d{2}$/,  // YYYY-MM-DD
-        /^\d{2}\/\d{2}\/\d{4}$/, // DD/MM/YYYY
-        /^\d{4}\/\d{2}\/\d{2}$/, // YYYY/MM/DD
-      ];
-      
-      if (dateFormats[0].test(value)) {
-        return value; // Já está correto
-      }
-      
-      if (dateFormats[1].test(value)) {
-        // DD/MM/YYYY para YYYY-MM-DD
-        const [day, month, year] = value.split('/');
-        return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
-      }
-      
-      if (dateFormats[2].test(value)) {
-        // YYYY/MM/DD para YYYY-MM-DD
-        return value.replace(/\//g, '-');
-      }
-      
-      // Tentar parsear como data
-      const date = new Date(value);
-      if (!isNaN(date.getTime())) {
-        return date.toISOString().split('T')[0];
-      }
+  const parseExcelDate = (excelDate: number): string | null => {
+    if (typeof excelDate !== 'number') {
+      return null;
     }
-    
-    // Se é um número (formato serial do Excel)
-    if (typeof value === 'number') {
-      const date = XLSX.SSF.parse_date_code(value);
-      if (date) {
-        const year = date.y;
-        const month = String(date.m).padStart(2, '0');
-        const day = String(date.d).padStart(2, '0');
-        return `${year}-${month}-${day}`;
-      }
-    }
-    
-    // Se é uma instância de Date
-    if (value instanceof Date && !isNaN(value.getTime())) {
-      return value.toISOString().split('T')[0];
-    }
-    
-    return undefined;
+  
+    const date = new Date((excelDate - (25567 + 1)) * 86400 * 1000);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+  
+    return `${year}-${month}-${day}`;
   };
 
-  const processExcelFile = useCallback((file: File) => {
-    const reader = new FileReader();
-    
-    reader.onload = (e) => {
-      try {
-        const data = new Uint8Array(e.target?.result as ArrayBuffer);
-        const workbook = XLSX.read(data, { type: 'array', cellDates: true });
-        
-        // Usar a primeira planilha
-        const firstSheetName = workbook.SheetNames[0];
-        const worksheet = workbook.Sheets[firstSheetName];
-        
-        // Converter para JSON mantendo os tipos originais
-        const jsonData = XLSX.utils.sheet_to_json(worksheet, { 
-          header: 1,
-          defval: '',
-          raw: false // Isso vai formatar as datas como strings
-        });
-        
-        if (jsonData.length < 2) {
-          toast({
-            title: "Erro no arquivo",
-            description: "O arquivo Excel deve conter pelo menos um cabeçalho e uma linha de dados.",
-            variant: "destructive",
-          });
-          return;
-        }
+  const onDrop = useCallback(async (acceptedFiles: File[]) => {
+    const file = acceptedFiles[0];
+    if (file) {
+      setUploadedFile(file);
+      await processFile(file);
+    }
+  }, []);
 
-        const headers = (jsonData[0] as string[]).map(h => 
-          h?.toString().trim().toLowerCase().replace(/\s+/g, '_') || ''
-        );
-        const funcionarios: FuncionarioImportData[] = [];
+  const processFile = async (file: File) => {
+    try {
+      console.log('Processando arquivo:', file.name);
+      const arrayBuffer = await file.arrayBuffer();
+      const workbook = XLSX.read(arrayBuffer);
+      const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+      const rawData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
 
-        console.log('Headers encontrados:', headers);
+      const headerMap: { [key: string]: string } = {
+        nome: 'nome',
+        funcao: 'funcao',
+        matricula: 'matricula',
+        cpf: 'cpf',
+        cca_codigo: 'cca_codigo',
+        data_admissao: 'data_admissao'
+      };
 
-        for (let i = 1; i < jsonData.length; i++) {
-          const values = jsonData[i] as any[];
-          
-          if (!values || values.length === 0) continue;
+      const data: FuncionarioImportData[] = rawData.slice(1).map((row: any) => {
+        const item: FuncionarioImportData = {
+          nome: row[0],
+          funcao: row[1],
+          matricula: row[2],
+          cpf: row[3],
+          cca_codigo: row[4],
+        };
 
-          const rowData: any = {};
-          headers.forEach((header, index) => {
-            const value = values[index];
-            rowData[header] = value !== undefined && value !== null ? String(value).trim() : '';
-          });
-
-          console.log('Dados da linha:', i, rowData);
-
-          // Processar data de admissão
-          let dataAdmissao: string | undefined;
-          if (rowData.data_admissao || rowData.data_de_admissao || rowData.admissao) {
-            const dateField = rowData.data_admissao || rowData.data_de_admissao || rowData.admissao;
-            dataAdmissao = convertExcelDate(dateField);
-            console.log('Data original:', dateField, 'Data convertida:', dataAdmissao);
-          }
-
-          // Mapear campos com mais flexibilidade
-          const funcionario: FuncionarioImportData = {
-            nome: rowData.nome || '',
-            funcao: rowData.funcao || rowData.função || '',
-            matricula: rowData.matricula || rowData.matrícula || '',
-            cpf: rowData.cpf || '',
-            cca_codigo: rowData.cca_codigo || rowData.cca_código || rowData.cca || undefined,
-            data_admissao: dataAdmissao
-          };
-
-          console.log('Funcionário processado:', funcionario);
-
-          // Só adicionar se pelo menos o nome estiver preenchido
-          if (funcionario.nome.trim()) {
-            funcionarios.push(funcionario);
+        if (row[5]) {
+          if (typeof row[5] === 'number') {
+            const parsedDate = parseExcelDate(row[5]);
+            item.data_admissao = parsedDate;
+          } else {
+            item.data_admissao = row[5];
           }
         }
 
-        console.log('Total de funcionários processados:', funcionarios.length);
+        return item;
+      });
 
-        if (funcionarios.length > 0) {
-          onFileProcessed(funcionarios);
-          toast({
-            title: "Arquivo processado",
-            description: `${funcionarios.length} registros encontrados no arquivo.`,
-          });
-        } else {
-          toast({
-            title: "Nenhum dado encontrado",
-            description: "Não foram encontrados dados válidos no arquivo Excel.",
-            variant: "destructive",
-          });
-        }
-      } catch (error) {
-        console.error('Erro ao processar Excel:', error);
-        toast({
-          title: "Erro ao processar arquivo",
-          description: "Verifique se o arquivo está no formato Excel correto (.xlsx).",
-          variant: "destructive",
-        });
-      }
-    };
-
-    reader.readAsArrayBuffer(file);
-  }, [onFileProcessed, toast]);
-
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const fileExtension = file.name.toLowerCase();
-      if (!fileExtension.endsWith('.xlsx') && !fileExtension.endsWith('.xls')) {
-        toast({
-          title: "Formato inválido",
-          description: "Por favor, selecione apenas arquivos Excel (.xlsx ou .xls).",
-          variant: "destructive",
-        });
-        return;
-      }
-      setSelectedFile(file);
+      console.log('Dados processados com sucesso:', data.length, 'registros');
+      onFileProcessed(data, file.name); // Passar o nome do arquivo
+    } catch (error) {
+      console.error('Erro ao processar arquivo Excel:', error);
     }
   };
 
-  const handleUpload = () => {
-    if (selectedFile) {
-      processExcelFile(selectedFile);
-    }
-  };
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    accept: {
+      'application/vnd.ms-excel': ['.xls'],
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx'],
+    },
+    multiple: false,
+    disabled: isProcessing,
+  });
 
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragActive(false);
-    
-    const file = e.dataTransfer.files[0];
-    if (file) {
-      const fileExtension = file.name.toLowerCase();
-      if (!fileExtension.endsWith('.xlsx') && !fileExtension.endsWith('.xls')) {
-        toast({
-          title: "Formato inválido",
-          description: "Por favor, arraste apenas arquivos Excel (.xlsx ou .xls).",
-          variant: "destructive",
-        });
-        return;
-      }
-      setSelectedFile(file);
-    }
-  }, [toast]);
-
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragActive(true);
-  };
-
-  const handleDragLeave = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragActive(false);
+  const handleRemoveFile = () => {
+    setUploadedFile(null);
   };
 
   return (
     <div className="space-y-4">
       <div
-        onDrop={handleDrop}
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
-          dragActive 
-            ? 'border-primary bg-primary/5' 
-            : 'border-muted-foreground/25 hover:border-muted-foreground/50'
-        }`}
+        {...getRootProps()}
+        className={`border-2 border-dashed rounded-md p-6 flex flex-col items-center justify-center ${
+          isDragActive ? 'border-primary' : 'border-muted-foreground/50'
+        } ${isProcessing ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}
       >
-        {selectedFile ? (
-          <div className="flex items-center justify-center gap-2">
-            <FileText className="h-8 w-8 text-green-600" />
-            <div>
-              <p className="font-medium">{selectedFile.name}</p>
-              <p className="text-sm text-muted-foreground">
-                {(selectedFile.size / 1024).toFixed(1)} KB
-              </p>
-            </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setSelectedFile(null)}
-              className="ml-2"
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
-        ) : (
-          <div>
-            <Upload className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-            <p className="text-lg font-medium mb-2">
-              Arraste o arquivo Excel aqui
-            </p>
-            <p className="text-sm text-muted-foreground mb-4">
-              ou clique para selecionar
-            </p>
-            <Label htmlFor="excel-file">
-              <Button variant="outline" asChild>
-                <span>Selecionar Arquivo</span>
-              </Button>
-            </Label>
-            <Input
-              id="excel-file"
-              type="file"
-              accept=".xlsx,.xls"
-              onChange={handleFileSelect}
-              className="hidden"
-            />
-          </div>
-        )}
+        <input {...getInputProps()} disabled={isProcessing} />
+        <div className="flex flex-col items-center justify-center space-y-3">
+          <FileSpreadsheet className="h-10 w-10 text-muted-foreground" />
+          <p className="text-sm text-muted-foreground">
+            {isDragActive
+              ? 'Solte o arquivo aqui...'
+              : 'Arraste e solte o arquivo Excel aqui, ou clique para selecionar'}
+          </p>
+        </div>
       </div>
 
-      {selectedFile && (
-        <div className="flex justify-center">
-          <Button
-            onClick={handleUpload}
-            disabled={isProcessing}
-            className="flex items-center gap-2"
-          >
-            <Upload className="h-4 w-4" />
-            {isProcessing ? "Processando..." : "Processar Arquivo"}
-          </Button>
-        </div>
+      {uploadedFile && (
+        <Card>
+          <CardContent className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <Upload className="h-4 w-4 text-green-500" />
+              <p className="text-sm font-medium">{uploadedFile.name}</p>
+            </div>
+            <Button variant="outline" size="sm" onClick={handleRemoveFile}>
+              <X className="h-4 w-4 mr-2" />
+              Remover
+            </Button>
+          </CardContent>
+        </Card>
       )}
     </div>
   );

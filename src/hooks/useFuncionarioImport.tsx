@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -153,10 +152,12 @@ export const useFuncionarioImport = () => {
   const importMutation = useMutation({
     mutationFn: async ({ 
       newFuncionarios, 
-      updateFuncionarios 
+      updateFuncionarios,
+      nomeArquivo 
     }: {
       newFuncionarios: FuncionarioImportData[];
       updateFuncionarios: FuncionarioImportData[];
+      nomeArquivo?: string;
     }) => {
       const results = {
         created: 0,
@@ -164,6 +165,9 @@ export const useFuncionarioImport = () => {
         errors: [] as string[]
       };
 
+      // Obter dados do usuário atual
+      const { data: { user } } = await supabase.auth.getUser();
+      
       // Buscar CCAs para mapeamento de código para ID
       const { data: ccas, error: ccaError } = await supabase
         .from('ccas')
@@ -248,10 +252,40 @@ export const useFuncionarioImport = () => {
       }
 
       console.log('Resultado final da importação:', results);
+
+      // Registrar log da importação
+      if (user) {
+        try {
+          const logData = {
+            usuario_id: user.id,
+            total_registros: newFuncionarios.length + updateFuncionarios.length,
+            registros_criados: results.created,
+            registros_atualizados: results.updated,
+            registros_com_erro: results.errors.length,
+            status: results.errors.length > 0 ? 'concluida_com_erros' : 'concluida',
+            detalhes_erro: results.errors.length > 0 ? results.errors.join('; ') : null,
+            nome_arquivo: nomeArquivo
+          };
+
+          const { error: logError } = await supabase
+            .from('logs_importacao_funcionarios')
+            .insert(logData);
+
+          if (logError) {
+            console.error('Erro ao registrar log de importação:', logError);
+          } else {
+            console.log('Log de importação registrado com sucesso');
+          }
+        } catch (error) {
+          console.error('Erro ao criar log de importação:', error);
+        }
+      }
+
       return results;
     },
     onSuccess: (results) => {
       queryClient.invalidateQueries({ queryKey: ['admin-funcionarios'] });
+      queryClient.invalidateQueries({ queryKey: ['logs-importacao-funcionarios'] });
       
       let message = '';
       if (results.created > 0) {
@@ -284,11 +318,13 @@ export const useFuncionarioImport = () => {
 
   const importFuncionarios = async (
     newFuncionarios: FuncionarioImportData[],
-    updateFuncionarios: FuncionarioImportData[]
+    updateFuncionarios: FuncionarioImportData[],
+    nomeArquivo?: string
   ) => {
     return importMutation.mutateAsync({
       newFuncionarios,
-      updateFuncionarios
+      updateFuncionarios,
+      nomeArquivo
     });
   };
 

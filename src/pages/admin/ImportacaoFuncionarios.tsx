@@ -3,11 +3,12 @@ import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Upload, Download, Users, AlertCircle, CheckCircle, Info, Code } from "lucide-react";
+import { Upload, Download, Users, AlertCircle, CheckCircle, Info, Code, FileText } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ExcelUpload } from "@/components/admin/funcionarios/ExcelUpload";
 import { ImportPreview } from "@/components/admin/funcionarios/ImportPreview";
 import { CCACodesTab } from "@/components/admin/funcionarios/CCACodesTab";
+import { LogsImportacao } from "@/components/admin/funcionarios/LogsImportacao";
 import { useFuncionarioImport } from "@/hooks/useFuncionarioImport";
 import { FuncionarioImportData } from "@/types/funcionarios";
 import * as XLSX from "xlsx";
@@ -90,10 +91,14 @@ const ImportacaoFuncionarios = () => {
       </div>
 
       <Tabs defaultValue="importacao" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="importacao" className="flex items-center gap-2">
             <Upload className="h-4 w-4" />
             Importação
+          </TabsTrigger>
+          <TabsTrigger value="logs" className="flex items-center gap-2">
+            <FileText className="h-4 w-4" />
+            Logs de Importação
           </TabsTrigger>
           <TabsTrigger value="codigos-cca" className="flex items-center gap-2">
             <Code className="h-4 w-4" />
@@ -194,6 +199,10 @@ const ImportacaoFuncionarios = () => {
               </Card>
             )}
           </div>
+        </TabsContent>
+
+        <TabsContent value="logs">
+          <LogsImportacao />
         </TabsContent>
 
         <TabsContent value="codigos-cca">
