@@ -1,7 +1,6 @@
 
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ConfigMenu } from "@/components/admin/ConfigMenu";
 
 const Settings = () => {
   return (
@@ -15,10 +14,12 @@ const Settings = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle>Configurações Administrativas</CardTitle>
+          <CardTitle>Configurações da Conta</CardTitle>
         </CardHeader>
         <CardContent>
-          <ConfigMenu />
+          <p className="text-muted-foreground">
+            Configure suas preferências pessoais e configurações da conta.
+          </p>
         </CardContent>
       </Card>
     </div>
