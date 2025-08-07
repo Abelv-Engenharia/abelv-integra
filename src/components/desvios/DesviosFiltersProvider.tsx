@@ -1,8 +1,7 @@
-
-import React, { useState } from 'react';
+import React from 'react';
 import { DesviosFiltersContext, DesviosFiltersContextType } from '@/hooks/useDesviosFilters';
 
-interface DesviosFiltersProviderProps extends Omit<DesviosFiltersContextType, 'refreshCharts'> {
+interface DesviosFiltersProviderProps extends DesviosFiltersContextType {
   children: React.ReactNode;
 }
 
@@ -16,12 +15,6 @@ export const DesviosFiltersProvider: React.FC<DesviosFiltersProviderProps> = ({
   userCCAs, 
   filtersApplied 
 }) => {
-  const [refreshKey, setRefreshKey] = useState(0);
-
-  const refreshCharts = () => {
-    setRefreshKey(prev => prev + 1);
-  };
-
   return (
     <DesviosFiltersContext.Provider value={{
       year,
@@ -30,12 +23,9 @@ export const DesviosFiltersProvider: React.FC<DesviosFiltersProviderProps> = ({
       disciplinaId,
       empresaId,
       userCCAs,
-      filtersApplied,
-      refreshCharts
+      filtersApplied
     }}>
-      <div key={refreshKey}>
-        {children}
-      </div>
+      {children}
     </DesviosFiltersContext.Provider>
   );
 };

@@ -1,48 +1,31 @@
 
-import DesviosAreaChart from "./DesviosAreaChart";
-import DesviosBarChart from "./DesviosBarChart";
-import DesviosByRisk from "./DesviosByRisk";
-import DesviosPieChart from "./DesviosPieChart";
-import DesviosByDisciplineChart from "./DesviosByDisciplineChart";
-import DesviosByCompanyChart from "./DesviosByCompanyChart";
-import DesviosClassificationChart from "./DesviosClassificationChart";
-import DesviosByEventChart from "./DesviosByEventChart";
-import DesviosByProcessoChart from "./DesviosByProcessoChart";
-import DesviosByBaseLegalChart from "./DesviosByBaseLegalChart";
+import DesviosPieChart from "@/components/desvios/DesviosPieChart";
+import DesviosByCompanyChart from "@/components/desvios/DesviosByCompanyChart";
+import DesviosClassificationChart from "@/components/desvios/DesviosClassificationChart";
+import DesviosByDisciplineChart from "@/components/desvios/DesviosByDisciplineChart";
+import DesviosByEventChart from "@/components/desvios/DesviosByEventChart";
+import DesviosByProcessoChart from "@/components/desvios/DesviosByProcessoChart";
+import DesviosByBaseLegalChart from "@/components/desvios/DesviosByBaseLegalChart";
 
 const DesviosChartRows = () => {
   return (
-    <div className="space-y-6">
-      {/* Primeira linha de gráficos */}
-      <div className="grid gap-6 md:grid-cols-2">
-        <DesviosAreaChart />
-        <DesviosBarChart />
-      </div>
-
-      {/* Segunda linha de gráficos */}
-      <div className="grid gap-6 md:grid-cols-2">
-        <DesviosByRisk />
+    <>
+      <div className="grid gap-4 md:grid-cols-2">
         <DesviosPieChart />
-      </div>
-
-      {/* Terceira linha de gráficos */}
-      <div className="grid gap-6 md:grid-cols-2">
         <DesviosByDisciplineChart />
+      </div>
+      <div className="grid gap-4 md:grid-cols-2">
+        <DesviosClassificationChart />
         <DesviosByCompanyChart />
       </div>
-
-      {/* Quarta linha de gráficos */}
-      <div className="grid gap-6 md:grid-cols-2">
-        <DesviosClassificationChart />
+      <div className="grid gap-4 md:grid-cols-2">
         <DesviosByEventChart />
-      </div>
-
-      {/* Quinta linha de gráficos */}
-      <div className="grid gap-6 md:grid-cols-2">
         <DesviosByProcessoChart />
+      </div>
+      <div className="w-full">
         <DesviosByBaseLegalChart />
       </div>
-    </div>
+    </>
   );
 };
 

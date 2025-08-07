@@ -1,4 +1,3 @@
-
 import { createContext, useContext } from 'react';
 
 export interface DesviosFiltersContextType {
@@ -9,7 +8,6 @@ export interface DesviosFiltersContextType {
   empresaId: string;
   userCCAs: any[];
   filtersApplied: boolean;
-  refreshCharts?: () => void;
 }
 
 export const DesviosFiltersContext = createContext<DesviosFiltersContextType | null>(null);
@@ -24,8 +22,7 @@ export const useDesviosFilters = () => {
       disciplinaId: "",
       empresaId: "",
       userCCAs: [],
-      filtersApplied: false,
-      refreshCharts: () => {}
+      filtersApplied: false
     };
   }
   return context;

@@ -20,7 +20,6 @@ interface DesviosDashboardFiltersProps {
   setDisciplinaId: (disciplinaId: string) => void;
   setEmpresaId: (empresaId: string) => void;
   onFilterChange: () => void;
-  onClearFilters?: () => void;
 }
 
 interface Disciplina {
@@ -45,8 +44,7 @@ const DesviosDashboardFilters = ({
   setCcaId,
   setDisciplinaId,
   setEmpresaId,
-  onFilterChange,
-  onClearFilters
+  onFilterChange
 }: DesviosDashboardFiltersProps) => {
   const { toast } = useToast();
   const { data: userCCAs = [] } = useUserCCAs();
@@ -221,17 +219,14 @@ const DesviosDashboardFilters = ({
           </Button>
           <Button 
             onClick={() => {
-              if (onClearFilters) {
-                onClearFilters();
-              } else {
-                // Fallback para limpar os filtros localmente
-                setYear("");
-                setMonth("");
-                setCcaId("");
-                setDisciplinaId("");
-                setEmpresaId("");
-                onFilterChange();
-              }
+              // Limpar todos os filtros
+              setYear("");
+              setMonth("");
+              setCcaId("");
+              setDisciplinaId("");
+              setEmpresaId("");
+              // Chamar a função de filtro para recarregar dados originais
+              onFilterChange();
             }}
             variant="outline"
             className="flex-1"
