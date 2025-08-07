@@ -93,10 +93,14 @@ export const desviosCompletosService = {
           disciplinas:disciplina_id(id, codigo, nome)
         `)
         .eq('id', id)
-        .single();
+        .maybeSingle();
       
       if (error) {
         console.error('Erro ao buscar desvio por ID:', error);
+        return null;
+      }
+      
+      if (!data) {
         return null;
       }
       

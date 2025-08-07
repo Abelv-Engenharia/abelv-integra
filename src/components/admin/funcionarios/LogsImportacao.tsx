@@ -45,7 +45,11 @@ const fetchLogsImportacao = async (): Promise<LogImportacao[]> => {
     throw error;
   }
 
-  return data || [];
+  // Process the data to handle potential null profiles
+  return (data || []).map(item => ({
+    ...item,
+    profiles: item.profiles || null
+  }));
 };
 
 export const LogsImportacao = () => {
