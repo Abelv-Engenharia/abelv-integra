@@ -29,6 +29,7 @@ export const FuncionarioForm: React.FC<FuncionarioFormProps> = ({
     nome: "",
     funcao: "",
     matricula: "",
+    cpf: "",
     cca_id: "none",
     data_admissao: ""
   });
@@ -39,13 +40,14 @@ export const FuncionarioForm: React.FC<FuncionarioFormProps> = ({
         nome: editingFuncionario.nome,
         funcao: editingFuncionario.funcao,
         matricula: editingFuncionario.matricula,
+        cpf: editingFuncionario.cpf || "",
         cca_id: editingFuncionario.cca_id?.toString() || "none",
         data_admissao: editingFuncionario.data_admissao ?? ""
       });
       setPhotoPreview(editingFuncionario.foto || null);
       setPhotoRemoved(false);
     } else {
-      setFormData({ nome: "", funcao: "", matricula: "", cca_id: "none", data_admissao: "" });
+      setFormData({ nome: "", funcao: "", matricula: "", cpf: "", cca_id: "none", data_admissao: "" });
       setPhotoPreview(null);
       setPhotoFile(null);
       setPhotoRemoved(false);
@@ -68,6 +70,22 @@ export const FuncionarioForm: React.FC<FuncionarioFormProps> = ({
     setPhotoPreview(null);
     setPhotoFile(null);
     setPhotoRemoved(true);
+  };
+
+  const formatCPF = (value: string) => {
+    const numbers = value.replace(/\D/g, '');
+    if (numbers.length <= 11) {
+      return numbers
+        .replace(/(\d{3})(\d)/, '$1.$2')
+        .replace(/(\d{3})(\d)/, '$1.$2')
+        .replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+    }
+    return value;
+  };
+
+  const handleCPFChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formatted = formatCPF(e.target.value);
+    setFormData(prev => ({ ...prev, cpf: formatted }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -106,8 +124,7 @@ export const FuncionarioForm: React.FC<FuncionarioFormProps> = ({
         </div>
       </div>
 
-      {/* Matrícula e Data de Admissão lado a lado */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
           <Label htmlFor="matricula">Matrícula</Label>
           <Input
@@ -115,6 +132,16 @@ export const FuncionarioForm: React.FC<FuncionarioFormProps> = ({
             value={formData.matricula}
             onChange={(e) => setFormData(prev => ({ ...prev, matricula: e.target.value }))}
             required
+          />
+        </div>
+        <div>
+          <Label htmlFor="cpf">CPF</Label>
+          <Input
+            id="cpf"
+            value={formData.cpf}
+            onChange={handleCPFChange}
+            placeholder="000.000.000-00"
+            maxLength={14}
           />
         </div>
         <div>
@@ -133,7 +160,6 @@ export const FuncionarioForm: React.FC<FuncionarioFormProps> = ({
         </div>
       </div>
 
-      {/* CCA logo abaixo */}
       <div>
         <Label htmlFor="cca">CCA</Label>
         <Select

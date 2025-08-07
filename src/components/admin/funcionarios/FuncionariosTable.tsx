@@ -1,18 +1,18 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Trash2, Edit, UserRound } from "lucide-react";
+import { Edit, Trash2 } from "lucide-react";
 import { Funcionario } from "@/types/funcionarios";
-import { useSignedUrl } from "@/hooks/useSignedUrl";
-
-function formatDateBR(dateStr?: string | null) {
-  if (!dateStr) return "-";
-  const onlyDate = dateStr.slice(0, 10);
-  const [ano, mes, dia] = onlyDate.split("-");
-  if (!ano || !mes || !dia) return "-";
-  return `${dia}/${mes}/${ano}`;
-}
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 interface FuncionariosTableProps {
   funcionarios: Funcionario[];
@@ -21,127 +21,94 @@ interface FuncionariosTableProps {
   onDelete: (id: string) => void;
 }
 
-// Novo componente para renderizar Avatar de funcionário com signedURL
-const FuncionarioAvatar: React.FC<{ funcionario: Funcionario }> = ({ funcionario }) => {
-  const { url, loading, error, generate } = useSignedUrl();
-
-  React.useEffect(() => {
-    // Gera a signed URL sempre que houver foto e id
-    if (funcionario.foto) {
-      // Espera que foto seja do tipo "funcionarios/xxx.jpg" ou só caminho do arquivo
-      let filePath = funcionario.foto;
-      // Em alguns casos, pode vir a URL completa, extraímos o path relativo se for
-      if (/^https?:\/\//.test(filePath)) {
-        // Remove supabase host, pega só o path no storage
-        const match = filePath.match(/\/storage\/v1\/object\/sign\/([^?]+)/);
-        if (match) {
-          filePath = decodeURIComponent(match[1]);
-        } else {
-          // Alternadamente, tenta pegar após 'funcionarios-fotos/' como fallback
-          const idx = filePath.indexOf('funcionarios-fotos/');
-          if (idx >= 0) filePath = filePath.slice(idx + 'funcionarios-fotos/'.length);
-        }
-      } else if (filePath.startsWith('funcionarios/')) {
-        // OK!
-      } else {
-        // Se vier só 'abc.jpg', prefixa corretamente
-        filePath = `funcionarios/${filePath}`;
-      }
-      generate('funcionarios-fotos', filePath, 300);
-    }
-    // Não colocar dependência em generate para evitar loop
-    // eslint-disable-next-line
-  }, [funcionario.foto]);
-
-  if (!funcionario.foto) {
-    return (
-      <Avatar className="size-8">
-        <AvatarFallback>
-          <UserRound className="h-4 w-4" />
-        </AvatarFallback>
-      </Avatar>
-    );
-  }
-
-  return (
-    <Avatar className="size-8">
-      {/* Mostra imagem quando a signed url está disponível */}
-      {url ? (
-        <AvatarImage src={url} />
-      ) : (
-        <AvatarFallback>
-          <UserRound className="h-4 w-4" />
-        </AvatarFallback>
-      )}
-    </Avatar>
-  );
-};
-
 export const FuncionariosTable: React.FC<FuncionariosTableProps> = ({
   funcionarios,
   isLoading,
   onEdit,
-  onDelete
+  onDelete,
 }) => {
   if (isLoading) {
-    return <p>Carregando...</p>;
+    return <div className="text-center py-4">Carregando funcionários...</div>;
   }
+
+  if (funcionarios.length === 0) {
+    return <div className="text-center py-4">Nenhum funcionário encontrado.</div>;
+  }
+
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return "-";
+    return new Date(dateString).toLocaleDateString('pt-BR');
+  };
 
   return (
     <div className="overflow-x-auto">
-      <table className="w-full border-collapse border border-gray-300">
-        <thead>
-          <tr className="bg-gray-50">
-            <th className="border border-gray-300 p-2 text-left">Foto</th>
-            <th className="border border-gray-300 p-2 text-left">Nome</th>
-            <th className="border border-gray-300 p-2 text-left">Função</th>
-            <th className="border border-gray-300 p-2 text-left">Matrícula</th>
-            <th className="border border-gray-300 p-2 text-left">Data de admissão</th>
-            <th className="border border-gray-300 p-2 text-left">CCA</th>
-            <th className="border border-gray-300 p-2 text-left">Status</th>
-            <th className="border border-gray-300 p-2 text-center">Ações</th>
-          </tr>
-        </thead>
-        <tbody>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Foto</TableHead>
+            <TableHead>Nome</TableHead>
+            <TableHead>Função</TableHead>
+            <TableHead>Matrícula</TableHead>
+            <TableHead>CPF</TableHead>
+            <TableHead>CCA</TableHead>
+            <TableHead>Data Admissão</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead>Ações</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
           {funcionarios.map((funcionario) => (
-            <tr key={funcionario.id}>
-              <td className="border border-gray-300 p-2">
-                <FuncionarioAvatar funcionario={funcionario} />
-              </td>
-              <td className="border border-gray-300 p-2">{funcionario.nome}</td>
-              <td className="border border-gray-300 p-2">{funcionario.funcao}</td>
-              <td className="border border-gray-300 p-2">{funcionario.matricula}</td>
-              <td className="border border-gray-300 p-2">
-                {formatDateBR(funcionario.data_admissao)}
-              </td>
-              <td className="border border-gray-300 p-2">
-                {funcionario.ccas ? `${funcionario.ccas.codigo} - ${funcionario.ccas.nome}` : "Nenhum"}
-              </td>
-              <td className="border border-gray-300 p-2">
-                <span className={`px-2 py-1 rounded text-xs ${funcionario.ativo ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+            <TableRow key={funcionario.id}>
+              <TableCell>
+                <Avatar className="h-8 w-8">
+                  <AvatarImage src={funcionario.foto} alt={funcionario.nome} />
+                  <AvatarFallback>
+                    {funcionario.nome.split(' ').map(n => n[0]).join('').toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+              </TableCell>
+              <TableCell className="font-medium">{funcionario.nome}</TableCell>
+              <TableCell>{funcionario.funcao}</TableCell>
+              <TableCell>{funcionario.matricula}</TableCell>
+              <TableCell>{funcionario.cpf || "-"}</TableCell>
+              <TableCell>
+                {funcionario.ccas ? (
+                  <span className="text-sm">
+                    {funcionario.ccas.codigo} - {funcionario.ccas.nome}
+                  </span>
+                ) : (
+                  "-"
+                )}
+              </TableCell>
+              <TableCell>{formatDate(funcionario.data_admissao)}</TableCell>
+              <TableCell>
+                <Badge variant={funcionario.ativo ? "default" : "secondary"}>
                   {funcionario.ativo ? "Ativo" : "Inativo"}
-                </span>
-              </td>
-              <td className="border border-gray-300 p-2 text-center">
-                <div className="flex justify-center space-x-2">
-                  <Button size="sm" variant="outline" onClick={() => onEdit(funcionario)}>
+                </Badge>
+              </TableCell>
+              <TableCell>
+                <div className="flex space-x-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => onEdit(funcionario)}
+                  >
                     <Edit className="h-4 w-4" />
                   </Button>
-                  {funcionario.ativo && (
-                    <Button 
-                      size="sm" 
-                      variant="destructive" 
-                      onClick={() => onDelete(funcionario.id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  )}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => onDelete(funcionario.id)}
+                    className="text-red-600 hover:text-red-700"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
                 </div>
-              </td>
-            </tr>
+              </TableCell>
+            </TableRow>
           ))}
-        </tbody>
-      </table>
+        </TableBody>
+      </Table>
     </div>
   );
 };

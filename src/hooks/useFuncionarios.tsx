@@ -1,3 +1,4 @@
+
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -18,6 +19,7 @@ export const useFuncionarios = () => {
           nome,
           funcao,
           matricula,
+          cpf,
           foto,
           ativo,
           cca_id,
@@ -83,7 +85,7 @@ export const useFuncionarios = () => {
       photoFile, 
       photoRemoved 
     }: {
-      funcionario: { nome: string; funcao: string; matricula: string; cca_id: string; data_admissao?: string | null };
+      funcionario: { nome: string; funcao: string; matricula: string; cpf?: string; cca_id: string; data_admissao?: string | null };
       editingFuncionario?: Funcionario | null;
       photoFile?: File | null;
       photoRemoved?: boolean;
@@ -107,7 +109,7 @@ export const useFuncionarios = () => {
             fotoUrl = uploadedUrl;
           }
         }
-        // Adicionando log para checagem
+        
         console.log('[Editar] id:', editingFuncionario.id, 'nome:', funcionario.nome, 'fotoUrl:', fotoUrl, 'data_admissao:', dataAdmissao);
 
         const { error: updateError } = await supabase
@@ -116,6 +118,7 @@ export const useFuncionarios = () => {
             nome: funcionario.nome, 
             funcao: funcionario.funcao,
             matricula: funcionario.matricula,
+            cpf: funcionario.cpf || null,
             cca_id: ccaId,
             foto: fotoUrl,
             data_admissao: dataAdmissao
@@ -133,6 +136,7 @@ export const useFuncionarios = () => {
             nome: funcionario.nome, 
             funcao: funcionario.funcao,
             matricula: funcionario.matricula,
+            cpf: funcionario.cpf || null,
             cca_id: ccaId,
             data_admissao: dataAdmissao
           })

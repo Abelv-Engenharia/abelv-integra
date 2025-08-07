@@ -992,6 +992,7 @@ export type Database = {
         Row: {
           ativo: boolean | null
           cca_id: number | null
+          cpf: string | null
           created_at: string | null
           data_admissao: string | null
           foto: string | null
@@ -1004,6 +1005,7 @@ export type Database = {
         Insert: {
           ativo?: boolean | null
           cca_id?: number | null
+          cpf?: string | null
           created_at?: string | null
           data_admissao?: string | null
           foto?: string | null
@@ -1016,6 +1018,7 @@ export type Database = {
         Update: {
           ativo?: boolean | null
           cca_id?: number | null
+          cpf?: string | null
           created_at?: string | null
           data_admissao?: string | null
           foto?: string | null
