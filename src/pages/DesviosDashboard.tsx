@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { fetchDashboardStats, fetchFilteredDashboardStats, DashboardStats, FilterParams } from "@/services/desvios/dashboardStatsService";
@@ -18,6 +17,7 @@ const DesviosDashboard = () => {
   const [disciplinaId, setDisciplinaId] = useState<string>("");
   const [empresaId, setEmpresaId] = useState<string>("");
   const [filtersApplied, setFiltersApplied] = useState<boolean>(false);
+  const [chartsRefreshKey, setChartsRefreshKey] = useState<number>(0);
   const [dashboardStats, setDashboardStats] = useState<DashboardStats>({
     totalDesvios: 0,
     acoesCompletas: 0,
@@ -106,6 +106,9 @@ const DesviosDashboard = () => {
       setDashboardStats(filteredStats);
       setFiltersApplied(true);
       
+      // Atualizar os gráficos
+      setChartsRefreshKey(prev => prev + 1);
+      
       toast({
         title: "Filtros aplicados",
         description: "Os dados foram atualizados com os filtros selecionados.",
@@ -142,6 +145,9 @@ const DesviosDashboard = () => {
       const stats = await fetchFilteredDashboardStats(filters);
       setDashboardStats(stats);
       
+      // Atualizar os gráficos
+      setChartsRefreshKey(prev => prev + 1);
+      
       toast({
         title: "Filtros limpos",
         description: "Os dados foram restaurados para o estado original.",
@@ -168,9 +174,11 @@ const DesviosDashboard = () => {
         setDisciplinaId={setDisciplinaId}
         setEmpresaId={setEmpresaId}
         onFilterChange={handleFilterChange}
+        onClearFilters={handleClearFilters}
       />
       <DesviosDashboardStats loading={loading} stats={dashboardStats} />
       <DesviosFiltersProvider
+        key={chartsRefreshKey}
         year={year}
         month={month}
         ccaId={ccaId}
