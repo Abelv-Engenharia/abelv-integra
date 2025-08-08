@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -143,9 +142,9 @@ const HoraSegurancaDashboard = () => {
           }
         });
 
-        // Converter para formato do gráfico
+        // Converter para formato do gráfico com primeiro nome no eixo X
         const chartData = Object.keys(processedData).map(responsavel => ({
-          name: responsavel,
+          name: responsavel.split(' ')[0] || responsavel,
           nomeCompleto: responsavel,
           ...processedData[responsavel]
         }));
