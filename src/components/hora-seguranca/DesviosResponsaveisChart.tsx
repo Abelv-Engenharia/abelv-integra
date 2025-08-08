@@ -79,7 +79,7 @@ export const DesviosResponsaveisChart = ({ filters }: DesviosResponsaveisChartPr
             }}
           />
           <Legend />
-          <Bar dataKey="desvios" fill="#ef4444" />
+          <Bar dataKey="desvios" fill="#3b82f6" />
         </BarChart>
       </ResponsiveContainer>
     </div>
