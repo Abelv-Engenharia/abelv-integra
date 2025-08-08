@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from "react";
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from "recharts";
+import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend } from "recharts";
 import { fetchDesviosByInspectionType } from "@/services/hora-seguranca/desviosInspectionService";
 import { useUserCCAs } from "@/hooks/useUserCCAs";
 
@@ -14,6 +14,8 @@ interface Filters {
 interface DesviosTipoInspecaoChartProps {
   filters?: Filters;
 }
+
+const COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#f97316", "#06b6d4"];
 
 export const DesviosTipoInspecaoChart = ({ filters }: DesviosTipoInspecaoChartProps) => {
   const [data, setData] = useState<any[]>([]);
@@ -33,7 +35,14 @@ export const DesviosTipoInspecaoChart = ({ filters }: DesviosTipoInspecaoChartPr
 
         const ccaIds = userCCAs.map(cca => cca.id);
         const chartData = await fetchDesviosByInspectionType(ccaIds, filters);
-        setData(chartData);
+        
+        // Transform data for pie chart - rename 'desvios' to 'value' and 'tipo' to 'name'
+        const pieData = chartData.map(item => ({
+          name: item.tipo,
+          value: item.desvios
+        }));
+        
+        setData(pieData);
       } catch (error) {
         console.error("Error loading desvios by inspection type chart:", error);
       } finally {
@@ -55,17 +64,30 @@ export const DesviosTipoInspecaoChart = ({ filters }: DesviosTipoInspecaoChartPr
   return (
     <div className="h-[300px]">
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart
-          data={data}
-          margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-        >
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="tipo" />
-          <YAxis />
-          <Tooltip />
+        <PieChart>
+          <Pie
+            data={data}
+            cx="50%"
+            cy="50%"
+            outerRadius={80}
+            dataKey="value"
+            label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+          >
+            {data.map((entry, index) => (
+              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+            ))}
+          </Pie>
+          <Tooltip 
+            formatter={(value) => [`${value} desvios`, 'Quantidade']}
+            contentStyle={{ 
+              backgroundColor: "white",
+              borderRadius: "0.375rem",
+              boxShadow: "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
+              border: "1px solid rgba(229, 231, 235, 1)"
+            }}
+          />
           <Legend />
-          <Bar dataKey="desvios" fill="#f97316" />
-        </BarChart>
+        </PieChart>
       </ResponsiveContainer>
     </div>
   );
