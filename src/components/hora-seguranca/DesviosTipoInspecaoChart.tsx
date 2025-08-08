@@ -68,9 +68,11 @@ export const DesviosTipoInspecaoChart = ({ filters }: DesviosTipoInspecaoChartPr
             data={data}
             cx="50%"
             cy="50%"
-            outerRadius={80}
+            outerRadius={100}
             dataKey="value"
             label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+            labelLine={false}
+            style={{ fontSize: '12px' }}
           >
             {data.map((entry, index) => (
               <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
