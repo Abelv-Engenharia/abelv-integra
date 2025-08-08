@@ -1,71 +1,88 @@
 
-import { supabase } from '@/integrations/supabase/client';
-import { InspecoesByCCA } from './types';
+import { supabase } from "@/integrations/supabase/client";
 
-export async function fetchInspecoesByCCA(ccaIds?: number[]): Promise<InspecoesByCCA[]> {
+interface Filters {
+  ccaId?: number;
+  responsavel?: string;
+  dataInicial?: string;
+  dataFinal?: string;
+}
+
+export async function fetchInspecoesByCCA(ccaIds: number[], filters?: Filters) {
   try {
     let query = supabase
-      .from('execucao_hsa')
+      .from("execucao_hsa")
       .select(`
-        status,
         cca_id,
+        status,
         ccas!inner(codigo, nome)
-      `);
+      `)
+      .in("cca_id", ccaIds);
 
-    // Aplicar filtro de CCAs se fornecido
-    if (ccaIds && ccaIds.length > 0) {
-      query = query.in('cca_id', ccaIds);
+    // Aplicar filtros
+    if (filters?.ccaId) {
+      query = query.eq('cca_id', filters.ccaId);
+    }
+    
+    if (filters?.responsavel) {
+      query = query.eq('responsavel_inspecao', filters.responsavel);
+    }
+    
+    if (filters?.dataInicial) {
+      query = query.gte('data', filters.dataInicial);
+    }
+    
+    if (filters?.dataFinal) {
+      query = query.lte('data', filters.dataFinal);
     }
 
-    const { data: rows, error } = await query;
+    const { data, error } = await query;
 
-    if (error || !rows) {
-      console.error("Erro ao buscar inspeções por CCA:", error);
+    if (error) {
+      console.error("Error fetching inspections by CCA:", error);
       return [];
     }
 
-    // Agrupar por CCA e contar por status
-    const ccaMap: Record<string, InspecoesByCCA> = {};
-
-    rows.forEach((row: any) => {
-      const ccaKey = `${row.ccas.codigo} - ${row.ccas.nome}`;
-      const status = (row.status || '').toUpperCase();
-
-      if (!ccaMap[ccaKey]) {
-        ccaMap[ccaKey] = {
+    // Agrupar por CCA e status
+    const groupedData: { [key: string]: any } = {};
+    
+    data?.forEach((item: any) => {
+      const ccaKey = `${item.ccas.codigo} - ${item.ccas.nome}`;
+      
+      if (!groupedData[ccaKey]) {
+        groupedData[ccaKey] = {
           cca: ccaKey,
-          codigo: row.ccas.codigo,
-          nomeCompleto: `${row.ccas.codigo} - ${row.ccas.nome}`,
           "A Realizar": 0,
           "Realizada": 0,
           "Não Realizada": 0,
           "Realizada (Não Programada)": 0,
-          "Cancelada": 0,
+          "Cancelada": 0
         };
       }
-
+      
+      const status = (item.status || '').toUpperCase();
       switch (status) {
         case 'A REALIZAR':
-          ccaMap[ccaKey]["A Realizar"]++;
+          groupedData[ccaKey]["A Realizar"]++;
           break;
         case 'REALIZADA':
-          ccaMap[ccaKey]["Realizada"]++;
+          groupedData[ccaKey]["Realizada"]++;
           break;
         case 'NÃO REALIZADA':
-          ccaMap[ccaKey]["Não Realizada"]++;
+          groupedData[ccaKey]["Não Realizada"]++;
           break;
         case 'REALIZADA (NÃO PROGRAMADA)':
-          ccaMap[ccaKey]["Realizada (Não Programada)"]++;
+          groupedData[ccaKey]["Realizada (Não Programada)"]++;
           break;
         case 'CANCELADA':
-          ccaMap[ccaKey]["Cancelada"]++;
+          groupedData[ccaKey]["Cancelada"]++;
           break;
       }
     });
 
-    return Object.values(ccaMap);
+    return Object.values(groupedData);
   } catch (error) {
-    console.error("Erro ao buscar inspeções por CCA:", error);
+    console.error("Error in fetchInspecoesByCCA:", error);
     return [];
   }
 }

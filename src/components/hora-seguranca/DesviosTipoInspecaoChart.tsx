@@ -1,9 +1,8 @@
 
-import { useState, useEffect } from 'react';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
-import { fetchDesviosByInspectionType } from '@/services/hora-seguranca';
-import { useUserCCAs } from '@/hooks/useUserCCAs';
-import { supabase } from "@/integrations/supabase/client";
+import React, { useEffect, useState } from "react";
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from "recharts";
+import { fetchDesviosByInspectionType } from "@/services/hora-seguranca/desviosInspectionService";
+import { useUserCCAs } from "@/hooks/useUserCCAs";
 
 interface Filters {
   ccaId?: number;
@@ -16,11 +15,9 @@ interface DesviosTipoInspecaoChartProps {
   filters?: Filters;
 }
 
-export function DesviosTipoInspecaoChart({ filters }: DesviosTipoInspecaoChartProps) {
-  console.log('DesviosTipoInspecaoChart rendering with PieChart');
+export const DesviosTipoInspecaoChart = ({ filters }: DesviosTipoInspecaoChartProps) => {
   const [data, setData] = useState<any[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
   const { data: userCCAs = [] } = useUserCCAs();
 
   useEffect(() => {
@@ -33,63 +30,12 @@ export function DesviosTipoInspecaoChart({ filters }: DesviosTipoInspecaoChartPr
           setLoading(false);
           return;
         }
-        
-        // Aplicar filtros na consulta
-        let query = supabase
-          .from('execucao_hsa')
-          .select('inspecao_programada, desvios_identificados')
-          .in('cca_id', userCCAs.map(cca => cca.id))
-          .gt('desvios_identificados', 0);
 
-        // Aplicar filtros adicionais
-        if (filters?.ccaId) {
-          query = query.eq('cca_id', filters.ccaId);
-        }
-        
-        if (filters?.responsavel) {
-          query = query.eq('responsavel_inspecao', filters.responsavel);
-        }
-        
-        if (filters?.dataInicial) {
-          query = query.gte('data', filters.dataInicial);
-        }
-        
-        if (filters?.dataFinal) {
-          query = query.lte('data', filters.dataFinal);
-        }
-
-        const { data: execucoes, error } = await query;
-        
-        if (error) {
-          console.error('Erro ao buscar dados:', error);
-          setError("Não foi possível carregar os dados de desvios por tipo de inspeção");
-          return;
-        }
-
-        // Processar dados por tipo de inspeção
-        const processedData: { [key: string]: number } = {};
-        
-        execucoes?.forEach(item => {
-          const tipo = item.inspecao_programada || 'Tipo não informado';
-          
-          if (!processedData[tipo]) {
-            processedData[tipo] = 0;
-          }
-          
-          processedData[tipo] += item.desvios_identificados || 0;
-        });
-
-        // Converter para formato do gráfico
-        const formattedData = Object.keys(processedData).map((tipo, index) => ({
-          name: tipo,
-          value: processedData[tipo],
-          fill: `hsl(${210 + index * 20}, 20%, ${50 + index * 10}%)`
-        }));
-        
-        setData(formattedData);
-      } catch (err) {
-        console.error("Error loading desvios by inspection type:", err);
-        setError("Não foi possível carregar os dados de desvios por tipo de inspeção");
+        const ccaIds = userCCAs.map(cca => cca.id);
+        const chartData = await fetchDesviosByInspectionType(ccaIds, filters);
+        setData(chartData);
+      } catch (error) {
+        console.error("Error loading desvios by inspection type chart:", error);
       } finally {
         setLoading(false);
       }
@@ -100,50 +46,27 @@ export function DesviosTipoInspecaoChart({ filters }: DesviosTipoInspecaoChartPr
 
   if (loading) {
     return (
-      <div className="h-[400px] w-full flex items-center justify-center">
+      <div className="flex items-center justify-center h-[300px]">
         <p className="text-muted-foreground">Carregando dados...</p>
       </div>
     );
   }
 
-  if (error) {
-    return (
-      <div className="h-[400px] w-full flex items-center justify-center">
-        <p className="text-red-500">{error}</p>
-      </div>
-    );
-  }
-
-  // If we have no data, show a message
-  if (data.length === 0) {
-    return (
-      <div className="h-[400px] w-full flex items-center justify-center">
-        <p className="text-muted-foreground">Nenhum desvio registrado</p>
-      </div>
-    );
-  }
-
   return (
-    <div className="h-[400px] w-full">
+    <div className="h-[300px]">
       <ResponsiveContainer width="100%" height="100%">
-        <PieChart>
-          <Pie
-            data={data}
-            cx="50%"
-            cy="50%"
-            labelLine={false}
-            label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-            outerRadius={150}
-            fill="#8884d8"
-            dataKey="value"
-          >
-            {data.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={entry.fill} />
-            ))}
-          </Pie>
+        <BarChart
+          data={data}
+          margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+        >
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="tipo" />
+          <YAxis />
           <Tooltip />
-        </PieChart>
+          <Legend />
+          <Bar dataKey="desvios" fill="#f97316" />
+        </BarChart>
       </ResponsiveContainer>
     </div>
   );
-}
+};

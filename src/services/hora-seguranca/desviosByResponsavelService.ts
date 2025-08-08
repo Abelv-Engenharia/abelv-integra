@@ -1,57 +1,62 @@
 
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from "@/integrations/supabase/client";
 
-import { DesviosByResponsavel } from './types';
+interface Filters {
+  ccaId?: number;
+  responsavel?: string;
+  dataInicial?: string;
+  dataFinal?: string;
+}
 
-/**
- * Fetch desvios by responsável from execucao_hsa table
- */
-export async function fetchDesviosByResponsavel(ccaIds?: number[]): Promise<DesviosByResponsavel[]> {
+export async function fetchDesviosByResponsavel(ccaIds: number[], filters?: Filters) {
   try {
     let query = supabase
-      .from('execucao_hsa')
-      .select('responsavel_inspecao, desvios_identificados');
+      .from("execucao_hsa")
+      .select("responsavel_inspecao, desvios_identificados")
+      .in("cca_id", ccaIds)
+      .not("responsavel_inspecao", "is", null);
 
-    // Aplicar filtro de CCAs se fornecido
-    if (ccaIds && ccaIds.length > 0) {
-      query = query.in('cca_id', ccaIds);
+    // Aplicar filtros
+    if (filters?.ccaId) {
+      query = query.eq('cca_id', filters.ccaId);
+    }
+    
+    if (filters?.responsavel) {
+      query = query.eq('responsavel_inspecao', filters.responsavel);
+    }
+    
+    if (filters?.dataInicial) {
+      query = query.gte('data', filters.dataInicial);
+    }
+    
+    if (filters?.dataFinal) {
+      query = query.lte('data', filters.dataFinal);
     }
 
     const { data, error } = await query;
 
-    if (error) throw error;
+    if (error) {
+      console.error("Error fetching desvios by responsável:", error);
+      return [];
+    }
 
-    // Agrupa por responsável e soma os desvios
-    const grouped: Record<string, number> = {};
+    // Agrupar por responsável
+    const groupedData: { [key: string]: number } = {};
     
-    data.forEach((row: any) => {
-      const nome = row.responsavel_inspecao || "Indefinido";
-      const desvios = row.desvios_identificados || 0;
-      
-      if (!(nome in grouped)) {
-        grouped[nome] = 0;
+    data?.forEach((item: any) => {
+      const responsavel = item.responsavel_inspecao;
+      if (!groupedData[responsavel]) {
+        groupedData[responsavel] = 0;
       }
-      grouped[nome] += desvios;
+      groupedData[responsavel] += item.desvios_identificados || 0;
     });
 
-    // DEBUG: log agrupamento final
-    console.log('[HSA][fetchDesviosByResponsavel] grouped:', grouped);
-
-    return Object.entries(grouped)
-      .filter(([_, desvios]) => desvios > 0) // Só mostra responsáveis com desvios
-      .map(([responsavel, desvios]) => {
-        const primeiroNome = responsavel.split(' ')[0];
-        return {
-          responsavel,
-          primeiroNome,
-          nomeCompleto: responsavel,
-          desvios
-        };
-      })
-      .sort((a, b) => b.desvios - a.desvios); // Ordena por quantidade de desvios (decrescente)
-      
+    return Object.entries(groupedData).map(([responsavel, desvios]) => ({
+      responsavel,
+      desvios
+    }));
   } catch (error) {
-    console.error("Erro ao buscar desvios por responsável:", error);
+    console.error("Error in fetchDesviosByResponsavel:", error);
     return [];
   }
 }

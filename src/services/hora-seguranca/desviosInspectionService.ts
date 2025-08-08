@@ -1,58 +1,62 @@
 
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from "@/integrations/supabase/client";
 
-export interface DesviosByInspectionType {
-  tipo: string;
-  quantidade: number;
+interface Filters {
+  ccaId?: number;
+  responsavel?: string;
+  dataInicial?: string;
+  dataFinal?: string;
 }
 
-/**
- * Fetch desvios by inspection type from execucao_hsa table
- */
-export async function fetchDesviosByInspectionType(ccaIds?: number[]): Promise<DesviosByInspectionType[]> {
+export async function fetchDesviosByInspectionType(ccaIds: number[], filters?: Filters) {
   try {
     let query = supabase
-      .from('execucao_hsa')
-      .select('inspecao_programada, desvios_identificados');
+      .from("execucao_hsa")
+      .select("inspecao_programada, desvios_identificados")
+      .in("cca_id", ccaIds)
+      .not("inspecao_programada", "is", null);
 
-    // Aplicar filtro de CCAs se fornecido
-    if (ccaIds && ccaIds.length > 0) {
-      query = query.in('cca_id', ccaIds);
+    // Aplicar filtros
+    if (filters?.ccaId) {
+      query = query.eq('cca_id', filters.ccaId);
+    }
+    
+    if (filters?.responsavel) {
+      query = query.eq('responsavel_inspecao', filters.responsavel);
+    }
+    
+    if (filters?.dataInicial) {
+      query = query.gte('data', filters.dataInicial);
+    }
+    
+    if (filters?.dataFinal) {
+      query = query.lte('data', filters.dataFinal);
     }
 
     const { data, error } = await query;
 
-    if (error) throw error;
+    if (error) {
+      console.error("Error fetching desvios by inspection type:", error);
+      return [];
+    }
 
-    // Agrupa por tipo de inspeção e soma os desvios
-    const grouped: Record<string, number> = {};
+    // Agrupar por tipo de inspeção
+    const groupedData: { [key: string]: number } = {};
     
-    data.forEach((row: any) => {
-      const tipo = row.inspecao_programada || "Indefinido";
-      const desvios = row.desvios_identificados || 0;
-      
-      // Só processa se há desvios identificados
-      if (desvios > 0) {
-        if (!(tipo in grouped)) {
-          grouped[tipo] = 0;
-        }
-        grouped[tipo] += desvios;
+    data?.forEach((item: any) => {
+      const tipo = item.inspecao_programada || "Não especificado";
+      if (!groupedData[tipo]) {
+        groupedData[tipo] = 0;
       }
+      groupedData[tipo] += item.desvios_identificados || 0;
     });
 
-    // DEBUG: log agrupamento final
-    console.log('[HSA][fetchDesviosByInspectionType] grouped:', grouped);
-
-    return Object.entries(grouped)
-      .filter(([_, quantidade]) => quantidade > 0) // Remove entradas com zero desvios
-      .map(([tipo, quantidade]) => ({
-        tipo,
-        quantidade
-      }))
-      .sort((a, b) => b.quantidade - a.quantidade); // Ordena por quantidade (decrescente)
-      
+    return Object.entries(groupedData).map(([tipo, desvios]) => ({
+      tipo,
+      desvios
+    }));
   } catch (error) {
-    console.error("Erro ao buscar desvios por tipo de inspeção:", error);
+    console.error("Error in fetchDesviosByInspectionType:", error);
     return [];
   }
 }
