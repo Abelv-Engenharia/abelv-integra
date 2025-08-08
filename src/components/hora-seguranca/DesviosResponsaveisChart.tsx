@@ -33,7 +33,15 @@ export const DesviosResponsaveisChart = ({ filters }: DesviosResponsaveisChartPr
 
         const ccaIds = userCCAs.map(cca => cca.id);
         const chartData = await fetchDesviosByResponsavel(ccaIds, filters);
-        setData(chartData);
+        
+        // Formatar dados para mostrar apenas primeiro nome no eixo X
+        const formattedData = chartData.map(item => ({
+          name: item.responsavel?.split(' ')[0] || item.responsavel,
+          nomeCompleto: item.responsavel,
+          desvios: item.desvios
+        }));
+        
+        setData(formattedData);
       } catch (error) {
         console.error("Error loading desvios by responsável chart:", error);
       } finally {
@@ -60,9 +68,16 @@ export const DesviosResponsaveisChart = ({ filters }: DesviosResponsaveisChartPr
           margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
         >
           <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="responsavel" />
+          <XAxis dataKey="name" />
           <YAxis />
-          <Tooltip />
+          <Tooltip 
+            labelFormatter={(label, payload) => {
+              if (payload && payload.length > 0) {
+                return payload[0]?.payload?.nomeCompleto || label;
+              }
+              return label;
+            }}
+          />
           <Legend />
           <Bar dataKey="desvios" fill="#ef4444" />
         </BarChart>
