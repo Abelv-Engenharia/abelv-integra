@@ -1,6 +1,5 @@
-
 import React, { useEffect, useState } from "react";
-import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend } from "recharts";
+import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from "recharts";
 import { fetchDesviosByInspectionType } from "@/services/hora-seguranca/desviosInspectionService";
 import { useUserCCAs } from "@/hooks/useUserCCAs";
 
@@ -86,7 +85,6 @@ export const DesviosTipoInspecaoChart = ({ filters }: DesviosTipoInspecaoChartPr
               border: "1px solid rgba(229, 231, 235, 1)"
             }}
           />
-          <Legend />
         </PieChart>
       </ResponsiveContainer>
     </div>
