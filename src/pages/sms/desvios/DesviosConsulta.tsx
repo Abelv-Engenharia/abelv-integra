@@ -1,3 +1,3 @@
 
 import { createPlaceholderPage } from '@/utils/createPlaceholderPage';
-export default createPlaceholderPage('Dashboard Relatórios');
+export default createPlaceholderPage('Consulta de Desvios');
