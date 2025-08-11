@@ -46,29 +46,36 @@ export const InspecoesByCCAChart = ({ filters }: InspecoesByCCAChartProps) => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-[300px]">
+      <div className="flex items-center justify-center h-[400px]">
         <p className="text-muted-foreground">Carregando dados...</p>
       </div>
     );
   }
 
   return (
-    <div className="h-[300px]">
+    <div className="h-[400px]">
       <ResponsiveContainer width="100%" height="100%">
         <BarChart
           data={data}
-          margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+          margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
         >
           <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="cca" />
+          <XAxis 
+            dataKey="cca" 
+            angle={-45}
+            textAnchor="end"
+            height={80}
+            interval={0}
+            tick={{ fontSize: 11 }}
+          />
           <YAxis />
           <Tooltip />
           <Legend />
-          <Bar dataKey="A Realizar" stackId="a" fill="#4285F4" />
-          <Bar dataKey="Realizada" stackId="a" fill="#34A853" />
-          <Bar dataKey="Não Realizada" stackId="a" fill="#EA4335" />
-          <Bar dataKey="Realizada (Não Programada)" stackId="a" fill="#FBBC05" />
-          <Bar dataKey="Cancelada" stackId="a" fill="#9E9E9E" />
+          <Bar dataKey="A Realizar" name="A Realizar" fill="#4285F4" />
+          <Bar dataKey="Realizada" name="Realizada" fill="#34A853" />
+          <Bar dataKey="Não Realizada" name="Não Realizada" fill="#EA4335" />
+          <Bar dataKey="Realizada (Não Programada)" name="Realizada (Não Programada)" fill="#FBBC05" />
+          <Bar dataKey="Cancelada" name="Cancelada" fill="#9E9E9E" />
         </BarChart>
       </ResponsiveContainer>
     </div>
