@@ -236,7 +236,7 @@ const HoraSegurancaDashboard = () => {
                       Distribuição de inspeções por responsável
                     </CardDescription>
                   </CardHeader>
-                  <CardContent className="pl-2 pb-8">
+                  <CardContent className="pl-2 pb-8 py-0">
                     <div className="h-[600px]">
                       <ResponsiveContainer width="100%" height="100%">
                         <ReBarChart data={respData} margin={{
@@ -281,7 +281,7 @@ const HoraSegurancaDashboard = () => {
                       Quantidade de desvios identificados por responsável
                     </CardDescription>
                   </CardHeader>
-                  <CardContent className="pl-2">
+                  <CardContent className="pl-2 py-[40px]">
                     <DesviosResponsaveisChart filters={getAppliedFilters()} />
                   </CardContent>
                 </Card>
