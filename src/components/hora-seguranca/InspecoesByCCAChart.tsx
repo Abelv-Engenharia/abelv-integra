@@ -33,7 +33,15 @@ export const InspecoesByCCAChart = ({ filters }: InspecoesByCCAChartProps) => {
 
         const ccaIds = userCCAs.map(cca => cca.id);
         const chartData = await fetchInspecoesByCCA(ccaIds, filters);
-        setData(chartData);
+        
+        // Processar dados para separar código do CCA da informação completa
+        const processedData = chartData.map((item: any) => ({
+          ...item,
+          ccaCode: item.cca.split(' - ')[0], // Extrai apenas o código (ex: "23015")
+          ccaFull: item.cca // Mantém a informação completa para o tooltip
+        }));
+        
+        setData(processedData);
       } catch (error) {
         console.error("Error loading inspeções by CCA chart:", error);
       } finally {
@@ -61,7 +69,7 @@ export const InspecoesByCCAChart = ({ filters }: InspecoesByCCAChartProps) => {
         >
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis 
-            dataKey="cca" 
+            dataKey="ccaCode"
             angle={-45}
             textAnchor="end"
             height={80}
@@ -69,7 +77,24 @@ export const InspecoesByCCAChart = ({ filters }: InspecoesByCCAChartProps) => {
             tick={{ fontSize: 11 }}
           />
           <YAxis />
-          <Tooltip />
+          <Tooltip 
+            content={({ active, payload, label }) => {
+              if (active && payload && payload.length) {
+                const data = payload[0]?.payload;
+                return (
+                  <div className="bg-white p-3 border border-gray-300 rounded shadow">
+                    <p className="font-medium mb-2">{data?.ccaFull}</p>
+                    {payload.map((entry, index) => (
+                      <p key={index} style={{ color: entry.color }}>
+                        {entry.name}: {entry.value}
+                      </p>
+                    ))}
+                  </div>
+                );
+              }
+              return null;
+            }}
+          />
           <Legend />
           <Bar dataKey="A Realizar" name="A Realizar" fill="#4285F4" />
           <Bar dataKey="Realizada" name="Realizada" fill="#34A853" />
