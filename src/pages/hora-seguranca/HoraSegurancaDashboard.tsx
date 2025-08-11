@@ -18,6 +18,7 @@ import { useUserCCAs } from "@/hooks/useUserCCAs";
 import { supabase } from "@/integrations/supabase/client";
 import { ResponsiveContainer, BarChart as ReBarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from "recharts";
 import { fetchInspecoesByResponsavel } from "@/services/hora-seguranca/inspecoesByResponsavelService";
+
 const HoraSegurancaDashboard = () => {
   const [tab, setTab] = useState("overview");
   const [filterCCA, setFilterCCA] = useState("");
@@ -29,6 +30,11 @@ const HoraSegurancaDashboard = () => {
   const {
     data: userCCAs = []
   } = useUserCCAs();
+
+  // Ordenar CCAs do menor para o maior código
+  const sortedCCAs = [...userCCAs].sort((a, b) => 
+    a.codigo.localeCompare(b.codigo, undefined, { numeric: true })
+  );
 
   // Função para construir filtros aplicados
   const getAppliedFilters = () => {
@@ -146,6 +152,7 @@ const HoraSegurancaDashboard = () => {
     };
     loadRespData();
   }, [userCCAs, filterCCA, filterResponsavel, dataInicial, dataFinal]);
+
   return <div className="container mx-auto py-6">
       <div className="flex flex-col space-y-6">
         <div className="flex flex-col space-y-2">
@@ -171,7 +178,7 @@ const HoraSegurancaDashboard = () => {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="todos">Todos</SelectItem>
-                    {userCCAs.map(cca => <SelectItem key={cca.id} value={cca.id.toString()}>
+                    {sortedCCAs.map(cca => <SelectItem key={cca.id} value={cca.id.toString()}>
                         {cca.codigo} - {cca.nome}
                       </SelectItem>)}
                   </SelectContent>
@@ -303,4 +310,5 @@ const HoraSegurancaDashboard = () => {
       </div>
     </div>;
 };
+
 export default HoraSegurancaDashboard;
