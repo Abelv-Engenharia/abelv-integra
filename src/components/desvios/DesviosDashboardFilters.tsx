@@ -50,6 +50,11 @@ const DesviosDashboardFilters = ({
   const [disciplinas, setDisciplinas] = useState<Disciplina[]>([]);
   const [empresas, setEmpresas] = useState<Empresa[]>([]);
 
+  // Sort CCAs from smallest to largest by codigo
+  const sortedCCAs = [...userCCAs].sort((a, b) => 
+    a.codigo.localeCompare(b.codigo, undefined, { numeric: true })
+  );
+
   useEffect(() => {
     const fetchFilterOptions = async () => {
       try {
@@ -154,7 +159,7 @@ const DesviosDashboardFilters = ({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="todos">Todos</SelectItem>
-                {userCCAs.map((cca) => (
+                {sortedCCAs.map((cca) => (
                   <SelectItem key={cca.id} value={cca.id.toString()}>
                     {cca.codigo} - {cca.nome}
                   </SelectItem>
@@ -178,7 +183,7 @@ const DesviosDashboardFilters = ({
                 <SelectItem value="todos">Todas</SelectItem>
                 {disciplinas.map((disciplina) => (
                   <SelectItem key={disciplina.id} value={disciplina.id.toString()}>
-                    {disciplina.codigo} - {disciplina.nome}
+                    {disciplina.nome}
                   </SelectItem>
                 ))}
               </SelectContent>
