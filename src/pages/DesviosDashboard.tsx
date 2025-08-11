@@ -92,7 +92,8 @@ const DesviosDashboard = () => {
         // Verificar se o CCA selecionado está nos permitidos
         const allowedCcaIds = userCCAs.map(cca => cca.id.toString());
         if (allowedCcaIds.includes(ccaId)) {
-          filters.ccaId = ccaId;
+          // Quando um CCA específico é selecionado, substituir a lista de CCAs permitidos
+          filters.ccaIds = [ccaId];
         }
       }
       if (disciplinaId && disciplinaId !== "todos") filters.disciplinaId = disciplinaId;
