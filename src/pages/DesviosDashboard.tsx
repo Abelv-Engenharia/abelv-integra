@@ -30,68 +30,67 @@ const DesviosDashboard = () => {
   });
   const [loading, setLoading] = useState(true);
 
-  // Buscar estatísticas do dashboard filtrando pelos CCAs permitidos
-  useEffect(() => {
-    const loadDashboardStats = async () => {
-      setLoading(true);
-      try {
-        console.log('Carregando estatísticas do dashboard para CCAs permitidos...');
-        
-        // Se o usuário não tem CCAs permitidos, não buscar dados
-        if (userCCAs.length === 0) {
-          setDashboardStats({
-            totalDesvios: 0,
-            acoesCompletas: 0,
-            acoesAndamento: 0,
-            acoesPendentes: 0,
-            percentualCompletas: 0,
-            percentualAndamento: 0,
-            percentualPendentes: 0,
-            riskLevel: "Baixo",
-          });
-          return;
-        }
-
-        // Filtrar pelos CCAs permitidos
-        const allowedCcaIds = userCCAs.map(cca => cca.id.toString());
-        const filters: FilterParams = {
-          ccaIds: allowedCcaIds
-        };
-        
-        const stats = await fetchFilteredDashboardStats(filters);
-        console.log('Estatísticas carregadas:', stats);
-        setDashboardStats(stats);
-      } catch (error) {
-        console.error('Erro ao buscar estatísticas do dashboard:', error);
-        toast({
-          title: "Erro ao carregar dados",
-          description: "Ocorreu um erro ao buscar as estatísticas do dashboard.",
-          variant: "destructive"
+  // Função para atualizar os cards de estatísticas
+  const updateDashboardStats = async (filters?: FilterParams) => {
+    setLoading(true);
+    try {
+      console.log('Atualizando estatísticas dos cards com filtros:', filters);
+      
+      // Se o usuário não tem CCAs permitidos, não buscar dados
+      if (userCCAs.length === 0) {
+        setDashboardStats({
+          totalDesvios: 0,
+          acoesCompletas: 0,
+          acoesAndamento: 0,
+          acoesPendentes: 0,
+          percentualCompletas: 0,
+          percentualAndamento: 0,
+          percentualPendentes: 0,
+          riskLevel: "Baixo",
         });
-      } finally {
-        setLoading(false);
+        return;
       }
-    };
 
-    loadDashboardStats();
-  }, [toast, userCCAs]);
+      // Sempre aplicar filtro por CCAs permitidos
+      const allowedCcaIds = userCCAs.map(cca => cca.id.toString());
+      const finalFilters: FilterParams = {
+        ccaIds: allowedCcaIds,
+        ...filters
+      };
+      
+      const stats = await fetchFilteredDashboardStats(finalFilters);
+      console.log('Estatísticas dos cards atualizadas:', stats);
+      setDashboardStats(stats);
+    } catch (error) {
+      console.error('Erro ao buscar estatísticas do dashboard:', error);
+      toast({
+        title: "Erro ao carregar dados",
+        description: "Ocorreu um erro ao buscar as estatísticas do dashboard.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Buscar estatísticas iniciais do dashboard filtrando pelos CCAs permitidos
+  useEffect(() => {
+    updateDashboardStats();
+  }, [userCCAs]);
 
   const handleFilterChange = async () => {
-    setLoading(true);
     try {
       console.log('Iniciando aplicação de filtros...');
       console.log('Filtros atuais:', { year, month, ccaId, disciplinaId, empresaId });
       
-      // Sempre aplicar filtro por CCAs permitidos
-      const allowedCcaIds = userCCAs.map(cca => cca.id.toString());
-      const filters: FilterParams = {
-        ccaIds: allowedCcaIds
-      };
+      // Preparar filtros para os cards
+      const filters: FilterParams = {};
       
       if (year && year !== "todos") filters.year = year;
       if (month && month !== "todos") filters.month = month;
       if (ccaId && ccaId !== "todos") {
         // Verificar se o CCA selecionado está nos permitidos
+        const allowedCcaIds = userCCAs.map(cca => cca.id.toString());
         if (allowedCcaIds.includes(ccaId)) {
           filters.ccaId = ccaId;
         }
@@ -101,9 +100,8 @@ const DesviosDashboard = () => {
 
       console.log('Aplicando filtros aos cards:', filters);
       
-      const filteredStats = await fetchFilteredDashboardStats(filters);
-      console.log('Estatísticas filtradas recebidas:', filteredStats);
-      setDashboardStats(filteredStats);
+      // Atualizar os cards de estatísticas com os filtros aplicados
+      await updateDashboardStats(filters);
       setFiltersApplied(true);
       
       toast({
@@ -117,8 +115,6 @@ const DesviosDashboard = () => {
         description: "Ocorreu um erro ao buscar os dados filtrados.",
         variant: "destructive"
       });
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -131,16 +127,9 @@ const DesviosDashboard = () => {
     setEmpresaId("");
     setFiltersApplied(false);
     
-    setLoading(true);
     try {
       // Recarregar dados originais apenas com filtro de CCA
-      const allowedCcaIds = userCCAs.map(cca => cca.id.toString());
-      const filters: FilterParams = {
-        ccaIds: allowedCcaIds
-      };
-      
-      const stats = await fetchFilteredDashboardStats(filters);
-      setDashboardStats(stats);
+      await updateDashboardStats();
       
       toast({
         title: "Filtros limpos",
@@ -148,8 +137,6 @@ const DesviosDashboard = () => {
       });
     } catch (error) {
       console.error('Erro ao limpar filtros:', error);
-    } finally {
-      setLoading(false);
     }
   };
 
