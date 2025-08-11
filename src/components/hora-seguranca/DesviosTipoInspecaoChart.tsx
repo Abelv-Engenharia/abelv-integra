@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from "recharts";
 import { fetchDesviosByInspectionType } from "@/services/hora-seguranca/desviosInspectionService";
@@ -54,25 +55,25 @@ export const DesviosTipoInspecaoChart = ({ filters }: DesviosTipoInspecaoChartPr
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-[300px]">
+      <div className="flex items-center justify-center h-[400px]">
         <p className="text-muted-foreground">Carregando dados...</p>
       </div>
     );
   }
 
   return (
-    <div className="h-[300px]">
+    <div className="h-[400px]">
       <ResponsiveContainer width="100%" height="100%">
         <PieChart>
           <Pie
             data={data}
             cx="50%"
             cy="50%"
-            outerRadius={100}
+            outerRadius={120}
             dataKey="value"
             label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-            labelLine={false}
-            style={{ fontSize: '12px' }}
+            labelLine={true}
+            style={{ fontSize: '11px' }}
           >
             {data.map((entry, index) => (
               <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
