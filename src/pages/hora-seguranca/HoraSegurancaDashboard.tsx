@@ -36,6 +36,14 @@ const HoraSegurancaDashboard = () => {
     a.codigo.localeCompare(b.codigo, undefined, { numeric: true })
   );
 
+  // Função para limpar filtros
+  const clearFilters = () => {
+    setFilterCCA("");
+    setFilterResponsavel("");
+    setDataInicial(undefined);
+    setDataFinal(undefined);
+  };
+
   // Função para construir filtros aplicados
   const getAppliedFilters = () => {
     return {
@@ -219,6 +227,15 @@ const HoraSegurancaDashboard = () => {
                     <Calendar mode="single" selected={dataFinal} onSelect={setDataFinal} initialFocus />
                   </PopoverContent>
                 </Popover>
+              </div>}
+
+            {userCCAs.length > 0 && <div className="flex justify-end">
+                <Button 
+                  onClick={clearFilters}
+                  variant="outline"
+                >
+                  Limpar Filtros
+                </Button>
               </div>}
 
             {userCCAs.length > 0 && <>
