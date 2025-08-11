@@ -14,7 +14,8 @@ export async function fetchDesviosByInspectionType(ccaIds: number[], filters?: F
       .from("execucao_hsa")
       .select("inspecao_programada, desvios_identificados")
       .in("cca_id", ccaIds)
-      .not("inspecao_programada", "is", null);
+      .not("inspecao_programada", "is", null)
+      .gt("desvios_identificados", 0); // Filtrar apenas registros com desvios > 0
 
     // Aplicar filtros
     if (filters?.ccaId) {
@@ -51,10 +52,13 @@ export async function fetchDesviosByInspectionType(ccaIds: number[], filters?: F
       groupedData[tipo] += item.desvios_identificados || 0;
     });
 
-    return Object.entries(groupedData).map(([tipo, desvios]) => ({
-      tipo,
-      desvios
-    }));
+    // Retornar apenas tipos que têm desvios registrados
+    return Object.entries(groupedData)
+      .filter(([tipo, desvios]) => desvios > 0)
+      .map(([tipo, desvios]) => ({
+        tipo,
+        desvios
+      }));
   } catch (error) {
     console.error("Error in fetchDesviosByInspectionType:", error);
     return [];
