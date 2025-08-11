@@ -2,7 +2,7 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { Users, Upload, Settings, FileText } from "lucide-react";
+import { Users, Upload, Settings, FileText, Database } from "lucide-react";
 
 const configMenuItems = [
   {
@@ -12,10 +12,10 @@ const configMenuItems = [
     description: "Gerenciar funcionários do sistema"
   },
   {
-    title: "Importação de Funcionários",
-    href: "/admin/importacao-funcionarios",
-    icon: Upload,
-    description: "Importar funcionários via arquivo CSV"
+    title: "Importação de Dados",
+    href: "/admin/importacao",
+    icon: Database,
+    description: "Importar dados via arquivos Excel"
   }
 ];
 
