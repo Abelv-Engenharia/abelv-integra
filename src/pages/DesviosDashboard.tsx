@@ -78,46 +78,47 @@ const DesviosDashboard = () => {
     updateDashboardStats();
   }, [userCCAs]);
 
-  const handleFilterChange = async () => {
-    try {
-      console.log('Iniciando aplicação de filtros...');
-      console.log('Filtros atuais:', { year, month, ccaId, disciplinaId, empresaId });
-      
-      // Preparar filtros para os cards
-      const filters: FilterParams = {};
-      
-      if (year && year !== "todos") filters.year = year;
-      if (month && month !== "todos") filters.month = month;
-      if (ccaId && ccaId !== "todos") {
-        // Verificar se o CCA selecionado está nos permitidos
-        const allowedCcaIds = userCCAs.map(cca => cca.id.toString());
-        if (allowedCcaIds.includes(ccaId)) {
-          // Quando um CCA específico é selecionado, substituir a lista de CCAs permitidos
-          filters.ccaIds = [ccaId];
+  // Atualizar automaticamente quando os filtros mudarem
+  useEffect(() => {
+    const applyFiltersAutomatically = async () => {
+      try {
+        console.log('Aplicando filtros automaticamente...');
+        console.log('Filtros atuais:', { year, month, ccaId, disciplinaId, empresaId });
+        
+        // Preparar filtros para os cards
+        const filters: FilterParams = {};
+        
+        if (year && year !== "todos") filters.year = year;
+        if (month && month !== "todos") filters.month = month;
+        if (ccaId && ccaId !== "todos") {
+          // Verificar se o CCA selecionado está nos permitidos
+          const allowedCcaIds = userCCAs.map(cca => cca.id.toString());
+          if (allowedCcaIds.includes(ccaId)) {
+            // Quando um CCA específico é selecionado, substituir a lista de CCAs permitidos
+            filters.ccaIds = [ccaId];
+          }
         }
-      }
-      if (disciplinaId && disciplinaId !== "todos") filters.disciplinaId = disciplinaId;
-      if (empresaId && empresaId !== "todos") filters.empresaId = empresaId;
+        if (disciplinaId && disciplinaId !== "todos") filters.disciplinaId = disciplinaId;
+        if (empresaId && empresaId !== "todos") filters.empresaId = empresaId;
 
-      console.log('Aplicando filtros aos cards:', filters);
-      
-      // Atualizar os cards de estatísticas com os filtros aplicados
-      await updateDashboardStats(filters);
-      setFiltersApplied(true);
-      
-      toast({
-        title: "Filtros aplicados",
-        description: "Os dados foram atualizados com os filtros selecionados.",
-      });
-    } catch (error) {
-      console.error('Erro ao aplicar filtros:', error);
-      toast({
-        title: "Erro ao aplicar filtros",
-        description: "Ocorreu um erro ao buscar os dados filtrados.",
-        variant: "destructive"
-      });
+        console.log('Aplicando filtros aos cards:', filters);
+        
+        // Atualizar os cards de estatísticas com os filtros aplicados
+        await updateDashboardStats(filters);
+        
+        // Marcar que filtros estão aplicados se algum filtro foi definido
+        const hasFilters = year !== "" || month !== "" || ccaId !== "" || disciplinaId !== "" || empresaId !== "";
+        setFiltersApplied(hasFilters);
+      } catch (error) {
+        console.error('Erro ao aplicar filtros automaticamente:', error);
+      }
+    };
+
+    // Só aplicar se já temos dados dos CCAs
+    if (userCCAs.length > 0) {
+      applyFiltersAutomatically();
     }
-  };
+  }, [year, month, ccaId, disciplinaId, empresaId, userCCAs]);
 
   // Função para limpar filtros e recarregar dados originais
   const handleClearFilters = async () => {
@@ -155,7 +156,7 @@ const DesviosDashboard = () => {
         setCcaId={setCcaId}
         setDisciplinaId={setDisciplinaId}
         setEmpresaId={setEmpresaId}
-        onFilterChange={handleFilterChange}
+        onClearFilters={handleClearFilters}
       />
       <DesviosDashboardStats loading={loading} stats={dashboardStats} />
       <DesviosFiltersProvider

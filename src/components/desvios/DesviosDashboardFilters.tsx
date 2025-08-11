@@ -1,9 +1,8 @@
 
 import { useState, useEffect } from "react";
-import { Filter } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserCCAs } from "@/hooks/useUserCCAs";
@@ -19,7 +18,7 @@ interface DesviosDashboardFiltersProps {
   setCcaId: (ccaId: string) => void;
   setDisciplinaId: (disciplinaId: string) => void;
   setEmpresaId: (empresaId: string) => void;
-  onFilterChange: () => void;
+  onClearFilters: () => void;
 }
 
 interface Disciplina {
@@ -44,7 +43,7 @@ const DesviosDashboardFilters = ({
   setCcaId,
   setDisciplinaId,
   setEmpresaId,
-  onFilterChange
+  onClearFilters
 }: DesviosDashboardFiltersProps) => {
   const { toast } = useToast();
   const { data: userCCAs = [] } = useUserCCAs();
@@ -88,7 +87,7 @@ const DesviosDashboardFilters = ({
       <CardHeader className="pb-3">
         <CardTitle className="text-base font-medium">Filtros</CardTitle>
         <CardDescription>
-          Selecione os filtros para visualizar os dados
+          Selecione os filtros para visualizar os dados (atualizados automaticamente)
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -209,27 +208,10 @@ const DesviosDashboardFilters = ({
           </div>
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex justify-end">
           <Button 
-            onClick={onFilterChange}
-            className="flex-1"
-          >
-            <Filter className="mr-2 h-4 w-4" />
-            Aplicar Filtros
-          </Button>
-          <Button 
-            onClick={() => {
-              // Limpar todos os filtros
-              setYear("");
-              setMonth("");
-              setCcaId("");
-              setDisciplinaId("");
-              setEmpresaId("");
-              // Chamar a função de filtro para recarregar dados originais
-              onFilterChange();
-            }}
+            onClick={onClearFilters}
             variant="outline"
-            className="flex-1"
           >
             Limpar Filtros
           </Button>
