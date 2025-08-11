@@ -16,12 +16,6 @@ const configMenuItems = [
     href: "/admin/importacao-funcionarios",
     icon: Upload,
     description: "Importar funcionários via arquivo CSV"
-  },
-  {
-    title: "Importação de Desvios",
-    href: "/admin/importacao-desvios",
-    icon: Upload,
-    description: "Importar desvios via arquivo CSV"
   }
 ];
 

@@ -226,17 +226,6 @@ export default function SidebarSectionAdministracao({ openMenu, toggleMenu }: Pr
                     </Link>
                   </SidebarMenuSubButton>
                 </SidebarMenuSubItem>
-                <SidebarMenuSubItem>
-                  <SidebarMenuSubButton 
-                    asChild
-                    className={currentPath === "/admin/importacao-desvios" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
-                  >
-                    <Link to="/admin/importacao-desvios" className="flex items-center gap-2">
-                      <Upload className="h-3 w-3 flex-shrink-0" />
-                      <span className="text-xs leading-tight break-words min-w-0">Importação de Desvios</span>
-                    </Link>
-                  </SidebarMenuSubButton>
-                </SidebarMenuSubItem>
             </SidebarMenuSub>
           </CollapsibleContent>
         </Collapsible>
