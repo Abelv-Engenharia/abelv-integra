@@ -69,7 +69,7 @@ export const DesviosTipoInspecaoChart = ({ filters }: DesviosTipoInspecaoChartPr
             data={data}
             cx="50%"
             cy="50%"
-            outerRadius={120}
+            outerRadius={140}
             dataKey="value"
             label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
             labelLine={true}
