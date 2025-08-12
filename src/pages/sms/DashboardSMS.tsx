@@ -15,7 +15,9 @@ import { fetchDashboardStats } from "@/services/desvios/dashboardStatsService";
 import { fetchHSAPercentage } from "@/services/dashboard/hsaStatsService";
 import { fetchTreinamentoInvestmentPercentage } from "@/services/dashboard/treinamentoStatsService";
 import { fetchOcorrenciasStats } from "@/services/ocorrencias/ocorrenciasStatsService";
+import { fetchTreinamentosStats } from "@/services/treinamentos/treinamentosStatsService";
 import { useUserCCAs } from "@/hooks/useUserCCAs";
+import SMSDashboardFilters from "@/components/sms/SMSDashboardFilters";
 
 // Simple stat card component (uses design tokens)
 function StatCard({
@@ -63,6 +65,11 @@ export default function DashboardSMS() {
   const { data: idsmsData = [], isLoading: loadingIDSMS } = useIDSMSDashboard();
   const { data: userCCAs = [] } = useUserCCAs();
   
+  // Estados para filtros
+  const [year, setYear] = useState("todos");
+  const [month, setMonth] = useState("todos");
+  const [ccaId, setCcaId] = useState("todos");
+  
   // Estados para dados dos indicadores
   const [desviosStats, setDesviosStats] = useState<any>(null);
   const [hsaPercentage, setHsaPercentage] = useState<number | null>(null);
@@ -83,23 +90,35 @@ export default function DashboardSMS() {
 
   const statusGeral = getStatusLabel(idsmsMedia);
 
-  // Carregar dados dos indicadores
+  // Carregar dados dos indicadores com filtros aplicados
   useEffect(() => {
     const loadIndicadores = async () => {
       try {
         setLoading(true);
-        const ccaIds = userCCAs.length > 0 ? userCCAs.map(cca => cca.id) : undefined;
+        
+        // Aplicar filtros de CCA
+        let ccaIds = userCCAs.length > 0 ? userCCAs.map(cca => cca.id) : undefined;
+        if (ccaId !== "todos") {
+          ccaIds = [parseInt(ccaId)];
+        }
 
-        const [desviosData, hsaData, treinamentoPercentage, ocorrenciasData] = await Promise.all([
+        // Criar filtros para desvios
+        const desviosFilters = {
+          year: year !== "todos" ? year : undefined,
+          month: month !== "todos" ? month : undefined,
+          ccaIds: ccaIds?.map(id => id.toString())
+        };
+
+        const [desviosData, hsaData, treinamentoStatsData, ocorrenciasData] = await Promise.all([
           fetchDashboardStats(),
           fetchHSAPercentage(ccaIds),
-          fetchTreinamentoInvestmentPercentage(ccaIds),
+          fetchTreinamentosStats(ccaIds || [], { year, month, ccaId }),
           fetchOcorrenciasStats(ccaIds)
         ]);
 
         setDesviosStats(desviosData);
         setHsaPercentage(hsaData);
-        setTreinamentoData({ percentual: treinamentoPercentage });
+        setTreinamentoData(treinamentoStatsData);
         setOcorrenciasStats(ocorrenciasData);
       } catch (error) {
         console.error('Erro ao carregar indicadores:', error);
@@ -111,7 +130,7 @@ export default function DashboardSMS() {
     if (userCCAs.length >= 0) {
       loadIndicadores();
     }
-  }, [userCCAs]);
+  }, [userCCAs, year, month, ccaId]);
 
   useEffect(() => {
     document.title = "Dashboard SMS | Gestão de SMS";
@@ -144,6 +163,16 @@ export default function DashboardSMS() {
       </header>
 
       <main className="space-y-8">
+        {/* Filtros */}
+        <SMSDashboardFilters 
+          year={year}
+          month={month}
+          ccaId={ccaId}
+          setYear={setYear}
+          setMonth={setMonth}
+          setCcaId={setCcaId}
+        />
+
         {/* Índice de Desenvolvimento de SMS */}
         <section aria-labelledby="idsms" className="space-y-4">
           <div className="flex items-center justify-between">
@@ -210,13 +239,28 @@ export default function DashboardSMS() {
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
               <StatCard 
                 title="Percentual investido" 
-                value={loading ? "..." : `${treinamentoData?.percentual?.toFixed(2) || 0}%`} 
+                value={loading ? "..." : `${treinamentoData?.percentualHorasInvestidas?.toFixed(2) || 0}%`} 
                 subtitle="Do total de horas trabalhadas (HHT)" 
                 icon={TrendingUp} 
               />
-              <StatCard title="Horas Trabalhadas (HHT)" value="564.090,36" subtitle="no período selecionado" icon={Clock} />
-              <StatCard title="Meta de Horas (2,5% HHT)" value="14.102" subtitle="Meta no trimestre" icon={Gauge} />
-              <StatCard title="Horas Totais de Treinamentos" value={718} subtitle="Realizadas no período" icon={CheckCircle2} />
+              <StatCard 
+                title="Horas Trabalhadas (HHT)" 
+                value={loading ? "..." : treinamentoData?.totalHHT?.toLocaleString() || 0} 
+                subtitle="no período selecionado" 
+                icon={Clock} 
+              />
+              <StatCard 
+                title="Meta de Horas (2,5% HHT)" 
+                value={loading ? "..." : Math.round(treinamentoData?.metaHoras || 0).toLocaleString()} 
+                subtitle="Meta no período" 
+                icon={Gauge} 
+              />
+              <StatCard 
+                title="Horas Totais de Treinamentos" 
+                value={loading ? "..." : Math.round(treinamentoData?.totalHorasTreinamento || 0).toLocaleString()} 
+                subtitle="Realizadas no período" 
+                icon={CheckCircle2} 
+              />
             </div>
           </article>
 
