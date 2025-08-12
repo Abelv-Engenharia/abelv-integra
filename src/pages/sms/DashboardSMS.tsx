@@ -62,13 +62,19 @@ const freqData = [
 
 export default function DashboardSMS() {
   const { counts, loading: loadingPiramide } = usePiramideOcorrencias();
-  const { data: idsmsData = [], isLoading: loadingIDSMS } = useIDSMSDashboard();
   const { data: userCCAs = [] } = useUserCCAs();
   
   // Estados para filtros
   const [year, setYear] = useState("todos");
   const [month, setMonth] = useState("todos");
   const [ccaId, setCcaId] = useState("todos");
+
+  // Usar o hook IDSMS com filtros
+  const { data: idsmsData = [], isLoading: loadingIDSMS } = useIDSMSDashboard({
+    cca_id: ccaId !== "todos" ? ccaId : "all",
+    ano: year !== "todos" ? year : "all",
+    mes: month !== "todos" ? month : "all"
+  });
   
   // Estados para dados dos indicadores
   const [desviosStats, setDesviosStats] = useState<any>(null);
@@ -102,17 +108,23 @@ export default function DashboardSMS() {
           ccaIds = [parseInt(ccaId)];
         }
 
-        // Criar filtros para desvios
+        // Criar filtros para os diferentes serviços
         const desviosFilters = {
           year: year !== "todos" ? year : undefined,
           month: month !== "todos" ? month : undefined,
           ccaIds: ccaIds?.map(id => id.toString())
         };
 
+        const treinamentosFilters = {
+          year: year !== "todos" ? year : undefined,
+          month: month !== "todos" ? month : undefined,
+          ccaId: ccaId !== "todos" ? ccaId : undefined
+        };
+
         const [desviosData, hsaData, treinamentoStatsData, ocorrenciasData] = await Promise.all([
-          fetchDashboardStats(),
+          fetchDashboardStats(desviosFilters),
           fetchHSAPercentage(ccaIds),
-          fetchTreinamentosStats(ccaIds || [], { year, month, ccaId }),
+          fetchTreinamentosStats(ccaIds || [], treinamentosFilters),
           fetchOcorrenciasStats(ccaIds)
         ]);
 
