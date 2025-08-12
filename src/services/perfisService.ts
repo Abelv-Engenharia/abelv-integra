@@ -1,10 +1,8 @@
-
 import { supabase } from '@/integrations/supabase/client';
 
 export function getAllMenusSidebar(): string[] {
   return [
     "dashboard",
-    
     // SMS menus
     "desvios_dashboard",
     "desvios_cadastro",
@@ -50,9 +48,6 @@ export function getAllMenusSidebar(): string[] {
     "adm_modelos_inspecao",
     "adm_templates",
     "adm_logo",
-    "adm_manutencao",
-    "adm_importacao_funcionarios",
-    "adm_importacao_execucao_treinamentos",
 
     // ORÇAMENTOS menus
     "orcamentos_dashboard",
@@ -97,32 +92,19 @@ export function getAllMenusSidebar(): string[] {
     "relatorios_dashboard",
     "relatorios_idsms",
 
-    // SUPORTE menu
-    "suporte",
-
-    // CONFIGURAÇÕES/ADMINISTRAÇÃO menus
+    // ADMINISTRAÇÃO menus (mantendo compatibilidade)
     "admin_usuarios",
     "admin_perfis",
     "admin_empresas",
     "admin_ccas",
     "admin_engenheiros",
     "admin_supervisores",
-    "admin_encarregados",
     "admin_funcionarios",
-    "admin_registro_hht",
+    "admin_hht",
     "admin_metas_indicadores",
-    "admin_modelos_inspecao",
     "admin_templates",
-    "admin_logo_sistema",
-    "admin_upload_tutoriais",
-    "admin_configuracao_emails",
-    "admin_exportacao_dados",
-    "admin_importacao_funcionarios",
-    "admin_importacao_execucao_treinamentos",
-
-    // CONTA menus
-    "conta_perfil",
-    "conta_configuracoes",
+    "admin_logo",
+    "admin_modelos_inspecao",
   ];
 }
 

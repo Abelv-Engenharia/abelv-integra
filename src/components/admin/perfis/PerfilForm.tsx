@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,47 +31,6 @@ export const PerfilForm = ({ initialData, onCancel, onSave, loading }: PerfilFor
   // Obter menus definidos globalmente
   const menusSidebar = getAllMenusSidebar();
 
-  // Organizar menus por categoria
-  const menuCategories = {
-    "Dashboard": ["dashboard"],
-    "Gestão SMS": [
-      "desvios_dashboard", "desvios_cadastro", "desvios_consulta", "desvios_nao_conformidade",
-      "treinamentos_dashboard", "treinamentos_normativo", "treinamentos_consulta", "treinamentos_execucao", "treinamentos_cracha",
-      "hora_seguranca_cadastro", "hora_seguranca_cadastro_inspecao", "hora_seguranca_cadastro_nao_programada", "hora_seguranca_dashboard", "hora_seguranca_agenda", "hora_seguranca_acompanhamento",
-      "inspecao_sms_dashboard", "inspecao_sms_cadastro", "inspecao_sms_consulta",
-      "medidas_disciplinares_dashboard", "medidas_disciplinares_cadastro", "medidas_disciplinares_consulta",
-      "ocorrencias_dashboard", "ocorrencias_cadastro", "ocorrencias_consulta"
-    ],
-    "IDSMS": ["idsms_dashboard", "idsms_relatorios"],
-    "ADM Matricial": [
-      "adm_dashboard", "adm_configuracoes", "adm_usuarios", "adm_perfis", "adm_empresas", "adm_ccas",
-      "adm_engenheiros", "adm_supervisores", "adm_funcionarios", "adm_hht", "adm_metas_indicadores",
-      "adm_modelos_inspecao", "adm_templates", "adm_logo", "adm_manutencao", "adm_importacao_funcionarios", "adm_importacao_execucao_treinamentos"
-    ],
-    "Orçamentos": [
-      "orcamentos_dashboard", "orcamentos_projetos", "orcamentos_custos", "orcamentos_analises", "orcamentos_aprovacoes", "orcamentos_historico"
-    ],
-    "Produção": [
-      "producao_dashboard", "producao_planejamento", "producao_ordens_producao", "producao_controle_qualidade", "producao_manutencao", "producao_recursos", "producao_indicadores"
-    ],
-    "Qualidade": [
-      "qualidade_dashboard", "qualidade_controle", "qualidade_auditorias", "qualidade_indicadores", "qualidade_equipe", "qualidade_configuracoes"
-    ],
-    "Suprimentos": [
-      "suprimentos_dashboard", "suprimentos_fornecedores", "suprimentos_materiais", "suprimentos_compras", "suprimentos_estoque", "suprimentos_pedidos", "suprimentos_contratos"
-    ],
-    "Tarefas": ["tarefas_dashboard", "tarefas_minhas_tarefas", "tarefas_cadastro"],
-    "Relatórios": ["relatorios_dashboard", "relatorios_idsms"],
-    "Suporte": ["suporte"],
-    "Configurações": [
-      "admin_usuarios", "admin_perfis", "admin_empresas", "admin_ccas", "admin_engenheiros", "admin_supervisores", "admin_encarregados",
-      "admin_funcionarios", "admin_registro_hht", "admin_metas_indicadores", "admin_modelos_inspecao", "admin_templates",
-      "admin_logo_sistema", "admin_upload_tutoriais", "admin_configuracao_emails", "admin_exportacao_dados",
-      "admin_importacao_funcionarios", "admin_importacao_execucao_treinamentos"
-    ],
-    "Conta": ["conta_perfil", "conta_configuracoes"]
-  };
-
   // Handler para seleção dos menus da sidebar
   const handleToggleSidebarMenu = (menu: string) => {
     setMenusSelecionados(prev => {
@@ -82,29 +42,10 @@ export const PerfilForm = ({ initialData, onCancel, onSave, loading }: PerfilFor
     });
   };
 
-  // Handler para selecionar/desselecionar todos os menus de uma categoria
-  const handleToggleCategory = (categoryMenus: string[]) => {
-    const allSelected = categoryMenus.every(menu => menusSelecionados.includes(menu));
-    
-    if (allSelected) {
-      // Desselecionar todos da categoria
-      setMenusSelecionados(prev => prev.filter(menu => !categoryMenus.includes(menu)));
-    } else {
-      // Selecionar todos da categoria
-      setMenusSelecionados(prev => {
-        const newMenus = [...prev];
-        categoryMenus.forEach(menu => {
-          if (!newMenus.includes(menu)) {
-            newMenus.push(menu);
-          }
-        });
-        return newMenus;
-      });
-    }
-  };
-
   const handleSave = () => {
+    // Criar objeto de permissões simplificado baseado apenas nos menus selecionados
     const permissoes: Permissoes = {
+      // Definir valores padrão para compatibilidade
       desvios: false,
       treinamentos: false,
       ocorrencias: false,
@@ -183,37 +124,16 @@ export const PerfilForm = ({ initialData, onCancel, onSave, loading }: PerfilFor
         <p className="text-xs sm:text-sm text-muted-foreground">
           Selecione os menus e submenus da sidebar que este perfil pode visualizar/acessar
         </p>
-        <div className="max-h-96 overflow-y-auto border p-4 rounded bg-orange-50">
-          {Object.entries(menuCategories).map(([category, categoryMenus]) => {
-            const allSelected = categoryMenus.every(menu => menusSelecionados.includes(menu));
-            const someSelected = categoryMenus.some(menu => menusSelecionados.includes(menu));
-            
-            return (
-              <div key={category} className="mb-4">
-                <div className="flex items-center space-x-2 mb-2 p-2 bg-orange-100 rounded">
-                  <Checkbox
-                    id={`category-${category}`}
-                    checked={allSelected}
-                    onCheckedChange={() => handleToggleCategory(categoryMenus)}
-                  />
-                  <Label htmlFor={`category-${category}`} className="font-semibold text-sm">
-                    {category}
-                  </Label>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 ml-6">
-                  {categoryMenus.map((menu) => (
-                    <SidebarMenuCheckbox
-                      key={menu}
-                      id={menu}
-                      label={menu.replace(/_/g, ' ')}
-                      checked={menusSelecionados.includes(menu)}
-                      onChange={() => handleToggleSidebarMenu(menu)}
-                    />
-                  ))}
-                </div>
-              </div>
-            );
-          })}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 max-h-48 sm:max-h-64 overflow-y-auto border p-2 rounded bg-orange-50">
+          {menusSidebar.map((menu) => (
+            <SidebarMenuCheckbox
+              key={menu}
+              id={menu}
+              label={menu}
+              checked={menusSelecionados.includes(menu)}
+              onChange={() => handleToggleSidebarMenu(menu)}
+            />
+          ))}
         </div>
       </div>
 
@@ -241,6 +161,6 @@ const SidebarMenuCheckbox = ({ id, label, checked, onChange }: SidebarMenuCheckb
       checked={checked}
       onCheckedChange={onChange}
     />
-    <Label htmlFor={id + "-sidebar"} className="text-xs break-words min-w-0 capitalize">{label}</Label>
+    <Label htmlFor={id + "-sidebar"} className="text-xs break-words min-w-0">{label}</Label>
   </div>
 );
