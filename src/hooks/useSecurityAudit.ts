@@ -16,7 +16,7 @@ export const useSecurityAudit = () => {
       
       if (!user) return;
 
-      // Use direct SQL query since types might not be updated yet
+      // Call the RPC function that we created in the database
       const { error } = await supabase.rpc('log_audit_event', {
         p_user_id: user.id,
         p_action: entry.action,
