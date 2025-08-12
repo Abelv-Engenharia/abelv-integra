@@ -26,7 +26,7 @@ export const fetchTreinamentosStats = async (userCCAIds: number[] = [], filters?
     const currentDate = new Date();
     const currentYear = currentDate.getFullYear();
 
-    const targetYear = filters?.year && filters.year !== "todos" ? parseInt(filters.year) : currentYear;
+    const targetYear = filters?.year && filters.year !== "todos" ? parseInt(filters.year) : null;
     const targetMonth = filters?.month && filters.month !== "todos" ? parseInt(filters.month) : null;
     
     console.log('Período definido:', { targetYear, targetMonth });
@@ -68,8 +68,11 @@ export const fetchTreinamentosStats = async (userCCAIds: number[] = [], filters?
     let execucaoQuery = supabase
       .from('execucao_treinamentos')
       .select('*', { count: 'exact', head: true })
-      .in('cca_id', allowedCCAIds)
-      .eq('ano', targetYear);
+      .in('cca_id', allowedCCAIds);
+    
+    if (targetYear) {
+      execucaoQuery = execucaoQuery.eq('ano', targetYear);
+    }
     
     if (targetMonth) {
       execucaoQuery = execucaoQuery.eq('mes', targetMonth);
@@ -83,8 +86,11 @@ export const fetchTreinamentosStats = async (userCCAIds: number[] = [], filters?
     let hhtQuery = supabase
       .from('horas_trabalhadas')
       .select('horas_trabalhadas')
-      .in('cca_id', allowedCCAIds)
-      .eq('ano', targetYear);
+      .in('cca_id', allowedCCAIds);
+    
+    if (targetYear) {
+      hhtQuery = hhtQuery.eq('ano', targetYear);
+    }
     
     if (targetMonth) {
       hhtQuery = hhtQuery.eq('mes', targetMonth);
@@ -98,8 +104,11 @@ export const fetchTreinamentosStats = async (userCCAIds: number[] = [], filters?
     let horasQuery = supabase
       .from('execucao_treinamentos')
       .select('horas_totais')
-      .in('cca_id', allowedCCAIds)
-      .eq('ano', targetYear);
+      .in('cca_id', allowedCCAIds);
+    
+    if (targetYear) {
+      horasQuery = horasQuery.eq('ano', targetYear);
+    }
     
     if (targetMonth) {
       horasQuery = horasQuery.eq('mes', targetMonth);

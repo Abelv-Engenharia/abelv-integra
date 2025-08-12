@@ -3,13 +3,15 @@ import { supabase } from '@/integrations/supabase/client';
 
 export async function fetchTreinamentoInvestmentPercentage(ccaIds?: number[], filters?: { year?: string; month?: string }): Promise<number> {
   try {
-    const currentYear = new Date().getFullYear();
-    const targetYear = filters?.year && filters.year !== "todos" ? parseInt(filters.year) : currentYear;
+    const yearFilter = filters?.year && filters.year !== "todos" ? parseInt(filters.year) : undefined;
 
     let query = supabase
       .from('execucao_treinamentos')
-      .select('horas_totais')
-      .eq('ano', targetYear);
+      .select('horas_totais');
+
+    if (yearFilter !== undefined) {
+      query = query.eq('ano', yearFilter);
+    }
 
     // Aplicar filtro de mês se especificado
     if (filters?.month && filters.month !== "todos") {
@@ -36,8 +38,11 @@ export async function fetchTreinamentoInvestmentPercentage(ccaIds?: number[], fi
     // Buscar total de horas trabalhadas do mesmo período
     let queryHHT = supabase
       .from('horas_trabalhadas')
-      .select('horas_trabalhadas')
-      .eq('ano', targetYear);
+      .select('horas_trabalhadas');
+
+    if (yearFilter !== undefined) {
+      queryHHT = queryHHT.eq('ano', yearFilter);
+    }
 
     // Aplicar filtro de mês se especificado
     if (filters?.month && filters.month !== "todos") {
