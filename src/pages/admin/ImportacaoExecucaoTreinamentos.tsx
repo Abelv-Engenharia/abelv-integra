@@ -30,26 +30,26 @@ const ImportacaoExecucaoTreinamentos = () => {
   const downloadTemplate = () => {
     const templateData = [
       {
-        'Data': '2024-01-15',
-        'CCA Código': '010',
-        'Processo de Treinamento': 'Treinamento de Segurança',
-        'Tipo de Treinamento': 'Formação',
-        'Treinamento Nome': 'Integração NR-12',
-        'Carga Horária': 8,
-        'Efetivo MOD': 15,
-        'Efetivo MOI': 3,
-        'Observações': 'Treinamento realizado conforme programação'
+        data: '2024-01-15',
+        cca_codigo: '010',
+        processo_treinamento: 'Treinamento de Segurança',
+        tipo_treinamento: 'Formação',
+        treinamento_nome: 'Integração NR-12',
+        carga_horaria: 8,
+        efetivo_mod: 15,
+        efetivo_moi: 3,
+        observacoes: 'Treinamento realizado conforme programação'
       },
       {
-        'Data': '2024-01-20',
-        'CCA Código': '020',
-        'Processo de Treinamento': 'Capacitação Técnica',
-        'Tipo de Treinamento': 'Reciclagem',
-        'Treinamento Nome': 'Brigada de Incêndio',
-        'Carga Horária': 4,
-        'Efetivo MOD': 10,
-        'Efetivo MOI': 2,
-        'Observações': 'Reciclagem anual obrigatória'
+        data: '2024-01-20',
+        cca_codigo: '020',
+        processo_treinamento: 'Capacitação Técnica',
+        tipo_treinamento: 'Reciclagem',
+        treinamento_nome: 'Brigada de Incêndio',
+        carga_horaria: 4,
+        efetivo_mod: 10,
+        efetivo_moi: 2,
+        observacoes: 'Reciclagem anual obrigatória'
       }
     ];
 
@@ -58,15 +58,15 @@ const ImportacaoExecucaoTreinamentos = () => {
 
     // Ajustar largura das colunas
     const wscols = [
-      { wch: 12 }, // Data
-      { wch: 12 }, // CCA Código
-      { wch: 30 }, // Processo de Treinamento
-      { wch: 20 }, // Tipo de Treinamento
-      { wch: 30 }, // Treinamento Nome
-      { wch: 15 }, // Carga Horária
-      { wch: 15 }, // Efetivo MOD
-      { wch: 15 }, // Efetivo MOI
-      { wch: 40 }  // Observações
+      { wch: 12 }, // data
+      { wch: 12 }, // cca_codigo
+      { wch: 30 }, // processo_treinamento
+      { wch: 20 }, // tipo_treinamento
+      { wch: 30 }, // treinamento_nome
+      { wch: 15 }, // carga_horaria
+      { wch: 15 }, // efetivo_mod
+      { wch: 15 }, // efetivo_moi
+      { wch: 40 }  // observacoes
     ];
     ws['!cols'] = wscols;
 
@@ -207,15 +207,15 @@ const ImportacaoExecucaoTreinamentos = () => {
                 <div className="space-y-3 text-sm text-muted-foreground">
                   <p>Prepare um arquivo Excel com as colunas na seguinte ordem:</p>
                   <ul className="list-disc pl-5 space-y-1">
-                    <li>Data (YYYY-MM-DD ou formato Excel)</li>
-                    <li>CCA Código (ex.: 010, 020)</li>
-                    <li>Processo de Treinamento</li>
-                    <li>Tipo de Treinamento</li>
-                    <li>Treinamento Nome (opcional)</li>
-                    <li>Carga Horária (número)</li>
-                    <li>Efetivo MOD (opcional, número)</li>
-                    <li>Efetivo MOI (opcional, número)</li>
-                    <li>Observações (opcional)</li>
+                    <li>data (YYYY-MM-DD ou formato Excel)</li>
+                    <li>cca_codigo (ex.: 010, 020)</li>
+                    <li>processo_treinamento</li>
+                    <li>tipo_treinamento</li>
+                    <li>treinamento_nome (opcional)</li>
+                    <li>carga_horaria (número)</li>
+                    <li>efetivo_mod (opcional, número)</li>
+                    <li>efetivo_moi (opcional, número)</li>
+                    <li>observacoes (opcional)</li>
                   </ul>
                   <Alert>
                     <AlertDescription>

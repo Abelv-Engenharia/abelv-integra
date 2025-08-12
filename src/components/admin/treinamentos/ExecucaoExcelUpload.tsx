@@ -43,31 +43,34 @@ export const ExecucaoExcelUpload = ({ onFileProcessed, isProcessing }: ExcelUplo
       const arrayBuffer = await file.arrayBuffer();
       const workbook = XLSX.read(arrayBuffer);
       const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-      const rawData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+      // Converte usando os cabeçalhos da primeira linha como chaves
+      const rows = XLSX.utils.sheet_to_json<Record<string, any>>(worksheet, { defval: '' });
 
-      if (!rawData || rawData.length < 2) {
-        throw new Error('A planilha deve conter cabeçalho e pelo menos uma linha de dados');
+      if (!rows || rows.length < 1) {
+        throw new Error('A planilha deve conter cabeçalhos válidos e pelo menos uma linha de dados');
       }
 
-      const dataRows = rawData.slice(1).filter((row: any) => Array.isArray(row) && row.some((c: any) => c !== null && c !== undefined && c !== ''));
+      // Filtra linhas totalmente vazias
+      const nonEmptyRows = rows.filter((row) =>
+        Object.values(row).some((v) => v !== null && v !== undefined && String(v).trim() !== '')
+      );
 
-      const data: ExecucaoTreinamentoImportData[] = dataRows.map((row: any) => {
+      const data: ExecucaoTreinamentoImportData[] = nonEmptyRows.map((row: any) => {
         const item: ExecucaoTreinamentoImportData = {};
-        // Colunas esperadas:
-        // 0: data, 1: cca_codigo, 2: processo_treinamento, 3: tipo_treinamento,
-        // 4: treinamento_nome, 5: carga_horaria, 6: efetivo_mod, 7: efetivo_moi, 8: observacoes
-        if (row[0]) {
-          if (typeof row[0] === 'number') item.data = parseExcelDate(row[0]);
-          else if (typeof row[0] === 'string') item.data = row[0].trim();
+        // Cabeçalhos esperados: data, cca_codigo, processo_treinamento, tipo_treinamento, treinamento_nome, carga_horaria, efetivo_mod, efetivo_moi, observacoes
+        const d = row['data'];
+        if (d !== undefined && d !== null && d !== '') {
+          if (typeof d === 'number') item.data = parseExcelDate(d);
+          else if (typeof d === 'string') item.data = d.trim();
         }
-        item.cca_codigo = row[1] ? String(row[1]).trim() : '';
-        item.processo_treinamento = row[2] ? String(row[2]).trim() : '';
-        item.tipo_treinamento = row[3] ? String(row[3]).trim() : '';
-        item.treinamento_nome = row[4] ? String(row[4]).trim() : '';
-        item.carga_horaria = row[5] ?? '';
-        item.efetivo_mod = row[6] ?? 0;
-        item.efetivo_moi = row[7] ?? 0;
-        item.observacoes = row[8] ? String(row[8]).trim() : '';
+        item.cca_codigo = row['cca_codigo'] ? String(row['cca_codigo']).trim() : '';
+        item.processo_treinamento = row['processo_treinamento'] ? String(row['processo_treinamento']).trim() : '';
+        item.tipo_treinamento = row['tipo_treinamento'] ? String(row['tipo_treinamento']).trim() : '';
+        item.treinamento_nome = row['treinamento_nome'] ? String(row['treinamento_nome']).trim() : '';
+        item.carga_horaria = row['carga_horaria'] ?? '';
+        item.efetivo_mod = row['efetivo_mod'] ?? 0;
+        item.efetivo_moi = row['efetivo_moi'] ?? 0;
+        item.observacoes = row['observacoes'] ? String(row['observacoes']).trim() : '';
         return item;
       });
 
