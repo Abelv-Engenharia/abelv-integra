@@ -58,7 +58,7 @@ export default function SidebarSectionSMS({ openMenu, toggleMenu }: SidebarSecti
 
   return (
     <>
-      {/* Seção IDSMS - Sempre mostrar para debug */}
+      {/* Seção IDSMS */}
       <SidebarMenu>
         <SidebarMenuItem>
           <Collapsible open={openMenu === "idsms"}>
@@ -84,13 +84,67 @@ export default function SidebarSectionSMS({ openMenu, toggleMenu }: SidebarSecti
                     </Link>
                   </SidebarMenuSubButton>
                 </SidebarMenuSubItem>
+
                 <SidebarMenuSubItem>
-                  <SidebarMenuSubButton 
-                    asChild
-                    className={currentPath === "/idsms/relatorios" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
-                  >
-                    <Link to="/idsms/relatorios" className="flex items-center gap-2">
-                      <span className="text-xs leading-tight break-words min-w-0">Relatórios</span>
+                  <SidebarMenuSubButton asChild className={currentPath === "/idsms/indicadores" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
+                    <Link to="/idsms/indicadores" className="flex items-center gap-2">
+                      <span className="text-xs leading-tight break-words min-w-0">Indicadores</span>
+                    </Link>
+                  </SidebarMenuSubButton>
+                </SidebarMenuSubItem>
+
+                <SidebarMenuSubItem>
+                  <SidebarMenuSubButton asChild className={currentPath === "/idsms/ht" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
+                    <Link to="/idsms/ht" className="flex items-center gap-2">
+                      <span className="text-xs leading-tight break-words min-w-0">HT</span>
+                    </Link>
+                  </SidebarMenuSubButton>
+                </SidebarMenuSubItem>
+
+                <SidebarMenuSubItem>
+                  <SidebarMenuSubButton asChild className={currentPath === "/idsms/hsa" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
+                    <Link to="/idsms/hsa" className="flex items-center gap-2">
+                      <span className="text-xs leading-tight break-words min-w-0">HSA</span>
+                    </Link>
+                  </SidebarMenuSubButton>
+                </SidebarMenuSubItem>
+
+                <SidebarMenuSubItem>
+                  <SidebarMenuSubButton asChild className={currentPath === "/idsms/iid" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
+                    <Link to="/idsms/iid" className="flex items-center gap-2">
+                      <span className="text-xs leading-tight break-words min-w-0">IID</span>
+                    </Link>
+                  </SidebarMenuSubButton>
+                </SidebarMenuSubItem>
+
+                <SidebarMenuSubItem>
+                  <SidebarMenuSubButton asChild className={currentPath === "/idsms/ipom" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
+                    <Link to="/idsms/ipom" className="flex items-center gap-2">
+                      <span className="text-xs leading-tight break-words min-w-0">IPOM</span>
+                    </Link>
+                  </SidebarMenuSubButton>
+                </SidebarMenuSubItem>
+
+                <SidebarMenuSubItem>
+                  <SidebarMenuSubButton asChild className={currentPath === "/idsms/indice-reativo" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
+                    <Link to="/idsms/indice-reativo" className="flex items-center gap-2">
+                      <span className="text-xs leading-tight break-words min-w-0">Índice Reativo</span>
+                    </Link>
+                  </SidebarMenuSubButton>
+                </SidebarMenuSubItem>
+
+                <SidebarMenuSubItem>
+                  <SidebarMenuSubButton asChild className={currentPath === "/idsms/inspecao-alta-lideranca" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
+                    <Link to="/idsms/inspecao-alta-lideranca" className="flex items-center gap-2">
+                      <span className="text-xs leading-tight break-words min-w-0">Inspeção Alta Liderança</span>
+                    </Link>
+                  </SidebarMenuSubButton>
+                </SidebarMenuSubItem>
+
+                <SidebarMenuSubItem>
+                  <SidebarMenuSubButton asChild className={currentPath === "/idsms/inspecao-gestao-sms" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
+                    <Link to="/idsms/inspecao-gestao-sms" className="flex items-center gap-2">
+                      <span className="text-xs leading-tight break-words min-w-0">Inspeção Gestão SMS</span>
                     </Link>
                   </SidebarMenuSubButton>
                 </SidebarMenuSubItem>

@@ -166,7 +166,8 @@ export default function SidebarSectionGestaoSMS({
                     </div>
                     {openSubMenus.idsms ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
                   </button>
-                  {openSubMenus.idsms && <div className="ml-4 mt-1 space-y-1">
+                  {openSubMenus.idsms && (
+                    <div className="ml-4 mt-1 space-y-1">
                       <SidebarMenuSubButton asChild className={currentPath === "/idsms/dashboard" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
                         <Link to="/idsms/dashboard">
                           <div className="flex items-center gap-2">
@@ -175,10 +176,40 @@ export default function SidebarSectionGestaoSMS({
                           </div>
                         </Link>
                       </SidebarMenuSubButton>
-                      <SidebarMenuSubButton asChild className={currentPath === "/idsms/relatorios" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
-                        <Link to="/idsms/relatorios">Relatórios</Link>
+
+                      <SidebarMenuSubButton asChild className={currentPath === "/idsms/indicadores" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
+                        <Link to="/idsms/indicadores">Indicadores</Link>
                       </SidebarMenuSubButton>
-                    </div>}
+
+                      <SidebarMenuSubButton asChild className={currentPath === "/idsms/ht" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
+                        <Link to="/idsms/ht">HT</Link>
+                      </SidebarMenuSubButton>
+
+                      <SidebarMenuSubButton asChild className={currentPath === "/idsms/hsa" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
+                        <Link to="/idsms/hsa">HSA</Link>
+                      </SidebarMenuSubButton>
+
+                      <SidebarMenuSubButton asChild className={currentPath === "/idsms/iid" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
+                        <Link to="/idsms/iid">IID</Link>
+                      </SidebarMenuSubButton>
+
+                      <SidebarMenuSubButton asChild className={currentPath === "/idsms/ipom" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
+                        <Link to="/idsms/ipom">IPOM</Link>
+                      </SidebarMenuSubButton>
+
+                      <SidebarMenuSubButton asChild className={currentPath === "/idsms/indice-reativo" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
+                        <Link to="/idsms/indice-reativo">Índice Reativo</Link>
+                      </SidebarMenuSubButton>
+
+                      <SidebarMenuSubButton asChild className={currentPath === "/idsms/inspecao-alta-lideranca" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
+                        <Link to="/idsms/inspecao-alta-lideranca">Inspeção Alta Liderança</Link>
+                      </SidebarMenuSubButton>
+
+                      <SidebarMenuSubButton asChild className={currentPath === "/idsms/inspecao-gestao-sms" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
+                        <Link to="/idsms/inspecao-gestao-sms">Inspeção Gestão SMS</Link>
+                      </SidebarMenuSubButton>
+                    </div>
+                  )}
                 </div>
               </SidebarMenuSubItem>
 
