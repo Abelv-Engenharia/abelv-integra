@@ -21,22 +21,12 @@ interface LogImportacaoExecucao {
   nome_arquivo?: string;
   usuario_id: string;
   created_at: string;
-  profiles: {
-    nome: string;
-    email: string;
-  } | null;
 }
 
 const fetchLogsImportacaoExecucao = async (): Promise<LogImportacaoExecucao[]> => {
   const { data, error } = await supabase
     .from('logs_importacao_execucao_treinamentos')
-    .select(`
-      *,
-      profiles!logs_importacao_execucao_treinamentos_usuario_id_fkey (
-        nome,
-        email
-      )
-    `)
+    .select('*')
     .order('data_importacao', { ascending: false })
     .limit(50);
 
@@ -150,13 +140,11 @@ export const LogsImportacaoExecucao = () => {
                         <User className="h-4 w-4 text-gray-400" />
                         <div>
                           <div className="font-medium">
-                            {log.profiles?.nome || 'Usuário não encontrado'}
+                            {log.usuario_id.substring(0, 8)}...
                           </div>
-                          {log.profiles?.email && (
-                            <div className="text-sm text-gray-500">
-                              {log.profiles.email}
-                            </div>
-                          )}
+                          <div className="text-sm text-gray-500">
+                            Usuário do sistema
+                          </div>
                         </div>
                       </div>
                     </TableCell>

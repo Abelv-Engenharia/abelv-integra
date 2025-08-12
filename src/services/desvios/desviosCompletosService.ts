@@ -1,190 +1,125 @@
 
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from '@/integrations/supabase/client';
 
 export interface DesvioCompleto {
   id?: string;
-  created_at?: string;
-  updated_at?: string;
   data_desvio: string;
   hora_desvio?: string;
   local: string;
-  cca_id?: number;
-  empresa_id?: number;
-  base_legal_opcao_id?: number;
-  engenheiro_responsavel_id?: string;
-  supervisor_responsavel_id?: string;
-  encarregado_responsavel_id?: string;
-  funcionarios_envolvidos?: any;
-  tipo_registro_id?: number;
-  processo_id?: number;
-  evento_identificado_id?: number;
-  causa_provavel_id?: number;
-  disciplina_id?: number;
   descricao_desvio: string;
   acao_imediata?: string;
-  imagem_url?: string;
-  exposicao?: number;
-  controle?: number;
-  deteccao?: number;
-  efeito_falha?: number;
-  impacto?: number;
-  probabilidade?: number;
-  severidade?: number;
-  classificacao_risco?: string;
-  acoes?: any;
-  status?: string;
+  cca_id?: number;
+  empresa_id?: number;
+  funcionarios_envolvidos?: any[];
   responsavel_id?: string;
+  encarregado_responsavel_id?: string;
+  supervisor_responsavel_id?: string;
+  engenheiro_responsavel_id?: string;
+  disciplina_id?: number;
+  causa_provavel_id?: number;
+  evento_identificado_id?: number;
+  processo_id?: number;
+  tipo_registro_id?: number;
+  base_legal_opcao_id?: number;
+  classificacao_risco?: string;
+  severidade?: number;
+  probabilidade?: number;
+  impacto?: number;
+  efeito_falha?: number;
+  deteccao?: number;
+  controle?: number;
+  exposicao?: number;
+  situacao?: string;
   prazo_conclusao?: string;
+  acoes?: any[];
+  status?: string;
+  imagem_url?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export const desviosCompletosService = {
-  async getAll(): Promise<DesvioCompleto[]> {
-    try {
-      const { data, error } = await supabase
-        .from('desvios_completos')
-        .select(`
-          *,
-          ccas:cca_id(id, codigo, nome),
-          empresas:empresa_id(id, nome, empresa_ccas(ccas:cca_id(codigo, nome))),
-          base_legal_opcoes:base_legal_opcao_id(id, codigo, nome),
-          engenheiros:engenheiro_responsavel_id(id, nome, engenheiro_ccas(ccas:cca_id(codigo, nome))),
-          supervisores:supervisor_responsavel_id(id, nome, supervisor_ccas(ccas:cca_id(codigo, nome))),
-          encarregados:encarregado_responsavel_id(id, nome, cca_id, ccas:cca_id(codigo, nome)),
-          tipos_registro:tipo_registro_id(id, codigo, nome),
-          processos:processo_id(id, codigo, nome),
-          eventos_identificados:evento_identificado_id(id, codigo, nome),
-          causas_provaveis:causa_provavel_id(id, codigo, nome),
-          disciplinas:disciplina_id(id, codigo, nome)
-        `)
-        .order('created_at', { ascending: false });
-      
-      if (error) {
-        console.error('Erro ao buscar desvios completos:', error);
-        return [];
-      }
-      
-      return (data || []).map((item: any) => ({
-        ...item,
-        funcionarios_envolvidos: Array.isArray(item.funcionarios_envolvidos) ? item.funcionarios_envolvidos : [],
-        acoes: Array.isArray(item.acoes) ? item.acoes : []
-      }));
-    } catch (error) {
-      console.error('Exceção ao buscar desvios completos:', error);
-      return [];
-    }
+  async getAll() {
+    const { data, error } = await supabase
+      .from('desvios_completos')
+      .select(`
+        *,
+        ccas (nome),
+        empresas (nome),
+        disciplinas (nome),
+        causas_provaveis (nome),
+        eventos_identificados (nome),
+        base_legal_opcoes (nome)
+      `)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return data;
   },
 
-  async getById(id: string): Promise<DesvioCompleto | null> {
-    try {
-      const { data, error } = await supabase
-        .from('desvios_completos')
-        .select(`
-          *,
-          ccas:cca_id(id, codigo, nome),
-          empresas:empresa_id(id, nome, empresa_ccas(ccas:cca_id(codigo, nome))),
-          base_legal_opcoes:base_legal_opcao_id(id, codigo, nome),
-          engenheiros:engenheiro_responsavel_id(id, nome, engenheiro_ccas(ccas:cca_id(codigo, nome))),
-          supervisores:supervisor_responsavel_id(id, nome, supervisor_ccas(ccas:cca_id(codigo, nome))),
-          encarregados:encarregado_responsavel_id(id, nome, cca_id, ccas:cca_id(codigo, nome)),
-          tipos_registro:tipo_registro_id(id, codigo, nome),
-          processos:processo_id(id, codigo, nome),
-          eventos_identificados:evento_identificado_id(id, codigo, nome),
-          causas_provaveis:causa_provavel_id(id, codigo, nome),
-          disciplinas:disciplina_id(id, codigo, nome)
-        `)
-        .eq('id', id)
-        .maybeSingle();
-      
-      if (error) {
-        console.error('Erro ao buscar desvio por ID:', error);
-        return null;
-      }
-      
-      if (!data) {
-        return null;
-      }
-      
-      return {
-        ...data,
-        funcionarios_envolvidos: Array.isArray(data.funcionarios_envolvidos) ? data.funcionarios_envolvidos : [],
-        acoes: Array.isArray(data.acoes) ? data.acoes : []
-      };
-    } catch (error) {
-      console.error('Exceção ao buscar desvio por ID:', error);
-      return null;
-    }
+  async getById(id: string) {
+    const { data, error } = await supabase
+      .from('desvios_completos')
+      .select(`
+        *,
+        ccas (nome),
+        empresas (nome),
+        disciplinas (nome),
+        causas_provaveis (nome),
+        eventos_identificados (nome),
+        base_legal_opcoes (nome)
+      `)
+      .eq('id', id)
+      .single();
+
+    if (error) throw error;
+    return data;
   },
 
-  async create(desvio: Omit<DesvioCompleto, 'id' | 'created_at' | 'updated_at'>): Promise<DesvioCompleto | null> {
-    try {
-      const { data, error } = await supabase
-        .from('desvios_completos')
-        .insert(desvio)
-        .select()
-        .single();
-      
-      if (error) {
-        console.error('Erro ao criar desvio:', error);
-        return null;
-      }
-      
-      return {
-        ...data,
-        funcionarios_envolvidos: Array.isArray(data.funcionarios_envolvidos) ? data.funcionarios_envolvidos : [],
-        acoes: Array.isArray(data.acoes) ? data.acoes : []
-      };
-    } catch (error) {
-      console.error('Exceção ao criar desvio:', error);
-      return null;
-    }
+  async create(desvio: Omit<DesvioCompleto, 'id' | 'created_at' | 'updated_at'>) {
+    const { data, error } = await supabase
+      .from('desvios_completos')
+      .insert(desvio)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
   },
 
-  async update(id: string, updates: Partial<DesvioCompleto>): Promise<DesvioCompleto | null> {
-    try {
-      console.log('Atualizando desvio com ID:', id, 'Updates:', updates);
-      
-      const { data, error } = await supabase
-        .from('desvios_completos')
-        .update(updates)
-        .eq('id', id)
-        .select()
-        .single();
-      
-      if (error) {
-        console.error('Erro ao atualizar desvio:', error);
-        return null;
-      }
-      
-      return {
-        ...data,
-        funcionarios_envolvidos: Array.isArray(data.funcionarios_envolvidos) ? data.funcionarios_envolvidos : [],
-        acoes: Array.isArray(data.acoes) ? data.acoes : []
-      };
-    } catch (error) {
-      console.error('Exceção ao atualizar desvio:', error);
-      return null;
-    }
+  async update(id: string, updates: Partial<DesvioCompleto>) {
+    const { data, error } = await supabase
+      .from('desvios_completos')
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
   },
 
-  async delete(id: string): Promise<boolean> {
-    try {
-      console.log('Excluindo desvio da tabela desvios_completos com ID:', id);
-      
-      const { error } = await supabase
-        .from('desvios_completos')
-        .delete()
-        .eq('id', id);
-      
-      if (error) {
-        console.error('Erro ao excluir desvio da tabela desvios_completos:', error);
-        return false;
-      }
-      
-      console.log('Desvio excluído com sucesso da tabela desvios_completos');
-      return true;
-    } catch (error) {
-      console.error('Exceção ao excluir desvio da tabela desvios_completos:', error);
-      return false;
-    }
+  async delete(id: string) {
+    const { error } = await supabase
+      .from('desvios_completos')
+      .delete()
+      .eq('id', id);
+
+    if (error) throw error;
+  },
+
+  async updateFuncionariosAndAcoes(id: string, funcionarios_envolvidos: any[], acoes: any[]) {
+    const { data, error } = await supabase
+      .from('desvios_completos')
+      .update({
+        funcionarios_envolvidos,
+        acoes
+      })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
   }
 };
