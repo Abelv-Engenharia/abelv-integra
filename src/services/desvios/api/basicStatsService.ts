@@ -1,31 +1,56 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { DashboardStats } from "../types/dashboardTypes";
+import { DashboardStats, FilterParams } from "../types/dashboardTypes";
 import { calculatePercentages, calculateRiskLevel } from "../calculations/statsCalculator";
+import { applyFiltersToQuery } from "../utils/filterUtils";
 
-export const fetchDashboardStats = async (): Promise<DashboardStats> => {
+export const fetchDashboardStats = async (filters?: FilterParams): Promise<DashboardStats> => {
   try {
-    // Buscar total de desvios
-    const { count: totalDesvios } = await supabase
+    // Buscar total de desvios com filtros
+    let totalQuery = supabase
       .from('desvios_completos')
       .select('*', { count: 'exact', head: true });
 
-    // Buscar ações por status
-    const { count: acoesCompletas } = await supabase
+    if (filters) {
+      totalQuery = applyFiltersToQuery(totalQuery, filters);
+    }
+
+    const { count: totalDesvios } = await totalQuery;
+
+    // Buscar ações por status com filtros
+    let acoesCompletasQuery = supabase
       .from('desvios_completos')
       .select('*', { count: 'exact', head: true })
       .in('status', ['Fechado', 'CONCLUÍDO', 'TRATADO']);
 
-    const { count: acoesAndamento } = await supabase
+    if (filters) {
+      acoesCompletasQuery = applyFiltersToQuery(acoesCompletasQuery, filters);
+    }
+
+    const { count: acoesCompletas } = await acoesCompletasQuery;
+
+    let acoesAndamentoQuery = supabase
       .from('desvios_completos')
       .select('*', { count: 'exact', head: true })
       .in('status', ['EM TRATATIVA', 'EM ANDAMENTO']);
 
+    if (filters) {
+      acoesAndamentoQuery = applyFiltersToQuery(acoesAndamentoQuery, filters);
+    }
+
+    const { count: acoesAndamento } = await acoesAndamentoQuery;
+
     // Ações Pendentes: status 'Aberto' ou 'PENDENTE'
-    const { count: acoesPendentes } = await supabase
+    let acoesPendentesQuery = supabase
       .from('desvios_completos')
       .select('*', { count: 'exact', head: true })
       .in('status', ['Aberto', 'PENDENTE']);
+
+    if (filters) {
+      acoesPendentesQuery = applyFiltersToQuery(acoesPendentesQuery, filters);
+    }
+
+    const { count: acoesPendentes } = await acoesPendentesQuery;
       
     // Calcular percentuais
     const percentages = calculatePercentages(
@@ -35,11 +60,17 @@ export const fetchDashboardStats = async (): Promise<DashboardStats> => {
       totalDesvios || 0
     );
 
-    // Calcular nível de risco médio
-    const { data: riskData } = await supabase
+    // Calcular nível de risco médio com filtros
+    let riskQuery = supabase
       .from('desvios_completos')
       .select('classificacao_risco')
       .not('classificacao_risco', 'is', null);
+
+    if (filters) {
+      riskQuery = applyFiltersToQuery(riskQuery, filters);
+    }
+
+    const { data: riskData } = await riskQuery;
 
     const riskLevel = calculateRiskLevel(riskData || []);
 
@@ -52,7 +83,7 @@ export const fetchDashboardStats = async (): Promise<DashboardStats> => {
       riskLevel,
     };
 
-    console.log('Dashboard Stats:', stats);
+    console.log('Dashboard Stats with filters:', stats, filters);
     return stats;
   } catch (error) {
     console.error('Erro ao buscar estatísticas do dashboard:', error);

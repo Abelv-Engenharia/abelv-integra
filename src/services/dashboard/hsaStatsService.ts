@@ -1,15 +1,25 @@
 
 import { supabase } from '@/integrations/supabase/client';
 
-export async function fetchHSAPercentage(ccaIds?: number[]): Promise<number> {
+export async function fetchHSAPercentage(ccaIds?: number[], filters?: { year?: string; month?: string }): Promise<number> {
   try {
     let query = supabase
       .from('execucao_hsa')
-      .select('id, inspecao_programada, status');
+      .select('id, inspecao_programada, status, ano, mes');
 
     // Aplicar filtro de CCAs se fornecido
     if (ccaIds && ccaIds.length > 0) {
       query = query.in('cca_id', ccaIds);
+    }
+
+    // Aplicar filtro de ano se fornecido
+    if (filters?.year && filters.year !== "todos") {
+      query = query.eq('ano', parseInt(filters.year));
+    }
+
+    // Aplicar filtro de mês se fornecido
+    if (filters?.month && filters.month !== "todos") {
+      query = query.eq('mes', parseInt(filters.month));
     }
 
     const { data, error } = await query;
@@ -31,6 +41,13 @@ export async function fetchHSAPercentage(ccaIds?: number[]): Promise<number> {
 
     // Calcular aderência ajustada = (REALIZADA + REALIZADA NÃO PROGRAMADA) / (PROGRAMADAS + REALIZADA NÃO PROGRAMADA) * 100
     const aderenciaAjustada = totalAjustado > 0 ? (realizadasAjustadas / totalAjustado) * 100 : 0;
+    
+    console.log('HSA Stats with filters:', {
+      filters,
+      ccaIds,
+      total: data.length,
+      aderenciaAjustada
+    });
     
     return Math.round(aderenciaAjustada * 100) / 100; // Arredondar para 2 casas decimais
   } catch (error) {

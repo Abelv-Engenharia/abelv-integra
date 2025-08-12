@@ -109,17 +109,28 @@ export default function DashboardSMS() {
         }
 
         // Criar filtros para os diferentes serviços
+        const desviosFilters = {
+          year: year !== "todos" ? year : undefined,
+          month: month !== "todos" ? month : undefined,
+          ccaIds: ccaIds?.map(id => id.toString())
+        };
+
         const treinamentosFilters = {
           year: year !== "todos" ? year : undefined,
           month: month !== "todos" ? month : undefined,
           ccaId: ccaId !== "todos" ? ccaId : undefined
         };
 
+        const hsaFilters = {
+          year: year !== "todos" ? year : undefined,
+          month: month !== "todos" ? month : undefined
+        };
+
         const [desviosData, hsaData, treinamentoStatsData, ocorrenciasData] = await Promise.all([
-          fetchDashboardStats(),
-          fetchHSAPercentage(ccaIds),
+          fetchDashboardStats(desviosFilters),
+          fetchHSAPercentage(ccaIds, hsaFilters),
           fetchTreinamentosStats(ccaIds || [], treinamentosFilters),
-          fetchOcorrenciasStats(ccaIds)
+          fetchOcorrenciasStats(ccaIds, year !== "todos" ? year : undefined, month !== "todos" ? month : undefined)
         ]);
 
         setDesviosStats(desviosData);
