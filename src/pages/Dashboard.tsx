@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -24,12 +25,30 @@ const Dashboard = () => {
     });
   };
 
+  const getGreeting = (name: string) => {
+    // Lista de nomes femininos comuns (pode ser expandida)
+    const femaleNames = [
+      'ana', 'maria', 'joana', 'carla', 'fernanda', 'juliana', 'amanda', 'patricia',
+      'sandra', 'monica', 'lucia', 'rita', 'rosa', 'helena', 'beatriz', 'camila',
+      'daniela', 'gabriela', 'isabela', 'leticia', 'mariana', 'natalia', 'paula',
+      'renata', 'silvia', 'tatiana', 'vanessa', 'viviane', 'adriana', 'andrea',
+      'cristina', 'debora', 'elizabete', 'fabiana', 'gloria', 'ingrid', 'jessica',
+      'karina', 'larissa', 'marcela', 'nicole', 'olivia', 'priscila', 'raquel',
+      'sabrina', 'tania', 'ursula', 'valeria', 'wanderlea', 'ximena', 'yara', 'zelia'
+    ];
+    
+    const firstName = name.split(' ')[0].toLowerCase();
+    const isFeminine = femaleNames.includes(firstName);
+    
+    return isFeminine ? 'Seja bem-vinda' : 'Seja bem-vindo';
+  };
+
   return (
     <div className="min-h-screen p-6">
       <div className="flex justify-between items-start mb-8">
         <div>
           <h1 className="text-2xl font-semibold text-foreground">
-            Seja bem-vindo, Luis Ribeiro
+            {getGreeting('Luis Ribeiro')}, Luis Ribeiro!
           </h1>
         </div>
         <div>
