@@ -1,14 +1,15 @@
 
-
 import React, { useState, useEffect } from "react";
 import { ChevronDown, ChevronRight, ShieldAlert, GraduationCap, Clock, ClipboardCheck, AlertTriangle, Gavel, BarChart3, TrendingUp } from "lucide-react";
 import { SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarMenuSub, SidebarMenuSubItem, SidebarMenuSubButton } from "@/components/ui/sidebar";
 import { Link, useLocation } from "react-router-dom";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+
 interface SidebarSectionGestaoSMSProps {
   openMenu: string | null;
   toggleMenu: (menuName: string) => void;
 }
+
 export default function SidebarSectionGestaoSMS({
   openMenu,
   toggleMenu
@@ -23,7 +24,6 @@ export default function SidebarSectionGestaoSMS({
 
   // Função para determinar qual submenu deve estar aberto baseado na rota atual
   const getActiveSubmenu = (path: string) => {
-    if (path.startsWith("/sms")) return "dashboard-sms";
     if (path.startsWith("/desvios")) return "desvios";
     if (path.startsWith("/treinamentos")) return "treinamentos";
     if (path.startsWith("/hora-seguranca")) return "hora-seguranca";
@@ -45,6 +45,7 @@ export default function SidebarSectionGestaoSMS({
       setOpenSubMenus({});
     }
   }, [currentPath]);
+
   const toggleSubMenu = (subMenuName: string) => {
     setOpenSubMenus(prev => {
       // Se o submenu clicado já está aberto, fecha ele
@@ -57,8 +58,11 @@ export default function SidebarSectionGestaoSMS({
       };
     });
   };
+
   const isGestaoSMSOpen = openMenu === "gestao-sms";
-  return <SidebarMenu>
+
+  return (
+    <SidebarMenu>
       <SidebarMenuItem>
         <Collapsible open={isGestaoSMSOpen}>
           <CollapsibleTrigger asChild>
@@ -70,24 +74,14 @@ export default function SidebarSectionGestaoSMS({
           </CollapsibleTrigger>
           <CollapsibleContent>
             <SidebarMenuSub>
-              {/* Dashboard SMS */}
+              {/* Dashboard SMS - Agora como link direto */}
               <SidebarMenuSubItem>
-                <div className="w-full">
-                  <button onClick={() => toggleSubMenu("dashboard-sms")} className="flex items-center justify-between w-full px-2 py-1 text-white hover:bg-slate-600 rounded text-xs">
-                    <div className="flex items-center gap-2">
-                      <BarChart3 className="h-3 w-3 flex-shrink-0" />
-                      <span>Dashboard SMS</span>
-                    </div>
-                    {openSubMenus["dashboard-sms"] ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
-                  </button>
-                  {openSubMenus["dashboard-sms"] && (
-                    <div className="ml-4 mt-1 space-y-1">
-                      <SidebarMenuSubButton asChild className={currentPath === "/sms/dashboard" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
-                        <Link to="/sms/dashboard">Dashboard</Link>
-                      </SidebarMenuSubButton>
-                    </div>
-                  )}
-                </div>
+                <SidebarMenuSubButton asChild className={currentPath === "/sms/dashboard" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
+                  <Link to="/sms/dashboard" className="flex items-center gap-2">
+                    <BarChart3 className="h-3 w-3 flex-shrink-0" />
+                    <span>Dashboard SMS</span>
+                  </Link>
+                </SidebarMenuSubButton>
               </SidebarMenuSubItem>
 
               {/* Desvios */}
@@ -100,7 +94,8 @@ export default function SidebarSectionGestaoSMS({
                     </div>
                     {openSubMenus.desvios ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
                   </button>
-                  {openSubMenus.desvios && <div className="ml-4 mt-1 space-y-1">
+                  {openSubMenus.desvios && (
+                    <div className="ml-4 mt-1 space-y-1">
                       <SidebarMenuSubButton asChild className={currentPath === "/desvios/dashboard" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
                         <Link to="/desvios/dashboard">Dashboard</Link>
                       </SidebarMenuSubButton>
@@ -113,7 +108,8 @@ export default function SidebarSectionGestaoSMS({
                       <SidebarMenuSubButton asChild className={currentPath === "/desvios/nao-conformidade" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
                         <Link to="/desvios/nao-conformidade">Não Conformidade</Link>
                       </SidebarMenuSubButton>
-                    </div>}
+                    </div>
+                  )}
                 </div>
               </SidebarMenuSubItem>
 
@@ -127,7 +123,8 @@ export default function SidebarSectionGestaoSMS({
                     </div>
                     {openSubMenus.treinamentos ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
                   </button>
-                  {openSubMenus.treinamentos && <div className="ml-4 mt-1 space-y-1">
+                  {openSubMenus.treinamentos && (
+                    <div className="ml-4 mt-1 space-y-1">
                       <SidebarMenuSubButton asChild className={currentPath === "/treinamentos/dashboard" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
                         <Link to="/treinamentos/dashboard">Dashboard</Link>
                       </SidebarMenuSubButton>
@@ -143,7 +140,8 @@ export default function SidebarSectionGestaoSMS({
                       <SidebarMenuSubButton asChild className={currentPath === "/treinamentos/cracha" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
                         <Link to="/treinamentos/cracha">Crachá</Link>
                       </SidebarMenuSubButton>
-                    </div>}
+                    </div>
+                  )}
                 </div>
               </SidebarMenuSubItem>
 
@@ -157,7 +155,8 @@ export default function SidebarSectionGestaoSMS({
                     </div>
                     {openSubMenus["hora-seguranca"] ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
                   </button>
-                  {openSubMenus["hora-seguranca"] && <div className="ml-4 mt-1 space-y-1">
+                  {openSubMenus["hora-seguranca"] && (
+                    <div className="ml-4 mt-1 space-y-1">
                       <SidebarMenuSubButton asChild className={currentPath === "/hora-seguranca/dashboard" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
                         <Link to="/hora-seguranca/dashboard">Dashboard</Link>
                       </SidebarMenuSubButton>
@@ -173,7 +172,8 @@ export default function SidebarSectionGestaoSMS({
                       <SidebarMenuSubButton asChild className={currentPath === "/hora-seguranca/inspecao-nao-programada-hsa" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
                         <Link to="/hora-seguranca/inspecao-nao-programada-hsa">Inspeção Não Programada</Link>
                       </SidebarMenuSubButton>
-                    </div>}
+                    </div>
+                  )}
                 </div>
               </SidebarMenuSubItem>
 
@@ -244,7 +244,8 @@ export default function SidebarSectionGestaoSMS({
                     </div>
                     {openSubMenus["inspecao-sms"] ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
                   </button>
-                  {openSubMenus["inspecao-sms"] && <div className="ml-4 mt-1 space-y-1">
+                  {openSubMenus["inspecao-sms"] && (
+                    <div className="ml-4 mt-1 space-y-1">
                       <SidebarMenuSubButton asChild className={currentPath === "/inspecao-sms/dashboard" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
                         <Link to="/inspecao-sms/dashboard">Dashboard</Link>
                       </SidebarMenuSubButton>
@@ -254,7 +255,8 @@ export default function SidebarSectionGestaoSMS({
                       <SidebarMenuSubButton asChild className={currentPath === "/inspecao-sms/consulta" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
                         <Link to="/inspecao-sms/consulta">Consulta</Link>
                       </SidebarMenuSubButton>
-                    </div>}
+                    </div>
+                  )}
                 </div>
               </SidebarMenuSubItem>
 
@@ -268,7 +270,8 @@ export default function SidebarSectionGestaoSMS({
                     </div>
                     {openSubMenus.ocorrencias ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
                   </button>
-                  {openSubMenus.ocorrencias && <div className="ml-4 mt-1 space-y-1">
+                  {openSubMenus.ocorrencias && (
+                    <div className="ml-4 mt-1 space-y-1">
                       <SidebarMenuSubButton asChild className={currentPath === "/ocorrencias/dashboard" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
                         <Link to="/ocorrencias/dashboard">Dashboard</Link>
                       </SidebarMenuSubButton>
@@ -278,7 +281,8 @@ export default function SidebarSectionGestaoSMS({
                       <SidebarMenuSubButton asChild className={currentPath === "/ocorrencias/consulta" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
                         <Link to="/ocorrencias/consulta">Consulta</Link>
                       </SidebarMenuSubButton>
-                    </div>}
+                    </div>
+                  )}
                 </div>
               </SidebarMenuSubItem>
 
@@ -292,7 +296,8 @@ export default function SidebarSectionGestaoSMS({
                     </div>
                     {openSubMenus["medidas-disciplinares"] ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
                   </button>
-                  {openSubMenus["medidas-disciplinares"] && <div className="ml-4 mt-1 space-y-1">
+                  {openSubMenus["medidas-disciplinares"] && (
+                    <div className="ml-4 mt-1 space-y-1">
                       <SidebarMenuSubButton asChild className={currentPath === "/medidas-disciplinares/dashboard" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
                         <Link to="/medidas-disciplinares/dashboard">Dashboard</Link>
                       </SidebarMenuSubButton>
@@ -302,13 +307,14 @@ export default function SidebarSectionGestaoSMS({
                       <SidebarMenuSubButton asChild className={currentPath === "/medidas-disciplinares/consulta" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
                         <Link to="/medidas-disciplinares/consulta">Consulta</Link>
                       </SidebarMenuSubButton>
-                    </div>}
+                    </div>
+                  )}
                 </div>
               </SidebarMenuSubItem>
             </SidebarMenuSub>
           </CollapsibleContent>
         </Collapsible>
       </SidebarMenuItem>
-    </SidebarMenu>;
+    </SidebarMenu>
+  );
 }
-
