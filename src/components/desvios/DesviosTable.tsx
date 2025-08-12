@@ -9,6 +9,7 @@ import { DesvioCompleto } from "@/services/desvios/desviosCompletosService";
 import { TableLoadingSkeleton } from "@/components/ui/loading-skeleton";
 import { InlineLoader } from "@/components/common/PageLoader";
 import { AlertCircle } from "lucide-react";
+
 interface DesviosTableProps {
   filters?: {
     year?: string;
@@ -20,6 +21,24 @@ interface DesviosTableProps {
   };
   searchTerm?: string;
 }
+
+// Helper function to convert database types to our interface
+const convertDbToDesvio = (dbDesvio: any): DesvioCompleto => {
+  return {
+    ...dbDesvio,
+    funcionarios_envolvidos: Array.isArray(dbDesvio.funcionarios_envolvidos) 
+      ? dbDesvio.funcionarios_envolvidos 
+      : dbDesvio.funcionarios_envolvidos 
+        ? [dbDesvio.funcionarios_envolvidos] 
+        : [],
+    acoes: Array.isArray(dbDesvio.acoes) 
+      ? dbDesvio.acoes 
+      : dbDesvio.acoes 
+        ? [dbDesvio.acoes] 
+        : [],
+  };
+};
+
 const DesviosTable = ({
   filters,
   searchTerm
@@ -85,7 +104,9 @@ const DesviosTable = ({
         setDesvios([]);
       } else {
         console.log("Desvios filtrados carregados:", data);
-        setDesvios(data || []);
+        // Convert database results to DesvioCompleto format
+        const convertedData = (data || []).map(convertDbToDesvio);
+        setDesvios(convertedData);
       }
     } catch (error) {
       console.error('Erro ao buscar desvios:', error);
@@ -94,6 +115,7 @@ const DesviosTable = ({
       setIsLoading(false);
     }
   };
+
   useEffect(() => {
     if (!isLoadingCCAs) {
       if (allowedCcaIds.length > 0) {
@@ -104,24 +126,26 @@ const DesviosTable = ({
       }
     }
   }, [allowedCcaIds.join(','), isLoadingCCAs, filters, searchTerm]);
+
   const handleStatusUpdated = (id: string, newStatus: string) => {
     setDesvios(desvios.map(d => d.id === id ? {
       ...d,
       status: newStatus
     } : d));
   };
+
   const handleEditClick = (desvio: DesvioCompleto) => {
     setEditDesvio(desvio);
     setEditDesvioId(desvio.id || null);
     setEditDialogOpen(true);
   };
+
   const handleDesvioUpdated = () => {
     fetchDesvios();
     setEditDialogOpen(false);
     setEditDesvioId(null);
   };
 
-  // Remove o desvio da UI de forma otimista, e faz fetch para manter sincronizado
   const handleDesvioDeleted = (id?: string, deleted?: boolean) => {
     if (deleted && id) {
       console.log("Removendo desvio da tabela na UI (otimista):", id);
@@ -141,6 +165,7 @@ const DesviosTable = ({
       console.error("Falha no handleDesvioDeleted (deleted=false ou id indefinido):", id, deleted);
     }
   };
+
   if (isLoadingCCAs) {
     return <div className="table-container">
         <div className="p-4 sm:p-6">
@@ -148,6 +173,7 @@ const DesviosTable = ({
         </div>
       </div>;
   }
+
   if (userCCAs.length === 0) {
     return <div className="table-container">
         <div className="flex flex-col items-center justify-center p-6 sm:p-8 space-y-4">
@@ -159,6 +185,7 @@ const DesviosTable = ({
         </div>
       </div>;
   }
+
   return <>
       <div className="table-container">
         <div className="relative w-full overflow-auto">
@@ -210,4 +237,5 @@ const DesviosTable = ({
       </div>
     </>;
 };
+
 export default DesviosTable;
