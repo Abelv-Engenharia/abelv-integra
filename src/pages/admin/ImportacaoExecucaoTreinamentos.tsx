@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -89,13 +88,13 @@ const ImportacaoExecucaoTreinamentos = () => {
             <Upload className="h-4 w-4" />
             Upload do Arquivo
           </TabsTrigger>
-          <TabsTrigger value="cca-codes" className="flex items-center gap-2">
-            <Code className="h-4 w-4" />
-            Códigos CCA
-          </TabsTrigger>
           <TabsTrigger value="logs" className="flex items-center gap-2">
             <FileText className="h-4 w-4" />
             Logs de Importação
+          </TabsTrigger>
+          <TabsTrigger value="cca-codes" className="flex items-center gap-2">
+            <Code className="h-4 w-4" />
+            Códigos CCA
           </TabsTrigger>
         </TabsList>
 
@@ -225,12 +224,12 @@ const ImportacaoExecucaoTreinamentos = () => {
           </div>
         </TabsContent>
 
-        <TabsContent value="cca-codes">
-          <CCACodesTab />
-        </TabsContent>
-
         <TabsContent value="logs">
           <LogsImportacaoExecucao />
+        </TabsContent>
+
+        <TabsContent value="cca-codes">
+          <CCACodesTab />
         </TabsContent>
       </Tabs>
     </div>
