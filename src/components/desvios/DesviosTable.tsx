@@ -146,40 +146,30 @@ const DesviosTable = ({
     setEditDesvioId(null);
   };
 
-  const handleDesvioDeleted = (id?: string, deleted?: boolean) => {
-    console.log('handleDesvioDeleted chamado com:', { id, deleted });
+  const handleDesvioDeleted = async (id?: string, deleted?: boolean) => {
+    console.log('🔄 handleDesvioDeleted chamado:', { id, deleted });
     
     if (deleted && id) {
-      console.log("Removendo desvio da UI:", id);
+      console.log('✅ Removendo desvio da UI:', id);
       
-      // Remover imediatamente da UI para feedback visual rápido
+      // Atualizar imediatamente a UI
       setDesvios(prev => {
-        const filtered = prev.filter(d => d.id !== id);
-        console.log('Estado atualizado, desvios restantes:', filtered.length);
-        return filtered;
+        const updated = prev.filter(d => d.id !== id);
+        console.log(`📊 UI atualizada: ${prev.length} -> ${updated.length} desvios`);
+        return updated;
       });
       
-      // Recarregar dados do servidor para garantir sincronização
-      setTimeout(() => {
-        console.log('Recarregando dados do servidor...');
-        fetchDesvios();
-      }, 500);
+      // Aguardar um pouco e recarregar do servidor para confirmar
+      console.log('🔄 Agendando recarregamento dos dados...');
+      setTimeout(async () => {
+        console.log('📡 Recarregando dados do servidor...');
+        await fetchDesvios();
+      }, 1000);
       
-      toast({
-        title: "Desvio excluído",
-        description: "O desvio foi removido com sucesso.",
-        variant: "default"
-      });
     } else {
-      console.error("Falha na exclusão do desvio:", { id, deleted });
-      toast({
-        title: "Erro na exclusão",
-        description: "Não foi possível excluir o desvio. Tente novamente.",
-        variant: "destructive"
-      });
-      
-      // Recarregar dados em caso de erro para manter sincronização
-      fetchDesvios();
+      console.error('❌ Falha na exclusão, recarregando dados:', { id, deleted });
+      // Se houve falha, recarregar imediatamente para sincronizar
+      await fetchDesvios();
     }
   };
 

@@ -26,6 +26,7 @@ const DeleteDesvioDialog = ({ desvio, onDesvioDeleted }: DeleteDesvioDialogProps
 
   const handleDelete = async () => {
     if (!desvio.id) {
+      console.error('❌ ID do desvio não encontrado');
       toast({
         title: "Erro",
         description: "ID do desvio não encontrado.",
@@ -36,35 +37,34 @@ const DeleteDesvioDialog = ({ desvio, onDesvioDeleted }: DeleteDesvioDialogProps
     }
 
     setIsLoading(true);
+    console.log('🗑️ Iniciando processo de exclusão para:', desvio.id);
+    
     try {
-      console.log('Iniciando processo de exclusão do desvio:', desvio.id);
       const success = await desviosCompletosService.delete(desvio.id);
-      console.log('Resultado da exclusão:', success);
+      console.log('📊 Resultado da exclusão:', success);
 
       if (success) {
+        console.log('✅ Exclusão bem-sucedida, atualizando UI');
         toast({
-          title: "Desvio excluído",
-          description: "O desvio foi excluído permanentemente do sistema.",
+          title: "Sucesso",
+          description: "Desvio excluído com sucesso.",
         });
         setOpen(false);
-        
-        // Garantir que o callback seja chamado com os parâmetros corretos
-        console.log('Chamando callback onDesvioDeleted com sucesso:', desvio.id);
         onDesvioDeleted(desvio.id, true);
       } else {
+        console.error('❌ Falha na exclusão - serviço retornou false');
         toast({
-          title: "Erro ao excluir",
-          description: "Não foi possível excluir o desvio. Verifique as permissões ou tente novamente.",
+          title: "Erro na exclusão",
+          description: "Não foi possível excluir o desvio. Verifique suas permissões.",
           variant: "destructive",
         });
         onDesvioDeleted(desvio.id, false);
-        console.error('Falha na exclusão do desvio:', desvio.id);
       }
     } catch (error) {
-      console.error('Erro inesperado durante exclusão:', error);
+      console.error('💥 Erro inesperado durante exclusão:', error);
       toast({
         title: "Erro técnico",
-        description: "Ocorreu um erro inesperado ao tentar excluir o desvio.",
+        description: "Ocorreu um erro inesperado. Tente novamente.",
         variant: "destructive",
       });
       onDesvioDeleted(desvio.id, false);
