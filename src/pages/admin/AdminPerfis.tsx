@@ -6,6 +6,8 @@ import { Perfil, Permissoes } from "@/types/users";
 import { useToast } from "@/hooks/use-toast";
 import { PerfisTable } from "@/components/admin/perfis/PerfisTable";
 import { PerfilDialog } from "@/components/admin/perfis/PerfilDialog";
+import { AdminOnlySection } from "@/components/security/AdminOnlySection";
+import { useSecurityValidation } from "@/hooks/useSecurityValidation";
 import { fetchPerfis, createPerfil, updatePerfil, deletePerfil } from "@/services/perfisService";
 
 const AdminPerfis = () => {
@@ -14,10 +16,9 @@ const AdminPerfis = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [buscar, setBuscar] = useState<string>('');
   const { toast } = useToast();
+  const { validateAction } = useSecurityValidation();
   
-  // Definir permissões iniciais simplificadas - apenas estrutura básica
   const permissoesIniciais: Permissoes = {
-    // Valores padrão para compatibilidade (todos falsos por padrão)
     desvios: false,
     treinamentos: false,
     ocorrencias: false,
@@ -47,7 +48,6 @@ const AdminPerfis = () => {
     pode_aprovar_tarefas: false,
     pode_visualizar_relatorios_completos: false,
     pode_exportar_dados: false,
-    // O foco principal são os menus da sidebar
     menus_sidebar: []
   };
   
@@ -58,9 +58,7 @@ const AdminPerfis = () => {
       setLoading(true);
       try {
         const data = await fetchPerfis();
-        // Safe type conversion with proper validation
         const perfisFormatados = data.map(perfil => {
-          // Safe conversion of permissoes from Json to Permissoes
           let permissoes: Permissoes;
           try {
             if (typeof perfil.permissoes === 'object' && perfil.permissoes !== null) {
@@ -73,7 +71,6 @@ const AdminPerfis = () => {
             permissoes = permissoesIniciais;
           }
 
-          // Safe conversion of ccas_permitidas from Json to number[]
           let ccas_permitidas: number[];
           try {
             if (Array.isArray(perfil.ccas_permitidas)) {
@@ -108,7 +105,10 @@ const AdminPerfis = () => {
     loadPerfis();
   }, [toast]);
 
-  const handleNovoPerfil = () => {
+  const handleNovoPerfil = async () => {
+    const isValid = await validateAction('create_profile', 'admin_perfis');
+    if (!isValid) return;
+
     setNovoPerfil(true);
     setPerfilSelecionado(null);
   };
@@ -123,10 +123,13 @@ const AdminPerfis = () => {
       return;
     }
 
+    const action = perfilSelecionado ? 'update_profile' : 'create_profile';
+    const isValid = await validateAction(action, 'admin_perfis');
+    if (!isValid) return;
+
     setLoading(true);
     try {
       if (perfilSelecionado) {
-        // Atualizar perfil existente
         const updatedPerfil = await updatePerfil(perfilSelecionado.id, {
           nome,
           descricao,
@@ -139,11 +142,9 @@ const AdminPerfis = () => {
           description: "Perfil atualizado com sucesso"
         });
 
-        // Atualizar o estado local com conversão segura de tipos
         setPerfis(prevPerfis =>
           prevPerfis.map(p => {
             if (p.id === perfilSelecionado.id) {
-              // Safe conversion
               let convertedPermissoes: Permissoes;
               let convertedCcas: number[];
               
@@ -171,7 +172,6 @@ const AdminPerfis = () => {
           })
         );
       } else {
-        // Criar novo perfil
         const novoPerfil = await createPerfil({
           nome,
           descricao,
@@ -185,7 +185,6 @@ const AdminPerfis = () => {
             description: "Perfil criado com sucesso"
           });
 
-          // Safe conversion for new profile
           let convertedPermissoes: Permissoes;
           let convertedCcas: number[];
           
@@ -226,12 +225,18 @@ const AdminPerfis = () => {
     }
   };
 
-  const handleEditar = (perfil: Perfil) => {
+  const handleEditar = async (perfil: Perfil) => {
+    const isValid = await validateAction('edit_profile', 'admin_perfis');
+    if (!isValid) return;
+
     setPerfilSelecionado(perfil);
     setNovoPerfil(true);
   };
 
   const handleExcluir = async (id: number) => {
+    const isValid = await validateAction('delete_profile', 'admin_perfis');
+    if (!isValid) return;
+
     if (window.confirm('Tem certeza que deseja excluir este perfil?')) {
       setLoading(true);
       try {
@@ -242,7 +247,6 @@ const AdminPerfis = () => {
           description: "Perfil excluído com sucesso"
         });
 
-        // Remover o perfil do estado local
         setPerfis(perfis.filter(p => p.id !== id));
       } catch (error: any) {
         console.error('Erro ao excluir perfil:', error);
@@ -258,42 +262,44 @@ const AdminPerfis = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <div>
-            <CardTitle>Perfis de Acesso</CardTitle>
-            <CardDescription>Gerencie os perfis de acesso dos usuários definindo CCAs permitidas e menus da sidebar</CardDescription>
-          </div>
-          <Button onClick={handleNovoPerfil}>Novo Perfil</Button>
-        </CardHeader>
-        <CardContent>
-          <div className="mb-4">
-            <Input 
-              placeholder="Buscar perfil..." 
-              value={buscar} 
-              onChange={(e) => setBuscar(e.target.value)}
+    <AdminOnlySection fallbackMessage="Apenas administradores podem gerenciar perfis de acesso.">
+      <div className="space-y-6">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div>
+              <CardTitle>Perfis de Acesso</CardTitle>
+              <CardDescription>Gerencie os perfis de acesso dos usuários definindo CCAs permitidas e menus da sidebar</CardDescription>
+            </div>
+            <Button onClick={handleNovoPerfil}>Novo Perfil</Button>
+          </CardHeader>
+          <CardContent>
+            <div className="mb-4">
+              <Input 
+                placeholder="Buscar perfil..." 
+                value={buscar} 
+                onChange={(e) => setBuscar(e.target.value)}
+              />
+            </div>
+            <PerfisTable
+              perfis={perfis}
+              loading={loading}
+              buscar={buscar}
+              onEditar={handleEditar}
+              onExcluir={handleExcluir}
             />
-          </div>
-          <PerfisTable
-            perfis={perfis}
-            loading={loading}
-            buscar={buscar}
-            onEditar={handleEditar}
-            onExcluir={handleExcluir}
-          />
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
 
-      <PerfilDialog
-        open={novoPerfil}
-        onOpenChange={setNovoPerfil}
-        perfilSelecionado={perfilSelecionado}
-        loading={loading}
-        permissoesIniciais={permissoesIniciais}
-        onSalvar={handleSalvar}
-      />
-    </div>
+        <PerfilDialog
+          open={novoPerfil}
+          onOpenChange={setNovoPerfil}
+          perfilSelecionado={perfilSelecionado}
+          loading={loading}
+          permissoesIniciais={permissoesIniciais}
+          onSalvar={handleSalvar}
+        />
+      </div>
+    </AdminOnlySection>
   );
 };
 

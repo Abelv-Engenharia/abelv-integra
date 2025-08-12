@@ -4,11 +4,13 @@ import { useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { PermissionsAlert } from "@/components/admin/usuarios/PermissionsAlert";
+import { AdminOnlySection } from "@/components/security/AdminOnlySection";
+import { SecurityGuard } from "@/components/security/SecurityGuard";
 import { UsersManagementCard } from "@/components/admin/usuarios/UsersManagementCard";
 import { UserDialogManager } from "@/components/admin/usuarios/UserDialogManager";
-import { User, SearchFormValues, UserFormValues, AuthUserCreateValues, Permissoes } from "@/types/users";
+import { User, SearchFormValues, UserFormValues, AuthUserCreateValues } from "@/types/users";
 import { useUsuarios } from "@/hooks/useUsuarios";
+import { useSecurityValidation } from "@/hooks/useSecurityValidation";
 
 const AdminUsuarios = () => {
   const navigate = useNavigate();
@@ -17,6 +19,7 @@ const AdminUsuarios = () => {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const { validateAction } = useSecurityValidation();
 
   const {
     usuarios,
@@ -24,7 +27,6 @@ const AdminUsuarios = () => {
     loadingUsuarios,
     usersError,
     canManageUsers,
-    userPermissions,
     createUsuarioMutation,
     updateUsuarioMutation,
     deleteUsuarioMutation
@@ -62,6 +64,9 @@ const AdminUsuarios = () => {
   };
 
   const onUserSubmit = async (data: UserFormValues) => {
+    const isValid = await validateAction('update_user', 'admin_usuarios');
+    if (!isValid) return;
+
     if (selectedUser) {
       updateUsuarioMutation.mutate({ 
         userId: selectedUser.id.toString(), 
@@ -72,11 +77,17 @@ const AdminUsuarios = () => {
   };
 
   const onAuthUserSubmit = async (data: AuthUserCreateValues) => {
+    const isValid = await validateAction('create_user', 'admin_usuarios');
+    if (!isValid) return;
+
     createUsuarioMutation.mutate(data);
     setIsCreateDialogOpen(false);
   };
 
   const handleDeleteUser = async () => {
+    const isValid = await validateAction('delete_user', 'admin_usuarios');
+    if (!isValid) return;
+
     if (selectedUser) {
       deleteUsuarioMutation.mutate(selectedUser.id.toString());
       setIsDeleteDialogOpen(false);
@@ -84,23 +95,29 @@ const AdminUsuarios = () => {
     }
   };
 
-  const handleEditClick = (user: User) => {
+  const handleEditClick = async (user: User) => {
+    const isValid = await validateAction('edit_user', 'admin_usuarios');
+    if (!isValid) return;
+
     setSelectedUser(user);
     setIsEditDialogOpen(true);
   };
 
-  const handleDeleteClick = (user: User) => {
+  const handleDeleteClick = async (user: User) => {
+    const isValid = await validateAction('delete_user_intent', 'admin_usuarios');
+    if (!isValid) return;
+
     setSelectedUser(user);
     setIsDeleteDialogOpen(true);
   };
 
-  const handleCreateClick = () => {
+  const handleCreateClick = async () => {
+    const isValid = await validateAction('create_user_intent', 'admin_usuarios');
+    if (!isValid) return;
+
     setSelectedUser(null);
     setIsCreateDialogOpen(true);
   };
-
-  // Cast userPermissions para o tipo correto
-  const permissions = (userPermissions as unknown) as Permissoes;
 
   return (
     <div className="space-y-6">
@@ -120,36 +137,33 @@ const AdminUsuarios = () => {
         </p>
       </div>
 
-      <PermissionsAlert 
-        canManageUsers={canManageUsers} 
-        permissions={permissions} 
-      />
+      <SecurityGuard requiredPermission="admin_usuarios" requiredSecurityLevel="high">
+        <UsersManagementCard
+          filteredUsers={filteredUsers}
+          loadingUsuarios={loadingUsuarios}
+          canManageUsers={canManageUsers}
+          onSearch={onSearchSubmit}
+          onCreateClick={handleCreateClick}
+          onEditClick={handleEditClick}
+          onDeleteClick={handleDeleteClick}
+        />
 
-      <UsersManagementCard
-        filteredUsers={filteredUsers}
-        loadingUsuarios={loadingUsuarios}
-        canManageUsers={canManageUsers}
-        onSearch={onSearchSubmit}
-        onCreateClick={handleCreateClick}
-        onEditClick={handleEditClick}
-        onDeleteClick={handleDeleteClick}
-      />
-
-      <UserDialogManager
-        isCreateDialogOpen={isCreateDialogOpen}
-        isEditDialogOpen={isEditDialogOpen}
-        isDeleteDialogOpen={isDeleteDialogOpen}
-        canManageUsers={canManageUsers}
-        selectedUser={selectedUser}
-        profiles={profiles}
-        isCreating={createUsuarioMutation.isPending}
-        onCreateDialogChange={setIsCreateDialogOpen}
-        onEditDialogChange={setIsEditDialogOpen}
-        onDeleteDialogChange={setIsDeleteDialogOpen}
-        onCreateSubmit={onAuthUserSubmit}
-        onEditSubmit={onUserSubmit}
-        onDeleteConfirm={handleDeleteUser}
-      />
+        <UserDialogManager
+          isCreateDialogOpen={isCreateDialogOpen}
+          isEditDialogOpen={isEditDialogOpen}
+          isDeleteDialogOpen={isDeleteDialogOpen}
+          canManageUsers={canManageUsers}
+          selectedUser={selectedUser}
+          profiles={profiles}
+          isCreating={createUsuarioMutation.isPending}
+          onCreateDialogChange={setIsCreateDialogOpen}
+          onEditDialogChange={setIsEditDialogOpen}
+          onDeleteDialogChange={setIsDeleteDialogOpen}
+          onCreateSubmit={onAuthUserSubmit}
+          onEditSubmit={onUserSubmit}
+          onDeleteConfirm={handleDeleteUser}
+        />
+      </SecurityGuard>
     </div>
   );
 };
