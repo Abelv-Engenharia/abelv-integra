@@ -78,8 +78,8 @@ export default function SidebarSearch({ menusSidebar = [] }: Props) {
     { name: "Admin Usuários", path: "/admin/usuarios", category: "ADMINISTRAÇÃO" },
     { name: "Admin Perfis", path: "/admin/perfis", category: "ADMINISTRAÇÃO" },
     { name: "Admin Empresas", path: "/admin/empresas", category: "ADMINISTRAÇÃO" },
-    
-    // CONTA
+    { name: "Importação Funcionários", path: "/admin/importacao-funcionarios", category: "ADMINISTRAÇÃO" },
+    { name: "Importação Execução Treinamentos", path: "/admin/importacao-execucao-treinamentos", category: "ADMINISTRAÇÃO" },
     { name: "Perfil", path: "/account/profile", category: "CONTA" },
     { name: "Configurações", path: "/account/settings", category: "CONTA" },
   ];
