@@ -1021,6 +1021,42 @@ export type Database = {
         }
         Relationships: []
       }
+      funcionario_supervisores: {
+        Row: {
+          created_at: string
+          funcionario_id: string
+          id: string
+          supervisor_id: string
+        }
+        Insert: {
+          created_at?: string
+          funcionario_id: string
+          id?: string
+          supervisor_id: string
+        }
+        Update: {
+          created_at?: string
+          funcionario_id?: string
+          id?: string
+          supervisor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "funcionario_supervisores_funcionario_id_fkey"
+            columns: ["funcionario_id"]
+            isOneToOne: false
+            referencedRelation: "funcionarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "funcionario_supervisores_supervisor_id_fkey"
+            columns: ["supervisor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       funcionarios: {
         Row: {
           ativo: boolean | null
@@ -2561,6 +2597,10 @@ export type Database = {
       }
       user_can_manage_funcionarios: {
         Args: { user_id_param: string }
+        Returns: boolean
+      }
+      user_is_supervisor_of: {
+        Args: { _user_id: string; _funcionario_id: string }
         Returns: boolean
       }
     }
