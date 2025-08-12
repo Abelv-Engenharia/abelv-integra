@@ -46,6 +46,7 @@ import CriarUsuario from "./pages/admin/CriarUsuario";
 import MetasIndicadores from "./pages/admin/MetasIndicadores";
 import RegistroHHT from "./pages/admin/RegistroHHT";
 import ImportacaoExecucaoTreinamentos from "./pages/admin/ImportacaoExecucaoTreinamentos";
+import AdminConfiguracoes from "./pages/admin/AdminConfiguracoes";
 
 // Tarefas pages
 import TarefasDashboard from "./pages/tarefas/TarefasDashboard";
@@ -178,6 +179,7 @@ function App() {
                 <Route path="admin/metas-indicadores" element={<MetasIndicadores />} />
                 <Route path="admin/registro-hht" element={<RegistroHHT />} />
                 <Route path="admin/exportacao-dados" element={<ExportacaoDados />} />
+                <Route path="adm/configuracoes" element={<AdminConfiguracoes />} />
                 <Route path="configuracao-emails" element={<ConfiguracaoEmailsPage />} />
                 <Route path="upload-tutoriais" element={<UploadTutoriaisPage />} />
                 <Route path="admin/importacao-execucao-treinamentos" element={<ImportacaoExecucaoTreinamentos />} />

@@ -1,6 +1,6 @@
 
 import React from "react";
-import { HardHat, Users, Building, Shield, Wrench } from "lucide-react";
+import { HardHat, Users, Building, Shield, Wrench, Upload } from "lucide-react";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import {
   SidebarMenu,
@@ -89,6 +89,17 @@ export default function SidebarSectionADM({ openMenu, toggleMenu }: Props) {
                   <Link to="/adm/perfis" className="flex items-center gap-2">
                     <Shield className="h-3 w-3 flex-shrink-0" />
                     <span className="text-xs leading-tight break-words min-w-0">Perfis</span>
+                  </Link>
+                </SidebarMenuSubButton>
+              </SidebarMenuSubItem>
+              <SidebarMenuSubItem>
+                <SidebarMenuSubButton 
+                  asChild
+                  className={currentPath === "/admin/importacao-execucao-treinamentos" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
+                >
+                  <Link to="/admin/importacao-execucao-treinamentos" className="flex items-center gap-2">
+                    <Upload className="h-3 w-3 flex-shrink-0" />
+                    <span className="text-xs leading-tight break-words min-w-0">Import. Execução Treinamentos</span>
                   </Link>
                 </SidebarMenuSubButton>
               </SidebarMenuSubItem>
