@@ -31,13 +31,37 @@ export const fetchTreinamentosStats = async (userCCAIds: number[] = [], filters?
     
     console.log('Período definido:', { targetYear, targetMonth });
     
-    // Filtrar CCAs se especificado
+    // Definir CCAs permitidos finais
     let allowedCCAIds = userCCAIds;
     if (filters?.ccaId && filters.ccaId !== "todos") {
-      allowedCCAIds = [parseInt(filters.ccaId)];
+      const ccaIdNumber = parseInt(filters.ccaId);
+      // Verificar se o CCA selecionado está entre os permitidos
+      if (userCCAIds.includes(ccaIdNumber)) {
+        allowedCCAIds = [ccaIdNumber];
+      } else {
+        // Se o CCA não está permitido, retorna dados vazios
+        allowedCCAIds = [];
+      }
     }
+    // Se ccaId é "todos", usa todos os CCAs permitidos (userCCAIds)
     
     console.log('CCAs permitidos finais:', allowedCCAIds);
+
+    if (allowedCCAIds.length === 0) {
+      console.log('Nenhum CCA permitido após filtros, retornando dados vazios');
+      return {
+        totalFuncionarios: 0,
+        funcionariosComTreinamentos: 0,
+        totalTreinamentosExecutados: 0,
+        treinamentosValidos: 0,
+        treinamentosVencendo: 0,
+        totalHHT: 0,
+        totalHorasTreinamento: 0,
+        metaHoras: 0,
+        percentualHorasInvestidas: 0,
+        metaAtingida: false
+      };
+    }
 
     // Buscar execuções de treinamento
     console.log('Buscando execuções de treinamento...');
