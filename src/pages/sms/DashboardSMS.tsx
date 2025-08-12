@@ -9,6 +9,7 @@ import {
   Tooltip,
   CartesianGrid,
 } from "recharts";
+import { usePiramideOcorrencias } from "@/hooks/usePiramideOcorrencias";
 
 // Simple stat card component (uses design tokens)
 function StatCard({
@@ -52,6 +53,7 @@ const freqData = [
 ];
 
 export default function DashboardSMS() {
+  const { counts, loading: loadingPiramide } = usePiramideOcorrencias();
   useEffect(() => {
     document.title = "Dashboard SMS | Gestão de SMS";
     const desc =
