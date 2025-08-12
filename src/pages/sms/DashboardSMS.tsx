@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { TrendingUp, CheckCircle2, Gauge, Clock, AlertTriangle, BarChart3 } from "lucide-react";
 import {
@@ -15,6 +14,7 @@ import { useIDSMSDashboard } from "@/hooks/useIDSMSDashboard";
 import { fetchDashboardStats } from "@/services/desvios/dashboardStatsService";
 import { fetchHSAPercentage } from "@/services/dashboard/hsaStatsService";
 import { fetchTreinamentoInvestmentPercentage } from "@/services/dashboard/treinamentoStatsService";
+import { fetchOcorrenciasStats } from "@/services/ocorrencias/ocorrenciasStatsService";
 import { useUserCCAs } from "@/hooks/useUserCCAs";
 
 // Simple stat card component (uses design tokens)
@@ -67,6 +67,7 @@ export default function DashboardSMS() {
   const [desviosStats, setDesviosStats] = useState<any>(null);
   const [hsaPercentage, setHsaPercentage] = useState<number | null>(null);
   const [treinamentoData, setTreinamentoData] = useState<any>(null);
+  const [ocorrenciasStats, setOcorrenciasStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   // Calcular IDSMS médio e status geral
@@ -89,15 +90,17 @@ export default function DashboardSMS() {
         setLoading(true);
         const ccaIds = userCCAs.length > 0 ? userCCAs.map(cca => cca.id) : undefined;
 
-        const [desviosData, hsaData, treinamentoPercentage] = await Promise.all([
+        const [desviosData, hsaData, treinamentoPercentage, ocorrenciasData] = await Promise.all([
           fetchDashboardStats(),
           fetchHSAPercentage(ccaIds),
-          fetchTreinamentoInvestmentPercentage(ccaIds)
+          fetchTreinamentoInvestmentPercentage(ccaIds),
+          fetchOcorrenciasStats(ccaIds)
         ]);
 
         setDesviosStats(desviosData);
         setHsaPercentage(hsaData);
         setTreinamentoData({ percentual: treinamentoPercentage });
+        setOcorrenciasStats(ocorrenciasData);
       } catch (error) {
         console.error('Erro ao carregar indicadores:', error);
       } finally {
@@ -249,14 +252,54 @@ export default function DashboardSMS() {
           <article className="space-y-3">
             <h3 className="text-base font-medium">Ocorrências</h3>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-              <StatCard title="Ocorrências com perda de dias" value={counts.cpd} />
-              <StatCard title="Ocorrências sem perda de dias" value={counts.spd} />
-              <StatCard title="Incidentes" value={counts.incidente} />
-              <StatCard title="Desvios de Alto Potencial" value={0} />
-              <StatCard title="Dias Perdidos" value={32} />
-              <StatCard title="Dias Debitados" value={0} />
-              <StatCard title="Ocorrências Concluídas" value={6} />
-              <StatCard title="Ocorrências Pendentes" value={0} />
+              <StatCard 
+                title="Ocorrências com perda de dias" 
+                value={loading ? "..." : ocorrenciasStats?.ocorrenciasComPerdaDias || 0} 
+                icon={AlertTriangle}
+                subtitle="AC CPD" 
+              />
+              <StatCard 
+                title="Ocorrências sem perda de dias" 
+                value={loading ? "..." : ocorrenciasStats?.ocorrenciasSemPerdaDias || 0}
+                icon={CheckCircle2}
+                subtitle="AC SPD"
+              />
+              <StatCard 
+                title="Incidentes" 
+                value={loading ? "..." : ocorrenciasStats?.incidentes || 0}
+                icon={BarChart3}
+                subtitle="INC DM, INC SDM, INC AMB"
+              />
+              <StatCard 
+                title="Desvios de Alto Potencial" 
+                value={loading ? "..." : ocorrenciasStats?.desviosAltoPotencial || 0}
+                icon={AlertTriangle}
+                subtitle="DAP"
+              />
+              <StatCard 
+                title="Dias Perdidos" 
+                value={loading ? "..." : ocorrenciasStats?.totalDiasPerdidos || 0}
+                icon={Clock}
+                subtitle="Total de dias perdidos"
+              />
+              <StatCard 
+                title="Dias Debitados" 
+                value={loading ? "..." : ocorrenciasStats?.totalDiasDebitados || 0}
+                icon={Clock}
+                subtitle="Total de dias debitados"
+              />
+              <StatCard 
+                title="Ocorrências Concluídas" 
+                value={loading ? "..." : ocorrenciasStats?.ocorrenciasConcluidas || 0}
+                icon={CheckCircle2}
+                subtitle="Status concluído/fechado"
+              />
+              <StatCard 
+                title="Ocorrências Pendentes" 
+                value={loading ? "..." : ocorrenciasStats?.ocorrenciasPendentes || 0}
+                icon={AlertTriangle}
+                subtitle="Status aberto/pendente"
+              />
             </div>
           </article>
 
