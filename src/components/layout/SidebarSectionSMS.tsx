@@ -50,55 +50,47 @@ export default function SidebarSectionSMS({ openMenu, toggleMenu }: SidebarSecti
 
   return (
     <>
-      {/* Seção IDSMS */}
-      {["idsms_dashboard", "idsms_relatorios"].some(menu =>
-        podeVerMenu(menu, menusSidebar)
-      ) && (
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <Collapsible open={openMenu === "idsms"}>
-              <CollapsibleTrigger asChild>
-                <SidebarMenuButton 
-                  onClick={() => toggleMenu("idsms")}
-                  className="text-white hover:bg-slate-600"
-                >
-                  <BarChart3 className="h-4 w-4 flex-shrink-0" />
-                  <span className="break-words">IDSMS</span>
-                </SidebarMenuButton>
-              </CollapsibleTrigger>
-              <CollapsibleContent asChild>
-                <SidebarMenuSub>
-                  {podeVerMenu("idsms_dashboard", menusSidebar) && (
-                    <SidebarMenuSubItem>
-                      <SidebarMenuSubButton 
-                        asChild
-                        className={currentPath === "/idsms/dashboard" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
-                      >
-                        <Link to="/idsms/dashboard" className="flex items-center gap-2">
-                          <TrendingUp className="h-3 w-3 flex-shrink-0" />
-                          <span className="text-xs leading-tight break-words min-w-0">Dashboard</span>
-                        </Link>
-                      </SidebarMenuSubButton>
-                    </SidebarMenuSubItem>
-                  )}
-                  {podeVerMenu("idsms_relatorios", menusSidebar) && (
-                    <SidebarMenuSubItem>
-                      <SidebarMenuSubButton 
-                        asChild
-                        className={currentPath === "/idsms/relatorios" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
-                      >
-                        <Link to="/idsms/relatorios" className="flex items-center gap-2">
-                          <span className="text-xs leading-tight break-words min-w-0">Relatórios</span>
-                        </Link>
-                      </SidebarMenuSubButton>
-                    </SidebarMenuSubItem>
-                  )}
-                </SidebarMenuSub>
-              </CollapsibleContent>
-            </Collapsible>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      )}
+      {/* Seção IDSMS - Removendo verificação temporariamente */}
+      <SidebarMenu>
+        <SidebarMenuItem>
+          <Collapsible open={openMenu === "idsms"}>
+            <CollapsibleTrigger asChild>
+              <SidebarMenuButton 
+                onClick={() => toggleMenu("idsms")}
+                className="text-white hover:bg-slate-600"
+              >
+                <BarChart3 className="h-4 w-4 flex-shrink-0" />
+                <span className="break-words">IDSMS</span>
+              </SidebarMenuButton>
+            </CollapsibleTrigger>
+            <CollapsibleContent asChild>
+              <SidebarMenuSub>
+                <SidebarMenuSubItem>
+                  <SidebarMenuSubButton 
+                    asChild
+                    className={currentPath === "/idsms/dashboard" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
+                  >
+                    <Link to="/idsms/dashboard" className="flex items-center gap-2">
+                      <TrendingUp className="h-3 w-3 flex-shrink-0" />
+                      <span className="text-xs leading-tight break-words min-w-0">Dashboard</span>
+                    </Link>
+                  </SidebarMenuSubButton>
+                </SidebarMenuSubItem>
+                <SidebarMenuSubItem>
+                  <SidebarMenuSubButton 
+                    asChild
+                    className={currentPath === "/idsms/relatorios" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
+                  >
+                    <Link to="/idsms/relatorios" className="flex items-center gap-2">
+                      <span className="text-xs leading-tight break-words min-w-0">Relatórios</span>
+                    </Link>
+                  </SidebarMenuSubButton>
+                </SidebarMenuSubItem>
+              </SidebarMenuSub>
+            </CollapsibleContent>
+          </Collapsible>
+        </SidebarMenuItem>
+      </SidebarMenu>
 
       {/* Seção Desvios */}
       {["desvios_dashboard", "desvios_cadastro", "desvios_consulta", "desvios_nao_conformidade"].some(menu =>
