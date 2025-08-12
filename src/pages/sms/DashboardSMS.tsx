@@ -162,16 +162,30 @@ export default function DashboardSMS() {
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             <article className="rounded-lg border border-border bg-card p-4">
               <h3 className="mb-3 text-base font-medium">Pirâmide de Ocorrências</h3>
-              <p className="text-sm text-muted-foreground">
-                Visualização simplificada. Gráfico detalhado pode ser adicionado posteriormente.
-              </p>
-              <ul className="mt-3 space-y-2 text-sm">
-                <li className="flex items-center justify-between"><span>Fatal</span><span className="font-semibold">0</span></li>
-                <li className="flex items-center justify-between"><span>CPD</span><span className="font-semibold">2</span></li>
-                <li className="flex items-center justify-between"><span>SPD</span><span className="font-semibold">3</span></li>
-                <li className="flex items-center justify-between"><span>Incidente</span><span className="font-semibold">4</span></li>
-                <li className="flex items-center justify-between"><span>Desvios</span><span className="font-semibold">964</span></li>
-              </ul>
+              <div className="relative w-full">
+                <img
+                  src="/lovable-uploads/1e50cebd-983a-47e4-af70-4e60b3a4439c.png"
+                  alt="Pirâmide de Ocorrências: Fatal, CPD, SPD, Incidente e Desvios"
+                  loading="lazy"
+                  className="w-full h-auto select-none"
+                />
+                {/* Overlay com valores dinâmicos */}
+                <span className="absolute right-2 rounded px-1.5 py-0.5 text-xs font-semibold bg-background/80 text-foreground" style={{ top: "6%" }}>
+                  {loadingPiramide ? "..." : counts.fatal}
+                </span>
+                <span className="absolute right-2 rounded px-1.5 py-0.5 text-xs font-semibold bg-background/80 text-foreground" style={{ top: "24%" }}>
+                  {loadingPiramide ? "..." : counts.cpd}
+                </span>
+                <span className="absolute right-2 rounded px-1.5 py-0.5 text-xs font-semibold bg-background/80 text-foreground" style={{ top: "41%" }}>
+                  {loadingPiramide ? "..." : counts.spd}
+                </span>
+                <span className="absolute right-2 rounded px-1.5 py-0.5 text-xs font-semibold bg-background/80 text-foreground" style={{ top: "58%" }}>
+                  {loadingPiramide ? "..." : counts.incidente}
+                </span>
+                <span className="absolute right-2 rounded px-1.5 py-0.5 text-xs font-semibold bg-background/80 text-foreground" style={{ top: "88%" }}>
+                  {loadingPiramide ? "..." : counts.desvios}
+                </span>
+              </div>
             </article>
 
             <article className="rounded-lg border border-border bg-card p-4">
