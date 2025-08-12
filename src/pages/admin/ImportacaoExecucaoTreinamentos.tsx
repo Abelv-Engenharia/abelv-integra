@@ -3,12 +3,13 @@ import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Info, Upload, CheckCircle, AlertCircle, Download, Code } from "lucide-react";
+import { Info, Upload, CheckCircle, AlertCircle, Download, Code, FileText } from "lucide-react";
 import { ExecucaoExcelUpload } from "@/components/admin/treinamentos/ExecucaoExcelUpload";
 import { ExecucaoTreinamentoImportData } from "@/types/treinamentosExecucaoImport";
 import { useExecucaoTreinamentosImport } from "@/hooks/useExecucaoTreinamentosImport";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CCACodesTab } from "@/components/admin/funcionarios/CCACodesTab";
+import { LogsImportacaoExecucao } from "@/components/admin/treinamentos/LogsImportacaoExecucao";
 import * as XLSX from "xlsx";
 
 const ImportacaoExecucaoTreinamentos = () => {
@@ -74,20 +75,16 @@ const ImportacaoExecucaoTreinamentos = () => {
   };
 
   return (
-    <div className="container max-w-6xl mx-auto py-6 animate-fade-in">
+    <div className="container max-w-full mx-auto py-6 animate-fade-in">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Importação de Execução de Treinamentos</h1>
-          <p className="text-sm text-muted-foreground">Carregue um arquivo Excel para importar execuções em massa.</p>
+          <h1 className="text-3xl font-bold tracking-tight">Importação de Execução de Treinamentos</h1>
+          <p className="text-muted-foreground">Carregue um arquivo Excel para importar execuções em massa.</p>
         </div>
-        <Button onClick={downloadTemplate} variant="outline" className="flex items-center gap-2">
-          <Download className="h-4 w-4" />
-          Baixar Template Excel
-        </Button>
       </div>
 
       <Tabs defaultValue="upload" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="upload" className="flex items-center gap-2">
             <Upload className="h-4 w-4" />
             Upload do Arquivo
@@ -96,15 +93,29 @@ const ImportacaoExecucaoTreinamentos = () => {
             <Code className="h-4 w-4" />
             Códigos CCA
           </TabsTrigger>
+          <TabsTrigger value="logs" className="flex items-center gap-2">
+            <FileText className="h-4 w-4" />
+            Logs de Importação
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="upload" className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <Card className="lg:col-span-2">
               <CardHeader>
-                <CardTitle className="text-base font-medium flex items-center gap-2"><Upload className="h-4 w-4" /> Upload do Arquivo</CardTitle>
+                <CardTitle className="text-base font-medium flex items-center gap-2">
+                  <Upload className="h-4 w-4" /> 
+                  Upload do Arquivo
+                </CardTitle>
               </CardHeader>
               <CardContent>
+                <div className="flex justify-end mb-4">
+                  <Button onClick={downloadTemplate} variant="outline" className="flex items-center gap-2">
+                    <Download className="h-4 w-4" />
+                    Baixar Template Excel
+                  </Button>
+                </div>
+
                 <ExecucaoExcelUpload onFileProcessed={handleFileProcessed} isProcessing={isValidating || isImporting} />
 
                 {validationResults && (validationResults.valid.length > 0 || validationResults.invalid.length > 0) && (
@@ -185,7 +196,10 @@ const ImportacaoExecucaoTreinamentos = () => {
 
             <Card>
               <CardHeader>
-                <CardTitle className="text-base font-medium flex items-center gap-2"><Info className="h-4 w-4" /> Instruções</CardTitle>
+                <CardTitle className="text-base font-medium flex items-center gap-2">
+                  <Info className="h-4 w-4" /> 
+                  Instruções
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3 text-sm text-muted-foreground">
@@ -213,6 +227,10 @@ const ImportacaoExecucaoTreinamentos = () => {
 
         <TabsContent value="cca-codes">
           <CCACodesTab />
+        </TabsContent>
+
+        <TabsContent value="logs">
+          <LogsImportacaoExecucao />
         </TabsContent>
       </Tabs>
     </div>
