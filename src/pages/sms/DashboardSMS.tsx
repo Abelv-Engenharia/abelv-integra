@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { TrendingUp, CheckCircle2, Gauge, Clock, AlertTriangle, BarChart3 } from "lucide-react";
 import {
@@ -13,6 +14,7 @@ import { usePiramideOcorrencias } from "@/hooks/usePiramideOcorrencias";
 import { useIDSMSDashboard } from "@/hooks/useIDSMSDashboard";
 import { fetchDashboardStats } from "@/services/desvios/dashboardStatsService";
 import { fetchHSAPercentage } from "@/services/dashboard/hsaStatsService";
+import { fetchHSADetailedStats } from "@/services/dashboard/hsaDetailedStatsService";
 import { fetchTreinamentoInvestmentPercentage } from "@/services/dashboard/treinamentoStatsService";
 import { fetchOcorrenciasStats } from "@/services/ocorrencias/ocorrenciasStatsService";
 import { fetchTreinamentosStats } from "@/services/treinamentos/treinamentosStatsService";
@@ -79,6 +81,7 @@ export default function DashboardSMS() {
   // Estados para dados dos indicadores
   const [desviosStats, setDesviosStats] = useState<any>(null);
   const [hsaPercentage, setHsaPercentage] = useState<number | null>(null);
+  const [hsaDetailedStats, setHsaDetailedStats] = useState<any>(null);
   const [treinamentoData, setTreinamentoData] = useState<any>(null);
   const [ocorrenciasStats, setOcorrenciasStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -126,15 +129,17 @@ export default function DashboardSMS() {
           month: month !== "todos" ? month : undefined
         };
 
-        const [desviosData, hsaData, treinamentoStatsData, ocorrenciasData] = await Promise.all([
+        const [desviosData, hsaData, hsaDetailedData, treinamentoStatsData, ocorrenciasData] = await Promise.all([
           fetchDashboardStats(desviosFilters),
           fetchHSAPercentage(ccaIds, hsaFilters),
+          fetchHSADetailedStats(ccaIds, hsaFilters),
           fetchTreinamentosStats(ccaIds || [], treinamentosFilters),
           fetchOcorrenciasStats(ccaIds, year !== "todos" ? year : undefined, month !== "todos" ? month : undefined)
         ]);
 
         setDesviosStats(desviosData);
         setHsaPercentage(hsaData);
+        setHsaDetailedStats(hsaDetailedData);
         setTreinamentoData(treinamentoStatsData);
         setOcorrenciasStats(ocorrenciasData);
       } catch (error) {
@@ -287,7 +292,7 @@ export default function DashboardSMS() {
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-6">
               <StatCard 
                 title="Adesão HSA (real)" 
-                value="36,44%" 
+                value={loading ? "..." : `${hsaDetailedStats?.aderenciaReal?.toFixed(2) || 0}%`} 
                 subtitle="Realizadas vs Programadas" 
                 icon={TrendingUp} 
               />
@@ -297,10 +302,30 @@ export default function DashboardSMS() {
                 subtitle="Incluindo não programadas" 
                 icon={TrendingUp} 
               />
-              <StatCard title="Inspeções Programadas" value={118} subtitle="A realizar + Replanejadas + Não realizadas" icon={Clock} />
-              <StatCard title="Inspeções Realizadas" value={43} subtitle="Inspeções concluídas" icon={CheckCircle2} />
-              <StatCard title="Não Programadas" value={1} subtitle="Inspeções não programadas" icon={BarChart3} />
-              <StatCard title="Não Realizadas" value={1} subtitle="Inspeções não executadas" icon={AlertTriangle} />
+              <StatCard 
+                title="Inspeções Programadas" 
+                value={loading ? "..." : hsaDetailedStats?.inspecoesProgramadas || 0} 
+                subtitle="A realizar + Replanejadas + Não realizadas" 
+                icon={Clock} 
+              />
+              <StatCard 
+                title="Inspeções Realizadas" 
+                value={loading ? "..." : hsaDetailedStats?.inspecoesRealizadas || 0} 
+                subtitle="Inspeções concluídas" 
+                icon={CheckCircle2} 
+              />
+              <StatCard 
+                title="Não Programadas" 
+                value={loading ? "..." : hsaDetailedStats?.naoProgramadas || 0} 
+                subtitle="Inspeções não programadas" 
+                icon={BarChart3} 
+              />
+              <StatCard 
+                title="Não Realizadas" 
+                value={loading ? "..." : hsaDetailedStats?.naoRealizadas || 0} 
+                subtitle="Inspeções não executadas" 
+                icon={AlertTriangle} 
+              />
             </div>
           </article>
         </section>
