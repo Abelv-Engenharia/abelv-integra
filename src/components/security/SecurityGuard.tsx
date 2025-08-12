@@ -1,98 +1,75 @@
 
-import { ReactNode, useEffect } from 'react';
-import { useSecurityValidation } from '@/hooks/useSecurityValidation';
-import { useAuth } from '@/contexts/AuthContext';
-import { Card, CardContent } from '@/components/ui/card';
-import { Lock, Shield, AlertTriangle } from 'lucide-react';
+import React from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useProfile } from "@/hooks/useProfile";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Lock, AlertCircle } from "lucide-react";
 
 interface SecurityGuardProps {
-  children: ReactNode;
+  children: React.ReactNode;
   requiredPermission?: string;
-  requiredSecurityLevel?: 'low' | 'medium' | 'high';
-  fallbackMessage?: string;
-  showFallback?: boolean;
+  requiredSecurityLevel?: "low" | "medium" | "high";
+  fallback?: React.ReactNode;
 }
 
-export const SecurityGuard = ({ 
-  children, 
-  requiredPermission, 
-  requiredSecurityLevel = 'low',
-  fallbackMessage = "Você não tem permissão para acessar este conteúdo.",
-  showFallback = true
-}: SecurityGuardProps) => {
-  const { user } = useAuth();
-  const { validation, validateAction } = useSecurityValidation();
+export const SecurityGuard: React.FC<SecurityGuardProps> = ({
+  children,
+  requiredPermission,
+  requiredSecurityLevel = "low",
+  fallback
+}) => {
+  const { user, loading } = useAuth();
+  const { userPermissoes, loading: profileLoading } = useProfile();
 
-  useEffect(() => {
-    if (requiredPermission) {
-      validateAction('access_protected_content', requiredPermission);
-    }
-  }, [requiredPermission, validateAction]);
+  console.log("=== DEBUG SecurityGuard ===");
+  console.log("SecurityGuard - user:", user);
+  console.log("SecurityGuard - loading:", loading);
+  console.log("SecurityGuard - profileLoading:", profileLoading);
+  console.log("SecurityGuard - userPermissoes:", userPermissoes);
+  console.log("SecurityGuard - requiredPermission:", requiredPermission);
+  console.log("SecurityGuard - requiredSecurityLevel:", requiredSecurityLevel);
 
-  // Check authentication
+  // Mostrar loading enquanto carrega dados
+  if (loading || profileLoading) {
+    console.log("SecurityGuard - ainda carregando...");
+    return (
+      <div className="flex items-center justify-center p-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+      </div>
+    );
+  }
+
+  // Verificar se o usuário está autenticado
   if (!user) {
-    if (!showFallback) return null;
-    
-    return (
-      <Card className="mx-auto max-w-md">
-        <CardContent className="pt-6">
-          <div className="text-center space-y-4">
-            <Lock className="mx-auto h-12 w-12 text-muted-foreground" />
-            <div>
-              <h3 className="text-lg font-semibold">Autenticação Necessária</h3>
-              <p className="text-sm text-muted-foreground">
-                Você precisa estar logado para acessar este conteúdo.
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+    console.log("SecurityGuard - usuário não autenticado");
+    return fallback || (
+      <Alert variant="destructive">
+        <Lock className="h-4 w-4" />
+        <AlertDescription>
+          Você precisa estar autenticado para acessar esta seção.
+        </AlertDescription>
+      </Alert>
     );
   }
 
-  // Check permission if required
-  if (requiredPermission && !validation.isValid) {
-    if (!showFallback) return null;
+  // Verificar permissão específica se fornecida
+  if (requiredPermission && userPermissoes) {
+    const hasPermission = (userPermissoes as any)[requiredPermission] === true;
+    console.log("SecurityGuard - verificando permissão:", requiredPermission, "resultado:", hasPermission);
     
-    return (
-      <Card className="mx-auto max-w-md">
-        <CardContent className="pt-6">
-          <div className="text-center space-y-4">
-            <AlertTriangle className="mx-auto h-12 w-12 text-destructive" />
-            <div>
-              <h3 className="text-lg font-semibold">Acesso Negado</h3>
-              <p className="text-sm text-muted-foreground">{fallbackMessage}</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    );
+    if (!hasPermission) {
+      console.log("SecurityGuard - permissão negada para:", requiredPermission);
+      return fallback || (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            Você não tem permissão para acessar esta seção. Permissão necessária: {requiredPermission}
+          </AlertDescription>
+        </Alert>
+      );
+    }
   }
 
-  // Check security level
-  const securityLevels = { low: 0, medium: 1, high: 2 };
-  const userLevel = securityLevels[validation.securityLevel];
-  const requiredLevel = securityLevels[requiredSecurityLevel];
-
-  if (userLevel < requiredLevel) {
-    if (!showFallback) return null;
-    
-    return (
-      <Card className="mx-auto max-w-md">
-        <CardContent className="pt-6">
-          <div className="text-center space-y-4">
-            <Shield className="mx-auto h-12 w-12 text-warning" />
-            <div>
-              <h3 className="text-lg font-semibold">Nível de Segurança Insuficiente</h3>
-              <p className="text-sm text-muted-foreground">
-                Esta funcionalidade requer nível de segurança: {requiredSecurityLevel}
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
+  console.log("SecurityGuard - acesso permitido, renderizando children");
   return <>{children}</>;
 };

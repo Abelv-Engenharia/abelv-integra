@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
@@ -32,19 +31,30 @@ const AdminUsuarios = () => {
     deleteUsuarioMutation
   } = useUsuarios();
 
-  // Debug logs
+  // Debug logs mais detalhados
+  console.log("=== DEBUG AdminUsuarios ===");
   console.log("AdminUsuarios - usuarios:", usuarios);
+  console.log("AdminUsuarios - usuarios.length:", usuarios?.length);
   console.log("AdminUsuarios - loadingUsuarios:", loadingUsuarios);
   console.log("AdminUsuarios - canManageUsers:", canManageUsers);
   console.log("AdminUsuarios - usersError:", usersError);
+  console.log("AdminUsuarios - profiles:", profiles);
 
   // Update filtered users when usuarios data changes
   useEffect(() => {
-    console.log("AdminUsuarios - useEffect - usuarios:", usuarios);
+    console.log("AdminUsuarios - useEffect - usuarios recebidos:", usuarios);
+    console.log("AdminUsuarios - useEffect - tipo de usuarios:", typeof usuarios);
+    console.log("AdminUsuarios - useEffect - é array:", Array.isArray(usuarios));
+    
     if (usuarios && usuarios.length >= 0) {
+      console.log("AdminUsuarios - useEffect - setando filteredUsers com:", usuarios);
       setFilteredUsers(usuarios);
+    } else {
+      console.log("AdminUsuarios - useEffect - usuarios está vazio ou null");
     }
   }, [usuarios]);
+
+  console.log("AdminUsuarios - filteredUsers final:", filteredUsers);
 
   const onSearchSubmit = (data: SearchFormValues) => {
     if (!data.search) {
@@ -135,6 +145,16 @@ const AdminUsuarios = () => {
         <p className="text-muted-foreground">
           Gerencie os usuários do sistema
         </p>
+      </div>
+
+      {/* DEBUG: Vamos mostrar informações de debug na tela temporariamente */}
+      <div className="bg-yellow-100 border border-yellow-400 p-4 rounded-md">
+        <h3 className="font-bold">DEBUG INFO:</h3>
+        <p>canManageUsers: {String(canManageUsers)}</p>
+        <p>loadingUsuarios: {String(loadingUsuarios)}</p>
+        <p>usuarios.length: {usuarios?.length || 0}</p>
+        <p>filteredUsers.length: {filteredUsers?.length || 0}</p>
+        <p>usersError: {String(usersError)}</p>
       </div>
 
       <SecurityGuard requiredPermission="admin_usuarios" requiredSecurityLevel="high">
