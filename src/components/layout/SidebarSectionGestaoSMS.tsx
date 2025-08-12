@@ -23,6 +23,7 @@ export default function SidebarSectionGestaoSMS({
 
   // Função para determinar qual submenu deve estar aberto baseado na rota atual
   const getActiveSubmenu = (path: string) => {
+    if (path.startsWith("/sms")) return "dashboard-sms";
     if (path.startsWith("/desvios")) return "desvios";
     if (path.startsWith("/treinamentos")) return "treinamentos";
     if (path.startsWith("/hora-seguranca")) return "hora-seguranca";
@@ -69,6 +70,26 @@ export default function SidebarSectionGestaoSMS({
           </CollapsibleTrigger>
           <CollapsibleContent>
             <SidebarMenuSub>
+              {/* Dashboard SMS */}
+              <SidebarMenuSubItem>
+                <div className="w-full">
+                  <button onClick={() => toggleSubMenu("dashboard-sms")} className="flex items-center justify-between w-full px-2 py-1 text-white hover:bg-slate-600 rounded text-xs">
+                    <div className="flex items-center gap-2">
+                      <BarChart3 className="h-3 w-3 flex-shrink-0" />
+                      <span>Dashboard SMS</span>
+                    </div>
+                    {openSubMenus["dashboard-sms"] ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
+                  </button>
+                  {openSubMenus["dashboard-sms"] && (
+                    <div className="ml-4 mt-1 space-y-1">
+                      <SidebarMenuSubButton asChild className={currentPath === "/sms/dashboard" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
+                        <Link to="/sms/dashboard">Dashboard</Link>
+                      </SidebarMenuSubButton>
+                    </div>
+                  )}
+                </div>
+              </SidebarMenuSubItem>
+
               {/* Desvios */}
               <SidebarMenuSubItem>
                 <div className="w-full">

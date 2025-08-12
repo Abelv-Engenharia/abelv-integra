@@ -100,6 +100,9 @@ import IndiceReativoForm from "./pages/idsms/IndiceReativoForm";
 import InspecaoAltaLiderancaForm from "./pages/idsms/InspecaoAltaLiderancaForm";
 import InspecaoGestaoSMSForm from "./pages/idsms/InspecaoGestaoSMSForm";
 
+// SMS pages
+import DashboardSMS from "./pages/sms/DashboardSMS";
+
 // GRO pages
 import GroAvaliacaoRiscos from "./pages/gro/GroAvaliacaoRiscos";
 import GroCadastroPerigos from "./pages/gro/GroCadastroPerigos";
@@ -235,6 +238,9 @@ function App() {
                 <Route path="idsms/indice-reativo" element={<IndiceReativoForm />} />
                 <Route path="idsms/inspecao-alta-lideranca" element={<InspecaoAltaLiderancaForm />} />
                 <Route path="idsms/inspecao-gestao-sms" element={<InspecaoGestaoSMSForm />} />
+
+                {/* SMS routes */}
+                <Route path="sms/dashboard" element={<DashboardSMS />} />
 
                 {/* GRO routes */}
                 <Route path="gro/avaliacao-riscos" element={<GroAvaliacaoRiscos />} />
