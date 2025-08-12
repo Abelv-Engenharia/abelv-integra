@@ -7,6 +7,7 @@ import { ptBR } from "date-fns/locale/pt-BR";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
 import { useUserCCAs } from "@/hooks/useUserCCAs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface InspecaoAgenda {
   id: string;
@@ -46,6 +47,7 @@ export default function AgendaHSA() {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(true);
   const { data: userCCAs = [] } = useUserCCAs();
+  const [ccaFilter, setCcaFilter] = useState<string>("todos");
 
   useEffect(() => {
     const fetchInspecoes = async () => {
@@ -57,21 +59,26 @@ export default function AgendaHSA() {
         return;
       }
 
-      // Aplicar filtro por CCAs permitidos
-      const ccaIds = userCCAs.map(cca => cca.id);
-      
-      const { data, error } = await supabase
+      // Aplicar filtro por CCAs permitidos e filtro selecionado
+      const allowedCcaIds = userCCAs.map(cca => cca.id);
+      let query = supabase
         .from("execucao_hsa")
-        .select("id, data, responsavel_inspecao, status, inspecao_programada")
-        .in('cca_id', ccaIds);
-        
+        .select("id, data, responsavel_inspecao, status, inspecao_programada");
+
+      if (ccaFilter && ccaFilter !== "todos") {
+        query = query.eq('cca_id', Number(ccaFilter));
+      } else {
+        query = query.in('cca_id', allowedCcaIds);
+      }
+
+      const { data, error } = await query;
       setIsLoading(false);
       if (data) {
         setInspecoes(data as InspecaoAgenda[]);
       }
     };
     fetchInspecoes();
-  }, [userCCAs]);
+  }, [userCCAs, ccaFilter]);
 
   // Função para formatar a data corretamente, evitando problemas de timezone
   const formatDateSafely = (dateString: string) => {
@@ -147,6 +154,27 @@ export default function AgendaHSA() {
           </p>
         </CardHeader>
         <CardContent>
+          <div className="mb-4">
+            <div className="grid gap-1 w-full max-w-xs">
+              <label htmlFor="cca" className="text-sm font-medium">CCA</label>
+              <Select value={ccaFilter} onValueChange={setCcaFilter}>
+                <SelectTrigger id="cca">
+                  <SelectValue placeholder="Todos os CCAs" />
+                </SelectTrigger>
+                <SelectContent className="z-50">
+                  <SelectItem value="todos">Todos</SelectItem>
+                  {userCCAs
+                    .slice()
+                    .sort((a, b) => a.codigo.localeCompare(b.codigo, undefined, { numeric: true }))
+                    .map((cca) => (
+                      <SelectItem key={cca.id} value={cca.id.toString()}>
+                        {`${cca.codigo} - ${cca.nome}`}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mb-4 border-b pb-4">
             <h3 className="text-sm font-medium text-muted-foreground">Legenda:</h3>
             {legendItems.map((item) => (
