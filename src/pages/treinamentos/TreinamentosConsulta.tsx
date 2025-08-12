@@ -405,6 +405,15 @@ const TreinamentosConsulta = () => {
     if (filterAno !== "todos") {
       results = results.filter(execucao => execucao.ano.toString() === filterAno);
     }
+    // Ordenar por data (mais recente primeiro)
+    results = results.sort((a, b) => {
+      const da = a.data;
+      const db = b.data;
+      if (da && db) {
+        return new Date(db).getTime() - new Date(da).getTime();
+      }
+      return 0;
+    });
     setFilteredExecucoes(results);
   };
 
