@@ -41,34 +41,49 @@ export const fetchTreinamentosStats = async (userCCAIds: number[] = [], filters?
       treinamentosNormativosResult
     ] = await Promise.all([
       // Contagem de execuções de treinamento
-      supabase
-        .from('execucao_treinamentos')
-        .select('*', { count: 'exact', head: true })
-        .in('cca_id', allowedCCAIds)
-        .eq('ano', targetYear)
-        .modify((query) => {
-          if (targetMonth) query.eq('mes', targetMonth);
-        }),
+      (() => {
+        let query = supabase
+          .from('execucao_treinamentos')
+          .select('*', { count: 'exact', head: true })
+          .in('cca_id', allowedCCAIds)
+          .eq('ano', targetYear);
+        
+        if (targetMonth) {
+          query = query.eq('mes', targetMonth);
+        }
+        
+        return query;
+      })(),
 
       // Total de HHT
-      supabase
-        .from('horas_trabalhadas')
-        .select('horas_trabalhadas')
-        .in('cca_id', allowedCCAIds)
-        .eq('ano', targetYear)
-        .modify((query) => {
-          if (targetMonth) query.eq('mes', targetMonth);
-        }),
+      (() => {
+        let query = supabase
+          .from('horas_trabalhadas')
+          .select('horas_trabalhadas')
+          .in('cca_id', allowedCCAIds)
+          .eq('ano', targetYear);
+        
+        if (targetMonth) {
+          query = query.eq('mes', targetMonth);
+        }
+        
+        return query;
+      })(),
 
       // Total de horas de treinamento
-      supabase
-        .from('execucao_treinamentos')
-        .select('horas_totais')
-        .in('cca_id', allowedCCAIds)
-        .eq('ano', targetYear)
-        .modify((query) => {
-          if (targetMonth) query.eq('mes', targetMonth);
-        }),
+      (() => {
+        let query = supabase
+          .from('execucao_treinamentos')
+          .select('horas_totais')
+          .in('cca_id', allowedCCAIds)
+          .eq('ano', targetYear);
+        
+        if (targetMonth) {
+          query = query.eq('mes', targetMonth);
+        }
+        
+        return query;
+      })(),
 
       // Funcionários dos CCAs permitidos
       supabase
