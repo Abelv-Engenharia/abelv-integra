@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -104,9 +103,7 @@ export const PerfilForm = ({ initialData, onCancel, onSave, loading }: PerfilFor
   };
 
   const handleSave = () => {
-    // Criar objeto de permissões simplificado baseado apenas nos menus selecionados
     const permissoes: Permissoes = {
-      // Definir valores padrão para compatibilidade
       desvios: false,
       treinamentos: false,
       ocorrencias: false,
@@ -196,11 +193,6 @@ export const PerfilForm = ({ initialData, onCancel, onSave, loading }: PerfilFor
                   <Checkbox
                     id={`category-${category}`}
                     checked={allSelected}
-                    ref={(el) => {
-                      if (el) {
-                        el.indeterminate = someSelected && !allSelected;
-                      }
-                    }}
                     onCheckedChange={() => handleToggleCategory(categoryMenus)}
                   />
                   <Label htmlFor={`category-${category}`} className="font-semibold text-sm">
