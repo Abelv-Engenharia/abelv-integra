@@ -37,33 +37,34 @@ const DeleteDesvioDialog = ({ desvio, onDesvioDeleted }: DeleteDesvioDialogProps
 
     setIsLoading(true);
     try {
-      console.log('Tentando excluir desvio com ID:', desvio.id);
+      console.log('Iniciando processo de exclusão do desvio:', desvio.id);
       const success = await desviosCompletosService.delete(desvio.id);
-      console.log('Retorno do service delete:', success);
+      console.log('Resultado da exclusão:', success);
 
       if (success) {
         toast({
           title: "Desvio excluído",
-          description: "O desvio foi excluído do banco de dados.",
+          description: "O desvio foi excluído permanentemente do sistema.",
         });
         setOpen(false);
-        // Passa true para deleted para mostrar que de fato foi removido
+        
+        // Garantir que o callback seja chamado com os parâmetros corretos
+        console.log('Chamando callback onDesvioDeleted com sucesso:', desvio.id);
         onDesvioDeleted(desvio.id, true);
-        console.log('Callback onDesvioDeleted SÓ disparado em caso de sucesso.', desvio.id);
       } else {
         toast({
           title: "Erro ao excluir",
-          description: "Não foi possível excluir o desvio no servidor Supabase.",
+          description: "Não foi possível excluir o desvio. Verifique as permissões ou tente novamente.",
           variant: "destructive",
         });
         onDesvioDeleted(desvio.id, false);
-        console.error('Falha ao excluir desvio: BACKEND RETORNOU FALSE', desvio.id);
+        console.error('Falha na exclusão do desvio:', desvio.id);
       }
     } catch (error) {
-      console.error('Erro ao excluir desvio:', error);
+      console.error('Erro inesperado durante exclusão:', error);
       toast({
-        title: "Erro técnico ao excluir",
-        description: "Erro inesperado ao tentar excluir o desvio.",
+        title: "Erro técnico",
+        description: "Ocorreu um erro inesperado ao tentar excluir o desvio.",
         variant: "destructive",
       });
       onDesvioDeleted(desvio.id, false);

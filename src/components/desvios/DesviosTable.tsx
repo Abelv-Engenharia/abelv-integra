@@ -147,22 +147,39 @@ const DesviosTable = ({
   };
 
   const handleDesvioDeleted = (id?: string, deleted?: boolean) => {
+    console.log('handleDesvioDeleted chamado com:', { id, deleted });
+    
     if (deleted && id) {
-      console.log("Removendo desvio da tabela na UI (otimista):", id);
-      setDesvios(prev => prev.filter(d => d.id !== id));
-      fetchDesvios();
+      console.log("Removendo desvio da UI:", id);
+      
+      // Remover imediatamente da UI para feedback visual rápido
+      setDesvios(prev => {
+        const filtered = prev.filter(d => d.id !== id);
+        console.log('Estado atualizado, desvios restantes:', filtered.length);
+        return filtered;
+      });
+      
+      // Recarregar dados do servidor para garantir sincronização
+      setTimeout(() => {
+        console.log('Recarregando dados do servidor...');
+        fetchDesvios();
+      }, 500);
+      
       toast({
         title: "Desvio excluído",
         description: "O desvio foi removido com sucesso.",
         variant: "default"
       });
     } else {
+      console.error("Falha na exclusão do desvio:", { id, deleted });
       toast({
-        title: "Erro técnico ao excluir",
-        description: "Não foi possível remover o desvio no servidor. Por favor, recarregue a página ou tente novamente.",
+        title: "Erro na exclusão",
+        description: "Não foi possível excluir o desvio. Tente novamente.",
         variant: "destructive"
       });
-      console.error("Falha no handleDesvioDeleted (deleted=false ou id indefinido):", id, deleted);
+      
+      // Recarregar dados em caso de erro para manter sincronização
+      fetchDesvios();
     }
   };
 
