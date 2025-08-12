@@ -29,6 +29,10 @@ export function getAllMenusSidebar(): string[] {
     "ocorrencias_cadastro",
     "ocorrencias_consulta",
     
+    // IDSMS menus
+    "idsms_dashboard",
+    "idsms_relatorios",
+    
     // ADM MATRICIAL menus
     "adm_dashboard",
     "adm_configuracoes",
