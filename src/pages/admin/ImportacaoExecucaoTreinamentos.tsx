@@ -3,10 +3,13 @@ import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Info, Upload, CheckCircle, AlertCircle } from "lucide-react";
+import { Info, Upload, CheckCircle, AlertCircle, Download, Code } from "lucide-react";
 import { ExecucaoExcelUpload } from "@/components/admin/treinamentos/ExecucaoExcelUpload";
 import { ExecucaoTreinamentoImportData } from "@/types/treinamentosExecucaoImport";
 import { useExecucaoTreinamentosImport } from "@/hooks/useExecucaoTreinamentosImport";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { CCACodesTab } from "@/components/admin/funcionarios/CCACodesTab";
+import * as XLSX from "xlsx";
 
 const ImportacaoExecucaoTreinamentos = () => {
   const [importData, setImportData] = useState<ExecucaoTreinamentoImportData[]>([]);
