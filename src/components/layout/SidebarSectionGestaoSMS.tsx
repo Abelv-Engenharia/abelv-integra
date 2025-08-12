@@ -1,6 +1,7 @@
 
+
 import React, { useState, useEffect } from "react";
-import { ChevronDown, ChevronRight, ShieldAlert, GraduationCap, Clock, ClipboardCheck, AlertTriangle, Gavel } from "lucide-react";
+import { ChevronDown, ChevronRight, ShieldAlert, GraduationCap, Clock, ClipboardCheck, AlertTriangle, Gavel, BarChart3, TrendingUp } from "lucide-react";
 import { SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarMenuSub, SidebarMenuSubItem, SidebarMenuSubButton } from "@/components/ui/sidebar";
 import { Link, useLocation } from "react-router-dom";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -25,6 +26,7 @@ export default function SidebarSectionGestaoSMS({
     if (path.startsWith("/desvios")) return "desvios";
     if (path.startsWith("/treinamentos")) return "treinamentos";
     if (path.startsWith("/hora-seguranca")) return "hora-seguranca";
+    if (path.startsWith("/idsms")) return "idsms";
     if (path.startsWith("/inspecao-sms")) return "inspecao-sms";
     if (path.startsWith("/ocorrencias")) return "ocorrencias";
     if (path.startsWith("/medidas-disciplinares")) return "medidas-disciplinares";
@@ -154,6 +156,32 @@ export default function SidebarSectionGestaoSMS({
                 </div>
               </SidebarMenuSubItem>
 
+              {/* IDSMS - Adicionando após Hora da Segurança */}
+              <SidebarMenuSubItem>
+                <div className="w-full">
+                  <button onClick={() => toggleSubMenu("idsms")} className="flex items-center justify-between w-full px-2 py-1 text-white hover:bg-slate-600 rounded text-xs">
+                    <div className="flex items-center gap-2">
+                      <BarChart3 className="h-3 w-3 flex-shrink-0" />
+                      <span>IDSMS</span>
+                    </div>
+                    {openSubMenus.idsms ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
+                  </button>
+                  {openSubMenus.idsms && <div className="ml-4 mt-1 space-y-1">
+                      <SidebarMenuSubButton asChild className={currentPath === "/idsms/dashboard" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
+                        <Link to="/idsms/dashboard">
+                          <div className="flex items-center gap-2">
+                            <TrendingUp className="h-3 w-3 flex-shrink-0" />
+                            <span>Dashboard</span>
+                          </div>
+                        </Link>
+                      </SidebarMenuSubButton>
+                      <SidebarMenuSubButton asChild className={currentPath === "/idsms/relatorios" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
+                        <Link to="/idsms/relatorios">Relatórios</Link>
+                      </SidebarMenuSubButton>
+                    </div>}
+                </div>
+              </SidebarMenuSubItem>
+
               {/* Inspeção SMS */}
               <SidebarMenuSubItem>
                 <div className="w-full">
@@ -231,3 +259,4 @@ export default function SidebarSectionGestaoSMS({
       </SidebarMenuItem>
     </SidebarMenu>;
 }
+
