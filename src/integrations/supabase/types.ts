@@ -2500,6 +2500,14 @@ export type Database = {
           total_horas: number
         }[]
       }
+      get_user_allowed_ccas: {
+        Args: { user_id_param: string }
+        Returns: Json
+      }
+      get_user_permissions: {
+        Args: { user_id_param: string }
+        Returns: Json
+      }
       populate_missing_profiles: {
         Args: Record<PropertyKey, never>
         Returns: undefined
@@ -2507,6 +2515,10 @@ export type Database = {
       processar_configuracoes_emails: {
         Args: Record<PropertyKey, never>
         Returns: undefined
+      }
+      user_can_manage_funcionarios: {
+        Args: { user_id_param: string }
+        Returns: boolean
       }
     }
     Enums: {
