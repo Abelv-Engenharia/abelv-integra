@@ -19,7 +19,16 @@ import { useProfile } from "@/hooks/useProfile";
 
 // Função utilitária para verificar acesso (contem na lista)
 function podeVerMenu(menu: string, menusSidebar?: string[]) {
-  if (!menusSidebar || !Array.isArray(menusSidebar)) return false;
+  console.log(`Verificando acesso ao menu "${menu}":`, {
+    menusSidebar,
+    hasAccess: menusSidebar && Array.isArray(menusSidebar) && menusSidebar.includes(menu)
+  });
+  
+  if (!menusSidebar || !Array.isArray(menusSidebar)) {
+    console.log('menusSidebar não é um array válido:', menusSidebar);
+    return false;
+  }
+  
   return menusSidebar.includes(menu);
 }
 
@@ -28,10 +37,24 @@ export function AppSidebar() {
   const currentPath = location.pathname;
   const { userPermissoes } = useProfile();
 
-  // Extrair menus permitidos do perfil do usuário
-  const menusSidebar = userPermissoes && typeof userPermissoes === "object" && Array.isArray((userPermissoes as any).menus_sidebar) 
-    ? (userPermissoes as any).menus_sidebar 
-    : [];
+  console.log('AppSidebar - userPermissoes completas:', userPermissoes);
+
+  // Extrair menus permitidos do perfil do usuário com debug
+  let menusSidebar: string[] = [];
+  
+  if (userPermissoes && typeof userPermissoes === "object") {
+    const permissoesObj = userPermissoes as any;
+    console.log('Permissões como objeto:', permissoesObj);
+    
+    if (Array.isArray(permissoesObj.menus_sidebar)) {
+      menusSidebar = permissoesObj.menus_sidebar;
+      console.log('Menus da sidebar extraídos:', menusSidebar);
+    } else {
+      console.log('menus_sidebar não é um array ou não existe:', permissoesObj.menus_sidebar);
+    }
+  } else {
+    console.log('userPermissoes não é um objeto válido:', userPermissoes);
+  }
 
   // Defina o menu principal aberto inicialmente
   const [openMenu, setOpenMenu] = useState<string | null>(() => {
@@ -82,6 +105,53 @@ export function AppSidebar() {
           <SidebarSectionGestaoSMS openMenu={openMenu} toggleMenu={toggleMenu} />
         )}
 
+        {/* Render IDSMS apenas se tiver acesso específico */}
+        {podeVerMenu("idsms_dashboard", menusSidebar) && (
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <Collapsible open={openMenu === "idsms"}>
+                <CollapsibleTrigger asChild>
+                  <SidebarMenuButton 
+                    onClick={() => toggleMenu("idsms")} 
+                    className="text-white hover:bg-slate-600"
+                  >
+                    <span className="break-words">IDSMS</span>
+                    {openMenu === "idsms" ? <ChevronDown className="h-4 w-4 ml-auto" /> : <ChevronRight className="h-4 w-4 ml-auto" />}
+                  </SidebarMenuButton>
+                </CollapsibleTrigger>
+                <CollapsibleContent asChild>
+                  <SidebarMenuSub>
+                    {podeVerMenu("idsms_dashboard", menusSidebar) && (
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton 
+                          asChild 
+                          className={currentPath === "/idsms/dashboard" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
+                        >
+                          <Link to="/idsms/dashboard" className="flex items-center gap-2">
+                            <span className="text-xs leading-tight break-words min-w-0">Dashboard</span>
+                          </Link>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                    )}
+                    {podeVerMenu("idsms_relatorios", menusSidebar) && (
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton 
+                          asChild 
+                          className={currentPath === "/idsms/relatorios" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
+                        >
+                          <Link to="/idsms/relatorios" className="flex items-center gap-2">
+                            <span className="text-xs leading-tight break-words min-w-0">Relatórios</span>
+                          </Link>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                    )}
+                  </SidebarMenuSub>
+                </CollapsibleContent>
+              </Collapsible>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        )}
+
         {/* Render ADM MATRICIAL em ordem alfabética */}
         {["adm_dashboard", "adm_configuracoes", "adm_usuarios", "adm_perfis", "adm_empresas", "adm_ccas", "adm_engenheiros", "adm_supervisores", "adm_funcionarios", "adm_hht", "adm_metas_indicadores", "adm_modelos_inspecao", "adm_templates", "adm_logo"].some(menu => podeVerMenu(menu, menusSidebar)) && (
           <SidebarSectionADM openMenu={openMenu} toggleMenu={toggleMenu} />
@@ -121,7 +191,6 @@ export function AppSidebar() {
         {["admin_usuarios", "admin_perfis", "admin_empresas", "admin_ccas", "admin_engenheiros", "admin_supervisores", "admin_funcionarios", "admin_hht", "admin_metas_indicadores", "admin_templates", "admin_logo", "admin_modelos_inspecao"].some(menu => podeVerMenu(menu, menusSidebar)) && (
           <SidebarSectionAdministracao openMenu={openMenu} toggleMenu={toggleMenu} />
         )}
-
 
         {/* Seção de Conta - sempre visível para usuários autenticados */}
         <SidebarMenu>
