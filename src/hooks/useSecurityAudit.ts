@@ -1,73 +1,60 @@
 
-import { useQuery } from "@tanstack/react-query";
-import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
+import { useCallback } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 
-interface SecurityAuditLog {
-  id: string;
-  user_id: string;
+interface AuditLogEntry {
   action: string;
-  table_name: string;
-  timestamp: string;
-  ip_address?: string;
-  user_agent?: string;
+  table_name?: string;
+  record_id?: string;
+  details?: Record<string, any>;
 }
 
-/**
- * Hook for security auditing and monitoring
- */
 export const useSecurityAudit = () => {
-  const { user } = useAuth();
-
-  // Log security-relevant actions
-  const logSecurityAction = async (action: string, tableName: string, details?: object) => {
-    if (!user?.id) return;
-
+  const logSecurityEvent = useCallback(async (entry: AuditLogEntry) => {
     try {
-      // Log to a security audit table (would need to be created)
-      console.log('Security Action:', {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) return;
+
+      await supabase.from('audit_logs').insert({
         user_id: user.id,
-        action,
-        table_name: tableName,
-        details,
-        timestamp: new Date().toISOString(),
-        user_agent: navigator.userAgent
+        action: entry.action,
+        table_name: entry.table_name,
+        record_id: entry.record_id,
+        details: entry.details,
+        timestamp: new Date().toISOString()
       });
-
-      // In a production environment, you would save this to an audit log table
-      // await supabase.from('security_audit_logs').insert({...})
     } catch (error) {
-      console.error('Failed to log security action:', error);
+      console.error('Failed to log security event:', error);
     }
-  };
+  }, []);
 
-  // Monitor failed authentication attempts
-  const monitorAuthFailures = () => {
-    // This would integrate with Supabase Auth webhooks in production
-    console.log('Monitoring authentication events...');
-  };
+  const logDataAccess = useCallback(async (tableName: string, recordId?: string) => {
+    await logSecurityEvent({
+      action: 'data_access',
+      table_name: tableName,
+      record_id: recordId
+    });
+  }, [logSecurityEvent]);
 
-  // Check for suspicious activity patterns
-  const { data: suspiciousActivity } = useQuery({
-    queryKey: ['security-audit', user?.id],
-    queryFn: async () => {
-      if (!user?.id) return null;
+  const logDataModification = useCallback(async (tableName: string, recordId: string, action: 'create' | 'update' | 'delete') => {
+    await logSecurityEvent({
+      action: `data_${action}`,
+      table_name: tableName,
+      record_id: recordId
+    });
+  }, [logSecurityEvent]);
 
-      // In production, this would query actual audit logs
-      // For now, return mock data to demonstrate the concept
-      return {
-        recentFailedLogins: 0,
-        unusualAccessPatterns: false,
-        lastSecurityCheck: new Date().toISOString()
-      };
-    },
-    enabled: !!user?.id,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-  });
+  const logAuthEvent = useCallback(async (action: 'login' | 'logout' | 'failed_login') => {
+    await logSecurityEvent({
+      action: `auth_${action}`
+    });
+  }, [logSecurityEvent]);
 
   return {
-    logSecurityAction,
-    monitorAuthFailures,
-    suspiciousActivity
+    logSecurityEvent,
+    logDataAccess,
+    logDataModification,
+    logAuthEvent
   };
 };

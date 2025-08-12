@@ -1,73 +1,60 @@
 
-import { sanitizeHtml, escapeHtml } from "@/utils/sanitization";
+import React from 'react';
+import { sanitizeHtml } from '@/utils/sanitization';
 
 interface SecurePrintComponentProps {
   content: string;
   title?: string;
-  styles?: string;
-  isHtml?: boolean;
+  className?: string;
 }
 
-/**
- * Secure component for printing content that prevents XSS attacks
- */
-export const SecurePrintComponent = ({ 
+export const SecurePrintComponent: React.FC<SecurePrintComponentProps> = ({ 
   content, 
-  title = "Relatório", 
-  styles = "",
-  isHtml = false 
-}: SecurePrintComponentProps) => {
-  
+  title = 'Documento',
+  className = '' 
+}) => {
   const handlePrint = () => {
-    // Create a new window for printing
     const printWindow = window.open('', '_blank');
-    if (!printWindow) {
-      console.error('Failed to open print window');
-      return;
-    }
+    if (!printWindow) return;
 
-    // Sanitize content based on type
-    const safeContent = isHtml ? sanitizeHtml(content) : escapeHtml(content);
-    const safeTitle = escapeHtml(title);
-    const safeStyles = sanitizeHtml(styles);
+    // Sanitize content before printing
+    const sanitizedContent = sanitizeHtml(content);
+    const sanitizedTitle = title.replace(/[<>]/g, ''); // Remove potential HTML tags from title
 
-    // Use safe document writing method
-    const htmlContent = `
+    const printContent = `
       <!DOCTYPE html>
       <html>
         <head>
-          <title>${safeTitle}</title>
-          <meta charset="utf-8">
+          <title>${sanitizedTitle}</title>
           <style>
             body { font-family: Arial, sans-serif; margin: 20px; }
-            .header { border-bottom: 2px solid #333; margin-bottom: 20px; }
-            .content { line-height: 1.6; }
-            ${safeStyles}
+            .print-content { max-width: 800px; margin: 0 auto; }
+            @media print { 
+              body { margin: 0; }
+              .no-print { display: none; }
+            }
           </style>
         </head>
         <body>
-          <div class="header">
-            <h1>${safeTitle}</h1>
-            <p>Gerado em: ${new Date().toLocaleString('pt-BR')}</p>
-          </div>
-          <div class="content">
-            ${safeContent}
+          <div class="print-content">
+            ${sanitizedContent}
           </div>
         </body>
       </html>
     `;
 
-    // Write content safely
-    printWindow.document.open();
-    printWindow.document.write(htmlContent);
+    printWindow.document.write(printContent);
     printWindow.document.close();
-
-    // Print and cleanup
-    printWindow.onload = () => {
-      printWindow.print();
-      printWindow.close();
-    };
+    printWindow.print();
+    printWindow.close();
   };
 
-  return { handlePrint };
+  return (
+    <button 
+      onClick={handlePrint}
+      className={`bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition-colors ${className}`}
+    >
+      Imprimir
+    </button>
+  );
 };

@@ -1,71 +1,40 @@
-/**
- * Security utility functions for content sanitization
- */
+
+import DOMPurify from 'dompurify';
 
 /**
  * Sanitizes HTML content to prevent XSS attacks
- * Removes dangerous tags and attributes while preserving safe formatting
  */
-export function sanitizeHtml(html: string): string {
-  // Remove script tags and their content
-  const withoutScripts = html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
-  
-  // Remove dangerous attributes
-  const withoutDangerousAttrs = withoutScripts.replace(
-    /\s(on\w+|javascript:|data:)[\s]*=[\s]*["'][^"']*["']/gi, 
-    ''
-  );
-  
-  // Remove dangerous tags but keep content
-  const withoutDangerousTags = withoutDangerousAttrs.replace(
-    /<(iframe|object|embed|form|input|script|style|link|meta)[^>]*>/gi,
-    ''
-  );
-  
-  return withoutDangerousTags;
-}
+export const sanitizeHtml = (html: string): string => {
+  return DOMPurify.sanitize(html, {
+    ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'a', 'p', 'br', 'ul', 'ol', 'li', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'],
+    ALLOWED_ATTR: ['href', 'target', 'rel']
+  });
+};
 
 /**
- * Escapes special characters for safe display in HTML
+ * Sanitizes text content by escaping HTML entities
  */
-export function escapeHtml(unsafe: string): string {
-  return unsafe
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-}
+export const sanitizeText = (text: string): string => {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+};
+
+/**
+ * Creates a safe HTML element with sanitized content
+ */
+export const createSafeElement = (tagName: string, content: string, className?: string): HTMLElement => {
+  const element = document.createElement(tagName);
+  element.textContent = content; // Use textContent instead of innerHTML
+  if (className) {
+    element.className = className;
+  }
+  return element;
+};
 
 /**
  * Safely sets innerHTML with sanitization
  */
-export function setSafeInnerHTML(element: HTMLElement, html: string): void {
-  const sanitized = sanitizeHtml(html);
-  element.innerHTML = sanitized;
-}
-
-/**
- * Creates a safe text node (no HTML parsing)
- */
-export function createSafeTextNode(content: string): Text {
-  return document.createTextNode(content);
-}
-
-/**
- * Validates and sanitizes URL to prevent javascript: and data: schemes
- */
-export function sanitizeUrl(url: string): string {
-  // Remove dangerous protocols
-  if (url.match(/^(javascript:|data:|vbscript:)/i)) {
-    return '#';
-  }
-  
-  // Allow relative URLs, http, https, mailto, tel
-  if (url.match(/^(https?:|mailto:|tel:|\/|#)/i)) {
-    return url;
-  }
-  
-  // Default to safe URL for unknown protocols
-  return '#';
-}
+export const setSafeInnerHTML = (element: HTMLElement, html: string): void => {
+  element.innerHTML = sanitizeHtml(html);
+};
