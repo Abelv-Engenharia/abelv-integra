@@ -41,7 +41,7 @@ export const fetchTreinamentosStats = async (userCCAIds: number[] = [], filters?
       treinamentosNormativosResult
     ] = await Promise.all([
       // Contagem de execuções de treinamento
-      (() => {
+      (async () => {
         let query = supabase
           .from('execucao_treinamentos')
           .select('*', { count: 'exact', head: true })
@@ -52,11 +52,11 @@ export const fetchTreinamentosStats = async (userCCAIds: number[] = [], filters?
           query = query.eq('mes', targetMonth);
         }
         
-        return query;
+        return await query;
       })(),
 
       // Total de HHT
-      (() => {
+      (async () => {
         let query = supabase
           .from('horas_trabalhadas')
           .select('horas_trabalhadas')
@@ -67,11 +67,11 @@ export const fetchTreinamentosStats = async (userCCAIds: number[] = [], filters?
           query = query.eq('mes', targetMonth);
         }
         
-        return query;
+        return await query;
       })(),
 
       // Total de horas de treinamento
-      (() => {
+      (async () => {
         let query = supabase
           .from('execucao_treinamentos')
           .select('horas_totais')
@@ -82,7 +82,7 @@ export const fetchTreinamentosStats = async (userCCAIds: number[] = [], filters?
           query = query.eq('mes', targetMonth);
         }
         
-        return query;
+        return await query;
       })(),
 
       // Funcionários dos CCAs permitidos
