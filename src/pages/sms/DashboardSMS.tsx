@@ -1,5 +1,5 @@
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { TrendingUp, CheckCircle2, Gauge, Clock, AlertTriangle, BarChart3 } from "lucide-react";
 import {
   ResponsiveContainer,
@@ -12,6 +12,10 @@ import {
 } from "recharts";
 import { usePiramideOcorrencias } from "@/hooks/usePiramideOcorrencias";
 import { useIDSMSDashboard } from "@/hooks/useIDSMSDashboard";
+import { fetchDashboardStats } from "@/services/desvios/dashboardStatsService";
+import { fetchHSAPercentage } from "@/services/dashboard/hsaStatsService";
+import { fetchTreinamentoInvestmentPercentage } from "@/services/dashboard/treinamentoStatsService";
+import { useUserCCAs } from "@/hooks/useUserCCAs";
 
 // Simple stat card component (uses design tokens)
 function StatCard({
@@ -57,6 +61,13 @@ const freqData = [
 export default function DashboardSMS() {
   const { counts, loading: loadingPiramide } = usePiramideOcorrencias();
   const { data: idsmsData = [], isLoading: loadingIDSMS } = useIDSMSDashboard();
+  const { data: userCCAs = [] } = useUserCCAs();
+  
+  // Estados para dados dos indicadores
+  const [desviosStats, setDesviosStats] = useState<any>(null);
+  const [hsaPercentage, setHsaPercentage] = useState<number | null>(null);
+  const [treinamentoData, setTreinamentoData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
   // Calcular IDSMS médio e status geral
   const idsmsMedia = idsmsData.length > 0 
@@ -70,6 +81,34 @@ export default function DashboardSMS() {
   };
 
   const statusGeral = getStatusLabel(idsmsMedia);
+
+  // Carregar dados dos indicadores
+  useEffect(() => {
+    const loadIndicadores = async () => {
+      try {
+        setLoading(true);
+        const ccaIds = userCCAs.length > 0 ? userCCAs.map(cca => cca.id) : undefined;
+
+        const [desviosData, hsaData, treinamentoPercentage] = await Promise.all([
+          fetchDashboardStats(),
+          fetchHSAPercentage(ccaIds),
+          fetchTreinamentoInvestmentPercentage(ccaIds)
+        ]);
+
+        setDesviosStats(desviosData);
+        setHsaPercentage(hsaData);
+        setTreinamentoData({ percentual: treinamentoPercentage });
+      } catch (error) {
+        console.error('Erro ao carregar indicadores:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (userCCAs.length >= 0) {
+      loadIndicadores();
+    }
+  }, [userCCAs]);
 
   useEffect(() => {
     document.title = "Dashboard SMS | Gestão de SMS";
@@ -135,10 +174,30 @@ export default function DashboardSMS() {
           <article className="space-y-3">
             <h3 className="text-base font-medium">Identificação de Desvios</h3>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-              <StatCard title="Total de Desvios" value={55} subtitle="1% Todos os desvios registrados" icon={AlertTriangle} />
-              <StatCard title="Ações Concluídas" value="51 (93%)" subtitle="Ações finalizadas" icon={CheckCircle2} />
-              <StatCard title="Ações em Andamento" value="4 (7%)" subtitle="Ações sendo executadas" icon={Clock} />
-              <StatCard title="Ações Pendentes" value="0 (0%)" subtitle="Ações ainda não iniciadas" icon={AlertTriangle} />
+              <StatCard 
+                title="Total de Desvios" 
+                value={loading ? "..." : desviosStats?.totalDesvios || 0} 
+                subtitle="Todos os desvios registrados" 
+                icon={AlertTriangle} 
+              />
+              <StatCard 
+                title="Ações Concluídas" 
+                value={loading ? "..." : `${desviosStats?.acoesCompletas || 0} (${desviosStats?.percentualCompletas || 0}%)`} 
+                subtitle="Ações finalizadas" 
+                icon={CheckCircle2} 
+              />
+              <StatCard 
+                title="Ações em Andamento" 
+                value={loading ? "..." : `${desviosStats?.acoesAndamento || 0} (${desviosStats?.percentualAndamento || 0}%)`} 
+                subtitle="Ações sendo executadas" 
+                icon={Clock} 
+              />
+              <StatCard 
+                title="Ações Pendentes" 
+                value={loading ? "..." : `${desviosStats?.acoesPendentes || 0} (${desviosStats?.percentualPendentes || 0}%)`} 
+                subtitle="Ações ainda não iniciadas" 
+                icon={AlertTriangle} 
+              />
             </div>
           </article>
 
@@ -146,7 +205,12 @@ export default function DashboardSMS() {
           <article className="space-y-3">
             <h3 className="text-base font-medium">Horas Investidas em Treinamentos</h3>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-              <StatCard title="Percentual investido" value="0,13%" subtitle="Do total de horas trabalhadas (HHT)" icon={TrendingUp} />
+              <StatCard 
+                title="Percentual investido" 
+                value={loading ? "..." : `${treinamentoData?.percentual?.toFixed(2) || 0}%`} 
+                subtitle="Do total de horas trabalhadas (HHT)" 
+                icon={TrendingUp} 
+              />
               <StatCard title="Horas Trabalhadas (HHT)" value="564.090,36" subtitle="no período selecionado" icon={Clock} />
               <StatCard title="Meta de Horas (2,5% HHT)" value="14.102" subtitle="Meta no trimestre" icon={Gauge} />
               <StatCard title="Horas Totais de Treinamentos" value={718} subtitle="Realizadas no período" icon={CheckCircle2} />
@@ -157,8 +221,18 @@ export default function DashboardSMS() {
           <article className="space-y-3">
             <h3 className="text-base font-medium">Execução Hora da Segurança</h3>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-6">
-              <StatCard title="Adesão HSA (real)" value="36,44%" subtitle="Realizadas vs Programadas" icon={TrendingUp} />
-              <StatCard title="Adesão HSA (ajustada)" value="36,97%" subtitle="Incluindo não programadas" icon={TrendingUp} />
+              <StatCard 
+                title="Adesão HSA (real)" 
+                value="36,44%" 
+                subtitle="Realizadas vs Programadas" 
+                icon={TrendingUp} 
+              />
+              <StatCard 
+                title="Adesão HSA (ajustada)" 
+                value={loading ? "..." : `${hsaPercentage?.toFixed(2) || 0}%`} 
+                subtitle="Incluindo não programadas" 
+                icon={TrendingUp} 
+              />
               <StatCard title="Inspeções Programadas" value={118} subtitle="A realizar + Replanejadas + Não realizadas" icon={Clock} />
               <StatCard title="Inspeções Realizadas" value={43} subtitle="Inspeções concluídas" icon={CheckCircle2} />
               <StatCard title="Não Programadas" value={1} subtitle="Inspeções não programadas" icon={BarChart3} />
@@ -175,9 +249,9 @@ export default function DashboardSMS() {
           <article className="space-y-3">
             <h3 className="text-base font-medium">Ocorrências</h3>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-              <StatCard title="Ocorrências com perda de dias" value={2} />
-              <StatCard title="Ocorrências sem perda de dias" value={1} />
-              <StatCard title="Incidentes" value={3} />
+              <StatCard title="Ocorrências com perda de dias" value={counts.cpd} />
+              <StatCard title="Ocorrências sem perda de dias" value={counts.spd} />
+              <StatCard title="Incidentes" value={counts.incidente} />
               <StatCard title="Desvios de Alto Potencial" value={0} />
               <StatCard title="Dias Perdidos" value={32} />
               <StatCard title="Dias Debitados" value={0} />
