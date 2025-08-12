@@ -1,5 +1,8 @@
 
 import { supabase } from '@/integrations/supabase/client';
+import type { Database } from '@/integrations/supabase/types';
+
+type DbDesvioCompleto = Database['public']['Tables']['desvios_completos']['Row'];
 
 export interface DesvioCompleto {
   id?: string;
@@ -38,8 +41,25 @@ export interface DesvioCompleto {
   updated_at?: string;
 }
 
+// Helper function to convert database types to our interface
+const convertDbToDesvio = (dbDesvio: any): DesvioCompleto => {
+  return {
+    ...dbDesvio,
+    funcionarios_envolvidos: Array.isArray(dbDesvio.funcionarios_envolvidos) 
+      ? dbDesvio.funcionarios_envolvidos 
+      : dbDesvio.funcionarios_envolvidos 
+        ? [dbDesvio.funcionarios_envolvidos] 
+        : [],
+    acoes: Array.isArray(dbDesvio.acoes) 
+      ? dbDesvio.acoes 
+      : dbDesvio.acoes 
+        ? [dbDesvio.acoes] 
+        : [],
+  };
+};
+
 export const desviosCompletosService = {
-  async getAll() {
+  async getAll(): Promise<DesvioCompleto[]> {
     const { data, error } = await supabase
       .from('desvios_completos')
       .select(`
@@ -54,10 +74,10 @@ export const desviosCompletosService = {
       .order('created_at', { ascending: false });
 
     if (error) throw error;
-    return data;
+    return (data || []).map(convertDbToDesvio);
   },
 
-  async getById(id: string) {
+  async getById(id: string): Promise<DesvioCompleto> {
     const { data, error } = await supabase
       .from('desvios_completos')
       .select(`
@@ -73,10 +93,10 @@ export const desviosCompletosService = {
       .single();
 
     if (error) throw error;
-    return data;
+    return convertDbToDesvio(data);
   },
 
-  async create(desvio: Omit<DesvioCompleto, 'id' | 'created_at' | 'updated_at'>) {
+  async create(desvio: Omit<DesvioCompleto, 'id' | 'created_at' | 'updated_at'>): Promise<DesvioCompleto> {
     const { data, error } = await supabase
       .from('desvios_completos')
       .insert(desvio)
@@ -84,10 +104,10 @@ export const desviosCompletosService = {
       .single();
 
     if (error) throw error;
-    return data;
+    return convertDbToDesvio(data);
   },
 
-  async update(id: string, updates: Partial<DesvioCompleto>) {
+  async update(id: string, updates: Partial<DesvioCompleto>): Promise<DesvioCompleto> {
     const { data, error } = await supabase
       .from('desvios_completos')
       .update(updates)
@@ -96,19 +116,28 @@ export const desviosCompletosService = {
       .single();
 
     if (error) throw error;
-    return data;
+    return convertDbToDesvio(data);
   },
 
-  async delete(id: string) {
-    const { error } = await supabase
-      .from('desvios_completos')
-      .delete()
-      .eq('id', id);
+  async delete(id: string): Promise<boolean> {
+    try {
+      const { error } = await supabase
+        .from('desvios_completos')
+        .delete()
+        .eq('id', id);
 
-    if (error) throw error;
+      if (error) {
+        console.error('Error deleting desvio:', error);
+        return false;
+      }
+      return true;
+    } catch (error) {
+      console.error('Exception deleting desvio:', error);
+      return false;
+    }
   },
 
-  async updateFuncionariosAndAcoes(id: string, funcionarios_envolvidos: any[], acoes: any[]) {
+  async updateFuncionariosAndAcoes(id: string, funcionarios_envolvidos: any[], acoes: any[]): Promise<DesvioCompleto> {
     const { data, error } = await supabase
       .from('desvios_completos')
       .update({
@@ -120,6 +149,6 @@ export const desviosCompletosService = {
       .single();
 
     if (error) throw error;
-    return data;
+    return convertDbToDesvio(data);
   }
 };
