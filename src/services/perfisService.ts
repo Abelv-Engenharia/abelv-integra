@@ -97,6 +97,9 @@ export function getAllMenusSidebar(): string[] {
     "relatorios_dashboard",
     "relatorios_idsms",
 
+    // SUPORTE menu
+    "suporte",
+
     // CONFIGURAÇÕES/ADMINISTRAÇÃO menus
     "admin_usuarios",
     "admin_perfis",

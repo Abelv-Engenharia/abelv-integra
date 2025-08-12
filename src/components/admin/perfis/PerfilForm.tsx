@@ -61,6 +61,7 @@ export const PerfilForm = ({ initialData, onCancel, onSave, loading }: PerfilFor
     ],
     "Tarefas": ["tarefas_dashboard", "tarefas_minhas_tarefas", "tarefas_cadastro"],
     "Relatórios": ["relatorios_dashboard", "relatorios_idsms"],
+    "Suporte": ["suporte"],
     "Configurações": [
       "admin_usuarios", "admin_perfis", "admin_empresas", "admin_ccas", "admin_engenheiros", "admin_supervisores", "admin_encarregados",
       "admin_funcionarios", "admin_registro_hht", "admin_metas_indicadores", "admin_modelos_inspecao", "admin_templates",
