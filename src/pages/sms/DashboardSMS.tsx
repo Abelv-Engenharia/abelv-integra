@@ -1,3 +1,4 @@
+
 import React, { useEffect } from "react";
 import { TrendingUp, CheckCircle2, Gauge, Clock, AlertTriangle, BarChart3 } from "lucide-react";
 import {
@@ -10,6 +11,7 @@ import {
   CartesianGrid,
 } from "recharts";
 import { usePiramideOcorrencias } from "@/hooks/usePiramideOcorrencias";
+import { useIDSMSDashboard } from "@/hooks/useIDSMSDashboard";
 
 // Simple stat card component (uses design tokens)
 function StatCard({
@@ -54,6 +56,21 @@ const freqData = [
 
 export default function DashboardSMS() {
   const { counts, loading: loadingPiramide } = usePiramideOcorrencias();
+  const { data: idsmsData = [], isLoading: loadingIDSMS } = useIDSMSDashboard();
+
+  // Calcular IDSMS médio e status geral
+  const idsmsMedia = idsmsData.length > 0 
+    ? idsmsData.reduce((sum, item) => sum + item.idsms_total, 0) / idsmsData.length 
+    : 0;
+
+  const getStatusLabel = (value: number) => {
+    if (value > 100) return 'Excelente';
+    if (value >= 95) return 'Bom';
+    return 'Atenção';
+  };
+
+  const statusGeral = getStatusLabel(idsmsMedia);
+
   useEffect(() => {
     document.title = "Dashboard SMS | Gestão de SMS";
     const desc =
@@ -93,8 +110,18 @@ export default function DashboardSMS() {
             </h2>
           </div>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <StatCard title="IDSMS Médio" value="95,1%" subtitle="média geral" icon={Gauge} />
-            <StatCard title="Status Geral" value="Bom" subtitle="baseado no IDSMS médio" icon={CheckCircle2} />
+            <StatCard 
+              title="IDSMS Médio" 
+              value={loadingIDSMS ? "..." : `${idsmsMedia.toFixed(1)}`} 
+              subtitle="média geral" 
+              icon={Gauge} 
+            />
+            <StatCard 
+              title="Status Geral" 
+              value={loadingIDSMS ? "..." : statusGeral} 
+              subtitle="baseado no IDSMS médio" 
+              icon={CheckCircle2} 
+            />
           </div>
         </section>
 
