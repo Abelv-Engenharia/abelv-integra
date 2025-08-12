@@ -16,14 +16,18 @@ export const useSecurityAudit = () => {
       
       if (!user) return;
 
-      await supabase.from('audit_logs').insert({
-        user_id: user.id,
-        action: entry.action,
-        table_name: entry.table_name,
-        record_id: entry.record_id,
-        details: entry.details,
-        timestamp: new Date().toISOString()
+      // Use direct SQL query since types might not be updated yet
+      const { error } = await supabase.rpc('log_audit_event', {
+        p_user_id: user.id,
+        p_action: entry.action,
+        p_table_name: entry.table_name,
+        p_record_id: entry.record_id,
+        p_details: entry.details || {}
       });
+
+      if (error) {
+        console.error('Failed to log security event:', error);
+      }
     } catch (error) {
       console.error('Failed to log security event:', error);
     }
