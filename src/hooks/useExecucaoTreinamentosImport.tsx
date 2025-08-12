@@ -144,10 +144,36 @@ export const useExecucaoTreinamentosImport = () => {
       const { error } = await supabase.from('execucao_treinamentos').insert(payload);
       if (error) throw error;
 
+      // Create log entry
+      await supabase.from('logs_importacao_execucao_treinamentos').insert({
+        total_registros: validationResults.valid.length + validationResults.invalid.length,
+        registros_criados: payload.length,
+        registros_atualizados: 0,
+        registros_com_erro: validationResults.invalid.length,
+        status: 'concluida',
+        usuario_id: (await supabase.auth.getUser()).data.user?.id,
+      });
+
       toast({ title: 'Importação concluída', description: `${payload.length} registros importados com sucesso.` });
       return { success: true } as const;
     } catch (e: any) {
       console.error('Erro ao importar execuções de treinamentos:', e);
+      
+      // Create error log entry
+      try {
+        await supabase.from('logs_importacao_execucao_treinamentos').insert({
+          total_registros: validationResults.valid.length + validationResults.invalid.length,
+          registros_criados: 0,
+          registros_atualizados: 0,
+          registros_com_erro: validationResults.valid.length + validationResults.invalid.length,
+          status: 'erro',
+          detalhes_erro: e.message,
+          usuario_id: (await supabase.auth.getUser()).data.user?.id,
+        });
+      } catch (logError) {
+        console.error('Erro ao criar log de erro:', logError);
+      }
+
       toast({ title: 'Erro na importação', description: e.message || 'Falha ao importar dados', variant: 'destructive' });
       return { success: false } as const;
     } finally {
