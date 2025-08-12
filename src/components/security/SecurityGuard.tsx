@@ -18,19 +18,18 @@ export const SecurityGuard: React.FC<SecurityGuardProps> = ({
   requiredSecurityLevel = "low",
   fallback
 }) => {
-  const { user, loading } = useAuth();
-  const { userPermissoes, loading: profileLoading } = useProfile();
+  const { user } = useAuth();
+  const { userPermissoes, loadingProfile } = useProfile();
 
   console.log("=== DEBUG SecurityGuard ===");
   console.log("SecurityGuard - user:", user);
-  console.log("SecurityGuard - loading:", loading);
-  console.log("SecurityGuard - profileLoading:", profileLoading);
+  console.log("SecurityGuard - loadingProfile:", loadingProfile);
   console.log("SecurityGuard - userPermissoes:", userPermissoes);
   console.log("SecurityGuard - requiredPermission:", requiredPermission);
   console.log("SecurityGuard - requiredSecurityLevel:", requiredSecurityLevel);
 
   // Mostrar loading enquanto carrega dados
-  if (loading || profileLoading) {
+  if (loadingProfile) {
     console.log("SecurityGuard - ainda carregando...");
     return (
       <div className="flex items-center justify-center p-8">
