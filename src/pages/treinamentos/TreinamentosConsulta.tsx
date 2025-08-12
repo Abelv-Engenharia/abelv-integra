@@ -349,10 +349,23 @@ const TreinamentosConsulta = () => {
     filterExecucoes();
   }, [searchTerm, filterMes, filterAno, execucoes]);
 
-  const formatDate = (date: string) => {
-    if (!date) return "";
-    const d = new Date(date);
-    return d.toLocaleDateString("pt-BR");
+  const formatDate = (dateString: string) => {
+    if (!dateString) return "";
+    
+    // Se a string já está no formato ISO (YYYY-MM-DD), usar diretamente
+    if (dateString.includes('-') && dateString.length === 10) {
+      const [ano, mes, dia] = dateString.split('-');
+      return `${dia}/${mes}/${ano}`;
+    }
+    
+    // Para outras situações, tentar criar a data de forma segura
+    try {
+      const date = new Date(dateString + 'T00:00:00'); // Força horário local
+      return date.toLocaleDateString("pt-BR");
+    } catch (error) {
+      console.error("Erro ao formatar data:", error);
+      return dateString; // Retorna a string original se houver erro
+    }
   };
 
   const handleView = (execucao: any) => {
