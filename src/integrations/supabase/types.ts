@@ -2541,6 +2541,16 @@ export type Database = {
         Args: { user_id_param: string }
         Returns: Json
       }
+      log_audit_event: {
+        Args: {
+          p_user_id: string
+          p_action: string
+          p_table_name?: string
+          p_record_id?: string
+          p_details?: Json
+        }
+        Returns: undefined
+      }
       populate_missing_profiles: {
         Args: Record<PropertyKey, never>
         Returns: undefined
