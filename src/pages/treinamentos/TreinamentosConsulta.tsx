@@ -11,6 +11,7 @@ import { listaTreinamentosNormativosService } from "@/services/treinamentos/list
 import { fetchFuncionarios } from "@/utils/treinamentosUtils";
 import { useNavigate } from "react-router-dom";
 import ConfirmacaoExclusaoModal from "@/components/treinamentos/ConfirmacaoExclusaoModal";
+import { ExclusaoTreinamentoNormativoModal } from "@/components/treinamentos/ExclusaoTreinamentoNormativoModal";
 import { toast } from "@/hooks/use-toast";
 import { Tabs as ShadTabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ccaService } from "@/services/treinamentos/ccaService";
@@ -35,6 +36,10 @@ function TreinamentosNormativosPorFuncionarioTab() {
   const { data: userCCAs = [] } = useUserCCAs();
 
   const sortedCCAs = [...userCCAs].sort((a, b) => a.codigo.localeCompare(b.codigo, undefined, { numeric: true }));
+
+  // Novos estados para controle de exclusão
+  const [modalExclusaoAberto, setModalExclusaoAberto] = useState(false);
+  const [treinamentoParaExcluir, setTreinamentoParaExcluir] = useState<{id: string, nome: string} | null>(null);
 
   useEffect(() => {
     const carregarFuncionarios = async () => {
@@ -196,6 +201,54 @@ function TreinamentosNormativosPorFuncionarioTab() {
     buscarTreinamentosNormativosFuncionario();
   }, [selectedFuncionarioId]);
 
+  const handleExcluirTreinamento = (id: string) => {
+    const treinamento = treinamentosAtual.find(t => t.id === id);
+    if (treinamento) {
+      setTreinamentoParaExcluir({
+        id: treinamento.id,
+        nome: treinamento.treinamento_nome
+      });
+      setModalExclusaoAberto(true);
+    }
+  };
+
+  const confirmarExclusaoTreinamento = async () => {
+    if (!treinamentoParaExcluir) return;
+    
+    try {
+      const { error } = await supabase
+        .from('treinamentos_normativos')
+        .update({ arquivado: true })
+        .eq('id', treinamentoParaExcluir.id);
+
+      if (error) {
+        toast({
+          title: "Erro",
+          description: "Erro ao excluir treinamento normativo",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      toast({
+        title: "Sucesso",
+        description: "Treinamento normativo excluído com sucesso",
+      });
+
+      // Recarregar os treinamentos
+      setTreinamentosAtual(prev => prev.filter(t => t.id !== treinamentoParaExcluir.id));
+      setModalExclusaoAberto(false);
+      setTreinamentoParaExcluir(null);
+
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Erro ao excluir treinamento normativo",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -265,7 +318,10 @@ function TreinamentosNormativosPorFuncionarioTab() {
                     </div>
                   </div>
                 ) : (
-                  <TabelaTreinamentosNormativos treinamentos={treinamentosAtual} />
+                  <TabelaTreinamentosNormativos 
+                    treinamentos={treinamentosAtual} 
+                    onExcluir={handleExcluirTreinamento}
+                  />
                 )}
               </TabsContent>
               <TabsContent value="historico">
@@ -279,6 +335,13 @@ function TreinamentosNormativosPorFuncionarioTab() {
           </div>
         )}
       </CardContent>
+
+      <ExclusaoTreinamentoNormativoModal
+        open={modalExclusaoAberto}
+        onOpenChange={setModalExclusaoAberto}
+        onConfirm={confirmarExclusaoTreinamento}
+        treinamentoNome={treinamentoParaExcluir?.nome}
+      />
     </Card>
   );
 }

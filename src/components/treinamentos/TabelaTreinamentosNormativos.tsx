@@ -1,6 +1,8 @@
 
 import React from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Trash2 } from "lucide-react";
 import { getStatusColor } from "@/utils/treinamentosUtils";
 import { CertificadoLink } from "./CertificadoLink";
 
@@ -16,6 +18,7 @@ interface TreinamentoNormativo {
 
 interface Props {
   treinamentos: TreinamentoNormativo[];
+  onExcluir?: (id: string) => void;
 }
 
 // Função para formatar data sem problemas de fuso horário
@@ -25,7 +28,7 @@ const formatarData = (dateString: string) => {
   return `${dia}/${mes}/${ano}`;
 };
 
-export const TabelaTreinamentosNormativos: React.FC<Props> = ({ treinamentos }) => (
+export const TabelaTreinamentosNormativos: React.FC<Props> = ({ treinamentos, onExcluir }) => (
   <div className="rounded-md border">
     <Table>
       <TableHeader>
@@ -36,12 +39,13 @@ export const TabelaTreinamentosNormativos: React.FC<Props> = ({ treinamentos }) 
           <TableHead>Data Validade</TableHead>
           <TableHead>Status</TableHead>
           <TableHead className="text-center">Certificado</TableHead>
+          {onExcluir && <TableHead className="text-center">Ações</TableHead>}
         </TableRow>
       </TableHeader>
       <TableBody>
         {treinamentos.length === 0 ? (
           <TableRow>
-            <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+            <TableCell colSpan={onExcluir ? 7 : 6} className="text-center py-8 text-muted-foreground">
               Nenhum treinamento encontrado
             </TableCell>
           </TableRow>
@@ -80,6 +84,19 @@ export const TabelaTreinamentosNormativos: React.FC<Props> = ({ treinamentos }) 
               <TableCell className="text-center">
                 <CertificadoLink certificadoUrl={tr.certificado_url} />
               </TableCell>
+              {onExcluir && (
+                <TableCell className="text-center">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => onExcluir(tr.id)}
+                    title="Excluir treinamento"
+                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </TableCell>
+              )}
             </TableRow>
           ))
         )}
