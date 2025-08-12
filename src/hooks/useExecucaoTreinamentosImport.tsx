@@ -12,6 +12,7 @@ interface ValidatedExecucaoRow {
   cca: string;
   processo_treinamento: string;
   tipo_treinamento: string;
+  treinamento_nome?: string;
   carga_horaria: number;
   efetivo_mod: number;
   efetivo_moi: number;
@@ -99,6 +100,7 @@ export const useExecucaoTreinamentosImport = () => {
           cca: `${cca!.codigo} - ${cca!.nome}`,
           processo_treinamento: processo,
           tipo_treinamento: tipo,
+          treinamento_nome: (r.treinamento_nome ? r.treinamento_nome.trim() : undefined),
           carga_horaria: carga,
           efetivo_mod: efetMod,
           efetivo_moi: efetMoi,
@@ -135,6 +137,7 @@ export const useExecucaoTreinamentosImport = () => {
         cca: v.cca,
         processo_treinamento: v.processo_treinamento,
         tipo_treinamento: v.tipo_treinamento,
+        treinamento_nome: v.treinamento_nome,
         carga_horaria: v.carga_horaria,
         efetivo_mod: v.efetivo_mod,
         efetivo_moi: v.efetivo_moi,

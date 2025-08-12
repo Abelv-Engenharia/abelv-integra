@@ -4,6 +4,7 @@ export interface ExecucaoTreinamentoImportData {
   cca_codigo?: string;
   processo_treinamento?: string;
   tipo_treinamento?: string;
+  treinamento_nome?: string;
   carga_horaria?: number | string;
   efetivo_mod?: number | string;
   efetivo_moi?: number | string;

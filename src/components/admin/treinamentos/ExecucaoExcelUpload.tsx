@@ -55,7 +55,7 @@ export const ExecucaoExcelUpload = ({ onFileProcessed, isProcessing }: ExcelUplo
         const item: ExecucaoTreinamentoImportData = {};
         // Colunas esperadas:
         // 0: data, 1: cca_codigo, 2: processo_treinamento, 3: tipo_treinamento,
-        // 4: carga_horaria, 5: efetivo_mod, 6: efetivo_moi, 7: observacoes
+        // 4: treinamento_nome, 5: carga_horaria, 6: efetivo_mod, 7: efetivo_moi, 8: observacoes
         if (row[0]) {
           if (typeof row[0] === 'number') item.data = parseExcelDate(row[0]);
           else if (typeof row[0] === 'string') item.data = row[0].trim();
@@ -63,10 +63,11 @@ export const ExecucaoExcelUpload = ({ onFileProcessed, isProcessing }: ExcelUplo
         item.cca_codigo = row[1] ? String(row[1]).trim() : '';
         item.processo_treinamento = row[2] ? String(row[2]).trim() : '';
         item.tipo_treinamento = row[3] ? String(row[3]).trim() : '';
-        item.carga_horaria = row[4] ?? '';
-        item.efetivo_mod = row[5] ?? 0;
-        item.efetivo_moi = row[6] ?? 0;
-        item.observacoes = row[7] ? String(row[7]).trim() : '';
+        item.treinamento_nome = row[4] ? String(row[4]).trim() : '';
+        item.carga_horaria = row[5] ?? '';
+        item.efetivo_mod = row[6] ?? 0;
+        item.efetivo_moi = row[7] ?? 0;
+        item.observacoes = row[8] ? String(row[8]).trim() : '';
         return item;
       });
 

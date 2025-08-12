@@ -34,6 +34,7 @@ const ImportacaoExecucaoTreinamentos = () => {
         'CCA Código': '010',
         'Processo de Treinamento': 'Treinamento de Segurança',
         'Tipo de Treinamento': 'Formação',
+        'Treinamento Nome': 'Integração NR-12',
         'Carga Horária': 8,
         'Efetivo MOD': 15,
         'Efetivo MOI': 3,
@@ -44,6 +45,7 @@ const ImportacaoExecucaoTreinamentos = () => {
         'CCA Código': '020',
         'Processo de Treinamento': 'Capacitação Técnica',
         'Tipo de Treinamento': 'Reciclagem',
+        'Treinamento Nome': 'Brigada de Incêndio',
         'Carga Horária': 4,
         'Efetivo MOD': 10,
         'Efetivo MOI': 2,
@@ -60,6 +62,7 @@ const ImportacaoExecucaoTreinamentos = () => {
       { wch: 12 }, // CCA Código
       { wch: 30 }, // Processo de Treinamento
       { wch: 20 }, // Tipo de Treinamento
+      { wch: 30 }, // Treinamento Nome
       { wch: 15 }, // Carga Horária
       { wch: 15 }, // Efetivo MOD
       { wch: 15 }, // Efetivo MOI
@@ -208,6 +211,7 @@ const ImportacaoExecucaoTreinamentos = () => {
                     <li>CCA Código (ex.: 010, 020)</li>
                     <li>Processo de Treinamento</li>
                     <li>Tipo de Treinamento</li>
+                    <li>Treinamento Nome (opcional)</li>
                     <li>Carga Horária (número)</li>
                     <li>Efetivo MOD (opcional, número)</li>
                     <li>Efetivo MOI (opcional, número)</li>
