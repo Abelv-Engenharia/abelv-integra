@@ -27,7 +27,7 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen p-6">
-      <div className="flex justify-between items-start">
+      <div className="flex justify-between items-start mb-8">
         <div>
           <h1 className="text-2xl font-semibold text-foreground">
             Seja bem-vindo, Luis Ribeiro
@@ -38,6 +38,14 @@ const Dashboard = () => {
             {formatDateTime(currentDateTime)}
           </p>
         </div>
+      </div>
+      
+      <div className="flex justify-center items-center flex-1">
+        <img 
+          src="/lovable-uploads/15c114e2-30c1-4767-9fe8-4ee84cc11daf.png" 
+          alt="Hora da Segurança - Abelv Engenharia" 
+          className="max-w-full h-auto"
+        />
       </div>
     </div>
   );
