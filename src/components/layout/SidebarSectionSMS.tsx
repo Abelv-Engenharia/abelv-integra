@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Activity, FileText, Shield, AlertTriangle, GraduationCap, Clock, TrendingUp, BarChart3 } from "lucide-react";
 import {
@@ -29,6 +30,10 @@ export default function SidebarSectionSMS({ openMenu, toggleMenu }: SidebarSecti
   const currentPath = location.pathname;
   const { userPermissoes, userRole } = useProfile();
 
+  // Debug logs
+  console.log("SidebarSectionSMS - userRole:", userRole);
+  console.log("SidebarSectionSMS - userPermissoes:", userPermissoes);
+
   // Garantir fallback para admins
   const isAdmin =
     (userRole && typeof userRole === "string" && userRole.toLowerCase().startsWith("admin")) ||
@@ -48,9 +53,12 @@ export default function SidebarSectionSMS({ openMenu, toggleMenu }: SidebarSecti
         : []
       );
 
+  console.log("SidebarSectionSMS - isAdmin:", isAdmin);
+  console.log("SidebarSectionSMS - menusSidebar:", menusSidebar);
+
   return (
     <>
-      {/* Seção IDSMS - Removendo verificação temporariamente */}
+      {/* Seção IDSMS - Sempre mostrar para debug */}
       <SidebarMenu>
         <SidebarMenuItem>
           <Collapsible open={openMenu === "idsms"}>
