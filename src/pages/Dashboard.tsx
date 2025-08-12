@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -40,7 +39,7 @@ const Dashboard = () => {
         </div>
       </div>
       
-      <div className="flex justify-center items-center flex-1 mt-16">
+      <div className="flex justify-center items-center flex-1 mt-32">
         <img 
           src="/lovable-uploads/15c114e2-30c1-4767-9fe8-4ee84cc11daf.png" 
           alt="Hora da Segurança - Abelv Engenharia" 
