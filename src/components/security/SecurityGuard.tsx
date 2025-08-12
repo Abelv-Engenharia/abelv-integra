@@ -51,7 +51,7 @@ export const SecurityGuard = ({
   }
 
   // Check permission if required
-  if (requiredPermission && !validation.validation.isValid) {
+  if (requiredPermission && !validation.isValid) {
     if (!showFallback) return null;
     
     return (
@@ -71,7 +71,7 @@ export const SecurityGuard = ({
 
   // Check security level
   const securityLevels = { low: 0, medium: 1, high: 2 };
-  const userLevel = securityLevels[validation.validation.securityLevel];
+  const userLevel = securityLevels[validation.securityLevel];
   const requiredLevel = securityLevels[requiredSecurityLevel];
 
   if (userLevel < requiredLevel) {

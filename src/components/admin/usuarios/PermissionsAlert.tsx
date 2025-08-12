@@ -13,14 +13,14 @@ interface PermissionsAlertProps {
 export const PermissionsAlert = ({ canManageUsers, permissions }: PermissionsAlertProps) => {
   const { validation } = useSecurityValidation();
 
-  if (canManageUsers && validation.validation.hasAdminAccess) {
+  if (canManageUsers && validation.hasAdminAccess) {
     return (
       <Alert>
         <Shield className="h-4 w-4" />
         <AlertDescription className="flex items-center justify-between">
           <span>Você tem permissões de administrador para gerenciar usuários.</span>
           <Badge variant="default" className="bg-green-500">
-            Nível: {validation.validation.securityLevel.toUpperCase()}
+            Nível: {validation.securityLevel.toUpperCase()}
           </Badge>
         </AlertDescription>
       </Alert>
@@ -34,7 +34,7 @@ export const PermissionsAlert = ({ canManageUsers, permissions }: PermissionsAle
         <AlertDescription className="flex items-center justify-between">
           <span>Você tem permissões para gerenciar usuários.</span>
           <Badge variant="secondary">
-            Nível: {validation.validation.securityLevel.toUpperCase()}
+            Nível: {validation.securityLevel.toUpperCase()}
           </Badge>
         </AlertDescription>
       </Alert>
@@ -49,7 +49,7 @@ export const PermissionsAlert = ({ canManageUsers, permissions }: PermissionsAle
           <div className="space-y-2">
             <p>Você não tem permissão para gerenciar usuários. Entre em contato com o administrador do sistema para obter as permissões necessárias.</p>
             <Badge variant="outline" className="text-destructive">
-              Nível Atual: {validation.validation.securityLevel.toUpperCase()}
+              Nível Atual: {validation.securityLevel.toUpperCase()}
             </Badge>
           </div>
         </AlertDescription>
