@@ -1,3 +1,4 @@
+
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { User, UserFormValues, Permissoes } from "@/types/users";
@@ -12,20 +13,14 @@ export const useUsuarios = () => {
   const { user } = useAuth();
   const createUserHook = useCreateUser();
 
-  console.log("=== DEBUG useUsuarios ===");
-  console.log("Current user:", user);
-
   // Verificar permissões do usuário atual
   const { data: userPermissions } = useQuery({
     queryKey: ['user-permissions', user?.id],
     queryFn: async () => {
-      if (!user?.id) {
-        console.log("DEBUG: Sem user.id");
-        return null;
-      }
+      if (!user?.id) return null;
       
       try {
-        console.log("DEBUG: Buscando permissões para usuário:", user.id);
+        console.log("Buscando permissões para usuário:", user.id);
         
         // Buscar o perfil do usuário e suas permissões
         const { data: userPerfil, error: userPerfilError } = await supabase
@@ -33,42 +28,29 @@ export const useUsuarios = () => {
           .select(`
             perfil_id,
             perfis!inner (
-              nome,
               permissoes
             )
           `)
           .eq('usuario_id', user.id)
           .single();
 
-        console.log("DEBUG: Query usuario_perfis resultado:", { userPerfil, userPerfilError });
-
         if (userPerfilError) {
-          console.error("DEBUG: Erro ao buscar perfil do usuário:", userPerfilError);
-          return null;
-        }
-
-        if (!userPerfil?.perfis?.permissoes) {
-          console.warn("DEBUG: Perfil encontrado mas sem permissões:", userPerfil);
+          console.error("Erro ao buscar permissões:", userPerfilError);
           return null;
         }
 
         // Conversão segura de tipos com validação
-        const rawPermissoes = userPerfil.perfis.permissoes;
-        console.log("DEBUG: Raw permissões:", rawPermissoes);
-        console.log("DEBUG: Tipo das permissões:", typeof rawPermissoes);
-        console.log("DEBUG: É array:", Array.isArray(rawPermissoes));
-
+        const rawPermissoes = userPerfil?.perfis?.permissoes;
         if (rawPermissoes && typeof rawPermissoes === 'object' && !Array.isArray(rawPermissoes)) {
           const permissoes = rawPermissoes as unknown as Permissoes;
-          console.log("DEBUG: Permissões convertidas:", permissoes);
-          console.log("DEBUG: admin_usuarios valor:", permissoes.admin_usuarios);
+          console.log("Permissões encontradas:", permissoes);
           return permissoes;
         }
 
-        console.warn("DEBUG: Permissões não encontradas ou inválidas:", rawPermissoes);
+        console.warn("Permissões não encontradas ou inválidas");
         return null;
       } catch (error) {
-        console.error("DEBUG: Erro ao verificar permissões:", error);
+        console.error("Erro ao verificar permissões:", error);
         return null;
       }
     },
@@ -77,11 +59,8 @@ export const useUsuarios = () => {
     retry: 1
   });
 
-  console.log("DEBUG: userPermissions final:", userPermissions);
-
   // Verificar se o usuário pode administrar usuários
   const canManageUsers = userPermissions?.admin_usuarios === true;
-  console.log("DEBUG: canManageUsers calculado:", canManageUsers);
 
   // Buscar usuários - simplificado e corrigido
   const { 
@@ -92,15 +71,13 @@ export const useUsuarios = () => {
   } = useQuery({
     queryKey: ['admin-usuarios'],
     queryFn: async (): Promise<User[]> => {
-      console.log("DEBUG: Executando query de usuários, canManageUsers:", canManageUsers);
-      
       if (!canManageUsers) {
-        console.log("DEBUG: Usuário não tem permissão para administrar usuários, retornando array vazio");
+        console.log("Usuário não tem permissão para administrar usuários");
         return [];
       }
 
       try {
-        console.log("DEBUG: Buscando usuários...");
+        console.log("Buscando usuários...");
         
         // Buscar todos os profiles
         const { data: profiles, error: profilesError } = await supabase
@@ -109,12 +86,12 @@ export const useUsuarios = () => {
           .order('nome');
 
         if (profilesError) {
-          console.error("DEBUG: Erro ao buscar profiles:", profilesError);
+          console.error("Erro ao buscar profiles:", profilesError);
           throw new Error("Erro ao buscar usuários");
         }
 
         if (!profiles || profiles.length === 0) {
-          console.log("DEBUG: Nenhum perfil encontrado");
+          console.log("Nenhum perfil encontrado");
           return [];
         }
 
@@ -130,11 +107,11 @@ export const useUsuarios = () => {
           `);
 
         if (userPerfilError) {
-          console.error("DEBUG: Erro ao buscar usuario_perfis:", userPerfilError);
+          console.error("Erro ao buscar usuario_perfis:", userPerfilError);
         }
 
-        console.log("DEBUG: Profiles encontrados:", profiles.length);
-        console.log("DEBUG: UserPerfis encontrados:", userPerfis?.length || 0);
+        console.log("Profiles encontrados:", profiles.length);
+        console.log("UserPerfis encontrados:", userPerfis?.length || 0);
 
         // Mapear os dados para o formato User
         const users: User[] = profiles.map((profile: any) => {
@@ -151,11 +128,10 @@ export const useUsuarios = () => {
           };
         });
 
-        console.log("DEBUG: Usuários mapeados:", users.length);
-        console.log("DEBUG: Lista de usuários:", users);
+        console.log("Usuários mapeados:", users.length);
         return users;
       } catch (error) {
-        console.error("DEBUG: Erro ao buscar usuários:", error);
+        console.error("Erro ao buscar usuários:", error);
         throw error;
       }
     },
@@ -164,10 +140,6 @@ export const useUsuarios = () => {
     staleTime: 2 * 60 * 1000,
     refetchOnWindowFocus: false
   });
-
-  console.log("DEBUG: Usuários finais:", usuarios);
-  console.log("DEBUG: Loading estado:", loadingUsuarios);
-  console.log("DEBUG: Error estado:", usersError);
 
   // Buscar perfis
   const { data: profiles = [] } = useQuery({
@@ -289,12 +261,6 @@ export const useUsuarios = () => {
         variant: "destructive",
       });
     }
-  });
-
-  console.log("DEBUG: Retornando do hook useUsuarios:", {
-    usuarios: usuarios.length,
-    canManageUsers,
-    loadingUsuarios
   });
 
   return {
