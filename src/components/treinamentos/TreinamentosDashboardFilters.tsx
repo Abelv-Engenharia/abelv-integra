@@ -85,11 +85,14 @@ const TreinamentosDashboardFilters = ({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="todos">Todos</SelectItem>
-                {userCCAs.map((cca) => (
-                  <SelectItem key={cca.id} value={cca.id.toString()}>
-                    {`${cca.codigo} - ${cca.nome}`}
-                  </SelectItem>
-                ))}
+                {userCCAs
+                  .slice()
+                  .sort((a, b) => a.codigo.localeCompare(b.codigo, undefined, { numeric: true }))
+                  .map((cca) => (
+                    <SelectItem key={cca.id} value={cca.id.toString()}>
+                      {`${cca.codigo} - ${cca.nome}`}
+                    </SelectItem>
+                  ))}
               </SelectContent>
             </Select>
           </div>
