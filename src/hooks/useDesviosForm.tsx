@@ -83,7 +83,7 @@ export const useDesviosForm = () => {
       const desvioData = {
         data_desvio: formData.data,
         hora_desvio: formData.hora || '00:00',
-        local: "Campo removido",
+        local: formData.responsavelInspecao || "Local não especificado",
         cca_id: formData.ccaId ? parseInt(formData.ccaId) : null,
         empresa_id: formData.empresa ? parseInt(formData.empresa) : null,
         base_legal_opcao_id: formData.baseLegal ? parseInt(formData.baseLegal) : null,
