@@ -56,9 +56,12 @@ const DesviosForm = () => {
   const watchData = form.watch("data");
   React.useEffect(() => {
     if (watchData) {
-      const date = new Date(watchData);
-      form.setValue("ano", date.getFullYear().toString());
-      form.setValue("mes", (date.getMonth() + 1).toString().padStart(2, '0'));
+      // Parse the date string directly to avoid timezone issues
+      const [year, month, day] = watchData.split('-').map(Number);
+      if (year && month && day) {
+        form.setValue("ano", year.toString());
+        form.setValue("mes", month.toString().padStart(2, '0'));
+      }
     }
   }, [watchData, form]);
 
