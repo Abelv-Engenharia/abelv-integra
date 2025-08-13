@@ -96,7 +96,7 @@ const DesviosTable = ({
       const {
         data,
         error
-      } = await query.order('created_at', {
+      } = await query.order('data_desvio', {
         ascending: false
       });
       if (error) {

@@ -34,15 +34,7 @@ const DesviosConsulta = () => {
     status: "",
     risk: "",
   });
-  const [appliedFilters, setAppliedFilters] = useState({
-    year: currentYear.toString(),
-    month: "",
-    cca: "",
-    company: "",
-    status: "",
-    risk: "",
-  });
-  const [appliedSearchTerm, setAppliedSearchTerm] = useState("");
+  // Remove applied filters state - filters will be applied automatically
   
   // Estados para dados dinâmicos da base de dados
   const [ccas, setCcas] = useState<Array<{codigo: string, nome: string}>>([]);
@@ -125,14 +117,7 @@ const DesviosConsulta = () => {
     });
   };
 
-  const applyFilters = () => {
-    setAppliedFilters(filters);
-    setAppliedSearchTerm(searchTerm);
-    toast({
-      title: "Filtros aplicados",
-      description: "Os resultados foram filtrados conforme solicitado.",
-    });
-  };
+  // Remove applyFilters function - filters are now automatic
 
   const clearFilters = () => {
     const clearedFilters = {
@@ -144,9 +129,7 @@ const DesviosConsulta = () => {
       risk: "",
     };
     setFilters(clearedFilters);
-    setAppliedFilters(clearedFilters);
     setSearchTerm("");
-    setAppliedSearchTerm("");
     toast({
       title: "Filtros limpos",
       description: "Todos os filtros foram removidos.",
@@ -359,19 +342,15 @@ const DesviosConsulta = () => {
             </div>
           </div>
         </CardContent>
-        <CardFooter className="flex justify-between">
+        <CardFooter>
           <Button variant="outline" onClick={clearFilters}>
             Limpar Filtros
-          </Button>
-          <Button onClick={applyFilters}>
-            <Filter className="mr-2 h-4 w-4" />
-            Aplicar Filtros
           </Button>
         </CardFooter>
       </Card>
 
       {/* Deviations Table */}
-      <DesviosTable filters={appliedFilters} searchTerm={appliedSearchTerm} />
+      <DesviosTable filters={filters} searchTerm={searchTerm} />
     </div>
   );
 };
