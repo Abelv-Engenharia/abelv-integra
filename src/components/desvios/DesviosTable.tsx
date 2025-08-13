@@ -76,15 +76,46 @@ const DesviosTable = ({
       if (filters?.year && filters.year !== "") {
         query = query.gte('data_desvio', `${filters.year}-01-01`).lte('data_desvio', `${filters.year}-12-31`);
       }
+      
       if (filters?.month && filters.month !== "" && filters.month !== "todos") {
         const monthStr = filters.month.padStart(2, '0');
         if (filters?.year) {
           query = query.gte('data_desvio', `${filters.year}-${monthStr}-01`).lte('data_desvio', `${filters.year}-${monthStr}-31`);
         }
       }
+      
+      // Filtro por CCA específico (além da permissão do usuário)
+      if (filters?.cca && filters.cca !== "" && filters.cca !== "todos") {
+        // Buscar o ID do CCA pelo código
+        const { data: ccaData } = await supabase
+          .from('ccas')
+          .select('id')
+          .eq('codigo', filters.cca)
+          .single();
+        
+        if (ccaData) {
+          query = query.eq('cca_id', ccaData.id);
+        }
+      }
+      
+      // Filtro por empresa
+      if (filters?.company && filters.company !== "" && filters.company !== "todas") {
+        // Buscar o ID da empresa pelo nome
+        const { data: empresaData } = await supabase
+          .from('empresas')
+          .select('id')
+          .eq('nome', filters.company)
+          .single();
+        
+        if (empresaData) {
+          query = query.eq('empresa_id', empresaData.id);
+        }
+      }
+      
       if (filters?.status && filters.status !== "" && filters.status !== "todos") {
         query = query.eq('status', filters.status);
       }
+      
       if (filters?.risk && filters.risk !== "" && filters.risk !== "todos") {
         query = query.eq('classificacao_risco', filters.risk);
       }
