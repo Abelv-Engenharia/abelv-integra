@@ -111,22 +111,33 @@ export default function DashboardSMS() {
           ccaIds = [parseInt(ccaId)];
         }
 
-        // Criar filtros para os diferentes serviços
-        const desviosFilters = {
-          year: year !== "todos" ? year : undefined,
-          month: month !== "todos" ? month : undefined,
-          ccaIds: ccaIds?.map(id => id.toString())
-        };
-        const treinamentosFilters = {
-          year: year !== "todos" ? year : undefined,
-          month: month !== "todos" ? month : undefined,
-          ccaId: ccaId !== "todos" ? ccaId : undefined
-        };
-        const hsaFilters = {
-          year: year !== "todos" ? year : undefined,
-          month: month !== "todos" ? month : undefined
-        };
-        const [desviosData, hsaData, hsaDetailedData, treinamentoStatsData, ocorrenciasData] = await Promise.all([fetchDashboardStats(desviosFilters), fetchHSAPercentage(ccaIds, hsaFilters), fetchHSADetailedStats(ccaIds, hsaFilters), fetchTreinamentosStats(ccaIds || [], treinamentosFilters), fetchOcorrenciasStats(ccaIds, year !== "todos" ? year : undefined, month !== "todos" ? month : undefined)]);
+        // Executar todas as consultas em paralelo para melhor performance
+        const [desviosData, hsaData, hsaDetailedData, treinamentoStatsData, ocorrenciasData] = await Promise.all([
+          fetchDashboardStats({
+            year: year !== "todos" ? year : undefined,
+            month: month !== "todos" ? month : undefined,
+            ccaIds: ccaIds?.map(id => id.toString())
+          }),
+          fetchHSAPercentage(ccaIds, {
+            year: year !== "todos" ? year : undefined,
+            month: month !== "todos" ? month : undefined
+          }),
+          fetchHSADetailedStats(ccaIds, {
+            year: year !== "todos" ? year : undefined,
+            month: month !== "todos" ? month : undefined
+          }),
+          fetchTreinamentosStats(ccaIds || [], {
+            year: year !== "todos" ? year : undefined,
+            month: month !== "todos" ? month : undefined,
+            ccaId: ccaId !== "todos" ? ccaId : undefined
+          }),
+          fetchOcorrenciasStats(
+            ccaIds, 
+            year !== "todos" ? year : undefined, 
+            month !== "todos" ? month : undefined
+          )
+        ]);
+
         setDesviosStats(desviosData);
         setHsaPercentage(hsaData);
         setHsaDetailedStats(hsaDetailedData);
