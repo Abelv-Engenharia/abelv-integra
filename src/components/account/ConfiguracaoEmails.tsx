@@ -208,12 +208,12 @@ const ConfiguracaoEmailsForm = ({
 
       <div>
         <Label htmlFor="tipoRelatorio">Tipo de Relatório (Opcional)</Label>
-        <Select value={tipoRelatorio || ""} onValueChange={(value) => setTipoRelatorio(value === "" ? null : value)}>
+        <Select value={tipoRelatorio || "nenhum"} onValueChange={(value) => setTipoRelatorio(value === "nenhum" ? null : value)}>
           <SelectTrigger className="w-full">
             <SelectValue placeholder="Nenhum" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Nenhum</SelectItem>
+            <SelectItem value="nenhum">Nenhum</SelectItem>
             {relatorios.map((relatorio) => (
               <SelectItem key={relatorio.value} value={relatorio.value}>
                 {relatorio.label}

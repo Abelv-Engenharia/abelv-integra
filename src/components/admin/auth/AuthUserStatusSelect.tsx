@@ -17,12 +17,12 @@ export const AuthUserStatusSelect = ({ onChange }: AuthUserStatusSelectProps) =>
       <label className="text-sm font-medium mb-1 block">
         Filtrar por Status
       </label>
-      <Select defaultValue="" onValueChange={onChange}>
+      <Select defaultValue="todos" onValueChange={onChange}>
         <SelectTrigger>
           <SelectValue placeholder="Todos os status" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="">Todos</SelectItem>
+          <SelectItem value="todos">Todos</SelectItem>
           <SelectItem value="confirmed">Confirmados</SelectItem>
           <SelectItem value="unconfirmed">Pendentes</SelectItem>
           <SelectItem value="blocked">Bloqueados</SelectItem>
