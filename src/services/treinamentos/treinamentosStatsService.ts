@@ -63,7 +63,7 @@ export const fetchTreinamentosStats = async (userCCAIds: number[] = [], filters?
       };
     }
 
-    // Buscar execuções de treinamento
+    // Buscar execuções de treinamento (otimizado com contagem direta)
     console.log('Buscando execuções de treinamento...');
     let execucaoQuery = supabase
       .from('execucao_treinamentos')
@@ -78,43 +78,48 @@ export const fetchTreinamentosStats = async (userCCAIds: number[] = [], filters?
       execucaoQuery = execucaoQuery.eq('mes', targetMonth);
     }
     
-    const execucaoResult = await execucaoQuery;
-    console.log('Resultado execução:', execucaoResult);
-
-    // Buscar HHT
-    console.log('Buscando HHT...');
-    let hhtQuery = supabase
-      .from('horas_trabalhadas')
-      .select('horas_trabalhadas')
-      .in('cca_id', allowedCCAIds);
+    // Executar consultas em paralelo para melhor performance
+    const [execucaoResult, hhtResult, horasTreinamentoResult] = await Promise.all([
+      execucaoQuery,
+      // Buscar HHT
+      (() => {
+        console.log('Buscando HHT...');
+        let hhtQuery = supabase
+          .from('horas_trabalhadas')
+          .select('horas_trabalhadas')
+          .in('cca_id', allowedCCAIds);
+        
+        if (targetYear) {
+          hhtQuery = hhtQuery.eq('ano', targetYear);
+        }
+        
+        if (targetMonth) {
+          hhtQuery = hhtQuery.eq('mes', targetMonth);
+        }
+        
+        return hhtQuery;
+      })(),
+      // Buscar horas de treinamento
+      (() => {
+        console.log('Buscando horas de treinamento...');
+        let horasQuery = supabase
+          .from('execucao_treinamentos')
+          .select('horas_totais')
+          .in('cca_id', allowedCCAIds);
+        
+        if (targetYear) {
+          horasQuery = horasQuery.eq('ano', targetYear);
+        }
+        
+        if (targetMonth) {
+          horasQuery = horasQuery.eq('mes', targetMonth);
+        }
+        
+        return horasQuery;
+      })()
+    ]);
     
-    if (targetYear) {
-      hhtQuery = hhtQuery.eq('ano', targetYear);
-    }
-    
-    if (targetMonth) {
-      hhtQuery = hhtQuery.eq('mes', targetMonth);
-    }
-    
-    const hhtResult = await hhtQuery;
-    console.log('Resultado HHT:', hhtResult);
-
-    // Buscar horas de treinamento
-    console.log('Buscando horas de treinamento...');
-    let horasQuery = supabase
-      .from('execucao_treinamentos')
-      .select('horas_totais')
-      .in('cca_id', allowedCCAIds);
-    
-    if (targetYear) {
-      horasQuery = horasQuery.eq('ano', targetYear);
-    }
-    
-    if (targetMonth) {
-      horasQuery = horasQuery.eq('mes', targetMonth);
-    }
-    
-    const horasTreinamentoResult = await horasQuery;
+    console.log('Resultados paralelos obtidos');
     console.log('Resultado horas treinamento:', horasTreinamentoResult);
 
     // Buscar funcionários

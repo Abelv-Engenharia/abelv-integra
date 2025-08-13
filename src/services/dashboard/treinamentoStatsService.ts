@@ -5,27 +5,48 @@ export async function fetchTreinamentoInvestmentPercentage(ccaIds?: number[], fi
   try {
     const yearFilter = filters?.year && filters.year !== "todos" ? parseInt(filters.year) : undefined;
 
-    let query = supabase
+    // Construir consultas para execução paralela
+    let treinamentosQuery = supabase
       .from('execucao_treinamentos')
       .select('horas_totais');
 
+    let hhtQuery = supabase
+      .from('horas_trabalhadas')
+      .select('horas_trabalhadas');
+
+    // Aplicar filtros de ano
     if (yearFilter !== undefined) {
-      query = query.eq('ano', yearFilter);
+      treinamentosQuery = treinamentosQuery.eq('ano', yearFilter);
+      hhtQuery = hhtQuery.eq('ano', yearFilter);
     }
 
     // Aplicar filtro de mês se especificado
     if (filters?.month && filters.month !== "todos") {
-      query = query.eq('mes', parseInt(filters.month));
+      const monthFilter = parseInt(filters.month);
+      treinamentosQuery = treinamentosQuery.eq('mes', monthFilter);
+      hhtQuery = hhtQuery.eq('mes', monthFilter);
     }
 
     // Aplicar filtro de CCAs se fornecido
     if (ccaIds && ccaIds.length > 0) {
-      query = query.in('cca_id', ccaIds);
+      treinamentosQuery = treinamentosQuery.in('cca_id', ccaIds);
+      hhtQuery = hhtQuery.in('cca_id', ccaIds);
     }
 
-    const { data: treinamentos, error: treinamentosError } = await query;
+    // Executar consultas em paralelo
+    const [
+      { data: treinamentos, error: treinamentosError },
+      { data: horasTrabalhadas, error: hhtError }
+    ] = await Promise.all([
+      treinamentosQuery,
+      hhtQuery
+    ]);
 
     if (treinamentosError || !treinamentos) {
+      return 0;
+    }
+
+    if (hhtError || !horasTrabalhadas || horasTrabalhadas.length === 0) {
       return 0;
     }
 
@@ -34,30 +55,6 @@ export async function fetchTreinamentoInvestmentPercentage(ccaIds?: number[], fi
       (acc, item) => acc + (item.horas_totais || 0), 
       0
     );
-
-    // Buscar total de horas trabalhadas do mesmo período
-    let queryHHT = supabase
-      .from('horas_trabalhadas')
-      .select('horas_trabalhadas');
-
-    if (yearFilter !== undefined) {
-      queryHHT = queryHHT.eq('ano', yearFilter);
-    }
-
-    // Aplicar filtro de mês se especificado
-    if (filters?.month && filters.month !== "todos") {
-      queryHHT = queryHHT.eq('mes', parseInt(filters.month));
-    }
-
-    if (ccaIds && ccaIds.length > 0) {
-      queryHHT = queryHHT.in('cca_id', ccaIds);
-    }
-
-    const { data: horasTrabalhadas, error: hhtError } = await queryHHT;
-
-    if (hhtError || !horasTrabalhadas || horasTrabalhadas.length === 0) {
-      return 0;
-    }
 
     const totalHorasTrabalhadas = horasTrabalhadas.reduce(
       (acc, item) => acc + (item.horas_trabalhadas || 0), 
