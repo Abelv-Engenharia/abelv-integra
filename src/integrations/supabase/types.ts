@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.3 (519615d)"
@@ -2606,8 +2606,8 @@ export type Database = {
       get_hht_by_month: {
         Args: Record<PropertyKey, never>
         Returns: {
-          mes: number
           ano: number
+          mes: number
           total_horas: number
         }[]
       }
@@ -2621,11 +2621,11 @@ export type Database = {
       }
       log_audit_event: {
         Args: {
-          p_user_id: string
           p_action: string
-          p_table_name?: string
-          p_record_id?: string
           p_details?: Json
+          p_record_id?: string
+          p_table_name?: string
+          p_user_id: string
         }
         Returns: undefined
       }
@@ -2642,7 +2642,7 @@ export type Database = {
         Returns: boolean
       }
       user_is_supervisor_of: {
-        Args: { _user_id: string; _funcionario_id: string }
+        Args: { _funcionario_id: string; _user_id: string }
         Returns: boolean
       }
     }
