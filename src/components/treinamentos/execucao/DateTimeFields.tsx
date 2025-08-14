@@ -14,9 +14,17 @@ const DateTimeFields = ({ form }: DateTimeFieldsProps) => {
 
   useEffect(() => {
     if (dataValue) {
-      const date = new Date(dataValue);
-      form.setValue("ano", date.getFullYear());
-      form.setValue("mes", date.getMonth() + 1);
+      // Criar a data corretamente para evitar problemas de timezone
+      const dateParts = dataValue.split('-');
+      if (dateParts.length === 3) {
+        const year = parseInt(dateParts[0]);
+        const month = parseInt(dateParts[1]);
+        const day = parseInt(dateParts[2]);
+        
+        // Usar os valores diretamente sem criar objeto Date
+        form.setValue("ano", year);
+        form.setValue("mes", month);
+      }
     }
   }, [dataValue, form]);
 
