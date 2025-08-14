@@ -112,32 +112,21 @@ export default function DashboardSMS() {
         }
 
         // Executar todas as consultas em paralelo para melhor performance
-        const [desviosData, hsaData, hsaDetailedData, treinamentoStatsData, ocorrenciasData] = await Promise.all([
-          fetchDashboardStats({
-            year: year !== "todos" ? year : undefined,
-            month: month !== "todos" ? month : undefined,
-            ccaIds: ccaIds?.map(id => id.toString())
-          }),
-          fetchHSAPercentage(ccaIds, {
-            year: year !== "todos" ? year : undefined,
-            month: month !== "todos" ? month : undefined
-          }),
-          fetchHSADetailedStats(ccaIds, {
-            year: year !== "todos" ? year : undefined,
-            month: month !== "todos" ? month : undefined
-          }),
-          fetchTreinamentosStats(ccaIds || [], {
-            year: year !== "todos" ? year : undefined,
-            month: month !== "todos" ? month : undefined,
-            ccaId: ccaId !== "todos" ? ccaId : undefined
-          }),
-          fetchOcorrenciasStats(
-            ccaIds, 
-            year !== "todos" ? year : undefined, 
-            month !== "todos" ? month : undefined
-          )
-        ]);
-
+        const [desviosData, hsaData, hsaDetailedData, treinamentoStatsData, ocorrenciasData] = await Promise.all([fetchDashboardStats({
+          year: year !== "todos" ? year : undefined,
+          month: month !== "todos" ? month : undefined,
+          ccaIds: ccaIds?.map(id => id.toString())
+        }), fetchHSAPercentage(ccaIds, {
+          year: year !== "todos" ? year : undefined,
+          month: month !== "todos" ? month : undefined
+        }), fetchHSADetailedStats(ccaIds, {
+          year: year !== "todos" ? year : undefined,
+          month: month !== "todos" ? month : undefined
+        }), fetchTreinamentosStats(ccaIds || [], {
+          year: year !== "todos" ? year : undefined,
+          month: month !== "todos" ? month : undefined,
+          ccaId: ccaId !== "todos" ? ccaId : undefined
+        }), fetchOcorrenciasStats(ccaIds, year !== "todos" ? year : undefined, month !== "todos" ? month : undefined)]);
         setDesviosStats(desviosData);
         setHsaPercentage(hsaData);
         setHsaDetailedStats(hsaDetailedData);
@@ -258,61 +247,9 @@ export default function DashboardSMS() {
           </article>
 
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-            <article className="rounded-lg border border-border bg-card p-4">
-              <h3 className="mb-3 text-base font-medium">Pirâmide de Ocorrências</h3>
-              <div className="relative w-full">
-                <img src="/lovable-uploads/1e50cebd-983a-47e4-af70-4e60b3a4439c.png" alt="Pirâmide de Ocorrências: Fatal, CPD, SPD, Incidente e Desvios" loading="lazy" className="w-full h-auto select-none" />
-                {/* Overlay com valores dinâmicos */}
-                <span className="absolute right-2 rounded px-1.5 py-0.5 text-xs font-semibold bg-background/80 text-foreground" style={{
-                top: "6%"
-              }}>
-                  {loadingPiramide ? "..." : counts.fatal}
-                </span>
-                <span className="absolute right-2 rounded px-1.5 py-0.5 text-xs font-semibold bg-background/80 text-foreground" style={{
-                top: "24%"
-              }}>
-                  {loadingPiramide ? "..." : counts.cpd}
-                </span>
-                <span className="absolute right-2 rounded px-1.5 py-0.5 text-xs font-semibold bg-background/80 text-foreground" style={{
-                top: "41%"
-              }}>
-                  {loadingPiramide ? "..." : counts.spd}
-                </span>
-                <span className="absolute right-2 rounded px-1.5 py-0.5 text-xs font-semibold bg-background/80 text-foreground" style={{
-                top: "58%"
-              }}>
-                  {loadingPiramide ? "..." : counts.incidente}
-                </span>
-                <span className="absolute right-2 rounded px-1.5 py-0.5 text-xs font-semibold bg-background/80 text-foreground" style={{
-                top: "88%"
-              }}>
-                  {loadingPiramide ? "..." : counts.desvios}
-                </span>
-              </div>
-            </article>
+            
 
-            <article className="rounded-lg border border-border bg-card p-4">
-              <h3 className="mb-3 text-base font-medium">Taxas de Frequência e Gravidade</h3>
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                {["Taxa de Frequência AC CPD", "Taxa de Frequência AC SPD", "Taxa de Gravidade"].map(titulo => <div key={titulo} className="h-40 rounded-md border border-border bg-background p-2">
-                    <p className="mb-1 text-xs text-muted-foreground">{titulo}</p>
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={freqData} margin={{
-                    top: 8,
-                    right: 8,
-                    left: 0,
-                    bottom: 0
-                  }}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="name" hide />
-                        <YAxis hide />
-                        <Tooltip />
-                        <Bar dataKey="valor" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>)}
-              </div>
-            </article>
+            
           </div>
         </section>
       </main>
