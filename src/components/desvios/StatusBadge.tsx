@@ -5,6 +5,7 @@ const getStatusColor = (status: string) => {
   switch (status) {
     case "CONCLUÍDO":
     case "Fechado":
+    case "TRATADO":
       return "bg-green-100 text-green-800 hover:bg-green-200";
     case "EM ANDAMENTO":
     case "Em andamento":
@@ -27,6 +28,8 @@ const statusDisplayMap: { [key: string]: string } = {
 const StatusBadge = ({ status }: { status?: string }) => {
   const currentStatus = status || "PENDENTE";
   const displayStatus = statusDisplayMap[currentStatus] || currentStatus;
+
+  console.log('🏷️ StatusBadge - Status recebido:', currentStatus, 'Status exibido:', displayStatus, 'Cor:', getStatusColor(currentStatus));
 
   return (
     <Badge variant="secondary" className={getStatusColor(currentStatus)}>

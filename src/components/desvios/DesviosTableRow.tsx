@@ -32,14 +32,16 @@ const DesviosTableRow = ({
   setEditDialogOpen,
   onDesvioUpdated
 }: Props) => {
-  // Calcular o status correto baseado na situação e prazo
+  // Calcular o status correto baseado na situação e prazo_conclusao
   const calculatedStatus = calculateStatusAcao(
-    desvio.situacao || "", 
+    desvio.situacao || desvio.status || "", 
     desvio.prazo_conclusao || ""
   );
   
+  console.log('📊 Desvio ID:', desvio.id, 'Situacao:', desvio.situacao, 'Status original:', desvio.status, 'Prazo:', desvio.prazo_conclusao, 'Status calculado:', calculatedStatus);
+  
   // Usar o status calculado se disponível, senão usar o status original
-  const displayStatus = calculatedStatus || desvio.status;
+  const displayStatus = calculatedStatus || desvio.status || "PENDENTE";
 
   return <tr>
       <td>{formatDate(desvio.data_desvio)}</td>
