@@ -305,11 +305,11 @@ export type Database = {
           id: string
           imagem_url: string | null
           impacto: number | null
-          local: string
           prazo_conclusao: string | null
           probabilidade: number | null
           processo_id: number | null
           responsavel_id: string | null
+          responsavel_inspecao: string
           severidade: number | null
           situacao: string | null
           status: string | null
@@ -341,11 +341,11 @@ export type Database = {
           id?: string
           imagem_url?: string | null
           impacto?: number | null
-          local: string
           prazo_conclusao?: string | null
           probabilidade?: number | null
           processo_id?: number | null
           responsavel_id?: string | null
+          responsavel_inspecao: string
           severidade?: number | null
           situacao?: string | null
           status?: string | null
@@ -377,11 +377,11 @@ export type Database = {
           id?: string
           imagem_url?: string | null
           impacto?: number | null
-          local?: string
           prazo_conclusao?: string | null
           probabilidade?: number | null
           processo_id?: number | null
           responsavel_id?: string | null
+          responsavel_inspecao?: string
           severidade?: number | null
           situacao?: string | null
           status?: string | null

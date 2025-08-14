@@ -5,7 +5,7 @@ export const transformFormDataToDesvio = (formData: DesvioFormData) => {
   return {
     data_desvio: formData.data,
     hora_desvio: formData.hora,
-    local: formData.responsavelInspecao || "Local não especificado",
+    responsavel_inspecao: formData.responsavelInspecao || "Responsável não especificado",
     cca_id: formData.ccaId ? parseInt(formData.ccaId) : null,
     empresa_id: formData.empresa ? parseInt(formData.empresa) : null,
     base_legal_opcao_id: formData.baseLegal ? parseInt(formData.baseLegal) : null,

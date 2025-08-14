@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import type { Database } from '@/integrations/supabase/types';
 
@@ -8,7 +7,7 @@ export interface DesvioCompleto {
   id?: string;
   data_desvio: string;
   hora_desvio?: string;
-  local: string;
+  responsavel_inspecao: string;
   descricao_desvio: string;
   acao_imediata?: string;
   cca_id?: number;
