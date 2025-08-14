@@ -9,6 +9,7 @@ import { DesvioCompleto } from "@/services/desvios/desviosCompletosService";
 import { TableLoadingSkeleton } from "@/components/ui/loading-skeleton";
 import { InlineLoader } from "@/components/common/PageLoader";
 import { AlertCircle } from "lucide-react";
+import { calculateStatusAcao } from "@/utils/desviosUtils";
 
 interface DesviosTableProps {
   filters?: {
@@ -43,13 +44,8 @@ const DesviosTable = ({
   filters,
   searchTerm
 }: DesviosTableProps) => {
-  const {
-    toast
-  } = useToast();
-  const {
-    data: userCCAs = [],
-    isLoading: isLoadingCCAs
-  } = useUserCCAs();
+  const { toast } = useToast();
+  const { data: userCCAs = [], isLoading: isLoadingCCAs } = useUserCCAs();
   const [desvios, setDesvios] = useState<DesvioCompleto[]>([]);
   const [editDesvio, setEditDesvio] = useState<DesvioCompleto | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -112,31 +108,37 @@ const DesviosTable = ({
         }
       }
       
-      if (filters?.status && filters.status !== "" && filters.status !== "todos") {
-        query = query.eq('status', filters.status);
-      }
-      
       if (filters?.risk && filters.risk !== "" && filters.risk !== "todos") {
         query = query.eq('classificacao_risco', filters.risk);
       }
 
       // Aplicar busca por termo se fornecido
       if (searchTerm && searchTerm.trim() !== "") {
-        query = query.or(`descricao_desvio.ilike.%${searchTerm}%,local.ilike.%${searchTerm}%`);
+        query = query.or(`descricao_desvio.ilike.%${searchTerm}%,responsavel_inspecao.ilike.%${searchTerm}%`);
       }
-      const {
-        data,
-        error
-      } = await query.order('data_desvio', {
-        ascending: false
-      });
+
+      const { data, error } = await query.order('data_desvio', { ascending: false });
+      
       if (error) {
         console.error('Erro ao buscar desvios:', error);
         setDesvios([]);
       } else {
         console.log("Desvios filtrados carregados:", data);
         // Convert database results to DesvioCompleto format
-        const convertedData = (data || []).map(convertDbToDesvio);
+        let convertedData = (data || []).map(convertDbToDesvio);
+        
+        // Aplicar filtro de status APÓS buscar os dados (pois precisa calcular o status)
+        if (filters?.status && filters.status !== "" && filters.status !== "todos") {
+          convertedData = convertedData.filter(desvio => {
+            const calculatedStatus = calculateStatusAcao(
+              desvio.situacao || desvio.status || "", 
+              desvio.prazo_conclusao || ""
+            );
+            const displayStatus = calculatedStatus || desvio.status || "PENDENTE";
+            return displayStatus === filters.status;
+          });
+        }
+        
         setDesvios(convertedData);
       }
     } catch (error) {
@@ -250,7 +252,10 @@ const DesviosTable = ({
                         <div className="text-center space-y-1">
                           <p className="text-responsive font-medium">Nenhum desvio encontrado</p>
                           <p className="text-xs sm:text-sm text-muted-foreground">
-                            Não há desvios cadastrados para os CCAs permitidos.
+                            {filters?.status && filters.status !== "todos" 
+                              ? `Não há desvios com status "${filters.status}" para os filtros aplicados.`
+                              : "Não há desvios cadastrados para os CCAs permitidos."
+                            }
                           </p>
                         </div>
                       </div>
