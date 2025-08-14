@@ -1,5 +1,7 @@
+
 import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -25,11 +27,16 @@ interface TreinamentoNormativoForm {
 
 const TreinamentosNormativo = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const [treinamentosDisponiveis, setTreinamentosDisponiveis] = useState<any[]>([]);
   const [funcionarios, setFuncionarios] = useState<any[]>([]);
   const [certificadoFile, setCertificadoFile] = useState<File | null>(null);
   const [selectedCcaId, setSelectedCcaId] = useState<string>("");
   const { data: userCCAs = [] } = useUserCCAs();
+
+  // Carregar treinamentos normativos usando useQuery
+  const { data: treinamentosDisponiveis = [], isLoading: isLoadingTreinamentos } = useQuery({
+    queryKey: ['lista-treinamentos-normativos'],
+    queryFn: listaTreinamentosNormativosService.getAll,
+  });
 
   // Ordenar CCAs do menor para o maior
   const sortedCCAs = [...userCCAs].sort((a, b) => a.codigo.localeCompare(b.codigo, undefined, { numeric: true }));
@@ -45,24 +52,6 @@ const TreinamentosNormativo = () => {
       certificado_url: "",
     },
   });
-
-  useEffect(() => {
-    const loadTreinamentos = async () => {
-      try {
-        const treinamentos = await listaTreinamentosNormativosService.getAll();
-        setTreinamentosDisponiveis(treinamentos);
-      } catch (error) {
-        console.error('Erro ao carregar treinamentos:', error);
-        toast({
-          title: "Erro",
-          description: "Não foi possível carregar os treinamentos",
-          variant: "destructive",
-        });
-      }
-    };
-
-    loadTreinamentos();
-  }, []);
 
   useEffect(() => {
     const loadFuncionarios = async () => {
@@ -97,7 +86,7 @@ const TreinamentosNormativo = () => {
     const treinamentoId = form.watch("treinamento_id");
     const dataRealizacao = form.watch("data_realizacao");
 
-    if (treinamentoId && dataRealizacao) {
+    if (treinamentoId && dataRealizacao && treinamentosDisponiveis.length > 0) {
       const treinamentoSelecionado = treinamentosDisponiveis.find(t => t.id === treinamentoId);
       
       if (treinamentoSelecionado && treinamentoSelecionado.validade_dias) {
@@ -437,10 +426,14 @@ const TreinamentosNormativo = () => {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Treinamento realizado</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
+                        <Select 
+                          onValueChange={field.onChange} 
+                          value={field.value}
+                          disabled={isLoadingTreinamentos}
+                        >
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Selecione o treinamento" />
+                              <SelectValue placeholder={isLoadingTreinamentos ? "Carregando..." : "Selecione o treinamento"} />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
