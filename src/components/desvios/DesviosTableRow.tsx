@@ -1,3 +1,4 @@
+
 import React from "react";
 import StatusBadge from "./StatusBadge";
 import RiskBadge from "./RiskBadge";
@@ -6,6 +7,8 @@ import EditDesvioDialog from "./EditDesvioDialog";
 import DeleteDesvioDialog from "./DeleteDesvioDialog";
 import { DesvioCompleto } from "@/services/desvios/desviosCompletosService";
 import { Button } from "@/components/ui/button";
+import { calculateStatusAcao } from "@/utils/desviosUtils";
+
 interface Props {
   desvio: DesvioCompleto;
   onStatusUpdated: (id: string, newStatus: string) => void;
@@ -16,7 +19,9 @@ interface Props {
   setEditDialogOpen: (open: boolean) => void;
   onDesvioUpdated: () => void;
 }
+
 const formatDate = (dateString?: string) => dateString ? new Date(dateString).toLocaleDateString("pt-BR") : "";
+
 const DesviosTableRow = ({
   desvio,
   onStatusUpdated,
@@ -27,6 +32,15 @@ const DesviosTableRow = ({
   setEditDialogOpen,
   onDesvioUpdated
 }: Props) => {
+  // Calcular o status correto baseado na situação e prazo
+  const calculatedStatus = calculateStatusAcao(
+    desvio.situacao || "", 
+    desvio.prazo_conclusao || ""
+  );
+  
+  // Usar o status calculado se disponível, senão usar o status original
+  const displayStatus = calculatedStatus || desvio.status;
+
   return <tr>
       <td>{formatDate(desvio.data_desvio)}</td>
       <td className="my-[199px]">
@@ -46,7 +60,7 @@ const DesviosTableRow = ({
         <RiskBadge risk={desvio.classificacao_risco} />
       </td>
       <td>
-        <StatusBadge status={desvio.status} />
+        <StatusBadge status={displayStatus} />
       </td>
       <td className="text-right">
         <div className="flex justify-end gap-2">
@@ -62,4 +76,5 @@ const DesviosTableRow = ({
       </td>
     </tr>;
 };
+
 export default DesviosTableRow;

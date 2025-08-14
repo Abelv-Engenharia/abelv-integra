@@ -9,10 +9,14 @@ export const calculateStatusAcao = (situacao: string, prazoCorrecao: string): st
       const prazoDate = new Date(prazoCorrecao);
       const currentDate = new Date();
       
-      if (prazoDate > currentDate) {
-        return "EM ANDAMENTO";
-      } else {
+      // Resetar horas para comparar apenas datas
+      prazoDate.setHours(0, 0, 0, 0);
+      currentDate.setHours(0, 0, 0, 0);
+      
+      if (prazoDate < currentDate) {
         return "PENDENTE";
+      } else {
+        return "EM ANDAMENTO";
       }
     }
     return "PENDENTE";
