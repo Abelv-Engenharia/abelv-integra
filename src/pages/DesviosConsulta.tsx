@@ -34,13 +34,18 @@ const DesviosConsulta = () => {
     status: "",
     risk: "",
   });
-  // Remove applied filters state - filters will be applied automatically
   
   // Estados para dados dinâmicos da base de dados
   const [ccas, setCcas] = useState<Array<{codigo: string, nome: string}>>([]);
   const [empresas, setEmpresas] = useState<Array<{nome: string}>>([]);
-  const [statusOptions, setStatusOptions] = useState<Array<{status: string}>>([]);
   const [riskOptions, setRiskOptions] = useState<Array<{classificacao_risco: string}>>([]);
+
+  // Opções fixas de status padronizadas
+  const statusOptions = [
+    { status: "CONCLUÍDO" },
+    { status: "EM ANDAMENTO" },
+    { status: "PENDENTE" }
+  ];
 
   // Carregar dados da base de dados
   useEffect(() => {
@@ -61,12 +66,6 @@ const DesviosConsulta = () => {
             empresas!inner(nome)
           `)
           .not('empresas.nome', 'is', null);
-        
-        // Buscar status únicos
-        const { data: statusData } = await supabase
-          .from('desvios_completos')
-          .select('status')
-          .not('status', 'is', null);
         
         // Buscar classificações de risco únicas
         const { data: riskData } = await supabase
@@ -89,13 +88,6 @@ const DesviosConsulta = () => {
           setEmpresas(uniqueEmpresas.sort((a, b) => a.nome.localeCompare(b.nome)));
         }
 
-        if (statusData) {
-          const uniqueStatus = Array.from(new Set(
-            statusData.map((item: any) => item.status)
-          )).map(status => ({ status }));
-          setStatusOptions(uniqueStatus.sort((a, b) => a.status.localeCompare(b.status)));
-        }
-
         if (riskData) {
           const uniqueRisk = Array.from(new Set(
             riskData.map((item: any) => item.classificacao_risco)
@@ -116,8 +108,6 @@ const DesviosConsulta = () => {
       [field]: value,
     });
   };
-
-  // Remove applyFilters function - filters are now automatic
 
   const clearFilters = () => {
     const clearedFilters = {
