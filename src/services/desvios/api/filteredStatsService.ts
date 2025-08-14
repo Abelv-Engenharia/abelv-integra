@@ -3,59 +3,74 @@ import { supabase } from "@/integrations/supabase/client";
 import { DashboardStats, FilterParams } from "../types/dashboardTypes";
 import { applyFiltersToQuery, createBaseQuery } from "../utils/filterUtils";
 import { calculatePercentages, calculateRiskLevel } from "../calculations/statsCalculator";
+import { calculateStatusAcao } from "@/utils/desviosUtils";
 
 export const fetchFilteredDashboardStats = async (filters: FilterParams): Promise<DashboardStats> => {
   try {
     console.log('fetchFilteredDashboardStats iniciado com filtros:', filters);
     
-    // Buscar total de desvios filtrados
-    let totalQuery = createBaseQuery();
-    totalQuery = applyFiltersToQuery(totalQuery, filters);
-    console.log('Query para total de desvios criada');
-    const { count: totalDesvios } = await totalQuery;
-    console.log('Total de desvios encontrados:', totalDesvios);
+    // Buscar todos os desvios com os campos necessários para calcular o status
+    let query = supabase
+      .from('desvios_completos')
+      .select('id, situacao, status, prazo_conclusao, classificacao_risco');
+    
+    query = applyFiltersToQuery(query, filters);
+    console.log('Query para desvios filtrados criada');
+    
+    const { data: desviosData, error } = await query;
+    
+    if (error) {
+      console.error('Erro ao buscar desvios filtrados:', error);
+      throw error;
+    }
 
-    // Buscar ações completas filtradas
-    let completasQuery = createBaseQuery().in('status', ['Fechado', 'CONCLUÍDO', 'TRATADO']);
-    completasQuery = applyFiltersToQuery(completasQuery, filters);
-    const { count: acoesCompletas } = await completasQuery;
+    console.log('Desvios filtrados encontrados:', desviosData?.length || 0);
 
-    // Buscar ações em andamento filtradas
-    let andamentoQuery = createBaseQuery()
-      .in('status', ['EM TRATATIVA', 'EM ANDAMENTO']);
-    andamentoQuery = applyFiltersToQuery(andamentoQuery, filters);
-    const { count: acoesAndamento } = await andamentoQuery;
+    // Calcular status para cada desvio usando a nova lógica
+    const desviosComStatusCalculado = (desviosData || []).map(desvio => ({
+      ...desvio,
+      statusCalculado: calculateStatusAcao(
+        desvio.situacao || desvio.status || "", 
+        desvio.prazo_conclusao || ""
+      )
+    }));
 
-    // Buscar ações pendentes filtradas (status 'Aberto' ou 'PENDENTE')
-    let pendentesQuery = createBaseQuery().in('status', ['Aberto', 'PENDENTE']);
-    pendentesQuery = applyFiltersToQuery(pendentesQuery, filters);
-    const { count: acoesPendentes } = await pendentesQuery;
+    const totalDesvios = desviosComStatusCalculado.length;
+
+    // Contar ações por status calculado
+    const acoesCompletas = desviosComStatusCalculado.filter(d => 
+      d.statusCalculado === 'CONCLUÍDO'
+    ).length;
+
+    const acoesAndamento = desviosComStatusCalculado.filter(d => 
+      d.statusCalculado === 'EM ANDAMENTO'
+    ).length;
+
+    const acoesPendentes = desviosComStatusCalculado.filter(d => 
+      d.statusCalculado === 'PENDENTE'
+    ).length;
 
     // Calcular percentuais
     const percentages = calculatePercentages(
-      acoesCompletas || 0,
-      acoesAndamento || 0,
-      acoesPendentes || 0,
-      totalDesvios || 0
+      acoesCompletas,
+      acoesAndamento,
+      acoesPendentes,
+      totalDesvios
     );
 
     // Calcular nível de risco do período filtrado
-    let riskQuery = supabase.from('desvios_completos').select('classificacao_risco').not('classificacao_risco', 'is', null);
-    riskQuery = applyFiltersToQuery(riskQuery, filters);
-    const { data: riskData } = await riskQuery;
-
-    const riskLevel = calculateRiskLevel(riskData || []);
+    const riskLevel = calculateRiskLevel(desviosComStatusCalculado.map(d => ({ classificacao_risco: d.classificacao_risco })));
 
     const stats = {
-      totalDesvios: totalDesvios || 0,
-      acoesCompletas: acoesCompletas || 0,
-      acoesAndamento: acoesAndamento || 0,
-      acoesPendentes: acoesPendentes || 0,
+      totalDesvios,
+      acoesCompletas,
+      acoesAndamento,
+      acoesPendentes,
       ...percentages,
       riskLevel,
     };
 
-    console.log('Filtered Dashboard Stats:', stats);
+    console.log('Filtered Dashboard Stats with calculated status:', stats);
     return stats;
   } catch (error) {
     console.error('Erro ao buscar estatísticas filtradas:', error);
