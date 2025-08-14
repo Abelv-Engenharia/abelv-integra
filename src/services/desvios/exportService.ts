@@ -1,3 +1,4 @@
+
 import * as XLSX from 'xlsx';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -53,7 +54,7 @@ export const exportDesviosToExcel = async (filters?: ExportFilters) => {
       'ID': desvio.id,
       'Data do Desvio': desvio.data_desvio,
       'Hora do Desvio': desvio.hora_desvio,
-      'Local': desvio.local,
+      'Responsável pela Inspeção': desvio.responsavel_inspecao,
       'Descrição do Desvio': desvio.descricao_desvio,
       'CCA': desvio.ccas?.nome || '',
       'Código CCA': desvio.ccas?.codigo || '',
@@ -100,7 +101,7 @@ export const exportDesviosToExcel = async (filters?: ExportFilters) => {
       { wch: 36 }, // ID
       { wch: 12 }, // Data do Desvio
       { wch: 10 }, // Hora do Desvio
-      { wch: 30 }, // Local
+      { wch: 30 }, // Responsável pela Inspeção
       { wch: 50 }, // Descrição do Desvio
       { wch: 15 }, // CCA
       { wch: 12 }, // Código CCA

@@ -8,7 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 interface DesvioCompleto {
   id: string;
   data_desvio: string;
-  local: string;
+  responsavel_inspecao: string;
   descricao_desvio: string;
   status: string;
   classificacao_risco: string;
@@ -28,7 +28,7 @@ const LatestDesvios = () => {
           .select(`
             id,
             data_desvio,
-            local,
+            responsavel_inspecao,
             descricao_desvio,
             status,
             classificacao_risco,
@@ -117,7 +117,7 @@ const LatestDesvios = () => {
                         <CalendarDays className="h-4 w-4" />
                         {new Date(desvio.data_desvio).toLocaleDateString('pt-BR')}
                         <MapPin className="h-4 w-4 ml-2" />
-                        {desvio.local}
+                        {desvio.responsavel_inspecao}
                       </div>
                       <p className="text-sm font-medium line-clamp-2">
                         {desvio.descricao_desvio}

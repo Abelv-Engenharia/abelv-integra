@@ -91,7 +91,7 @@ const DeleteDesvioDialog = ({ desvio, onDesvioDeleted }: DeleteDesvioDialogProps
           <div className="bg-gray-50 p-4 rounded-lg">
             <p className="text-sm font-medium">ID: {desvio.id?.slice(0, 8)}...</p>
             <p className="text-sm text-gray-600 mt-1">Data: {new Date(desvio.data_desvio).toLocaleDateString('pt-BR')}</p>
-            <p className="text-sm text-gray-600 mt-1">Local: {desvio.local}</p>
+            <p className="text-sm text-gray-600 mt-1">Responsável: {desvio.responsavel_inspecao}</p>
             <p className="text-sm text-gray-600 mt-1">
               Descrição: {desvio.descricao_desvio?.substring(0, 100)}
               {desvio.descricao_desvio && desvio.descricao_desvio.length > 100 ? '...' : ''}

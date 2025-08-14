@@ -159,7 +159,7 @@ const EditDesvioDialog = ({ desvio, open, onOpenChange, onDesvioUpdated }: EditD
       const updatedDesvio = await desviosCompletosService.update(desvio.id, {
         data_desvio: data.data,
         hora_desvio: data.hora,
-        local: desvio.local,
+        responsavel_inspecao: data.responsavelInspecao,
         cca_id: data.ccaId ? parseInt(data.ccaId) : null,
         empresa_id: data.empresa ? parseInt(data.empresa) : null,
         base_legal_opcao_id: data.baseLegal ? parseInt(data.baseLegal) : null,
