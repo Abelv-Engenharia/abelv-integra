@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { ArrowLeft, FileText, Mail, Send } from "lucide-react";
@@ -83,7 +84,7 @@ NÃO CONFORMIDADE - RELATÓRIO
 
 ID do Desvio: {ID}
 Data de Registro: {DATA}
-Local: {LOCAL}
+Responsável: {RESPONSAVEL_INSPECAO}
 CCA: {CCA}
 
 DESCRIÇÃO DA NÃO CONFORMIDADE:
@@ -175,7 +176,7 @@ const DesviosNaoConformidade = () => {
     let processed = template;
     processed = processed.replace(/{ID}/g, data.id?.slice(0, 8) + "..." || "");
     processed = processed.replace(/{DATA}/g, data.data_desvio ? new Date(data.data_desvio).toLocaleDateString("pt-BR") : "");
-    processed = processed.replace(/{LOCAL}/g, data.local || "");
+    processed = processed.replace(/{RESPONSAVEL_INSPECAO}/g, data.responsavel_inspecao || "");
     processed = processed.replace(/{DESCRICAO}/g, data.descricao_desvio || "");
     processed = processed.replace(/{CCA}/g, (data as any).ccas?.nome || "");
     processed = processed.replace(/{EMPRESA}/g, (data as any).empresas?.nome || "");
@@ -356,7 +357,7 @@ const DesviosNaoConformidade = () => {
                               <div>
                                 <span className="font-semibold">{d.id?.slice(0, 8)}... </span>
                                 <span>{new Date(d.data_desvio).toLocaleDateString("pt-BR")} </span>
-                                <span className="italic truncate">{d.local}</span>
+                                <span className="italic truncate">{d.responsavel_inspecao}</span>
                               </div>
                               <div className="text-xs text-muted-foreground">{(d.descricao_desvio || "").slice(0, 40)}...</div>
                             </SelectItem>
