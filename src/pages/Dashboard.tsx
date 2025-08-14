@@ -1,9 +1,11 @@
 
 import React, { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useProfile } from "@/hooks/useProfile";
 
 const Dashboard = () => {
   const { user } = useAuth();
+  const { profile } = useProfile();
   const [currentDateTime, setCurrentDateTime] = useState(new Date());
 
   useEffect(() => {
@@ -43,12 +45,15 @@ const Dashboard = () => {
     return isFeminine ? 'Seja bem-vinda' : 'Seja bem-vindo';
   };
 
+  // Obter o nome do usuário logado do perfil ou do user metadata
+  const userName = profile?.nome || user?.user_metadata?.nome || user?.email?.split('@')[0] || 'Usuário';
+
   return (
     <div className="min-h-screen p-6">
       <div className="flex justify-between items-start mb-8">
         <div>
           <h1 className="text-2xl font-semibold text-foreground">
-            {getGreeting('Luis Ribeiro')}, Luis Ribeiro!
+            {getGreeting(userName)}, {userName}!
           </h1>
         </div>
         <div>
