@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useQuery } from "@tanstack/react-query";
@@ -32,11 +31,33 @@ const TreinamentosNormativo = () => {
   const [selectedCcaId, setSelectedCcaId] = useState<string>("");
   const { data: userCCAs = [] } = useUserCCAs();
 
-  // Carregar treinamentos normativos usando useQuery
-  const { data: treinamentosDisponiveis = [], isLoading: isLoadingTreinamentos } = useQuery({
+  // Carregar treinamentos normativos usando useQuery com debugging
+  const { data: treinamentosDisponiveis = [], isLoading: isLoadingTreinamentos, error: errorTreinamentos } = useQuery({
     queryKey: ['lista-treinamentos-normativos'],
-    queryFn: listaTreinamentosNormativosService.getAll,
+    queryFn: async () => {
+      console.log('Buscando treinamentos normativos...');
+      try {
+        const result = await listaTreinamentosNormativosService.getAll();
+        console.log('Treinamentos encontrados:', result);
+        return result;
+      } catch (error) {
+        console.error('Erro ao buscar treinamentos:', error);
+        throw error;
+      }
+    },
+    retry: 1,
+    staleTime: 0, // Sempre buscar dados frescos para debug
   });
+
+  // Log de debug para acompanhar o estado
+  useEffect(() => {
+    console.log('Estado dos treinamentos:', {
+      isLoading: isLoadingTreinamentos,
+      error: errorTreinamentos,
+      data: treinamentosDisponiveis,
+      length: treinamentosDisponiveis?.length
+    });
+  }, [isLoadingTreinamentos, errorTreinamentos, treinamentosDisponiveis]);
 
   // Ordenar CCAs do menor para o maior
   const sortedCCAs = [...userCCAs].sort((a, b) => a.codigo.localeCompare(b.codigo, undefined, { numeric: true }));
@@ -433,18 +454,37 @@ const TreinamentosNormativo = () => {
                         >
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder={isLoadingTreinamentos ? "Carregando..." : "Selecione o treinamento"} />
+                              <SelectValue placeholder={
+                                isLoadingTreinamentos 
+                                  ? "Carregando treinamentos..." 
+                                  : errorTreinamentos 
+                                    ? "Erro ao carregar treinamentos" 
+                                    : treinamentosDisponiveis.length === 0
+                                      ? "Nenhum treinamento disponível"
+                                      : "Selecione o treinamento"
+                              } />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {treinamentosDisponiveis.map((treinamento) => (
-                              <SelectItem key={treinamento.id} value={treinamento.id}>
-                                {treinamento.nome}
+                            {treinamentosDisponiveis.length > 0 ? (
+                              treinamentosDisponiveis.map((treinamento) => (
+                                <SelectItem key={treinamento.id} value={treinamento.id}>
+                                  {treinamento.nome}
+                                </SelectItem>
+                              ))
+                            ) : (
+                              <SelectItem value="no-options" disabled>
+                                {isLoadingTreinamentos ? "Carregando..." : "Nenhum treinamento encontrado"}
                               </SelectItem>
-                            ))}
+                            )}
                           </SelectContent>
                         </Select>
                         <FormMessage />
+                        {errorTreinamentos && (
+                          <p className="text-sm text-red-600 mt-1">
+                            Erro ao carregar treinamentos. Verifique o console para mais detalhes.
+                          </p>
+                        )}
                       </FormItem>
                     )}
                   />
