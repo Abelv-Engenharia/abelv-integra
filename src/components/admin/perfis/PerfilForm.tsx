@@ -1,12 +1,14 @@
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Perfil, Permissoes } from "@/types/users";
-import { getAllMenusSidebar } from "@/services/perfisService";
+import { getMenusHierarchy, MenuItem, MenuSection } from "@/services/perfisService";
 import { CCASelector } from "./CCASelector";
+import { ChevronDown, ChevronRight } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 interface PerfilFormProps {
   initialData: {
@@ -27,11 +29,48 @@ export const PerfilForm = ({ initialData, onCancel, onSave, loading }: PerfilFor
   const [menusSelecionados, setMenusSelecionados] = useState<string[]>(
     initialData.permissoes.menus_sidebar || []
   );
+  const [expandedSections, setExpandedSections] = useState<string[]>([]);
 
-  // Obter menus definidos globalmente
-  const menusSidebar = getAllMenusSidebar();
+  // Obter estrutura hierárquica de menus
+  const menusHierarchy = getMenusHierarchy();
 
-  // Handler para seleção dos menus da sidebar
+  // Handler para expandir/colapsar seções
+  const handleToggleSection = (sectionKey: string) => {
+    setExpandedSections(prev => 
+      prev.includes(sectionKey) 
+        ? prev.filter(key => key !== sectionKey)
+        : [...prev, sectionKey]
+    );
+  };
+
+  // Handler para seleção completa de menu principal (com todos os submenus)
+  const handleToggleMainMenu = (item: MenuItem) => {
+    if (item.submenus) {
+      const allSubmenus = item.submenus.map(sub => sub.key);
+      const allSelected = allSubmenus.every(key => menusSelecionados.includes(key));
+      
+      if (allSelected) {
+        // Remover todos os submenus
+        setMenusSelecionados(prev => prev.filter(menu => !allSubmenus.includes(menu)));
+      } else {
+        // Adicionar todos os submenus
+        setMenusSelecionados(prev => {
+          const newMenus = [...prev];
+          allSubmenus.forEach(key => {
+            if (!newMenus.includes(key)) {
+              newMenus.push(key);
+            }
+          });
+          return newMenus;
+        });
+      }
+    } else {
+      // Menu simples sem submenus
+      handleToggleSidebarMenu(item.key);
+    }
+  };
+
+  // Handler para seleção individual de submenu
   const handleToggleSidebarMenu = (menu: string) => {
     setMenusSelecionados(prev => {
       if (prev.includes(menu)) {
@@ -40,6 +79,23 @@ export const PerfilForm = ({ initialData, onCancel, onSave, loading }: PerfilFor
         return [...prev, menu];
       }
     });
+  };
+
+  // Verificar se um menu principal está totalmente selecionado
+  const isMainMenuSelected = (item: MenuItem) => {
+    if (item.submenus) {
+      return item.submenus.every(sub => menusSelecionados.includes(sub.key));
+    }
+    return menusSelecionados.includes(item.key);
+  };
+
+  // Verificar se um menu principal está parcialmente selecionado
+  const isMainMenuPartiallySelected = (item: MenuItem) => {
+    if (item.submenus) {
+      const selectedCount = item.submenus.filter(sub => menusSelecionados.includes(sub.key)).length;
+      return selectedCount > 0 && selectedCount < item.submenus.length;
+    }
+    return false;
   };
 
   const handleSave = () => {
@@ -118,21 +174,82 @@ export const PerfilForm = ({ initialData, onCancel, onSave, loading }: PerfilFor
         />
       </div>
 
-      {/* Menus da Sidebar */}
+      {/* Menus da Sidebar - Estrutura Hierárquica */}
       <div className="section-spacing pt-4 border-t">
-        <h4 className="text-sm sm:text-base font-semibold text-orange-700">Menus e Itens da Sidebar</h4>
-        <p className="text-xs sm:text-sm text-muted-foreground">
-          Selecione os menus e submenus da sidebar que este perfil pode visualizar/acessar
+        <h4 className="text-sm sm:text-base font-semibold text-orange-700">Menus e Permissões do Sistema</h4>
+        <p className="text-xs sm:text-sm text-muted-foreground mb-4">
+          Selecione os módulos do sistema que este perfil pode acessar. Você pode selecionar o módulo completo ou apenas submenus específicos.
         </p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 max-h-48 sm:max-h-64 overflow-y-auto border p-2 rounded bg-orange-50">
-          {menusSidebar.map((menu) => (
-            <SidebarMenuCheckbox
-              key={menu}
-              id={menu}
-              label={menu}
-              checked={menusSelecionados.includes(menu)}
-              onChange={() => handleToggleSidebarMenu(menu)}
-            />
+        
+        <div className="space-y-4 max-h-96 overflow-y-auto border rounded-lg p-4 bg-gradient-to-br from-orange-50 to-red-50">
+          {menusHierarchy.map((section) => (
+            <div key={section.key} className="border rounded-lg bg-white/80 backdrop-blur-sm">
+              <Collapsible
+                open={expandedSections.includes(section.key)}
+                onOpenChange={() => handleToggleSection(section.key)}
+              >
+                <CollapsibleTrigger className="flex items-center justify-between w-full p-3 text-left hover:bg-gray-50 rounded-t-lg">
+                  <div className="flex items-center gap-2">
+                    {expandedSections.includes(section.key) ? (
+                      <ChevronDown className="h-4 w-4" />
+                    ) : (
+                      <ChevronRight className="h-4 w-4" />
+                    )}
+                    <span className="font-medium text-sm">{section.label}</span>
+                  </div>
+                </CollapsibleTrigger>
+                
+                <CollapsibleContent className="px-3 pb-3">
+                  <div className="space-y-2 pl-6">
+                    {section.items.map((item) => (
+                      <div key={item.key} className="space-y-2">
+                         {/* Menu Principal */}
+                         <div className="flex items-center gap-2 p-2 rounded bg-gray-50 hover:bg-gray-100">
+                           <MenuCheckbox
+                             id={`main-${item.key}`}
+                             checked={isMainMenuSelected(item)}
+                             indeterminate={isMainMenuPartiallySelected(item)}
+                             onCheckedChange={() => handleToggleMainMenu(item)}
+                           />
+                           <Label 
+                             htmlFor={`main-${item.key}`} 
+                             className="text-sm font-medium cursor-pointer flex-1"
+                           >
+                             {item.label}
+                             {item.submenus && (
+                               <span className="text-xs text-muted-foreground ml-1">
+                                 (Módulo completo)
+                               </span>
+                             )}
+                           </Label>
+                         </div>
+                        
+                        {/* Submenus */}
+                        {item.submenus && (
+                          <div className="pl-6 space-y-1">
+                            {item.submenus.map((submenu) => (
+                              <div key={submenu.key} className="flex items-center gap-2 p-1">
+                                <Checkbox
+                                  id={`sub-${submenu.key}`}
+                                  checked={menusSelecionados.includes(submenu.key)}
+                                  onCheckedChange={() => handleToggleSidebarMenu(submenu.key)}
+                                />
+                                <Label 
+                                  htmlFor={`sub-${submenu.key}`} 
+                                  className="text-xs cursor-pointer text-muted-foreground"
+                                >
+                                  {submenu.label}
+                                </Label>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
+            </div>
           ))}
         </div>
       </div>
@@ -164,3 +281,32 @@ const SidebarMenuCheckbox = ({ id, label, checked, onChange }: SidebarMenuCheckb
     <Label htmlFor={id + "-sidebar"} className="text-xs break-words min-w-0">{label}</Label>
   </div>
 );
+
+interface MenuCheckboxProps {
+  id: string;
+  checked: boolean;
+  indeterminate: boolean;
+  onCheckedChange: () => void;
+}
+
+const MenuCheckbox = ({ id, checked, indeterminate, onCheckedChange }: MenuCheckboxProps) => {
+  const checkboxRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (checkboxRef.current) {
+      const input = checkboxRef.current.querySelector('input[type="checkbox"]') as HTMLInputElement;
+      if (input) {
+        input.indeterminate = indeterminate;
+      }
+    }
+  }, [indeterminate]);
+
+  return (
+    <Checkbox
+      ref={checkboxRef}
+      id={id}
+      checked={checked}
+      onCheckedChange={onCheckedChange}
+    />
+  );
+};
