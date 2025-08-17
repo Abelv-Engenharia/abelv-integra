@@ -25,7 +25,7 @@ interface LogImportacaoHSA {
 // Função para buscar logs de importação HSA
 const fetchLogsImportacaoHSA = async (): Promise<LogImportacaoHSA[]> => {
   const { data, error } = await supabase
-    .from('logs_importacao_hsa')
+    .from('logs_importacao_hsa' as any)
     .select(`
       id,
       data_importacao,
@@ -47,7 +47,7 @@ const fetchLogsImportacaoHSA = async (): Promise<LogImportacaoHSA[]> => {
     throw error;
   }
 
-  return data || [];
+  return (data as any) || [];
 };
 
 export const LogsImportacaoHSA = () => {

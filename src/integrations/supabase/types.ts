@@ -1450,6 +1450,48 @@ export type Database = {
           },
         ]
       }
+      logs_importacao_hsa: {
+        Row: {
+          created_at: string
+          data_importacao: string
+          detalhes_erro: string | null
+          id: string
+          nome_arquivo: string | null
+          registros_atualizados: number
+          registros_com_erro: number
+          registros_criados: number
+          status: string
+          total_registros: number
+          usuario_id: string
+        }
+        Insert: {
+          created_at?: string
+          data_importacao?: string
+          detalhes_erro?: string | null
+          id?: string
+          nome_arquivo?: string | null
+          registros_atualizados?: number
+          registros_com_erro?: number
+          registros_criados?: number
+          status?: string
+          total_registros?: number
+          usuario_id: string
+        }
+        Update: {
+          created_at?: string
+          data_importacao?: string
+          detalhes_erro?: string | null
+          id?: string
+          nome_arquivo?: string | null
+          registros_atualizados?: number
+          registros_com_erro?: number
+          registros_criados?: number
+          status?: string
+          total_registros?: number
+          usuario_id?: string
+        }
+        Relationships: []
+      }
       medidas_disciplinares: {
         Row: {
           ano: string

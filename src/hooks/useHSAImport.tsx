@@ -170,7 +170,7 @@ export const useHSAImport = () => {
 
       // Log da importação
       await supabase
-        .from('logs_importacao_hsa')
+        .from('logs_importacao_hsa' as any)
         .insert({
           usuario_id: userData.user.id,
           total_registros: validationResults.valid.length + validationResults.invalid.length,
