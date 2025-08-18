@@ -144,7 +144,8 @@ const RelatoriosHSA = () => {
 
         // Converter para formato do gráfico
         const chartData = Object.keys(processedData).map(responsavel => ({
-          name: responsavel,
+          name: responsavel.split(' ')[0], // Mostrar apenas o primeiro nome
+          nomeCompleto: responsavel, // Manter nome completo para tooltip
           ...processedData[responsavel]
         }));
 
@@ -415,7 +416,7 @@ const RelatoriosHSA = () => {
                               type="category"
                               dataKey="name"
                               interval={0}
-                              angle={-45}
+                              angle={-90}
                               textAnchor="end"
                               height={140}
                               tick={{
