@@ -11,12 +11,30 @@ import {
 import { Form } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { desviosCompletosService, DesvioCompleto } from "@/services/desvios/desviosCompletosService";
+import { supabase } from "@/integrations/supabase/client";
 import { useFilteredFormData } from "@/hooks/useFilteredFormData";
 import NovaIdentificacaoForm from "@/components/desvios/forms/NovaIdentificacaoForm";
 import InformacoesDesvioForm from "@/components/desvios/forms/InformacoesDesvioForm";
 import AcaoCorretivaForm from "@/components/desvios/forms/AcaoCorretivaForm";
 import ClassificacaoRiscoForm from "@/components/desvios/forms/ClassificacaoRiscoForm";
 import { calculateStatusAcao } from "@/utils/desviosUtils";
+
+// Helper function to convert database types to our interface
+const convertDbToDesvio = (dbDesvio: any): DesvioCompleto => {
+  return {
+    ...dbDesvio,
+    funcionarios_envolvidos: Array.isArray(dbDesvio.funcionarios_envolvidos) 
+      ? dbDesvio.funcionarios_envolvidos 
+      : dbDesvio.funcionarios_envolvidos 
+        ? [dbDesvio.funcionarios_envolvidos] 
+        : [],
+    acoes: Array.isArray(dbDesvio.acoes) 
+      ? dbDesvio.acoes 
+      : dbDesvio.acoes 
+        ? [dbDesvio.acoes] 
+        : [],
+  };
+};
 
 interface EditDesvioDialogProps {
   desvio: DesvioCompleto | null;
@@ -161,10 +179,15 @@ const EditDesvioDialog = ({ desvio, open, onOpenChange, onDesvioUpdated }: EditD
         data_desvio: data.data,
         hora_desvio: data.hora,
         responsavel_inspecao: data.responsavelInspecao,
-        descricao_desvio: data.descricaoDesvio
+        descricao_desvio: data.descricaoDesvio,
+        probabilidade: data.probabilidade,
+        severidade: data.severidade,
+        classificacao_risco: data.classificacaoRisco
       });
 
-      const updatedDesvio = await desviosCompletosService.update(desvio.id, {
+      // Para permitir edição manual dos valores calculados, usaremos uma abordagem diferente
+      // Primeiro, atualizamos sem os campos calculados automaticamente
+      const baseUpdates = {
         data_desvio: data.data,
         hora_desvio: data.hora,
         responsavel_inspecao: data.responsavelInspecao,
@@ -181,15 +204,7 @@ const EditDesvioDialog = ({ desvio, open, onOpenChange, onDesvioUpdated }: EditD
         disciplina_id: data.disciplina ? parseInt(data.disciplina) : null,
         descricao_desvio: data.descricaoDesvio,
         acao_imediata: data.tratativaAplicada,
-        exposicao: data.exposicao ? parseInt(data.exposicao) : null,
-        controle: data.controle ? parseInt(data.controle) : null,
-        deteccao: data.deteccao ? parseInt(data.deteccao) : null,
-        efeito_falha: data.efeitoFalha ? parseInt(data.efeitoFalha) : null,
-        impacto: data.impacto ? parseInt(data.impacto) : null,
-        probabilidade: data.probabilidade,
-        severidade: data.severidade,
         status: data.situacao,
-        classificacao_risco: data.classificacaoRisco,
         responsavel_id: desvio.responsavel_id,
         prazo_conclusao: data.prazoCorrecao || null,
         funcionarios_envolvidos: data.colaboradorInfrator ? [{
@@ -206,23 +221,95 @@ const EditDesvioDialog = ({ desvio, open, onOpenChange, onDesvioUpdated }: EditD
             medida_disciplinar: data.aplicacaoMedidaDisciplinar,
             tratativa: data.tratativaAplicada
         }] : [],
-      });
+      };
 
-      if (updatedDesvio) {
-        console.log('Desvio atualizado com sucesso:', updatedDesvio);
-        toast({
-          title: "Desvio atualizado",
-          description: "O desvio foi atualizado com sucesso.",
-        });
-        onDesvioUpdated();
-        onOpenChange(false);
+      // Se os valores de risco foram alterados manualmente, fazemos update direto via SQL
+      if (data.probabilidade !== desvio.probabilidade || 
+          data.severidade !== desvio.severidade || 
+          data.classificacaoRisco !== desvio.classificacao_risco) {
+        
+        console.log('Atualizando valores de risco manualmente...');
+        
+        // Primeiro update dos campos base
+        await supabase
+          .from('desvios_completos')
+          .update(baseUpdates)
+          .eq('id', desvio.id);
+
+        // Segundo update para sobrescrever os valores calculados pelos triggers
+        const { data: updatedData, error: updateError } = await supabase
+          .from('desvios_completos')
+          .update({
+            probabilidade: data.probabilidade,
+            severidade: data.severidade,
+            classificacao_risco: data.classificacaoRisco,
+            // Zeramos os campos que causam o recálculo automático temporariamente
+            exposicao: null,
+            controle: null,
+            deteccao: null,
+            efeito_falha: null,
+            impacto: null
+          })
+          .eq('id', desvio.id)
+          .select()
+          .single();
+
+        if (updateError) throw updateError;
+        
+        // Terceiro update para restaurar os valores originais de exposição/controle/etc se existirem
+        if (data.exposicao || data.controle || data.deteccao || data.efeitoFalha || data.impacto) {
+          await supabase
+            .from('desvios_completos')
+            .update({
+              exposicao: data.exposicao ? parseInt(data.exposicao) : null,
+              controle: data.controle ? parseInt(data.controle) : null,
+              deteccao: data.deteccao ? parseInt(data.deteccao) : null,
+              efeito_falha: data.efeitoFalha ? parseInt(data.efeitoFalha) : null,
+              impacto: data.impacto ? parseInt(data.impacto) : null,
+            })
+            .eq('id', desvio.id);
+        }
+
+        const updatedDesvio = convertDbToDesvio(updatedData);
+        
+        if (updatedDesvio) {
+          console.log('Desvio atualizado com valores manuais:', updatedDesvio);
+          toast({
+            title: "Desvio atualizado",
+            description: "O desvio foi atualizado com os valores de risco personalizados.",
+          });
+          onDesvioUpdated();
+          onOpenChange(false);
+        }
       } else {
-        console.error('Nenhum desvio foi retornado na atualização');
-        toast({
-          title: "Erro na atualização",
-          description: "A atualização não retornou dados.",
-          variant: "destructive",
-        });
+        // Update normal com os campos de exposição/controle que farão o cálculo automático
+        const updatesWithRisk = {
+          ...baseUpdates,
+          exposicao: data.exposicao ? parseInt(data.exposicao) : null,
+          controle: data.controle ? parseInt(data.controle) : null,
+          deteccao: data.deteccao ? parseInt(data.deteccao) : null,
+          efeito_falha: data.efeitoFalha ? parseInt(data.efeitoFalha) : null,
+          impacto: data.impacto ? parseInt(data.impacto) : null,
+        };
+
+        const updatedDesvio = await desviosCompletosService.update(desvio.id, updatesWithRisk);
+
+        if (updatedDesvio) {
+          console.log('Desvio atualizado com sucesso:', updatedDesvio);
+          toast({
+            title: "Desvio atualizado",
+            description: "O desvio foi atualizado com sucesso.",
+          });
+          onDesvioUpdated();
+          onOpenChange(false);
+        } else {
+          console.error('Nenhum desvio foi retornado na atualização');
+          toast({
+            title: "Erro na atualização",
+            description: "A atualização não retornou dados.",
+            variant: "destructive",
+          });
+        }
       }
     } catch (error) {
       console.error('Erro ao atualizar desvio:', error);
