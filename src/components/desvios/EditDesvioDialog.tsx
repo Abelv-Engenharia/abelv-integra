@@ -186,6 +186,8 @@ const EditDesvioDialog = ({ desvio, open, onOpenChange, onDesvioUpdated }: EditD
         deteccao: data.deteccao ? parseInt(data.deteccao) : null,
         efeito_falha: data.efeitoFalha ? parseInt(data.efeitoFalha) : null,
         impacto: data.impacto ? parseInt(data.impacto) : null,
+        probabilidade: data.probabilidade,
+        severidade: data.severidade,
         status: data.situacao,
         classificacao_risco: data.classificacaoRisco,
         responsavel_id: desvio.responsavel_id,
