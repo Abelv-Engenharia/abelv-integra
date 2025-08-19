@@ -229,34 +229,50 @@ const EditDesvioDialog = ({ desvio, open, onOpenChange, onDesvioUpdated }: EditD
           data.classificacaoRisco !== desvio.classificacao_risco) {
         
         console.log('Atualizando valores de risco manualmente...');
+        console.log('Valores originais:', { 
+          probabilidade: desvio.probabilidade, 
+          severidade: desvio.severidade, 
+          classificacao_risco: desvio.classificacao_risco 
+        });
+        console.log('Novos valores:', { 
+          probabilidade: data.probabilidade, 
+          severidade: data.severidade, 
+          classificacao_risco: data.classificacaoRisco 
+        });
         
-        // Primeiro update dos campos base
+        // Primeiro update dos campos base sem os campos de risco
         await supabase
           .from('desvios_completos')
           .update(baseUpdates)
           .eq('id', desvio.id);
 
-        // Segundo update para sobrescrever os valores calculados pelos triggers
-        const { data: updatedData, error: updateError } = await supabase
+        // Segundo update: forçar valores manuais de risco primeiro zerando os campos de entrada
+        await supabase
+          .from('desvios_completos')
+          .update({
+            exposicao: null,
+            controle: null,
+            deteccao: null,
+            efeito_falha: null,
+            impacto: null,
+          })
+          .eq('id', desvio.id);
+
+        // Terceiro update: definir os valores de risco manualmente
+        const { data: finalData, error: finalError } = await supabase
           .from('desvios_completos')
           .update({
             probabilidade: data.probabilidade,
             severidade: data.severidade,
             classificacao_risco: data.classificacaoRisco,
-            // Zeramos os campos que causam o recálculo automático temporariamente
-            exposicao: null,
-            controle: null,
-            deteccao: null,
-            efeito_falha: null,
-            impacto: null
           })
           .eq('id', desvio.id)
           .select()
           .single();
-
-        if (updateError) throw updateError;
+            
+        if (finalError) throw finalError;
         
-        // Terceiro update para restaurar os valores originais de exposição/controle/etc se existirem
+        // Quarto update para restaurar os valores originais de exposição/controle/etc se existirem
         if (data.exposicao || data.controle || data.deteccao || data.efeitoFalha || data.impacto) {
           await supabase
             .from('desvios_completos')
@@ -270,7 +286,7 @@ const EditDesvioDialog = ({ desvio, open, onOpenChange, onDesvioUpdated }: EditD
             .eq('id', desvio.id);
         }
 
-        const updatedDesvio = convertDbToDesvio(updatedData);
+        const updatedDesvio = convertDbToDesvio(finalData);
         
         if (updatedDesvio) {
           console.log('Desvio atualizado com valores manuais:', updatedDesvio);
