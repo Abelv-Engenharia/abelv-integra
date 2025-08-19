@@ -153,8 +153,16 @@ const EditDesvioDialog = ({ desvio, open, onOpenChange, onDesvioUpdated }: EditD
     setIsLoading(true);
     try {
       console.log('Dados do formulário de edição:', data);
+      console.log('ID do desvio para atualização:', desvio.id);
       
       const situacaoAcaoCalculada = calculateStatusAcao(data.situacao, data.prazoCorrecao);
+
+      console.log('Dados que serão enviados para atualização:', {
+        data_desvio: data.data,
+        hora_desvio: data.hora,
+        responsavel_inspecao: data.responsavelInspecao,
+        descricao_desvio: data.descricaoDesvio
+      });
 
       const updatedDesvio = await desviosCompletosService.update(desvio.id, {
         data_desvio: data.data,
@@ -199,12 +207,20 @@ const EditDesvioDialog = ({ desvio, open, onOpenChange, onDesvioUpdated }: EditD
       });
 
       if (updatedDesvio) {
+        console.log('Desvio atualizado com sucesso:', updatedDesvio);
         toast({
           title: "Desvio atualizado",
           description: "O desvio foi atualizado com sucesso.",
         });
         onDesvioUpdated();
         onOpenChange(false);
+      } else {
+        console.error('Nenhum desvio foi retornado na atualização');
+        toast({
+          title: "Erro na atualização",
+          description: "A atualização não retornou dados.",
+          variant: "destructive",
+        });
       }
     } catch (error) {
       console.error('Erro ao atualizar desvio:', error);
