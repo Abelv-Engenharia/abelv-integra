@@ -9,7 +9,7 @@ export type Tarefa = {
   tipoCca: TipoCCA;
   dataCadastro: string;
   dataConclusao: string;
-  data_real_conclusao?: string | null; // <-- NOVO: campo opcional para a data real de conclusão
+  data_real_conclusao?: string | null;
   descricao: string;
   titulo?: string;
   responsavel: {
@@ -17,6 +17,7 @@ export type Tarefa = {
     nome: string;
   };
   anexo?: string;
+  observacoes_progresso?: string; // Added this field
   status: TarefaStatus;
   iniciada: boolean;
   configuracao: {
