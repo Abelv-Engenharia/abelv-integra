@@ -7,6 +7,7 @@ import { Tarefa } from "@/types/tarefas";
 import { tarefasService } from "@/services/tarefasService";
 import { Search } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 
 const MinhasTarefas = () => {
   const [tarefas, setTarefas] = useState<Tarefa[]>([]);
@@ -14,23 +15,38 @@ const MinhasTarefas = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("todas");
   const [loading, setLoading] = useState(true);
+  const [debugInfo, setDebugInfo] = useState<string>("");
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user } = useAuth();
 
   useEffect(() => {
     const fetchMinhasTarefas = async () => {
       try {
+        console.log("=== MinhasTarefas: Iniciando busca ===");
+        console.log("Usuário autenticado:", user?.id, user?.email);
+        
         const data = await tarefasService.getMyTasks();
+        console.log("=== MinhasTarefas: Resultado ===", data?.length || 0);
+        
         setTarefas(data);
         setFilteredTarefas(data);
+        
+        // Informações de debug para o usuário
+        if (data.length === 0) {
+          setDebugInfo(`Nenhuma tarefa encontrada para o usuário ${user?.email}. Verifique se há tarefas onde você é responsável ou criador.`);
+        } else {
+          setDebugInfo(`${data.length} tarefa(s) encontrada(s)`);
+        }
       } catch (error) {
         console.error("Erro ao carregar minhas tarefas:", error);
+        setDebugInfo(`Erro ao carregar tarefas: ${error}`);
       } finally {
         setLoading(false);
       }
     };
     fetchMinhasTarefas();
-  }, []);
+  }, [user]);
 
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
     const term = event.target.value.toLowerCase();
@@ -107,6 +123,11 @@ const MinhasTarefas = () => {
         <p className="text-muted-foreground">
           Acompanhe e gerencie suas tarefas atribuídas ou criadas por você
         </p>
+        {debugInfo && (
+          <p className="text-sm text-blue-600 bg-blue-50 p-2 rounded">
+            Debug: {debugInfo}
+          </p>
+        )}
       </div>
 
       <div className="flex flex-col md:flex-row gap-4">
@@ -151,6 +172,15 @@ const MinhasTarefas = () => {
                 : "Nenhuma tarefa corresponde aos filtros aplicados."
               }
             </p>
+            {tarefas.length === 0 && (
+              <div className="mt-4 text-sm text-gray-600">
+                <p>Tarefas aparecem aqui quando:</p>
+                <ul className="list-disc list-inside mt-2">
+                  <li>Você é definido como responsável por uma tarefa</li>
+                  <li>Você criou uma tarefa</li>
+                </ul>
+              </div>
+            )}
           </div>
         )}
       </div>
