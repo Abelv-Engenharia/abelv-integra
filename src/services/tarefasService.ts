@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { Tarefa, TarefaStatus, TarefaCriticidade } from "@/types/tarefas";
 
@@ -163,24 +164,42 @@ export const tarefasService = {
       console.log("User ID:", user.id);
       console.log("User email:", user.email);
 
-      // Query principal para buscar tarefas
-      console.log("=== Executando query principal ===");
-      const { data: tarefasData, error: tarefasError } = await supabase
+      // Query simplificada - buscar tarefas onde sou responsável
+      console.log("=== Buscando tarefas onde sou responsável ===");
+      const { data: tarefasResponsavel, error: errorResponsavel } = await supabase
         .from('tarefas')
         .select('*')
-        .or(`responsavel_id.eq.${user.id},criado_por.eq.${user.id}`)
+        .eq('responsavel_id', user.id)
         .order('created_at', { ascending: false });
 
-      if (tarefasError) {
-        console.error("Erro na query de tarefas:", tarefasError);
-        return [];
+      if (errorResponsavel) {
+        console.error("Erro ao buscar tarefas como responsável:", errorResponsavel);
       }
 
-      console.log("=== Tarefas encontradas na query principal ===", tarefasData?.length || 0);
-      console.log("Dados brutos das tarefas:", tarefasData);
+      // Query simplificada - buscar tarefas que criei
+      console.log("=== Buscando tarefas que criei ===");
+      const { data: tarefasCriadas, error: errorCriadas } = await supabase
+        .from('tarefas')
+        .select('*')
+        .eq('criado_por', user.id)
+        .order('created_at', { ascending: false });
 
-      if (!tarefasData || tarefasData.length === 0) {
-        // Query de debug para entender o problema
+      if (errorCriadas) {
+        console.error("Erro ao buscar tarefas criadas:", errorCriadas);
+      }
+
+      // Combinar resultados e remover duplicatas
+      const todasTarefas = [...(tarefasResponsavel || []), ...(tarefasCriadas || [])];
+      const tarefasUnicas = todasTarefas.filter((tarefa, index, self) => 
+        index === self.findIndex(t => t.id === tarefa.id)
+      );
+
+      console.log("=== Resultado das queries ===");
+      console.log("Tarefas como responsável:", tarefasResponsavel?.length || 0);
+      console.log("Tarefas criadas:", tarefasCriadas?.length || 0);
+      console.log("Total único:", tarefasUnicas.length);
+
+      if (tarefasUnicas.length === 0) {
         console.log("=== QUERY DE DEBUG: Verificando todas as tarefas ===");
         const { data: allTasks, error: allError } = await supabase
           .from('tarefas')
@@ -208,7 +227,7 @@ export const tarefasService = {
       }
 
       // Buscar profiles dos responsáveis
-      const responsavelIds = [...new Set(tarefasData.map(t => t.responsavel_id).filter(Boolean))];
+      const responsavelIds = [...new Set(tarefasUnicas.map(t => t.responsavel_id).filter(Boolean))];
       console.log("=== Buscando profiles dos responsáveis ===");
       console.log("IDs de responsáveis únicos:", responsavelIds);
 
@@ -232,7 +251,7 @@ export const tarefasService = {
       }
 
       // Mapear as tarefas com os dados dos profiles
-      const tarefasMapeadas = tarefasData.map(tarefa => {
+      const tarefasMapeadas = tarefasUnicas.map(tarefa => {
         console.log(`=== Mapeando tarefa ${tarefa.id} ===`);
         console.log("Dados brutos da tarefa:", tarefa);
         
