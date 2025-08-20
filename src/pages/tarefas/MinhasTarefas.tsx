@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
@@ -27,43 +28,47 @@ const MinhasTarefas = () => {
         console.log("Usuário autenticado:", user?.id, user?.email);
         
         if (!user) {
-          setDebugInfo("Usuário não autenticado");
+          setDebugInfo("❌ Usuário não autenticado");
           setLoading(false);
           return;
         }
         
+        setDebugInfo("⏳ Carregando tarefas...");
         const data = await tarefasService.getMyTasks();
         console.log("=== MinhasTarefas: Resultado ===", data?.length || 0);
-        console.log("Tarefas retornadas:", data);
         
         setTarefas(data);
         setFilteredTarefas(data);
         
-        // Informações de debug detalhadas para o usuário
         if (data.length === 0) {
           setDebugInfo(`
-            Nenhuma tarefa encontrada para o usuário ${user?.email}. 
-            Detalhes técnicos:
-            - User ID: ${user?.id}
-            - Verifique se há tarefas na tabela 'tarefas' onde:
-              • responsavel_id = '${user?.id}' OU
-              • criado_por = '${user?.id}'
-            - Verifique as políticas RLS da tabela 'tarefas'
+❌ Nenhuma tarefa encontrada para ${user?.email}
+
+Possíveis causas:
+• Você não é responsável por nenhuma tarefa
+• Você não criou nenhuma tarefa
+• As políticas RLS podem estar restringindo o acesso
+• Verifique se existem tarefas na tabela 'tarefas' onde:
+  - responsavel_id = '${user?.id}' OU
+  - criado_por = '${user?.id}'
+
+🔧 User ID: ${user?.id}
           `);
         } else {
           const tarefasResponsavel = data.filter(t => t.responsavel.id === user?.id);
           const tarefasCriadas = data.filter(t => (t as any).criado_por === user?.id);
           
           setDebugInfo(`
-            ${data.length} tarefa(s) encontrada(s):
-            - ${tarefasResponsavel.length} como responsável
-            - ${tarefasCriadas.length} criadas por você
-            - User ID: ${user?.id}
+✅ ${data.length} tarefa(s) encontrada(s):
+• ${tarefasResponsavel.length} como responsável
+• ${tarefasCriadas.length} criadas por você
+• User ID: ${user?.id}
+• Email: ${user?.email}
           `);
         }
       } catch (error) {
         console.error("Erro ao carregar minhas tarefas:", error);
-        setDebugInfo(`Erro ao carregar tarefas: ${error}`);
+        setDebugInfo(`❌ Erro ao carregar tarefas: ${error}`);
         toast({
           title: "Erro ao carregar tarefas",
           description: "Não foi possível carregar suas tarefas. Tente novamente.",
@@ -142,7 +147,8 @@ const MinhasTarefas = () => {
           </p>
         </div>
         <div className="flex justify-center items-center p-8">
-          <p>Carregando tarefas...</p>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          <p className="ml-3">Carregando tarefas...</p>
         </div>
       </div>
     );
@@ -156,36 +162,38 @@ const MinhasTarefas = () => {
           Acompanhe e gerencie suas tarefas atribuídas ou criadas por você
         </p>
         {debugInfo && (
-          <div className="text-sm text-blue-600 bg-blue-50 p-3 rounded border">
-            <strong>Debug Info:</strong>
-            <pre className="whitespace-pre-wrap mt-1">{debugInfo}</pre>
+          <div className="text-sm bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 p-4 rounded-lg">
+            <strong className="text-blue-800 dark:text-blue-200">Debug Info:</strong>
+            <pre className="whitespace-pre-wrap mt-2 text-blue-700 dark:text-blue-300 font-mono text-xs">{debugInfo}</pre>
           </div>
         )}
       </div>
 
-      <div className="flex flex-col md:flex-row gap-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Pesquisar tarefas..."
-            value={searchTerm}
-            onChange={handleSearch}
-            className="pl-8"
-          />
+      {!loading && tarefas.length > 0 && (
+        <div className="flex flex-col md:flex-row gap-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Pesquisar tarefas..."
+              value={searchTerm}
+              onChange={handleSearch}
+              className="pl-8"
+            />
+          </div>
+          <Select defaultValue="todas" onValueChange={handleStatusFilter}>
+            <SelectTrigger className="w-full md:w-[180px]">
+              <SelectValue placeholder="Filtrar por status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="todas">Todas as tarefas</SelectItem>
+              <SelectItem value="programada">Programadas</SelectItem>
+              <SelectItem value="em-andamento">Em andamento</SelectItem>
+              <SelectItem value="pendente">Pendentes</SelectItem>
+              <SelectItem value="concluida">Concluídas</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
-        <Select defaultValue="todas" onValueChange={handleStatusFilter}>
-          <SelectTrigger className="w-full md:w-[180px]">
-            <SelectValue placeholder="Filtrar por status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="todas">Todas as tarefas</SelectItem>
-            <SelectItem value="programada">Programadas</SelectItem>
-            <SelectItem value="em-andamento">Em andamento</SelectItem>
-            <SelectItem value="pendente">Pendentes</SelectItem>
-            <SelectItem value="concluida">Concluídas</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+      )}
 
       <div className="space-y-4">
         {filteredTarefas.length > 0 ? (
@@ -198,23 +206,27 @@ const MinhasTarefas = () => {
             />
           ))
         ) : (
-          <div className="text-center p-8">
-            <p className="text-muted-foreground">
+          <div className="text-center p-8 bg-gray-50 dark:bg-gray-900 rounded-lg">
+            <p className="text-muted-foreground text-lg mb-4">
               {tarefas.length === 0 
                 ? "Nenhuma tarefa encontrada para você." 
                 : "Nenhuma tarefa corresponde aos filtros aplicados."
               }
             </p>
             {tarefas.length === 0 && (
-              <div className="mt-4 text-sm text-gray-600">
-                <p>Tarefas aparecem aqui quando:</p>
-                <ul className="list-disc list-inside mt-2">
-                  <li>Você é definido como responsável por uma tarefa</li>
-                  <li>Você criou uma tarefa</li>
-                </ul>
-                <p className="mt-3 text-xs text-gray-500">
-                  Se você acredita que deveria ver tarefas aqui, verifique com o administrador do sistema.
-                </p>
+              <div className="text-sm text-gray-600 dark:text-gray-400 space-y-3">
+                <div className="bg-white dark:bg-gray-800 p-4 rounded border">
+                  <p className="font-medium mb-2">📋 Tarefas aparecem aqui quando:</p>
+                  <ul className="list-disc list-inside space-y-1 text-left max-w-md mx-auto">
+                    <li>Você é definido como responsável por uma tarefa</li>
+                    <li>Você criou uma tarefa</li>
+                  </ul>
+                </div>
+                <div className="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded border border-yellow-200 dark:border-yellow-800">
+                  <p className="text-yellow-800 dark:text-yellow-200 text-sm">
+                    💡 Se você acredita que deveria ver tarefas aqui, verifique com o administrador do sistema ou consulte os logs de debug acima.
+                  </p>
+                </div>
               </div>
             )}
           </div>

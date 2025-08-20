@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { Tarefa, TarefaStatus, TarefaCriticidade } from "@/types/tarefas";
 
@@ -164,130 +163,102 @@ export const tarefasService = {
       console.log("User ID:", user.id);
       console.log("User email:", user.email);
 
-      // Primeiro, vamos buscar todas as tarefas para debug
-      const { data: allTasks, error: allTasksError } = await supabase
+      // Query simplificada sem JOIN primeiro
+      console.log("=== Executando query simplificada sem JOIN ===");
+      const { data: tarefasData, error: tarefasError } = await supabase
         .from('tarefas')
-        .select(`
-          id,
-          titulo,
-          responsavel_id,
-          criado_por,
-          status,
-          created_at
-        `)
-        .order('created_at', { ascending: false });
-
-      if (allTasksError) {
-        console.error("Erro ao buscar todas as tarefas para debug:", allTasksError);
-      } else {
-        console.log("=== DEBUG: Total de tarefas na base ===", allTasks?.length || 0);
-        if (allTasks && allTasks.length > 0) {
-          console.log("Primeiras 5 tarefas da base:", allTasks.slice(0, 5).map(t => ({
-            id: t.id,
-            titulo: t.titulo,
-            responsavel_id: t.responsavel_id,
-            criado_por: t.criado_por,
-            eh_responsavel: t.responsavel_id === user.id,
-            eh_criador: t.criado_por === user.id
-          })));
-          
-          // Contar quantas tarefas o usuário deveria ver
-          const minhasTarefasCount = allTasks.filter(t => 
-            t.responsavel_id === user.id || t.criado_por === user.id
-          ).length;
-          console.log("Tarefas que o usuário deveria ver:", minhasTarefasCount);
-        }
-      }
-
-      // Tentar a query principal com LEFT JOIN
-      console.log("=== Tentando query principal com LEFT JOIN ===");
-      const { data, error } = await supabase
-        .from('tarefas')
-        .select(`
-          *,
-          profiles!left(id, nome)
-        `)
+        .select('*')
         .or(`responsavel_id.eq.${user.id},criado_por.eq.${user.id}`)
         .order('created_at', { ascending: false });
 
-      if (error) {
-        console.error("Erro na query principal:", error);
-        console.error("Detalhes do erro:", JSON.stringify(error, null, 2));
-        
-        // Tentar query mais simples sem o JOIN
-        console.log("=== Tentando query alternativa sem JOIN ===");
-        const { data: simpleData, error: simpleError } = await supabase
+      if (tarefasError) {
+        console.error("Erro na query de tarefas:", tarefasError);
+        return [];
+      }
+
+      console.log("=== Tarefas encontradas na query simplificada ===", tarefasData?.length || 0);
+
+      if (!tarefasData || tarefasData.length === 0) {
+        // Vamos fazer uma query para ver TODAS as tarefas e entender o problema
+        const { data: allTasks, error: allError } = await supabase
           .from('tarefas')
-          .select('*')
-          .or(`responsavel_id.eq.${user.id},criado_por.eq.${user.id}`)
-          .order('created_at', { ascending: false });
+          .select('id, titulo, responsavel_id, criado_por, status')
+          .limit(10);
         
-        if (simpleError) {
-          console.error("Erro na query alternativa:", simpleError);
-          return [];
+        console.log("=== DEBUG: Primeiras 10 tarefas da base ===");
+        console.log("Total de tarefas na base:", allTasks?.length || 0);
+        if (allTasks && allTasks.length > 0) {
+          allTasks.forEach(task => {
+            console.log(`Tarefa ${task.id}:`, {
+              titulo: task.titulo,
+              responsavel: task.responsavel_id,
+              criador: task.criado_por,
+              eh_minha_responsavel: task.responsavel_id === user.id,
+              eh_minha_criada: task.criado_por === user.id
+            });
+          });
         }
         
-        console.log("Query alternativa funcionou! Tarefas encontradas:", simpleData?.length || 0);
-        
-        // Processar os dados sem o JOIN do profile
-        return (simpleData || []).map(tarefa => ({
-          id: tarefa.id,
-          cca: tarefa.cca,
-          tipoCca: 'linha-inteira' as const,
-          dataCadastro: tarefa.data_cadastro,
-          dataConclusao: tarefa.data_conclusao,
-          data_real_conclusao: tarefa.data_real_conclusao ?? null,
-          descricao: tarefa.descricao,
-          titulo: tarefa.titulo ?? "",
-          responsavel: {
-            id: tarefa.responsavel_id || '',
-            nome: 'Usuário'
-          },
-          anexo: tarefa.anexo,
-          status: tarefa.status as TarefaStatus,
-          iniciada: tarefa.iniciada,
-          configuracao: tarefa.configuracao as any
-        }));
+        return [];
       }
 
-      console.log("=== DEBUG: Resultado da query principal ===");
-      console.log("Tarefas encontradas:", data?.length || 0);
+      // Agora buscar os profiles dos responsáveis
+      const responsavelIds = [...new Set(tarefasData.map(t => t.responsavel_id).filter(Boolean))];
+      console.log("IDs de responsáveis únicos:", responsavelIds);
 
-      if (data && data.length > 0) {
-        console.log("Detalhes das tarefas encontradas:");
-        data.forEach((tarefa, index) => {
-          console.log(`Tarefa ${index + 1}:`, {
-            id: tarefa.id,
-            titulo: tarefa.titulo,
-            responsavel_id: tarefa.responsavel_id,
-            criado_por: tarefa.criado_por,
-            status: tarefa.status,
-            eh_responsavel: tarefa.responsavel_id === user.id,
-            eh_criador: tarefa.criado_por === user.id
-          });
+      let profilesMap: Record<string, any> = {};
+      
+      if (responsavelIds.length > 0) {
+        const { data: profilesData, error: profilesError } = await supabase
+          .from('profiles')
+          .select('id, nome')
+          .in('id', responsavelIds);
+
+        if (!profilesError && profilesData) {
+          profilesMap = profilesData.reduce((acc, profile) => {
+            acc[profile.id] = profile;
+            return acc;
+          }, {} as Record<string, any>);
+        } else {
+          console.warn("Erro ao buscar profiles:", profilesError);
+        }
+      }
+
+      console.log("Profiles encontrados:", Object.keys(profilesMap).length);
+
+      // Mapear as tarefas com os dados dos profiles
+      const tarefasMapeadas = tarefasData.map(tarefa => ({
+        id: tarefa.id,
+        cca: tarefa.cca,
+        tipoCca: 'linha-inteira' as const,
+        dataCadastro: tarefa.data_cadastro,
+        dataConclusao: tarefa.data_conclusao,
+        data_real_conclusao: tarefa.data_real_conclusao ?? null,
+        descricao: tarefa.descricao,
+        titulo: tarefa.titulo ?? "",
+        responsavel: {
+          id: tarefa.responsavel_id || '',
+          nome: profilesMap[tarefa.responsavel_id]?.nome || 'Não atribuído'
+        },
+        anexo: tarefa.anexo,
+        status: tarefa.status as TarefaStatus,
+        iniciada: tarefa.iniciada,
+        observacoes_progresso: tarefa.observacoes_progresso,
+        configuracao: tarefa.configuracao as any
+      }));
+
+      console.log("=== Resultado final ===");
+      console.log("Tarefas mapeadas:", tarefasMapeadas.length);
+      tarefasMapeadas.forEach((tarefa, index) => {
+        console.log(`Tarefa ${index + 1}:`, {
+          id: tarefa.id,
+          titulo: tarefa.titulo,
+          status: tarefa.status,
+          responsavel: tarefa.responsavel.nome
         });
-      }
-
-      return (data || []).map(tarefa => {
-        return {
-          id: tarefa.id,
-          cca: tarefa.cca,
-          tipoCca: 'linha-inteira' as const,
-          dataCadastro: tarefa.data_cadastro,
-          dataConclusao: tarefa.data_conclusao,
-          data_real_conclusao: tarefa.data_real_conclusao ?? null,
-          descricao: tarefa.descricao,
-          titulo: tarefa.titulo ?? "",
-          responsavel: {
-            id: tarefa.responsavel_id || '',
-            nome: tarefa.profiles?.nome || 'Não atribuído'
-          },
-          anexo: tarefa.anexo,
-          status: tarefa.status as TarefaStatus,
-          iniciada: tarefa.iniciada,
-          configuracao: tarefa.configuracao as any
-        };
       });
+
+      return tarefasMapeadas;
     } catch (error) {
       console.error("Exceção ao buscar minhas tarefas:", error);
       return [];
