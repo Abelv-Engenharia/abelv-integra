@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { Tarefa, TarefaStatus, TarefaCriticidade } from "@/types/tarefas";
 
@@ -30,6 +31,8 @@ export interface TarefaUpdateData {
 export const tarefasService = {
   async getById(id: string): Promise<Tarefa | null> {
     try {
+      console.log("=== getById: Buscando tarefa com ID ===", id);
+      
       const { data, error } = await supabase
         .from('tarefas')
         .select(`
@@ -44,7 +47,12 @@ export const tarefasService = {
         return null;
       }
 
-      if (!data) return null;
+      if (!data) {
+        console.log("Nenhuma tarefa encontrada com ID:", id);
+        return null;
+      }
+
+      console.log("Tarefa encontrada:", data);
 
       return {
         id: data.id,
@@ -102,6 +110,8 @@ export const tarefasService = {
 
   async getAll(): Promise<Tarefa[]> {
     try {
+      console.log("=== getAll: Buscando todas as tarefas ===");
+      
       const { data, error } = await supabase
         .from('tarefas')
         .select(`
@@ -114,6 +124,8 @@ export const tarefasService = {
         console.error("Erro ao buscar tarefas:", error);
         return [];
       }
+
+      console.log("Total de tarefas encontradas:", data?.length || 0);
 
       return (data || []).map(tarefa => ({
         id: tarefa.id,
@@ -152,7 +164,7 @@ export const tarefasService = {
       console.log("User ID:", user.id);
       console.log("User email:", user.email);
 
-      // Primeiro, vamos buscar todas as tarefas sem filtros para debug
+      // Primeiro, vamos buscar todas as tarefas para debug
       const { data: allTasks, error: allTasksError } = await supabase
         .from('tarefas')
         .select(`
@@ -169,8 +181,8 @@ export const tarefasService = {
         console.error("Erro ao buscar todas as tarefas para debug:", allTasksError);
       } else {
         console.log("=== DEBUG: Total de tarefas na base ===", allTasks?.length || 0);
-        if (allTasks) {
-          console.log("Primeiras 5 tarefas:", allTasks.slice(0, 5).map(t => ({
+        if (allTasks && allTasks.length > 0) {
+          console.log("Primeiras 5 tarefas da base:", allTasks.slice(0, 5).map(t => ({
             id: t.id,
             titulo: t.titulo,
             responsavel_id: t.responsavel_id,
@@ -178,10 +190,17 @@ export const tarefasService = {
             eh_responsavel: t.responsavel_id === user.id,
             eh_criador: t.criado_por === user.id
           })));
+          
+          // Contar quantas tarefas o usuário deveria ver
+          const minhasTarefasCount = allTasks.filter(t => 
+            t.responsavel_id === user.id || t.criado_por === user.id
+          ).length;
+          console.log("Tarefas que o usuário deveria ver:", minhasTarefasCount);
         }
       }
 
-      // Agora fazer a busca das tarefas do usuário com LEFT JOIN para não perder dados
+      // Tentar a query principal com LEFT JOIN
+      console.log("=== Tentando query principal com LEFT JOIN ===");
       const { data, error } = await supabase
         .from('tarefas')
         .select(`
@@ -192,10 +211,10 @@ export const tarefasService = {
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error("Erro ao buscar minhas tarefas:", error);
+        console.error("Erro na query principal:", error);
         console.error("Detalhes do erro:", JSON.stringify(error, null, 2));
         
-        // Tentar uma query mais simples sem o JOIN
+        // Tentar query mais simples sem o JOIN
         console.log("=== Tentando query alternativa sem JOIN ===");
         const { data: simpleData, error: simpleError } = await supabase
           .from('tarefas')
@@ -231,7 +250,7 @@ export const tarefasService = {
         }));
       }
 
-      console.log("=== DEBUG: Resultado da busca ===");
+      console.log("=== DEBUG: Resultado da query principal ===");
       console.log("Tarefas encontradas:", data?.length || 0);
 
       if (data && data.length > 0) {

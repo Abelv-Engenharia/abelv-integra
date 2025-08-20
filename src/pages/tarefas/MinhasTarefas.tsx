@@ -26,27 +26,58 @@ const MinhasTarefas = () => {
         console.log("=== MinhasTarefas: Iniciando busca ===");
         console.log("Usuário autenticado:", user?.id, user?.email);
         
+        if (!user) {
+          setDebugInfo("Usuário não autenticado");
+          setLoading(false);
+          return;
+        }
+        
         const data = await tarefasService.getMyTasks();
         console.log("=== MinhasTarefas: Resultado ===", data?.length || 0);
+        console.log("Tarefas retornadas:", data);
         
         setTarefas(data);
         setFilteredTarefas(data);
         
-        // Informações de debug para o usuário
+        // Informações de debug detalhadas para o usuário
         if (data.length === 0) {
-          setDebugInfo(`Nenhuma tarefa encontrada para o usuário ${user?.email}. Verifique se há tarefas onde você é responsável ou criador.`);
+          setDebugInfo(`
+            Nenhuma tarefa encontrada para o usuário ${user?.email}. 
+            Detalhes técnicos:
+            - User ID: ${user?.id}
+            - Verifique se há tarefas na tabela 'tarefas' onde:
+              • responsavel_id = '${user?.id}' OU
+              • criado_por = '${user?.id}'
+            - Verifique as políticas RLS da tabela 'tarefas'
+          `);
         } else {
-          setDebugInfo(`${data.length} tarefa(s) encontrada(s)`);
+          const tarefasResponsavel = data.filter(t => t.responsavel.id === user?.id);
+          const tarefasCriadas = data.filter(t => (t as any).criado_por === user?.id);
+          
+          setDebugInfo(`
+            ${data.length} tarefa(s) encontrada(s):
+            - ${tarefasResponsavel.length} como responsável
+            - ${tarefasCriadas.length} criadas por você
+            - User ID: ${user?.id}
+          `);
         }
       } catch (error) {
         console.error("Erro ao carregar minhas tarefas:", error);
         setDebugInfo(`Erro ao carregar tarefas: ${error}`);
+        toast({
+          title: "Erro ao carregar tarefas",
+          description: "Não foi possível carregar suas tarefas. Tente novamente.",
+          variant: "destructive"
+        });
       } finally {
         setLoading(false);
       }
     };
-    fetchMinhasTarefas();
-  }, [user]);
+
+    if (user) {
+      fetchMinhasTarefas();
+    }
+  }, [user, toast]);
 
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
     const term = event.target.value.toLowerCase();
@@ -74,6 +105,7 @@ const MinhasTarefas = () => {
   };
 
   const handleTarefaClick = (tarefa: Tarefa) => {
+    console.log("Navegando para tarefa:", tarefa.id);
     navigate(`/tarefas/detalhe/${tarefa.id}`);
   };
 
@@ -124,9 +156,10 @@ const MinhasTarefas = () => {
           Acompanhe e gerencie suas tarefas atribuídas ou criadas por você
         </p>
         {debugInfo && (
-          <p className="text-sm text-blue-600 bg-blue-50 p-2 rounded">
-            Debug: {debugInfo}
-          </p>
+          <div className="text-sm text-blue-600 bg-blue-50 p-3 rounded border">
+            <strong>Debug Info:</strong>
+            <pre className="whitespace-pre-wrap mt-1">{debugInfo}</pre>
+          </div>
         )}
       </div>
 
@@ -179,6 +212,9 @@ const MinhasTarefas = () => {
                   <li>Você é definido como responsável por uma tarefa</li>
                   <li>Você criou uma tarefa</li>
                 </ul>
+                <p className="mt-3 text-xs text-gray-500">
+                  Se você acredita que deveria ver tarefas aqui, verifique com o administrador do sistema.
+                </p>
               </div>
             )}
           </div>
