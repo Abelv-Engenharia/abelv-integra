@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
@@ -35,7 +34,7 @@ const MinhasTarefas = () => {
         
         setDebugInfo("⏳ Carregando tarefas...");
         const data = await tarefasService.getMyTasks();
-        console.log("=== MinhasTarefas: Resultado ===", data?.length || 0);
+        console.log("=== MinhasTarefas: Resultado ===", data?.length || 0, data);
         
         setTarefas(data);
         setFilteredTarefas(data);
@@ -64,6 +63,9 @@ Possíveis causas:
 • ${tarefasCriadas.length} criadas por você
 • User ID: ${user?.id}
 • Email: ${user?.email}
+
+📋 Tarefas encontradas:
+${data.map((t, i) => `${i + 1}. ID: ${t.id} | Título: ${t.titulo || t.descricao.substring(0, 50)}...`).join('\n')}
           `);
         }
       } catch (error) {
@@ -110,11 +112,28 @@ Possíveis causas:
   };
 
   const handleTarefaClick = (tarefa: Tarefa) => {
-    console.log("Navegando para tarefa:", tarefa.id);
-    navigate(`/tarefas/detalhe/${tarefa.id}`);
+    console.log("=== handleTarefaClick: Clique na tarefa ===");
+    console.log("Tarefa completa:", tarefa);
+    console.log("ID da tarefa:", tarefa.id);
+    console.log("Tipo do ID:", typeof tarefa.id);
+    
+    // Validar se o ID é um UUID válido
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    if (!tarefa.id || !uuidRegex.test(tarefa.id)) {
+      console.error("ID da tarefa inválido:", tarefa.id);
+      toast({
+        title: "Erro",
+        description: "ID da tarefa inválido. Não é possível navegar para os detalhes.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    const url = `/tarefas/detalhe/${tarefa.id}`;
+    console.log("Navegando para URL:", url);
+    navigate(url);
   };
 
-  // Função de remover tarefa da lista após exclusão (efeito local + banco)
   const handleTarefaDelete = async (tarefa: Tarefa) => {
     setLoading(true);
     const sucesso = await tarefasService.deleteById(tarefa.id);
