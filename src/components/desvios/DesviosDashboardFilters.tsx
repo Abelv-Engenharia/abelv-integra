@@ -32,22 +32,6 @@ interface Empresa {
   nome: string;
 }
 
-// Lista completa de todos os meses
-const MESES = [
-  { value: "1", label: "Janeiro" },
-  { value: "2", label: "Fevereiro" },
-  { value: "3", label: "Março" },
-  { value: "4", label: "Abril" },
-  { value: "5", label: "Maio" },
-  { value: "6", label: "Junho" },
-  { value: "7", label: "Julho" },
-  { value: "8", label: "Agosto" },
-  { value: "9", label: "Setembro" },
-  { value: "10", label: "Outubro" },
-  { value: "11", label: "Novembro" },
-  { value: "12", label: "Dezembro" }
-];
-
 const DesviosDashboardFilters = ({
   year,
   month,
@@ -146,11 +130,18 @@ const DesviosDashboardFilters = ({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="todos">Todos</SelectItem>
-                {MESES.map((mes) => (
-                  <SelectItem key={mes.value} value={mes.value}>
-                    {mes.label}
-                  </SelectItem>
-                ))}
+                <SelectItem value="1">Janeiro</SelectItem>
+                <SelectItem value="2">Fevereiro</SelectItem>
+                <SelectItem value="3">Março</SelectItem>
+                <SelectItem value="4">Abril</SelectItem>
+                <SelectItem value="5">Maio</SelectItem>
+                <SelectItem value="6">Junho</SelectItem>
+                <SelectItem value="7">Julho</SelectItem>
+                <SelectItem value="8">Agosto</SelectItem>
+                <SelectItem value="9">Setembro</SelectItem>
+                <SelectItem value="10">Outubro</SelectItem>
+                <SelectItem value="11">Novembro</SelectItem>
+                <SelectItem value="12">Dezembro</SelectItem>
               </SelectContent>
             </Select>
           </div>
