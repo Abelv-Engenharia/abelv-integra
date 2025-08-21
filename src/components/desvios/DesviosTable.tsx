@@ -70,14 +70,27 @@ const DesviosTable = ({
 
       // Aplicar filtros se fornecidos
       if (filters?.year && filters.year !== "") {
-        query = query.gte('data_desvio', `${filters.year}-01-01`).lte('data_desvio', `${filters.year}-12-31`);
+        const year = parseInt(filters.year);
+        query = query.gte('data_desvio', `${year}-01-01`).lte('data_desvio', `${year}-12-31`);
+        console.log(`Aplicando filtro de ano: ${year}`);
       }
       
       if (filters?.month && filters.month !== "" && filters.month !== "todos") {
-        const monthStr = filters.month.padStart(2, '0');
-        if (filters?.year) {
-          query = query.gte('data_desvio', `${filters.year}-${monthStr}-01`).lte('data_desvio', `${filters.year}-${monthStr}-31`);
-        }
+        const month = parseInt(filters.month);
+        
+        // Definir o ano - usar o ano do filtro se disponível, senão usar o ano atual
+        const year = filters?.year && filters.year !== "" ? parseInt(filters.year) : new Date().getFullYear();
+        
+        // Criar data de início e fim do mês corretamente
+        const startDate = new Date(year, month - 1, 1); // mês - 1 porque Date usa mês 0-indexado
+        const endDate = new Date(year, month, 0); // último dia do mês
+        
+        const startDateStr = startDate.toISOString().split('T')[0];
+        const endDateStr = endDate.toISOString().split('T')[0];
+        
+        console.log(`Aplicando filtro de mês ${month}/${year}: ${startDateStr} até ${endDateStr}`);
+        
+        query = query.gte('data_desvio', startDateStr).lte('data_desvio', endDateStr);
       }
       
       // Filtro por CCA específico (além da permissão do usuário)
