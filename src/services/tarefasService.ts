@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { Tarefa, TarefaStatus, TarefaCriticidade } from "@/types/tarefas";
 
@@ -164,53 +163,55 @@ export const tarefasService = {
       console.log("User ID:", user.id);
       console.log("User email:", user.email);
 
-      // Query simplificada - buscar tarefas onde sou responsável
-      console.log("=== Buscando tarefas onde sou responsável ===");
-      const { data: tarefasResponsavel, error: errorResponsavel } = await supabase
+      // Buscar todas as tarefas do usuário em uma única query com LEFT JOIN
+      console.log("=== Buscando todas as minhas tarefas ===");
+      const { data: minhasTarefas, error: errorMinhasTarefas } = await supabase
         .from('tarefas')
-        .select('*')
-        .eq('responsavel_id', user.id)
+        .select(`
+          *,
+          profiles!tarefas_responsavel_id_fkey(id, nome)
+        `)
+        .or(`responsavel_id.eq.${user.id},criado_por.eq.${user.id}`)
         .order('created_at', { ascending: false });
 
-      if (errorResponsavel) {
-        console.error("Erro ao buscar tarefas como responsável:", errorResponsavel);
+      if (errorMinhasTarefas) {
+        console.error("Erro ao buscar minhas tarefas:", errorMinhasTarefas);
+        
+        // Fallback: tentar buscar apenas como responsável
+        console.log("=== FALLBACK: Buscando apenas como responsável ===");
+        const { data: tarefasResponsavel, error: errorFallback } = await supabase
+          .from('tarefas')
+          .select(`
+            *,
+            profiles!tarefas_responsavel_id_fkey(id, nome)
+          `)
+          .eq('responsavel_id', user.id)
+          .order('created_at', { ascending: false });
+
+        if (errorFallback) {
+          console.error("Erro no fallback:", errorFallback);
+          return [];
+        }
+
+        console.log("Fallback executado com sucesso:", tarefasResponsavel?.length || 0, "tarefas");
+        return this.mapTarefasData(tarefasResponsavel || []);
       }
 
-      // Query simplificada - buscar tarefas que criei
-      console.log("=== Buscando tarefas que criei ===");
-      const { data: tarefasCriadas, error: errorCriadas } = await supabase
-        .from('tarefas')
-        .select('*')
-        .eq('criado_por', user.id)
-        .order('created_at', { ascending: false });
+      console.log("=== Resultado da query principal ===");
+      console.log("Total de tarefas encontradas:", minhasTarefas?.length || 0);
 
-      if (errorCriadas) {
-        console.error("Erro ao buscar tarefas criadas:", errorCriadas);
-      }
-
-      // Combinar resultados e remover duplicatas
-      const todasTarefas = [...(tarefasResponsavel || []), ...(tarefasCriadas || [])];
-      const tarefasUnicas = todasTarefas.filter((tarefa, index, self) => 
-        index === self.findIndex(t => t.id === tarefa.id)
-      );
-
-      console.log("=== Resultado das queries ===");
-      console.log("Tarefas como responsável:", tarefasResponsavel?.length || 0);
-      console.log("Tarefas criadas:", tarefasCriadas?.length || 0);
-      console.log("Total único:", tarefasUnicas.length);
-
-      if (tarefasUnicas.length === 0) {
-        console.log("=== QUERY DE DEBUG: Verificando todas as tarefas ===");
-        const { data: allTasks, error: allError } = await supabase
+      if (!minhasTarefas || minhasTarefas.length === 0) {
+        console.log("=== QUERY DE DEBUG: Verificando estrutura da tabela ===");
+        const { data: sampleData, error: sampleError } = await supabase
           .from('tarefas')
           .select('id, titulo, responsavel_id, criado_por, status, created_at')
-          .limit(10);
+          .limit(5);
         
-        console.log("=== DEBUG: Primeiras 10 tarefas da base ===");
-        console.log("Total de tarefas na base:", allTasks?.length || 0);
-        if (allTasks && allTasks.length > 0) {
+        console.log("=== DEBUG: Amostra da tabela tarefas ===");
+        console.log("Total de tarefas na base:", sampleData?.length || 0);
+        if (sampleData && sampleData.length > 0) {
           console.log("Estrutura das tarefas encontradas:");
-          allTasks.forEach((task, index) => {
+          sampleData.forEach((task, index) => {
             console.log(`Tarefa ${index + 1}:`, {
               id: task.id,
               titulo: task.titulo,
@@ -221,75 +222,50 @@ export const tarefasService = {
               eh_minha_criada: task.criado_por === user.id
             });
           });
+        } else {
+          console.log("Nenhuma tarefa encontrada na tabela tarefas");
         }
         
         return [];
       }
 
-      // Buscar profiles dos responsáveis
-      const responsavelIds = [...new Set(tarefasUnicas.map(t => t.responsavel_id).filter(Boolean))];
-      console.log("=== Buscando profiles dos responsáveis ===");
-      console.log("IDs de responsáveis únicos:", responsavelIds);
-
-      let profilesMap: Record<string, any> = {};
-      
-      if (responsavelIds.length > 0) {
-        const { data: profilesData, error: profilesError } = await supabase
-          .from('profiles')
-          .select('id, nome')
-          .in('id', responsavelIds);
-
-        if (!profilesError && profilesData) {
-          profilesMap = profilesData.reduce((acc, profile) => {
-            acc[profile.id] = profile;
-            return acc;
-          }, {} as Record<string, any>);
-          console.log("Profiles encontrados:", Object.keys(profilesMap).length);
-        } else {
-          console.warn("Erro ao buscar profiles:", profilesError);
-        }
-      }
-
-      // Mapear as tarefas com os dados dos profiles
-      const tarefasMapeadas = tarefasUnicas.map(tarefa => {
-        console.log(`=== Mapeando tarefa ${tarefa.id} ===`);
-        console.log("Dados brutos da tarefa:", tarefa);
-        
-        const tarefaMapeada = {
-          id: tarefa.id,
-          cca: tarefa.cca,
-          tipoCca: 'linha-inteira' as const,
-          dataCadastro: tarefa.data_cadastro,
-          dataConclusao: tarefa.data_conclusao,
-          data_real_conclusao: tarefa.data_real_conclusao ?? null,
-          descricao: tarefa.descricao,
-          titulo: tarefa.titulo ?? "",
-          responsavel: {
-            id: tarefa.responsavel_id || '',
-            nome: profilesMap[tarefa.responsavel_id]?.nome || 'Não atribuído'
-          },
-          anexo: tarefa.anexo,
-          status: tarefa.status as TarefaStatus,
-          iniciada: tarefa.iniciada,
-          observacoes_progresso: tarefa.observacoes_progresso,
-          configuracao: tarefa.configuracao as any
-        };
-        
-        console.log("Tarefa mapeada:", tarefaMapeada);
-        console.log("ID da tarefa mapeada:", tarefaMapeada.id, "Tipo:", typeof tarefaMapeada.id);
-        
-        return tarefaMapeada;
-      });
-
-      console.log("=== Resultado final ===");
-      console.log("Total de tarefas mapeadas:", tarefasMapeadas.length);
-      console.log("IDs das tarefas mapeadas:", tarefasMapeadas.map(t => t.id));
-
-      return tarefasMapeadas;
+      return this.mapTarefasData(minhasTarefas);
     } catch (error) {
       console.error("Exceção ao buscar minhas tarefas:", error);
       return [];
     }
+  },
+
+  mapTarefasData(tarefasData: any[]): Tarefa[] {
+    return tarefasData.map(tarefa => {
+      console.log(`=== Mapeando tarefa ${tarefa.id} ===`);
+      console.log("Dados brutos da tarefa:", tarefa);
+      
+      const tarefaMapeada = {
+        id: tarefa.id,
+        cca: tarefa.cca,
+        tipoCca: 'linha-inteira' as const,
+        dataCadastro: tarefa.data_cadastro,
+        dataConclusao: tarefa.data_conclusao,
+        data_real_conclusao: tarefa.data_real_conclusao ?? null,
+        descricao: tarefa.descricao,
+        titulo: tarefa.titulo ?? "",
+        responsavel: {
+          id: tarefa.responsavel_id || '',
+          nome: tarefa.profiles?.nome || 'Não atribuído'
+        },
+        anexo: tarefa.anexo,
+        status: tarefa.status as TarefaStatus,
+        iniciada: tarefa.iniciada,
+        observacoes_progresso: tarefa.observacoes_progresso,
+        configuracao: tarefa.configuracao as any
+      };
+      
+      console.log("Tarefa mapeada:", tarefaMapeada);
+      console.log("ID da tarefa mapeada:", tarefaMapeada.id, "Tipo:", typeof tarefaMapeada.id);
+      
+      return tarefaMapeada;
+    });
   },
 
   async create(dadosTarefa: TarefaFormData): Promise<boolean> {

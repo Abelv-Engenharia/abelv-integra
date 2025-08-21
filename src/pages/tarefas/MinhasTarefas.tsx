@@ -34,7 +34,7 @@ const MinhasTarefas = () => {
         
         setDebugInfo("⏳ Carregando tarefas...");
         const data = await tarefasService.getMyTasks();
-        console.log("=== MinhasTarefas: Resultado ===", data?.length || 0, data);
+        console.log("=== MinhasTarefas: Resultado final ===", data?.length || 0, data);
         
         setTarefas(data);
         setFilteredTarefas(data);
@@ -52,6 +52,10 @@ Possíveis causas:
   - criado_por = '${user?.id}'
 
 🔧 User ID: ${user?.id}
+
+Verificação das políticas RLS:
+• A query utilizada: SELECT * FROM tarefas WHERE responsavel_id = '${user?.id}' OR criado_por = '${user?.id}'
+• Verifique se há dados na tabela 'profiles' para o responsável
           `);
         } else {
           const tarefasResponsavel = data.filter(t => t.responsavel.id === user?.id);
@@ -65,7 +69,14 @@ Possíveis causas:
 • Email: ${user?.email}
 
 📋 Tarefas encontradas:
-${data.map((t, i) => `${i + 1}. ID: ${t.id} | Título: ${t.titulo || t.descricao.substring(0, 50)}...`).join('\n')}
+${data.map((t, i) => `${i + 1}. ID: ${t.id.substring(0, 8)}... | Título: ${t.titulo || t.descricao.substring(0, 50)}... | Status: ${t.status}`).join('\n')}
+
+🔍 Tipos de relacionamento:
+${data.map((t, i) => {
+  const isResponsavel = t.responsavel.id === user?.id;
+  const isCriador = (t as any).criado_por === user?.id;
+  return `${i + 1}. ${isResponsavel ? '👤 Responsável' : ''} ${isCriador ? '✍️ Criador' : ''}`;
+}).join('\n')}
           `);
         }
       } catch (error) {
@@ -102,7 +113,8 @@ ${data.map((t, i) => `${i + 1}. ID: ${t.id} | Título: ${t.titulo || t.descricao
     if (term) {
       result = result.filter(tarefa => 
         tarefa.descricao.toLowerCase().includes(term) || 
-        tarefa.cca.toLowerCase().includes(term)
+        tarefa.cca.toLowerCase().includes(term) ||
+        (tarefa.titulo && tarefa.titulo.toLowerCase().includes(term))
       );
     }
     if (status !== "todas") {
@@ -243,7 +255,7 @@ ${data.map((t, i) => `${i + 1}. ID: ${t.id} | Título: ${t.titulo || t.descricao
                 </div>
                 <div className="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded border border-yellow-200 dark:border-yellow-800">
                   <p className="text-yellow-800 dark:text-yellow-200 text-sm">
-                    💡 Se você acredita que deveria ver tarefas aqui, verifique com o administrador do sistema ou consulte os logs de debug acima.
+                    💡 Se você acredita que deveria ver tarefas aqui, verifique os logs de debug acima ou consulte o administrador do sistema.
                   </p>
                 </div>
               </div>
