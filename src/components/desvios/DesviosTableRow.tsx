@@ -1,4 +1,3 @@
-
 import React from "react";
 import StatusBadge from "./StatusBadge";
 import RiskBadge from "./RiskBadge";
@@ -20,7 +19,15 @@ interface Props {
   onDesvioUpdated: () => void;
 }
 
-const formatDate = (dateString?: string) => dateString ? new Date(dateString).toLocaleDateString("pt-BR") : "";
+const formatDate = (dateString?: string) => {
+  if (!dateString) return "";
+  
+  // Parse the date as a local date to avoid timezone issues
+  const [year, month, day] = dateString.split('-').map(Number);
+  const date = new Date(year, month - 1, day); // month is 0-indexed
+  
+  return date.toLocaleDateString("pt-BR");
+};
 
 const DesviosTableRow = ({
   desvio,
