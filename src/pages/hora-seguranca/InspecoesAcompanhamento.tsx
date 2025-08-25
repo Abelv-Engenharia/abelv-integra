@@ -17,7 +17,7 @@ import { InspecaoAcompanhamentoCard } from "@/components/hora-seguranca/Inspecao
 import { useUserCCAs } from "@/hooks/useUserCCAs";
 import { PdfUpload } from "@/components/ui/pdf-upload";
 
-const statusOptions: string[] = ["REALIZADA", "NÃO REALIZADA", "CANCELADA", "NÃO PROGRAMADA"];
+const statusOptions: string[] = ["REALIZADA", "NÃO REALIZADA", "CANCELADA", "REALIZADA (NÃO PROGRAMADA)"];
 
 const getStatusIcon = (status: string) => {
   switch (status) {
@@ -58,7 +58,7 @@ const getStatusBadgeClass = (status: string) => {
 };
 
 const formSchema = z.object({
-  status: z.enum(["REALIZADA", "NÃO REALIZADA", "CANCELADA", "NÃO PROGRAMADA"], {
+  status: z.enum(["REALIZADA", "NÃO REALIZADA", "CANCELADA", "REALIZADA (NÃO PROGRAMADA)"], {
     required_error: "O status da inspeção é obrigatório.",
   }),
   desviosIdentificados: z.number().int().min(0).default(0),
