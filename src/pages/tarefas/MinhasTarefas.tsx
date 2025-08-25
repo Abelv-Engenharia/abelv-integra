@@ -58,25 +58,43 @@ Verificação das políticas RLS:
 • Verifique se há dados na tabela 'profiles' para o responsável
           `);
         } else {
-          const tarefasResponsavel = data.filter(t => t.responsavel.id === user?.id);
-          const tarefasCriadas = data.filter(t => (t as any).criado_por === user?.id);
+          // Separar tarefas por tipo de relação
+          const tarefasComoResponsavel = data.filter(t => t.responsavel.id === user?.id);
+          const tarefasCriadas = data.filter(t => {
+            // Verificar se a tarefa foi criada pelo usuário atual
+            const tarefaComCriador = t as any;
+            return tarefaComCriador.criado_por === user?.id;
+          });
           
           setDebugInfo(`
 ✅ ${data.length} tarefa(s) encontrada(s):
-• ${tarefasResponsavel.length} como responsável
-• ${tarefasCriadas.length} criadas por você
-• User ID: ${user?.id}
-• Email: ${user?.email}
 
-📋 Tarefas encontradas:
-${data.map((t, i) => `${i + 1}. ID: ${t.id.substring(0, 8)}... | Título: ${t.titulo || t.descricao.substring(0, 50)}... | Status: ${t.status}`).join('\n')}
+📋 Resumo das relações:
+• ${tarefasComoResponsavel.length} tarefa(s) onde você é RESPONSÁVEL
+• ${tarefasCriadas.length} tarefa(s) CRIADAS por você
 
-🔍 Tipos de relacionamento:
+👤 User ID: ${user?.id}
+📧 Email: ${user?.email}
+
+📊 Detalhes das tarefas:
 ${data.map((t, i) => {
+  const tarefaComCriador = t as any;
   const isResponsavel = t.responsavel.id === user?.id;
-  const isCriador = (t as any).criado_por === user?.id;
-  return `${i + 1}. ${isResponsavel ? '👤 Responsável' : ''} ${isCriador ? '✍️ Criador' : ''}`;
+  const isCriador = tarefaComCriador.criado_por === user?.id;
+  
+  return `
+${i + 1}. "${t.titulo || t.descricao.substring(0, 40)}..."
+   • ID: ${t.id.substring(0, 8)}...
+   • Status: ${t.status}
+   • Responsável: ${t.responsavel.nome}
+   • ${isResponsavel ? '👤 VOCÊ É O RESPONSÁVEL' : ''}
+   • ${isCriador ? '✍️ VOCÊ CRIOU ESTA TAREFA' : ''}
+   • ${!isResponsavel && !isCriador ? '❓ Relação não identificada' : ''}`;
 }).join('\n')}
+
+🔍 Critérios de busca utilizados:
+• Tarefas onde responsavel_id = '${user?.id}' OU
+• Tarefas onde criado_por = '${user?.id}'
           `);
         }
       } catch (error) {
