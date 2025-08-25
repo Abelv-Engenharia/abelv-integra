@@ -163,67 +163,46 @@ export const tarefasService = {
       console.log("User ID:", user.id);
       console.log("User email:", user.email);
 
-      // Buscar todas as tarefas do usuário em uma única query com LEFT JOIN
-      console.log("=== Buscando todas as minhas tarefas ===");
+      // Buscar todas as tarefas relacionadas ao usuário:
+      // 1. Tarefas onde ele é responsável
+      // 2. Tarefas criadas por ele (independentemente do responsável)
+      console.log("=== Buscando tarefas onde sou responsável ou criador ===");
       const { data: minhasTarefas, error: errorMinhasTarefas } = await supabase
         .from('tarefas')
         .select(`
           *,
-          profiles!tarefas_responsavel_id_fkey(id, nome)
+          profiles!tarefas_responsavel_id_fkey(id, nome),
+          criador:profiles!tarefas_criado_por_fkey(id, nome)
         `)
         .or(`responsavel_id.eq.${user.id},criado_por.eq.${user.id}`)
         .order('created_at', { ascending: false });
 
       if (errorMinhasTarefas) {
         console.error("Erro ao buscar minhas tarefas:", errorMinhasTarefas);
-        
-        // Fallback: tentar buscar apenas como responsável
-        console.log("=== FALLBACK: Buscando apenas como responsável ===");
-        const { data: tarefasResponsavel, error: errorFallback } = await supabase
-          .from('tarefas')
-          .select(`
-            *,
-            profiles!tarefas_responsavel_id_fkey(id, nome)
-          `)
-          .eq('responsavel_id', user.id)
-          .order('created_at', { ascending: false });
-
-        if (errorFallback) {
-          console.error("Erro no fallback:", errorFallback);
-          return [];
-        }
-
-        console.log("Fallback executado com sucesso:", tarefasResponsavel?.length || 0, "tarefas");
-        return this.mapTarefasData(tarefasResponsavel || []);
+        return [];
       }
 
-      console.log("=== Resultado da query principal ===");
+      console.log("=== Resultado da query ===");
       console.log("Total de tarefas encontradas:", minhasTarefas?.length || 0);
 
       if (!minhasTarefas || minhasTarefas.length === 0) {
-        console.log("=== QUERY DE DEBUG: Verificando estrutura da tabela ===");
-        const { data: sampleData, error: sampleError } = await supabase
+        console.log("=== DIAGNÓSTICO: Verificando se existem tarefas na base ===");
+        const { data: sampleData } = await supabase
           .from('tarefas')
-          .select('id, titulo, responsavel_id, criado_por, status, created_at')
-          .limit(5);
+          .select('id, titulo, responsavel_id, criado_por, status')
+          .limit(10);
         
-        console.log("=== DEBUG: Amostra da tabela tarefas ===");
         console.log("Total de tarefas na base:", sampleData?.length || 0);
         if (sampleData && sampleData.length > 0) {
-          console.log("Estrutura das tarefas encontradas:");
+          console.log("Primeiras tarefas encontradas:");
           sampleData.forEach((task, index) => {
-            console.log(`Tarefa ${index + 1}:`, {
-              id: task.id,
-              titulo: task.titulo,
-              responsavel_id: task.responsavel_id,
-              criado_por: task.criado_por,
-              status: task.status,
-              eh_minha_responsavel: task.responsavel_id === user.id,
-              eh_minha_criada: task.criado_por === user.id
-            });
+            console.log(`${index + 1}. ${task.titulo || 'Sem título'}`);
+            console.log(`   - Responsável: ${task.responsavel_id}`);
+            console.log(`   - Criador: ${task.criado_por}`);
+            console.log(`   - É minha (responsável): ${task.responsavel_id === user.id}`);
+            console.log(`   - É minha (criador): ${task.criado_por === user.id}`);
+            console.log(`   - Status: ${task.status}`);
           });
-        } else {
-          console.log("Nenhuma tarefa encontrada na tabela tarefas");
         }
         
         return [];
