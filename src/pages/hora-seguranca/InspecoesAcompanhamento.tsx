@@ -17,7 +17,7 @@ import { InspecaoAcompanhamentoCard } from "@/components/hora-seguranca/Inspecao
 import { useUserCCAs } from "@/hooks/useUserCCAs";
 import { PdfUpload } from "@/components/ui/pdf-upload";
 
-const statusOptions: string[] = ["REALIZADA", "NÃO REALIZADA", "CANCELADA"];
+const statusOptions: string[] = ["REALIZADA", "NÃO REALIZADA", "CANCELADA", "NÃO PROGRAMADA"];
 
 const getStatusIcon = (status: string) => {
   switch (status) {
@@ -25,6 +25,8 @@ const getStatusIcon = (status: string) => {
       return <ShieldCheck className="h-5 w-5" />;
     case "REALIZADA (NÃO PROGRAMADA)":
       return <ShieldCheck className="h-5 w-5 text-orange-500" />;
+    case "NÃO PROGRAMADA":
+      return <ShieldAlert className="h-5 w-5 text-purple-500" />;
     case "A REALIZAR":
       return <Shield className="h-5 w-5" />;
     case "NÃO REALIZADA":
@@ -42,6 +44,8 @@ const getStatusBadgeClass = (status: string) => {
       return "bg-green-500 hover:bg-green-600";
     case "REALIZADA (NÃO PROGRAMADA)":
       return "bg-orange-500 hover:bg-orange-600";
+    case "NÃO PROGRAMADA":
+      return "bg-purple-500 hover:bg-purple-600";
     case "A REALIZAR":
       return "bg-blue-500 hover:bg-blue-600";
     case "NÃO REALIZADA":
@@ -54,7 +58,7 @@ const getStatusBadgeClass = (status: string) => {
 };
 
 const formSchema = z.object({
-  status: z.enum(["REALIZADA", "NÃO REALIZADA", "CANCELADA"], {
+  status: z.enum(["REALIZADA", "NÃO REALIZADA", "CANCELADA", "NÃO PROGRAMADA"], {
     required_error: "O status da inspeção é obrigatório.",
   }),
   desviosIdentificados: z.number().int().min(0).default(0),

@@ -15,6 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserCCAs } from "@/hooks/useUserCCAs";
+import { PdfUpload } from "@/components/ui/pdf-upload";
 
 // Hooks para buscar dados (filtrado pelos CCAs permitidos)
 const useCCAs = () => {
@@ -93,7 +94,8 @@ const formSchema = z.object({
   responsavelFuncionarioId: z.string().optional(),
   responsavelNome: z.string().optional(),
   responsavelFuncao: z.string().optional(),
-  desviosIdentificados: z.number().int("Insira um número inteiro.").min(0, "Não pode ser negativo").default(0)
+  desviosIdentificados: z.number().int("Insira um número inteiro.").min(0, "Não pode ser negativo").default(0),
+  relatorioUrl: z.string().optional()
 });
 
 type FormType = z.infer<typeof formSchema>;
@@ -108,7 +110,8 @@ const InspecaoNaoProgramadaHSA = () => {
     defaultValues: {
       responsavelTipo: "funcionario",
       desviosIdentificados: 0,
-      responsavelFuncionarioId: ""
+      responsavelFuncionarioId: "",
+      relatorioUrl: ""
     }
   });
   const watchCCA = form.watch("cca");
@@ -119,6 +122,7 @@ const InspecaoNaoProgramadaHSA = () => {
   const watchResponsavelTipo = form.watch("responsavelTipo");
   const [success, setSuccess] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [relatorioUrl, setRelatorioUrl] = useState<string>("");
   const {
     toast
   } = useToast();
@@ -222,6 +226,7 @@ const InspecaoNaoProgramadaHSA = () => {
       responsavel_inspecao: responsavel_nome,
       funcao,
       desvios_identificados: values.desviosIdentificados,
+      relatorio_url: relatorioUrl || null,
       status: "REALIZADA (NÃO PROGRAMADA)"
     });
     const { error } = await supabase.from("execucao_hsa").insert({
@@ -233,6 +238,7 @@ const InspecaoNaoProgramadaHSA = () => {
       responsavel_inspecao: responsavel_nome,
       funcao,
       desvios_identificados: values.desviosIdentificados,
+      relatorio_url: relatorioUrl || null,
       status: "REALIZADA (NÃO PROGRAMADA)"
     });
     setIsSaving(false);
@@ -263,6 +269,7 @@ const InspecaoNaoProgramadaHSA = () => {
             <div className="flex flex-col md:flex-row gap-4 w-full">
               <Button className="flex-1" onClick={() => {
               form.reset();
+              setRelatorioUrl("");
               setSuccess(false);
             }}>
                 Cadastrar nova inspeção não programada
@@ -417,6 +424,24 @@ const InspecaoNaoProgramadaHSA = () => {
                     </FormControl>
                     <FormMessage />
                   </FormItem>} />
+
+              {/* Upload de relatório */}
+              <div className="space-y-2">
+                <label className="block font-medium">
+                  Anexar Relatório da Inspeção (Opcional)
+                </label>
+                <PdfUpload
+                  onFileUploaded={(url) => {
+                    setRelatorioUrl(url);
+                    form.setValue("relatorioUrl", url);
+                  }}
+                  currentFile={relatorioUrl}
+                  onFileRemoved={() => {
+                    setRelatorioUrl("");
+                    form.setValue("relatorioUrl", "");
+                  }}
+                />
+              </div>
 
               <div className="flex flex-col md:flex-row w-full pt-4 gap-3 md:gap-0">
                 <div className="flex md:flex-1 md:justify-start">
