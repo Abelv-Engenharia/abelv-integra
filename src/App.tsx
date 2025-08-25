@@ -192,9 +192,9 @@ function App() {
                 {/* Tarefas routes */}
                 <Route path="tarefas/dashboard" element={<TarefasDashboard />} />
                 <Route path="tarefas/cadastro" element={<CadastroTarefas />} />
-                <Route path="tarefas/minhas" element={<MinhasTarefas />} />
-                <Route path="tarefas/:id" element={<DetalheTarefa />} />
-                <Route path="tarefas/:id/editar" element={<EditarTarefa />} />
+                <Route path="tarefas/minhas-tarefas" element={<MinhasTarefas />} />
+                <Route path="tarefas/detalhe/:id" element={<DetalheTarefa />} />
+                <Route path="tarefas/editar/:id" element={<EditarTarefa />} />
 
                 {/* Treinamentos routes */}
                 <Route path="treinamentos/dashboard" element={<TreinamentosDashboard />} />
