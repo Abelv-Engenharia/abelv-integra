@@ -60,7 +60,6 @@ const DesviosByCompanyChart = () => {
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={data} margin={{ top: 40, right: 30, left: 20, bottom: 60 }}>
                 <XAxis dataKey="name" angle={-90} textAnchor="end" height={60} />
-                <YAxis />
                 <ChartTooltip content={<ChartTooltipContent />} />
                 <Bar dataKey="value" fill="var(--color-value)" radius={[4, 4, 0, 0]}>
                   <LabelList dataKey="value" position="top" />

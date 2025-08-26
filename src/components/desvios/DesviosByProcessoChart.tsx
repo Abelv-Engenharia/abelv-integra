@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend } from "recharts";
+import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 import { fetchDesviosByProcesso } from "@/services/desviosDashboardService";
 import { useDesviosFilters } from "@/hooks/useDesviosFilters";
 
@@ -73,7 +73,6 @@ const DesviosByProcessoChart = () => {
                   ))}
                 </Pie>
                 <ChartTooltip content={<ChartTooltipContent />} />
-                <Legend />
               </PieChart>
             </ResponsiveContainer>
           </ChartContainer>
