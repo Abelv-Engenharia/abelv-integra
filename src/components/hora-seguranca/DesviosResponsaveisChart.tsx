@@ -67,7 +67,6 @@ export const DesviosResponsaveisChart = ({ filters }: DesviosResponsaveisChartPr
           data={data}
           margin={{ top: 40, right: 30, left: 20, bottom: 60 }}
         >
-          <CartesianGrid strokeDasharray="3 3" />
           <XAxis 
             dataKey="name" 
             angle={-90}

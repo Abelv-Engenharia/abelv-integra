@@ -110,7 +110,6 @@ export function InspecoesBarChart({ dataType }: InspecoesBarChartProps) {
             bottom: 150,
           }}
         >
-          <CartesianGrid strokeDasharray="3 3" />
           <XAxis 
             dataKey={getDataKey()} 
             angle={-45} 
