@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LabelList } from 'recharts';
 import { fetchInspecoesByResponsavel } from '@/services/hora-seguranca';
 import { useUserCCAs } from '@/hooks/useUserCCAs';
 
@@ -104,7 +104,7 @@ export function InspecoesBarChart({ dataType }: InspecoesBarChartProps) {
         <BarChart
           data={data}
           margin={{
-            top: 20,
+            top: 40,
             right: 30,
             left: 20,
             bottom: 150,
@@ -118,7 +118,6 @@ export function InspecoesBarChart({ dataType }: InspecoesBarChartProps) {
             height={120}
             interval={0}
           />
-          <YAxis />
           <Tooltip 
             labelFormatter={(label, payload) => {
               if (dataType === 'responsible' && payload && payload.length > 0) {
@@ -128,11 +127,21 @@ export function InspecoesBarChart({ dataType }: InspecoesBarChartProps) {
             }}
           />
           <Legend wrapperStyle={{ paddingTop: '40px' }} />
-          <Bar dataKey="A Realizar" name="A Realizar" fill="#4285F4" />
-          <Bar dataKey="Realizada" name="Realizada" fill="#43A047" />
-          <Bar dataKey="Não Realizada" name="Não Realizada" fill="#E53935" />
-          <Bar dataKey="Realizada (Não Programada)" name="Realizada (Não Programada)" fill="#FFA000" />
-          <Bar dataKey="Cancelada" name="Cancelada" fill="#757575" />
+          <Bar dataKey="A Realizar" name="A Realizar" fill="#4285F4">
+            <LabelList dataKey="A Realizar" position="inside" />
+          </Bar>
+          <Bar dataKey="Realizada" name="Realizada" fill="#43A047">
+            <LabelList dataKey="Realizada" position="inside" />
+          </Bar>
+          <Bar dataKey="Não Realizada" name="Não Realizada" fill="#E53935">
+            <LabelList dataKey="Não Realizada" position="inside" />
+          </Bar>
+          <Bar dataKey="Realizada (Não Programada)" name="Realizada (Não Programada)" fill="#FFA000">
+            <LabelList dataKey="Realizada (Não Programada)" position="inside" />
+          </Bar>
+          <Bar dataKey="Cancelada" name="Cancelada" fill="#757575">
+            <LabelList dataKey="Cancelada" position="inside" />
+          </Bar>
         </BarChart>
       </ResponsiveContainer>
     </div>

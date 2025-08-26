@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from "react";
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from "recharts";
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, LabelList } from "recharts";
 import { fetchDesviosByResponsavel } from "@/services/hora-seguranca/desviosByResponsavelService";
 import { useUserCCAs } from "@/hooks/useUserCCAs";
 
@@ -65,7 +65,7 @@ export const DesviosResponsaveisChart = ({ filters }: DesviosResponsaveisChartPr
       <ResponsiveContainer width="100%" height="100%">
         <BarChart
           data={data}
-          margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
+          margin={{ top: 40, right: 30, left: 20, bottom: 60 }}
         >
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis 
@@ -76,7 +76,6 @@ export const DesviosResponsaveisChart = ({ filters }: DesviosResponsaveisChartPr
             interval={0}
             tick={{ fontSize: 11 }}
           />
-          <YAxis />
           <Tooltip 
             labelFormatter={(label, payload) => {
               if (payload && payload.length > 0) {
@@ -86,7 +85,9 @@ export const DesviosResponsaveisChart = ({ filters }: DesviosResponsaveisChartPr
             }}
           />
           <Legend />
-          <Bar dataKey="desvios" fill="#3b82f6" />
+          <Bar dataKey="desvios" fill="#3b82f6">
+            <LabelList dataKey="desvios" position="top" />
+          </Bar>
         </BarChart>
       </ResponsiveContainer>
     </div>

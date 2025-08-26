@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from "react";
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from "recharts";
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, LabelList } from "recharts";
 import { fetchInspecoesByCCA } from "@/services/hora-seguranca/inspecoesByCCAService";
 import { useUserCCAs } from "@/hooks/useUserCCAs";
 
@@ -65,7 +65,7 @@ export const InspecoesByCCAChart = ({ filters }: InspecoesByCCAChartProps) => {
       <ResponsiveContainer width="100%" height="100%">
         <BarChart
           data={data}
-          margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
+          margin={{ top: 40, right: 30, left: 20, bottom: 60 }}
         >
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis 
@@ -76,7 +76,6 @@ export const InspecoesByCCAChart = ({ filters }: InspecoesByCCAChartProps) => {
             interval={0}
             tick={{ fontSize: 11 }}
           />
-          <YAxis />
           <Tooltip 
             content={({ active, payload, label }) => {
               if (active && payload && payload.length) {
@@ -96,11 +95,21 @@ export const InspecoesByCCAChart = ({ filters }: InspecoesByCCAChartProps) => {
             }}
           />
           <Legend />
-          <Bar dataKey="A Realizar" name="A Realizar" fill="#4285F4" />
-          <Bar dataKey="Realizada" name="Realizada" fill="#34A853" />
-          <Bar dataKey="Não Realizada" name="Não Realizada" fill="#EA4335" />
-          <Bar dataKey="Realizada (Não Programada)" name="Realizada (Não Programada)" fill="#FBBC05" />
-          <Bar dataKey="Cancelada" name="Cancelada" fill="#9E9E9E" />
+          <Bar dataKey="A Realizar" name="A Realizar" fill="#4285F4">
+            <LabelList dataKey="A Realizar" position="top" />
+          </Bar>
+          <Bar dataKey="Realizada" name="Realizada" fill="#34A853">
+            <LabelList dataKey="Realizada" position="top" />
+          </Bar>
+          <Bar dataKey="Não Realizada" name="Não Realizada" fill="#EA4335">
+            <LabelList dataKey="Não Realizada" position="top" />
+          </Bar>
+          <Bar dataKey="Realizada (Não Programada)" name="Realizada (Não Programada)" fill="#FBBC05">
+            <LabelList dataKey="Realizada (Não Programada)" position="top" />
+          </Bar>
+          <Bar dataKey="Cancelada" name="Cancelada" fill="#9E9E9E">
+            <LabelList dataKey="Cancelada" position="top" />
+          </Bar>
         </BarChart>
       </ResponsiveContainer>
     </div>
