@@ -1,76 +1,310 @@
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { RelatorioFilters } from "@/components/relatorios/RelatorioFilters";
-import { Table, TableHeader, TableHead, TableBody, TableRow, TableCell } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ChartContainer, ChartLegend, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from "recharts";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Download, FileText, Camera, FileSpreadsheet } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
+import { useUserCCAs } from "@/hooks/useUserCCAs";
+import { 
+  fetchDashboardStats, 
+  fetchFilteredDashboardStats,
+  DashboardStats,
+  FilterParams
+} from "@/services/desvios/dashboardStatsService";
 
-// Sample data for the report
-const MOCK_DESVIOS_DATA = [
-  { id: 1, data: "2023-04-10", tipo: "Condição Insegura", classificacaoRisco: "Alto", area: "Produção", status: "Fechado", responsavel: "João Silva" },
-  { id: 2, data: "2023-04-15", tipo: "Ato Inseguro", classificacaoRisco: "Médio", area: "Manutenção", status: "Em Andamento", responsavel: "Maria Santos" },
-  { id: 3, data: "2023-04-18", tipo: "Condição Insegura", classificacaoRisco: "Baixo", area: "Escritório", status: "Fechado", responsavel: "Pedro Lima" },
-  { id: 4, data: "2023-04-22", tipo: "Desvio Comportamental", classificacaoRisco: "Alto", area: "Produção", status: "Em Andamento", responsavel: "Ana Oliveira" },
-  { id: 5, data: "2023-04-25", tipo: "Ato Inseguro", classificacaoRisco: "Médio", area: "Logística", status: "Fechado", responsavel: "Carlos Souza" },
-  { id: 6, data: "2023-05-02", tipo: "Desvio Comportamental", classificacaoRisco: "Baixo", area: "Produção", status: "Em Andamento", responsavel: "João Silva" },
-  { id: 7, data: "2023-05-05", tipo: "Condição Insegura", classificacaoRisco: "Alto", area: "Manutenção", status: "Fechado", responsavel: "Maria Santos" },
-  { id: 8, data: "2023-05-10", tipo: "Ato Inseguro", classificacaoRisco: "Médio", area: "Escritório", status: "Em Andamento", responsavel: "Pedro Lima" },
-];
+// Import chart components from the dashboard
+import DesviosPieChart from "@/components/desvios/DesviosPieChart";
+import DesviosByCompanyChart from "@/components/desvios/DesviosByCompanyChart";
+import DesviosClassificationChart from "@/components/desvios/DesviosClassificationChart";
+import DesviosByDisciplineChart from "@/components/desvios/DesviosByDisciplineChart";
+import DesviosByEventChart from "@/components/desvios/DesviosByEventChart";
+import DesviosByProcessoChart from "@/components/desvios/DesviosByProcessoChart";
+import DesviosByBaseLegalChart from "@/components/desvios/DesviosByBaseLegalChart";
+import { DesviosFiltersProvider } from "@/components/desvios/DesviosFiltersProvider";
 
-// Chart data
-const prepareChartData = (data: typeof MOCK_DESVIOS_DATA) => {
-  const byTipo = data.reduce((acc, item) => {
-    acc[item.tipo] = (acc[item.tipo] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
-  
-  const byRisco = data.reduce((acc, item) => {
-    acc[item.classificacaoRisco] = (acc[item.classificacaoRisco] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
-  
-  const byArea = data.reduce((acc, item) => {
-    acc[item.area] = (acc[item.area] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
-  
-  return {
-    byTipo: Object.entries(byTipo).map(([name, value]) => ({ name, value })),
-    byRisco: Object.entries(byRisco).map(([name, value]) => ({ name, value })),
-    byArea: Object.entries(byArea).map(([name, value]) => ({ name, value })),
-  };
-};
-
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
+// Import filters from dashboard
+import DesviosDashboardFilters from "@/components/desvios/DesviosDashboardFilters";
+import DesviosDashboardStats from "@/components/desvios/DesviosDashboardStats";
 
 const RelatoriosDesvios = () => {
-  const [filteredData, setFilteredData] = useState(MOCK_DESVIOS_DATA);
-  const [isFiltered, setIsFiltered] = useState(false);
+  const { toast } = useToast();
+  const { data: userCCAs = [] } = useUserCCAs();
   
-  const chartData = prepareChartData(filteredData);
+  // Filter states (same as dashboard)
+  const [year, setYear] = useState<string>("");
+  const [month, setMonth] = useState<string>("");
+  const [ccaId, setCcaId] = useState<string>("");
+  const [disciplinaId, setDisciplinaId] = useState<string>("");
+  const [empresaId, setEmpresaId] = useState<string>("");
+  const [filtersApplied, setFiltersApplied] = useState<boolean>(false);
   
-  const handleFilter = (filters: any) => {
-    console.log("Applied filters:", filters);
-    // In a real app, this would filter the data based on the selected filters
-    // For now, we'll just set the flag to show the filter is applied
-    setIsFiltered(true);
+  // Stats state
+  const [dashboardStats, setDashboardStats] = useState<DashboardStats>({
+    totalDesvios: 0,
+    acoesCompletas: 0,
+    acoesAndamento: 0,
+    acoesPendentes: 0,
+    percentualCompletas: 0,
+    percentualAndamento: 0,
+    percentualPendentes: 0,
+    riskLevel: "Baixo",
+  });
+  const [loading, setLoading] = useState(true);
+
+  // Function to update dashboard stats
+  const updateDashboardStats = async (filters?: FilterParams) => {
+    setLoading(true);
+    try {
+      console.log('Atualizando estatísticas do relatório com filtros:', filters);
+      
+      if (userCCAs.length === 0) {
+        setDashboardStats({
+          totalDesvios: 0,
+          acoesCompletas: 0,
+          acoesAndamento: 0,
+          acoesPendentes: 0,
+          percentualCompletas: 0,
+          percentualAndamento: 0,
+          percentualPendentes: 0,
+          riskLevel: "Baixo",
+        });
+        return;
+      }
+
+      const allowedCcaIds = userCCAs.map(cca => cca.id.toString());
+      const finalFilters: FilterParams = {
+        ccaIds: allowedCcaIds,
+        ...filters
+      };
+      
+      const stats = await fetchFilteredDashboardStats(finalFilters);
+      console.log('Estatísticas do relatório atualizadas:', stats);
+      setDashboardStats(stats);
+    } catch (error) {
+      console.error('Erro ao buscar estatísticas do relatório:', error);
+      toast({
+        title: "Erro ao carregar dados",
+        description: "Ocorreu um erro ao buscar as estatísticas do relatório.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
   };
-  
-  const chartConfig = {
-    alto: { label: "Alto", theme: { light: "#ef4444", dark: "#ef4444" } },
-    médio: { label: "Médio", theme: { light: "#f97316", dark: "#f97316" } },
-    baixo: { label: "Baixo", theme: { light: "#22c55e", dark: "#22c55e" } },
-    "condição insegura": { label: "Condição Insegura", color: "#0088FE" },
-    "ato inseguro": { label: "Ato Inseguro", color: "#00C49F" },
-    "desvio comportamental": { label: "Desvio Comportamental", color: "#FFBB28" },
+
+  // Load initial stats
+  useEffect(() => {
+    updateDashboardStats();
+  }, [userCCAs]);
+
+  // Auto-apply filters when they change
+  useEffect(() => {
+    const applyFiltersAutomatically = async () => {
+      try {
+        console.log('Aplicando filtros automaticamente no relatório...');
+        
+        const filters: FilterParams = {};
+        
+        if (year && year !== "todos") filters.year = year;
+        if (month && month !== "todos") filters.month = month;
+        if (ccaId && ccaId !== "todos") {
+          const allowedCcaIds = userCCAs.map(cca => cca.id.toString());
+          if (allowedCcaIds.includes(ccaId)) {
+            filters.ccaIds = [ccaId];
+          }
+        }
+        if (disciplinaId && disciplinaId !== "todos") filters.disciplinaId = disciplinaId;
+        if (empresaId && empresaId !== "todos") filters.empresaId = empresaId;
+
+        await updateDashboardStats(filters);
+        
+        const hasFilters = year !== "" || month !== "" || ccaId !== "" || disciplinaId !== "" || empresaId !== "";
+        setFiltersApplied(hasFilters);
+      } catch (error) {
+        console.error('Erro ao aplicar filtros automaticamente no relatório:', error);
+      }
+    };
+
+    if (userCCAs.length > 0) {
+      applyFiltersAutomatically();
+    }
+  }, [year, month, ccaId, disciplinaId, empresaId, userCCAs]);
+
+  // Clear filters function
+  const handleClearFilters = async () => {
+    setYear("");
+    setMonth("");
+    setCcaId("");
+    setDisciplinaId("");
+    setEmpresaId("");
+    setFiltersApplied(false);
+    
+    try {
+      await updateDashboardStats();
+      
+      toast({
+        title: "Filtros limpos",
+        description: "Os dados foram restaurados para o estado original.",
+      });
+    } catch (error) {
+      console.error('Erro ao limpar filtros no relatório:', error);
+    }
   };
-  
+
+  // Export functions
+  const exportToPDF = async () => {
+    toast({
+      title: "Gerando PDF",
+      description: "O relatório está sendo gerado..."
+    });
+
+    try {
+      // Create a new window for printing
+      const printWindow = window.open('', '_blank');
+      if (!printWindow) return;
+
+      // Get the content to print
+      const content = document.getElementById('relatorio-content');
+      if (!content) return;
+
+      // Write the content to the new window
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>Relatório de Desvios</title>
+            <style>
+              body { font-family: Arial, sans-serif; margin: 20px; }
+              .print-header { text-align: center; margin-bottom: 30px; }
+              .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 30px; }
+              .stat-card { border: 1px solid #ddd; padding: 15px; border-radius: 5px; }
+              .chart-container { margin-bottom: 30px; page-break-inside: avoid; }
+              @media print { body { margin: 0; } }
+            </style>
+          </head>
+          <body>
+            <div class="print-header">
+              <h1>Relatório de Desvios</h1>
+              <p>Gerado em: ${new Date().toLocaleDateString('pt-BR')}</p>
+            </div>
+            ${content.innerHTML}
+          </body>
+        </html>
+      `);
+
+      printWindow.document.close();
+      
+      // Wait a bit then trigger print
+      setTimeout(() => {
+        printWindow.print();
+        printWindow.close();
+        
+        toast({
+          title: "PDF gerado com sucesso",
+          description: "O relatório foi enviado para impressão/download."
+        });
+      }, 1000);
+
+    } catch (error) {
+      console.error('Erro ao gerar PDF:', error);
+      toast({
+        title: "Erro ao gerar PDF",
+        description: "Ocorreu um erro ao gerar o relatório em PDF.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const exportToJPEG = async () => {
+    toast({
+      title: "Gerando JPEG",
+      description: "A imagem está sendo gerada..."
+    });
+
+    try {
+      const html2canvas = (await import('html2canvas')).default;
+      const content = document.getElementById('relatorio-content');
+      
+      if (!content) {
+        throw new Error('Conteúdo não encontrado');
+      }
+
+      const canvas = await html2canvas(content, {
+        backgroundColor: '#ffffff',
+        scale: 2,
+        logging: false,
+        useCORS: true
+      });
+
+      // Create download link
+      const link = document.createElement('a');
+      link.download = `relatorio-desvios-${new Date().toISOString().split('T')[0]}.jpeg`;
+      link.href = canvas.toDataURL('image/jpeg', 0.9);
+      link.click();
+
+      toast({
+        title: "JPEG gerado com sucesso",
+        description: "A imagem foi baixada com sucesso."
+      });
+
+    } catch (error) {
+      console.error('Erro ao gerar JPEG:', error);
+      toast({
+        title: "Erro ao gerar JPEG",
+        description: "Ocorreu um erro ao gerar a imagem.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const exportToExcel = async () => {
+    toast({
+      title: "Gerando Excel",
+      description: "A planilha está sendo gerada..."
+    });
+
+    try {
+      const XLSX = (await import('xlsx')).default;
+      
+      // Create workbook
+      const wb = XLSX.utils.book_new();
+      
+      // Create stats worksheet
+      const statsData = [
+        ['Métrica', 'Valor'],
+        ['Total de Desvios', dashboardStats.totalDesvios],
+        ['Ações Completas', dashboardStats.acoesCompletas],
+        ['Ações em Andamento', dashboardStats.acoesAndamento],
+        ['Ações Pendentes', dashboardStats.acoesPendentes],
+        ['% Completas', `${dashboardStats.percentualCompletas}%`],
+        ['% Em Andamento', `${dashboardStats.percentualAndamento}%`],
+        ['% Pendentes', `${dashboardStats.percentualPendentes}%`],
+        ['Nível de Risco', dashboardStats.riskLevel]
+      ];
+      
+      const ws = XLSX.utils.aoa_to_sheet(statsData);
+      XLSX.utils.book_append_sheet(wb, ws, 'Estatísticas');
+      
+      // Save file
+      const fileName = `relatorio-desvios-${new Date().toISOString().split('T')[0]}.xlsx`;
+      XLSX.writeFile(wb, fileName);
+
+      toast({
+        title: "Excel gerado com sucesso",
+        description: "A planilha foi baixada com sucesso."
+      });
+
+    } catch (error) {
+      console.error('Erro ao gerar Excel:', error);
+      toast({
+        title: "Erro ao gerar Excel",
+        description: "Ocorreu um erro ao gerar a planilha.",
+        variant: "destructive"
+      });
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -83,200 +317,83 @@ const RelatoriosDesvios = () => {
           </Button>
           <h2 className="text-3xl font-bold tracking-tight">Relatório de Desvios</h2>
         </div>
+        
+        {/* Export buttons */}
+        <div className="flex gap-2">
+          <Button onClick={exportToPDF} variant="outline" size="sm">
+            <FileText className="h-4 w-4 mr-1" />
+            PDF
+          </Button>
+          <Button onClick={exportToJPEG} variant="outline" size="sm">
+            <Camera className="h-4 w-4 mr-1" />
+            JPEG
+          </Button>
+          <Button onClick={exportToExcel} variant="outline" size="sm">
+            <FileSpreadsheet className="h-4 w-4 mr-1" />
+            Excel
+          </Button>
+        </div>
       </div>
       
-      <RelatorioFilters 
-        onFilter={handleFilter}
-        filterOptions={{
-          periods: [
-            { value: "last-7", label: "Últimos 7 dias" },
-            { value: "last-30", label: "Últimos 30 dias" },
-            { value: "last-90", label: "Últimos 90 dias" },
-            { value: "current-month", label: "Mês atual" },
-            { value: "previous-month", label: "Mês anterior" },
-            { value: "current-year", label: "Ano atual" },
-          ],
-          additionalFilters: [
-            {
-              id: "tipo",
-              label: "Tipo de Desvio",
-              options: [
-                { value: "condicao-insegura", label: "Condição Insegura" },
-                { value: "ato-inseguro", label: "Ato Inseguro" },
-                { value: "desvio-comportamental", label: "Desvio Comportamental" },
-              ]
-            },
-            {
-              id: "risco",
-              label: "Classificação de Risco",
-              options: [
-                { value: "alto", label: "Alto" },
-                { value: "medio", label: "Médio" },
-                { value: "baixo", label: "Baixo" },
-              ]
-            },
-            {
-              id: "area",
-              label: "Área",
-              options: [
-                { value: "producao", label: "Produção" },
-                { value: "manutencao", label: "Manutenção" },
-                { value: "escritorio", label: "Escritório" },
-                { value: "logistica", label: "Logística" },
-              ]
-            }
-          ]
-        }}
+      {/* Filters */}
+      <DesviosDashboardFilters 
+        year={year} 
+        month={month} 
+        ccaId={ccaId}
+        disciplinaId={disciplinaId}
+        empresaId={empresaId}
+        setYear={setYear} 
+        setMonth={setMonth} 
+        setCcaId={setCcaId}
+        setDisciplinaId={setDisciplinaId}
+        setEmpresaId={setEmpresaId}
+        onClearFilters={handleClearFilters}
       />
-      
-      {isFiltered && (
-        <div className="bg-slate-50 p-3 rounded-md border border-slate-200">
-          <p className="text-sm text-muted-foreground">
-            Mostrando dados filtrados. 
-          </p>
-        </div>
-      )}
-      
-      <Tabs defaultValue="graficos">
-        <TabsList>
-          <TabsTrigger value="graficos">Gráficos</TabsTrigger>
-          <TabsTrigger value="tabela">Tabela</TabsTrigger>
-        </TabsList>
-        <TabsContent value="graficos" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Desvios por Tipo</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="h-[300px]">
-                  <ChartContainer config={chartConfig}>
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie
-                          data={chartData.byTipo}
-                          cx="50%"
-                          cy="50%"
-                          labelLine={false}
-                          outerRadius={80}
-                          fill="#8884d8"
-                          dataKey="value"
-                          nameKey="name"
-                        >
-                          {chartData.byTipo.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                          ))}
-                        </Pie>
-                        <ChartTooltip content={<ChartTooltipContent />} />
-                        <Legend content={<ChartLegend />} />
-                      </PieChart>
-                    </ResponsiveContainer>
-                  </ChartContainer>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle>Desvios por Classificação de Risco</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="h-[300px]">
-                  <ChartContainer config={chartConfig}>
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie
-                          data={chartData.byRisco}
-                          cx="50%"
-                          cy="50%"
-                          labelLine={false}
-                          outerRadius={80}
-                          fill="#8884d8"
-                          dataKey="value"
-                          nameKey="name"
-                        >
-                          {chartData.byRisco.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={
-                              entry.name === "Alto" ? "#ef4444" :
-                              entry.name === "Médio" ? "#f97316" : "#22c55e"
-                            } />
-                          ))}
-                        </Pie>
-                        <ChartTooltip content={<ChartTooltipContent />} />
-                        <Legend content={<ChartLegend />} />
-                      </PieChart>
-                    </ResponsiveContainer>
-                  </ChartContainer>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card className="md:col-span-2">
-              <CardHeader>
-                <CardTitle>Desvios por Área</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="h-[300px]">
-                  <ChartContainer config={chartConfig}>
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={chartData.byArea}>
-                        <XAxis dataKey="name" />
-                        <YAxis />
-                        <Tooltip content={<ChartTooltipContent />} />
-                        <Legend content={<ChartLegend />} />
-                        <Bar dataKey="value" fill="#8884d8" />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </ChartContainer>
-                </div>
-              </CardContent>
-            </Card>
+
+      {/* Content for export */}
+      <div id="relatorio-content">
+        {/* Stats cards */}
+        <DesviosDashboardStats loading={loading} stats={dashboardStats} />
+        
+        {/* Charts */}
+        <DesviosFiltersProvider
+          year={year}
+          month={month}
+          ccaId={ccaId}
+          disciplinaId={disciplinaId}
+          empresaId={empresaId}
+          userCCAs={userCCAs}
+          filtersApplied={filtersApplied}
+        >
+          <div className="space-y-6">
+            <div className="grid gap-4 md:grid-cols-2">
+              <DesviosPieChart />
+              <DesviosByDisciplineChart />
+            </div>
+            <div className="grid gap-4 md:grid-cols-2">
+              <DesviosClassificationChart />
+              <DesviosByCompanyChart />
+            </div>
+            <div className="grid gap-4 md:grid-cols-2">
+              <DesviosByEventChart />
+              <DesviosByProcessoChart />
+            </div>
+            <div className="w-full">
+              <DesviosByBaseLegalChart />
+            </div>
           </div>
-        </TabsContent>
-        <TabsContent value="tabela">
-          <Card>
-            <CardContent className="p-0">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>ID</TableHead>
-                    <TableHead>Data</TableHead>
-                    <TableHead>Tipo</TableHead>
-                    <TableHead>Classificação</TableHead>
-                    <TableHead>Área</TableHead>
-                    <TableHead>Responsável</TableHead>
-                    <TableHead>Status</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredData.map((desvio) => (
-                    <TableRow key={desvio.id}>
-                      <TableCell>{desvio.id}</TableCell>
-                      <TableCell>{new Date(desvio.data).toLocaleDateString('pt-BR')}</TableCell>
-                      <TableCell>{desvio.tipo}</TableCell>
-                      <TableCell>
-                        <Badge variant={
-                          desvio.classificacaoRisco === "Alto" ? "destructive" :
-                          desvio.classificacaoRisco === "Médio" ? "default" : "outline"
-                        }>
-                          {desvio.classificacaoRisco}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>{desvio.area}</TableCell>
-                      <TableCell>{desvio.responsavel}</TableCell>
-                      <TableCell>
-                        <Badge variant={desvio.status === "Fechado" ? "outline" : "secondary"}>
-                          {desvio.status}
-                        </Badge>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+        </DesviosFiltersProvider>
+      </div>
+      
+      {/* Generation info */}
+      <Card>
+        <CardContent className="pt-6">
+          <div className="text-center text-sm text-muted-foreground">
+            <p>Relatório gerado em: {new Date().toLocaleString('pt-BR')}</p>
+            <p>Dados baseados nos filtros aplicados e CCAs permitidos para o usuário</p>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };
