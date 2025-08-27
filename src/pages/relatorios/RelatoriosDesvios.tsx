@@ -217,12 +217,40 @@ const RelatoriosDesvios = () => {
   };
 
   const exportToJPEG = async () => {
+    if (loading) {
+      toast({
+        title: "Aguarde os dados carregarem",
+        description: "Por favor, aguarde os gráficos terminarem de carregar antes de exportar.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     toast({
       title: "Gerando JPEG",
-      description: "A imagem está sendo gerada..."
+      description: "Aguardando gráficos carregarem..."
     });
 
     try {
+      // Wait for charts to fully load
+      await new Promise(resolve => setTimeout(resolve, 3000));
+      
+      // Check if charts are still loading
+      const loadingElements = document.querySelectorAll('[data-loading="true"], .loading');
+      if (loadingElements.length > 0) {
+        toast({
+          title: "Gráficos ainda carregando",
+          description: "Aguarde mais um momento e tente novamente.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      toast({
+        title: "Capturando imagem",
+        description: "Gerando a imagem do relatório..."
+      });
+
       const html2canvas = (await import('html2canvas')).default;
       const content = document.getElementById('relatorio-content');
       
@@ -232,16 +260,23 @@ const RelatoriosDesvios = () => {
 
       const canvas = await html2canvas(content, {
         backgroundColor: '#ffffff',
-        scale: 2,
+        scale: 1.2,
         logging: false,
-        useCORS: true
+        useCORS: true,
+        allowTaint: true,
+        height: content.scrollHeight,
+        width: content.scrollWidth,
+        scrollX: 0,
+        scrollY: 0
       });
 
       // Create download link
       const link = document.createElement('a');
       link.download = `relatorio-desvios-${new Date().toISOString().split('T')[0]}.jpeg`;
       link.href = canvas.toDataURL('image/jpeg', 0.9);
+      document.body.appendChild(link);
       link.click();
+      document.body.removeChild(link);
 
       toast({
         title: "JPEG gerado com sucesso",
@@ -252,7 +287,7 @@ const RelatoriosDesvios = () => {
       console.error('Erro ao gerar JPEG:', error);
       toast({
         title: "Erro ao gerar JPEG",
-        description: "Ocorreu um erro ao gerar a imagem.",
+        description: "Ocorreu um erro ao gerar a imagem. Tente novamente.",
         variant: "destructive"
       });
     }
@@ -265,13 +300,16 @@ const RelatoriosDesvios = () => {
     });
 
     try {
-      const XLSX = (await import('xlsx')).default;
+      // Import XLSX library
+      const XLSX = await import('xlsx');
       
       // Create workbook
       const wb = XLSX.utils.book_new();
       
       // Create stats worksheet
       const statsData = [
+        ['Relatório de Desvios - Estatísticas'],
+        [''],
         ['Métrica', 'Valor'],
         ['Total de Desvios', dashboardStats.totalDesvios],
         ['Ações Completas', dashboardStats.acoesCompletas],
@@ -280,10 +318,26 @@ const RelatoriosDesvios = () => {
         ['% Completas', `${dashboardStats.percentualCompletas}%`],
         ['% Em Andamento', `${dashboardStats.percentualAndamento}%`],
         ['% Pendentes', `${dashboardStats.percentualPendentes}%`],
-        ['Nível de Risco', dashboardStats.riskLevel]
+        ['Nível de Risco', dashboardStats.riskLevel],
+        [''],
+        ['Filtros Aplicados:'],
+        ['Ano', year || 'Todos'],
+        ['Mês', month || 'Todos'],
+        ['CCA', ccaId || 'Todos'],
+        ['Disciplina', disciplinaId || 'Todas'],
+        ['Empresa', empresaId || 'Todas'],
+        [''],
+        ['Relatório gerado em:', new Date().toLocaleString('pt-BR')]
       ];
       
       const ws = XLSX.utils.aoa_to_sheet(statsData);
+      
+      // Set column widths
+      ws['!cols'] = [
+        { wch: 25 }, // Column A
+        { wch: 15 }  // Column B
+      ];
+      
       XLSX.utils.book_append_sheet(wb, ws, 'Estatísticas');
       
       // Save file
@@ -299,7 +353,7 @@ const RelatoriosDesvios = () => {
       console.error('Erro ao gerar Excel:', error);
       toast({
         title: "Erro ao gerar Excel",
-        description: "Ocorreu um erro ao gerar a planilha.",
+        description: "Ocorreu um erro ao gerar a planilha. Verifique se a biblioteca está instalada.",
         variant: "destructive"
       });
     }
@@ -320,15 +374,30 @@ const RelatoriosDesvios = () => {
         
         {/* Export buttons */}
         <div className="flex gap-2">
-          <Button onClick={exportToPDF} variant="outline" size="sm">
+          <Button 
+            onClick={exportToPDF} 
+            variant="outline" 
+            size="sm"
+            disabled={loading}
+          >
             <FileText className="h-4 w-4 mr-1" />
             PDF
           </Button>
-          <Button onClick={exportToJPEG} variant="outline" size="sm">
+          <Button 
+            onClick={exportToJPEG} 
+            variant="outline" 
+            size="sm"
+            disabled={loading}
+          >
             <Camera className="h-4 w-4 mr-1" />
             JPEG
           </Button>
-          <Button onClick={exportToExcel} variant="outline" size="sm">
+          <Button 
+            onClick={exportToExcel} 
+            variant="outline" 
+            size="sm"
+            disabled={loading}
+          >
             <FileSpreadsheet className="h-4 w-4 mr-1" />
             Excel
           </Button>
