@@ -117,6 +117,7 @@ export function InspecoesBarChart({ dataType }: InspecoesBarChartProps) {
             height={120}
             interval={0}
           />
+          <YAxis hide />
           <Tooltip 
             labelFormatter={(label, payload) => {
               if (dataType === 'responsible' && payload && payload.length > 0) {
