@@ -128,19 +128,19 @@ export function InspecoesBarChart({ dataType }: InspecoesBarChartProps) {
           />
           <Legend wrapperStyle={{ paddingTop: '40px' }} />
           <Bar dataKey="A Realizar" name="A Realizar" fill="#4285F4">
-            <LabelList dataKey="A Realizar" position="inside" formatter={(value: any) => value > 0 ? value : ''} />
+            <LabelList dataKey="A Realizar" position="inside" fill="white" fontSize={12} formatter={(value: any) => value > 0 ? value : ''} />
           </Bar>
           <Bar dataKey="Realizada" name="Realizada" fill="#43A047">
-            <LabelList dataKey="Realizada" position="inside" formatter={(value: any) => value > 0 ? value : ''} />
+            <LabelList dataKey="Realizada" position="inside" fill="white" fontSize={12} formatter={(value: any) => value > 0 ? value : ''} />
           </Bar>
           <Bar dataKey="Não Realizada" name="Não Realizada" fill="#E53935">
-            <LabelList dataKey="Não Realizada" position="inside" formatter={(value: any) => value > 0 ? value : ''} />
+            <LabelList dataKey="Não Realizada" position="inside" fill="white" fontSize={12} formatter={(value: any) => value > 0 ? value : ''} />
           </Bar>
           <Bar dataKey="Realizada (Não Programada)" name="Realizada (Não Programada)" fill="#FFA000">
-            <LabelList dataKey="Realizada (Não Programada)" position="inside" formatter={(value: any) => value > 0 ? value : ''} />
+            <LabelList dataKey="Realizada (Não Programada)" position="inside" fill="white" fontSize={12} formatter={(value: any) => value > 0 ? value : ''} />
           </Bar>
           <Bar dataKey="Cancelada" name="Cancelada" fill="#757575">
-            <LabelList dataKey="Cancelada" position="inside" formatter={(value: any) => value > 0 ? value : ''} />
+            <LabelList dataKey="Cancelada" position="inside" fill="white" fontSize={12} formatter={(value: any) => value > 0 ? value : ''} />
           </Bar>
         </BarChart>
       </ResponsiveContainer>
