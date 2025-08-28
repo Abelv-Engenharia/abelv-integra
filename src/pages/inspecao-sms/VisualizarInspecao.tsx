@@ -179,7 +179,7 @@ const VisualizarInspecao = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:items-start">
         {/* Informações Gerais */}
         <div className="lg:col-span-2 space-y-6">
           <Card>
@@ -346,11 +346,11 @@ const VisualizarInspecao = () => {
 
         {/* Sidebar - Resumo */}
         <div className="space-y-6">
-          <Card>
+          <Card className="h-fit lg:h-full">
             <CardHeader>
               <CardTitle>Resumo</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 flex flex-col justify-between h-full">
               <div className="text-center">
                 <div className="text-2xl font-bold mb-1">
                   {inspecao.dados_preenchidos?.itens?.length || 0}
