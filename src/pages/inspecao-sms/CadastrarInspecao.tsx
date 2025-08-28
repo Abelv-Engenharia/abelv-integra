@@ -335,7 +335,9 @@ const CadastrarInspecao = () => {
                     <SelectValue placeholder="Selecione o CCA" />
                   </SelectTrigger>
                   <SelectContent className="bg-background border border-border z-50">
-                    {userCCAs.map(cca => <SelectItem key={cca.id} value={cca.id.toString()}>
+                    {[...userCCAs].sort((a, b) => 
+                      a.codigo.localeCompare(b.codigo, undefined, { numeric: true })
+                    ).map(cca => <SelectItem key={cca.id} value={cca.id.toString()}>
                         <span className="block sm:hidden">{cca.codigo}</span>
                         <span className="hidden sm:block">{cca.codigo} - {cca.nome}</span>
                       </SelectItem>)}
