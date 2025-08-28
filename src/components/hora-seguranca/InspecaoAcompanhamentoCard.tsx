@@ -39,28 +39,10 @@ export function InspecaoAcompanhamentoCard({
       const pathParts = url.pathname.split('/');
       const fileName = pathParts[pathParts.length - 1];
       
-      // Usar a edge function para servir o PDF
-      const { data, error } = await supabase.functions.invoke('serve-hsa-report', {
-        body: {},
-        headers: {
-          'Content-Type': 'application/json',
-        }
-      });
-
-      if (error) {
-        console.error('Erro na edge function:', error);
-        toast({
-          title: "Erro ao abrir relatório",
-          description: "Não foi possível acessar o arquivo via função",
-          variant: "destructive",
-        });
-        return;
-      }
-
       // Construir URL da edge function com o nome do arquivo
       const functionUrl = `https://xexgdtlctyuycohzhmuu.supabase.co/functions/v1/serve-hsa-report?file=${encodeURIComponent(fileName)}`;
       
-      // Abrir em nova aba
+      // Abrir em nova aba diretamente
       window.open(functionUrl, '_blank');
       
     } catch (err) {
