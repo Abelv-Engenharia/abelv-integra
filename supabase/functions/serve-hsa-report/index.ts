@@ -1,0 +1,72 @@
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+}
+
+serve(async (req) => {
+  // Handle CORS preflight requests
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders })
+  }
+
+  try {
+    const url = new URL(req.url)
+    const fileName = url.searchParams.get('file')
+    
+    if (!fileName) {
+      return new Response(
+        JSON.stringify({ error: 'Nome do arquivo é obrigatório' }),
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      )
+    }
+
+    const supabase = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    )
+
+    // Buscar o arquivo do storage
+    const { data: fileData, error: downloadError } = await supabase.storage
+      .from('relatorios-inspecao-hsa')
+      .download(fileName)
+
+    if (downloadError || !fileData) {
+      console.error('Erro ao baixar arquivo:', downloadError)
+      return new Response(
+        JSON.stringify({ error: 'Arquivo não encontrado' }),
+        { 
+          status: 404, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      )
+    }
+
+    // Retornar o arquivo PDF
+    return new Response(fileData, {
+      headers: {
+        ...corsHeaders,
+        'Content-Type': 'application/pdf',
+        'Content-Disposition': `inline; filename="${fileName}"`,
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      }
+    })
+
+  } catch (error) {
+    console.error('Erro ao servir relatório HSA:', error)
+    return new Response(
+      JSON.stringify({ error: 'Erro interno do servidor' }),
+      { 
+        status: 500, 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+      }
+    )
+  }
+})
