@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { ChevronDown, ChevronRight, ShieldAlert, GraduationCap, Clock, ClipboardCheck, AlertTriangle, Gavel, BarChart3, TrendingUp, FileText } from "lucide-react";
 import { SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarMenuSub, SidebarMenuSubItem, SidebarMenuSubButton } from "@/components/ui/sidebar";
@@ -327,6 +326,15 @@ export default function SidebarSectionGestaoSMS({
                     <div className="ml-4 mt-1 space-y-1">
                       <SidebarMenuSubButton asChild className={currentPath === "/gro/dashboard" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
                         <Link to="/gro/dashboard">Dashboard</Link>
+                      </SidebarMenuSubButton>
+                      <SidebarMenuSubButton asChild className={currentPath === "/gro/cadastro-perigos" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
+                        <Link to="/gro/cadastro-perigos">Cadastro de Perigos</Link>
+                      </SidebarMenuSubButton>
+                      <SidebarMenuSubButton asChild className={currentPath === "/gro/avaliacao-riscos" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
+                        <Link to="/gro/avaliacao-riscos">Avaliação de Riscos</Link>
+                      </SidebarMenuSubButton>
+                      <SidebarMenuSubButton asChild className={currentPath === "/gro/pgr" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
+                        <Link to="/gro/pgr">PGR</Link>
                       </SidebarMenuSubButton>
                       <SidebarMenuSubButton asChild className={currentPath === "/gro/cadastro" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
                         <Link to="/gro/cadastro">Cadastro</Link>
