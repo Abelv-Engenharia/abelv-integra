@@ -38,7 +38,7 @@ import AdminSupervisores from "./pages/admin/AdminSupervisores";
 import AdminEncarregados from "./pages/admin/AdminEncarregados";
 import AdminLogo from "./pages/admin/AdminLogo";
 import AdminTemplates from "./pages/AdminTemplates";
-import AdminModelosInspecao from "./pages/admin/AdminModelosInspecao";
+
 import ExportacaoDados from "./pages/admin/ExportacaoDados";
 import CadastroFuncionarios from "./pages/admin/CadastroFuncionarios";
 import ImportacaoFuncionarios from "./pages/admin/ImportacaoFuncionarios";
@@ -177,7 +177,7 @@ function App() {
                 <Route path="admin/encarregados" element={<AdminEncarregados />} />
                 <Route path="admin/logo" element={<AdminLogo />} />
                 <Route path="admin/templates" element={<AdminTemplates />} />
-                <Route path="admin/modelos-inspecao" element={<AdminModelosInspecao />} />
+                
                 <Route path="admin/funcionarios" element={<CadastroFuncionarios />} />
                 <Route path="admin/importacao-funcionarios" element={<ImportacaoFuncionarios />} />
                 <Route path="admin/criar-usuario" element={<CriarUsuario />} />
