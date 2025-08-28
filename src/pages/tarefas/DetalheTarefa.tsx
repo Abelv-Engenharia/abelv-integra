@@ -7,7 +7,7 @@ import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, Calendar, User, Clock, AlertCircle, CheckCircle, FileUp, X, MessageSquare, Send, Trash2, Download, Eye, File } from "lucide-react";
+import { ArrowLeft, Calendar, User, Clock, AlertCircle, CheckCircle, FileUp, X, MessageSquare, Send, Trash2, Download, Eye, File, ExternalLink } from "lucide-react";
 import { Tarefa, TarefaStatus } from "@/types/tarefas";
 import { tarefasService } from "@/services/tarefasService";
 import { useToast } from "@/hooks/use-toast";
@@ -26,6 +26,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { supabase } from "@/integrations/supabase/client";
 
 const DetalheTarefa = () => {
   const { id } = useParams<{ id: string }>();
@@ -37,6 +38,7 @@ const DetalheTarefa = () => {
   const [loading, setLoading] = useState(true);
   const [anexo, setAnexo] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [excluindoAnexo, setExcluindoAnexo] = useState(false);
   const [novaObservacao, setNovaObservacao] = useState("");
   const [adicionandoObservacao, setAdicionandoObservacao] = useState(false);
 
@@ -158,35 +160,132 @@ const DetalheTarefa = () => {
 
     setUploading(true);
     try {
-      // Simulação de upload (substitua pela lógica real de upload)
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      // Upload do arquivo para o Supabase Storage
+      const fileExt = anexo.name.split('.').pop();
+      const fileName = `${tarefa.id}-${Date.now()}.${fileExt}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from('tarefas-anexos')
+        .upload(fileName, anexo);
 
-      // Atualizar a tarefa com o nome do anexo (simulação)
-      const anexoNome = anexo.name;
-      const sucesso = await tarefasService.updateStatus(tarefa.id, { anexo: anexoNome });
+      if (uploadError) throw uploadError;
+
+      // Atualizar a tarefa com o nome do arquivo
+      const sucesso = await tarefasService.updateStatus(tarefa.id, { anexo: fileName });
 
       if (sucesso) {
-        setTarefa({ ...tarefa, anexo: anexoNome });
+        setTarefa({ ...tarefa, anexo: fileName });
+        setAnexo(null);
         toast({
           title: "Anexo enviado",
           description: "Anexo enviado com sucesso.",
         });
       } else {
-        toast({
-          title: "Erro ao enviar anexo",
-          description: "Não foi possível enviar o anexo.",
-          variant: "destructive",
-        });
+        // Se falhou ao atualizar a tarefa, remover o arquivo do storage
+        await supabase.storage.from('tarefas-anexos').remove([fileName]);
+        throw new Error("Falha ao atualizar tarefa");
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Erro ao enviar anexo:", error);
       toast({
         title: "Erro",
-        description: "Ocorreu um erro ao enviar o anexo.",
+        description: error.message || "Ocorreu um erro ao enviar o anexo.",
         variant: "destructive",
       });
     } finally {
       setUploading(false);
+    }
+  };
+
+  const handleVisualizarAnexo = async () => {
+    if (!tarefa?.anexo) return;
+
+    try {
+      const { data, error } = await supabase.storage
+        .from('tarefas-anexos')
+        .createSignedUrl(tarefa.anexo, 3600); // URL válida por 1 hora
+
+      if (error) throw error;
+
+      // Abrir em nova aba
+      window.open(data.signedUrl, '_blank');
+    } catch (error: any) {
+      console.error("Erro ao visualizar anexo:", error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível visualizar o documento.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDownloadAnexo = async () => {
+    if (!tarefa?.anexo) return;
+
+    try {
+      const { data, error } = await supabase.storage
+        .from('tarefas-anexos')
+        .download(tarefa.anexo);
+
+      if (error) throw error;
+
+      // Criar URL do blob e fazer download
+      const url = URL.createObjectURL(data);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = tarefa.anexo.split('-').slice(1).join('-') || tarefa.anexo; // Remove timestamp do nome
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      toast({
+        title: "Download concluído",
+        description: "O arquivo foi baixado com sucesso.",
+      });
+    } catch (error: any) {
+      console.error("Erro ao baixar anexo:", error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível baixar o documento.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleExcluirAnexo = async () => {
+    if (!tarefa?.id || !tarefa?.anexo) return;
+
+    setExcluindoAnexo(true);
+    try {
+      // Remover arquivo do storage
+      const { error: storageError } = await supabase.storage
+        .from('tarefas-anexos')
+        .remove([tarefa.anexo]);
+
+      if (storageError) throw storageError;
+
+      // Atualizar tarefa removendo o anexo
+      const sucesso = await tarefasService.updateStatus(tarefa.id, { anexo: null });
+
+      if (sucesso) {
+        setTarefa({ ...tarefa, anexo: null });
+        toast({
+          title: "Anexo excluído",
+          description: "O anexo foi excluído com sucesso.",
+        });
+      } else {
+        throw new Error("Falha ao atualizar tarefa");
+      }
+    } catch (error: any) {
+      console.error("Erro ao excluir anexo:", error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível excluir o anexo.",
+        variant: "destructive",
+      });
+    } finally {
+      setExcluindoAnexo(false);
     }
   };
 
@@ -386,7 +485,9 @@ const DetalheTarefa = () => {
                       <File className="h-6 w-6 text-blue-600" />
                     </div>
                     <div>
-                      <p className="font-medium text-sm">{tarefa.anexo}</p>
+                      <p className="font-medium text-sm">
+                        {tarefa.anexo.split('-').slice(1).join('-') || tarefa.anexo}
+                      </p>
                       <p className="text-xs text-muted-foreground">
                         Documento anexado à tarefa
                       </p>
@@ -396,13 +497,7 @@ const DetalheTarefa = () => {
                     <Button 
                       variant="outline" 
                       size="sm"
-                      onClick={() => {
-                        // Simular visualização do documento
-                        toast({
-                          title: "Visualizar documento",
-                          description: "Funcionalidade de visualização será implementada conforme necessário.",
-                        });
-                      }}
+                      onClick={handleVisualizarAnexo}
                     >
                       <Eye className="h-4 w-4 mr-2" />
                       Visualizar
@@ -410,21 +505,41 @@ const DetalheTarefa = () => {
                     <Button 
                       variant="outline" 
                       size="sm"
-                      onClick={() => {
-                        // Simular download do documento
-                        const link = document.createElement('a');
-                        link.href = '#'; // Aqui seria a URL real do arquivo
-                        link.download = tarefa.anexo;
-                        link.click();
-                        toast({
-                          title: "Download iniciado",
-                          description: `Download do arquivo ${tarefa.anexo} foi iniciado.`,
-                        });
-                      }}
+                      onClick={handleDownloadAnexo}
                     >
                       <Download className="h-4 w-4 mr-2" />
                       Baixar
                     </Button>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          className="text-destructive hover:text-destructive"
+                          disabled={excluindoAnexo}
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          {excluindoAnexo ? "Excluindo..." : "Excluir"}
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Tem certeza de que deseja excluir este anexo? Esta ação não pode ser desfeita.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                          <AlertDialogAction 
+                            onClick={handleExcluirAnexo}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                          >
+                            Excluir
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   </div>
                 </div>
               </div>
