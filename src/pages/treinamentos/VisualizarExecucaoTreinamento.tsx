@@ -61,7 +61,15 @@ const VisualizarExecucaoTreinamento = () => {
       
       // Usar a edge function para servir o PDF
       const functionUrl = `https://xexgdtlctyuycohzhmuu.supabase.co/functions/v1/serve-treinamento-file?file=${encodeURIComponent(path)}`;
-      window.open(functionUrl, '_blank');
+      
+      // Criar um link temporário e simular clique para evitar bloqueio de popup
+      const link = document.createElement('a');
+      link.href = functionUrl;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     }
   };
 
@@ -85,7 +93,15 @@ const VisualizarExecucaoTreinamento = () => {
       
       // Usar a edge function para servir o PDF
       const functionUrl = `https://xexgdtlctyuycohzhmuu.supabase.co/functions/v1/serve-treinamento-file?file=${encodeURIComponent(path)}`;
-      window.open(functionUrl, '_blank');
+      
+      // Criar um link temporário e simular clique para evitar bloqueio de popup
+      const link = document.createElement('a');
+      link.href = functionUrl;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     }
   };
 
