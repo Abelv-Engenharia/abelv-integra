@@ -78,50 +78,51 @@ serve(async (req) => {
     const camposCabecalho = inspecao.dados_preenchidos?.campos_cabecalho || {}
     const responsaveis: any = {}
 
-    if (camposCabecalho.engenheiro_responsavel_id) {
-      const { data: engenheiro } = await supabase
-        .from('engenheiros')
-        .select('nome')
-        .eq('id', camposCabecalho.engenheiro_responsavel_id)
-        .single()
-      if (engenheiro) responsaveis.engenheiro = engenheiro.nome
+    // Buscar dados de forma paralela
+    const promises = []
+
+    if (camposCabecalho.engenheiro_responsavel || camposCabecalho.engenheiro_responsavel_id) {
+      const id = camposCabecalho.engenheiro_responsavel || camposCabecalho.engenheiro_responsavel_id
+      promises.push(
+        supabase.from('engenheiros').select('nome').eq('id', id).single()
+          .then(({ data }) => { if (data) responsaveis.engenheiro = data.nome })
+      )
     }
 
-    if (camposCabecalho.supervisor_responsavel_id) {
-      const { data: supervisor } = await supabase
-        .from('supervisores')
-        .select('nome')
-        .eq('id', camposCabecalho.supervisor_responsavel_id)
-        .single()
-      if (supervisor) responsaveis.supervisor = supervisor.nome
+    if (camposCabecalho.supervisor_responsavel || camposCabecalho.supervisor_responsavel_id) {
+      const id = camposCabecalho.supervisor_responsavel || camposCabecalho.supervisor_responsavel_id
+      promises.push(
+        supabase.from('supervisores').select('nome').eq('id', id).single()
+          .then(({ data }) => { if (data) responsaveis.supervisor = data.nome })
+      )
     }
 
-    if (camposCabecalho.encarregado_responsavel_id) {
-      const { data: encarregado } = await supabase
-        .from('encarregados')
-        .select('nome')
-        .eq('id', camposCabecalho.encarregado_responsavel_id)
-        .single()
-      if (encarregado) responsaveis.encarregado = encarregado.nome
+    if (camposCabecalho.encarregado_responsavel || camposCabecalho.encarregado_responsavel_id) {
+      const id = camposCabecalho.encarregado_responsavel || camposCabecalho.encarregado_responsavel_id
+      promises.push(
+        supabase.from('encarregados').select('nome').eq('id', id).single()
+          .then(({ data }) => { if (data) responsaveis.encarregado = data.nome })
+      )
     }
 
-    if (camposCabecalho.empresa_id) {
-      const { data: empresa } = await supabase
-        .from('empresas')
-        .select('nome')
-        .eq('id', camposCabecalho.empresa_id)
-        .single()
-      if (empresa) responsaveis.empresa = empresa.nome
+    if (camposCabecalho.empresa || camposCabecalho.empresa_id) {
+      const id = camposCabecalho.empresa || camposCabecalho.empresa_id
+      promises.push(
+        supabase.from('empresas').select('nome').eq('id', id).single()
+          .then(({ data }) => { if (data) responsaveis.empresa = data.nome })
+      )
     }
 
-    if (camposCabecalho.disciplina_id) {
-      const { data: disciplina } = await supabase
-        .from('disciplinas')
-        .select('nome')
-        .eq('id', camposCabecalho.disciplina_id)
-        .single()
-      if (disciplina) responsaveis.disciplina = disciplina.nome
+    if (camposCabecalho.disciplina || camposCabecalho.disciplina_id) {
+      const id = camposCabecalho.disciplina || camposCabecalho.disciplina_id
+      promises.push(
+        supabase.from('disciplinas').select('nome').eq('id', id).single()
+          .then(({ data }) => { if (data) responsaveis.disciplina = data.nome })
+      )
     }
+
+    // Aguardar todas as consultas
+    await Promise.all(promises)
 
     // Gerar HTML do relatório
     const htmlContent = generateHTMLReport(inspecao as InspectionData, responsaveis)
