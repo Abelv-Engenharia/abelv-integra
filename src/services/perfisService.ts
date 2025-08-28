@@ -125,56 +125,6 @@ export function getMenusHierarchy(): MenuSection[] {
       ]
     },
     {
-      key: "orcamentos",
-      label: "Orçamentos",
-      items: [
-        { key: "orcamentos_dashboard", label: "Dashboard" },
-        { key: "orcamentos_projetos", label: "Projetos" },
-        { key: "orcamentos_custos", label: "Custos" },
-        { key: "orcamentos_analises", label: "Análises" },
-        { key: "orcamentos_aprovacoes", label: "Aprovações" },
-        { key: "orcamentos_historico", label: "Histórico" }
-      ]
-    },
-    {
-      key: "producao",
-      label: "Produção",
-      items: [
-        { key: "producao_dashboard", label: "Dashboard" },
-        { key: "producao_planejamento", label: "Planejamento" },
-        { key: "producao_ordens_producao", label: "Ordens de Produção" },
-        { key: "producao_controle_qualidade", label: "Controle de Qualidade" },
-        { key: "producao_manutencao", label: "Manutenção" },
-        { key: "producao_recursos", label: "Recursos" },
-        { key: "producao_indicadores", label: "Indicadores" }
-      ]
-    },
-    {
-      key: "qualidade",
-      label: "Qualidade",
-      items: [
-        { key: "qualidade_dashboard", label: "Dashboard" },
-        { key: "qualidade_controle", label: "Controle" },
-        { key: "qualidade_auditorias", label: "Auditorias" },
-        { key: "qualidade_indicadores", label: "Indicadores" },
-        { key: "qualidade_equipe", label: "Equipe" },
-        { key: "qualidade_configuracoes", label: "Configurações" }
-      ]
-    },
-    {
-      key: "suprimentos",
-      label: "Suprimentos",
-      items: [
-        { key: "suprimentos_dashboard", label: "Dashboard" },
-        { key: "suprimentos_fornecedores", label: "Fornecedores" },
-        { key: "suprimentos_materiais", label: "Materiais" },
-        { key: "suprimentos_compras", label: "Compras" },
-        { key: "suprimentos_estoque", label: "Estoque" },
-        { key: "suprimentos_pedidos", label: "Pedidos" },
-        { key: "suprimentos_contratos", label: "Contratos" }
-      ]
-    },
-    {
       key: "tarefas",
       label: "Tarefas",
       items: [
