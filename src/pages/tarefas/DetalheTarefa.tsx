@@ -191,11 +191,17 @@ const DetalheTarefa = () => {
         minute: '2-digit' 
       });
       
-      const novaObservacao = `[${dataFormatada}, ${horaFormatada} - ${userProfile.nome}]\n${observacoes.trim()}\n\n`;
+      const novaObservacao = `[${dataFormatada} às ${horaFormatada} - ${userProfile.nome}]\n${observacoes.trim()}`;
       
       // Garantir que observações existentes sejam mantidas
       const observacoesExistentes = tarefa.observacoes_progresso || "";
-      const observacoesAtualizadas = observacoesExistentes + novaObservacao;
+      let observacoesAtualizadas = "";
+      
+      if (observacoesExistentes.trim()) {
+        observacoesAtualizadas = observacoesExistentes + "\n\n" + novaObservacao;
+      } else {
+        observacoesAtualizadas = novaObservacao;
+      }
 
       console.log("Salvando observações:", {
         observacoesExistentes,
@@ -218,6 +224,9 @@ const DetalheTarefa = () => {
         });
 
         console.log("Observação salva com sucesso");
+        
+        // Recarregar os dados da tarefa para garantir sincronização
+        await fetchTarefa();
       } else {
         toast({
           title: "Erro ao salvar observação",
@@ -355,6 +364,48 @@ const DetalheTarefa = () => {
       description: "Funcionalidade de download será implementada em breve.",
     });
   };
+
+  // Função para parsear e exibir observações
+  const parseObservacoes = (observacoesText: string) => {
+    if (!observacoesText || !observacoesText.trim()) {
+      return [];
+    }
+
+    // Dividir observações por linha dupla, mantendo apenas as não vazias
+    const observacoesList = observacoesText
+      .split(/\n\n+/)
+      .filter(obs => obs.trim())
+      .map(obs => obs.trim());
+
+    return observacoesList.map((observacao, index) => {
+      // Verificar se tem o formato [data - usuário]
+      const linhas = observacao.split('\n');
+      const primeiraLinha = linhas[0];
+      
+      if (primeiraLinha.match(/^\[.*\]$/)) {
+        // Formato com cabeçalho
+        const cabecalho = primeiraLinha.replace(/[\[\]]/g, '');
+        const conteudo = linhas.slice(1).join('\n');
+        
+        return {
+          id: index,
+          cabecalho,
+          conteudo,
+          temCabecalho: true
+        };
+      } else {
+        // Formato sem cabeçalho (observações antigas)
+        return {
+          id: index,
+          cabecalho: '',
+          conteudo: observacao,
+          temCabecalho: false
+        };
+      }
+    });
+  };
+
+  const observacoesParsed = parseObservacoes(tarefa.observacoes_progresso || "");
 
   return (
     <div className="container mx-auto py-8">
@@ -505,40 +556,48 @@ const DetalheTarefa = () => {
           <div>
             <Label className="text-muted-foreground mb-2 block">Observações de Progresso</Label>
             
-            {/* Mostrar observações existentes se houver */}
-            {tarefa.observacoes_progresso && tarefa.observacoes_progresso.trim() !== "" && (
-              <div className="mb-4 p-3 border rounded-lg bg-muted/50">
-                <div className="flex items-start justify-between mb-2">
+            {/* Histórico de observações */}
+            {observacoesParsed.length > 0 && (
+              <div className="mb-4 space-y-3">
+                <div className="flex items-center justify-between">
                   <Label className="text-sm font-medium text-green-700">Histórico de Observações:</Label>
                   <Badge variant="secondary" className="text-xs">
                     <CheckCircle className="mr-1 h-3 w-3" />
-                    Salvo
+                    {observacoesParsed.length} observação{observacoesParsed.length > 1 ? 'ões' : ''}
                   </Badge>
                 </div>
-                <div className="text-sm whitespace-pre-wrap space-y-2 max-h-64 overflow-y-auto">
-                  {tarefa.observacoes_progresso.split('\n\n').filter(obs => obs.trim()).map((observacao, index) => {
-                    const linhas = observacao.split('\n');
-                    const cabecalho = linhas[0];
-                    const conteudo = linhas.slice(1).join('\n');
-                    
-                    // Verificar se é uma observação com formato de cabeçalho
-                    if (cabecalho.match(/^\[.*\]$/)) {
-                      return (
-                        <div key={index} className="border-l-4 border-blue-500 pl-3 py-2 bg-white/50 rounded">
-                          <div className="text-xs text-blue-600 font-medium mb-1">
-                            {cabecalho.replace(/[\[\]]/g, '')}
+                
+                <div className="max-h-80 overflow-y-auto space-y-3">
+                  {observacoesParsed.map((obs, index) => (
+                    <div key={obs.id} className="border rounded-lg p-3 bg-white/50">
+                      {obs.temCabecalho ? (
+                        <div className="border-l-4 border-blue-500 pl-3">
+                          <div className="flex items-start justify-between mb-2">
+                            <div className="text-xs text-blue-600 font-medium flex items-center">
+                              <Clock className="mr-1 h-3 w-3" />
+                              {obs.cabecalho}
+                            </div>
+                            <Badge variant="outline" className="text-xs">
+                              #{observacoesParsed.length - index}
+                            </Badge>
                           </div>
-                          <div className="text-sm">{conteudo}</div>
+                          <div className="text-sm whitespace-pre-wrap">{obs.conteudo}</div>
                         </div>
-                      );
-                    }
-                    
-                    return (
-                      <div key={index} className="text-sm border-l-4 border-gray-300 pl-3 py-2">
-                        {observacao}
-                      </div>
-                    );
-                  })}
+                      ) : (
+                        <div className="border-l-4 border-gray-300 pl-3">
+                          <div className="flex items-start justify-between mb-2">
+                            <div className="text-xs text-gray-500 font-medium">
+                              Observação sem data/usuário
+                            </div>
+                            <Badge variant="outline" className="text-xs">
+                              #{observacoesParsed.length - index}
+                            </Badge>
+                          </div>
+                          <div className="text-sm whitespace-pre-wrap">{obs.conteudo}</div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
                 </div>
               </div>
             )}
