@@ -13,6 +13,7 @@ import { tarefasService } from "@/services/tarefasService";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTarefaObservacoes } from "@/hooks/tarefas/useTarefaObservacoes";
+import { useTarefaAnexos } from "@/hooks/tarefas/useTarefaAnexos";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { 
@@ -42,9 +43,8 @@ const DetalheTarefa = () => {
   
   const [tarefa, setTarefa] = useState<Tarefa | null>(null);
   const [loading, setLoading] = useState(true);
-  const [anexo, setAnexo] = useState<File | null>(null);
+  const [arquivosSelecionados, setArquivosSelecionados] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
-  const [excluindoAnexo, setExcluindoAnexo] = useState(false);
   const [novaObservacao, setNovaObservacao] = useState("");
   const [adicionandoObservacao, setAdicionandoObservacao] = useState(false);
   const [showVisualizacao, setShowVisualizacao] = useState(false);
@@ -57,6 +57,16 @@ const DetalheTarefa = () => {
     adicionarObservacao,
     excluirObservacao
   } = useTarefaObservacoes(id);
+
+  // Hook para gerenciar anexos da tarefa
+  const {
+    anexos,
+    loading: loadingAnexos,
+    adicionarAnexo,
+    removerAnexo,
+    visualizarAnexo,
+    baixarAnexo
+  } = useTarefaAnexos(id);
 
   useEffect(() => {
     const fetchTarefa = async () => {
@@ -148,19 +158,17 @@ const DetalheTarefa = () => {
     }
   };
 
-  const handleAnexoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files && event.target.files.length > 0) {
-      setAnexo(event.target.files[0]);
-    } else {
-      setAnexo(null);
+  const handleArquivosChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files) {
+      setArquivosSelecionados(Array.from(event.target.files));
     }
   };
 
-  const handleUploadAnexo = async () => {
-    if (!tarefa?.id || !anexo) {
+  const handleUploadAnexos = async () => {
+    if (!tarefa?.id || arquivosSelecionados.length === 0) {
       toast({
         title: "Erro",
-        description: "Tarefa ou anexo não encontrado.",
+        description: "Selecione pelo menos um arquivo para anexar.",
         variant: "destructive",
       });
       return;
@@ -168,36 +176,29 @@ const DetalheTarefa = () => {
 
     setUploading(true);
     try {
-      // Upload do arquivo para o Supabase Storage
-      const fileExt = anexo.name.split('.').pop();
-      const fileName = `${tarefa.id}-${Date.now()}.${fileExt}`;
+      let sucessos = 0;
       
-      const { error: uploadError } = await supabase.storage
-        .from('tarefas-anexos')
-        .upload(fileName, anexo);
+      for (const arquivo of arquivosSelecionados) {
+        const sucesso = await adicionarAnexo(arquivo, tarefa.titulo);
+        if (sucesso) sucessos++;
+      }
 
-      if (uploadError) throw uploadError;
-
-      // Atualizar a tarefa com o nome do arquivo
-      const sucesso = await tarefasService.updateStatus(tarefa.id, { anexo: fileName });
-
-      if (sucesso) {
-        setTarefa({ ...tarefa, anexo: fileName });
-        setAnexo(null);
+      if (sucessos > 0) {
+        setArquivosSelecionados([]);
+        // Limpar o input file
+        const fileInput = document.getElementById('file-upload') as HTMLInputElement;
+        if (fileInput) fileInput.value = '';
+        
         toast({
-          title: "Anexo enviado",
-          description: "Anexo enviado com sucesso.",
+          title: "Upload concluído",
+          description: `${sucessos} arquivo(s) anexado(s) com sucesso.`,
         });
-      } else {
-        // Se falhou ao atualizar a tarefa, remover o arquivo do storage
-        await supabase.storage.from('tarefas-anexos').remove([fileName]);
-        throw new Error("Falha ao atualizar tarefa");
       }
     } catch (error: any) {
-      console.error("Erro ao enviar anexo:", error);
+      console.error("Erro ao enviar anexos:", error);
       toast({
         title: "Erro",
-        description: error.message || "Ocorreu um erro ao enviar o anexo.",
+        description: "Ocorreu um erro durante o upload dos arquivos.",
         variant: "destructive",
       });
     } finally {
@@ -206,27 +207,18 @@ const DetalheTarefa = () => {
   };
 
   // Função para visualizar anexo
-  const handleVisualizarAnexo = async () => {
-    if (!tarefa?.anexo) return;
-
+  const handleVisualizarAnexo = async (nomeArquivo: string) => {
     try {
-      // Baixar o arquivo e criar URL blob
-      const { data, error } = await supabase.storage
-        .from('tarefas-anexos')
-        .download(tarefa.anexo);
-
-      if (error) throw error;
-
-      // Criar URL do blob para visualização
-      const url = URL.createObjectURL(data);
-      setAnexoUrl(url);
-      setShowVisualizacao(true);
-
+      const url = await visualizarAnexo(nomeArquivo);
+      if (url) {
+        setAnexoUrl(url);
+        setShowVisualizacao(true);
+      }
     } catch (error: any) {
       console.error("Erro ao visualizar anexo:", error);
       toast({
         title: "Erro",
-        description: "Não foi possível visualizar o documento. Tente fazer o download.",
+        description: "Não foi possível visualizar o documento.",
         variant: "destructive",
       });
     }
@@ -239,76 +231,6 @@ const DetalheTarefa = () => {
       setAnexoUrl(null);
     }
     setShowVisualizacao(false);
-  };
-
-  const handleDownloadAnexo = async () => {
-    if (!tarefa?.anexo) return;
-
-    try {
-      const { data, error } = await supabase.storage
-        .from('tarefas-anexos')
-        .download(tarefa.anexo);
-
-      if (error) throw error;
-
-      // Criar URL do blob e fazer download
-      const url = URL.createObjectURL(data);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = tarefa.anexo.split('-').slice(1).join('-') || tarefa.anexo; // Remove timestamp do nome
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-
-      toast({
-        title: "Download concluído",
-        description: "O arquivo foi baixado com sucesso.",
-      });
-    } catch (error: any) {
-      console.error("Erro ao baixar anexo:", error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível baixar o documento.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleExcluirAnexo = async () => {
-    if (!tarefa?.id || !tarefa?.anexo) return;
-
-    setExcluindoAnexo(true);
-    try {
-      // Remover arquivo do storage
-      const { error: storageError } = await supabase.storage
-        .from('tarefas-anexos')
-        .remove([tarefa.anexo]);
-
-      if (storageError) throw storageError;
-
-      // Atualizar tarefa removendo o anexo
-      const sucesso = await tarefasService.updateStatus(tarefa.id, { anexo: null });
-
-      if (sucesso) {
-        setTarefa({ ...tarefa, anexo: null });
-        toast({
-          title: "Anexo excluído",
-          description: "O anexo foi excluído com sucesso.",
-        });
-      } else {
-        throw new Error("Falha ao atualizar tarefa");
-      }
-    } catch (error: any) {
-      console.error("Erro ao excluir anexo:", error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível excluir o anexo.",
-        variant: "destructive",
-      });
-    } finally {
-      setExcluindoAnexo(false);
-    }
   };
 
   const handleAdicionarObservacao = async () => {
@@ -474,18 +396,27 @@ const DetalheTarefa = () => {
           <div>
             <Label className="text-muted-foreground">
               <FileUp className="mr-2 h-4 w-4 inline-block" />
-              Anexar Documento
+              Anexar Documentos
             </Label>
-            <div className="flex items-center space-x-4">
-              <Input type="file" onChange={handleAnexoChange} />
-              <Button onClick={handleUploadAnexo} disabled={!anexo || uploading}>
-                {uploading ? "Enviando..." : "Enviar Anexo"}
-              </Button>
-              {tarefa.anexo && (
-                <Badge variant="secondary">
-                  <CheckCircle className="mr-2 h-4 w-4 inline-block" />
-                  {tarefa.anexo}
-                </Badge>
+            <div className="space-y-4">
+              <div className="flex items-center space-x-4">
+                <Input 
+                  id="file-upload"
+                  type="file" 
+                  multiple
+                  onChange={handleArquivosChange} 
+                />
+                <Button 
+                  onClick={handleUploadAnexos} 
+                  disabled={arquivosSelecionados.length === 0 || uploading}
+                >
+                  {uploading ? "Enviando..." : "Enviar Anexos"}
+                </Button>
+              </div>
+              {arquivosSelecionados.length > 0 && (
+                <div className="text-sm text-muted-foreground">
+                  {arquivosSelecionados.length} arquivo(s) selecionado(s)
+                </div>
               )}
             </div>
           </div>
@@ -496,74 +427,94 @@ const DetalheTarefa = () => {
           <div>
             <Label className="text-muted-foreground flex items-center gap-2 mb-4">
               <File className="h-4 w-4" />
-              Documentos Anexados
+              Documentos Anexados ({anexos.length})
             </Label>
             
-            {tarefa.anexo ? (
-              <div className="border rounded-lg p-4 bg-background">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-blue-50 rounded-lg">
-                      <File className="h-6 w-6 text-blue-600" />
-                    </div>
-                    <div>
-                      <p className="font-medium text-sm">
-                        {tarefa.anexo.split('-').slice(1).join('-') || tarefa.anexo}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        Documento anexado à tarefa
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={handleVisualizarAnexo}
-                    >
-                      <Eye className="h-4 w-4 mr-2" />
-                      Visualizar
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={handleDownloadAnexo}
-                    >
-                      <Download className="h-4 w-4 mr-2" />
-                      Baixar
-                    </Button>
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
+            {loadingAnexos ? (
+              <div className="text-center py-4">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mx-auto"></div>
+                <p className="text-sm text-muted-foreground mt-2">Carregando anexos...</p>
+              </div>
+            ) : anexos.length > 0 ? (
+              <div className="space-y-3">
+                {anexos.map((anexo) => (
+                  <div key={anexo.id} className="border rounded-lg p-4 bg-background">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-blue-50 rounded-lg">
+                          <File className="h-6 w-6 text-blue-600" />
+                        </div>
+                        <div className="flex-1">
+                          <p className="font-medium text-sm">
+                            {anexo.nome_original}
+                          </p>
+                          <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                            <span>
+                              Anexado em {format(new Date(anexo.created_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
+                            </span>
+                            {anexo.tamanho && (
+                              <span>
+                                {(anexo.tamanho / 1024 / 1024).toFixed(2)} MB
+                              </span>
+                            )}
+                            {anexo.tipo_arquivo && (
+                              <span className="uppercase">
+                                {anexo.tipo_arquivo.split('/')[1] || anexo.tipo_arquivo}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
                         <Button 
                           variant="outline" 
                           size="sm"
-                          className="text-destructive hover:text-destructive"
-                          disabled={excluindoAnexo}
+                          onClick={() => handleVisualizarAnexo(anexo.nome_arquivo)}
                         >
-                          <Trash2 className="h-4 w-4 mr-2" />
-                          {excluindoAnexo ? "Excluindo..." : "Excluir"}
+                          <Eye className="h-4 w-4 mr-2" />
+                          Visualizar
                         </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            Tem certeza de que deseja excluir este anexo? Esta ação não pode ser desfeita.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                          <AlertDialogAction 
-                            onClick={handleExcluirAnexo}
-                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                          >
-                            Excluir
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => baixarAnexo(anexo)}
+                        >
+                          <Download className="h-4 w-4 mr-2" />
+                          Baixar
+                        </Button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              className="text-destructive hover:text-destructive"
+                            >
+                              <Trash2 className="h-4 w-4 mr-2" />
+                              Excluir
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Tem certeza de que deseja excluir o anexo "{anexo.nome_original}"? Esta ação não pode ser desfeita.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                              <AlertDialogAction 
+                                onClick={() => removerAnexo(anexo.id, anexo.nome_arquivo)}
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                              >
+                                Excluir
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
+                    </div>
                   </div>
-                </div>
+                ))}
               </div>
             ) : (
               <div className="text-center py-8 text-muted-foreground border rounded-lg bg-muted/20">

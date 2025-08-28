@@ -2333,6 +2333,39 @@ export type Database = {
           },
         ]
       }
+      tarefas_anexos: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          nome_arquivo: string
+          nome_original: string
+          tamanho: number | null
+          tarefa_id: string
+          tipo_arquivo: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          nome_arquivo: string
+          nome_original: string
+          tamanho?: number | null
+          tarefa_id: string
+          tipo_arquivo?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          nome_arquivo?: string
+          nome_original?: string
+          tamanho?: number | null
+          tarefa_id?: string
+          tipo_arquivo?: string | null
+        }
+        Relationships: []
+      }
       tipo_inspecao_hsa: {
         Row: {
           ativo: boolean
