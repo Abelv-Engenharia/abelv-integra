@@ -16,11 +16,57 @@ const VisualizarInspecao = () => {
   const navigate = useNavigate();
   const [inspecao, setInspecao] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [responsavelFrenteTrabalho, setResponsavelFrenteTrabalho] = useState<string>('');
 
   // Hook para buscar dados da identificação da frente de trabalho
   const { identificacao, isLoading: isLoadingIdentificacao } = useIdentificacaoFrenteTrabalho(
     inspecao?.dados_preenchidos?.campos_cabecalho
   );
+
+  // Função para buscar o nome do responsável pela frente de trabalho
+  const buscarResponsavelFrenteTrabalho = async (responsavelId: string) => {
+    if (!responsavelId) return;
+
+    try {
+      // Tentar buscar em engenheiros
+      const { data: engenheiro } = await supabase
+        .from('engenheiros')
+        .select('nome')
+        .eq('id', responsavelId)
+        .maybeSingle();
+
+      if (engenheiro?.nome) {
+        setResponsavelFrenteTrabalho(engenheiro.nome);
+        return;
+      }
+
+      // Tentar buscar em supervisores
+      const { data: supervisor } = await supabase
+        .from('supervisores')
+        .select('nome')
+        .eq('id', responsavelId)
+        .maybeSingle();
+
+      if (supervisor?.nome) {
+        setResponsavelFrenteTrabalho(supervisor.nome);
+        return;
+      }
+
+      // Tentar buscar em encarregados
+      const { data: encarregado } = await supabase
+        .from('encarregados')
+        .select('nome')
+        .eq('id', responsavelId)
+        .maybeSingle();
+
+      if (encarregado?.nome) {
+        setResponsavelFrenteTrabalho(encarregado.nome);
+        return;
+      }
+    } catch (error) {
+      console.error('Erro ao buscar responsável da frente de trabalho:', error);
+    }
+  };
 
   const loadInspecao = async () => {
     if (!id) return;
@@ -121,6 +167,16 @@ const VisualizarInspecao = () => {
   useEffect(() => {
     loadInspecao();
   }, [id]);
+
+  // Buscar nome do responsável quando a inspeção for carregada
+  useEffect(() => {
+    if (inspecao?.dados_preenchidos?.responsavel_tecnico_id || 
+        inspecao?.dados_preenchidos?.assinaturas?.responsavel_tecnico) {
+      const responsavelId = inspecao.dados_preenchidos.responsavel_tecnico_id || 
+                           inspecao.dados_preenchidos.assinaturas.responsavel_tecnico;
+      buscarResponsavelFrenteTrabalho(responsavelId);
+    }
+  }, [inspecao]);
 
   if (isLoading) {
     return <PageLoader />;
@@ -447,12 +503,13 @@ const VisualizarInspecao = () => {
                         </div>
                       )}
                     </div>
-                    <p className="text-sm font-medium">
-                      {/* Mostrar o nome do responsável selecionado baseado no ID */}
-                      {inspecao.dados_preenchidos?.responsavel_tecnico_id ? 
-                        "Responsável pela Frente de Trabalho" : 
-                        (identificacao?.supervisor || identificacao?.engenheiro || identificacao?.encarregado || "Responsável pela Frente de Trabalho")}
-                    </p>
+                    {/* Mostrar o nome da pessoa selecionada para assinatura */}
+                    {responsavelFrenteTrabalho && (
+                      <p className="text-sm font-semibold text-primary mb-1">
+                        {responsavelFrenteTrabalho}
+                      </p>
+                    )}
+                    <p className="text-sm font-medium">Responsável pela Frente de Trabalho</p>
                     <p className="text-xs text-muted-foreground">Responsável para Assinatura</p>
                     {inspecao.dados_preenchidos?.data_assinatura && (
                       <p className="text-xs text-muted-foreground mt-1">
