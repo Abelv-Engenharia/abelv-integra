@@ -123,20 +123,35 @@ serve(async (req) => {
 
     // Buscar dados do responsável técnico selecionado para assinatura
     const responsavelTecnicoId = inspecao.dados_preenchidos?.responsavel_tecnico_id || 
-                                 camposCabecalho.assinaturas?.responsavel_tecnico
+                                 inspecao.dados_preenchidos?.assinaturas?.responsavel_tecnico
     
     if (responsavelTecnicoId) {
-      // Verificar em todas as tabelas de responsáveis
+      // Tentar buscar em engenheiros primeiro
       promises.push(
-        supabase.from('engenheiros').select('nome').eq('id', responsavelTecnicoId).single()
-          .then(({ data }) => { if (data) responsaveis.responsavel_tecnico = data.nome })
-          .catch(() => {
-            return supabase.from('supervisores').select('nome').eq('id', responsavelTecnicoId).single()
-              .then(({ data }) => { if (data) responsaveis.responsavel_tecnico = data.nome })
-              .catch(() => {
-                return supabase.from('encarregados').select('nome').eq('id', responsavelTecnicoId).single()
-                  .then(({ data }) => { if (data) responsaveis.responsavel_tecnico = data.nome })
+        supabase.from('engenheiros').select('nome').eq('id', responsavelTecnicoId).maybeSingle()
+          .then(({ data }) => { 
+            if (data?.nome) {
+              responsaveis.responsavel_tecnico = data.nome
+              return
+            }
+            // Se não encontrou em engenheiros, tentar supervisores
+            return supabase.from('supervisores').select('nome').eq('id', responsavelTecnicoId).maybeSingle()
+              .then(({ data }) => { 
+                if (data?.nome) {
+                  responsaveis.responsavel_tecnico = data.nome
+                  return
+                }
+                // Se não encontrou em supervisores, tentar encarregados
+                return supabase.from('encarregados').select('nome').eq('id', responsavelTecnicoId).maybeSingle()
+                  .then(({ data }) => { 
+                    if (data?.nome) {
+                      responsaveis.responsavel_tecnico = data.nome
+                    }
+                  })
               })
+          })
+          .catch(error => {
+            console.error('Erro ao buscar responsável técnico:', error)
           })
       )
     }
