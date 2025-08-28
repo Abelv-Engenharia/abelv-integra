@@ -409,12 +409,12 @@ const CadastrarInspecao = () => {
                       {(() => {
                         console.log('Verificando campo:', campoKey);
                         
-                        if (campoKey === 'CCA') {
+                        if (campoKey === 'cca') {
                           console.log('Renderizando CCA, opções:', ccas.length);
                           return (
                             <Select 
-                              value={dadosCabecalho.CCA || ''} 
-                              onValueChange={(value) => setDadosCabecalho(prev => ({...prev, CCA: value}))}
+                              value={dadosCabecalho.cca || ''} 
+                              onValueChange={(value) => setDadosCabecalho(prev => ({...prev, cca: value}))}
                             >
                               <SelectTrigger className="w-full">
                                 <SelectValue placeholder="Selecione o CCA" />
@@ -430,12 +430,12 @@ const CadastrarInspecao = () => {
                           );
                         }
                         
-                        if (campoKey === 'Engenheiro Responsável') {
+                        if (campoKey === 'engenheiro_responsavel') {
                           console.log('Renderizando Engenheiro, opções:', engenheiros.length);
                           return (
                             <Select 
-                              value={dadosCabecalho['Engenheiro Responsável'] || ''} 
-                              onValueChange={(value) => setDadosCabecalho(prev => ({...prev, 'Engenheiro Responsável': value}))}
+                              value={dadosCabecalho.engenheiro_responsavel || ''} 
+                              onValueChange={(value) => setDadosCabecalho(prev => ({...prev, engenheiro_responsavel: value}))}
                             >
                               <SelectTrigger className="w-full">
                                 <SelectValue placeholder="Selecione o engenheiro responsável" />
@@ -451,12 +451,12 @@ const CadastrarInspecao = () => {
                           );
                         }
                         
-                        if (campoKey === 'Supervisor Responsável') {
+                        if (campoKey === 'supervisor_responsavel') {
                           console.log('Renderizando Supervisor, opções:', supervisores.length);
                           return (
                             <Select 
-                              value={dadosCabecalho['Supervisor Responsável'] || ''} 
-                              onValueChange={(value) => setDadosCabecalho(prev => ({...prev, 'Supervisor Responsável': value}))}
+                              value={dadosCabecalho.supervisor_responsavel || ''} 
+                              onValueChange={(value) => setDadosCabecalho(prev => ({...prev, supervisor_responsavel: value}))}
                             >
                               <SelectTrigger className="w-full">
                                 <SelectValue placeholder="Selecione o supervisor responsável" />
@@ -472,12 +472,12 @@ const CadastrarInspecao = () => {
                           );
                         }
                         
-                        if (campoKey === 'Encarregado Responsável') {
+                        if (campoKey === 'encarregado_responsavel') {
                           console.log('Renderizando Encarregado, opções:', encarregados.length);
                           return (
                             <Select 
-                              value={dadosCabecalho['Encarregado Responsável'] || ''} 
-                              onValueChange={(value) => setDadosCabecalho(prev => ({...prev, 'Encarregado Responsável': value}))}
+                              value={dadosCabecalho.encarregado_responsavel || ''} 
+                              onValueChange={(value) => setDadosCabecalho(prev => ({...prev, encarregado_responsavel: value}))}
                             >
                               <SelectTrigger className="w-full">
                                 <SelectValue placeholder="Selecione o encarregado responsável" />
@@ -493,12 +493,12 @@ const CadastrarInspecao = () => {
                           );
                         }
                         
-                        if (campoKey === 'Empresa') {
+                        if (campoKey === 'empresa') {
                           console.log('Renderizando Empresa, opções:', empresas.length);
                           return (
                             <Select 
-                              value={dadosCabecalho.Empresa || ''} 
-                              onValueChange={(value) => setDadosCabecalho(prev => ({...prev, Empresa: value}))}
+                              value={dadosCabecalho.empresa || ''} 
+                              onValueChange={(value) => setDadosCabecalho(prev => ({...prev, empresa: value}))}
                             >
                               <SelectTrigger className="w-full">
                                 <SelectValue placeholder="Selecione a empresa" />
@@ -514,12 +514,12 @@ const CadastrarInspecao = () => {
                           );
                         }
                         
-                        if (campoKey === 'Disciplina') {
+                        if (campoKey === 'disciplina') {
                           console.log('Renderizando Disciplina, opções:', disciplinas.length);
                           return (
                             <Select 
-                              value={dadosCabecalho.Disciplina || ''} 
-                              onValueChange={(value) => setDadosCabecalho(prev => ({...prev, Disciplina: value}))}
+                              value={dadosCabecalho.disciplina || ''} 
+                              onValueChange={(value) => setDadosCabecalho(prev => ({...prev, disciplina: value}))}
                             >
                               <SelectTrigger className="w-full">
                                 <SelectValue placeholder="Selecione a disciplina" />
@@ -535,12 +535,12 @@ const CadastrarInspecao = () => {
                           );
                         }
                         
-                        if (campoKey === 'Responsável pela inspeção (Usuário do sistema)') {
+                        if (campoKey === 'responsavel_inspecao') {
                           console.log('Renderizando Responsável, opções:', usuarios.length);
                           return (
                             <Select 
-                              value={dadosCabecalho['Responsável pela inspeção (Usuário do sistema)'] || ''} 
-                              onValueChange={(value) => setDadosCabecalho(prev => ({...prev, 'Responsável pela inspeção (Usuário do sistema)': value}))}
+                              value={dadosCabecalho.responsavel_inspecao || ''} 
+                              onValueChange={(value) => setDadosCabecalho(prev => ({...prev, responsavel_inspecao: value}))}
                             >
                               <SelectTrigger className="w-full">
                                 <SelectValue placeholder="Selecione o responsável pela inspeção" />
