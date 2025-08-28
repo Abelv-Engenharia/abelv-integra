@@ -83,22 +83,32 @@ const RelatoriosTreinamentos = () => {
         filtersElement.style.display = 'none';
       }
 
-      // Criar cabeçalho temporário
+      // Criar cabeçalho temporário com logo
       const headerElement = document.createElement('div');
       headerElement.style.padding = '20px';
       headerElement.style.backgroundColor = '#ffffff';
-      headerElement.style.textAlign = 'center';
       headerElement.style.borderBottom = '2px solid #e2e8f0';
       headerElement.style.marginBottom = '20px';
+      headerElement.style.display = 'flex';
+      headerElement.style.alignItems = 'center';
+      headerElement.style.justifyContent = 'space-between';
       
       const currentDate = new Date().toLocaleDateString('pt-BR');
       const monthName = month === 'todos' ? 'Todos os meses' : new Date(2024, parseInt(month) - 1).toLocaleDateString('pt-BR', { month: 'long' });
       
       headerElement.innerHTML = `
-        <h1 style="font-size: 24px; font-weight: bold; margin: 0; color: #1e293b;">RELATÓRIO DE TREINAMENTOS</h1>
-        <p style="font-size: 14px; color: #64748b; margin: 10px 0 0 0;">
-          Período: ${monthName} de ${year} | Gerado em: ${currentDate}
-        </p>
+        <div style="display: flex; align-items: center; gap: 20px;">
+          <img src="/lovable-uploads/15c114e2-30c1-4767-9fe8-4ee84cc11daf.png" 
+               alt="Logo ABELV" 
+               style="height: 60px; width: auto;" />
+        </div>
+        <div style="text-align: center; flex: 1;">
+          <h1 style="font-size: 24px; font-weight: bold; margin: 0; color: #1e293b;">RELATÓRIO DE TREINAMENTOS</h1>
+          <p style="font-size: 14px; color: #64748b; margin: 10px 0 0 0;">
+            Período: ${monthName} de ${year} | Gerado em: ${currentDate}
+          </p>
+        </div>
+        <div style="width: 80px;"></div>
       `;
       
       // Inserir cabeçalho no início do conteúdo
