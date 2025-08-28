@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { Tarefa, TarefaStatus, TarefaCriticidade } from "@/types/tarefas";
 
@@ -215,7 +216,7 @@ export const tarefasService = {
           status: tarefa.status as TarefaStatus || 'programada',
           iniciada: tarefa.iniciada || false,
           observacoes_progresso: tarefa.observacoes_progresso,
-          configuracao: tarefa.configuracao || {
+          configuracao: (tarefa.configuracao as any) || {
             criticidade: 'media' as TarefaCriticidade,
             requerValidacao: false,
             notificarUsuario: false
