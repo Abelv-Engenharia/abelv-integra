@@ -54,14 +54,14 @@ const VisualizarExecucaoTreinamento = () => {
     return url.substring(idx + splitToken.length);
   }
 
-  // FUNÇÃO MODIFICADA: SÓ ABRE O MODAL QUANDO O signedUrl ESTIVER PRONTO
+  // Função simplificada para usar edge function
   const handleOpenVisualizar = async () => {
     if (execucao?.lista_presenca_url) {
       const path = extractPathFromUrl(execucao.lista_presenca_url);
-      setFilePath(path);
-      setPendingVisualizar(true);
-      await generateSignedUrl("treinamentos-anexos", path);
-      // Modal será aberto por efeito depois do signedUrl disponível!
+      
+      // Usar a edge function para servir o PDF
+      const functionUrl = `https://xexgdtlctyuycohzhmuu.supabase.co/functions/v1/serve-treinamento-file?file=${encodeURIComponent(path)}`;
+      window.open(functionUrl, '_blank');
     }
   };
 

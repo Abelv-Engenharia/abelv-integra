@@ -13,7 +13,7 @@ export function useCertificadoUrl(certificadoUrl: string | null) {
       return;
     }
 
-    const generateSignedUrl = async () => {
+    const generateUrl = async () => {
       setLoading(true);
       setError(null);
       
@@ -22,23 +22,11 @@ export function useCertificadoUrl(certificadoUrl: string | null) {
         const urlParts = certificadoUrl.split('/');
         const fileName = urlParts[urlParts.length - 1];
         
-        // Gerar URL assinada válida por 1 hora
-        const { data, error } = await supabase.storage
-          .from('certificados-treinamentos-normativos')
-          .createSignedUrl(fileName, 3600);
-
-        if (error) {
-          console.error('Erro ao gerar URL assinada:', error);
-          setError(error.message);
-          setSignedUrl(null);
-        } else if (data?.signedUrl) {
-          setSignedUrl(data.signedUrl);
-        } else {
-          setError('URL inválida');
-          setSignedUrl(null);
-        }
+        // Usar a edge function para servir o certificado
+        const functionUrl = `https://xexgdtlctyuycohzhmuu.supabase.co/functions/v1/serve-certificado?file=${encodeURIComponent(fileName)}`;
+        setSignedUrl(functionUrl);
       } catch (err) {
-        console.error('Exceção ao gerar URL assinada:', err);
+        console.error('Erro ao gerar URL do certificado:', err);
         setError('Erro interno ao gerar link do certificado');
         setSignedUrl(null);
       } finally {
@@ -46,7 +34,7 @@ export function useCertificadoUrl(certificadoUrl: string | null) {
       }
     };
 
-    generateSignedUrl();
+    generateUrl();
   }, [certificadoUrl]);
 
   return { signedUrl, loading, error };

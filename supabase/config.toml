@@ -10,3 +10,9 @@ verify_jwt = true
 
 [functions.serve-hsa-report]
 verify_jwt = false
+
+[functions.serve-treinamento-file]
+verify_jwt = false
+
+[functions.serve-certificado]
+verify_jwt = false
