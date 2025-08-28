@@ -425,11 +425,11 @@ const CadastrarInspecao = () => {
                               <SelectTrigger className="w-full">
                                 <SelectValue placeholder="Selecione o engenheiro responsável" />
                               </SelectTrigger>
-                              <SelectContent className="bg-background border border-border z-50">
-                                {engenheiros.map(eng => <SelectItem key={eng.id} value={eng.id}>
-                                    {eng.nome} - {eng.funcao}
-                                  </SelectItem>)}
-                              </SelectContent>
+                             <SelectContent className="bg-background border border-border z-50">
+                               {engenheiros.map(eng => <SelectItem key={eng.id} value={eng.id}>
+                                   {eng.nome}
+                                 </SelectItem>)}
+                             </SelectContent>
                             </Select>;
                   }
                   if (campoKey === 'supervisor_responsavel') {
@@ -443,7 +443,7 @@ const CadastrarInspecao = () => {
                               </SelectTrigger>
                               <SelectContent className="bg-background border border-border z-50">
                                 {supervisores.map(sup => <SelectItem key={sup.id} value={sup.id}>
-                                    {sup.nome} - {sup.funcao}
+                                    {sup.nome}
                                   </SelectItem>)}
                               </SelectContent>
                             </Select>;
@@ -459,7 +459,7 @@ const CadastrarInspecao = () => {
                               </SelectTrigger>
                               <SelectContent className="bg-background border border-border z-50">
                                 {encarregados.map(enc => <SelectItem key={enc.id} value={enc.id}>
-                                    {enc.nome} - {enc.funcao}
+                                    {enc.nome}
                                   </SelectItem>)}
                               </SelectContent>
                             </Select>;
