@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import AuthGuard from "@/components/auth/AuthGuard";
 import Layout from "@/components/layout/Layout";
@@ -258,6 +258,7 @@ function App() {
                 <Route path="medidas-disciplinares/consulta" element={<MedidasDisciplinaresConsulta />} />
 
                 {/* Relatórios routes */}
+                <Route path="relatorios" element={<Navigate to="/relatorios/dashboard" replace />} />
                 <Route path="relatorios/dashboard" element={<RelatoriosDashboard />} />
                 <Route path="relatorios/ocorrencias" element={<RelatoriosOcorrencias />} />
                 <Route path="relatorios/desvios" element={<RelatoriosDesvios />} />
