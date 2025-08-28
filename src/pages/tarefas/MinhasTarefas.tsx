@@ -118,7 +118,7 @@ const MinhasTarefas = () => {
     } else {
       toast({
         title: "Erro ao excluir",
-        description: "Não foi possível excluir a tarefa. Tente novamente.",
+        description: "Não foi possível excluir a tarefa. Apenas o criador da tarefa pode excluí-la.",
         variant: "destructive"
       });
     }

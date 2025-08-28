@@ -184,14 +184,6 @@ export const tarefasService = {
       
       if (!tarefasData || tarefasData.length === 0) {
         console.log("Nenhuma tarefa encontrada para o usuário");
-        
-        // Debug adicional: verificar se existem tarefas na tabela
-        const { data: allTasks } = await supabase
-          .from('tarefas')
-          .select('id, titulo, responsavel_id, criado_por')
-          .limit(5);
-        
-        console.log("Algumas tarefas na base (para debug):", allTasks);
         return [];
       }
 
@@ -220,7 +212,8 @@ export const tarefasService = {
             criticidade: 'media' as TarefaCriticidade,
             requerValidacao: false,
             notificarUsuario: false
-          }
+          },
+          criado_por: tarefa.criado_por
         };
       });
 
@@ -417,6 +410,38 @@ export const tarefasService = {
 
   async deleteById(id: string): Promise<boolean> {
     try {
+      // Primeiro, verificar se o usuário atual é o criador da tarefa
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        console.error("Usuário não autenticado");
+        return false;
+      }
+
+      // Buscar a tarefa para verificar quem a criou
+      const { data: tarefa, error: fetchError } = await supabase
+        .from('tarefas')
+        .select('criado_por')
+        .eq('id', id)
+        .single();
+
+      if (fetchError) {
+        console.error("Erro ao buscar tarefa para verificar criador:", fetchError);
+        return false;
+      }
+
+      if (!tarefa) {
+        console.error("Tarefa não encontrada");
+        return false;
+      }
+
+      // Verificar se o usuário atual é o criador da tarefa
+      if (tarefa.criado_por !== user.id) {
+        console.error("Apenas o criador da tarefa pode excluí-la");
+        return false;
+      }
+
+      // Excluir a tarefa
       const { error } = await supabase
         .from('tarefas')
         .delete()
@@ -426,6 +451,7 @@ export const tarefasService = {
         console.error("Erro ao excluir tarefa:", error);
         return false;
       }
+      
       return true;
     } catch (error) {
       console.error("Exceção ao excluir tarefa:", error);

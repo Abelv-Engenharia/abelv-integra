@@ -17,7 +17,7 @@ export type Tarefa = {
     nome: string;
   };
   anexo?: string;
-  observacoes_progresso?: string; // Added this field
+  observacoes_progresso?: string;
   status: TarefaStatus;
   iniciada: boolean;
   configuracao: {
@@ -29,6 +29,7 @@ export type Tarefa = {
     requerValidacao: boolean;
     notificarUsuario: boolean;
   };
+  criado_por?: string; // ID do usuário que criou a tarefa
 };
 
 export type Usuario = {

@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -17,6 +18,7 @@ import {
   AlertDialogCancel
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface TarefaCardProps {
   tarefa: Tarefa;
@@ -69,7 +71,11 @@ export const TarefaCard: React.FC<TarefaCardProps> = ({
   onClick,
   onDelete
 }) => {
+  const { user } = useAuth();
   const statusConfig = getStatusConfig(tarefa.status);
+
+  // Verificar se o usuário atual é o criador da tarefa
+  const isCreator = user?.id === tarefa.criado_por;
 
   // Preparar a data real de conclusão, se existir; se não, usar dataConclusao para manter retrocompatibilidade
   const dataRealConclusao = tarefa.data_real_conclusao
@@ -105,7 +111,7 @@ export const TarefaCard: React.FC<TarefaCardProps> = ({
 
   return (
     <Card className="mb-4 hover:shadow-md transition-shadow cursor-pointer relative" onClick={() => onClick(tarefa)}>
-      {onDelete && (
+      {onDelete && isCreator && (
         <div className="absolute top-3 right-3 z-10">
           <AlertDialog open={openDialog} onOpenChange={setOpenDialog}>
             <AlertDialogTrigger asChild>
@@ -117,7 +123,7 @@ export const TarefaCard: React.FC<TarefaCardProps> = ({
                   e.stopPropagation();
                   setOpenDialog(true);
                 }}
-                title="Excluir tarefa"
+                title="Excluir tarefa (apenas criador)"
               >
                 <Trash />
               </Button>
@@ -127,6 +133,7 @@ export const TarefaCard: React.FC<TarefaCardProps> = ({
                 <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
                 <AlertDialogDescription>
                   Tem certeza que deseja excluir esta tarefa? Esta ação não pode ser desfeita.
+                  Apenas o criador da tarefa pode excluí-la.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
@@ -157,6 +164,7 @@ export const TarefaCard: React.FC<TarefaCardProps> = ({
             <span className="flex items-center text-xs text-muted-foreground">
               <Calendar className="w-3 h-3 mr-1" />
               Criada em {dataCriacaoFormatada}
+              {isCreator && <Badge variant="outline" className="ml-1 text-xs">Criada por você</Badge>}
             </span>
           </div>
         </div>
