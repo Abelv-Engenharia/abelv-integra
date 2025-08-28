@@ -1328,7 +1328,7 @@ export type Database = {
             foreignKeyName: "inspecoes_sms_modelo_id_fkey"
             columns: ["modelo_id"]
             isOneToOne: false
-            referencedRelation: "modelos_inspecao_sms"
+            referencedRelation: "checklists_avaliacao"
             referencedColumns: ["id"]
           },
           {
