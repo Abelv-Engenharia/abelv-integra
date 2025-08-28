@@ -7,3 +7,6 @@ additional_redirect_urls = ["https://localhost:8910"]
 
 [functions.generate-inspecao-pdf]
 verify_jwt = true
+
+[functions.serve-hsa-report]
+verify_jwt = false
