@@ -422,7 +422,7 @@ const VisualizarInspecao = () => {
                        )}
                      </div>
                     <p className="text-sm font-medium">{inspecao.profiles?.nome || 'N/A'}</p>
-                    <p className="text-xs text-muted-foreground">Inspetor Responsável</p>
+                    <p className="text-xs text-muted-foreground">Auditor Responsável</p>
                     {inspecao.dados_preenchidos?.data_assinatura_inspetor && (
                       <p className="text-xs text-muted-foreground mt-1">
                         Assinado em: {format(new Date(inspecao.dados_preenchidos.data_assinatura_inspetor), 'dd/MM/yyyy HH:mm', { locale: ptBR })}
@@ -479,13 +479,13 @@ const VisualizarInspecao = () => {
                        <p className="text-sm font-medium">
                          {/* Buscar o nome correto baseado no responsável técnico selecionado */}
                          {inspecao.dados_preenchidos?.responsavel_tecnico_id ? 
-                           'Responsável Técnico Selecionado' : 
-                           (identificacao?.supervisor || 'Responsável Técnico')}
+                           "Responsável pela Frente de Trabalho" : 
+                           (identificacao?.supervisor || "Responsável Técnico")}
                        </p>
                        <p className="text-xs text-muted-foreground">
                          {inspecao.dados_preenchidos?.responsavel_tecnico_id ? 
-                           'Responsável para Assinatura' : 
-                           'Supervisor Responsável'}
+                           "Responsável para Assinatura" : 
+                           "Supervisor Responsável"}
                        </p>
                       {inspecao.dados_preenchidos?.data_assinatura_supervisor && (
                         <p className="text-xs text-muted-foreground mt-1">

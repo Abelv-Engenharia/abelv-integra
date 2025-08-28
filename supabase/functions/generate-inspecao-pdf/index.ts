@@ -496,7 +496,7 @@ function generateHTMLReport(inspecao: InspectionData, responsaveis: any = {}): s
         <h2>Assinaturas</h2>
         <div class="signature-grid">
             <div class="signature-box">
-                <p><strong>Responsável pela Inspeção</strong></p>
+                <p><strong>Auditor Responsável</strong></p>
                 <p>${inspecao.profiles?.nome || 'N/A'}</p>
                 ${(camposCabecalho.assinaturas?.assinatura_inspetor || camposCabecalho.assinatura_inspetor) ? `
                     <div style="margin: 20px 0;">
@@ -510,7 +510,7 @@ function generateHTMLReport(inspecao: InspectionData, responsaveis: any = {}): s
                 `}
             </div>
             <div class="signature-box">
-                <p><strong>${responsaveis.tipo_responsavel || 'Responsável Técnico'}</strong></p>
+                <p><strong>Responsável pela Frente de Trabalho</strong></p>
                 <p>${responsaveis.responsavel_tecnico || responsaveis.engenheiro || responsaveis.supervisor || responsaveis.encarregado || '_______________________'}</p>
                 ${(camposCabecalho.assinaturas?.assinatura_responsavel_tecnico || camposCabecalho.assinatura_responsavel_tecnico) ? `
                     <div style="margin: 20px 0;">

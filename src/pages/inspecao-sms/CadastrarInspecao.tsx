@@ -502,7 +502,7 @@ const CadastrarInspecao = () => {
     return (
       <div className="content-padding section-spacing">
         <DigitalSignature
-          title={`Assinatura - ${currentSignatureType === 'inspetor' ? 'Inspetor' : 'Responsável Técnico'}`}
+          title={`Assinatura - ${currentSignatureType === 'inspetor' ? 'Auditor' : 'Responsável pela Frente de Trabalho'}`}
           onSave={handleSignatureSave}
           onCancel={() => setShowSignatureModal(false)}
         />
@@ -530,7 +530,7 @@ const CadastrarInspecao = () => {
             <div className="space-y-6">
               <div className="space-y-4">
                 <div>
-                  <Label className="text-sm font-medium">Assinatura do Inspetor (Obrigatória)</Label>
+                  <Label className="text-sm font-medium">Assinatura do Auditor (Obrigatória)</Label>
                   <div className="flex items-center gap-2 mt-2">
                     <Button 
                       variant="outline" 
@@ -543,7 +543,7 @@ const CadastrarInspecao = () => {
                 </div>
 
                 <div>
-                  <Label className="text-sm font-medium">Responsável Técnico/Supervisor</Label>
+                  <Label className="text-sm font-medium">Responsável pela Frente de Trabalho</Label>
                   <Select 
                     value={assinaturas.responsavel_tecnico} 
                     onValueChange={(value) => setAssinaturas({
@@ -552,7 +552,7 @@ const CadastrarInspecao = () => {
                     })}
                   >
                     <SelectTrigger className="mt-2">
-                      <SelectValue placeholder="Selecione o responsável técnico" />
+                      <SelectValue placeholder="Selecione o responsável pela frente de trabalho" />
                     </SelectTrigger>
                     <SelectContent className="bg-background border border-border z-50">
                       {engenheiros.map(eng => (
