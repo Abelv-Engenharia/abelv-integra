@@ -2227,6 +2227,41 @@ export type Database = {
           },
         ]
       }
+      tarefa_observacoes: {
+        Row: {
+          created_at: string
+          id: string
+          observacao: string
+          tarefa_id: string
+          updated_at: string
+          usuario_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          observacao: string
+          tarefa_id: string
+          updated_at?: string
+          usuario_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          observacao?: string
+          tarefa_id?: string
+          updated_at?: string
+          usuario_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tarefa_observacoes_tarefa_id_fkey"
+            columns: ["tarefa_id"]
+            isOneToOne: false
+            referencedRelation: "tarefas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tarefas: {
         Row: {
           anexo: string | null

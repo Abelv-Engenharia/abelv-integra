@@ -7,11 +7,25 @@ import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, Calendar, User, Clock, AlertCircle, CheckCircle, FileUp, X } from "lucide-react";
+import { ArrowLeft, Calendar, User, Clock, AlertCircle, CheckCircle, FileUp, X, MessageSquare, Send, Trash2 } from "lucide-react";
 import { Tarefa, TarefaStatus } from "@/types/tarefas";
 import { tarefasService } from "@/services/tarefasService";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
+import { useTarefaObservacoes } from "@/hooks/tarefas/useTarefaObservacoes";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { 
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 const DetalheTarefa = () => {
   const { id } = useParams<{ id: string }>();
@@ -24,6 +38,16 @@ const DetalheTarefa = () => {
   const [observacoes, setObservacoes] = useState("");
   const [anexo, setAnexo] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [novaObservacao, setNovaObservacao] = useState("");
+  const [adicionandoObservacao, setAdicionandoObservacao] = useState(false);
+
+  // Hook para gerenciar observações da tarefa
+  const { 
+    observacoes: listaObservacoes, 
+    isLoading: loadingObservacoes,
+    adicionarObservacao,
+    excluirObservacao
+  } = useTarefaObservacoes(id);
 
   useEffect(() => {
     const fetchTarefa = async () => {
@@ -209,6 +233,69 @@ const DetalheTarefa = () => {
     }
   };
 
+  const handleAdicionarObservacao = async () => {
+    if (!novaObservacao.trim()) {
+      toast({
+        title: "Erro",
+        description: "Digite uma observação antes de enviar.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setAdicionandoObservacao(true);
+    try {
+      const sucesso = await adicionarObservacao(novaObservacao);
+      if (sucesso) {
+        setNovaObservacao("");
+        toast({
+          title: "Observação adicionada",
+          description: "Observação adicionada com sucesso.",
+        });
+      } else {
+        toast({
+          title: "Erro",
+          description: "Não foi possível adicionar a observação.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Erro ao adicionar observação:", error);
+      toast({
+        title: "Erro",
+        description: "Ocorreu um erro ao adicionar a observação.",
+        variant: "destructive",
+      });
+    } finally {
+      setAdicionandoObservacao(false);
+    }
+  };
+
+  const handleExcluirObservacao = async (observacaoId: string) => {
+    try {
+      const sucesso = await excluirObservacao(observacaoId);
+      if (sucesso) {
+        toast({
+          title: "Observação excluída",
+          description: "Observação excluída com sucesso.",
+        });
+      } else {
+        toast({
+          title: "Erro",
+          description: "Não foi possível excluir a observação.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Erro ao excluir observação:", error);
+      toast({
+        title: "Erro",
+        description: "Ocorreu um erro ao excluir a observação.",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen">
@@ -337,6 +424,100 @@ const DetalheTarefa = () => {
             <Button onClick={handleObservacoesSubmit} className="mt-2">
               Salvar Observações
             </Button>
+          </div>
+
+          <Separator />
+
+          {/* Seção de Observações */}
+          <div>
+            <Label className="text-muted-foreground flex items-center gap-2 mb-4">
+              <MessageSquare className="h-4 w-4" />
+              Observações da Tarefa
+            </Label>
+            
+            {/* Adicionar nova observação */}
+            <div className="mb-4 p-4 border rounded-lg bg-muted/50">
+              <Label className="text-sm font-medium mb-2 block">Adicionar Observação</Label>
+              <div className="flex gap-2">
+                <Textarea
+                  placeholder="Digite sua observação..."
+                  value={novaObservacao}
+                  onChange={(e) => setNovaObservacao(e.target.value)}
+                  className="min-h-[80px]"
+                />
+                <Button 
+                  onClick={handleAdicionarObservacao}
+                  disabled={adicionandoObservacao || !novaObservacao.trim()}
+                  size="sm"
+                  className="flex-shrink-0"
+                >
+                  <Send className="h-4 w-4" />
+                  {adicionandoObservacao ? "Enviando..." : "Enviar"}
+                </Button>
+              </div>
+            </div>
+
+            {/* Lista de observações */}
+            <div className="space-y-3">
+              {loadingObservacoes ? (
+                <div className="text-center py-4">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mx-auto"></div>
+                  <p className="text-sm text-muted-foreground mt-2">Carregando observações...</p>
+                </div>
+              ) : listaObservacoes.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  <MessageSquare className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <p>Nenhuma observação foi registrada ainda.</p>
+                </div>
+              ) : (
+                listaObservacoes.map((obs) => (
+                  <div key={obs.id} className="border rounded-lg p-4 bg-background">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <User className="h-4 w-4 text-muted-foreground" />
+                          <span className="text-sm font-medium">{obs.usuario_nome}</span>
+                          <span className="text-xs text-muted-foreground">
+                            {format(new Date(obs.created_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
+                          </span>
+                        </div>
+                        <p className="text-sm">{obs.observacao}</p>
+                      </div>
+                      {obs.usuario_id === user?.id && (
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              className="text-destructive hover:text-destructive ml-2"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Tem certeza de que deseja excluir esta observação? Esta ação não pode ser desfeita.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                              <AlertDialogAction 
+                                onClick={() => handleExcluirObservacao(obs.id)}
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                              >
+                                Excluir
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      )}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
           </div>
         </CardContent>
       </Card>
