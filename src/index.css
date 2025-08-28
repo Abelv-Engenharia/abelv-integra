@@ -45,6 +45,16 @@
     --sidebar-accent-foreground: 0 0% 100%;
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+
+    /* Status colors */
+    --status-programada: 221 83% 53%;
+    --status-andamento: 31 81% 56%;
+    --status-pendente: 0 84% 60%;
+    --status-concluida: 142 71% 45%;
+    --status-programada-bg: 221 83% 95%;
+    --status-andamento-bg: 31 81% 95%;
+    --status-pendente-bg: 0 84% 95%;
+    --status-concluida-bg: 142 71% 95%;
   }
 
   .dark {
@@ -84,6 +94,16 @@
     --sidebar-accent-foreground: 0 0% 100%;
     --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+
+    /* Status colors - dark mode */
+    --status-programada: 221 83% 53%;
+    --status-andamento: 31 81% 56%;
+    --status-pendente: 0 84% 60%;
+    --status-concluida: 142 71% 45%;
+    --status-programada-bg: 221 83% 15%;
+    --status-andamento-bg: 31 81% 15%;
+    --status-pendente-bg: 0 84% 15%;
+    --status-concluida-bg: 142 71% 15%;
   }
 }
 

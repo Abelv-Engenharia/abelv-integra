@@ -79,6 +79,16 @@ export default {
             DEFAULT: '#F97316',
             dark: '#EA580C'
           }
+        },
+        status: {
+          programada: 'hsl(var(--status-programada))',
+          andamento: 'hsl(var(--status-andamento))',
+          pendente: 'hsl(var(--status-pendente))',
+          concluida: 'hsl(var(--status-concluida))',
+          'programada-bg': 'hsl(var(--status-programada-bg))',
+          'andamento-bg': 'hsl(var(--status-andamento-bg))',
+          'pendente-bg': 'hsl(var(--status-pendente-bg))',
+          'concluida-bg': 'hsl(var(--status-concluida-bg))',
         }
 			},
 			borderRadius: {

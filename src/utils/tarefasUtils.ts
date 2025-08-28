@@ -2,13 +2,13 @@
 export const getStatusColor = (status: string) => {
   switch (status) {
     case 'programada':
-      return 'text-blue-700 bg-blue-50 border-blue-200';
+      return 'bg-status-programada-bg text-status-programada border-status-programada';
     case 'em-andamento':
-      return 'text-orange-700 bg-orange-50 border-orange-200';
+      return 'bg-status-andamento-bg text-status-andamento border-status-andamento';
     case 'pendente':
-      return 'text-yellow-700 bg-yellow-50 border-yellow-200';
+      return 'bg-status-pendente-bg text-status-pendente border-status-pendente';
     case 'concluida':
-      return 'text-green-700 bg-green-50 border-green-200';
+      return 'bg-status-concluida-bg text-status-concluida border-status-concluida';
     case 'aguardando-validacao':
       return 'text-purple-700 bg-purple-50 border-purple-200';
     default:

@@ -6,15 +6,15 @@ const getStatusColor = (status: string) => {
     case "CONCLUÍDO":
     case "Fechado":
     case "TRATADO":
-      return "bg-green-100 text-green-800 hover:bg-green-200";
+      return "bg-status-concluida-bg text-status-concluida border-status-concluida";
     case "EM ANDAMENTO":
     case "Em andamento":
-      return "bg-blue-100 text-blue-800 hover:bg-blue-200";
+      return "bg-status-andamento-bg text-status-andamento border-status-andamento";
     case "EM TRATATIVA":
-      return "bg-blue-100 text-blue-800 hover:bg-blue-200";
+      return "bg-status-andamento-bg text-status-andamento border-status-andamento";
     case "PENDENTE":
     case "Aberto":
-      return "bg-red-100 text-red-800 hover:bg-red-200";
+      return "bg-status-pendente-bg text-status-pendente border-status-pendente";
     default:
       return "bg-gray-100 text-gray-800 hover:bg-gray-200";
   }
@@ -32,7 +32,7 @@ const StatusBadge = ({ status }: { status?: string }) => {
   console.log('🏷️ StatusBadge - Status recebido:', currentStatus, 'Status exibido:', displayStatus, 'Cor:', getStatusColor(currentStatus));
 
   return (
-    <Badge variant="secondary" className={getStatusColor(currentStatus)}>
+    <Badge variant="secondary" className={`${getStatusColor(currentStatus)} border font-medium`}>
       {displayStatus}
     </Badge>
   );
