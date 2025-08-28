@@ -57,10 +57,7 @@ const ConsultarInspecoes = () => {
         .from('inspecoes_sms')
         .select(`
           *,
-          modelos_inspecao_sms(
-            nome,
-            tipos_inspecao_sms(id, nome)
-          ),
+          checklists_avaliacao(nome),
           profiles(nome),
           ccas(codigo, nome)
         `)
@@ -99,10 +96,10 @@ const ConsultarInspecoes = () => {
       );
     }
 
-    // Filtro por tipo de inspeção
+    // Filtro por tipo de inspeção (agora baseado no nome do checklist)
     if (filtros.tipoInspecao && filtros.tipoInspecao !== "todos") {
       filtered = filtered.filter(i => 
-        i.modelos_inspecao_sms?.tipos_inspecao_sms?.id === filtros.tipoInspecao
+        i.checklists_avaliacao?.nome?.includes(filtros.tipoInspecao)
       );
     }
 

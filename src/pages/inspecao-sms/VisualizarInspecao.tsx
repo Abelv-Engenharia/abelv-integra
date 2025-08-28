@@ -26,10 +26,7 @@ const VisualizarInspecao = () => {
         .from('inspecoes_sms')
         .select(`
           *,
-          modelos_inspecao_sms(
-            nome,
-            tipos_inspecao_sms(id, nome)
-          ),
+          checklists_avaliacao(nome),
           profiles(nome),
           ccas(codigo, nome)
         `)

@@ -46,10 +46,7 @@ const InspecaoSMSDashboard = () => {
         .from('inspecoes_sms')
         .select(`
           *,
-          modelos_inspecao_sms(
-            nome,
-            tipos_inspecao_sms(id, nome)
-          ),
+          checklists_avaliacao(nome),
           profiles(nome),
           ccas(codigo, nome)
         `)
@@ -115,7 +112,7 @@ const InspecaoSMSDashboard = () => {
 
         // Agrupar por tipo de inspeção
         const tiposCount = inspecoes.reduce((acc: any, insp) => {
-          const tipo = insp.modelos_inspecao_sms?.tipos_inspecao_sms?.nome || 'Sem tipo';
+          const tipo = insp.checklists_avaliacao?.nome || 'Sem tipo';
           acc[tipo] = (acc[tipo] || 0) + 1;
           return acc;
         }, {});

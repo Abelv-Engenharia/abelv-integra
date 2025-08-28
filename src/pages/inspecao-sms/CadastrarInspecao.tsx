@@ -16,6 +16,7 @@ import { toast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { PageLoader, InlineLoader } from "@/components/common/PageLoader";
 import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
+
 const CadastrarInspecao = () => {
   const [step, setStep] = useState(1);
   const [modelos, setModelos] = useState<any[]>([]);
@@ -33,12 +34,13 @@ const CadastrarInspecao = () => {
   const [camposCabecalho, setCamposCabecalho] = useState<any[]>([]);
   const [dadosCabecalho, setDadosCabecalho] = useState<any>({});
   const [itensInspecao, setItensInspecao] = useState<any[]>([]);
-  const {
-    profile
-  } = useProfile();
-  const {
-    data: userCCAs = []
-  } = useUserCCAs();
+  const [assinaturas, setAssinaturas] = useState({
+    responsavel_tecnico: '',
+    responsavel_inspecao: ''
+  });
+
+  const { profile } = useProfile();
+  const { data: userCCAs = [] } = useUserCCAs();
   const {
     ccas,
     engenheiros,
@@ -52,11 +54,13 @@ const CadastrarInspecao = () => {
 
   // Buscar usuários do sistema para o campo "Responsável pela inspeção"
   const [usuarios, setUsuarios] = useState<any[]>([]);
+  
   const loadUsuarios = async () => {
     try {
-      const {
-        data
-      } = await supabase.from('profiles').select('id, nome, email').order('nome');
+      const { data } = await supabase
+        .from('profiles')
+        .select('id, nome, email')
+        .order('nome');
       if (data) {
         setUsuarios(data);
       }
@@ -64,12 +68,15 @@ const CadastrarInspecao = () => {
       console.error('Erro ao carregar usuários:', error);
     }
   };
+
   const loadModelos = async () => {
     try {
       setIsLoadingModelos(true);
-      const {
-        data
-      } = await supabase.from('checklists_avaliacao').select('*').eq('ativo', true).order('nome');
+      const { data } = await supabase
+        .from('checklists_avaliacao')
+        .select('*')
+        .eq('ativo', true)
+        .order('nome');
       if (data) {
         setModelos(data);
       }
@@ -79,6 +86,7 @@ const CadastrarInspecao = () => {
       setIsLoadingModelos(false);
     }
   };
+
   const selecionarModelo = (modelo: any) => {
     setModeloSelecionado(modelo);
 
@@ -99,12 +107,10 @@ const CadastrarInspecao = () => {
     });
     setDadosCabecalho(dadosIniciais);
 
-    // Carregar itens de avaliação do checklist selecionado
-    const itensAvaliacao = Array.isArray(modelo.itens_avaliacao) ? modelo.itens_avaliacao : [];
-    const secoes = Array.isArray(modelo.secoes) ? modelo.secoes : [];
-
     // Organizar itens por seção
     let itensOrganizados: any[] = [];
+    const itensAvaliacao = Array.isArray(modelo.itens_avaliacao) ? modelo.itens_avaliacao : [];
+    const secoes = Array.isArray(modelo.secoes) ? modelo.secoes : [];
     
     console.log('Seções do modelo:', secoes);
     console.log('Itens de avaliação:', itensAvaliacao);
@@ -123,7 +129,6 @@ const CadastrarInspecao = () => {
         });
 
         // Filtrar itens que pertencem a esta seção
-        // Verificar múltiplos campos possíveis para a seção
         const nomeSecao = secao.nome || secao.titulo;
         const itensSecao = itensAvaliacao.filter((item: any) => {
           return item.secao === nomeSecao || 
@@ -196,13 +201,28 @@ const CadastrarInspecao = () => {
     setItensInspecao(itensOrganizados);
     setStep(2);
   };
+
   const handleItemChange = (itemId: string, status: string) => {
-    setItensInspecao(prev => prev.map(item => item.id === itemId ? {
-      ...item,
-      status
-    } : item));
+    setItensInspecao(prev => prev.map(item => 
+      item.id === itemId ? { ...item, status } : item
+    ));
   };
+
   const finalizarInspecao = async () => {
+    // Verificar se requer assinatura antes de finalizar
+    if (modeloSelecionado?.requer_assinatura) {
+      setAssinaturas({
+        responsavel_tecnico: '',
+        responsavel_inspecao: profile?.id || ''
+      });
+      setStep(3); // Ir para a tela de assinatura
+      return;
+    }
+    
+    await salvarInspecao();
+  };
+
+  const salvarInspecao = async () => {
     try {
       setIsSubmitting(true);
       
@@ -245,10 +265,11 @@ const CadastrarInspecao = () => {
       
       console.log('Dados completos para inserção:', dadosCompletos);
       
-      const {
-        data: inspecao,
-        error
-      } = await supabase.from('inspecoes_sms').insert([dadosCompletos]).select().single();
+      const { data: inspecao, error } = await supabase
+        .from('inspecoes_sms')
+        .insert([dadosCompletos])
+        .select()
+        .single();
       
       if (error) {
         console.error('Erro do Supabase:', error);
@@ -292,17 +313,136 @@ const CadastrarInspecao = () => {
       setIsSubmitting(false);
     }
   };
+
+  const finalizarComAssinatura = async () => {
+    if (!assinaturas.responsavel_tecnico) {
+      toast({
+        title: "Assinatura obrigatória",
+        description: "Selecione o responsável técnico para assinar.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Adicionar assinaturas aos dados do cabeçalho
+    const dadosCabecalhoComAssinatura = {
+      ...dadosCabecalho,
+      assinaturas: assinaturas,
+      data_assinatura: new Date().toISOString()
+    };
+
+    setDadosCabecalho(dadosCabecalhoComAssinatura);
+    await salvarInspecao();
+  };
+
   useEffect(() => {
     loadModelos();
     loadUsuarios();
   }, []);
+
+  // Tela de assinatura (step 3)
+  if (step === 3) {
+    return (
+      <div className="content-padding section-spacing">
+        <div className="flex items-center gap-2 mb-4 sm:mb-6">
+          <Button variant="outline" size="sm" onClick={() => setStep(2)} className="flex-shrink-0">
+            <ChevronLeft className="h-4 w-4 mr-1 sm:mr-2" />
+            <span className="hidden sm:inline">Voltar</span>
+          </Button>
+          <h1 className="heading-responsive min-w-0">Assinatura Digital</h1>
+        </div>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg sm:text-xl">Assinaturas Obrigatórias</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-6">
+              <div className="space-y-2">
+                <Label className="text-sm sm:text-base font-medium">
+                  Responsável Técnico (Engenheiro/Supervisor/Encarregado) *
+                </Label>
+                <Select 
+                  value={assinaturas.responsavel_tecnico} 
+                  onValueChange={(value) => setAssinaturas({
+                    ...assinaturas,
+                    responsavel_tecnico: value
+                  })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione o responsável técnico" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-background border border-border z-50">
+                    {engenheiros.map(eng => (
+                      <SelectItem key={`eng_${eng.id}`} value={eng.id}>
+                        {eng.nome} - Engenheiro
+                      </SelectItem>
+                    ))}
+                    {supervisores.map(sup => (
+                      <SelectItem key={`sup_${sup.id}`} value={sup.id}>
+                        {sup.nome} - Supervisor
+                      </SelectItem>
+                    ))}
+                    {encarregados.map(enc => (
+                      <SelectItem key={`enc_${enc.id}`} value={enc.id}>
+                        {enc.nome} - Encarregado
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-sm sm:text-base font-medium">
+                  Responsável pela Inspeção
+                </Label>
+                <Input 
+                  value={profile?.nome || 'Usuário não identificado'} 
+                  disabled 
+                  className="bg-muted text-muted-foreground cursor-not-allowed" 
+                />
+              </div>
+
+              <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <p className="text-sm text-blue-800">
+                  <strong>Declaração:</strong> Ao finalizar esta inspeção, declaro que as informações 
+                  fornecidas são verdadeiras e que a inspeção foi realizada conforme os procedimentos 
+                  estabelecidos.
+                </p>
+              </div>
+            </div>
+
+            <div className="button-group-end mt-6">
+              <Button variant="outline" onClick={() => setStep(2)}>
+                Cancelar
+              </Button>
+              <Button onClick={finalizarComAssinatura} disabled={isSubmitting}>
+                {isSubmitting ? (
+                  <>
+                    <InlineLoader size="sm" />
+                    <span className="ml-2">Finalizando...</span>
+                  </>
+                ) : (
+                  <>
+                    <Send className="h-4 w-4 mr-2" />
+                    Finalizar com Assinatura
+                  </>
+                )}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   if (step === 1) {
-    return <div className="content-padding section-spacing">
+    return (
+      <div className="content-padding section-spacing">
         <div className="flex items-center gap-2 mb-4 sm:mb-6">
           <FileSearch className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600 flex-shrink-0" />
           <h1 className="heading-responsive">Cadastrar Inspeção SMS</h1>
         </div>
-
 
         {/* Lista de Modelos */}
         <Card>
@@ -310,39 +450,58 @@ const CadastrarInspecao = () => {
             <CardTitle className="text-lg sm:text-xl">Selecione um Modelo de Inspeção</CardTitle>
           </CardHeader>
           <CardContent>
-            {isLoadingModelos ? <div className="card-grid">
-                {Array.from({
-              length: 6
-            }).map((_, i) => <div key={i} className="border rounded-lg p-4">
+            {isLoadingModelos ? (
+              <div className="card-grid">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} className="border rounded-lg p-4">
                     <LoadingSkeleton variant="card" />
-                  </div>)}
-              </div> : <div className="card-grid">
-                {modelos.length === 0 ? <div className="col-span-full text-center py-8 text-muted-foreground">
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="card-grid">
+                {modelos.length === 0 ? (
+                  <div className="col-span-full text-center py-8 text-muted-foreground">
                     <FileSearch className="h-12 w-12 mx-auto mb-4 opacity-50" />
                     <p className="text-responsive">Nenhum modelo encontrado. Verifique os filtros ou cadastre novos modelos.</p>
-                  </div> : modelos.map(modelo => <Card key={modelo.id} className="cursor-pointer hover:shadow-md transition-all duration-200 hover:border-primary/50" onClick={() => selecionarModelo(modelo)}>
+                  </div>
+                ) : (
+                  modelos.map(modelo => (
+                    <Card 
+                      key={modelo.id} 
+                      className="cursor-pointer hover:shadow-md transition-all duration-200 hover:border-primary/50" 
+                      onClick={() => selecionarModelo(modelo)}
+                    >
                       <CardHeader className="pb-3">
                         <CardTitle className="text-base sm:text-lg line-clamp-2">{modelo.nome}</CardTitle>
                       </CardHeader>
                       <CardContent className="pt-0">
-                         <p className="text-sm text-muted-foreground mb-2 line-clamp-2">
-                           {modelo.descricao || 'Checklist de avaliação'}
-                         </p>
-                         <p className="text-xs text-muted-foreground">
-                           {Array.isArray(modelo.itens_avaliacao) ? modelo.itens_avaliacao.length : 0} itens de verificação
-                         </p>
-                         {modelo.requer_assinatura && <p className="text-xs text-blue-600 mt-1">
-                             ✓ Requer assinatura
-                           </p>}
+                        <p className="text-sm text-muted-foreground mb-2 line-clamp-2">
+                          {modelo.descricao || 'Checklist de avaliação'}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {Array.isArray(modelo.itens_avaliacao) ? modelo.itens_avaliacao.length : 0} itens de verificação
+                        </p>
+                        {modelo.requer_assinatura && (
+                          <p className="text-xs text-blue-600 mt-1">
+                            ✓ Requer assinatura
+                          </p>
+                        )}
                       </CardContent>
-                    </Card>)}
-              </div>}
+                    </Card>
+                  ))
+                )}
+              </div>
+            )}
           </CardContent>
         </Card>
-      </div>;
+      </div>
+    );
   }
+
   if (step === 2) {
-    return <div className="content-padding section-spacing">
+    return (
+      <div className="content-padding section-spacing">
         <div className="flex items-center gap-2 mb-4 sm:mb-6">
           <Button variant="outline" size="sm" onClick={() => setStep(1)} className="flex-shrink-0">
             <ChevronLeft className="h-4 w-4 mr-1 sm:mr-2" />
@@ -363,47 +522,61 @@ const CadastrarInspecao = () => {
             <div className="form-grid">
               <div className="space-y-2">
                 <Label className="text-sm sm:text-base">Data da Inspeção *</Label>
-                <DatePickerWithManualInput value={dadosInspecao.data_inspecao} onChange={date => setDadosInspecao({
-                ...dadosInspecao,
-                data_inspecao: date || new Date()
-              })} />
+                <DatePickerWithManualInput 
+                  value={dadosInspecao.data_inspecao} 
+                  onChange={date => setDadosInspecao({
+                    ...dadosInspecao,
+                    data_inspecao: date || new Date()
+                  })} 
+                />
               </div>
               <div className="space-y-2">
                 <Label className="text-sm sm:text-base">Local *</Label>
-                <Input value={dadosInspecao.local} onChange={e => setDadosInspecao({
-                ...dadosInspecao,
-                local: e.target.value
-              })} placeholder="Informe o local da inspeção" required className="text-sm sm:text-base" />
+                <Input 
+                  value={dadosInspecao.local} 
+                  onChange={e => setDadosInspecao({
+                    ...dadosInspecao,
+                    local: e.target.value
+                  })} 
+                  placeholder="Informe o local da inspeção" 
+                  required 
+                  className="text-sm sm:text-base" 
+                />
               </div>
               <div className="space-y-2">
                 <Label className="text-sm sm:text-base">CCA *</Label>
-                <Select value={dadosInspecao.cca_id} onValueChange={value => {
-                setDadosInspecao({
-                  ...dadosInspecao,
-                  cca_id: value
-                });
-                // Reset campos de cabeçalho quando CCA muda
-                const dadosIniciais: any = {};
-                camposCabecalho.forEach((campo: any) => {
-                  // Manter o responsável da inspeção sempre preenchido com o usuário logado
-                  if (campo === 'responsavel_inspecao') {
-                    dadosIniciais[campo] = profile?.id || '';
-                  } else {
-                    dadosIniciais[campo] = '';
-                  }
-                });
-                setDadosCabecalho(dadosIniciais);
-              }}>
+                <Select 
+                  value={dadosInspecao.cca_id} 
+                  onValueChange={value => {
+                    setDadosInspecao({
+                      ...dadosInspecao,
+                      cca_id: value
+                    });
+                    // Reset campos de cabeçalho quando CCA muda
+                    const dadosIniciais: any = {};
+                    camposCabecalho.forEach((campo: any) => {
+                      // Manter o responsável da inspeção sempre preenchido com o usuário logado
+                      if (campo === 'responsavel_inspecao') {
+                        dadosIniciais[campo] = profile?.id || '';
+                      } else {
+                        dadosIniciais[campo] = '';
+                      }
+                    });
+                    setDadosCabecalho(dadosIniciais);
+                  }}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione o CCA" />
                   </SelectTrigger>
                   <SelectContent className="bg-background border border-border z-50">
                     {[...userCCAs].sort((a, b) => 
                       a.codigo.localeCompare(b.codigo, undefined, { numeric: true })
-                    ).map(cca => <SelectItem key={cca.id} value={cca.id.toString()}>
+                    ).map(cca => (
+                      <SelectItem key={cca.id} value={cca.id.toString()}>
                         <span className="block sm:hidden">{cca.codigo}</span>
                         <span className="hidden sm:block">{cca.codigo} - {cca.nome}</span>
-                      </SelectItem>)}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -411,136 +584,162 @@ const CadastrarInspecao = () => {
           </CardContent>
         </Card>
 
-        {/* Campos de Cabeçalho Personalizados - só aparecem se CCA foi selecionado */}
-        {camposCabecalho.length > 0 && dadosInspecao.cca_id && <Card className="mb-4 sm:mb-6">
+        {/* Campos de Cabeçalho Personalizados */}
+        {camposCabecalho.length > 0 && dadosInspecao.cca_id && (
+          <Card className="mb-4 sm:mb-6">
             <CardHeader>
               <CardTitle className="text-lg sm:text-xl">Identificação da Frente de Trabalho</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="form-grid">
-                {camposCabecalho.map(campo => {
-              const campoKey = campo as string;
-              return <div key={campoKey} className="space-y-2">
+                {camposCabecalho.map((campo: string) => {
+                  const campoKey = campo.toLowerCase().replace(/\s+/g, '_');
+                  return (
+                    <div key={campo} className="space-y-2">
                       <Label className="text-sm sm:text-base font-medium">
-                        {campoKey.replace(/_/g, ' ').toUpperCase()}
+                        {campo.charAt(0).toUpperCase() + campo.slice(1).replace(/_/g, ' ')}
                       </Label>
-                      
-                      {/* Renderizar dropdown baseado no tipo de campo */}
                       {(() => {
-                  console.log('Verificando campo:', campoKey);
-                  if (campoKey === 'cca') {
-                    console.log('Renderizando CCA, opções:', ccas.length);
-                    return <Select value={dadosCabecalho.cca || ''} onValueChange={value => setDadosCabecalho(prev => ({
-                      ...prev,
-                      cca: value
-                    }))}>
-                              <SelectTrigger className="w-full">
-                                <SelectValue placeholder="Selecione o CCA" />
-                              </SelectTrigger>
-                              <SelectContent className="bg-background border border-border z-50">
-                                {ccas.map(cca => <SelectItem key={cca.id} value={cca.id.toString()}>
-                                    {cca.codigo} - {cca.nome}
-                                  </SelectItem>)}
-                              </SelectContent>
-                            </Select>;
-                  }
-                  if (campoKey === 'engenheiro_responsavel') {
-                    console.log('Renderizando Engenheiro, opções:', engenheiros.length);
-                    return <Select value={dadosCabecalho.engenheiro_responsavel || ''} onValueChange={value => setDadosCabecalho(prev => ({
-                      ...prev,
-                      engenheiro_responsavel: value
-                    }))}>
+                        if (campoKey === 'engenheiro_responsavel') {
+                          return (
+                            <Select 
+                              value={dadosCabecalho.engenheiro_responsavel || ''} 
+                              onValueChange={value => setDadosCabecalho(prev => ({
+                                ...prev,
+                                engenheiro_responsavel: value
+                              }))}
+                            >
                               <SelectTrigger className="w-full">
                                 <SelectValue placeholder="Selecione o engenheiro responsável" />
                               </SelectTrigger>
-                             <SelectContent className="bg-background border border-border z-50">
-                               {engenheiros.map(eng => <SelectItem key={eng.id} value={eng.id}>
-                                   {eng.nome}
-                                 </SelectItem>)}
-                             </SelectContent>
-                            </Select>;
-                  }
-                  if (campoKey === 'supervisor_responsavel') {
-                    console.log('Renderizando Supervisor, opções:', supervisores.length);
-                    return <Select value={dadosCabecalho.supervisor_responsavel || ''} onValueChange={value => setDadosCabecalho(prev => ({
-                      ...prev,
-                      supervisor_responsavel: value
-                    }))}>
+                              <SelectContent className="bg-background border border-border z-50">
+                                {engenheiros.map(eng => (
+                                  <SelectItem key={eng.id} value={eng.id}>
+                                    {eng.nome}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          );
+                        }
+                        if (campoKey === 'supervisor_responsavel') {
+                          return (
+                            <Select 
+                              value={dadosCabecalho.supervisor_responsavel || ''} 
+                              onValueChange={value => setDadosCabecalho(prev => ({
+                                ...prev,
+                                supervisor_responsavel: value
+                              }))}
+                            >
                               <SelectTrigger className="w-full">
                                 <SelectValue placeholder="Selecione o supervisor responsável" />
                               </SelectTrigger>
                               <SelectContent className="bg-background border border-border z-50">
-                                {supervisores.map(sup => <SelectItem key={sup.id} value={sup.id}>
+                                {supervisores.map(sup => (
+                                  <SelectItem key={sup.id} value={sup.id}>
                                     {sup.nome}
-                                  </SelectItem>)}
+                                  </SelectItem>
+                                ))}
                               </SelectContent>
-                            </Select>;
-                  }
-                  if (campoKey === 'encarregado_responsavel') {
-                    console.log('Renderizando Encarregado, opções:', encarregados.length);
-                    return <Select value={dadosCabecalho.encarregado_responsavel || ''} onValueChange={value => setDadosCabecalho(prev => ({
-                      ...prev,
-                      encarregado_responsavel: value
-                    }))}>
+                            </Select>
+                          );
+                        }
+                        if (campoKey === 'encarregado_responsavel') {
+                          return (
+                            <Select 
+                              value={dadosCabecalho.encarregado_responsavel || ''} 
+                              onValueChange={value => setDadosCabecalho(prev => ({
+                                ...prev,
+                                encarregado_responsavel: value
+                              }))}
+                            >
                               <SelectTrigger className="w-full">
                                 <SelectValue placeholder="Selecione o encarregado responsável" />
                               </SelectTrigger>
                               <SelectContent className="bg-background border border-border z-50">
-                                {encarregados.map(enc => <SelectItem key={enc.id} value={enc.id}>
+                                {encarregados.map(enc => (
+                                  <SelectItem key={enc.id} value={enc.id}>
                                     {enc.nome}
-                                  </SelectItem>)}
+                                  </SelectItem>
+                                ))}
                               </SelectContent>
-                            </Select>;
-                  }
-                  if (campoKey === 'empresa') {
-                    console.log('Renderizando Empresa, opções:', empresas.length);
-                    return <Select value={dadosCabecalho.empresa || ''} onValueChange={value => setDadosCabecalho(prev => ({
-                      ...prev,
-                      empresa: value
-                    }))}>
+                            </Select>
+                          );
+                        }
+                        if (campoKey === 'empresa') {
+                          return (
+                            <Select 
+                              value={dadosCabecalho.empresa || ''} 
+                              onValueChange={value => setDadosCabecalho(prev => ({
+                                ...prev,
+                                empresa: value
+                              }))}
+                            >
                               <SelectTrigger className="w-full">
                                 <SelectValue placeholder="Selecione a empresa" />
                               </SelectTrigger>
                               <SelectContent className="bg-background border border-border z-50">
-                                {empresas.map(emp => <SelectItem key={emp.id} value={emp.id.toString()}>
+                                {empresas.map(emp => (
+                                  <SelectItem key={emp.id} value={emp.id.toString()}>
                                     {emp.nome}
-                                  </SelectItem>)}
+                                  </SelectItem>
+                                ))}
                               </SelectContent>
-                            </Select>;
-                  }
-                  if (campoKey === 'disciplina') {
-                    console.log('Renderizando Disciplina, opções:', disciplinas.length);
-                    return <Select value={dadosCabecalho.disciplina || ''} onValueChange={value => setDadosCabecalho(prev => ({
-                      ...prev,
-                      disciplina: value
-                    }))}>
+                            </Select>
+                          );
+                        }
+                        if (campoKey === 'disciplina') {
+                          return (
+                            <Select 
+                              value={dadosCabecalho.disciplina || ''} 
+                              onValueChange={value => setDadosCabecalho(prev => ({
+                                ...prev,
+                                disciplina: value
+                              }))}
+                            >
                               <SelectTrigger className="w-full">
                                 <SelectValue placeholder="Selecione a disciplina" />
                               </SelectTrigger>
                               <SelectContent className="bg-background border border-border z-50">
-                                {disciplinas.map(disc => <SelectItem key={disc.id} value={disc.id.toString()}>
+                                {disciplinas.map(disc => (
+                                  <SelectItem key={disc.id} value={disc.id.toString()}>
                                     {disc.codigo} - {disc.nome}
-                                  </SelectItem>)}
+                                  </SelectItem>
+                                ))}
                               </SelectContent>
-                            </Select>;
-                  }
-                  if (campoKey === 'responsavel_inspecao') {
-                    console.log('Renderizando Responsável (usuário logado):', profile?.nome);
-                    return <Input value={profile?.nome || 'Usuário não identificado'} disabled className="bg-muted text-muted-foreground cursor-not-allowed" placeholder="Responsável pela inspeção" />;
-                  }
+                            </Select>
+                          );
+                        }
+                        if (campoKey === 'responsavel_inspecao') {
+                          return (
+                            <Input 
+                              value={profile?.nome || 'Usuário não identificado'} 
+                              disabled 
+                              className="bg-muted text-muted-foreground cursor-not-allowed" 
+                              placeholder="Responsável pela inspeção" 
+                            />
+                          );
+                        }
 
-                  // Campo padrão caso não seja reconhecido
-                  console.log('Campo não reconhecido:', campoKey);
-                  return <Input value={dadosCabecalho[campoKey] || ''} onChange={e => setDadosCabecalho(prev => ({
-                    ...prev,
-                    [campoKey]: e.target.value
-                  }))} placeholder={`Digite ${campoKey.toLowerCase()}`} />;
-                })()}
-                    </div>;
-            })}
+                        // Campo padrão caso não seja reconhecido
+                        return (
+                          <Input 
+                            value={dadosCabecalho[campoKey] || ''} 
+                            onChange={e => setDadosCabecalho(prev => ({
+                              ...prev,
+                              [campoKey]: e.target.value
+                            }))} 
+                            placeholder={`Digite ${campoKey.toLowerCase()}`} 
+                          />
+                        );
+                      })()}
+                    </div>
+                  );
+                })}
               </div>
             </CardContent>
-          </Card>}
+          </Card>
+        )}
 
         {/* Itens de Inspeção */}
         <Card className="mb-4 sm:mb-6">
@@ -550,18 +749,25 @@ const CadastrarInspecao = () => {
           <CardContent>
             <div className="section-spacing">
               {itensInspecao.map((item, index) => {
-              if (item.isSection) {
-                return <div key={item.id} className="mb-6 mt-8 first:mt-0">
+                if (item.isSection) {
+                  return (
+                    <div key={item.id} className="mb-6 mt-8 first:mt-0">
                       <h3 className="text-xl font-bold text-primary border-b-2 border-primary/20 pb-3 mb-4">
                         {item.nome}
                       </h3>
-                    </div>;
-              }
-              return <div key={item.id} className="border rounded-lg p-3 sm:p-4 mb-4 bg-card">
+                    </div>
+                  );
+                }
+                return (
+                  <div key={item.id} className="border rounded-lg p-3 sm:p-4 mb-4 bg-card">
                     <h4 className="font-medium mb-3 text-sm sm:text-base">
                       {item.nome}
                     </h4>
-                    <RadioGroup value={item.status || 'nao_se_aplica'} onValueChange={value => handleItemChange(item.id, value)} className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
+                    <RadioGroup 
+                      value={item.status || 'nao_se_aplica'} 
+                      onValueChange={value => handleItemChange(item.id, value)} 
+                      className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3"
+                    >
                       <div className="flex items-center space-x-2">
                         <RadioGroupItem value="conforme" id={`${item.id}-conforme`} />
                         <Label htmlFor={`${item.id}-conforme`} className="text-green-600 text-sm sm:text-base cursor-pointer">
@@ -601,8 +807,9 @@ const CadastrarInspecao = () => {
                         />
                       </div>
                     )}
-                  </div>;
-            })}
+                  </div>
+                );
+              })}
             </div>
           </CardContent>
         </Card>
@@ -613,10 +820,16 @@ const CadastrarInspecao = () => {
             <CardTitle className="text-lg sm:text-xl">Observações</CardTitle>
           </CardHeader>
           <CardContent>
-            <Textarea value={dadosInspecao.observacoes} onChange={e => setDadosInspecao({
-            ...dadosInspecao,
-            observacoes: e.target.value
-          })} placeholder="Observações adicionais sobre a inspeção..." rows={4} className="text-sm sm:text-base" />
+            <Textarea 
+              value={dadosInspecao.observacoes} 
+              onChange={e => setDadosInspecao({
+                ...dadosInspecao,
+                observacoes: e.target.value
+              })} 
+              placeholder="Observações adicionais sobre a inspeção..." 
+              rows={4} 
+              className="text-sm sm:text-base" 
+            />
           </CardContent>
         </Card>
 
@@ -626,17 +839,24 @@ const CadastrarInspecao = () => {
             Cancelar
           </Button>
           <Button onClick={finalizarInspecao} disabled={!dadosInspecao.local || isSubmitting} className="w-full sm:w-auto">
-            {isSubmitting ? <>
+            {isSubmitting ? (
+              <>
                 <InlineLoader size="sm" />
                 <span className="ml-2">Finalizando...</span>
-              </> : <>
+              </>
+            ) : (
+              <>
                 <Send className="h-4 w-4 mr-2" />
                 Finalizar Inspeção
-              </>}
+              </>
+            )}
           </Button>
         </div>
-      </div>;
+      </div>
+    );
   }
+
   return null;
 };
+
 export default CadastrarInspecao;
