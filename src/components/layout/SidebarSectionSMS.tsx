@@ -59,100 +59,106 @@ export default function SidebarSectionSMS({ openMenu, toggleMenu }: SidebarSecti
   return (
     <>
       {/* Seção IDSMS */}
-      <SidebarMenu>
-        <SidebarMenuItem>
-          <Collapsible open={openMenu === "idsms"}>
-            <CollapsibleTrigger asChild>
-              <SidebarMenuButton 
-                onClick={() => toggleMenu("idsms")}
-                className="text-white hover:bg-slate-600"
-              >
-                <BarChart3 className="h-4 w-4 flex-shrink-0" />
-                <span className="break-words">IDSMS</span>
-              </SidebarMenuButton>
-            </CollapsibleTrigger>
-            <CollapsibleContent asChild>
-              <SidebarMenuSub>
-                <SidebarMenuSubItem>
-                  <SidebarMenuSubButton 
-                    asChild
-                    className={currentPath === "/idsms/dashboard" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
-                  >
-                    <Link to="/idsms/dashboard" className="flex items-center gap-2">
-                      <TrendingUp className="h-3 w-3 flex-shrink-0" />
-                      <span className="text-xs leading-tight break-words min-w-0">Dashboard</span>
-                    </Link>
-                  </SidebarMenuSubButton>
-                </SidebarMenuSubItem>
+      {["idsms_dashboard", "idsms_relatorios"].some(menu =>
+        podeVerMenu(menu, menusSidebar)
+      ) && (
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <Collapsible open={openMenu === "idsms"}>
+              <CollapsibleTrigger asChild>
+                <SidebarMenuButton 
+                  onClick={() => toggleMenu("idsms")}
+                  className="text-white hover:bg-slate-600"
+                >
+                  <BarChart3 className="h-4 w-4 flex-shrink-0" />
+                  <span className="break-words">IDSMS</span>
+                </SidebarMenuButton>
+              </CollapsibleTrigger>
+              <CollapsibleContent asChild>
+                <SidebarMenuSub>
+                  {podeVerMenu("idsms_dashboard", menusSidebar) && (
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton 
+                        asChild
+                        className={currentPath === "/idsms/dashboard" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
+                      >
+                        <Link to="/idsms/dashboard" className="flex items-center gap-2">
+                          <TrendingUp className="h-3 w-3 flex-shrink-0" />
+                          <span className="text-xs leading-tight break-words min-w-0">Dashboard</span>
+                        </Link>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+                  )}
 
-                <SidebarMenuSubItem>
-                  <SidebarMenuSubButton asChild className={currentPath === "/idsms/indicadores" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
-                    <Link to="/idsms/indicadores" className="flex items-center gap-2">
-                      <span className="text-xs leading-tight break-words min-w-0">Indicadores</span>
-                    </Link>
-                  </SidebarMenuSubButton>
-                </SidebarMenuSubItem>
+                  <SidebarMenuSubItem>
+                    <SidebarMenuSubButton asChild className={currentPath === "/idsms/indicadores" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
+                      <Link to="/idsms/indicadores" className="flex items-center gap-2">
+                        <span className="text-xs leading-tight break-words min-w-0">Indicadores</span>
+                      </Link>
+                    </SidebarMenuSubButton>
+                  </SidebarMenuSubItem>
 
-                <SidebarMenuSubItem>
-                  <SidebarMenuSubButton asChild className={currentPath === "/idsms/ht" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
-                    <Link to="/idsms/ht" className="flex items-center gap-2">
-                      <span className="text-xs leading-tight break-words min-w-0">HT</span>
-                    </Link>
-                  </SidebarMenuSubButton>
-                </SidebarMenuSubItem>
+                  <SidebarMenuSubItem>
+                    <SidebarMenuSubButton asChild className={currentPath === "/idsms/ht" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
+                      <Link to="/idsms/ht" className="flex items-center gap-2">
+                        <span className="text-xs leading-tight break-words min-w-0">HT</span>
+                      </Link>
+                    </SidebarMenuSubButton>
+                  </SidebarMenuSubItem>
 
-                <SidebarMenuSubItem>
-                  <SidebarMenuSubButton asChild className={currentPath === "/idsms/hsa" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
-                    <Link to="/idsms/hsa" className="flex items-center gap-2">
-                      <span className="text-xs leading-tight break-words min-w-0">HSA</span>
-                    </Link>
-                  </SidebarMenuSubButton>
-                </SidebarMenuSubItem>
+                  <SidebarMenuSubItem>
+                    <SidebarMenuSubButton asChild className={currentPath === "/idsms/hsa" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
+                      <Link to="/idsms/hsa" className="flex items-center gap-2">
+                        <span className="text-xs leading-tight break-words min-w-0">HSA</span>
+                      </Link>
+                    </SidebarMenuSubButton>
+                  </SidebarMenuSubItem>
 
-                <SidebarMenuSubItem>
-                  <SidebarMenuSubButton asChild className={currentPath === "/idsms/iid" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
-                    <Link to="/idsms/iid" className="flex items-center gap-2">
-                      <span className="text-xs leading-tight break-words min-w-0">IID</span>
-                    </Link>
-                  </SidebarMenuSubButton>
-                </SidebarMenuSubItem>
+                  <SidebarMenuSubItem>
+                    <SidebarMenuSubButton asChild className={currentPath === "/idsms/iid" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
+                      <Link to="/idsms/iid" className="flex items-center gap-2">
+                        <span className="text-xs leading-tight break-words min-w-0">IID</span>
+                      </Link>
+                    </SidebarMenuSubButton>
+                  </SidebarMenuSubItem>
 
-                <SidebarMenuSubItem>
-                  <SidebarMenuSubButton asChild className={currentPath === "/idsms/ipom" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
-                    <Link to="/idsms/ipom" className="flex items-center gap-2">
-                      <span className="text-xs leading-tight break-words min-w-0">IPOM</span>
-                    </Link>
-                  </SidebarMenuSubButton>
-                </SidebarMenuSubItem>
+                  <SidebarMenuSubItem>
+                    <SidebarMenuSubButton asChild className={currentPath === "/idsms/ipom" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
+                      <Link to="/idsms/ipom" className="flex items-center gap-2">
+                        <span className="text-xs leading-tight break-words min-w-0">IPOM</span>
+                      </Link>
+                    </SidebarMenuSubButton>
+                  </SidebarMenuSubItem>
 
-                <SidebarMenuSubItem>
-                  <SidebarMenuSubButton asChild className={currentPath === "/idsms/indice-reativo" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
-                    <Link to="/idsms/indice-reativo" className="flex items-center gap-2">
-                      <span className="text-xs leading-tight break-words min-w-0">Índice Reativo</span>
-                    </Link>
-                  </SidebarMenuSubButton>
-                </SidebarMenuSubItem>
+                  <SidebarMenuSubItem>
+                    <SidebarMenuSubButton asChild className={currentPath === "/idsms/indice-reativo" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
+                      <Link to="/idsms/indice-reativo" className="flex items-center gap-2">
+                        <span className="text-xs leading-tight break-words min-w-0">Índice Reativo</span>
+                      </Link>
+                    </SidebarMenuSubButton>
+                  </SidebarMenuSubItem>
 
-                <SidebarMenuSubItem>
-                  <SidebarMenuSubButton asChild className={currentPath === "/idsms/inspecao-alta-lideranca" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
-                    <Link to="/idsms/inspecao-alta-lideranca" className="flex items-center gap-2">
-                      <span className="text-xs leading-tight break-words min-w-0">Inspeção Alta Liderança</span>
-                    </Link>
-                  </SidebarMenuSubButton>
-                </SidebarMenuSubItem>
+                  <SidebarMenuSubItem>
+                    <SidebarMenuSubButton asChild className={currentPath === "/idsms/inspecao-alta-lideranca" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
+                      <Link to="/idsms/inspecao-alta-lideranca" className="flex items-center gap-2">
+                        <span className="text-xs leading-tight break-words min-w-0">Inspeção Alta Liderança</span>
+                      </Link>
+                    </SidebarMenuSubButton>
+                  </SidebarMenuSubItem>
 
-                <SidebarMenuSubItem>
-                  <SidebarMenuSubButton asChild className={currentPath === "/idsms/inspecao-gestao-sms" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
-                    <Link to="/idsms/inspecao-gestao-sms" className="flex items-center gap-2">
-                      <span className="text-xs leading-tight break-words min-w-0">Inspeção Gestão SMS</span>
-                    </Link>
-                  </SidebarMenuSubButton>
-                </SidebarMenuSubItem>
-              </SidebarMenuSub>
-            </CollapsibleContent>
-          </Collapsible>
-        </SidebarMenuItem>
-      </SidebarMenu>
+                  <SidebarMenuSubItem>
+                    <SidebarMenuSubButton asChild className={currentPath === "/idsms/inspecao-gestao-sms" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
+                      <Link to="/idsms/inspecao-gestao-sms" className="flex items-center gap-2">
+                        <span className="text-xs leading-tight break-words min-w-0">Inspeção Gestão SMS</span>
+                      </Link>
+                    </SidebarMenuSubButton>
+                  </SidebarMenuSubItem>
+                </SidebarMenuSub>
+              </CollapsibleContent>
+            </Collapsible>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      )}
 
       {/* Seção Desvios */}
       {["desvios_dashboard", "desvios_cadastro", "desvios_consulta", "desvios_nao_conformidade"].some(menu =>
@@ -576,6 +582,56 @@ export default function SidebarSectionSMS({ openMenu, toggleMenu }: SidebarSecti
                       >
                         <Link to="/medidas-disciplinares/consulta" className="flex items-center gap-2">
                           <span className="text-xs leading-tight break-words min-w-0">Consulta</span>
+                        </Link>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+                  )}
+                </SidebarMenuSub>
+              </CollapsibleContent>
+            </Collapsible>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      )}
+
+      {/* Seção GRO */}
+      {["gro_dashboard", "gro_avaliacao_riscos"].some(menu =>
+        podeVerMenu(menu, menusSidebar)
+      ) && (
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <Collapsible open={openMenu === "gro"}>
+              <CollapsibleTrigger asChild>
+                <SidebarMenuButton 
+                  onClick={() => toggleMenu("gro")}
+                  className="text-white hover:bg-slate-600"
+                >
+                  <Shield className="h-4 w-4 flex-shrink-0" />
+                  <span className="break-words">GRO</span>
+                </SidebarMenuButton>
+              </CollapsibleTrigger>
+              <CollapsibleContent asChild>
+                <SidebarMenuSub>
+                  {podeVerMenu("gro_dashboard", menusSidebar) && (
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton 
+                        asChild
+                        className={currentPath === "/gro/dashboard" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
+                      >
+                        <Link to="/gro/dashboard" className="flex items-center gap-2">
+                          <TrendingUp className="h-3 w-3 flex-shrink-0" />
+                          <span className="text-xs leading-tight break-words min-w-0">Dashboard</span>
+                        </Link>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+                  )}
+                  {podeVerMenu("gro_avaliacao_riscos", menusSidebar) && (
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton 
+                        asChild
+                        className={currentPath === "/gro/avaliacao-riscos" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
+                      >
+                        <Link to="/gro/avaliacao-riscos" className="flex items-center gap-2">
+                          <span className="text-xs leading-tight break-words min-w-0">Avaliação de Riscos</span>
                         </Link>
                       </SidebarMenuSubButton>
                     </SidebarMenuSubItem>

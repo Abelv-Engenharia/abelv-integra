@@ -84,6 +84,14 @@ export function getMenusHierarchy(): MenuSection[] {
             { key: "ocorrencias_cadastro", label: "Cadastro" },
             { key: "ocorrencias_consulta", label: "Consulta" }
           ]
+        },
+        {
+          key: "gro",
+          label: "GRO",
+          submenus: [
+            { key: "gro_dashboard", label: "Dashboard" },
+            { key: "gro_avaliacao_riscos", label: "Avaliação de Riscos" }
+          ]
         }
       ]
     },
