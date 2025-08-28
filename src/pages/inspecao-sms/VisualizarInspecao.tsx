@@ -4,18 +4,24 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Download, FileText, MapPin, Calendar, User, Building } from "lucide-react";
+import { ArrowLeft, Download, FileText, MapPin, Calendar, User, Building, Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { PageLoader } from "@/components/common/PageLoader";
 import { toast } from "@/hooks/use-toast";
+import { useIdentificacaoFrenteTrabalho } from "@/hooks/inspecao-sms/useIdentificacaoFrenteTrabalho";
 
 const VisualizarInspecao = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [inspecao, setInspecao] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
+  
+  // Hook para buscar dados da identificação da frente de trabalho
+  const { identificacao, isLoading: isLoadingIdentificacao } = useIdentificacaoFrenteTrabalho(
+    inspecao?.dados_preenchidos?.campos_cabecalho
+  );
 
   const loadInspecao = async () => {
     if (!id) return;
@@ -235,6 +241,69 @@ const VisualizarInspecao = () => {
               )}
             </CardContent>
           </Card>
+
+          {/* Card Identificação da Frente de Trabalho */}
+          {inspecao.dados_preenchidos?.campos_cabecalho && Object.keys(inspecao.dados_preenchidos.campos_cabecalho).length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Users className="h-5 w-5" />
+                  Identificação da Frente de Trabalho
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {isLoadingIdentificacao ? (
+                  <div className="text-center py-4">
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mx-auto"></div>
+                    <p className="text-sm text-muted-foreground mt-2">Carregando informações...</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {identificacao.engenheiro && (
+                      <div>
+                        <p className="text-sm text-muted-foreground">Engenheiro Responsável</p>
+                        <p className="font-medium">{identificacao.engenheiro}</p>
+                      </div>
+                    )}
+                    
+                    {identificacao.supervisor && (
+                      <div>
+                        <p className="text-sm text-muted-foreground">Supervisor Responsável</p>
+                        <p className="font-medium">{identificacao.supervisor}</p>
+                      </div>
+                    )}
+                    
+                    {identificacao.encarregado && (
+                      <div>
+                        <p className="text-sm text-muted-foreground">Encarregado Responsável</p>
+                        <p className="font-medium">{identificacao.encarregado}</p>
+                      </div>
+                    )}
+                    
+                    {identificacao.empresa && (
+                      <div>
+                        <p className="text-sm text-muted-foreground">Empresa</p>
+                        <p className="font-medium">{identificacao.empresa}</p>
+                      </div>
+                    )}
+                    
+                    {identificacao.disciplina && (
+                      <div>
+                        <p className="text-sm text-muted-foreground">Disciplina</p>
+                        <p className="font-medium">{identificacao.disciplina}</p>
+                      </div>
+                    )}
+                    
+                    {!identificacao.engenheiro && !identificacao.supervisor && !identificacao.encarregado && !identificacao.empresa && !identificacao.disciplina && (
+                      <div className="col-span-2 text-center py-4">
+                        <p className="text-muted-foreground">Nenhuma informação de identificação da frente de trabalho disponível.</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
 
           {/* Itens Verificados */}
           <Card>
