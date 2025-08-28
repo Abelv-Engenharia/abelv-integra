@@ -31,16 +31,25 @@ export function InspecaoAcompanhamentoCard({
   };
 
   const handleViewReport = async () => {
-    if (!inspecao.relatorio_url) return;
+    if (!inspecao.relatorio_url) {
+      console.log('Nenhum relatório URL encontrado');
+      return;
+    }
     
     try {
+      console.log('URL original do relatório:', inspecao.relatorio_url);
+      
       // Extrai o path do arquivo da URL completa
       const url = new URL(inspecao.relatorio_url);
       const pathParts = url.pathname.split('/');
       const fileName = pathParts[pathParts.length - 1];
       
+      console.log('Nome do arquivo extraído:', fileName);
+      
       // Construir URL da edge function com o nome do arquivo
       const functionUrl = `https://xexgdtlctyuycohzhmuu.supabase.co/functions/v1/serve-hsa-report?file=${encodeURIComponent(fileName)}`;
+      
+      console.log('URL da edge function:', functionUrl);
       
       // Abrir em nova aba diretamente
       window.open(functionUrl, '_blank');
