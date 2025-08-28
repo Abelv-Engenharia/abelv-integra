@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Settings, Users, Building, Shield, Wrench, UserCheck, UserCog, Clock, Target, FileText, Image, Upload, Mail, HardHat, Download } from "lucide-react";
+import { Settings, Users, Building, Shield, Wrench, UserCheck, UserCog, Clock, Target, FileText, Image, Upload, Mail, HardHat, Download, ClipboardList } from "lucide-react";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import {
   SidebarMenu,
@@ -157,6 +157,17 @@ export default function SidebarSectionAdministracao({ openMenu, toggleMenu }: Pr
                   <Link to="/admin/modelos-inspecao" className="flex items-center gap-2">
                     <FileText className="h-3 w-3 flex-shrink-0" />
                     <span className="text-xs leading-tight break-words min-w-0">Modelos de Inspeção</span>
+                  </Link>
+                </SidebarMenuSubButton>
+              </SidebarMenuSubItem>
+              <SidebarMenuSubItem>
+                <SidebarMenuSubButton 
+                  asChild
+                  className={currentPath === "/admin/checklists" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
+                >
+                  <Link to="/admin/checklists" className="flex items-center gap-2">
+                    <ClipboardList className="h-3 w-3 flex-shrink-0" />
+                    <span className="text-xs leading-tight break-words min-w-0">Checklists</span>
                   </Link>
                 </SidebarMenuSubButton>
               </SidebarMenuSubItem>
