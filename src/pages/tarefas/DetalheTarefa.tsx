@@ -201,19 +201,37 @@ const DetalheTarefa = () => {
     if (!tarefa?.anexo) return;
 
     try {
+      // Baixar o arquivo e abrir como blob para evitar bloqueios do navegador
       const { data, error } = await supabase.storage
         .from('tarefas-anexos')
-        .createSignedUrl(tarefa.anexo, 3600); // URL válida por 1 hora
+        .download(tarefa.anexo);
 
       if (error) throw error;
 
-      // Abrir em nova aba
-      window.open(data.signedUrl, '_blank');
+      // Criar URL do blob e abrir em nova aba
+      const url = URL.createObjectURL(data);
+      const newWindow = window.open(url, '_blank');
+      
+      if (!newWindow) {
+        toast({
+          title: "Pop-up bloqueado",
+          description: "Por favor, permita pop-ups para visualizar o documento.",
+          variant: "destructive",
+        });
+        URL.revokeObjectURL(url);
+        return;
+      }
+
+      // Limpar a URL após alguns segundos
+      setTimeout(() => {
+        URL.revokeObjectURL(url);
+      }, 10000);
+
     } catch (error: any) {
       console.error("Erro ao visualizar anexo:", error);
       toast({
         title: "Erro",
-        description: "Não foi possível visualizar o documento.",
+        description: "Não foi possível visualizar o documento. Tente fazer o download.",
         variant: "destructive",
       });
     }
