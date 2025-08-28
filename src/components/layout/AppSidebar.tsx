@@ -9,11 +9,6 @@ import SidebarSectionGestaoSMS from "./SidebarSectionGestaoSMS";
 import SidebarSectionTarefas from "./SidebarSectionTarefas";
 import SidebarSectionRelatorios from "./SidebarSectionRelatorios";
 import SidebarSectionAdministracao from "./SidebarSectionAdministracao";
-import SidebarSectionADM from "./SidebarSectionADM";
-import SidebarSectionSuprimentos from "./SidebarSectionSuprimentos";
-import SidebarSectionProducao from "./SidebarSectionProducao";
-import SidebarSectionOrcamentos from "./SidebarSectionOrcamentos";
-import SidebarSectionQualidade from "./SidebarSectionQualidade";
 import SidebarSearch from "./SidebarSearch";
 import { useProfile } from "@/hooks/useProfile";
 
@@ -40,11 +35,6 @@ export function AppSidebar() {
     if (currentPath.startsWith("/relatorios")) return "relatorios";
     if (currentPath.startsWith("/idsms")) return "idsms";
     if (currentPath.startsWith("/admin")) return "admin";
-    if (currentPath.startsWith("/adm")) return "adm";
-    if (currentPath.startsWith("/suprimentos")) return "suprimentos";
-    if (currentPath.startsWith("/producao")) return "producao";
-    if (currentPath.startsWith("/orcamentos")) return "orcamentos";
-    if (currentPath.startsWith("/qualidade")) return "qualidade";
     if (currentPath.startsWith("/gro")) return "gro";
     if (currentPath.startsWith("/tutoriais")) return "admin";
     if (currentPath.startsWith("/account")) return "account";
@@ -82,30 +72,6 @@ export function AppSidebar() {
           <SidebarSectionGestaoSMS openMenu={openMenu} toggleMenu={toggleMenu} />
         )}
 
-        {/* Render ADM MATRICIAL em ordem alfabética */}
-        {["adm_dashboard", "adm_configuracoes", "adm_usuarios", "adm_perfis", "adm_empresas", "adm_ccas", "adm_engenheiros", "adm_supervisores", "adm_funcionarios", "adm_hht", "adm_metas_indicadores", "adm_modelos_inspecao", "adm_templates", "adm_logo"].some(menu => podeVerMenu(menu, menusSidebar)) && (
-          <SidebarSectionADM openMenu={openMenu} toggleMenu={toggleMenu} />
-        )}
-
-        {/* Render ORÇAMENTOS em ordem alfabética */}
-        {["orcamentos_dashboard", "orcamentos_projetos", "orcamentos_custos", "orcamentos_analises", "orcamentos_aprovacoes", "orcamentos_historico"].some(menu => podeVerMenu(menu, menusSidebar)) && (
-          <SidebarSectionOrcamentos openMenu={openMenu} toggleMenu={toggleMenu} />
-        )}
-
-        {/* Render PRODUÇÃO em ordem alfabética */}
-        {["producao_dashboard", "producao_planejamento", "producao_ordens_producao", "producao_controle_qualidade", "producao_manutencao", "producao_recursos", "producao_indicadores"].some(menu => podeVerMenu(menu, menusSidebar)) && (
-          <SidebarSectionProducao openMenu={openMenu} toggleMenu={toggleMenu} />
-        )}
-
-        {/* Render QUALIDADE em ordem alfabética */}
-        {["qualidade_dashboard", "qualidade_controle", "qualidade_auditorias", "qualidade_indicadores", "qualidade_equipe", "qualidade_configuracoes"].some(menu => podeVerMenu(menu, menusSidebar)) && (
-          <SidebarSectionQualidade openMenu={openMenu} toggleMenu={toggleMenu} />
-        )}
-
-        {/* Render SUPRIMENTOS em ordem alfabética */}
-        {["suprimentos_dashboard", "suprimentos_fornecedores", "suprimentos_materiais", "suprimentos_compras", "suprimentos_estoque", "suprimentos_pedidos", "suprimentos_contratos"].some(menu => podeVerMenu(menu, menusSidebar)) && (
-          <SidebarSectionSuprimentos openMenu={openMenu} toggleMenu={toggleMenu} />
-        )}
 
         {/* Render Tarefas */}
         {["tarefas_dashboard", "tarefas_minhas_tarefas", "tarefas_cadastro"].some(menu => podeVerMenu(menu, menusSidebar)) && (
