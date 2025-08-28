@@ -24,7 +24,6 @@ const ConsultarInspecoes = () => {
   const [filtros, setFiltros] = useState({
     dataInicio: null as Date | null,
     dataFim: null as Date | null,
-    tipoInspecao: "",
     ccaId: "",
     status: "",
     temNaoConformidade: "",
@@ -32,21 +31,6 @@ const ConsultarInspecoes = () => {
   });
   
   const { data: userCCAs = [] } = useUserCCAs();
-
-  const loadTiposInspecao = async () => {
-    try {
-      const { data } = await supabase
-        .from('tipos_inspecao_sms')
-        .select('*')
-        .eq('ativo', true);
-      
-      if (data) {
-        setTiposInspecao(data);
-      }
-    } catch (error) {
-      console.error('Erro ao carregar tipos de inspeção:', error);
-    }
-  };
 
   const loadInspecoes = async () => {
     try {
@@ -96,12 +80,6 @@ const ConsultarInspecoes = () => {
       );
     }
 
-    // Filtro por tipo de inspeção (agora baseado no nome do checklist)
-    if (filtros.tipoInspecao && filtros.tipoInspecao !== "todos") {
-      filtered = filtered.filter(i => 
-        i.checklists_avaliacao?.nome?.includes(filtros.tipoInspecao)
-      );
-    }
 
     // Filtro por CCA
     if (filtros.ccaId && filtros.ccaId !== "todos") {
@@ -126,7 +104,7 @@ const ConsultarInspecoes = () => {
       const searchTerm = filtros.busca.toLowerCase();
       filtered = filtered.filter(i => 
         i.local?.toLowerCase().includes(searchTerm) ||
-        i.modelos_inspecao_sms?.nome?.toLowerCase().includes(searchTerm) ||
+        i.checklists_avaliacao?.nome?.toLowerCase().includes(searchTerm) ||
         i.profiles?.nome?.toLowerCase().includes(searchTerm) ||
         i.ccas?.nome?.toLowerCase().includes(searchTerm)
       );
@@ -139,7 +117,6 @@ const ConsultarInspecoes = () => {
     setFiltros({
       dataInicio: null,
       dataFim: null,
-      tipoInspecao: "",
       ccaId: "",
       status: "",
       temNaoConformidade: "",
@@ -206,10 +183,6 @@ const ConsultarInspecoes = () => {
   };
 
   useEffect(() => {
-    loadTiposInspecao();
-  }, []);
-
-  useEffect(() => {
     if (userCCAs.length >= 0) {
       loadInspecoes();
     }
@@ -270,23 +243,6 @@ const ConsultarInspecoes = () => {
             </div>
             
             <div className="space-y-2">
-              <Label className="text-sm sm:text-base">Tipo de Inspeção</Label>
-              <Select value={filtros.tipoInspecao} onValueChange={(value) => setFiltros({...filtros, tipoInspecao: value})}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Todos os tipos" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="todos">Todos os tipos</SelectItem>
-                  {tiposInspecao.map((tipo) => (
-                    <SelectItem key={tipo.id} value={tipo.id}>
-                      {tipo.nome}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="space-y-2">
               <Label className="text-sm sm:text-base">CCA</Label>
               <Select value={filtros.ccaId} onValueChange={(value) => setFiltros({...filtros, ccaId: value})}>
                 <SelectTrigger>
@@ -344,8 +300,8 @@ const ConsultarInspecoes = () => {
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead>Nome da Inspeção</TableHead>
                     <TableHead>Data</TableHead>
-                    <TableHead>Tipo/Modelo</TableHead>
                     <TableHead>Local</TableHead>
                     <TableHead>CCA</TableHead>
                     <TableHead>Responsável</TableHead>
@@ -358,17 +314,12 @@ const ConsultarInspecoes = () => {
                   {filteredInspecoes.map((inspecao) => (
                     <TableRow key={inspecao.id}>
                       <TableCell>
-                        {format(new Date(inspecao.data_inspecao), 'dd/MM/yyyy', { locale: ptBR })}
+                        <div className="font-medium text-sm">
+                          {inspecao.checklists_avaliacao?.nome || 'N/A'}
+                        </div>
                       </TableCell>
                       <TableCell>
-                        <div className="space-y-1">
-                          <div className="text-sm font-medium">
-                            {inspecao.modelos_inspecao_sms?.tipos_inspecao_sms?.nome || 'N/A'}
-                          </div>
-                          <div className="text-xs text-muted-foreground">
-                            {inspecao.modelos_inspecao_sms?.nome || 'N/A'}
-                          </div>
-                        </div>
+                        {format(new Date(inspecao.data_inspecao), 'dd/MM/yyyy', { locale: ptBR })}
                       </TableCell>
                       <TableCell className="max-w-xs truncate" title={inspecao.local}>
                         {inspecao.local}

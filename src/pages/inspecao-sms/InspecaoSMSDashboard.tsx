@@ -22,9 +22,7 @@ const InspecaoSMSDashboard = () => {
     mesAnterior: 0
   });
   const [ultimasInspecoes, setUltimasInspecoes] = useState<any[]>([]);
-  const [inspecoesPorTipo, setInspecoesPorTipo] = useState<any[]>([]);
   const [inspecoesPorCCA, setInspecoesPorCCA] = useState<any[]>([]);
-  const [tiposInspecao, setTiposInspecao] = useState<any[]>([]);
   const [filtroTipo, setFiltroTipo] = useState<string>("todos");
   const [dataInicio, setDataInicio] = useState<Date>();
   const [dataFim, setDataFim] = useState<Date>();
@@ -65,18 +63,6 @@ const InspecaoSMSDashboard = () => {
         query = query.lte('data_inspecao', format(dataFim, 'yyyy-MM-dd'));
       }
 
-      // Aplicar filtro de tipo se definido
-      if (filtroTipo && filtroTipo !== "todos") {
-        const { data: modelosDoTipo } = await supabase
-          .from('modelos_inspecao_sms')
-          .select('id')
-          .eq('tipo_inspecao_id', filtroTipo);
-        
-        if (modelosDoTipo) {
-          const modeloIds = modelosDoTipo.map(m => m.id);
-          query = query.in('modelo_id', modeloIds);
-        }
-      }
 
       const { data: inspecoes } = await query;
 
@@ -110,17 +96,6 @@ const InspecaoSMSDashboard = () => {
 
         setUltimasInspecoes(inspecoes.slice(0, 8));
 
-        // Agrupar por tipo de inspeção
-        const tiposCount = inspecoes.reduce((acc: any, insp) => {
-          const tipo = insp.checklists_avaliacao?.nome || 'Sem tipo';
-          acc[tipo] = (acc[tipo] || 0) + 1;
-          return acc;
-        }, {});
-
-        setInspecoesPorTipo(
-          Object.entries(tiposCount).map(([tipo, count]) => ({ tipo, count }))
-        );
-
         // Agrupar por CCA
         const ccasCount = inspecoes.reduce((acc: any, insp) => {
           const cca = insp.ccas ? `${insp.ccas.codigo} - ${insp.ccas.nome}` : 'Sem CCA';
@@ -139,20 +114,6 @@ const InspecaoSMSDashboard = () => {
     }
   };
 
-  const loadTiposInspecao = async () => {
-    try {
-      const { data } = await supabase
-        .from('tipos_inspecao_sms')
-        .select('*')
-        .eq('ativo', true);
-      
-      if (data) {
-        setTiposInspecao(data);
-      }
-    } catch (error) {
-      console.error('Erro ao carregar tipos de inspeção:', error);
-    }
-  };
 
   const getStatusBadge = (status: string) => {
     const statusMap = {
@@ -189,14 +150,10 @@ const InspecaoSMSDashboard = () => {
     : 0;
 
   useEffect(() => {
-    loadTiposInspecao();
-  }, []);
-
-  useEffect(() => {
     if (userCCAs.length >= 0) {
       loadStats();
     }
-  }, [userCCAs, filtroTipo, dataInicio, dataFim]);
+  }, [userCCAs, dataInicio, dataFim]);
 
   return (
     <div className="content-padding section-spacing">
@@ -212,22 +169,6 @@ const InspecaoSMSDashboard = () => {
         </CardHeader>
         <CardContent>
           <div className="form-grid">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Tipo de Inspeção</label>
-              <Select value={filtroTipo} onValueChange={setFiltroTipo}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Todos os tipos" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="todos">Todos os tipos</SelectItem>
-                  {tiposInspecao.map((tipo) => (
-                    <SelectItem key={tipo.id} value={tipo.id}>
-                      {tipo.nome}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
             <div className="space-y-2">
               <label className="text-sm font-medium">Data Início</label>
               <DatePickerWithManualInput
@@ -310,40 +251,7 @@ const InspecaoSMSDashboard = () => {
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        {/* Inspeções por Tipo */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg sm:text-xl">Inspeções por Tipo</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {inspecoesPorTipo.length === 0 ? (
-                <p className="text-muted-foreground text-center py-4">
-                  Nenhum dado encontrado
-                </p>
-              ) : (
-                inspecoesPorTipo.map((item, index) => (
-                  <div key={index} className="flex items-center justify-between">
-                    <span className="text-sm font-medium truncate mr-2">{item.tipo}</span>
-                    <div className="flex items-center gap-2">
-                      <div className="w-16 bg-muted rounded-full h-2 overflow-hidden">
-                        <div 
-                          className="h-full bg-blue-600 transition-all"
-                          style={{ 
-                            width: `${(item.count / stats.totalInspecoes) * 100}%` 
-                          }}
-                        />
-                      </div>
-                      <span className="text-sm font-bold w-8 text-right">{item.count}</span>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-          </CardContent>
-        </Card>
-
+      <div className="grid grid-cols-1 gap-6 mb-6">
         {/* Inspeções por CCA */}
         <Card>
           <CardHeader>
