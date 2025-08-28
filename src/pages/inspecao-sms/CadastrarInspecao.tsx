@@ -389,15 +389,6 @@ const CadastrarInspecao = () => {
     resetFormulario();
   }, []); // Executa apenas na montagem do componente
 
-  // Adicionar botão de reset no step 1 para permitir limpeza manual
-  const handleResetManual = () => {
-    resetFormulario();
-    toast({
-      title: "Formulário limpo",
-      description: "Todos os dados foram resetados.",
-    });
-  };
-
   // Modal de assinatura
   if (showSignatureModal) {
     return (
@@ -543,17 +534,7 @@ const CadastrarInspecao = () => {
         {/* Lista de Modelos */}
         <Card>
           <CardHeader>
-            <div className="flex justify-between items-center">
-              <CardTitle className="text-lg sm:text-xl">Selecione um Modelo de Inspeção</CardTitle>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={handleResetManual}
-                className="text-xs"
-              >
-                Limpar Formulário
-              </Button>
-            </div>
+            <CardTitle className="text-lg sm:text-xl">Selecione um Modelo de Inspeção</CardTitle>
           </CardHeader>
           <CardContent>
             {isLoadingModelos ? (
