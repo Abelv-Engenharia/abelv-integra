@@ -50,59 +50,57 @@ const DetalheTarefa = () => {
     fetchUserProfile();
   }, [user]);
 
+  const fetchTarefa = async () => {
+    if (!id) {
+      console.error("ID da tarefa não fornecido");
+      navigate("/tarefas/minhas-tarefas");
+      return;
+    }
+
+    // Validar se o ID é um UUID válido
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(id)) {
+      console.error("ID da tarefa não é um UUID válido:", id);
+      toast({
+        title: "Erro",
+        description: "ID da tarefa inválido.",
+        variant: "destructive"
+      });
+      navigate("/tarefas/minhas-tarefas");
+      return;
+    }
+
+    try {
+      console.log("Buscando tarefa com ID:", id);
+      const data = await tarefasService.getById(id);
+      if (data) {
+        setTarefa(data);
+        // Não carregar observações no campo de texto - mantê-lo limpo para novas observações
+        console.log("Tarefa carregada:", data);
+        console.log("Observações da tarefa:", data.observacoes_progresso);
+      } else {
+        console.error("Tarefa não encontrada");
+        toast({
+          title: "Tarefa não encontrada",
+          description: "A tarefa solicitada não foi encontrada ou você não tem permissão para visualizá-la.",
+          variant: "destructive"
+        });
+        navigate("/tarefas/minhas-tarefas");
+      }
+    } catch (error) {
+      console.error("Erro ao carregar tarefa:", error);
+      toast({
+        title: "Erro ao carregar tarefa",
+        description: "Não foi possível carregar os detalhes da tarefa.",
+        variant: "destructive"
+      });
+      navigate("/tarefas/minhas-tarefas");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchTarefa = async () => {
-      if (!id) {
-        console.error("ID da tarefa não fornecido");
-        navigate("/tarefas/minhas-tarefas");
-        return;
-      }
-
-      // Validar se o ID é um UUID válido
-      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-      if (!uuidRegex.test(id)) {
-        console.error("ID da tarefa não é um UUID válido:", id);
-        toast({
-          title: "Erro",
-          description: "ID da tarefa inválido.",
-          variant: "destructive"
-        });
-        navigate("/tarefas/minhas-tarefas");
-        return;
-      }
-
-      try {
-        console.log("Buscando tarefa com ID:", id);
-        const data = await tarefasService.getById(id);
-        if (data) {
-          setTarefa(data);
-          // Carregar observações existentes no campo de texto
-          if (data.observacoes_progresso) {
-            setObservacoes(data.observacoes_progresso);
-          }
-          console.log("Tarefa carregada:", data);
-        } else {
-          console.error("Tarefa não encontrada");
-          toast({
-            title: "Tarefa não encontrada",
-            description: "A tarefa solicitada não foi encontrada ou você não tem permissão para visualizá-la.",
-            variant: "destructive"
-          });
-          navigate("/tarefas/minhas-tarefas");
-        }
-      } catch (error) {
-        console.error("Erro ao carregar tarefa:", error);
-        toast({
-          title: "Erro ao carregar tarefa",
-          description: "Não foi possível carregar os detalhes da tarefa.",
-          variant: "destructive"
-        });
-        navigate("/tarefas/minhas-tarefas");
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchTarefa();
   }, [id, navigate, toast]);
 
@@ -175,25 +173,41 @@ const DetalheTarefa = () => {
       return;
     }
 
+    if (!observacoes.trim()) {
+      toast({
+        title: "Erro",
+        description: "Digite uma observação antes de salvar.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setLoading(true);
     try {
       // Criar registro da observação com informações do usuário
-      const novaObservacao = `[${new Date().toLocaleString('pt-BR')} - ${userProfile.nome}]\n${observacoes}\n\n`;
+      const novaObservacao = `[${new Date().toLocaleString('pt-BR')} - ${userProfile.nome}]\n${observacoes.trim()}\n\n`;
       const observacoesAtualizadas = tarefa.observacoes_progresso 
         ? tarefa.observacoes_progresso + novaObservacao
         : novaObservacao;
+
+      console.log("Salvando observações:", observacoesAtualizadas);
 
       const sucesso = await tarefasService.updateStatus(tarefa.id, { 
         observacoes_progresso: observacoesAtualizadas 
       });
       
       if (sucesso) {
+        // Atualizar o estado local da tarefa
         setTarefa({ ...tarefa, observacoes_progresso: observacoesAtualizadas });
         setObservacoes(""); // Limpar o campo após salvar
+        
         toast({
           title: "Observações atualizadas",
-          description: "Observações atualizadas com sucesso.",
+          description: "Observação adicionada com sucesso.",
         });
+
+        // Recarregar a tarefa para garantir que temos os dados mais recentes
+        await fetchTarefa();
       } else {
         toast({
           title: "Erro ao atualizar observações",
@@ -312,6 +326,22 @@ const DetalheTarefa = () => {
 
   const anexoInfo = parseAnexoInfo(tarefa.anexo || "");
 
+  const handleViewAttachment = () => {
+    // Implementar visualização do anexo
+    toast({
+      title: "Visualizar anexo",
+      description: "Funcionalidade de visualização será implementada em breve.",
+    });
+  };
+
+  const handleDownloadAttachment = () => {
+    // Implementar download do anexo
+    toast({
+      title: "Baixar anexo",
+      description: "Funcionalidade de download será implementada em breve.",
+    });
+  };
+
   return (
     <div className="container mx-auto py-8">
       <Button variant="ghost" onClick={() => navigate("/tarefas/minhas-tarefas")} className="mb-4">
@@ -423,11 +453,21 @@ const DetalheTarefa = () => {
                     )}
                   </div>
                   <div className="flex space-x-2">
-                    <Button variant="outline" size="sm" className="text-blue-600 hover:text-blue-800">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="text-blue-600 hover:text-blue-800"
+                      onClick={handleViewAttachment}
+                    >
                       <Eye className="h-4 w-4 mr-1" />
                       Visualizar
                     </Button>
-                    <Button variant="outline" size="sm" className="text-green-600 hover:text-green-800">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="text-green-600 hover:text-green-800"
+                      onClick={handleDownloadAttachment}
+                    >
                       <Download className="h-4 w-4 mr-1" />
                       Baixar
                     </Button>
@@ -461,10 +501,8 @@ const DetalheTarefa = () => {
                     Salvo
                   </Badge>
                 </div>
-                <div className="text-sm whitespace-pre-wrap space-y-2">
-                  {tarefa.observacoes_progresso.split('\n\n').map((observacao, index) => {
-                    if (!observacao.trim()) return null;
-                    
+                <div className="text-sm whitespace-pre-wrap space-y-2 max-h-64 overflow-y-auto">
+                  {tarefa.observacoes_progresso.split('\n\n').filter(obs => obs.trim()).map((observacao, index) => {
                     const linhas = observacao.split('\n');
                     const cabecalho = linhas[0];
                     const conteudo = linhas.slice(1).join('\n');
@@ -482,7 +520,7 @@ const DetalheTarefa = () => {
                     }
                     
                     return (
-                      <div key={index} className="text-sm">
+                      <div key={index} className="text-sm border-l-4 border-gray-300 pl-3 py-2">
                         {observacao}
                       </div>
                     );
@@ -500,8 +538,12 @@ const DetalheTarefa = () => {
                 onChange={handleObservacoesChange}
                 className="min-h-24"
               />
-              <Button onClick={handleObservacoesSubmit} className="mt-2" disabled={!observacoes.trim()}>
-                Adicionar Observação
+              <Button 
+                onClick={handleObservacoesSubmit} 
+                className="mt-2" 
+                disabled={!observacoes.trim() || loading}
+              >
+                {loading ? "Salvando..." : "Adicionar Observação"}
               </Button>
             </div>
           </div>
