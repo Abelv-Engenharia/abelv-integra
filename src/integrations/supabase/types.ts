@@ -164,6 +164,8 @@ export type Database = {
           id: string
           itens_avaliacao: Json | null
           nome: string
+          requer_assinatura: boolean | null
+          secoes: Json | null
           updated_at: string
         }
         Insert: {
@@ -174,6 +176,8 @@ export type Database = {
           id?: string
           itens_avaliacao?: Json | null
           nome: string
+          requer_assinatura?: boolean | null
+          secoes?: Json | null
           updated_at?: string
         }
         Update: {
@@ -184,6 +188,8 @@ export type Database = {
           id?: string
           itens_avaliacao?: Json | null
           nome?: string
+          requer_assinatura?: boolean | null
+          secoes?: Json | null
           updated_at?: string
         }
         Relationships: []

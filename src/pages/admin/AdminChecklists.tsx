@@ -41,8 +41,8 @@ interface ChecklistAvaliacao {
   ativo: boolean;
   campos_cabecalho: Json;
   itens_avaliacao: Json;
-  secoes: Json;
-  requer_assinatura: boolean;
+  secoes?: Json;
+  requer_assinatura?: boolean;
   created_at: string;
 }
 
