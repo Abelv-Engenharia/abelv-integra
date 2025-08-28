@@ -113,7 +113,7 @@ const RelatoriosOcorrencias = () => {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Button variant="ghost" size="sm" asChild>
-            <Link to="/relatorios">
+            <Link to="/relatorios/dashboard">
               <ArrowLeft className="h-4 w-4 mr-1" />
               Voltar
             </Link>
