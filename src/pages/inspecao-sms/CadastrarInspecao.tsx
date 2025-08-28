@@ -353,10 +353,50 @@ const CadastrarInspecao = () => {
     setShowSignatureModal(false);
   };
 
+  const navigate = useNavigate();
+
+  // Função para resetar o formulário completamente
+  const resetFormulario = () => {
+    setStep(1);
+    setModeloSelecionado(null);
+    setItensInspecao([]);
+    setCamposCabecalho([]);
+    setDadosCabecalho({});
+    setDadosInspecao({
+      data_inspecao: new Date(),
+      local: '',
+      cca_id: '',
+      observacoes: '',
+      dados_preenchidos: {},
+      tem_nao_conformidade: false
+    });
+    setAssinaturas({
+      responsavel_tecnico: '',
+      assinatura_responsavel_tecnico: '',
+      assinatura_inspetor: ''
+    });
+  };
+
   useEffect(() => {
     loadModelos();
     loadUsuarios();
   }, []);
+
+  // Reset automático quando o componente é montado (usuário navega de volta)
+  useEffect(() => {
+    // Reset completo sempre que o componente for montado
+    // Isso garante que o formulário sempre inicie limpo
+    resetFormulario();
+  }, []); // Executa apenas na montagem do componente
+
+  // Adicionar botão de reset no step 1 para permitir limpeza manual
+  const handleResetManual = () => {
+    resetFormulario();
+    toast({
+      title: "Formulário limpo",
+      description: "Todos os dados foram resetados.",
+    });
+  };
 
   // Modal de assinatura
   if (showSignatureModal) {
@@ -503,7 +543,17 @@ const CadastrarInspecao = () => {
         {/* Lista de Modelos */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg sm:text-xl">Selecione um Modelo de Inspeção</CardTitle>
+            <div className="flex justify-between items-center">
+              <CardTitle className="text-lg sm:text-xl">Selecione um Modelo de Inspeção</CardTitle>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={handleResetManual}
+                className="text-xs"
+              >
+                Limpar Formulário
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
             {isLoadingModelos ? (
