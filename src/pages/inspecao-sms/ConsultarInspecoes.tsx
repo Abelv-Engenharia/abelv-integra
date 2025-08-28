@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DatePickerWithManualInput } from "@/components/ui/date-picker-with-manual-input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { FileSearch, Eye, Download, Filter, Search } from "lucide-react";
+import { FileSearch, Eye, Download, Filter, Search, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserCCAs } from "@/hooks/useUserCCAs";
 import { format } from "date-fns";
@@ -15,6 +15,17 @@ import { Badge } from "@/components/ui/badge";
 import { PageLoader } from "@/components/common/PageLoader";
 import { useNavigate } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
+import { 
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 const ConsultarInspecoes = () => {
   const navigate = useNavigate();
@@ -183,6 +194,33 @@ const ConsultarInspecoes = () => {
     }
   };
 
+  const handleDeleteInspecao = async (inspecao: any) => {
+    try {
+      const { error } = await supabase
+        .from('inspecoes_sms')
+        .delete()
+        .eq('id', inspecao.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Inspeção excluída",
+        description: "A inspeção foi excluída com sucesso.",
+      });
+
+      // Atualizar a lista removendo a inspeção excluída
+      setInspecoes(prev => prev.filter(i => i.id !== inspecao.id));
+      setFilteredInspecoes(prev => prev.filter(i => i.id !== inspecao.id));
+    } catch (error: any) {
+      console.error('Erro ao excluir inspeção:', error);
+      toast({
+        title: "Erro ao excluir inspeção",
+        description: error.message || "Não foi possível excluir a inspeção. Tente novamente.",
+        variant: "destructive",
+      });
+    }
+  };
+
   useEffect(() => {
     if (userCCAs.length >= 0) {
       loadInspecoes();
@@ -337,26 +375,59 @@ const ConsultarInspecoes = () => {
                       <TableCell>
                         {getConformidadeBadge(inspecao.tem_nao_conformidade)}
                       </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => handleViewInspecao(inspecao)}
-                          >
-                            <Eye className="h-4 w-4" />
-                            <span className="sr-only">Visualizar</span>
-                          </Button>
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => handleDownloadPDF(inspecao)}
-                          >
-                            <Download className="h-4 w-4" />
-                            <span className="sr-only">Download PDF</span>
-                          </Button>
-                        </div>
-                      </TableCell>
+                       <TableCell>
+                         <div className="flex items-center gap-2">
+                           <Button 
+                             variant="outline" 
+                             size="sm"
+                             onClick={() => handleViewInspecao(inspecao)}
+                           >
+                             <Eye className="h-4 w-4" />
+                             <span className="sr-only">Visualizar</span>
+                           </Button>
+                           <Button 
+                             variant="outline" 
+                             size="sm"
+                             onClick={() => handleDownloadPDF(inspecao)}
+                           >
+                             <Download className="h-4 w-4" />
+                             <span className="sr-only">Download PDF</span>
+                           </Button>
+                           <AlertDialog>
+                             <AlertDialogTrigger asChild>
+                               <Button 
+                                 variant="outline" 
+                                 size="sm"
+                                 className="text-destructive hover:text-destructive"
+                               >
+                                 <Trash2 className="h-4 w-4" />
+                                 <span className="sr-only">Excluir</span>
+                               </Button>
+                             </AlertDialogTrigger>
+                             <AlertDialogContent>
+                               <AlertDialogHeader>
+                                 <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+                                 <AlertDialogDescription>
+                                   Tem certeza de que deseja excluir esta inspeção? Esta ação não pode ser desfeita.
+                                   <br /><br />
+                                   <strong>Inspeção:</strong> {inspecao.checklists_avaliacao?.nome || 'N/A'}<br />
+                                   <strong>Local:</strong> {inspecao.local}<br />
+                                   <strong>Data:</strong> {format(new Date(inspecao.data_inspecao), 'dd/MM/yyyy', { locale: ptBR })}
+                                 </AlertDialogDescription>
+                               </AlertDialogHeader>
+                               <AlertDialogFooter>
+                                 <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                 <AlertDialogAction 
+                                   onClick={() => handleDeleteInspecao(inspecao)}
+                                   className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                 >
+                                   Excluir
+                                 </AlertDialogAction>
+                               </AlertDialogFooter>
+                             </AlertDialogContent>
+                           </AlertDialog>
+                         </div>
+                       </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
