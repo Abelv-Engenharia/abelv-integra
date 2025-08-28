@@ -31,7 +31,7 @@ export const PerfilForm = ({ initialData, onCancel, onSave, loading }: PerfilFor
   );
   const [expandedSections, setExpandedSections] = useState<string[]>([]);
 
-  // Obter estrutura hierárquica de menus
+  // Obter estrutura hierárquica de menus atualizada
   const menusHierarchy = getMenusHierarchy();
 
   // Handler para expandir/colapsar seções
