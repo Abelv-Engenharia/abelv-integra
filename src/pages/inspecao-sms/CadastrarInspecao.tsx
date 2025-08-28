@@ -21,9 +21,6 @@ const CadastrarInspecao = () => {
   const [step, setStep] = useState(1);
   const [modelos, setModelos] = useState<any[]>([]);
   const [modeloSelecionado, setModeloSelecionado] = useState<any>(null);
-  const [tiposInspecao, setTiposInspecao] = useState<any[]>([]);
-  const [filtroTipo, setFiltroTipo] = useState("");
-  const [isLoadingTipos, setIsLoadingTipos] = useState(true);
   const [isLoadingModelos, setIsLoadingModelos] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [dadosInspecao, setDadosInspecao] = useState({
@@ -39,38 +36,15 @@ const CadastrarInspecao = () => {
   const { profile } = useProfile();
   const { data: userCCAs = [] } = useUserCCAs();
 
-  const loadTiposInspecao = async () => {
-    try {
-      setIsLoadingTipos(true);
-      // Por enquanto, carregar todos os tipos de checklist disponíveis
-      // Pode ser expandido para categorizar checklists por tipo
-      setTiposInspecao([
-        { id: 'todos', nome: 'Todos os tipos' },
-        { id: 'seguranca', nome: 'Segurança' },
-        { id: 'qualidade', nome: 'Qualidade' },
-        { id: 'meio_ambiente', nome: 'Meio Ambiente' }
-      ]);
-    } catch (error) {
-      console.error('Erro ao carregar tipos:', error);
-    } finally {
-      setIsLoadingTipos(false);
-    }
-  };
 
   const loadModelos = async () => {
     try {
       setIsLoadingModelos(true);
-      let query = supabase
+      const { data } = await supabase
         .from('checklists_avaliacao')
         .select('*')
-        .eq('ativo', true);
-
-      if (filtroTipo) {
-        // Filtrar por tipo se houver filtro específico
-        // Por enquanto, mostrar todos os checklists
-      }
-
-      const { data } = await query.order('nome');
+        .eq('ativo', true)
+        .order('nome');
       
       if (data) {
         setModelos(data);
@@ -204,12 +178,8 @@ const CadastrarInspecao = () => {
   };
 
   useEffect(() => {
-    loadTiposInspecao();
-  }, []);
-
-  useEffect(() => {
     loadModelos();
-  }, [filtroTipo]);
+  }, []);
 
   if (step === 1) {
     return (
@@ -219,36 +189,6 @@ const CadastrarInspecao = () => {
           <h1 className="heading-responsive">Cadastrar Inspeção SMS</h1>
         </div>
 
-        {/* Filtros */}
-        <Card className="mb-4 sm:mb-6">
-          <CardHeader>
-            <CardTitle className="text-lg sm:text-xl">Filtrar Modelos</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="form-grid">
-              <div className="space-y-2">
-                <Label className="text-sm sm:text-base">Tipo de Inspeção</Label>
-                {isLoadingTipos ? (
-                  <LoadingSkeleton variant="form" lines={1} />
-                ) : (
-                  <Select value={filtroTipo} onValueChange={setFiltroTipo}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Todos os tipos" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="todos">Todos os tipos</SelectItem>
-                      {tiposInspecao.map((tipo) => (
-                        <SelectItem key={tipo.id} value={tipo.id}>
-                          {tipo.nome}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
 
         {/* Lista de Modelos */}
         <Card>
