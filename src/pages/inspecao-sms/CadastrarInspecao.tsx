@@ -96,7 +96,12 @@ const CadastrarInspecao = () => {
     // Resetar dados do cabeçalho
     const dadosIniciais: any = {};
     camposCabecalhoModelo.forEach((campo: any) => {
-      dadosIniciais[campo] = '';
+      // Preencher automaticamente o responsável da inspeção com o usuário logado
+      if (campo === 'responsavel_inspecao') {
+        dadosIniciais[campo] = profile?.id || '';
+      } else {
+        dadosIniciais[campo] = '';
+      }
     });
     setDadosCabecalho(dadosIniciais);
     
@@ -367,7 +372,12 @@ const CadastrarInspecao = () => {
                     // Reset campos de cabeçalho quando CCA muda
                     const dadosIniciais: any = {};
                     camposCabecalho.forEach((campo: any) => {
-                      dadosIniciais[campo] = '';
+                      // Manter o responsável da inspeção sempre preenchido com o usuário logado
+                      if (campo === 'responsavel_inspecao') {
+                        dadosIniciais[campo] = profile?.id || '';
+                      } else {
+                        dadosIniciais[campo] = '';
+                      }
                     });
                     setDadosCabecalho(dadosIniciais);
                   }}
@@ -536,23 +546,14 @@ const CadastrarInspecao = () => {
                         }
                         
                         if (campoKey === 'responsavel_inspecao') {
-                          console.log('Renderizando Responsável, opções:', usuarios.length);
+                          console.log('Renderizando Responsável (usuário logado):', profile?.nome);
                           return (
-                            <Select 
-                              value={dadosCabecalho.responsavel_inspecao || ''} 
-                              onValueChange={(value) => setDadosCabecalho(prev => ({...prev, responsavel_inspecao: value}))}
-                            >
-                              <SelectTrigger className="w-full">
-                                <SelectValue placeholder="Selecione o responsável pela inspeção" />
-                              </SelectTrigger>
-                              <SelectContent className="bg-background border border-border z-50">
-                                {usuarios.map((user) => (
-                                  <SelectItem key={user.id} value={user.id}>
-                                    {user.nome} {user.email && `(${user.email})`}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
+                            <Input 
+                              value={profile?.nome || 'Usuário não identificado'} 
+                              disabled
+                              className="bg-muted text-muted-foreground cursor-not-allowed"
+                              placeholder="Responsável pela inspeção"
+                            />
                           );
                         }
                         
