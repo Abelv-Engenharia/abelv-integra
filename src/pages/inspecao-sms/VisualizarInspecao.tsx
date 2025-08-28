@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Download, FileText, MapPin, Calendar, User, Building, Users } from "lucide-react";
+import { ArrowLeft, Download, FileText, MapPin, Calendar, User, Building, Users, PenTool } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -240,12 +240,12 @@ const VisualizarInspecao = () => {
           </div>
 
           {/* Sidebar - Resumo */}
-          <div>
-            <Card className="h-full">
+          <div className="space-y-6">
+            <Card>
               <CardHeader>
                 <CardTitle>Resumo</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4 flex flex-col justify-between h-full">
+              <CardContent className="space-y-4">
                 <div className="space-y-4">
                   <div className="text-center">
                     <div className="text-2xl font-bold mb-1">
@@ -277,19 +277,63 @@ const VisualizarInspecao = () => {
                 </div>
                 
                 <div className="space-y-4 pt-2 border-t">
-                  <div>
-                    
-                    
-                  </div>
-                  
-                  {inspecao.updated_at !== inspecao.created_at && <div>
+                  {inspecao.updated_at !== inspecao.created_at && (
+                    <div>
                       <div className="text-xs text-muted-foreground mb-1">Atualizado em</div>
                       <div className="text-sm">
                         {format(new Date(inspecao.updated_at), 'dd/MM/yyyy HH:mm', {
-                      locale: ptBR
-                    })}
+                          locale: ptBR
+                        })}
                       </div>
-                    </div>}
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Card Assinaturas */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <PenTool className="h-5 w-5" />
+                  Assinaturas dos Responsáveis
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="space-y-4">
+                  <div className="text-center border-b pb-4">
+                    <div className="mb-2">
+                      <div className="h-16 border-2 border-dashed border-muted-foreground/30 rounded-md flex items-center justify-center">
+                        <span className="text-xs text-muted-foreground">Assinatura do Inspetor</span>
+                      </div>
+                    </div>
+                    <p className="text-sm font-medium">{inspecao.profiles?.nome || 'N/A'}</p>
+                    <p className="text-xs text-muted-foreground">Inspetor Responsável</p>
+                  </div>
+
+                  {identificacao?.engenheiro && (
+                    <div className="text-center border-b pb-4">
+                      <div className="mb-2">
+                        <div className="h-16 border-2 border-dashed border-muted-foreground/30 rounded-md flex items-center justify-center">
+                          <span className="text-xs text-muted-foreground">Assinatura do Engenheiro</span>
+                        </div>
+                      </div>
+                      <p className="text-sm font-medium">{identificacao.engenheiro}</p>
+                      <p className="text-xs text-muted-foreground">Engenheiro Responsável</p>
+                    </div>
+                  )}
+
+                  {identificacao?.supervisor && (
+                    <div className="text-center">
+                      <div className="mb-2">
+                        <div className="h-16 border-2 border-dashed border-muted-foreground/30 rounded-md flex items-center justify-center">
+                          <span className="text-xs text-muted-foreground">Assinatura do Supervisor</span>
+                        </div>
+                      </div>
+                      <p className="text-sm font-medium">{identificacao.supervisor}</p>
+                      <p className="text-xs text-muted-foreground">Supervisor Responsável</p>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
