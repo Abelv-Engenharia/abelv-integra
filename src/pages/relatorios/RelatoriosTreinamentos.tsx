@@ -35,6 +35,25 @@ const RelatoriosTreinamentos = () => {
         description: "Por favor, aguarde enquanto o relatório é gerado.",
       });
 
+      // Aguardar que todos os dados sejam carregados
+      const maxWaitTime = 10000; // 10 segundos máximo
+      const startTime = Date.now();
+      
+      while (Date.now() - startTime < maxWaitTime) {
+        const loadingElements = document.querySelectorAll('[data-loading="true"]');
+        const carregandoElements = document.querySelectorAll(':contains("Carregando")');
+        const carregandoTexts = Array.from(document.querySelectorAll('*')).filter(el => 
+          el.textContent?.includes('Carregando') || el.textContent?.includes('carregando')
+        );
+        
+        if (loadingElements.length === 0 && carregandoTexts.length === 0) {
+          break;
+        }
+        
+        // Aguardar 500ms antes de verificar novamente
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
+
       const jsPDF = (await import('jspdf')).default;
       const html2canvas = (await import('html2canvas')).default;
       
@@ -69,6 +88,9 @@ const RelatoriosTreinamentos = () => {
       }
       
       reportContent.insertBefore(headerElement, reportContent.firstChild);
+
+      // Aguardar um pouco mais para garantir que tudo foi renderizado
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
       const canvas = await html2canvas(reportContent, {
         backgroundColor: '#ffffff',
