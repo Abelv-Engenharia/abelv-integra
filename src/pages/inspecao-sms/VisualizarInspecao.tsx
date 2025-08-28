@@ -301,37 +301,96 @@ const VisualizarInspecao = () => {
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="space-y-4">
+                  {/* Assinatura do Inspetor */}
                   <div className="text-center border-b pb-4">
                     <div className="mb-2">
-                      <div className="h-16 border-2 border-dashed border-muted-foreground/30 rounded-md flex items-center justify-center">
-                        <span className="text-xs text-muted-foreground">Assinatura do Inspetor</span>
-                      </div>
+                      {inspecao.dados_preenchidos?.assinatura_inspetor ? (
+                        <div className="h-20 border rounded-md flex items-center justify-center bg-muted/50">
+                          <img 
+                            src={inspecao.dados_preenchidos.assinatura_inspetor} 
+                            alt="Assinatura do Inspetor" 
+                            className="max-h-16 max-w-full object-contain"
+                          />
+                        </div>
+                      ) : (
+                        <div className="h-16 border-2 border-dashed border-muted-foreground/30 rounded-md flex items-center justify-center">
+                          <span className="text-xs text-muted-foreground">Assinatura não capturada</span>
+                        </div>
+                      )}
                     </div>
                     <p className="text-sm font-medium">{inspecao.profiles?.nome || 'N/A'}</p>
                     <p className="text-xs text-muted-foreground">Inspetor Responsável</p>
+                    {inspecao.dados_preenchidos?.data_assinatura_inspetor && (
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Assinado em: {format(new Date(inspecao.dados_preenchidos.data_assinatura_inspetor), 'dd/MM/yyyy HH:mm', { locale: ptBR })}
+                      </p>
+                    )}
                   </div>
 
+                  {/* Assinatura do Engenheiro */}
                   {identificacao?.engenheiro && (
                     <div className="text-center border-b pb-4">
                       <div className="mb-2">
-                        <div className="h-16 border-2 border-dashed border-muted-foreground/30 rounded-md flex items-center justify-center">
-                          <span className="text-xs text-muted-foreground">Assinatura do Engenheiro</span>
-                        </div>
+                        {inspecao.dados_preenchidos?.assinatura_engenheiro ? (
+                          <div className="h-20 border rounded-md flex items-center justify-center bg-muted/50">
+                            <img 
+                              src={inspecao.dados_preenchidos.assinatura_engenheiro} 
+                              alt="Assinatura do Engenheiro" 
+                              className="max-h-16 max-w-full object-contain"
+                            />
+                          </div>
+                        ) : (
+                          <div className="h-16 border-2 border-dashed border-muted-foreground/30 rounded-md flex items-center justify-center">
+                            <span className="text-xs text-muted-foreground">Assinatura não capturada</span>
+                          </div>
+                        )}
                       </div>
                       <p className="text-sm font-medium">{identificacao.engenheiro}</p>
                       <p className="text-xs text-muted-foreground">Engenheiro Responsável</p>
+                      {inspecao.dados_preenchidos?.data_assinatura_engenheiro && (
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Assinado em: {format(new Date(inspecao.dados_preenchidos.data_assinatura_engenheiro), 'dd/MM/yyyy HH:mm', { locale: ptBR })}
+                        </p>
+                      )}
                     </div>
                   )}
 
+                  {/* Assinatura do Supervisor */}
                   {identificacao?.supervisor && (
                     <div className="text-center">
                       <div className="mb-2">
-                        <div className="h-16 border-2 border-dashed border-muted-foreground/30 rounded-md flex items-center justify-center">
-                          <span className="text-xs text-muted-foreground">Assinatura do Supervisor</span>
-                        </div>
+                        {inspecao.dados_preenchidos?.assinatura_supervisor ? (
+                          <div className="h-20 border rounded-md flex items-center justify-center bg-muted/50">
+                            <img 
+                              src={inspecao.dados_preenchidos.assinatura_supervisor} 
+                              alt="Assinatura do Supervisor" 
+                              className="max-h-16 max-w-full object-contain"
+                            />
+                          </div>
+                        ) : (
+                          <div className="h-16 border-2 border-dashed border-muted-foreground/30 rounded-md flex items-center justify-center">
+                            <span className="text-xs text-muted-foreground">Assinatura não capturada</span>
+                          </div>
+                        )}
                       </div>
                       <p className="text-sm font-medium">{identificacao.supervisor}</p>
                       <p className="text-xs text-muted-foreground">Supervisor Responsável</p>
+                      {inspecao.dados_preenchidos?.data_assinatura_supervisor && (
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Assinado em: {format(new Date(inspecao.dados_preenchidos.data_assinatura_supervisor), 'dd/MM/yyyy HH:mm', { locale: ptBR })}
+                        </p>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Mensagem quando nenhuma assinatura foi capturada */}
+                  {!inspecao.dados_preenchidos?.assinatura_inspetor && 
+                   !inspecao.dados_preenchidos?.assinatura_engenheiro && 
+                   !inspecao.dados_preenchidos?.assinatura_supervisor && (
+                    <div className="text-center py-4">
+                      <p className="text-muted-foreground text-sm">
+                        Nenhuma assinatura foi capturada para esta inspeção.
+                      </p>
                     </div>
                   )}
                 </div>
