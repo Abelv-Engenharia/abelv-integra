@@ -12,16 +12,19 @@ export interface ItemVerificacao {
 export interface ModeloInspecao {
   id: string;
   nome: string;
-  descricao: string;
   tipo_inspecao_id: string;
-  campos_cabecalho: string[];
-  itens_verificacao: ItemVerificacao[];
+  arquivo_modelo_url: string;
+  campos_substituicao: any;
   ativo: boolean;
   created_at: string;
   updated_at: string;
   tipos_inspecao_sms?: {
     nome: string;
   };
+  // Propriedades adicionais para compatibilidade com o frontend
+  descricao?: string;
+  campos_cabecalho?: string[];
+  itens_verificacao?: ItemVerificacao[];
 }
 
 export const useModelosInspecao = () => {
@@ -47,18 +50,21 @@ export const useModelosInspecao = () => {
       
       console.log("Modelos retornados:", data);
       
-      // Mapear os dados do banco para o formato esperado
+      // Mapear os dados do banco para o formato esperado pelo frontend
       return (data || []).map(modelo => ({
         id: modelo.id,
         nome: modelo.nome,
-        descricao: modelo.descricao || '',
         tipo_inspecao_id: modelo.tipo_inspecao_id,
-        campos_cabecalho: Array.isArray(modelo.campos_cabecalho) ? modelo.campos_cabecalho : [],
-        itens_verificacao: Array.isArray(modelo.itens_verificacao) ? modelo.itens_verificacao : [],
+        arquivo_modelo_url: modelo.arquivo_modelo_url,
+        campos_substituicao: modelo.campos_substituicao,
         ativo: modelo.ativo,
         created_at: modelo.created_at,
         updated_at: modelo.updated_at,
-        tipos_inspecao_sms: modelo.tipos_inspecao_sms
+        tipos_inspecao_sms: modelo.tipos_inspecao_sms,
+        // Valores padrão para compatibilidade
+        descricao: '',
+        campos_cabecalho: [],
+        itens_verificacao: []
       })) as ModeloInspecao[];
     },
   });
@@ -70,10 +76,9 @@ export const useModelosInspecao = () => {
         .from('modelos_inspecao_sms')
         .insert([{
           nome: modelo.nome,
-          descricao: modelo.descricao,
           tipo_inspecao_id: modelo.tipo_inspecao_id,
-          campos_cabecalho: modelo.campos_cabecalho,
-          itens_verificacao: modelo.itens_verificacao
+          arquivo_modelo_url: modelo.arquivo_modelo_url || '',
+          campos_substituicao: modelo.campos_substituicao || {}
         }])
         .select()
         .single();
@@ -108,10 +113,9 @@ export const useModelosInspecao = () => {
         .from('modelos_inspecao_sms')
         .update({
           nome: modelo.nome,
-          descricao: modelo.descricao,
           tipo_inspecao_id: modelo.tipo_inspecao_id,
-          campos_cabecalho: modelo.campos_cabecalho,
-          itens_verificacao: modelo.itens_verificacao
+          arquivo_modelo_url: modelo.arquivo_modelo_url,
+          campos_substituicao: modelo.campos_substituicao
         })
         .eq('id', id)
         .select()
