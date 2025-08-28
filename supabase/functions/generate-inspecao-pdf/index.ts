@@ -512,7 +512,7 @@ function generateHTMLReport(inspecao: InspectionData, responsaveis: any = {}): s
             </div>
             <div class="signature-box">
                 <p><strong>Responsável pela Frente de Trabalho</strong></p>
-                <p>${responsaveis.responsavel_tecnico || responsaveis.engenheiro || responsaveis.supervisor || responsaveis.encarregado || '_______________________'}</p>
+                <p>${responsaveis.responsavel_tecnico || '_______________________'}</p>
                 ${(camposCabecalho.assinaturas?.assinatura_responsavel_tecnico || camposCabecalho.assinatura_responsavel_tecnico) ? `
                     <div style="margin: 20px 0;">
                         <img src="${camposCabecalho.assinaturas?.assinatura_responsavel_tecnico || camposCabecalho.assinatura_responsavel_tecnico}" alt="Assinatura do Responsável" style="max-width: 200px; max-height: 80px; border: 1px solid #ddd; padding: 5px;">
