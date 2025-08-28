@@ -36,23 +36,42 @@ const RelatoriosTreinamentos = () => {
       });
 
       // Aguardar que todos os dados sejam carregados
-      const maxWaitTime = 10000; // 10 segundos máximo
+      const maxWaitTime = 15000; // 15 segundos máximo
       const startTime = Date.now();
       
       while (Date.now() - startTime < maxWaitTime) {
+        // Verificar elementos com atributo data-loading
         const loadingElements = document.querySelectorAll('[data-loading="true"]');
-        const carregandoTexts = Array.from(document.querySelectorAll('*')).filter(el => 
-          el.textContent?.includes('Carregando') || 
-          el.textContent?.includes('carregando') ||
-          el.textContent?.includes('Carregando dados')
+        
+        // Verificar spinners e elementos de carregamento
+        const spinnerElements = document.querySelectorAll('.animate-spin, [role="progressbar"], .loading');
+        
+        // Verificar textos de carregamento mais específicos
+        const carregandoTexts = Array.from(document.querySelectorAll('*')).filter(el => {
+          const text = el.textContent?.toLowerCase() || '';
+          return text.includes('carregando') || 
+                 text.includes('loading') || 
+                 text.includes('aguarde') ||
+                 text === '' && el.classList.contains('animate-pulse');
+        });
+        
+        // Verificar se existem tabelas vazias ou com dados não carregados
+        const emptyTables = Array.from(document.querySelectorAll('table tbody')).filter(tbody => 
+          tbody.children.length === 0 || 
+          Array.from(tbody.querySelectorAll('td')).some(td => 
+            td.textContent?.includes('Nenhum') || td.textContent?.trim() === ''
+          )
         );
         
-        if (loadingElements.length === 0 && carregandoTexts.length === 0) {
+        if (loadingElements.length === 0 && 
+            spinnerElements.length === 0 && 
+            carregandoTexts.length === 0 && 
+            emptyTables.length === 0) {
           break;
         }
         
-        // Aguardar 500ms antes de verificar novamente
-        await new Promise(resolve => setTimeout(resolve, 500));
+        // Aguardar 1 segundo antes de verificar novamente
+        await new Promise(resolve => setTimeout(resolve, 1000));
       }
 
       const jsPDF = (await import('jspdf')).default;
@@ -160,12 +179,54 @@ const RelatoriosTreinamentos = () => {
         description: "Por favor, aguarde enquanto a imagem é gerada.",
       });
 
+      // Aguardar que todos os dados sejam carregados (mesmo código do PDF)
+      const maxWaitTime = 15000; // 15 segundos máximo
+      const startTime = Date.now();
+      
+      while (Date.now() - startTime < maxWaitTime) {
+        const loadingElements = document.querySelectorAll('[data-loading="true"]');
+        const spinnerElements = document.querySelectorAll('.animate-spin, [role="progressbar"], .loading');
+        const carregandoTexts = Array.from(document.querySelectorAll('*')).filter(el => {
+          const text = el.textContent?.toLowerCase() || '';
+          return text.includes('carregando') || 
+                 text.includes('loading') || 
+                 text.includes('aguarde') ||
+                 text === '' && el.classList.contains('animate-pulse');
+        });
+        
+        const emptyTables = Array.from(document.querySelectorAll('table tbody')).filter(tbody => 
+          tbody.children.length === 0 || 
+          Array.from(tbody.querySelectorAll('td')).some(td => 
+            td.textContent?.includes('Nenhum') || td.textContent?.trim() === ''
+          )
+        );
+        
+        if (loadingElements.length === 0 && 
+            spinnerElements.length === 0 && 
+            carregandoTexts.length === 0 && 
+            emptyTables.length === 0) {
+          break;
+        }
+        
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+
       const html2canvas = (await import('html2canvas')).default;
+      
+      // Esconder os filtros temporariamente
+      const filtersElement = document.querySelector('[data-filters]') as HTMLElement;
+      if (filtersElement) {
+        filtersElement.style.display = 'none';
+      }
+
       const content = reportRef.current;
       
       if (!content) {
         throw new Error('Conteúdo não encontrado');
       }
+
+      // Aguardar um pouco mais para garantir que tudo foi renderizado
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
       const canvas = await html2canvas(content, {
         backgroundColor: '#ffffff',
@@ -178,6 +239,11 @@ const RelatoriosTreinamentos = () => {
         scrollX: 0,
         scrollY: 0
       });
+
+      // Restaurar filtros
+      if (filtersElement) {
+        filtersElement.style.display = '';
+      }
 
       canvas.toBlob((blob) => {
         if (!blob) return;
