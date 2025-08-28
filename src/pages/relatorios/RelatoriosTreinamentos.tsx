@@ -38,63 +38,55 @@ const RelatoriosTreinamentos = () => {
       const jsPDF = (await import('jspdf')).default;
       const html2canvas = (await import('html2canvas')).default;
       
-      // Criar um elemento temporário com o conteúdo do relatório formatado
-      const reportElement = document.createElement('div');
-      reportElement.style.backgroundColor = '#ffffff';
-      reportElement.style.padding = '20px';
-      reportElement.style.fontFamily = 'Arial, sans-serif';
-      reportElement.style.width = '794px'; // Largura A4 em px (210mm)
-      reportElement.style.position = 'absolute';
-      reportElement.style.left = '-9999px';
+      // Esconder os filtros temporariamente
+      const filtersElement = document.querySelector('[data-filters]') as HTMLElement;
+      if (filtersElement) {
+        filtersElement.style.display = 'none';
+      }
+
+      // Criar cabeçalho temporário
+      const headerElement = document.createElement('div');
+      headerElement.style.padding = '20px';
+      headerElement.style.backgroundColor = '#ffffff';
+      headerElement.style.textAlign = 'center';
+      headerElement.style.borderBottom = '2px solid #e2e8f0';
+      headerElement.style.marginBottom = '20px';
       
-      // Cabeçalho do relatório
       const currentDate = new Date().toLocaleDateString('pt-BR');
       const monthName = month === 'todos' ? 'Todos os meses' : new Date(2024, parseInt(month) - 1).toLocaleDateString('pt-BR', { month: 'long' });
       
-      reportElement.innerHTML = `
-        <div style="text-align: center; margin-bottom: 30px; border-bottom: 2px solid #e2e8f0; padding-bottom: 20px;">
-          <h1 style="font-size: 24px; font-weight: bold; margin: 0; color: #1e293b;">RELATÓRIO DE TREINAMENTOS</h1>
-          <p style="font-size: 14px; color: #64748b; margin: 10px 0 0 0;">
-            Período: ${monthName} de ${year} | Gerado em: ${currentDate}
-          </p>
-        </div>
+      headerElement.innerHTML = `
+        <h1 style="font-size: 24px; font-weight: bold; margin: 0; color: #1e293b;">RELATÓRIO DE TREINAMENTOS</h1>
+        <p style="font-size: 14px; color: #64748b; margin: 10px 0 0 0;">
+          Período: ${monthName} de ${year} | Gerado em: ${currentDate}
+        </p>
       `;
       
-      // Clonar o conteúdo do relatório (sem filtros)
+      // Inserir cabeçalho no início do conteúdo
       const reportContent = reportRef.current;
       if (!reportContent) {
         throw new Error('Conteúdo não encontrado');
       }
-
-      // Clonar apenas os componentes que devem aparecer no PDF
-      const summaryCards = reportContent.querySelector('[data-summary-cards]');
-      const processTable = reportContent.querySelector('[data-process-table]');
-      const tabsContent = reportContent.querySelector('[data-tabs-content]');
       
-      if (summaryCards) {
-        reportElement.appendChild(summaryCards.cloneNode(true));
-      }
-      if (processTable) {
-        reportElement.appendChild(processTable.cloneNode(true));
-      }
-      if (tabsContent) {
-        reportElement.appendChild(tabsContent.cloneNode(true));
-      }
-      
-      document.body.appendChild(reportElement);
+      reportContent.insertBefore(headerElement, reportContent.firstChild);
 
-      const canvas = await html2canvas(reportElement, {
+      const canvas = await html2canvas(reportContent, {
         backgroundColor: '#ffffff',
-        scale: 2,
+        scale: 1.5,
         logging: false,
         useCORS: true,
         allowTaint: true,
-        width: 794,
-        height: reportElement.scrollHeight
+        width: reportContent.scrollWidth,
+        height: reportContent.scrollHeight,
+        scrollX: 0,
+        scrollY: 0
       });
 
-      // Remover o elemento temporário
-      document.body.removeChild(reportElement);
+      // Remover cabeçalho temporário e restaurar filtros
+      reportContent.removeChild(headerElement);
+      if (filtersElement) {
+        filtersElement.style.display = '';
+      }
 
       const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF('p', 'mm', 'a4');
@@ -245,14 +237,16 @@ const RelatoriosTreinamentos = () => {
       </div>
 
       <div ref={reportRef} className="space-y-6">
-        <TreinamentosDashboardFilters 
-          year={year} 
-          setYear={setYear} 
-          month={month} 
-          setMonth={setMonth} 
-          ccaId={ccaId} 
-          setCcaId={setCcaId} 
-        />
+        <div data-filters>
+          <TreinamentosDashboardFilters 
+            year={year} 
+            setYear={setYear} 
+            month={month} 
+            setMonth={setMonth} 
+            ccaId={ccaId} 
+            setCcaId={setCcaId} 
+          />
+        </div>
 
         <div data-summary-cards>
           <TreinamentosSummaryCards filters={filters} />
