@@ -8,6 +8,7 @@ import { Switch } from "@/components/ui/switch";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Plus, Edit2, Trash2, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -16,6 +17,12 @@ import type { Json } from "@/integrations/supabase/types";
 interface ItemAvaliacao {
   id: string;
   texto: string;
+}
+
+interface CampoDisponivel {
+  id: string;
+  nome: string;
+  descricao: string;
 }
 
 interface ChecklistAvaliacao {
@@ -39,9 +46,19 @@ const AdminChecklists = () => {
     campos_cabecalho: [] as string[],
     itens_avaliacao: [] as ItemAvaliacao[]
   });
-  const [novoCampo, setNovoCampo] = useState('');
   const [novoItem, setNovoItem] = useState('');
   const { toast } = useToast();
+
+  // Campos disponíveis para seleção no cabeçalho
+  const camposDisponiveis: CampoDisponivel[] = [
+    { id: 'cca', nome: 'CCA', descricao: 'Centro de Custo de Atividade' },
+    { id: 'engenheiro_responsavel', nome: 'Engenheiro Responsável', descricao: 'Engenheiro responsável pelo CCA' },
+    { id: 'supervisor_responsavel', nome: 'Supervisor Responsável', descricao: 'Supervisor responsável pelo CCA' },
+    { id: 'encarregado_responsavel', nome: 'Encarregado Responsável', descricao: 'Encarregado responsável pelo CCA' },
+    { id: 'empresa', nome: 'Empresa', descricao: 'Empresa vinculada ao CCA' },
+    { id: 'disciplina', nome: 'Disciplina', descricao: 'Disciplina da inspeção' },
+    { id: 'responsavel_inspecao', nome: 'Responsável pela Inspeção', descricao: 'Usuário responsável pela inspeção' },
+  ];
 
   const loadChecklists = async () => {
     try {
@@ -149,7 +166,6 @@ const AdminChecklists = () => {
       campos_cabecalho: [],
       itens_avaliacao: []
     });
-    setNovoCampo('');
     setNovoItem('');
     setEditingChecklist(null);
   };
@@ -166,21 +182,18 @@ const AdminChecklists = () => {
     setDialogOpen(true);
   };
 
-  const adicionarCampo = () => {
-    if (novoCampo.trim()) {
+  const handleCampoChange = (campoId: string, checked: boolean) => {
+    if (checked) {
       setFormData(prev => ({
         ...prev,
-        campos_cabecalho: [...prev.campos_cabecalho, novoCampo.trim()]
+        campos_cabecalho: [...prev.campos_cabecalho, campoId]
       }));
-      setNovoCampo('');
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        campos_cabecalho: prev.campos_cabecalho.filter(campo => campo !== campoId)
+      }));
     }
-  };
-
-  const removerCampo = (index: number) => {
-    setFormData(prev => ({
-      ...prev,
-      campos_cabecalho: prev.campos_cabecalho.filter((_, i) => i !== index)
-    }));
   };
 
   const adicionarItem = () => {
@@ -206,6 +219,11 @@ const AdminChecklists = () => {
 
   const getCamposCabecalho = (campos: Json): string[] => {
     return Array.isArray(campos) ? campos as string[] : [];
+  };
+
+  const getCampoNome = (campoId: string): string => {
+    const campo = camposDisponiveis.find(c => c.id === campoId);
+    return campo ? campo.nome : campoId;
   };
 
   const getItensAvaliacao = (itens: Json): ItemAvaliacao[] => {
@@ -269,35 +287,43 @@ const AdminChecklists = () => {
 
               <div>
                 <Label>Campos do Cabeçalho</Label>
+                <p className="text-sm text-muted-foreground mb-3">
+                  Selecione os campos que aparecerão no cabeçalho do checklist
+                </p>
                 <div className="space-y-3">
-                  <div className="flex gap-2">
-                    <Input
-                      value={novoCampo}
-                      onChange={(e) => setNovoCampo(e.target.value)}
-                      placeholder="Nome do campo (ex: Data, Local, Responsável)"
-                      onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), adicionarCampo())}
-                    />
-                    <Button type="button" onClick={adicionarCampo} size="sm">
-                      <Plus className="h-4 w-4" />
-                    </Button>
-                  </div>
-                  
-                  <div className="flex flex-wrap gap-2">
-                    {formData.campos_cabecalho.map((campo, index) => (
-                      <Badge key={index} variant="secondary" className="flex items-center gap-1">
-                        {campo}
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => removerCampo(index)}
-                          className="h-auto p-0 hover:bg-transparent"
+                  {camposDisponiveis.map((campo) => (
+                    <div key={campo.id} className="flex items-start space-x-3">
+                      <Checkbox
+                        id={campo.id}
+                        checked={formData.campos_cabecalho.includes(campo.id)}
+                        onCheckedChange={(checked) => handleCampoChange(campo.id, checked as boolean)}
+                      />
+                      <div className="space-y-1">
+                        <Label 
+                          htmlFor={campo.id} 
+                          className="text-sm font-medium cursor-pointer"
                         >
-                          <X className="h-3 w-3" />
-                        </Button>
-                      </Badge>
-                    ))}
-                  </div>
+                          {campo.nome}
+                        </Label>
+                        <p className="text-xs text-muted-foreground">
+                          {campo.descricao}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                  
+                  {formData.campos_cabecalho.length > 0 && (
+                    <div className="mt-4">
+                      <Label className="text-sm font-medium">Campos Selecionados:</Label>
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {formData.campos_cabecalho.map((campoId) => (
+                          <Badge key={campoId} variant="secondary">
+                            {getCampoNome(campoId)}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -379,9 +405,9 @@ const AdminChecklists = () => {
                     </TableCell>
                     <TableCell>
                       <div className="flex flex-wrap gap-1">
-                        {getCamposCabecalho(checklist.campos_cabecalho).slice(0, 2).map((campo, index) => (
+                        {getCamposCabecalho(checklist.campos_cabecalho).slice(0, 2).map((campoId, index) => (
                           <Badge key={index} variant="outline" className="text-xs">
-                            {campo}
+                            {getCampoNome(campoId)}
                           </Badge>
                         ))}
                         {getCamposCabecalho(checklist.campos_cabecalho).length > 2 && (
