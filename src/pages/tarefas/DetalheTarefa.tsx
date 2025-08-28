@@ -7,12 +7,11 @@ import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, Calendar, User, Clock, AlertCircle, CheckCircle, FileUp, X, FileText, Download, Eye } from "lucide-react";
+import { ArrowLeft, Calendar, User, Clock, AlertCircle, CheckCircle, FileUp, X } from "lucide-react";
 import { Tarefa, TarefaStatus } from "@/types/tarefas";
 import { tarefasService } from "@/services/tarefasService";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
 
 const DetalheTarefa = () => {
   const { id } = useParams<{ id: string }>();
@@ -25,80 +24,56 @@ const DetalheTarefa = () => {
   const [observacoes, setObservacoes] = useState("");
   const [anexo, setAnexo] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
-  const [userProfile, setUserProfile] = useState<{ nome: string } | null>(null);
 
   useEffect(() => {
-    const fetchUserProfile = async () => {
-      if (user?.id) {
-        try {
-          const { data, error } = await supabase
-            .from('profiles')
-            .select('nome')
-            .eq('id', user.id)
-            .single();
-
-          if (data && !error) {
-            setUserProfile(data);
-          }
-        } catch (error) {
-          console.error("Erro ao buscar perfil do usuário:", error);
-        }
+    const fetchTarefa = async () => {
+      if (!id) {
+        console.error("ID da tarefa não fornecido");
+        navigate("/tarefas/minhas-tarefas");
+        return;
       }
-    };
 
-    fetchUserProfile();
-  }, [user]);
-
-  const fetchTarefa = async () => {
-    if (!id) {
-      console.error("ID da tarefa não fornecido");
-      navigate("/tarefas/minhas-tarefas");
-      return;
-    }
-
-    // Validar se o ID é um UUID válido
-    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-    if (!uuidRegex.test(id)) {
-      console.error("ID da tarefa não é um UUID válido:", id);
-      toast({
-        title: "Erro",
-        description: "ID da tarefa inválido.",
-        variant: "destructive"
-      });
-      navigate("/tarefas/minhas-tarefas");
-      return;
-    }
-
-    try {
-      console.log("Buscando tarefa com ID:", id);
-      const data = await tarefasService.getById(id);
-      if (data) {
-        setTarefa(data);
-        console.log("Tarefa carregada:", data);
-        console.log("Observações existentes:", data.observacoes_progresso);
-      } else {
-        console.error("Tarefa não encontrada");
+      // Validar se o ID é um UUID válido
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+      if (!uuidRegex.test(id)) {
+        console.error("ID da tarefa não é um UUID válido:", id);
         toast({
-          title: "Tarefa não encontrada",
-          description: "A tarefa solicitada não foi encontrada ou você não tem permissão para visualizá-la.",
+          title: "Erro",
+          description: "ID da tarefa inválido.",
           variant: "destructive"
         });
         navigate("/tarefas/minhas-tarefas");
+        return;
       }
-    } catch (error) {
-      console.error("Erro ao carregar tarefa:", error);
-      toast({
-        title: "Erro ao carregar tarefa",
-        description: "Não foi possível carregar os detalhes da tarefa.",
-        variant: "destructive"
-      });
-      navigate("/tarefas/minhas-tarefas");
-    } finally {
-      setLoading(false);
-    }
-  };
 
-  useEffect(() => {
+      try {
+        console.log("Buscando tarefa com ID:", id);
+        const data = await tarefasService.getById(id);
+        if (data) {
+          setTarefa(data);
+          console.log("Tarefa carregada:", data);
+        } else {
+          console.error("Tarefa não encontrada");
+          toast({
+            title: "Tarefa não encontrada",
+            description: "A tarefa solicitada não foi encontrada ou você não tem permissão para visualizá-la.",
+            variant: "destructive"
+          });
+          navigate("/tarefas/minhas-tarefas");
+        }
+      } catch (error) {
+        console.error("Erro ao carregar tarefa:", error);
+        toast({
+          title: "Erro ao carregar tarefa",
+          description: "Não foi possível carregar os detalhes da tarefa.",
+          variant: "destructive"
+        });
+        navigate("/tarefas/minhas-tarefas");
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchTarefa();
   }, [id, navigate, toast]);
 
@@ -152,109 +127,6 @@ const DetalheTarefa = () => {
     }
   };
 
-  const handleObservacoesSubmit = async () => {
-    if (!tarefa?.id) {
-      toast({
-        title: "Erro",
-        description: "ID da tarefa não encontrado.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!userProfile?.nome) {
-      toast({
-        title: "Erro",
-        description: "Perfil do usuário não encontrado.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!observacoes.trim()) {
-      toast({
-        title: "Erro",
-        description: "Digite uma observação antes de salvar.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setLoading(true);
-    try {
-      // Buscar dados mais atuais DIRETAMENTE do Supabase
-      console.log("Buscando dados mais atuais da tarefa...");
-      const { data: tarefaAtual, error } = await supabase
-        .from('tarefas')
-        .select('observacoes_progresso')
-        .eq('id', tarefa.id)
-        .single();
-
-      if (error) {
-        console.error("Erro ao buscar tarefa atual:", error);
-        throw error;
-      }
-
-      const observacoesExistentes = tarefaAtual?.observacoes_progresso || "";
-      console.log("Observações existentes do banco:", observacoesExistentes);
-
-      // Criar registro da observação com informações do usuário
-      const agora = new Date();
-      const dataFormatada = agora.toLocaleDateString('pt-BR');
-      const horaFormatada = agora.toLocaleTimeString('pt-BR', { 
-        hour: '2-digit', 
-        minute: '2-digit' 
-      });
-      
-      const novaObservacao = `[${dataFormatada} às ${horaFormatada} - ${userProfile.nome}]\n${observacoes.trim()}`;
-      console.log("Nova observação formatada:", novaObservacao);
-      
-      // Concatenar observações
-      let observacoesAtualizadas;
-      if (observacoesExistentes && observacoesExistentes.trim()) {
-        observacoesAtualizadas = observacoesExistentes + "\n\n" + novaObservacao;
-      } else {
-        observacoesAtualizadas = novaObservacao;
-      }
-
-      console.log("Observações que serão salvas:", observacoesAtualizadas);
-
-      // Salvar diretamente no Supabase
-      const { error: updateError } = await supabase
-        .from('tarefas')
-        .update({ observacoes_progresso: observacoesAtualizadas })
-        .eq('id', tarefa.id);
-
-      if (updateError) {
-        console.error("Erro ao atualizar observações:", updateError);
-        throw updateError;
-      }
-
-      console.log("Observações salvas com sucesso!");
-      
-      // Limpar o campo
-      setObservacoes("");
-      
-      toast({
-        title: "Observação adicionada",
-        description: "Observação salva com sucesso.",
-      });
-
-      // Recarregar os dados da tarefa
-      await fetchTarefa();
-      
-    } catch (error) {
-      console.error("Erro ao salvar observação:", error);
-      toast({
-        title: "Erro",
-        description: "Ocorreu um erro ao salvar a observação.",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleUploadAnexo = async () => {
     if (!tarefa?.id || !anexo) {
       toast({
@@ -265,35 +137,17 @@ const DetalheTarefa = () => {
       return;
     }
 
-    if (!userProfile?.nome) {
-      toast({
-        title: "Erro",
-        description: "Perfil do usuário não encontrado.",
-        variant: "destructive",
-      });
-      return;
-    }
-
     setUploading(true);
     try {
-      // Criar nome do arquivo com informações do usuário e timestamp
-      const agora = new Date();
-      const timestamp = agora.toISOString().replace(/[:.]/g, '-').split('T')[0] + '_' + agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }).replace(':', '-');
-      const fileName = `${timestamp}_${userProfile.nome.replace(/\s+/g, '_')}_${anexo.name}`;
-      
       // Simulação de upload (substitua pela lógica real de upload)
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
-      const sucesso = await tarefasService.updateStatus(tarefa.id, { anexo: fileName });
+      // Atualizar a tarefa com o nome do anexo (simulação)
+      const anexoNome = anexo.name;
+      const sucesso = await tarefasService.updateStatus(tarefa.id, { anexo: anexoNome });
 
       if (sucesso) {
-        setTarefa({ ...tarefa, anexo: fileName });
-        setAnexo(null);
-        // Reset input file
-        const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
-        if (fileInput) {
-          fileInput.value = '';
-        }
+        setTarefa({ ...tarefa, anexo: anexoNome });
         toast({
           title: "Anexo enviado",
           description: "Anexo enviado com sucesso.",
@@ -317,6 +171,44 @@ const DetalheTarefa = () => {
     }
   };
 
+  const handleObservacoesSubmit = async () => {
+    if (!tarefa?.id) {
+      toast({
+        title: "Erro",
+        description: "ID da tarefa não encontrado.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const sucesso = await tarefasService.updateStatus(tarefa.id, { observacoes_progresso: observacoes });
+      if (sucesso) {
+        setTarefa({ ...tarefa, observacoes_progresso: observacoes });
+        toast({
+          title: "Observações atualizadas",
+          description: "Observações atualizadas com sucesso.",
+        });
+      } else {
+        toast({
+          title: "Erro ao atualizar observações",
+          description: "Não foi possível atualizar as observações.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Erro ao atualizar observações:", error);
+      toast({
+        title: "Erro",
+        description: "Ocorreu um erro ao atualizar as observações.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen">
@@ -332,111 +224,6 @@ const DetalheTarefa = () => {
       </div>
     );
   }
-
-  const parseAnexoInfo = (anexoPath: string) => {
-    if (!anexoPath) return null;
-    
-    // Tentar extrair informações do nome do arquivo
-    const parts = anexoPath.split('_');
-    if (parts.length >= 3) {
-      try {
-        const datePart = parts[0];
-        const timePart = parts[1];
-        const userName = parts[2].replace(/_/g, ' ');
-        const originalName = parts.slice(3).join('_');
-        
-        return {
-          userName,
-          date: `${datePart} ${timePart.replace('-', ':')}`,
-          originalName
-        };
-      } catch {
-        return { originalName: anexoPath };
-      }
-    }
-    
-    return { originalName: anexoPath };
-  };
-
-  const anexoInfo = parseAnexoInfo(tarefa.anexo || "");
-
-  const handleViewAttachment = () => {
-    toast({
-      title: "Visualizar anexo",
-      description: "Funcionalidade de visualização será implementada em breve.",
-    });
-  };
-
-  const handleDownloadAttachment = () => {
-    toast({
-      title: "Baixar anexo", 
-      description: "Funcionalidade de download será implementada em breve.",
-    });
-  };
-
-  const parseObservacoes = (observacoesText: string) => {
-    console.log("=== PARSING OBSERVAÇÕES ===");
-    console.log("Texto recebido:", JSON.stringify(observacoesText));
-    
-    if (!observacoesText || !observacoesText.trim()) {
-      console.log("Nenhuma observação encontrada");
-      return [];
-    }
-
-    // Dividir por dupla quebra de linha OU quebra de linha simples se não houver dupla
-    const observacoesList = observacoesText
-      .split(/\n\n+/)
-      .filter(obs => obs.trim())
-      .map(obs => obs.trim());
-
-    console.log("Observações divididas:", observacoesList);
-
-    const parsed = observacoesList.map((observacao, index) => {
-      console.log(`Processando observação ${index + 1}:`, JSON.stringify(observacao));
-      
-      const linhas = observacao.split('\n');
-      const primeiraLinha = linhas[0];
-      
-      // Verificar se tem o formato [data - usuário]
-      const cabecalhoMatch = primeiraLinha.match(/^\[(.*?)\]$/);
-      
-      if (cabecalhoMatch) {
-        const cabecalho = cabecalhoMatch[1];
-        const conteudo = linhas.slice(1).join('\n').trim();
-        
-        console.log(`Observação ${index + 1} - com cabeçalho:`, {
-          cabecalho,
-          conteudo,
-          temCabecalho: true
-        });
-        
-        return {
-          id: index,
-          cabecalho,
-          conteudo,
-          temCabecalho: true
-        };
-      } else {
-        console.log(`Observação ${index + 1} - sem cabeçalho:`, {
-          conteudo: observacao,
-          temCabecalho: false
-        });
-        
-        return {
-          id: index,
-          cabecalho: '',
-          conteudo: observacao,
-          temCabecalho: false
-        };
-      }
-    });
-
-    console.log("Resultado final do parsing:", parsed);
-    return parsed;
-  };
-
-  const observacoesParsed = parseObservacoes(tarefa.observacoes_progresso || "");
-  console.log("Observações parseadas para exibição:", observacoesParsed);
 
   return (
     <div className="container mx-auto py-8">
@@ -459,7 +246,7 @@ const DetalheTarefa = () => {
                 <Calendar className="mr-2 h-4 w-4 inline-block" />
                 Data de Conclusão
               </Label>
-              <p>{new Date(tarefa.dataConclusao).toLocaleDateString('pt-BR')}</p>
+              <p>{new Date(tarefa.dataConclusao).toLocaleDateString()}</p>
             </div>
             <div>
               <Label className="text-muted-foreground">
@@ -522,132 +309,34 @@ const DetalheTarefa = () => {
           <div>
             <Label className="text-muted-foreground">
               <FileUp className="mr-2 h-4 w-4 inline-block" />
-              Anexos
+              Anexar Documento
             </Label>
-            
-            {tarefa.anexo && (
-              <div className="mb-4 p-3 border rounded-lg bg-muted/50">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-2 mb-2">
-                      <FileText className="h-4 w-4 text-blue-600" />
-                      <span className="text-sm font-medium">
-                        {anexoInfo?.originalName || tarefa.anexo}
-                      </span>
-                      <Badge variant="secondary" className="text-xs">
-                        <CheckCircle className="mr-1 h-3 w-3" />
-                        Anexado
-                      </Badge>
-                    </div>
-                    {anexoInfo?.userName && anexoInfo?.date && (
-                      <div className="text-xs text-muted-foreground">
-                        <User className="inline h-3 w-3 mr-1" />
-                        Anexado por: {anexoInfo.userName} em {anexoInfo.date}
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex space-x-2">
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="text-blue-600 hover:text-blue-800"
-                      onClick={handleViewAttachment}
-                    >
-                      <Eye className="h-4 w-4 mr-1" />
-                      Visualizar
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="text-green-600 hover:text-green-800"
-                      onClick={handleDownloadAttachment}
-                    >
-                      <Download className="h-4 w-4 mr-1" />
-                      Baixar
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            )}
-            
             <div className="flex items-center space-x-4">
               <Input type="file" onChange={handleAnexoChange} />
               <Button onClick={handleUploadAnexo} disabled={!anexo || uploading}>
                 {uploading ? "Enviando..." : "Enviar Anexo"}
               </Button>
+              {tarefa.anexo && (
+                <Badge variant="secondary">
+                  <CheckCircle className="mr-2 h-4 w-4 inline-block" />
+                  {tarefa.anexo}
+                </Badge>
+              )}
             </div>
           </div>
 
           <Separator />
 
           <div>
-            <Label className="text-muted-foreground mb-2 block">Observações de Progresso</Label>
-            
-            {observacoesParsed.length > 0 ? (
-              <div className="mb-4 space-y-3">
-                <div className="flex items-center justify-between">
-                  <Label className="text-sm font-medium text-green-700">Histórico de Observações:</Label>
-                  <Badge variant="secondary" className="text-xs">
-                    <CheckCircle className="mr-1 h-3 w-3" />
-                    {observacoesParsed.length} observação{observacoesParsed.length > 1 ? 'ões' : ''}
-                  </Badge>
-                </div>
-                
-                <div className="max-h-80 overflow-y-auto space-y-3">
-                  {observacoesParsed.map((obs, index) => (
-                    <div key={obs.id} className="border rounded-lg p-3 bg-white shadow-sm">
-                      {obs.temCabecalho && obs.conteudo ? (
-                        <div className="border-l-4 border-blue-500 pl-3">
-                          <div className="flex items-start justify-between mb-2">
-                            <div className="text-xs text-blue-600 font-medium flex items-center">
-                              <Clock className="mr-1 h-3 w-3" />
-                              {obs.cabecalho}
-                            </div>
-                            <Badge variant="outline" className="text-xs">
-                              #{observacoesParsed.length - index}
-                            </Badge>
-                          </div>
-                          <div className="text-sm whitespace-pre-wrap">{obs.conteudo}</div>
-                        </div>
-                      ) : (
-                        <div className="border-l-4 border-gray-300 pl-3">
-                          <div className="flex items-start justify-between mb-2">
-                            <div className="text-xs text-gray-500 font-medium">
-                              Observação sem formato
-                            </div>
-                            <Badge variant="outline" className="text-xs">
-                              #{observacoesParsed.length - index}
-                            </Badge>
-                          </div>
-                          <div className="text-sm whitespace-pre-wrap">{obs.conteudo || obs.cabecalho}</div>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ) : (
-              <div className="mb-4 p-4 border rounded-lg bg-gray-50">
-                <p className="text-sm text-gray-600">Nenhuma observação registrada ainda.</p>
-              </div>
-            )}
-            
-            <div>
-              <Label className="text-sm font-medium mb-2 block">Adicionar Nova Observação:</Label>
-              <Textarea
-                placeholder="Digite sua observação aqui..."
-                value={observacoes}
-                onChange={handleObservacoesChange}
-                className="min-h-24"
-              />
-              <Button 
-                onClick={handleObservacoesSubmit} 
-                className="mt-2" 
-                disabled={!observacoes.trim() || loading}
-              >
-                {loading ? "Salvando..." : "Adicionar Observação"}
-              </Button>
-            </div>
+            <Label className="text-muted-foreground">Observações</Label>
+            <Textarea
+              placeholder="Adicione suas observações aqui..."
+              value={observacoes}
+              onChange={handleObservacoesChange}
+            />
+            <Button onClick={handleObservacoesSubmit} className="mt-2">
+              Salvar Observações
+            </Button>
           </div>
         </CardContent>
       </Card>

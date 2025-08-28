@@ -1,96 +1,182 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Plus, Edit2, Trash2, Eye } from "lucide-react";
-import { useModelosInspecao, ModeloInspecao } from "@/hooks/inspecao-sms/useModelosInspecao";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useTiposInspecao } from "@/hooks/inspecao-sms/useTiposInspecao";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
+import { Plus, FileUp, Trash2, Edit2, Download } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
 
 const AdminModelosInspecao = () => {
-  const { modelos, isLoading, createModelo, updateModelo, deleteModelo } = useModelosInspecao();
-  const { tipos } = useTiposInspecao();
+  const [modelos, setModelos] = useState<any[]>([]);
+  const [tiposInspecao, setTiposInspecao] = useState<any[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [editingModelo, setEditingModelo] = useState<ModeloInspecao | null>(null);
-  const [viewingModelo, setViewingModelo] = useState<ModeloInspecao | null>(null);
+  const [editingModelo, setEditingModelo] = useState<any>(null);
   const [formData, setFormData] = useState({
     nome: '',
     tipo_inspecao_id: '',
-    arquivo_modelo_url: ''
+    arquivo_modelo_url: '',
+    campos_substituicao: '[]'
   });
+  const [arquivo, setArquivo] = useState<File | null>(null);
 
-  console.log("Modelos carregados:", modelos);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log("Submitting form data:", formData);
-    
-    const modeloData = {
-      ...formData,
-      campos_substituicao: {}
-    };
-
-    if (editingModelo) {
-      updateModelo({ id: editingModelo.id, ...modeloData });
-    } else {
-      createModelo(modeloData);
+  const loadModelos = async () => {
+    try {
+      const { data } = await supabase
+        .from('modelos_inspecao_sms')
+        .select(`
+          *,
+          tipos_inspecao_sms(nome)
+        `)
+        .eq('ativo', true)
+        .order('nome');
+      
+      if (data) {
+        setModelos(data);
+      }
+    } catch (error) {
+      console.error('Erro ao carregar modelos:', error);
     }
-    handleCloseDialog();
   };
 
-  const handleEdit = (modelo: ModeloInspecao) => {
-    console.log("Editing modelo:", modelo);
+  const loadTiposInspecao = async () => {
+    try {
+      const { data } = await supabase
+        .from('tipos_inspecao_sms')
+        .select('*')
+        .eq('ativo', true);
+      
+      if (data) {
+        setTiposInspecao(data);
+      }
+    } catch (error) {
+      console.error('Erro ao carregar tipos de inspeção:', error);
+    }
+  };
+
+  const handleFileUpload = async (file: File) => {
+    try {
+      // Por enquanto, vamos simular o upload
+      // Em produção, isso seria feito com o Supabase Storage
+      const fileName = `modelo_${Date.now()}_${file.name}`;
+      return `/uploads/modelos/${fileName}`;
+    } catch (error) {
+      console.error('Erro no upload:', error);
+      throw error;
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    try {
+      let arquivoUrl = formData.arquivo_modelo_url;
+      
+      if (arquivo) {
+        arquivoUrl = await handleFileUpload(arquivo);
+      }
+
+      const dadosModelo = {
+        ...formData,
+        arquivo_modelo_url: arquivoUrl,
+        campos_substituicao: JSON.parse(formData.campos_substituicao || '[]')
+      };
+
+      if (editingModelo) {
+        const { error } = await supabase
+          .from('modelos_inspecao_sms')
+          .update(dadosModelo)
+          .eq('id', editingModelo.id);
+        
+        if (error) throw error;
+        
+        toast({
+          title: "Modelo atualizado com sucesso!",
+          description: "O modelo de inspeção foi atualizado.",
+        });
+      } else {
+        const { error } = await supabase
+          .from('modelos_inspecao_sms')
+          .insert([dadosModelo]);
+        
+        if (error) throw error;
+        
+        toast({
+          title: "Modelo cadastrado com sucesso!",
+          description: "O modelo de inspeção foi criado.",
+        });
+      }
+
+      setDialogOpen(false);
+      resetForm();
+      loadModelos();
+    } catch (error: any) {
+      toast({
+        title: "Erro ao salvar modelo",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Tem certeza que deseja excluir este modelo?')) return;
+    
+    try {
+      const { error } = await supabase
+        .from('modelos_inspecao_sms')
+        .update({ ativo: false })
+        .eq('id', id);
+      
+      if (error) throw error;
+      
+      toast({
+        title: "Modelo excluído com sucesso!",
+        description: "O modelo foi removido da lista.",
+      });
+      
+      loadModelos();
+    } catch (error: any) {
+      toast({
+        title: "Erro ao excluir modelo",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const resetForm = () => {
+    setFormData({
+      nome: '',
+      tipo_inspecao_id: '',
+      arquivo_modelo_url: '',
+      campos_substituicao: '[]'
+    });
+    setArquivo(null);
+    setEditingModelo(null);
+  };
+
+  const openEditDialog = (modelo: any) => {
     setEditingModelo(modelo);
     setFormData({
       nome: modelo.nome,
       tipo_inspecao_id: modelo.tipo_inspecao_id,
-      arquivo_modelo_url: modelo.arquivo_modelo_url || ''
+      arquivo_modelo_url: modelo.arquivo_modelo_url,
+      campos_substituicao: JSON.stringify(modelo.campos_substituicao || [])
     });
     setDialogOpen(true);
   };
 
-  const handleDelete = (id: string) => {
-    if (confirm('Tem certeza que deseja excluir este modelo?')) {
-      deleteModelo(id);
-    }
-  };
-
-  const handleView = (modelo: ModeloInspecao) => {
-    console.log("Viewing modelo:", modelo);
-    setViewingModelo(modelo);
-  };
-
-  const handleCloseDialog = () => {
-    setDialogOpen(false);
-    setEditingModelo(null);
-    setFormData({
-      nome: '',
-      tipo_inspecao_id: '',
-      arquivo_modelo_url: ''
-    });
-  };
-
-  const handleNewModel = () => {
-    setEditingModelo(null);
-    setFormData({
-      nome: '',
-      tipo_inspecao_id: '',
-      arquivo_modelo_url: ''
-    });
-    setDialogOpen(true);
-  };
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center p-8">
-        <div className="text-center">Carregando...</div>
-      </div>
-    );
-  }
+  useEffect(() => {
+    loadModelos();
+    loadTiposInspecao();
+  }, []);
 
   return (
     <div className="space-y-6">
@@ -98,7 +184,7 @@ const AdminModelosInspecao = () => {
         <h1 className="text-2xl font-bold">Modelos de Inspeção SMS</h1>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
-            <Button onClick={handleNewModel}>
+            <Button onClick={resetForm}>
               <Plus className="h-4 w-4 mr-2" />
               Novo Modelo
             </Button>
@@ -115,7 +201,7 @@ const AdminModelosInspecao = () => {
                 <Input
                   id="nome"
                   value={formData.nome}
-                  onChange={(e) => setFormData(prev => ({ ...prev, nome: e.target.value }))}
+                  onChange={(e) => setFormData({...formData, nome: e.target.value})}
                   required
                 />
               </div>
@@ -124,13 +210,13 @@ const AdminModelosInspecao = () => {
                 <Label htmlFor="tipo">Tipo de Inspeção *</Label>
                 <Select 
                   value={formData.tipo_inspecao_id} 
-                  onValueChange={(value) => setFormData(prev => ({ ...prev, tipo_inspecao_id: value }))}
+                  onValueChange={(value) => setFormData({...formData, tipo_inspecao_id: value})}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione o tipo" />
                   </SelectTrigger>
                   <SelectContent>
-                    {tipos.map((tipo) => (
+                    {tiposInspecao.map((tipo) => (
                       <SelectItem key={tipo.id} value={tipo.id}>
                         {tipo.nome}
                       </SelectItem>
@@ -140,21 +226,39 @@ const AdminModelosInspecao = () => {
               </div>
 
               <div>
-                <Label htmlFor="arquivo_modelo_url">URL do Arquivo Modelo</Label>
+                <Label htmlFor="arquivo">Arquivo Excel (.xlsx) *</Label>
                 <Input
-                  id="arquivo_modelo_url"
-                  value={formData.arquivo_modelo_url}
-                  onChange={(e) => setFormData(prev => ({ ...prev, arquivo_modelo_url: e.target.value }))}
-                  placeholder="URL opcional do arquivo modelo"
+                  id="arquivo"
+                  type="file"
+                  accept=".xlsx,.xls"
+                  onChange={(e) => setArquivo(e.target.files?.[0] || null)}
+                  required={!editingModelo}
                 />
+                <p className="text-xs text-muted-foreground mt-1">
+                  O arquivo deve conter códigos de substituição como: {`{{data}}, {{local}}, {{responsavel}}`}
+                </p>
+              </div>
+
+              <div>
+                <Label htmlFor="campos">Campos de Substituição (JSON)</Label>
+                <Textarea
+                  id="campos"
+                  value={formData.campos_substituicao}
+                  onChange={(e) => setFormData({...formData, campos_substituicao: e.target.value})}
+                  placeholder='["data", "local", "responsavel", "item1_status"]'
+                  rows={3}
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Lista dos campos que podem ser substituídos no formato JSON
+                </p>
               </div>
 
               <div className="flex justify-end gap-2">
-                <Button type="button" variant="outline" onClick={handleCloseDialog}>
+                <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
                   Cancelar
                 </Button>
                 <Button type="submit">
-                  {editingModelo ? 'Atualizar' : 'Criar'} Modelo
+                  {editingModelo ? 'Atualizar' : 'Cadastrar'}
                 </Button>
               </div>
             </form>
@@ -171,9 +275,9 @@ const AdminModelosInspecao = () => {
             <TableHeader>
               <TableRow>
                 <TableHead>Nome</TableHead>
-                <TableHead>Tipo</TableHead>
-                <TableHead>Arquivo Modelo</TableHead>
-                <TableHead>Data Criação</TableHead>
+                <TableHead>Tipo de Inspeção</TableHead>
+                <TableHead>Campos Substituição</TableHead>
+                <TableHead>Data Cadastro</TableHead>
                 <TableHead className="text-right">Ações</TableHead>
               </TableRow>
             </TableHeader>
@@ -188,20 +292,20 @@ const AdminModelosInspecao = () => {
                 modelos.map((modelo) => (
                   <TableRow key={modelo.id}>
                     <TableCell className="font-medium">{modelo.nome}</TableCell>
-                    <TableCell>{modelo.tipos_inspecao_sms?.nome || 'N/A'}</TableCell>
+                    <TableCell>{modelo.tipos_inspecao_sms?.nome}</TableCell>
                     <TableCell>
-                      {modelo.arquivo_modelo_url ? (
-                        <a 
-                          href={modelo.arquivo_modelo_url} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="text-blue-600 hover:underline"
-                        >
-                          Ver arquivo
-                        </a>
-                      ) : (
-                        'Nenhum arquivo'
-                      )}
+                      <div className="flex flex-wrap gap-1">
+                        {(modelo.campos_substituicao || []).slice(0, 3).map((campo: string, index: number) => (
+                          <Badge key={index} variant="secondary" className="text-xs">
+                            {campo}
+                          </Badge>
+                        ))}
+                        {(modelo.campos_substituicao || []).length > 3 && (
+                          <Badge variant="outline" className="text-xs">
+                            +{(modelo.campos_substituicao || []).length - 3}
+                          </Badge>
+                        )}
+                      </div>
                     </TableCell>
                     <TableCell>
                       {new Date(modelo.created_at).toLocaleDateString('pt-BR')}
@@ -211,14 +315,14 @@ const AdminModelosInspecao = () => {
                         <Button 
                           size="sm" 
                           variant="outline"
-                          onClick={() => handleView(modelo)}
+                          onClick={() => window.open(modelo.arquivo_modelo_url, '_blank')}
                         >
-                          <Eye className="h-4 w-4" />
+                          <Download className="h-4 w-4" />
                         </Button>
                         <Button 
                           size="sm" 
                           variant="outline"
-                          onClick={() => handleEdit(modelo)}
+                          onClick={() => openEditDialog(modelo)}
                         >
                           <Edit2 className="h-4 w-4" />
                         </Button>
@@ -238,50 +342,6 @@ const AdminModelosInspecao = () => {
           </Table>
         </CardContent>
       </Card>
-
-      {/* Dialog para visualizar modelo */}
-      <Dialog open={!!viewingModelo} onOpenChange={() => setViewingModelo(null)}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Visualizar Modelo: {viewingModelo?.nome}</DialogTitle>
-          </DialogHeader>
-          {viewingModelo && (
-            <div className="space-y-4">
-              <div>
-                <h4 className="font-semibold mb-2">Tipo de Inspeção:</h4>
-                <p className="text-sm text-muted-foreground">
-                  {viewingModelo.tipos_inspecao_sms?.nome || 'N/A'}
-                </p>
-              </div>
-              
-              <div>
-                <h4 className="font-semibold mb-2">Arquivo Modelo:</h4>
-                <p className="text-sm text-muted-foreground">
-                  {viewingModelo.arquivo_modelo_url ? (
-                    <a 
-                      href={viewingModelo.arquivo_modelo_url} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="text-blue-600 hover:underline"
-                    >
-                      {viewingModelo.arquivo_modelo_url}
-                    </a>
-                  ) : (
-                    'Nenhum arquivo especificado'
-                  )}
-                </p>
-              </div>
-              
-              <div>
-                <h4 className="font-semibold mb-2">Data de Criação:</h4>
-                <p className="text-sm text-muted-foreground">
-                  {new Date(viewingModelo.created_at).toLocaleString('pt-BR')}
-                </p>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };
