@@ -41,9 +41,10 @@ const RelatoriosTreinamentos = () => {
       
       while (Date.now() - startTime < maxWaitTime) {
         const loadingElements = document.querySelectorAll('[data-loading="true"]');
-        const carregandoElements = document.querySelectorAll(':contains("Carregando")');
         const carregandoTexts = Array.from(document.querySelectorAll('*')).filter(el => 
-          el.textContent?.includes('Carregando') || el.textContent?.includes('carregando')
+          el.textContent?.includes('Carregando') || 
+          el.textContent?.includes('carregando') ||
+          el.textContent?.includes('Carregando dados')
         );
         
         if (loadingElements.length === 0 && carregandoTexts.length === 0) {
