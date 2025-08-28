@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -8,11 +7,13 @@ import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, Calendar, User, Clock, AlertCircle, CheckCircle, FileUp, X, FileText, Download } from "lucide-react";
+import { ArrowLeft, Calendar, User, Clock, AlertCircle, CheckCircle, FileUp, X, FileText, Download, Eye } from "lucide-react";
 import { Tarefa, TarefaStatus } from "@/types/tarefas";
 import { tarefasService } from "@/services/tarefasService";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
+import { TarefaAnexo } from "@/components/tarefas/TarefaAnexo";
+import { supabase } from "@/integrations/supabase/client";
 
 const DetalheTarefa = () => {
   const { id } = useParams<{ id: string }>();
@@ -25,6 +26,29 @@ const DetalheTarefa = () => {
   const [observacoes, setObservacoes] = useState("");
   const [anexo, setAnexo] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [userProfile, setUserProfile] = useState<{ nome: string } | null>(null);
+
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      if (user?.id) {
+        try {
+          const { data, error } = await supabase
+            .from('profiles')
+            .select('nome')
+            .eq('id', user.id)
+            .single();
+
+          if (data && !error) {
+            setUserProfile(data);
+          }
+        } catch (error) {
+          console.error("Erro ao buscar perfil do usuário:", error);
+        }
+      }
+    };
+
+    fetchUserProfile();
+  }, [user]);
 
   useEffect(() => {
     const fetchTarefa = async () => {
@@ -132,50 +156,6 @@ const DetalheTarefa = () => {
     }
   };
 
-  const handleUploadAnexo = async () => {
-    if (!tarefa?.id || !anexo) {
-      toast({
-        title: "Erro",
-        description: "Tarefa ou anexo não encontrado.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setUploading(true);
-    try {
-      // Simulação de upload (substitua pela lógica real de upload)
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-
-      // Atualizar a tarefa com o nome do anexo (simulação)
-      const anexoNome = anexo.name;
-      const sucesso = await tarefasService.updateStatus(tarefa.id, { anexo: anexoNome });
-
-      if (sucesso) {
-        setTarefa({ ...tarefa, anexo: anexoNome });
-        toast({
-          title: "Anexo enviado",
-          description: "Anexo enviado com sucesso.",
-        });
-      } else {
-        toast({
-          title: "Erro ao enviar anexo",
-          description: "Não foi possível enviar o anexo.",
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
-      console.error("Erro ao enviar anexo:", error);
-      toast({
-        title: "Erro",
-        description: "Ocorreu um erro ao enviar o anexo.",
-        variant: "destructive",
-      });
-    } finally {
-      setUploading(false);
-    }
-  };
-
   const handleObservacoesSubmit = async () => {
     if (!tarefa?.id) {
       toast({
@@ -186,11 +166,30 @@ const DetalheTarefa = () => {
       return;
     }
 
+    if (!userProfile?.nome) {
+      toast({
+        title: "Erro",
+        description: "Perfil do usuário não encontrado.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setLoading(true);
     try {
-      const sucesso = await tarefasService.updateStatus(tarefa.id, { observacoes_progresso: observacoes });
+      // Criar registro da observação com informações do usuário
+      const novaObservacao = `[${new Date().toLocaleString('pt-BR')} - ${userProfile.nome}]\n${observacoes}\n\n`;
+      const observacoesAtualizadas = tarefa.observacoes_progresso 
+        ? tarefa.observacoes_progresso + novaObservacao
+        : novaObservacao;
+
+      const sucesso = await tarefasService.updateStatus(tarefa.id, { 
+        observacoes_progresso: observacoesAtualizadas 
+      });
+      
       if (sucesso) {
-        setTarefa({ ...tarefa, observacoes_progresso: observacoes });
+        setTarefa({ ...tarefa, observacoes_progresso: observacoesAtualizadas });
+        setObservacoes(""); // Limpar o campo após salvar
         toast({
           title: "Observações atualizadas",
           description: "Observações atualizadas com sucesso.",
@@ -214,6 +213,62 @@ const DetalheTarefa = () => {
     }
   };
 
+  const handleUploadAnexo = async () => {
+    if (!tarefa?.id || !anexo) {
+      toast({
+        title: "Erro",
+        description: "Tarefa ou anexo não encontrado.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!userProfile?.nome) {
+      toast({
+        title: "Erro",
+        description: "Perfil do usuário não encontrado.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setUploading(true);
+    try {
+      // Criar nome do arquivo com informações do usuário e timestamp
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+      const fileName = `${timestamp}_${userProfile.nome.replace(/\s+/g, '_')}_${anexo.name}`;
+      
+      // Simulação de upload (substitua pela lógica real de upload)
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
+      const sucesso = await tarefasService.updateStatus(tarefa.id, { anexo: fileName });
+
+      if (sucesso) {
+        setTarefa({ ...tarefa, anexo: fileName });
+        setAnexo(null);
+        toast({
+          title: "Anexo enviado",
+          description: "Anexo enviado com sucesso.",
+        });
+      } else {
+        toast({
+          title: "Erro ao enviar anexo",
+          description: "Não foi possível enviar o anexo.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Erro ao enviar anexo:", error);
+      toast({
+        title: "Erro",
+        description: "Ocorreu um erro ao enviar o anexo.",
+        variant: "destructive",
+      });
+    } finally {
+      setUploading(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen">
@@ -229,6 +284,33 @@ const DetalheTarefa = () => {
       </div>
     );
   }
+
+  const parseAnexoInfo = (anexoPath: string) => {
+    if (!anexoPath) return null;
+    
+    // Tentar extrair informações do nome do arquivo
+    const parts = anexoPath.split('_');
+    if (parts.length >= 3) {
+      try {
+        const timestamp = parts[0];
+        const userName = parts[1].replace(/_/g, ' ');
+        const originalName = parts.slice(2).join('_');
+        
+        const date = new Date(timestamp);
+        return {
+          userName,
+          date: date.toLocaleString('pt-BR'),
+          originalName
+        };
+      } catch {
+        return { originalName: anexoPath };
+      }
+    }
+    
+    return { originalName: anexoPath };
+  };
+
+  const anexoInfo = parseAnexoInfo(tarefa.anexo || "");
 
   return (
     <div className="container mx-auto py-8">
@@ -321,19 +403,35 @@ const DetalheTarefa = () => {
             {/* Mostrar anexo existente se houver */}
             {tarefa.anexo && (
               <div className="mb-4 p-3 border rounded-lg bg-muted/50">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <FileText className="h-4 w-4 text-blue-600" />
-                    <span className="text-sm font-medium">{tarefa.anexo}</span>
-                    <Badge variant="secondary" className="text-xs">
-                      <CheckCircle className="mr-1 h-3 w-3" />
-                      Anexado
-                    </Badge>
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-2 mb-2">
+                      <FileText className="h-4 w-4 text-blue-600" />
+                      <span className="text-sm font-medium">
+                        {anexoInfo?.originalName || tarefa.anexo}
+                      </span>
+                      <Badge variant="secondary" className="text-xs">
+                        <CheckCircle className="mr-1 h-3 w-3" />
+                        Anexado
+                      </Badge>
+                    </div>
+                    {anexoInfo?.userName && anexoInfo?.date && (
+                      <div className="text-xs text-muted-foreground">
+                        <User className="inline h-3 w-3 mr-1" />
+                        Anexado por: {anexoInfo.userName} em {anexoInfo.date}
+                      </div>
+                    )}
                   </div>
-                  <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-800">
-                    <Download className="h-4 w-4 mr-1" />
-                    Baixar
-                  </Button>
+                  <div className="flex space-x-2">
+                    <Button variant="outline" size="sm" className="text-blue-600 hover:text-blue-800">
+                      <Eye className="h-4 w-4 mr-1" />
+                      Visualizar
+                    </Button>
+                    <Button variant="outline" size="sm" className="text-green-600 hover:text-green-800">
+                      <Download className="h-4 w-4 mr-1" />
+                      Baixar
+                    </Button>
+                  </div>
                 </div>
               </div>
             )}
@@ -353,30 +451,59 @@ const DetalheTarefa = () => {
           <div>
             <Label className="text-muted-foreground mb-2 block">Observações de Progresso</Label>
             
-            {/* Mostrar observações existentes se houver e não estiver editando */}
+            {/* Mostrar observações existentes se houver */}
             {tarefa.observacoes_progresso && tarefa.observacoes_progresso.trim() !== "" && (
               <div className="mb-4 p-3 border rounded-lg bg-muted/50">
                 <div className="flex items-start justify-between mb-2">
-                  <Label className="text-sm font-medium text-green-700">Observações Salvas:</Label>
+                  <Label className="text-sm font-medium text-green-700">Histórico de Observações:</Label>
                   <Badge variant="secondary" className="text-xs">
                     <CheckCircle className="mr-1 h-3 w-3" />
                     Salvo
                   </Badge>
                 </div>
-                <p className="text-sm whitespace-pre-wrap">{tarefa.observacoes_progresso}</p>
+                <div className="text-sm whitespace-pre-wrap space-y-2">
+                  {tarefa.observacoes_progresso.split('\n\n').map((observacao, index) => {
+                    if (!observacao.trim()) return null;
+                    
+                    const linhas = observacao.split('\n');
+                    const cabecalho = linhas[0];
+                    const conteudo = linhas.slice(1).join('\n');
+                    
+                    // Verificar se é uma observação com formato de cabeçalho
+                    if (cabecalho.match(/^\[.*\]$/)) {
+                      return (
+                        <div key={index} className="border-l-4 border-blue-500 pl-3 py-2 bg-white/50 rounded">
+                          <div className="text-xs text-blue-600 font-medium mb-1">
+                            {cabecalho.replace(/[\[\]]/g, '')}
+                          </div>
+                          <div className="text-sm">{conteudo}</div>
+                        </div>
+                      );
+                    }
+                    
+                    return (
+                      <div key={index} className="text-sm">
+                        {observacao}
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             )}
             
-            {/* Campo para editar/adicionar observações */}
-            <Textarea
-              placeholder="Adicione suas observações aqui..."
-              value={observacoes}
-              onChange={handleObservacoesChange}
-              className="min-h-24"
-            />
-            <Button onClick={handleObservacoesSubmit} className="mt-2">
-              {tarefa.observacoes_progresso ? "Atualizar Observações" : "Salvar Observações"}
-            </Button>
+            {/* Campo para adicionar novas observações */}
+            <div>
+              <Label className="text-sm font-medium mb-2 block">Adicionar Nova Observação:</Label>
+              <Textarea
+                placeholder="Digite sua observação aqui..."
+                value={observacoes}
+                onChange={handleObservacoesChange}
+                className="min-h-24"
+              />
+              <Button onClick={handleObservacoesSubmit} className="mt-2" disabled={!observacoes.trim()}>
+                Adicionar Observação
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>
