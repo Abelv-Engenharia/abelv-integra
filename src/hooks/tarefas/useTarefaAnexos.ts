@@ -95,6 +95,7 @@ export function useTarefaAnexos(tarefaId: string | undefined) {
           nome_arquivo: nomeUnico,
           tamanho: arquivo.size,
           tipo_arquivo: arquivo.type,
+          // created_by será definido automaticamente pelo trigger
         });
 
       if (insertError) {
