@@ -14,13 +14,24 @@ import StatusBadge from "./StatusBadge";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { desviosCompletosService, DesvioCompleto } from "@/services/desvios/desviosCompletosService";
+import { format, parseISO } from "date-fns";
 
 interface Props {
   desvio: DesvioCompleto;
   onStatusUpdated?: (id: string, newStatus: string) => void;
 }
 
-const formatDate = (dateString: string) => (dateString ? new Date(dateString).toLocaleDateString("pt-BR") : "");
+const formatDate = (dateString: string) => {
+  if (!dateString) return "";
+  try {
+    // Usar parseISO para tratar corretamente datas ISO e format para formatação
+    const date = parseISO(dateString);
+    return format(date, "dd/MM/yyyy");
+  } catch (error) {
+    console.error("Erro ao formatar data:", error);
+    return "";
+  }
+};
 
 const DesvioDetailsDialog = ({ desvio, onStatusUpdated }: Props) => {
   const { toast } = useToast();
