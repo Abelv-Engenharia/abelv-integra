@@ -1,8 +1,9 @@
-
 project_id = "xexgdtlctyuycohzhmuu"
 
-[functions.generate-with-ai]
-verify_jwt = false
+[auth]
+enabled = true
+site_url = "https://de39dd50-14fe-4ffc-975a-32dc85fa2af8.sandbox.lovable.dev"
+additional_redirect_urls = ["https://localhost:8910"]
 
-[functions.generate-report]
-verify_jwt = false
+[functions.generate-inspecao-pdf]
+verify_jwt = true
