@@ -378,54 +378,6 @@ const InspecaoSMSDashboard = () => {
         </Card>
       </div>
 
-      {/* Lista das Últimas Inspeções */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg sm:text-xl">Últimas Inspeções Realizadas</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {ultimasInspecoes.length === 0 ? (
-              <p className="text-muted-foreground text-center py-4">
-                Nenhuma inspeção encontrada no período selecionado.
-              </p>
-            ) : (
-              ultimasInspecoes.map((inspecao) => (
-                <div key={inspecao.id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <h4 className="font-medium text-sm truncate">
-                        {inspecao.modelos_inspecao_sms?.tipos_inspecao_sms?.nome || 'Tipo não definido'}
-                      </h4>
-                      {getStatusBadge(inspecao.status)}
-                      {getConformidadeBadge(inspecao.tem_nao_conformidade)}
-                    </div>
-                    <p className="text-sm text-muted-foreground truncate">
-                      {inspecao.modelos_inspecao_sms?.nome || 'Modelo não definido'}
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Local: {inspecao.local} | Responsável: {inspecao.profiles?.nome || 'N/A'}
-                    </p>
-                    {inspecao.ccas && (
-                      <p className="text-xs text-muted-foreground">
-                        CCA: {inspecao.ccas.codigo} - {inspecao.ccas.nome}
-                      </p>
-                    )}
-                  </div>
-                  <div className="text-right ml-4">
-                    <p className="text-sm font-medium">
-                      {format(new Date(inspecao.data_inspecao), 'dd/MM/yyyy', { locale: ptBR })}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {format(new Date(inspecao.created_at), 'HH:mm', { locale: ptBR })}
-                    </p>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 };

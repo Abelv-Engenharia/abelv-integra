@@ -178,13 +178,30 @@ const ConsultarInspecoes = () => {
   };
 
   const handleDownloadPDF = async (inspecao: any) => {
-    if (!inspecao.pdf_gerado_url) return;
-    
     try {
-      // Implementar download do PDF
-      window.open(inspecao.pdf_gerado_url, '_blank');
+      // Implementar funcionalidade de geração e download do PDF
+      const response = await supabase.functions.invoke('generate-inspecao-pdf', {
+        body: { inspecaoId: inspecao.id }
+      });
+
+      if (response.data) {
+        // Criar blob e fazer download
+        const blob = new Blob([response.data], { type: 'application/pdf' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `inspecao-${inspecao.id}-${format(new Date(inspecao.data_inspecao), 'dd-MM-yyyy')}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      }
     } catch (error) {
-      console.error('Erro ao baixar PDF:', error);
+      console.error('Erro ao gerar/baixar PDF:', error);
+      // Fallback para URL existente se houver
+      if (inspecao.pdf_gerado_url) {
+        window.open(inspecao.pdf_gerado_url, '_blank');
+      }
     }
   };
 
@@ -378,16 +395,14 @@ const ConsultarInspecoes = () => {
                             <Eye className="h-4 w-4" />
                             <span className="sr-only">Visualizar</span>
                           </Button>
-                          {inspecao.pdf_gerado_url && (
-                            <Button 
-                              variant="outline" 
-                              size="sm"
-                              onClick={() => handleDownloadPDF(inspecao)}
-                            >
-                              <Download className="h-4 w-4" />
-                              <span className="sr-only">Download PDF</span>
-                            </Button>
-                          )}
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => handleDownloadPDF(inspecao)}
+                          >
+                            <Download className="h-4 w-4" />
+                            <span className="sr-only">Download PDF</span>
+                          </Button>
                         </div>
                       </TableCell>
                     </TableRow>
