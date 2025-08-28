@@ -307,20 +307,27 @@ const CadastrarInspecao = () => {
         });
       }
 
-      // Reset do formulário
-      setStep(1);
-      setModeloSelecionado(null);
-      setItensInspecao([]);
-      setCamposCabecalho([]);
-      setDadosCabecalho({});
-      setDadosInspecao({
-        data_inspecao: new Date(),
-        local: '',
-        cca_id: '',
-        observacoes: '',
-        dados_preenchidos: {},
-        tem_nao_conformidade: false
-      });
+      // Reset do formulário APENAS após salvar com sucesso
+      setTimeout(() => {
+        setStep(1);
+        setModeloSelecionado(null);
+        setItensInspecao([]);
+        setCamposCabecalho([]);
+        setDadosCabecalho({});
+        setDadosInspecao({
+          data_inspecao: new Date(),
+          local: '',
+          cca_id: '',
+          observacoes: '',
+          dados_preenchidos: {},
+          tem_nao_conformidade: false
+        });
+        setAssinaturas({
+          responsavel_tecnico: '',
+          assinatura_responsavel_tecnico: '',
+          assinatura_inspetor: ''
+        });
+      }, 1500); // Delay para permitir que o toast seja visto
     } catch (error: any) {
       toast({
         title: "Erro ao finalizar inspeção",
@@ -342,29 +349,103 @@ const CadastrarInspecao = () => {
       return;
     }
 
-    // Adicionar assinaturas aos dados do cabeçalho
-    const dadosCabecalhoComAssinatura = {
-      ...dadosCabecalho,
-      assinaturas: assinaturas,
-      data_assinatura: new Date().toISOString()
-    };
+    console.log('Assinaturas antes do salvamento:', assinaturas);
+    console.log('Responsável técnico selecionado:', assinaturas.responsavel_tecnico);
 
-    setDadosCabecalho(dadosCabecalhoComAssinatura);
-    
-    // Modificar os dados de inspeção para incluir as assinaturas
-    const dadosInspecaoComAssinatura = {
-      ...dadosInspecao,
+    // Preparar dados completos incluindo assinaturas
+    const temNaoConformidade = itensInspecao.some(item => item.status === 'nao_conforme');
+    const dadosCompletos = {
+      modelo_id: modeloSelecionado.id,
+      responsavel_id: profile.id,
+      data_inspecao: format(dadosInspecao.data_inspecao, 'yyyy-MM-dd'),
+      local: dadosInspecao.local,
+      cca_id: dadosInspecao.cca_id ? parseInt(dadosInspecao.cca_id) : null,
+      observacoes: dadosInspecao.observacoes || '',
       dados_preenchidos: {
-        ...dadosInspecao.dados_preenchidos,
+        itens: itensInspecao,
+        campos_cabecalho: {
+          ...dadosCabecalho,
+          assinaturas: {
+            ...assinaturas,
+            data_assinatura: new Date().toISOString()
+          }
+        },
+        // Incluir assinaturas diretamente no nível superior também
         assinatura_inspetor: assinaturas.assinatura_inspetor,
         assinatura_responsavel_tecnico: assinaturas.assinatura_responsavel_tecnico,
-        assinaturas: assinaturas,
-        data_assinatura: new Date().toISOString()
-      }
+        responsavel_tecnico_id: assinaturas.responsavel_tecnico, // ID do responsável técnico selecionado
+        assinaturas: {
+          ...assinaturas,
+          data_assinatura: new Date().toISOString()
+        },
+        data_assinatura: new Date().toISOString(),
+        data_preenchimento: new Date().toISOString()
+      },
+      tem_nao_conformidade: temNaoConformidade,
+      status: 'concluida'
     };
-    
-    setDadosInspecao(dadosInspecaoComAssinatura);
-    await salvarInspecao();
+
+    console.log('Dados completos para inserção com assinaturas:', dadosCompletos);
+
+    try {
+      setIsSubmitting(true);
+      
+      const { data: inspecao, error } = await supabase
+        .from('inspecoes_sms')
+        .insert([dadosCompletos])
+        .select()
+        .single();
+      
+      if (error) {
+        console.error('Erro do Supabase:', error);
+        throw error;
+      }
+
+      console.log('Inspeção salva com sucesso:', inspecao);
+
+      if (temNaoConformidade) {
+        toast({
+          title: "Inspeção finalizada com não conformidades",
+          description: "Um PDF foi gerado e enviado por email devido às não conformidades encontradas."
+        });
+      } else {
+        toast({
+          title: "Inspeção finalizada com sucesso",
+          description: "Todos os itens estão em conformidade."
+        });
+      }
+
+      // Reset do formulário APENAS após salvar com sucesso
+      setTimeout(() => {
+        setStep(1);
+        setModeloSelecionado(null);
+        setItensInspecao([]);
+        setCamposCabecalho([]);
+        setDadosCabecalho({});
+        setDadosInspecao({
+          data_inspecao: new Date(),
+          local: '',
+          cca_id: '',
+          observacoes: '',
+          dados_preenchidos: {},
+          tem_nao_conformidade: false
+        });
+        setAssinaturas({
+          responsavel_tecnico: '',
+          assinatura_responsavel_tecnico: '',
+          assinatura_inspetor: ''
+        });
+      }, 1500);
+
+    } catch (error: any) {
+      toast({
+        title: "Erro ao finalizar inspeção",
+        description: error.message,
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleSignatureRequest = (type: 'inspetor' | 'responsavel_tecnico') => {

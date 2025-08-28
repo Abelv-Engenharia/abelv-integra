@@ -476,8 +476,17 @@ const VisualizarInspecao = () => {
                            </div>
                          )}
                        </div>
-                      <p className="text-sm font-medium">{identificacao.supervisor}</p>
-                      <p className="text-xs text-muted-foreground">Supervisor Responsável</p>
+                       <p className="text-sm font-medium">
+                         {/* Buscar o nome correto baseado no responsável técnico selecionado */}
+                         {inspecao.dados_preenchidos?.responsavel_tecnico_id ? 
+                           'Responsável Técnico Selecionado' : 
+                           (identificacao?.supervisor || 'Responsável Técnico')}
+                       </p>
+                       <p className="text-xs text-muted-foreground">
+                         {inspecao.dados_preenchidos?.responsavel_tecnico_id ? 
+                           'Responsável para Assinatura' : 
+                           'Supervisor Responsável'}
+                       </p>
                       {inspecao.dados_preenchidos?.data_assinatura_supervisor && (
                         <p className="text-xs text-muted-foreground mt-1">
                           Assinado em: {format(new Date(inspecao.dados_preenchidos.data_assinatura_supervisor), 'dd/MM/yyyy HH:mm', { locale: ptBR })}
