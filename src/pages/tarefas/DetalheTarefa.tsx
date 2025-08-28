@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -12,7 +13,6 @@ import { Tarefa, TarefaStatus } from "@/types/tarefas";
 import { tarefasService } from "@/services/tarefasService";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
-import { TarefaAnexo } from "@/components/tarefas/TarefaAnexo";
 import { supabase } from "@/integrations/supabase/client";
 
 const DetalheTarefa = () => {
@@ -75,9 +75,8 @@ const DetalheTarefa = () => {
       const data = await tarefasService.getById(id);
       if (data) {
         setTarefa(data);
-        // Não carregar observações no campo de texto - mantê-lo limpo para novas observações
         console.log("Tarefa carregada:", data);
-        console.log("Observações da tarefa:", data.observacoes_progresso);
+        console.log("Observações existentes:", data.observacoes_progresso);
       } else {
         console.error("Tarefa não encontrada");
         toast({
@@ -185,12 +184,24 @@ const DetalheTarefa = () => {
     setLoading(true);
     try {
       // Criar registro da observação com informações do usuário
-      const novaObservacao = `[${new Date().toLocaleString('pt-BR')} - ${userProfile.nome}]\n${observacoes.trim()}\n\n`;
-      const observacoesAtualizadas = tarefa.observacoes_progresso 
-        ? tarefa.observacoes_progresso + novaObservacao
-        : novaObservacao;
+      const agora = new Date();
+      const dataFormatada = agora.toLocaleDateString('pt-BR');
+      const horaFormatada = agora.toLocaleTimeString('pt-BR', { 
+        hour: '2-digit', 
+        minute: '2-digit' 
+      });
+      
+      const novaObservacao = `[${dataFormatada}, ${horaFormatada} - ${userProfile.nome}]\n${observacoes.trim()}\n\n`;
+      
+      // Garantir que observações existentes sejam mantidas
+      const observacoesExistentes = tarefa.observacoes_progresso || "";
+      const observacoesAtualizadas = observacoesExistentes + novaObservacao;
 
-      console.log("Salvando observações:", observacoesAtualizadas);
+      console.log("Salvando observações:", {
+        observacoesExistentes,
+        novaObservacao,
+        observacoesAtualizadas
+      });
 
       const sucesso = await tarefasService.updateStatus(tarefa.id, { 
         observacoes_progresso: observacoesAtualizadas 
@@ -202,24 +213,23 @@ const DetalheTarefa = () => {
         setObservacoes(""); // Limpar o campo após salvar
         
         toast({
-          title: "Observações atualizadas",
-          description: "Observação adicionada com sucesso.",
+          title: "Observação adicionada",
+          description: "Observação salva com sucesso.",
         });
 
-        // Recarregar a tarefa para garantir que temos os dados mais recentes
-        await fetchTarefa();
+        console.log("Observação salva com sucesso");
       } else {
         toast({
-          title: "Erro ao atualizar observações",
-          description: "Não foi possível atualizar as observações.",
+          title: "Erro ao salvar observação",
+          description: "Não foi possível salvar a observação.",
           variant: "destructive",
         });
       }
     } catch (error) {
-      console.error("Erro ao atualizar observações:", error);
+      console.error("Erro ao salvar observação:", error);
       toast({
         title: "Erro",
-        description: "Ocorreu um erro ao atualizar as observações.",
+        description: "Ocorreu um erro ao salvar a observação.",
         variant: "destructive",
       });
     } finally {
@@ -249,7 +259,8 @@ const DetalheTarefa = () => {
     setUploading(true);
     try {
       // Criar nome do arquivo com informações do usuário e timestamp
-      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+      const agora = new Date();
+      const timestamp = agora.toISOString().replace(/[:.]/g, '-').split('T')[0] + '_' + agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }).replace(':', '-');
       const fileName = `${timestamp}_${userProfile.nome.replace(/\s+/g, '_')}_${anexo.name}`;
       
       // Simulação de upload (substitua pela lógica real de upload)
@@ -260,6 +271,11 @@ const DetalheTarefa = () => {
       if (sucesso) {
         setTarefa({ ...tarefa, anexo: fileName });
         setAnexo(null);
+        // Reset input file
+        const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+        if (fileInput) {
+          fileInput.value = '';
+        }
         toast({
           title: "Anexo enviado",
           description: "Anexo enviado com sucesso.",
@@ -306,14 +322,14 @@ const DetalheTarefa = () => {
     const parts = anexoPath.split('_');
     if (parts.length >= 3) {
       try {
-        const timestamp = parts[0];
-        const userName = parts[1].replace(/_/g, ' ');
-        const originalName = parts.slice(2).join('_');
+        const datePart = parts[0];
+        const timePart = parts[1];
+        const userName = parts[2].replace(/_/g, ' ');
+        const originalName = parts.slice(3).join('_');
         
-        const date = new Date(timestamp);
         return {
           userName,
-          date: date.toLocaleString('pt-BR'),
+          date: `${datePart} ${timePart.replace('-', ':')}`,
           originalName
         };
       } catch {
@@ -327,7 +343,6 @@ const DetalheTarefa = () => {
   const anexoInfo = parseAnexoInfo(tarefa.anexo || "");
 
   const handleViewAttachment = () => {
-    // Implementar visualização do anexo
     toast({
       title: "Visualizar anexo",
       description: "Funcionalidade de visualização será implementada em breve.",
@@ -335,9 +350,8 @@ const DetalheTarefa = () => {
   };
 
   const handleDownloadAttachment = () => {
-    // Implementar download do anexo
     toast({
-      title: "Baixar anexo",
+      title: "Baixar anexo", 
       description: "Funcionalidade de download será implementada em breve.",
     });
   };
@@ -363,7 +377,7 @@ const DetalheTarefa = () => {
                 <Calendar className="mr-2 h-4 w-4 inline-block" />
                 Data de Conclusão
               </Label>
-              <p>{new Date(tarefa.dataConclusao).toLocaleDateString()}</p>
+              <p>{new Date(tarefa.dataConclusao).toLocaleDateString('pt-BR')}</p>
             </div>
             <div>
               <Label className="text-muted-foreground">
