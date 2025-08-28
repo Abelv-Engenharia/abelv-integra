@@ -205,14 +205,35 @@ const CadastrarInspecao = () => {
   const finalizarInspecao = async () => {
     try {
       setIsSubmitting(true);
+      
+      // Validações antes de enviar
+      if (!modeloSelecionado || !modeloSelecionado.id) {
+        throw new Error('Modelo de inspeção não selecionado ou inválido');
+      }
+      
+      if (!profile?.id) {
+        throw new Error('Usuário não identificado');
+      }
+      
+      if (!dadosInspecao.local) {
+        throw new Error('Local da inspeção é obrigatório');
+      }
+      
+      console.log('Dados da inspeção:', {
+        modelo_id: modeloSelecionado.id,
+        responsavel_id: profile?.id,
+        cca_id: dadosInspecao.cca_id,
+        local: dadosInspecao.local
+      });
+      
       const temNaoConformidade = itensInspecao.some(item => item.status === 'nao_conforme');
       const dadosCompletos = {
         modelo_id: modeloSelecionado.id,
-        responsavel_id: profile?.id,
+        responsavel_id: profile.id,
         data_inspecao: format(dadosInspecao.data_inspecao, 'yyyy-MM-dd'),
         local: dadosInspecao.local,
         cca_id: dadosInspecao.cca_id ? parseInt(dadosInspecao.cca_id) : null,
-        observacoes: dadosInspecao.observacoes,
+        observacoes: dadosInspecao.observacoes || '',
         dados_preenchidos: {
           itens: itensInspecao,
           campos_cabecalho: dadosCabecalho,
@@ -221,11 +242,18 @@ const CadastrarInspecao = () => {
         tem_nao_conformidade: temNaoConformidade,
         status: 'concluida'
       };
+      
+      console.log('Dados completos para inserção:', dadosCompletos);
+      
       const {
         data: inspecao,
         error
       } = await supabase.from('inspecoes_sms').insert([dadosCompletos]).select().single();
-      if (error) throw error;
+      
+      if (error) {
+        console.error('Erro do Supabase:', error);
+        throw error;
+      }
 
       // Se tem não conformidade, gerar PDF e enviar email
       if (temNaoConformidade) {
