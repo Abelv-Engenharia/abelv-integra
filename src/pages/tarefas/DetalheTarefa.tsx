@@ -7,7 +7,7 @@ import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, Calendar, User, Clock, AlertCircle, CheckCircle, FileUp, X, MessageSquare, Send, Trash2 } from "lucide-react";
+import { ArrowLeft, Calendar, User, Clock, AlertCircle, CheckCircle, FileUp, X, MessageSquare, Send, Trash2, Download, Eye, File } from "lucide-react";
 import { Tarefa, TarefaStatus } from "@/types/tarefas";
 import { tarefasService } from "@/services/tarefasService";
 import { useToast } from "@/hooks/use-toast";
@@ -35,7 +35,6 @@ const DetalheTarefa = () => {
   
   const [tarefa, setTarefa] = useState<Tarefa | null>(null);
   const [loading, setLoading] = useState(true);
-  const [observacoes, setObservacoes] = useState("");
   const [anexo, setAnexo] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [novaObservacao, setNovaObservacao] = useState("");
@@ -139,10 +138,6 @@ const DetalheTarefa = () => {
     }
   };
 
-  const handleObservacoesChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setObservacoes(event.target.value);
-  };
-
   const handleAnexoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files.length > 0) {
       setAnexo(event.target.files[0]);
@@ -192,44 +187,6 @@ const DetalheTarefa = () => {
       });
     } finally {
       setUploading(false);
-    }
-  };
-
-  const handleObservacoesSubmit = async () => {
-    if (!tarefa?.id) {
-      toast({
-        title: "Erro",
-        description: "ID da tarefa não encontrado.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const sucesso = await tarefasService.updateStatus(tarefa.id, { observacoes_progresso: observacoes });
-      if (sucesso) {
-        setTarefa({ ...tarefa, observacoes_progresso: observacoes });
-        toast({
-          title: "Observações atualizadas",
-          description: "Observações atualizadas com sucesso.",
-        });
-      } else {
-        toast({
-          title: "Erro ao atualizar observações",
-          description: "Não foi possível atualizar as observações.",
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
-      console.error("Erro ao atualizar observações:", error);
-      toast({
-        title: "Erro",
-        description: "Ocorreu um erro ao atualizar as observações.",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -414,16 +371,69 @@ const DetalheTarefa = () => {
 
           <Separator />
 
+          {/* Seção de Documentos Anexados */}
           <div>
-            <Label className="text-muted-foreground">Observações</Label>
-            <Textarea
-              placeholder="Adicione suas observações aqui..."
-              value={observacoes}
-              onChange={handleObservacoesChange}
-            />
-            <Button onClick={handleObservacoesSubmit} className="mt-2">
-              Salvar Observações
-            </Button>
+            <Label className="text-muted-foreground flex items-center gap-2 mb-4">
+              <File className="h-4 w-4" />
+              Documentos Anexados
+            </Label>
+            
+            {tarefa.anexo ? (
+              <div className="border rounded-lg p-4 bg-background">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-blue-50 rounded-lg">
+                      <File className="h-6 w-6 text-blue-600" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-sm">{tarefa.anexo}</p>
+                      <p className="text-xs text-muted-foreground">
+                        Documento anexado à tarefa
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => {
+                        // Simular visualização do documento
+                        toast({
+                          title: "Visualizar documento",
+                          description: "Funcionalidade de visualização será implementada conforme necessário.",
+                        });
+                      }}
+                    >
+                      <Eye className="h-4 w-4 mr-2" />
+                      Visualizar
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => {
+                        // Simular download do documento
+                        const link = document.createElement('a');
+                        link.href = '#'; // Aqui seria a URL real do arquivo
+                        link.download = tarefa.anexo;
+                        link.click();
+                        toast({
+                          title: "Download iniciado",
+                          description: `Download do arquivo ${tarefa.anexo} foi iniciado.`,
+                        });
+                      }}
+                    >
+                      <Download className="h-4 w-4 mr-2" />
+                      Baixar
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="text-center py-8 text-muted-foreground border rounded-lg bg-muted/20">
+                <File className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                <p>Nenhum documento foi anexado a esta tarefa.</p>
+              </div>
+            )}
           </div>
 
           <Separator />
