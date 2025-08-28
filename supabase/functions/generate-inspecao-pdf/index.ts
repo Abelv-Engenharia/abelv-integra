@@ -74,30 +74,23 @@ serve(async (req) => {
       )
     }
 
-    // Gerar PDF usando jsPDF (simulado para este exemplo)
-    const pdfContent = generatePDFContent(inspecao as InspectionData)
+    // Gerar HTML do relatório
+    const htmlContent = generateHTMLReport(inspecao as InspectionData)
 
-    // Retornar o PDF como blob
-    const decoder = new TextDecoder()
-    const uint8Array = new Uint8Array(
-      atob(pdfContent)
-        .split('')
-        .map(char => char.charCodeAt(0))
-    )
-    
+    // Retornar como HTML que pode ser convertido para PDF pelo navegador
     return new Response(
-      uint8Array,
+      htmlContent,
       {
         headers: {
           ...corsHeaders,
-          'Content-Type': 'application/pdf',
-          'Content-Disposition': `attachment; filename="inspecao-${inspecaoId}.pdf"`
+          'Content-Type': 'text/html; charset=utf-8',
+          'Content-Disposition': `inline; filename="inspecao-${inspecaoId}.html"`
         }
       }
     )
 
   } catch (error) {
-    console.error('Erro ao gerar PDF:', error)
+    console.error('Erro ao gerar relatório:', error)
     return new Response(
       JSON.stringify({ error: 'Erro interno do servidor' }),
       { 
@@ -108,46 +101,263 @@ serve(async (req) => {
   }
 })
 
-function generatePDFContent(inspecao: InspectionData): string {
-  // Esta é uma implementação simplificada usando TextEncoder
-  // Em um ambiente real, você usaria uma biblioteca como PDFKit ou similar
-  
+function generateHTMLReport(inspecao: InspectionData): string {
   const itens = inspecao.dados_preenchidos?.itens || []
   const naoConformidades = itens.filter((item: any) => 
     item.status === 'nao_conforme' && item.observacao_nc
   )
 
-  const pdfData = {
-    titulo: 'RELATÓRIO DE INSPEÇÃO SMS',
-    dados: {
-      data: new Date(inspecao.data_inspecao).toLocaleDateString('pt-BR'),
-      local: inspecao.local,
-      responsavel: inspecao.profiles?.nome || 'N/A',
-      cca: inspecao.ccas ? `${inspecao.ccas.codigo} - ${inspecao.ccas.nome}` : 'N/A',
-      tipo: inspecao.checklists_avaliacao?.nome || 'N/A',
-      status: inspecao.status,
-      conformidade: inspecao.tem_nao_conformidade ? 'Não Conforme' : 'Conforme'
-    },
-    itens: itens.map((item: any) => ({
-      secao: item.secao || 'N/A',
-      nome: item.nome || 'N/A',
-      status: item.status || 'N/A',
-      observacao: item.observacao_nc || ''
-    })),
-    naoConformidades,
-    assinaturas: {
-      inspetor: inspecao.assinatura_inspetor || null,
-      supervisor: inspecao.assinatura_supervisor || null
-    }
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('pt-BR')
   }
 
-  // Usar TextEncoder ao invés de Buffer para Deno
-  const encoder = new TextEncoder()
-  const jsonString = JSON.stringify(pdfData, null, 2)
-  const uint8Array = encoder.encode(jsonString)
-  
-  // Converter para base64 usando btoa
-  const base64 = btoa(String.fromCharCode(...uint8Array))
-  
-  return base64
+  const getStatusLabel = (status: string) => {
+    const statusMap: { [key: string]: string } = {
+      'conforme': 'Conforme',
+      'nao_conforme': 'Não Conforme', 
+      'nao_se_aplica': 'Não se Aplica'
+    }
+    return statusMap[status] || status
+  }
+
+  return `
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatório de Inspeção SMS</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #0066cc;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            color: #0066cc;
+            margin: 0;
+            font-size: 24px;
+        }
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .info-item {
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        .info-label {
+            font-weight: bold;
+            color: #555;
+            margin-bottom: 5px;
+        }
+        .info-value {
+            color: #333;
+        }
+        .section {
+            margin-bottom: 30px;
+        }
+        .section h2 {
+            color: #0066cc;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
+        }
+        .item {
+            border: 1px solid #ddd;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        .item-header {
+            padding: 15px;
+            background-color: #f5f5f5;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .item-name {
+            font-weight: bold;
+            flex: 1;
+        }
+        .status {
+            padding: 5px 10px;
+            border-radius: 3px;
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .status-conforme {
+            background-color: #28a745;
+        }
+        .status-nao-conforme {
+            background-color: #dc3545;
+        }
+        .status-nao-se-aplica {
+            background-color: #6c757d;
+        }
+        .item-observation {
+            padding: 15px;
+            background-color: #fff3cd;
+            border-top: 1px solid #ddd;
+        }
+        .summary {
+            background-color: #e7f3ff;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 30px;
+        }
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            text-align: center;
+        }
+        .summary-item {
+            background-color: white;
+            padding: 15px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        .summary-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #0066cc;
+        }
+        .signature-section {
+            margin-top: 50px;
+            border-top: 2px solid #ddd;
+            padding-top: 30px;
+        }
+        .signature-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-top: 30px;
+        }
+        .signature-box {
+            border: 1px solid #ddd;
+            padding: 20px;
+            text-align: center;
+            min-height: 80px;
+        }
+        @media print {
+            body { margin: 0; }
+            .header { page-break-after: avoid; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>RELATÓRIO DE INSPEÇÃO SMS</h1>
+        <p>Data: ${formatDate(inspecao.data_inspecao)}</p>
+    </div>
+
+    <div class="info-grid">
+        <div class="info-item">
+            <div class="info-label">Tipo de Inspeção:</div>
+            <div class="info-value">${inspecao.checklists_avaliacao?.nome || 'N/A'}</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">Local:</div>
+            <div class="info-value">${inspecao.local}</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">Responsável:</div>
+            <div class="info-value">${inspecao.profiles?.nome || 'N/A'}</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">CCA:</div>
+            <div class="info-value">${inspecao.ccas ? `${inspecao.ccas.codigo} - ${inspecao.ccas.nome}` : 'N/A'}</div>
+        </div>
+    </div>
+
+    <div class="summary">
+        <h3 style="margin-top: 0; text-align: center;">Resumo da Inspeção</h3>
+        <div class="summary-grid">
+            <div class="summary-item">
+                <div class="summary-number">${itens.length}</div>
+                <div>Itens Verificados</div>
+            </div>
+            <div class="summary-item">
+                <div class="summary-number" style="color: #28a745;">${itens.filter((item: any) => item.status === 'conforme').length}</div>
+                <div>Conformes</div>
+            </div>
+            <div class="summary-item">
+                <div class="summary-number" style="color: #dc3545;">${itens.filter((item: any) => item.status === 'nao_conforme').length}</div>
+                <div>Não Conformes</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Itens Verificados</h2>
+        ${itens.map((item: any) => `
+            <div class="item">
+                <div class="item-header">
+                    <div class="item-name">${item.nome || 'Item não identificado'}</div>
+                    <div class="status status-${item.status?.replace('_', '-') || 'conforme'}">
+                        ${getStatusLabel(item.status)}
+                    </div>
+                </div>
+                ${item.status === 'nao_conforme' && item.observacao_nc ? `
+                    <div class="item-observation">
+                        <strong>Observação:</strong> ${item.observacao_nc}
+                    </div>
+                ` : ''}
+            </div>
+        `).join('')}
+    </div>
+
+    ${naoConformidades.length > 0 ? `
+    <div class="section">
+        <h2>Resumo das Não Conformidades</h2>
+        ${naoConformidades.map((item: any, index: number) => `
+            <div style="margin-bottom: 15px; padding: 15px; border-left: 4px solid #dc3545; background-color: #f8f9fa;">
+                <strong>${index + 1}. ${item.nome}</strong><br>
+                <span style="color: #666;">${item.observacao_nc}</span>
+            </div>
+        `).join('')}
+    </div>
+    ` : ''}
+
+    <div class="signature-section">
+        <h2>Assinaturas</h2>
+        <div class="signature-grid">
+            <div class="signature-box">
+                <p><strong>Responsável pela Inspeção</strong></p>
+                <p>${inspecao.profiles?.nome || 'N/A'}</p>
+                <br><br>
+                <div style="border-top: 1px solid #333; margin-top: 40px; padding-top: 5px;">
+                    Assinatura
+                </div>
+            </div>
+            <div class="signature-box">
+                <p><strong>Supervisor Responsável</strong></p>
+                <p>_______________________</p>
+                <br><br>
+                <div style="border-top: 1px solid #333; margin-top: 40px; padding-top: 5px;">
+                    Assinatura
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div style="margin-top: 30px; text-align: center; font-size: 12px; color: #666;">
+        <p>Relatório gerado automaticamente em ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}</p>
+    </div>
+</body>
+</html>`
 }

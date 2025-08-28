@@ -97,22 +97,22 @@ const VisualizarInspecao = () => {
       });
 
       if (response.data) {
-        // Criar blob e fazer download
-        const blob = new Blob([response.data], { type: 'application/pdf' });
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `inspecao-${inspecao.id}-${format(new Date(inspecao.data_inspecao), 'dd-MM-yyyy')}.pdf`;
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
+        // Abrir o relatório HTML em uma nova aba para impressão como PDF
+        const newWindow = window.open('', '_blank');
+        if (newWindow) {
+          newWindow.document.write(response.data);
+          newWindow.document.close();
+          // Aguardar um pouco e então abrir a caixa de impressão
+          setTimeout(() => {
+            newWindow.print();
+          }, 1000);
+        }
       }
     } catch (error) {
-      console.error('Erro ao gerar/baixar PDF:', error);
+      console.error('Erro ao gerar relatório:', error);
       toast({
-        title: "Erro ao baixar PDF",
-        description: "Não foi possível gerar o arquivo",
+        title: "Erro ao gerar relatório",
+        description: "Não foi possível gerar o relatório. Tente novamente.",
         variant: "destructive",
       });
     }
