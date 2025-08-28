@@ -102,19 +102,24 @@ export default function AgendaHSA() {
     const isToday = isSameDay(date, new Date());
 
     return (
-      <div className="flex flex-col h-full w-full p-2">
-        <span className={`font-medium self-start ${isToday ? 'text-blue-600 font-bold' : ''}`}>{date.getDate()}</span>
-        <div className="flex-grow overflow-y-auto text-[10px] mt-1 space-y-0.5">
-          {eventosDoDia.map((inspecao) => (
+      <div className="flex flex-col h-full w-full p-1">
+        <span className={`font-medium self-start text-xs ${isToday ? 'text-blue-600 font-bold' : ''}`}>{date.getDate()}</span>
+        <div className="flex-grow overflow-y-auto text-[9px] mt-1 space-y-0.5 max-h-32">
+          {eventosDoDia.slice(0, 4).map((inspecao) => (
             <div
               key={inspecao.id}
-              className={`rounded p-0.5 ${getInspecaoStatusColor(inspecao.status)}`}
-              title={`${inspecao.inspecao_programada || 'Inspeção'} - ${inspecao.status}`}
+              className={`rounded p-0.5 h-8 flex flex-col justify-center overflow-hidden ${getInspecaoStatusColor(inspecao.status)}`}
+              title={`${inspecao.responsavel_inspecao} - ${inspecao.inspecao_programada || 'Não Programada'} - ${inspecao.status}`}
             >
-              <p className="font-bold truncate">{inspecao.responsavel_inspecao}</p>
-              <p className="truncate opacity-80">{inspecao.inspecao_programada || 'Não Programada'}</p>
+              <p className="font-bold truncate leading-none text-[8px]">{inspecao.responsavel_inspecao}</p>
+              <p className="truncate opacity-80 leading-none text-[7px]">{inspecao.inspecao_programada || 'Não Programada'}</p>
             </div>
           ))}
+          {eventosDoDia.length > 4 && (
+            <div className="text-center text-[7px] text-muted-foreground">
+              +{eventosDoDia.length - 4} mais
+            </div>
+          )}
         </div>
       </div>
     );
