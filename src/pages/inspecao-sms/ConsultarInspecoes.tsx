@@ -330,7 +330,7 @@ const ConsultarInspecoes = () => {
       <Card>
         <CardHeader>
           <CardTitle className="text-lg sm:text-xl">
-            Inspeções Encontradas ({filteredInspecoes.length})
+            Inspeções realizadas
           </CardTitle>
         </CardHeader>
         <CardContent>
