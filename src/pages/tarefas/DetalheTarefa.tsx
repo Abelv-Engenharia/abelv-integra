@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -193,11 +192,14 @@ const DetalheTarefa = () => {
       
       const novaObservacao = `[${dataFormatada} às ${horaFormatada} - ${userProfile.nome}]\n${observacoes.trim()}`;
       
-      // Garantir que observações existentes sejam mantidas
-      const observacoesExistentes = tarefa.observacoes_progresso || "";
+      // Buscar as observações mais atuais diretamente do banco
+      const tarefaAtual = await tarefasService.getById(tarefa.id);
+      const observacoesExistentes = tarefaAtual?.observacoes_progresso || "";
+      
       let observacoesAtualizadas = "";
       
       if (observacoesExistentes.trim()) {
+        // Separar observações com duas quebras de linha
         observacoesAtualizadas = observacoesExistentes + "\n\n" + novaObservacao;
       } else {
         observacoesAtualizadas = novaObservacao;
@@ -214,8 +216,6 @@ const DetalheTarefa = () => {
       });
       
       if (sucesso) {
-        // Atualizar o estado local da tarefa
-        setTarefa({ ...tarefa, observacoes_progresso: observacoesAtualizadas });
         setObservacoes(""); // Limpar o campo após salvar
         
         toast({
@@ -371,11 +371,15 @@ const DetalheTarefa = () => {
       return [];
     }
 
-    // Dividir observações por linha dupla, mantendo apenas as não vazias
+    console.log("Parseando observações:", observacoesText);
+
+    // Dividir observações por dupla quebra de linha
     const observacoesList = observacoesText
       .split(/\n\n+/)
       .filter(obs => obs.trim())
       .map(obs => obs.trim());
+
+    console.log("Observações divididas:", observacoesList);
 
     return observacoesList.map((observacao, index) => {
       // Verificar se tem o formato [data - usuário]
@@ -406,6 +410,7 @@ const DetalheTarefa = () => {
   };
 
   const observacoesParsed = parseObservacoes(tarefa.observacoes_progresso || "");
+  console.log("Observações parseadas:", observacoesParsed);
 
   return (
     <div className="container mx-auto py-8">
@@ -557,7 +562,7 @@ const DetalheTarefa = () => {
             <Label className="text-muted-foreground mb-2 block">Observações de Progresso</Label>
             
             {/* Histórico de observações */}
-            {observacoesParsed.length > 0 && (
+            {observacoesParsed.length > 0 ? (
               <div className="mb-4 space-y-3">
                 <div className="flex items-center justify-between">
                   <Label className="text-sm font-medium text-green-700">Histórico de Observações:</Label>
@@ -569,7 +574,7 @@ const DetalheTarefa = () => {
                 
                 <div className="max-h-80 overflow-y-auto space-y-3">
                   {observacoesParsed.map((obs, index) => (
-                    <div key={obs.id} className="border rounded-lg p-3 bg-white/50">
+                    <div key={obs.id} className="border rounded-lg p-3 bg-white shadow-sm">
                       {obs.temCabecalho ? (
                         <div className="border-l-4 border-blue-500 pl-3">
                           <div className="flex items-start justify-between mb-2">
@@ -599,6 +604,10 @@ const DetalheTarefa = () => {
                     </div>
                   ))}
                 </div>
+              </div>
+            ) : (
+              <div className="mb-4 p-4 border rounded-lg bg-gray-50">
+                <p className="text-sm text-gray-600">Nenhuma observação registrada ainda.</p>
               </div>
             )}
             
