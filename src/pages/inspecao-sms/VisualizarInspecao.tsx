@@ -298,106 +298,111 @@ const VisualizarInspecao = () => {
           </div>
         </div>
 
-        {/* Card Identificação da Frente de Trabalho */}
-        {inspecao.dados_preenchidos?.campos_cabecalho && Object.keys(inspecao.dados_preenchidos.campos_cabecalho).length > 0 && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Users className="h-5 w-5" />
-                Identificação da Frente de Trabalho
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {isLoadingIdentificacao ? (
-                <div className="text-center py-4">
-                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mx-auto"></div>
-                  <p className="text-sm text-muted-foreground mt-2">Carregando informações...</p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {identificacao.engenheiro && (
-                    <div>
-                      <p className="text-sm text-muted-foreground">Engenheiro Responsável</p>
-                      <p className="font-medium">{identificacao.engenheiro}</p>
+        {/* Layout original para os demais cards */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 space-y-6">
+            {/* Card Identificação da Frente de Trabalho */}
+            {inspecao.dados_preenchidos?.campos_cabecalho && Object.keys(inspecao.dados_preenchidos.campos_cabecalho).length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Users className="h-5 w-5" />
+                    Identificação da Frente de Trabalho
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {isLoadingIdentificacao ? (
+                    <div className="text-center py-4">
+                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mx-auto"></div>
+                      <p className="text-sm text-muted-foreground mt-2">Carregando informações...</p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {identificacao.engenheiro && (
+                        <div>
+                          <p className="text-sm text-muted-foreground">Engenheiro Responsável</p>
+                          <p className="font-medium">{identificacao.engenheiro}</p>
+                        </div>
+                      )}
+                      
+                      {identificacao.supervisor && (
+                        <div>
+                          <p className="text-sm text-muted-foreground">Supervisor Responsável</p>
+                          <p className="font-medium">{identificacao.supervisor}</p>
+                        </div>
+                      )}
+                      
+                      {identificacao.encarregado && (
+                        <div>
+                          <p className="text-sm text-muted-foreground">Encarregado Responsável</p>
+                          <p className="font-medium">{identificacao.encarregado}</p>
+                        </div>
+                      )}
+                      
+                      {identificacao.empresa && (
+                        <div>
+                          <p className="text-sm text-muted-foreground">Empresa</p>
+                          <p className="font-medium">{identificacao.empresa}</p>
+                        </div>
+                      )}
+                      
+                      {identificacao.disciplina && (
+                        <div>
+                          <p className="text-sm text-muted-foreground">Disciplina</p>
+                          <p className="font-medium">{identificacao.disciplina}</p>
+                        </div>
+                      )}
+                      
+                      {!identificacao.engenheiro && !identificacao.supervisor && !identificacao.encarregado && !identificacao.empresa && !identificacao.disciplina && (
+                        <div className="col-span-2 text-center py-4">
+                          <p className="text-muted-foreground">Nenhuma informação de identificação da frente de trabalho disponível.</p>
+                        </div>
+                      )}
                     </div>
                   )}
-                  
-                  {identificacao.supervisor && (
-                    <div>
-                      <p className="text-sm text-muted-foreground">Supervisor Responsável</p>
-                      <p className="font-medium">{identificacao.supervisor}</p>
-                    </div>
-                  )}
-                  
-                  {identificacao.encarregado && (
-                    <div>
-                      <p className="text-sm text-muted-foreground">Encarregado Responsável</p>
-                      <p className="font-medium">{identificacao.encarregado}</p>
-                    </div>
-                  )}
-                  
-                  {identificacao.empresa && (
-                    <div>
-                      <p className="text-sm text-muted-foreground">Empresa</p>
-                      <p className="font-medium">{identificacao.empresa}</p>
-                    </div>
-                  )}
-                  
-                  {identificacao.disciplina && (
-                    <div>
-                      <p className="text-sm text-muted-foreground">Disciplina</p>
-                      <p className="font-medium">{identificacao.disciplina}</p>
-                    </div>
-                  )}
-                  
-                  {!identificacao.engenheiro && !identificacao.supervisor && !identificacao.encarregado && !identificacao.empresa && !identificacao.disciplina && (
-                    <div className="col-span-2 text-center py-4">
-                      <p className="text-muted-foreground">Nenhuma informação de identificação da frente de trabalho disponível.</p>
-                    </div>
-                  )}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        )}
+                </CardContent>
+              </Card>
+            )}
 
-        {/* Itens Verificados */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Itens Verificados</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {inspecao.dados_preenchidos?.itens ? (
-              <div className="space-y-4">
-                {inspecao.dados_preenchidos.itens.map((item: any, index: number) => (
-                  <div key={item.id || index} className="border rounded-lg p-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex-1">
-                        <p className="font-medium text-sm">{item.nome}</p>
-                        {item.secao && !item.isSection && (
-                          <p className="text-xs text-muted-foreground mt-1">Seção: {item.secao}</p>
+            {/* Itens Verificados */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Itens Verificados</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {inspecao.dados_preenchidos?.itens ? (
+                  <div className="space-y-4">
+                    {inspecao.dados_preenchidos.itens.map((item: any, index: number) => (
+                      <div key={item.id || index} className="border rounded-lg p-4">
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex-1">
+                            <p className="font-medium text-sm">{item.nome}</p>
+                            {item.secao && !item.isSection && (
+                              <p className="text-xs text-muted-foreground mt-1">Seção: {item.secao}</p>
+                            )}
+                          </div>
+                          <div className="ml-4">
+                            {getItemStatusBadge(item.status)}
+                          </div>
+                        </div>
+                        {item.status === 'nao_conforme' && item.observacao_nc && (
+                          <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-md">
+                            <p className="text-sm font-medium text-red-900 mb-1">Observação da Não Conformidade:</p>
+                            <p className="text-sm text-red-800">{item.observacao_nc}</p>
+                          </div>
                         )}
                       </div>
-                      <div className="ml-4">
-                        {getItemStatusBadge(item.status)}
-                      </div>
-                    </div>
-                    {item.status === 'nao_conforme' && item.observacao_nc && (
-                      <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-md">
-                        <p className="text-sm font-medium text-red-900 mb-1">Observação da Não Conformidade:</p>
-                        <p className="text-sm text-red-800">{item.observacao_nc}</p>
-                      </div>
-                    )}
+                    ))}
                   </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-muted-foreground text-center py-4">
-                Nenhum item verificado encontrado.
-              </p>
-            )}
-          </CardContent>
-        </Card>
+                ) : (
+                  <p className="text-muted-foreground text-center py-4">
+                    Nenhum item verificado encontrado.
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </div>
     </div>
   );
