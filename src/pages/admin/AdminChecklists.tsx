@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Plus, Edit2, Trash2, X } from "lucide-react";
@@ -17,6 +18,14 @@ import type { Json } from "@/integrations/supabase/types";
 interface ItemAvaliacao {
   id: string;
   texto: string;
+  secao_id?: string;
+}
+
+interface Secao {
+  id: string;
+  nome: string;
+  descricao?: string;
+  ordem: number;
 }
 
 interface CampoDisponivel {
@@ -32,6 +41,8 @@ interface ChecklistAvaliacao {
   ativo: boolean;
   campos_cabecalho: Json;
   itens_avaliacao: Json;
+  secoes: Json;
+  requer_assinatura: boolean;
   created_at: string;
 }
 
@@ -44,9 +55,13 @@ const AdminChecklists = () => {
     descricao: '',
     ativo: true,
     campos_cabecalho: [] as string[],
-    itens_avaliacao: [] as ItemAvaliacao[]
+    itens_avaliacao: [] as ItemAvaliacao[],
+    secoes: [] as Secao[],
+    requer_assinatura: false
   });
   const [novoItem, setNovoItem] = useState('');
+  const [novaSecao, setNovaSecao] = useState({ nome: '', descricao: '' });
+  const [secaoSelecionada, setSecaoSelecionada] = useState<string>('sem_secao');
   const { toast } = useToast();
 
   // Campos disponíveis para seleção no cabeçalho
@@ -92,7 +107,9 @@ const AdminChecklists = () => {
         descricao: formData.descricao || null,
         ativo: formData.ativo,
         campos_cabecalho: formData.campos_cabecalho as unknown as Json,
-        itens_avaliacao: formData.itens_avaliacao as unknown as Json
+        itens_avaliacao: formData.itens_avaliacao as unknown as Json,
+        secoes: formData.secoes as unknown as Json,
+        requer_assinatura: formData.requer_assinatura
       };
 
       if (editingChecklist) {
@@ -164,9 +181,13 @@ const AdminChecklists = () => {
       descricao: '',
       ativo: true,
       campos_cabecalho: [],
-      itens_avaliacao: []
+      itens_avaliacao: [],
+      secoes: [],
+      requer_assinatura: false
     });
     setNovoItem('');
+    setNovaSecao({ nome: '', descricao: '' });
+    setSecaoSelecionada('sem_secao');
     setEditingChecklist(null);
   };
 
@@ -177,7 +198,9 @@ const AdminChecklists = () => {
       descricao: checklist.descricao || '',
       ativo: checklist.ativo,
       campos_cabecalho: Array.isArray(checklist.campos_cabecalho) ? checklist.campos_cabecalho as unknown as string[] : [],
-      itens_avaliacao: Array.isArray(checklist.itens_avaliacao) ? checklist.itens_avaliacao as unknown as ItemAvaliacao[] : []
+      itens_avaliacao: Array.isArray(checklist.itens_avaliacao) ? checklist.itens_avaliacao as unknown as ItemAvaliacao[] : [],
+      secoes: Array.isArray(checklist.secoes) ? checklist.secoes as unknown as Secao[] : [],
+      requer_assinatura: checklist.requer_assinatura || false
     });
     setDialogOpen(true);
   };
@@ -196,11 +219,38 @@ const AdminChecklists = () => {
     }
   };
 
+  const adicionarSecao = () => {
+    if (novaSecao.nome.trim()) {
+      const novaSecaoObj: Secao = {
+        id: Date.now().toString(),
+        nome: novaSecao.nome.trim(),
+        descricao: novaSecao.descricao.trim() || undefined,
+        ordem: formData.secoes.length + 1
+      };
+      setFormData(prev => ({
+        ...prev,
+        secoes: [...prev.secoes, novaSecaoObj]
+      }));
+      setNovaSecao({ nome: '', descricao: '' });
+    }
+  };
+
+  const removerSecao = (secaoId: string) => {
+    setFormData(prev => ({
+      ...prev,
+      secoes: prev.secoes.filter(secao => secao.id !== secaoId),
+      itens_avaliacao: prev.itens_avaliacao.map(item => 
+        item.secao_id === secaoId ? { ...item, secao_id: undefined } : item
+      )
+    }));
+  };
+
   const adicionarItem = () => {
     if (novoItem.trim()) {
       const novoItemObj: ItemAvaliacao = {
         id: Date.now().toString(),
-        texto: novoItem.trim()
+        texto: novoItem.trim(),
+        secao_id: secaoSelecionada === 'sem_secao' ? undefined : secaoSelecionada
       };
       setFormData(prev => ({
         ...prev,
@@ -219,6 +269,16 @@ const AdminChecklists = () => {
 
   const getCamposCabecalho = (campos: Json): string[] => {
     return Array.isArray(campos) ? campos as string[] : [];
+  };
+
+  const getSecoes = (secoes: Json): Secao[] => {
+    return Array.isArray(secoes) ? secoes as unknown as Secao[] : [];
+  };
+
+  const getNomeSecao = (secaoId?: string): string => {
+    if (!secaoId) return 'Sem seção';
+    const secao = formData.secoes.find(s => s.id === secaoId);
+    return secao ? secao.nome : 'Sem seção';
   };
 
   const getCampoNome = (campoId: string): string => {
@@ -252,8 +312,8 @@ const AdminChecklists = () => {
               </DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="md:col-span-2">
                   <Label htmlFor="nome">Nome do Checklist *</Label>
                   <Input
                     id="nome"
@@ -264,13 +324,24 @@ const AdminChecklists = () => {
                   />
                 </div>
                 
-                <div className="flex items-center gap-3">
-                  <Label htmlFor="ativo">Checklist Ativo</Label>
-                  <Switch
-                    id="ativo"
-                    checked={formData.ativo}
-                    onCheckedChange={(checked) => setFormData({...formData, ativo: checked})}
-                  />
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3">
+                    <Label htmlFor="ativo">Checklist Ativo</Label>
+                    <Switch
+                      id="ativo"
+                      checked={formData.ativo}
+                      onCheckedChange={(checked) => setFormData({...formData, ativo: checked})}
+                    />
+                  </div>
+                  
+                  <div className="flex items-center gap-3">
+                    <Label htmlFor="assinatura">Requer Assinatura</Label>
+                    <Switch
+                      id="assinatura"
+                      checked={formData.requer_assinatura}
+                      onCheckedChange={(checked) => setFormData({...formData, requer_assinatura: checked})}
+                    />
+                  </div>
                 </div>
               </div>
 
@@ -328,24 +399,98 @@ const AdminChecklists = () => {
               </div>
 
               <div>
+                <Label>Seções do Checklist</Label>
+                <p className="text-sm text-muted-foreground mb-3">
+                  Crie seções para organizar os itens de verificação (opcional)
+                </p>
+                <div className="space-y-3">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                    <Input
+                      value={novaSecao.nome}
+                      onChange={(e) => setNovaSecao(prev => ({...prev, nome: e.target.value}))}
+                      placeholder="Nome da seção"
+                      onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), adicionarSecao())}
+                    />
+                    <Input
+                      value={novaSecao.descricao}
+                      onChange={(e) => setNovaSecao(prev => ({...prev, descricao: e.target.value}))}
+                      placeholder="Descrição (opcional)"
+                      onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), adicionarSecao())}
+                    />
+                  </div>
+                  <Button type="button" onClick={adicionarSecao} size="sm" className="w-full md:w-auto">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Adicionar Seção
+                  </Button>
+                  
+                  {formData.secoes.length > 0 && (
+                    <div className="space-y-2 max-h-32 overflow-y-auto">
+                      {formData.secoes.map((secao) => (
+                        <div key={secao.id} className="flex items-center justify-between p-2 border rounded">
+                          <div>
+                            <span className="text-sm font-medium">{secao.nome}</span>
+                            {secao.descricao && (
+                              <p className="text-xs text-muted-foreground">{secao.descricao}</p>
+                            )}
+                          </div>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removerSecao(secao.id)}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div>
                 <Label>Itens de Avaliação</Label>
                 <div className="space-y-3">
-                  <div className="flex gap-2">
-                    <Input
-                      value={novoItem}
-                      onChange={(e) => setNovoItem(e.target.value)}
-                      placeholder="Adicionar item"
-                      onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), adicionarItem())}
-                    />
-                    <Button type="button" onClick={adicionarItem} size="sm">
-                      <Plus className="h-4 w-4" />
-                    </Button>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                    <div className="md:col-span-2">
+                      <Input
+                        value={novoItem}
+                        onChange={(e) => setNovoItem(e.target.value)}
+                        placeholder="Adicionar item"
+                        onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), adicionarItem())}
+                      />
+                    </div>
+                    <div className="flex gap-2">
+                      <Select value={secaoSelecionada} onValueChange={setSecaoSelecionada}>
+                        <SelectTrigger className="flex-1">
+                          <SelectValue placeholder="Seção" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="sem_secao">Sem seção</SelectItem>
+                          {formData.secoes.map((secao) => (
+                            <SelectItem key={secao.id} value={secao.id}>
+                              {secao.nome}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <Button type="button" onClick={adicionarItem} size="sm">
+                        <Plus className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
                   
                   <div className="space-y-2 max-h-40 overflow-y-auto">
                     {formData.itens_avaliacao.map((item, index) => (
                       <div key={item.id} className="flex items-center justify-between p-2 border rounded">
-                        <span className="text-sm">{item.texto}</span>
+                        <div className="flex-1">
+                          <span className="text-sm">{item.texto}</span>
+                          {item.secao_id && (
+                            <span className="ml-2 text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded">
+                              {getNomeSecao(item.secao_id)}
+                            </span>
+                          )}
+                        </div>
                         <Button
                           type="button"
                           variant="ghost"
@@ -384,7 +529,9 @@ const AdminChecklists = () => {
                 <TableHead>Nome</TableHead>
                 <TableHead>Descrição</TableHead>
                 <TableHead>Campos Cabeçalho</TableHead>
+                <TableHead>Seções</TableHead>
                 <TableHead>Itens</TableHead>
+                <TableHead>Assinatura</TableHead>
                 <TableHead>Data Cadastro</TableHead>
                 <TableHead className="text-right">Ações</TableHead>
               </TableRow>
@@ -392,7 +539,7 @@ const AdminChecklists = () => {
             <TableBody>
               {checklists.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-4">
+                  <TableCell colSpan={8} className="text-center py-4">
                     Nenhum checklist cadastrado
                   </TableCell>
                 </TableRow>
@@ -418,8 +565,30 @@ const AdminChecklists = () => {
                       </div>
                     </TableCell>
                     <TableCell>
+                      <div className="flex flex-wrap gap-1">
+                        {getSecoes(checklist.secoes || []).slice(0, 2).map((secao, index) => (
+                          <Badge key={index} variant="outline" className="text-xs">
+                            {secao.nome}
+                          </Badge>
+                        ))}
+                        {getSecoes(checklist.secoes || []).length > 2 && (
+                          <Badge variant="secondary" className="text-xs">
+                            +{getSecoes(checklist.secoes || []).length - 2}
+                          </Badge>
+                        )}
+                        {getSecoes(checklist.secoes || []).length === 0 && (
+                          <span className="text-xs text-muted-foreground">-</span>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell>
                       <Badge variant="secondary">
                         {getItensAvaliacao(checklist.itens_avaliacao).length} itens
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={checklist.requer_assinatura ? "default" : "secondary"}>
+                        {checklist.requer_assinatura ? "Sim" : "Não"}
                       </Badge>
                     </TableCell>
                     <TableCell>
