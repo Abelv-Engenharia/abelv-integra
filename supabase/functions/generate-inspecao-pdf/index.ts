@@ -122,9 +122,10 @@ serve(async (req) => {
     }
 
     // Buscar dados do responsável técnico selecionado para assinatura
-    if (camposCabecalho.assinaturas?.responsavel_tecnico) {
-      const responsavelTecnicoId = camposCabecalho.assinaturas.responsavel_tecnico
-      
+    const responsavelTecnicoId = inspecao.dados_preenchidos?.responsavel_tecnico_id || 
+                                 camposCabecalho.assinaturas?.responsavel_tecnico
+    
+    if (responsavelTecnicoId) {
       // Verificar em todas as tabelas de responsáveis
       promises.push(
         supabase.from('engenheiros').select('nome').eq('id', responsavelTecnicoId).single()
