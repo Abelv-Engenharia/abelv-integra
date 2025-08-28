@@ -91,15 +91,28 @@ const VisualizarInspecao = () => {
   };
 
   const handleDownloadPDF = async () => {
-    if (!inspecao?.pdf_gerado_url) return;
-    
     try {
-      window.open(inspecao.pdf_gerado_url, '_blank');
+      const response = await supabase.functions.invoke('generate-inspecao-pdf', {
+        body: { inspecaoId: inspecao.id }
+      });
+
+      if (response.data) {
+        // Criar blob e fazer download
+        const blob = new Blob([response.data], { type: 'application/pdf' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `inspecao-${inspecao.id}-${format(new Date(inspecao.data_inspecao), 'dd-MM-yyyy')}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      }
     } catch (error) {
-      console.error('Erro ao baixar PDF:', error);
+      console.error('Erro ao gerar/baixar PDF:', error);
       toast({
         title: "Erro ao baixar PDF",
-        description: "Não foi possível baixar o arquivo",
+        description: "Não foi possível gerar o arquivo",
         variant: "destructive",
       });
     }
@@ -153,12 +166,10 @@ const VisualizarInspecao = () => {
         <div className="flex items-center gap-2">
           {getStatusBadge(inspecao.status)}
           {getConformidadeBadge(inspecao.tem_nao_conformidade)}
-          {inspecao.pdf_gerado_url && (
-            <Button onClick={handleDownloadPDF} size="sm">
-              <Download className="h-4 w-4 mr-2" />
-              Download PDF
-            </Button>
-          )}
+          <Button onClick={handleDownloadPDF} size="sm">
+            <Download className="h-4 w-4 mr-2" />
+            Download PDF
+          </Button>
         </div>
       </div>
 
@@ -232,15 +243,26 @@ const VisualizarInspecao = () => {
             </CardHeader>
             <CardContent>
               {inspecao.dados_preenchidos?.itens ? (
-                <div className="space-y-3">
+                <div className="space-y-4">
                   {inspecao.dados_preenchidos.itens.map((item: any, index: number) => (
-                    <div key={item.id || index} className="flex items-center justify-between p-3 border rounded-lg">
-                      <div className="flex-1">
-                        <p className="font-medium text-sm">{item.nome}</p>
+                    <div key={item.id || index} className="border rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex-1">
+                          <p className="font-medium text-sm">{item.nome}</p>
+                          {item.secao && !item.isSection && (
+                            <p className="text-xs text-muted-foreground mt-1">Seção: {item.secao}</p>
+                          )}
+                        </div>
+                        <div className="ml-4">
+                          {getItemStatusBadge(item.status)}
+                        </div>
                       </div>
-                      <div className="ml-4">
-                        {getItemStatusBadge(item.status)}
-                      </div>
+                      {item.status === 'nao_conforme' && item.observacao_nc && (
+                        <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-md">
+                          <p className="text-sm font-medium text-red-900 mb-1">Observação da Não Conformidade:</p>
+                          <p className="text-sm text-red-800">{item.observacao_nc}</p>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>

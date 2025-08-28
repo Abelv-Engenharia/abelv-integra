@@ -15,7 +15,8 @@ import { useFilteredFormData } from "@/hooks/useFilteredFormData";
 import { toast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { PageLoader, InlineLoader } from "@/components/common/PageLoader";
-import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
+import { DigitalSignature } from "@/components/ui/digital-signature";
+import { useNavigate } from "react-router-dom";
 
 const CadastrarInspecao = () => {
   const [step, setStep] = useState(1);
@@ -36,8 +37,11 @@ const CadastrarInspecao = () => {
   const [itensInspecao, setItensInspecao] = useState<any[]>([]);
   const [assinaturas, setAssinaturas] = useState({
     responsavel_tecnico: '',
-    responsavel_inspecao: ''
+    assinatura_responsavel_tecnico: '',
+    assinatura_inspetor: ''
   });
+  const [showSignatureModal, setShowSignatureModal] = useState(false);
+  const [currentSignatureType, setCurrentSignatureType] = useState<'inspetor' | 'responsavel_tecnico'>('inspetor');
 
   const { profile } = useProfile();
   const { data: userCCAs = [] } = useUserCCAs();
@@ -213,7 +217,8 @@ const CadastrarInspecao = () => {
     if (modeloSelecionado?.requer_assinatura) {
       setAssinaturas({
         responsavel_tecnico: '',
-        responsavel_inspecao: profile?.id || ''
+        assinatura_responsavel_tecnico: '',
+        assinatura_inspetor: ''
       });
       setStep(3); // Ir para a tela de assinatura
       return;
@@ -315,10 +320,10 @@ const CadastrarInspecao = () => {
   };
 
   const finalizarComAssinatura = async () => {
-    if (!assinaturas.responsavel_tecnico) {
+    if (!assinaturas.assinatura_inspetor) {
       toast({
         title: "Assinatura obrigatória",
-        description: "Selecione o responsável técnico para assinar.",
+        description: "É necessário capturar a assinatura do inspetor.",
         variant: "destructive"
       });
       return;
@@ -334,6 +339,31 @@ const CadastrarInspecao = () => {
     setDadosCabecalho(dadosCabecalhoComAssinatura);
     await salvarInspecao();
   };
+
+  const handleSignatureRequest = (type: 'inspetor' | 'responsavel_tecnico') => {
+    setCurrentSignatureType(type);
+    setShowSignatureModal(true);
+  };
+
+  const handleSignatureSave = (signatureData: string) => {
+    setAssinaturas(prev => ({
+      ...prev,
+      [`assinatura_${currentSignatureType}`]: signatureData
+    }));
+    setShowSignatureModal(false);
+  };
+  // Modal de assinatura
+  if (showSignatureModal) {
+    return (
+      <div className="content-padding section-spacing">
+        <DigitalSignature
+          title={`Assinatura - ${currentSignatureType === 'inspetor' ? 'Inspetor' : 'Responsável Técnico'}`}
+          onSave={handleSignatureSave}
+          onCancel={() => setShowSignatureModal(false)}
+        />
+      </div>
+    );
+  }
 
   useEffect(() => {
     loadModelos();
@@ -358,49 +388,74 @@ const CadastrarInspecao = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-6">
-              <div className="space-y-2">
-                <Label className="text-sm sm:text-base font-medium">
-                  Responsável Técnico (Engenheiro/Supervisor/Encarregado) *
-                </Label>
-                <Select 
-                  value={assinaturas.responsavel_tecnico} 
-                  onValueChange={(value) => setAssinaturas({
-                    ...assinaturas,
-                    responsavel_tecnico: value
-                  })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione o responsável técnico" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-background border border-border z-50">
-                    {engenheiros.map(eng => (
-                      <SelectItem key={`eng_${eng.id}`} value={eng.id}>
-                        {eng.nome} - Engenheiro
-                      </SelectItem>
-                    ))}
-                    {supervisores.map(sup => (
-                      <SelectItem key={`sup_${sup.id}`} value={sup.id}>
-                        {sup.nome} - Supervisor
-                      </SelectItem>
-                    ))}
-                    {encarregados.map(enc => (
-                      <SelectItem key={`enc_${enc.id}`} value={enc.id}>
-                        {enc.nome} - Encarregado
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              <div className="space-y-4">
+                <div>
+                  <Label className="text-sm font-medium">Assinatura do Inspetor (Obrigatória)</Label>
+                  <div className="flex items-center gap-2 mt-2">
+                    <Button 
+                      variant="outline" 
+                      onClick={() => handleSignatureRequest('inspetor')}
+                      className="w-full"
+                    >
+                      {assinaturas.assinatura_inspetor ? 'Assinatura Capturada ✓' : 'Capturar Assinatura'}
+                    </Button>
+                  </div>
+                </div>
 
-              <div className="space-y-2">
-                <Label className="text-sm sm:text-base font-medium">
-                  Responsável pela Inspeção
-                </Label>
-                <Input 
-                  value={profile?.nome || 'Usuário não identificado'} 
-                  disabled 
-                  className="bg-muted text-muted-foreground cursor-not-allowed" 
-                />
+                <div>
+                  <Label className="text-sm font-medium">Responsável Técnico/Supervisor</Label>
+                  <Select 
+                    value={assinaturas.responsavel_tecnico} 
+                    onValueChange={(value) => setAssinaturas({
+                      ...assinaturas,
+                      responsavel_tecnico: value
+                    })}
+                  >
+                    <SelectTrigger className="mt-2">
+                      <SelectValue placeholder="Selecione o responsável técnico" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-background border border-border z-50">
+                      {engenheiros.map(eng => (
+                        <SelectItem key={`eng_${eng.id}`} value={eng.id}>
+                          {eng.nome} - Engenheiro
+                        </SelectItem>
+                      ))}
+                      {supervisores.map(sup => (
+                        <SelectItem key={`sup_${sup.id}`} value={sup.id}>
+                          {sup.nome} - Supervisor
+                        </SelectItem>
+                      ))}
+                      {encarregados.map(enc => (
+                        <SelectItem key={`enc_${enc.id}`} value={enc.id}>
+                          {enc.nome} - Encarregado
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  
+                  {assinaturas.responsavel_tecnico && (
+                    <div className="mt-3">
+                      <Button 
+                        variant="outline" 
+                        onClick={() => handleSignatureRequest('responsavel_tecnico')}
+                        className="w-full"
+                      >
+                        {assinaturas.assinatura_responsavel_tecnico ? 'Assinatura Capturada ✓' : 'Capturar Assinatura do Responsável'}
+                      </Button>
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <Label className="text-sm font-medium">
+                    Responsável pela Inspeção
+                  </Label>
+                  <Input 
+                    value={profile?.nome || 'Usuário não identificado'} 
+                    disabled 
+                    className="bg-muted text-muted-foreground cursor-not-allowed mt-2" 
+                  />
+                </div>
               </div>
 
               <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
@@ -416,7 +471,7 @@ const CadastrarInspecao = () => {
               <Button variant="outline" onClick={() => setStep(2)}>
                 Cancelar
               </Button>
-              <Button onClick={finalizarComAssinatura} disabled={isSubmitting}>
+              <Button onClick={finalizarComAssinatura} disabled={isSubmitting || !assinaturas.assinatura_inspetor}>
                 {isSubmitting ? (
                   <>
                     <InlineLoader size="sm" />
@@ -453,8 +508,10 @@ const CadastrarInspecao = () => {
             {isLoadingModelos ? (
               <div className="card-grid">
                 {Array.from({ length: 6 }).map((_, i) => (
-                  <div key={i} className="border rounded-lg p-4">
-                    <LoadingSkeleton variant="card" />
+                  <div key={i} className="border rounded-lg p-4 animate-pulse">
+                    <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                    <div className="h-3 bg-gray-200 rounded w-1/2 mb-1"></div>
+                    <div className="h-3 bg-gray-200 rounded w-1/4"></div>
                   </div>
                 ))}
               </div>

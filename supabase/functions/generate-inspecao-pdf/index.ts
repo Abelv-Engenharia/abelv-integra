@@ -78,8 +78,15 @@ serve(async (req) => {
     const pdfContent = generatePDFContent(inspecao as InspectionData)
 
     // Retornar o PDF como blob
+    const decoder = new TextDecoder()
+    const uint8Array = new Uint8Array(
+      atob(pdfContent)
+        .split('')
+        .map(char => char.charCodeAt(0))
+    )
+    
     return new Response(
-      new Uint8Array(Buffer.from(pdfContent, 'base64')),
+      uint8Array,
       {
         headers: {
           ...corsHeaders,
@@ -102,7 +109,7 @@ serve(async (req) => {
 })
 
 function generatePDFContent(inspecao: InspectionData): string {
-  // Esta é uma implementação simplificada
+  // Esta é uma implementação simplificada usando TextEncoder
   // Em um ambiente real, você usaria uma biblioteca como PDFKit ou similar
   
   const itens = inspecao.dados_preenchidos?.itens || []
@@ -134,9 +141,13 @@ function generatePDFContent(inspecao: InspectionData): string {
     }
   }
 
-  // Simular geração de PDF retornando base64
-  // Em produção, usaria uma biblioteca real de PDF
-  const pdfBase64 = Buffer.from(JSON.stringify(pdfData, null, 2)).toString('base64')
+  // Usar TextEncoder ao invés de Buffer para Deno
+  const encoder = new TextEncoder()
+  const jsonString = JSON.stringify(pdfData, null, 2)
+  const uint8Array = encoder.encode(jsonString)
   
-  return pdfBase64
+  // Converter para base64 usando btoa
+  const base64 = btoa(String.fromCharCode(...uint8Array))
+  
+  return base64
 }
