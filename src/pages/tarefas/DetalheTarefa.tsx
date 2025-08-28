@@ -26,6 +26,12 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 
 const DetalheTarefa = () => {
@@ -41,6 +47,8 @@ const DetalheTarefa = () => {
   const [excluindoAnexo, setExcluindoAnexo] = useState(false);
   const [novaObservacao, setNovaObservacao] = useState("");
   const [adicionandoObservacao, setAdicionandoObservacao] = useState(false);
+  const [showVisualizacao, setShowVisualizacao] = useState(false);
+  const [anexoUrl, setAnexoUrl] = useState<string | null>(null);
 
   // Hook para gerenciar observações da tarefa
   const { 
@@ -197,35 +205,22 @@ const DetalheTarefa = () => {
     }
   };
 
+  // Função para visualizar anexo
   const handleVisualizarAnexo = async () => {
     if (!tarefa?.anexo) return;
 
     try {
-      // Baixar o arquivo e abrir como blob para evitar bloqueios do navegador
+      // Baixar o arquivo e criar URL blob
       const { data, error } = await supabase.storage
         .from('tarefas-anexos')
         .download(tarefa.anexo);
 
       if (error) throw error;
 
-      // Criar URL do blob e abrir em nova aba
+      // Criar URL do blob para visualização
       const url = URL.createObjectURL(data);
-      const newWindow = window.open(url, '_blank');
-      
-      if (!newWindow) {
-        toast({
-          title: "Pop-up bloqueado",
-          description: "Por favor, permita pop-ups para visualizar o documento.",
-          variant: "destructive",
-        });
-        URL.revokeObjectURL(url);
-        return;
-      }
-
-      // Limpar a URL após alguns segundos
-      setTimeout(() => {
-        URL.revokeObjectURL(url);
-      }, 10000);
+      setAnexoUrl(url);
+      setShowVisualizacao(true);
 
     } catch (error: any) {
       console.error("Erro ao visualizar anexo:", error);
@@ -235,6 +230,15 @@ const DetalheTarefa = () => {
         variant: "destructive",
       });
     }
+  };
+
+  // Função para fechar visualização
+  const handleFecharVisualizacao = () => {
+    if (anexoUrl) {
+      URL.revokeObjectURL(anexoUrl);
+      setAnexoUrl(null);
+    }
+    setShowVisualizacao(false);
   };
 
   const handleDownloadAnexo = async () => {
@@ -664,6 +668,24 @@ const DetalheTarefa = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Modal de Visualização */}
+      <Dialog open={showVisualizacao} onOpenChange={handleFecharVisualizacao}>
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden">
+          <DialogHeader>
+            <DialogTitle>Visualização do Anexo</DialogTitle>
+          </DialogHeader>
+          {anexoUrl && (
+            <div className="w-full h-[80vh]">
+              <iframe
+                src={anexoUrl}
+                className="w-full h-full border-0"
+                title="Visualização do anexo"
+              />
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
