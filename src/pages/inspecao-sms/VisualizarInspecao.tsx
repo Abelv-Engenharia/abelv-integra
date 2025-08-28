@@ -179,218 +179,225 @@ const VisualizarInspecao = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:items-start">
-        {/* Informações Gerais */}
-        <div className="lg:col-span-2 space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <FileText className="h-5 w-5" />
-                Informações Gerais
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4 text-muted-foreground" />
-                  <div>
-                    <p className="text-sm text-muted-foreground">Data da Inspeção</p>
-                    <p className="font-medium">
-                      {format(new Date(inspecao.data_inspecao), 'dd/MM/yyyy', { locale: ptBR })}
-                    </p>
-                  </div>
-                </div>
-                
-                <div className="flex items-center gap-2">
-                  <MapPin className="h-4 w-4 text-muted-foreground" />
-                  <div>
-                    <p className="text-sm text-muted-foreground">Local</p>
-                    <p className="font-medium">{inspecao.local}</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-center gap-2">
-                  <User className="h-4 w-4 text-muted-foreground" />
-                  <div>
-                    <p className="text-sm text-muted-foreground">Responsável</p>
-                    <p className="font-medium">{inspecao.profiles?.nome || 'N/A'}</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-center gap-2">
-                  <Building className="h-4 w-4 text-muted-foreground" />
-                  <div>
-                    <p className="text-sm text-muted-foreground">CCA</p>
-                    <p className="font-medium">
-                      {inspecao.ccas ? `${inspecao.ccas.codigo} - ${inspecao.ccas.nome}` : 'N/A'}
-                    </p>
-                  </div>
-                </div>
-              </div>
-              
-              <div>
-                <p className="text-sm text-muted-foreground mb-1">Modelo de Inspeção</p>
-                <p className="font-medium">{inspecao.modelos_inspecao_sms?.nome}</p>
-              </div>
-              
-              {inspecao.observacoes && (
-                <div>
-                  <p className="text-sm text-muted-foreground mb-1">Observações</p>
-                  <p className="text-sm bg-muted p-3 rounded-md">{inspecao.observacoes}</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Card Identificação da Frente de Trabalho */}
-          {inspecao.dados_preenchidos?.campos_cabecalho && Object.keys(inspecao.dados_preenchidos.campos_cabecalho).length > 0 && (
-            <Card>
+      <div className="space-y-6">
+        {/* Grid para cards alinhados */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:grid-rows-1 lg:items-stretch">
+          {/* Informações Gerais */}
+          <div className="lg:col-span-2">
+            <Card className="h-full">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Users className="h-5 w-5" />
-                  Identificação da Frente de Trabalho
+                  <FileText className="h-5 w-5" />
+                  Informações Gerais
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                {isLoadingIdentificacao ? (
-                  <div className="text-center py-4">
-                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mx-auto"></div>
-                    <p className="text-sm text-muted-foreground mt-2">Carregando informações...</p>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4 text-muted-foreground" />
+                    <div>
+                      <p className="text-sm text-muted-foreground">Data da Inspeção</p>
+                      <p className="font-medium">
+                        {format(new Date(inspecao.data_inspecao), 'dd/MM/yyyy', { locale: ptBR })}
+                      </p>
+                    </div>
                   </div>
-                ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {identificacao.engenheiro && (
-                      <div>
-                        <p className="text-sm text-muted-foreground">Engenheiro Responsável</p>
-                        <p className="font-medium">{identificacao.engenheiro}</p>
-                      </div>
-                    )}
-                    
-                    {identificacao.supervisor && (
-                      <div>
-                        <p className="text-sm text-muted-foreground">Supervisor Responsável</p>
-                        <p className="font-medium">{identificacao.supervisor}</p>
-                      </div>
-                    )}
-                    
-                    {identificacao.encarregado && (
-                      <div>
-                        <p className="text-sm text-muted-foreground">Encarregado Responsável</p>
-                        <p className="font-medium">{identificacao.encarregado}</p>
-                      </div>
-                    )}
-                    
-                    {identificacao.empresa && (
-                      <div>
-                        <p className="text-sm text-muted-foreground">Empresa</p>
-                        <p className="font-medium">{identificacao.empresa}</p>
-                      </div>
-                    )}
-                    
-                    {identificacao.disciplina && (
-                      <div>
-                        <p className="text-sm text-muted-foreground">Disciplina</p>
-                        <p className="font-medium">{identificacao.disciplina}</p>
-                      </div>
-                    )}
-                    
-                    {!identificacao.engenheiro && !identificacao.supervisor && !identificacao.encarregado && !identificacao.empresa && !identificacao.disciplina && (
-                      <div className="col-span-2 text-center py-4">
-                        <p className="text-muted-foreground">Nenhuma informação de identificação da frente de trabalho disponível.</p>
-                      </div>
-                    )}
+                  
+                  <div className="flex items-center gap-2">
+                    <MapPin className="h-4 w-4 text-muted-foreground" />
+                    <div>
+                      <p className="text-sm text-muted-foreground">Local</p>
+                      <p className="font-medium">{inspecao.local}</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center gap-2">
+                    <User className="h-4 w-4 text-muted-foreground" />
+                    <div>
+                      <p className="text-sm text-muted-foreground">Responsável</p>
+                      <p className="font-medium">{inspecao.profiles?.nome || 'N/A'}</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center gap-2">
+                    <Building className="h-4 w-4 text-muted-foreground" />
+                    <div>
+                      <p className="text-sm text-muted-foreground">CCA</p>
+                      <p className="font-medium">
+                        {inspecao.ccas ? `${inspecao.ccas.codigo} - ${inspecao.ccas.nome}` : 'N/A'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div>
+                  <p className="text-sm text-muted-foreground mb-1">Modelo de Inspeção</p>
+                  <p className="font-medium">{inspecao.checklists_avaliacao?.nome || 'N/A'}</p>
+                </div>
+                
+                {inspecao.observacoes && (
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-1">Observações</p>
+                    <p className="text-sm bg-muted p-3 rounded-md">{inspecao.observacoes}</p>
                   </div>
                 )}
               </CardContent>
             </Card>
-          )}
+          </div>
 
-          {/* Itens Verificados */}
+          {/* Sidebar - Resumo */}
+          <div>
+            <Card className="h-full">
+              <CardHeader>
+                <CardTitle>Resumo</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4 flex flex-col justify-between h-full">
+                <div className="space-y-4">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold mb-1">
+                      {inspecao.dados_preenchidos?.itens?.length || 0}
+                    </div>
+                    <p className="text-sm text-muted-foreground">Itens Verificados</p>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-4 text-center">
+                    <div>
+                      <div className="text-lg font-semibold text-green-600">
+                        {inspecao.dados_preenchidos?.itens?.filter((item: any) => item.status === 'conforme')?.length || 0}
+                      </div>
+                      <p className="text-xs text-muted-foreground">Conformes</p>
+                    </div>
+                    <div>
+                      <div className="text-lg font-semibold text-red-600">
+                        {inspecao.dados_preenchidos?.itens?.filter((item: any) => item.status === 'nao_conforme')?.length || 0}
+                      </div>
+                      <p className="text-xs text-muted-foreground">Não Conformes</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="space-y-4 pt-2 border-t">
+                  <div>
+                    <div className="text-xs text-muted-foreground mb-1">Criado em</div>
+                    <div className="text-sm">
+                      {format(new Date(inspecao.created_at), 'dd/MM/yyyy HH:mm', { locale: ptBR })}
+                    </div>
+                  </div>
+                  
+                  {inspecao.updated_at !== inspecao.created_at && (
+                    <div>
+                      <div className="text-xs text-muted-foreground mb-1">Atualizado em</div>
+                      <div className="text-sm">
+                        {format(new Date(inspecao.updated_at), 'dd/MM/yyyy HH:mm', { locale: ptBR })}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+
+        {/* Card Identificação da Frente de Trabalho */}
+        {inspecao.dados_preenchidos?.campos_cabecalho && Object.keys(inspecao.dados_preenchidos.campos_cabecalho).length > 0 && (
           <Card>
             <CardHeader>
-              <CardTitle>Itens Verificados</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <Users className="h-5 w-5" />
+                Identificação da Frente de Trabalho
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              {inspecao.dados_preenchidos?.itens ? (
-                <div className="space-y-4">
-                  {inspecao.dados_preenchidos.itens.map((item: any, index: number) => (
-                    <div key={item.id || index} className="border rounded-lg p-4">
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex-1">
-                          <p className="font-medium text-sm">{item.nome}</p>
-                          {item.secao && !item.isSection && (
-                            <p className="text-xs text-muted-foreground mt-1">Seção: {item.secao}</p>
-                          )}
-                        </div>
-                        <div className="ml-4">
-                          {getItemStatusBadge(item.status)}
-                        </div>
-                      </div>
-                      {item.status === 'nao_conforme' && item.observacao_nc && (
-                        <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-md">
-                          <p className="text-sm font-medium text-red-900 mb-1">Observação da Não Conformidade:</p>
-                          <p className="text-sm text-red-800">{item.observacao_nc}</p>
-                        </div>
-                      )}
-                    </div>
-                  ))}
+              {isLoadingIdentificacao ? (
+                <div className="text-center py-4">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mx-auto"></div>
+                  <p className="text-sm text-muted-foreground mt-2">Carregando informações...</p>
                 </div>
               ) : (
-                <p className="text-muted-foreground text-center py-4">
-                  Nenhum item verificado encontrado.
-                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {identificacao.engenheiro && (
+                    <div>
+                      <p className="text-sm text-muted-foreground">Engenheiro Responsável</p>
+                      <p className="font-medium">{identificacao.engenheiro}</p>
+                    </div>
+                  )}
+                  
+                  {identificacao.supervisor && (
+                    <div>
+                      <p className="text-sm text-muted-foreground">Supervisor Responsável</p>
+                      <p className="font-medium">{identificacao.supervisor}</p>
+                    </div>
+                  )}
+                  
+                  {identificacao.encarregado && (
+                    <div>
+                      <p className="text-sm text-muted-foreground">Encarregado Responsável</p>
+                      <p className="font-medium">{identificacao.encarregado}</p>
+                    </div>
+                  )}
+                  
+                  {identificacao.empresa && (
+                    <div>
+                      <p className="text-sm text-muted-foreground">Empresa</p>
+                      <p className="font-medium">{identificacao.empresa}</p>
+                    </div>
+                  )}
+                  
+                  {identificacao.disciplina && (
+                    <div>
+                      <p className="text-sm text-muted-foreground">Disciplina</p>
+                      <p className="font-medium">{identificacao.disciplina}</p>
+                    </div>
+                  )}
+                  
+                  {!identificacao.engenheiro && !identificacao.supervisor && !identificacao.encarregado && !identificacao.empresa && !identificacao.disciplina && (
+                    <div className="col-span-2 text-center py-4">
+                      <p className="text-muted-foreground">Nenhuma informação de identificação da frente de trabalho disponível.</p>
+                    </div>
+                  )}
+                </div>
               )}
             </CardContent>
           </Card>
-        </div>
+        )}
 
-        {/* Sidebar - Resumo */}
-        <div className="space-y-6">
-          <Card className="h-fit lg:h-full">
-            <CardHeader>
-              <CardTitle>Resumo</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4 flex flex-col justify-between h-full">
-              <div className="text-center">
-                <div className="text-2xl font-bold mb-1">
-                  {inspecao.dados_preenchidos?.itens?.length || 0}
-                </div>
-                <p className="text-sm text-muted-foreground">Itens Verificados</p>
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4 text-center">
-                <div>
-                  <div className="text-lg font-semibold text-green-600">
-                    {inspecao.dados_preenchidos?.itens?.filter((item: any) => item.status === 'conforme')?.length || 0}
+        {/* Itens Verificados */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Itens Verificados</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {inspecao.dados_preenchidos?.itens ? (
+              <div className="space-y-4">
+                {inspecao.dados_preenchidos.itens.map((item: any, index: number) => (
+                  <div key={item.id || index} className="border rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex-1">
+                        <p className="font-medium text-sm">{item.nome}</p>
+                        {item.secao && !item.isSection && (
+                          <p className="text-xs text-muted-foreground mt-1">Seção: {item.secao}</p>
+                        )}
+                      </div>
+                      <div className="ml-4">
+                        {getItemStatusBadge(item.status)}
+                      </div>
+                    </div>
+                    {item.status === 'nao_conforme' && item.observacao_nc && (
+                      <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-md">
+                        <p className="text-sm font-medium text-red-900 mb-1">Observação da Não Conformidade:</p>
+                        <p className="text-sm text-red-800">{item.observacao_nc}</p>
+                      </div>
+                    )}
                   </div>
-                  <p className="text-xs text-muted-foreground">Conformes</p>
-                </div>
-                <div>
-                  <div className="text-lg font-semibold text-red-600">
-                    {inspecao.dados_preenchidos?.itens?.filter((item: any) => item.status === 'nao_conforme')?.length || 0}
-                  </div>
-                  <p className="text-xs text-muted-foreground">Não Conformes</p>
-                </div>
+                ))}
               </div>
-              
-              <div className="pt-2 border-t">
-                <div className="text-xs text-muted-foreground mb-1">Criado em</div>
-                <div className="text-sm">
-                  {format(new Date(inspecao.created_at), 'dd/MM/yyyy HH:mm', { locale: ptBR })}
-                </div>
-              </div>
-              
-              {inspecao.updated_at !== inspecao.created_at && (
-                <div>
-                  <div className="text-xs text-muted-foreground mb-1">Atualizado em</div>
-                  <div className="text-sm">
-                    {format(new Date(inspecao.updated_at), 'dd/MM/yyyy HH:mm', { locale: ptBR })}
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
+            ) : (
+              <p className="text-muted-foreground text-center py-4">
+                Nenhum item verificado encontrado.
+              </p>
+            )}
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
