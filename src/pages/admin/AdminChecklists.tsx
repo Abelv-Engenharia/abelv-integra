@@ -50,6 +50,9 @@ const AdminChecklists = () => {
   const [checklists, setChecklists] = useState<ChecklistAvaliacao[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingChecklist, setEditingChecklist] = useState<ChecklistAvaliacao | null>(null);
+  const [editingItemId, setEditingItemId] = useState<string | null>(null);
+  const [editingItemText, setEditingItemText] = useState('');
+  const [editingItemSecao, setEditingItemSecao] = useState('');
   const [formData, setFormData] = useState({
     nome: '',
     descricao: '',
@@ -267,6 +270,37 @@ const AdminChecklists = () => {
     }));
   };
 
+  const iniciarEdicaoItem = (item: ItemAvaliacao) => {
+    setEditingItemId(item.id);
+    setEditingItemText(item.texto);
+    setEditingItemSecao(item.secao_id || 'sem_secao');
+  };
+
+  const cancelarEdicaoItem = () => {
+    setEditingItemId(null);
+    setEditingItemText('');
+    setEditingItemSecao('');
+  };
+
+  const salvarEdicaoItem = () => {
+    if (!editingItemText.trim()) return;
+    
+    setFormData(prev => ({
+      ...prev,
+      itens_avaliacao: prev.itens_avaliacao.map(item =>
+        item.id === editingItemId
+          ? {
+              ...item,
+              texto: editingItemText.trim(),
+              secao_id: editingItemSecao === 'sem_secao' ? undefined : editingItemSecao
+            }
+          : item
+      )
+    }));
+    
+    cancelarEdicaoItem();
+  };
+
   const getCamposCabecalho = (campos: Json): string[] => {
     return Array.isArray(campos) ? campos as string[] : [];
   };
@@ -482,23 +516,88 @@ const AdminChecklists = () => {
                   
                   <div className="space-y-2 max-h-40 overflow-y-auto">
                     {formData.itens_avaliacao.map((item, index) => (
-                      <div key={item.id} className="flex items-center justify-between p-2 border rounded">
-                        <div className="flex-1">
-                          <span className="text-sm">{item.texto}</span>
-                          {item.secao_id && (
-                            <span className="ml-2 text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded">
-                              {getNomeSecao(item.secao_id)}
-                            </span>
-                          )}
-                        </div>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => removerItem(index)}
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
+                      <div key={item.id} className="border rounded">
+                        {editingItemId === item.id ? (
+                          <div className="p-2 space-y-2">
+                            <div className="flex gap-2">
+                              <Input
+                                value={editingItemText}
+                                onChange={(e) => setEditingItemText(e.target.value)}
+                                placeholder="Texto do item"
+                                className="flex-1"
+                                onKeyPress={(e) => {
+                                  if (e.key === 'Enter') {
+                                    e.preventDefault();
+                                    salvarEdicaoItem();
+                                  }
+                                  if (e.key === 'Escape') {
+                                    e.preventDefault();
+                                    cancelarEdicaoItem();
+                                  }
+                                }}
+                              />
+                              <Select value={editingItemSecao} onValueChange={setEditingItemSecao}>
+                                <SelectTrigger className="w-32">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="sem_secao">Sem seção</SelectItem>
+                                  {formData.secoes.map((secao) => (
+                                    <SelectItem key={secao.id} value={secao.id}>
+                                      {secao.nome}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div className="flex gap-2 justify-end">
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={cancelarEdicaoItem}
+                              >
+                                Cancelar
+                              </Button>
+                              <Button
+                                type="button"
+                                size="sm"
+                                onClick={salvarEdicaoItem}
+                              >
+                                Salvar
+                              </Button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="flex items-center justify-between p-2">
+                            <div className="flex-1">
+                              <span className="text-sm">{item.texto}</span>
+                              {item.secao_id && (
+                                <span className="ml-2 text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded">
+                                  {getNomeSecao(item.secao_id)}
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex gap-1">
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => iniciarEdicaoItem(item)}
+                              >
+                                <Edit2 className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => removerItem(index)}
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
