@@ -12,6 +12,7 @@ import { ChevronLeft, ChevronRight, FileSearch, Send } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useProfile } from "@/hooks/useProfile";
 import { useUserCCAs } from "@/hooks/useUserCCAs";
+import { useFilteredFormData } from "@/hooks/useFilteredFormData";
 import { toast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { PageLoader, InlineLoader } from "@/components/common/PageLoader";
@@ -31,11 +32,39 @@ const CadastrarInspecao = () => {
     dados_preenchidos: {} as any,
     tem_nao_conformidade: false
   });
+  const [camposCabecalho, setCamposCabecalho] = useState<any[]>([]);
+  const [dadosCabecalho, setDadosCabecalho] = useState<any>({});
   const [itensInspecao, setItensInspecao] = useState<any[]>([]);
   
   const { profile } = useProfile();
   const { data: userCCAs = [] } = useUserCCAs();
+  const {
+    ccas,
+    engenheiros,
+    supervisores,
+    encarregados,
+    empresas,
+    disciplinas
+  } = useFilteredFormData({ selectedCcaId: dadosCabecalho.cca_id });
+  
+  // Buscar usuários do sistema para o campo "Responsável pela inspeção"
+  const [usuarios, setUsuarios] = useState<any[]>([]);
 
+
+  const loadUsuarios = async () => {
+    try {
+      const { data } = await supabase
+        .from('profiles')
+        .select('id, nome, email')
+        .order('nome');
+      
+      if (data) {
+        setUsuarios(data);
+      }
+    } catch (error) {
+      console.error('Erro ao carregar usuários:', error);
+    }
+  };
 
   const loadModelos = async () => {
     try {
@@ -59,41 +88,73 @@ const CadastrarInspecao = () => {
   const selecionarModelo = (modelo: any) => {
     setModeloSelecionado(modelo);
     
+    // Configurar campos de cabeçalho
+    const camposCabecalhoModelo = Array.isArray(modelo.campos_cabecalho) ? modelo.campos_cabecalho : [];
+    setCamposCabecalho(camposCabecalhoModelo);
+    
+    // Resetar dados do cabeçalho
+    const dadosIniciais: any = {};
+    camposCabecalhoModelo.forEach((campo: any) => {
+      dadosIniciais[campo] = '';
+    });
+    setDadosCabecalho(dadosIniciais);
+    
     // Carregar itens de avaliação do checklist selecionado
     const itensAvaliacao = Array.isArray(modelo.itens_avaliacao) ? modelo.itens_avaliacao : [];
     const secoes = Array.isArray(modelo.secoes) ? modelo.secoes : [];
     
-    // Organizar itens por seção ou criar uma lista simples
-    let itensOrganizados = [];
+    // Organizar itens por seção
+    let itensOrganizados: any[] = [];
     
     if (secoes.length > 0) {
-      // Se há seções, organizar itens por seção
-      secoes.forEach((secao: any, secaoIndex: number) => {
+      // Se há seções definidas, organizar itens por seção
+      secoes.forEach((secao: any) => {
+        // Adicionar cabeçalho da seção
         itensOrganizados.push({
-          id: `secao_${secaoIndex}`,
+          id: `secao_${secao.nome}`,
           nome: secao.nome,
           tipo: 'secao',
           isSection: true
         });
         
-        itensAvaliacao.forEach((item: any, itemIndex: number) => {
-          if (item.secao === secao.nome || (!item.secao && secaoIndex === 0)) {
-            itensOrganizados.push({
-              id: `item_${itemIndex}`,
-              nome: item.texto || item.nome,
-              tipo: 'item',
-              status: 'nao_se_aplica',
-              secao: secao.nome
-            });
-          }
+        // Filtrar itens que pertencem a esta seção
+        const itensSecao = itensAvaliacao.filter((item: any) => item.secao === secao.nome);
+        itensSecao.forEach((item: any, index: number) => {
+          itensOrganizados.push({
+            id: `item_${secao.nome}_${index}`,
+            nome: item.texto || item.nome || 'Item sem nome',
+            tipo: 'item',
+            status: 'nao_se_aplica',
+            secao: secao.nome
+          });
         });
       });
+      
+      // Adicionar itens sem seção definida (se houver)
+      const itensSemSecao = itensAvaliacao.filter((item: any) => !item.secao);
+      if (itensSemSecao.length > 0) {
+        itensOrganizados.push({
+          id: 'secao_outros',
+          nome: 'Outros Itens',
+          tipo: 'secao',
+          isSection: true
+        });
+        
+        itensSemSecao.forEach((item: any, index: number) => {
+          itensOrganizados.push({
+            id: `item_outros_${index}`,
+            nome: item.texto || item.nome || 'Item sem nome',
+            tipo: 'item',
+            status: 'nao_se_aplica'
+          });
+        });
+      }
     } else {
       // Se não há seções, mostrar todos os itens em sequência
       itensAvaliacao.forEach((item: any, index: number) => {
         itensOrganizados.push({
           id: `item_${index}`,
-          nome: item.texto || item.nome,
+          nome: item.texto || item.nome || 'Item sem nome',
           tipo: 'item',
           status: 'nao_se_aplica'
         });
@@ -126,6 +187,7 @@ const CadastrarInspecao = () => {
         observacoes: dadosInspecao.observacoes,
         dados_preenchidos: {
           itens: itensInspecao,
+          campos_cabecalho: dadosCabecalho,
           data_preenchimento: new Date().toISOString()
         },
         tem_nao_conformidade: temNaoConformidade,
@@ -157,6 +219,8 @@ const CadastrarInspecao = () => {
       setStep(1);
       setModeloSelecionado(null);
       setItensInspecao([]);
+      setCamposCabecalho([]);
+      setDadosCabecalho({});
       setDadosInspecao({
         data_inspecao: new Date(),
         local: '',
@@ -179,6 +243,7 @@ const CadastrarInspecao = () => {
 
   useEffect(() => {
     loadModelos();
+    loadUsuarios();
   }, []);
 
   if (step === 1) {
@@ -263,6 +328,143 @@ const CadastrarInspecao = () => {
             <span className="hidden sm:block">Preencher Inspeção: {modeloSelecionado?.nome}</span>
           </h1>
         </div>
+
+        {/* Campos de Cabeçalho Personalizados */}
+        {camposCabecalho.length > 0 && (
+          <Card className="mb-4 sm:mb-6">
+            <CardHeader>
+              <CardTitle className="text-lg sm:text-xl">Campos do Cabeçalho</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="form-grid">
+                {camposCabecalho.map((campo) => (
+                  <div key={campo} className="space-y-2">
+                    <Label className="text-sm sm:text-base">{campo.replace('_', ' ').toUpperCase()}</Label>
+                    {campo === 'CCA' && (
+                      <Select 
+                        value={dadosCabecalho.CCA || ''} 
+                        onValueChange={(value) => setDadosCabecalho(prev => ({...prev, CCA: value}))}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione o CCA" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {ccas.map((cca) => (
+                            <SelectItem key={cca.id} value={cca.id.toString()}>
+                              {cca.codigo} - {cca.nome}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                    {campo === 'Engenheiro Responsável' && (
+                      <Select 
+                        value={dadosCabecalho['Engenheiro Responsável'] || ''} 
+                        onValueChange={(value) => setDadosCabecalho(prev => ({...prev, 'Engenheiro Responsável': value}))}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione o engenheiro" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {engenheiros.map((eng) => (
+                            <SelectItem key={eng.id} value={eng.id}>
+                              {eng.nome}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                    {campo === 'Supervisor Responsável' && (
+                      <Select 
+                        value={dadosCabecalho['Supervisor Responsável'] || ''} 
+                        onValueChange={(value) => setDadosCabecalho(prev => ({...prev, 'Supervisor Responsável': value}))}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione o supervisor" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {supervisores.map((sup) => (
+                            <SelectItem key={sup.id} value={sup.id}>
+                              {sup.nome}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                    {campo === 'Encarregado Responsável' && (
+                      <Select 
+                        value={dadosCabecalho['Encarregado Responsável'] || ''} 
+                        onValueChange={(value) => setDadosCabecalho(prev => ({...prev, 'Encarregado Responsável': value}))}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione o encarregado" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {encarregados.map((enc) => (
+                            <SelectItem key={enc.id} value={enc.id}>
+                              {enc.nome}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                    {campo === 'Empresa' && (
+                      <Select 
+                        value={dadosCabecalho.Empresa || ''} 
+                        onValueChange={(value) => setDadosCabecalho(prev => ({...prev, Empresa: value}))}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione a empresa" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {empresas.map((emp) => (
+                            <SelectItem key={emp.id} value={emp.id.toString()}>
+                              {emp.nome}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                    {campo === 'Disciplina' && (
+                      <Select 
+                        value={dadosCabecalho.Disciplina || ''} 
+                        onValueChange={(value) => setDadosCabecalho(prev => ({...prev, Disciplina: value}))}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione a disciplina" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {disciplinas.map((disc) => (
+                            <SelectItem key={disc.id} value={disc.id.toString()}>
+                              {disc.nome}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                    {campo === 'Responsável pela inspeção (Usuário do sistema)' && (
+                      <Select 
+                        value={dadosCabecalho['Responsável pela inspeção (Usuário do sistema)'] || ''} 
+                        onValueChange={(value) => setDadosCabecalho(prev => ({...prev, 'Responsável pela inspeção (Usuário do sistema)': value}))}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione o responsável" />
+                         </SelectTrigger>
+                         <SelectContent>
+                           {usuarios.map((user) => (
+                             <SelectItem key={user.id} value={user.id}>
+                               {user.nome}
+                             </SelectItem>
+                           ))}
+                         </SelectContent>
+                      </Select>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Dados Gerais */}
         <Card className="mb-4 sm:mb-6">
