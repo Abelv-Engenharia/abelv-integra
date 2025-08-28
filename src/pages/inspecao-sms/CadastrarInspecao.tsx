@@ -352,6 +352,12 @@ const CadastrarInspecao = () => {
     }));
     setShowSignatureModal(false);
   };
+
+  useEffect(() => {
+    loadModelos();
+    loadUsuarios();
+  }, []);
+
   // Modal de assinatura
   if (showSignatureModal) {
     return (
@@ -364,11 +370,6 @@ const CadastrarInspecao = () => {
       </div>
     );
   }
-
-  useEffect(() => {
-    loadModelos();
-    loadUsuarios();
-  }, []);
 
   // Tela de assinatura (step 3)
   if (step === 3) {
