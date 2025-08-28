@@ -7,6 +7,18 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Download, Eye } from "lucide-react";
 import { useSignedUrl } from "@/hooks/useSignedUrl";
+import { format, parseISO } from "date-fns";
+
+const formatDate = (dateString: string) => {
+  if (!dateString) return "";
+  try {
+    const date = parseISO(dateString);
+    return format(date, "dd/MM/yyyy");
+  } catch (error) {
+    console.error("Erro ao formatar data:", error);
+    return "";
+  }
+};
 
 const VisualizarExecucaoTreinamento = () => {
   const { id } = useParams<{ id: string }>();
@@ -93,12 +105,12 @@ const VisualizarExecucaoTreinamento = () => {
         <CardHeader>
           <CardTitle>Detalhes da Execução</CardTitle>
           <CardDescription>
-            {execucao.treinamento_nome || "Sem nome"} em {new Date(execucao.data).toLocaleDateString("pt-BR")}
+            {execucao.treinamento_nome || "Sem nome"} em {formatDate(execucao.data)}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
-            <div><strong>Data:</strong> {new Date(execucao.data).toLocaleDateString("pt-BR")}</div>
+            <div><strong>Data:</strong> {formatDate(execucao.data)}</div>
             <div><strong>Treinamento:</strong> {execucao.treinamento_nome}</div>
             <div><strong>CCA:</strong> {execucao.cca}</div>
             <div><strong>Processo:</strong> {execucao.processo_treinamento}</div>
