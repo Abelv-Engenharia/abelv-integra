@@ -78,17 +78,14 @@ const VisualizarExecucaoTreinamento = () => {
     setFilePath(null);
   };
 
-  // Faz download usando signed URL válido
+  // Faz download usando edge function
   const handleDownload = async () => {
     if (execucao?.lista_presenca_url) {
       const path = extractPathFromUrl(execucao.lista_presenca_url);
-      await generateSignedUrl("treinamentos-anexos", path);
-
-      setTimeout(() => {
-        if (signedUrl) {
-          window.open(signedUrl, "_blank");
-        }
-      }, 200);
+      
+      // Usar a edge function para servir o PDF
+      const functionUrl = `https://xexgdtlctyuycohzhmuu.supabase.co/functions/v1/serve-treinamento-file?file=${encodeURIComponent(path)}`;
+      window.open(functionUrl, '_blank');
     }
   };
 
