@@ -1,6 +1,6 @@
 
 import React from "react";
-import { FileText, HelpCircle } from "lucide-react";
+import { BarChart } from "lucide-react";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import {
   SidebarMenu,
@@ -32,7 +32,7 @@ export default function SidebarSectionRelatorios({ openMenu, toggleMenu }: Props
               onClick={() => toggleMenu("relatorios")}
               className="text-white hover:bg-slate-600"
             >
-              <FileText className="h-4 w-4 flex-shrink-0" />
+              <BarChart className="h-4 w-4 flex-shrink-0" />
               <span className="break-words">RELATÓRIOS</span>
               {isRelatoriosOpen ? <ChevronDown className="h-4 w-4 ml-auto" /> : <ChevronRight className="h-4 w-4 ml-auto" />}
             </SidebarMenuButton>
@@ -49,32 +49,9 @@ export default function SidebarSectionRelatorios({ openMenu, toggleMenu }: Props
                   </Link>
                 </SidebarMenuSubButton>
               </SidebarMenuSubItem>
-              <SidebarMenuSubItem>
-                <SidebarMenuSubButton 
-                  asChild
-                  className={currentPath === "/relatorios/idsms" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
-                >
-                  <Link to="/relatorios/idsms" className="flex items-center gap-2">
-                    <span className="text-xs leading-tight break-words min-w-0">ID SMS</span>
-                  </Link>
-                </SidebarMenuSubButton>
-              </SidebarMenuSubItem>
             </SidebarMenuSub>
           </CollapsibleContent>
         </Collapsible>
-      </SidebarMenuItem>
-      
-      {/* Menu Suporte - sempre visível */}
-      <SidebarMenuItem>
-        <SidebarMenuButton 
-          asChild 
-          className={currentPath === "/suporte" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
-        >
-          <Link to="/suporte" className="flex items-center gap-2">
-            <HelpCircle className="h-4 w-4 flex-shrink-0" />
-            <span className="break-words">SUPORTE</span>
-          </Link>
-        </SidebarMenuButton>
       </SidebarMenuItem>
     </SidebarMenu>
   );
