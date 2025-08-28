@@ -121,6 +121,25 @@ serve(async (req) => {
       )
     }
 
+    // Buscar dados do responsável técnico selecionado para assinatura
+    if (camposCabecalho.assinaturas?.responsavel_tecnico) {
+      const responsavelTecnicoId = camposCabecalho.assinaturas.responsavel_tecnico
+      
+      // Verificar em todas as tabelas de responsáveis
+      promises.push(
+        supabase.from('engenheiros').select('nome').eq('id', responsavelTecnicoId).single()
+          .then(({ data }) => { if (data) responsaveis.responsavel_tecnico = data.nome })
+          .catch(() => {
+            return supabase.from('supervisores').select('nome').eq('id', responsavelTecnicoId).single()
+              .then(({ data }) => { if (data) responsaveis.responsavel_tecnico = data.nome })
+              .catch(() => {
+                return supabase.from('encarregados').select('nome').eq('id', responsavelTecnicoId).single()
+                  .then(({ data }) => { if (data) responsaveis.responsavel_tecnico = data.nome })
+              })
+          })
+      )
+    }
+
     // Aguardar todas as consultas
     await Promise.all(promises)
 
@@ -479,18 +498,30 @@ function generateHTMLReport(inspecao: InspectionData, responsaveis: any = {}): s
             <div class="signature-box">
                 <p><strong>Responsável pela Inspeção</strong></p>
                 <p>${inspecao.profiles?.nome || 'N/A'}</p>
-                <br><br>
-                <div style="border-top: 1px solid #333; margin-top: 40px; padding-top: 5px;">
-                    Assinatura
-                </div>
+                ${camposCabecalho.assinaturas?.assinatura_inspetor ? `
+                    <div style="margin: 20px 0;">
+                        <img src="${camposCabecalho.assinaturas.assinatura_inspetor}" alt="Assinatura do Inspetor" style="max-width: 200px; max-height: 80px; border: 1px solid #ddd; padding: 5px;">
+                    </div>
+                ` : `
+                    <br><br>
+                    <div style="border-top: 1px solid #333; margin-top: 40px; padding-top: 5px;">
+                        Assinatura
+                    </div>
+                `}
             </div>
             <div class="signature-box">
                 <p><strong>Supervisor Responsável</strong></p>
-                <p>_______________________</p>
-                <br><br>
-                <div style="border-top: 1px solid #333; margin-top: 40px; padding-top: 5px;">
-                    Assinatura
-                </div>
+                <p>${responsaveis.responsavel_tecnico || '_______________________'}</p>
+                ${camposCabecalho.assinaturas?.assinatura_responsavel_tecnico ? `
+                    <div style="margin: 20px 0;">
+                        <img src="${camposCabecalho.assinaturas.assinatura_responsavel_tecnico}" alt="Assinatura do Supervisor" style="max-width: 200px; max-height: 80px; border: 1px solid #ddd; padding: 5px;">
+                    </div>
+                ` : `
+                    <br><br>
+                    <div style="border-top: 1px solid #333; margin-top: 40px; padding-top: 5px;">
+                        Assinatura
+                    </div>
+                `}
             </div>
         </div>
     </div>
