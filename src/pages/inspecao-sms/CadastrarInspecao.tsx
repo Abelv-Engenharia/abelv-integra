@@ -45,7 +45,7 @@ const CadastrarInspecao = () => {
     encarregados,
     empresas,
     disciplinas
-  } = useFilteredFormData({ selectedCcaId: dadosCabecalho.cca_id });
+  } = useFilteredFormData({ selectedCcaId: dadosInspecao.cca_id });
   
   // Buscar usuários do sistema para o campo "Responsável pela inspeção"
   const [usuarios, setUsuarios] = useState<any[]>([]);
@@ -329,143 +329,6 @@ const CadastrarInspecao = () => {
           </h1>
         </div>
 
-        {/* Campos de Cabeçalho Personalizados */}
-        {camposCabecalho.length > 0 && (
-          <Card className="mb-4 sm:mb-6">
-            <CardHeader>
-              <CardTitle className="text-lg sm:text-xl">Campos do Cabeçalho</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="form-grid">
-                {camposCabecalho.map((campo) => (
-                  <div key={campo} className="space-y-2">
-                    <Label className="text-sm sm:text-base">{campo.replace('_', ' ').toUpperCase()}</Label>
-                    {campo === 'CCA' && (
-                      <Select 
-                        value={dadosCabecalho.CCA || ''} 
-                        onValueChange={(value) => setDadosCabecalho(prev => ({...prev, CCA: value}))}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione o CCA" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {ccas.map((cca) => (
-                            <SelectItem key={cca.id} value={cca.id.toString()}>
-                              {cca.codigo} - {cca.nome}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    )}
-                    {campo === 'Engenheiro Responsável' && (
-                      <Select 
-                        value={dadosCabecalho['Engenheiro Responsável'] || ''} 
-                        onValueChange={(value) => setDadosCabecalho(prev => ({...prev, 'Engenheiro Responsável': value}))}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione o engenheiro" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {engenheiros.map((eng) => (
-                            <SelectItem key={eng.id} value={eng.id}>
-                              {eng.nome}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    )}
-                    {campo === 'Supervisor Responsável' && (
-                      <Select 
-                        value={dadosCabecalho['Supervisor Responsável'] || ''} 
-                        onValueChange={(value) => setDadosCabecalho(prev => ({...prev, 'Supervisor Responsável': value}))}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione o supervisor" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {supervisores.map((sup) => (
-                            <SelectItem key={sup.id} value={sup.id}>
-                              {sup.nome}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    )}
-                    {campo === 'Encarregado Responsável' && (
-                      <Select 
-                        value={dadosCabecalho['Encarregado Responsável'] || ''} 
-                        onValueChange={(value) => setDadosCabecalho(prev => ({...prev, 'Encarregado Responsável': value}))}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione o encarregado" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {encarregados.map((enc) => (
-                            <SelectItem key={enc.id} value={enc.id}>
-                              {enc.nome}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    )}
-                    {campo === 'Empresa' && (
-                      <Select 
-                        value={dadosCabecalho.Empresa || ''} 
-                        onValueChange={(value) => setDadosCabecalho(prev => ({...prev, Empresa: value}))}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione a empresa" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {empresas.map((emp) => (
-                            <SelectItem key={emp.id} value={emp.id.toString()}>
-                              {emp.nome}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    )}
-                    {campo === 'Disciplina' && (
-                      <Select 
-                        value={dadosCabecalho.Disciplina || ''} 
-                        onValueChange={(value) => setDadosCabecalho(prev => ({...prev, Disciplina: value}))}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione a disciplina" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {disciplinas.map((disc) => (
-                            <SelectItem key={disc.id} value={disc.id.toString()}>
-                              {disc.nome}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    )}
-                    {campo === 'Responsável pela inspeção (Usuário do sistema)' && (
-                      <Select 
-                        value={dadosCabecalho['Responsável pela inspeção (Usuário do sistema)'] || ''} 
-                        onValueChange={(value) => setDadosCabecalho(prev => ({...prev, 'Responsável pela inspeção (Usuário do sistema)': value}))}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione o responsável" />
-                         </SelectTrigger>
-                         <SelectContent>
-                           {usuarios.map((user) => (
-                             <SelectItem key={user.id} value={user.id}>
-                               {user.nome}
-                             </SelectItem>
-                           ))}
-                         </SelectContent>
-                      </Select>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
         {/* Dados Gerais */}
         <Card className="mb-4 sm:mb-6">
           <CardHeader>
@@ -495,17 +358,23 @@ const CadastrarInspecao = () => {
                 />
               </div>
               <div className="space-y-2">
-                <Label className="text-sm sm:text-base">CCA</Label>
+                <Label className="text-sm sm:text-base">CCA *</Label>
                 <Select 
                   value={dadosInspecao.cca_id} 
-                  onValueChange={(value) => 
-                    setDadosInspecao({...dadosInspecao, cca_id: value})
-                  }
+                  onValueChange={(value) => {
+                    setDadosInspecao({...dadosInspecao, cca_id: value});
+                    // Reset campos de cabeçalho quando CCA muda
+                    const dadosIniciais: any = {};
+                    camposCabecalho.forEach((campo: any) => {
+                      dadosIniciais[campo] = '';
+                    });
+                    setDadosCabecalho(dadosIniciais);
+                  }}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione o CCA" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-background border border-border z-50">
                     {userCCAs.map((cca) => (
                       <SelectItem key={cca.id} value={cca.id.toString()}>
                         <span className="block sm:hidden">{cca.codigo}</span>
@@ -518,6 +387,143 @@ const CadastrarInspecao = () => {
             </div>
           </CardContent>
         </Card>
+
+        {/* Campos de Cabeçalho Personalizados - só aparecem se CCA foi selecionado */}
+        {camposCabecalho.length > 0 && dadosInspecao.cca_id && (
+          <Card className="mb-4 sm:mb-6">
+            <CardHeader>
+              <CardTitle className="text-lg sm:text-xl">Campos do Cabeçalho</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="form-grid">
+                {camposCabecalho.map((campo) => (
+                  <div key={campo} className="space-y-2">
+                    <Label className="text-sm sm:text-base">{campo.replace('_', ' ').toUpperCase()}</Label>
+                    {campo === 'CCA' && (
+                      <Select 
+                        value={dadosCabecalho.CCA || ''} 
+                        onValueChange={(value) => setDadosCabecalho(prev => ({...prev, CCA: value}))}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione o CCA" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-background border border-border z-50">
+                          {ccas.map((cca) => (
+                            <SelectItem key={cca.id} value={cca.id.toString()}>
+                              {cca.codigo} - {cca.nome}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                    {campo === 'Engenheiro Responsável' && (
+                      <Select 
+                        value={dadosCabecalho['Engenheiro Responsável'] || ''} 
+                        onValueChange={(value) => setDadosCabecalho(prev => ({...prev, 'Engenheiro Responsável': value}))}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione o engenheiro" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-background border border-border z-50">
+                          {engenheiros.map((eng) => (
+                            <SelectItem key={eng.id} value={eng.id}>
+                              {eng.nome}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                    {campo === 'Supervisor Responsável' && (
+                      <Select 
+                        value={dadosCabecalho['Supervisor Responsável'] || ''} 
+                        onValueChange={(value) => setDadosCabecalho(prev => ({...prev, 'Supervisor Responsável': value}))}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione o supervisor" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-background border border-border z-50">
+                          {supervisores.map((sup) => (
+                            <SelectItem key={sup.id} value={sup.id}>
+                              {sup.nome}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                    {campo === 'Encarregado Responsável' && (
+                      <Select 
+                        value={dadosCabecalho['Encarregado Responsável'] || ''} 
+                        onValueChange={(value) => setDadosCabecalho(prev => ({...prev, 'Encarregado Responsável': value}))}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione o encarregado" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-background border border-border z-50">
+                          {encarregados.map((enc) => (
+                            <SelectItem key={enc.id} value={enc.id}>
+                              {enc.nome}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                    {campo === 'Empresa' && (
+                      <Select 
+                        value={dadosCabecalho.Empresa || ''} 
+                        onValueChange={(value) => setDadosCabecalho(prev => ({...prev, Empresa: value}))}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione a empresa" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-background border border-border z-50">
+                          {empresas.map((emp) => (
+                            <SelectItem key={emp.id} value={emp.id.toString()}>
+                              {emp.nome}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                    {campo === 'Disciplina' && (
+                      <Select 
+                        value={dadosCabecalho.Disciplina || ''} 
+                        onValueChange={(value) => setDadosCabecalho(prev => ({...prev, Disciplina: value}))}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione a disciplina" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-background border border-border z-50">
+                          {disciplinas.map((disc) => (
+                            <SelectItem key={disc.id} value={disc.id.toString()}>
+                              {disc.nome}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                    {campo === 'Responsável pela inspeção (Usuário do sistema)' && (
+                      <Select 
+                        value={dadosCabecalho['Responsável pela inspeção (Usuário do sistema)'] || ''} 
+                        onValueChange={(value) => setDadosCabecalho(prev => ({...prev, 'Responsável pela inspeção (Usuário do sistema)': value}))}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione o responsável" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-background border border-border z-50">
+                          {usuarios.map((user) => (
+                            <SelectItem key={user.id} value={user.id}>
+                              {user.nome}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Itens de Inspeção */}
         <Card className="mb-4 sm:mb-6">
