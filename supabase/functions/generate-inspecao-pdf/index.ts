@@ -106,6 +106,8 @@ function generateHTMLReport(inspecao: InspectionData): string {
   const naoConformidades = itens.filter((item: any) => 
     item.status === 'nao_conforme' && item.observacao_nc
   )
+  
+  const camposCabecalho = inspecao.dados_preenchidos?.campos_cabecalho || {}
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('pt-BR')
@@ -137,10 +139,20 @@ function generateHTMLReport(inspecao: InspectionData): string {
             padding: 20px;
         }
         .header {
-            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
             border-bottom: 2px solid #0066cc;
             padding-bottom: 20px;
             margin-bottom: 30px;
+        }
+        .header-logo {
+            width: 80px;
+            height: auto;
+        }
+        .header-content {
+            flex: 1;
+            text-align: center;
         }
         .header h1 {
             color: #0066cc;
@@ -172,8 +184,11 @@ function generateHTMLReport(inspecao: InspectionData): string {
         }
         .section h2 {
             color: #0066cc;
-            border-bottom: 1px solid #ddd;
-            padding-bottom: 10px;
+            background-color: #e7f3ff;
+            border-left: 4px solid #0066cc;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
         }
         .item {
             border: 1px solid #ddd;
@@ -261,13 +276,17 @@ function generateHTMLReport(inspecao: InspectionData): string {
 </head>
 <body>
     <div class="header">
-        <h1>RELATÓRIO DE INSPEÇÃO SMS</h1>
-        <p>Data: ${formatDate(inspecao.data_inspecao)}</p>
+        <div style="width: 80px; height: 60px; background-color: #0066cc; border-radius: 5px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 18px;">ABELV</div>
+        <div class="header-content">
+            <h1>RELATÓRIO DE INSPEÇÃO SMS</h1>
+            <p>Data: ${formatDate(inspecao.data_inspecao)}</p>
+        </div>
+        <div style="width: 80px;"></div>
     </div>
 
     <div class="info-grid">
         <div class="info-item">
-            <div class="info-label">Tipo de Inspeção:</div>
+            <div class="info-label">Nome da Inspeção:</div>
             <div class="info-value">${inspecao.checklists_avaliacao?.nome || 'N/A'}</div>
         </div>
         <div class="info-item">
@@ -282,6 +301,21 @@ function generateHTMLReport(inspecao: InspectionData): string {
             <div class="info-label">CCA:</div>
             <div class="info-value">${inspecao.ccas ? `${inspecao.ccas.codigo} - ${inspecao.ccas.nome}` : 'N/A'}</div>
         </div>
+    </div>
+    
+    ${Object.keys(camposCabecalho).length > 0 ? `
+    <div class="section">
+        <h2>Identificação da Frente de Trabalho</h2>
+        <div class="info-grid">
+            ${Object.entries(camposCabecalho).map(([key, value]) => `
+                <div class="info-item">
+                    <div class="info-label">${key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}:</div>
+                    <div class="info-value">${value || 'N/A'}</div>
+                </div>
+            `).join('')}
+        </div>
+    </div>
+    ` : ''}
     </div>
 
     <div class="summary">
