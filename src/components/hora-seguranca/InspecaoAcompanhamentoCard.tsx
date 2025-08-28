@@ -51,14 +51,24 @@ export function InspecaoAcompanhamentoCard({
       
       console.log('URL da edge function:', functionUrl);
       
-      // Criar um link temporário e simular clique para evitar bloqueio de popup
-      const link = document.createElement('a');
-      link.href = functionUrl;
-      link.target = '_blank';
-      link.rel = 'noopener noreferrer';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      // Tentar forçar o download do arquivo
+      try {
+        const response = await fetch(functionUrl);
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = fileName;
+        link.target = '_blank';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      } catch (fetchError) {
+        console.error('Erro ao fazer fetch do arquivo:', fetchError);
+        // Fallback: tentar abrir diretamente
+        window.location.href = functionUrl;
+      }
       
     } catch (err) {
       console.error('Erro ao processar relatório:', err);
