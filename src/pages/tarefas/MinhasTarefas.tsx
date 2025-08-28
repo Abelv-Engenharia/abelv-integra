@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
@@ -15,7 +16,6 @@ const MinhasTarefas = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("todas");
   const [loading, setLoading] = useState(true);
-  const [debugInfo, setDebugInfo] = useState<string>("");
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
@@ -27,79 +27,17 @@ const MinhasTarefas = () => {
         console.log("Usuário autenticado:", user?.id, user?.email);
         
         if (!user) {
-          setDebugInfo("❌ Usuário não autenticado");
           setLoading(false);
           return;
         }
         
-        setDebugInfo("⏳ Carregando tarefas...");
         const data = await tarefasService.getMyTasks();
         console.log("=== MinhasTarefas: Resultado final ===", data?.length || 0, data);
         
         setTarefas(data);
         setFilteredTarefas(data);
-        
-        if (data.length === 0) {
-          setDebugInfo(`
-❌ Nenhuma tarefa encontrada para ${user?.email}
-
-Possíveis causas:
-• Você não é responsável por nenhuma tarefa
-• Você não criou nenhuma tarefa
-• As políticas RLS podem estar restringindo o acesso
-• Verifique se existem tarefas na tabela 'tarefas' onde:
-  - responsavel_id = '${user?.id}' OU
-  - criado_por = '${user?.id}'
-
-🔧 User ID: ${user?.id}
-
-Verificação das políticas RLS:
-• A query utilizada: SELECT * FROM tarefas WHERE responsavel_id = '${user?.id}' OR criado_por = '${user?.id}'
-• Verifique se há dados na tabela 'profiles' para o responsável
-          `);
-        } else {
-          // Separar tarefas por tipo de relação
-          const tarefasComoResponsavel = data.filter(t => t.responsavel.id === user?.id);
-          const tarefasCriadas = data.filter(t => {
-            // Verificar se a tarefa foi criada pelo usuário atual
-            const tarefaComCriador = t as any;
-            return tarefaComCriador.criado_por === user?.id;
-          });
-          
-          setDebugInfo(`
-✅ ${data.length} tarefa(s) encontrada(s):
-
-📋 Resumo das relações:
-• ${tarefasComoResponsavel.length} tarefa(s) onde você é RESPONSÁVEL
-• ${tarefasCriadas.length} tarefa(s) CRIADAS por você
-
-👤 User ID: ${user?.id}
-📧 Email: ${user?.email}
-
-📊 Detalhes das tarefas:
-${data.map((t, i) => {
-  const tarefaComCriador = t as any;
-  const isResponsavel = t.responsavel.id === user?.id;
-  const isCriador = tarefaComCriador.criado_por === user?.id;
-  
-  return `
-${i + 1}. "${t.titulo || t.descricao.substring(0, 40)}..."
-   • ID: ${t.id.substring(0, 8)}...
-   • Status: ${t.status}
-   • Responsável: ${t.responsavel.nome}
-   • ${isResponsavel ? '👤 VOCÊ É O RESPONSÁVEL' : ''}
-   • ${isCriador ? '✍️ VOCÊ CRIOU ESTA TAREFA' : ''}
-   • ${!isResponsavel && !isCriador ? '❓ Relação não identificada' : ''}`;
-}).join('\n')}
-
-🔍 Critérios de busca utilizados:
-• Tarefas onde responsavel_id = '${user?.id}' OU
-• Tarefas onde criado_por = '${user?.id}'
-          `);
-        }
       } catch (error) {
         console.error("Erro ao carregar minhas tarefas:", error);
-        setDebugInfo(`❌ Erro ao carregar tarefas: ${error}`);
         toast({
           title: "Erro ao carregar tarefas",
           description: "Não foi possível carregar suas tarefas. Tente novamente.",
@@ -210,12 +148,6 @@ ${i + 1}. "${t.titulo || t.descricao.substring(0, 40)}..."
         <p className="text-muted-foreground">
           Acompanhe e gerencie suas tarefas atribuídas ou criadas por você
         </p>
-        {debugInfo && (
-          <div className="text-sm bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 p-4 rounded-lg">
-            <strong className="text-blue-800 dark:text-blue-200">Debug Info:</strong>
-            <pre className="whitespace-pre-wrap mt-2 text-blue-700 dark:text-blue-300 font-mono text-xs">{debugInfo}</pre>
-          </div>
-        )}
       </div>
 
       {!loading && tarefas.length > 0 && (
@@ -270,11 +202,6 @@ ${i + 1}. "${t.titulo || t.descricao.substring(0, 40)}..."
                     <li>Você é definido como responsável por uma tarefa</li>
                     <li>Você criou uma tarefa</li>
                   </ul>
-                </div>
-                <div className="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded border border-yellow-200 dark:border-yellow-800">
-                  <p className="text-yellow-800 dark:text-yellow-200 text-sm">
-                    💡 Se você acredita que deveria ver tarefas aqui, verifique os logs de debug acima ou consulte o administrador do sistema.
-                  </p>
                 </div>
               </div>
             )}
