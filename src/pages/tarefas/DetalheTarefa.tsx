@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -199,7 +200,7 @@ const DetalheTarefa = () => {
       let observacoesAtualizadas = "";
       
       if (observacoesExistentes.trim()) {
-        // Separar observações com duas quebras de linha
+        // Adicionar nova observação ao FINAL, separada por duas quebras de linha
         observacoesAtualizadas = observacoesExistentes + "\n\n" + novaObservacao;
       } else {
         observacoesAtualizadas = novaObservacao;
