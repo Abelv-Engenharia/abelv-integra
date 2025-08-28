@@ -105,32 +105,63 @@ const CadastrarInspecao = () => {
 
     // Organizar itens por seção
     let itensOrganizados: any[] = [];
+    
+    console.log('Seções do modelo:', secoes);
+    console.log('Itens de avaliação:', itensAvaliacao);
+
     if (secoes.length > 0) {
       // Se há seções definidas, organizar itens por seção
       secoes.forEach((secao: any) => {
+        console.log('Processando seção:', secao);
+        
         // Adicionar cabeçalho da seção
         itensOrganizados.push({
-          id: `secao_${secao.nome}`,
-          nome: secao.nome,
+          id: `secao_${secao.nome || secao.id}`,
+          nome: secao.nome || secao.titulo || 'Seção sem nome',
           tipo: 'secao',
           isSection: true
         });
 
         // Filtrar itens que pertencem a esta seção
-        const itensSecao = itensAvaliacao.filter((item: any) => item.secao === secao.nome);
+        // Verificar múltiplos campos possíveis para a seção
+        const nomeSecao = secao.nome || secao.titulo;
+        const itensSecao = itensAvaliacao.filter((item: any) => {
+          return item.secao === nomeSecao || 
+                 item.secao_nome === nomeSecao ||
+                 item.categoria === nomeSecao ||
+                 item.grupo === nomeSecao ||
+                 (item.secao_id && secao.id && item.secao_id === secao.id);
+        });
+        
+        console.log(`Itens encontrados para seção "${nomeSecao}":`, itensSecao);
+        
         itensSecao.forEach((item: any, index: number) => {
           itensOrganizados.push({
-            id: `item_${secao.nome}_${index}`,
-            nome: item.texto || item.nome || 'Item sem nome',
+            id: `item_${nomeSecao}_${index}`,
+            nome: item.texto || item.nome || item.pergunta || item.descricao || 'Item sem nome',
             tipo: 'item',
             status: 'nao_se_aplica',
-            secao: secao.nome
+            secao: nomeSecao,
+            observacao_nc: ''
           });
         });
       });
 
       // Adicionar itens sem seção definida (se houver)
-      const itensSemSecao = itensAvaliacao.filter((item: any) => !item.secao);
+      const itensSemSecao = itensAvaliacao.filter((item: any) => {
+        const temSecao = secoes.some((secao: any) => {
+          const nomeSecao = secao.nome || secao.titulo;
+          return item.secao === nomeSecao || 
+                 item.secao_nome === nomeSecao ||
+                 item.categoria === nomeSecao ||
+                 item.grupo === nomeSecao ||
+                 (item.secao_id && secao.id && item.secao_id === secao.id);
+        });
+        return !temSecao;
+      });
+      
+      console.log('Itens sem seção:', itensSemSecao);
+      
       if (itensSemSecao.length > 0) {
         itensOrganizados.push({
           id: 'secao_outros',
@@ -141,9 +172,10 @@ const CadastrarInspecao = () => {
         itensSemSecao.forEach((item: any, index: number) => {
           itensOrganizados.push({
             id: `item_outros_${index}`,
-            nome: item.texto || item.nome || 'Item sem nome',
+            nome: item.texto || item.nome || item.pergunta || item.descricao || 'Item sem nome',
             tipo: 'item',
-            status: 'nao_se_aplica'
+            status: 'nao_se_aplica',
+            observacao_nc: ''
           });
         });
       }
@@ -152,12 +184,15 @@ const CadastrarInspecao = () => {
       itensAvaliacao.forEach((item: any, index: number) => {
         itensOrganizados.push({
           id: `item_${index}`,
-          nome: item.texto || item.nome || 'Item sem nome',
+          nome: item.texto || item.nome || item.pergunta || item.descricao || 'Item sem nome',
           tipo: 'item',
-          status: 'nao_se_aplica'
+          status: 'nao_se_aplica',
+          observacao_nc: ''
         });
       });
     }
+    
+    console.log('Itens organizados finais:', itensOrganizados);
     setItensInspecao(itensOrganizados);
     setStep(2);
   };
