@@ -254,7 +254,7 @@ const VisualizarInspecao = () => {
                     <p className="text-sm text-muted-foreground">Itens Verificados</p>
                   </div>
                   
-                  <div className="grid grid-cols-2 gap-4 text-center">
+                  <div className="grid grid-cols-3 gap-2 text-center">
                     <div>
                       <div className="text-lg font-semibold text-green-600">
                         {inspecao.dados_preenchidos?.itens?.filter((item: any) => item.status === 'conforme')?.length || 0}
@@ -266,6 +266,12 @@ const VisualizarInspecao = () => {
                         {inspecao.dados_preenchidos?.itens?.filter((item: any) => item.status === 'nao_conforme')?.length || 0}
                       </div>
                       <p className="text-xs text-muted-foreground">Não Conformes</p>
+                    </div>
+                    <div>
+                      <div className="text-lg font-semibold text-gray-600">
+                        {inspecao.dados_preenchidos?.itens?.filter((item: any) => item.status === 'nao_se_aplica')?.length || 0}
+                      </div>
+                      <p className="text-xs text-muted-foreground">Não Aplicáveis</p>
                     </div>
                   </div>
                 </div>
