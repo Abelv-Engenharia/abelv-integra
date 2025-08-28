@@ -31,7 +31,12 @@ export function InspecaoAcompanhamentoCard({
   };
 
   const handleViewReport = async () => {
-    if (!inspecao.relatorio_url) return;
+    if (!inspecao.relatorio_url) {
+      console.log('Nenhuma URL de relatório encontrada');
+      return;
+    }
+    
+    console.log('URL original do relatório:', inspecao.relatorio_url);
     
     try {
       // Extrai o path do arquivo da URL completa
@@ -39,12 +44,17 @@ export function InspecaoAcompanhamentoCard({
       const pathParts = url.pathname.split('/');
       const fileName = pathParts[pathParts.length - 1];
       
+      console.log('Nome do arquivo extraído:', fileName);
+      
       // Gera signed URL diretamente
       const { data, error: storageError } = await supabase.storage
         .from('relatorios-inspecao-hsa')
         .createSignedUrl(fileName, 120);
       
+      console.log('Resposta do Supabase:', { data, error: storageError });
+      
       if (storageError || !data?.signedUrl) {
+        console.error('Erro ao gerar signed URL:', storageError);
         toast({
           title: "Erro ao abrir relatório",
           description: storageError?.message || "Não foi possível gerar link do arquivo",
@@ -53,10 +63,15 @@ export function InspecaoAcompanhamentoCard({
         return;
       }
 
+      // Constrói a URL completa
+      const fullUrl = `https://xexgdtlctyuycohzhmuu.supabase.co/storage/v1${data.signedUrl}`;
+      console.log('URL completa gerada:', fullUrl);
+
       // Abre o relatório em nova aba
-      window.open(data.signedUrl, '_blank');
+      window.open(fullUrl, '_blank');
       
     } catch (err) {
+      console.error('Erro no handleViewReport:', err);
       toast({
         title: "Erro ao abrir relatório",
         description: "Não foi possível acessar o arquivo",
