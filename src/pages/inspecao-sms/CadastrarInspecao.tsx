@@ -42,14 +42,14 @@ const CadastrarInspecao = () => {
   const loadTiposInspecao = async () => {
     try {
       setIsLoadingTipos(true);
-      const { data } = await supabase
-        .from('tipos_inspecao_sms')
-        .select('*')
-        .eq('ativo', true);
-      
-      if (data) {
-        setTiposInspecao(data);
-      }
+      // Por enquanto, carregar todos os tipos de checklist disponíveis
+      // Pode ser expandido para categorizar checklists por tipo
+      setTiposInspecao([
+        { id: 'todos', nome: 'Todos os tipos' },
+        { id: 'seguranca', nome: 'Segurança' },
+        { id: 'qualidade', nome: 'Qualidade' },
+        { id: 'meio_ambiente', nome: 'Meio Ambiente' }
+      ]);
     } catch (error) {
       console.error('Erro ao carregar tipos:', error);
     } finally {
@@ -61,15 +61,13 @@ const CadastrarInspecao = () => {
     try {
       setIsLoadingModelos(true);
       let query = supabase
-        .from('modelos_inspecao_sms')
-        .select(`
-          *,
-          tipos_inspecao_sms(nome)
-        `)
+        .from('checklists_avaliacao')
+        .select('*')
         .eq('ativo', true);
 
       if (filtroTipo) {
-        query = query.eq('tipo_inspecao_id', filtroTipo);
+        // Filtrar por tipo se houver filtro específico
+        // Por enquanto, mostrar todos os checklists
       }
 
       const { data } = await query.order('nome');
@@ -86,20 +84,49 @@ const CadastrarInspecao = () => {
 
   const selecionarModelo = (modelo: any) => {
     setModeloSelecionado(modelo);
-    // Simular campos dinâmicos baseados no modelo
-    const camposSimulados = [
-      { id: 'item1', nome: 'EPIs em uso correto', tipo: 'conformidade' },
-      { id: 'item2', nome: 'Área limpa e organizada', tipo: 'conformidade' },
-      { id: 'item3', nome: 'Ferramentas em bom estado', tipo: 'conformidade' },
-      { id: 'item4', nome: 'Sinalização adequada', tipo: 'conformidade' },
-      { id: 'item5', nome: 'Procedimentos sendo seguidos', tipo: 'conformidade' }
-    ];
     
-    setItensInspecao(camposSimulados.map(item => ({
-      ...item,
-      status: 'nao_se_aplica'
-    })));
+    // Carregar itens de avaliação do checklist selecionado
+    const itensAvaliacao = Array.isArray(modelo.itens_avaliacao) ? modelo.itens_avaliacao : [];
+    const secoes = Array.isArray(modelo.secoes) ? modelo.secoes : [];
     
+    // Organizar itens por seção ou criar uma lista simples
+    let itensOrganizados = [];
+    
+    if (secoes.length > 0) {
+      // Se há seções, organizar itens por seção
+      secoes.forEach((secao: any, secaoIndex: number) => {
+        itensOrganizados.push({
+          id: `secao_${secaoIndex}`,
+          nome: secao.nome,
+          tipo: 'secao',
+          isSection: true
+        });
+        
+        itensAvaliacao.forEach((item: any, itemIndex: number) => {
+          if (item.secao === secao.nome || (!item.secao && secaoIndex === 0)) {
+            itensOrganizados.push({
+              id: `item_${itemIndex}`,
+              nome: item.texto || item.nome,
+              tipo: 'item',
+              status: 'nao_se_aplica',
+              secao: secao.nome
+            });
+          }
+        });
+      });
+    } else {
+      // Se não há seções, mostrar todos os itens em sequência
+      itensAvaliacao.forEach((item: any, index: number) => {
+        itensOrganizados.push({
+          id: `item_${index}`,
+          nome: item.texto || item.nome,
+          tipo: 'item',
+          status: 'nao_se_aplica'
+        });
+      });
+    }
+    
+    setItensInspecao(itensOrganizados);
     setStep(2);
   };
 
@@ -255,12 +282,17 @@ const CadastrarInspecao = () => {
                         <CardTitle className="text-base sm:text-lg line-clamp-2">{modelo.nome}</CardTitle>
                       </CardHeader>
                       <CardContent className="pt-0">
-                        <p className="text-sm text-muted-foreground mb-2 line-clamp-1">
-                          {modelo.tipos_inspecao_sms?.nome}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          {(modelo.campos_substituicao || []).length} campos configurados
-                        </p>
+                         <p className="text-sm text-muted-foreground mb-2 line-clamp-2">
+                           {modelo.descricao || 'Checklist de avaliação'}
+                         </p>
+                         <p className="text-xs text-muted-foreground">
+                           {Array.isArray(modelo.itens_avaliacao) ? modelo.itens_avaliacao.length : 0} itens de verificação
+                         </p>
+                         {modelo.requer_assinatura && (
+                           <p className="text-xs text-blue-600 mt-1">
+                             ✓ Requer assinatura
+                           </p>
+                         )}
                       </CardContent>
                     </Card>
                   ))
@@ -352,37 +384,49 @@ const CadastrarInspecao = () => {
           </CardHeader>
           <CardContent>
             <div className="section-spacing">
-              {itensInspecao.map((item, index) => (
-                <div key={item.id} className="border rounded-lg p-3 sm:p-4">
-                  <h4 className="font-medium mb-3 text-sm sm:text-base">
-                    {index + 1}. {item.nome}
-                  </h4>
-                  <RadioGroup
-                    value={item.status}
-                    onValueChange={(value) => handleItemChange(item.id, value)}
-                    className="grid grid-cols-1 sm:grid-cols-3 gap-3"
-                  >
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="conforme" id={`${item.id}-conforme`} />
-                      <Label htmlFor={`${item.id}-conforme`} className="text-green-600 text-sm sm:text-base">
-                        Conforme
-                      </Label>
+              {itensInspecao.map((item, index) => {
+                if (item.isSection) {
+                  return (
+                    <div key={item.id} className="mb-4">
+                      <h3 className="text-lg font-semibold text-primary border-b pb-2">
+                        {item.nome}
+                      </h3>
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="nao_conforme" id={`${item.id}-nao-conforme`} />
-                      <Label htmlFor={`${item.id}-nao-conforme`} className="text-red-600 text-sm sm:text-base">
-                        Não Conforme
-                      </Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="nao_se_aplica" id={`${item.id}-nao-aplica`} />
-                      <Label htmlFor={`${item.id}-nao-aplica`} className="text-gray-500 text-sm sm:text-base">
-                        Não se Aplica
-                      </Label>
-                    </div>
-                  </RadioGroup>
-                </div>
-              ))}
+                  );
+                }
+                
+                return (
+                  <div key={item.id} className="border rounded-lg p-3 sm:p-4">
+                    <h4 className="font-medium mb-3 text-sm sm:text-base">
+                      {item.nome}
+                    </h4>
+                    <RadioGroup
+                      value={item.status}
+                      onValueChange={(value) => handleItemChange(item.id, value)}
+                      className="grid grid-cols-1 sm:grid-cols-3 gap-3"
+                    >
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="conforme" id={`${item.id}-conforme`} />
+                        <Label htmlFor={`${item.id}-conforme`} className="text-green-600 text-sm sm:text-base">
+                          Conforme
+                        </Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="nao_conforme" id={`${item.id}-nao-conforme`} />
+                        <Label htmlFor={`${item.id}-nao-conforme`} className="text-red-600 text-sm sm:text-base">
+                          Não Conforme
+                        </Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="nao_se_aplica" id={`${item.id}-nao-aplica`} />
+                        <Label htmlFor={`${item.id}-nao-aplica`} className="text-gray-500 text-sm sm:text-base">
+                          Não se Aplica
+                        </Label>
+                      </div>
+                    </RadioGroup>
+                  </div>
+                );
+              })}
             </div>
           </CardContent>
         </Card>
