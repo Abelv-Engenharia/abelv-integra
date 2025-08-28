@@ -155,6 +155,39 @@ export type Database = {
         }
         Relationships: []
       }
+      checklists_avaliacao: {
+        Row: {
+          ativo: boolean
+          campos_cabecalho: Json | null
+          created_at: string
+          descricao: string | null
+          id: string
+          itens_avaliacao: Json | null
+          nome: string
+          updated_at: string
+        }
+        Insert: {
+          ativo?: boolean
+          campos_cabecalho?: Json | null
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          itens_avaliacao?: Json | null
+          nome: string
+          updated_at?: string
+        }
+        Update: {
+          ativo?: boolean
+          campos_cabecalho?: Json | null
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          itens_avaliacao?: Json | null
+          nome?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       classificacoes_ocorrencia: {
         Row: {
           ativo: boolean | null

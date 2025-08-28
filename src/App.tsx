@@ -48,6 +48,7 @@ import RegistroHHT from "./pages/admin/RegistroHHT";
 import ImportacaoExecucaoTreinamentos from "./pages/admin/ImportacaoExecucaoTreinamentos";
 import ImportacaoHSA from "./pages/admin/ImportacaoHSA";
 import AdminConfiguracoes from "./pages/admin/AdminConfiguracoes";
+import AdminChecklists from "./pages/admin/AdminChecklists";
 
 // Tarefas pages
 import TarefasDashboard from "./pages/tarefas/TarefasDashboard";
@@ -184,6 +185,8 @@ function App() {
                 <Route path="admin/registro-hht" element={<RegistroHHT />} />
                 <Route path="admin/exportacao-dados" element={<ExportacaoDados />} />
                 <Route path="adm/configuracoes" element={<AdminConfiguracoes />} />
+                <Route path="admin/configuracoes" element={<AdminConfiguracoes />} />
+                <Route path="admin/checklists" element={<AdminChecklists />} />
                 <Route path="configuracao-emails" element={<ConfiguracaoEmailsPage />} />
                 <Route path="upload-tutoriais" element={<UploadTutoriaisPage />} />
                 <Route path="admin/importacao-execucao-treinamentos" element={<ImportacaoExecucaoTreinamentos />} />
