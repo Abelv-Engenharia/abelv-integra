@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -183,6 +182,22 @@ const DetalheTarefa = () => {
 
     setLoading(true);
     try {
+      // Buscar dados mais atuais DIRETAMENTE do Supabase
+      console.log("Buscando dados mais atuais da tarefa...");
+      const { data: tarefaAtual, error } = await supabase
+        .from('tarefas')
+        .select('observacoes_progresso')
+        .eq('id', tarefa.id)
+        .single();
+
+      if (error) {
+        console.error("Erro ao buscar tarefa atual:", error);
+        throw error;
+      }
+
+      const observacoesExistentes = tarefaAtual?.observacoes_progresso || "";
+      console.log("Observações existentes do banco:", observacoesExistentes);
+
       // Criar registro da observação com informações do usuário
       const agora = new Date();
       const dataFormatada = agora.toLocaleDateString('pt-BR');
@@ -192,49 +207,42 @@ const DetalheTarefa = () => {
       });
       
       const novaObservacao = `[${dataFormatada} às ${horaFormatada} - ${userProfile.nome}]\n${observacoes.trim()}`;
+      console.log("Nova observação formatada:", novaObservacao);
       
-      // Buscar as observações mais atuais diretamente do banco
-      const tarefaAtual = await tarefasService.getById(tarefa.id);
-      const observacoesExistentes = tarefaAtual?.observacoes_progresso || "";
-      
-      let observacoesAtualizadas = "";
-      
-      if (observacoesExistentes.trim()) {
-        // Adicionar nova observação ao FINAL, separada por duas quebras de linha
+      // Concatenar observações
+      let observacoesAtualizadas;
+      if (observacoesExistentes && observacoesExistentes.trim()) {
         observacoesAtualizadas = observacoesExistentes + "\n\n" + novaObservacao;
       } else {
         observacoesAtualizadas = novaObservacao;
       }
 
-      console.log("Salvando observações:", {
-        observacoesExistentes,
-        novaObservacao,
-        observacoesAtualizadas
-      });
+      console.log("Observações que serão salvas:", observacoesAtualizadas);
 
-      const sucesso = await tarefasService.updateStatus(tarefa.id, { 
-        observacoes_progresso: observacoesAtualizadas 
-      });
-      
-      if (sucesso) {
-        setObservacoes(""); // Limpar o campo após salvar
-        
-        toast({
-          title: "Observação adicionada",
-          description: "Observação salva com sucesso.",
-        });
+      // Salvar diretamente no Supabase
+      const { error: updateError } = await supabase
+        .from('tarefas')
+        .update({ observacoes_progresso: observacoesAtualizadas })
+        .eq('id', tarefa.id);
 
-        console.log("Observação salva com sucesso");
-        
-        // Recarregar os dados da tarefa para garantir sincronização
-        await fetchTarefa();
-      } else {
-        toast({
-          title: "Erro ao salvar observação",
-          description: "Não foi possível salvar a observação.",
-          variant: "destructive",
-        });
+      if (updateError) {
+        console.error("Erro ao atualizar observações:", updateError);
+        throw updateError;
       }
+
+      console.log("Observações salvas com sucesso!");
+      
+      // Limpar o campo
+      setObservacoes("");
+      
+      toast({
+        title: "Observação adicionada",
+        description: "Observação salva com sucesso.",
+      });
+
+      // Recarregar os dados da tarefa
+      await fetchTarefa();
+      
     } catch (error) {
       console.error("Erro ao salvar observação:", error);
       toast({
@@ -366,15 +374,16 @@ const DetalheTarefa = () => {
     });
   };
 
-  // Função para parsear e exibir observações
   const parseObservacoes = (observacoesText: string) => {
+    console.log("=== PARSING OBSERVAÇÕES ===");
+    console.log("Texto recebido:", JSON.stringify(observacoesText));
+    
     if (!observacoesText || !observacoesText.trim()) {
+      console.log("Nenhuma observação encontrada");
       return [];
     }
 
-    console.log("Parseando observações:", observacoesText);
-
-    // Dividir observações por dupla quebra de linha
+    // Dividir por dupla quebra de linha OU quebra de linha simples se não houver dupla
     const observacoesList = observacoesText
       .split(/\n\n+/)
       .filter(obs => obs.trim())
@@ -382,15 +391,24 @@ const DetalheTarefa = () => {
 
     console.log("Observações divididas:", observacoesList);
 
-    return observacoesList.map((observacao, index) => {
-      // Verificar se tem o formato [data - usuário]
+    const parsed = observacoesList.map((observacao, index) => {
+      console.log(`Processando observação ${index + 1}:`, JSON.stringify(observacao));
+      
       const linhas = observacao.split('\n');
       const primeiraLinha = linhas[0];
       
-      if (primeiraLinha.match(/^\[.*\]$/)) {
-        // Formato com cabeçalho
-        const cabecalho = primeiraLinha.replace(/[\[\]]/g, '');
-        const conteudo = linhas.slice(1).join('\n');
+      // Verificar se tem o formato [data - usuário]
+      const cabecalhoMatch = primeiraLinha.match(/^\[(.*?)\]$/);
+      
+      if (cabecalhoMatch) {
+        const cabecalho = cabecalhoMatch[1];
+        const conteudo = linhas.slice(1).join('\n').trim();
+        
+        console.log(`Observação ${index + 1} - com cabeçalho:`, {
+          cabecalho,
+          conteudo,
+          temCabecalho: true
+        });
         
         return {
           id: index,
@@ -399,7 +417,11 @@ const DetalheTarefa = () => {
           temCabecalho: true
         };
       } else {
-        // Formato sem cabeçalho (observações antigas)
+        console.log(`Observação ${index + 1} - sem cabeçalho:`, {
+          conteudo: observacao,
+          temCabecalho: false
+        });
+        
         return {
           id: index,
           cabecalho: '',
@@ -408,10 +430,13 @@ const DetalheTarefa = () => {
         };
       }
     });
+
+    console.log("Resultado final do parsing:", parsed);
+    return parsed;
   };
 
   const observacoesParsed = parseObservacoes(tarefa.observacoes_progresso || "");
-  console.log("Observações parseadas:", observacoesParsed);
+  console.log("Observações parseadas para exibição:", observacoesParsed);
 
   return (
     <div className="container mx-auto py-8">
@@ -494,14 +519,12 @@ const DetalheTarefa = () => {
 
           <Separator />
 
-          {/* Seção de arquivos anexados */}
           <div>
             <Label className="text-muted-foreground">
               <FileUp className="mr-2 h-4 w-4 inline-block" />
               Anexos
             </Label>
             
-            {/* Mostrar anexo existente se houver */}
             {tarefa.anexo && (
               <div className="mb-4 p-3 border rounded-lg bg-muted/50">
                 <div className="flex items-start justify-between">
@@ -547,7 +570,6 @@ const DetalheTarefa = () => {
               </div>
             )}
             
-            {/* Upload de novo anexo */}
             <div className="flex items-center space-x-4">
               <Input type="file" onChange={handleAnexoChange} />
               <Button onClick={handleUploadAnexo} disabled={!anexo || uploading}>
@@ -558,11 +580,9 @@ const DetalheTarefa = () => {
 
           <Separator />
 
-          {/* Seção de observações */}
           <div>
             <Label className="text-muted-foreground mb-2 block">Observações de Progresso</Label>
             
-            {/* Histórico de observações */}
             {observacoesParsed.length > 0 ? (
               <div className="mb-4 space-y-3">
                 <div className="flex items-center justify-between">
@@ -576,7 +596,7 @@ const DetalheTarefa = () => {
                 <div className="max-h-80 overflow-y-auto space-y-3">
                   {observacoesParsed.map((obs, index) => (
                     <div key={obs.id} className="border rounded-lg p-3 bg-white shadow-sm">
-                      {obs.temCabecalho ? (
+                      {obs.temCabecalho && obs.conteudo ? (
                         <div className="border-l-4 border-blue-500 pl-3">
                           <div className="flex items-start justify-between mb-2">
                             <div className="text-xs text-blue-600 font-medium flex items-center">
@@ -593,13 +613,13 @@ const DetalheTarefa = () => {
                         <div className="border-l-4 border-gray-300 pl-3">
                           <div className="flex items-start justify-between mb-2">
                             <div className="text-xs text-gray-500 font-medium">
-                              Observação sem data/usuário
+                              Observação sem formato
                             </div>
                             <Badge variant="outline" className="text-xs">
                               #{observacoesParsed.length - index}
                             </Badge>
                           </div>
-                          <div className="text-sm whitespace-pre-wrap">{obs.conteudo}</div>
+                          <div className="text-sm whitespace-pre-wrap">{obs.conteudo || obs.cabecalho}</div>
                         </div>
                       )}
                     </div>
@@ -612,7 +632,6 @@ const DetalheTarefa = () => {
               </div>
             )}
             
-            {/* Campo para adicionar novas observações */}
             <div>
               <Label className="text-sm font-medium mb-2 block">Adicionar Nova Observação:</Label>
               <Textarea
