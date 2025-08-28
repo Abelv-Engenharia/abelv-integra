@@ -262,7 +262,20 @@ const CadastrarInspecao = () => {
         dados_preenchidos: {
           itens: itensInspecao,
           campos_cabecalho: dadosCabecalho,
-          data_preenchimento: new Date().toISOString()
+          data_preenchimento: new Date().toISOString(),
+          // Incluir assinaturas no dados_preenchidos se existirem
+          ...(dadosInspecao.dados_preenchidos?.assinatura_inspetor && {
+            assinatura_inspetor: dadosInspecao.dados_preenchidos.assinatura_inspetor
+          }),
+          ...(dadosInspecao.dados_preenchidos?.assinatura_responsavel_tecnico && {
+            assinatura_responsavel_tecnico: dadosInspecao.dados_preenchidos.assinatura_responsavel_tecnico
+          }),
+          ...(dadosInspecao.dados_preenchidos?.assinaturas && {
+            assinaturas: dadosInspecao.dados_preenchidos.assinaturas
+          }),
+          ...(dadosInspecao.dados_preenchidos?.data_assinatura && {
+            data_assinatura: dadosInspecao.dados_preenchidos.data_assinatura
+          })
         },
         tem_nao_conformidade: temNaoConformidade,
         status: 'concluida'
@@ -337,6 +350,20 @@ const CadastrarInspecao = () => {
     };
 
     setDadosCabecalho(dadosCabecalhoComAssinatura);
+    
+    // Modificar os dados de inspeção para incluir as assinaturas
+    const dadosInspecaoComAssinatura = {
+      ...dadosInspecao,
+      dados_preenchidos: {
+        ...dadosInspecao.dados_preenchidos,
+        assinatura_inspetor: assinaturas.assinatura_inspetor,
+        assinatura_responsavel_tecnico: assinaturas.assinatura_responsavel_tecnico,
+        assinaturas: assinaturas,
+        data_assinatura: new Date().toISOString()
+      }
+    };
+    
+    setDadosInspecao(dadosInspecaoComAssinatura);
     await salvarInspecao();
   };
 

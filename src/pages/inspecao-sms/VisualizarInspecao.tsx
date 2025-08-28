@@ -406,21 +406,21 @@ const VisualizarInspecao = () => {
                 <div className="space-y-4">
                   {/* Assinatura do Inspetor */}
                   <div className="text-center border-b pb-4">
-                    <div className="mb-2">
-                      {inspecao.dados_preenchidos?.assinatura_inspetor ? (
-                        <div className="h-20 border rounded-md flex items-center justify-center bg-muted/50">
-                          <img 
-                            src={inspecao.dados_preenchidos.assinatura_inspetor} 
-                            alt="Assinatura do Inspetor" 
-                            className="max-h-16 max-w-full object-contain"
-                          />
-                        </div>
-                      ) : (
-                        <div className="h-16 border-2 border-dashed border-muted-foreground/30 rounded-md flex items-center justify-center">
-                          <span className="text-xs text-muted-foreground">Assinatura não capturada</span>
-                        </div>
-                      )}
-                    </div>
+                     <div className="mb-2">
+                       {(inspecao.dados_preenchidos?.assinatura_inspetor || inspecao.dados_preenchidos?.assinaturas?.assinatura_inspetor) ? (
+                         <div className="h-20 border rounded-md flex items-center justify-center bg-muted/50">
+                           <img 
+                             src={inspecao.dados_preenchidos?.assinatura_inspetor || inspecao.dados_preenchidos?.assinaturas?.assinatura_inspetor} 
+                             alt="Assinatura do Inspetor" 
+                             className="max-h-16 max-w-full object-contain"
+                           />
+                         </div>
+                       ) : (
+                         <div className="h-16 border-2 border-dashed border-muted-foreground/30 rounded-md flex items-center justify-center">
+                           <span className="text-xs text-muted-foreground">Assinatura não capturada</span>
+                         </div>
+                       )}
+                     </div>
                     <p className="text-sm font-medium">{inspecao.profiles?.nome || 'N/A'}</p>
                     <p className="text-xs text-muted-foreground">Inspetor Responsável</p>
                     {inspecao.dados_preenchidos?.data_assinatura_inspetor && (
@@ -461,21 +461,21 @@ const VisualizarInspecao = () => {
                   {/* Assinatura do Supervisor */}
                   {identificacao?.supervisor && (
                     <div className="text-center">
-                      <div className="mb-2">
-                        {inspecao.dados_preenchidos?.assinatura_supervisor ? (
-                          <div className="h-20 border rounded-md flex items-center justify-center bg-muted/50">
-                            <img 
-                              src={inspecao.dados_preenchidos.assinatura_supervisor} 
-                              alt="Assinatura do Supervisor" 
-                              className="max-h-16 max-w-full object-contain"
-                            />
-                          </div>
-                        ) : (
-                          <div className="h-16 border-2 border-dashed border-muted-foreground/30 rounded-md flex items-center justify-center">
-                            <span className="text-xs text-muted-foreground">Assinatura não capturada</span>
-                          </div>
-                        )}
-                      </div>
+                       <div className="mb-2">
+                         {(inspecao.dados_preenchidos?.assinatura_responsavel_tecnico || inspecao.dados_preenchidos?.assinaturas?.assinatura_responsavel_tecnico) ? (
+                           <div className="h-20 border rounded-md flex items-center justify-center bg-muted/50">
+                             <img 
+                               src={inspecao.dados_preenchidos?.assinatura_responsavel_tecnico || inspecao.dados_preenchidos?.assinaturas?.assinatura_responsavel_tecnico} 
+                               alt="Assinatura do Responsável Técnico" 
+                               className="max-h-16 max-w-full object-contain"
+                             />
+                           </div>
+                         ) : (
+                           <div className="h-16 border-2 border-dashed border-muted-foreground/30 rounded-md flex items-center justify-center">
+                             <span className="text-xs text-muted-foreground">Assinatura não capturada</span>
+                           </div>
+                         )}
+                       </div>
                       <p className="text-sm font-medium">{identificacao.supervisor}</p>
                       <p className="text-xs text-muted-foreground">Supervisor Responsável</p>
                       {inspecao.dados_preenchidos?.data_assinatura_supervisor && (
@@ -486,16 +486,17 @@ const VisualizarInspecao = () => {
                     </div>
                   )}
 
-                  {/* Mensagem quando nenhuma assinatura foi capturada */}
-                  {!inspecao.dados_preenchidos?.assinatura_inspetor && 
-                   !inspecao.dados_preenchidos?.assinatura_engenheiro && 
-                   !inspecao.dados_preenchidos?.assinatura_supervisor && (
-                    <div className="text-center py-4">
-                      <p className="text-muted-foreground text-sm">
-                        Nenhuma assinatura foi capturada para esta inspeção.
-                      </p>
-                    </div>
-                  )}
+                   {/* Mensagem quando nenhuma assinatura foi capturada */}
+                   {!inspecao.dados_preenchidos?.assinatura_inspetor && 
+                    !inspecao.dados_preenchidos?.assinaturas?.assinatura_inspetor && 
+                    !inspecao.dados_preenchidos?.assinatura_responsavel_tecnico && 
+                    !inspecao.dados_preenchidos?.assinaturas?.assinatura_responsavel_tecnico && (
+                     <div className="text-center py-4">
+                       <p className="text-muted-foreground text-sm">
+                         Nenhuma assinatura foi capturada para esta inspeção.
+                       </p>
+                     </div>
+                   )}
                 </div>
               </CardContent>
             </Card>
