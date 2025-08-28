@@ -26,7 +26,10 @@ const AdminModelosInspecao = () => {
   const [editingModelo, setEditingModelo] = useState<ModeloInspecao | null>(null);
   const [viewingModelo, setViewingModelo] = useState<ModeloInspecao | null>(null);
 
+  console.log("Modelos carregados:", modelos);
+
   const handleSubmit = (formData: any) => {
+    console.log("Submitting form data:", formData);
     if (editingModelo) {
       updateModelo({ id: editingModelo.id, ...formData });
     } else {
@@ -37,6 +40,7 @@ const AdminModelosInspecao = () => {
   };
 
   const handleEdit = (modelo: ModeloInspecao) => {
+    console.log("Editing modelo:", modelo);
     setEditingModelo(modelo);
     setDialogOpen(true);
   };
@@ -48,6 +52,7 @@ const AdminModelosInspecao = () => {
   };
 
   const handleView = (modelo: ModeloInspecao) => {
+    console.log("Viewing modelo:", modelo);
     setViewingModelo(modelo);
   };
 
@@ -117,15 +122,15 @@ const AdminModelosInspecao = () => {
                 modelos.map((modelo) => (
                   <TableRow key={modelo.id}>
                     <TableCell className="font-medium">{modelo.nome}</TableCell>
-                    <TableCell>{modelo.tipos_inspecao_sms?.nome}</TableCell>
+                    <TableCell>{modelo.tipos_inspecao_sms?.nome || 'N/A'}</TableCell>
                     <TableCell>
                       <div className="flex flex-wrap gap-1">
-                        {modelo.campos_cabecalho.slice(0, 3).map((campo) => (
+                        {Array.isArray(modelo.campos_cabecalho) && modelo.campos_cabecalho.slice(0, 3).map((campo) => (
                           <Badge key={campo} variant="secondary" className="text-xs">
                             {CAMPOS_CABECALHO_LABELS[campo] || campo}
                           </Badge>
                         ))}
-                        {modelo.campos_cabecalho.length > 3 && (
+                        {Array.isArray(modelo.campos_cabecalho) && modelo.campos_cabecalho.length > 3 && (
                           <Badge variant="outline" className="text-xs">
                             +{modelo.campos_cabecalho.length - 3}
                           </Badge>
@@ -134,7 +139,7 @@ const AdminModelosInspecao = () => {
                     </TableCell>
                     <TableCell>
                       <Badge variant="outline">
-                        {modelo.itens_verificacao.length} itens
+                        {Array.isArray(modelo.itens_verificacao) ? modelo.itens_verificacao.length : 0} itens
                       </Badge>
                     </TableCell>
                     <TableCell>
@@ -191,7 +196,7 @@ const AdminModelosInspecao = () => {
               <div>
                 <h4 className="font-semibold mb-2">Campos do Cabeçalho:</h4>
                 <div className="flex flex-wrap gap-2">
-                  {viewingModelo.campos_cabecalho.map((campo) => (
+                  {Array.isArray(viewingModelo.campos_cabecalho) && viewingModelo.campos_cabecalho.map((campo) => (
                     <Badge key={campo} variant="secondary">
                       {CAMPOS_CABECALHO_LABELS[campo] || campo}
                     </Badge>
@@ -202,7 +207,7 @@ const AdminModelosInspecao = () => {
               <div>
                 <h4 className="font-semibold mb-2">Itens de Verificação:</h4>
                 <div className="space-y-2 max-h-60 overflow-y-auto">
-                  {viewingModelo.itens_verificacao.map((item) => (
+                  {Array.isArray(viewingModelo.itens_verificacao) && viewingModelo.itens_verificacao.map((item) => (
                     <div key={item.id} className="flex items-center justify-between p-2 border rounded">
                       <span className="text-sm">{item.descricao}</span>
                       {item.categoria && (

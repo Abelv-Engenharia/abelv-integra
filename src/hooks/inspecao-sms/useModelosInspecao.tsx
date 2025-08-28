@@ -30,6 +30,7 @@ export const useModelosInspecao = () => {
   const { data: modelos = [], isLoading } = useQuery({
     queryKey: ['modelos-inspecao-sms'],
     queryFn: async () => {
+      console.log("Buscando modelos de inspeção...");
       const { data, error } = await supabase
         .from('modelos_inspecao_sms')
         .select(`
@@ -39,20 +40,48 @@ export const useModelosInspecao = () => {
         .eq('ativo', true)
         .order('nome');
       
-      if (error) throw error;
-      return data as ModeloInspecao[];
+      if (error) {
+        console.error("Erro ao buscar modelos:", error);
+        throw error;
+      }
+      
+      console.log("Modelos retornados:", data);
+      
+      // Mapear os dados do banco para o formato esperado
+      return (data || []).map(modelo => ({
+        id: modelo.id,
+        nome: modelo.nome,
+        descricao: modelo.descricao || '',
+        tipo_inspecao_id: modelo.tipo_inspecao_id,
+        campos_cabecalho: Array.isArray(modelo.campos_cabecalho) ? modelo.campos_cabecalho : [],
+        itens_verificacao: Array.isArray(modelo.itens_verificacao) ? modelo.itens_verificacao : [],
+        ativo: modelo.ativo,
+        created_at: modelo.created_at,
+        updated_at: modelo.updated_at,
+        tipos_inspecao_sms: modelo.tipos_inspecao_sms
+      })) as ModeloInspecao[];
     },
   });
 
   const createModelo = useMutation({
     mutationFn: async (modelo: Omit<ModeloInspecao, 'id' | 'created_at' | 'updated_at' | 'ativo'>) => {
+      console.log("Criando modelo:", modelo);
       const { data, error } = await supabase
         .from('modelos_inspecao_sms')
-        .insert([modelo])
+        .insert([{
+          nome: modelo.nome,
+          descricao: modelo.descricao,
+          tipo_inspecao_id: modelo.tipo_inspecao_id,
+          campos_cabecalho: modelo.campos_cabecalho,
+          itens_verificacao: modelo.itens_verificacao
+        }])
         .select()
         .single();
       
-      if (error) throw error;
+      if (error) {
+        console.error("Erro ao criar modelo:", error);
+        throw error;
+      }
       return data;
     },
     onSuccess: () => {
@@ -63,6 +92,7 @@ export const useModelosInspecao = () => {
       });
     },
     onError: (error: any) => {
+      console.error("Erro na criação:", error);
       toast({
         title: "Erro ao criar modelo",
         description: error.message,
@@ -73,14 +103,24 @@ export const useModelosInspecao = () => {
 
   const updateModelo = useMutation({
     mutationFn: async ({ id, ...modelo }: Partial<ModeloInspecao> & { id: string }) => {
+      console.log("Atualizando modelo:", id, modelo);
       const { data, error } = await supabase
         .from('modelos_inspecao_sms')
-        .update(modelo)
+        .update({
+          nome: modelo.nome,
+          descricao: modelo.descricao,
+          tipo_inspecao_id: modelo.tipo_inspecao_id,
+          campos_cabecalho: modelo.campos_cabecalho,
+          itens_verificacao: modelo.itens_verificacao
+        })
         .eq('id', id)
         .select()
         .single();
       
-      if (error) throw error;
+      if (error) {
+        console.error("Erro ao atualizar modelo:", error);
+        throw error;
+      }
       return data;
     },
     onSuccess: () => {
@@ -91,6 +131,7 @@ export const useModelosInspecao = () => {
       });
     },
     onError: (error: any) => {
+      console.error("Erro na atualização:", error);
       toast({
         title: "Erro ao atualizar modelo",
         description: error.message,
@@ -101,12 +142,16 @@ export const useModelosInspecao = () => {
 
   const deleteModelo = useMutation({
     mutationFn: async (id: string) => {
+      console.log("Excluindo modelo:", id);
       const { error } = await supabase
         .from('modelos_inspecao_sms')
         .update({ ativo: false })
         .eq('id', id);
       
-      if (error) throw error;
+      if (error) {
+        console.error("Erro ao excluir modelo:", error);
+        throw error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['modelos-inspecao-sms'] });
@@ -116,6 +161,7 @@ export const useModelosInspecao = () => {
       });
     },
     onError: (error: any) => {
+      console.error("Erro na exclusão:", error);
       toast({
         title: "Erro ao excluir modelo",
         description: error.message,
