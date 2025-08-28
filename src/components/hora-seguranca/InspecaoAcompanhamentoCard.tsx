@@ -39,28 +39,22 @@ export function InspecaoAcompanhamentoCard({
       const pathParts = url.pathname.split('/');
       const fileName = pathParts[pathParts.length - 1];
       
-      // Gera signed URL válida por 2 minutos
-      await generate('relatorios-inspecao-hsa', fileName, 120);
+      // Gera signed URL diretamente
+      const { data, error: storageError } = await supabase.storage
+        .from('relatorios-inspecao-hsa')
+        .createSignedUrl(fileName, 120);
       
-      if (error) {
+      if (storageError || !data?.signedUrl) {
         toast({
           title: "Erro ao abrir relatório",
-          description: error,
+          description: storageError?.message || "Não foi possível gerar link do arquivo",
           variant: "destructive",
         });
         return;
       }
 
-      // Aguarda um pouco para garantir que a URL foi gerada
-      setTimeout(async () => {
-        const { data } = await supabase.storage
-          .from('relatorios-inspecao-hsa')
-          .createSignedUrl(fileName, 120);
-          
-        if (data?.signedUrl) {
-          window.open(data.signedUrl, '_blank');
-        }
-      }, 100);
+      // Abre o relatório em nova aba
+      window.open(data.signedUrl, '_blank');
       
     } catch (err) {
       toast({
