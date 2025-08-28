@@ -488,36 +488,56 @@ const CadastrarInspecao = () => {
             <div className="section-spacing">
               {itensInspecao.map((item, index) => {
               if (item.isSection) {
-                return <div key={item.id} className="mb-4">
-                      <h3 className="text-lg font-semibold text-primary border-b pb-2">
+                return <div key={item.id} className="mb-6 mt-8 first:mt-0">
+                      <h3 className="text-xl font-bold text-primary border-b-2 border-primary/20 pb-3 mb-4">
                         {item.nome}
                       </h3>
                     </div>;
               }
-              return <div key={item.id} className="border rounded-lg p-3 sm:p-4">
+              return <div key={item.id} className="border rounded-lg p-3 sm:p-4 mb-4 bg-card">
                     <h4 className="font-medium mb-3 text-sm sm:text-base">
                       {item.nome}
                     </h4>
-                    <RadioGroup value={item.status} onValueChange={value => handleItemChange(item.id, value)} className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <RadioGroup value={item.status || 'nao_se_aplica'} onValueChange={value => handleItemChange(item.id, value)} className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
                       <div className="flex items-center space-x-2">
                         <RadioGroupItem value="conforme" id={`${item.id}-conforme`} />
-                        <Label htmlFor={`${item.id}-conforme`} className="text-green-600 text-sm sm:text-base">
+                        <Label htmlFor={`${item.id}-conforme`} className="text-green-600 text-sm sm:text-base cursor-pointer">
                           Conforme
                         </Label>
                       </div>
                       <div className="flex items-center space-x-2">
                         <RadioGroupItem value="nao_conforme" id={`${item.id}-nao-conforme`} />
-                        <Label htmlFor={`${item.id}-nao-conforme`} className="text-red-600 text-sm sm:text-base">
+                        <Label htmlFor={`${item.id}-nao-conforme`} className="text-red-600 text-sm sm:text-base cursor-pointer">
                           Não Conforme
                         </Label>
                       </div>
                       <div className="flex items-center space-x-2">
                         <RadioGroupItem value="nao_se_aplica" id={`${item.id}-nao-aplica`} />
-                        <Label htmlFor={`${item.id}-nao-aplica`} className="text-gray-500 text-sm sm:text-base">
+                        <Label htmlFor={`${item.id}-nao-aplica`} className="text-gray-500 text-sm sm:text-base cursor-pointer">
                           Não se Aplica
                         </Label>
                       </div>
                     </RadioGroup>
+                    
+                    {/* Campo de observação para Não Conforme */}
+                    {item.status === 'nao_conforme' && (
+                      <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                        <Label className="text-sm font-medium text-red-800 mb-2 block">
+                          Motivo da Não Conformidade *
+                        </Label>
+                        <Textarea
+                          value={item.observacao_nc || ''}
+                          onChange={(e) => setItensInspecao(prev => prev.map(prevItem => 
+                            prevItem.id === item.id 
+                              ? { ...prevItem, observacao_nc: e.target.value }
+                              : prevItem
+                          ))}
+                          placeholder="Descreva o motivo da não conformidade..."
+                          rows={3}
+                          className="text-sm bg-white border-red-300 focus:border-red-500"
+                        />
+                      </div>
+                    )}
                   </div>;
             })}
             </div>
