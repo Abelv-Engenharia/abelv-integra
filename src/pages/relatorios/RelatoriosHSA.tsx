@@ -15,9 +15,7 @@ import { useUserCCAs } from "@/hooks/useUserCCAs";
 import { supabase } from "@/integrations/supabase/client";
 import { ResponsiveContainer, BarChart as ReBarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from "recharts";
 import { fetchInspecoesByResponsavel } from "@/services/hora-seguranca/inspecoesByResponsavelService";
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
-import { toast } from "sonner";
+import { useToast } from "@/hooks/use-toast";
 
 const RelatoriosHSA = () => {
   const [filterCCA, setFilterCCA] = useState("");
@@ -29,6 +27,7 @@ const RelatoriosHSA = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const reportRef = useRef<HTMLDivElement>(null);
   const { data: userCCAs = [] } = useUserCCAs();
+  const { toast } = useToast();
 
   // Função para construir filtros aplicados
   const getAppliedFilters = () => {
@@ -160,105 +159,261 @@ const RelatoriosHSA = () => {
 
   // Função para gerar PDF
   const generatePDF = async () => {
-    if (!reportRef.current) return;
-
-    setIsGenerating(true);
-    toast.info("Gerando relatório PDF...");
-
     try {
-      const element = reportRef.current;
-      
-      // Criar canvas do elemento
-      const canvas = await html2canvas(element, {
-        scale: 2,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: '#ffffff',
-        removeContainer: true,
-        imageTimeout: 30000,
-        logging: false,
+      toast({
+        title: "Gerando PDF...",
+        description: "Por favor, aguarde enquanto o relatório é gerado.",
       });
 
-      // Calcular dimensões para PDF
+      // Aguardar que todos os dados sejam carregados
+      const maxWaitTime = 15000; // 15 segundos máximo
+      const startTime = Date.now();
+      
+      while (Date.now() - startTime < maxWaitTime) {
+        // Verificar elementos com atributo data-loading
+        const loadingElements = document.querySelectorAll('[data-loading="true"]');
+        
+        // Verificar spinners e elementos de carregamento
+        const spinnerElements = document.querySelectorAll('.animate-spin, [role="progressbar"], .loading');
+        
+        // Verificar textos de carregamento mais específicos
+        const carregandoTexts = Array.from(document.querySelectorAll('*')).filter(el => {
+          const text = el.textContent?.toLowerCase() || '';
+          return text.includes('carregando') || 
+                 text.includes('loading') || 
+                 text.includes('aguarde') ||
+                 text === '' && el.classList.contains('animate-pulse');
+        });
+        
+        // Verificar se existem tabelas vazias ou com dados não carregados
+        const emptyTables = Array.from(document.querySelectorAll('table tbody')).filter(tbody => 
+          tbody.children.length === 0 || 
+          Array.from(tbody.querySelectorAll('td')).some(td => 
+            td.textContent?.includes('Nenhum') || td.textContent?.trim() === ''
+          )
+        );
+        
+        if (loadingElements.length === 0 && 
+            spinnerElements.length === 0 && 
+            carregandoTexts.length === 0 && 
+            emptyTables.length === 0) {
+          break;
+        }
+        
+        // Aguardar 1 segundo antes de verificar novamente
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+
+      const jsPDF = (await import('jspdf')).default;
+      const html2canvas = (await import('html2canvas')).default;
+      
+      // Esconder os filtros temporariamente
+      const filtersElement = document.querySelector('.grid.gap-4.md\\:grid-cols-2.lg\\:grid-cols-4') as HTMLElement;
+      if (filtersElement) {
+        filtersElement.style.display = 'none';
+      }
+
+      // Criar cabeçalho temporário com logo
+      const headerElement = document.createElement('div');
+      headerElement.style.padding = '20px';
+      headerElement.style.backgroundColor = '#ffffff';
+      headerElement.style.borderBottom = '2px solid #e2e8f0';
+      headerElement.style.marginBottom = '20px';
+      headerElement.style.display = 'flex';
+      headerElement.style.alignItems = 'center';
+      headerElement.style.justifyContent = 'space-between';
+      
+      const currentDate = new Date().toLocaleDateString('pt-BR');
+      const periodText = dataInicial && dataFinal ? 
+        `${format(dataInicial, "dd/MM/yyyy")} a ${format(dataFinal, "dd/MM/yyyy")}` : 
+        'Todos os períodos';
+      
+      headerElement.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 20px;">
+          <img src="/lovable-uploads/15c114e2-30c1-4767-9fe8-4ee84cc11daf.png" 
+               alt="Logo ABELV" 
+               style="height: 60px; width: auto;" />
+        </div>
+        <div style="text-align: center; flex: 1;">
+          <h1 style="font-size: 24px; font-weight: bold; margin: 0; color: #1e293b;">RELATÓRIO - EXECUÇÃO DA HSA</h1>
+          <p style="font-size: 14px; color: #64748b; margin: 10px 0 0 0;">
+            Período: ${periodText} | Gerado em: ${currentDate}
+          </p>
+        </div>
+        <div style="width: 80px;"></div>
+      `;
+      
+      // Inserir cabeçalho no início do conteúdo
+      const reportContent = reportRef.current;
+      if (!reportContent) {
+        throw new Error('Conteúdo não encontrado');
+      }
+      
+      reportContent.insertBefore(headerElement, reportContent.firstChild);
+
+      // Aguardar um pouco mais para garantir que tudo foi renderizado
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      const canvas = await html2canvas(reportContent, {
+        backgroundColor: '#ffffff',
+        scale: 1.5,
+        logging: false,
+        useCORS: true,
+        allowTaint: true,
+        width: reportContent.scrollWidth,
+        height: reportContent.scrollHeight,
+        scrollX: 0,
+        scrollY: 0
+      });
+
+      // Remover cabeçalho temporário e restaurar filtros
+      reportContent.removeChild(headerElement);
+      if (filtersElement) {
+        filtersElement.style.display = '';
+      }
+
       const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF('p', 'mm', 'a4');
       
-      const imgWidth = 210; // A4 width in mm
-      const pageHeight = 295; // A4 height in mm
+      const pageWidth = 210; // A4 width in mm
+      const pageHeight = 297; // A4 height in mm
+      const margin = 10;
+      const imgWidth = pageWidth - (margin * 2);
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      
       let heightLeft = imgHeight;
-      let position = 0;
+      let position = margin;
 
-      // Adicionar primeira página
-      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
+      // Primeira página
+      pdf.addImage(imgData, 'PNG', margin, position, imgWidth, imgHeight);
+      heightLeft -= (pageHeight - margin * 2);
 
-      // Adicionar páginas adicionais se necessário
+      // Páginas adicionais se necessário
       while (heightLeft >= 0) {
-        position = heightLeft - imgHeight;
+        position = heightLeft - imgHeight + margin;
         pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
+        pdf.addImage(imgData, 'PNG', margin, position, imgWidth, imgHeight);
+        heightLeft -= (pageHeight - margin * 2);
       }
 
-      // Salvar PDF
-      const timestamp = format(new Date(), "dd-MM-yyyy_HH-mm");
-      pdf.save(`relatorio-hsa_${timestamp}.pdf`);
-      
-      toast.success("Relatório PDF gerado com sucesso!");
+      const nomeArquivo = `relatorio-hsa-${new Date().toISOString().split('T')[0]}.pdf`;
+      pdf.save(nomeArquivo);
+
+      toast({
+        title: "PDF gerado com sucesso!",
+        description: `O arquivo ${nomeArquivo} foi baixado.`,
+        variant: "default",
+      });
     } catch (error) {
-      console.error("Erro ao gerar PDF:", error);
-      toast.error("Erro ao gerar relatório PDF. Tente novamente.");
-    } finally {
-      setIsGenerating(false);
+      console.error('Erro ao gerar PDF:', error);
+      toast({
+        title: "Erro ao gerar PDF",
+        description: "Ocorreu um erro ao gerar o relatório em PDF.",
+        variant: "destructive",
+      });
     }
   };
 
   // Função para gerar JPEG
   const generateJPEG = async () => {
-    if (!reportRef.current) return;
-
-    setIsGenerating(true);
-    toast.info("Gerando relatório JPEG...");
-
     try {
-      const element = reportRef.current;
-      
-      // Criar canvas do elemento
-      const canvas = await html2canvas(element, {
-        scale: 2,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: '#ffffff',
-        removeContainer: true,
-        imageTimeout: 30000,
-        logging: false,
+      toast({
+        title: "Gerando JPEG...",
+        description: "Por favor, aguarde enquanto a imagem é gerada.",
       });
 
-      // Converter para JPEG e fazer download
+      // Aguardar que todos os dados sejam carregados (mesmo código do PDF)
+      const maxWaitTime = 15000; // 15 segundos máximo
+      const startTime = Date.now();
+      
+      while (Date.now() - startTime < maxWaitTime) {
+        const loadingElements = document.querySelectorAll('[data-loading="true"]');
+        const spinnerElements = document.querySelectorAll('.animate-spin, [role="progressbar"], .loading');
+        const carregandoTexts = Array.from(document.querySelectorAll('*')).filter(el => {
+          const text = el.textContent?.toLowerCase() || '';
+          return text.includes('carregando') || 
+                 text.includes('loading') || 
+                 text.includes('aguarde') ||
+                 text === '' && el.classList.contains('animate-pulse');
+        });
+        
+        const emptyTables = Array.from(document.querySelectorAll('table tbody')).filter(tbody => 
+          tbody.children.length === 0 || 
+          Array.from(tbody.querySelectorAll('td')).some(td => 
+            td.textContent?.includes('Nenhum') || td.textContent?.trim() === ''
+          )
+        );
+        
+        if (loadingElements.length === 0 && 
+            spinnerElements.length === 0 && 
+            carregandoTexts.length === 0 && 
+            emptyTables.length === 0) {
+          break;
+        }
+        
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+
+      const html2canvas = (await import('html2canvas')).default;
+      
+      // Esconder os filtros temporariamente
+      const filtersElement = document.querySelector('.grid.gap-4.md\\:grid-cols-2.lg\\:grid-cols-4') as HTMLElement;
+      if (filtersElement) {
+        filtersElement.style.display = 'none';
+      }
+
+      const content = reportRef.current;
+      
+      if (!content) {
+        throw new Error('Conteúdo não encontrado');
+      }
+
+      // Aguardar um pouco mais para garantir que tudo foi renderizado
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      const canvas = await html2canvas(content, {
+        backgroundColor: '#ffffff',
+        scale: 1.5,
+        logging: false,
+        useCORS: true,
+        allowTaint: true,
+        height: content.scrollHeight,
+        width: content.scrollWidth,
+        scrollX: 0,
+        scrollY: 0
+      });
+
+      // Restaurar filtros
+      if (filtersElement) {
+        filtersElement.style.display = '';
+      }
+
       canvas.toBlob((blob) => {
         if (!blob) return;
         
         const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        
-        const timestamp = format(new Date(), "dd-MM-yyyy_HH-mm");
-        link.download = `relatorio-hsa_${timestamp}.jpeg`;
-        
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        
+        const a = document.createElement('a');
+        a.href = url;
+        const nomeArquivo = `relatorio-hsa-${new Date().toISOString().split('T')[0]}.jpg`;
+        a.download = nomeArquivo;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
         URL.revokeObjectURL(url);
-        toast.success("Relatório JPEG gerado com sucesso!");
+
+        toast({
+          title: "JPEG gerado com sucesso!",
+          description: `O arquivo ${nomeArquivo} foi baixado.`,
+          variant: "default",
+        });
       }, 'image/jpeg', 0.95);
-      
     } catch (error) {
-      console.error("Erro ao gerar JPEG:", error);
-      toast.error("Erro ao gerar relatório JPEG. Tente novamente.");
-    } finally {
-      setIsGenerating(false);
+      console.error('Erro ao gerar JPEG:', error);
+      toast({
+        title: "Erro ao gerar JPEG",
+        description: "Ocorreu um erro ao gerar o relatório em JPEG.",
+        variant: "destructive",
+      });
     }
   };
 
