@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -7,7 +8,7 @@ import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, Calendar, User, Clock, AlertCircle, CheckCircle, FileUp, X } from "lucide-react";
+import { ArrowLeft, Calendar, User, Clock, AlertCircle, CheckCircle, FileUp, X, FileText, Download } from "lucide-react";
 import { Tarefa, TarefaStatus } from "@/types/tarefas";
 import { tarefasService } from "@/services/tarefasService";
 import { useToast } from "@/hooks/use-toast";
@@ -51,6 +52,10 @@ const DetalheTarefa = () => {
         const data = await tarefasService.getById(id);
         if (data) {
           setTarefa(data);
+          // Carregar observações existentes no campo de texto
+          if (data.observacoes_progresso) {
+            setObservacoes(data.observacoes_progresso);
+          }
           console.log("Tarefa carregada:", data);
         } else {
           console.error("Tarefa não encontrada");
@@ -306,36 +311,71 @@ const DetalheTarefa = () => {
 
           <Separator />
 
+          {/* Seção de arquivos anexados */}
           <div>
             <Label className="text-muted-foreground">
               <FileUp className="mr-2 h-4 w-4 inline-block" />
-              Anexar Documento
+              Anexos
             </Label>
+            
+            {/* Mostrar anexo existente se houver */}
+            {tarefa.anexo && (
+              <div className="mb-4 p-3 border rounded-lg bg-muted/50">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <FileText className="h-4 w-4 text-blue-600" />
+                    <span className="text-sm font-medium">{tarefa.anexo}</span>
+                    <Badge variant="secondary" className="text-xs">
+                      <CheckCircle className="mr-1 h-3 w-3" />
+                      Anexado
+                    </Badge>
+                  </div>
+                  <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-800">
+                    <Download className="h-4 w-4 mr-1" />
+                    Baixar
+                  </Button>
+                </div>
+              </div>
+            )}
+            
+            {/* Upload de novo anexo */}
             <div className="flex items-center space-x-4">
               <Input type="file" onChange={handleAnexoChange} />
               <Button onClick={handleUploadAnexo} disabled={!anexo || uploading}>
                 {uploading ? "Enviando..." : "Enviar Anexo"}
               </Button>
-              {tarefa.anexo && (
-                <Badge variant="secondary">
-                  <CheckCircle className="mr-2 h-4 w-4 inline-block" />
-                  {tarefa.anexo}
-                </Badge>
-              )}
             </div>
           </div>
 
           <Separator />
 
+          {/* Seção de observações */}
           <div>
-            <Label className="text-muted-foreground">Observações</Label>
+            <Label className="text-muted-foreground mb-2 block">Observações de Progresso</Label>
+            
+            {/* Mostrar observações existentes se houver e não estiver editando */}
+            {tarefa.observacoes_progresso && tarefa.observacoes_progresso.trim() !== "" && (
+              <div className="mb-4 p-3 border rounded-lg bg-muted/50">
+                <div className="flex items-start justify-between mb-2">
+                  <Label className="text-sm font-medium text-green-700">Observações Salvas:</Label>
+                  <Badge variant="secondary" className="text-xs">
+                    <CheckCircle className="mr-1 h-3 w-3" />
+                    Salvo
+                  </Badge>
+                </div>
+                <p className="text-sm whitespace-pre-wrap">{tarefa.observacoes_progresso}</p>
+              </div>
+            )}
+            
+            {/* Campo para editar/adicionar observações */}
             <Textarea
               placeholder="Adicione suas observações aqui..."
               value={observacoes}
               onChange={handleObservacoesChange}
+              className="min-h-24"
             />
             <Button onClick={handleObservacoesSubmit} className="mt-2">
-              Salvar Observações
+              {tarefa.observacoes_progresso ? "Atualizar Observações" : "Salvar Observações"}
             </Button>
           </div>
         </CardContent>
