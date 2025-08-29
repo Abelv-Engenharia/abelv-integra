@@ -34,6 +34,13 @@ interface CampoDisponivel {
   descricao: string;
 }
 
+interface CampoManual {
+  id: string;
+  nome: string;
+  tipo: 'text' | 'number' | 'date' | 'textarea';
+  obrigatorio: boolean;
+}
+
 interface ChecklistAvaliacao {
   id: string;
   nome: string;
@@ -58,6 +65,7 @@ const AdminChecklists = () => {
     descricao: '',
     ativo: true,
     campos_cabecalho: [] as string[],
+    campos_manuais: [] as CampoManual[],
     itens_avaliacao: [] as ItemAvaliacao[],
     secoes: [] as Secao[],
     requer_assinatura: false
@@ -65,6 +73,12 @@ const AdminChecklists = () => {
   const [novoItem, setNovoItem] = useState('');
   const [novaSecao, setNovaSecao] = useState({ nome: '', descricao: '' });
   const [secaoSelecionada, setSecaoSelecionada] = useState<string>('sem_secao');
+  const [novoCampoManual, setNovoCampoManual] = useState<CampoManual>({
+    id: '',
+    nome: '',
+    tipo: 'text',
+    obrigatorio: false
+  });
   const [visualizandoChecklist, setVisualizandoChecklist] = useState<ChecklistAvaliacao | null>(null);
   const [dialogVisualizacaoOpen, setDialogVisualizacaoOpen] = useState(false);
   const { toast } = useToast();
@@ -111,7 +125,10 @@ const AdminChecklists = () => {
         nome: formData.nome,
         descricao: formData.descricao || null,
         ativo: formData.ativo,
-        campos_cabecalho: formData.campos_cabecalho as unknown as Json,
+        campos_cabecalho: {
+          campos_selecionaveis: formData.campos_cabecalho,
+          campos_manuais: formData.campos_manuais
+        } as unknown as Json,
         itens_avaliacao: formData.itens_avaliacao as unknown as Json,
         secoes: formData.secoes as unknown as Json,
         requer_assinatura: formData.requer_assinatura
@@ -186,6 +203,7 @@ const AdminChecklists = () => {
       descricao: '',
       ativo: true,
       campos_cabecalho: [],
+      campos_manuais: [],
       itens_avaliacao: [],
       secoes: [],
       requer_assinatura: false
@@ -193,16 +211,40 @@ const AdminChecklists = () => {
     setNovoItem('');
     setNovaSecao({ nome: '', descricao: '' });
     setSecaoSelecionada('sem_secao');
+    setNovoCampoManual({
+      id: '',
+      nome: '',
+      tipo: 'text',
+      obrigatorio: false
+    });
     setEditingChecklist(null);
   };
 
   const openEditDialog = (checklist: ChecklistAvaliacao) => {
     setEditingChecklist(checklist);
+    
+    // Parse campos_cabecalho que pode ter o formato antigo ou novo
+    let camposSelecionaveis: string[] = [];
+    let camposManuais: CampoManual[] = [];
+    
+    if (checklist.campos_cabecalho) {
+      if (Array.isArray(checklist.campos_cabecalho)) {
+        // Formato antigo (apenas array de strings)
+        camposSelecionaveis = checklist.campos_cabecalho as string[];
+      } else if (typeof checklist.campos_cabecalho === 'object') {
+        // Formato novo (objeto com campos_selecionaveis e campos_manuais)
+        const cabecalho = checklist.campos_cabecalho as any;
+        camposSelecionaveis = Array.isArray(cabecalho.campos_selecionaveis) ? cabecalho.campos_selecionaveis : [];
+        camposManuais = Array.isArray(cabecalho.campos_manuais) ? cabecalho.campos_manuais : [];
+      }
+    }
+    
     setFormData({
       nome: checklist.nome,
       descricao: checklist.descricao || '',
       ativo: checklist.ativo,
-      campos_cabecalho: Array.isArray(checklist.campos_cabecalho) ? checklist.campos_cabecalho as unknown as string[] : [],
+      campos_cabecalho: camposSelecionaveis,
+      campos_manuais: camposManuais,
       itens_avaliacao: Array.isArray(checklist.itens_avaliacao) ? checklist.itens_avaliacao as unknown as ItemAvaliacao[] : [],
       secoes: Array.isArray(checklist.secoes) ? checklist.secoes as unknown as Secao[] : [],
       requer_assinatura: checklist.requer_assinatura || false
@@ -303,8 +345,51 @@ const AdminChecklists = () => {
     cancelarEdicaoItem();
   };
 
+  const adicionarCampoManual = () => {
+    if (novoCampoManual.nome.trim()) {
+      const novoCampo: CampoManual = {
+        ...novoCampoManual,
+        id: Date.now().toString(),
+        nome: novoCampoManual.nome.trim()
+      };
+      
+      setFormData(prev => ({
+        ...prev,
+        campos_manuais: [...prev.campos_manuais, novoCampo]
+      }));
+      
+      setNovoCampoManual({
+        id: '',
+        nome: '',
+        tipo: 'text',
+        obrigatorio: false
+      });
+    }
+  };
+
+  const removerCampoManual = (campoId: string) => {
+    setFormData(prev => ({
+      ...prev,
+      campos_manuais: prev.campos_manuais.filter(campo => campo.id !== campoId)
+    }));
+  };
+
   const getCamposCabecalho = (campos: Json): string[] => {
-    return Array.isArray(campos) ? campos as string[] : [];
+    if (Array.isArray(campos)) {
+      return campos as string[];
+    } else if (typeof campos === 'object' && campos !== null) {
+      const cabecalho = campos as any;
+      return Array.isArray(cabecalho.campos_selecionaveis) ? cabecalho.campos_selecionaveis : [];
+    }
+    return [];
+  };
+
+  const getCamposManuais = (campos: Json): CampoManual[] => {
+    if (typeof campos === 'object' && campos !== null && !Array.isArray(campos)) {
+      const cabecalho = campos as any;
+      return Array.isArray(cabecalho.campos_manuais) ? cabecalho.campos_manuais : [];
+    }
+    return [];
   };
 
   const getSecoes = (secoes: Json): Secao[] => {
@@ -352,15 +437,35 @@ const AdminChecklists = () => {
             <p className="text-muted-foreground">{visualizandoChecklist.descricao}</p>
           )}
           
-          {campos.length > 0 && (
+          {(campos.length > 0 || getCamposManuais(visualizandoChecklist.campos_cabecalho).length > 0) && (
             <div className="space-y-2">
               <h4 className="font-medium">Campos do Cabeçalho:</h4>
-              <div className="flex flex-wrap gap-2">
-                {campos.map((campoId) => (
-                  <Badge key={campoId} variant="outline">
-                    {getCampoNome(campoId)}
-                  </Badge>
-                ))}
+              <div className="space-y-2">
+                {campos.length > 0 && (
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-1">Campos Selecionáveis:</p>
+                    <div className="flex flex-wrap gap-2">
+                      {campos.map((campoId) => (
+                        <Badge key={campoId} variant="outline">
+                          {getCampoNome(campoId)}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {getCamposManuais(visualizandoChecklist.campos_cabecalho).length > 0 && (
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-1">Campos de Preenchimento Manual:</p>
+                    <div className="flex flex-wrap gap-2">
+                      {getCamposManuais(visualizandoChecklist.campos_cabecalho).map((campo) => (
+                        <Badge key={campo.id} variant="secondary">
+                          {campo.nome} ({campo.tipo})
+                          {campo.obrigatorio && <span className="text-red-500">*</span>}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -517,43 +622,118 @@ const AdminChecklists = () => {
 
               <div>
                 <Label>Campos do Cabeçalho</Label>
-                <p className="text-sm text-muted-foreground mb-3">
-                  Selecione os campos que aparecerão no cabeçalho do checklist
+                <p className="text-sm text-muted-foreground mb-4">
+                  Configure os campos que aparecerão no cabeçalho do checklist
                 </p>
-                <div className="space-y-3">
-                  {camposDisponiveis.map((campo) => (
-                    <div key={campo.id} className="flex items-start space-x-3">
-                      <Checkbox
-                        id={campo.id}
-                        checked={formData.campos_cabecalho.includes(campo.id)}
-                        onCheckedChange={(checked) => handleCampoChange(campo.id, checked as boolean)}
-                      />
-                      <div className="space-y-1">
-                        <Label 
-                          htmlFor={campo.id} 
-                          className="text-sm font-medium cursor-pointer"
-                        >
-                          {campo.nome}
-                        </Label>
-                        <p className="text-xs text-muted-foreground">
-                          {campo.descricao}
-                        </p>
+                
+                <div className="space-y-6">
+                  {/* Campos Selecionáveis */}
+                  <div className="space-y-3">
+                    <Label className="text-base font-medium">Campos Selecionáveis</Label>
+                    <p className="text-sm text-muted-foreground">
+                      Campos que serão preenchidos automaticamente com base nos dados do sistema
+                    </p>
+                    {camposDisponiveis.map((campo) => (
+                      <div key={campo.id} className="flex items-start space-x-3">
+                        <Checkbox
+                          id={campo.id}
+                          checked={formData.campos_cabecalho.includes(campo.id)}
+                          onCheckedChange={(checked) => handleCampoChange(campo.id, checked as boolean)}
+                        />
+                        <div className="space-y-1">
+                          <Label 
+                            htmlFor={campo.id} 
+                            className="text-sm font-medium cursor-pointer"
+                          >
+                            {campo.nome}
+                          </Label>
+                          <p className="text-xs text-muted-foreground">
+                            {campo.descricao}
+                          </p>
+                        </div>
                       </div>
+                    ))}
+                    
+                    {formData.campos_cabecalho.length > 0 && (
+                      <div className="mt-4">
+                        <Label className="text-sm font-medium">Campos Selecionados:</Label>
+                        <div className="flex flex-wrap gap-2 mt-2">
+                          {formData.campos_cabecalho.map((campoId) => (
+                            <Badge key={campoId} variant="secondary">
+                              {getCampoNome(campoId)}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Campos Manuais */}
+                  <div className="space-y-3 border-t pt-4">
+                    <Label className="text-base font-medium">Campos de Preenchimento Manual</Label>
+                    <p className="text-sm text-muted-foreground">
+                      Campos que deverão ser preenchidos manualmente durante a inspeção
+                    </p>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
+                      <Input
+                        value={novoCampoManual.nome}
+                        onChange={(e) => setNovoCampoManual(prev => ({...prev, nome: e.target.value}))}
+                        placeholder="Nome do campo"
+                        onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), adicionarCampoManual())}
+                      />
+                      <Select 
+                        value={novoCampoManual.tipo} 
+                        onValueChange={(value) => setNovoCampoManual(prev => ({...prev, tipo: value as CampoManual['tipo']}))}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Tipo" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="text">Texto</SelectItem>
+                          <SelectItem value="number">Número</SelectItem>
+                          <SelectItem value="date">Data</SelectItem>
+                          <SelectItem value="textarea">Texto Longo</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="obrigatorio"
+                          checked={novoCampoManual.obrigatorio}
+                          onCheckedChange={(checked) => setNovoCampoManual(prev => ({...prev, obrigatorio: checked as boolean}))}
+                        />
+                        <Label htmlFor="obrigatorio" className="text-sm">Obrigatório</Label>
+                      </div>
+                      <Button type="button" onClick={adicionarCampoManual} size="sm">
+                        <Plus className="h-4 w-4 mr-1" />
+                        Adicionar
+                      </Button>
                     </div>
-                  ))}
-                  
-                  {formData.campos_cabecalho.length > 0 && (
-                    <div className="mt-4">
-                      <Label className="text-sm font-medium">Campos Selecionados:</Label>
-                      <div className="flex flex-wrap gap-2 mt-2">
-                        {formData.campos_cabecalho.map((campoId) => (
-                          <Badge key={campoId} variant="secondary">
-                            {getCampoNome(campoId)}
-                          </Badge>
+                    
+                    {formData.campos_manuais.length > 0 && (
+                      <div className="space-y-2 max-h-32 overflow-y-auto">
+                        {formData.campos_manuais.map((campo) => (
+                          <div key={campo.id} className="flex items-center justify-between p-2 border rounded">
+                            <div className="flex items-center gap-2">
+                              <Badge variant="outline">{campo.nome}</Badge>
+                              <Badge variant="secondary" className="text-xs">{campo.tipo}</Badge>
+                              {campo.obrigatorio && (
+                                <Badge variant="destructive" className="text-xs">Obrigatório</Badge>
+                              )}
+                            </div>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => removerCampoManual(campo.id)}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
                         ))}
                       </div>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
               </div>
 
