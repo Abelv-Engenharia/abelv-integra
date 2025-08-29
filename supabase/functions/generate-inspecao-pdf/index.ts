@@ -391,38 +391,99 @@ function generateHTMLReport(inspecao: InspectionData, responsaveis: any = {}): s
     
     ${Object.keys(camposCabecalho).length > 0 ? `
     <div class="section">
-        <h2>Identificação da Frente de Trabalho</h2>
+        <h2>${(inspecao.checklists_avaliacao?.nome?.toLowerCase().includes('veículo') || inspecao.checklists_avaliacao?.nome?.toLowerCase().includes('transporte')) ? 'Identificação do Veículo de Transporte' : 'Identificação da Frente de Trabalho'}</h2>
         <div class="info-grid">
-            ${responsaveis.engenheiro ? `
+            ${(inspecao.checklists_avaliacao?.nome?.toLowerCase().includes('veículo') || inspecao.checklists_avaliacao?.nome?.toLowerCase().includes('transporte')) ? `
+                ${responsaveis.empresa ? `
+                    <div class="info-item">
+                        <div class="info-label">Empresa:</div>
+                        <div class="info-value">${responsaveis.empresa}</div>
+                    </div>
+                ` : ''}
                 <div class="info-item">
-                    <div class="info-label">Engenheiro Responsável:</div>
-                    <div class="info-value">${responsaveis.engenheiro}</div>
+                    <div class="info-label">Responsável pela Inspeção:</div>
+                    <div class="info-value">${inspecao.profiles?.nome || 'N/A'}</div>
                 </div>
-            ` : ''}
-            ${responsaveis.supervisor ? `
-                <div class="info-item">
-                    <div class="info-label">Supervisor Responsável:</div>
-                    <div class="info-value">${responsaveis.supervisor}</div>
-                </div>
-            ` : ''}
-            ${responsaveis.encarregado ? `
-                <div class="info-item">
-                    <div class="info-label">Encarregado Responsável:</div>
-                    <div class="info-value">${responsaveis.encarregado}</div>
-                </div>
-            ` : ''}
-            ${responsaveis.empresa ? `
-                <div class="info-item">
-                    <div class="info-label">Empresa:</div>
-                    <div class="info-value">${responsaveis.empresa}</div>
-                </div>
-            ` : ''}
-            ${responsaveis.disciplina ? `
-                <div class="info-item">
-                    <div class="info-label">Disciplina:</div>
-                    <div class="info-value">${responsaveis.disciplina}</div>
-                </div>
-            ` : ''}
+                ${responsaveis.engenheiro ? `
+                    <div class="info-item">
+                        <div class="info-label">Engenheiro Responsável:</div>
+                        <div class="info-value">${responsaveis.engenheiro}</div>
+                    </div>
+                ` : ''}
+                ${Object.entries(camposCabecalho).map(([key, value]) => {
+                    if (!value || value === '') return '';
+                    
+                    // Filtrar campos de assinatura, IDs, campos de responsáveis e empresa
+                    if (key.toLowerCase().includes('assinatura') || 
+                        key.toLowerCase().includes('data_assinatura') ||
+                        key.toLowerCase().includes('responsavel_inspecao') ||
+                        key.toLowerCase().includes('engenheiro_responsavel') ||
+                        key.toLowerCase() === 'empresa' ||
+                        (typeof value === 'string' && value.includes('-') && value.length > 30)) {
+                        return '';
+                    }
+                    
+                    // Mapear os nomes dos campos para rótulos mais amigáveis
+                    const fieldLabels = {
+                        placa: 'Placa do Veículo',
+                        motorista: 'Motorista',
+                        modelo: 'Modelo do Veículo',
+                        ano: 'Ano',
+                        cor: 'Cor',
+                        km: 'Quilometragem',
+                        km_do_veiculo: 'Quilometragem',
+                        combustivel: 'Combustível',
+                        capacidade: 'Capacidade',
+                        categoria: 'Categoria',
+                        cnh: 'CNH (Nº/Categoria)',
+                        empresa_de_transporte: 'Empresa de Transporte',
+                        modelo_do_veiculo: 'Modelo do Veículo',
+                        renavam: 'RENAVAM',
+                        chassi: 'Chassi'
+                    };
+                    
+                    const label = fieldLabels[key] || key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' ');
+                    const displayValue = typeof value === 'object' ? JSON.stringify(value) : String(value);
+                    
+                    return `
+                        <div class="info-item">
+                            <div class="info-label">${label}:</div>
+                            <div class="info-value">${displayValue}</div>
+                        </div>
+                    `;
+                }).join('')}
+            ` : `
+                ${responsaveis.engenheiro ? `
+                    <div class="info-item">
+                        <div class="info-label">Engenheiro Responsável:</div>
+                        <div class="info-value">${responsaveis.engenheiro}</div>
+                    </div>
+                ` : ''}
+                ${responsaveis.supervisor ? `
+                    <div class="info-item">
+                        <div class="info-label">Supervisor Responsável:</div>
+                        <div class="info-value">${responsaveis.supervisor}</div>
+                    </div>
+                ` : ''}
+                ${responsaveis.encarregado ? `
+                    <div class="info-item">
+                        <div class="info-label">Encarregado Responsável:</div>
+                        <div class="info-value">${responsaveis.encarregado}</div>
+                    </div>
+                ` : ''}
+                ${responsaveis.empresa ? `
+                    <div class="info-item">
+                        <div class="info-label">Empresa:</div>
+                        <div class="info-value">${responsaveis.empresa}</div>
+                    </div>
+                ` : ''}
+                ${responsaveis.disciplina ? `
+                    <div class="info-item">
+                        <div class="info-label">Disciplina:</div>
+                        <div class="info-value">${responsaveis.disciplina}</div>
+                    </div>
+                ` : ''}
+            `}
         </div>
     </div>
     ` : ''}
@@ -526,11 +587,11 @@ function generateHTMLReport(inspecao: InspectionData, responsaveis: any = {}): s
                 `}
             </div>
             <div class="signature-box">
-                <p><strong>Responsável pela Frente de Trabalho</strong></p>
-                <p>${responsaveis.responsavel_tecnico || '_______________________'}</p>
+                <p><strong>${(inspecao.checklists_avaliacao?.nome?.toLowerCase().includes('veículo') || inspecao.checklists_avaliacao?.nome?.toLowerCase().includes('transporte')) ? 'Motorista' : 'Responsável pela Frente de Trabalho'}</strong></p>
+                <p>${(inspecao.checklists_avaliacao?.nome?.toLowerCase().includes('veículo') || inspecao.checklists_avaliacao?.nome?.toLowerCase().includes('transporte')) ? (camposCabecalho.motorista || '_______________________') : (responsaveis.responsavel_tecnico || '_______________________')}</p>
                 ${(camposCabecalho.assinaturas?.assinatura_responsavel_tecnico || camposCabecalho.assinatura_responsavel_tecnico) ? `
                     <div style="margin: 20px 0;">
-                        <img src="${camposCabecalho.assinaturas?.assinatura_responsavel_tecnico || camposCabecalho.assinatura_responsavel_tecnico}" alt="Assinatura do Responsável" style="max-width: 200px; max-height: 80px; border: 1px solid #ddd; padding: 5px;">
+                        <img src="${camposCabecalho.assinaturas?.assinatura_responsavel_tecnico || camposCabecalho.assinatura_responsavel_tecnico}" alt="Assinatura do ${(inspecao.checklists_avaliacao?.nome?.toLowerCase().includes('veículo') || inspecao.checklists_avaliacao?.nome?.toLowerCase().includes('transporte')) ? 'Motorista' : 'Responsável'}" style="max-width: 200px; max-height: 80px; border: 1px solid #ddd; padding: 5px;">
                     </div>
                 ` : `
                     <br><br>
