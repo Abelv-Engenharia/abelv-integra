@@ -333,8 +333,8 @@ function generateHTMLReport(inspecao: InspectionData, responsaveis: any = {}): s
         }
         .summary-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
             text-align: center;
         }
         .summary-item {
@@ -571,6 +571,10 @@ function generateHTMLReport(inspecao: InspectionData, responsaveis: any = {}): s
             <div class="summary-item">
                 <div class="summary-number" style="color: #dc3545;">${itens.filter((item: any) => item.tipo === 'item' && !item.isSection && item.status === 'nao_conforme').length}</div>
                 <div>Não Conformes</div>
+            </div>
+            <div class="summary-item">
+                <div class="summary-number" style="color: #6c757d;">${itens.filter((item: any) => item.tipo === 'item' && !item.isSection && item.status === 'nao_se_aplica').length}</div>
+                <div>Não Aplicáveis</div>
             </div>
         </div>
     </div>
