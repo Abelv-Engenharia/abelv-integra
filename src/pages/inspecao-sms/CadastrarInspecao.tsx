@@ -558,7 +558,21 @@ const CadastrarInspecao = () => {
                 </div>
 
                 <div>
-                  <Label className="text-sm font-medium">Responsável pela Frente de Trabalho</Label>
+                  <Label className="text-sm font-medium">
+                    {modeloSelecionado?.nome?.toLowerCase().includes('veículo') || modeloSelecionado?.nome?.toLowerCase().includes('veiculo') || modeloSelecionado?.nome?.toLowerCase().includes('transporte') ? 
+                      'Responsável pelo Veículo' : 
+                      'Responsável pela Frente de Trabalho'
+                    }
+                  </Label>
+                  
+                  {/* Mostrar nome do motorista se for checklist de veículo */}
+                  {(modeloSelecionado?.nome?.toLowerCase().includes('veículo') || modeloSelecionado?.nome?.toLowerCase().includes('veiculo') || modeloSelecionado?.nome?.toLowerCase().includes('transporte')) && dadosCabecalho?.motorista && (
+                    <div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded-lg">
+                      <Label className="text-sm font-medium text-blue-800">Motorista:</Label>
+                      <p className="text-sm text-blue-700">{dadosCabecalho.motorista}</p>
+                    </div>
+                  )}
+                  
                   <Select 
                     value={assinaturas.responsavel_tecnico} 
                     onValueChange={(value) => setAssinaturas({
@@ -567,7 +581,11 @@ const CadastrarInspecao = () => {
                     })}
                   >
                     <SelectTrigger className="mt-2">
-                      <SelectValue placeholder="Selecione o responsável pela frente de trabalho" />
+                      <SelectValue placeholder={
+                        modeloSelecionado?.nome?.toLowerCase().includes('veículo') || modeloSelecionado?.nome?.toLowerCase().includes('veiculo') || modeloSelecionado?.nome?.toLowerCase().includes('transporte') ? 
+                          'Selecione o responsável pelo veículo' : 
+                          'Selecione o responsável pela frente de trabalho'
+                      } />
                     </SelectTrigger>
                     <SelectContent className="bg-background border border-border z-50">
                       {engenheiros.map(eng => (
