@@ -55,8 +55,14 @@ export function InspecaoAcompanhamentoCard({
       console.log('URL da edge function:', functionUrl);
       
       try {
-        // Usar a URL da edge function diretamente no iframe
-        setPdfUrl(functionUrl);
+        // Baixar o arquivo e criar blob URL para usar no iframe
+        const response = await fetch(functionUrl);
+        if (!response.ok) throw new Error('Erro no download');
+        
+        const blob = await response.blob();
+        const blobUrl = URL.createObjectURL(blob);
+        
+        setPdfUrl(blobUrl);
         setShowPdfModal(true);
       } catch (err) {
         console.error('Erro ao abrir PDF:', err);
@@ -150,7 +156,13 @@ export function InspecaoAcompanhamentoCard({
     </Card>
 
     {/* Modal para exibir PDF */}
-    <Dialog open={showPdfModal} onOpenChange={setShowPdfModal}>
+    <Dialog open={showPdfModal} onOpenChange={(open) => {
+      setShowPdfModal(open);
+      if (!open && pdfUrl.startsWith('blob:')) {
+        URL.revokeObjectURL(pdfUrl);
+        setPdfUrl('');
+      }
+    }}>
       <DialogContent className="max-w-4xl h-[80vh] p-0">
         <DialogHeader className="p-4 border-b">
           <DialogTitle className="flex items-center justify-between">
