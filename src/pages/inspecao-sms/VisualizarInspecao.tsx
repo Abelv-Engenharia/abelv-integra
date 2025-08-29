@@ -319,6 +319,28 @@ const VisualizarInspecao = () => {
                       {(inspecao.checklists_avaliacao?.nome?.toLowerCase().includes('veículo') || 
                         inspecao.checklists_avaliacao?.nome?.toLowerCase().includes('transporte')) ? (
                         <>
+                          {/* Empresa */}
+                          {identificacao.empresa && (
+                            <div>
+                              <p className="text-sm text-muted-foreground">Empresa</p>
+                              <p className="font-medium">{identificacao.empresa}</p>
+                            </div>
+                          )}
+                          
+                          {/* Responsável pela Inspeção */}
+                          <div>
+                            <p className="text-sm text-muted-foreground">Responsável pela Inspeção</p>
+                            <p className="font-medium">{inspecao.profiles?.nome || 'N/A'}</p>
+                          </div>
+                          
+                          {/* Engenheiro Responsável */}
+                          {identificacao.engenheiro && (
+                            <div>
+                              <p className="text-sm text-muted-foreground">Engenheiro Responsável</p>
+                              <p className="font-medium">{identificacao.engenheiro}</p>
+                            </div>
+                          )}
+                          
                           {/* Mostrar todos os campos do cabeçalho para veículo */}
                           {Object.entries(inspecao.dados_preenchidos.campos_cabecalho).map(([key, value]: [string, any]) => {
                             if (!value || value === '') return null;
@@ -327,7 +349,6 @@ const VisualizarInspecao = () => {
                             const fieldLabels: { [key: string]: string } = {
                               placa: 'Placa do Veículo',
                               motorista: 'Motorista',
-                              empresa: 'Empresa',
                               modelo: 'Modelo do Veículo',
                               ano: 'Ano',
                               cor: 'Cor',
@@ -530,55 +551,42 @@ const VisualizarInspecao = () => {
                   </div>
 
                   {/* Assinatura do Responsável - Adaptado para tipo de inspeção */}
-                  <div className="text-center">
-                    <div className="mb-2">
-                      {(inspecao.dados_preenchidos?.assinatura_responsavel_tecnico || inspecao.dados_preenchidos?.assinaturas?.assinatura_responsavel_tecnico) ? (
-                        <div className="h-20 border rounded-md flex items-center justify-center bg-muted/50">
-                          <img 
-                            src={inspecao.dados_preenchidos?.assinatura_responsavel_tecnico || inspecao.dados_preenchidos?.assinaturas?.assinatura_responsavel_tecnico} 
-                            alt={`Assinatura do ${(inspecao.checklists_avaliacao?.nome?.toLowerCase().includes('veículo') || inspecao.checklists_avaliacao?.nome?.toLowerCase().includes('transporte')) ? 'Motorista' : 'Responsável pela Frente de Trabalho'}`} 
-                            className="max-h-16 max-w-full object-contain"
-                          />
-                        </div>
-                      ) : (
-                        <div className="h-16 border-2 border-dashed border-muted-foreground/30 rounded-md flex items-center justify-center">
-                          <span className="text-xs text-muted-foreground">Assinatura não capturada</span>
-                        </div>
+                  {/* Para veículo de transporte, não mostrar a seção de assinatura do responsável */}
+                  {!(inspecao.checklists_avaliacao?.nome?.toLowerCase().includes('veículo') || 
+                    inspecao.checklists_avaliacao?.nome?.toLowerCase().includes('transporte')) && (
+                    <div className="text-center">
+                      <div className="mb-2">
+                        {(inspecao.dados_preenchidos?.assinatura_responsavel_tecnico || inspecao.dados_preenchidos?.assinaturas?.assinatura_responsavel_tecnico) ? (
+                          <div className="h-20 border rounded-md flex items-center justify-center bg-muted/50">
+                            <img 
+                              src={inspecao.dados_preenchidos?.assinatura_responsavel_tecnico || inspecao.dados_preenchidos?.assinaturas?.assinatura_responsavel_tecnico} 
+                              alt="Assinatura do Responsável pela Frente de Trabalho" 
+                              className="max-h-16 max-w-full object-contain"
+                            />
+                          </div>
+                        ) : (
+                          <div className="h-16 border-2 border-dashed border-muted-foreground/30 rounded-md flex items-center justify-center">
+                            <span className="text-xs text-muted-foreground">Assinatura não capturada</span>
+                          </div>
+                        )}
+                      </div>
+                      
+                      {/* Para frente de trabalho - mostrar nome do responsável técnico */}
+                      {responsavelFrenteTrabalho && (
+                        <p className="text-sm font-semibold text-primary mb-1">
+                          {responsavelFrenteTrabalho}
+                        </p>
+                      )}
+                      <p className="text-sm font-medium">Responsável pela Frente de Trabalho</p>
+                      <p className="text-xs text-muted-foreground">Responsável para Assinatura</p>
+                      
+                      {inspecao.dados_preenchidos?.data_assinatura && (
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Assinado em: {format(new Date(inspecao.dados_preenchidos.data_assinatura), 'dd/MM/yyyy HH:mm', { locale: ptBR })}
+                        </p>
                       )}
                     </div>
-                    
-                    {/* Mostrar o nome baseado no tipo de inspeção */}
-                    {(inspecao.checklists_avaliacao?.nome?.toLowerCase().includes('veículo') || 
-                      inspecao.checklists_avaliacao?.nome?.toLowerCase().includes('transporte')) ? (
-                      <>
-                        {/* Para veículo de transporte - mostrar nome do motorista do cabeçalho */}
-                        {inspecao.dados_preenchidos?.campos_cabecalho?.motorista && (
-                          <p className="text-sm font-semibold text-primary mb-1">
-                            {inspecao.dados_preenchidos.campos_cabecalho.motorista}
-                          </p>
-                        )}
-                        <p className="text-sm font-medium">Motorista</p>
-                        <p className="text-xs text-muted-foreground">Responsável pelo Veículo</p>
-                      </>
-                    ) : (
-                      <>
-                        {/* Para frente de trabalho - mostrar nome do responsável técnico */}
-                        {responsavelFrenteTrabalho && (
-                          <p className="text-sm font-semibold text-primary mb-1">
-                            {responsavelFrenteTrabalho}
-                          </p>
-                        )}
-                        <p className="text-sm font-medium">Responsável pela Frente de Trabalho</p>
-                        <p className="text-xs text-muted-foreground">Responsável para Assinatura</p>
-                      </>
-                    )}
-                    
-                    {inspecao.dados_preenchidos?.data_assinatura && (
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Assinado em: {format(new Date(inspecao.dados_preenchidos.data_assinatura), 'dd/MM/yyyy HH:mm', { locale: ptBR })}
-                      </p>
-                    )}
-                  </div>
+                  )}
 
                   {/* Mensagem quando nenhuma assinatura foi capturada */}
                   {!inspecao.dados_preenchidos?.assinatura_inspetor && 
