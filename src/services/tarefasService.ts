@@ -174,10 +174,11 @@ export const tarefasService = {
         .select(`
           *,
           tarefas_responsaveis(
+            usuario_id,
             profiles(id, nome)
           )
         `)
-        .or(`tarefas_responsaveis.responsavel_id.eq.${user.id},criado_por.eq.${user.id}`)
+        .or(`tarefas_responsaveis.usuario_id.eq.${user.id},criado_por.eq.${user.id}`)
         .order('created_at', { ascending: false });
 
       if (error) {
