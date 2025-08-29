@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Plus, Edit2, Trash2, X } from "lucide-react";
+import { Plus, Edit2, Trash2, X, Eye } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import type { Json } from "@/integrations/supabase/types";
@@ -65,6 +65,8 @@ const AdminChecklists = () => {
   const [novoItem, setNovoItem] = useState('');
   const [novaSecao, setNovaSecao] = useState({ nome: '', descricao: '' });
   const [secaoSelecionada, setSecaoSelecionada] = useState<string>('sem_secao');
+  const [visualizandoChecklist, setVisualizandoChecklist] = useState<ChecklistAvaliacao | null>(null);
+  const [dialogVisualizacaoOpen, setDialogVisualizacaoOpen] = useState(false);
   const { toast } = useToast();
 
   // Campos disponíveis para seleção no cabeçalho
@@ -322,6 +324,129 @@ const AdminChecklists = () => {
 
   const getItensAvaliacao = (itens: Json): ItemAvaliacao[] => {
     return Array.isArray(itens) ? itens as unknown as ItemAvaliacao[] : [];
+  };
+
+  const openVisualizacaoDialog = (checklist: ChecklistAvaliacao) => {
+    setVisualizandoChecklist(checklist);
+    setDialogVisualizacaoOpen(true);
+  };
+
+  const closeVisualizacaoDialog = () => {
+    setVisualizandoChecklist(null);
+    setDialogVisualizacaoOpen(false);
+  };
+
+  const renderVisualizacaoChecklist = () => {
+    if (!visualizandoChecklist) return null;
+
+    const campos = getCamposCabecalho(visualizandoChecklist.campos_cabecalho);
+    const secoes = getSecoes(visualizandoChecklist.secoes || []);
+    const itens = getItensAvaliacao(visualizandoChecklist.itens_avaliacao);
+
+    return (
+      <div className="space-y-6">
+        {/* Cabeçalho */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold">{visualizandoChecklist.nome}</h3>
+          {visualizandoChecklist.descricao && (
+            <p className="text-muted-foreground">{visualizandoChecklist.descricao}</p>
+          )}
+          
+          {campos.length > 0 && (
+            <div className="space-y-2">
+              <h4 className="font-medium">Campos do Cabeçalho:</h4>
+              <div className="flex flex-wrap gap-2">
+                {campos.map((campoId) => (
+                  <Badge key={campoId} variant="outline">
+                    {getCampoNome(campoId)}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Itens organizados por seção */}
+        <div className="space-y-4">
+          <h4 className="font-medium">Itens de Avaliação:</h4>
+          
+          {secoes.length > 0 ? (
+            // Renderizar itens por seção
+            <>
+              {secoes.map((secao) => {
+                const itensSecao = itens.filter(item => item.secao_id === secao.id);
+                if (itensSecao.length === 0) return null;
+                
+                return (
+                  <div key={secao.id} className="space-y-2">
+                    <div className="border-l-4 border-primary pl-4">
+                      <h5 className="font-medium text-primary">{secao.nome}</h5>
+                      {secao.descricao && (
+                        <p className="text-sm text-muted-foreground">{secao.descricao}</p>
+                      )}
+                    </div>
+                    <div className="ml-4 space-y-1">
+                      {itensSecao.map((item, index) => (
+                        <div key={item.id} className="flex items-start gap-2 p-2 border rounded">
+                          <span className="text-sm text-muted-foreground mt-1">{index + 1}.</span>
+                          <span className="text-sm">{item.texto}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+              
+              {/* Itens sem seção */}
+              {(() => {
+                const itensSemSecao = itens.filter(item => !item.secao_id);
+                if (itensSemSecao.length === 0) return null;
+                
+                return (
+                  <div className="space-y-2">
+                    <div className="border-l-4 border-muted pl-4">
+                      <h5 className="font-medium text-muted-foreground">Sem Seção</h5>
+                    </div>
+                    <div className="ml-4 space-y-1">
+                      {itensSemSecao.map((item, index) => (
+                        <div key={item.id} className="flex items-start gap-2 p-2 border rounded">
+                          <span className="text-sm text-muted-foreground mt-1">{index + 1}.</span>
+                          <span className="text-sm">{item.texto}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()}
+            </>
+          ) : (
+            // Renderizar itens sem seções
+            <div className="space-y-1">
+              {itens.map((item, index) => (
+                <div key={item.id} className="flex items-start gap-2 p-2 border rounded">
+                  <span className="text-sm text-muted-foreground mt-1">{index + 1}.</span>
+                  <span className="text-sm">{item.texto}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Informações adicionais */}
+        <div className="pt-4 border-t space-y-2">
+          <div className="flex justify-between items-center text-sm">
+            <span>Requer Assinatura:</span>
+            <Badge variant={visualizandoChecklist.requer_assinatura ? "default" : "secondary"}>
+              {visualizandoChecklist.requer_assinatura ? "Sim" : "Não"}
+            </Badge>
+          </div>
+          <div className="flex justify-between items-center text-sm">
+            <span>Total de Itens:</span>
+            <Badge variant="secondary">{itens.length}</Badge>
+          </div>
+        </div>
+      </div>
+    );
   };
 
   useEffect(() => {
@@ -697,8 +822,17 @@ const AdminChecklists = () => {
                       <div className="flex justify-end gap-2">
                         <Button 
                           size="sm" 
+                          variant="ghost"
+                          onClick={() => openVisualizacaoDialog(checklist)}
+                          title="Visualizar checklist"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          size="sm" 
                           variant="outline"
                           onClick={() => openEditDialog(checklist)}
+                          title="Editar checklist"
                         >
                           <Edit2 className="h-4 w-4" />
                         </Button>
@@ -706,6 +840,7 @@ const AdminChecklists = () => {
                           size="sm" 
                           variant="destructive"
                           onClick={() => handleDelete(checklist.id)}
+                          title="Excluir checklist"
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
@@ -718,6 +853,21 @@ const AdminChecklists = () => {
           </Table>
         </CardContent>
       </Card>
+
+      {/* Dialog de Visualização */}
+      <Dialog open={dialogVisualizacaoOpen} onOpenChange={setDialogVisualizacaoOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Visualizar Checklist</DialogTitle>
+          </DialogHeader>
+          {renderVisualizacaoChecklist()}
+          <div className="flex justify-end">
+            <Button variant="outline" onClick={closeVisualizacaoDialog}>
+              Fechar
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
