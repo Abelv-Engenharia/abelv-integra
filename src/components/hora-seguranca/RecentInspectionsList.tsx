@@ -31,19 +31,20 @@ const getStatusBadgeClass = (status: string) => {
   switch (status) {
     case "REALIZADA":
     case "Concluída":
-      return "bg-green-500 hover:bg-green-600";
+    case "CONFORME":
+      return "bg-green-500 hover:bg-green-600 text-white";
     case "REALIZADA NÃO PROGRAMADA":
-      return "bg-blue-500 hover:bg-blue-600";
+      return "bg-blue-500 hover:bg-blue-600 text-white";
     case "A REALIZAR":
     case "Pendente":
-      return "bg-yellow-500 hover:bg-yellow-600";
+      return "bg-yellow-500 hover:bg-yellow-600 text-white";
     case "NÃO REALIZADA":
-      return "bg-red-500 hover:bg-red-600";
+      return "bg-red-500 hover:bg-red-600 text-white";
     case "CANCELADA":
     case "Cancelada":
-      return "bg-gray-500 hover:bg-gray-600";
+      return "bg-gray-500 hover:bg-gray-600 text-white";
     default:
-      return "";
+      return "bg-gray-100 hover:bg-gray-200 text-gray-800";
   }
 };
 
