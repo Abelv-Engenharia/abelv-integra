@@ -1,10 +1,11 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { InspecaoStatusBadge } from "./InspecaoStatusBadge";
 import { format } from "date-fns";
-import { FileText } from "lucide-react";
+import { FileText, X } from "lucide-react";
 import { useSignedUrl } from "@/hooks/useSignedUrl";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -22,6 +23,8 @@ export function InspecaoAcompanhamentoCard({
 }: InspecaoAcompanhamentoCardProps) {
   const { generate, loading, error } = useSignedUrl();
   const { toast } = useToast();
+  const [showPdfModal, setShowPdfModal] = useState(false);
+  const [pdfUrl, setPdfUrl] = useState<string>("");
 
   // Função para formatar a data corretamente, evitando problemas de timezone
   const formatDateSafely = (dateString: string) => {
@@ -52,27 +55,14 @@ export function InspecaoAcompanhamentoCard({
       console.log('URL da edge function:', functionUrl);
       
       try {
-        // Fetch do arquivo e criação de blob URL para evitar bloqueio
-        const response = await fetch(functionUrl);
-        const blob = await response.blob();
-        const blobUrl = window.URL.createObjectURL(blob);
-        
-        // Abrir blob URL em nova aba
-        const newTab = window.open(blobUrl, '_blank');
-        
-        // Limpar blob URL após um tempo para liberar memória
-        setTimeout(() => {
-          window.URL.revokeObjectURL(blobUrl);
-        }, 1000);
-        
-        if (!newTab) {
-          throw new Error('Popup bloqueado');
-        }
+        // Usar a URL da edge function diretamente no iframe
+        setPdfUrl(functionUrl);
+        setShowPdfModal(true);
       } catch (err) {
         console.error('Erro ao abrir PDF:', err);
         toast({
           title: "Erro ao abrir relatório",
-          description: "Não foi possível abrir o arquivo. Verifique se popups estão permitidos.",
+          description: "Não foi possível acessar o arquivo",
           variant: "destructive",
         });
       }
@@ -88,7 +78,8 @@ export function InspecaoAcompanhamentoCard({
   };
 
   return (
-    <Card className="animate-fade-in relative min-h-[72px] p-1.5">
+    <>
+      <Card className="animate-fade-in relative min-h-[72px] p-1.5">
       {/* Status badge canto superior direito */}
       <div className="absolute right-2 top-2 z-10">
         <InspecaoStatusBadge status={inspecao.status} />
@@ -157,5 +148,33 @@ export function InspecaoAcompanhamentoCard({
         </div>
       </CardFooter>
     </Card>
+
+    {/* Modal para exibir PDF */}
+    <Dialog open={showPdfModal} onOpenChange={setShowPdfModal}>
+      <DialogContent className="max-w-4xl h-[80vh] p-0">
+        <DialogHeader className="p-4 border-b">
+          <DialogTitle className="flex items-center justify-between">
+            Relatório de Inspeção
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowPdfModal(false)}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </DialogTitle>
+        </DialogHeader>
+        <div className="flex-1 p-0">
+          {pdfUrl && (
+            <iframe
+              src={pdfUrl}
+              className="w-full h-full border-0"
+              title="Relatório PDF"
+            />
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
+    </>
   );
 }
