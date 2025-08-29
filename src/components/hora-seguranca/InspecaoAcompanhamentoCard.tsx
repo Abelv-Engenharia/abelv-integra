@@ -56,7 +56,7 @@ export function InspecaoAcompanhamentoCard({
       // Usar createSignedUrl do Supabase para gerar URL temporária
       const { data, error } = await supabase.storage
         .from('relatorios-inspecao-hsa')
-        .createSignedUrl(fileName, 120); // 2 minutos de validade
+        .createSignedUrl(fileName, 3600); // 1 hora de validade
       
       if (error) {
         console.error('Erro ao gerar signed URL:', error);
@@ -70,8 +70,8 @@ export function InspecaoAcompanhamentoCard({
       
       if (data?.signedUrl) {
         console.log('Signed URL gerada:', data.signedUrl);
-        setPdfUrl(data.signedUrl);
-        setShowPdfModal(true);
+        // Abrir em nova guia ao invés do modal
+        window.open(data.signedUrl, '_blank');
       }
       
     } catch (err) {
