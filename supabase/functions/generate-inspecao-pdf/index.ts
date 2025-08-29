@@ -232,6 +232,7 @@ function generateHTMLReport(inspecao: InspectionData, responsaveis: any = {}): s
             border-bottom: 2px solid #0066cc;
             padding-bottom: 20px;
             margin-bottom: 30px;
+            page-break-after: avoid;
         }
         .header-logo {
             width: 80px;
@@ -251,6 +252,8 @@ function generateHTMLReport(inspecao: InspectionData, responsaveis: any = {}): s
             grid-template-columns: 1fr 1fr;
             gap: 20px;
             margin-bottom: 30px;
+            page-break-inside: avoid;
+            break-inside: avoid;
         }
         .info-item {
             border: 1px solid #ddd;
@@ -268,6 +271,8 @@ function generateHTMLReport(inspecao: InspectionData, responsaveis: any = {}): s
         }
         .section {
             margin-bottom: 30px;
+            page-break-inside: avoid;
+            break-inside: avoid;
         }
         .section h2 {
             color: #0066cc;
@@ -276,12 +281,15 @@ function generateHTMLReport(inspecao: InspectionData, responsaveis: any = {}): s
             padding: 15px;
             margin-bottom: 20px;
             border-radius: 5px;
+            page-break-after: avoid;
         }
         .item {
             border: 1px solid #ddd;
             margin-bottom: 10px;
             border-radius: 5px;
             overflow: hidden;
+            page-break-inside: avoid;
+            break-inside: avoid;
         }
         .item-header {
             padding: 15px;
@@ -320,6 +328,8 @@ function generateHTMLReport(inspecao: InspectionData, responsaveis: any = {}): s
             padding: 20px;
             border-radius: 5px;
             margin-bottom: 30px;
+            page-break-inside: avoid;
+            break-inside: avoid;
         }
         .summary-grid {
             display: grid;
@@ -342,22 +352,80 @@ function generateHTMLReport(inspecao: InspectionData, responsaveis: any = {}): s
             margin-top: 50px;
             border-top: 2px solid #ddd;
             padding-top: 30px;
+            page-break-inside: avoid;
+            break-inside: avoid;
         }
         .signature-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 40px;
             margin-top: 30px;
+            page-break-inside: avoid;
+            break-inside: avoid;
         }
         .signature-box {
             border: 1px solid #ddd;
             padding: 20px;
             text-align: center;
             min-height: 80px;
+            page-break-inside: avoid;
+            break-inside: avoid;
+        }
+        .section-group {
+            page-break-inside: avoid;
+            break-inside: avoid;
+            margin-bottom: 25px;
+        }
+        .section-title {
+            color: #0066cc;
+            background-color: #e7f3ff;
+            padding: 10px;
+            margin-bottom: 15px;
+            border-left: 4px solid #0066cc;
+            border-radius: 3px;
+            font-size: 16px;
+            page-break-after: avoid;
+        }
+        .non-conformities-section {
+            page-break-inside: avoid;
+            break-inside: avoid;
+        }
+        .non-conformity-item {
+            margin-bottom: 15px;
+            padding: 15px;
+            border-left: 4px solid #dc3545;
+            background-color: #f8f9fa;
+            page-break-inside: avoid;
+            break-inside: avoid;
         }
         @media print {
-            body { margin: 0; }
-            .header { page-break-after: avoid; }
+            body { 
+                margin: 0; 
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            .header { 
+                page-break-after: avoid; 
+            }
+            .section {
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
+            .section h2 {
+                page-break-after: avoid;
+            }
+            .summary {
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
+            .signature-section {
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
+            .info-grid {
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
         }
     </style>
 </head>
@@ -532,8 +600,8 @@ function generateHTMLReport(inspecao: InspectionData, responsaveis: any = {}): s
             secoes.forEach((secao, nomeSecao) => {
                 if (secao.items.length > 0) {
                     html += `
-                        <div style="margin-bottom: 25px;">
-                            <h3 style="color: #0066cc; background-color: #e7f3ff; padding: 10px; margin-bottom: 15px; border-left: 4px solid #0066cc; border-radius: 3px; font-size: 16px;">${nomeSecao}</h3>
+                        <div class="section-group">
+                            <h3 class="section-title">${nomeSecao}</h3>
                             ${secao.items.map((item: any) => `
                                 <div class="item">
                                     <div class="item-header">
@@ -559,10 +627,10 @@ function generateHTMLReport(inspecao: InspectionData, responsaveis: any = {}): s
     </div>
 
     ${naoConformidades.length > 0 ? `
-    <div class="section">
+    <div class="section non-conformities-section">
         <h2>Resumo das Não Conformidades</h2>
         ${naoConformidades.map((item: any, index: number) => `
-            <div style="margin-bottom: 15px; padding: 15px; border-left: 4px solid #dc3545; background-color: #f8f9fa;">
+            <div class="non-conformity-item">
                 <strong>${index + 1}. ${item.nome}</strong><br>
                 <span style="color: #666;">${item.observacao_nc}</span>
             </div>
