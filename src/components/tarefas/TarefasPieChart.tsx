@@ -10,7 +10,7 @@ import {
 } from 'recharts';
 import { tarefasService } from '@/services/tarefasService';
 
-const COLORS = ['#22c55e', '#3b82f6', '#f97316', '#ef4444']; // verde, azul, laranja, vermelho
+const COLORS = ['#22c55e', '#f97316', '#ef4444', '#3b82f6']; // concluídas: verde, em andamento: laranja, pendentes: vermelho, programadas: azul
 
 const TarefasPieChart = () => {
   const [data, setData] = useState([
