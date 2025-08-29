@@ -64,9 +64,9 @@ export const PermissionsAlert = ({ canManageUsers, permissions }: PermissionsAle
               <div className="flex flex-wrap gap-1">
                 {permissions.admin_perfis && <Badge variant="secondary">Gerenciar perfis</Badge>}
                 {permissions.admin_funcionarios && <Badge variant="secondary">Gerenciar funcionários</Badge>}
-                {permissions.admin_usuarios && <Badge variant="secondary">Gerenciar usuários</Badge>}
-                {permissions.admin_empresas && <Badge variant="secondary">Gerenciar empresas</Badge>}
-                {permissions.menus_sidebar?.length > 0 && <Badge variant="secondary">{permissions.menus_sidebar.length} menus permitidos</Badge>}
+                {permissions.desvios && <Badge variant="secondary">Desvios</Badge>}
+                {permissions.ocorrencias && <Badge variant="secondary">Ocorrências</Badge>}
+                {permissions.treinamentos && <Badge variant="secondary">Treinamentos</Badge>}
                 {Object.values(permissions).every(v => v === false) && (
                   <Badge variant="outline">Nenhuma permissão especial</Badge>
                 )}

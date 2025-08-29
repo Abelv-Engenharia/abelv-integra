@@ -8,9 +8,9 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import SidebarSectionGestaoSMS from "./SidebarSectionGestaoSMS";
 import SidebarSectionTarefas from "./SidebarSectionTarefas";
 import SidebarSectionRelatorios from "./SidebarSectionRelatorios";
-import SidebarSectionSistema from "./SidebarSectionSistema";
+import SidebarSectionAdministracao from "./SidebarSectionAdministracao";
 import SidebarSearch from "./SidebarSearch";
-import { usePermissions } from "@/hooks/usePermissions";
+import { useProfile } from "@/hooks/useProfile";
 
 // Função utilitária para verificar acesso (contem na lista)
 function podeVerMenu(menu: string, menusSidebar?: string[]) {
@@ -21,10 +21,12 @@ function podeVerMenu(menu: string, menusSidebar?: string[]) {
 export function AppSidebar() {
   const location = useLocation();
   const currentPath = location.pathname;
-  const permissions = usePermissions();
-  
-  // Usar o sistema de permissões atualizado
-  const menusSidebar = permissions.allowedMenus;
+  const { userPermissoes } = useProfile();
+
+  // Extrair menus permitidos do perfil do usuário
+  const menusSidebar = userPermissoes && typeof userPermissoes === "object" && Array.isArray((userPermissoes as any).menus_sidebar) 
+    ? (userPermissoes as any).menus_sidebar 
+    : [];
 
   // Defina o menu principal aberto inicialmente
   const [openMenu, setOpenMenu] = useState<string | null>(() => {
@@ -32,9 +34,9 @@ export function AppSidebar() {
     if (currentPath.startsWith("/tarefas")) return "tarefas";
     if (currentPath.startsWith("/relatorios")) return "relatorios";
     if (currentPath.startsWith("/idsms")) return "idsms";
-    if (currentPath.startsWith("/admin") || currentPath.startsWith("/suporte") || currentPath.startsWith("/conta")) return "sistema";
+    if (currentPath.startsWith("/admin")) return "admin";
     if (currentPath.startsWith("/gro")) return "gro";
-    if (currentPath.startsWith("/tutoriais")) return "sistema";
+    if (currentPath.startsWith("/tutoriais")) return "admin";
     if (currentPath.startsWith("/account")) return "account";
     return null;
   });
@@ -81,9 +83,9 @@ export function AppSidebar() {
           <SidebarSectionRelatorios openMenu={openMenu} toggleMenu={toggleMenu} />
         )}
 
-        {/* Render Sistema (ex-Administração) */}
-        {["adm_usuarios", "adm_perfis", "adm_empresas", "adm_ccas", "adm_engenheiros", "adm_supervisores", "adm_funcionarios", "adm_hht", "adm_metas_indicadores", "adm_templates", "adm_logo", "adm_modelos_inspecao", "adm_checklists", "adm_importacao_funcionarios", "adm_configuracoes", "suporte", "conta"].some(menu => podeVerMenu(menu, menusSidebar)) && (
-          <SidebarSectionSistema openMenu={openMenu} toggleMenu={toggleMenu} />
+        {/* Render Administração (mantendo compatibilidade) */}
+        {["admin_usuarios", "admin_perfis", "admin_empresas", "admin_ccas", "admin_engenheiros", "admin_supervisores", "admin_funcionarios", "admin_hht", "admin_metas_indicadores", "admin_templates", "admin_logo", "admin_modelos_inspecao"].some(menu => podeVerMenu(menu, menusSidebar)) && (
+          <SidebarSectionAdministracao openMenu={openMenu} toggleMenu={toggleMenu} />
         )}
 
 
