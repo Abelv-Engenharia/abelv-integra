@@ -62,7 +62,7 @@ export function InspecaoAcompanhamentoCard({
         console.error('Erro ao gerar signed URL:', error);
         toast({
           title: "Erro ao abrir relatório",
-          description: "Não foi possível gerar link do arquivo: " + error.message,
+          description: "Não foi possível gerar link do arquivo",
           variant: "destructive",
         });
         return;
@@ -70,41 +70,15 @@ export function InspecaoAcompanhamentoCard({
       
       if (data?.signedUrl) {
         console.log('Signed URL gerada:', data.signedUrl);
-        
-        // Baixar o arquivo e criar blob URL
-        try {
-          const response = await fetch(data.signedUrl);
-          if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-          }
-          
-          const blob = await response.blob();
-          const blobUrl = URL.createObjectURL(blob);
-          
-          console.log('Blob URL criada:', blobUrl);
-          setPdfUrl(blobUrl);
-          setShowPdfModal(true);
-        } catch (fetchError) {
-          console.error('Erro ao fazer fetch do arquivo:', fetchError);
-          toast({
-            title: "Erro ao carregar arquivo",
-            description: "Não foi possível baixar o arquivo: " + fetchError.message,
-            variant: "destructive",
-          });
-        }
-      } else {
-        toast({
-          title: "Erro",
-          description: "Não foi possível gerar URL do arquivo",
-          variant: "destructive",
-        });
+        setPdfUrl(data.signedUrl);
+        setShowPdfModal(true);
       }
       
     } catch (err) {
       console.error('Erro ao processar relatório:', err);
       toast({
         title: "Erro ao abrir relatório",
-        description: "Erro inesperado: " + (err instanceof Error ? err.message : String(err)),
+        description: "Não foi possível acessar o arquivo",
         variant: "destructive",
       });
     }
@@ -186,9 +160,6 @@ export function InspecaoAcompanhamentoCard({
     <Dialog open={showPdfModal} onOpenChange={(open) => {
       setShowPdfModal(open);
       if (!open) {
-        if (pdfUrl.startsWith('blob:')) {
-          URL.revokeObjectURL(pdfUrl);
-        }
         setPdfUrl('');
       }
     }}>
