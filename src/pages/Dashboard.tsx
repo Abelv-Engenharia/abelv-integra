@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useProfile } from "@/hooks/useProfile";
+import { SecurityAlert } from "@/components/admin/SecurityAlert";
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -50,6 +51,8 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen p-6">
+      <SecurityAlert />
+      
       <div className="flex justify-between items-start mb-8">
         <div>
           <h1 className="text-2xl font-semibold text-foreground">
