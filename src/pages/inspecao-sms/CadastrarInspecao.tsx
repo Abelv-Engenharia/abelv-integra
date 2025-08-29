@@ -94,19 +94,34 @@ const CadastrarInspecao = () => {
   const selecionarModelo = (modelo: any) => {
     setModeloSelecionado(modelo);
 
-    // Configurar campos de cabeçalho
-    const camposCabecalhoModelo = Array.isArray(modelo.campos_cabecalho) ? modelo.campos_cabecalho : [];
+    // Configurar campos de cabeçalho - suportar nova estrutura
+    let camposCabecalhoModelo: any[] = [];
+    
+    if (modelo.campos_cabecalho) {
+      // Nova estrutura com campos_selecionaveis e campos_manuais
+      if (typeof modelo.campos_cabecalho === 'object' && !Array.isArray(modelo.campos_cabecalho)) {
+        const campos_selecionaveis = modelo.campos_cabecalho.campos_selecionaveis || [];
+        const campos_manuais = modelo.campos_cabecalho.campos_manuais || [];
+        camposCabecalhoModelo = [...campos_selecionaveis, ...campos_manuais];
+      } 
+      // Estrutura antiga (array simples)
+      else if (Array.isArray(modelo.campos_cabecalho)) {
+        camposCabecalhoModelo = modelo.campos_cabecalho;
+      }
+    }
+    
     console.log('Campos cabeçalho do modelo:', camposCabecalhoModelo);
     setCamposCabecalho(camposCabecalhoModelo);
 
     // Resetar dados do cabeçalho
     const dadosIniciais: any = {};
     camposCabecalhoModelo.forEach((campo: any) => {
+      const campoNome = typeof campo === 'string' ? campo : campo.nome || campo.id;
       // Preencher automaticamente o responsável da inspeção com o usuário logado
-      if (campo === 'responsavel_inspecao') {
-        dadosIniciais[campo] = profile?.id || '';
+      if (campoNome === 'responsavel_inspecao') {
+        dadosIniciais[campoNome] = profile?.id || '';
       } else {
-        dadosIniciais[campo] = '';
+        dadosIniciais[campoNome] = '';
       }
     });
     setDadosCabecalho(dadosIniciais);
@@ -752,11 +767,12 @@ const CadastrarInspecao = () => {
                     // Reset campos de cabeçalho quando CCA muda
                     const dadosIniciais: any = {};
                     camposCabecalho.forEach((campo: any) => {
+                      const campoNome = typeof campo === 'string' ? campo : campo.nome || campo.id;
                       // Manter o responsável da inspeção sempre preenchido com o usuário logado
-                      if (campo === 'responsavel_inspecao') {
-                        dadosIniciais[campo] = profile?.id || '';
+                      if (campoNome === 'responsavel_inspecao') {
+                        dadosIniciais[campoNome] = profile?.id || '';
                       } else {
-                        dadosIniciais[campo] = '';
+                        dadosIniciais[campoNome] = '';
                       }
                     });
                     setDadosCabecalho(dadosIniciais);
@@ -789,12 +805,18 @@ const CadastrarInspecao = () => {
             </CardHeader>
             <CardContent>
               <div className="form-grid">
-                {camposCabecalho.map((campo: string) => {
-                  const campoKey = campo.toLowerCase().replace(/\s+/g, '_');
+                {camposCabecalho.map((campo: any) => {
+                  // Suportar tanto string quanto objeto
+                  const campoNome = typeof campo === 'string' ? campo : campo.nome || campo.id;
+                  const campoTipo = typeof campo === 'object' ? campo.tipo : 'text';
+                  const campoObrigatorio = typeof campo === 'object' ? campo.obrigatorio : false;
+                  const campoKey = campoNome.toLowerCase().replace(/\s+/g, '_');
+                  
                   return (
-                    <div key={campo} className="space-y-2">
+                    <div key={campoKey} className="space-y-2">
                       <Label className="text-sm sm:text-base font-medium">
-                        {campo.charAt(0).toUpperCase() + campo.slice(1).replace(/_/g, ' ')}
+                        {campoNome.charAt(0).toUpperCase() + campoNome.slice(1).replace(/_/g, ' ')}
+                        {campoObrigatorio && <span className="text-red-500 ml-1">*</span>}
                       </Label>
                       {(() => {
                         if (campoKey === 'engenheiro_responsavel') {
@@ -918,15 +940,32 @@ const CadastrarInspecao = () => {
                           );
                         }
 
-                        // Campo padrão caso não seja reconhecido
+                        // Campo padrão - suportar diferentes tipos de input
+                        if (campoTipo === 'number') {
+                          return (
+                            <Input 
+                              type="number"
+                              value={dadosCabecalho[campoKey] || ''} 
+                              onChange={e => setDadosCabecalho(prev => ({
+                                ...prev,
+                                [campoKey]: e.target.value
+                              }))} 
+                              placeholder={`Digite ${campoNome.toLowerCase()}`} 
+                              required={campoObrigatorio}
+                            />
+                          );
+                        }
+                        
                         return (
                           <Input 
+                            type="text"
                             value={dadosCabecalho[campoKey] || ''} 
                             onChange={e => setDadosCabecalho(prev => ({
                               ...prev,
                               [campoKey]: e.target.value
                             }))} 
-                            placeholder={`Digite ${campoKey.toLowerCase()}`} 
+                            placeholder={`Digite ${campoNome.toLowerCase()}`} 
+                            required={campoObrigatorio}
                           />
                         );
                       })()}
