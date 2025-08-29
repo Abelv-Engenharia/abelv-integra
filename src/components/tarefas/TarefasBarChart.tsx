@@ -37,12 +37,11 @@ const TarefasBarChart = () => {
           return;
         }
 
-        const allowedCcaNames = userCCAs.map(cca => cca.codigo);
+        const allowedCcaCodes = userCCAs.map(cca => cca.codigo.trim());
         
         const { data: tarefasData, error } = await supabase
           .from('tarefas')
           .select('data_cadastro, status, cca')
-          .in('cca', allowedCcaNames.map(codigo => `${codigo} - `))
           .gte('data_cadastro', new Date(new Date().getFullYear(), 0, 1).toISOString())
           .order('data_cadastro', { ascending: true });
 
@@ -72,6 +71,12 @@ const TarefasBarChart = () => {
 
         // Processar dados das tarefas
         tarefasData?.forEach(tarefa => {
+          // Verificar se a tarefa pertence a uma CCA permitida
+          const tarefaCcaCode = tarefa.cca.split(' - ')[0].trim();
+          if (!allowedCcaCodes.includes(tarefaCcaCode)) {
+            return;
+          }
+
           const date = new Date(tarefa.data_cadastro);
           const monthKey = monthNames[date.getMonth()];
           
@@ -87,6 +92,7 @@ const TarefasBarChart = () => {
                 monthlyData[monthKey].pendentes++;
                 break;
               case 'em_andamento':
+              case 'em-andamento':
                 monthlyData[monthKey].em_andamento++;
                 break;
             }
