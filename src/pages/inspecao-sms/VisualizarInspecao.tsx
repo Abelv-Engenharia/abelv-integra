@@ -295,13 +295,16 @@ const VisualizarInspecao = () => {
               </CardContent>
             </Card>
 
-            {/* Card Identificação da Frente de Trabalho */}
+            {/* Card Identificação - Adaptado para tipo de inspeção */}
             {inspecao.dados_preenchidos?.campos_cabecalho && Object.keys(inspecao.dados_preenchidos.campos_cabecalho).length > 0 && (
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Users className="h-5 w-5" />
-                    Identificação da Frente de Trabalho
+                    {inspecao.checklists_avaliacao?.nome?.toLowerCase().includes('veículo') || 
+                     inspecao.checklists_avaliacao?.nome?.toLowerCase().includes('transporte') ? 
+                      'Identificação do Veículo de Transporte' : 
+                      'Identificação da Frente de Trabalho'}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -312,45 +315,85 @@ const VisualizarInspecao = () => {
                     </div>
                   ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      {identificacao.engenheiro && (
-                        <div>
-                          <p className="text-sm text-muted-foreground">Engenheiro Responsável</p>
-                          <p className="font-medium">{identificacao.engenheiro}</p>
-                        </div>
-                      )}
-                      
-                      {identificacao.supervisor && (
-                        <div>
-                          <p className="text-sm text-muted-foreground">Supervisor Responsável</p>
-                          <p className="font-medium">{identificacao.supervisor}</p>
-                        </div>
-                      )}
-                      
-                      {identificacao.encarregado && (
-                        <div>
-                          <p className="text-sm text-muted-foreground">Encarregado Responsável</p>
-                          <p className="font-medium">{identificacao.encarregado}</p>
-                        </div>
-                      )}
-                      
-                      {identificacao.empresa && (
-                        <div>
-                          <p className="text-sm text-muted-foreground">Empresa</p>
-                          <p className="font-medium">{identificacao.empresa}</p>
-                        </div>
-                      )}
-                      
-                      {identificacao.disciplina && (
-                        <div>
-                          <p className="text-sm text-muted-foreground">Disciplina</p>
-                          <p className="font-medium">{identificacao.disciplina}</p>
-                        </div>
-                      )}
-                      
-                      {!identificacao.engenheiro && !identificacao.supervisor && !identificacao.encarregado && !identificacao.empresa && !identificacao.disciplina && (
-                        <div className="col-span-2 text-center py-4">
-                          <p className="text-muted-foreground">Nenhuma informação de identificação da frente de trabalho disponível.</p>
-                        </div>
+                      {/* Campos específicos para veículo de transporte */}
+                      {(inspecao.checklists_avaliacao?.nome?.toLowerCase().includes('veículo') || 
+                        inspecao.checklists_avaliacao?.nome?.toLowerCase().includes('transporte')) ? (
+                        <>
+                          {/* Mostrar todos os campos do cabeçalho para veículo */}
+                          {Object.entries(inspecao.dados_preenchidos.campos_cabecalho).map(([key, value]: [string, any]) => {
+                            if (!value || value === '') return null;
+                            
+                            // Mapear os nomes dos campos para rótulos mais amigáveis
+                            const fieldLabels: { [key: string]: string } = {
+                              placa: 'Placa do Veículo',
+                              motorista: 'Motorista',
+                              empresa: 'Empresa',
+                              modelo: 'Modelo do Veículo',
+                              ano: 'Ano',
+                              cor: 'Cor',
+                              km: 'Quilometragem',
+                              combustivel: 'Combustível',
+                              capacidade: 'Capacidade',
+                              categoria: 'Categoria',
+                              renavam: 'RENAVAM',
+                              chassi: 'Chassi'
+                            };
+                            
+                            const label = fieldLabels[key] || key.charAt(0).toUpperCase() + key.slice(1);
+                            const displayValue = typeof value === 'object' ? JSON.stringify(value) : String(value);
+                            
+                            return (
+                              <div key={key}>
+                                <p className="text-sm text-muted-foreground">{label}</p>
+                                <p className="font-medium">{displayValue}</p>
+                              </div>
+                            );
+                          })}
+                        </>
+                      ) : (
+                        <>
+                          {/* Campos para frente de trabalho (original) */}
+                          {identificacao.engenheiro && (
+                            <div>
+                              <p className="text-sm text-muted-foreground">Engenheiro Responsável</p>
+                              <p className="font-medium">{identificacao.engenheiro}</p>
+                            </div>
+                          )}
+                          
+                          {identificacao.supervisor && (
+                            <div>
+                              <p className="text-sm text-muted-foreground">Supervisor Responsável</p>
+                              <p className="font-medium">{identificacao.supervisor}</p>
+                            </div>
+                          )}
+                          
+                          {identificacao.encarregado && (
+                            <div>
+                              <p className="text-sm text-muted-foreground">Encarregado Responsável</p>
+                              <p className="font-medium">{identificacao.encarregado}</p>
+                            </div>
+                          )}
+                          
+                          {identificacao.empresa && (
+                            <div>
+                              <p className="text-sm text-muted-foreground">Empresa</p>
+                              <p className="font-medium">{identificacao.empresa}</p>
+                            </div>
+                          )}
+                          
+                          {identificacao.disciplina && (
+                            <div>
+                              <p className="text-sm text-muted-foreground">Disciplina</p>
+                              <p className="font-medium">{identificacao.disciplina}</p>
+                            </div>
+                          )}
+                          
+                          {!identificacao.engenheiro && !identificacao.supervisor && !identificacao.encarregado && !identificacao.empresa && !identificacao.disciplina && (
+                            <div className="col-span-2 text-center py-4">
+                              <p className="text-muted-foreground">Nenhuma informação de identificação da frente de trabalho disponível.</p>
+                            </div>
+                          )}
+                        </>
                       )}
                     </div>
                   )}
@@ -486,14 +529,14 @@ const VisualizarInspecao = () => {
                     )}
                   </div>
 
-                  {/* Assinatura do Responsável pela Frente de Trabalho */}
+                  {/* Assinatura do Responsável - Adaptado para tipo de inspeção */}
                   <div className="text-center">
                     <div className="mb-2">
                       {(inspecao.dados_preenchidos?.assinatura_responsavel_tecnico || inspecao.dados_preenchidos?.assinaturas?.assinatura_responsavel_tecnico) ? (
                         <div className="h-20 border rounded-md flex items-center justify-center bg-muted/50">
                           <img 
                             src={inspecao.dados_preenchidos?.assinatura_responsavel_tecnico || inspecao.dados_preenchidos?.assinaturas?.assinatura_responsavel_tecnico} 
-                            alt="Assinatura do Responsável pela Frente de Trabalho" 
+                            alt={`Assinatura do ${(inspecao.checklists_avaliacao?.nome?.toLowerCase().includes('veículo') || inspecao.checklists_avaliacao?.nome?.toLowerCase().includes('transporte')) ? 'Motorista' : 'Responsável pela Frente de Trabalho'}`} 
                             className="max-h-16 max-w-full object-contain"
                           />
                         </div>
@@ -503,14 +546,33 @@ const VisualizarInspecao = () => {
                         </div>
                       )}
                     </div>
-                    {/* Mostrar o nome da pessoa selecionada para assinatura */}
-                    {responsavelFrenteTrabalho && (
-                      <p className="text-sm font-semibold text-primary mb-1">
-                        {responsavelFrenteTrabalho}
-                      </p>
+                    
+                    {/* Mostrar o nome baseado no tipo de inspeção */}
+                    {(inspecao.checklists_avaliacao?.nome?.toLowerCase().includes('veículo') || 
+                      inspecao.checklists_avaliacao?.nome?.toLowerCase().includes('transporte')) ? (
+                      <>
+                        {/* Para veículo de transporte - mostrar nome do motorista do cabeçalho */}
+                        {inspecao.dados_preenchidos?.campos_cabecalho?.motorista && (
+                          <p className="text-sm font-semibold text-primary mb-1">
+                            {inspecao.dados_preenchidos.campos_cabecalho.motorista}
+                          </p>
+                        )}
+                        <p className="text-sm font-medium">Motorista</p>
+                        <p className="text-xs text-muted-foreground">Responsável pelo Veículo</p>
+                      </>
+                    ) : (
+                      <>
+                        {/* Para frente de trabalho - mostrar nome do responsável técnico */}
+                        {responsavelFrenteTrabalho && (
+                          <p className="text-sm font-semibold text-primary mb-1">
+                            {responsavelFrenteTrabalho}
+                          </p>
+                        )}
+                        <p className="text-sm font-medium">Responsável pela Frente de Trabalho</p>
+                        <p className="text-xs text-muted-foreground">Responsável para Assinatura</p>
+                      </>
                     )}
-                    <p className="text-sm font-medium">Responsável pela Frente de Trabalho</p>
-                    <p className="text-xs text-muted-foreground">Responsável para Assinatura</p>
+                    
                     {inspecao.dados_preenchidos?.data_assinatura && (
                       <p className="text-xs text-muted-foreground mt-1">
                         Assinado em: {format(new Date(inspecao.dados_preenchidos.data_assinatura), 'dd/MM/yyyy HH:mm', { locale: ptBR })}
