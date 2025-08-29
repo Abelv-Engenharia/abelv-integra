@@ -4,6 +4,26 @@ interface ConformidadePorCCAChartProps {
   data: any[];
 }
 
+const CustomizedAxisTick = (props: any) => {
+  const { x, y, payload } = props;
+  
+  return (
+    <g transform={`translate(${x},${y})`}>
+      <text 
+        x={0} 
+        y={0} 
+        dy={16} 
+        textAnchor="end" 
+        fill="#666" 
+        fontSize="10"
+        transform="rotate(-90)"
+      >
+        {payload.value}
+      </text>
+    </g>
+  );
+};
+
 export const ConformidadePorCCAChart = ({ data }: ConformidadePorCCAChartProps) => {
   return (
     <ResponsiveContainer width="100%" height={300}>
@@ -13,7 +33,7 @@ export const ConformidadePorCCAChart = ({ data }: ConformidadePorCCAChartProps) 
       >
         <XAxis 
           dataKey="cca" 
-          tick={{ fontSize: 10, textAnchor: 'end', transform: 'rotate(-90)' }}
+          tick={<CustomizedAxisTick />}
           height={80}
           interval={0}
           axisLine={true}
