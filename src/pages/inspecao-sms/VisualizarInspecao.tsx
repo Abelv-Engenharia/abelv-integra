@@ -341,13 +341,16 @@ const VisualizarInspecao = () => {
                             </div>
                           )}
                           
-                          {/* Mostrar todos os campos do cabeçalho para veículo, exceto assinaturas */}
+                          {/* Mostrar todos os campos do cabeçalho para veículo, exceto assinaturas e IDs */}
                           {Object.entries(inspecao.dados_preenchidos.campos_cabecalho).map(([key, value]: [string, any]) => {
                             if (!value || value === '') return null;
                             
-                            // Filtrar campos de assinatura
+                            // Filtrar campos de assinatura, IDs e campos de responsáveis
                             if (key.toLowerCase().includes('assinatura') || 
-                                key.toLowerCase().includes('data_assinatura')) {
+                                key.toLowerCase().includes('data_assinatura') ||
+                                key.toLowerCase().includes('responsavel_inspecao') ||
+                                key.toLowerCase().includes('engenheiro_responsavel') ||
+                                (typeof value === 'string' && value.includes('-') && value.length > 30)) {
                               return null;
                             }
                             
@@ -366,8 +369,6 @@ const VisualizarInspecao = () => {
                               cnh: 'CNH (Nº/Categoria)',
                               empresa_de_transporte: 'Empresa de Transporte',
                               modelo_do_veiculo: 'Modelo do Veículo',
-                              responsavel_inspecao: 'Responsável da Inspeção',
-                              engenheiro_responsavel: 'Engenheiro Responsável',
                               renavam: 'RENAVAM',
                               chassi: 'Chassi'
                             };
