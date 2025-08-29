@@ -4,11 +4,10 @@ import {
   BarChart,
   Bar,
   XAxis,
-  YAxis,
-  CartesianGrid,
   Tooltip,
   Legend,
-  ResponsiveContainer
+  ResponsiveContainer,
+  LabelList
 } from 'recharts';
 import { supabase } from '@/integrations/supabase/client';
 import { useUserCCAs } from '@/hooks/useUserCCAs';
@@ -56,11 +55,12 @@ const TarefasBarChart = () => {
         
         const monthNames = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
         
-        // Inicializar os últimos 6 meses
+        // Inicializar todos os 12 meses do ano atual
         const currentDate = new Date();
-        for (let i = 5; i >= 0; i--) {
-          const date = new Date(currentDate.getFullYear(), currentDate.getMonth() - i, 1);
-          const monthKey = monthNames[date.getMonth()];
+        const currentYear = currentDate.getFullYear();
+        
+        for (let i = 0; i < 12; i++) {
+          const monthKey = monthNames[i];
           monthlyData[monthKey] = {
             programadas: 0,
             concluidas: 0,
@@ -99,13 +99,13 @@ const TarefasBarChart = () => {
           }
         });
 
-        // Converter para array no formato do gráfico
-        const chartData = Object.entries(monthlyData).map(([name, values]) => ({
-          name,
-          programadas: values.programadas,
-          concluidas: values.concluidas,
-          pendentes: values.pendentes,
-          em_andamento: values.em_andamento
+        // Converter para array no formato do gráfico (manter ordem dos meses)
+        const chartData = monthNames.map(month => ({
+          name: month,
+          programadas: monthlyData[month].programadas,
+          concluidas: monthlyData[month].concluidas,
+          pendentes: monthlyData[month].pendentes,
+          em_andamento: monthlyData[month].em_andamento
         }));
 
         setData(chartData);
@@ -132,17 +132,23 @@ const TarefasBarChart = () => {
     <ResponsiveContainer width="100%" height={300}>
       <BarChart
         data={data}
-        margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+        margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
       >
-        <CartesianGrid strokeDasharray="3 3" />
         <XAxis dataKey="name" />
-        <YAxis />
         <Tooltip />
         <Legend />
-        <Bar dataKey="programadas" fill="#3b82f6" name="Programadas" />
-        <Bar dataKey="concluidas" fill="#22c55e" name="Concluídas" />
-        <Bar dataKey="pendentes" fill="#ef4444" name="Pendentes" />
-        <Bar dataKey="em_andamento" fill="#f97316" name="Em Andamento" />
+        <Bar dataKey="programadas" fill="#3b82f6" name="Programadas">
+          <LabelList dataKey="programadas" position="top" fill="hsl(var(--foreground))" fontSize={10} />
+        </Bar>
+        <Bar dataKey="concluidas" fill="#22c55e" name="Concluídas">
+          <LabelList dataKey="concluidas" position="top" fill="hsl(var(--foreground))" fontSize={10} />
+        </Bar>
+        <Bar dataKey="pendentes" fill="#ef4444" name="Pendentes">
+          <LabelList dataKey="pendentes" position="top" fill="hsl(var(--foreground))" fontSize={10} />
+        </Bar>
+        <Bar dataKey="em_andamento" fill="#f97316" name="Em Andamento">
+          <LabelList dataKey="em_andamento" position="top" fill="hsl(var(--foreground))" fontSize={10} />
+        </Bar>
       </BarChart>
     </ResponsiveContainer>
   );
