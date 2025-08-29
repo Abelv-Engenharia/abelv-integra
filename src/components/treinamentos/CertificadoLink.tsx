@@ -1,4 +1,5 @@
 
+
 import React, { useState } from "react";
 import { Loader2, ExternalLink, AlertCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -26,29 +27,27 @@ export const CertificadoLink: React.FC<CertificadoLinkProps> = ({
       const urlParts = certificadoUrl.split('/');
       const fileName = urlParts[urlParts.length - 1];
       
-      console.log('Tentando baixar certificado:', fileName);
+      console.log('Gerando signed URL para certificado:', fileName);
       
-      // Usar a edge function para servir o certificado
-      const functionUrl = `https://xexgdtlctyuycohzhmuu.supabase.co/functions/v1/serve-certificado?file=${encodeURIComponent(fileName)}`;
+      // Usar createSignedUrl do Supabase
+      const { data, error } = await supabase.storage
+        .from('certificados-treinamentos-normativos')
+        .createSignedUrl(fileName, 120); // 2 minutos de validade
       
-      // Baixar o arquivo e criar blob URL
-      const response = await fetch(functionUrl);
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      if (error) {
+        console.error('Erro ao gerar signed URL:', error);
+        toast({
+          title: "Erro ao abrir certificado",
+          description: "Não foi possível gerar link do arquivo",
+          variant: "destructive",
+        });
+        return;
       }
       
-      const blob = await response.blob();
-      const blobUrl = URL.createObjectURL(blob);
-      
-      console.log('Blob URL criada para certificado:', blobUrl);
-      
-      // Abrir em nova aba
-      window.open(blobUrl, '_blank');
-      
-      // Limpar o blob URL após um tempo para liberar memória
-      setTimeout(() => {
-        URL.revokeObjectURL(blobUrl);
-      }, 5000);
+      if (data?.signedUrl) {
+        console.log('Signed URL gerada:', data.signedUrl);
+        window.open(data.signedUrl, '_blank');
+      }
       
     } catch (err) {
       console.error('Erro ao abrir certificado:', err);
@@ -88,3 +87,4 @@ export const CertificadoLink: React.FC<CertificadoLinkProps> = ({
     </button>
   );
 };
+
