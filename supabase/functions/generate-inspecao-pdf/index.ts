@@ -433,7 +433,7 @@ function generateHTMLReport(inspecao: InspectionData, responsaveis: any = {}): s
     <div class="header">
         <img src="/lovable-uploads/ed7dfa99-8b19-4c1a-a642-c54e0ac65c7f.png" class="header-logo" alt="ABELV Logo" style="max-width: 80px; height: auto;">
         <div class="header-content">
-            <h1>RELATÓRIO DE INSPEÇÃO SMS</h1>
+            <h1>RELATÓRIO DE INSPEÇÃO DE SMS</h1>
             <p>Data: ${formatDate(inspecao.data_inspecao)}</p>
         </div>
         <div style="width: 80px;"></div>
