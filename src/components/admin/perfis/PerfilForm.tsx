@@ -7,6 +7,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Perfil, Permissoes } from "@/types/users";
 import { getMenusHierarchy, MenuItem, MenuSection } from "@/services/perfisService";
 import { CCASelector } from "./CCASelector";
+import { PermissoesActions } from "./PermissoesActions";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
@@ -30,6 +31,13 @@ export const PerfilForm = ({ initialData, onCancel, onSave, loading }: PerfilFor
     initialData.permissoes.menus_sidebar || []
   );
   const [expandedSections, setExpandedSections] = useState<string[]>([]);
+  const [permissoesAcoes, setPermissoesAcoes] = useState({
+    pode_editar: initialData.permissoes.pode_editar ?? true,
+    pode_excluir: initialData.permissoes.pode_excluir ?? true,
+    pode_aprovar: initialData.permissoes.pode_aprovar ?? false,
+    pode_exportar: initialData.permissoes.pode_exportar ?? true,
+    pode_visualizar_todos_ccas: initialData.permissoes.pode_visualizar_todos_ccas ?? false
+  });
 
   // Obter estrutura hierárquica de menus atualizada
   const menusHierarchy = getMenusHierarchy();
@@ -98,40 +106,37 @@ export const PerfilForm = ({ initialData, onCancel, onSave, loading }: PerfilFor
     return false;
   };
 
+  const handlePermissionChange = (permission: string, value: boolean) => {
+    setPermissoesAcoes(prev => ({
+      ...prev,
+      [permission]: value
+    }));
+  };
+
   const handleSave = () => {
-    // Criar objeto de permissões simplificado baseado apenas nos menus selecionados
+    // Determinar permissões administrativas baseadas nos menus selecionados
     const permissoes: Permissoes = {
-      // Definir valores padrão para compatibilidade
-      desvios: false,
-      treinamentos: false,
-      ocorrencias: false,
-      tarefas: false,
-      relatorios: false,
-      hora_seguranca: false,
-      medidas_disciplinares: false,
-      admin_usuarios: false,
-      admin_perfis: false,
-      admin_funcionarios: false,
-      admin_hht: false,
-      admin_templates: false,
-      admin_empresas: false,
-      admin_supervisores: false,
-      admin_engenheiros: false,
-      admin_ccas: false,
-      idsms_dashboard: false,
-      idsms_formularios: false,
-      pode_editar_desvios: false,
-      pode_excluir_desvios: false,
-      pode_editar_ocorrencias: false,
-      pode_excluir_ocorrencias: false,
-      pode_editar_treinamentos: false,
-      pode_excluir_treinamentos: false,
-      pode_editar_tarefas: false,
-      pode_excluir_tarefas: false,
-      pode_aprovar_tarefas: false,
-      pode_visualizar_relatorios_completos: false,
-      pode_exportar_dados: false,
-      menus_sidebar: menusSelecionados
+      menus_sidebar: menusSelecionados,
+      
+      // Permissões administrativas baseadas nos menus selecionados
+      admin_usuarios: menusSelecionados.includes('adm_usuarios'),
+      admin_perfis: menusSelecionados.includes('adm_perfis'),
+      admin_funcionarios: menusSelecionados.includes('adm_funcionarios'),
+      admin_empresas: menusSelecionados.includes('adm_empresas'),
+      admin_ccas: menusSelecionados.includes('adm_ccas'),
+      admin_engenheiros: menusSelecionados.includes('adm_engenheiros'),
+      admin_supervisores: menusSelecionados.includes('adm_supervisores'),
+      admin_hht: menusSelecionados.includes('adm_hht'),
+      admin_templates: menusSelecionados.includes('adm_templates'),
+      admin_metas_indicadores: menusSelecionados.includes('adm_metas_indicadores'),
+      admin_modelos_inspecao: menusSelecionados.includes('adm_modelos_inspecao'),
+      admin_checklists: menusSelecionados.includes('adm_checklists'),
+      admin_importacao_funcionarios: menusSelecionados.includes('adm_importacao_funcionarios'),
+      admin_logo: menusSelecionados.includes('adm_logo'),
+      admin_configuracoes: menusSelecionados.includes('adm_configuracoes'),
+      
+      // Permissões de ações configuradas pelo usuário
+      ...permissoesAcoes
     };
 
     onSave(nome, descricao, permissoes, ccasPermitidas);
@@ -252,6 +257,18 @@ export const PerfilForm = ({ initialData, onCancel, onSave, loading }: PerfilFor
             </div>
           ))}
         </div>
+      </div>
+
+      {/* Permissões de Ações */}
+      <div className="section-spacing pt-4 border-t">
+        <h4 className="text-sm sm:text-base font-semibold text-blue-700">Permissões de Ações</h4>
+        <p className="text-xs sm:text-sm text-muted-foreground mb-4">
+          Configure as ações que este perfil pode realizar nos dados do sistema
+        </p>
+        <PermissoesActions 
+          permissions={permissoesAcoes}
+          onPermissionChange={handlePermissionChange}
+        />
       </div>
 
       <div className="button-group-end pt-4 border-t">

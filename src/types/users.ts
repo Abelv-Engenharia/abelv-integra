@@ -56,45 +56,32 @@ export type AuthUserCreateValues = z.infer<typeof authUserCreateSchema>;
 
 // Define the Permissoes interface with all required properties for the system
 export interface Permissoes {
-  // Módulos principais
-  desvios: boolean;
-  treinamentos: boolean;
-  ocorrencias: boolean;
-  tarefas: boolean;
-  relatorios: boolean;
-  hora_seguranca: boolean;
-  medidas_disciplinares: boolean;
+  // Sistema baseado em menus hierárquicos
+  menus_sidebar: string[]; // Array com todos os menus e submenus permitidos
   
-  // Administração
+  // Permissões administrativas especiais
   admin_usuarios: boolean;
-  admin_perfis: boolean;
+  admin_perfis: boolean; 
   admin_funcionarios: boolean;
+  admin_empresas: boolean;
+  admin_ccas: boolean;
+  admin_engenheiros: boolean;
+  admin_supervisores: boolean;
   admin_hht: boolean;
   admin_templates: boolean;
-  admin_empresas: boolean;
-  admin_supervisores: boolean;
-  admin_engenheiros: boolean;
-  admin_ccas: boolean;
+  admin_metas_indicadores: boolean;
+  admin_modelos_inspecao: boolean;
+  admin_checklists: boolean;
+  admin_importacao_funcionarios: boolean;
+  admin_logo: boolean;
+  admin_configuracoes: boolean;
   
-  // IDSMS
-  idsms_dashboard: boolean;
-  idsms_formularios: boolean;
-  
-  // Configurações específicas de permissões
-  pode_editar_desvios: boolean;
-  pode_excluir_desvios: boolean;
-  pode_editar_ocorrencias: boolean;
-  pode_excluir_ocorrencias: boolean;
-  pode_editar_treinamentos: boolean;
-  pode_excluir_treinamentos: boolean;
-  pode_editar_tarefas: boolean;
-  pode_excluir_tarefas: boolean;
-  pode_aprovar_tarefas: boolean;
-  pode_visualizar_relatorios_completos: boolean;
-  pode_exportar_dados: boolean;
-
-  // Novidade: definição explícita dos menus/submenus visíveis para esse perfil
-  menus_sidebar?: string[]; // Ex: ['dashboard', 'desvios', 'tarefas-minhas', ...]  
+  // Permissões de ações específicas
+  pode_editar: boolean;
+  pode_excluir: boolean;
+  pode_aprovar: boolean;
+  pode_exportar: boolean;
+  pode_visualizar_todos_ccas: boolean;
 }
 
 export interface Perfil {

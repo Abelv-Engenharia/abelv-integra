@@ -10,7 +10,7 @@ import SidebarSectionTarefas from "./SidebarSectionTarefas";
 import SidebarSectionRelatorios from "./SidebarSectionRelatorios";
 import SidebarSectionAdministracao from "./SidebarSectionAdministracao";
 import SidebarSearch from "./SidebarSearch";
-import { useProfile } from "@/hooks/useProfile";
+import { usePermissions } from "@/hooks/usePermissions";
 
 // Função utilitária para verificar acesso (contem na lista)
 function podeVerMenu(menu: string, menusSidebar?: string[]) {
@@ -21,12 +21,10 @@ function podeVerMenu(menu: string, menusSidebar?: string[]) {
 export function AppSidebar() {
   const location = useLocation();
   const currentPath = location.pathname;
-  const { userPermissoes } = useProfile();
-
-  // Extrair menus permitidos do perfil do usuário
-  const menusSidebar = userPermissoes && typeof userPermissoes === "object" && Array.isArray((userPermissoes as any).menus_sidebar) 
-    ? (userPermissoes as any).menus_sidebar 
-    : [];
+  const permissions = usePermissions();
+  
+  // Usar o sistema de permissões atualizado
+  const menusSidebar = permissions.allowedMenus;
 
   // Defina o menu principal aberto inicialmente
   const [openMenu, setOpenMenu] = useState<string | null>(() => {
