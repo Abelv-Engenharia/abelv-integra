@@ -6,7 +6,7 @@ import TarefasSummaryCards from "@/components/tarefas/TarefasSummaryCards";
 import TarefasBarChart from "@/components/tarefas/TarefasBarChart";
 import TarefasPieChart from "@/components/tarefas/TarefasPieChart";
 import TarefasCriticidadeChart from "@/components/tarefas/TarefasCriticidadeChart";
-import TarefasRecentTable from "@/components/tarefas/TarefasRecentTable";
+import TarefasStatusPorUsuarioChart from "@/components/tarefas/TarefasStatusPorUsuarioChart";
 
 const TarefasDashboard = () => {
   return (
@@ -53,10 +53,10 @@ const TarefasDashboard = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle>Tarefas Recentes</CardTitle>
+          <CardTitle>Status de Tarefas por Usuário</CardTitle>
         </CardHeader>
         <CardContent>
-          <TarefasRecentTable />
+          <TarefasStatusPorUsuarioChart />
         </CardContent>
       </Card>
     </div>
