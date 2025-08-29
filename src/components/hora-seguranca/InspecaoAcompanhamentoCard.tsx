@@ -51,8 +51,31 @@ export function InspecaoAcompanhamentoCard({
       
       console.log('URL da edge function:', functionUrl);
       
-      // Abrir PDF para visualização em nova aba
-      window.open(functionUrl, '_blank');
+      try {
+        // Fetch do arquivo e criação de blob URL para evitar bloqueio
+        const response = await fetch(functionUrl);
+        const blob = await response.blob();
+        const blobUrl = window.URL.createObjectURL(blob);
+        
+        // Abrir blob URL em nova aba
+        const newTab = window.open(blobUrl, '_blank');
+        
+        // Limpar blob URL após um tempo para liberar memória
+        setTimeout(() => {
+          window.URL.revokeObjectURL(blobUrl);
+        }, 1000);
+        
+        if (!newTab) {
+          throw new Error('Popup bloqueado');
+        }
+      } catch (err) {
+        console.error('Erro ao abrir PDF:', err);
+        toast({
+          title: "Erro ao abrir relatório",
+          description: "Não foi possível abrir o arquivo. Verifique se popups estão permitidos.",
+          variant: "destructive",
+        });
+      }
       
     } catch (err) {
       console.error('Erro ao processar relatório:', err);
