@@ -144,17 +144,17 @@ const TarefasStatusPorUsuarioChart = () => {
           interval={0}
           tick={{ fontSize: 12 }}
         />
-        <Bar dataKey="programadas" stackId="a" fill="hsl(var(--chart-1))" name="Programadas">
-          <LabelList dataKey="programadas" position="center" fill="white" fontSize={10} />
+        <Bar dataKey="programadas" fill="hsl(var(--chart-1))" name="Programadas">
+          <LabelList dataKey="programadas" position="top" fill="hsl(var(--foreground))" fontSize={10} />
         </Bar>
-        <Bar dataKey="em_andamento" stackId="a" fill="hsl(var(--chart-2))" name="Em Andamento">
-          <LabelList dataKey="em_andamento" position="center" fill="white" fontSize={10} />
+        <Bar dataKey="em_andamento" fill="hsl(var(--chart-2))" name="Em Andamento">
+          <LabelList dataKey="em_andamento" position="top" fill="hsl(var(--foreground))" fontSize={10} />
         </Bar>
-        <Bar dataKey="pendentes" stackId="a" fill="hsl(var(--chart-3))" name="Pendentes">
-          <LabelList dataKey="pendentes" position="center" fill="white" fontSize={10} />
+        <Bar dataKey="pendentes" fill="hsl(var(--chart-3))" name="Pendentes">
+          <LabelList dataKey="pendentes" position="top" fill="hsl(var(--foreground))" fontSize={10} />
         </Bar>
-        <Bar dataKey="concluidas" stackId="a" fill="hsl(var(--chart-4))" name="Concluídas">
-          <LabelList dataKey="concluidas" position="center" fill="white" fontSize={10} />
+        <Bar dataKey="concluidas" fill="hsl(var(--chart-4))" name="Concluídas">
+          <LabelList dataKey="concluidas" position="top" fill="hsl(var(--foreground))" fontSize={10} />
         </Bar>
       </BarChart>
     </ResponsiveContainer>
