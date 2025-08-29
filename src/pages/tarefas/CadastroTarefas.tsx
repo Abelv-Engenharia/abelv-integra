@@ -6,8 +6,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { X } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useForm } from "react-hook-form";
@@ -23,7 +21,7 @@ const tarefaSchema = z.object({
   cca_id: z.number({ required_error: "CCA é obrigatório" }),
   data_conclusao: z.string().min(1, "Data de conclusão é obrigatória"),
   descricao: z.string().min(1, "Descrição é obrigatória"),
-  responsaveis_ids: z.array(z.string()).min(1, "Pelo menos um responsável é obrigatório"),
+  responsavel_id: z.string().min(1, "Responsável é obrigatório"),
   configuracao: z.object({
     criticidade: z.enum(["baixa", "media", "alta", "critica"]),
     requerValidacao: z.boolean(),
@@ -40,7 +38,6 @@ type TarefaFormSchema = z.infer<typeof tarefaSchema>;
 const CadastroTarefas = () => {
   const [ccas, setCcas] = useState<any[]>([]);
   const [usuarios, setUsuarios] = useState<any[]>([]);
-  const [selectedResponsaveis, setSelectedResponsaveis] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(true);
   const [success, setSuccess] = useState(false); // indica sucesso ao cadastrar
@@ -126,7 +123,7 @@ const CadastroTarefas = () => {
         cca_id: data.cca_id,
         data_conclusao: data.data_conclusao,
         descricao: data.descricao,
-        responsaveis_ids: data.responsaveis_ids,
+        responsavel_id: data.responsavel_id,
         configuracao: {
           criticidade: data.configuracao.criticidade,
           requerValidacao: data.configuracao.requerValidacao,
@@ -139,7 +136,6 @@ const CadastroTarefas = () => {
 
       if (success) {
         setSuccess(true); // exibe tela de sucesso
-        setSelectedResponsaveis([]); // limpar responsáveis selecionados
         reset();
       } else {
         toast.error("Erro ao cadastrar tarefa. Tente novamente.");
@@ -226,62 +222,25 @@ const CadastroTarefas = () => {
               )}
             </div>
 
-            {/* Responsáveis e Data de Conclusão */}
+            {/* Responsável e Data de Conclusão */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Responsáveis */}
+              {/* Responsável */}
               <div className="space-y-2">
-                <Label htmlFor="responsaveis">Responsáveis *</Label>
-                <Select onValueChange={(value) => {
-                  if (value && !selectedResponsaveis.includes(value)) {
-                    const newResponsaveis = [...selectedResponsaveis, value];
-                    setSelectedResponsaveis(newResponsaveis);
-                    setValue("responsaveis_ids", newResponsaveis);
-                  }
-                }}>
+                <Label htmlFor="responsavel_id">Responsável *</Label>
+                <Select onValueChange={(value) => setValue("responsavel_id", value)}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Selecione um responsável" />
+                    <SelectValue placeholder="Selecione o responsável" />
                   </SelectTrigger>
-                  <SelectContent className="bg-background border shadow-md z-50">
-                    {usuarios
-                      .filter(usuario => !selectedResponsaveis.includes(usuario.id))
-                      .map((usuario) => (
-                        <SelectItem key={usuario.id} value={usuario.id}>
-                          {usuario.nome}
-                        </SelectItem>
-                      ))}
+                  <SelectContent>
+                    {usuarios.map((usuario) => (
+                      <SelectItem key={usuario.id} value={usuario.id}>
+                        {usuario.nome}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
-                
-                {/* Área de responsáveis selecionados */}
-                {selectedResponsaveis.length > 0 && (
-                  <div className="space-y-2">
-                    <Label className="text-sm text-muted-foreground">Responsáveis selecionados:</Label>
-                    <div className="flex flex-wrap gap-2 p-3 border rounded-md bg-muted/50">
-                      {selectedResponsaveis.map((responsavelId) => {
-                        const usuario = usuarios.find(u => u.id === responsavelId);
-                        return (
-                          <Badge key={responsavelId} variant="secondary" className="flex items-center gap-1">
-                            {usuario?.nome}
-                            <button
-                              type="button"
-                              onClick={() => {
-                                const newResponsaveis = selectedResponsaveis.filter(id => id !== responsavelId);
-                                setSelectedResponsaveis(newResponsaveis);
-                                setValue("responsaveis_ids", newResponsaveis);
-                              }}
-                              className="ml-1 hover:text-destructive"
-                            >
-                              <X className="h-3 w-3" />
-                            </button>
-                          </Badge>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
-                
-                {errors.responsaveis_ids && (
-                  <p className="text-sm text-red-500">{errors.responsaveis_ids.message}</p>
+                {errors.responsavel_id && (
+                  <p className="text-sm text-red-500">{errors.responsavel_id.message}</p>
                 )}
               </div>
 

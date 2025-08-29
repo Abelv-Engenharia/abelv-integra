@@ -7,7 +7,7 @@ export interface TarefaFormData {
   cca_id: number;
   data_conclusao: string;
   descricao: string;
-  responsaveis_ids: string[];
+  responsavel_id: string;
   configuracao: {
     criticidade: "baixa" | "media" | "alta" | "critica";
     requerValidacao: boolean;
@@ -37,9 +37,7 @@ export const tarefasService = {
         .from('tarefas')
         .select(`
           *,
-          tarefas_responsaveis!inner(
-            profiles!inner(id, nome)
-          )
+          profiles!tarefas_responsavel_id_fkey(id, nome)
         `)
         .eq('id', id)
         .single();
@@ -65,10 +63,10 @@ export const tarefasService = {
         data_real_conclusao: data.data_real_conclusao ?? null,
         descricao: data.descricao,
         titulo: data.titulo ?? "",
-        responsaveis: data.tarefas_responsaveis ? data.tarefas_responsaveis.map((tr: any) => ({
-          id: tr.profiles?.id || '',
-          nome: tr.profiles?.nome || 'Não atribuído'
-        })) : [],
+        responsavel: {
+          id: data.responsavel_id || '',
+          nome: data.profiles?.nome || 'Não atribuído'
+        },
         anexo: data.anexo,
         status: data.status as TarefaStatus,
         iniciada: data.iniciada,
@@ -118,9 +116,7 @@ export const tarefasService = {
         .from('tarefas')
         .select(`
           *,
-          tarefas_responsaveis(
-            profiles(id, nome)
-          )
+          profiles!tarefas_responsavel_id_fkey(id, nome)
         `)
         .order('created_at', { ascending: false });
 
@@ -140,10 +136,10 @@ export const tarefasService = {
         data_real_conclusao: tarefa.data_real_conclusao ?? null,
         descricao: tarefa.descricao,
         titulo: tarefa.titulo ?? "",
-        responsaveis: tarefa.tarefas_responsaveis ? tarefa.tarefas_responsaveis.map((tr: any) => ({
-          id: tr.profiles?.id || '',
-          nome: tr.profiles?.nome || 'Não atribuído'
-        })) : [],
+        responsavel: {
+          id: tarefa.responsavel_id || '',
+          nome: tarefa.profiles?.nome || 'Não atribuído'
+        },
         anexo: tarefa.anexo,
         status: tarefa.status as TarefaStatus,
         iniciada: tarefa.iniciada,
@@ -173,12 +169,9 @@ export const tarefasService = {
         .from('tarefas')
         .select(`
           *,
-          tarefas_responsaveis(
-            responsavel_id,
-            profiles(id, nome)
-          )
+          profiles!tarefas_responsavel_id_fkey(id, nome)
         `)
-        .or(`tarefas_responsaveis.responsavel_id.eq.${user.id},criado_por.eq.${user.id}`)
+        .or(`responsavel_id.eq.${user.id},criado_por.eq.${user.id}`)
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -207,10 +200,10 @@ export const tarefasService = {
           data_real_conclusao: tarefa.data_real_conclusao ?? null,
           descricao: tarefa.descricao || '',
           titulo: tarefa.titulo || tarefa.descricao?.substring(0, 50) || 'Tarefa sem título',
-          responsaveis: tarefa.tarefas_responsaveis ? tarefa.tarefas_responsaveis.map((tr: any) => ({
-            id: tr.profiles?.id || '',
-            nome: tr.profiles?.nome || 'Não atribuído'
-          })) : [],
+          responsavel: {
+            id: tarefa.responsavel_id || '',
+            nome: tarefa.profiles?.nome || 'Não atribuído'
+          },
           anexo: tarefa.anexo,
           status: tarefa.status as TarefaStatus || 'programada',
           iniciada: tarefa.iniciada || false,
@@ -246,10 +239,10 @@ export const tarefasService = {
         data_real_conclusao: tarefa.data_real_conclusao ?? null,
         descricao: tarefa.descricao,
         titulo: tarefa.titulo ?? "",
-        responsaveis: tarefa.tarefas_responsaveis ? tarefa.tarefas_responsaveis.map((tr: any) => ({
-          id: tr.profiles?.id || '',
-          nome: tr.profiles?.nome || 'Não atribuído'
-        })) : [],
+        responsavel: {
+          id: tarefa.responsavel_id || '',
+          nome: tarefa.profiles?.nome || 'Não atribuído'
+        },
         anexo: tarefa.anexo,
         status: tarefa.status as TarefaStatus,
         iniciada: tarefa.iniciada,
@@ -274,8 +267,7 @@ export const tarefasService = {
         !dadosTarefa.cca_id ||
         !dadosTarefa.data_conclusao ||
         !dadosTarefa.descricao ||
-        !dadosTarefa.responsaveis_ids ||
-        dadosTarefa.responsaveis_ids.length === 0
+        !dadosTarefa.responsavel_id
       ) {
         console.error("Campos obrigatórios não preenchidos:", dadosTarefa);
         return false;
@@ -300,7 +292,7 @@ export const tarefasService = {
         return false;
       }
 
-      const { data: tarefaData, error } = await supabase
+      const { error } = await supabase
         .from('tarefas')
         .insert({
           titulo: dadosTarefa.titulo,
@@ -308,31 +300,15 @@ export const tarefasService = {
           tipo_cca: 'linha-inteira',
           data_conclusao: dadosTarefa.data_conclusao,
           descricao: dadosTarefa.descricao,
+          responsavel_id: dadosTarefa.responsavel_id,
           criado_por: user.id,
           status: 'programada',
           iniciada: false,
           configuracao: dadosTarefa.configuracao
-        })
-        .select()
-        .single();
+        });
 
       if (error) {
         console.error("Erro ao criar tarefa:", error);
-        return false;
-      }
-
-      // Inserir responsáveis na tabela de relacionamento
-      const responsaveisData = dadosTarefa.responsaveis_ids.map(responsavelId => ({
-        tarefa_id: tarefaData.id,
-        responsavel_id: responsavelId
-      }));
-
-      const { error: responsaveisError } = await supabase
-        .from('tarefas_responsaveis')
-        .insert(responsaveisData);
-
-      if (responsaveisError) {
-        console.error("Erro ao criar responsáveis da tarefa:", responsaveisError);
         return false;
       }
 
@@ -350,9 +326,7 @@ export const tarefasService = {
         .from('tarefas')
         .select(`
           *,
-          tarefas_responsaveis(
-            profiles(id, nome)
-          )
+          profiles!tarefas_responsavel_id_fkey(id, nome)
         `)
         .order('created_at', { ascending: false })
         .limit(limit);
@@ -367,10 +341,10 @@ export const tarefasService = {
         return {
           id: tarefa.id,
           descricao: tarefa.descricao,
-          responsaveis: tarefa.tarefas_responsaveis ? tarefa.tarefas_responsaveis.map((tr: any) => ({
-            id: tr.profiles?.id || '',
-            nome: tr.profiles?.nome || 'Não atribuído'
-          })) : [],
+          responsavel: {
+            id: tarefa.responsavel_id || '',
+            nome: tarefa.profiles?.nome || 'Não atribuído'
+          },
           dataConclusao: new Date(tarefa.data_conclusao),
           status: tarefa.status,
           criticidade: config?.criticidade || 'media'

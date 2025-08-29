@@ -340,7 +340,7 @@ const DetalheTarefa = () => {
                 <User className="mr-2 h-4 w-4 inline-block" />
                 Responsável
               </Label>
-              <p>{tarefa.responsaveis?.map(r => r.nome).join(', ') || 'Sem responsável'}</p>
+              <p>{tarefa.responsavel.nome}</p>
             </div>
           </div>
 

@@ -159,7 +159,7 @@ export const TarefaCard: React.FC<TarefaCardProps> = ({
           <div className="flex flex-col mt-1 gap-0.5">
             <span className="flex items-center text-xs text-muted-foreground">
               <User className="w-3 h-3 mr-1" />
-              {tarefa.responsaveis?.map(r => r.nome).join(', ') || 'Sem responsável'}
+              {tarefa.responsavel?.nome}
             </span>
             <span className="flex items-center text-xs text-muted-foreground">
               <Calendar className="w-3 h-3 mr-1" />

@@ -64,12 +64,10 @@ export const mockTarefas = [
     dataCadastro: '2024-01-15',
     dataConclusao: '2024-02-15',
     descricao: 'Realizar inspeção completa da linha',
-    responsaveis: [
-      {
-        id: '1',
-        nome: 'João Silva'
-      }
-    ],
+    responsavel: {
+      id: '1',
+      nome: 'João Silva'
+    },
     status: 'em-andamento' as const,
     iniciada: true,
     configuracao: {
