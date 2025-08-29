@@ -175,6 +175,7 @@ serve(async (req) => {
       }
     )
 
+
   } catch (error) {
     console.error('Erro ao gerar relatório:', error)
     return new Response(
