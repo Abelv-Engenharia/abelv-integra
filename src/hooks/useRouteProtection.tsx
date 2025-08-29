@@ -20,6 +20,13 @@ const ROUTE_PERMISSIONS: Record<string, string[]> = {
   '/admin/metas-indicadores': ['admin_metas_indicadores'],
   '/admin/registro-hht': ['admin_hht'],
   '/admin/checklists': ['admin_modelos_inspecao'],
+  '/admin/importacao-funcionarios': ['admin_funcionarios'],
+  '/admin/configuracoes': ['admin_funcionarios'],
+  '/admin/configuracao-emails': ['admin_usuarios'],
+  '/admin/exportacao-dados': ['admin_usuarios'],
+  '/admin/upload-tutorial': ['admin_usuarios'],
+  '/admin/importacao-execucao-treinamentos': ['admin_funcionarios'],
+  '/admin/importacao-hsa': ['admin_funcionarios'],
   
   // Tarefas
   '/tarefas/dashboard': ['tarefas_dashboard'],
