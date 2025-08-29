@@ -486,7 +486,7 @@ const VisualizarInspecao = () => {
                 <div className="space-y-4">
                   <div className="text-center">
                     <div className="text-2xl font-bold mb-1">
-                      {inspecao.dados_preenchidos?.itens?.length || 0}
+                      {inspecao.dados_preenchidos?.itens?.filter((item: any) => item.tipo === 'item' && !item.isSection)?.length || 0}
                     </div>
                     <p className="text-sm text-muted-foreground">Itens Verificados</p>
                   </div>
@@ -494,19 +494,19 @@ const VisualizarInspecao = () => {
                   <div className="grid grid-cols-3 gap-2 text-center">
                     <div>
                       <div className="text-lg font-semibold text-green-600">
-                        {inspecao.dados_preenchidos?.itens?.filter((item: any) => item.status === 'conforme')?.length || 0}
+                        {inspecao.dados_preenchidos?.itens?.filter((item: any) => item.tipo === 'item' && !item.isSection && item.status === 'conforme')?.length || 0}
                       </div>
                       <p className="text-xs text-muted-foreground">Conformes</p>
                     </div>
                     <div>
                       <div className="text-lg font-semibold text-red-600">
-                        {inspecao.dados_preenchidos?.itens?.filter((item: any) => item.status === 'nao_conforme')?.length || 0}
+                        {inspecao.dados_preenchidos?.itens?.filter((item: any) => item.tipo === 'item' && !item.isSection && item.status === 'nao_conforme')?.length || 0}
                       </div>
                       <p className="text-xs text-muted-foreground">Não Conformes</p>
                     </div>
                     <div>
                       <div className="text-lg font-semibold text-gray-600">
-                        {inspecao.dados_preenchidos?.itens?.filter((item: any) => item.status === 'nao_se_aplica')?.length || 0}
+                        {inspecao.dados_preenchidos?.itens?.filter((item: any) => item.tipo === 'item' && !item.isSection && item.status === 'nao_se_aplica')?.length || 0}
                       </div>
                       <p className="text-xs text-muted-foreground">Não Aplicáveis</p>
                     </div>

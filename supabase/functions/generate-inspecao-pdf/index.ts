@@ -561,15 +561,15 @@ function generateHTMLReport(inspecao: InspectionData, responsaveis: any = {}): s
         <h3 style="margin-top: 0; text-align: center;">Resumo da Inspeção</h3>
         <div class="summary-grid">
             <div class="summary-item">
-                <div class="summary-number">${itens.length}</div>
+                <div class="summary-number">${itens.filter((item: any) => item.tipo === 'item' && !item.isSection).length}</div>
                 <div>Itens Verificados</div>
             </div>
             <div class="summary-item">
-                <div class="summary-number" style="color: #28a745;">${itens.filter((item: any) => item.status === 'conforme').length}</div>
+                <div class="summary-number" style="color: #28a745;">${itens.filter((item: any) => item.tipo === 'item' && !item.isSection && item.status === 'conforme').length}</div>
                 <div>Conformes</div>
             </div>
             <div class="summary-item">
-                <div class="summary-number" style="color: #dc3545;">${itens.filter((item: any) => item.status === 'nao_conforme').length}</div>
+                <div class="summary-number" style="color: #dc3545;">${itens.filter((item: any) => item.tipo === 'item' && !item.isSection && item.status === 'nao_conforme').length}</div>
                 <div>Não Conformes</div>
             </div>
         </div>
