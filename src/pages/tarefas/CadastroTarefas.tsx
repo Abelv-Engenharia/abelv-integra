@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { X } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useForm } from "react-hook-form";
@@ -229,30 +231,55 @@ const CadastroTarefas = () => {
               {/* Responsáveis */}
               <div className="space-y-2">
                 <Label htmlFor="responsaveis">Responsáveis *</Label>
-                <div className="space-y-2 max-h-40 overflow-y-auto border rounded-md p-2">
-                  {usuarios.map((usuario) => (
-                    <div key={usuario.id} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={`responsavel_${usuario.id}`}
-                        checked={selectedResponsaveis.includes(usuario.id)}
-                        onCheckedChange={(checked) => {
-                          if (checked) {
-                            const newResponsaveis = [...selectedResponsaveis, usuario.id];
-                            setSelectedResponsaveis(newResponsaveis);
-                            setValue("responsaveis_ids", newResponsaveis);
-                          } else {
-                            const newResponsaveis = selectedResponsaveis.filter(id => id !== usuario.id);
-                            setSelectedResponsaveis(newResponsaveis);
-                            setValue("responsaveis_ids", newResponsaveis);
-                          }
-                        }}
-                      />
-                      <Label htmlFor={`responsavel_${usuario.id}`} className="text-sm">
-                        {usuario.nome}
-                      </Label>
+                <Select onValueChange={(value) => {
+                  if (value && !selectedResponsaveis.includes(value)) {
+                    const newResponsaveis = [...selectedResponsaveis, value];
+                    setSelectedResponsaveis(newResponsaveis);
+                    setValue("responsaveis_ids", newResponsaveis);
+                  }
+                }}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione um responsável" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-background border shadow-md z-50">
+                    {usuarios
+                      .filter(usuario => !selectedResponsaveis.includes(usuario.id))
+                      .map((usuario) => (
+                        <SelectItem key={usuario.id} value={usuario.id}>
+                          {usuario.nome}
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+                
+                {/* Área de responsáveis selecionados */}
+                {selectedResponsaveis.length > 0 && (
+                  <div className="space-y-2">
+                    <Label className="text-sm text-muted-foreground">Responsáveis selecionados:</Label>
+                    <div className="flex flex-wrap gap-2 p-3 border rounded-md bg-muted/50">
+                      {selectedResponsaveis.map((responsavelId) => {
+                        const usuario = usuarios.find(u => u.id === responsavelId);
+                        return (
+                          <Badge key={responsavelId} variant="secondary" className="flex items-center gap-1">
+                            {usuario?.nome}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const newResponsaveis = selectedResponsaveis.filter(id => id !== responsavelId);
+                                setSelectedResponsaveis(newResponsaveis);
+                                setValue("responsaveis_ids", newResponsaveis);
+                              }}
+                              className="ml-1 hover:text-destructive"
+                            >
+                              <X className="h-3 w-3" />
+                            </button>
+                          </Badge>
+                        );
+                      })}
                     </div>
-                  ))}
-                </div>
+                  </div>
+                )}
+                
                 {errors.responsaveis_ids && (
                   <p className="text-sm text-red-500">{errors.responsaveis_ids.message}</p>
                 )}
