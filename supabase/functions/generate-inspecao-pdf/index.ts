@@ -253,7 +253,6 @@ function generateHTMLReport(inspecao: InspectionData, responsaveis: any = {}): s
             gap: 20px;
             margin-bottom: 30px;
             page-break-inside: avoid;
-            break-inside: avoid;
         }
         .info-item {
             border: 1px solid #ddd;
@@ -271,8 +270,6 @@ function generateHTMLReport(inspecao: InspectionData, responsaveis: any = {}): s
         }
         .section {
             margin-bottom: 30px;
-            page-break-inside: avoid;
-            break-inside: avoid;
         }
         .section h2 {
             color: #0066cc;
@@ -288,8 +285,6 @@ function generateHTMLReport(inspecao: InspectionData, responsaveis: any = {}): s
             margin-bottom: 10px;
             border-radius: 5px;
             overflow: hidden;
-            page-break-inside: avoid;
-            break-inside: avoid;
         }
         .item-header {
             padding: 15px;
@@ -329,7 +324,6 @@ function generateHTMLReport(inspecao: InspectionData, responsaveis: any = {}): s
             border-radius: 5px;
             margin-bottom: 30px;
             page-break-inside: avoid;
-            break-inside: avoid;
         }
         .summary-grid {
             display: grid;
@@ -353,27 +347,20 @@ function generateHTMLReport(inspecao: InspectionData, responsaveis: any = {}): s
             border-top: 2px solid #ddd;
             padding-top: 30px;
             page-break-inside: avoid;
-            break-inside: avoid;
         }
         .signature-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 40px;
             margin-top: 30px;
-            page-break-inside: avoid;
-            break-inside: avoid;
         }
         .signature-box {
             border: 1px solid #ddd;
             padding: 20px;
             text-align: center;
             min-height: 80px;
-            page-break-inside: avoid;
-            break-inside: avoid;
         }
         .section-group {
-            page-break-inside: avoid;
-            break-inside: avoid;
             margin-bottom: 25px;
         }
         .section-title {
@@ -388,15 +375,21 @@ function generateHTMLReport(inspecao: InspectionData, responsaveis: any = {}): s
         }
         .non-conformities-section {
             page-break-inside: avoid;
-            break-inside: avoid;
         }
         .non-conformity-item {
             margin-bottom: 15px;
             padding: 15px;
             border-left: 4px solid #dc3545;
             background-color: #f8f9fa;
+        }
+        /* Controle inteligente de quebras de página */
+        .section-with-items {
             page-break-inside: avoid;
-            break-inside: avoid;
+            orphans: 3;
+            widows: 3;
+        }
+        .item-group {
+            page-break-inside: avoid;
         }
         @media print {
             body { 
@@ -407,24 +400,27 @@ function generateHTMLReport(inspecao: InspectionData, responsaveis: any = {}): s
             .header { 
                 page-break-after: avoid; 
             }
-            .section {
-                page-break-inside: avoid;
-                break-inside: avoid;
-            }
             .section h2 {
                 page-break-after: avoid;
+                orphans: 2;
             }
             .summary {
                 page-break-inside: avoid;
-                break-inside: avoid;
             }
             .signature-section {
                 page-break-inside: avoid;
-                break-inside: avoid;
             }
             .info-grid {
                 page-break-inside: avoid;
-                break-inside: avoid;
+            }
+            /* Permitir quebras mais naturais para seções longas */
+            .section-group {
+                break-inside: auto;
+                page-break-inside: auto;
+            }
+            /* Mas ainda evitar quebras ruins */
+            .section-title + .item:first-of-type {
+                page-break-before: avoid;
             }
         }
     </style>
