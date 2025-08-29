@@ -49,28 +49,24 @@ export function InspecaoAcompanhamentoCard({
       
       console.log('Nome do arquivo extraído:', fileName);
       
-      // Construir URL da edge function com o nome do arquivo
-      const functionUrl = `https://xexgdtlctyuycohzhmuu.supabase.co/functions/v1/serve-hsa-report?file=${encodeURIComponent(fileName)}`;
+      // Usar createSignedUrl do Supabase para gerar URL temporária
+      const { data, error } = await supabase.storage
+        .from('relatorios-inspecao-hsa')
+        .createSignedUrl(fileName, 120); // 2 minutos de validade
       
-      console.log('URL da edge function:', functionUrl);
-      
-      try {
-        // Baixar o arquivo e criar blob URL para usar no iframe
-        const response = await fetch(functionUrl);
-        if (!response.ok) throw new Error('Erro no download');
-        
-        const blob = await response.blob();
-        const blobUrl = URL.createObjectURL(blob);
-        
-        setPdfUrl(blobUrl);
-        setShowPdfModal(true);
-      } catch (err) {
-        console.error('Erro ao abrir PDF:', err);
+      if (error) {
+        console.error('Erro ao gerar signed URL:', error);
         toast({
           title: "Erro ao abrir relatório",
-          description: "Não foi possível acessar o arquivo",
+          description: "Não foi possível gerar link do arquivo",
           variant: "destructive",
         });
+        return;
+      }
+      
+      if (data?.signedUrl) {
+        setPdfUrl(data.signedUrl);
+        setShowPdfModal(true);
       }
       
     } catch (err) {
@@ -158,8 +154,10 @@ export function InspecaoAcompanhamentoCard({
     {/* Modal para exibir PDF */}
     <Dialog open={showPdfModal} onOpenChange={(open) => {
       setShowPdfModal(open);
-      if (!open && pdfUrl.startsWith('blob:')) {
-        URL.revokeObjectURL(pdfUrl);
+      if (!open) {
+        if (pdfUrl.startsWith('blob:')) {
+          URL.revokeObjectURL(pdfUrl);
+        }
         setPdfUrl('');
       }
     }}>
