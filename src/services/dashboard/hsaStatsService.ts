@@ -36,11 +36,10 @@ export async function fetchHSAPercentage(ccaIds?: number[], filters?: { year?: s
 
     // Totais para aderência ajustada
     const programadas = aRealizar + realizadas + naoRealizadas; // A REALIZAR + REALIZADA + NÃO REALIZADA
-    const totalAjustado = programadas + realizadasNaoProgramadas;
     const realizadasAjustadas = realizadas + realizadasNaoProgramadas;
 
-    // Calcular aderência ajustada = (REALIZADA + REALIZADA NÃO PROGRAMADA) / (PROGRAMADAS + REALIZADA NÃO PROGRAMADA) * 100
-    const aderenciaAjustada = totalAjustado > 0 ? (realizadasAjustadas / totalAjustado) * 100 : 0;
+    // Calcular aderência ajustada = (REALIZADA + REALIZADA NÃO PROGRAMADA) / PROGRAMADAS * 100
+    const aderenciaAjustada = programadas > 0 ? (realizadasAjustadas / programadas) * 100 : 0;
     
     console.log('HSA Stats with filters:', {
       filters,

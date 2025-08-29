@@ -165,10 +165,9 @@ const InspecoesSummaryCards = ({ filters }: InspecoesSummaryCardsProps) => {
   // Aderência HSA (real) = REALIZADA / (A REALIZAR + REALIZADA + NÃO REALIZADA) * 100
   const aderenciaReal = inspecoesProgramadas > 0 ? ((inspecoesRealizadas / inspecoesProgramadas) * 100).toFixed(2) : "0.00";
   
-  // Aderência HSA (ajustada) = (REALIZADA + REALIZADA NÃO PROGRAMADA) / (A REALIZAR + REALIZADA + REALIZADA NÃO PROGRAMADA + NÃO REALIZADA) * 100
-  const totalAjustado = inspecoesProgramadas + inspecoesNaoProgramadas;
+  // Aderência HSA (ajustada) = (REALIZADA + REALIZADA NÃO PROGRAMADA) / PROGRAMADAS * 100
   const realizadasAjustadas = inspecoesRealizadas + inspecoesNaoProgramadas;
-  const aderenciaAjustada = totalAjustado > 0 ? ((realizadasAjustadas / totalAjustado) * 100).toFixed(2) : "0.00";
+  const aderenciaAjustada = inspecoesProgramadas > 0 ? ((realizadasAjustadas / inspecoesProgramadas) * 100).toFixed(2) : "0.00";
 
   return (
     <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-6">
