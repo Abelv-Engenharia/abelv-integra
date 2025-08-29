@@ -21,7 +21,7 @@ const tarefaSchema = z.object({
   cca_id: z.number({ required_error: "CCA é obrigatório" }),
   data_conclusao: z.string().min(1, "Data de conclusão é obrigatória"),
   descricao: z.string().min(1, "Descrição é obrigatória"),
-  responsavel_id: z.string().min(1, "Responsável é obrigatório"),
+  responsaveis_ids: z.array(z.string()).min(1, "Pelo menos um responsável é obrigatório"),
   configuracao: z.object({
     criticidade: z.enum(["baixa", "media", "alta", "critica"]),
     requerValidacao: z.boolean(),
@@ -38,6 +38,7 @@ type TarefaFormSchema = z.infer<typeof tarefaSchema>;
 const CadastroTarefas = () => {
   const [ccas, setCcas] = useState<any[]>([]);
   const [usuarios, setUsuarios] = useState<any[]>([]);
+  const [selectedResponsaveis, setSelectedResponsaveis] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(true);
   const [success, setSuccess] = useState(false); // indica sucesso ao cadastrar
@@ -123,7 +124,7 @@ const CadastroTarefas = () => {
         cca_id: data.cca_id,
         data_conclusao: data.data_conclusao,
         descricao: data.descricao,
-        responsavel_id: data.responsavel_id,
+        responsaveis_ids: data.responsaveis_ids,
         configuracao: {
           criticidade: data.configuracao.criticidade,
           requerValidacao: data.configuracao.requerValidacao,
@@ -222,25 +223,37 @@ const CadastroTarefas = () => {
               )}
             </div>
 
-            {/* Responsável e Data de Conclusão */}
+            {/* Responsáveis e Data de Conclusão */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Responsável */}
+              {/* Responsáveis */}
               <div className="space-y-2">
-                <Label htmlFor="responsavel_id">Responsável *</Label>
-                <Select onValueChange={(value) => setValue("responsavel_id", value)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione o responsável" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {usuarios.map((usuario) => (
-                      <SelectItem key={usuario.id} value={usuario.id}>
+                <Label htmlFor="responsaveis">Responsáveis *</Label>
+                <div className="space-y-2 max-h-40 overflow-y-auto border rounded-md p-2">
+                  {usuarios.map((usuario) => (
+                    <div key={usuario.id} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`responsavel_${usuario.id}`}
+                        checked={selectedResponsaveis.includes(usuario.id)}
+                        onCheckedChange={(checked) => {
+                          if (checked) {
+                            const newResponsaveis = [...selectedResponsaveis, usuario.id];
+                            setSelectedResponsaveis(newResponsaveis);
+                            setValue("responsaveis_ids", newResponsaveis);
+                          } else {
+                            const newResponsaveis = selectedResponsaveis.filter(id => id !== usuario.id);
+                            setSelectedResponsaveis(newResponsaveis);
+                            setValue("responsaveis_ids", newResponsaveis);
+                          }
+                        }}
+                      />
+                      <Label htmlFor={`responsavel_${usuario.id}`} className="text-sm">
                         {usuario.nome}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {errors.responsavel_id && (
-                  <p className="text-sm text-red-500">{errors.responsavel_id.message}</p>
+                      </Label>
+                    </div>
+                  ))}
+                </div>
+                {errors.responsaveis_ids && (
+                  <p className="text-sm text-red-500">{errors.responsaveis_ids.message}</p>
                 )}
               </div>
 

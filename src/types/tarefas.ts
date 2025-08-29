@@ -12,10 +12,10 @@ export type Tarefa = {
   data_real_conclusao?: string | null;
   descricao: string;
   titulo?: string;
-  responsavel: {
+  responsaveis: {
     id: string;
     nome: string;
-  };
+  }[];
   anexo?: string;
   observacoes_progresso?: string;
   status: TarefaStatus;
