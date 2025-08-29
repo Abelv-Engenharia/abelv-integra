@@ -11,6 +11,8 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { ConformidadePorMesChart } from "@/components/inspecao-sms/ConformidadePorMesChart";
+import { ConformidadePorCCAChart } from "@/components/inspecao-sms/ConformidadePorCCAChart";
 
 const InspecaoSMSDashboard = () => {
   const [stats, setStats] = useState({
@@ -23,6 +25,8 @@ const InspecaoSMSDashboard = () => {
   });
   const [ultimasInspecoes, setUltimasInspecoes] = useState<any[]>([]);
   const [inspecoesPorCCA, setInspecoesPorCCA] = useState<any[]>([]);
+  const [conformidadePorMes, setConformidadePorMes] = useState<any[]>([]);
+  const [conformidadePorCCA, setConformidadePorCCAChart] = useState<any[]>([]);
   const [filtroTipo, setFiltroTipo] = useState<string>("todos");
   const [dataInicio, setDataInicio] = useState<Date>();
   const [dataFim, setDataFim] = useState<Date>();
@@ -106,6 +110,51 @@ const InspecaoSMSDashboard = () => {
         setInspecoesPorCCA(
           Object.entries(ccasCount).map(([cca, count]) => ({ cca, count }))
         );
+
+        // Processar dados para gráfico de conformidade por mês
+        const conformidadeMes = inspecoes.reduce((acc: any, insp) => {
+          const data = new Date(insp.data_inspecao);
+          const mesAno = `${String(data.getMonth() + 1).padStart(2, '0')}/${data.getFullYear()}`;
+          
+          if (!acc[mesAno]) {
+            acc[mesAno] = { mes: mesAno, conformes: 0, naoConformes: 0 };
+          }
+          
+          if (insp.tem_nao_conformidade) {
+            acc[mesAno].naoConformes++;
+          } else {
+            acc[mesAno].conformes++;
+          }
+          
+          return acc;
+        }, {});
+
+        const conformidadeMesArray = Object.values(conformidadeMes).sort((a: any, b: any) => {
+          const [mesA, anoA] = a.mes.split('/');
+          const [mesB, anoB] = b.mes.split('/');
+          return new Date(parseInt(anoA), parseInt(mesA) - 1).getTime() - new Date(parseInt(anoB), parseInt(mesB) - 1).getTime();
+        });
+        
+        setConformidadePorMes(conformidadeMesArray.slice(-12)); // Últimos 12 meses
+
+        // Processar dados para gráfico de conformidade por CCA
+        const conformidadeCCAData = inspecoes.reduce((acc: any, insp) => {
+          const cca = insp.ccas ? `${insp.ccas.codigo}` : 'Sem CCA';
+          
+          if (!acc[cca]) {
+            acc[cca] = { cca, conformes: 0, naoConformes: 0 };
+          }
+          
+          if (insp.tem_nao_conformidade) {
+            acc[cca].naoConformes++;
+          } else {
+            acc[cca].conformes++;
+          }
+          
+          return acc;
+        }, {});
+
+        setConformidadePorCCAChart(Object.values(conformidadeCCAData));
       }
     } catch (error) {
       console.error('Erro ao carregar dados:', error);
@@ -247,6 +296,39 @@ const InspecaoSMSDashboard = () => {
             <p className="text-xs text-muted-foreground mt-1">
               Meta: 90%
             </p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Gráficos de Conformidade */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg sm:text-xl">Conformidade por Mês</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {conformidadePorMes.length === 0 ? (
+              <p className="text-muted-foreground text-center py-8">
+                Nenhum dado encontrado
+              </p>
+            ) : (
+              <ConformidadePorMesChart data={conformidadePorMes} />
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg sm:text-xl">Conformidade por CCA</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {conformidadePorCCA.length === 0 ? (
+              <p className="text-muted-foreground text-center py-8">
+                Nenhum dado encontrado
+              </p>
+            ) : (
+              <ConformidadePorCCAChart data={conformidadePorCCA} />
+            )}
           </CardContent>
         </Card>
       </div>
