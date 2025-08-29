@@ -5,7 +5,8 @@ import {
   XAxis,
   ResponsiveContainer,
   Cell,
-  LabelList
+  LabelList,
+  Legend
 } from 'recharts';
 import { supabase } from '@/integrations/supabase/client';
 import { useUserCCAs } from '@/hooks/useUserCCAs';
@@ -144,16 +145,17 @@ const TarefasStatusPorUsuarioChart = () => {
           interval={0}
           tick={{ fontSize: 12 }}
         />
-        <Bar dataKey="programadas" fill="hsl(var(--chart-1))" name="Programadas">
+        <Legend />
+        <Bar dataKey="programadas" fill="#3b82f6" name="Programadas">
           <LabelList dataKey="programadas" position="top" fill="hsl(var(--foreground))" fontSize={10} />
         </Bar>
-        <Bar dataKey="em_andamento" fill="hsl(var(--chart-2))" name="Em Andamento">
+        <Bar dataKey="em_andamento" fill="#f97316" name="Em Andamento">
           <LabelList dataKey="em_andamento" position="top" fill="hsl(var(--foreground))" fontSize={10} />
         </Bar>
-        <Bar dataKey="pendentes" fill="hsl(var(--chart-3))" name="Pendentes">
+        <Bar dataKey="pendentes" fill="#ef4444" name="Pendentes">
           <LabelList dataKey="pendentes" position="top" fill="hsl(var(--foreground))" fontSize={10} />
         </Bar>
-        <Bar dataKey="concluidas" fill="hsl(var(--chart-4))" name="Concluídas">
+        <Bar dataKey="concluidas" fill="#22c55e" name="Concluídas">
           <LabelList dataKey="concluidas" position="top" fill="hsl(var(--foreground))" fontSize={10} />
         </Bar>
       </BarChart>

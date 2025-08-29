@@ -139,10 +139,10 @@ const TarefasBarChart = () => {
         <YAxis />
         <Tooltip />
         <Legend />
-        <Bar dataKey="programadas" fill="#8884d8" name="Programadas" />
-        <Bar dataKey="concluidas" fill="#82ca9d" name="Concluídas" />
-        <Bar dataKey="pendentes" fill="#ffc658" name="Pendentes" />
-        <Bar dataKey="em_andamento" fill="#ff7300" name="Em Andamento" />
+        <Bar dataKey="programadas" fill="#3b82f6" name="Programadas" />
+        <Bar dataKey="concluidas" fill="#22c55e" name="Concluídas" />
+        <Bar dataKey="pendentes" fill="#ef4444" name="Pendentes" />
+        <Bar dataKey="em_andamento" fill="#f97316" name="Em Andamento" />
       </BarChart>
     </ResponsiveContainer>
   );
