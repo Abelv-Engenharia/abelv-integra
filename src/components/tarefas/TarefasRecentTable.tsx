@@ -79,7 +79,7 @@ const TarefasRecentTable = () => {
           tarefas.map((tarefa) => (
             <TableRow key={tarefa.id}>
               <TableCell className="font-medium">{tarefa.descricao}</TableCell>
-              <TableCell>{tarefa.responsavel.nome}</TableCell>
+              <TableCell>{tarefa.responsaveis?.map(r => r.nome).join(', ') || 'Sem responsável'}</TableCell>
               <TableCell>{format(tarefa.dataConclusao, 'dd/MM/yyyy', { locale: ptBR })}</TableCell>
               <TableCell>{getStatusBadge(tarefa.status)}</TableCell>
               <TableCell>{getCriticidadeBadge(tarefa.criticidade)}</TableCell>

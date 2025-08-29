@@ -137,6 +137,7 @@ const CadastroTarefas = () => {
 
       if (success) {
         setSuccess(true); // exibe tela de sucesso
+        setSelectedResponsaveis([]); // limpar responsáveis selecionados
         reset();
       } else {
         toast.error("Erro ao cadastrar tarefa. Tente novamente.");

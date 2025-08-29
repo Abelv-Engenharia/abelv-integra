@@ -80,7 +80,7 @@ const EditarTarefa = () => {
             dataCadastro: new Date(tarefaEncontrada.dataCadastro),
             dataConclusao: new Date(tarefaEncontrada.dataConclusao),
             descricao: tarefaEncontrada.descricao,
-            responsavelId: tarefaEncontrada.responsavel.id,
+            responsavelId: tarefaEncontrada.responsaveis?.[0]?.id || '',
             status: tarefaEncontrada.status,
             iniciada: tarefaEncontrada.iniciada,
             criticidade: tarefaEncontrada.configuracao.criticidade,

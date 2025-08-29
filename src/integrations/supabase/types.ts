@@ -2366,6 +2366,42 @@ export type Database = {
         }
         Relationships: []
       }
+      tarefas_responsaveis: {
+        Row: {
+          created_at: string
+          id: string
+          responsavel_id: string
+          tarefa_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          responsavel_id: string
+          tarefa_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          responsavel_id?: string
+          tarefa_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tarefas_responsaveis_responsavel_id_fkey"
+            columns: ["responsavel_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tarefas_responsaveis_tarefa_id_fkey"
+            columns: ["tarefa_id"]
+            isOneToOne: false
+            referencedRelation: "tarefas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tipo_inspecao_hsa: {
         Row: {
           ativo: boolean
