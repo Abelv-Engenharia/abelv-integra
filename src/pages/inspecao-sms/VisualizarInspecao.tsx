@@ -341,9 +341,15 @@ const VisualizarInspecao = () => {
                             </div>
                           )}
                           
-                          {/* Mostrar todos os campos do cabeçalho para veículo */}
+                          {/* Mostrar todos os campos do cabeçalho para veículo, exceto assinaturas */}
                           {Object.entries(inspecao.dados_preenchidos.campos_cabecalho).map(([key, value]: [string, any]) => {
                             if (!value || value === '') return null;
+                            
+                            // Filtrar campos de assinatura
+                            if (key.toLowerCase().includes('assinatura') || 
+                                key.toLowerCase().includes('data_assinatura')) {
+                              return null;
+                            }
                             
                             // Mapear os nomes dos campos para rótulos mais amigáveis
                             const fieldLabels: { [key: string]: string } = {
@@ -353,14 +359,20 @@ const VisualizarInspecao = () => {
                               ano: 'Ano',
                               cor: 'Cor',
                               km: 'Quilometragem',
+                              km_do_veiculo: 'Quilometragem',
                               combustivel: 'Combustível',
                               capacidade: 'Capacidade',
                               categoria: 'Categoria',
+                              cnh: 'CNH (Nº/Categoria)',
+                              empresa_de_transporte: 'Empresa de Transporte',
+                              modelo_do_veiculo: 'Modelo do Veículo',
+                              responsavel_inspecao: 'Responsável da Inspeção',
+                              engenheiro_responsavel: 'Engenheiro Responsável',
                               renavam: 'RENAVAM',
                               chassi: 'Chassi'
                             };
                             
-                            const label = fieldLabels[key] || key.charAt(0).toUpperCase() + key.slice(1);
+                            const label = fieldLabels[key] || key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' ');
                             const displayValue = typeof value === 'object' ? JSON.stringify(value) : String(value);
                             
                             return (
