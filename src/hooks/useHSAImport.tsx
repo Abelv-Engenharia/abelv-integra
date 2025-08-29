@@ -10,7 +10,7 @@ interface ValidatedHSARow {
   cca_id: number;
   responsavel_inspecao: string;
   funcao?: string;
-  inspecao_programada?: string;
+  tipo_inspecao?: string;
   status: string;
   desvios_identificados: number;
   observacao?: string;
@@ -109,7 +109,7 @@ export const useHSAImport = () => {
             cca_id: ccaMap.get(ccaCode)!,
             responsavel_inspecao: row.responsavel_inspecao!.trim(),
             funcao: row.funcao?.trim(),
-            inspecao_programada: row.inspecao_programada?.trim(),
+            tipo_inspecao: row.tipo_inspecao?.trim(),
             status: row.status!.trim().toUpperCase(),
             desvios_identificados: row.desvios_identificados || 0,
             observacao: row.observacao?.trim(),
@@ -159,7 +159,7 @@ export const useHSAImport = () => {
           cca_id: row.cca_id,
           responsavel_inspecao: row.responsavel_inspecao,
           funcao: row.funcao,
-          inspecao_programada: row.inspecao_programada,
+          tipo_inspecao: row.tipo_inspecao,
           status: row.status,
           desvios_identificados: row.desvios_identificados,
           observacao: row.observacao,

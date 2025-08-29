@@ -61,7 +61,7 @@ export const HSAExcelUpload = ({ onFileProcessed, isProcessing }: ExcelUploadPro
       const data: HSAImportData[] = nonEmptyRows.map((row: any) => {
         const item: HSAImportData = {};
         
-        // Cabeçalhos esperados: data, cca_codigo, responsavel_inspecao, funcao, inspecao_programada, status, desvios_identificados, observacao, relatorio_url
+        // Cabeçalhos esperados: data, cca_codigo, responsavel_inspecao, funcao, tipo_inspecao, status, desvios_identificados, observacao, relatorio_url
         const d = row['data'];
         if (d !== undefined && d !== null && d !== '') {
           if (typeof d === 'number') item.data = parseExcelDate(d);
@@ -71,7 +71,7 @@ export const HSAExcelUpload = ({ onFileProcessed, isProcessing }: ExcelUploadPro
         if (row['cca_codigo']) item.cca_codigo = String(row['cca_codigo']).trim();
         if (row['responsavel_inspecao']) item.responsavel_inspecao = String(row['responsavel_inspecao']).trim();
         if (row['funcao']) item.funcao = String(row['funcao']).trim();
-        if (row['inspecao_programada']) item.inspecao_programada = String(row['inspecao_programada']).trim();
+        if (row['tipo_inspecao']) item.tipo_inspecao = String(row['tipo_inspecao']).trim();
         if (row['status']) item.status = String(row['status']).trim();
         if (row['desvios_identificados']) item.desvios_identificados = Number(row['desvios_identificados']) || 0;
         if (row['observacao']) item.observacao = String(row['observacao']).trim();

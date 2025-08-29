@@ -3,7 +3,7 @@ export interface HSAImportData {
   cca_codigo?: string;
   responsavel_inspecao?: string;
   funcao?: string;
-  inspecao_programada?: string; // Sim/Não
+  tipo_inspecao?: string; // Ex: Bloqueio de Energias, Documentação de Atividade, etc.
   status?: string; // Realizada/Não Realizada/Não Programada
   desvios_identificados?: number;
   observacao?: string;

@@ -32,7 +32,7 @@ const ImportacaoHSA = () => {
         cca_codigo: "001",
         responsavel_inspecao: "João Silva",
         funcao: "Técnico de Segurança",
-        inspecao_programada: "Sim",
+        tipo_inspecao: "Bloqueio de Energias",
         status: "REALIZADA",
         desvios_identificados: 0,
         observacao: "Inspeção realizada sem intercorrências",
@@ -49,7 +49,7 @@ const ImportacaoHSA = () => {
       { wch: 12 }, // cca_codigo
       { wch: 25 }, // responsavel_inspecao
       { wch: 20 }, // funcao
-      { wch: 18 }, // inspecao_programada
+      { wch: 25 }, // tipo_inspecao
       { wch: 15 }, // status
       { wch: 18 }, // desvios_identificados
       { wch: 40 }, // observacao
@@ -199,10 +199,10 @@ const ImportacaoHSA = () => {
                     <ul className="list-disc list-inside space-y-1 text-sm">
                       <li>A primeira linha deve conter os cabeçalhos das colunas</li>
                       <li>Colunas obrigatórias: <code>data</code>, <code>cca_codigo</code>, <code>responsavel_inspecao</code>, <code>status</code></li>
-                      <li>Colunas opcionais: <code>funcao</code>, <code>inspecao_programada</code>, <code>desvios_identificados</code>, <code>observacao</code>, <code>relatorio_url</code></li>
+                      <li>Colunas opcionais: <code>funcao</code>, <code>tipo_inspecao</code>, <code>desvios_identificados</code>, <code>observacao</code>, <code>relatorio_url</code></li>
                       <li>Data deve estar no formato DD/MM/AAAA</li>
                       <li>Status deve ser: REALIZADA, NÃO REALIZADA, A REALIZAR, CANCELADA ou REALIZADA (NÃO PROGRAMADA)</li>
-                      <li>Inspeção Programada deve ser: Sim ou Não</li>
+                      <li>Tipo de Inspeção: Ex: Bloqueio de Energias, Documentação de Atividade, Segurança na Soldagem, etc.</li>
                     </ul>
                     <div className="pt-2">
                       <Button
