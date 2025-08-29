@@ -345,11 +345,12 @@ const VisualizarInspecao = () => {
                           {Object.entries(inspecao.dados_preenchidos.campos_cabecalho).map(([key, value]: [string, any]) => {
                             if (!value || value === '') return null;
                             
-                            // Filtrar campos de assinatura, IDs e campos de responsáveis
+                            // Filtrar campos de assinatura, IDs, campos de responsáveis e empresa
                             if (key.toLowerCase().includes('assinatura') || 
                                 key.toLowerCase().includes('data_assinatura') ||
                                 key.toLowerCase().includes('responsavel_inspecao') ||
                                 key.toLowerCase().includes('engenheiro_responsavel') ||
+                                key.toLowerCase() === 'empresa' ||
                                 (typeof value === 'string' && value.includes('-') && value.length > 30)) {
                               return null;
                             }
