@@ -139,16 +139,16 @@ const ConsultarInspecoes = () => {
 
   const getStatusBadge = (status: string) => {
     const statusMap = {
-      'concluida': { label: 'Concluída', variant: 'default' as const },
-      'em_andamento': { label: 'Em Andamento', variant: 'secondary' as const },
-      'pendente': { label: 'Pendente', variant: 'outline' as const }
+      'concluida': { label: 'Concluída', className: 'bg-green-500 hover:bg-green-600 text-white' },
+      'em_andamento': { label: 'Em Andamento', className: 'bg-blue-500 hover:bg-blue-600 text-white' },
+      'pendente': { label: 'Pendente', className: 'bg-yellow-500 hover:bg-yellow-600 text-white' }
     };
     
     const statusInfo = statusMap[status as keyof typeof statusMap] || 
-      { label: status, variant: 'outline' as const };
+      { label: status, className: 'bg-gray-500 hover:bg-gray-600 text-white' };
     
     return (
-      <Badge variant={statusInfo.variant}>
+      <Badge className={statusInfo.className}>
         {statusInfo.label}
       </Badge>
     );
@@ -156,7 +156,7 @@ const ConsultarInspecoes = () => {
 
   const getConformidadeBadge = (temNaoConformidade: boolean) => {
     return (
-      <Badge variant={temNaoConformidade ? "destructive" : "default"}>
+      <Badge className={temNaoConformidade ? "bg-red-500 hover:bg-red-600 text-white" : "bg-green-500 hover:bg-green-600 text-white"}>
         {temNaoConformidade ? "Não Conforme" : "Conforme"}
       </Badge>
     );
