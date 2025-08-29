@@ -517,7 +517,10 @@ const CadastrarInspecao = () => {
     return (
       <div className="content-padding section-spacing">
         <DigitalSignature
-          title={`Assinatura - ${currentSignatureType === 'inspetor' ? 'Auditor' : 'Responsável pela Frente de Trabalho'}`}
+          title={`Assinatura - ${currentSignatureType === 'inspetor' ? 'Auditor' : 
+            (modeloSelecionado?.nome?.toLowerCase().includes('veículo') || 
+             modeloSelecionado?.nome?.toLowerCase().includes('veiculo') || 
+             modeloSelecionado?.nome?.toLowerCase().includes('transporte')) ? 'Motorista' : 'Responsável pela Frente de Trabalho'}`}
           onSave={handleSignatureSave}
           onCancel={() => setShowSignatureModal(false)}
         />
@@ -557,67 +560,75 @@ const CadastrarInspecao = () => {
                   </div>
                 </div>
 
-                <div>
-                  <Label className="text-sm font-medium">
-                    {modeloSelecionado?.nome?.toLowerCase().includes('veículo') || modeloSelecionado?.nome?.toLowerCase().includes('veiculo') || modeloSelecionado?.nome?.toLowerCase().includes('transporte') ? 
-                      'Responsável pelo Veículo' : 
-                      'Responsável pela Frente de Trabalho'
-                    }
-                  </Label>
-                  
-                  {/* Mostrar nome do motorista se for checklist de veículo */}
-                  {(modeloSelecionado?.nome?.toLowerCase().includes('veículo') || modeloSelecionado?.nome?.toLowerCase().includes('veiculo') || modeloSelecionado?.nome?.toLowerCase().includes('transporte')) && dadosCabecalho?.motorista && (
-                    <div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded-lg">
+                {/* Para veículos de transporte, não mostrar campo de seleção de responsável */}
+                {!(modeloSelecionado?.nome?.toLowerCase().includes('veículo') || 
+                   modeloSelecionado?.nome?.toLowerCase().includes('veiculo') || 
+                   modeloSelecionado?.nome?.toLowerCase().includes('transporte')) && (
+                  <div>
+                    <Label className="text-sm font-medium">Responsável pela Frente de Trabalho</Label>
+                    
+                    <Select 
+                      value={assinaturas.responsavel_tecnico} 
+                      onValueChange={(value) => setAssinaturas({
+                        ...assinaturas,
+                        responsavel_tecnico: value
+                      })}
+                    >
+                      <SelectTrigger className="mt-2">
+                        <SelectValue placeholder="Selecione o responsável pela frente de trabalho" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-background border border-border z-50">
+                        {engenheiros.map(eng => (
+                          <SelectItem key={`eng_${eng.id}`} value={eng.id}>
+                            {eng.nome} - Engenheiro
+                          </SelectItem>
+                        ))}
+                        {supervisores.map(sup => (
+                          <SelectItem key={`sup_${sup.id}`} value={sup.id}>
+                            {sup.nome} - Supervisor
+                          </SelectItem>
+                        ))}
+                        {encarregados.map(enc => (
+                          <SelectItem key={`enc_${enc.id}`} value={enc.id}>
+                            {enc.nome} - Encarregado
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    
+                    {assinaturas.responsavel_tecnico && (
+                      <div className="mt-3">
+                        <Button 
+                          variant="outline" 
+                          onClick={() => handleSignatureRequest('responsavel_tecnico')}
+                          className="w-full"
+                        >
+                          {assinaturas.assinatura_responsavel_tecnico ? 'Assinatura Capturada ✓' : 'Capturar Assinatura do Responsável'}
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Para veículos de transporte, mostrar informações do motorista e capturar assinatura */}
+                {(modeloSelecionado?.nome?.toLowerCase().includes('veículo') || 
+                  modeloSelecionado?.nome?.toLowerCase().includes('veiculo') || 
+                  modeloSelecionado?.nome?.toLowerCase().includes('transporte')) && dadosCabecalho?.motorista && (
+                  <div>
+                    <Label className="text-sm font-medium">Assinatura do Motorista</Label>
+                    <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
                       <Label className="text-sm font-medium text-blue-800">Motorista:</Label>
-                      <p className="text-sm text-blue-700">{dadosCabecalho.motorista}</p>
-                    </div>
-                  )}
-                  
-                  <Select 
-                    value={assinaturas.responsavel_tecnico} 
-                    onValueChange={(value) => setAssinaturas({
-                      ...assinaturas,
-                      responsavel_tecnico: value
-                    })}
-                  >
-                    <SelectTrigger className="mt-2">
-                      <SelectValue placeholder={
-                        modeloSelecionado?.nome?.toLowerCase().includes('veículo') || modeloSelecionado?.nome?.toLowerCase().includes('veiculo') || modeloSelecionado?.nome?.toLowerCase().includes('transporte') ? 
-                          'Selecione o responsável pelo veículo' : 
-                          'Selecione o responsável pela frente de trabalho'
-                      } />
-                    </SelectTrigger>
-                    <SelectContent className="bg-background border border-border z-50">
-                      {engenheiros.map(eng => (
-                        <SelectItem key={`eng_${eng.id}`} value={eng.id}>
-                          {eng.nome} - Engenheiro
-                        </SelectItem>
-                      ))}
-                      {supervisores.map(sup => (
-                        <SelectItem key={`sup_${sup.id}`} value={sup.id}>
-                          {sup.nome} - Supervisor
-                        </SelectItem>
-                      ))}
-                      {encarregados.map(enc => (
-                        <SelectItem key={`enc_${enc.id}`} value={enc.id}>
-                          {enc.nome} - Encarregado
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  
-                  {assinaturas.responsavel_tecnico && (
-                    <div className="mt-3">
+                      <p className="text-sm text-blue-700 mb-3">{dadosCabecalho.motorista}</p>
                       <Button 
                         variant="outline" 
                         onClick={() => handleSignatureRequest('responsavel_tecnico')}
                         className="w-full"
                       >
-                        {assinaturas.assinatura_responsavel_tecnico ? 'Assinatura Capturada ✓' : 'Capturar Assinatura do Responsável'}
+                        {assinaturas.assinatura_responsavel_tecnico ? 'Assinatura do Motorista Capturada ✓' : 'Capturar Assinatura do Motorista'}
                       </Button>
                     </div>
-                  )}
-                </div>
+                  </div>
+                )}
 
                 <div>
                   <Label className="text-sm font-medium">
@@ -644,7 +655,14 @@ const CadastrarInspecao = () => {
               <Button variant="outline" onClick={() => setStep(2)}>
                 Cancelar
               </Button>
-              <Button onClick={finalizarComAssinatura} disabled={isSubmitting || !assinaturas.assinatura_inspetor}>
+              <Button 
+                onClick={finalizarComAssinatura} 
+                disabled={isSubmitting || !assinaturas.assinatura_inspetor || 
+                  (!(modeloSelecionado?.nome?.toLowerCase().includes('veículo') || 
+                     modeloSelecionado?.nome?.toLowerCase().includes('veiculo') || 
+                     modeloSelecionado?.nome?.toLowerCase().includes('transporte')) && 
+                   !assinaturas.assinatura_responsavel_tecnico)}
+              >
                 {isSubmitting ? (
                   <>
                     <InlineLoader size="sm" />
