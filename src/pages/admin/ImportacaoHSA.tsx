@@ -33,7 +33,7 @@ const ImportacaoHSA = () => {
         responsavel_inspecao: "João Silva",
         funcao: "Técnico de Segurança",
         inspecao_programada: "Sim",
-        status: "Realizada",
+        status: "REALIZADA",
         desvios_identificados: 0,
         observacao: "Inspeção realizada sem intercorrências",
         relatorio_url: ""
@@ -201,7 +201,7 @@ const ImportacaoHSA = () => {
                       <li>Colunas obrigatórias: <code>data</code>, <code>cca_codigo</code>, <code>responsavel_inspecao</code>, <code>status</code></li>
                       <li>Colunas opcionais: <code>funcao</code>, <code>inspecao_programada</code>, <code>desvios_identificados</code>, <code>observacao</code>, <code>relatorio_url</code></li>
                       <li>Data deve estar no formato DD/MM/AAAA</li>
-                      <li>Status deve ser: Realizada, Não Realizada ou Não Programada</li>
+                      <li>Status deve ser: REALIZADA, NÃO REALIZADA, A REALIZAR, CANCELADA ou REALIZADA (NÃO PROGRAMADA)</li>
                       <li>Inspeção Programada deve ser: Sim ou Não</li>
                     </ul>
                     <div className="pt-2">

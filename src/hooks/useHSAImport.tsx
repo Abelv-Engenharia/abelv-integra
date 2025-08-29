@@ -91,10 +91,10 @@ export const useHSAImport = () => {
         }
 
         // Validar status
-        const validStatuses = ['Realizada', 'Não Realizada', 'Não Programada'];
+        const validStatuses = ['REALIZADA', 'NÃO REALIZADA', 'A REALIZAR', 'CANCELADA', 'REALIZADA (NÃO PROGRAMADA)'];
         if (!row.status?.trim()) {
           errors.push('Status é obrigatório');
-        } else if (!validStatuses.includes(row.status.trim())) {
+        } else if (!validStatuses.includes(row.status.trim().toUpperCase())) {
           errors.push(`Status deve ser: ${validStatuses.join(', ')}`);
         }
 
@@ -110,7 +110,7 @@ export const useHSAImport = () => {
             responsavel_inspecao: row.responsavel_inspecao!.trim(),
             funcao: row.funcao?.trim(),
             inspecao_programada: row.inspecao_programada?.trim(),
-            status: row.status!.trim(),
+            status: row.status!.trim().toUpperCase(),
             desvios_identificados: row.desvios_identificados || 0,
             observacao: row.observacao?.trim(),
             relatorio_url: row.relatorio_url?.trim(),
