@@ -3,12 +3,8 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
 import Navbar from "./Navbar";
 import { Outlet } from "react-router-dom";
-import { useRouteProtection } from "@/hooks/useRouteProtection";
 
 const Layout = () => {
-  // Proteção de rotas em nível de layout
-  useRouteProtection();
-  
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full">

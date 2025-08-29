@@ -6,7 +6,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import AuthGuard from "@/components/auth/AuthGuard";
-import PermissionGuard from "@/components/auth/PermissionGuard";
 import Layout from "@/components/layout/Layout";
 
 // Import pages
@@ -168,168 +167,44 @@ function App() {
                 <Route path="suporte" element={<Suporte />} />
 
                 {/* Admin routes - NEW USER MANAGEMENT */}
-                <Route path="admin/usuarios" element={
-                  <PermissionGuard requiredPermission="sistema_usuarios">
-                    <GerenciarUsuarios />
-                  </PermissionGuard>
-                } />
-                <Route path="admin/usuarios-auth" element={
-                  <PermissionGuard requiredPermission="sistema_usuarios">
-                    <AdminUsuariosAuth />
-                  </PermissionGuard>
-                } />
-                <Route path="admin/ccas" element={
-                  <PermissionGuard requiredPermission="sistema_ccas">
-                    <AdminCCAs />
-                  </PermissionGuard>
-                } />
-                <Route path="admin/perfis" element={
-                  <PermissionGuard requiredPermission="sistema_perfis">
-                    <AdminPerfis />
-                  </PermissionGuard>
-                } />
-                <Route path="admin/empresas" element={
-                  <PermissionGuard requiredPermission="sistema_empresas">
-                    <AdminEmpresas />
-                  </PermissionGuard>
-                } />
-                <Route path="admin/engenheiros" element={
-                  <PermissionGuard requiredPermission="sistema_engenheiros">
-                    <AdminEngenheiros />
-                  </PermissionGuard>
-                } />
-                <Route path="admin/supervisores" element={
-                  <PermissionGuard requiredPermission="sistema_supervisores">
-                    <AdminSupervisores />
-                  </PermissionGuard>
-                } />
-                <Route path="admin/encarregados" element={
-                  <PermissionGuard requiredPermission="sistema_funcionarios">
-                    <AdminEncarregados />
-                  </PermissionGuard>
-                } />
-                <Route path="admin/logo" element={
-                  <PermissionGuard requiredPermission="sistema_logo">
-                    <AdminLogo />
-                  </PermissionGuard>
-                } />
-                <Route path="admin/templates" element={
-                  <PermissionGuard requiredPermission="sistema_templates">
-                    <AdminTemplates />
-                  </PermissionGuard>
-                } />
+                <Route path="admin/usuarios" element={<GerenciarUsuarios />} />
+                <Route path="admin/usuarios-auth" element={<AdminUsuariosAuth />} />
+                <Route path="admin/ccas" element={<AdminCCAs />} />
+                <Route path="admin/perfis" element={<AdminPerfis />} />
+                <Route path="admin/empresas" element={<AdminEmpresas />} />
+                <Route path="admin/engenheiros" element={<AdminEngenheiros />} />
+                <Route path="admin/supervisores" element={<AdminSupervisores />} />
+                <Route path="admin/encarregados" element={<AdminEncarregados />} />
+                <Route path="admin/logo" element={<AdminLogo />} />
+                <Route path="admin/templates" element={<AdminTemplates />} />
                 
-                <Route path="admin/funcionarios" element={
-                  <PermissionGuard requiredPermission="sistema_funcionarios">
-                    <CadastroFuncionarios />
-                  </PermissionGuard>
-                } />
-                <Route path="admin/importacao-funcionarios" element={
-                  <PermissionGuard requiredPermission="sistema_funcionarios">
-                    <ImportacaoFuncionarios />
-                  </PermissionGuard>
-                } />
-                <Route path="admin/criar-usuario" element={
-                  <PermissionGuard requiredPermission="sistema_usuarios">
-                    <CriarUsuario />
-                  </PermissionGuard>
-                } />
-                <Route path="admin/metas-indicadores" element={
-                  <PermissionGuard requiredPermission="sistema_metas_indicadores">
-                    <MetasIndicadores />
-                  </PermissionGuard>
-                } />
-                <Route path="admin/registro-hht" element={
-                  <PermissionGuard requiredPermission="sistema_hht">
-                    <RegistroHHT />
-                  </PermissionGuard>
-                } />
-                <Route path="admin/exportacao-dados" element={
-                  <PermissionGuard requiredPermission="sistema_funcionarios">
-                    <ExportacaoDados />
-                  </PermissionGuard>
-                } />
-                <Route path="adm/configuracoes" element={
-                  <PermissionGuard requiredPermission="sistema_funcionarios">
-                    <AdminConfiguracoes />
-                  </PermissionGuard>
-                } />
-                <Route path="admin/configuracoes" element={
-                  <PermissionGuard requiredPermission="sistema_funcionarios">
-                    <AdminConfiguracoes />
-                  </PermissionGuard>
-                } />
-                <Route path="admin/checklists" element={
-                  <PermissionGuard requiredPermission="sistema_modelos_inspecao">
-                    <AdminChecklists />
-                  </PermissionGuard>
-                } />
-                <Route path="configuracao-emails" element={
-                  <PermissionGuard requiredPermission="sistema_funcionarios">
-                    <ConfiguracaoEmailsPage />
-                  </PermissionGuard>
-                } />
-                <Route path="upload-tutoriais" element={
-                  <PermissionGuard requiredPermission="sistema_funcionarios">
-                    <UploadTutoriaisPage />
-                  </PermissionGuard>
-                } />
-                <Route path="admin/importacao-execucao-treinamentos" element={
-                  <PermissionGuard requiredPermission="sistema_funcionarios">
-                    <ImportacaoExecucaoTreinamentos />
-                  </PermissionGuard>
-                } />
-                <Route path="admin/importacao-hsa" element={
-                  <PermissionGuard requiredPermission="sistema_funcionarios">
-                    <ImportacaoHSA />
-                  </PermissionGuard>
-                } />
+                <Route path="admin/funcionarios" element={<CadastroFuncionarios />} />
+                <Route path="admin/importacao-funcionarios" element={<ImportacaoFuncionarios />} />
+                <Route path="admin/criar-usuario" element={<CriarUsuario />} />
+                <Route path="admin/metas-indicadores" element={<MetasIndicadores />} />
+                <Route path="admin/registro-hht" element={<RegistroHHT />} />
+                <Route path="admin/exportacao-dados" element={<ExportacaoDados />} />
+                <Route path="adm/configuracoes" element={<AdminConfiguracoes />} />
+                <Route path="admin/configuracoes" element={<AdminConfiguracoes />} />
+                <Route path="admin/checklists" element={<AdminChecklists />} />
+                <Route path="configuracao-emails" element={<ConfiguracaoEmailsPage />} />
+                <Route path="upload-tutoriais" element={<UploadTutoriaisPage />} />
+                <Route path="admin/importacao-execucao-treinamentos" element={<ImportacaoExecucaoTreinamentos />} />
+                <Route path="admin/importacao-hsa" element={<ImportacaoHSA />} />
 
                 {/* Tarefas routes */}
-                <Route path="tarefas/dashboard" element={
-                  <PermissionGuard requiredPermission="tarefas_dashboard">
-                    <TarefasDashboard />
-                  </PermissionGuard>
-                } />
-                <Route path="tarefas/cadastro" element={
-                  <PermissionGuard requiredPermission="tarefas_cadastro">
-                    <CadastroTarefas />
-                  </PermissionGuard>
-                } />
-                <Route path="tarefas/minhas-tarefas" element={
-                  <PermissionGuard requiredPermission="tarefas_minhas_tarefas">
-                    <MinhasTarefas />
-                  </PermissionGuard>
-                } />
+                <Route path="tarefas/dashboard" element={<TarefasDashboard />} />
+                <Route path="tarefas/cadastro" element={<CadastroTarefas />} />
+                <Route path="tarefas/minhas-tarefas" element={<MinhasTarefas />} />
                 <Route path="tarefas/detalhe/:id" element={<DetalheTarefa />} />
                 <Route path="tarefas/editar/:id" element={<EditarTarefa />} />
 
                 {/* Treinamentos routes */}
-                <Route path="treinamentos/dashboard" element={
-                  <PermissionGuard requiredPermission="treinamentos_dashboard">
-                    <TreinamentosDashboard />
-                  </PermissionGuard>
-                } />
-                <Route path="treinamentos/execucao" element={
-                  <PermissionGuard requiredPermission="treinamentos_execucao">
-                    <TreinamentosExecucao />
-                  </PermissionGuard>
-                } />
-                <Route path="treinamentos/consulta" element={
-                  <PermissionGuard requiredPermission="treinamentos_consulta">
-                    <TreinamentosConsulta />
-                  </PermissionGuard>
-                } />
-                <Route path="treinamentos/cracha" element={
-                  <PermissionGuard requiredPermission="treinamentos_cracha">
-                    <TreinamentosCracha />
-                  </PermissionGuard>
-                } />
-                <Route path="treinamentos/normativo" element={
-                  <PermissionGuard requiredPermission="treinamentos_normativo">
-                    <TreinamentosNormativo />
-                  </PermissionGuard>
-                } />
+                <Route path="treinamentos/dashboard" element={<TreinamentosDashboard />} />
+                <Route path="treinamentos/execucao" element={<TreinamentosExecucao />} />
+                <Route path="treinamentos/consulta" element={<TreinamentosConsulta />} />
+                <Route path="treinamentos/cracha" element={<TreinamentosCracha />} />
+                <Route path="treinamentos/normativo" element={<TreinamentosNormativo />} />
                 <Route path="treinamentos/execucao/:id/editar" element={<EditarExecucaoTreinamento />} />
                 <Route path="treinamentos/execucao/:id/visualizar" element={<VisualizarExecucaoTreinamento />} />
 
@@ -343,26 +218,10 @@ function App() {
                 <Route path="ocorrencias/:id/atualizar-status" element={<OcorrenciasAtualizarStatus />} />
 
                 {/* Desvios routes */}
-                <Route path="desvios/dashboard" element={
-                  <PermissionGuard requiredPermission="desvios_dashboard">
-                    <DesviosDashboard />
-                  </PermissionGuard>
-                } />
-                <Route path="desvios/cadastro" element={
-                  <PermissionGuard requiredPermission="desvios_cadastro">
-                    <DesviosForm />
-                  </PermissionGuard>
-                } />
-                <Route path="desvios/consulta" element={
-                  <PermissionGuard requiredPermission="desvios_consulta">
-                    <DesviosConsulta />
-                  </PermissionGuard>
-                } />
-                <Route path="desvios/nao-conformidade" element={
-                  <PermissionGuard requiredPermission="desvios_nao_conformidade">
-                    <DesviosNaoConformidade />
-                  </PermissionGuard>
-                } />
+                <Route path="desvios/dashboard" element={<DesviosDashboard />} />
+                <Route path="desvios/cadastro" element={<DesviosForm />} />
+                <Route path="desvios/consulta" element={<DesviosConsulta />} />
+                <Route path="desvios/nao-conformidade" element={<DesviosNaoConformidade />} />
 
                 {/* Hora da Segurança routes */}
                 <Route path="hora-seguranca/dashboard" element={<HoraSegurancaDashboard />} />
@@ -400,11 +259,7 @@ function App() {
 
                 {/* Relatórios routes */}
                 <Route path="relatorios" element={<Navigate to="/relatorios/dashboard" replace />} />
-                <Route path="relatorios/dashboard" element={
-                  <PermissionGuard requiredPermission="relatorios_dashboard">
-                    <RelatoriosDashboard />
-                  </PermissionGuard>
-                } />
+                <Route path="relatorios/dashboard" element={<RelatoriosDashboard />} />
                 <Route path="relatorios/ocorrencias" element={<RelatoriosOcorrencias />} />
                 <Route path="relatorios/desvios" element={<RelatoriosDesvios />} />
                 <Route path="relatorios/treinamentos" element={<RelatoriosTreinamentos />} />
