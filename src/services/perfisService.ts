@@ -104,27 +104,6 @@ export function getMenusHierarchy(): MenuSection[] {
       ]
     },
     {
-      key: "administracao",
-      label: "Administração",
-      items: [
-        { key: "adm_configuracoes", label: "Configurações" },
-        { key: "adm_usuarios", label: "Usuários" },
-        { key: "adm_perfis", label: "Perfis" },
-        { key: "adm_empresas", label: "Empresas" },
-        { key: "adm_ccas", label: "CCAs" },
-        { key: "adm_engenheiros", label: "Engenheiros" },
-        { key: "adm_supervisores", label: "Supervisores" },
-        { key: "adm_funcionarios", label: "Funcionários" },
-        { key: "adm_importacao_funcionarios", label: "Importação de Funcionários" },
-        { key: "adm_checklists", label: "Cadastro de Checklists" },
-        { key: "adm_hht", label: "HHT" },
-        { key: "adm_metas_indicadores", label: "Metas e Indicadores" },
-        { key: "adm_modelos_inspecao", label: "Modelos de Inspeção" },
-        { key: "adm_templates", label: "Templates" },
-        { key: "adm_logo", label: "Logo" }
-      ]
-    },
-    {
       key: "tarefas",
       label: "Tarefas",
       items: [
@@ -145,9 +124,23 @@ export function getMenusHierarchy(): MenuSection[] {
       key: "sistema",
       label: "Sistema",
       items: [
-        { key: "configuracoes", label: "Configurações" },
+        { key: "adm_configuracoes", label: "Configurações" },
         { key: "suporte", label: "Suporte" },
-        { key: "conta", label: "Conta" }
+        { key: "conta", label: "Conta" },
+        { key: "adm_usuarios", label: "Usuários" },
+        { key: "adm_perfis", label: "Perfis" },
+        { key: "adm_empresas", label: "Empresas" },
+        { key: "adm_ccas", label: "CCAs" },
+        { key: "adm_engenheiros", label: "Engenheiros" },
+        { key: "adm_supervisores", label: "Supervisores" },
+        { key: "adm_funcionarios", label: "Funcionários" },
+        { key: "adm_importacao_funcionarios", label: "Importação de Funcionários" },
+        { key: "adm_checklists", label: "Cadastro de Checklists" },
+        { key: "adm_hht", label: "HHT" },
+        { key: "adm_metas_indicadores", label: "Metas e Indicadores" },
+        { key: "adm_modelos_inspecao", label: "Modelos de Inspeção" },
+        { key: "adm_templates", label: "Templates" },
+        { key: "adm_logo", label: "Logo" }
       ]
     }
   ];
