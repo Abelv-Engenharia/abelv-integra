@@ -178,6 +178,7 @@ export const PhotoUpload: React.FC<PhotoUploadProps> = ({
           id="photo-upload"
           type="file"
           accept="image/*"
+          capture="environment"
           onChange={handleFileUpload}
           disabled={disabled || isUploading}
           className="hidden"

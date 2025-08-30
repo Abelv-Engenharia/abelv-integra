@@ -652,12 +652,37 @@ function generateHTMLReport(inspecao: InspectionData, responsaveis: any = {}): s
             <div class="non-conformity-item">
                 <strong>${index + 1}. ${item.nome}</strong><br>
                 <span style="color: #666;">${item.observacao_nc}</span>
-                ${item.foto ? `
-                    <div class="photo-container">
-                        <img src="${item.foto.url}" alt="Foto da não conformidade: ${item.nome}" />
-                        <div class="photo-filename">Arquivo: ${item.foto.fileName}</div>
-                    </div>
-                ` : ''}
+                ${item.foto ? await (async () => {
+                    try {
+                        // Extract the file path from the full URL
+                        const url = new URL(item.foto.url);
+                        const pathSegments = url.pathname.split('/');
+                        const filePath = pathSegments.slice(-2).join('/'); // userId/fileName
+                        
+                        // Create signed URL for private bucket
+                        const { data: signedUrlData, error: signedUrlError } = await supabase.storage
+                            .from('inspecoes-sms-fotos')
+                            .createSignedUrl(filePath, 300);
+
+                        if (signedUrlError) {
+                            console.error('Error creating signed URL:', signedUrlError);
+                            return '';
+                        }
+                        
+                        if (signedUrlData?.signedUrl) {
+                            return `
+                                <div class="photo-container">
+                                    <img src="${signedUrlData.signedUrl}" alt="Foto da não conformidade: ${item.nome}" />
+                                    <div class="photo-filename">Arquivo: ${item.foto.fileName}</div>
+                                </div>
+                            `;
+                        }
+                        return '';
+                    } catch (error) {
+                        console.error('Error processing photo:', error);
+                        return '';
+                    }
+                })() : ''}
             </div>
         `).join('')}
     </div>

@@ -462,22 +462,6 @@ const VisualizarInspecao = () => {
                             <p className="text-sm font-medium text-red-900 mb-1">Observação da Não Conformidade:</p>
                             <p className="text-sm text-red-800">{item.observacao_nc}</p>
                             
-                            {/* Mostrar foto anexada, se houver */}
-                            {item.foto && (
-                              <div className="mt-3">
-                                <p className="text-sm font-medium text-red-900 mb-2">Foto anexada:</p>
-                                <div className="inline-block">
-                                  <img 
-                                    src={item.foto.url} 
-                                    alt={`Foto do item: ${item.nome}`}
-                                    className="max-w-full h-32 object-cover rounded border border-red-300 cursor-pointer hover:opacity-80"
-                                    loading="lazy"
-                                    onClick={() => window.open(item.foto.url, '_blank')}
-                                  />
-                                  <p className="text-xs text-red-700 mt-1">{item.foto.fileName}</p>
-                                </div>
-                              </div>
-                            )}
                           </div>
                         )}
                       </div>
@@ -674,6 +658,10 @@ const VisualizarInspecao = () => {
                           className="w-full h-48 object-cover rounded-lg border cursor-pointer hover:opacity-90 transition-opacity"
                           loading="lazy"
                           onClick={() => window.open(item.foto.url, '_blank')}
+                          onError={(e) => {
+                            console.error('Erro ao carregar imagem:', item.foto.url);
+                            e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDJMMTMuMDkgOC4yNkwyMCA5TDEzLjA5IDE1Ljc0TDEyIDIyTDEwLjkxIDE1Ljc0TDQgOUwxMC45MSA4LjI2TDEyIDJaIiBzdHJva2U9IiM5Q0E0QUYiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+Cjwvc3ZnPgo=';
+                          }}
                         />
                         <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-10 transition-all rounded-lg cursor-pointer" 
                              onClick={() => window.open(item.foto.url, '_blank')} />
