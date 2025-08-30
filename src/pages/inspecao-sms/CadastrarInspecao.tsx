@@ -955,13 +955,13 @@ const CadastrarInspecao = () => {
                               <SelectTrigger className="w-full">
                                 <SelectValue placeholder="Selecione a disciplina" />
                               </SelectTrigger>
-                              <SelectContent className="bg-background border border-border z-50">
-                                {disciplinas.map(disc => (
-                                  <SelectItem key={disc.id} value={disc.id.toString()}>
-                                    {disc.codigo} - {disc.nome}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
+                               <SelectContent className="bg-background border border-border z-50">
+                                 {disciplinas.map(disc => (
+                                   <SelectItem key={disc.id} value={disc.id.toString()}>
+                                     {disc.nome}
+                                   </SelectItem>
+                                 ))}
+                               </SelectContent>
                             </Select>
                           );
                         }
