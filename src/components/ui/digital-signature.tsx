@@ -138,6 +138,7 @@ export const DigitalSignature: React.FC<DigitalSignatureProps> = ({
   };
 
   const clearSignature = () => {
+    console.log('clearSignature called, isMobile:', isMobile);
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -147,14 +148,17 @@ export const DigitalSignature: React.FC<DigitalSignatureProps> = ({
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     setHasSignature(false);
+    console.log('clearSignature completed');
   };
 
   const saveSignature = () => {
+    console.log('saveSignature called, hasSignature:', hasSignature, 'isMobile:', isMobile);
     const canvas = canvasRef.current;
     if (!canvas || !hasSignature) return;
 
     const dataURL = canvas.toDataURL('image/png');
     onSave(dataURL);
+    console.log('saveSignature completed');
   };
 
   return (
@@ -162,7 +166,6 @@ export const DigitalSignature: React.FC<DigitalSignatureProps> = ({
       data-signature-container
       className={`${isMobile ? 'fixed inset-0 z-50 bg-background flex items-center justify-center p-4' : 'relative'}`}
       style={isMobile ? { 
-        touchAction: 'none',
         WebkitTouchCallout: 'none',
         WebkitUserSelect: 'none',
         userSelect: 'none'
@@ -204,7 +207,10 @@ export const DigitalSignature: React.FC<DigitalSignatureProps> = ({
             </Button>
 
             <div className="flex gap-2">
-              <Button variant="outline" onClick={onCancel} size="sm">
+              <Button variant="outline" onClick={() => {
+                console.log('onCancel called, isMobile:', isMobile);
+                onCancel();
+              }} size="sm">
                 Cancelar
               </Button>
               <Button 
