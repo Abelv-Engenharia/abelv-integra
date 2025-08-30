@@ -9,7 +9,6 @@ import AuthGuard from "@/components/auth/AuthGuard";
 import Layout from "@/components/layout/Layout";
 
 // Import pages
-import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
 
@@ -155,7 +154,7 @@ function App() {
                   <Layout />
                 </AuthGuard>
               }>
-                <Route index element={<Index />} />
+                <Route index element={<Navigate to="/dashboard" replace />} />
                 <Route path="dashboard" element={<Dashboard />} />
 
                 {/* Account routes */}
