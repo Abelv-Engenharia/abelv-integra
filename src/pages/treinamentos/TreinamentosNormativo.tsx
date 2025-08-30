@@ -680,9 +680,21 @@ const TreinamentosNormativo = () => {
                     Voltar
                   </Link>
                 </Button>
-                <Button type="submit" disabled={isLoading} size="sm">
-                  {isLoading ? "Salvando..." : "Salvar registro"}
-                </Button>
+                <div className="flex gap-2">
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={adicionarTreinamento}
+                    className="flex items-center gap-2"
+                  >
+                    <Plus className="h-4 w-4" />
+                    Adicionar Treinamento
+                  </Button>
+                  <Button type="submit" disabled={isLoading} size="sm">
+                    {isLoading ? "Salvando..." : "Salvar registro"}
+                  </Button>
+                </div>
               </div>
             </form>
           </Form>
