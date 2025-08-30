@@ -194,6 +194,9 @@ function generateHTMLReport(inspecao: InspectionData, responsaveis: any = {}): s
     item.status === 'nao_conforme' && item.observacao_nc
   )
   
+  // Filtrar não conformidades que têm fotos anexadas
+  const naoConformidadesComFotos = naoConformidades.filter((item: any) => item.foto)
+  
   const camposCabecalho = inspecao.dados_preenchidos?.campos_cabecalho || {}
 
   const formatDate = (dateString: string) => {
@@ -381,6 +384,22 @@ function generateHTMLReport(inspecao: InspectionData, responsaveis: any = {}): s
             padding: 15px;
             border-left: 4px solid #dc3545;
             background-color: #f8f9fa;
+        }
+        .photo-container {
+            margin-top: 15px;
+            text-align: center;
+        }
+        .photo-container img {
+            max-width: 300px;
+            max-height: 200px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .photo-filename {
+            font-size: 11px;
+            color: #666;
+            font-style: italic;
         }
         /* Controle inteligente de quebras de página */
         .section-with-items {
@@ -633,6 +652,12 @@ function generateHTMLReport(inspecao: InspectionData, responsaveis: any = {}): s
             <div class="non-conformity-item">
                 <strong>${index + 1}. ${item.nome}</strong><br>
                 <span style="color: #666;">${item.observacao_nc}</span>
+                ${item.foto ? `
+                    <div class="photo-container">
+                        <img src="${item.foto.url}" alt="Foto da não conformidade: ${item.nome}" />
+                        <div class="photo-filename">Arquivo: ${item.foto.fileName}</div>
+                    </div>
+                ` : ''}
             </div>
         `).join('')}
     </div>

@@ -16,6 +16,7 @@ import { toast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { PageLoader, InlineLoader } from "@/components/common/PageLoader";
 import { DigitalSignature } from "@/components/ui/digital-signature";
+import { PhotoUpload } from "@/components/inspecao-sms/PhotoUpload";
 import { useNavigate } from "react-router-dom";
 
 const CadastrarInspecao = () => {
@@ -224,6 +225,28 @@ const CadastrarInspecao = () => {
   const handleItemChange = (itemId: string, status: string) => {
     setItensInspecao(prev => prev.map(item => 
       item.id === itemId ? { ...item, status } : item
+    ));
+  };
+
+  // Funções para gerenciar fotos dos itens
+  const handlePhotoUploaded = (itemId: string, photoUrl: string, fileName: string) => {
+    setItensInspecao(prev => prev.map(item => 
+      item.id === itemId ? { 
+        ...item, 
+        foto: { 
+          url: photoUrl, 
+          fileName: fileName 
+        } 
+      } : item
+    ));
+  };
+
+  const handlePhotoRemoved = (itemId: string) => {
+    setItensInspecao(prev => prev.map(item => 
+      item.id === itemId ? { 
+        ...item, 
+        foto: undefined 
+      } : item
     ));
   };
 
@@ -1062,21 +1085,32 @@ const CadastrarInspecao = () => {
                     
                     {/* Campo de observação para Não Conforme */}
                     {item.status === 'nao_conforme' && (
-                      <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-                        <Label className="text-sm font-medium text-red-800 mb-2 block">
-                          Motivo da Não Conformidade *
-                        </Label>
-                        <Textarea
-                          value={item.observacao_nc || ''}
-                          onChange={(e) => setItensInspecao(prev => prev.map(prevItem => 
-                            prevItem.id === item.id 
-                              ? { ...prevItem, observacao_nc: e.target.value }
-                              : prevItem
-                          ))}
-                          placeholder="Descreva o motivo da não conformidade..."
-                          rows={3}
-                          className="text-sm bg-white border-red-300 focus:border-red-500"
-                        />
+                      <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg space-y-4">
+                        <div>
+                          <Label className="text-sm font-medium text-red-800 mb-2 block">
+                            Motivo da Não Conformidade *
+                          </Label>
+                          <Textarea
+                            value={item.observacao_nc || ''}
+                            onChange={(e) => setItensInspecao(prev => prev.map(prevItem => 
+                              prevItem.id === item.id 
+                                ? { ...prevItem, observacao_nc: e.target.value }
+                                : prevItem
+                            ))}
+                            placeholder="Descreva o motivo da não conformidade..."
+                            rows={3}
+                            className="text-sm bg-white border-red-300 focus:border-red-500"
+                          />
+                        </div>
+                        
+                        {/* Componente de upload de foto */}
+                        <div>
+                          <PhotoUpload
+                            onPhotoUploaded={(photoUrl, fileName) => handlePhotoUploaded(item.id, photoUrl, fileName)}
+                            onPhotoRemoved={() => handlePhotoRemoved(item.id)}
+                            existingPhoto={item.foto}
+                          />
+                        </div>
                       </div>
                     )}
                   </div>

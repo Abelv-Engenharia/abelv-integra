@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Download, FileText, MapPin, Calendar, User, Building, Users, PenTool } from "lucide-react";
+import { ArrowLeft, Download, FileText, MapPin, Calendar, User, Building, Users, PenTool, Camera } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -461,6 +461,23 @@ const VisualizarInspecao = () => {
                           <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-md">
                             <p className="text-sm font-medium text-red-900 mb-1">Observação da Não Conformidade:</p>
                             <p className="text-sm text-red-800">{item.observacao_nc}</p>
+                            
+                            {/* Mostrar foto anexada, se houver */}
+                            {item.foto && (
+                              <div className="mt-3">
+                                <p className="text-sm font-medium text-red-900 mb-2">Foto anexada:</p>
+                                <div className="inline-block">
+                                  <img 
+                                    src={item.foto.url} 
+                                    alt={`Foto do item: ${item.nome}`}
+                                    className="max-w-full h-32 object-cover rounded border border-red-300 cursor-pointer hover:opacity-80"
+                                    loading="lazy"
+                                    onClick={() => window.open(item.foto.url, '_blank')}
+                                  />
+                                  <p className="text-xs text-red-700 mt-1">{item.foto.fileName}</p>
+                                </div>
+                              </div>
+                            )}
                           </div>
                         )}
                       </div>
@@ -631,6 +648,60 @@ const VisualizarInspecao = () => {
             </Card>
           </div>
         </div>
+
+        {/* Seção de Fotos Anexadas - Separada no final */}
+        {inspecao.dados_preenchidos?.itens?.some((item: any) => item.foto) && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Camera className="h-5 w-5" />
+                Fotos das Não Conformidades
+              </CardTitle>
+              <p className="text-sm text-muted-foreground mt-1">
+                Fotos anexadas aos itens não conformes durante a inspeção
+              </p>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {inspecao.dados_preenchidos.itens
+                  .filter((item: any) => item.foto)
+                  .map((item: any, index: number) => (
+                    <div key={item.id || index} className="space-y-3">
+                      <div className="relative">
+                        <img 
+                          src={item.foto.url} 
+                          alt={`Foto do item: ${item.nome}`}
+                          className="w-full h-48 object-cover rounded-lg border cursor-pointer hover:opacity-90 transition-opacity"
+                          loading="lazy"
+                          onClick={() => window.open(item.foto.url, '_blank')}
+                        />
+                        <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-10 transition-all rounded-lg cursor-pointer" 
+                             onClick={() => window.open(item.foto.url, '_blank')} />
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-sm font-medium text-foreground line-clamp-2">
+                          {item.nome}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {item.foto.fileName}
+                        </p>
+                        {item.secao && (
+                          <p className="text-xs text-muted-foreground">
+                            Seção: {item.secao}
+                          </p>
+                        )}
+                        {item.observacao_nc && (
+                          <p className="text-xs text-red-600 line-clamp-2">
+                            {item.observacao_nc}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   );
