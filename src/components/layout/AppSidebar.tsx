@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { Home, Settings, User, Upload } from "lucide-react";
 import { ChevronDown, ChevronRight } from "lucide-react";
-import { Sidebar, SidebarContent, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarMenuSub, SidebarMenuSubItem, SidebarMenuSubButton } from "@/components/ui/sidebar";
+import { Sidebar, SidebarContent, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarMenuSub, SidebarMenuSubItem, SidebarMenuSubButton, useSidebar } from "@/components/ui/sidebar";
 import { Link, useLocation } from "react-router-dom";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import SidebarSectionGestaoSMS from "./SidebarSectionGestaoSMS";
@@ -22,6 +22,7 @@ export function AppSidebar() {
   const location = useLocation();
   const currentPath = location.pathname;
   const { userPermissoes } = useProfile();
+  const { isMobile, setOpenMobile } = useSidebar();
 
   // Extrair menus permitidos do perfil do usuário
   const menusSidebar = userPermissoes && typeof userPermissoes === "object" && Array.isArray((userPermissoes as any).menus_sidebar) 
@@ -45,6 +46,13 @@ export function AppSidebar() {
     setOpenMenu(openMenu === menuName ? null : menuName);
   };
 
+  // Função para fechar o sidebar automaticamente em mobile quando um link é clicado
+  const handleLinkClick = () => {
+    if (isMobile) {
+      setOpenMobile(false);
+    }
+  };
+
   return (
     <Sidebar>
       <SidebarContent className="bg-sky-900">
@@ -55,7 +63,7 @@ export function AppSidebar() {
                 asChild 
                 className={currentPath === "/dashboard" || currentPath === "/" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
               >
-                <Link to="/dashboard" className="flex items-center gap-2">
+                <Link to="/dashboard" className="flex items-center gap-2" onClick={handleLinkClick}>
                   <Home className="h-4 w-4 flex-shrink-0" />
                   <span className="break-words">Dashboard</span>
                 </Link>
@@ -69,23 +77,23 @@ export function AppSidebar() {
 
         {/* Render SMS se tiver acesso a pelo menos 1 menu dos agrupados */}
         {["desvios_dashboard", "desvios_cadastro", "desvios_consulta", "desvios_nao_conformidade", "treinamentos_dashboard", "treinamentos_normativo", "treinamentos_consulta", "treinamentos_execucao", "treinamentos_cracha", "hora_seguranca_cadastro", "hora_seguranca_cadastro_inspecao", "hora_seguranca_cadastro_nao_programada", "hora_seguranca_dashboard", "hora_seguranca_agenda", "hora_seguranca_acompanhamento", "inspecao_sms_dashboard", "inspecao_sms_cadastro", "inspecao_sms_consulta", "medidas_disciplinares_dashboard", "medidas_disciplinares_cadastro", "medidas_disciplinares_consulta", "ocorrencias_dashboard", "ocorrencias_cadastro", "ocorrencias_consulta"].some(menu => podeVerMenu(menu, menusSidebar)) && (
-          <SidebarSectionGestaoSMS openMenu={openMenu} toggleMenu={toggleMenu} />
+          <SidebarSectionGestaoSMS openMenu={openMenu} toggleMenu={toggleMenu} onLinkClick={handleLinkClick} />
         )}
 
 
         {/* Render Tarefas */}
         {["tarefas_dashboard", "tarefas_minhas_tarefas", "tarefas_cadastro"].some(menu => podeVerMenu(menu, menusSidebar)) && (
-          <SidebarSectionTarefas openMenu={openMenu} toggleMenu={toggleMenu} />
+          <SidebarSectionTarefas openMenu={openMenu} toggleMenu={toggleMenu} onLinkClick={handleLinkClick} />
         )}
 
         {/* Render Relatórios */}
         {["relatorios_dashboard", "relatorios_idsms"].some(menu => podeVerMenu(menu, menusSidebar)) && (
-          <SidebarSectionRelatorios openMenu={openMenu} toggleMenu={toggleMenu} />
+          <SidebarSectionRelatorios openMenu={openMenu} toggleMenu={toggleMenu} onLinkClick={handleLinkClick} />
         )}
 
         {/* Render Administração (mantendo compatibilidade) */}
         {["admin_usuarios", "admin_perfis", "admin_empresas", "admin_ccas", "admin_engenheiros", "admin_supervisores", "admin_funcionarios", "admin_hht", "admin_metas_indicadores", "admin_templates", "admin_logo", "admin_modelos_inspecao"].some(menu => podeVerMenu(menu, menusSidebar)) && (
-          <SidebarSectionAdministracao openMenu={openMenu} toggleMenu={toggleMenu} />
+          <SidebarSectionAdministracao openMenu={openMenu} toggleMenu={toggleMenu} onLinkClick={handleLinkClick} />
         )}
 
 
@@ -110,9 +118,9 @@ export function AppSidebar() {
                       asChild 
                       className={currentPath === "/account/profile" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
                     >
-                      <Link to="/account/profile" className="flex items-center gap-2">
-                        <span className="text-xs leading-tight break-words min-w-0">Perfil</span>
-                      </Link>
+                       <Link to="/account/profile" className="flex items-center gap-2" onClick={handleLinkClick}>
+                         <span className="text-xs leading-tight break-words min-w-0">Perfil</span>
+                       </Link>
                     </SidebarMenuSubButton>
                   </SidebarMenuSubItem>
                   <SidebarMenuSubItem>
@@ -120,10 +128,10 @@ export function AppSidebar() {
                       asChild 
                       className={currentPath === "/account/settings" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
                     >
-                      <Link to="/account/settings" className="flex items-center gap-2">
-                        <Settings className="h-3 w-3 flex-shrink-0" />
-                        <span className="text-xs leading-tight break-words min-w-0">Configuração da conta</span>
-                      </Link>
+                       <Link to="/account/settings" className="flex items-center gap-2" onClick={handleLinkClick}>
+                         <Settings className="h-3 w-3 flex-shrink-0" />
+                         <span className="text-xs leading-tight break-words min-w-0">Configuração da conta</span>
+                       </Link>
                     </SidebarMenuSubButton>
                   </SidebarMenuSubItem>
                 </SidebarMenuSub>

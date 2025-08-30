@@ -7,11 +7,13 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 interface SidebarSectionGestaoSMSProps {
   openMenu: string | null;
   toggleMenu: (menuName: string) => void;
+  onLinkClick?: () => void;
 }
 
 export default function SidebarSectionGestaoSMS({
   openMenu,
-  toggleMenu
+  toggleMenu,
+  onLinkClick
 }: SidebarSectionGestaoSMSProps) {
   const location = useLocation();
   const currentPath = location.pathname;
@@ -77,7 +79,7 @@ export default function SidebarSectionGestaoSMS({
               {/* Dashboard SMS - Agora como link direto */}
               <SidebarMenuSubItem>
                 <SidebarMenuSubButton asChild className={currentPath === "/sms/dashboard" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
-                  <Link to="/sms/dashboard" className="flex items-center gap-2">
+                  <Link to="/sms/dashboard" className="flex items-center gap-2" onClick={onLinkClick}>
                     <BarChart3 className="h-3 w-3 flex-shrink-0" />
                     <span>Dashboard SMS</span>
                   </Link>

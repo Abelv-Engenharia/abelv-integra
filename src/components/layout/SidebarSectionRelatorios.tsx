@@ -16,9 +16,10 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 type Props = {
   openMenu: string | null;
   toggleMenu: (menuName: string) => void;
+  onLinkClick?: () => void;
 };
 
-export default function SidebarSectionRelatorios({ openMenu, toggleMenu }: Props) {
+export default function SidebarSectionRelatorios({ openMenu, toggleMenu, onLinkClick }: Props) {
   const location = useLocation();
   const currentPath = location.pathname;
   const isRelatoriosOpen = openMenu === "relatorios";
