@@ -190,12 +190,23 @@ serve(async (req) => {
 
 async function generateHTMLReport(inspecao: InspectionData, responsaveis: any = {}): Promise<string> {
   const itens = inspecao.dados_preenchidos?.itens || []
+  console.log('Total de itens:', itens.length)
+  
   const naoConformidades = itens.filter((item: any) => 
     item.status === 'nao_conforme' && item.observacao_nc
   )
+  console.log('Não conformidades encontradas:', naoConformidades.length)
+  console.log('Dados das não conformidades:', JSON.stringify(naoConformidades, null, 2))
   
   // Filtrar não conformidades que têm fotos anexadas
   const naoConformidadesComFotos = naoConformidades.filter((item: any) => item.foto)
+  console.log('Não conformidades com fotos:', naoConformidadesComFotos.length)
+  
+  // Criar cliente Supabase para as signed URLs
+  const supabase = createClient(
+    Deno.env.get('SUPABASE_URL') ?? '',
+    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+  )
   
   const camposCabecalho = inspecao.dados_preenchidos?.campos_cabecalho || {}
 
@@ -645,7 +656,9 @@ async function generateHTMLReport(inspecao: InspectionData, responsaveis: any = 
         })()}
     </div>
 
-    ${naoConformidades.length > 0 ? `
+    ${naoConformidades.length > 0 ? (() => {
+        console.log('Renderizando seção de não conformidades com', naoConformidades.length, 'itens');
+        return `
     <div class="section non-conformities-section">
         <h2>Resumo das Não Conformidades</h2>
         ${await Promise.all(naoConformidades.map(async (item: any, index: number) => {
@@ -688,7 +701,8 @@ async function generateHTMLReport(inspecao: InspectionData, responsaveis: any = 
             `;
         })).then(items => items.join(''))}
     </div>
-    ` : ''}
+        `;
+    })() : ''}
 
     <div class="signature-section">
         <h2>Assinaturas</h2>
