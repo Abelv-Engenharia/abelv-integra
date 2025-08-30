@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useFieldArray } from "react-hook-form";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,25 +9,29 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, Upload } from "lucide-react";
+import { ArrowLeft, Upload, Plus, Trash2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { listaTreinamentosNormativosService } from "@/services/treinamentos/listaTreinamentosNormativosService";
 import { useUserCCAs } from "@/hooks/useUserCCAs";
 
-interface TreinamentoNormativoForm {
-  cca_id: string;
-  funcionario_id: string;
+interface TreinamentoIndividual {
   treinamento_id: string;
   tipo: "Formação" | "Reciclagem";
   data_realizacao: string;
   data_validade: string;
   certificado_url?: string;
+  certificado_file?: File | null;
+}
+
+interface TreinamentoNormativoForm {
+  cca_id: string;
+  funcionario_id: string;
+  treinamentos: TreinamentoIndividual[];
 }
 
 const TreinamentosNormativo = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [funcionarios, setFuncionarios] = useState<any[]>([]);
-  const [certificadoFile, setCertificadoFile] = useState<File | null>(null);
   const [selectedCcaId, setSelectedCcaId] = useState<string>("");
   const { data: userCCAs = [] } = useUserCCAs();
 
@@ -66,12 +70,20 @@ const TreinamentosNormativo = () => {
     defaultValues: {
       cca_id: "",
       funcionario_id: "",
-      treinamento_id: "",
-      tipo: "Formação",
-      data_realizacao: "",
-      data_validade: "",
-      certificado_url: "",
+      treinamentos: [{
+        treinamento_id: "",
+        tipo: "Formação",
+        data_realizacao: "",
+        data_validade: "",
+        certificado_url: "",
+        certificado_file: null,
+      }],
     },
+  });
+
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: "treinamentos"
   });
 
   useEffect(() => {
@@ -102,11 +114,8 @@ const TreinamentosNormativo = () => {
     loadFuncionarios();
   }, [selectedCcaId]);
 
-  // Efeito para calcular automaticamente a data de validade
-  useEffect(() => {
-    const treinamentoId = form.watch("treinamento_id");
-    const dataRealizacao = form.watch("data_realizacao");
-
+  // Função para calcular data de validade
+  const calcularDataValidade = (treinamentoId: string, dataRealizacao: string) => {
     if (treinamentoId && dataRealizacao && treinamentosDisponiveis.length > 0) {
       const treinamentoSelecionado = treinamentosDisponiveis.find(t => t.id === treinamentoId);
       
@@ -121,12 +130,11 @@ const TreinamentosNormativo = () => {
         const year = dataValidade.getFullYear();
         const month = String(dataValidade.getMonth() + 1).padStart(2, '0');
         const day = String(dataValidade.getDate()).padStart(2, '0');
-        const dataValidadeFormatada = `${year}-${month}-${day}`;
-        
-        form.setValue('data_validade', dataValidadeFormatada);
+        return `${year}-${month}-${day}`;
       }
     }
-  }, [form.watch("treinamento_id"), form.watch("data_realizacao"), treinamentosDisponiveis, form]);
+    return '';
+  };
 
   const handleCcaChange = (ccaId: string) => {
     setSelectedCcaId(ccaId);
@@ -134,7 +142,24 @@ const TreinamentosNormativo = () => {
     form.setValue('funcionario_id', ''); // Reset funcionário quando mudar CCA
   };
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const adicionarTreinamento = () => {
+    append({
+      treinamento_id: "",
+      tipo: "Formação",
+      data_realizacao: "",
+      data_validade: "",
+      certificado_url: "",
+      certificado_file: null,
+    });
+  };
+
+  const removerTreinamento = (index: number) => {
+    if (fields.length > 1) {
+      remove(index);
+    }
+  };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>, index: number) => {
     const file = event.target.files?.[0];
     if (file) {
       // Validar tipo e tamanho do arquivo
@@ -159,17 +184,17 @@ const TreinamentosNormativo = () => {
         return;
       }
       
-      setCertificadoFile(file);
+      form.setValue(`treinamentos.${index}.certificado_file`, file);
     }
   };
 
-  const uploadCertificado = async (file: File): Promise<string | null> => {
+  const uploadCertificado = async (file: File, treinamentoId: string): Promise<string | null> => {
     try {
       console.log('Iniciando upload do certificado...');
       
       // Obter dados para nomenclatura
       const funcionarioSelecionado = funcionarios.find(f => f.id === form.getValues('funcionario_id'));
-      const treinamentoSelecionado = treinamentosDisponiveis.find(t => t.id === form.getValues('treinamento_id'));
+      const treinamentoSelecionado = treinamentosDisponiveis.find(t => t.id === treinamentoId);
       
       if (!funcionarioSelecionado || !treinamentoSelecionado) {
         console.error('Funcionário ou treinamento não encontrado para nomenclatura');
@@ -252,47 +277,57 @@ const TreinamentosNormativo = () => {
 
     setIsLoading(true);
     try {
-      let certificadoUrl = data.certificado_url;
-
-      // Upload do certificado se houver arquivo
-      if (certificadoFile) {
-        console.log('Fazendo upload do certificado...');
-        certificadoUrl = await uploadCertificado(certificadoFile);
-        if (!certificadoUrl) {
-          setIsLoading(false);
-          return;
-        }
-      }
-
-      // Criar data sem problemas de fuso horário para cálculo do status
-      const [anoValidade, mesValidade, diaValidade] = data.data_validade.split('-');
-      const dataValidade = new Date(parseInt(anoValidade), parseInt(mesValidade) - 1, parseInt(diaValidade));
-      const hoje = new Date();
-      hoje.setHours(0, 0, 0, 0); // Reset para início do dia
-      dataValidade.setHours(0, 0, 0, 0); // Reset para início do dia
+      console.log('Iniciando processamento de múltiplos treinamentos...');
       
-      const diasParaVencimento = Math.ceil((dataValidade.getTime() - hoje.getTime()) / (1000 * 3600 * 24));
+      const treinamentosParaInserir = [];
 
-      let status = "Válido";
-      if (diasParaVencimento < 0) {
-        status = "Vencido";
-      } else if (diasParaVencimento <= 30) {
-        status = "Próximo ao vencimento";
+      // Processar cada treinamento
+      for (let i = 0; i < data.treinamentos.length; i++) {
+        const treinamento = data.treinamentos[i];
+        let certificadoUrl = treinamento.certificado_url;
+
+        // Upload do certificado se houver arquivo
+        if (treinamento.certificado_file) {
+          console.log(`Fazendo upload do certificado ${i + 1}...`);
+          certificadoUrl = await uploadCertificado(treinamento.certificado_file, treinamento.treinamento_id);
+          if (!certificadoUrl) {
+            setIsLoading(false);
+            return;
+          }
+        }
+
+        // Criar data sem problemas de fuso horário para cálculo do status
+        const [anoValidade, mesValidade, diaValidade] = treinamento.data_validade.split('-');
+        const dataValidade = new Date(parseInt(anoValidade), parseInt(mesValidade) - 1, parseInt(diaValidade));
+        const hoje = new Date();
+        hoje.setHours(0, 0, 0, 0); // Reset para início do dia
+        dataValidade.setHours(0, 0, 0, 0); // Reset para início do dia
+        
+        const diasParaVencimento = Math.ceil((dataValidade.getTime() - hoje.getTime()) / (1000 * 3600 * 24));
+
+        let status = "Válido";
+        if (diasParaVencimento < 0) {
+          status = "Vencido";
+        } else if (diasParaVencimento <= 30) {
+          status = "Próximo ao vencimento";
+        }
+
+        treinamentosParaInserir.push({
+          funcionario_id: data.funcionario_id,
+          treinamento_id: treinamento.treinamento_id,
+          tipo: treinamento.tipo,
+          data_realizacao: treinamento.data_realizacao,
+          data_validade: treinamento.data_validade,
+          certificado_url: certificadoUrl,
+          status: status,
+          arquivado: false,
+        });
       }
 
       console.log('Inserindo dados no banco...');
       const { error } = await supabase
         .from('treinamentos_normativos')
-        .insert({
-          funcionario_id: data.funcionario_id,
-          treinamento_id: data.treinamento_id,
-          tipo: data.tipo,
-          data_realizacao: data.data_realizacao,
-          data_validade: data.data_validade,
-          certificado_url: certificadoUrl,
-          status: status,
-          arquivado: false,
-        });
+        .insert(treinamentosParaInserir);
 
       if (error) {
         console.error('Erro ao inserir no banco:', error);
@@ -301,17 +336,27 @@ const TreinamentosNormativo = () => {
 
       toast({
         title: "Sucesso",
-        description: "Treinamento normativo registrado com sucesso!",
+        description: `${data.treinamentos.length} treinamento(s) normativo(s) registrado(s) com sucesso!`,
       });
 
-      form.reset();
-      setCertificadoFile(null);
+      form.reset({
+        cca_id: "",
+        funcionario_id: "",
+        treinamentos: [{
+          treinamento_id: "",
+          tipo: "Formação",
+          data_realizacao: "",
+          data_validade: "",
+          certificado_url: "",
+          certificado_file: null,
+        }],
+      });
       setSelectedCcaId("");
     } catch (error) {
-      console.error('Erro ao salvar treinamento normativo:', error);
+      console.error('Erro ao salvar treinamentos normativos:', error);
       toast({
         title: "Erro",
-        description: "Não foi possível registrar o treinamento normativo",
+        description: "Não foi possível registrar os treinamentos normativos",
         variant: "destructive",
       });
     } finally {
@@ -439,130 +484,192 @@ const TreinamentosNormativo = () => {
                   </div>
                 </div>
 
-                {/* Terceira linha - Treinamento e Tipo */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <FormField
-                    control={form.control}
-                    name="treinamento_id"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Treinamento realizado</FormLabel>
-                        <Select 
-                          onValueChange={field.onChange} 
-                          value={field.value}
-                          disabled={isLoadingTreinamentos}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder={
-                                isLoadingTreinamentos 
-                                  ? "Carregando treinamentos..." 
-                                  : errorTreinamentos 
-                                    ? "Erro ao carregar treinamentos" 
-                                    : treinamentosDisponiveis.length === 0
-                                      ? "Nenhum treinamento disponível"
-                                      : "Selecione o treinamento"
-                              } />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {treinamentosDisponiveis.length > 0 ? (
-                              treinamentosDisponiveis.map((treinamento) => (
-                                <SelectItem key={treinamento.id} value={treinamento.id}>
-                                  {treinamento.nome}
-                                </SelectItem>
-                              ))
-                            ) : (
-                              <SelectItem value="no-options" disabled>
-                                {isLoadingTreinamentos ? "Carregando..." : "Nenhum treinamento encontrado"}
-                              </SelectItem>
-                            )}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                        {errorTreinamentos && (
-                          <p className="text-sm text-red-600 mt-1">
-                            Erro ao carregar treinamentos. Verifique o console para mais detalhes.
-                          </p>
-                        )}
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="tipo"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Tipo de treinamento</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Selecione o tipo" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="Formação">Formação</SelectItem>
-                            <SelectItem value="Reciclagem">Reciclagem</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                {/* Quarta linha - Datas */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <FormField
-                    control={form.control}
-                    name="data_realizacao"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Data da realização</FormLabel>
-                        <FormControl>
-                          <Input type="date" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="data_validade"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Data de validade (calculada automaticamente)</FormLabel>
-                        <FormControl>
-                          <Input type="date" {...field} readOnly className="bg-muted" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                {/* Quinta linha - Upload de certificado */}
-                <div className="space-y-2">
-                  <FormLabel>Anexar certificado (PDF, JPG, PNG - máx. 2MB)</FormLabel>
-                  <div className="flex items-center space-x-2">
-                    <Input
-                      type="file"
-                      accept=".pdf,.jpg,.jpeg,.png"
-                      onChange={handleFileChange}
-                      className="flex-1"
-                    />
-                    <Upload className="h-4 w-4 text-muted-foreground" />
+                {/* Treinamentos - Lista dinâmica */}
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-medium">Treinamentos</h3>
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={adicionarTreinamento}
+                      className="flex items-center gap-2"
+                    >
+                      <Plus className="h-4 w-4" />
+                      Adicionar Treinamento
+                    </Button>
                   </div>
-                  {certificadoFile && (
-                    <p className="text-sm text-muted-foreground">
-                      Arquivo selecionado: {certificadoFile.name}
-                    </p>
-                  )}
-                  <p className="text-xs text-muted-foreground">
-                    Apenas arquivos PDF, JPG, PNG, máximo 2MB. Nome será automaticamente formatado como: TREINAMENTO_MATRÍCULA_NOME COMPLETO
-                  </p>
+
+                  {fields.map((field, index) => (
+                    <Card key={field.id} className="relative">
+                      <CardHeader className="pb-4">
+                        <div className="flex items-center justify-between">
+                          <CardTitle className="text-sm">Treinamento {index + 1}</CardTitle>
+                          {fields.length > 1 && (
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => removerTreinamento(index)}
+                              className="text-destructive hover:text-destructive"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </div>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <FormField
+                            control={form.control}
+                            name={`treinamentos.${index}.treinamento_id`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Treinamento realizado</FormLabel>
+                                <Select 
+                                  onValueChange={(value) => {
+                                    field.onChange(value);
+                                    // Calcular data de validade automaticamente
+                                    const dataRealizacao = form.getValues(`treinamentos.${index}.data_realizacao`);
+                                    if (dataRealizacao) {
+                                      const dataValidade = calcularDataValidade(value, dataRealizacao);
+                                      if (dataValidade) {
+                                        form.setValue(`treinamentos.${index}.data_validade`, dataValidade);
+                                      }
+                                    }
+                                  }}
+                                  value={field.value}
+                                  disabled={isLoadingTreinamentos}
+                                >
+                                  <FormControl>
+                                    <SelectTrigger>
+                                      <SelectValue placeholder={
+                                        isLoadingTreinamentos 
+                                          ? "Carregando treinamentos..." 
+                                          : errorTreinamentos 
+                                            ? "Erro ao carregar treinamentos"
+                                            : treinamentosDisponiveis.length === 0
+                                              ? "Nenhum treinamento disponível"
+                                              : "Selecione o treinamento"
+                                      } />
+                                    </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent>
+                                    {treinamentosDisponiveis.length > 0 ? (
+                                      treinamentosDisponiveis.map((treinamento) => (
+                                        <SelectItem key={treinamento.id} value={treinamento.id}>
+                                          {treinamento.nome}
+                                        </SelectItem>
+                                      ))
+                                    ) : (
+                                      <SelectItem value="no-options" disabled>
+                                        {isLoadingTreinamentos ? "Carregando..." : "Nenhum treinamento encontrado"}
+                                      </SelectItem>
+                                    )}
+                                  </SelectContent>
+                                </Select>
+                                <FormMessage />
+                                {errorTreinamentos && (
+                                  <p className="text-sm text-red-600 mt-1">
+                                    Erro ao carregar treinamentos. Verifique o console para mais detalhes.
+                                  </p>
+                                )}
+                              </FormItem>
+                            )}
+                          />
+
+                          <FormField
+                            control={form.control}
+                            name={`treinamentos.${index}.tipo`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Tipo de treinamento</FormLabel>
+                                <Select onValueChange={field.onChange} value={field.value}>
+                                  <FormControl>
+                                    <SelectTrigger>
+                                      <SelectValue placeholder="Selecione o tipo" />
+                                    </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent>
+                                    <SelectItem value="Formação">Formação</SelectItem>
+                                    <SelectItem value="Reciclagem">Reciclagem</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+
+                        {/* Datas */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <FormField
+                            control={form.control}
+                            name={`treinamentos.${index}.data_realizacao`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Data da realização</FormLabel>
+                                <FormControl>
+                                  <Input 
+                                    type="date" 
+                                    {...field} 
+                                    onChange={(e) => {
+                                      field.onChange(e);
+                                      // Calcular data de validade automaticamente
+                                      const treinamentoId = form.getValues(`treinamentos.${index}.treinamento_id`);
+                                      if (treinamentoId) {
+                                        const dataValidade = calcularDataValidade(treinamentoId, e.target.value);
+                                        if (dataValidade) {
+                                          form.setValue(`treinamentos.${index}.data_validade`, dataValidade);
+                                        }
+                                      }
+                                    }}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+
+                          <FormField
+                            control={form.control}
+                            name={`treinamentos.${index}.data_validade`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Data de validade (calculada automaticamente)</FormLabel>
+                                <FormControl>
+                                  <Input type="date" {...field} readOnly className="bg-muted" />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+
+                        {/* Upload de certificado */}
+                        <div className="space-y-2">
+                          <FormLabel>Anexar certificado (PDF, JPG, PNG - máx. 2MB)</FormLabel>
+                          <div className="flex items-center space-x-2">
+                            <Input
+                              type="file"
+                              accept=".pdf,.jpg,.jpeg,.png"
+                              onChange={(e) => handleFileChange(e, index)}
+                              className="flex-1"
+                            />
+                            <Upload className="h-4 w-4 text-muted-foreground" />
+                          </div>
+                          {form.watch(`treinamentos.${index}.certificado_file`) && (
+                            <p className="text-sm text-muted-foreground">
+                              Arquivo selecionado: {(form.watch(`treinamentos.${index}.certificado_file`) as File)?.name}
+                            </p>
+                          )}
+                          <p className="text-xs text-muted-foreground">
+                            Apenas arquivos PDF, JPG, PNG, máximo 2MB. Nome será automaticamente formatado como: TREINAMENTO_MATRÍCULA_NOME COMPLETO
+                          </p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
                 </div>
               </div>
 
