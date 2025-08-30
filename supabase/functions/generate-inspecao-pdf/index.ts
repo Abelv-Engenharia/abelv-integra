@@ -193,9 +193,15 @@ async function generateHTMLReport(inspecao: InspectionData, responsaveis: any = 
   console.log('Total de itens:', itens.length)
   
   const naoConformidades = itens.filter((item: any) => 
-    item.status === 'nao_conforme' && item.observacao_nc
+    item.status === 'nao_conforme'
   )
   console.log('Não conformidades encontradas:', naoConformidades.length)
+  console.log('Detalhes das não conformidades:', naoConformidades.map(item => ({
+    nome: item.nome,
+    status: item.status,
+    observacao_nc: item.observacao_nc,
+    foto: !!item.foto
+  })))
   
   // Criar cliente Supabase para as signed URLs
   const supabase = createClient(
@@ -238,7 +244,7 @@ async function generateHTMLReport(inspecao: InspectionData, responsaveis: any = 
     return `
       <div class="non-conformity-item">
         <strong>${index + 1}. ${item.nome}</strong><br>
-        <span style="color: #666;">${item.observacao_nc}</span>
+        ${item.observacao_nc ? `<span style="color: #666;">${item.observacao_nc}</span>` : '<span style="color: #999; font-style: italic;">Não conforme - sem observação específica</span>'}
         ${fotoHtml}
       </div>
     `;
