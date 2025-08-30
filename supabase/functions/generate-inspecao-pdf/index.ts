@@ -209,6 +209,25 @@ async function generateHTMLReport(inspecao: InspectionData, responsaveis: any = 
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
   )
   
+  // Gerar signed URL para a logo
+  let logoUrl = '';
+  try {
+    const { data: logoSignedUrlData, error: logoSignedUrlError } = await supabase.storage
+      .from('inspecoes')
+      .createSignedUrl('ed7dfa99-8b19-4c1a-a642-c54e0ac65c7f.png', 60)
+    
+    if (logoSignedUrlError) {
+      console.error('Erro ao gerar signed URL para logo:', logoSignedUrlError)
+      logoUrl = '/lovable-uploads/ed7dfa99-8b19-4c1a-a642-c54e0ac65c7f.png' // fallback
+    } else if (logoSignedUrlData?.signedUrl) {
+      logoUrl = logoSignedUrlData.signedUrl
+      console.log('Signed URL da logo gerada com sucesso')
+    }
+  } catch (error) {
+    console.error('Erro ao processar logo:', error)
+    logoUrl = '/lovable-uploads/ed7dfa99-8b19-4c1a-a642-c54e0ac65c7f.png' // fallback
+  }
+
   // Processar as não conformidades com fotos antes do template
   const naoConformidadesHtml = await Promise.all(naoConformidades.map(async (item: any, index: number) => {
     let fotoHtml = '';
@@ -230,7 +249,7 @@ async function generateHTMLReport(inspecao: InspectionData, responsaveis: any = 
         } else if (signedUrlData?.signedUrl) {
           fotoHtml = `
             <div class="photo-container">
-              <img src="${signedUrlData.signedUrl}" alt="Foto da não conformidade: ${item.nome}" />
+              <img src="${signedUrlData.signedUrl}" alt="Foto da não conformidade: ${item.nome}" style="max-width: 400px; width: 100%; height: auto; object-fit: contain;" />
               <div class="photo-filename">Arquivo: ${item.foto.fileName}</div>
             </div>
           `;
@@ -443,8 +462,10 @@ async function generateHTMLReport(inspecao: InspectionData, responsaveis: any = 
             text-align: center;
         }
         .photo-container img {
-            max-width: 300px;
-            max-height: 200px;
+            max-width: 400px;
+            width: 100%;
+            height: auto;
+            object-fit: contain;
             border: 1px solid #ddd;
             border-radius: 5px;
             margin: 10px 0;
@@ -499,7 +520,7 @@ async function generateHTMLReport(inspecao: InspectionData, responsaveis: any = 
 </head>
 <body>
     <div class="header">
-        <img src="/lovable-uploads/ed7dfa99-8b19-4c1a-a642-c54e0ac65c7f.png" class="header-logo" alt="ABELV Logo" style="max-width: 80px; height: auto;">
+        <img src="${logoUrl}" class="header-logo" alt="ABELV Logo" style="max-width: 80px; height: auto;">
         <div class="header-content">
             <h1>RELATÓRIO DE INSPEÇÃO DE SMS</h1>
             <p>Data: ${formatDate(inspecao.data_inspecao)}</p>
