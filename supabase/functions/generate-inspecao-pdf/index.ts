@@ -196,17 +196,53 @@ async function generateHTMLReport(inspecao: InspectionData, responsaveis: any = 
     item.status === 'nao_conforme' && item.observacao_nc
   )
   console.log('Não conformidades encontradas:', naoConformidades.length)
-  console.log('Dados das não conformidades:', JSON.stringify(naoConformidades, null, 2))
-  
-  // Filtrar não conformidades que têm fotos anexadas
-  const naoConformidadesComFotos = naoConformidades.filter((item: any) => item.foto)
-  console.log('Não conformidades com fotos:', naoConformidadesComFotos.length)
   
   // Criar cliente Supabase para as signed URLs
   const supabase = createClient(
     Deno.env.get('SUPABASE_URL') ?? '',
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
   )
+  
+  // Processar as não conformidades com fotos antes do template
+  const naoConformidadesHtml = await Promise.all(naoConformidades.map(async (item: any, index: number) => {
+    let fotoHtml = '';
+    if (item.foto) {
+      try {
+        // Extract the file path from the full URL
+        const url = new URL(item.foto.url);
+        const pathSegments = url.pathname.split('/');
+        const filePath = pathSegments.slice(-2).join('/'); // userId/fileName
+        
+        // Create signed URL for private bucket
+        const { data: signedUrlData, error: signedUrlError } = await supabase.storage
+          .from('inspecoes-sms-fotos')
+          .createSignedUrl(filePath, 300);
+
+        if (signedUrlError) {
+          console.error('Error creating signed URL:', signedUrlError);
+          fotoHtml = '';
+        } else if (signedUrlData?.signedUrl) {
+          fotoHtml = `
+            <div class="photo-container">
+              <img src="${signedUrlData.signedUrl}" alt="Foto da não conformidade: ${item.nome}" />
+              <div class="photo-filename">Arquivo: ${item.foto.fileName}</div>
+            </div>
+          `;
+        }
+      } catch (error) {
+        console.error('Error processing photo:', error);
+        fotoHtml = '';
+      }
+    }
+    
+    return `
+      <div class="non-conformity-item">
+        <strong>${index + 1}. ${item.nome}</strong><br>
+        <span style="color: #666;">${item.observacao_nc}</span>
+        ${fotoHtml}
+      </div>
+    `;
+  }));
   
   const camposCabecalho = inspecao.dados_preenchidos?.campos_cabecalho || {}
 
@@ -656,53 +692,12 @@ async function generateHTMLReport(inspecao: InspectionData, responsaveis: any = 
         })()}
     </div>
 
-    ${naoConformidades.length > 0 ? (() => {
-        console.log('Renderizando seção de não conformidades com', naoConformidades.length, 'itens');
-        return `
+    ${naoConformidades.length > 0 ? `
     <div class="section non-conformities-section">
         <h2>Resumo das Não Conformidades</h2>
-        ${await Promise.all(naoConformidades.map(async (item: any, index: number) => {
-            let fotoHtml = '';
-            if (item.foto) {
-                try {
-                    // Extract the file path from the full URL
-                    const url = new URL(item.foto.url);
-                    const pathSegments = url.pathname.split('/');
-                    const filePath = pathSegments.slice(-2).join('/'); // userId/fileName
-                    
-                    // Create signed URL for private bucket
-                    const { data: signedUrlData, error: signedUrlError } = await supabase.storage
-                        .from('inspecoes-sms-fotos')
-                        .createSignedUrl(filePath, 300);
-
-                    if (signedUrlError) {
-                        console.error('Error creating signed URL:', signedUrlError);
-                        fotoHtml = '';
-                    } else if (signedUrlData?.signedUrl) {
-                        fotoHtml = `
-                            <div class="photo-container">
-                                <img src="${signedUrlData.signedUrl}" alt="Foto da não conformidade: ${item.nome}" />
-                                <div class="photo-filename">Arquivo: ${item.foto.fileName}</div>
-                            </div>
-                        `;
-                    }
-                } catch (error) {
-                    console.error('Error processing photo:', error);
-                    fotoHtml = '';
-                }
-            }
-            
-            return `
-                <div class="non-conformity-item">
-                    <strong>${index + 1}. ${item.nome}</strong><br>
-                    <span style="color: #666;">${item.observacao_nc}</span>
-                    ${fotoHtml}
-                </div>
-            `;
-        })).then(items => items.join(''))}
+        ${naoConformidadesHtml.join('')}
     </div>
-        `;
-    })() : ''}
+    ` : ''}
 
     <div class="signature-section">
         <h2>Assinaturas</h2>
