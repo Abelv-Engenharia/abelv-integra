@@ -2,6 +2,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Trash2, Save } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface DigitalSignatureProps {
   onSave: (signatureData: string) => void;
@@ -17,6 +18,7 @@ export const DigitalSignature: React.FC<DigitalSignatureProps> = ({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const [hasSignature, setHasSignature] = useState(false);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -36,7 +38,34 @@ export const DigitalSignature: React.FC<DigitalSignatureProps> = ({
     // Limpar canvas
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-  }, []);
+
+    // Prevenir scroll em dispositivos móveis
+    if (isMobile) {
+      const preventScroll = (e: TouchEvent) => {
+        // Apenas prevenir se o toque for no canvas ou seus elementos pais
+        const target = e.target as Element;
+        if (target && (target === canvas || canvas.contains(target) || target.closest('[data-signature-container]'))) {
+          e.preventDefault();
+        }
+      };
+
+      const preventContextMenu = (e: Event) => {
+        e.preventDefault();
+      };
+
+      // Adicionar event listeners para prevenir comportamentos indesejados
+      document.addEventListener('touchmove', preventScroll, { passive: false });
+      document.addEventListener('touchstart', preventScroll, { passive: false });
+      canvas.addEventListener('contextmenu', preventContextMenu);
+
+      // Cleanup
+      return () => {
+        document.removeEventListener('touchmove', preventScroll);
+        document.removeEventListener('touchstart', preventScroll);
+        canvas.removeEventListener('contextmenu', preventContextMenu);
+      };
+    }
+  }, [isMobile]);
 
   const startDrawing = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
@@ -129,50 +158,67 @@ export const DigitalSignature: React.FC<DigitalSignatureProps> = ({
   };
 
   return (
-    <Card className="w-full max-w-md mx-auto">
-      <CardHeader>
-        <CardTitle className="text-center">{title}</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="border border-gray-300 rounded-lg p-2 bg-white">
-          <canvas
-            ref={canvasRef}
-            className="w-full h-48 cursor-crosshair border border-dashed border-gray-200 rounded"
-            onMouseDown={startDrawing}
-            onMouseMove={draw}
-            onMouseUp={stopDrawing}
-            onMouseLeave={stopDrawing}
-            onTouchStart={startTouch}
-            onTouchMove={moveTouch}
-            onTouchEnd={endTouch}
-          />
-        </div>
-
-        <p className="text-xs text-center text-muted-foreground">
-          Use o mouse ou toque para desenhar sua assinatura
-        </p>
-
-        <div className="flex justify-between gap-2">
-          <Button variant="outline" onClick={clearSignature} size="sm">
-            <Trash2 className="h-4 w-4 mr-2" />
-            Limpar
-          </Button>
-
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={onCancel} size="sm">
-              Cancelar
-            </Button>
-            <Button 
-              onClick={saveSignature} 
-              disabled={!hasSignature}
-              size="sm"
-            >
-              <Save className="h-4 w-4 mr-2" />
-              Salvar
-            </Button>
+    <div 
+      data-signature-container
+      className={`${isMobile ? 'fixed inset-0 z-50 bg-background flex items-center justify-center p-4' : 'relative'}`}
+      style={isMobile ? { 
+        touchAction: 'none',
+        WebkitTouchCallout: 'none',
+        WebkitUserSelect: 'none',
+        userSelect: 'none'
+      } : {}}
+    >
+      <Card className={`w-full ${isMobile ? 'max-w-sm' : 'max-w-md'} mx-auto`}>
+        <CardHeader>
+          <CardTitle className="text-center">{title}</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="border border-gray-300 rounded-lg p-2 bg-white">
+            <canvas
+              ref={canvasRef}
+              className={`w-full ${isMobile ? 'h-40' : 'h-48'} cursor-crosshair border border-dashed border-gray-200 rounded`}
+              onMouseDown={startDrawing}
+              onMouseMove={draw}
+              onMouseUp={stopDrawing}
+              onMouseLeave={stopDrawing}
+              onTouchStart={startTouch}
+              onTouchMove={moveTouch}
+              onTouchEnd={endTouch}
+              style={{
+                touchAction: 'none',
+                WebkitTouchCallout: 'none',
+                WebkitUserSelect: 'none',
+                userSelect: 'none'
+              }}
+            />
           </div>
-        </div>
-      </CardContent>
-    </Card>
+
+          <p className="text-xs text-center text-muted-foreground">
+            {isMobile ? 'Toque para desenhar sua assinatura' : 'Use o mouse ou toque para desenhar sua assinatura'}
+          </p>
+
+          <div className="flex justify-between gap-2">
+            <Button variant="outline" onClick={clearSignature} size="sm">
+              <Trash2 className="h-4 w-4 mr-2" />
+              Limpar
+            </Button>
+
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={onCancel} size="sm">
+                Cancelar
+              </Button>
+              <Button 
+                onClick={saveSignature} 
+                disabled={!hasSignature}
+                size="sm"
+              >
+                <Save className="h-4 w-4 mr-2" />
+                Salvar
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
