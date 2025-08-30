@@ -42,9 +42,9 @@ export const DigitalSignature: React.FC<DigitalSignatureProps> = ({
     // Prevenir scroll em dispositivos móveis
     if (isMobile) {
       const preventScroll = (e: TouchEvent) => {
-        // Apenas prevenir se o toque for no canvas ou seus elementos pais
+        // Apenas prevenir se o toque for especificamente no canvas
         const target = e.target as Element;
-        if (target && (target === canvas || canvas.contains(target) || target.closest('[data-signature-container]'))) {
+        if (target && target === canvas) {
           e.preventDefault();
         }
       };
@@ -53,15 +53,15 @@ export const DigitalSignature: React.FC<DigitalSignatureProps> = ({
         e.preventDefault();
       };
 
-      // Adicionar event listeners para prevenir comportamentos indesejados
-      document.addEventListener('touchmove', preventScroll, { passive: false });
-      document.addEventListener('touchstart', preventScroll, { passive: false });
+      // Adicionar event listeners apenas no canvas
+      canvas.addEventListener('touchmove', preventScroll, { passive: false });
+      canvas.addEventListener('touchstart', preventScroll, { passive: false });
       canvas.addEventListener('contextmenu', preventContextMenu);
 
       // Cleanup
       return () => {
-        document.removeEventListener('touchmove', preventScroll);
-        document.removeEventListener('touchstart', preventScroll);
+        canvas.removeEventListener('touchmove', preventScroll);
+        canvas.removeEventListener('touchstart', preventScroll);
         canvas.removeEventListener('contextmenu', preventContextMenu);
       };
     }
