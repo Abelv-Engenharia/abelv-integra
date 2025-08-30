@@ -160,7 +160,7 @@ serve(async (req) => {
     await Promise.all(promises)
 
     // Gerar HTML do relatório
-    const htmlContent = generateHTMLReport(inspecao as InspectionData, responsaveis)
+    const htmlContent = await generateHTMLReport(inspecao as InspectionData, responsaveis)
 
 
     // Retornar como HTML que pode ser convertido para PDF pelo navegador
@@ -188,7 +188,7 @@ serve(async (req) => {
   }
 })
 
-function generateHTMLReport(inspecao: InspectionData, responsaveis: any = {}): string {
+async function generateHTMLReport(inspecao: InspectionData, responsaveis: any = {}): Promise<string> {
   const itens = inspecao.dados_preenchidos?.itens || []
   const naoConformidades = itens.filter((item: any) => 
     item.status === 'nao_conforme' && item.observacao_nc
@@ -648,43 +648,45 @@ function generateHTMLReport(inspecao: InspectionData, responsaveis: any = {}): s
     ${naoConformidades.length > 0 ? `
     <div class="section non-conformities-section">
         <h2>Resumo das Não Conformidades</h2>
-        ${naoConformidades.map((item: any, index: number) => `
-            <div class="non-conformity-item">
-                <strong>${index + 1}. ${item.nome}</strong><br>
-                <span style="color: #666;">${item.observacao_nc}</span>
-                ${item.foto ? await (async () => {
-                    try {
-                        // Extract the file path from the full URL
-                        const url = new URL(item.foto.url);
-                        const pathSegments = url.pathname.split('/');
-                        const filePath = pathSegments.slice(-2).join('/'); // userId/fileName
-                        
-                        // Create signed URL for private bucket
-                        const { data: signedUrlData, error: signedUrlError } = await supabase.storage
-                            .from('inspecoes-sms-fotos')
-                            .createSignedUrl(filePath, 300);
+        ${await Promise.all(naoConformidades.map(async (item: any, index: number) => {
+            let fotoHtml = '';
+            if (item.foto) {
+                try {
+                    // Extract the file path from the full URL
+                    const url = new URL(item.foto.url);
+                    const pathSegments = url.pathname.split('/');
+                    const filePath = pathSegments.slice(-2).join('/'); // userId/fileName
+                    
+                    // Create signed URL for private bucket
+                    const { data: signedUrlData, error: signedUrlError } = await supabase.storage
+                        .from('inspecoes-sms-fotos')
+                        .createSignedUrl(filePath, 300);
 
-                        if (signedUrlError) {
-                            console.error('Error creating signed URL:', signedUrlError);
-                            return '';
-                        }
-                        
-                        if (signedUrlData?.signedUrl) {
-                            return `
-                                <div class="photo-container">
-                                    <img src="${signedUrlData.signedUrl}" alt="Foto da não conformidade: ${item.nome}" />
-                                    <div class="photo-filename">Arquivo: ${item.foto.fileName}</div>
-                                </div>
-                            `;
-                        }
-                        return '';
-                    } catch (error) {
-                        console.error('Error processing photo:', error);
-                        return '';
+                    if (signedUrlError) {
+                        console.error('Error creating signed URL:', signedUrlError);
+                        fotoHtml = '';
+                    } else if (signedUrlData?.signedUrl) {
+                        fotoHtml = `
+                            <div class="photo-container">
+                                <img src="${signedUrlData.signedUrl}" alt="Foto da não conformidade: ${item.nome}" />
+                                <div class="photo-filename">Arquivo: ${item.foto.fileName}</div>
+                            </div>
+                        `;
                     }
-                })() : ''}
-            </div>
-        `).join('')}
+                } catch (error) {
+                    console.error('Error processing photo:', error);
+                    fotoHtml = '';
+                }
+            }
+            
+            return `
+                <div class="non-conformity-item">
+                    <strong>${index + 1}. ${item.nome}</strong><br>
+                    <span style="color: #666;">${item.observacao_nc}</span>
+                    ${fotoHtml}
+                </div>
+            `;
+        })).then(items => items.join(''))}
     </div>
     ` : ''}
 

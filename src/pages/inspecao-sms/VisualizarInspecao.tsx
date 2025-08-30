@@ -17,6 +17,7 @@ const VisualizarInspecao = () => {
   const [inspecao, setInspecao] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [responsavelFrenteTrabalho, setResponsavelFrenteTrabalho] = useState<string>('');
+  const [signedUrls, setSignedUrls] = useState<{ [key: string]: string }>({});
 
   // Hook para buscar dados da identificação da frente de trabalho
   const { identificacao, isLoading: isLoadingIdentificacao } = useIdentificacaoFrenteTrabalho(
@@ -86,6 +87,36 @@ const VisualizarInspecao = () => {
 
       if (error) throw error;
       setInspecao(data);
+
+      // Carregar signed URLs para as fotos
+      const dadosPreenchidos = data?.dados_preenchidos as any;
+      if (dadosPreenchidos?.itens) {
+        const urls: { [key: string]: string } = {};
+        
+        for (const item of dadosPreenchidos.itens) {
+          if (item.foto?.url) {
+            try {
+              // Extrair o caminho do arquivo da URL
+              const urlParts = item.foto.url.split('/');
+              const fileName = urlParts[urlParts.length - 1];
+              const inspectionId = urlParts[urlParts.length - 2];
+              const filePath = `${inspectionId}/${fileName}`;
+              
+              const { data: signedUrlData } = await supabase.storage
+                .from('inspecoes-sms-fotos')
+                .createSignedUrl(filePath, 3600); // 1 hora de expiração
+                
+              if (signedUrlData?.signedUrl) {
+                urls[item.foto.url] = signedUrlData.signedUrl;
+              }
+            } catch (urlError) {
+              console.error('Erro ao gerar signed URL:', urlError);
+            }
+          }
+        }
+        
+        setSignedUrls(urls);
+      }
     } catch (error: any) {
       console.error('Erro ao carregar inspeção:', error);
       toast({
@@ -650,22 +681,22 @@ const VisualizarInspecao = () => {
                 {inspecao.dados_preenchidos.itens
                   .filter((item: any) => item.foto)
                   .map((item: any, index: number) => (
-                    <div key={item.id || index} className="space-y-3">
-                      <div className="relative">
-                        <img 
-                          src={item.foto.url} 
-                          alt={`Foto do item: ${item.nome}`}
-                          className="w-full h-48 object-cover rounded-lg border cursor-pointer hover:opacity-90 transition-opacity"
-                          loading="lazy"
-                          onClick={() => window.open(item.foto.url, '_blank')}
-                          onError={(e) => {
-                            console.error('Erro ao carregar imagem:', item.foto.url);
-                            e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDJMMTMuMDkgOC4yNkwyMCA5TDEzLjA5IDE1Ljc0TDEyIDIyTDEwLjkxIDE1Ljc0TDQgOUwxMC45MSA4LjI2TDEyIDJaIiBzdHJva2U9IiM5Q0E0QUYiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+Cjwvc3ZnPgo=';
-                          }}
-                        />
-                        <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-10 transition-all rounded-lg cursor-pointer" 
-                             onClick={() => window.open(item.foto.url, '_blank')} />
-                      </div>
+                     <div key={item.id || index} className="space-y-3">
+                       <div className="relative">
+                         <img 
+                           src={signedUrls[item.foto.url] || item.foto.url} 
+                           alt={`Foto do item: ${item.nome}`}
+                           className="w-full h-48 object-cover rounded-lg border cursor-pointer hover:opacity-90 transition-opacity"
+                           loading="lazy"
+                           onClick={() => window.open(signedUrls[item.foto.url] || item.foto.url, '_blank')}
+                           onError={(e) => {
+                             console.error('Erro ao carregar imagem:', item.foto.url);
+                             e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDJMMTMuMDkgOC4yNkwyMCA5TDEzLjA5IDE1Ljc0TDEyIDIyTDEwLjkxIDE1Ljc0TDQgOUwxMC45MSA4LjI2TDEyIDJaIiBzdHJva2U9IiM5Q0E0QUYiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+Cjwvc3ZnPgo=';
+                           }}
+                         />
+                         <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-10 transition-all rounded-lg cursor-pointer" 
+                              onClick={() => window.open(signedUrls[item.foto.url] || item.foto.url, '_blank')} />
+                       </div>
                       <div className="space-y-1">
                         <p className="text-sm font-medium text-foreground line-clamp-2">
                           {item.nome}
