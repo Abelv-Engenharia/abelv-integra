@@ -741,7 +741,7 @@ const CadastrarInspecao = () => {
                 {/* Card especial para HORA DA SEGURANÇA */}
                 <Card 
                   className="cursor-pointer hover:shadow-md transition-all duration-200 hover:border-green-500/50 border-green-200 bg-green-50" 
-                  onClick={() => window.location.href = '/inspecao-sms/hora-seguranca'}
+                  onClick={() => navigate('/inspecao-sms/hora-seguranca')}
                 >
                   <CardHeader className="pb-3">
                     <CardTitle className="text-base sm:text-lg text-green-700">HORA DA SEGURANÇA ABELV</CardTitle>
