@@ -60,20 +60,20 @@ const HoraSeguranca = () => {
           <ChevronLeft className="h-4 w-4 mr-1 sm:mr-2" />
           <span className="hidden sm:inline">Voltar</span>
         </Button>
-        <Clock className="h-5 w-5 sm:h-6 sm:w-6 text-orange-600 flex-shrink-0" />
-        <h1 className="heading-responsive text-orange-700">HORA DA SEGURANÇA ABELV</h1>
+        <Clock className="h-5 w-5 sm:h-6 sm:w-6 text-green-600 flex-shrink-0" />
+        <h1 className="heading-responsive text-green-700">HORA DA SEGURANÇA ABELV</h1>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg sm:text-xl text-orange-700">
+          <CardTitle className="text-lg sm:text-xl text-green-700">
             Checklists Disponíveis para Hora da Segurança
           </CardTitle>
         </CardHeader>
         <CardContent>
           {modelos.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground">
-              <FileSearch className="h-16 w-16 mx-auto mb-4 opacity-50 text-orange-300" />
+              <FileSearch className="h-16 w-16 mx-auto mb-4 opacity-50 text-green-300" />
               <h3 className="text-lg font-medium mb-2">Nenhum checklist encontrado</h3>
               <p className="text-responsive">
                 Não há checklists "HORA DA SEGURANÇA" cadastrados no sistema.
@@ -84,11 +84,11 @@ const HoraSeguranca = () => {
               {modelos.map(modelo => (
                 <Card 
                   key={modelo.id} 
-                  className="cursor-pointer hover:shadow-md transition-all duration-200 hover:border-orange-500/50 border-orange-200 bg-orange-50 hover:bg-orange-100" 
+                  className="cursor-pointer hover:shadow-md transition-all duration-200 hover:border-green-500/50 border-green-200 bg-green-50 hover:bg-green-100" 
                   onClick={() => selecionarModelo(modelo)}
                 >
                   <CardHeader className="pb-3">
-                    <CardTitle className="text-base sm:text-lg line-clamp-2 text-orange-800">
+                    <CardTitle className="text-base sm:text-lg line-clamp-2 text-green-800">
                       {modelo.nome}
                     </CardTitle>
                   </CardHeader>
@@ -101,12 +101,12 @@ const HoraSeguranca = () => {
                         {Array.isArray(modelo.itens_avaliacao) ? modelo.itens_avaliacao.length : 0} itens de verificação
                       </span>
                       {modelo.requer_assinatura && (
-                        <span className="text-orange-600 bg-orange-100 px-2 py-1 rounded-full">
+                        <span className="text-green-600 bg-green-100 px-2 py-1 rounded-full">
                           ✓ Requer assinatura
                         </span>
                       )}
                     </div>
-                    <div className="mt-3 flex items-center text-xs text-orange-700">
+                    <div className="mt-3 flex items-center text-xs text-green-700">
                       <Clock className="h-3 w-3 mr-1" />
                       <span>Checklist Hora da Segurança</span>
                     </div>
