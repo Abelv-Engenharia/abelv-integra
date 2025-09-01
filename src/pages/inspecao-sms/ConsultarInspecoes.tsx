@@ -358,7 +358,7 @@ const ConsultarInspecoes = () => {
                         </div>
                       </TableCell>
                       <TableCell>
-                        {format(new Date(inspecao.data_inspecao), 'dd/MM/yyyy', { locale: ptBR })}
+                        {format(new Date(inspecao.data_inspecao + 'T00:00:00'), 'dd/MM/yyyy', { locale: ptBR })}
                       </TableCell>
                       <TableCell className="max-w-xs truncate" title={inspecao.local}>
                         {inspecao.local}
@@ -412,7 +412,7 @@ const ConsultarInspecoes = () => {
                                    <br /><br />
                                    <strong>Inspeção:</strong> {inspecao.checklists_avaliacao?.nome || 'N/A'}<br />
                                    <strong>Local:</strong> {inspecao.local}<br />
-                                   <strong>Data:</strong> {format(new Date(inspecao.data_inspecao), 'dd/MM/yyyy', { locale: ptBR })}
+                                   <strong>Data:</strong> {format(new Date(inspecao.data_inspecao + 'T00:00:00'), 'dd/MM/yyyy', { locale: ptBR })}
                                  </AlertDialogDescription>
                                </AlertDialogHeader>
                                <AlertDialogFooter>

@@ -278,7 +278,7 @@ const VisualizarInspecao = () => {
                     <div>
                       <p className="text-sm text-muted-foreground">Data da Inspeção</p>
                       <p className="font-medium">
-                        {format(new Date(inspecao.data_inspecao), 'dd/MM/yyyy', {
+                        {format(new Date(inspecao.data_inspecao + 'T00:00:00'), 'dd/MM/yyyy', {
                           locale: ptBR
                         })}
                       </p>
