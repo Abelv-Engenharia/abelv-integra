@@ -740,17 +740,17 @@ const CadastrarInspecao = () => {
               <div className="card-grid">
                 {/* Card especial para HORA DA SEGURANÇA */}
                 <Card 
-                  className="cursor-pointer hover:shadow-md transition-all duration-200 hover:border-orange-500/50 border-orange-200 bg-orange-50" 
+                  className="cursor-pointer hover:shadow-md transition-all duration-200 hover:border-green-500/50 border-green-200 bg-green-50" 
                   onClick={() => window.location.href = '/inspecao-sms/hora-seguranca'}
                 >
                   <CardHeader className="pb-3">
-                    <CardTitle className="text-base sm:text-lg text-orange-700">HORA DA SEGURANÇA ABELV</CardTitle>
+                    <CardTitle className="text-base sm:text-lg text-green-700">HORA DA SEGURANÇA ABELV</CardTitle>
                   </CardHeader>
                   <CardContent className="pt-0">
                     <p className="text-sm text-muted-foreground mb-2">
                       Checklists específicos para Hora da Segurança
                     </p>
-                    <p className="text-xs text-orange-600">
+                    <p className="text-xs text-green-600">
                       {modelos.filter(modelo => modelo.nome.startsWith("HORA DA SEGURANÇA")).length} checklists disponíveis
                     </p>
                   </CardContent>
