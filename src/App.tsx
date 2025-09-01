@@ -79,7 +79,7 @@ import DesviosDashboard from "./pages/DesviosDashboard";
 import DesviosForm from "./pages/DesviosForm";
 import DesviosConsulta from "./pages/DesviosConsulta";
 import DesviosNaoConformidade from "./pages/DesviosNaoConformidade";
-import InsightsDesvios from "./pages/desvios/InsightsDesvios";
+import InsightsDesvios from "@/pages/desvios/InsightsDesvios";
 
 // Hora da Segurança pages
 import HoraSegurancaDashboard from "./pages/hora-seguranca/HoraSegurancaDashboard";

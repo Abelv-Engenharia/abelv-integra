@@ -5,9 +5,9 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { CalendarIcon, Filter, X, Eye, Plus, BarChart3, TrendingUp, Grid3X3 } from 'lucide-react';
+import { CalendarIcon, Filter, Eye, Plus, BarChart3, TrendingUp, Grid3X3 } from 'lucide-react';
 import { format, subDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { supabase } from '@/integrations/supabase/client';
@@ -112,24 +112,6 @@ const InsightsDesvios = () => {
     try {
       setChartsLoading(true);
       
-      // Para demonstração, vamos usar dados mockados já que as RPCs não existem ainda
-      // Quando as RPCs estiverem disponíveis, descomente o código abaixo:
-      
-      // const { data: paretoResult, error: paretoError } = await supabase.rpc('get_pareto_causas_90d');
-      // if (!paretoError && paretoResult) {
-      //   setParetoData(paretoResult);
-      // }
-
-      // const { data: tendenciaResult, error: tendenciaError } = await supabase.rpc('get_tendencia_12s');  
-      // if (!tendenciaError && tendenciaResult) {
-      //   setTendenciaData(tendenciaResult);
-      // }
-
-      // const { data: repeticaoResult, error: repeticaoError } = await supabase.rpc('get_repeticao_chaves');
-      // if (!repeticaoError && repeticaoResult) {
-      //   setRepeticaoData(repeticaoResult);
-      // }
-
       // Dados mockados para demonstração
       setParetoData([
         { causa_raiz: "Falha de comunicação", qtde: 15, pct: 35 },
@@ -161,16 +143,6 @@ const InsightsDesvios = () => {
     try {
       setLoading(true);
       
-      // Para demonstração, vamos usar dados mockados já que a tabela insights_desvios não existe ainda
-      // Quando a tabela estiver disponível, descomente o código abaixo:
-      
-      // let query = supabase
-      //   .from('insights_desvios')
-      //   .select('id, gerado_em, escopo, classificacao_risco, tipo, resumo, recomendacao, dados', { count: 'exact' })
-      //   .gte('gerado_em', appliedFilters.dateRange.from.toISOString())
-      //   .lte('gerado_em', appliedFilters.dateRange.to.toISOString())
-      //   .order('gerado_em', { ascending: false });
-
       // Dados mockados para demonstração
       const mockInsights: InsightDesvio[] = [
         {
@@ -332,7 +304,6 @@ const InsightsDesvios = () => {
   };
 
   const handleSaveTask = async (taskData: any) => {
-    // Aqui seria a integração com o sistema de tarefas
     toast({
       title: "Tarefa criada com sucesso",
       description: `Tarefa criada baseada no insight ${createTaskInsight?.tipo}`
@@ -351,6 +322,56 @@ const InsightsDesvios = () => {
         <p className="text-muted-foreground mt-2">
           Análises diárias geradas pelo agente. Filtre por período, classificação e tipo para priorizar ações.
         </p>
+      </div>
+
+      {/* KPI Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total de Insights</CardTitle>
+            <BarChart3 className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{kpis.total}</div>
+            <p className="text-xs text-muted-foreground">No período selecionado</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">% MODERADO</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold" style={{ color: RISK_COLORS.MODERADO }}>
+              {kpis.percentualModerado}%
+            </div>
+            <p className="text-xs text-muted-foreground">Do total filtrado</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">% SUBSTANCIAL</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold" style={{ color: RISK_COLORS.SUBSTANCIAL }}>
+              {kpis.percentualSubstancial}%
+            </div>
+            <p className="text-xs text-muted-foreground">Do total filtrado</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">% INTOLERÁVEL</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold" style={{ color: RISK_COLORS.INTOLERÁVEL }}>
+              {kpis.percentualIntoleravel}%
+            </div>
+            <p className="text-xs text-muted-foreground">Do total filtrado</p>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Filtros */}
@@ -455,56 +476,6 @@ const InsightsDesvios = () => {
           </div>
         </CardContent>
       </Card>
-
-      {/* KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total de Insights</CardTitle>
-            <BarChart3 className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{kpis.total}</div>
-            <p className="text-xs text-muted-foreground">No período selecionado</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">% MODERADO</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold" style={{ color: RISK_COLORS.MODERADO }}>
-              {kpis.percentualModerado}%
-            </div>
-            <p className="text-xs text-muted-foreground">Do total filtrado</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">% SUBSTANCIAL</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold" style={{ color: RISK_COLORS.SUBSTANCIAL }}>
-              {kpis.percentualSubstancial}%
-            </div>
-            <p className="text-xs text-muted-foreground">Do total filtrado</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">% INTOLERÁVEL</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold" style={{ color: RISK_COLORS.INTOLERÁVEL }}>
-              {kpis.percentualIntoleravel}%
-            </div>
-            <p className="text-xs text-muted-foreground">Do total filtrado</p>
-          </CardContent>
-        </Card>
-      </div>
 
       {/* Gráficos */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -623,7 +594,7 @@ const InsightsDesvios = () => {
                   {insights.map((insight) => (
                     <TableRow key={insight.id}>
                       <TableCell>
-                        {format(new Date(insight.gerado_em + 'T00:00:00'), 'dd/MM/yyyy HH:mm', { locale: ptBR })}
+                        {format(new Date(insight.gerado_em), 'dd/MM/yyyy HH:mm', { locale: ptBR })}
                       </TableCell>
                       <TableCell>{getRiskBadge(insight)}</TableCell>
                       <TableCell>{insight.tipo}</TableCell>
@@ -699,7 +670,7 @@ const InsightsDesvios = () => {
           {selectedInsight && (
             <div className="space-y-4">
               <div>
-                <strong>Gerado em:</strong> {format(new Date(selectedInsight.gerado_em + 'T00:00:00'), 'dd/MM/yyyy HH:mm', { locale: ptBR })}
+                <strong>Gerado em:</strong> {format(new Date(selectedInsight.gerado_em), 'dd/MM/yyyy HH:mm', { locale: ptBR })}
               </div>
               <div>
                 <strong>Escopo:</strong> {selectedInsight.escopo}
