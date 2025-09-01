@@ -147,7 +147,7 @@ const InsightsDesvios = () => {
       const mockInsights: InsightDesvio[] = [
         {
           id: "1",
-          gerado_em: new Date().toISOString(),
+          gerado_em: format(new Date(), 'yyyy-MM-dd HH:mm:ss'),
           escopo: "Geral",
           classificacao_risco: "MODERADO",
           tipo: "Recomendação",
@@ -157,7 +157,7 @@ const InsightsDesvios = () => {
         },
         {
           id: "2", 
-          gerado_em: subDays(new Date(), 1).toISOString(),
+          gerado_em: format(subDays(new Date(), 1), 'yyyy-MM-dd HH:mm:ss'),
           escopo: "Área de Produção",
           classificacao_risco: "SUBSTANCIAL",
           tipo: "Sumário",
@@ -167,7 +167,7 @@ const InsightsDesvios = () => {
         },
         {
           id: "3",
-          gerado_em: subDays(new Date(), 2).toISOString(),
+          gerado_em: format(subDays(new Date(), 2), 'yyyy-MM-dd HH:mm:ss'),
           escopo: "Manutenção",
           classificacao_risco: null,
           tipo: "Tendência",
@@ -279,6 +279,19 @@ const InsightsDesvios = () => {
         ...prev,
         tipos: prev.tipos.filter(t => t !== tipo)
       }));
+    }
+  };
+
+  // Função para formatar data com segurança
+  const formatSafeDate = (dateString: string, formatStr: string = 'dd/MM/yyyy HH:mm') => {
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) {
+        return 'Data inválida';
+      }
+      return format(date, formatStr, { locale: ptBR });
+    } catch (error) {
+      return 'Data inválida';
     }
   };
 
@@ -594,7 +607,7 @@ const InsightsDesvios = () => {
                   {insights.map((insight) => (
                     <TableRow key={insight.id}>
                       <TableCell>
-                        {format(new Date(insight.gerado_em), 'dd/MM/yyyy HH:mm', { locale: ptBR })}
+                        {formatSafeDate(insight.gerado_em)}
                       </TableCell>
                       <TableCell>{getRiskBadge(insight)}</TableCell>
                       <TableCell>{insight.tipo}</TableCell>
@@ -670,7 +683,7 @@ const InsightsDesvios = () => {
           {selectedInsight && (
             <div className="space-y-4">
               <div>
-                <strong>Gerado em:</strong> {format(new Date(selectedInsight.gerado_em), 'dd/MM/yyyy HH:mm', { locale: ptBR })}
+                <strong>Gerado em:</strong> {formatSafeDate(selectedInsight.gerado_em)}
               </div>
               <div>
                 <strong>Escopo:</strong> {selectedInsight.escopo}
