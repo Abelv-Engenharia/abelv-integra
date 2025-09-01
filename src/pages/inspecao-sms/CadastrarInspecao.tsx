@@ -17,7 +17,7 @@ import { format } from "date-fns";
 import { PageLoader, InlineLoader } from "@/components/common/PageLoader";
 import { DigitalSignature } from "@/components/ui/digital-signature";
 import { PhotoUpload } from "@/components/inspecao-sms/PhotoUpload";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const CadastrarInspecao = () => {
   const [step, setStep] = useState(1);
@@ -500,6 +500,7 @@ const CadastrarInspecao = () => {
   };
 
   const navigate = useNavigate();
+  const location = useLocation();
 
   // Função para resetar o formulário completamente
   const resetFormulario = () => {
@@ -528,12 +529,18 @@ const CadastrarInspecao = () => {
     loadUsuarios();
   }, []);
 
-  // Reset automático quando o componente é montado (usuário navega de volta)
+  // Verificar se há modelo pré-selecionado vindo da página Hora da Segurança
   useEffect(() => {
-    // Reset completo sempre que o componente for montado
-    // Isso garante que o formulário sempre inicie limpo
-    resetFormulario();
-  }, []); // Executa apenas na montagem do componente
+    const state = location.state as any;
+    if (state?.modeloSelecionado && state?.fromHoraSeguranca) {
+      selecionarModelo(state.modeloSelecionado);
+      // Limpar o state após usar
+      window.history.replaceState({}, document.title);
+    } else {
+      // Reset automático quando o componente é montado sem modelo pré-selecionado
+      resetFormulario();
+    }
+  }, [location.state]); // Executa quando há mudança no state da navegação
 
   // Modal de assinatura
   if (showSignatureModal) {
@@ -713,66 +720,10 @@ const CadastrarInspecao = () => {
           <h1 className="heading-responsive">Cadastrar Inspeção SMS</h1>
         </div>
 
-        {/* Card HORA DA SEGURANÇA ABELV */}
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle className="text-lg sm:text-xl text-orange-600">HORA DA SEGURANÇA ABELV</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {isLoadingModelos ? (
-              <div className="card-grid">
-                {Array.from({ length: 3 }).map((_, i) => (
-                  <div key={i} className="border rounded-lg p-4 animate-pulse">
-                    <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-                    <div className="h-3 bg-gray-200 rounded w-1/2 mb-1"></div>
-                    <div className="h-3 bg-gray-200 rounded w-1/4"></div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="card-grid">
-                {modelos.filter(modelo => modelo.nome.startsWith("HORA DA SEGURANÇA")).length === 0 ? (
-                  <div className="col-span-full text-center py-8 text-muted-foreground">
-                    <FileSearch className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                    <p className="text-responsive">Nenhum checklist "HORA DA SEGURANÇA" encontrado.</p>
-                  </div>
-                ) : (
-                  modelos
-                    .filter(modelo => modelo.nome.startsWith("HORA DA SEGURANÇA"))
-                    .map(modelo => (
-                      <Card 
-                        key={modelo.id} 
-                        className="cursor-pointer hover:shadow-md transition-all duration-200 hover:border-orange-500/50 border-orange-200" 
-                        onClick={() => selecionarModelo(modelo)}
-                      >
-                        <CardHeader className="pb-3">
-                          <CardTitle className="text-base sm:text-lg line-clamp-2 text-orange-700">{modelo.nome}</CardTitle>
-                        </CardHeader>
-                        <CardContent className="pt-0">
-                          <p className="text-sm text-muted-foreground mb-2 line-clamp-2">
-                            {modelo.descricao || 'Checklist de avaliação'}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            {Array.isArray(modelo.itens_avaliacao) ? modelo.itens_avaliacao.length : 0} itens de verificação
-                          </p>
-                          {modelo.requer_assinatura && (
-                            <p className="text-xs text-orange-600 mt-1">
-                              ✓ Requer assinatura
-                            </p>
-                          )}
-                        </CardContent>
-                      </Card>
-                    ))
-                )}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
         {/* Lista de Modelos */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg sm:text-xl">Outros Modelos de Inspeção</CardTitle>
+            <CardTitle className="text-lg sm:text-xl">Selecione um Modelo de Inspeção</CardTitle>
           </CardHeader>
           <CardContent>
             {isLoadingModelos ? (
@@ -787,6 +738,25 @@ const CadastrarInspecao = () => {
               </div>
             ) : (
               <div className="card-grid">
+                {/* Card especial para HORA DA SEGURANÇA */}
+                <Card 
+                  className="cursor-pointer hover:shadow-md transition-all duration-200 hover:border-orange-500/50 border-orange-200 bg-orange-50" 
+                  onClick={() => window.location.href = '/inspecao-sms/hora-seguranca'}
+                >
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base sm:text-lg text-orange-700">HORA DA SEGURANÇA ABELV</CardTitle>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    <p className="text-sm text-muted-foreground mb-2">
+                      Checklists específicos para Hora da Segurança
+                    </p>
+                    <p className="text-xs text-orange-600">
+                      {modelos.filter(modelo => modelo.nome.startsWith("HORA DA SEGURANÇA")).length} checklists disponíveis
+                    </p>
+                  </CardContent>
+                </Card>
+
+                {/* Outros modelos */}
                 {modelos.filter(modelo => !modelo.nome.startsWith("HORA DA SEGURANÇA")).length === 0 ? (
                   <div className="col-span-full text-center py-8 text-muted-foreground">
                     <FileSearch className="h-12 w-12 mx-auto mb-4 opacity-50" />

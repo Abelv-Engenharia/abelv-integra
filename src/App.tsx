@@ -128,6 +128,7 @@ import CadastrarInspecao from "./pages/inspecao-sms/CadastrarInspecao";
 import ConsultarInspecoes from "./pages/inspecao-sms/ConsultarInspecoes";
 import InspecaoSMSDashboard from "./pages/inspecao-sms/InspecaoSMSDashboard";
 import VisualizarInspecao from "./pages/inspecao-sms/VisualizarInspecao";
+import HoraSeguranca from "./pages/inspecao-sms/HoraSeguranca";
 
 // Placeholder page
 import PlaceholderPage from "./pages/PlaceholderPage";
@@ -272,6 +273,7 @@ function App() {
                 <Route path="inspecao-sms/consulta" element={<ConsultarInspecoes />} />
                 <Route path="inspecao-sms/dashboard" element={<InspecaoSMSDashboard />} />
                 <Route path="inspecao-sms/visualizar/:id" element={<VisualizarInspecao />} />
+                <Route path="inspecao-sms/hora-seguranca" element={<HoraSeguranca />} />
 
                 {/* Placeholder routes */}
                 <Route path="placeholder" element={<PlaceholderPage />} />
