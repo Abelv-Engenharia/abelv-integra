@@ -227,18 +227,16 @@ export default function SidebarSectionSMS({ openMenu, toggleMenu }: SidebarSecti
                       </SidebarMenuSubButton>
                     </SidebarMenuSubItem>
                   )}
-                  {podeVerMenu("desvios_insights", menusSidebar) && (
-                    <SidebarMenuSubItem>
-                      <SidebarMenuSubButton 
-                        asChild
-                        className={currentPath === "/desvios/insights" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
-                      >
-                        <Link to="/desvios/insights" className="flex items-center gap-2">
-                          <span className="text-xs leading-tight break-words min-w-0">Insights de Desvios</span>
-                        </Link>
-                      </SidebarMenuSubButton>
-                    </SidebarMenuSubItem>
-                  )}
+                  <SidebarMenuSubItem>
+                    <SidebarMenuSubButton 
+                      asChild
+                      className={currentPath === "/desvios/insights" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
+                    >
+                      <Link to="/desvios/insights" className="flex items-center gap-2">
+                        <span className="text-xs leading-tight break-words min-w-0">Insights de Desvios</span>
+                      </Link>
+                    </SidebarMenuSubButton>
+                  </SidebarMenuSubItem>
                 </SidebarMenuSub>
               </CollapsibleContent>
             </Collapsible>
