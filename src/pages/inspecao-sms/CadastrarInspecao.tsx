@@ -713,10 +713,66 @@ const CadastrarInspecao = () => {
           <h1 className="heading-responsive">Cadastrar Inspeção SMS</h1>
         </div>
 
+        {/* Card HORA DA SEGURANÇA ABELV */}
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="text-lg sm:text-xl text-orange-600">HORA DA SEGURANÇA ABELV</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {isLoadingModelos ? (
+              <div className="card-grid">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <div key={i} className="border rounded-lg p-4 animate-pulse">
+                    <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                    <div className="h-3 bg-gray-200 rounded w-1/2 mb-1"></div>
+                    <div className="h-3 bg-gray-200 rounded w-1/4"></div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="card-grid">
+                {modelos.filter(modelo => modelo.nome.startsWith("HORA DA SEGURANÇA")).length === 0 ? (
+                  <div className="col-span-full text-center py-8 text-muted-foreground">
+                    <FileSearch className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p className="text-responsive">Nenhum checklist "HORA DA SEGURANÇA" encontrado.</p>
+                  </div>
+                ) : (
+                  modelos
+                    .filter(modelo => modelo.nome.startsWith("HORA DA SEGURANÇA"))
+                    .map(modelo => (
+                      <Card 
+                        key={modelo.id} 
+                        className="cursor-pointer hover:shadow-md transition-all duration-200 hover:border-orange-500/50 border-orange-200" 
+                        onClick={() => selecionarModelo(modelo)}
+                      >
+                        <CardHeader className="pb-3">
+                          <CardTitle className="text-base sm:text-lg line-clamp-2 text-orange-700">{modelo.nome}</CardTitle>
+                        </CardHeader>
+                        <CardContent className="pt-0">
+                          <p className="text-sm text-muted-foreground mb-2 line-clamp-2">
+                            {modelo.descricao || 'Checklist de avaliação'}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {Array.isArray(modelo.itens_avaliacao) ? modelo.itens_avaliacao.length : 0} itens de verificação
+                          </p>
+                          {modelo.requer_assinatura && (
+                            <p className="text-xs text-orange-600 mt-1">
+                              ✓ Requer assinatura
+                            </p>
+                          )}
+                        </CardContent>
+                      </Card>
+                    ))
+                )}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
         {/* Lista de Modelos */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg sm:text-xl">Selecione um Modelo de Inspeção</CardTitle>
+            <CardTitle className="text-lg sm:text-xl">Outros Modelos de Inspeção</CardTitle>
           </CardHeader>
           <CardContent>
             {isLoadingModelos ? (
@@ -731,36 +787,38 @@ const CadastrarInspecao = () => {
               </div>
             ) : (
               <div className="card-grid">
-                {modelos.length === 0 ? (
+                {modelos.filter(modelo => !modelo.nome.startsWith("HORA DA SEGURANÇA")).length === 0 ? (
                   <div className="col-span-full text-center py-8 text-muted-foreground">
                     <FileSearch className="h-12 w-12 mx-auto mb-4 opacity-50" />
                     <p className="text-responsive">Nenhum modelo encontrado. Verifique os filtros ou cadastre novos modelos.</p>
                   </div>
                 ) : (
-                  modelos.map(modelo => (
-                    <Card 
-                      key={modelo.id} 
-                      className="cursor-pointer hover:shadow-md transition-all duration-200 hover:border-primary/50" 
-                      onClick={() => selecionarModelo(modelo)}
-                    >
-                      <CardHeader className="pb-3">
-                        <CardTitle className="text-base sm:text-lg line-clamp-2">{modelo.nome}</CardTitle>
-                      </CardHeader>
-                      <CardContent className="pt-0">
-                        <p className="text-sm text-muted-foreground mb-2 line-clamp-2">
-                          {modelo.descricao || 'Checklist de avaliação'}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          {Array.isArray(modelo.itens_avaliacao) ? modelo.itens_avaliacao.length : 0} itens de verificação
-                        </p>
-                        {modelo.requer_assinatura && (
-                          <p className="text-xs text-blue-600 mt-1">
-                            ✓ Requer assinatura
+                  modelos
+                    .filter(modelo => !modelo.nome.startsWith("HORA DA SEGURANÇA"))
+                    .map(modelo => (
+                      <Card 
+                        key={modelo.id} 
+                        className="cursor-pointer hover:shadow-md transition-all duration-200 hover:border-primary/50" 
+                        onClick={() => selecionarModelo(modelo)}
+                      >
+                        <CardHeader className="pb-3">
+                          <CardTitle className="text-base sm:text-lg line-clamp-2">{modelo.nome}</CardTitle>
+                        </CardHeader>
+                        <CardContent className="pt-0">
+                          <p className="text-sm text-muted-foreground mb-2 line-clamp-2">
+                            {modelo.descricao || 'Checklist de avaliação'}
                           </p>
-                        )}
-                      </CardContent>
-                    </Card>
-                  ))
+                          <p className="text-xs text-muted-foreground">
+                            {Array.isArray(modelo.itens_avaliacao) ? modelo.itens_avaliacao.length : 0} itens de verificação
+                          </p>
+                          {modelo.requer_assinatura && (
+                            <p className="text-xs text-blue-600 mt-1">
+                              ✓ Requer assinatura
+                            </p>
+                          )}
+                        </CardContent>
+                      </Card>
+                    ))
                 )}
               </div>
             )}
