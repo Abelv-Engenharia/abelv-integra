@@ -335,13 +335,13 @@ const CadastrarInspecao = () => {
       // Se tem não conformidade, gerar PDF e enviar email
       if (temNaoConformidade) {
         toast({
-          title: "Inspeção finalizada com não conformidades",
-          description: "Um PDF foi gerado e enviado por email devido às não conformidades encontradas."
+          title: "Inspeção registrada com sucesso",
+          description: "A inspeção foi registrada no sistema."
         });
       } else {
         toast({
-          title: "Inspeção finalizada com sucesso",
-          description: "Todos os itens estão em conformidade."
+          title: "Inspeção registrada com sucesso",
+          description: "A inspeção foi registrada no sistema."
         });
       }
 
@@ -443,13 +443,13 @@ const CadastrarInspecao = () => {
 
       if (temNaoConformidade) {
         toast({
-          title: "Inspeção finalizada com não conformidades",
-          description: "Um PDF foi gerado e enviado por email devido às não conformidades encontradas."
+          title: "Inspeção registrada com sucesso",
+          description: "A inspeção foi registrada no sistema."
         });
       } else {
         toast({
-          title: "Inspeção finalizada com sucesso",
-          description: "Todos os itens estão em conformidade."
+          title: "Inspeção registrada com sucesso",
+          description: "A inspeção foi registrada no sistema."
         });
       }
 
