@@ -434,66 +434,6 @@ export default function SidebarSectionSMS({ openMenu, toggleMenu }: SidebarSecti
         </SidebarMenu>
       )}
 
-      {/* Seção Prevenção de Incêndio */}
-      {(isAdmin || canAccessMenu("prevencao_incendio_dashboard") || canAccessMenu("prevencao_incendio_cadastro_extintores") || canAccessMenu("prevencao_incendio_inspecao_extintores")) && (
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <Collapsible open={openMenu === "prevencao-incendio"}>
-              <CollapsibleTrigger asChild>
-                <SidebarMenuButton 
-                  onClick={() => toggleMenu("prevencao-incendio")}
-                  className="text-white hover:bg-slate-600"
-                >
-                  <Flame className="h-4 w-4 flex-shrink-0" />
-                  <span className="break-words">Prevenção de Incêndio</span>
-                </SidebarMenuButton>
-              </CollapsibleTrigger>
-              <CollapsibleContent asChild>
-                <SidebarMenuSub>
-                  {(isAdmin || canAccessMenu("prevencao_incendio_dashboard")) && (
-                    <SidebarMenuSubItem>
-                      <SidebarMenuSubButton 
-                        asChild
-                        className={currentPath === "/prevencao-incendio/dashboard" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
-                      >
-                        <Link to="/prevencao-incendio/dashboard" className="flex items-center gap-2">
-                          <TrendingUp className="h-3 w-3 flex-shrink-0" />
-                          <span className="text-xs leading-tight break-words min-w-0">Dashboard</span>
-                        </Link>
-                      </SidebarMenuSubButton>
-                    </SidebarMenuSubItem>
-                  )}
-                  {(isAdmin || canAccessMenu("prevencao_incendio_cadastro_extintores")) && (
-                    <SidebarMenuSubItem>
-                      <SidebarMenuSubButton 
-                        asChild
-                        className={currentPath === "/prevencao-incendio/cadastro-extintores" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
-                      >
-                        <Link to="/prevencao-incendio/cadastro-extintores" className="flex items-center gap-2">
-                          <span className="text-xs leading-tight break-words min-w-0">Cadastro de Extintores</span>
-                        </Link>
-                      </SidebarMenuSubButton>
-                    </SidebarMenuSubItem>
-                  )}
-                  {(isAdmin || canAccessMenu("prevencao_incendio_inspecao_extintores")) && (
-                    <SidebarMenuSubItem>
-                      <SidebarMenuSubButton 
-                        asChild
-                        className={currentPath === "/prevencao-incendio/inspecao-extintores" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
-                      >
-                        <Link to="/prevencao-incendio/inspecao-extintores" className="flex items-center gap-2">
-                          <span className="text-xs leading-tight break-words min-w-0">Inspeção de Extintores</span>
-                        </Link>
-                      </SidebarMenuSubButton>
-                    </SidebarMenuSubItem>
-                  )}
-                </SidebarMenuSub>
-              </CollapsibleContent>
-            </Collapsible>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      )}
-
       {/* Seção Ocorrências */}
       {(isAdmin || canAccessMenu("ocorrencias_dashboard") || canAccessMenu("ocorrencias_cadastro") || canAccessMenu("ocorrencias_consulta")) && (
         <SidebarMenu>
@@ -651,6 +591,66 @@ export default function SidebarSectionSMS({ openMenu, toggleMenu }: SidebarSecti
                       >
                         <Link to="/gro/avaliacao-riscos" className="flex items-center gap-2">
                           <span className="text-xs leading-tight break-words min-w-0">Avaliação de Riscos</span>
+                        </Link>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+                  )}
+                </SidebarMenuSub>
+              </CollapsibleContent>
+            </Collapsible>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      )}
+
+      {/* Seção Prevenção de Incêndio */}
+      {(isAdmin || canAccessMenu("prevencao_incendio_dashboard") || canAccessMenu("prevencao_incendio_cadastro_extintores") || canAccessMenu("prevencao_incendio_inspecao_extintores")) && (
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <Collapsible open={openMenu === "prevencao-incendio"}>
+              <CollapsibleTrigger asChild>
+                <SidebarMenuButton 
+                  onClick={() => toggleMenu("prevencao-incendio")}
+                  className="text-white hover:bg-slate-600"
+                >
+                  <Flame className="h-4 w-4 flex-shrink-0" />
+                  <span className="break-words">Prevenção de Incêndio</span>
+                </SidebarMenuButton>
+              </CollapsibleTrigger>
+              <CollapsibleContent asChild>
+                <SidebarMenuSub>
+                  {(isAdmin || canAccessMenu("prevencao_incendio_dashboard")) && (
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton 
+                        asChild
+                        className={currentPath === "/prevencao-incendio/dashboard" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
+                      >
+                        <Link to="/prevencao-incendio/dashboard" className="flex items-center gap-2">
+                          <TrendingUp className="h-3 w-3 flex-shrink-0" />
+                          <span className="text-xs leading-tight break-words min-w-0">Dashboard</span>
+                        </Link>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+                  )}
+                  {(isAdmin || canAccessMenu("prevencao_incendio_cadastro_extintores")) && (
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton 
+                        asChild
+                        className={currentPath === "/prevencao-incendio/cadastro-extintores" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
+                      >
+                        <Link to="/prevencao-incendio/cadastro-extintores" className="flex items-center gap-2">
+                          <span className="text-xs leading-tight break-words min-w-0">Cadastro de Extintores</span>
+                        </Link>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+                  )}
+                  {(isAdmin || canAccessMenu("prevencao_incendio_inspecao_extintores")) && (
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton 
+                        asChild
+                        className={currentPath === "/prevencao-incendio/inspecao-extintores" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
+                      >
+                        <Link to="/prevencao-incendio/inspecao-extintores" className="flex items-center gap-2">
+                          <span className="text-xs leading-tight break-words min-w-0">Inspeção de Extintores</span>
                         </Link>
                       </SidebarMenuSubButton>
                     </SidebarMenuSubItem>
