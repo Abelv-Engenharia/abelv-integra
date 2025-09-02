@@ -269,7 +269,7 @@ const HoraSegurancaDashboard = () => {
                       left: 20,
                       bottom: 160
                     }}>
-                          <CartesianGrid strokeDasharray="3 3" />
+                          
                           
                           <XAxis type="category" dataKey="name" interval={0} angle={-45} textAnchor="end" height={140} tick={{
                         fontSize: 12
