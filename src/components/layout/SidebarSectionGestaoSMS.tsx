@@ -1,6 +1,25 @@
-import React, { useState, useEffect } from "react";
-import { ChevronDown, ChevronRight, ShieldAlert, GraduationCap, Clock, ClipboardCheck, AlertTriangle, Gavel, BarChart3, TrendingUp, FileText, Shield, Flame } from "lucide-react";
-import { SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarMenuSub, SidebarMenuSubItem, SidebarMenuSubButton } from "@/components/ui/sidebar";
+import React, { useState, useEffect, useMemo } from "react";
+import {
+  ChevronDown,
+  ChevronRight,
+  ShieldAlert,
+  GraduationCap,
+  Clock,
+  ClipboardCheck,
+  AlertTriangle,
+  Gavel,
+  BarChart3,
+  Shield,
+  Flame,
+} from "lucide-react";
+import {
+  SidebarMenu,
+  SidebarMenuItem,
+  SidebarMenuButton,
+  SidebarMenuSub,
+  SidebarMenuSubItem,
+  SidebarMenuSubButton,
+} from "@/components/ui/sidebar";
 import { Link, useLocation } from "react-router-dom";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
@@ -8,22 +27,28 @@ interface SidebarSectionGestaoSMSProps {
   openMenu: string | null;
   toggleMenu: (menuName: string) => void;
   onLinkClick?: () => void;
+  /** Predicado de permissão (whitelist menus_sidebar). Se não vier, assume tudo visível. */
+  canSee?: (slug: string) => boolean;
 }
+
+type LinkItem = { label: string; to: string; slug: string };
 
 export default function SidebarSectionGestaoSMS({
   openMenu,
   toggleMenu,
-  onLinkClick
+  onLinkClick,
+  canSee,
 }: SidebarSectionGestaoSMSProps) {
   const location = useLocation();
   const currentPath = location.pathname;
 
-  // Estado local para controlar os submenus - agora com lógica para manter apenas um aberto
-  const [openSubMenus, setOpenSubMenus] = useState<{
-    [key: string]: boolean;
-  }>({});
+  // fallback de permissão (compatibilidade)
+  const can = useMemo<(slug: string) => boolean>(() => canSee ?? (() => true), [canSee]);
 
-  // Função para determinar qual submenu deve estar aberto baseado na rota atual
+  // Estado local para controlar os submenus - mantém apenas um aberto
+  const [openSubMenus, setOpenSubMenus] = useState<Record<string, boolean>>({});
+
+  // Qual submenu deve abrir com base na rota
   const getActiveSubmenu = (path: string) => {
     if (path.startsWith("/idsms")) return "idsms";
     if (path.startsWith("/desvios")) return "desvios";
@@ -37,32 +62,118 @@ export default function SidebarSectionGestaoSMS({
     return null;
   };
 
-  // Effect para definir qual submenu deve estar aberto baseado na rota atual
   useEffect(() => {
-    const activeSubmenu = getActiveSubmenu(currentPath);
-    if (activeSubmenu) {
-      setOpenSubMenus({
-        [activeSubmenu]: true
-      });
-    } else {
-      setOpenSubMenus({});
-    }
+    const active = getActiveSubmenu(currentPath);
+    if (active) setOpenSubMenus({ [active]: true });
+    else setOpenSubMenus({});
   }, [currentPath]);
 
-  const toggleSubMenu = (subMenuName: string) => {
-    setOpenSubMenus(prev => {
-      // Se o submenu clicado já está aberto, fecha ele
-      if (prev[subMenuName]) {
-        return {};
-      }
-      // Senão, abre apenas o submenu clicado e fecha todos os outros
-      return {
-        [subMenuName]: true
-      };
-    });
+  const toggleSubMenu = (key: string) => {
+    setOpenSubMenus((prev) => (prev[key] ? {} : { [key]: true }));
   };
 
   const isGestaoSMSOpen = openMenu === "gestao-sms";
+
+  // ---- DEF. DOS LINKS (cada um com o slug do menus_sidebar) ----
+  const idsmsItems: LinkItem[] = [
+    { label: "Dashboard", to: "/idsms/dashboard", slug: "idsms_dashboard" },
+    { label: "Indicadores", to: "/idsms/indicadores", slug: "idsms_relatorios" }, // use o slug que você preferir para “indicadores”
+    { label: "HT", to: "/idsms/ht", slug: "idsms_relatorios" },
+    { label: "HSA", to: "/idsms/hsa", slug: "idsms_relatorios" },
+    { label: "IID", to: "/idsms/iid", slug: "idsms_relatorios" },
+    { label: "IPOM", to: "/idsms/ipom", slug: "idsms_relatorios" },
+    { label: "Índice Reativo", to: "/idsms/indice-reativo", slug: "idsms_relatorios" },
+    { label: "Inspeção Alta Liderança", to: "/idsms/inspecao-alta-lideranca", slug: "idsms_relatorios" },
+    { label: "Inspeção Gestão SMS", to: "/idsms/inspecao-gestao-sms", slug: "idsms_relatorios" },
+  ];
+
+  const desviosItems: LinkItem[] = [
+    { label: "Dashboard", to: "/desvios/dashboard", slug: "desvios_dashboard" },
+    { label: "Cadastro", to: "/desvios/cadastro", slug: "desvios_cadastro" },
+    { label: "Consulta", to: "/desvios/consulta", slug: "desvios_consulta" },
+    { label: "Não Conformidade", to: "/desvios/nao-conformidade", slug: "desvios_nao_conformidade" },
+  ];
+
+  const treinamentosItems: LinkItem[] = [
+    { label: "Dashboard", to: "/treinamentos/dashboard", slug: "treinamentos_dashboard" },
+    { label: "Normativo", to: "/treinamentos/normativo", slug: "treinamentos_normativo" },
+    { label: "Consulta", to: "/treinamentos/consulta", slug: "treinamentos_consulta" },
+    { label: "Execução", to: "/treinamentos/execucao", slug: "treinamentos_execucao" },
+    { label: "Crachá", to: "/treinamentos/cracha", slug: "treinamentos_cracha" },
+  ];
+
+  const horaSegurancaItems: LinkItem[] = [
+    { label: "Dashboard", to: "/hora-seguranca/dashboard", slug: "hora_seguranca_dashboard" },
+    { label: "Cadastro", to: "/hora-seguranca/inspecao-cadastro-hsa", slug: "hora_seguranca_cadastro" },
+    { label: "Agenda", to: "/hora-seguranca/agenda-hsa", slug: "hora_seguranca_agenda" },
+    { label: "Acompanhamento", to: "/hora-seguranca/inspecoes-acompanhamento", slug: "hora_seguranca_acompanhamento" },
+    { label: "Inspeção Não Programada", to: "/hora-seguranca/inspecao-nao-programada-hsa", slug: "hora_seguranca_cadastro_nao_programada" },
+  ];
+
+  const inspecaoSmsItems: LinkItem[] = [
+    { label: "Dashboard", to: "/inspecao-sms/dashboard", slug: "inspecao_sms_dashboard" },
+    { label: "Cadastro", to: "/inspecao-sms/cadastrar", slug: "inspecao_sms_cadastro" },
+    { label: "Consulta", to: "/inspecao-sms/consulta", slug: "inspecao_sms_consulta" },
+  ];
+
+  const ocorrenciasItems: LinkItem[] = [
+    { label: "Dashboard", to: "/ocorrencias/dashboard", slug: "ocorrencias_dashboard" },
+    { label: "Cadastro", to: "/ocorrencias/cadastro", slug: "ocorrencias_cadastro" },
+    { label: "Consulta", to: "/ocorrencias/consulta", slug: "ocorrencias_consulta" },
+  ];
+
+  const medidasDiscItems: LinkItem[] = [
+    { label: "Dashboard", to: "/medidas-disciplinares/dashboard", slug: "medidas_disciplinares_dashboard" },
+    { label: "Cadastro", to: "/medidas-disciplinares/cadastro", slug: "medidas_disciplinares_cadastro" },
+    { label: "Consulta", to: "/medidas-disciplinares/consulta", slug: "medidas_disciplinares_consulta" },
+  ];
+
+  const groItems: LinkItem[] = [
+    { label: "Dashboard", to: "/gro/dashboard", slug: "gro_dashboard" },
+    { label: "Cadastro de Perigos", to: "/gro/cadastro-perigos", slug: "gro_cadastro_perigos" /* se usar este no JSON */ },
+    { label: "Avaliação de Riscos", to: "/gro/avaliacao-riscos", slug: "gro_avaliacao_riscos" },
+    { label: "PGR", to: "/gro/pgr", slug: "gro_pgr" },
+    { label: "Cadastro", to: "/gro/cadastro", slug: "gro_cadastro" },
+    { label: "Consulta", to: "/gro/consulta", slug: "gro_consulta" },
+  ];
+
+  const prevIncendioItems: LinkItem[] = [
+    { label: "Dashboard", to: "/prevencao-incendio/dashboard", slug: "prevencao_incendio_dashboard" },
+    { label: "Cadastro de Extintores", to: "/prevencao-incendio/cadastro-extintores", slug: "prevencao_incendio_cadastro_extintores" },
+    { label: "Inspeção de Extintores", to: "/prevencao-incendio/inspecao-extintores", slug: "prevencao_incendio_inspecao_extintores" },
+    { label: "Consulta de Inspeções", to: "/prevencao-incendio/consulta-inspecoes", slug: "prevencao_incendio_consulta_inspecoes" /* se existir no JSON */ },
+  ];
+
+  // Helpers para filtrar por permissão
+  const filterAllowed = (items: LinkItem[]) => items.filter((i) => can(i.slug));
+
+  const idsms = filterAllowed(idsmsItems);
+  const desvios = filterAllowed(desviosItems);
+  const treinamentos = filterAllowed(treinamentosItems);
+  const horaSeg = filterAllowed(horaSegurancaItems);
+  const inspecao = filterAllowed(inspecaoSmsItems);
+  const ocorrencias = filterAllowed(ocorrenciasItems);
+  const medidas = filterAllowed(medidasDiscItems);
+  const gro = filterAllowed(groItems);
+  const prevInc = filterAllowed(prevIncendioItems);
+
+  // item direto de Dashboard SMS
+  const showSmsDashboard = can("sms_dashboard");
+
+  // Se a seção inteira ficar sem nada, nem renderiza
+  const sectionIsEmpty =
+    !showSmsDashboard &&
+    idsms.length === 0 &&
+    desvios.length === 0 &&
+    treinamentos.length === 0 &&
+    horaSeg.length === 0 &&
+    inspecao.length === 0 &&
+    ocorrencias.length === 0 &&
+    medidas.length === 0 &&
+    gro.length === 0 &&
+    prevInc.length === 0;
+
+  if (sectionIsEmpty) return null;
 
   return (
     <SidebarMenu>
@@ -77,294 +188,325 @@ export default function SidebarSectionGestaoSMS({
           </CollapsibleTrigger>
           <CollapsibleContent>
             <SidebarMenuSub>
-              {/* Dashboard SMS - Agora como link direto */}
-              <SidebarMenuSubItem>
-                <SidebarMenuSubButton asChild className={currentPath === "/sms/dashboard" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
-                  <Link to="/sms/dashboard" className="flex items-center gap-2" onClick={onLinkClick}>
-                    <BarChart3 className="h-3 w-3 flex-shrink-0" />
-                    <span>Dashboard SMS</span>
-                  </Link>
-                </SidebarMenuSubButton>
-              </SidebarMenuSubItem>
+              {/* Dashboard SMS direto */}
+              {showSmsDashboard && (
+                <SidebarMenuSubItem>
+                  <SidebarMenuSubButton
+                    asChild
+                    className={
+                      currentPath === "/sms/dashboard" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"
+                    }
+                  >
+                    <Link to="/sms/dashboard" className="flex items-center gap-2" onClick={onLinkClick}>
+                      <BarChart3 className="h-3 w-3 flex-shrink-0" />
+                      <span>Dashboard SMS</span>
+                    </Link>
+                  </SidebarMenuSubButton>
+                </SidebarMenuSubItem>
+              )}
 
               {/* IDSMS */}
-              <SidebarMenuSubItem>
-                <div className="w-full">
-                  <button onClick={() => toggleSubMenu("idsms")} className="flex items-center justify-between w-full px-2 py-1 text-white hover:bg-slate-600 rounded text-xs">
-                    <div className="flex items-center gap-2">
-                      <BarChart3 className="h-3 w-3 flex-shrink-0" />
-                      <span>IDSMS</span>
-                    </div>
-                    {openSubMenus.idsms ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
-                  </button>
-                  {openSubMenus.idsms && (
-                    <div className="ml-4 mt-1 space-y-1">
-                      <SidebarMenuSubButton asChild className={currentPath === "/idsms/dashboard" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
-                        <Link to="/idsms/dashboard" onClick={onLinkClick}>Dashboard</Link>
-                      </SidebarMenuSubButton>
-                      <SidebarMenuSubButton asChild className={currentPath === "/idsms/indicadores" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
-                        <Link to="/idsms/indicadores" onClick={onLinkClick}>Indicadores</Link>
-                      </SidebarMenuSubButton>
-                      <SidebarMenuSubButton asChild className={currentPath === "/idsms/ht" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
-                        <Link to="/idsms/ht" onClick={onLinkClick}>HT</Link>
-                      </SidebarMenuSubButton>
-                      <SidebarMenuSubButton asChild className={currentPath === "/idsms/hsa" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
-                        <Link to="/idsms/hsa" onClick={onLinkClick}>HSA</Link>
-                      </SidebarMenuSubButton>
-                      <SidebarMenuSubButton asChild className={currentPath === "/idsms/iid" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
-                        <Link to="/idsms/iid" onClick={onLinkClick}>IID</Link>
-                      </SidebarMenuSubButton>
-                      <SidebarMenuSubButton asChild className={currentPath === "/idsms/ipom" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
-                        <Link to="/idsms/ipom" onClick={onLinkClick}>IPOM</Link>
-                      </SidebarMenuSubButton>
-                      <SidebarMenuSubButton asChild className={currentPath === "/idsms/indice-reativo" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
-                        <Link to="/idsms/indice-reativo" onClick={onLinkClick}>Índice Reativo</Link>
-                      </SidebarMenuSubButton>
-                      <SidebarMenuSubButton asChild className={currentPath === "/idsms/inspecao-alta-lideranca" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
-                        <Link to="/idsms/inspecao-alta-lideranca" onClick={onLinkClick}>Inspeção Alta Liderança</Link>
-                      </SidebarMenuSubButton>
-                      <SidebarMenuSubButton asChild className={currentPath === "/idsms/inspecao-gestao-sms" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
-                        <Link to="/idsms/inspecao-gestao-sms" onClick={onLinkClick}>Inspeção Gestão SMS</Link>
-                      </SidebarMenuSubButton>
-                    </div>
-                  )}
-                </div>
-              </SidebarMenuSubItem>
+              {idsms.length > 0 && (
+                <SidebarMenuSubItem>
+                  <div className="w-full">
+                    <button
+                      onClick={() => toggleSubMenu("idsms")}
+                      className="flex items-center justify-between w-full px-2 py-1 text-white hover:bg-slate-600 rounded text-xs"
+                    >
+                      <div className="flex items-center gap-2">
+                        <BarChart3 className="h-3 w-3 flex-shrink-0" />
+                        <span>IDSMS</span>
+                      </div>
+                      {openSubMenus.idsms ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
+                    </button>
+                    {openSubMenus.idsms && (
+                      <div className="ml-4 mt-1 space-y-1">
+                        {idsms.map((it) => (
+                          <SidebarMenuSubButton
+                            key={it.slug}
+                            asChild
+                            className={
+                              currentPath === it.to ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"
+                            }
+                          >
+                            <Link to={it.to} onClick={onLinkClick}>
+                              {it.label}
+                            </Link>
+                          </SidebarMenuSubButton>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </SidebarMenuSubItem>
+              )}
 
               {/* Desvios */}
-              <SidebarMenuSubItem>
-                <div className="w-full">
-                  <button onClick={() => toggleSubMenu("desvios")} className="flex items-center justify-between w-full px-2 py-1 text-white hover:bg-slate-600 rounded text-xs">
-                    <div className="flex items-center gap-2">
-                      <AlertTriangle className="h-3 w-3 flex-shrink-0" />
-                      <span>Desvios</span>
-                    </div>
-                    {openSubMenus.desvios ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
-                  </button>
-                  {openSubMenus.desvios && (
-                    <div className="ml-4 mt-1 space-y-1">
-                      <SidebarMenuSubButton asChild className={currentPath === "/desvios/dashboard" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
-                        <Link to="/desvios/dashboard">Dashboard</Link>
-                      </SidebarMenuSubButton>
-                      <SidebarMenuSubButton asChild className={currentPath === "/desvios/cadastro" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
-                        <Link to="/desvios/cadastro">Cadastro</Link>
-                      </SidebarMenuSubButton>
-                      <SidebarMenuSubButton asChild className={currentPath === "/desvios/consulta" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
-                        <Link to="/desvios/consulta">Consulta</Link>
-                      </SidebarMenuSubButton>
-                      <SidebarMenuSubButton asChild className={currentPath === "/desvios/nao-conformidade" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
-                        <Link to="/desvios/nao-conformidade">Não Conformidade</Link>
-                      </SidebarMenuSubButton>
-                    </div>
-                  )}
-                </div>
-              </SidebarMenuSubItem>
+              {desvios.length > 0 && (
+                <SidebarMenuSubItem>
+                  <div className="w-full">
+                    <button
+                      onClick={() => toggleSubMenu("desvios")}
+                      className="flex items-center justify-between w-full px-2 py-1 text-white hover:bg-slate-600 rounded text-xs"
+                    >
+                      <div className="flex items-center gap-2">
+                        <AlertTriangle className="h-3 w-3 flex-shrink-0" />
+                        <span>Desvios</span>
+                      </div>
+                      {openSubMenus.desvios ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
+                    </button>
+                    {openSubMenus.desvios && (
+                      <div className="ml-4 mt-1 space-y-1">
+                        {desvios.map((it) => (
+                          <SidebarMenuSubButton
+                            key={it.slug}
+                            asChild
+                            className={
+                              currentPath === it.to ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"
+                            }
+                          >
+                            <Link to={it.to}>{it.label}</Link>
+                          </SidebarMenuSubButton>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </SidebarMenuSubItem>
+              )}
 
               {/* Treinamentos */}
-              <SidebarMenuSubItem>
-                <div className="w-full">
-                  <button onClick={() => toggleSubMenu("treinamentos")} className="flex items-center justify-between w-full px-2 py-1 text-white hover:bg-slate-600 rounded text-xs">
-                    <div className="flex items-center gap-2">
-                      <GraduationCap className="h-3 w-3 flex-shrink-0" />
-                      <span>Treinamentos</span>
-                    </div>
-                    {openSubMenus.treinamentos ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
-                  </button>
-                  {openSubMenus.treinamentos && (
-                    <div className="ml-4 mt-1 space-y-1">
-                      <SidebarMenuSubButton asChild className={currentPath === "/treinamentos/dashboard" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
-                        <Link to="/treinamentos/dashboard">Dashboard</Link>
-                      </SidebarMenuSubButton>
-                      <SidebarMenuSubButton asChild className={currentPath === "/treinamentos/normativo" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
-                        <Link to="/treinamentos/normativo">Normativo</Link>
-                      </SidebarMenuSubButton>
-                      <SidebarMenuSubButton asChild className={currentPath === "/treinamentos/consulta" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
-                        <Link to="/treinamentos/consulta">Consulta</Link>
-                      </SidebarMenuSubButton>
-                      <SidebarMenuSubButton asChild className={currentPath === "/treinamentos/execucao" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
-                        <Link to="/treinamentos/execucao">Execução</Link>
-                      </SidebarMenuSubButton>
-                      <SidebarMenuSubButton asChild className={currentPath === "/treinamentos/cracha" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
-                        <Link to="/treinamentos/cracha">Crachá</Link>
-                      </SidebarMenuSubButton>
-                    </div>
-                  )}
-                </div>
-              </SidebarMenuSubItem>
+              {treinamentos.length > 0 && (
+                <SidebarMenuSubItem>
+                  <div className="w-full">
+                    <button
+                      onClick={() => toggleSubMenu("treinamentos")}
+                      className="flex items-center justify-between w-full px-2 py-1 text-white hover:bg-slate-600 rounded text-xs"
+                    >
+                      <div className="flex items-center gap-2">
+                        <GraduationCap className="h-3 w-3 flex-shrink-0" />
+                        <span>Treinamentos</span>
+                      </div>
+                      {openSubMenus.treinamentos ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
+                    </button>
+                    {openSubMenus.treinamentos && (
+                      <div className="ml-4 mt-1 space-y-1">
+                        {treinamentos.map((it) => (
+                          <SidebarMenuSubButton
+                            key={it.slug}
+                            asChild
+                            className={
+                              currentPath === it.to ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"
+                            }
+                          >
+                            <Link to={it.to}>{it.label}</Link>
+                          </SidebarMenuSubButton>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </SidebarMenuSubItem>
+              )}
 
               {/* Hora da Segurança */}
-              <SidebarMenuSubItem>
-                <div className="w-full">
-                  <button onClick={() => toggleSubMenu("hora-seguranca")} className="flex items-center justify-between w-full px-2 py-1 text-white hover:bg-slate-600 rounded text-xs">
-                    <div className="flex items-center gap-2">
-                      <Clock className="h-3 w-3 flex-shrink-0" />
-                      <span>Hora da Segurança</span>
-                    </div>
-                    {openSubMenus["hora-seguranca"] ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
-                  </button>
-                  {openSubMenus["hora-seguranca"] && (
-                    <div className="ml-4 mt-1 space-y-1">
-                      <SidebarMenuSubButton asChild className={currentPath === "/hora-seguranca/dashboard" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
-                        <Link to="/hora-seguranca/dashboard">Dashboard</Link>
-                      </SidebarMenuSubButton>
-                      <SidebarMenuSubButton asChild className={currentPath === "/hora-seguranca/inspecao-cadastro-hsa" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
-                        <Link to="/hora-seguranca/inspecao-cadastro-hsa">Cadastro</Link>
-                      </SidebarMenuSubButton>
-                      <SidebarMenuSubButton asChild className={currentPath === "/hora-seguranca/agenda-hsa" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
-                        <Link to="/hora-seguranca/agenda-hsa">Agenda</Link>
-                      </SidebarMenuSubButton>
-                      <SidebarMenuSubButton asChild className={currentPath === "/hora-seguranca/inspecoes-acompanhamento" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
-                        <Link to="/hora-seguranca/inspecoes-acompanhamento">Acompanhamento</Link>
-                      </SidebarMenuSubButton>
-                      <SidebarMenuSubButton asChild className={currentPath === "/hora-seguranca/inspecao-nao-programada-hsa" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
-                        <Link to="/hora-seguranca/inspecao-nao-programada-hsa">Inspeção Não Programada</Link>
-                      </SidebarMenuSubButton>
-                    </div>
-                  )}
-                </div>
-              </SidebarMenuSubItem>
+              {horaSeg.length > 0 && (
+                <SidebarMenuSubItem>
+                  <div className="w-full">
+                    <button
+                      onClick={() => toggleSubMenu("hora-seguranca")}
+                      className="flex items-center justify-between w-full px-2 py-1 text-white hover:bg-slate-600 rounded text-xs"
+                    >
+                      <div className="flex items-center gap-2">
+                        <Clock className="h-3 w-3 flex-shrink-0" />
+                        <span>Hora da Segurança</span>
+                      </div>
+                      {openSubMenus["hora-seguranca"] ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
+                    </button>
+                    {openSubMenus["hora-seguranca"] && (
+                      <div className="ml-4 mt-1 space-y-1">
+                        {horaSeg.map((it) => (
+                          <SidebarMenuSubButton
+                            key={it.slug}
+                            asChild
+                            className={
+                              currentPath === it.to ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"
+                            }
+                          >
+                            <Link to={it.to}>{it.label}</Link>
+                          </SidebarMenuSubButton>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </SidebarMenuSubItem>
+              )}
 
               {/* Inspeção SMS */}
-              <SidebarMenuSubItem>
-                <div className="w-full">
-                  <button onClick={() => toggleSubMenu("inspecao-sms")} className="flex items-center justify-between w-full px-2 py-1 text-white hover:bg-slate-600 rounded text-xs">
-                    <div className="flex items-center gap-2">
-                      <ClipboardCheck className="h-3 w-3 flex-shrink-0" />
-                      <span>Inspeção SMS</span>
-                    </div>
-                    {openSubMenus["inspecao-sms"] ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
-                  </button>
-                  {openSubMenus["inspecao-sms"] && (
-                    <div className="ml-4 mt-1 space-y-1">
-                      <SidebarMenuSubButton asChild className={currentPath === "/inspecao-sms/dashboard" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
-                        <Link to="/inspecao-sms/dashboard">Dashboard</Link>
-                      </SidebarMenuSubButton>
-                      <SidebarMenuSubButton asChild className={currentPath === "/inspecao-sms/cadastrar" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
-                        <Link to="/inspecao-sms/cadastrar">Cadastro</Link>
-                      </SidebarMenuSubButton>
-                      <SidebarMenuSubButton asChild className={currentPath === "/inspecao-sms/consulta" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
-                        <Link to="/inspecao-sms/consulta">Consulta</Link>
-                      </SidebarMenuSubButton>
-                    </div>
-                  )}
-                </div>
-              </SidebarMenuSubItem>
+              {inspecao.length > 0 && (
+                <SidebarMenuSubItem>
+                  <div className="w-full">
+                    <button
+                      onClick={() => toggleSubMenu("inspecao-sms")}
+                      className="flex items-center justify-between w-full px-2 py-1 text-white hover:bg-slate-600 rounded text-xs"
+                    >
+                      <div className="flex items-center gap-2">
+                        <ClipboardCheck className="h-3 w-3 flex-shrink-0" />
+                        <span>Inspeção SMS</span>
+                      </div>
+                      {openSubMenus["inspecao-sms"] ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
+                    </button>
+                    {openSubMenus["inspecao-sms"] && (
+                      <div className="ml-4 mt-1 space-y-1">
+                        {inspecao.map((it) => (
+                          <SidebarMenuSubButton
+                            key={it.slug}
+                            asChild
+                            className={
+                              currentPath === it.to ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"
+                            }
+                          >
+                            <Link to={it.to}>{it.label}</Link>
+                          </SidebarMenuSubButton>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </SidebarMenuSubItem>
+              )}
 
               {/* Ocorrências */}
-              <SidebarMenuSubItem>
-                <div className="w-full">
-                  <button onClick={() => toggleSubMenu("ocorrencias")} className="flex items-center justify-between w-full px-2 py-1 text-white hover:bg-slate-600 rounded text-xs">
-                    <div className="flex items-center gap-2">
-                      <AlertTriangle className="h-3 w-3 flex-shrink-0" />
-                      <span>Ocorrências</span>
-                    </div>
-                    {openSubMenus.ocorrencias ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
-                  </button>
-                  {openSubMenus.ocorrencias && (
-                    <div className="ml-4 mt-1 space-y-1">
-                      <SidebarMenuSubButton asChild className={currentPath === "/ocorrencias/dashboard" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
-                        <Link to="/ocorrencias/dashboard">Dashboard</Link>
-                      </SidebarMenuSubButton>
-                      <SidebarMenuSubButton asChild className={currentPath === "/ocorrencias/cadastro" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
-                        <Link to="/ocorrencias/cadastro">Cadastro</Link>
-                      </SidebarMenuSubButton>
-                      <SidebarMenuSubButton asChild className={currentPath === "/ocorrencias/consulta" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
-                        <Link to="/ocorrencias/consulta">Consulta</Link>
-                      </SidebarMenuSubButton>
-                    </div>
-                  )}
-                </div>
-              </SidebarMenuSubItem>
+              {ocorrencias.length > 0 && (
+                <SidebarMenuSubItem>
+                  <div className="w-full">
+                    <button
+                      onClick={() => toggleSubMenu("ocorrencias")}
+                      className="flex items-center justify-between w-full px-2 py-1 text-white hover:bg-slate-600 rounded text-xs"
+                    >
+                      <div className="flex items-center gap-2">
+                        <AlertTriangle className="h-3 w-3 flex-shrink-0" />
+                        <span>Ocorrências</span>
+                      </div>
+                      {openSubMenus.ocorrencias ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
+                    </button>
+                    {openSubMenus.ocorrencias && (
+                      <div className="ml-4 mt-1 space-y-1">
+                        {ocorrencias.map((it) => (
+                          <SidebarMenuSubButton
+                            key={it.slug}
+                            asChild
+                            className={
+                              currentPath === it.to ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"
+                            }
+                          >
+                            <Link to={it.to}>{it.label}</Link>
+                          </SidebarMenuSubButton>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </SidebarMenuSubItem>
+              )}
 
               {/* Medidas Disciplinares */}
-              <SidebarMenuSubItem>
-                <div className="w-full">
-                  <button onClick={() => toggleSubMenu("medidas-disciplinares")} className="flex items-center justify-between w-full px-2 py-1 text-white hover:bg-slate-600 rounded text-xs">
-                    <div className="flex items-center gap-2">
-                      <Gavel className="h-3 w-3 flex-shrink-0" />
-                      <span>Medidas Disciplinares</span>
-                    </div>
-                    {openSubMenus["medidas-disciplinares"] ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
-                  </button>
-                  {openSubMenus["medidas-disciplinares"] && (
-                    <div className="ml-4 mt-1 space-y-1">
-                      <SidebarMenuSubButton asChild className={currentPath === "/medidas-disciplinares/dashboard" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
-                        <Link to="/medidas-disciplinares/dashboard">Dashboard</Link>
-                      </SidebarMenuSubButton>
-                      <SidebarMenuSubButton asChild className={currentPath === "/medidas-disciplinares/cadastro" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
-                        <Link to="/medidas-disciplinares/cadastro">Cadastro</Link>
-                      </SidebarMenuSubButton>
-                      <SidebarMenuSubButton asChild className={currentPath === "/medidas-disciplinares/consulta" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
-                        <Link to="/medidas-disciplinares/consulta">Consulta</Link>
-                      </SidebarMenuSubButton>
-                    </div>
-                  )}
-                </div>
-              </SidebarMenuSubItem>
+              {medidas.length > 0 && (
+                <SidebarMenuSubItem>
+                  <div className="w-full">
+                    <button
+                      onClick={() => toggleSubMenu("medidas-disciplinares")}
+                      className="flex items-center justify-between w-full px-2 py-1 text-white hover:bg-slate-600 rounded text-xs"
+                    >
+                      <div className="flex items-center gap-2">
+                        <Gavel className="h-3 w-3 flex-shrink-0" />
+                        <span>Medidas Disciplinares</span>
+                      </div>
+                      {openSubMenus["medidas-disciplinares"] ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
+                    </button>
+                    {openSubMenus["medidas-disciplinares"] && (
+                      <div className="ml-4 mt-1 space-y-1">
+                        {medidas.map((it) => (
+                          <SidebarMenuSubButton
+                            key={it.slug}
+                            asChild
+                            className={
+                              currentPath === it.to ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"
+                            }
+                          >
+                            <Link to={it.to}>{it.label}</Link>
+                          </SidebarMenuSubButton>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </SidebarMenuSubItem>
+              )}
 
               {/* GRO */}
-              <SidebarMenuSubItem>
-                 <div className="w-full">
-                   <button onClick={() => toggleSubMenu("gro")} className="flex items-center justify-between w-full px-2 py-1 text-white hover:bg-slate-600 rounded text-xs">
-                     <div className="flex items-center gap-2">
-                       <Shield className="h-3 w-3 flex-shrink-0" />
-                       <span>GRO</span>
-                    </div>
-                    {openSubMenus.gro ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
-                  </button>
-                  {openSubMenus.gro && (
-                    <div className="ml-4 mt-1 space-y-1">
-                      <SidebarMenuSubButton asChild className={currentPath === "/gro/dashboard" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
-                        <Link to="/gro/dashboard">Dashboard</Link>
-                      </SidebarMenuSubButton>
-                      <SidebarMenuSubButton asChild className={currentPath === "/gro/cadastro-perigos" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
-                        <Link to="/gro/cadastro-perigos">Cadastro de Perigos</Link>
-                      </SidebarMenuSubButton>
-                      <SidebarMenuSubButton asChild className={currentPath === "/gro/avaliacao-riscos" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
-                        <Link to="/gro/avaliacao-riscos">Avaliação de Riscos</Link>
-                      </SidebarMenuSubButton>
-                      <SidebarMenuSubButton asChild className={currentPath === "/gro/pgr" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
-                        <Link to="/gro/pgr">PGR</Link>
-                      </SidebarMenuSubButton>
-                      <SidebarMenuSubButton asChild className={currentPath === "/gro/cadastro" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
-                        <Link to="/gro/cadastro">Cadastro</Link>
-                      </SidebarMenuSubButton>
-                      <SidebarMenuSubButton asChild className={currentPath === "/gro/consulta" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
-                        <Link to="/gro/consulta">Consulta</Link>
-                      </SidebarMenuSubButton>
-                    </div>
-                  )}
-                </div>
-              </SidebarMenuSubItem>
+              {gro.length > 0 && (
+                <SidebarMenuSubItem>
+                  <div className="w-full">
+                    <button
+                      onClick={() => toggleSubMenu("gro")}
+                      className="flex items-center justify-between w-full px-2 py-1 text-white hover:bg-slate-600 rounded text-xs"
+                    >
+                      <div className="flex items-center gap-2">
+                        <Shield className="h-3 w-3 flex-shrink-0" />
+                        <span>GRO</span>
+                      </div>
+                      {openSubMenus.gro ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
+                    </button>
+                    {openSubMenus.gro && (
+                      <div className="ml-4 mt-1 space-y-1">
+                        {gro.map((it) => (
+                          <SidebarMenuSubButton
+                            key={it.slug}
+                            asChild
+                            className={
+                              currentPath === it.to ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"
+                            }
+                          >
+                            <Link to={it.to}>{it.label}</Link>
+                          </SidebarMenuSubButton>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </SidebarMenuSubItem>
+              )}
 
               {/* Prevenção de Incêndio */}
-              <SidebarMenuSubItem>
-                <div className="w-full">
-                  <button onClick={() => toggleSubMenu("prevencao-incendio")} className="flex items-center justify-between w-full px-2 py-1 text-white hover:bg-slate-600 rounded text-xs">
-                    <div className="flex items-center gap-2">
-                      <Flame className="h-3 w-3 flex-shrink-0" />
-                      <span>Prevenção de Incêndio</span>
-                    </div>
-                    {openSubMenus["prevencao-incendio"] ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
-                  </button>
-                  {openSubMenus["prevencao-incendio"] && (
-                    <div className="ml-4 mt-1 space-y-1">
-                      <SidebarMenuSubButton asChild className={currentPath === "/prevencao-incendio/dashboard" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
-                        <Link to="/prevencao-incendio/dashboard">Dashboard</Link>
-                      </SidebarMenuSubButton>
-                      <SidebarMenuSubButton asChild className={currentPath === "/prevencao-incendio/cadastro-extintores" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
-                        <Link to="/prevencao-incendio/cadastro-extintores">Cadastro de Extintores</Link>
-                      </SidebarMenuSubButton>
-                      <SidebarMenuSubButton asChild className={currentPath === "/prevencao-incendio/inspecao-extintores" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
-                        <Link to="/prevencao-incendio/inspecao-extintores">Inspeção de Extintores</Link>
-                      </SidebarMenuSubButton>
-                      <SidebarMenuSubButton asChild className={currentPath === "/prevencao-incendio/consulta-inspecoes" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
-                        <Link to="/prevencao-incendio/consulta-inspecoes">Consulta de Inspeções</Link>
-                      </SidebarMenuSubButton>
-                    </div>
-                  )}
-                </div>
-              </SidebarMenuSubItem>
+              {prevInc.length > 0 && (
+                <SidebarMenuSubItem>
+                  <div className="w-full">
+                    <button
+                      onClick={() => toggleSubMenu("prevencao-incendio")}
+                      className="flex items-center justify-between w-full px-2 py-1 text-white hover:bg-slate-600 rounded text-xs"
+                    >
+                      <div className="flex items-center gap-2">
+                        <Flame className="h-3 w-3 flex-shrink-0" />
+                        <span>Prevenção de Incêndio</span>
+                      </div>
+                      {openSubMenus["prevencao-incendio"] ? (
+                        <ChevronDown className="h-3 w-3" />
+                      ) : (
+                        <ChevronRight className="h-3 w-3" />
+                      )}
+                    </button>
+                    {openSubMenus["prevencao-incendio"] && (
+                      <div className="ml-4 mt-1 space-y-1">
+                        {prevInc.map((it) => (
+                          <SidebarMenuSubButton
+                            key={it.slug}
+                            asChild
+                            className={
+                              currentPath === it.to ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"
+                            }
+                          >
+                            <Link to={it.to}>{it.label}</Link>
+                          </SidebarMenuSubButton>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </SidebarMenuSubItem>
+              )}
             </SidebarMenuSub>
           </CollapsibleContent>
         </Collapsible>
