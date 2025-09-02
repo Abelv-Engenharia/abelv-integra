@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Activity, FileText, Shield, AlertTriangle, GraduationCap, Clock, TrendingUp, BarChart3, Flame } from "lucide-react";
 import {
@@ -11,14 +10,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Link, useLocation } from "react-router-dom";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { useProfile } from "@/hooks/useProfile";
-import { getAllMenusSidebar } from "@/services/perfisService";
-
-// Função utilitária para verificar acesso (contem na lista)
-function podeVerMenu(menu: string, menusSidebar?: string[]) {
-  if (!menusSidebar || !Array.isArray(menusSidebar)) return false;
-  return menusSidebar.includes(menu);
-}
+import { usePermissions } from "@/hooks/usePermissions";
 
 interface SidebarSectionSMSProps {
   openMenu: string | null;
@@ -28,39 +20,12 @@ interface SidebarSectionSMSProps {
 export default function SidebarSectionSMS({ openMenu, toggleMenu }: SidebarSectionSMSProps) {
   const location = useLocation();
   const currentPath = location.pathname;
-  const { userPermissoes, userRole } = useProfile();
-
-  // Debug logs
-  console.log("SidebarSectionSMS - userRole:", userRole);
-  console.log("SidebarSectionSMS - userPermissoes:", userPermissoes);
-
-  // Verificar se é admin de forma mais robusta
-  const isAdmin = 
-    (userRole && typeof userRole === "string" && 
-     (userRole.toLowerCase().includes("admin") || userRole.toLowerCase() === "administrador")) ||
-    (userPermissoes && 
-     typeof userPermissoes === "object" && 
-     (userPermissoes as any).admin_funcionarios === true);
-
-  const menusSidebar = isAdmin
-    ? getAllMenusSidebar()
-    : (
-        userPermissoes &&
-        typeof userPermissoes === "object" &&
-        Array.isArray((userPermissoes as any).menus_sidebar)
-        ? (userPermissoes as any).menus_sidebar
-        : []
-      );
-
-  console.log("SidebarSectionSMS - isAdmin:", isAdmin);
-  console.log("SidebarSectionSMS - menusSidebar:", menusSidebar);
+  const { isAdmin, canAccessMenu } = usePermissions();
 
   return (
     <>
       {/* Seção IDSMS */}
-      {(isAdmin || ["idsms_dashboard", "idsms_relatorios"].some(menu =>
-        podeVerMenu(menu, menusSidebar)
-      )) && (
+      {(isAdmin || canAccessMenu("idsms_dashboard") || canAccessMenu("idsms_relatorios")) && (
         <SidebarMenu>
           <SidebarMenuItem>
             <Collapsible open={openMenu === "idsms"}>
@@ -75,7 +40,7 @@ export default function SidebarSectionSMS({ openMenu, toggleMenu }: SidebarSecti
               </CollapsibleTrigger>
               <CollapsibleContent asChild>
                 <SidebarMenuSub>
-                  {podeVerMenu("idsms_dashboard", menusSidebar) && (
+                  {(isAdmin || canAccessMenu("idsms_dashboard")) && (
                     <SidebarMenuSubItem>
                       <SidebarMenuSubButton 
                         asChild
@@ -160,9 +125,7 @@ export default function SidebarSectionSMS({ openMenu, toggleMenu }: SidebarSecti
       )}
 
       {/* Seção Desvios */}
-      {(isAdmin || ["desvios_dashboard", "desvios_cadastro", "desvios_consulta", "desvios_nao_conformidade", "desvios_insights"].some(menu =>
-        podeVerMenu(menu, menusSidebar)
-      )) && (
+      {(isAdmin || canAccessMenu("desvios_dashboard") || canAccessMenu("desvios_cadastro") || canAccessMenu("desvios_consulta")) && (
         <SidebarMenu>
           <SidebarMenuItem>
             <Collapsible open={openMenu === "desvios"}>
@@ -177,7 +140,7 @@ export default function SidebarSectionSMS({ openMenu, toggleMenu }: SidebarSecti
               </CollapsibleTrigger>
               <CollapsibleContent asChild>
                 <SidebarMenuSub>
-                  {podeVerMenu("desvios_dashboard", menusSidebar) && (
+                  {(isAdmin || canAccessMenu("desvios_dashboard")) && (
                     <SidebarMenuSubItem>
                       <SidebarMenuSubButton 
                         asChild
@@ -190,7 +153,7 @@ export default function SidebarSectionSMS({ openMenu, toggleMenu }: SidebarSecti
                       </SidebarMenuSubButton>
                     </SidebarMenuSubItem>
                   )}
-                  {podeVerMenu("desvios_cadastro", menusSidebar) && (
+                  {(isAdmin || canAccessMenu("desvios_cadastro")) && (
                     <SidebarMenuSubItem>
                       <SidebarMenuSubButton 
                         asChild
@@ -202,7 +165,7 @@ export default function SidebarSectionSMS({ openMenu, toggleMenu }: SidebarSecti
                       </SidebarMenuSubButton>
                     </SidebarMenuSubItem>
                   )}
-                  {podeVerMenu("desvios_consulta", menusSidebar) && (
+                  {(isAdmin || canAccessMenu("desvios_consulta")) && (
                     <SidebarMenuSubItem>
                       <SidebarMenuSubButton 
                         asChild
@@ -214,7 +177,7 @@ export default function SidebarSectionSMS({ openMenu, toggleMenu }: SidebarSecti
                       </SidebarMenuSubButton>
                     </SidebarMenuSubItem>
                   )}
-                  {podeVerMenu("desvios_nao_conformidade", menusSidebar) && (
+                  {(isAdmin || canAccessMenu("desvios_nao_conformidade")) && (
                     <SidebarMenuSubItem>
                       <SidebarMenuSubButton 
                         asChild
@@ -244,9 +207,7 @@ export default function SidebarSectionSMS({ openMenu, toggleMenu }: SidebarSecti
       )}
 
       {/* Seção Treinamentos */}
-      {(isAdmin || ["treinamentos_dashboard", "treinamentos_normativo", "treinamentos_consulta", "treinamentos_execucao", "treinamentos_cracha"].some(menu =>
-        podeVerMenu(menu, menusSidebar)
-      )) && (
+      {(isAdmin || canAccessMenu("treinamentos_dashboard") || canAccessMenu("treinamentos_normativo") || canAccessMenu("treinamentos_execucao")) && (
         <SidebarMenu>
           <SidebarMenuItem>
             <Collapsible open={openMenu === "treinamentos"}>
@@ -261,7 +222,7 @@ export default function SidebarSectionSMS({ openMenu, toggleMenu }: SidebarSecti
               </CollapsibleTrigger>
               <CollapsibleContent asChild>
                 <SidebarMenuSub>
-                  {podeVerMenu("treinamentos_dashboard", menusSidebar) && (
+                  {(isAdmin || canAccessMenu("treinamentos_dashboard")) && (
                     <SidebarMenuSubItem>
                       <SidebarMenuSubButton 
                         asChild
@@ -274,7 +235,7 @@ export default function SidebarSectionSMS({ openMenu, toggleMenu }: SidebarSecti
                       </SidebarMenuSubButton>
                     </SidebarMenuSubItem>
                   )}
-                  {podeVerMenu("treinamentos_normativo", menusSidebar) && (
+                  {(isAdmin || canAccessMenu("treinamentos_normativo")) && (
                     <SidebarMenuSubItem>
                       <SidebarMenuSubButton 
                         asChild
@@ -286,7 +247,7 @@ export default function SidebarSectionSMS({ openMenu, toggleMenu }: SidebarSecti
                       </SidebarMenuSubButton>
                     </SidebarMenuSubItem>
                   )}
-                  {podeVerMenu("treinamentos_consulta", menusSidebar) && (
+                  {(isAdmin || canAccessMenu("treinamentos_consulta")) && (
                     <SidebarMenuSubItem>
                       <SidebarMenuSubButton 
                         asChild
@@ -298,7 +259,7 @@ export default function SidebarSectionSMS({ openMenu, toggleMenu }: SidebarSecti
                       </SidebarMenuSubButton>
                     </SidebarMenuSubItem>
                   )}
-                  {podeVerMenu("treinamentos_execucao", menusSidebar) && (
+                  {(isAdmin || canAccessMenu("treinamentos_execucao")) && (
                     <SidebarMenuSubItem>
                       <SidebarMenuSubButton 
                         asChild
@@ -310,7 +271,7 @@ export default function SidebarSectionSMS({ openMenu, toggleMenu }: SidebarSecti
                       </SidebarMenuSubButton>
                     </SidebarMenuSubItem>
                   )}
-                  {podeVerMenu("treinamentos_cracha", menusSidebar) && (
+                  {(isAdmin || canAccessMenu("treinamentos_cracha")) && (
                     <SidebarMenuSubItem>
                       <SidebarMenuSubButton 
                         asChild
@@ -330,10 +291,7 @@ export default function SidebarSectionSMS({ openMenu, toggleMenu }: SidebarSecti
       )}
 
       {/* Seção Hora de Segurança */}
-      {(isAdmin || ["hora_seguranca_cadastro", "hora_seguranca_cadastro_inspecao", "hora_seguranca_cadastro_nao_programada", 
-        "hora_seguranca_dashboard", "hora_seguranca_agenda", "hora_seguranca_acompanhamento"].some(menu =>
-        podeVerMenu(menu, menusSidebar)
-      )) && (
+      {(isAdmin || canAccessMenu("hora_seguranca_dashboard") || canAccessMenu("hora_seguranca_agenda") || canAccessMenu("hora_seguranca_cadastro")) && (
         <SidebarMenu>
           <SidebarMenuItem>
             <Collapsible open={openMenu === "hora-seguranca"}>
@@ -348,7 +306,7 @@ export default function SidebarSectionSMS({ openMenu, toggleMenu }: SidebarSecti
               </CollapsibleTrigger>
               <CollapsibleContent asChild>
                 <SidebarMenuSub>
-                  {podeVerMenu("hora_seguranca_dashboard", menusSidebar) && (
+                  {(isAdmin || canAccessMenu("hora_seguranca_dashboard")) && (
                     <SidebarMenuSubItem>
                       <SidebarMenuSubButton 
                         asChild
@@ -361,7 +319,7 @@ export default function SidebarSectionSMS({ openMenu, toggleMenu }: SidebarSecti
                       </SidebarMenuSubButton>
                     </SidebarMenuSubItem>
                   )}
-                  {podeVerMenu("hora_seguranca_agenda", menusSidebar) && (
+                  {(isAdmin || canAccessMenu("hora_seguranca_agenda")) && (
                     <SidebarMenuSubItem>
                       <SidebarMenuSubButton 
                         asChild
@@ -373,7 +331,7 @@ export default function SidebarSectionSMS({ openMenu, toggleMenu }: SidebarSecti
                       </SidebarMenuSubButton>
                     </SidebarMenuSubItem>
                   )}
-                  {podeVerMenu("hora_seguranca_cadastro_inspecao", menusSidebar) && (
+                  {(isAdmin || canAccessMenu("hora_seguranca_cadastro_inspecao")) && (
                     <SidebarMenuSubItem>
                       <SidebarMenuSubButton 
                         asChild
@@ -385,7 +343,7 @@ export default function SidebarSectionSMS({ openMenu, toggleMenu }: SidebarSecti
                       </SidebarMenuSubButton>
                     </SidebarMenuSubItem>
                   )}
-                  {podeVerMenu("hora_seguranca_acompanhamento", menusSidebar) && (
+                  {(isAdmin || canAccessMenu("hora_seguranca_acompanhamento")) && (
                     <SidebarMenuSubItem>
                       <SidebarMenuSubButton 
                         asChild
@@ -397,7 +355,7 @@ export default function SidebarSectionSMS({ openMenu, toggleMenu }: SidebarSecti
                       </SidebarMenuSubButton>
                     </SidebarMenuSubItem>
                   )}
-                  {podeVerMenu("hora_seguranca_cadastro_nao_programada", menusSidebar) && (
+                  {(isAdmin || canAccessMenu("hora_seguranca_cadastro_nao_programada")) && (
                     <SidebarMenuSubItem>
                       <SidebarMenuSubButton 
                         asChild
@@ -417,9 +375,7 @@ export default function SidebarSectionSMS({ openMenu, toggleMenu }: SidebarSecti
       )}
 
       {/* Seção Inspeção SMS */}
-      {(isAdmin || ["inspecao_sms_dashboard", "inspecao_sms_cadastro", "inspecao_sms_consulta"].some(menu =>
-        podeVerMenu(menu, menusSidebar)
-      )) && (
+      {(isAdmin || canAccessMenu("inspecao_sms_dashboard") || canAccessMenu("inspecao_sms_cadastro") || canAccessMenu("inspecao_sms_consulta")) && (
         <SidebarMenu>
           <SidebarMenuItem>
             <Collapsible open={openMenu === "inspecao-sms"}>
@@ -434,7 +390,7 @@ export default function SidebarSectionSMS({ openMenu, toggleMenu }: SidebarSecti
               </CollapsibleTrigger>
               <CollapsibleContent asChild>
                 <SidebarMenuSub>
-                  {podeVerMenu("inspecao_sms_dashboard", menusSidebar) && (
+                  {(isAdmin || canAccessMenu("inspecao_sms_dashboard")) && (
                     <SidebarMenuSubItem>
                       <SidebarMenuSubButton 
                         asChild
@@ -447,19 +403,19 @@ export default function SidebarSectionSMS({ openMenu, toggleMenu }: SidebarSecti
                       </SidebarMenuSubButton>
                     </SidebarMenuSubItem>
                   )}
-                  {podeVerMenu("inspecao_sms_cadastro", menusSidebar) && (
+                  {(isAdmin || canAccessMenu("inspecao_sms_cadastro")) && (
                     <SidebarMenuSubItem>
                       <SidebarMenuSubButton 
                         asChild
-                        className={currentPath === "/inspecao-sms/cadastro" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
+                        className={currentPath === "/inspecao-sms/cadastrar" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
                       >
-                        <Link to="/inspecao-sms/cadastro" className="flex items-center gap-2">
+                        <Link to="/inspecao-sms/cadastrar" className="flex items-center gap-2">
                           <span className="text-xs leading-tight break-words min-w-0">Cadastrar</span>
                         </Link>
                       </SidebarMenuSubButton>
                     </SidebarMenuSubItem>
                   )}
-                  {podeVerMenu("inspecao_sms_consulta", menusSidebar) && (
+                  {(isAdmin || canAccessMenu("inspecao_sms_consulta")) && (
                     <SidebarMenuSubItem>
                       <SidebarMenuSubButton 
                         asChild
@@ -478,10 +434,68 @@ export default function SidebarSectionSMS({ openMenu, toggleMenu }: SidebarSecti
         </SidebarMenu>
       )}
 
+      {/* Seção Prevenção de Incêndio */}
+      {(isAdmin || canAccessMenu("prevencao_incendio_dashboard") || canAccessMenu("prevencao_incendio_cadastro_extintores") || canAccessMenu("prevencao_incendio_inspecao_extintores")) && (
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <Collapsible open={openMenu === "prevencao-incendio"}>
+              <CollapsibleTrigger asChild>
+                <SidebarMenuButton 
+                  onClick={() => toggleMenu("prevencao-incendio")}
+                  className="text-white hover:bg-slate-600"
+                >
+                  <Flame className="h-4 w-4 flex-shrink-0" />
+                  <span className="break-words">Prevenção de Incêndio</span>
+                </SidebarMenuButton>
+              </CollapsibleTrigger>
+              <CollapsibleContent asChild>
+                <SidebarMenuSub>
+                  {(isAdmin || canAccessMenu("prevencao_incendio_dashboard")) && (
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton 
+                        asChild
+                        className={currentPath === "/prevencao-incendio/dashboard" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
+                      >
+                        <Link to="/prevencao-incendio/dashboard" className="flex items-center gap-2">
+                          <TrendingUp className="h-3 w-3 flex-shrink-0" />
+                          <span className="text-xs leading-tight break-words min-w-0">Dashboard</span>
+                        </Link>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+                  )}
+                  {(isAdmin || canAccessMenu("prevencao_incendio_cadastro_extintores")) && (
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton 
+                        asChild
+                        className={currentPath === "/prevencao-incendio/cadastro-extintores" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
+                      >
+                        <Link to="/prevencao-incendio/cadastro-extintores" className="flex items-center gap-2">
+                          <span className="text-xs leading-tight break-words min-w-0">Cadastro de Extintores</span>
+                        </Link>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+                  )}
+                  {(isAdmin || canAccessMenu("prevencao_incendio_inspecao_extintores")) && (
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton 
+                        asChild
+                        className={currentPath === "/prevencao-incendio/inspecao-extintores" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
+                      >
+                        <Link to="/prevencao-incendio/inspecao-extintores" className="flex items-center gap-2">
+                          <span className="text-xs leading-tight break-words min-w-0">Inspeção de Extintores</span>
+                        </Link>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+                  )}
+                </SidebarMenuSub>
+              </CollapsibleContent>
+            </Collapsible>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      )}
+
       {/* Seção Ocorrências */}
-      {(isAdmin || ["ocorrencias_dashboard", "ocorrencias_cadastro", "ocorrencias_consulta"].some(menu =>
-        podeVerMenu(menu, menusSidebar)
-      )) && (
+      {(isAdmin || canAccessMenu("ocorrencias_dashboard") || canAccessMenu("ocorrencias_cadastro") || canAccessMenu("ocorrencias_consulta")) && (
         <SidebarMenu>
           <SidebarMenuItem>
             <Collapsible open={openMenu === "ocorrencias"}>
@@ -496,7 +510,7 @@ export default function SidebarSectionSMS({ openMenu, toggleMenu }: SidebarSecti
               </CollapsibleTrigger>
               <CollapsibleContent asChild>
                 <SidebarMenuSub>
-                  {podeVerMenu("ocorrencias_dashboard", menusSidebar) && (
+                  {(isAdmin || canAccessMenu("ocorrencias_dashboard")) && (
                     <SidebarMenuSubItem>
                       <SidebarMenuSubButton 
                         asChild
@@ -509,7 +523,7 @@ export default function SidebarSectionSMS({ openMenu, toggleMenu }: SidebarSecti
                       </SidebarMenuSubButton>
                     </SidebarMenuSubItem>
                   )}
-                  {podeVerMenu("ocorrencias_cadastro", menusSidebar) && (
+                  {(isAdmin || canAccessMenu("ocorrencias_cadastro")) && (
                     <SidebarMenuSubItem>
                       <SidebarMenuSubButton 
                         asChild
@@ -521,7 +535,7 @@ export default function SidebarSectionSMS({ openMenu, toggleMenu }: SidebarSecti
                       </SidebarMenuSubButton>
                     </SidebarMenuSubItem>
                   )}
-                  {podeVerMenu("ocorrencias_consulta", menusSidebar) && (
+                  {(isAdmin || canAccessMenu("ocorrencias_consulta")) && (
                     <SidebarMenuSubItem>
                       <SidebarMenuSubButton 
                         asChild
@@ -541,9 +555,7 @@ export default function SidebarSectionSMS({ openMenu, toggleMenu }: SidebarSecti
       )}
 
       {/* Seção Medidas Disciplinares */}
-      {(isAdmin || ["medidas_disciplinares_dashboard", "medidas_disciplinares_cadastro", "medidas_disciplinares_consulta"].some(menu =>
-        podeVerMenu(menu, menusSidebar)
-      )) && (
+      {(isAdmin || canAccessMenu("medidas_disciplinares_dashboard") || canAccessMenu("medidas_disciplinares_cadastro") || canAccessMenu("medidas_disciplinares_consulta")) && (
         <SidebarMenu>
           <SidebarMenuItem>
             <Collapsible open={openMenu === "medidas-disciplinares"}>
@@ -558,7 +570,7 @@ export default function SidebarSectionSMS({ openMenu, toggleMenu }: SidebarSecti
               </CollapsibleTrigger>
               <CollapsibleContent asChild>
                 <SidebarMenuSub>
-                  {podeVerMenu("medidas_disciplinares_dashboard", menusSidebar) && (
+                  {(isAdmin || canAccessMenu("medidas_disciplinares_dashboard")) && (
                     <SidebarMenuSubItem>
                       <SidebarMenuSubButton 
                         asChild
@@ -571,7 +583,7 @@ export default function SidebarSectionSMS({ openMenu, toggleMenu }: SidebarSecti
                       </SidebarMenuSubButton>
                     </SidebarMenuSubItem>
                   )}
-                  {podeVerMenu("medidas_disciplinares_cadastro", menusSidebar) && (
+                  {(isAdmin || canAccessMenu("medidas_disciplinares_cadastro")) && (
                     <SidebarMenuSubItem>
                       <SidebarMenuSubButton 
                         asChild
@@ -583,7 +595,7 @@ export default function SidebarSectionSMS({ openMenu, toggleMenu }: SidebarSecti
                       </SidebarMenuSubButton>
                     </SidebarMenuSubItem>
                   )}
-                  {podeVerMenu("medidas_disciplinares_consulta", menusSidebar) && (
+                  {(isAdmin || canAccessMenu("medidas_disciplinares_consulta")) && (
                     <SidebarMenuSubItem>
                       <SidebarMenuSubButton 
                         asChild
@@ -602,72 +614,8 @@ export default function SidebarSectionSMS({ openMenu, toggleMenu }: SidebarSecti
         </SidebarMenu>
       )}
 
-      {/* Seção Prevenção de Incêndio */}
-      {(isAdmin || ["prevencao_incendio_dashboard", "prevencao_incendio_cadastro_extintores", "prevencao_incendio_inspecao_extintores"].some(menu =>
-        podeVerMenu(menu, menusSidebar)
-      )) && (
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <Collapsible open={openMenu === "prevencao-incendio"}>
-              <CollapsibleTrigger asChild>
-                <SidebarMenuButton 
-                  onClick={() => toggleMenu("prevencao-incendio")}
-                  className="text-white hover:bg-slate-600"
-                >
-                  <Flame className="h-4 w-4 flex-shrink-0" />
-                  <span className="break-words">Prevenção de Incêndio</span>
-                </SidebarMenuButton>
-              </CollapsibleTrigger>
-              <CollapsibleContent asChild>
-                <SidebarMenuSub>
-                  {(isAdmin || podeVerMenu("prevencao_incendio_dashboard", menusSidebar)) && (
-                    <SidebarMenuSubItem>
-                      <SidebarMenuSubButton 
-                        asChild
-                        className={currentPath === "/prevencao-incendio/dashboard" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
-                      >
-                        <Link to="/prevencao-incendio/dashboard" className="flex items-center gap-2">
-                          <TrendingUp className="h-3 w-3 flex-shrink-0" />
-                          <span className="text-xs leading-tight break-words min-w-0">Dashboard</span>
-                        </Link>
-                      </SidebarMenuSubButton>
-                    </SidebarMenuSubItem>
-                  )}
-                  {(isAdmin || podeVerMenu("prevencao_incendio_cadastro_extintores", menusSidebar)) && (
-                    <SidebarMenuSubItem>
-                      <SidebarMenuSubButton 
-                        asChild
-                        className={currentPath === "/prevencao-incendio/cadastro-extintores" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
-                      >
-                        <Link to="/prevencao-incendio/cadastro-extintores" className="flex items-center gap-2">
-                          <span className="text-xs leading-tight break-words min-w-0">Cadastro de Extintores</span>
-                        </Link>
-                      </SidebarMenuSubButton>
-                    </SidebarMenuSubItem>
-                  )}
-                  {(isAdmin || podeVerMenu("prevencao_incendio_inspecao_extintores", menusSidebar)) && (
-                    <SidebarMenuSubItem>
-                      <SidebarMenuSubButton 
-                        asChild
-                        className={currentPath === "/prevencao-incendio/inspecao-extintores" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
-                      >
-                        <Link to="/prevencao-incendio/inspecao-extintores" className="flex items-center gap-2">
-                          <span className="text-xs leading-tight break-words min-w-0">Inspeção de Extintores</span>
-                        </Link>
-                      </SidebarMenuSubButton>
-                    </SidebarMenuSubItem>
-                  )}
-                </SidebarMenuSub>
-              </CollapsibleContent>
-            </Collapsible>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      )}
-
       {/* Seção GRO */}
-      {(isAdmin || ["gro_dashboard", "gro_avaliacao_riscos"].some(menu =>
-        podeVerMenu(menu, menusSidebar)
-      )) && (
+      {(isAdmin || canAccessMenu("gro_dashboard") || canAccessMenu("gro_avaliacao_riscos")) && (
         <SidebarMenu>
           <SidebarMenuItem>
             <Collapsible open={openMenu === "gro"}>
@@ -682,7 +630,7 @@ export default function SidebarSectionSMS({ openMenu, toggleMenu }: SidebarSecti
               </CollapsibleTrigger>
               <CollapsibleContent asChild>
                 <SidebarMenuSub>
-                  {podeVerMenu("gro_dashboard", menusSidebar) && (
+                  {(isAdmin || canAccessMenu("gro_dashboard")) && (
                     <SidebarMenuSubItem>
                       <SidebarMenuSubButton 
                         asChild
@@ -695,7 +643,7 @@ export default function SidebarSectionSMS({ openMenu, toggleMenu }: SidebarSecti
                       </SidebarMenuSubButton>
                     </SidebarMenuSubItem>
                   )}
-                  {podeVerMenu("gro_avaliacao_riscos", menusSidebar) && (
+                  {(isAdmin || canAccessMenu("gro_avaliacao_riscos")) && (
                     <SidebarMenuSubItem>
                       <SidebarMenuSubButton 
                         asChild
