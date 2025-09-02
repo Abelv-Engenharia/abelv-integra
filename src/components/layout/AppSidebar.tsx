@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 import { Home, Settings, User } from "lucide-react";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import {
@@ -7,9 +7,6 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarMenuSub,
-  SidebarMenuSubItem,
-  SidebarMenuSubButton,
   useSidebar,
 } from "@/components/ui/sidebar";
 import { Link, useLocation } from "react-router-dom";
@@ -21,12 +18,10 @@ import SidebarSectionAdministracao from "./SidebarSectionAdministracao";
 import SidebarSearch from "./SidebarSearch";
 import { useProfile } from "@/hooks/useProfile";
 
-// === Regra de permissão baseada em menus_sidebar (whitelist) ===
-function useCanSee(menusSidebar: string[]) {
-  return useMemo(() => {
-    const set = new Set(menusSidebar ?? []);
-    return (slug: string) => set.has(slug);
-  }, [menusSidebar]);
+// helper simples
+function podeVerMenu(menu: string, menusSidebar?: string[]) {
+  if (!menusSidebar || !Array.isArray(menusSidebar)) return false;
+  return menusSidebar.includes(menu);
 }
 
 export function AppSidebar() {
@@ -35,17 +30,15 @@ export function AppSidebar() {
   const { userPermissoes } = useProfile();
   const { isMobile, setOpenMobile } = useSidebar();
 
-  // Extrai e normaliza a lista de slugs permitidos
-  const menusSidebar: string[] = useMemo(() => {
-    const raw = userPermissoes && typeof userPermissoes === "object"
+  // pega os slugs do perfil
+  const menusSidebar =
+    userPermissoes && typeof userPermissoes === "object" && Array.isArray((userPermissoes as any).menus_sidebar)
       ? (userPermissoes as any).menus_sidebar
       : [];
-    return Array.isArray(raw) ? Array.from(new Set<string>(raw)) : [];
-  }, [userPermissoes]);
 
-  const canSee = useCanSee(menusSidebar);
+  // função que será repassada
+  const canSee = (slug: string) => podeVerMenu(slug, menusSidebar);
 
-  // Grupo aberto inicialmente
   const [openMenu, setOpenMenu] = useState<string | null>(() => {
     if (
       currentPath.startsWith("/idsms") ||
@@ -57,7 +50,8 @@ export function AppSidebar() {
       currentPath.startsWith("/inspecao-sms") ||
       currentPath.startsWith("/ocorrencias") ||
       currentPath.startsWith("/medidas-disciplinares")
-    ) return "gestao-sms";
+    )
+      return "gestao-sms";
     if (currentPath.startsWith("/tarefas")) return "tarefas";
     if (currentPath.startsWith("/relatorios")) return "relatorios";
     if (currentPath.startsWith("/admin") || currentPath.startsWith("/tutoriais")) return "admin";
@@ -71,34 +65,9 @@ export function AppSidebar() {
     if (isMobile) setOpenMobile(false);
   };
 
-  // Conjuntos de slugs por seção (só para checar se a seção deve aparecer)
-  const smsSlugs = [
-    "idsms_dashboard", "idsms_relatorios",
-    "gro_dashboard", "gro_avaliacao_riscos",
-    "prevencao_incendio_dashboard", "prevencao_incendio_cadastro_extintores", "prevencao_incendio_inspecao_extintores",
-    "desvios_dashboard", "desvios_cadastro", "desvios_consulta", "desvios_nao_conformidade",
-    "treinamentos_dashboard", "treinamentos_normativo", "treinamentos_consulta", "treinamentos_execucao", "treinamentos_cracha",
-    "hora_seguranca_cadastro", "hora_seguranca_cadastro_inspecao", "hora_seguranca_cadastro_nao_programada",
-    "hora_seguranca_dashboard", "hora_seguranca_agenda", "hora_seguranca_acompanhamento",
-    "inspecao_sms_dashboard", "inspecao_sms_cadastro", "inspecao_sms_consulta",
-    "medidas_disciplinares_dashboard", "medidas_disciplinares_cadastro", "medidas_disciplinares_consulta",
-    "ocorrencias_dashboard", "ocorrencias_cadastro", "ocorrencias_consulta",
-  ];
-  const tarefasSlugs   = ["tarefas_dashboard", "tarefas_minhas_tarefas", "tarefas_cadastro"];
-  const relatoriosSlugs= ["relatorios_dashboard", "relatorios_idsms"];
-  const adminSlugs     = [
-    "admin_usuarios", "admin_perfis", "admin_empresas", "admin_ccas",
-    "admin_engenheiros", "admin_supervisores", "admin_funcionarios",
-    "admin_hht", "admin_metas_indicadores", "admin_templates", "admin_logo",
-    "admin_modelos_inspecao",
-  ];
-
-  const hasAny = (slugs: string[]) => slugs.some(canSee);
-
   return (
     <Sidebar>
       <SidebarContent className="bg-sky-900">
-        {/* Dashboard simples */}
         <SidebarMenu>
           {canSee("dashboard") && (
             <SidebarMenuItem>
@@ -119,45 +88,77 @@ export function AppSidebar() {
           )}
         </SidebarMenu>
 
-        {/* Busca (agora já filtrando pelos slugs permitidos) */}
+        {/* Busca */}
         <SidebarSearch menusSidebar={menusSidebar} />
 
-        {/* Seções – só aparecem se houver ao menos 1 slug permitido */}
-        {hasAny(smsSlugs) && (
+        {/* SMS */}
+        {[
+          "idsms_dashboard",
+          "idsms_relatorios",
+          "gro_dashboard",
+          "gro_avaliacao_riscos",
+          "prevencao_incendio_dashboard",
+          "prevencao_incendio_cadastro_extintores",
+          "prevencao_incendio_inspecao_extintores",
+          "desvios_dashboard",
+          "desvios_cadastro",
+          "desvios_consulta",
+          "desvios_nao_conformidade",
+          "treinamentos_dashboard",
+          "treinamentos_normativo",
+          "treinamentos_consulta",
+          "treinamentos_execucao",
+          "treinamentos_cracha",
+          "hora_seguranca_cadastro",
+          "hora_seguranca_cadastro_inspecao",
+          "hora_seguranca_cadastro_nao_programada",
+          "hora_seguranca_dashboard",
+          "hora_seguranca_agenda",
+          "hora_seguranca_acompanhamento",
+          "inspecao_sms_dashboard",
+          "inspecao_sms_cadastro",
+          "inspecao_sms_consulta",
+          "medidas_disciplinares_dashboard",
+          "medidas_disciplinares_cadastro",
+          "medidas_disciplinares_consulta",
+          "ocorrencias_dashboard",
+          "ocorrencias_cadastro",
+          "ocorrencias_consulta",
+        ].some(canSee) && (
           <SidebarSectionGestaoSMS
             openMenu={openMenu}
             toggleMenu={toggleMenu}
             onLinkClick={handleLinkClick}
-            // se você for ajustar as seções para filtrar os filhos lá dentro, pode também passar canSee por props
-            // canSee={canSee}
+            canSee={canSee}   // <<< repassando aqui
           />
         )}
 
-        {hasAny(tarefasSlugs) && (
-          <SidebarSectionTarefas
-            openMenu={openMenu}
-            toggleMenu={toggleMenu}
-            onLinkClick={handleLinkClick}
-            // canSee={canSee}
-          />
+        {/* Tarefas */}
+        {["tarefas_dashboard", "tarefas_minhas_tarefas", "tarefas_cadastro"].some(canSee) && (
+          <SidebarSectionTarefas openMenu={openMenu} toggleMenu={toggleMenu} onLinkClick={handleLinkClick} />
         )}
 
-        {hasAny(relatoriosSlugs) && (
-          <SidebarSectionRelatorios
-            openMenu={openMenu}
-            toggleMenu={toggleMenu}
-            onLinkClick={handleLinkClick}
-            // canSee={canSee}
-          />
+        {/* Relatórios */}
+        {["relatorios_dashboard", "relatorios_idsms"].some(canSee) && (
+          <SidebarSectionRelatorios openMenu={openMenu} toggleMenu={toggleMenu} onLinkClick={handleLinkClick} />
         )}
 
-        {hasAny(adminSlugs) && (
-          <SidebarSectionAdministracao
-            openMenu={openMenu}
-            toggleMenu={toggleMenu}
-            onLinkClick={handleLinkClick}
-            // canSee={canSee}
-          />
+        {/* Administração */}
+        {[
+          "admin_usuarios",
+          "admin_perfis",
+          "admin_empresas",
+          "admin_ccas",
+          "admin_engenheiros",
+          "admin_supervisores",
+          "admin_funcionarios",
+          "admin_hht",
+          "admin_metas_indicadores",
+          "admin_templates",
+          "admin_logo",
+          "admin_modelos_inspecao",
+        ].some(canSee) && (
+          <SidebarSectionAdministracao openMenu={openMenu} toggleMenu={toggleMenu} onLinkClick={handleLinkClick} />
         )}
 
         {/* Conta */}
@@ -176,9 +177,9 @@ export function AppSidebar() {
                 </SidebarMenuButton>
               </CollapsibleTrigger>
               <CollapsibleContent asChild>
-                <SidebarMenuSub>
-                  <SidebarMenuSubItem>
-                    <SidebarMenuSubButton
+                <SidebarMenu>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
                       asChild
                       className={
                         currentPath === "/account/profile"
@@ -189,10 +190,10 @@ export function AppSidebar() {
                       <Link to="/account/profile" className="flex items-center gap-2" onClick={handleLinkClick}>
                         <span className="text-xs leading-tight break-words min-w-0">Perfil</span>
                       </Link>
-                    </SidebarMenuSubButton>
-                  </SidebarMenuSubItem>
-                  <SidebarMenuSubItem>
-                    <SidebarMenuSubButton
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
                       asChild
                       className={
                         currentPath === "/account/settings"
@@ -202,11 +203,13 @@ export function AppSidebar() {
                     >
                       <Link to="/account/settings" className="flex items-center gap-2" onClick={handleLinkClick}>
                         <Settings className="h-3 w-3 flex-shrink-0" />
-                        <span className="text-xs leading-tight break-words min-w-0">Configuração da conta</span>
+                        <span className="text-xs leading-tight break-words min-w-0">
+                          Configuração da conta
+                        </span>
                       </Link>
-                    </SidebarMenuSubButton>
-                  </SidebarMenuSubItem>
-                </SidebarMenuSub>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                </SidebarMenu>
               </CollapsibleContent>
             </Collapsible>
           </SidebarMenuItem>
