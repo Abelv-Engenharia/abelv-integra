@@ -10,6 +10,8 @@ import { useState } from "react";
 import { PermissionGuard } from "@/components/security/PermissionGuard";
 import { AccessDenied } from "@/components/security/AccessDenied";
 import QRCodeDialog from "@/components/prevencao-incendio/QRCodeDialog";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
 
 const CadastroExtintores = () => {
   const navigate = useNavigate();
@@ -32,20 +34,62 @@ const CadastroExtintores = () => {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Validar campos obrigatórios
     if (!formData.codigo || !formData.tipo || !formData.capacidade || !formData.localizacao) {
-      alert('Por favor, preencha todos os campos obrigatórios.');
+      toast({
+        title: "Campos obrigatórios",
+        description: "Por favor, preencha todos os campos obrigatórios.",
+        variant: "destructive"
+      });
       return;
     }
     
-    // Aqui seria implementada a lógica de salvamento
-    console.log('Dados do extintor:', formData);
-    
-    // Mostrar QR Code após sucesso
-    setShowQRDialog(true);
+    try {
+      // Salvar extintor no banco de dados
+      const { data, error } = await supabase
+        .from('extintores')
+        .insert([{
+          codigo: formData.codigo,
+          tipo: formData.tipo,
+          capacidade: formData.capacidade,
+          fabricante: formData.fabricante || null,
+          data_fabricacao: formData.dataFabricacao || null,
+          data_vencimento: formData.dataVencimento || null,
+          localizacao: formData.localizacao,
+          observacoes: formData.observacoes || null
+        }])
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Erro ao salvar extintor:', error);
+        toast({
+          title: "Erro ao cadastrar",
+          description: "Erro ao cadastrar o extintor. Verifique se o código já não existe.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      toast({
+        title: "Sucesso!",
+        description: "Extintor cadastrado com sucesso.",
+      });
+      
+      // Mostrar QR Code após sucesso
+      setShowQRDialog(true);
+      
+    } catch (error) {
+      console.error('Erro:', error);
+      toast({
+        title: "Erro",
+        description: "Erro inesperado ao cadastrar extintor.",
+        variant: "destructive"
+      });
+    }
   };
 
   const handleNewRecord = () => {

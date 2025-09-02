@@ -1060,6 +1060,51 @@ export type Database = {
         }
         Relationships: []
       }
+      extintores: {
+        Row: {
+          ativo: boolean | null
+          capacidade: string
+          codigo: string
+          created_at: string | null
+          data_fabricacao: string | null
+          data_vencimento: string | null
+          fabricante: string | null
+          id: string
+          localizacao: string
+          observacoes: string | null
+          tipo: string
+          updated_at: string | null
+        }
+        Insert: {
+          ativo?: boolean | null
+          capacidade: string
+          codigo: string
+          created_at?: string | null
+          data_fabricacao?: string | null
+          data_vencimento?: string | null
+          fabricante?: string | null
+          id?: string
+          localizacao: string
+          observacoes?: string | null
+          tipo: string
+          updated_at?: string | null
+        }
+        Update: {
+          ativo?: boolean | null
+          capacidade?: string
+          codigo?: string
+          created_at?: string | null
+          data_fabricacao?: string | null
+          data_vencimento?: string | null
+          fabricante?: string | null
+          id?: string
+          localizacao?: string
+          observacoes?: string | null
+          tipo?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       funcionario_supervisores: {
         Row: {
           created_at: string
@@ -1269,6 +1314,63 @@ export type Database = {
           valor?: number
         }
         Relationships: []
+      }
+      inspecoes_extintores: {
+        Row: {
+          checklist_id: string
+          created_at: string | null
+          dados_preenchidos: Json
+          data_inspecao: string
+          extintor_id: string
+          id: string
+          observacoes: string | null
+          responsavel_id: string
+          status: string
+          tem_nao_conformidade: boolean | null
+          updated_at: string | null
+        }
+        Insert: {
+          checklist_id: string
+          created_at?: string | null
+          dados_preenchidos?: Json
+          data_inspecao: string
+          extintor_id: string
+          id?: string
+          observacoes?: string | null
+          responsavel_id: string
+          status?: string
+          tem_nao_conformidade?: boolean | null
+          updated_at?: string | null
+        }
+        Update: {
+          checklist_id?: string
+          created_at?: string | null
+          dados_preenchidos?: Json
+          data_inspecao?: string
+          extintor_id?: string
+          id?: string
+          observacoes?: string | null
+          responsavel_id?: string
+          status?: string
+          tem_nao_conformidade?: boolean | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inspecoes_extintores_checklist_id_fkey"
+            columns: ["checklist_id"]
+            isOneToOne: false
+            referencedRelation: "checklists_avaliacao"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inspecoes_extintores_extintor_id_fkey"
+            columns: ["extintor_id"]
+            isOneToOne: false
+            referencedRelation: "extintores"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       inspecoes_sms: {
         Row: {
