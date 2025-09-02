@@ -1,4 +1,4 @@
-import { ArrowLeft, Flame, Shield, Calendar, TrendingUp } from "lucide-react";
+import { ArrowLeft, Flame, Shield, Calendar, TrendingUp, FileSearch } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
@@ -128,6 +128,14 @@ const PrevencaoIncendioDashboard = () => {
             >
               <Shield className="mr-2 h-4 w-4" />
               Inspecionar Extintores
+            </Button>
+            <Button 
+              variant="outline"
+              className="w-full" 
+              onClick={() => navigate('/prevencao-incendio/consulta-inspecoes')}
+            >
+              <FileSearch className="mr-2 h-4 w-4" />
+              Consultar Inspeções
             </Button>
           </CardContent>
         </Card>

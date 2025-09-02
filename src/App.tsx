@@ -134,6 +134,8 @@ import HoraSeguranca from "./pages/inspecao-sms/HoraSeguranca";
 import PrevencaoIncendioDashboard from "./pages/prevencao-incendio/PrevencaoIncendioDashboard";
 import CadastroExtintores from "./pages/prevencao-incendio/CadastroExtintores";
 import InspecaoExtintores from "./pages/prevencao-incendio/InspecaoExtintores";
+import ConsultaInspecoesExtintores from "./pages/prevencao-incendio/ConsultaInspecoesExtintores";
+import VisualizarInspecaoExtintor from "./pages/prevencao-incendio/VisualizarInspecaoExtintor";
 
 // Atualização de Perfis
 import AtualizarPerfis from "./pages/admin/AtualizarPerfis";
@@ -288,6 +290,8 @@ function App() {
                 <Route path="prevencao-incendio/dashboard" element={<PrevencaoIncendioDashboard />} />
                 <Route path="prevencao-incendio/cadastro-extintores" element={<CadastroExtintores />} />
                 <Route path="prevencao-incendio/inspecao-extintores" element={<InspecaoExtintores />} />
+                <Route path="prevencao-incendio/consulta-inspecoes" element={<ConsultaInspecoesExtintores />} />
+                <Route path="prevencao-incendio/inspecoes/:id" element={<VisualizarInspecaoExtintor />} />
 
                 {/* Placeholder routes */}
                 <Route path="placeholder" element={<PlaceholderPage />} />

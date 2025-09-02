@@ -358,6 +358,9 @@ export default function SidebarSectionGestaoSMS({
                       <SidebarMenuSubButton asChild className={currentPath === "/prevencao-incendio/inspecao-extintores" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
                         <Link to="/prevencao-incendio/inspecao-extintores">Inspeção de Extintores</Link>
                       </SidebarMenuSubButton>
+                      <SidebarMenuSubButton asChild className={currentPath === "/prevencao-incendio/consulta-inspecoes" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}>
+                        <Link to="/prevencao-incendio/consulta-inspecoes">Consulta de Inspeções</Link>
+                      </SidebarMenuSubButton>
                     </div>
                   )}
                 </div>
