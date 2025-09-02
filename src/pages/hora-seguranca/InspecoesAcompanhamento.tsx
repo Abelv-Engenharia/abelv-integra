@@ -166,9 +166,7 @@ export default function InspecoesAcompanhamento() {
     setSelectedInspecao(inspecao);
     setRelatorioUrl(inspecao.relatorio_url || "");
     updateForm.reset({
-      status: (inspecao.status === "REALIZADA (NÃO PROGRAMADA)")
-        ? "REALIZADA"
-        : (inspecao.status || "REALIZADA"),
+      status: inspecao.status || "REALIZADA",
       desviosIdentificados: inspecao.desvios_identificados || 0,
     });
     setUpdateDialogOpen(true);
