@@ -6,6 +6,7 @@ import { Sidebar, SidebarContent, SidebarMenu, SidebarMenuButton, SidebarMenuIte
 import { Link, useLocation } from "react-router-dom";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import SidebarSectionGestaoSMS from "./SidebarSectionGestaoSMS";
+import SidebarSectionSMS from "./SidebarSectionSMS";
 import SidebarSectionTarefas from "./SidebarSectionTarefas";
 import SidebarSectionRelatorios from "./SidebarSectionRelatorios";
 import SidebarSectionAdministracao from "./SidebarSectionAdministracao";
@@ -37,6 +38,7 @@ export function AppSidebar() {
     if (currentPath.startsWith("/idsms")) return "idsms";
     if (currentPath.startsWith("/admin")) return "admin";
     if (currentPath.startsWith("/gro")) return "gro";
+    if (currentPath.startsWith("/prevencao-incendio")) return "prevencao-incendio";
     if (currentPath.startsWith("/tutoriais")) return "admin";
     if (currentPath.startsWith("/account")) return "account";
     return null;
@@ -74,6 +76,11 @@ export function AppSidebar() {
 
         {/* Área de busca */}
         <SidebarSearch menusSidebar={menusSidebar} />
+
+        {/* Seção SMS com IDSMS, GRO e Prevenção de Incêndio */}
+        {["idsms_dashboard", "idsms_relatorios", "gro_dashboard", "gro_avaliacao_riscos", "prevencao_incendio_dashboard", "prevencao_incendio_cadastro_extintores", "prevencao_incendio_inspecao_extintores"].some(menu => podeVerMenu(menu, menusSidebar)) && (
+          <SidebarSectionSMS openMenu={openMenu} toggleMenu={toggleMenu} onLinkClick={handleLinkClick} />
+        )}
 
         {/* Render SMS se tiver acesso a pelo menos 1 menu dos agrupados */}
         {["desvios_dashboard", "desvios_cadastro", "desvios_consulta", "desvios_nao_conformidade", "treinamentos_dashboard", "treinamentos_normativo", "treinamentos_consulta", "treinamentos_execucao", "treinamentos_cracha", "hora_seguranca_cadastro", "hora_seguranca_cadastro_inspecao", "hora_seguranca_cadastro_nao_programada", "hora_seguranca_dashboard", "hora_seguranca_agenda", "hora_seguranca_acompanhamento", "inspecao_sms_dashboard", "inspecao_sms_cadastro", "inspecao_sms_consulta", "medidas_disciplinares_dashboard", "medidas_disciplinares_cadastro", "medidas_disciplinares_consulta", "ocorrencias_dashboard", "ocorrencias_cadastro", "ocorrencias_consulta"].some(menu => podeVerMenu(menu, menusSidebar)) && (

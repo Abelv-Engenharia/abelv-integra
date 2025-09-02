@@ -15,9 +15,10 @@ import { usePermissions } from "@/hooks/usePermissions";
 interface SidebarSectionSMSProps {
   openMenu: string | null;
   toggleMenu: (menuName: string) => void;
+  onLinkClick?: () => void;
 }
 
-export default function SidebarSectionSMS({ openMenu, toggleMenu }: SidebarSectionSMSProps) {
+export default function SidebarSectionSMS({ openMenu, toggleMenu, onLinkClick }: SidebarSectionSMSProps) {
   const location = useLocation();
   const currentPath = location.pathname;
   const { isAdmin, canAccessMenu } = usePermissions();
@@ -46,7 +47,7 @@ export default function SidebarSectionSMS({ openMenu, toggleMenu }: SidebarSecti
                         asChild
                         className={currentPath === "/idsms/dashboard" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
                       >
-                        <Link to="/idsms/dashboard" className="flex items-center gap-2">
+                        <Link to="/idsms/dashboard" className="flex items-center gap-2" onClick={onLinkClick}>
                           <TrendingUp className="h-3 w-3 flex-shrink-0" />
                           <span className="text-xs leading-tight break-words min-w-0">Dashboard</span>
                         </Link>
@@ -624,7 +625,7 @@ export default function SidebarSectionSMS({ openMenu, toggleMenu }: SidebarSecti
                         asChild
                         className={currentPath === "/prevencao-incendio/dashboard" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
                       >
-                        <Link to="/prevencao-incendio/dashboard" className="flex items-center gap-2">
+                        <Link to="/prevencao-incendio/dashboard" className="flex items-center gap-2" onClick={onLinkClick}>
                           <TrendingUp className="h-3 w-3 flex-shrink-0" />
                           <span className="text-xs leading-tight break-words min-w-0">Dashboard</span>
                         </Link>
@@ -637,7 +638,7 @@ export default function SidebarSectionSMS({ openMenu, toggleMenu }: SidebarSecti
                         asChild
                         className={currentPath === "/prevencao-incendio/cadastro-extintores" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
                       >
-                        <Link to="/prevencao-incendio/cadastro-extintores" className="flex items-center gap-2">
+                        <Link to="/prevencao-incendio/cadastro-extintores" className="flex items-center gap-2" onClick={onLinkClick}>
                           <span className="text-xs leading-tight break-words min-w-0">Cadastro de Extintores</span>
                         </Link>
                       </SidebarMenuSubButton>
@@ -649,7 +650,7 @@ export default function SidebarSectionSMS({ openMenu, toggleMenu }: SidebarSecti
                         asChild
                         className={currentPath === "/prevencao-incendio/inspecao-extintores" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
                       >
-                        <Link to="/prevencao-incendio/inspecao-extintores" className="flex items-center gap-2">
+                        <Link to="/prevencao-incendio/inspecao-extintores" className="flex items-center gap-2" onClick={onLinkClick}>
                           <span className="text-xs leading-tight break-words min-w-0">Inspeção de Extintores</span>
                         </Link>
                       </SidebarMenuSubButton>
