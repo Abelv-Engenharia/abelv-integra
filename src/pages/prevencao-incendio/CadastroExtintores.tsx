@@ -7,6 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { PermissionGuard } from "@/components/security/PermissionGuard";
+import { AccessDenied } from "@/components/security/AccessDenied";
 
 const CadastroExtintores = () => {
   const navigate = useNavigate();
@@ -48,8 +50,13 @@ const CadastroExtintores = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div>
+    <PermissionGuard 
+      requiredPermissions={['prevencao_incendio_cadastro_extintores', 'prevencao_incendio']}
+      requireAdmin={false}
+      fallback={<AccessDenied title="Acesso Negado" description="Você não tem permissão para cadastrar extintores." />}
+    >
+      <div className="space-y-6">
+        <div>
         <Button
           variant="ghost"
           size="sm"
@@ -185,7 +192,8 @@ const CadastroExtintores = () => {
           </form>
         </CardContent>
       </Card>
-    </div>
+      </div>
+    </PermissionGuard>
   );
 };
 

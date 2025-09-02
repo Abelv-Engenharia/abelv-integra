@@ -2,13 +2,20 @@ import { ArrowLeft, Flame, Shield, Calendar, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
+import { PermissionGuard } from "@/components/security/PermissionGuard";
+import { AccessDenied } from "@/components/security/AccessDenied";
 
 const PrevencaoIncendioDashboard = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="space-y-6">
-      <div>
+    <PermissionGuard 
+      requiredPermissions={['prevencao_incendio_dashboard', 'prevencao_incendio']}
+      requireAdmin={false}
+      fallback={<AccessDenied title="Acesso Negado" description="Você não tem permissão para acessar o dashboard de Prevenção de Incêndio." />}
+    >
+      <div className="space-y-6">
+        <div>
         <Button
           variant="ghost"
           size="sm"
@@ -125,7 +132,8 @@ const PrevencaoIncendioDashboard = () => {
           </CardContent>
         </Card>
       </div>
-    </div>
+      </div>
+    </PermissionGuard>
   );
 };
 

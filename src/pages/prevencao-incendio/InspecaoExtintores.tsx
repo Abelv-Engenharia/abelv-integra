@@ -8,6 +8,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { PermissionGuard } from "@/components/security/PermissionGuard";
+import { AccessDenied } from "@/components/security/AccessDenied";
 
 const InspecaoExtintores = () => {
   const navigate = useNavigate();
@@ -100,7 +102,12 @@ const InspecaoExtintores = () => {
   ];
 
   return (
-    <div className="space-y-6">
+    <PermissionGuard 
+      requiredPermissions={['prevencao_incendio_inspecao_extintores', 'prevencao_incendio']}
+      requireAdmin={false}
+      fallback={<AccessDenied title="Acesso Negado" description="Você não tem permissão para realizar inspeções de extintores." />}
+    >
+      <div className="space-y-6">
       <div>
         <Button
           variant="ghost"
@@ -255,8 +262,9 @@ const InspecaoExtintores = () => {
             </form>
           </CardContent>
         </Card>
-      )}
-    </div>
+        )}
+      </div>
+    </PermissionGuard>
   );
 };
 

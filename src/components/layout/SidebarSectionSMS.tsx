@@ -34,14 +34,13 @@ export default function SidebarSectionSMS({ openMenu, toggleMenu }: SidebarSecti
   console.log("SidebarSectionSMS - userRole:", userRole);
   console.log("SidebarSectionSMS - userPermissoes:", userPermissoes);
 
-  // Garantir fallback para admins
-  const isAdmin =
-    (userRole && typeof userRole === "string" && userRole.toLowerCase().startsWith("admin")) ||
-    // fallback extra: talvez userPermissoes tenha perfil admin
-    (userPermissoes &&
-      typeof userPermissoes === "object" &&
-      typeof (userPermissoes as any).nome === "string" &&
-      (userPermissoes as any).nome.toLowerCase().startsWith("admin"));
+  // Verificar se é admin de forma mais robusta
+  const isAdmin = 
+    (userRole && typeof userRole === "string" && 
+     (userRole.toLowerCase().includes("admin") || userRole.toLowerCase() === "administrador")) ||
+    (userPermissoes && 
+     typeof userPermissoes === "object" && 
+     (userPermissoes as any).admin_funcionarios === true);
 
   const menusSidebar = isAdmin
     ? getAllMenusSidebar()
@@ -59,9 +58,9 @@ export default function SidebarSectionSMS({ openMenu, toggleMenu }: SidebarSecti
   return (
     <>
       {/* Seção IDSMS */}
-      {["idsms_dashboard", "idsms_relatorios"].some(menu =>
+      {(isAdmin || ["idsms_dashboard", "idsms_relatorios"].some(menu =>
         podeVerMenu(menu, menusSidebar)
-      ) && (
+      )) && (
         <SidebarMenu>
           <SidebarMenuItem>
             <Collapsible open={openMenu === "idsms"}>
@@ -161,9 +160,9 @@ export default function SidebarSectionSMS({ openMenu, toggleMenu }: SidebarSecti
       )}
 
       {/* Seção Desvios */}
-      {["desvios_dashboard", "desvios_cadastro", "desvios_consulta", "desvios_nao_conformidade", "desvios_insights"].some(menu =>
+      {(isAdmin || ["desvios_dashboard", "desvios_cadastro", "desvios_consulta", "desvios_nao_conformidade", "desvios_insights"].some(menu =>
         podeVerMenu(menu, menusSidebar)
-      ) && (
+      )) && (
         <SidebarMenu>
           <SidebarMenuItem>
             <Collapsible open={openMenu === "desvios"}>
@@ -245,9 +244,9 @@ export default function SidebarSectionSMS({ openMenu, toggleMenu }: SidebarSecti
       )}
 
       {/* Seção Treinamentos */}
-      {["treinamentos_dashboard", "treinamentos_normativo", "treinamentos_consulta", "treinamentos_execucao", "treinamentos_cracha"].some(menu =>
+      {(isAdmin || ["treinamentos_dashboard", "treinamentos_normativo", "treinamentos_consulta", "treinamentos_execucao", "treinamentos_cracha"].some(menu =>
         podeVerMenu(menu, menusSidebar)
-      ) && (
+      )) && (
         <SidebarMenu>
           <SidebarMenuItem>
             <Collapsible open={openMenu === "treinamentos"}>
@@ -331,10 +330,10 @@ export default function SidebarSectionSMS({ openMenu, toggleMenu }: SidebarSecti
       )}
 
       {/* Seção Hora de Segurança */}
-      {["hora_seguranca_cadastro", "hora_seguranca_cadastro_inspecao", "hora_seguranca_cadastro_nao_programada", 
+      {(isAdmin || ["hora_seguranca_cadastro", "hora_seguranca_cadastro_inspecao", "hora_seguranca_cadastro_nao_programada", 
         "hora_seguranca_dashboard", "hora_seguranca_agenda", "hora_seguranca_acompanhamento"].some(menu =>
         podeVerMenu(menu, menusSidebar)
-      ) && (
+      )) && (
         <SidebarMenu>
           <SidebarMenuItem>
             <Collapsible open={openMenu === "hora-seguranca"}>
@@ -418,9 +417,9 @@ export default function SidebarSectionSMS({ openMenu, toggleMenu }: SidebarSecti
       )}
 
       {/* Seção Inspeção SMS */}
-      {["inspecao_sms_dashboard", "inspecao_sms_cadastro", "inspecao_sms_consulta"].some(menu =>
+      {(isAdmin || ["inspecao_sms_dashboard", "inspecao_sms_cadastro", "inspecao_sms_consulta"].some(menu =>
         podeVerMenu(menu, menusSidebar)
-      ) && (
+      )) && (
         <SidebarMenu>
           <SidebarMenuItem>
             <Collapsible open={openMenu === "inspecao-sms"}>
@@ -480,9 +479,9 @@ export default function SidebarSectionSMS({ openMenu, toggleMenu }: SidebarSecti
       )}
 
       {/* Seção Ocorrências */}
-      {["ocorrencias_dashboard", "ocorrencias_cadastro", "ocorrencias_consulta"].some(menu =>
+      {(isAdmin || ["ocorrencias_dashboard", "ocorrencias_cadastro", "ocorrencias_consulta"].some(menu =>
         podeVerMenu(menu, menusSidebar)
-      ) && (
+      )) && (
         <SidebarMenu>
           <SidebarMenuItem>
             <Collapsible open={openMenu === "ocorrencias"}>
@@ -542,9 +541,9 @@ export default function SidebarSectionSMS({ openMenu, toggleMenu }: SidebarSecti
       )}
 
       {/* Seção Medidas Disciplinares */}
-      {["medidas_disciplinares_dashboard", "medidas_disciplinares_cadastro", "medidas_disciplinares_consulta"].some(menu =>
+      {(isAdmin || ["medidas_disciplinares_dashboard", "medidas_disciplinares_cadastro", "medidas_disciplinares_consulta"].some(menu =>
         podeVerMenu(menu, menusSidebar)
-      ) && (
+      )) && (
         <SidebarMenu>
           <SidebarMenuItem>
             <Collapsible open={openMenu === "medidas-disciplinares"}>
@@ -604,9 +603,9 @@ export default function SidebarSectionSMS({ openMenu, toggleMenu }: SidebarSecti
       )}
 
       {/* Seção Prevenção de Incêndio */}
-      {["prevencao_incendio_dashboard", "prevencao_incendio_cadastro_extintores", "prevencao_incendio_inspecao_extintores"].some(menu =>
+      {(isAdmin || ["prevencao_incendio_dashboard", "prevencao_incendio_cadastro_extintores", "prevencao_incendio_inspecao_extintores"].some(menu =>
         podeVerMenu(menu, menusSidebar)
-      ) && (
+      )) && (
         <SidebarMenu>
           <SidebarMenuItem>
             <Collapsible open={openMenu === "prevencao-incendio"}>
@@ -621,7 +620,7 @@ export default function SidebarSectionSMS({ openMenu, toggleMenu }: SidebarSecti
               </CollapsibleTrigger>
               <CollapsibleContent asChild>
                 <SidebarMenuSub>
-                  {podeVerMenu("prevencao_incendio_dashboard", menusSidebar) && (
+                  {(isAdmin || podeVerMenu("prevencao_incendio_dashboard", menusSidebar)) && (
                     <SidebarMenuSubItem>
                       <SidebarMenuSubButton 
                         asChild
@@ -634,7 +633,7 @@ export default function SidebarSectionSMS({ openMenu, toggleMenu }: SidebarSecti
                       </SidebarMenuSubButton>
                     </SidebarMenuSubItem>
                   )}
-                  {podeVerMenu("prevencao_incendio_cadastro_extintores", menusSidebar) && (
+                  {(isAdmin || podeVerMenu("prevencao_incendio_cadastro_extintores", menusSidebar)) && (
                     <SidebarMenuSubItem>
                       <SidebarMenuSubButton 
                         asChild
@@ -646,7 +645,7 @@ export default function SidebarSectionSMS({ openMenu, toggleMenu }: SidebarSecti
                       </SidebarMenuSubButton>
                     </SidebarMenuSubItem>
                   )}
-                  {podeVerMenu("prevencao_incendio_inspecao_extintores", menusSidebar) && (
+                  {(isAdmin || podeVerMenu("prevencao_incendio_inspecao_extintores", menusSidebar)) && (
                     <SidebarMenuSubItem>
                       <SidebarMenuSubButton 
                         asChild
@@ -666,9 +665,9 @@ export default function SidebarSectionSMS({ openMenu, toggleMenu }: SidebarSecti
       )}
 
       {/* Seção GRO */}
-      {["gro_dashboard", "gro_avaliacao_riscos"].some(menu =>
+      {(isAdmin || ["gro_dashboard", "gro_avaliacao_riscos"].some(menu =>
         podeVerMenu(menu, menusSidebar)
-      ) && (
+      )) && (
         <SidebarMenu>
           <SidebarMenuItem>
             <Collapsible open={openMenu === "gro"}>
