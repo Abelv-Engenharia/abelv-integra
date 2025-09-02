@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   ChevronDown,
   ChevronRight,
@@ -27,7 +27,7 @@ interface SidebarSectionGestaoSMSProps {
   openMenu: string | null;
   toggleMenu: (menuName: string) => void;
   onLinkClick?: () => void;
-  /** Predicado de permissão (whitelist menus_sidebar). Se não vier, assume tudo visível. */
+  /** Predicado de permissão (whitelist menus_sidebar). */
   canSee?: (slug: string) => boolean;
 }
 
@@ -42,13 +42,10 @@ export default function SidebarSectionGestaoSMS({
   const location = useLocation();
   const currentPath = location.pathname;
 
-  // fallback de permissão (compatibilidade)
   const can = useMemo<(slug: string) => boolean>(() => canSee ?? (() => true), [canSee]);
 
-  // Estado local para controlar os submenus - mantém apenas um aberto
   const [openSubMenus, setOpenSubMenus] = useState<Record<string, boolean>>({});
 
-  // Qual submenu deve abrir com base na rota
   const getActiveSubmenu = (path: string) => {
     if (path.startsWith("/idsms")) return "idsms";
     if (path.startsWith("/desvios")) return "desvios";
@@ -64,8 +61,7 @@ export default function SidebarSectionGestaoSMS({
 
   useEffect(() => {
     const active = getActiveSubmenu(currentPath);
-    if (active) setOpenSubMenus({ [active]: true });
-    else setOpenSubMenus({});
+    setOpenSubMenus(active ? { [active]: true } : {});
   }, [currentPath]);
 
   const toggleSubMenu = (key: string) => {
@@ -74,10 +70,11 @@ export default function SidebarSectionGestaoSMS({
 
   const isGestaoSMSOpen = openMenu === "gestao-sms";
 
-  // ---- DEF. DOS LINKS (cada um com o slug do menus_sidebar) ----
+  // ===== LINKS COM SLUGS 1:1 COM menus_sidebar =====
   const idsmsItems: LinkItem[] = [
     { label: "Dashboard", to: "/idsms/dashboard", slug: "idsms_dashboard" },
-    { label: "Indicadores", to: "/idsms/indicadores", slug: "idsms_relatorios" }, // use o slug que você preferir para “indicadores”
+    // Os itens abaixo compartilham o slug idsms_relatorios no teu JSON
+    { label: "Indicadores", to: "/idsms/indicadores", slug: "idsms_relatorios" },
     { label: "HT", to: "/idsms/ht", slug: "idsms_relatorios" },
     { label: "HSA", to: "/idsms/hsa", slug: "idsms_relatorios" },
     { label: "IID", to: "/idsms/iid", slug: "idsms_relatorios" },
@@ -130,7 +127,7 @@ export default function SidebarSectionGestaoSMS({
 
   const groItems: LinkItem[] = [
     { label: "Dashboard", to: "/gro/dashboard", slug: "gro_dashboard" },
-    { label: "Cadastro de Perigos", to: "/gro/cadastro-perigos", slug: "gro_cadastro_perigos" /* se usar este no JSON */ },
+    { label: "Cadastro de Perigos", to: "/gro/cadastro-perigos", slug: "gro_cadastro_perigos" },
     { label: "Avaliação de Riscos", to: "/gro/avaliacao-riscos", slug: "gro_avaliacao_riscos" },
     { label: "PGR", to: "/gro/pgr", slug: "gro_pgr" },
     { label: "Cadastro", to: "/gro/cadastro", slug: "gro_cadastro" },
@@ -141,10 +138,9 @@ export default function SidebarSectionGestaoSMS({
     { label: "Dashboard", to: "/prevencao-incendio/dashboard", slug: "prevencao_incendio_dashboard" },
     { label: "Cadastro de Extintores", to: "/prevencao-incendio/cadastro-extintores", slug: "prevencao_incendio_cadastro_extintores" },
     { label: "Inspeção de Extintores", to: "/prevencao-incendio/inspecao-extintores", slug: "prevencao_incendio_inspecao_extintores" },
-    { label: "Consulta de Inspeções", to: "/prevencao-incendio/consulta-inspecoes", slug: "prevencao_incendio_consulta_inspecoes" /* se existir no JSON */ },
+    { label: "Consulta de Inspeções", to: "/prevencao-incendio/consulta-inspecoes", slug: "prevencao_incendio_consulta_inspecoes" },
   ];
 
-  // Helpers para filtrar por permissão
   const filterAllowed = (items: LinkItem[]) => items.filter((i) => can(i.slug));
 
   const idsms = filterAllowed(idsmsItems);
@@ -157,10 +153,8 @@ export default function SidebarSectionGestaoSMS({
   const gro = filterAllowed(groItems);
   const prevInc = filterAllowed(prevIncendioItems);
 
-  // item direto de Dashboard SMS
   const showSmsDashboard = can("sms_dashboard");
 
-  // Se a seção inteira ficar sem nada, nem renderiza
   const sectionIsEmpty =
     !showSmsDashboard &&
     idsms.length === 0 &&
@@ -178,14 +172,19 @@ export default function SidebarSectionGestaoSMS({
   return (
     <SidebarMenu>
       <SidebarMenuItem>
-        <Collapsible open={isGestaoSMSOpen}>
+        <Collapsible open={openMenu === "gestao-sms"}>
           <CollapsibleTrigger asChild>
             <SidebarMenuButton onClick={() => toggleMenu("gestao-sms")} className="text-white hover:bg-slate-600">
               <ShieldAlert className="h-4 w-4 flex-shrink-0" />
               <span className="break-words">SMS</span>
-              {isGestaoSMSOpen ? <ChevronDown className="h-4 w-4 ml-auto" /> : <ChevronRight className="h-4 w-4 ml-auto" />}
+              {openSubMenus["gestao-sms"] ? (
+                <ChevronDown className="h-4 w-4 ml-auto" />
+              ) : (
+                <ChevronRight className="h-4 w-4 ml-auto" />
+              )}
             </SidebarMenuButton>
           </CollapsibleTrigger>
+
           <CollapsibleContent>
             <SidebarMenuSub>
               {/* Dashboard SMS direto */}
@@ -483,11 +482,7 @@ export default function SidebarSectionGestaoSMS({
                         <Flame className="h-3 w-3 flex-shrink-0" />
                         <span>Prevenção de Incêndio</span>
                       </div>
-                      {openSubMenus["prevencao-incendio"] ? (
-                        <ChevronDown className="h-3 w-3" />
-                      ) : (
-                        <ChevronRight className="h-3 w-3" />
-                      )}
+                      {openSubMenus["prevencao-incendio"] ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
                     </button>
                     {openSubMenus["prevencao-incendio"] && (
                       <div className="ml-4 mt-1 space-y-1">
