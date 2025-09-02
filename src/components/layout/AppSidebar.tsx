@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Link, useLocation } from "react-router-dom";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+
 import SidebarSectionGestaoSMS from "./SidebarSectionGestaoSMS";
 import SidebarSectionTarefas from "./SidebarSectionTarefas";
 import SidebarSectionRelatorios from "./SidebarSectionRelatorios";
@@ -18,7 +19,7 @@ import SidebarSectionAdministracao from "./SidebarSectionAdministracao";
 import SidebarSearch from "./SidebarSearch";
 import { useProfile } from "@/hooks/useProfile";
 
-// helper simples
+// helper simples para ler a whitelist do perfil
 function podeVerMenu(menu: string, menusSidebar?: string[]) {
   if (!menusSidebar || !Array.isArray(menusSidebar)) return false;
   return menusSidebar.includes(menu);
@@ -36,9 +37,10 @@ export function AppSidebar() {
       ? (userPermissoes as any).menus_sidebar
       : [];
 
-  // função que será repassada
+  // predicado de visibilidade que será repassado às seções
   const canSee = (slug: string) => podeVerMenu(slug, menusSidebar);
 
+  // qual grupo começa aberto
   const [openMenu, setOpenMenu] = useState<string | null>(() => {
     if (
       currentPath.startsWith("/idsms") ||
@@ -68,6 +70,7 @@ export function AppSidebar() {
   return (
     <Sidebar>
       <SidebarContent className="bg-sky-900">
+        {/* Dashboard simples */}
         <SidebarMenu>
           {canSee("dashboard") && (
             <SidebarMenuItem>
@@ -88,10 +91,10 @@ export function AppSidebar() {
           )}
         </SidebarMenu>
 
-        {/* Busca */}
+        {/* Busca (já filtrando pela whitelist via prop) */}
         <SidebarSearch menusSidebar={menusSidebar} />
 
-        {/* SMS */}
+        {/* Seção: Gestão SMS (renderiza se houver pelo menos 1 slug permitido dessa área) */}
         {[
           "idsms_dashboard",
           "idsms_relatorios",
@@ -110,7 +113,6 @@ export function AppSidebar() {
           "treinamentos_execucao",
           "treinamentos_cracha",
           "hora_seguranca_cadastro",
-          "hora_seguranca_cadastro_inspecao",
           "hora_seguranca_cadastro_nao_programada",
           "hora_seguranca_dashboard",
           "hora_seguranca_agenda",
@@ -124,26 +126,37 @@ export function AppSidebar() {
           "ocorrencias_dashboard",
           "ocorrencias_cadastro",
           "ocorrencias_consulta",
+          "sms_dashboard",
         ].some(canSee) && (
           <SidebarSectionGestaoSMS
             openMenu={openMenu}
             toggleMenu={toggleMenu}
             onLinkClick={handleLinkClick}
-            canSee={canSee}   // <<< repassando aqui
+            canSee={canSee}
           />
         )}
 
-        {/* Tarefas */}
+        {/* Seção: Tarefas */}
         {["tarefas_dashboard", "tarefas_minhas_tarefas", "tarefas_cadastro"].some(canSee) && (
-          <SidebarSectionTarefas openMenu={openMenu} toggleMenu={toggleMenu} onLinkClick={handleLinkClick} />
+          <SidebarSectionTarefas
+            openMenu={openMenu}
+            toggleMenu={toggleMenu}
+            onLinkClick={handleLinkClick}
+            canSee={canSee}
+          />
         )}
 
-        {/* Relatórios */}
+        {/* Seção: Relatórios */}
         {["relatorios_dashboard", "relatorios_idsms"].some(canSee) && (
-          <SidebarSectionRelatorios openMenu={openMenu} toggleMenu={toggleMenu} onLinkClick={handleLinkClick} />
+          <SidebarSectionRelatorios
+            openMenu={openMenu}
+            toggleMenu={toggleMenu}
+            onLinkClick={handleLinkClick}
+            canSee={canSee}
+          />
         )}
 
-        {/* Administração */}
+        {/* Seção: Administração */}
         {[
           "admin_usuarios",
           "admin_perfis",
@@ -157,11 +170,26 @@ export function AppSidebar() {
           "admin_templates",
           "admin_logo",
           "admin_modelos_inspecao",
+          // extras que você mencionou no JSON (se usar)
+          "admin_importacao_funcionarios",
+          "admin_importacao_execucao_treinamentos",
+          "admin_upload_tutoriais",
+          "admin_configuracao_emails",
+          "admin_exportacao_dados",
+          "admin_usuarios_auth",
+          "admin_checklists",
+          "admin_criar_usuario",
+          "admin_importacao_hsa",
         ].some(canSee) && (
-          <SidebarSectionAdministracao openMenu={openMenu} toggleMenu={toggleMenu} onLinkClick={handleLinkClick} />
+          <SidebarSectionAdministracao
+            openMenu={openMenu}
+            toggleMenu={toggleMenu}
+            onLinkClick={handleLinkClick}
+            canSee={canSee}
+          />
         )}
 
-        {/* Conta */}
+        {/* Conta (sempre visível) */}
         <SidebarMenu>
           <SidebarMenuItem>
             <Collapsible open={openMenu === "account"}>
@@ -203,9 +231,7 @@ export function AppSidebar() {
                     >
                       <Link to="/account/settings" className="flex items-center gap-2" onClick={handleLinkClick}>
                         <Settings className="h-3 w-3 flex-shrink-0" />
-                        <span className="text-xs leading-tight break-words min-w-0">
-                          Configuração da conta
-                        </span>
+                        <span className="text-xs leading-tight break-words min-w-0">Configuração da conta</span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
