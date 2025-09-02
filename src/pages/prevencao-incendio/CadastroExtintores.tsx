@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { PermissionGuard } from "@/components/security/PermissionGuard";
 import { AccessDenied } from "@/components/security/AccessDenied";
+import QRCodeDialog from "@/components/prevencao-incendio/QRCodeDialog";
 
 const CadastroExtintores = () => {
   const navigate = useNavigate();
@@ -22,6 +23,7 @@ const CadastroExtintores = () => {
     localizacao: '',
     observacoes: ''
   });
+  const [showQRDialog, setShowQRDialog] = useState(false);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({
@@ -32,10 +34,21 @@ const CadastroExtintores = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validar campos obrigatórios
+    if (!formData.codigo || !formData.tipo || !formData.capacidade || !formData.localizacao) {
+      alert('Por favor, preencha todos os campos obrigatórios.');
+      return;
+    }
+    
     // Aqui seria implementada a lógica de salvamento
     console.log('Dados do extintor:', formData);
-    // Simular sucesso
-    alert('Extintor cadastrado com sucesso!');
+    
+    // Mostrar QR Code após sucesso
+    setShowQRDialog(true);
+  };
+
+  const handleNewRecord = () => {
     // Reset form
     setFormData({
       codigo: '',
@@ -47,6 +60,7 @@ const CadastroExtintores = () => {
       localizacao: '',
       observacoes: ''
     });
+    setShowQRDialog(false);
   };
 
   return (
@@ -192,6 +206,17 @@ const CadastroExtintores = () => {
           </form>
         </CardContent>
       </Card>
+
+      <QRCodeDialog
+        open={showQRDialog}
+        onOpenChange={setShowQRDialog}
+        extintorData={{
+          codigo: formData.codigo,
+          tipo: formData.tipo,
+          capacidade: formData.capacidade,
+          localizacao: formData.localizacao
+        }}
+      />
       </div>
     </PermissionGuard>
   );
