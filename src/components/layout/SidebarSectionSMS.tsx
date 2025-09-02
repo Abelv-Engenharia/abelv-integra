@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Activity, FileText, Shield, AlertTriangle, GraduationCap, Clock, TrendingUp, BarChart3 } from "lucide-react";
+import { Activity, FileText, Shield, AlertTriangle, GraduationCap, Clock, TrendingUp, BarChart3, Flame } from "lucide-react";
 import {
   SidebarMenu,
   SidebarMenuItem,
@@ -592,6 +592,68 @@ export default function SidebarSectionSMS({ openMenu, toggleMenu }: SidebarSecti
                       >
                         <Link to="/medidas-disciplinares/consulta" className="flex items-center gap-2">
                           <span className="text-xs leading-tight break-words min-w-0">Consulta</span>
+                        </Link>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+                  )}
+                </SidebarMenuSub>
+              </CollapsibleContent>
+            </Collapsible>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      )}
+
+      {/* Seção Prevenção de Incêndio */}
+      {["prevencao_incendio_dashboard", "prevencao_incendio_cadastro_extintores", "prevencao_incendio_inspecao_extintores"].some(menu =>
+        podeVerMenu(menu, menusSidebar)
+      ) && (
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <Collapsible open={openMenu === "prevencao-incendio"}>
+              <CollapsibleTrigger asChild>
+                <SidebarMenuButton 
+                  onClick={() => toggleMenu("prevencao-incendio")}
+                  className="text-white hover:bg-slate-600"
+                >
+                  <Flame className="h-4 w-4 flex-shrink-0" />
+                  <span className="break-words">Prevenção de Incêndio</span>
+                </SidebarMenuButton>
+              </CollapsibleTrigger>
+              <CollapsibleContent asChild>
+                <SidebarMenuSub>
+                  {podeVerMenu("prevencao_incendio_dashboard", menusSidebar) && (
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton 
+                        asChild
+                        className={currentPath === "/prevencao-incendio/dashboard" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
+                      >
+                        <Link to="/prevencao-incendio/dashboard" className="flex items-center gap-2">
+                          <TrendingUp className="h-3 w-3 flex-shrink-0" />
+                          <span className="text-xs leading-tight break-words min-w-0">Dashboard</span>
+                        </Link>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+                  )}
+                  {podeVerMenu("prevencao_incendio_cadastro_extintores", menusSidebar) && (
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton 
+                        asChild
+                        className={currentPath === "/prevencao-incendio/cadastro-extintores" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
+                      >
+                        <Link to="/prevencao-incendio/cadastro-extintores" className="flex items-center gap-2">
+                          <span className="text-xs leading-tight break-words min-w-0">Cadastro de Extintores</span>
+                        </Link>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+                  )}
+                  {podeVerMenu("prevencao_incendio_inspecao_extintores", menusSidebar) && (
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton 
+                        asChild
+                        className={currentPath === "/prevencao-incendio/inspecao-extintores" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
+                      >
+                        <Link to="/prevencao-incendio/inspecao-extintores" className="flex items-center gap-2">
+                          <span className="text-xs leading-tight break-words min-w-0">Inspeção de Extintores</span>
                         </Link>
                       </SidebarMenuSubButton>
                     </SidebarMenuSubItem>
