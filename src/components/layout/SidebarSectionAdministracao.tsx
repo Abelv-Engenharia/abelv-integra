@@ -1,5 +1,28 @@
 import React from "react";
-import { ChevronDown, ChevronRight, Settings } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronRight,
+  Settings,
+  Users,
+  Shield,
+  Building2,
+  Layers,
+  Hammer,
+  UserCog,
+  UserCheck,
+  Users2,
+  Timer,
+  Target,
+  ListChecks,
+  FileCode2,
+  Image as ImageIcon,
+  Upload,
+  Mail,
+  Database,
+  Lock,
+  UserPlus,
+  UploadCloud,
+} from "lucide-react";
 import {
   SidebarMenu,
   SidebarMenuItem,
@@ -15,43 +38,50 @@ type Props = {
   openMenu: string | null;
   toggleMenu: (menuName: string) => void;
   onLinkClick?: () => void;
-  canSee?: (slug: string) => boolean; // <- novo
+  canSee?: (slug: string) => boolean; // ← controle por permissões
 };
 
-type Item = { label: string; to: string; slug: string };
+type Item = { label: string; to: string; slug: string; Icon: React.ComponentType<any> };
 
 export default function SidebarSectionAdministracao({ openMenu, toggleMenu, onLinkClick, canSee }: Props) {
   const { pathname } = useLocation();
   const can = (slug: string) => (canSee ? canSee(slug) : true);
 
+  // ⚠️ Slugs batendo 1:1 com o seu JSON de permissões
   const items: Item[] = [
-    { label: "Usuários", to: "/admin/usuarios", slug: "admin_usuarios" },
-    { label: "Perfis", to: "/admin/perfis", slug: "admin_perfis" },
-    { label: "Empresas", to: "/admin/empresas", slug: "admin_empresas" },
-    { label: "CCAs", to: "/admin/ccas", slug: "admin_ccas" },
-    { label: "Engenheiros", to: "/admin/engenheiros", slug: "admin_engenheiros" },
-    { label: "Supervisores", to: "/admin/supervisores", slug: "admin_supervisores" },
-    { label: "Funcionários", to: "/admin/funcionarios", slug: "admin_funcionarios" },
-    { label: "HHT", to: "/admin/hht", slug: "admin_hht" },
-    { label: "Metas & Indicadores", to: "/admin/metas-indicadores", slug: "admin_metas_indicadores" },
-    { label: "Templates", to: "/admin/templates", slug: "admin_templates" },
-    { label: "Logo", to: "/admin/logo", slug: "admin_logo" },
-    { label: "Modelos de Inspeção", to: "/admin/modelos-inspecao", slug: "admin_modelos_inspecao" },
+    { label: "Usuários", to: "/admin/usuarios", slug: "admin_usuarios", Icon: Users },
+    { label: "Perfis", to: "/admin/perfis", slug: "admin_perfis", Icon: Shield },
+    { label: "Empresas", to: "/admin/empresas", slug: "admin_empresas", Icon: Building2 },
+    { label: "CCAs", to: "/admin/ccas", slug: "admin_ccas", Icon: Layers },
+    { label: "Engenheiros", to: "/admin/engenheiros", slug: "admin_engenheiros", Icon: Hammer },
+    { label: "Supervisores", to: "/admin/supervisores", slug: "admin_supervisores", Icon: UserCog },
+    { label: "Encarregados", to: "/admin/encarregados", slug: "admin_encarregados", Icon: UserCheck },
+    { label: "Funcionários", to: "/admin/funcionarios", slug: "admin_funcionarios", Icon: Users2 },
+    { label: "Registro HHT", to: "/admin/registro-hht", slug: "admin_registro_hht", Icon: Timer },
+    { label: "Metas & Indicadores", to: "/admin/metas-indicadores", slug: "admin_metas_indicadores", Icon: Target },
+    { label: "Checklists", to: "/admin/checklists", slug: "admin_checklists", Icon: ListChecks },
+    { label: "Templates", to: "/admin/templates", slug: "admin_templates", Icon: FileCode2 },
+    { label: "Logo do Sistema", to: "/admin/logo-sistema", slug: "admin_logo_sistema", Icon: ImageIcon },
+    { label: "Logo", to: "/admin/logo", slug: "admin_logo", Icon: ImageIcon },
 
-    // Extras que vi no seu JSON (se existirem no app):
-    { label: "Importação Funcionários", to: "/admin/importacao-funcionarios", slug: "admin_importacao_funcionarios" },
+    { label: "Upload de Tutoriais", to: "/admin/upload-tutoriais", slug: "admin_upload_tutoriais", Icon: Upload },
+    { label: "Configuração de E-mails", to: "/admin/configuracao-emails", slug: "admin_configuracao_emails", Icon: Mail },
+    { label: "Exportação de Dados", to: "/admin/exportacao-dados", slug: "admin_exportacao_dados", Icon: Database },
+
+    { label: "Importação de Funcionários", to: "/admin/importacao-funcionarios", slug: "admin_importacao_funcionarios", Icon: UploadCloud },
     {
       label: "Importação Execução Treinamentos",
       to: "/admin/importacao-execucao-treinamentos",
       slug: "admin_importacao_execucao_treinamentos",
+      Icon: UploadCloud,
     },
-    { label: "Upload Tutoriais", to: "/admin/upload-tutoriais", slug: "admin_upload_tutoriais" },
-    { label: "Configuração de E-mails", to: "/admin/configuracao-emails", slug: "admin_configuracao_emails" },
-    { label: "Exportação de Dados", to: "/admin/exportacao-dados", slug: "admin_exportacao_dados" },
-    { label: "Usuários (Auth)", to: "/admin/usuarios-auth", slug: "admin_usuarios_auth" },
-    { label: "Checklists", to: "/admin/checklists", slug: "admin_checklists" },
-    { label: "Criar Usuário", to: "/admin/criar-usuario", slug: "admin_criar_usuario" },
-    { label: "Importação HSA", to: "/admin/importacao-hsa", slug: "admin_importacao_hsa" },
+    { label: "Importação de HSA", to: "/admin/importacao-hsa", slug: "admin_importacao_hsa", Icon: UploadCloud },
+
+    { label: "Usuários (Auth)", to: "/admin/usuarios-auth", slug: "admin_usuarios_auth", Icon: Lock },
+    { label: "Criar Usuário", to: "/admin/criar-usuario", slug: "admin_criar_usuario", Icon: UserPlus },
+    { label: "Modelos de Inspeção", to: "/admin/modelos-inspecao", slug: "admin_modelos_inspecao", Icon: ListChecks },
+    // Se existir “adm_manutencao” como rota:
+    // { label: "Manutenção", to: "/admin/manutencao", slug: "adm_manutencao", Icon: Wrench }
   ].filter((i) => can(i.slug));
 
   if (items.length === 0) return null;
@@ -65,22 +95,24 @@ export default function SidebarSectionAdministracao({ openMenu, toggleMenu, onLi
           <CollapsibleTrigger asChild>
             <SidebarMenuButton onClick={() => toggleMenu("admin")} className="text-white hover:bg-slate-600">
               <Settings className="h-4 w-4" />
-              <span className="break-words">Administração</span>
+              <span className="break-words">Configurações</span>
               {isOpen ? <ChevronDown className="h-4 w-4 ml-auto" /> : <ChevronRight className="h-4 w-4 ml-auto" />}
             </SidebarMenuButton>
           </CollapsibleTrigger>
+
           <CollapsibleContent>
             <SidebarMenuSub>
-              {items.map((it) => (
-                <SidebarMenuSubItem key={it.slug}>
+              {items.map(({ slug, to, label, Icon }) => (
+                <SidebarMenuSubItem key={slug}>
                   <SidebarMenuSubButton
                     asChild
                     className={
-                      pathname === it.to ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"
+                      pathname === to ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"
                     }
                   >
-                    <Link to={it.to} onClick={onLinkClick}>
-                      {it.label}
+                    <Link to={to} onClick={onLinkClick} className="flex items-center gap-2">
+                      <Icon className="h-3 w-3 flex-shrink-0" />
+                      <span className="text-xs leading-tight break-words min-w-0">{label}</span>
                     </Link>
                   </SidebarMenuSubButton>
                 </SidebarMenuSubItem>
