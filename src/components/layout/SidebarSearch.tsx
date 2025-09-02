@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from "react";
 import { Search, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -9,6 +8,7 @@ type MenuItem = {
   name: string;
   path: string;
   category: string;
+  slug: string; // <-- usado para checar permissão
 };
 
 type Props = {
@@ -19,80 +19,105 @@ export default function SidebarSearch({ menusSidebar = [] }: Props) {
   const [searchTerm, setSearchTerm] = useState("");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
-  // Todos os itens de menu disponíveis
+  // Predicado de permissão baseado no whitelist menus_sidebar
+  const canSee = useMemo(() => {
+    const set = new Set(menusSidebar ?? []);
+    return (slug: string) => set.has(slug);
+  }, [menusSidebar]);
+
+  // Todos os itens de menu disponíveis (agora com slug correspondente ao menus_sidebar)
   const allMenuItems: MenuItem[] = [
     // Dashboard
-    { name: "Dashboard", path: "/dashboard", category: "Dashboard" },
-    
-    // SMS
-    { name: "Desvios Dashboard", path: "/desvios/dashboard", category: "SMS" },
-    { name: "Desvios Cadastro", path: "/desvios/cadastro", category: "SMS" },
-    { name: "Treinamentos Dashboard", path: "/treinamentos/dashboard", category: "SMS" },
-    { name: "Treinamentos Execução", path: "/treinamentos/execucao", category: "SMS" },
-    { name: "Hora Segurança Dashboard", path: "/hora-seguranca/dashboard", category: "SMS" },
-    { name: "Inspeção SMS Dashboard", path: "/inspecao-sms/dashboard", category: "SMS" },
-    { name: "Ocorrências Dashboard", path: "/ocorrencias/dashboard", category: "SMS" },
-    { name: "Medidas Disciplinares Dashboard", path: "/medidas-disciplinares/dashboard", category: "SMS" },
-    
-    // ADM MATRICIAL
-    { name: "ADM Dashboard", path: "/adm/dashboard", category: "ADM MATRICIAL" },
-    { name: "ADM Configurações", path: "/adm/configuracoes", category: "ADM MATRICIAL" },
-    { name: "ADM Usuários", path: "/adm/usuarios", category: "ADM MATRICIAL" },
-    { name: "ADM Empresas", path: "/adm/empresas", category: "ADM MATRICIAL" },
-    { name: "ADM Perfis", path: "/adm/perfis", category: "ADM MATRICIAL" },
-    
+    { name: "Dashboard", path: "/dashboard", category: "Dashboard", slug: "dashboard" },
+
+    // SMS / Desvios
+    { name: "Desvios Dashboard", path: "/desvios/dashboard", category: "SMS", slug: "desvios_dashboard" },
+    { name: "Desvios Cadastro", path: "/desvios/cadastro", category: "SMS", slug: "desvios_cadastro" },
+
+    // Treinamentos
+    { name: "Treinamentos Dashboard", path: "/treinamentos/dashboard", category: "SMS", slug: "treinamentos_dashboard" },
+    { name: "Treinamentos Execução", path: "/treinamentos/execucao", category: "SMS", slug: "treinamentos_execucao" },
+
+    // Hora de Segurança
+    { name: "Hora Segurança Dashboard", path: "/hora-seguranca/dashboard", category: "SMS", slug: "hora_seguranca_dashboard" },
+
+    // Inspeção SMS
+    { name: "Inspeção SMS Dashboard", path: "/inspecao-sms/dashboard", category: "SMS", slug: "inspecao_sms_dashboard" },
+
+    // Ocorrências
+    { name: "Ocorrências Dashboard", path: "/ocorrencias/dashboard", category: "SMS", slug: "ocorrencias_dashboard" },
+
+    // Medidas Disciplinares
+    { name: "Medidas Disciplinares Dashboard", path: "/medidas-disciplinares/dashboard", category: "SMS", slug: "medidas_disciplinares_dashboard" },
+
+    // ADM MATRICIAL (slugs “adm_*”, como no seu JSON)
+    { name: "ADM Dashboard", path: "/adm/dashboard", category: "ADM MATRICIAL", slug: "adm_dashboard" },
+    { name: "ADM Configurações", path: "/adm/configuracoes", category: "ADM MATRICIAL", slug: "adm_configuracoes" },
+    { name: "ADM Usuários", path: "/adm/usuarios", category: "ADM MATRICIAL", slug: "adm_usuarios" },
+    { name: "ADM Empresas", path: "/adm/empresas", category: "ADM MATRICIAL", slug: "adm_empresas" },
+    { name: "ADM Perfis", path: "/adm/perfis", category: "ADM MATRICIAL", slug: "adm_perfis" },
+
     // ORÇAMENTOS
-    { name: "Orçamentos Dashboard", path: "/orcamentos/dashboard", category: "ORÇAMENTOS" },
-    { name: "Orçamentos Projetos", path: "/orcamentos/projetos", category: "ORÇAMENTOS" },
-    { name: "Orçamentos Custos", path: "/orcamentos/custos", category: "ORÇAMENTOS" },
-    { name: "Orçamentos Análises", path: "/orcamentos/analises", category: "ORÇAMENTOS" },
-    
+    { name: "Orçamentos Dashboard", path: "/orcamentos/dashboard", category: "ORÇAMENTOS", slug: "orcamentos_dashboard" },
+    { name: "Orçamentos Projetos", path: "/orcamentos/projetos", category: "ORÇAMENTOS", slug: "orcamentos_projetos" },
+    { name: "Orçamentos Custos", path: "/orcamentos/custos", category: "ORÇAMENTOS", slug: "orcamentos_custos" },
+    { name: "Orçamentos Análises", path: "/orcamentos/analises", category: "ORÇAMENTOS", slug: "orcamentos_analises" },
+
     // PRODUÇÃO
-    { name: "Produção Dashboard", path: "/producao/dashboard", category: "PRODUÇÃO" },
-    { name: "Produção Planejamento", path: "/producao/planejamento", category: "PRODUÇÃO" },
-    { name: "Produção Ordens", path: "/producao/ordens-producao", category: "PRODUÇÃO" },
-    { name: "Produção Controle", path: "/producao/controle-qualidade", category: "PRODUÇÃO" },
-    
+    { name: "Produção Dashboard", path: "/producao/dashboard", category: "PRODUÇÃO", slug: "producao_dashboard" },
+    { name: "Produção Planejamento", path: "/producao/planejamento", category: "PRODUÇÃO", slug: "producao_planejamento" },
+    { name: "Produção Ordens", path: "/producao/ordens-producao", category: "PRODUÇÃO", slug: "producao_ordens_producao" },
+    { name: "Produção Controle", path: "/producao/controle-qualidade", category: "PRODUÇÃO", slug: "producao_controle_qualidade" },
+
     // QUALIDADE
-    { name: "Qualidade Dashboard", path: "/qualidade/dashboard", category: "QUALIDADE" },
-    { name: "Qualidade Controle", path: "/qualidade/controle", category: "QUALIDADE" },
-    { name: "Qualidade Auditorias", path: "/qualidade/auditorias", category: "QUALIDADE" },
-    { name: "Qualidade Indicadores", path: "/qualidade/indicadores", category: "QUALIDADE" },
-    
+    { name: "Qualidade Dashboard", path: "/qualidade/dashboard", category: "QUALIDADE", slug: "qualidade_dashboard" },
+    { name: "Qualidade Controle", path: "/qualidade/controle", category: "QUALIDADE", slug: "qualidade_controle" },
+    { name: "Qualidade Auditorias", path: "/qualidade/auditorias", category: "QUALIDADE", slug: "qualidade_auditorias" },
+    { name: "Qualidade Indicadores", path: "/qualidade/indicadores", category: "QUALIDADE", slug: "qualidade_indicadores" },
+
     // SUPRIMENTOS
-    { name: "Suprimentos Dashboard", path: "/suprimentos/dashboard", category: "SUPRIMENTOS" },
-    { name: "Suprimentos Fornecedores", path: "/suprimentos/fornecedores", category: "SUPRIMENTOS" },
-    { name: "Suprimentos Materiais", path: "/suprimentos/materiais", category: "SUPRIMENTOS" },
-    { name: "Suprimentos Compras", path: "/suprimentos/compras", category: "SUPRIMENTOS" },
-    
+    { name: "Suprimentos Dashboard", path: "/suprimentos/dashboard", category: "SUPRIMENTOS", slug: "suprimentos_dashboard" },
+    { name: "Suprimentos Fornecedores", path: "/suprimentos/fornecedores", category: "SUPRIMENTOS", slug: "suprimentos_fornecedores" },
+    { name: "Suprimentos Materiais", path: "/suprimentos/materiais", category: "SUPRIMENTOS", slug: "suprimentos_materiais" },
+    { name: "Suprimentos Compras", path: "/suprimentos/compras", category: "SUPRIMENTOS", slug: "suprimentos_compras" },
+
     // TAREFAS
-    { name: "Tarefas Dashboard", path: "/tarefas/dashboard", category: "TAREFAS" },
-    { name: "Minhas Tarefas", path: "/tarefas/minhas-tarefas", category: "TAREFAS" },
-    { name: "Cadastro de Tarefas", path: "/tarefas/cadastro", category: "TAREFAS" },
-    
+    { name: "Tarefas Dashboard", path: "/tarefas/dashboard", category: "TAREFAS", slug: "tarefas_dashboard" },
+    { name: "Minhas Tarefas", path: "/tarefas/minhas-tarefas", category: "TAREFAS", slug: "tarefas_minhas_tarefas" },
+    { name: "Cadastro de Tarefas", path: "/tarefas/cadastro", category: "TAREFAS", slug: "tarefas_cadastro" },
+
     // RELATÓRIOS
-    { name: "Relatórios Dashboard", path: "/relatorios/dashboard", category: "RELATÓRIOS" },
-    { name: "Relatórios ID SMS", path: "/relatorios/idsms", category: "RELATÓRIOS" },
-    
-    // ADMINISTRAÇÃO
-    { name: "Admin Usuários", path: "/admin/usuarios", category: "ADMINISTRAÇÃO" },
-    { name: "Admin Perfis", path: "/admin/perfis", category: "ADMINISTRAÇÃO" },
-    { name: "Admin Empresas", path: "/admin/empresas", category: "ADMINISTRAÇÃO" },
-    { name: "Importação Funcionários", path: "/admin/importacao-funcionarios", category: "ADMINISTRAÇÃO" },
-    { name: "Importação Execução Treinamentos", path: "/admin/importacao-execucao-treinamentos", category: "ADMINISTRAÇÃO" },
-    { name: "Perfil", path: "/account/profile", category: "CONTA" },
-    { name: "Configurações", path: "/account/settings", category: "CONTA" },
+    { name: "Relatórios Dashboard", path: "/relatorios/dashboard", category: "RELATÓRIOS", slug: "relatorios_dashboard" },
+    { name: "Relatórios ID SMS", path: "/relatorios/idsms", category: "RELATÓRIOS", slug: "relatorios_idsms" },
+
+    // ADMINISTRAÇÃO (slugs “admin_*”, como no seu JSON)
+    { name: "Admin Usuários", path: "/admin/usuarios", category: "ADMINISTRAÇÃO", slug: "admin_usuarios" },
+    { name: "Admin Perfis", path: "/admin/perfis", category: "ADMINISTRAÇÃO", slug: "admin_perfis" },
+    { name: "Admin Empresas", path: "/admin/empresas", category: "ADMINISTRAÇÃO", slug: "admin_empresas" },
+    { name: "Importação Funcionários", path: "/admin/importacao-funcionarios", category: "ADMINISTRAÇÃO", slug: "admin_importacao_funcionarios" },
+    { name: "Importação Execução Treinamentos", path: "/admin/importacao-execucao-treinamentos", category: "ADMINISTRAÇÃO", slug: "admin_importacao_execucao_treinamentos" },
+
+    // Conta
+    { name: "Perfil", path: "/account/profile", category: "CONTA", slug: "account_profile" },
+    { name: "Configurações", path: "/account/settings", category: "CONTA", slug: "account_settings" },
   ];
 
-  // Filtrar itens baseado na busca
+  // Filtrar por permissão + termo buscado
   const filteredItems = useMemo(() => {
     if (!searchTerm.trim()) return [];
-    
-    return allMenuItems.filter(item =>
-      item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.category.toLowerCase().includes(searchTerm.toLowerCase())
-    ).slice(0, 8); // Limitar a 8 resultados
-  }, [searchTerm]);
+
+    // 1) aplica whitelist
+    const permitted = allMenuItems.filter((i) => canSee(i.slug));
+
+    // 2) aplica busca (nome ou categoria)
+    return permitted
+      .filter(
+        (item) =>
+          item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          item.category.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+      .slice(0, 8); // limitar a 8 resultados
+  }, [searchTerm, canSee]);
 
   const clearSearch = () => {
     setSearchTerm("");
@@ -126,8 +151,8 @@ export default function SidebarSearch({ menusSidebar = [] }: Props) {
             </Button>
           )}
         </div>
-        
-        {/* Resultados da busca */}
+
+        {/* Resultados */}
         {isSearchOpen && searchTerm && filteredItems.length > 0 && (
           <div className="absolute top-full left-0 right-0 mt-1 bg-slate-800 border border-slate-600 rounded-md shadow-lg z-50 max-h-64 overflow-y-auto">
             {filteredItems.map((item, index) => (
@@ -143,13 +168,11 @@ export default function SidebarSearch({ menusSidebar = [] }: Props) {
             ))}
           </div>
         )}
-        
-        {/* Mensagem quando não há resultados */}
+
+        {/* Sem resultados */}
         {isSearchOpen && searchTerm && filteredItems.length === 0 && (
           <div className="absolute top-full left-0 right-0 mt-1 bg-slate-800 border border-slate-600 rounded-md shadow-lg z-50 p-3">
-            <div className="text-sm text-gray-400 text-center">
-              Nenhum resultado encontrado
-            </div>
+            <div className="text-sm text-gray-400 text-center">Nenhum resultado encontrado</div>
           </div>
         )}
       </div>
