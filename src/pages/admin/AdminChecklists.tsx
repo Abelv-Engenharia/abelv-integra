@@ -99,7 +99,6 @@ const AdminChecklists = () => {
       const { data, error } = await supabase
         .from('checklists_avaliacao')
         .select('*')
-        .eq('ativo', true)
         .order('nome');
       
       if (error) throw error;
