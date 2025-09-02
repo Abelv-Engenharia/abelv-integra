@@ -135,6 +135,9 @@ import PrevencaoIncendioDashboard from "./pages/prevencao-incendio/PrevencaoInce
 import CadastroExtintores from "./pages/prevencao-incendio/CadastroExtintores";
 import InspecaoExtintores from "./pages/prevencao-incendio/InspecaoExtintores";
 
+// Atualização de Perfis
+import AtualizarPerfis from "./pages/admin/AtualizarPerfis";
+
 // Placeholder page
 import PlaceholderPage from "./pages/PlaceholderPage";
 
@@ -197,6 +200,7 @@ function App() {
                 <Route path="upload-tutoriais" element={<UploadTutoriaisPage />} />
                 <Route path="admin/importacao-execucao-treinamentos" element={<ImportacaoExecucaoTreinamentos />} />
                 <Route path="admin/importacao-hsa" element={<ImportacaoHSA />} />
+                <Route path="admin/atualizar-perfis" element={<AtualizarPerfis />} />
 
                 {/* Tarefas routes */}
                 <Route path="tarefas/dashboard" element={<TarefasDashboard />} />

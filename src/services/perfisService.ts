@@ -32,7 +32,8 @@ export function getMenusHierarchy(): MenuSection[] {
             { key: "desvios_dashboard", label: "Dashboard" },
             { key: "desvios_cadastro", label: "Cadastro" },
             { key: "desvios_consulta", label: "Consulta" },
-            { key: "desvios_nao_conformidade", label: "Não Conformidade" }
+            { key: "desvios_nao_conformidade", label: "Não Conformidade" },
+            { key: "desvios_insights", label: "Insights" }
           ]
         },
         {
@@ -51,11 +52,11 @@ export function getMenusHierarchy(): MenuSection[] {
           label: "Hora de Segurança",
           submenus: [
             { key: "hora_seguranca_dashboard", label: "Dashboard" },
-            { key: "hora_seguranca_agenda", label: "Agenda" },
+            { key: "hora_seguranca_agenda", label: "Agenda HSA" },
             { key: "hora_seguranca_acompanhamento", label: "Acompanhamento" },
             { key: "hora_seguranca_cadastro", label: "Cadastro" },
             { key: "hora_seguranca_cadastro_inspecao", label: "Cadastro Inspeção" },
-            { key: "hora_seguranca_cadastro_nao_programada", label: "Cadastro Não Programada" }
+            { key: "hora_seguranca_cadastro_nao_programada", label: "Inspeção Não Programada" }
           ]
         },
         {
@@ -63,8 +64,17 @@ export function getMenusHierarchy(): MenuSection[] {
           label: "Inspeção SMS",
           submenus: [
             { key: "inspecao_sms_dashboard", label: "Dashboard" },
-            { key: "inspecao_sms_cadastro", label: "Cadastro" },
-            { key: "inspecao_sms_consulta", label: "Consulta" }
+            { key: "inspecao_sms_cadastro", label: "Cadastrar" },
+            { key: "inspecao_sms_consulta", label: "Consultar" }
+          ]
+        },
+        {
+          key: "prevencao_incendio",
+          label: "Prevenção de Incêndio",
+          submenus: [
+            { key: "prevencao_incendio_dashboard", label: "Dashboard" },
+            { key: "prevencao_incendio_cadastro_extintores", label: "Cadastro de Extintores" },
+            { key: "prevencao_incendio_inspecao_extintores", label: "Inspeção de Extintores" }
           ]
         },
         {
@@ -90,7 +100,9 @@ export function getMenusHierarchy(): MenuSection[] {
           label: "GRO",
           submenus: [
             { key: "gro_dashboard", label: "Dashboard" },
-            { key: "gro_avaliacao_riscos", label: "Avaliação de Riscos" }
+            { key: "gro_avaliacao_riscos", label: "Avaliação de Riscos" },
+            { key: "gro_cadastro_perigos", label: "Cadastro de Perigos" },
+            { key: "gro_pgr", label: "PGR" }
           ]
         }
       ]
@@ -100,6 +112,14 @@ export function getMenusHierarchy(): MenuSection[] {
       label: "IDSMS - Indicadores",
       items: [
         { key: "idsms_dashboard", label: "Dashboard" },
+        { key: "idsms_indicadores", label: "Indicadores" },
+        { key: "idsms_ht", label: "HT" },
+        { key: "idsms_hsa", label: "HSA" },
+        { key: "idsms_iid", label: "IID" },
+        { key: "idsms_ipom", label: "IPOM" },
+        { key: "idsms_indice_reativo", label: "Índice Reativo" },
+        { key: "idsms_inspecao_alta_lideranca", label: "Inspeção Alta Liderança" },
+        { key: "idsms_inspecao_gestao_sms", label: "Inspeção Gestão SMS" },
         { key: "idsms_relatorios", label: "Relatórios" }
       ]
     },
@@ -107,21 +127,28 @@ export function getMenusHierarchy(): MenuSection[] {
       key: "administracao",
       label: "Administração",
       items: [
-        { key: "adm_configuracoes", label: "Configurações" },
-        { key: "adm_usuarios", label: "Usuários" },
-        { key: "adm_perfis", label: "Perfis" },
-        { key: "adm_empresas", label: "Empresas" },
-        { key: "adm_ccas", label: "CCAs" },
-        { key: "adm_engenheiros", label: "Engenheiros" },
-        { key: "adm_supervisores", label: "Supervisores" },
-        { key: "adm_funcionarios", label: "Funcionários" },
-        { key: "adm_importacao_funcionarios", label: "Importação de Funcionários" },
-        { key: "adm_checklists", label: "Cadastro de Checklists" },
-        { key: "adm_hht", label: "HHT" },
-        { key: "adm_metas_indicadores", label: "Metas e Indicadores" },
-        { key: "adm_modelos_inspecao", label: "Modelos de Inspeção" },
-        { key: "adm_templates", label: "Templates" },
-        { key: "adm_logo", label: "Logo" }
+        { key: "admin_configuracoes", label: "Configurações" },
+        { key: "admin_usuarios", label: "Usuários" },
+        { key: "admin_usuarios_auth", label: "Usuários Auth" },
+        { key: "admin_perfis", label: "Perfis" },
+        { key: "admin_empresas", label: "Empresas" },
+        { key: "admin_ccas", label: "CCAs" },
+        { key: "admin_engenheiros", label: "Engenheiros" },
+        { key: "admin_supervisores", label: "Supervisores" },
+        { key: "admin_encarregados", label: "Encarregados" },
+        { key: "admin_funcionarios", label: "Funcionários" },
+        { key: "admin_importacao_funcionarios", label: "Importação de Funcionários" },
+        { key: "admin_checklists", label: "Cadastro de Checklists" },
+        { key: "admin_exportacao_dados", label: "Exportação de Dados" },
+        { key: "admin_criar_usuario", label: "Criar Usuário" },
+        { key: "admin_metas_indicadores", label: "Metas e Indicadores" },
+        { key: "admin_registro_hht", label: "Registro HHT" },
+        { key: "admin_importacao_execucao_treinamentos", label: "Importação Execução Treinamentos" },
+        { key: "admin_importacao_hsa", label: "Importação HSA" },
+        { key: "admin_templates", label: "Templates" },
+        { key: "admin_logo", label: "Logo" },
+        { key: "configuracao_emails", label: "Configuração de Emails" },
+        { key: "upload_tutoriais", label: "Upload de Tutoriais" }
       ]
     },
     {
@@ -138,16 +165,22 @@ export function getMenusHierarchy(): MenuSection[] {
       label: "Relatórios",
       items: [
         { key: "relatorios_dashboard", label: "Dashboard" },
-        { key: "relatorios_idsms", label: "IDSMS" }
+        { key: "relatorios_ocorrencias", label: "Ocorrências" },
+        { key: "relatorios_desvios", label: "Desvios" },
+        { key: "relatorios_treinamentos", label: "Treinamentos" },
+        { key: "relatorios_idsms", label: "IDSMS" },
+        { key: "relatorios_hsa", label: "HSA" }
       ]
     },
     {
       key: "sistema",
       label: "Sistema",
       items: [
-        { key: "configuracoes", label: "Configurações" },
+        { key: "sms_dashboard", label: "Dashboard SMS" },
         { key: "suporte", label: "Suporte" },
-        { key: "conta", label: "Conta" }
+        { key: "account_profile", label: "Perfil" },
+        { key: "account_settings", label: "Configurações" },
+        { key: "account_support", label: "Suporte da Conta" }
       ]
     }
   ];
@@ -168,23 +201,30 @@ export function getAllMenusSidebar(): string[] {
     });
   });
   
-  // Manter compatibilidade com menus antigos de administração
-  const adminMenus = [
-    "admin_usuarios",
-    "admin_perfis", 
-    "admin_empresas",
-    "admin_ccas",
-    "admin_engenheiros",
-    "admin_supervisores",
-    "admin_funcionarios",
-    "admin_hht",
-    "admin_metas_indicadores",
-    "admin_templates",
-    "admin_logo",
-    "admin_modelos_inspecao"
+  // Manter compatibilidade com menus antigos para transição
+  const compatibilityMenus = [
+    // Menus antigos de administração
+    "adm_configuracoes",
+    "adm_usuarios",
+    "adm_perfis", 
+    "adm_empresas",
+    "adm_ccas",
+    "adm_engenheiros",
+    "adm_supervisores",
+    "adm_funcionarios",
+    "adm_hht",
+    "adm_metas_indicadores",
+    "adm_templates",
+    "adm_logo",
+    "adm_modelos_inspecao",
+    "adm_checklists",
+    "adm_importacao_funcionarios",
+    // Outros menus de compatibilidade
+    "configuracoes",
+    "conta"
   ];
   
-  return [...allMenus, ...adminMenus];
+  return [...allMenus, ...compatibilityMenus];
 }
 
 export async function fetchPerfis() {
