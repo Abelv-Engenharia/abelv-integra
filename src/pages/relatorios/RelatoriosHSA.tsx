@@ -16,6 +16,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { ResponsiveContainer, BarChart as ReBarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from "recharts";
 import { fetchInspecoesByResponsavel } from "@/services/hora-seguranca/inspecoesByResponsavelService";
 import { useToast } from "@/hooks/use-toast";
+import ReportHeader from "@/components/relatorios/ReportHeader";
 
 const RelatoriosHSA = () => {
   const [filterCCA, setFilterCCA] = useState("");
