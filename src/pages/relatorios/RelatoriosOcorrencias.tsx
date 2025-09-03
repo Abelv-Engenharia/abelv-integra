@@ -1,111 +1,174 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { RelatorioFilters } from "@/components/relatorios/RelatorioFilters";
-import { Table, TableHeader, TableHead, TableBody, TableRow, TableCell } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ChartContainer, ChartLegend, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, LineChart, Line } from "recharts";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Download, FileImage } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
+import html2canvas from "html2canvas";
+import OcorrenciasSummaryCards from "@/components/ocorrencias/OcorrenciasSummaryCards";
+import OcorrenciasByTipoChart from "@/components/ocorrencias/OcorrenciasByTipoChart";
+import OcorrenciasByEmpresaChart from "@/components/ocorrencias/OcorrenciasByEmpresaChart";
+import OcorrenciasTimelineChart from "@/components/ocorrencias/OcorrenciasTimelineChart";
+import TaxaFrequenciaAcCpdChart from "@/components/ocorrencias/TaxaFrequenciaAcCpdChart";
+import TaxaFrequenciaAcSpdChart from "@/components/ocorrencias/TaxaFrequenciaAcSpdChart";
+import TaxaGravidadeChart from "@/components/ocorrencias/TaxaGravidadeChart";
+import OcorrenciasTable from "@/components/ocorrencias/OcorrenciasTable";
+import OcorrenciasSimpleFilters from "@/components/ocorrencias/OcorrenciasSimpleFilters";
+import { useUserCCAs } from "@/hooks/useUserCCAs";
+import { OcorrenciasFilterProvider, useOcorrenciasFilter } from "@/contexts/OcorrenciasFilterContext";
 
-// Mock data for the report
-const MOCK_OCORRENCIAS_DATA = [
-  { id: 1, data: "2023-04-05", tipo: "Acidente", classificacaoRisco: "Alto", empresa: "Empresa A", partesCorpo: "Mãos", status: "Fechado" },
-  { id: 2, data: "2023-04-10", tipo: "Quase Acidente", classificacaoRisco: "Médio", empresa: "Empresa B", partesCorpo: "N/A", status: "Em Análise" },
-  { id: 3, data: "2023-04-15", tipo: "Incidente", classificacaoRisco: "Baixo", empresa: "Empresa A", partesCorpo: "N/A", status: "Fechado" },
-  { id: 4, data: "2023-04-20", tipo: "Acidente", classificacaoRisco: "Alto", empresa: "Empresa C", partesCorpo: "Pernas", status: "Em Análise" },
-  { id: 5, data: "2023-04-25", tipo: "Quase Acidente", classificacaoRisco: "Médio", empresa: "Empresa B", partesCorpo: "N/A", status: "Fechado" },
-  { id: 6, data: "2023-05-02", tipo: "Incidente", classificacaoRisco: "Baixo", empresa: "Empresa A", partesCorpo: "N/A", status: "Fechado" },
-  { id: 7, data: "2023-05-08", tipo: "Acidente", classificacaoRisco: "Alto", empresa: "Empresa C", partesCorpo: "Cabeça", status: "Em Análise" },
-  { id: 8, data: "2023-05-15", tipo: "Quase Acidente", classificacaoRisco: "Médio", empresa: "Empresa B", partesCorpo: "N/A", status: "Fechado" },
-  { id: 9, data: "2023-05-22", tipo: "Incidente", classificacaoRisco: "Baixo", empresa: "Empresa A", partesCorpo: "N/A", status: "Em Análise" },
-  { id: 10, data: "2023-05-28", tipo: "Acidente", classificacaoRisco: "Alto", empresa: "Empresa C", partesCorpo: "Braços", status: "Fechado" },
-];
+const RelatoriosOcorrenciasContent = () => {
+  const { data: userCCAs = [] } = useUserCCAs();
+  const { year, month, ccaId, clearFilters } = useOcorrenciasFilter();
+  const { toast } = useToast();
+  const [loading, setLoading] = useState(false);
+  
+  const hasActiveFilters = year !== 'todos' || month !== 'todos' || ccaId !== 'todos';
 
-// Prepare chart data
-const prepareChartData = (data: typeof MOCK_OCORRENCIAS_DATA) => {
-  // By type
-  const byTipo = data.reduce((acc, item) => {
-    acc[item.tipo] = (acc[item.tipo] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
-  
-  // By risk classification
-  const byRisco = data.reduce((acc, item) => {
-    acc[item.classificacaoRisco] = (acc[item.classificacaoRisco] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
-  
-  // By company
-  const byEmpresa = data.reduce((acc, item) => {
-    acc[item.empresa] = (acc[item.empresa] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
-  
-  // By month for timeline
-  const byMonth = data.reduce((acc, item) => {
-    const date = new Date(item.data);
-    const monthYear = `${date.getMonth() + 1}/${date.getFullYear()}`;
-    
-    if (!acc[monthYear]) {
-      acc[monthYear] = {
-        name: monthYear,
-        acidentes: 0,
-        quaseAcidentes: 0,
-        incidentes: 0
-      };
+  // Export functions
+  const exportToPDF = async () => {
+    toast({
+      title: "Gerando PDF",
+      description: "O relatório está sendo gerado..."
+    });
+
+    try {
+      // Create a new window for printing
+      const printWindow = window.open('', '_blank');
+      if (!printWindow) return;
+
+      // Get the content to print
+      const content = document.getElementById('relatorio-content');
+      if (!content) return;
+
+      // Write the content to the new window
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>Relatório de Ocorrências</title>
+            <style>
+              body { font-family: Arial, sans-serif; margin: 20px; }
+              .print-header { text-align: center; margin-bottom: 30px; }
+              .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 30px; }
+              .stat-card { border: 1px solid #ddd; padding: 15px; border-radius: 5px; }
+              .chart-container { margin-bottom: 30px; page-break-inside: avoid; }
+              @media print { body { margin: 0; } }
+            </style>
+          </head>
+          <body>
+            <div class="print-header">
+              <h1>Relatório de Ocorrências</h1>
+              <p>Gerado em: ${new Date().toLocaleDateString('pt-BR')}</p>
+            </div>
+            ${content.innerHTML}
+          </body>
+        </html>
+      `);
+
+      printWindow.document.close();
+      
+      // Wait a bit then trigger print
+      setTimeout(() => {
+        printWindow.print();
+        printWindow.close();
+        
+        toast({
+          title: "PDF gerado com sucesso",
+          description: "O relatório foi enviado para impressão/download."
+        });
+      }, 1000);
+
+    } catch (error) {
+      console.error('Erro ao gerar PDF:', error);
+      toast({
+        title: "Erro ao gerar PDF",
+        description: "Ocorreu um erro ao gerar o relatório em PDF.",
+        variant: "destructive"
+      });
     }
-    
-    if (item.tipo === "Acidente") {
-      acc[monthYear].acidentes += 1;
-    } else if (item.tipo === "Quase Acidente") {
-      acc[monthYear].quaseAcidentes += 1;
-    } else if (item.tipo === "Incidente") {
-      acc[monthYear].incidentes += 1;
+  };
+
+  const exportToJPEG = async () => {
+    if (loading) {
+      toast({
+        title: "Aguarde os dados carregarem",
+        description: "Por favor, aguarde os gráficos terminarem de carregar antes de exportar.",
+        variant: "destructive"
+      });
+      return;
     }
-    
-    return acc;
-  }, {} as Record<string, { name: string; acidentes: number; quaseAcidentes: number; incidentes: number }>);
-  
-  // Convert to arrays and sort
-  const timelineData = Object.values(byMonth).sort((a, b) => {
-    const [aMonth, aYear] = a.name.split('/').map(Number);
-    const [bMonth, bYear] = b.name.split('/').map(Number);
-    return aYear !== bYear ? aYear - bYear : aMonth - bMonth;
-  });
-  
-  return {
-    byTipo: Object.entries(byTipo).map(([name, value]) => ({ name, value })),
-    byRisco: Object.entries(byRisco).map(([name, value]) => ({ name, value })),
-    byEmpresa: Object.entries(byEmpresa).map(([name, value]) => ({ name, value })),
-    timeline: timelineData
-  };
-};
 
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
+    toast({
+      title: "Gerando JPEG",
+      description: "Aguardando gráficos carregarem..."
+    });
 
-const RelatoriosOcorrencias = () => {
-  const [filteredData, setFilteredData] = useState(MOCK_OCORRENCIAS_DATA);
-  const [isFiltered, setIsFiltered] = useState(false);
-  
-  const chartData = prepareChartData(filteredData);
-  
-  const handleFilter = (filters: any) => {
-    console.log("Applied filters:", filters);
-    // In a real app, this would filter the data based on the selected filters
-    setIsFiltered(true);
-  };
-  
-  const chartConfig = {
-    alto: { label: "Alto", theme: { light: "#ef4444", dark: "#ef4444" } },
-    médio: { label: "Médio", theme: { light: "#f97316", dark: "#f97316" } },
-    baixo: { label: "Baixo", theme: { light: "#22c55e", dark: "#22c55e" } },
-    acidente: { label: "Acidente", color: "#ef4444" },
-    "quase acidente": { label: "Quase Acidente", color: "#f97316" },
-    incidente: { label: "Incidente", color: "#3b82f6" },
+    try {
+      // Wait for charts to fully load
+      await new Promise(resolve => setTimeout(resolve, 3000));
+      
+      // Check if charts are still loading
+      const loadingElements = document.querySelectorAll('[data-loading="true"], .loading');
+      if (loadingElements.length > 0) {
+        toast({
+          title: "Gráficos ainda carregando",
+          description: "Aguarde mais um momento e tente novamente.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      toast({
+        title: "Capturando imagem",
+        description: "Preparando download..."
+      });
+
+      const element = document.getElementById('relatorio-content');
+      if (!element) {
+        throw new Error('Elemento do relatório não encontrado');
+      }
+
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#ffffff',
+        width: element.scrollWidth,
+        height: element.scrollHeight,
+        scrollX: 0,
+        scrollY: 0
+      });
+
+      // Convert to blob and download
+      canvas.toBlob((blob) => {
+        if (blob) {
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = `relatorio-ocorrencias-${new Date().toISOString().split('T')[0]}.jpeg`;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          URL.revokeObjectURL(url);
+          
+          toast({
+            title: "JPEG gerado com sucesso",
+            description: "O download do relatório foi iniciado."
+          });
+        }
+      }, 'image/jpeg', 0.9);
+
+    } catch (error) {
+      console.error('Erro ao gerar JPEG:', error);
+      toast({
+        title: "Erro ao gerar JPEG",
+        description: "Ocorreu um erro ao gerar o relatório em JPEG. Tente novamente.",
+        variant: "destructive"
+      });
+    }
   };
   
   return (
@@ -120,241 +183,136 @@ const RelatoriosOcorrencias = () => {
           </Button>
           <h2 className="text-3xl font-bold tracking-tight">Relatório de Ocorrências</h2>
         </div>
+        
+        <div className="flex gap-2">
+          <Button 
+            onClick={exportToPDF}
+            variant="outline"
+            disabled={loading}
+            size="sm"
+          >
+            <Download className="h-4 w-4 mr-2" />
+            PDF
+          </Button>
+          <Button 
+            onClick={exportToJPEG}
+            variant="outline"
+            disabled={loading}
+            size="sm"
+          >
+            <FileImage className="h-4 w-4 mr-2" />
+            JPEG
+          </Button>
+        </div>
       </div>
       
-      <RelatorioFilters 
-        onFilter={handleFilter}
-        filterOptions={{
-          periods: [
-            { value: "last-7", label: "Últimos 7 dias" },
-            { value: "last-30", label: "Últimos 30 dias" },
-            { value: "last-90", label: "Últimos 90 dias" },
-            { value: "current-month", label: "Mês atual" },
-            { value: "previous-month", label: "Mês anterior" },
-            { value: "current-year", label: "Ano atual" },
-          ],
-          additionalFilters: [
-            {
-              id: "tipo",
-              label: "Tipo de Ocorrência",
-              options: [
-                { value: "acidente", label: "Acidente" },
-                { value: "quase-acidente", label: "Quase Acidente" },
-                { value: "incidente", label: "Incidente" },
-              ]
-            },
-            {
-              id: "risco",
-              label: "Classificação de Risco",
-              options: [
-                { value: "alto", label: "Alto" },
-                { value: "medio", label: "Médio" },
-                { value: "baixo", label: "Baixo" },
-              ]
-            },
-            {
-              id: "empresa",
-              label: "Empresa",
-              options: [
-                { value: "empresa-a", label: "Empresa A" },
-                { value: "empresa-b", label: "Empresa B" },
-                { value: "empresa-c", label: "Empresa C" },
-              ]
-            }
-          ]
-        }}
-      />
+      <div className="flex flex-col gap-4">
+        {userCCAs.length > 0 && <OcorrenciasSimpleFilters />}
+      </div>
       
-      {isFiltered && (
-        <div className="bg-slate-50 p-3 rounded-md border border-slate-200">
+      {hasActiveFilters && (
+        <div className="bg-slate-50 p-2 rounded-md border border-slate-200">
           <p className="text-sm text-muted-foreground">
-            Mostrando dados filtrados. 
+            Filtros aplicados - <button className="text-primary underline" onClick={clearFilters}>Limpar filtros</button>
           </p>
         </div>
       )}
-      
-      <Tabs defaultValue="graficos">
-        <TabsList>
-          <TabsTrigger value="graficos">Gráficos</TabsTrigger>
-          <TabsTrigger value="tabela">Tabela</TabsTrigger>
-        </TabsList>
-        <TabsContent value="graficos" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Ocorrências por Tipo</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="h-[300px]">
-                  <ChartContainer config={chartConfig}>
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie
-                          data={chartData.byTipo}
-                          cx="50%"
-                          cy="50%"
-                          labelLine={false}
-                          outerRadius={80}
-                          fill="#8884d8"
-                          dataKey="value"
-                          nameKey="name"
-                        >
-                          {chartData.byTipo.map((entry) => (
-                            <Cell 
-                              key={`cell-${entry.name}`} 
-                              fill={
-                                entry.name === "Acidente" ? "#ef4444" :
-                                entry.name === "Quase Acidente" ? "#f97316" : 
-                                "#3b82f6"
-                              } 
-                            />
-                          ))}
-                        </Pie>
-                        <ChartTooltip content={<ChartTooltipContent />} />
-                        <Legend content={<ChartLegend />} />
-                      </PieChart>
-                    </ResponsiveContainer>
-                  </ChartContainer>
-                </div>
-              </CardContent>
-            </Card>
+
+      {userCCAs.length === 0 ? (
+        <div className="text-center py-8">
+          <p className="text-yellow-600">Você não possui acesso a nenhum CCA.</p>
+        </div>
+      ) : (
+        <div id="relatorio-content" className="space-y-6">
+          <OcorrenciasSummaryCards />
+
+          <Tabs defaultValue="charts" className="w-full">
+            <TabsList className="w-full md:w-auto">
+              <TabsTrigger value="charts">Gráficos</TabsTrigger>
+              <TabsTrigger value="table">Ocorrências Recentes</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="charts" className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Ocorrências por Tipo</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <OcorrenciasByTipoChart />
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Ocorrências por Classificação de Risco</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <OcorrenciasByEmpresaChart />
+                  </CardContent>
+                </Card>
+              </div>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Ocorrências por CCA</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <OcorrenciasTimelineChart />
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Taxa de Frequência AC CPD</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <TaxaFrequenciaAcCpdChart />
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Taxa de Frequência AC SPD</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <TaxaFrequenciaAcSpdChart />
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Taxa de Gravidade</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <TaxaGravidadeChart />
+                </CardContent>
+              </Card>
+            </TabsContent>
             
-            <Card>
-              <CardHeader>
-                <CardTitle>Ocorrências por Classificação de Risco</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="h-[300px]">
-                  <ChartContainer config={chartConfig}>
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie
-                          data={chartData.byRisco}
-                          cx="50%"
-                          cy="50%"
-                          labelLine={false}
-                          outerRadius={80}
-                          fill="#8884d8"
-                          dataKey="value"
-                          nameKey="name"
-                        >
-                          {chartData.byRisco.map((entry) => (
-                            <Cell 
-                              key={`cell-${entry.name}`} 
-                              fill={
-                                entry.name === "Alto" ? "#ef4444" :
-                                entry.name === "Médio" ? "#f97316" : 
-                                "#22c55e"
-                              } 
-                            />
-                          ))}
-                        </Pie>
-                        <ChartTooltip content={<ChartTooltipContent />} />
-                        <Legend content={<ChartLegend />} />
-                      </PieChart>
-                    </ResponsiveContainer>
-                  </ChartContainer>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle>Ocorrências por Empresa</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="h-[300px]">
-                  <ChartContainer config={{}}>
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={chartData.byEmpresa}>
-                        <XAxis dataKey="name" />
-                        <YAxis />
-                        <Tooltip content={<ChartTooltipContent />} />
-                        <Legend content={<ChartLegend />} />
-                        <Bar dataKey="value" name="Quantidade" fill="#8884d8" />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </ChartContainer>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card className="md:col-span-2">
-              <CardHeader>
-                <CardTitle>Tendência de Ocorrências</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="h-[300px]">
-                  <ChartContainer config={{}}>
-                    <ResponsiveContainer width="100%" height="100%">
-                      <LineChart data={chartData.timeline}>
-                        <XAxis dataKey="name" />
-                        <YAxis />
-                        <Tooltip content={<ChartTooltipContent />} />
-                        <Legend content={<ChartLegend />} />
-                        <Line type="monotone" dataKey="acidentes" name="Acidentes" stroke="#ef4444" />
-                        <Line type="monotone" dataKey="quaseAcidentes" name="Quase Acidentes" stroke="#f97316" />
-                        <Line type="monotone" dataKey="incidentes" name="Incidentes" stroke="#3b82f6" />
-                      </LineChart>
-                    </ResponsiveContainer>
-                  </ChartContainer>
-                </div>
-              </CardContent>
-            </Card>
+            <TabsContent value="table">
+              <Card>
+                <CardContent className="p-0">
+                  <OcorrenciasTable />
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
+          
+          <div className="text-center text-sm text-muted-foreground pt-4">
+            <p>Relatório gerado em: {new Date().toLocaleDateString('pt-BR')} às {new Date().toLocaleTimeString('pt-BR')}</p>
           </div>
-        </TabsContent>
-        <TabsContent value="tabela">
-          <Card>
-            <CardContent className="p-0">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>ID</TableHead>
-                    <TableHead>Data</TableHead>
-                    <TableHead>Tipo</TableHead>
-                    <TableHead>Classificação</TableHead>
-                    <TableHead>Empresa</TableHead>
-                    <TableHead>Partes do Corpo</TableHead>
-                    <TableHead>Status</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredData.map((ocorrencia) => (
-                    <TableRow key={ocorrencia.id}>
-                      <TableCell>{ocorrencia.id}</TableCell>
-                      <TableCell>{new Date(ocorrencia.data).toLocaleDateString('pt-BR')}</TableCell>
-                      <TableCell>
-                        <Badge variant={
-                          ocorrencia.tipo === "Acidente" ? "destructive" :
-                          ocorrencia.tipo === "Quase Acidente" ? "default" : "secondary"
-                        }>
-                          {ocorrencia.tipo}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={
-                          ocorrencia.classificacaoRisco === "Alto" ? "destructive" :
-                          ocorrencia.classificacaoRisco === "Médio" ? "default" : "outline"
-                        }>
-                          {ocorrencia.classificacaoRisco}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>{ocorrencia.empresa}</TableCell>
-                      <TableCell>{ocorrencia.partesCorpo}</TableCell>
-                      <TableCell>
-                        <Badge variant={ocorrencia.status === "Fechado" ? "outline" : "secondary"}>
-                          {ocorrencia.status}
-                        </Badge>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+        </div>
+      )}
     </div>
+  );
+};
+
+const RelatoriosOcorrencias = () => {
+  return (
+    <OcorrenciasFilterProvider>
+      <RelatoriosOcorrenciasContent />
+    </OcorrenciasFilterProvider>
   );
 };
 
