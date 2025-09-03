@@ -26,7 +26,6 @@ import { DesviosFiltersProvider } from "@/components/desvios/DesviosFiltersProvi
 // Import filters from dashboard
 import DesviosDashboardFilters from "@/components/desvios/DesviosDashboardFilters";
 import DesviosDashboardStats from "@/components/desvios/DesviosDashboardStats";
-import ReportHeader from "@/components/relatorios/ReportHeader";
 
 const RelatoriosDesvios = () => {
   const { toast } = useToast();
@@ -176,7 +175,8 @@ const RelatoriosDesvios = () => {
           <head>
             <title>Relatório de Desvios</title>
             <style>
-              body { font-family: Arial, sans-serif; margin: 0; }
+              body { font-family: Arial, sans-serif; margin: 20px; }
+              .print-header { text-align: center; margin-bottom: 30px; }
               .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 30px; }
               .stat-card { border: 1px solid #ddd; padding: 15px; border-radius: 5px; }
               .chart-container { margin-bottom: 30px; page-break-inside: avoid; }
@@ -184,6 +184,10 @@ const RelatoriosDesvios = () => {
             </style>
           </head>
           <body>
+            <div class="print-header">
+              <h1>Relatório de Desvios</h1>
+              <p>Gerado em: ${new Date().toLocaleDateString('pt-BR')}</p>
+            </div>
             ${content.innerHTML}
           </body>
         </html>
@@ -417,9 +421,6 @@ const RelatoriosDesvios = () => {
 
       {/* Content for export */}
       <div id="relatorio-content">
-        {/* Header for reports */}
-        <ReportHeader title="RELATÓRIO DE DESVIOS" />
-        
         {/* Stats cards */}
         <DesviosDashboardStats loading={loading} stats={dashboardStats} />
         

@@ -224,7 +224,6 @@ const RelatoriosOcorrenciasContent = () => {
         </div>
       ) : (
         <div id="relatorio-content" className="space-y-6">
-          <ReportHeader title="RELATÓRIO DE OCORRÊNCIAS" />
           <OcorrenciasSummaryCards />
 
           <Tabs defaultValue="charts" className="w-full">

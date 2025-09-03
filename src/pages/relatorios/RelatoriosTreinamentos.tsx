@@ -336,7 +336,6 @@ const RelatoriosTreinamentos = () => {
       </div>
 
       <div ref={reportRef} className="space-y-6">
-        <ReportHeader title="RELATÓRIO DE TREINAMENTOS" />
         <div data-filters>
           <TreinamentosDashboardFilters 
             year={year} 
