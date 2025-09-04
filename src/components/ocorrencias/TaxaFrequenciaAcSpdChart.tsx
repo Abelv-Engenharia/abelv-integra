@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from "recharts";
+import { ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, LabelList } from "recharts";
 import { fetchTaxaFrequenciaAcSpdPorMes, fetchMetaIndicador } from "@/services/ocorrencias/ocorrenciasStatsService";
 import { useUserCCAs } from "@/hooks/useUserCCAs";
 import { useOcorrenciasFilter } from "@/contexts/OcorrenciasFilterContext";
@@ -136,7 +136,14 @@ const TaxaFrequenciaAcSpdChart = () => {
             dataKey="mensal" 
             fill="#16a34a"
             name="Taxa Mensal"
-          />
+          >
+            <LabelList 
+              dataKey="mensal" 
+              position="top" 
+              fontSize={10} 
+              formatter={(value: any) => value > 0 ? value.toFixed(2) : ''} 
+            />
+          </Bar>
           <Line 
             type="monotone" 
             dataKey="acumulada" 

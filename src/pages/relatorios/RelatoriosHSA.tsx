@@ -13,7 +13,7 @@ import { DesviosResponsaveisChart } from "@/components/hora-seguranca/DesviosRes
 import { DesviosTipoInspecaoChart } from "@/components/hora-seguranca/DesviosTipoInspecaoChart";
 import { useUserCCAs } from "@/hooks/useUserCCAs";
 import { supabase } from "@/integrations/supabase/client";
-import { ResponsiveContainer, BarChart as ReBarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from "recharts";
+import { ResponsiveContainer, BarChart as ReBarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, LabelList } from "recharts";
 import { fetchInspecoesByResponsavel } from "@/services/hora-seguranca/inspecoesByResponsavelService";
 import { useToast } from "@/hooks/use-toast";
 
@@ -567,34 +567,81 @@ const RelatoriosHSA = () => {
                           >
                             <CartesianGrid strokeDasharray="3 3" />
                             
-                            <XAxis
-                              type="category"
-                              dataKey="name"
-                              interval={0}
-                              angle={-90}
-                              textAnchor="end"
-                              height={140}
-                              tick={{
-                                fontSize: 12,
-                              }}
-                            />
-                        
-                            <YAxis type="number" />
-                            <Tooltip />
-                        
-                            <Legend 
-                              verticalAlign="bottom" 
-                              height={36}
-                              wrapperStyle={{
-                                paddingTop: '20px'
-                              }}
-                            />
-                        
-                            <Bar dataKey="A Realizar" stackId="a" fill="#4285F4" />
-                            <Bar dataKey="Realizada" stackId="a" fill="#34A853" />
-                            <Bar dataKey="Não Realizada" stackId="a" fill="#EA4335" />
-                            <Bar dataKey="Realizada (Não Programada)" stackId="a" fill="#FBBC05" />
-                            <Bar dataKey="Cancelada" stackId="a" fill="#9E9E9E" />
+                             <XAxis
+                               type="category"
+                               dataKey="name"
+                               interval={0}
+                               angle={-45}
+                               textAnchor="end"
+                               height={140}
+                               tick={{
+                                 fontSize: 12,
+                               }}
+                             />
+                         
+                             <YAxis hide />
+                             <Tooltip 
+                               labelFormatter={(label, payload) => {
+                                 if (payload && payload.length > 0) {
+                                   return payload[0]?.payload?.nomeCompleto || label;
+                                 }
+                                 return label;
+                               }}
+                             />
+                         
+                             <Legend 
+                               verticalAlign="bottom" 
+                               height={36}
+                               wrapperStyle={{
+                                 paddingTop: '20px'
+                               }}
+                             />
+                         
+                             <Bar dataKey="A Realizar" stackId="a" fill="#4285F4">
+                               <LabelList 
+                                 dataKey="A Realizar" 
+                                 position="inside" 
+                                 fill="white" 
+                                 fontSize={12} 
+                                 formatter={(value: any) => value > 0 ? value : ''} 
+                               />
+                             </Bar>
+                             <Bar dataKey="Realizada" stackId="a" fill="#34A853">
+                               <LabelList 
+                                 dataKey="Realizada" 
+                                 position="inside" 
+                                 fill="white" 
+                                 fontSize={12} 
+                                 formatter={(value: any) => value > 0 ? value : ''} 
+                               />
+                             </Bar>
+                             <Bar dataKey="Não Realizada" stackId="a" fill="#EA4335">
+                               <LabelList 
+                                 dataKey="Não Realizada" 
+                                 position="inside" 
+                                 fill="white" 
+                                 fontSize={12} 
+                                 formatter={(value: any) => value > 0 ? value : ''} 
+                               />
+                             </Bar>
+                             <Bar dataKey="Realizada (Não Programada)" stackId="a" fill="#FBBC05">
+                               <LabelList 
+                                 dataKey="Realizada (Não Programada)" 
+                                 position="inside" 
+                                 fill="white" 
+                                 fontSize={12} 
+                                 formatter={(value: any) => value > 0 ? value : ''} 
+                               />
+                             </Bar>
+                             <Bar dataKey="Cancelada" stackId="a" fill="#9E9E9E">
+                               <LabelList 
+                                 dataKey="Cancelada" 
+                                 position="inside" 
+                                 fill="white" 
+                                 fontSize={12} 
+                                 formatter={(value: any) => value > 0 ? value : ''} 
+                               />
+                             </Bar>
                           </ReBarChart>
                         </ResponsiveContainer>
                     </div>

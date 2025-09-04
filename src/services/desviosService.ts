@@ -101,16 +101,33 @@ export interface Disciplina {
 
 export const fetchDesvios = async () => {
   try {
+    console.log('Buscando todos os desvios...');
+    
+    // Primeiro, contar o total de registros
+    const { count, error: countError } = await supabase
+      .from('desvios_completos')
+      .select('*', { count: 'exact', head: true });
+      
+    if (countError) {
+      console.error('Erro ao contar desvios:', countError);
+      return [];
+    }
+    
+    console.log(`Total de desvios encontrados: ${count}`);
+    
+    // Buscar todos os registros sem limitação
     const { data, error } = await supabase
       .from('desvios_completos')
       .select('*')
-      .order('created_at', { ascending: false });
+      .order('created_at', { ascending: false })
+      .limit(50000); // Limite alto para garantir que pegue todos
       
     if (error) {
       console.error('Erro ao buscar desvios:', error);
       return [];
     }
     
+    console.log(`Desvios carregados: ${data?.length || 0}`);
     return data || [];
   } catch (error) {
     console.error('Exceção ao buscar desvios:', error);
