@@ -13,7 +13,8 @@ export const fetchDesviosByClassification = async (filters?: FilterParams) => {
         disciplina_id,
         empresa_id
       `)
-      .not('classificacao_risco', 'is', null);
+      .not('classificacao_risco', 'is', null)
+      .limit(50000);
 
     // Apply filters if provided
     if (filters) {

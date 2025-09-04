@@ -9,7 +9,8 @@ export const fetchDesviosByRiskLevel = async () => {
         id,
         classificacao_risco
       `)
-      .order('created_at', { ascending: false });
+      .order('created_at', { ascending: false })
+      .limit(50000);
       
     if (error) {
       console.error('Erro ao buscar desvios por nível de risco:', error);

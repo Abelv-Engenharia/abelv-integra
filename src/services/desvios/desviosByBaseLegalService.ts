@@ -14,7 +14,8 @@ export const fetchDesviosByBaseLegal = async (filters?: FilterParams) => {
         empresa_id,
         base_legal_opcoes:base_legal_opcao_id(codigo, nome)
       `)
-      .not('base_legal_opcao_id', 'is', null);
+      .not('base_legal_opcao_id', 'is', null)
+      .limit(50000);
 
     // Apply filters if provided
     if (filters) {

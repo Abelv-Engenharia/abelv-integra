@@ -13,7 +13,8 @@ export const fetchDesviosByDiscipline = async (filters?: FilterParams) => {
         empresa_id,
         disciplinas:disciplina_id(codigo, nome)
       `)
-      .not('disciplina_id', 'is', null);
+      .not('disciplina_id', 'is', null)
+      .limit(50000);
 
     // Apply filters if provided
     if (filters) {

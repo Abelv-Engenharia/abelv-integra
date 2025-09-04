@@ -14,7 +14,8 @@ export const fetchDesviosByProcesso = async (filters?: FilterParams) => {
         empresa_id,
         processos:processo_id(codigo, nome)
       `)
-      .not('processo_id', 'is', null);
+      .not('processo_id', 'is', null)
+      .limit(50000);
 
     // Apply filters if provided
     if (filters) {

@@ -10,7 +10,8 @@ export const fetchDesviosByMonth = async () => {
         data_desvio,
         created_at
       `)
-      .order('created_at', { ascending: false });
+      .order('created_at', { ascending: false })
+      .limit(50000);
       
     if (error) {
       console.error('Erro ao buscar desvios por mês:', error);

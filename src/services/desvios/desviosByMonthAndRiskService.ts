@@ -9,7 +9,8 @@ export const fetchDesviosByMonthAndRisk = async () => {
       .from('desvios_completos')
       .select('data_desvio, classificacao_risco')
       .gte('data_desvio', `${currentYear}-01-01`)
-      .order('data_desvio', { ascending: true });
+      .order('data_desvio', { ascending: true })
+      .limit(50000);
     
     if (error) {
       console.error('Error fetching desvios by month and risk:', error);

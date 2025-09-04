@@ -27,7 +27,8 @@ export const exportDesviosToExcel = async (filters?: ExportFilters) => {
         profiles_engenheiro:engenheiro_responsavel_id(nome),
         profiles_supervisor:supervisor_responsavel_id(nome),
         profiles_encarregado:encarregado_responsavel_id(nome)
-      `);
+      `)
+      .limit(50000);
 
     if (filters?.dataInicial && filters?.dataFinal) {
       query = query.gte('data_desvio', filters.dataInicial)
