@@ -17,16 +17,7 @@ const DesviosByEventChart = () => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        // Get CCA IDs that user has permission to
-        const allowedCcaIds = filters.userCCAs.map(cca => cca.id.toString());
-        const chartData = await fetchDesviosByEvent({
-          ccaIds: allowedCcaIds,
-          year: filters.year,
-          month: filters.month,
-          ccaId: filters.ccaId,
-          disciplinaId: filters.disciplinaId,
-          empresaId: filters.empresaId
-        });
+        const chartData = await fetchDesviosByEvent(filters.normalizedFilters);
         setData(chartData);
       } catch (error) {
         console.error("Error loading event chart data:", error);

@@ -4,6 +4,7 @@ import { FilterParams } from "../types/dashboardTypes";
 import dayjs from "dayjs";
 
 export const applyFiltersToQuery = (query: any, filters: FilterParams) => {
+  console.log('applyFiltersToQuery - Received filters:', filters);
   let filteredQuery = query;
 
   // Aplicar filtros de data com lógica padronizada usando dayjs

@@ -41,6 +41,14 @@ export const useDesviosFilters = () => {
     userCcaIds: allowedCcaIds
   });
   
+  console.log('useDesviosFilters - Raw filters:', {
+    year: context.year,
+    month: context.month,
+    ccaId: context.ccaId,
+    allowedCcaIds
+  });
+  console.log('useDesviosFilters - Normalized filters:', normalizedFilters);
+  
   return {
     ...context,
     normalizedFilters
