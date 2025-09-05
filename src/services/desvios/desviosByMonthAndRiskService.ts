@@ -1,16 +1,27 @@
 
 import { supabase } from "@/integrations/supabase/client";
+import { FilterParams } from "./types/dashboardTypes";
+import { applyFiltersToQuery } from "./utils/filterUtils";
 
 // Function to fetch data for the bar chart (desvios by month and risk level)
-export const fetchDesviosByMonthAndRisk = async () => {
+export const fetchDesviosByMonthAndRisk = async (filters?: FilterParams) => {
   try {
-    const currentYear = new Date().getFullYear();
-    const { data, error } = await supabase
+    let query = supabase
       .from('desvios_completos')
       .select('data_desvio, classificacao_risco')
-      .gte('data_desvio', `${currentYear}-01-01`)
       .order('data_desvio', { ascending: true })
       .limit(50000);
+
+    // Apply standardized filters
+    if (filters) {
+      query = applyFiltersToQuery(query, filters);
+    } else {
+      // Default to current year if no filters
+      const currentYear = new Date().getFullYear();
+      query = query.gte('data_desvio', `${currentYear}-01-01`);
+    }
+
+    const { data, error } = await query;
     
     if (error) {
       console.error('Error fetching desvios by month and risk:', error);

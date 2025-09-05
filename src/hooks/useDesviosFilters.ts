@@ -1,4 +1,5 @@
 import { createContext, useContext } from 'react';
+import { normalizeFilters } from '@/utils/dateFilters';
 
 export interface DesviosFiltersContextType {
   year: string;
@@ -22,8 +23,26 @@ export const useDesviosFilters = () => {
       disciplinaId: "",
       empresaId: "",
       userCCAs: [],
-      filtersApplied: false
+      filtersApplied: false,
+      normalizedFilters: {
+        ccaIds: []
+      }
     };
   }
-  return context;
+  
+  // Normalize filters for consistent date handling
+  const allowedCcaIds = context.userCCAs.map(cca => cca.id.toString());
+  const normalizedFilters = normalizeFilters({
+    year: context.year,
+    month: context.month,
+    ccaId: context.ccaId,
+    disciplinaId: context.disciplinaId,
+    empresaId: context.empresaId,
+    userCcaIds: allowedCcaIds
+  });
+  
+  return {
+    ...context,
+    normalizedFilters
+  };
 };

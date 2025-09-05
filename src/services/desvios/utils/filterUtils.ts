@@ -1,57 +1,35 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { FilterParams } from "../types/dashboardTypes";
+import dayjs from "dayjs";
 
 export const applyFiltersToQuery = (query: any, filters: FilterParams) => {
   let filteredQuery = query;
 
-  // Aplicar filtros de data com lógica corrigida
-  if (filters.year && filters.year !== "todos" && filters.month && filters.month !== "todos") {
+  // Aplicar filtros de data com lógica padronizada usando dayjs
+  const DATE_COL = "data_desvio";
+
+  if (filters.month && filters.year) {
     // Quando temos ano e mês específicos
-    const year = parseInt(filters.year);
-    const month = parseInt(filters.month);
+    const start = dayjs(`${filters.year}-${filters.month}-01`).format("YYYY-MM-DD");
+    const end = dayjs(start).add(1, "month").format("YYYY-MM-DD");
     
-    // Criar data de início e fim do mês corretamente
-    const startDate = new Date(year, month - 1, 1); // mês - 1 porque Date usa mês 0-indexado
-    const endDate = new Date(year, month, 0); // último dia do mês
-    
-    const startDateStr = startDate.toISOString().split('T')[0];
-    const endDateStr = endDate.toISOString().split('T')[0];
-    
-    console.log(`Filtrando por mês ${month}/${year}: ${startDateStr} até ${endDateStr}`);
+    console.log(`Filtrando por mês ${filters.month}/${filters.year}: ${start} até ${end}`);
     
     filteredQuery = filteredQuery
-      .gte('data_desvio', startDateStr)
-      .lte('data_desvio', endDateStr);
+      .gte(DATE_COL, start)
+      .lt(DATE_COL, end);
       
-  } else if (filters.year && filters.year !== "todos") {
+  } else if (filters.year) {
     // Apenas ano específico
-    const year = parseInt(filters.year);
-    const startDate = `${year}-01-01`;
-    const endDate = `${year}-12-31`;
+    const start = dayjs(`${filters.year}-01-01`).format("YYYY-MM-DD");
+    const end = dayjs(start).add(1, "year").format("YYYY-MM-DD");
     
-    console.log(`Filtrando por ano ${year}: ${startDate} até ${endDate}`);
-    
-    filteredQuery = filteredQuery
-      .gte('data_desvio', startDate)
-      .lte('data_desvio', endDate);
-      
-  } else if (filters.month && filters.month !== "todos") {
-    // Apenas mês específico (ano atual)
-    const currentYear = new Date().getFullYear();
-    const month = parseInt(filters.month);
-    
-    const startDate = new Date(currentYear, month - 1, 1);
-    const endDate = new Date(currentYear, month, 0);
-    
-    const startDateStr = startDate.toISOString().split('T')[0];
-    const endDateStr = endDate.toISOString().split('T')[0];
-    
-    console.log(`Filtrando por mês ${month} do ano atual (${currentYear}): ${startDateStr} até ${endDateStr}`);
+    console.log(`Filtrando por ano ${filters.year}: ${start} até ${end}`);
     
     filteredQuery = filteredQuery
-      .gte('data_desvio', startDateStr)
-      .lte('data_desvio', endDateStr);
+      .gte(DATE_COL, start)
+      .lt(DATE_COL, end);
   }
 
   // Aplicar filtros de CCA - support both single and multiple CCAs

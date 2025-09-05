@@ -1,9 +1,11 @@
 
 import { supabase } from "@/integrations/supabase/client";
+import { FilterParams } from "./types/dashboardTypes";
+import { applyFiltersToQuery } from "./utils/filterUtils";
 
-export const fetchDesviosByMonth = async () => {
+export const fetchDesviosByMonth = async (filters?: FilterParams) => {
   try {
-    const { data, error } = await supabase
+    let query = supabase
       .from('desvios_completos')
       .select(`
         id,
@@ -12,6 +14,13 @@ export const fetchDesviosByMonth = async () => {
       `)
       .order('created_at', { ascending: false })
       .limit(50000);
+
+    // Apply standardized filters
+    if (filters) {
+      query = applyFiltersToQuery(query, filters);
+    }
+
+    const { data, error } = await query;
       
     if (error) {
       console.error('Erro ao buscar desvios por mês:', error);

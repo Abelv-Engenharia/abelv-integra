@@ -15,16 +15,7 @@ const DesviosByDisciplineChart = () => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        // Get CCA IDs that user has permission to
-        const allowedCcaIds = filters.userCCAs.map(cca => cca.id.toString());
-        const chartData = await fetchDesviosByDiscipline({
-          ccaIds: allowedCcaIds,
-          year: filters.year,
-          month: filters.month,
-          ccaId: filters.ccaId,
-          disciplinaId: filters.disciplinaId,
-          empresaId: filters.empresaId
-        });
+        const chartData = await fetchDesviosByDiscipline(filters.normalizedFilters);
         setData(chartData);
       } catch (error) {
         console.error("Error loading discipline chart data:", error);
