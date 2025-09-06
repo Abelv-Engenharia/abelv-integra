@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Cell, LabelList } from "recharts";
-import { fetchDesviosByClassification } from "@/services/desviosDashboardService";
+import { fetchDesviosByClassification } from "@/services/desvios/desviosByClassificationService";
 import { useDesviosFilters } from "@/hooks/useDesviosFilters";
 
 const DesviosClassificationChart = () => {
@@ -15,7 +15,9 @@ const DesviosClassificationChart = () => {
     const fetchData = async () => {
       setLoading(true);
       try {
+        console.log('📊 ClassificationChart - Buscando dados com filtros:', filters.normalizedFilters);
         const chartData = await fetchDesviosByClassification(filters.normalizedFilters);
+        console.log('📊 ClassificationChart - Dados recebidos:', chartData);
         setData(chartData);
       } catch (error) {
         console.error("Error loading classification chart data:", error);

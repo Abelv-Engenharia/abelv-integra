@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend } from "recharts";
-import { fetchDesviosByType } from "@/services/desviosDashboardService";
+import { fetchDesviosByType } from "@/services/desvios/desviosByTypeService";
 import { useDesviosFilters } from "@/hooks/useDesviosFilters";
 
 const COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6"];
@@ -17,7 +17,9 @@ const DesviosPieChart = () => {
     const fetchData = async () => {
       setLoading(true);
       try {
+        console.log('🍰 PieChart - Buscando dados com filtros:', filters.normalizedFilters);
         const chartData = await fetchDesviosByType(filters.normalizedFilters);
+        console.log('🍰 PieChart - Dados recebidos:', chartData);
         setData(chartData);
       } catch (error) {
         console.error("Error loading pie chart data:", error);

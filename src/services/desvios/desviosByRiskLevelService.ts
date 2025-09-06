@@ -42,10 +42,33 @@ export const fetchDesviosByRiskLevel = async (filters?: FilterParams) => {
       return acc;
     }, {});
     
-    return Object.entries(desviosByRisk || {}).map(([name, value]) => ({
-      name,
-      value
-    }));
+    return Object.entries(desviosByRisk || {}).map(([name, value]) => {
+      // Add colors for risk classification chart
+      let color = "#6b7280"; // default gray
+      switch (name) {
+        case "TRIVIAL":
+          color = "#10b981"; // green
+          break;
+        case "TOLERÁVEL":
+          color = "#3b82f6"; // blue
+          break;
+        case "MODERADO":
+          color = "#f59e0b"; // yellow
+          break;
+        case "SUBSTANCIAL":
+          color = "#f97316"; // orange
+          break;
+        case "INTOLERÁVEL":
+          color = "#ef4444"; // red
+          break;
+      }
+      
+      return {
+        name,
+        value,
+        color
+      };
+    }).sort((a, b) => (b.value as number) - (a.value as number));
   } catch (error) {
     console.error('Exceção ao buscar desvios por nível de risco:', error);
     return [];
