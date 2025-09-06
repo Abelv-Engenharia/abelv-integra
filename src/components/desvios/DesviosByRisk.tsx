@@ -2,7 +2,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Cell, LabelList } from "recharts";
-import { fetchDesviosByRiskLevel } from "@/services/desviosDashboardService";
+import { fetchDesviosByRiskLevel } from "@/services/desvios/desviosByRiskLevelService";
 import { useDesviosFilters } from "@/hooks/useDesviosFilters";
 
 type ChartItem = { name: string; value: number; color?: string };
