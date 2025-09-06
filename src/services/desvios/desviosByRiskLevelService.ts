@@ -1,16 +1,29 @@
 
 import { supabase } from "@/integrations/supabase/client";
+import { FilterParams } from "./types/dashboardTypes";
+import { applyFiltersToQuery } from "./utils/filterUtils";
 
-export const fetchDesviosByRiskLevel = async () => {
+export const fetchDesviosByRiskLevel = async (filters?: FilterParams) => {
   try {
-    const { data, error } = await supabase
+    let query = supabase
       .from('desvios_completos')
       .select(`
         id,
-        classificacao_risco
+        classificacao_risco,
+        data_desvio,
+        cca_id,
+        disciplina_id,
+        empresa_id
       `)
-      .order('created_at', { ascending: false })
+      .not('classificacao_risco', 'is', null)
       .limit(50000);
+
+    // Apply standardized filters
+    if (filters) {
+      query = applyFiltersToQuery(query, filters);
+    }
+      
+    const { data, error } = await query;
       
     if (error) {
       console.error('Erro ao buscar desvios por nível de risco:', error);
@@ -29,9 +42,9 @@ export const fetchDesviosByRiskLevel = async () => {
       return acc;
     }, {});
     
-    return Object.entries(desviosByRisk || {}).map(([risk, count]) => ({
-      risk,
-      count
+    return Object.entries(desviosByRisk || {}).map(([name, value]) => ({
+      name,
+      value
     }));
   } catch (error) {
     console.error('Exceção ao buscar desvios por nível de risco:', error);
