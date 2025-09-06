@@ -42,3 +42,12 @@ export interface DesvioFormData {
   severidade: number;
   classificacaoRisco: string;
 }
+
+// Filtros usados pelos serviços do dashboard de Desvios
+export interface FilterParams {
+  year?: string;                  // ex.: "2025"
+  month?: string;                 // ex.: "09" (ou "Setembro" — os services normalizam)
+  ccaIds?: (string | number)[];   // lista de CCAs permitidos
+  disciplinaId?: string | number; // filtro por disciplina (opcional)
+  empresaId?: string | number;    // filtro por empresa (opcional)
+}
