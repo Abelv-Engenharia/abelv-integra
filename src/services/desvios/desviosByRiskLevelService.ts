@@ -47,10 +47,10 @@ export const fetchDesviosByRiskLevel = async (filters?: FilterParams) => {
       let color = "#6b7280"; // default gray
       switch (name) {
         case "TRIVIAL":
-          color = "#10b981"; // green
+          color = "#3b82f6"; // blue
           break;
         case "TOLERÁVEL":
-          color = "#3b82f6"; // blue
+          color = "#10b981"; // green
           break;
         case "MODERADO":
           color = "#f59e0b"; // yellow
