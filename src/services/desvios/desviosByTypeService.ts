@@ -2,11 +2,12 @@
 import { supabase } from "@/integrations/supabase/client";
 import { FilterParams } from "@/types/desvios";
 
-/* helpers locais */
+/* helpers */
 const toNum = (v?: string | number | null) =>
   v === undefined || v === null || v === "" ? undefined : Number(v);
 const toNumArray = (arr?: (string | number)[]) =>
   (arr ?? []).map(Number).filter(Number.isFinite);
+
 const MONTH_MAP: Record<string, string> = {
   janeiro: "01", fevereiro: "02", março: "03", abril: "04", maio: "05", junho: "06",
   julho: "07", agosto: "08", setembro: "09", outubro: "10", novembro: "11", dezembro: "12",
@@ -26,12 +27,9 @@ function getDateRange(year?: string, month?: string): { start?: string; end?: st
   if (year) return { start: `${year}-01-01`, end: `${String(Number(year) + 1)}-01-01` };
   return {};
 }
-/* fim helpers */
 
-type TypeItem = { name: string; value: number };
-
-/** Aplica filtros comuns a uma query do Supabase */
-function applyCommonFilters<T extends any>(query: any, filters?: FilterParams) {
+/** aplica filtros comuns */
+function applyFilters(query: any, filters?: FilterParams) {
   if (!filters) return query;
 
   const ccaIdsNum = toNumArray(filters.ccaIds as any);
@@ -47,73 +45,51 @@ function applyCommonFilters<T extends any>(query: any, filters?: FilterParams) {
   const effectiveYear = year ?? (month ? String(new Date().getFullYear()) : undefined);
   const { start, end } = getDateRange(effectiveYear, month);
 
-  console.log("[type] intervalo efetivo:", { start, end });
-
   if (start && end) query = query.gte("data_desvio", start).lt("data_desvio", end);
   else if (effectiveYear && !month) {
     const { start: ys, end: ye } = getDateRange(effectiveYear);
     if (ys && ye) query = query.gte("data_desvio", ys).lt("data_desvio", ye);
   }
-
   return query;
 }
 
+type TypeItem = { name: string; value: number };
+
+/**
+ * Usa `tipo_registro_id` e relaciona com `tipos_registro (nome)`.
+ * Soma e devolve pares { name: 'Desvios' | 'OM' | <outro nome>, value }.
+ */
 export const fetchDesviosByType = async (filters?: FilterParams): Promise<TypeItem[]> => {
   try {
-    console.log("[type] filtros recebidos:", filters);
-
-    // 1ª tentativa: coluna texto "tipo_registro" (ex.: "DESVIO", "OM")
-    let q1 = supabase
+    // join correto: tipos_registro:tipo_registro_id(nome)
+    let q = supabase
       .from("desvios_completos")
-      .select(`tipo_registro, data_desvio, cca_id, disciplina_id, empresa_id`)
-      .not("tipo_registro", "is", null)
+      .select(`tipo_registro_id, data_desvio, cca_id, disciplina_id, empresa_id, tipos_registro:tipo_registro_id ( nome )`)
+      .not("tipo_registro_id", "is", null)
       .limit(50000);
 
-    q1 = applyCommonFilters(q1, filters);
+    q = applyFilters(q, filters);
 
-    let { data: data1, error: err1 } = await q1;
-    console.log("[type] tentativa tipo_registro -> rows:", data1?.length, "error:", err1);
-
-    if (!err1) {
-      const counts: Record<string, number> = {};
-      (data1 ?? []).forEach((row: any) => {
-        // normaliza nomes
-        const raw = String(row.tipo_registro || "").trim().toUpperCase();
-        const key = raw === "OM" || raw === "OPORTUNIDADE" ? "OM" : raw === "DESVIO" ? "DESVIO" : "OUTROS";
-        counts[key] = (counts[key] || 0) + 1;
-      });
-
-      return [
-        { name: "Desvios", value: counts["DESVIO"] || 0 },
-        { name: "OM", value: counts["OM"] || 0 },
-        ...(counts["OUTROS"] ? [{ name: "Outros", value: counts["OUTROS"] }] : []),
-      ].filter(i => i.value > 0);
-    }
-
-    // 2ª tentativa (fallback): coluna booleana "is_om"
-    let q2 = supabase
-      .from("desvios_completos")
-      .select(`is_om, data_desvio, cca_id, disciplina_id, empresa_id`)
-      .not("is_om", "is", null)
-      .limit(50000);
-
-    q2 = applyCommonFilters(q2, filters);
-
-    const { data: data2, error: err2 } = await q2;
-    console.log("[type] tentativa is_om -> rows:", data2?.length, "error:", err2);
-
-    if (err2) {
-      console.error("[type] nenhuma coluna conhecida disponível (tipo_registro ou is_om).");
+    const { data, error } = await q;
+    if (error) {
+      console.error("[type] supabase error:", error);
       return [];
     }
 
-    let desvios = 0, om = 0;
-    (data2 ?? []).forEach((row: any) => (row.is_om ? om++ : desvios++));
+    const counts: Record<string, number> = {};
+    (data ?? []).forEach((row: any) => {
+      const nome = row?.tipos_registro?.nome?.toString().trim();
+      // normaliza nomes comuns (se seu banco usa "Desvio" / "OM")
+      let label = nome || (row?.tipo_registro_id ? `ID ${row.tipo_registro_id}` : "OUTROS");
+      const up = (label || "").toUpperCase();
+      if (up.includes("DESVIO")) label = "Desvios";
+      else if (up === "OM" || up.includes("OPORTUNIDADE")) label = "OM";
+      counts[label] = (counts[label] || 0) + 1;
+    });
 
-    return [
-      { name: "Desvios", value: desvios },
-      { name: "OM", value: om },
-    ].filter(i => i.value > 0);
+    return Object.entries(counts)
+      .map(([name, value]) => ({ name, value }))
+      .sort((a, b) => b.value - a.value);
   } catch (err) {
     console.error("[type] exception:", err);
     return [];
