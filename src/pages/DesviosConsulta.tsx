@@ -17,6 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import DesviosTable from "@/components/desvios/DesviosTable";
 import { supabase } from "@/integrations/supabase/client";
+import { useUserCCAs } from "@/hooks/useUserCCAs";
 
 // Mock data
 const currentYear = new Date().getFullYear();
@@ -24,6 +25,7 @@ const currentYear = new Date().getFullYear();
 const DesviosConsulta = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { data: userCCAs = [] } = useUserCCAs();
   const [searchTerm, setSearchTerm] = useState("");
   const [filters, setFilters] = useState({
     year: currentYear.toString(),
@@ -35,7 +37,7 @@ const DesviosConsulta = () => {
   });
   
   // Estados para dados dinâmicos da base de dados
-  const [ccas, setCcas] = useState<Array<{codigo: string, nome: string}>>([]);
+  const [ccas, setCcas] = useState<Array<{codigo: string, nome: string, id: number}>>([]);
   const [empresas, setEmpresas] = useState<Array<{nome: string}>>([]);
   const [riskOptions, setRiskOptions] = useState<Array<{classificacao_risco: string}>>([]);
 
@@ -46,40 +48,40 @@ const DesviosConsulta = () => {
     { status: "PENDENTE" }
   ];
 
-  // Carregar dados da base de dados
+  // Carregar dados da base de dados apenas com CCAs permitidos
   useEffect(() => {
     const loadFilterData = async () => {
+      if (userCCAs.length === 0) return;
+      
       try {
-        // Buscar CCAs únicos
-        const { data: ccasData } = await supabase
-          .from('desvios_completos')
-          .select(`
-            ccas!inner(codigo, nome)
-          `)
-          .not('ccas.codigo', 'is', null);
+        // Buscar apenas CCAs que o usuário tem acesso
+        const allowedCcaIds = userCCAs.map(cca => cca.id);
         
-        // Buscar empresas únicas
+        // Usar os CCAs do usuário diretamente
+        const userCcasFormatted = userCCAs.map(cca => ({
+          codigo: cca.codigo,
+          nome: cca.nome,
+          id: cca.id
+        }));
+        setCcas(userCcasFormatted.sort((a, b) => a.codigo.localeCompare(b.codigo)));
+        
+        // Buscar empresas únicas apenas de desvios dos CCAs permitidos
         const { data: empresasData } = await supabase
           .from('desvios_completos')
           .select(`
             empresas!inner(nome)
           `)
+          .in('cca_id', allowedCcaIds)
           .not('empresas.nome', 'is', null);
         
-        // Buscar classificações de risco únicas
+        // Buscar classificações de risco únicas apenas de desvios dos CCAs permitidos
         const { data: riskData } = await supabase
           .from('desvios_completos')
           .select('classificacao_risco')
+          .in('cca_id', allowedCcaIds)
           .not('classificacao_risco', 'is', null);
 
         // Processar dados únicos
-        if (ccasData) {
-          const uniqueCcas = Array.from(new Map(
-            ccasData.map((item: any) => [item.ccas.codigo, item.ccas])
-          ).values());
-          setCcas(uniqueCcas.sort((a, b) => a.codigo.localeCompare(b.codigo)));
-        }
-
         if (empresasData) {
           const uniqueEmpresas = Array.from(new Set(
             empresasData.map((item: any) => item.empresas.nome)
@@ -99,7 +101,7 @@ const DesviosConsulta = () => {
     };
 
     loadFilterData();
-  }, []);
+  }, [userCCAs]);
 
   const handleFilterChange = (field: string, value: string) => {
     setFilters({
@@ -127,7 +129,52 @@ const DesviosConsulta = () => {
 
   const handleExport = async () => {
     try {
-      await exportDesviosToExcel();
+      // Preparar filtros para exportação
+      const exportFilters: any = {};
+      
+      // Aplicar filtros de data se selecionados
+      if (filters.year) {
+        if (filters.month && filters.month !== "todos") {
+          // Mês específico
+          const month = filters.month.padStart(2, '0');
+          exportFilters.dataInicial = `${filters.year}-${month}-01`;
+          const nextMonth = parseInt(month) === 12 ? 1 : parseInt(month) + 1;
+          const nextYear = parseInt(month) === 12 ? parseInt(filters.year) + 1 : parseInt(filters.year);
+          exportFilters.dataFinal = `${nextYear}-${nextMonth.toString().padStart(2, '0')}-01`;
+        } else {
+          // Ano inteiro
+          exportFilters.dataInicial = `${filters.year}-01-01`;
+          exportFilters.dataFinal = `${parseInt(filters.year) + 1}-01-01`;
+        }
+      }
+      
+      // Aplicar filtro de CCA se selecionado
+      if (filters.cca && filters.cca !== "todos") {
+        const selectedCca = ccas.find(c => c.codigo === filters.cca);
+        if (selectedCca) {
+          exportFilters.ccaId = selectedCca.id.toString();
+        }
+      }
+      
+      // Aplicar restrições de CCAs do usuário
+      const allowedCcaIds = userCCAs.map(cca => cca.id);
+      exportFilters.allowedCcaIds = allowedCcaIds;
+      
+      // Aplicar outros filtros
+      if (filters.company && filters.company !== "todas") {
+        exportFilters.empresa = filters.company;
+      }
+      if (filters.status && filters.status !== "todos") {
+        exportFilters.status = filters.status;
+      }
+      if (filters.risk && filters.risk !== "todos") {
+        exportFilters.classificacaoRisco = filters.risk;
+      }
+      if (searchTerm) {
+        exportFilters.searchTerm = searchTerm;
+      }
+      
+      await exportDesviosToExcel(exportFilters);
       toast({
         title: "Exportação concluída",
         description: "Os dados foram exportados para Excel com sucesso.",
@@ -256,7 +303,7 @@ const DesviosConsulta = () => {
                 <SelectContent>
                   <SelectItem value="todos">Todos</SelectItem>
                   {ccas.map((cca) => (
-                    <SelectItem key={cca.codigo} value={cca.codigo}>
+                    <SelectItem key={cca.id} value={cca.codigo}>
                       {cca.codigo} - {cca.nome}
                     </SelectItem>
                   ))}

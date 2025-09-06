@@ -3,9 +3,14 @@ import * as XLSX from 'xlsx';
 import { supabase } from '@/integrations/supabase/client';
 
 interface ExportFilters {
-  dataInicial: string;
-  dataFinal: string;
+  dataInicial?: string;
+  dataFinal?: string;
   ccaId?: string;
+  allowedCcaIds?: number[];
+  empresa?: string;
+  status?: string;
+  classificacaoRisco?: string;
+  searchTerm?: string;
 }
 
 export const exportDesviosToExcel = async (filters?: ExportFilters) => {
@@ -30,13 +35,33 @@ export const exportDesviosToExcel = async (filters?: ExportFilters) => {
       `)
       .limit(5000);
 
-    if (filters?.dataInicial && filters?.dataFinal) {
-      query = query.gte('data_desvio', filters.dataInicial)
-                  .lte('data_desvio', filters.dataFinal);
+    // SEMPRE aplicar filtro de CCAs permitidos para segurança
+    if (filters?.allowedCcaIds && filters.allowedCcaIds.length > 0) {
+      query = query.in('cca_id', filters.allowedCcaIds);
     }
 
+    // Aplicar filtros de data
+    if (filters?.dataInicial && filters?.dataFinal) {
+      query = query.gte('data_desvio', filters.dataInicial)
+                  .lt('data_desvio', filters.dataFinal);
+    }
+
+    // Aplicar filtro de CCA específico (se dentro dos permitidos)
     if (filters?.ccaId) {
       query = query.eq('cca_id', parseInt(filters.ccaId));
+    }
+
+    // Aplicar outros filtros
+    if (filters?.empresa) {
+      query = query.eq('empresas.nome', filters.empresa);
+    }
+
+    if (filters?.status) {
+      query = query.eq('status', filters.status);
+    }
+
+    if (filters?.classificacaoRisco) {
+      query = query.eq('classificacao_risco', filters.classificacaoRisco);
     }
 
     const { data: desvios, error } = await query.order('created_at', { ascending: false });
@@ -50,8 +75,20 @@ export const exportDesviosToExcel = async (filters?: ExportFilters) => {
       throw new Error('Nenhum desvio encontrado para exportar');
     }
 
+    // Aplicar filtro de busca por texto no lado cliente (se necessário)
+    let filteredDesvios = desvios;
+    if (filters?.searchTerm) {
+      const searchTerm = filters.searchTerm.toLowerCase();
+      filteredDesvios = desvios.filter(desvio => 
+        desvio.descricao_desvio?.toLowerCase().includes(searchTerm) ||
+        desvio.responsavel_inspecao?.toLowerCase().includes(searchTerm) ||
+        desvio.ccas?.nome?.toLowerCase().includes(searchTerm) ||
+        desvio.empresas?.nome?.toLowerCase().includes(searchTerm)
+      );
+    }
+
     // Preparar dados para o Excel
-    const excelData = desvios.map(desvio => ({
+    const excelData = filteredDesvios.map(desvio => ({
       'ID': desvio.id,
       'Data do Desvio': desvio.data_desvio,
       'Hora do Desvio': desvio.hora_desvio,
