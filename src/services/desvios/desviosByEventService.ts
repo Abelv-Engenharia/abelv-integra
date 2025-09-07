@@ -15,8 +15,7 @@ export const fetchDesviosByEvent = async (filters?: FilterParams) => {
         empresa_id,
         eventos_identificados:evento_identificado_id(codigo, nome)
       `)
-      .not('evento_identificado_id', 'is', null)
-      .limit(50000);
+      .not('evento_identificado_id', 'is', null);
 
     // Apply standardized filters
     if (filters) {

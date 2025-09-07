@@ -14,8 +14,7 @@ export const fetchDesviosByCompany = async (filters?: FilterParams) => {
         disciplina_id,
         empresas:empresa_id(nome)
       `)
-      .not('empresa_id', 'is', null)
-      .limit(50000);
+      .not('empresa_id', 'is', null);
 
     // Apply standardized filters
     if (filters) {

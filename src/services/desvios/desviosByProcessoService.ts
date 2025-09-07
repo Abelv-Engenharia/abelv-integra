@@ -54,8 +54,7 @@ export const fetchDesviosByProcesso = async (filters?: FilterParams): Promise<Ch
         empresa_id,
         processos ( codigo, nome )
       `)
-      .not("processo_id", "is", null)
-      .limit(50000);
+      .not("processo_id", "is", null);
 
     if (filters) {
       // IDs numéricos

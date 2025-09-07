@@ -26,8 +26,7 @@ export const fetchDesviosByClassification = async (filters?: FilterParams): Prom
         disciplina_id,
         empresa_id
       `)
-      .not("classificacao_risco", "is", null)
-      .limit(50000);
+      .not("classificacao_risco", "is", null);
 
     // Apply standardized filters
     if (filters) {
