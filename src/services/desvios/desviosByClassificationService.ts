@@ -13,14 +13,10 @@ const COLOR_MAP: Record<string, string> = {
   INTOLERAVEL: "#ef4444",
 };
 
-type ChartItem = { name: string; value: number; color: string };
-
-export const fetchDesviosByClassification = async (filters?: FilterParams): Promise<ChartItem[]> => {
+export const fetchDesviosByClassification = async (filters?: FilterParams) => {
   try {
-    console.log("[classification] Iniciando busca com filtros:", filters);
-    
     let query = supabase
-      .from("desvios_completos")
+      .from('desvios_completos')
       .select(`
         classificacao_risco,
         data_desvio,
@@ -28,43 +24,37 @@ export const fetchDesviosByClassification = async (filters?: FilterParams): Prom
         disciplina_id,
         empresa_id
       `)
-      .not("classificacao_risco", "is", null);
-
-    console.log("[classification] Query inicial criada");
+      .not('classificacao_risco', 'is', null);
 
     // Apply standardized filters
     if (filters) {
-      console.log("[classification] Aplicando filtros:", filters);
       query = applyFiltersToQuery(query, filters);
     }
 
-    console.log("[classification] Executando query...");
     const { data, error } = await query;
     
     if (error) {
-      console.error("Error fetching desvios by classification:", error);
+      console.error('Error fetching desvios by classification:', error);
       return [];
     }
 
-    console.log("[classification] Dados recebidos:", data?.length, "registros");
-
-    const counts: Record<string, number> = {};
-    (data ?? []).forEach((row: any) => {
-      const key = String(row.classificacao_risco ?? "TRIVIAL").trim().toUpperCase();
-      counts[key] = (counts[key] || 0) + 1;
+    // Count occurrences by classification
+    const classificationCounts: Record<string, number> = {};
+    data?.forEach(desvio => {
+      const key = String(desvio.classificacao_risco ?? "TRIVIAL").trim().toUpperCase();
+      classificationCounts[key] = (classificationCounts[key] || 0) + 1;
     });
 
-    console.log("[classification] Contadores finais:", counts);
-
-    return Object.entries(counts)
+    // Convert to array format for the chart
+    return Object.entries(classificationCounts)
       .map(([name, value]) => ({
         name,
         value,
         color: COLOR_MAP[name] ?? "#94a3b8",
       }))
       .sort((a, b) => b.value - a.value);
-  } catch (err) {
-    console.error("Exception fetching desvios by classification:", err);
+  } catch (error) {
+    console.error('Exception fetching desvios by classification:', error);
     return [];
   }
 };
