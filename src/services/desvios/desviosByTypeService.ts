@@ -11,22 +11,31 @@ type TypeItem = { name: string; value: number };
  */
 export const fetchDesviosByType = async (filters?: FilterParams): Promise<TypeItem[]> => {
   try {
+    console.log("[type] Iniciando busca com filtros:", filters);
+    
     // join correto: tipos_registro:tipo_registro_id(nome)
     let q = supabase
       .from("desvios_completos")
       .select(`tipo_registro_id, data_desvio, cca_id, disciplina_id, empresa_id, tipos_registro:tipo_registro_id ( nome )`)
       .not("tipo_registro_id", "is", null);
 
+    console.log("[type] Query inicial criada");
+
     // Apply standardized filters
     if (filters) {
+      console.log("[type] Aplicando filtros:", filters);
       q = applyFiltersToQuery(q, filters);
     }
 
+    console.log("[type] Executando query...");
     const { data, error } = await q;
+    
     if (error) {
       console.error("[type] supabase error:", error);
       return [];
     }
+
+    console.log("[type] Dados recebidos:", data?.length, "registros");
 
     const counts: Record<string, number> = {};
     (data ?? []).forEach((row: any) => {
@@ -38,6 +47,8 @@ export const fetchDesviosByType = async (filters?: FilterParams): Promise<TypeIt
       else if (up === "OM" || up.includes("OPORTUNIDADE")) label = "OM";
       counts[label] = (counts[label] || 0) + 1;
     });
+
+    console.log("[type] Contadores finais:", counts);
 
     return Object.entries(counts)
       .map(([name, value]) => ({ name, value }))

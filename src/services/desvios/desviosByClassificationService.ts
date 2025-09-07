@@ -17,6 +17,8 @@ type ChartItem = { name: string; value: number; color: string };
 
 export const fetchDesviosByClassification = async (filters?: FilterParams): Promise<ChartItem[]> => {
   try {
+    console.log("[classification] Iniciando busca com filtros:", filters);
+    
     let query = supabase
       .from("desvios_completos")
       .select(`
@@ -28,22 +30,31 @@ export const fetchDesviosByClassification = async (filters?: FilterParams): Prom
       `)
       .not("classificacao_risco", "is", null);
 
+    console.log("[classification] Query inicial criada");
+
     // Apply standardized filters
     if (filters) {
+      console.log("[classification] Aplicando filtros:", filters);
       query = applyFiltersToQuery(query, filters);
     }
 
+    console.log("[classification] Executando query...");
     const { data, error } = await query;
+    
     if (error) {
       console.error("Error fetching desvios by classification:", error);
       return [];
     }
+
+    console.log("[classification] Dados recebidos:", data?.length, "registros");
 
     const counts: Record<string, number> = {};
     (data ?? []).forEach((row: any) => {
       const key = String(row.classificacao_risco ?? "TRIVIAL").trim().toUpperCase();
       counts[key] = (counts[key] || 0) + 1;
     });
+
+    console.log("[classification] Contadores finais:", counts);
 
     return Object.entries(counts)
       .map(([name, value]) => ({
