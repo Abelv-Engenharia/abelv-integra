@@ -49,8 +49,8 @@ const DesviosBarChart = () => {
                 }}
               />
               <Legend />
-              <Bar dataKey="Trivial" fill="#4ade80" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="Tolerável" fill="#60a5fa" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="Trivial" fill="#60a5fa" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="Tolerável" fill="#4ade80" radius={[4, 4, 0, 0]} />
               <Bar dataKey="Moderado" fill="#facc15" radius={[4, 4, 0, 0]} />
               <Bar dataKey="Substancial" fill="#f97316" radius={[4, 4, 0, 0]} />
               <Bar dataKey="Intolerável" fill="#ef4444" radius={[4, 4, 0, 0]} />

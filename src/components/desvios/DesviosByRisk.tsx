@@ -9,9 +9,9 @@ type ChartItem = { name: string; value: number; color?: string };
 
 // Fallback de cores por nível (UPPERCASE, sem depender de acentos)
 const RISK_COLORS: Record<string, string> = {
-  TRIVIAL: "#4ade80",
-  TOLERAVEL: "#60a5fa",
-  TOLERÁVEL: "#60a5fa",
+  TRIVIAL: "#60a5fa",
+  TOLERAVEL: "#4ade80",
+  TOLERÁVEL: "#4ade80",
   MODERADO: "#facc15",
   SUBSTANCIAL: "#f97316",
   INTOLERAVEL: "#ef4444",
