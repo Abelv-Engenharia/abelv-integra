@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend } from "recharts";
@@ -11,27 +11,37 @@ const COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6"];
 const DesviosPieChart = () => {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const filters = useDesviosFilters();
+  
+  const { normalizedFilters, userCCAs } = useDesviosFilters();
+
+  // chave estável p/ disparar o efeito somente quando os valores de fato mudarem
+  const normalizedKey = useMemo(
+    () => JSON.stringify(normalizedFilters ?? {}),
+    [normalizedFilters]
+  );
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        console.log('🍰 PieChart - Buscando dados com filtros:', filters.normalizedFilters);
-        const chartData = await fetchDesviosByType(filters.normalizedFilters);
+        if (!userCCAs || userCCAs.length === 0) {
+          setData([]);
+          return;
+        }
+        console.log('🍰 PieChart - Buscando dados com filtros:', normalizedFilters);
+        const chartData = await fetchDesviosByType(normalizedFilters);
         console.log('🍰 PieChart - Dados recebidos:', chartData);
-        setData(chartData);
+        setData(chartData || []);
       } catch (error) {
         console.error("Error loading pie chart data:", error);
+        setData([]);
       } finally {
         setLoading(false);
       }
     };
 
-    if (filters.userCCAs.length > 0) {
-      fetchData();
-    }
-  }, [filters]);
+    fetchData();
+  }, [normalizedKey, userCCAs?.length]);
 
   const chartConfig = {
     value: {

@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Cell, LabelList } from "recharts";
@@ -9,27 +9,37 @@ import { useDesviosFilters } from "@/hooks/useDesviosFilters";
 const DesviosClassificationChart = () => {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const filters = useDesviosFilters();
+  
+  const { normalizedFilters, userCCAs } = useDesviosFilters();
+
+  // chave estável p/ disparar o efeito somente quando os valores de fato mudarem
+  const normalizedKey = useMemo(
+    () => JSON.stringify(normalizedFilters ?? {}),
+    [normalizedFilters]
+  );
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        console.log('📊 ClassificationChart - Buscando dados com filtros:', filters.normalizedFilters);
-        const chartData = await fetchDesviosByClassification(filters.normalizedFilters);
+        if (!userCCAs || userCCAs.length === 0) {
+          setData([]);
+          return;
+        }
+        console.log('📊 ClassificationChart - Buscando dados com filtros:', normalizedFilters);
+        const chartData = await fetchDesviosByClassification(normalizedFilters);
         console.log('📊 ClassificationChart - Dados recebidos:', chartData);
-        setData(chartData);
+        setData(chartData || []);
       } catch (error) {
         console.error("Error loading classification chart data:", error);
+        setData([]);
       } finally {
         setLoading(false);
       }
     };
 
-    if (filters.userCCAs.length > 0) {
-      fetchData();
-    }
-  }, [filters]);
+    fetchData();
+  }, [normalizedKey, userCCAs?.length]);
 
   const chartConfig = {
     value: {
