@@ -4,9 +4,9 @@ import { FilterParams } from "./types/dashboardTypes";
 import { applyFiltersToQuery } from "./utils/filterUtils";
 
 const COLOR_MAP: Record<string, string> = {
-  TRIVIAL: "#4ade80",
-  TOLERÁVEL: "#60a5fa",
-  TOLERAVEL: "#60a5fa",
+  TRIVIAL: "#60a5fa",
+  TOLERÁVEL: "#4ade80",
+  TOLERAVEL: "#4ade80",
   MODERADO: "#facc15",
   SUBSTANCIAL: "#f97316",
   INTOLERÁVEL: "#ef4444",
