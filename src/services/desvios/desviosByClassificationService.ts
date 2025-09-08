@@ -25,7 +25,7 @@ export const fetchDesviosByClassification = async (filters?: FilterParams) => {
         empresa_id
       `)
       .not('classificacao_risco', 'is', null)
-      .range(0, 99999); // Remove o limite padrão de 1000 registros
+      .limit(50000); // Força um limite maior explicitamente
 
     // Apply standardized filters
     if (filters) {

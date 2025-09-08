@@ -15,7 +15,7 @@ export const fetchDesviosByDiscipline = async (filters?: FilterParams) => {
         disciplinas:disciplina_id(codigo, nome)
       `)
       .not('disciplina_id', 'is', null)
-      .range(0, 99999); // Remove o limite padrão de 1000 registros
+      .limit(50000); // Força um limite maior explicitamente
 
     // Apply standardized filters
     if (filters) {

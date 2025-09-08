@@ -13,7 +13,7 @@ export const fetchFilteredDashboardStats = async (filters: FilterParams): Promis
     let query = supabase
       .from('desvios_completos')
       .select('id, situacao, status, prazo_conclusao, classificacao_risco')
-      .range(0, 99999); // Remove o limite padrão de 1000 registros
+      .limit(50000); // Força um limite maior explicitamente
     
     query = applyFiltersToQuery(query, filters);
     console.log('Query para desvios filtrados criada');
