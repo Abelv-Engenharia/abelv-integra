@@ -33,7 +33,7 @@ export const exportDesviosToExcel = async (filters?: ExportFilters) => {
         profiles_supervisor:supervisor_responsavel_id(nome),
         profiles_encarregado:encarregado_responsavel_id(nome)
       `)
-      .limit(5000);
+      .range(0, 99999); // Remove o limite de 5000 registros
 
     // SEMPRE aplicar filtro de CCAs permitidos para segurança
     if (filters?.allowedCcaIds && filters.allowedCcaIds.length > 0) {

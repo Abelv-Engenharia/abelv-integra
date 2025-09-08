@@ -70,7 +70,8 @@ export const desviosCompletosService = {
         eventos_identificados (nome),
         base_legal_opcoes (nome)
       `)
-      .order('created_at', { ascending: false });
+      .order('created_at', { ascending: false })
+      .range(0, 99999); // Remove o limite padrão de 1000 registros
 
     if (error) throw error;
     return (data || []).map(convertDbToDesvio);

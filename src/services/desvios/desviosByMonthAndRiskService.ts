@@ -9,7 +9,8 @@ export const fetchDesviosByMonthAndRisk = async (filters?: FilterParams) => {
     let query = supabase
       .from('desvios_completos')
       .select('data_desvio, classificacao_risco')
-      .order('data_desvio', { ascending: true });
+      .order('data_desvio', { ascending: true })
+      .range(0, 99999); // Remove o limite padrão de 1000 registros
 
     // Apply standardized filters
     if (filters) {

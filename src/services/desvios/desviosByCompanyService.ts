@@ -14,7 +14,8 @@ export const fetchDesviosByCompany = async (filters?: FilterParams) => {
         disciplina_id,
         empresas:empresa_id(nome)
       `)
-      .not('empresa_id', 'is', null);
+      .not('empresa_id', 'is', null)
+      .range(0, 99999); // Remove o limite padrão de 1000 registros
 
     // Apply standardized filters
     if (filters) {
