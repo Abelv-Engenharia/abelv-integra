@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableHead, TableHeader, TableRow, TableCell } from "@/components/ui/table";
@@ -84,45 +85,32 @@ const DesviosTable = ({
       
       if (filters?.month && filters.month !== "" && filters.month !== "todos") {
         const month = parseInt(filters.month);
-        
-        // Definir o ano - usar o ano do filtro se disponível, senão usar o ano atual
         const year = filters?.year && filters.year !== "" ? parseInt(filters.year) : new Date().getFullYear();
-        
-        // Criar data de início e fim do mês corretamente
-        const startDate = new Date(year, month - 1, 1); // mês - 1 porque Date usa mês 0-indexado
-        const endDate = new Date(year, month, 0); // último dia do mês
-        
+        const startDate = new Date(year, month - 1, 1);
+        const endDate = new Date(year, month, 0);
         const startDateStr = startDate.toISOString().split('T')[0];
         const endDateStr = endDate.toISOString().split('T')[0];
-        
         console.log(`Aplicando filtro de mês ${month}/${year}: ${startDateStr} até ${endDateStr}`);
-        
         query = query.gte('data_desvio', startDateStr).lte('data_desvio', endDateStr);
       }
       
-      // Filtro por CCA específico (além da permissão do usuário)
       if (filters?.cca && filters.cca !== "" && filters.cca !== "todos") {
-        // Buscar o ID do CCA pelo código
         const { data: ccaData } = await supabase
           .from('ccas')
           .select('id')
           .eq('codigo', filters.cca)
           .single();
-        
         if (ccaData) {
           query = query.eq('cca_id', ccaData.id);
         }
       }
       
-      // Filtro por empresa
       if (filters?.company && filters.company !== "" && filters.company !== "todas") {
-        // Buscar o ID da empresa pelo nome
         const { data: empresaData } = await supabase
           .from('empresas')
           .select('id')
           .eq('nome', filters.company)
           .single();
-        
         if (empresaData) {
           query = query.eq('empresa_id', empresaData.id);
         }
@@ -132,7 +120,6 @@ const DesviosTable = ({
         query = query.eq('classificacao_risco', filters.risk);
       }
 
-      // Filtros adicionais vindos dos gráficos
       if (filters?.disciplina && filters.disciplina !== "") {
         const { data: disciplinaData } = await supabase
           .from('disciplinas')
@@ -203,7 +190,6 @@ const DesviosTable = ({
         query = query.eq('classificacao_risco', filters.classificacao);
       }
 
-      // Aplicar busca por termo se fornecido
       if (searchTerm && searchTerm.trim() !== "") {
         query = query.or(`descricao_desvio.ilike.%${searchTerm}%,responsavel_inspecao.ilike.%${searchTerm}%`);
       }
@@ -215,10 +201,8 @@ const DesviosTable = ({
         setDesvios([]);
       } else {
         console.log("Desvios filtrados carregados:", data);
-        // Convert database results to DesvioCompleto format
         let convertedData = (data || []).map(convertDbToDesvio);
         
-        // Aplicar filtro de status APÓS buscar os dados (pois precisa calcular o status)
         if (filters?.status && filters.status !== "" && filters.status !== "todos") {
           convertedData = convertedData.filter(desvio => {
             const calculatedStatus = calculateStatusAcao(
@@ -275,16 +259,11 @@ const DesviosTable = ({
     
     if (deleted && id) {
       console.log('✅ Removendo desvio da UI:', id);
-      
-      // Atualizar imediatamente a UI
       setDesvios(prev => {
         const updated = prev.filter(d => d.id !== id);
         console.log(`📊 UI atualizada: ${prev.length} -> ${updated.length} desvios`);
         return updated;
       });
-      
-      // Aguardar um pouco e recarregar do servidor para confirmar
-      console.log('🔄 Agendando recarregamento dos dados...');
       setTimeout(async () => {
         console.log('📡 Recarregando dados do servidor...');
         await fetchDesvios();
@@ -292,7 +271,6 @@ const DesviosTable = ({
       
     } else {
       console.error('❌ Falha na exclusão, recarregando dados:', { id, deleted });
-      // Se houve falha, recarregar imediatamente para sincronizar
       await fetchDesvios();
     }
   };
@@ -317,26 +295,58 @@ const DesviosTable = ({
       </div>;
   }
 
-  return <>
+  return (
+    <>
       <div className="table-container">
         <div className="relative w-full overflow-auto">
-          {isLoading ? <div className="p-4 sm:p-6">
+          {isLoading ? (
+            <div className="p-4 sm:p-6">
               <TableLoadingSkeleton rows={8} />
-            </div> : <Table>
+            </div>
+          ) : (
+            <Table className="w-full table-fixed">
+              {/* Controle de largura das colunas */}
+              <colgroup>
+                <col className="w-24 sm:w-32" />        {/* Data */}
+                <col className="w-56 sm:w-64" />        {/* CCA */}
+                <col className="w-[360px] sm:w-[480px]" /> {/* Descrição */}
+                <col className="w-32 sm:w-40" />        {/* Empresa */}
+                <col className="w-32 sm:w-40" />        {/* Disciplina */}
+                <col className="w-16 sm:w-20" />        {/* Risco */}
+                <col className="w-20 sm:w-24" />        {/* Status */}
+                <col className="w-24 sm:w-32" />        {/* Ações */}
+              </colgroup>
+
               <TableHeader>
                 <TableRow>
-                  <TableHead className="text-xs sm:text-sm w-24 sm:w-32">Data</TableHead>
-                  <TableHead className="text-xs sm:text-sm w-56 sm:w-64">CCA</TableHead>
-                  <TableHead className="text-xs sm:text-sm min-w-[200px] max-w-[250px]">Descrição</TableHead>
-                  <TableHead className="text-xs sm:text-sm w-32 sm:w-40">Empresa</TableHead>
-                  <TableHead className="text-xs sm:text-sm w-32 sm:w-40">Disciplina</TableHead>
-                  <TableHead className="text-xs sm:text-sm w-16 sm:w-20">Risco</TableHead>
-                  <TableHead className="text-xs sm:text-sm w-20 sm:w-24">Status</TableHead>
-                  <TableHead className="text-right text-xs sm:text-sm w-24 sm:w-32">Ações</TableHead>
+                  <TableHead className="text-xs sm:text-sm">Data</TableHead>
+                  <TableHead className="text-xs sm:text-sm">CCA</TableHead>
+                  <TableHead className="text-xs sm:text-sm">Descrição</TableHead>
+                  <TableHead className="text-xs sm:text-sm">Empresa</TableHead>
+                  <TableHead className="text-xs sm:text-sm">Disciplina</TableHead>
+                  <TableHead className="text-xs sm:text-sm">Risco</TableHead>
+                  <TableHead className="text-xs sm:text-sm">Status</TableHead>
+                  <TableHead className="text-right text-xs sm:text-sm">Ações</TableHead>
                 </TableRow>
               </TableHeader>
+
               <TableBody>
-                {desvios.length > 0 ? desvios.map(desvio => <DesviosTableRow key={desvio.id} desvio={desvio} onStatusUpdated={handleStatusUpdated} onEditClick={handleEditClick} onDesvioDeleted={handleDesvioDeleted} editDesvioId={editDesvioId} editDialogOpen={editDialogOpen} setEditDialogOpen={setEditDialogOpen} onDesvioUpdated={handleDesvioUpdated} />) : <TableRow>
+                {desvios.length > 0 ? (
+                  desvios.map((desvio) => (
+                    <DesviosTableRow
+                      key={desvio.id}
+                      desvio={desvio}
+                      onStatusUpdated={handleStatusUpdated}
+                      onEditClick={handleEditClick}
+                      onDesvioDeleted={handleDesvioDeleted}
+                      editDesvioId={editDesvioId}
+                      editDialogOpen={editDialogOpen}
+                      setEditDialogOpen={setEditDialogOpen}
+                      onDesvioUpdated={handleDesvioUpdated}
+                    />
+                  ))
+                ) : (
+                  <TableRow>
                     <TableCell colSpan={8} className="h-24 sm:h-32">
                       <div className="flex flex-col items-center justify-center space-y-3">
                         <AlertCircle className="h-8 w-8 text-muted-foreground/50" />
@@ -351,10 +361,13 @@ const DesviosTable = ({
                         </div>
                       </div>
                     </TableCell>
-                  </TableRow>}
+                  </TableRow>
+                )}
               </TableBody>
-            </Table>}
+            </Table>
+          )}
         </div>
+
         <div className="flex flex-col sm:flex-row items-center justify-between p-3 sm:p-4 border-t gap-3">
           <div className="text-xs sm:text-sm text-muted-foreground order-2 sm:order-1">
             Mostrando {desvios.length} de {desvios.length} desvios dos CCAs permitidos
@@ -369,7 +382,8 @@ const DesviosTable = ({
           </div>
         </div>
       </div>
-    </>;
+    </>
+  );
 };
 
 export default DesviosTable;
