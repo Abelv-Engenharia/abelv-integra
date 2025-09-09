@@ -31,7 +31,6 @@ interface DesviosTableProps {
   searchTerm?: string;
 }
 
-// Helper function to convert database types to our interface
 const convertDbToDesvio = (dbDesvio: any): DesvioCompleto => {
   return {
     ...dbDesvio,
@@ -48,10 +47,7 @@ const convertDbToDesvio = (dbDesvio: any): DesvioCompleto => {
   };
 };
 
-const DesviosTable = ({
-  filters,
-  searchTerm
-}: DesviosTableProps) => {
+const DesviosTable = ({ filters, searchTerm }: DesviosTableProps) => {
   const { toast } = useToast();
   const { data: userCCAs = [], isLoading: isLoadingCCAs } = useUserCCAs();
   const [desvios, setDesvios] = useState<DesvioCompleto[]>([]);
@@ -61,7 +57,6 @@ const DesviosTable = ({
   const [isLoading, setIsLoading] = useState(true);
   const allowedCcaIds = userCCAs.map(cca => cca.id);
 
-  // Recarrega desvios do backend filtrando pelos CCAs permitidos e filtros aplicados
   const fetchDesvios = async () => {
     setIsLoading(true);
     try {
@@ -81,13 +76,11 @@ const DesviosTable = ({
         `)
         .in("cca_id", allowedCcaIds);
 
-      // Aplicar filtros se fornecidos
       if (filters?.year && filters.year !== "") {
         const year = parseInt(filters.year);
         query = query
           .gte("data_desvio", `${year}-01-01`)
           .lte("data_desvio", `${year}-12-31`);
-        console.log(`Aplicando filtro de ano: ${year}`);
       }
 
       if (filters?.month && filters.month !== "" && filters.month !== "todos") {
@@ -97,48 +90,38 @@ const DesviosTable = ({
         const endDate = new Date(year, month, 0);
         const startDateStr = startDate.toISOString().split("T")[0];
         const endDateStr = endDate.toISOString().split("T")[0];
-        console.log(`Aplicando filtro de mês ${month}/${year}: ${startDateStr} até ${endDateStr}`);
         query = query.gte("data_desvio", startDateStr).lte("data_desvio", endDateStr);
       }
 
-      // Filtro por CCA específico (além da permissão do usuário)
       if (filters?.cca && filters.cca !== "" && filters.cca !== "todos") {
         const { data: ccaData } = await supabase
           .from("ccas")
           .select("id")
           .eq("codigo", filters.cca)
           .single();
-        if (ccaData) {
-          query = query.eq("cca_id", ccaData.id);
-        }
+        if (ccaData) query = query.eq("cca_id", ccaData.id);
       }
 
-      // Filtro por empresa (via company)
       if (filters?.company && filters.company !== "" && filters.company !== "todas") {
         const { data: empresaData } = await supabase
           .from("empresas")
           .select("id")
           .eq("nome", filters.company)
           .single();
-        if (empresaData) {
-          query = query.eq("empresa_id", empresaData.id);
-        }
+        if (empresaData) query = query.eq("empresa_id", empresaData.id);
       }
 
       if (filters?.risk && filters.risk !== "" && filters.risk !== "todos") {
         query = query.eq("classificacao_risco", filters.risk);
       }
 
-      // Filtros adicionais vindos dos gráficos
       if (filters?.disciplina && filters.disciplina !== "") {
         const { data: disciplinaData } = await supabase
           .from("disciplinas")
           .select("id")
           .eq("nome", filters.disciplina)
           .single();
-        if (disciplinaData) {
-          query = query.eq("disciplina_id", disciplinaData.id);
-        }
+        if (disciplinaData) query = query.eq("disciplina_id", disciplinaData.id);
       }
 
       if (filters?.tipo && filters.tipo !== "") {
@@ -147,9 +130,7 @@ const DesviosTable = ({
           .select("id")
           .eq("nome", filters.tipo)
           .single();
-        if (tipoData) {
-          query = query.eq("tipo_registro_id", tipoData.id);
-        }
+        if (tipoData) query = query.eq("tipo_registro_id", tipoData.id);
       }
 
       if (filters?.evento && filters.evento !== "") {
@@ -158,9 +139,7 @@ const DesviosTable = ({
           .select("id")
           .eq("nome", filters.evento)
           .single();
-        if (eventoData) {
-          query = query.eq("evento_identificado_id", eventoData.id);
-        }
+        if (eventoData) query = query.eq("evento_identificado_id", eventoData.id);
       }
 
       if (filters?.processo && filters.processo !== "") {
@@ -169,9 +148,7 @@ const DesviosTable = ({
           .select("id")
           .eq("nome", filters.processo)
           .single();
-        if (processoData) {
-          query = query.eq("processo_id", processoData.id);
-        }
+        if (processoData) query = query.eq("processo_id", processoData.id);
       }
 
       if (filters?.baseLegal && filters.baseLegal !== "") {
@@ -180,9 +157,7 @@ const DesviosTable = ({
           .select("id")
           .eq("nome", filters.baseLegal)
           .single();
-        if (baseData) {
-          query = query.eq("base_legal_opcao_id", baseData.id);
-        }
+        if (baseData) query = query.eq("base_legal_opcao_id", baseData.id);
       }
 
       if (filters?.empresa && filters.empresa !== "") {
@@ -191,16 +166,13 @@ const DesviosTable = ({
           .select("id")
           .eq("nome", filters.empresa)
           .single();
-        if (empresaData) {
-          query = query.eq("empresa_id", empresaData.id);
-        }
+        if (empresaData) query = query.eq("empresa_id", empresaData.id);
       }
 
       if (filters?.classificacao && filters.classificacao !== "") {
         query = query.eq("classificacao_risco", filters.classificacao);
       }
 
-      // Aplicar busca por termo se fornecido
       if (searchTerm && searchTerm.trim() !== "") {
         query = query.or(`descricao_desvio.ilike.%${searchTerm}%,responsavel_inspecao.ilike.%${searchTerm}%`);
       }
@@ -211,11 +183,8 @@ const DesviosTable = ({
         console.error("Erro ao buscar desvios:", error);
         setDesvios([]);
       } else {
-        console.log("Desvios filtrados carregados:", data);
-        // Convert database results to DesvioCompleto format
         let convertedData = (data || []).map(convertDbToDesvio);
 
-        // Aplicar filtro de status APÓS buscar os dados (pois precisa calcular o status)
         if (filters?.status && filters.status !== "" && filters.status !== "todos") {
           convertedData = convertedData.filter(desvio => {
             const calculatedStatus = calculateStatusAcao(
@@ -249,16 +218,7 @@ const DesviosTable = ({
   }, [allowedCcaIds.join(","), isLoadingCCAs, filters, searchTerm]);
 
   const handleStatusUpdated = (id: string, newStatus: string) => {
-    setDesvios(
-      desvios.map(d =>
-        d.id === id
-          ? {
-              ...d,
-              status: newStatus,
-            }
-          : d
-      )
-    );
+    setDesvios(desvios.map(d => (d.id === id ? { ...d, status: newStatus } : d)));
   };
 
   const handleEditClick = (desvio: DesvioCompleto) => {
@@ -274,25 +234,10 @@ const DesviosTable = ({
   };
 
   const handleDesvioDeleted = async (id?: string, deleted?: boolean) => {
-    console.log("🔄 handleDesvioDeleted chamado:", { id, deleted });
-
     if (deleted && id) {
-      console.log("✅ Removendo desvio da UI:", id);
-
-      // Atualizar imediatamente a UI
-      setDesvios(prev => {
-        const updated = prev.filter(d => d.id !== id);
-        console.log(`📊 UI atualizada: ${prev.length} -> ${updated.length} desvios`);
-        return updated;
-      });
-
-      // Recarregar do servidor para confirmar
-      console.log("📡 Recarregando dados do servidor...");
-      setTimeout(async () => {
-        await fetchDesvios();
-      }, 1000);
+      setDesvios(prev => prev.filter(d => d.id !== id));
+      setTimeout(async () => { await fetchDesvios(); }, 1000);
     } else {
-      console.error("❌ Falha na exclusão, recarregando dados:", { id, deleted });
       await fetchDesvios();
     }
   };
@@ -331,17 +276,17 @@ const DesviosTable = ({
             </div>
           ) : (
             <Table className="w-full table-fixed">
-              {/* Controle de largura das colunas */}
+              {/* Larguras das colunas */}
               <colgroup>
-                <col className="w-24 sm:w-32" />            {/* Data */}
-                <col className="w-56 sm:w-64" />            {/* CCA */}
-                <col className="w-[360px] sm:w-[480px]" />  {/* Descrição */}
-                <col className="w-40 sm:w-48" />            {/* Base Legal */}
-                <col className="w-32 sm:w-40" />            {/* Empresa */}
-                <col className="w-32 sm:w-40" />            {/* Disciplina */}
-                <col className="w-16 sm:w-20" />            {/* Risco */}
-                <col className="w-20 sm:w-24" />            {/* Status */}
-                <col className="w-24 sm:w-32" />            {/* Ações */}
+                <col className="w-24 sm:w-32" />             {/* Data */}
+                <col className="w-56 sm:w-64" />             {/* CCA */}
+                <col className="w-[340px] sm:w-[440px]" />   {/* Descrição */}
+                <col className="w-[260px] sm:w-[320px]" />   {/* Base Legal */}
+                <col className="w-32 sm:w-40" />             {/* Empresa */}
+                <col className="w-32 sm:w-40" />             {/* Disciplina */}
+                <col className="w-16 sm:w-20" />             {/* Risco */}
+                <col className="w-20 sm:w-24" />             {/* Status */}
+                <col className="w-24 sm:w-32" />             {/* Ações */}
               </colgroup>
 
               <TableHeader>
