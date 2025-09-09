@@ -5,6 +5,7 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, LabelList } from "recharts";
 import { fetchDesviosByBaseLegal } from "@/services/desviosDashboardService";
 import { useDesviosFilters } from "@/hooks/useDesviosFilters";
+import { useDesviosNavigation } from "@/hooks/useDesviosNavigation";
 
 type ChartItem = {
   name: string;     // rótulo curto para eixo (ex.: "NR 10")
@@ -19,6 +20,7 @@ const DesviosByBaseLegalChart = () => {
 
   // Evitar depender do objeto inteiro (muda por referência a cada render)
   const { normalizedFilters, userCCAs } = useDesviosFilters();
+  const { navigateToConsulta } = useDesviosNavigation();
 
   // Chave estável para disparar o efeito quando filtros realmente mudarem
   const normalizedKey = useMemo(
@@ -113,7 +115,17 @@ const DesviosByBaseLegalChart = () => {
                     />
                   }
                 />
-                <Bar dataKey="value" fill="var(--color-value)" radius={[4, 4, 0, 0]}>
+                <Bar 
+                  dataKey="value" 
+                  fill="var(--color-value)" 
+                  radius={[4, 4, 0, 0]}
+                  onClick={(data) => {
+                    if (data && data.name) {
+                      navigateToConsulta({ baseLegal: data.name });
+                    }
+                  }}
+                  style={{ cursor: 'pointer' }}
+                >
                   <LabelList dataKey="value" position="top" />
                 </Bar>
               </BarChart>

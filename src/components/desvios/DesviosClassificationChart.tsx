@@ -5,12 +5,14 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Cell, LabelList } from "recharts";
 import { fetchDesviosByClassification } from "@/services/desvios/desviosByClassificationService";
 import { useDesviosFilters } from "@/hooks/useDesviosFilters";
+import { useDesviosNavigation } from "@/hooks/useDesviosNavigation";
 
 const DesviosClassificationChart = () => {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   
   const { normalizedFilters, userCCAs } = useDesviosFilters();
+  const { navigateToConsulta } = useDesviosNavigation();
 
   // chave estável p/ disparar o efeito somente quando os valores de fato mudarem
   const normalizedKey = useMemo(
@@ -63,7 +65,16 @@ const DesviosClassificationChart = () => {
               <BarChart data={data} margin={{ top: 40, right: 30, left: 20, bottom: 5 }}>
                 <XAxis dataKey="name" />
                 <ChartTooltip content={<ChartTooltipContent />} />
-                <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+                <Bar 
+                  dataKey="value" 
+                  radius={[4, 4, 0, 0]}
+                  onClick={(data) => {
+                    if (data && data.name) {
+                      navigateToConsulta({ classificacao: data.name });
+                    }
+                  }}
+                  style={{ cursor: 'pointer' }}
+                >
                   <LabelList dataKey="value" position="top" />
                   {data.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />

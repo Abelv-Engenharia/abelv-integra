@@ -5,6 +5,7 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, LabelList } from "recharts";
 import { fetchDesviosByDiscipline } from "@/services/desviosDashboardService";
 import { useDesviosFilters } from "@/hooks/useDesviosFilters";
+import { useDesviosNavigation } from "@/hooks/useDesviosNavigation";
 
 type ChartItem = {
   name: string;       // rótulo curto (ex.: "Elétrica")
@@ -18,6 +19,7 @@ const DesviosByDisciplineChart = () => {
   const [loading, setLoading] = useState<boolean>(true);
 
   const { normalizedFilters, userCCAs } = useDesviosFilters();
+  const { navigateToConsulta } = useDesviosNavigation();
 
   // chave estável p/ disparar o efeito somente quando os valores de fato mudarem
   const normalizedKey = useMemo(
@@ -103,7 +105,17 @@ const DesviosByDisciplineChart = () => {
                     />
                   }
                 />
-                <Bar dataKey="value" fill="var(--color-value)" radius={[4, 4, 0, 0]}>
+                <Bar 
+                  dataKey="value" 
+                  fill="var(--color-value)" 
+                  radius={[4, 4, 0, 0]}
+                  onClick={(data) => {
+                    if (data && data.name) {
+                      navigateToConsulta({ disciplina: data.name });
+                    }
+                  }}
+                  style={{ cursor: 'pointer' }}
+                >
                   <LabelList dataKey="value" position="top" />
                 </Bar>
               </BarChart>

@@ -5,6 +5,7 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, LabelList } from "recharts";
 import { fetchDesviosByCompany } from "@/services/desviosDashboardService";
 import { useDesviosFilters } from "@/hooks/useDesviosFilters";
+import { useDesviosNavigation } from "@/hooks/useDesviosNavigation";
 
 type ChartItem = {
   name: string;       // rótulo curto (ex.: sigla da empresa)
@@ -19,6 +20,7 @@ const DesviosByCompanyChart = () => {
 
   // Evite depender do objeto inteiro "filters" (muda a cada render)
   const { normalizedFilters, userCCAs } = useDesviosFilters();
+  const { navigateToConsulta } = useDesviosNavigation();
   const normalizedKey = useMemo(
     () => JSON.stringify(normalizedFilters ?? {}),
     [normalizedFilters]
@@ -106,7 +108,17 @@ const DesviosByCompanyChart = () => {
                     />
                   }
                 />
-                <Bar dataKey="value" fill="var(--color-value)" radius={[4, 4, 0, 0]}>
+                <Bar 
+                  dataKey="value" 
+                  fill="var(--color-value)" 
+                  radius={[4, 4, 0, 0]}
+                  onClick={(data) => {
+                    if (data && data.name) {
+                      navigateToConsulta({ empresa: data.name });
+                    }
+                  }}
+                  style={{ cursor: 'pointer' }}
+                >
                   <LabelList dataKey="value" position="top" />
                 </Bar>
               </BarChart>

@@ -19,6 +19,13 @@ interface DesviosTableProps {
     company?: string;
     status?: string;
     risk?: string;
+    disciplina?: string;
+    empresa?: string;
+    classificacao?: string;
+    tipo?: string;
+    evento?: string;
+    processo?: string;
+    baseLegal?: string;
   };
   searchTerm?: string;
 }
@@ -123,6 +130,77 @@ const DesviosTable = ({
       
       if (filters?.risk && filters.risk !== "" && filters.risk !== "todos") {
         query = query.eq('classificacao_risco', filters.risk);
+      }
+
+      // Filtros adicionais vindos dos gráficos
+      if (filters?.disciplina && filters.disciplina !== "") {
+        const { data: disciplinaData } = await supabase
+          .from('disciplinas')
+          .select('id')
+          .eq('nome', filters.disciplina)
+          .single();
+        if (disciplinaData) {
+          query = query.eq('disciplina_id', disciplinaData.id);
+        }
+      }
+      
+      if (filters?.tipo && filters.tipo !== "") {
+        const { data: tipoData } = await supabase
+          .from('tipos_registro')
+          .select('id')
+          .eq('nome', filters.tipo)
+          .single();
+        if (tipoData) {
+          query = query.eq('tipo_registro_id', tipoData.id);
+        }
+      }
+      
+      if (filters?.evento && filters.evento !== "") {
+        const { data: eventoData } = await supabase
+          .from('eventos_identificados')
+          .select('id')
+          .eq('nome', filters.evento)
+          .single();
+        if (eventoData) {
+          query = query.eq('evento_identificado_id', eventoData.id);
+        }
+      }
+      
+      if (filters?.processo && filters.processo !== "") {
+        const { data: processoData } = await supabase
+          .from('processos')
+          .select('id')
+          .eq('nome', filters.processo)
+          .single();
+        if (processoData) {
+          query = query.eq('processo_id', processoData.id);
+        }
+      }
+      
+      if (filters?.baseLegal && filters.baseLegal !== "") {
+        const { data: baseData } = await supabase
+          .from('base_legal_opcoes')
+          .select('id')
+          .eq('nome', filters.baseLegal)
+          .single();
+        if (baseData) {
+          query = query.eq('base_legal_opcao_id', baseData.id);
+        }
+      }
+      
+      if (filters?.empresa && filters.empresa !== "") {
+        const { data: empresaData } = await supabase
+          .from('empresas')
+          .select('id')
+          .eq('nome', filters.empresa)
+          .single();
+        if (empresaData) {
+          query = query.eq('empresa_id', empresaData.id);
+        }
+      }
+      
+      if (filters?.classificacao && filters.classificacao !== "") {
+        query = query.eq('classificacao_risco', filters.classificacao);
       }
 
       // Aplicar busca por termo se fornecido

@@ -5,6 +5,7 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 import { fetchDesviosByProcesso } from "@/services/desviosDashboardService";
 import { useDesviosFilters } from "@/hooks/useDesviosFilters";
+import { useDesviosNavigation } from "@/hooks/useDesviosNavigation";
 
 type ChartItem = { name: string; value: number; color?: string };
 
@@ -16,6 +17,7 @@ const DesviosByProcessoChart = () => {
 
   // Evite depender do objeto inteiro "filters" (muda por referência a cada render).
   const { normalizedFilters, userCCAs } = useDesviosFilters();
+  const { navigateToConsulta } = useDesviosNavigation();
 
   // String estável para dependência do useEffect
   const normalizedKey = useMemo(() => JSON.stringify(normalizedFilters ?? {}), [normalizedFilters]);
@@ -79,6 +81,12 @@ const DesviosByProcessoChart = () => {
                     const pct = total > 0 ? Math.round((Number(value) * 100) / total) : 0;
                     return `${name} ${pct}%`;
                   }}
+                  onClick={(data) => {
+                    if (data && data.name) {
+                      navigateToConsulta({ processo: data.name });
+                    }
+                  }}
+                  style={{ cursor: 'pointer' }}
                 >
                   {data.map((entry, index) => (
                     <Cell

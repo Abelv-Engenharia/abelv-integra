@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { ArrowLeft, Download, Filter, Printer, Search } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { exportDesviosToExcel } from "@/services/desvios/exportService";
 import { 
@@ -26,6 +26,7 @@ const DesviosConsulta = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { data: userCCAs = [] } = useUserCCAs();
+  const [searchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState("");
   const [filters, setFilters] = useState({
     year: currentYear.toString(),
@@ -34,12 +35,24 @@ const DesviosConsulta = () => {
     company: "",
     status: "",
     risk: "",
+    disciplina: "",
+    empresa: "",
+    classificacao: "",
+    tipo: "",
+    evento: "",
+    processo: "",
+    baseLegal: "",
   });
   
   // Estados para dados dinâmicos da base de dados
   const [ccas, setCcas] = useState<Array<{codigo: string, nome: string, id: number}>>([]);
   const [empresas, setEmpresas] = useState<Array<{nome: string}>>([]);
   const [riskOptions, setRiskOptions] = useState<Array<{classificacao_risco: string}>>([]);
+  const [disciplinas, setDisciplinas] = useState<Array<{nome: string}>>([]);
+  const [tiposRegistro, setTiposRegistro] = useState<Array<{nome: string}>>([]);
+  const [eventosIdentificados, setEventosIdentificados] = useState<Array<{nome: string}>>([]);
+  const [processos, setProcessos] = useState<Array<{nome: string}>>([]);
+  const [basesLegais, setBasesLegais] = useState<Array<{nome: string}>>([]);
 
   // Opções fixas de status padronizadas
   const statusOptions = [
@@ -47,6 +60,31 @@ const DesviosConsulta = () => {
     { status: "EM ANDAMENTO" },
     { status: "PENDENTE" }
   ];
+
+  // Aplicar filtros da URL quando a página carregar
+  useEffect(() => {
+    const applyUrlFilters = () => {
+      const newFilters = { ...filters };
+      
+      // Aplicar filtros básicos da URL
+      if (searchParams.get("year")) newFilters.year = searchParams.get("year")!;
+      if (searchParams.get("month")) newFilters.month = searchParams.get("month")!;
+      if (searchParams.get("cca")) newFilters.cca = searchParams.get("cca")!;
+      
+      // Aplicar filtros específicos dos gráficos
+      if (searchParams.get("disciplina")) newFilters.disciplina = searchParams.get("disciplina")!;
+      if (searchParams.get("empresa")) newFilters.empresa = searchParams.get("empresa")!;
+      if (searchParams.get("classificacao")) newFilters.classificacao = searchParams.get("classificacao")!;
+      if (searchParams.get("tipo")) newFilters.tipo = searchParams.get("tipo")!;
+      if (searchParams.get("evento")) newFilters.evento = searchParams.get("evento")!;
+      if (searchParams.get("processo")) newFilters.processo = searchParams.get("processo")!;
+      if (searchParams.get("baseLegal")) newFilters.baseLegal = searchParams.get("baseLegal")!;
+      
+      setFilters(newFilters);
+    };
+    
+    applyUrlFilters();
+  }, [searchParams]);
 
   // Carregar dados da base de dados apenas com CCAs permitidos
   useEffect(() => {
@@ -81,6 +119,36 @@ const DesviosConsulta = () => {
           .in('cca_id', allowedCcaIds)
           .not('classificacao_risco', 'is', null);
 
+        // Buscar disciplinas ativas
+        const { data: disciplinasData } = await supabase
+          .from('disciplinas')
+          .select('nome')
+          .eq('ativo', true);
+
+        // Buscar tipos de registro ativos
+        const { data: tiposData } = await supabase
+          .from('tipos_registro')
+          .select('nome')
+          .eq('ativo', true);
+
+        // Buscar eventos identificados ativos
+        const { data: eventosData } = await supabase
+          .from('eventos_identificados')
+          .select('nome')
+          .eq('ativo', true);
+
+        // Buscar processos ativos
+        const { data: processosData } = await supabase
+          .from('processos')
+          .select('nome')
+          .eq('ativo', true);
+
+        // Buscar bases legais ativas
+        const { data: basesData } = await supabase
+          .from('base_legal_opcoes')
+          .select('nome')
+          .eq('ativo', true);
+
         // Processar dados únicos
         if (empresasData) {
           const uniqueEmpresas = Array.from(new Set(
@@ -94,6 +162,31 @@ const DesviosConsulta = () => {
             riskData.map((item: any) => item.classificacao_risco)
           )).map(classificacao_risco => ({ classificacao_risco }));
           setRiskOptions(uniqueRisk.sort((a, b) => a.classificacao_risco.localeCompare(b.classificacao_risco)));
+        }
+
+        // Processar disciplinas
+        if (disciplinasData) {
+          setDisciplinas(disciplinasData.sort((a, b) => a.nome.localeCompare(b.nome)));
+        }
+
+        // Processar tipos de registro
+        if (tiposData) {
+          setTiposRegistro(tiposData.sort((a, b) => a.nome.localeCompare(b.nome)));
+        }
+
+        // Processar eventos identificados
+        if (eventosData) {
+          setEventosIdentificados(eventosData.sort((a, b) => a.nome.localeCompare(b.nome)));
+        }
+
+        // Processar processos
+        if (processosData) {
+          setProcessos(processosData.sort((a, b) => a.nome.localeCompare(b.nome)));
+        }
+
+        // Processar bases legais
+        if (basesData) {
+          setBasesLegais(basesData.sort((a, b) => a.nome.localeCompare(b.nome)));
         }
       } catch (error) {
         console.error('Erro ao carregar dados dos filtros:', error);
@@ -118,9 +211,18 @@ const DesviosConsulta = () => {
       company: "",
       status: "",
       risk: "",
+      disciplina: "",
+      empresa: "",
+      classificacao: "",
+      tipo: "",
+      evento: "",
+      processo: "",
+      baseLegal: "",
     };
     setFilters(clearedFilters);
     setSearchTerm("");
+    // Limpar também os parâmetros da URL
+    navigate("/desvios/consulta", { replace: true });
     toast({
       title: "Filtros limpos",
       description: "Todos os filtros foram removidos.",
@@ -169,6 +271,21 @@ const DesviosConsulta = () => {
       }
       if (filters.risk && filters.risk !== "todos") {
         exportFilters.classificacaoRisco = filters.risk;
+      }
+      if (filters.disciplina) {
+        exportFilters.disciplina = filters.disciplina;
+      }
+      if (filters.tipo) {
+        exportFilters.tipo = filters.tipo;
+      }
+      if (filters.evento) {
+        exportFilters.evento = filters.evento;
+      }
+      if (filters.processo) {
+        exportFilters.processo = filters.processo;
+      }
+      if (filters.baseLegal) {
+        exportFilters.baseLegal = filters.baseLegal;
       }
       if (searchTerm) {
         exportFilters.searchTerm = searchTerm;
@@ -240,7 +357,7 @@ const DesviosConsulta = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             <div className="grid gap-1.5">
               <label htmlFor="filter-year" className="text-sm font-medium">
                 Ano
@@ -371,6 +488,116 @@ const DesviosConsulta = () => {
                   {riskOptions.map((risk) => (
                     <SelectItem key={risk.classificacao_risco} value={risk.classificacao_risco}>
                       {risk.classificacao_risco}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="grid gap-1.5">
+              <label htmlFor="filter-disciplina" className="text-sm font-medium">
+                Disciplina
+              </label>
+              <Select
+                value={filters.disciplina}
+                onValueChange={(value) => handleFilterChange("disciplina", value)}
+              >
+                <SelectTrigger id="filter-disciplina">
+                  <SelectValue placeholder="Todas as disciplinas" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Todas</SelectItem>
+                  {disciplinas.map((disciplina) => (
+                    <SelectItem key={disciplina.nome} value={disciplina.nome}>
+                      {disciplina.nome}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="grid gap-1.5">
+              <label htmlFor="filter-tipo" className="text-sm font-medium">
+                Tipo de Registro
+              </label>
+              <Select
+                value={filters.tipo}
+                onValueChange={(value) => handleFilterChange("tipo", value)}
+              >
+                <SelectTrigger id="filter-tipo">
+                  <SelectValue placeholder="Todos os tipos" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Todos</SelectItem>
+                  {tiposRegistro.map((tipo) => (
+                    <SelectItem key={tipo.nome} value={tipo.nome}>
+                      {tipo.nome}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="grid gap-1.5">
+              <label htmlFor="filter-evento" className="text-sm font-medium">
+                Evento Identificado
+              </label>
+              <Select
+                value={filters.evento}
+                onValueChange={(value) => handleFilterChange("evento", value)}
+              >
+                <SelectTrigger id="filter-evento">
+                  <SelectValue placeholder="Todos os eventos" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Todos</SelectItem>
+                  {eventosIdentificados.map((evento) => (
+                    <SelectItem key={evento.nome} value={evento.nome}>
+                      {evento.nome}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="grid gap-1.5">
+              <label htmlFor="filter-processo" className="text-sm font-medium">
+                Processo
+              </label>
+              <Select
+                value={filters.processo}
+                onValueChange={(value) => handleFilterChange("processo", value)}
+              >
+                <SelectTrigger id="filter-processo">
+                  <SelectValue placeholder="Todos os processos" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Todos</SelectItem>
+                  {processos.map((processo) => (
+                    <SelectItem key={processo.nome} value={processo.nome}>
+                      {processo.nome}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="grid gap-1.5">
+              <label htmlFor="filter-base-legal" className="text-sm font-medium">
+                Base Legal
+              </label>
+              <Select
+                value={filters.baseLegal}
+                onValueChange={(value) => handleFilterChange("baseLegal", value)}
+              >
+                <SelectTrigger id="filter-base-legal">
+                  <SelectValue placeholder="Todas as bases legais" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Todas</SelectItem>
+                  {basesLegais.map((base) => (
+                    <SelectItem key={base.nome} value={base.nome}>
+                      {base.nome}
                     </SelectItem>
                   ))}
                 </SelectContent>

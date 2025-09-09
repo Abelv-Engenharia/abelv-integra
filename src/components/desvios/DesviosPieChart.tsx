@@ -5,6 +5,7 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend } from "recharts";
 import { fetchDesviosByType } from "@/services/desvios/desviosByTypeService";
 import { useDesviosFilters } from "@/hooks/useDesviosFilters";
+import { useDesviosNavigation } from "@/hooks/useDesviosNavigation";
 
 const COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6"];
 
@@ -13,6 +14,7 @@ const DesviosPieChart = () => {
   const [loading, setLoading] = useState<boolean>(true);
   
   const { normalizedFilters, userCCAs } = useDesviosFilters();
+  const { navigateToConsulta } = useDesviosNavigation();
 
   // chave estável p/ disparar o efeito somente quando os valores de fato mudarem
   const normalizedKey = useMemo(
@@ -70,6 +72,12 @@ const DesviosPieChart = () => {
                   outerRadius={80}
                   dataKey="value"
                   label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                  onClick={(data) => {
+                    if (data && data.name) {
+                      navigateToConsulta({ tipo: data.name });
+                    }
+                  }}
+                  style={{ cursor: 'pointer' }}
                 >
                   {data.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />

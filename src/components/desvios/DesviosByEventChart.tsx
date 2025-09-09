@@ -5,6 +5,7 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 import { fetchDesviosByEvent } from "@/services/desviosDashboardService";
 import { useDesviosFilters } from "@/hooks/useDesviosFilters";
+import { useDesviosNavigation } from "@/hooks/useDesviosNavigation";
 
 type ChartItem = { name: string; value: number; color?: string };
 
@@ -15,6 +16,7 @@ const DesviosByEventChart = () => {
   const [loading, setLoading] = useState<boolean>(true);
 
   const { normalizedFilters, userCCAs } = useDesviosFilters();
+  const { navigateToConsulta } = useDesviosNavigation();
   const normalizedKey = useMemo(
     () => JSON.stringify(normalizedFilters ?? {}),
     [normalizedFilters]
@@ -86,6 +88,12 @@ const DesviosByEventChart = () => {
                     const pct = total > 0 ? Math.round((Number(value) * 100) / total) : 0;
                     return `${name} ${pct}%`;
                   }}
+                  onClick={(data) => {
+                    if (data && data.name) {
+                      navigateToConsulta({ evento: data.name });
+                    }
+                  }}
+                  style={{ cursor: 'pointer' }}
                 >
                   {data.map((entry, index) => (
                     <Cell
