@@ -26,8 +26,8 @@ interface DesviosTableProps {
     tipo?: string;
     evento?: string;
     processo?: string;
-    baseLegal?: string;     // nome/título vindo do gráfico (pode vir truncado)
-    baseLegalId?: string;   // ID vindo do gráfico (preferível)
+    baseLegal?: string;    // nome vindo do gráfico
+    baseLegalId?: string;  // id vindo do gráfico
   };
   searchTerm?: string;
 }
@@ -59,12 +59,12 @@ const DesviosTable = ({ filters, searchTerm }: DesviosTableProps) => {
   const [editDesvioId, setEditDesvioId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // >>> Controle de concorrência entre buscas
-  const fetchSeq = useRef(0); // id incremental de cada fetch
+  // Controle de concorrência entre buscas
+  const fetchSeq = useRef(0);
   const allowedCcaIds = userCCAs.map(cca => cca.id);
 
   const fetchDesvios = async () => {
-    const myId = ++fetchSeq.current; // gera um id para esta chamada
+    const myId = ++fetchSeq.current;
     setIsLoading(true);
 
     try {
@@ -165,21 +165,24 @@ const DesviosTable = ({ filters, searchTerm }: DesviosTableProps) => {
       // --- Base Legal (robusto: aceita ID ou nome parcial) ---
       if ((filters?.baseLegalId && filters.baseLegalId !== "") || (filters?.baseLegal && filters.baseLegal !== "")) {
         if (filters?.baseLegalId && filters.baseLegalId !== "") {
-          // Preferível: já veio o ID do dashboard
-          query = query.eq("base_legal_opcao_id", filters.baseLegalId as string);
+          const idNum = Number(filters.baseLegalId);
+          if (Number.isFinite(idNum)) {
+            query = query.eq("base_legal_opcao_id", idNum);
+          } else {
+            console.warn("baseLegalId recebido não é numérico:", filters.baseLegalId);
+          }
         } else if (filters?.baseLegal && filters.baseLegal !== "") {
-          // Veio o texto do rótulo (possivelmente truncado no gráfico)
           const termo = String(filters.baseLegal).trim();
 
-          // tentativa 1: igual (case-insensitive)
-          let { data: baseData, error: baseErr } = await supabase
+          // tentativa 1: igual
+          let { data: baseData } = await supabase
             .from("base_legal_opcoes")
             .select("id, nome")
             .ilike("nome", termo)
             .limit(1)
             .maybeSingle();
 
-          // tentativa 2: parcial com wildcard
+          // tentativa 2: parcial
           if (!baseData) {
             const { data: baseLike } = await supabase
               .from("base_legal_opcoes")
@@ -190,7 +193,7 @@ const DesviosTable = ({ filters, searchTerm }: DesviosTableProps) => {
             baseData = baseLike?.[0];
           }
 
-          // tentativa 3: usar prefixo antes de " - " (comum em rótulos longos)
+          // tentativa 3: prefixo antes de " - "
           if (!baseData && termo.includes(" - ")) {
             const prefixo = termo.split(" - ")[0].trim();
             const { data: basePrefix } = await supabase
@@ -202,11 +205,11 @@ const DesviosTable = ({ filters, searchTerm }: DesviosTableProps) => {
             baseData = basePrefix?.[0];
           }
 
-          if (baseData?.id) {
-            query = query.eq("base_legal_opcao_id", baseData.id);
+          if (baseData?.id !== undefined && baseData?.id !== null) {
+            query = query.eq("base_legal_opcao_id", baseData.id as number);
           } else {
-            // Não achou correspondência: força retorno vazio, evitando cair para "geral"
-            query = query.eq("base_legal_opcao_id", "00000000-0000-0000-0000-000000000000");
+            // força sem resultado com um número impossível
+            query = query.eq("base_legal_opcao_id", -1);
           }
         }
       }
@@ -224,15 +227,13 @@ const DesviosTable = ({ filters, searchTerm }: DesviosTableProps) => {
         query = query.eq("classificacao_risco", filters.classificacao);
       }
 
-      // Busca textual
       if (searchTerm && searchTerm.trim() !== "") {
         query = query.or(`descricao_desvio.ilike.%${searchTerm}%,responsavel_inspecao.ilike.%${searchTerm}%`);
       }
 
       const { data, error } = await query.order("data_desvio", { ascending: false });
 
-      // Se existe outra chamada mais nova, ignora esta resposta
-      if (myId !== fetchSeq.current) return;
+      if (myId !== fetchSeq.current) return; // ignora se outra chamada mais nova foi feita
 
       if (error) {
         console.error("Erro ao buscar desvios:", error);
@@ -240,7 +241,6 @@ const DesviosTable = ({ filters, searchTerm }: DesviosTableProps) => {
       } else {
         let convertedData = (data || []).map(convertDbToDesvio);
 
-        // Filtro de status depois (precisa do cálculo)
         if (filters?.status && filters.status !== "" && filters.status !== "todos") {
           convertedData = convertedData.filter(desvio => {
             const calculatedStatus = calculateStatusAcao(
@@ -272,7 +272,6 @@ const DesviosTable = ({ filters, searchTerm }: DesviosTableProps) => {
         setIsLoading(false);
       }
     }
-    // inclui filters/searchTerm; stringificar para evitar misses com objetos
   }, [allowedCcaIds.join(","), isLoadingCCAs, JSON.stringify(filters), searchTerm]);
 
   const handleStatusUpdated = (id: string, newStatus: string) => {
@@ -334,7 +333,6 @@ const DesviosTable = ({ filters, searchTerm }: DesviosTableProps) => {
             </div>
           ) : (
             <Table className="w-full table-fixed">
-              {/* Larguras das colunas */}
               <colgroup>
                 <col className="w-24 sm:w-32" />             {/* Data */}
                 <col className="w-56 sm:w-64" />             {/* CCA */}
