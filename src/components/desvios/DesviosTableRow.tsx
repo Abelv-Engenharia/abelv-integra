@@ -1,3 +1,4 @@
+
 import React from "react";
 import StatusBadge from "./StatusBadge";
 import RiskBadge from "./RiskBadge";
@@ -23,8 +24,8 @@ const formatDate = (dateString?: string) => {
   if (!dateString) return "";
   
   // Parse the date as a local date to avoid timezone issues
-  const [year, month, day] = dateString.split('-').map(Number);
-  const date = new Date(year, month - 1, day); // month is 0-indexed
+  const [year, month, day] = dateString.split("-").map(Number);
+  const date = new Date(year, month - 1, day); // month é 0-indexado
   
   return date.toLocaleDateString("pt-BR");
 };
@@ -37,27 +38,27 @@ const DesviosTableRow = ({
   editDesvioId,
   editDialogOpen,
   setEditDialogOpen,
-  onDesvioUpdated
+  onDesvioUpdated,
 }: Props) => {
   // Calcular o status correto baseado na situação e prazo_conclusao
   const calculatedStatus = calculateStatusAcao(
-    desvio.situacao || desvio.status || "", 
+    desvio.situacao || desvio.status || "",
     desvio.prazo_conclusao || ""
   );
-  
-  console.log('📊 Desvio ID:', desvio.id, 'Situacao:', desvio.situacao, 'Status original:', desvio.status, 'Prazo:', desvio.prazo_conclusao, 'Status calculado:', calculatedStatus);
-  
+
   // Usar o status calculado se disponível, senão usar o status original
   const displayStatus = calculatedStatus || desvio.status || "PENDENTE";
 
-  return <tr>
+  return (
+    <tr>
       <td>{formatDate(desvio.data_desvio)}</td>
-      <td className="my-[199px]">
-        {(desvio as any).ccas?.codigo ? `${(desvio as any).ccas.codigo} - ${(desvio as any).ccas.nome}` : "N/A"}
+      <td>
+        {(desvio as any).ccas?.codigo
+          ? `${(desvio as any).ccas.codigo} - ${(desvio as any).ccas.nome}`
+          : "N/A"}
       </td>
-      <td className="max-w-[250px] truncate">
-        {desvio.descricao_desvio?.substring(0, 60)}
-        {desvio.descricao_desvio && desvio.descricao_desvio.length > 60 ? "..." : ""}
+      <td className="whitespace-pre-wrap break-words">
+        {desvio.descricao_desvio || "-"}
       </td>
       <td className="max-w-[150px] truncate">
         {(desvio as any).empresas?.nome || "N/A"}
@@ -73,17 +74,44 @@ const DesviosTableRow = ({
       </td>
       <td className="text-right">
         <div className="flex justify-end gap-2">
-          <DesvioDetailsDialog desvio={desvio} onStatusUpdated={onStatusUpdated} />
+          <DesvioDetailsDialog
+            desvio={desvio}
+            onStatusUpdated={onStatusUpdated}
+          />
           <Button variant="ghost" size="icon" onClick={() => onEditClick(desvio)}>
             <span className="sr-only">Editar</span>
-            <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 20h9" /><path strokeLinecap="round" strokeLinejoin="round" d="M16.5 3.5l4 4L6 22H2v-4L16.5 3.5z" /></svg>
+            <svg
+              className="h-4 w-4"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 20h9" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M16.5 3.5l4 4L6 22H2v-4L16.5 3.5z"
+              />
+            </svg>
           </Button>
-          <DeleteDesvioDialog desvio={desvio} onDesvioDeleted={onDesvioDeleted} />
+          <DeleteDesvioDialog
+            desvio={desvio}
+            onDesvioDeleted={onDesvioDeleted}
+          />
           {/* Modal de edição fora para garantir consistência do dialog em múltiplas linhas */}
-          {editDesvioId === desvio.id && <EditDesvioDialog desvio={desvio} open={editDialogOpen} onOpenChange={setEditDialogOpen} onDesvioUpdated={onDesvioUpdated} />}
+          {editDesvioId === desvio.id && (
+            <EditDesvioDialog
+              desvio={desvio}
+              open={editDialogOpen}
+              onOpenChange={setEditDialogOpen}
+              onDesvioUpdated={onDesvioUpdated}
+            />
+          )}
         </div>
       </td>
-    </tr>;
+    </tr>
+  );
 };
 
 export default DesviosTableRow;
