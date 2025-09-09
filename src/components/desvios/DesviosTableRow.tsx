@@ -22,11 +22,9 @@ interface Props {
 
 const formatDate = (dateString?: string) => {
   if (!dateString) return "";
-  
-  // Parse the date as a local date to avoid timezone issues
+  // Parse local para evitar problemas de fuso
   const [year, month, day] = dateString.split("-").map(Number);
-  const date = new Date(year, month - 1, day); // month é 0-indexado
-  
+  const date = new Date(year, month - 1, day);
   return date.toLocaleDateString("pt-BR");
 };
 
@@ -40,44 +38,60 @@ const DesviosTableRow = ({
   setEditDialogOpen,
   onDesvioUpdated,
 }: Props) => {
-  // Calcular o status correto baseado na situação e prazo_conclusao
+  // Status calculado (situação + prazo)
   const calculatedStatus = calculateStatusAcao(
     desvio.situacao || desvio.status || "",
     desvio.prazo_conclusao || ""
   );
-
-  // Usar o status calculado se disponível, senão usar o status original
   const displayStatus = calculatedStatus || desvio.status || "PENDENTE";
 
   return (
     <tr>
+      {/* Data */}
       <td>{formatDate(desvio.data_desvio)}</td>
+
+      {/* CCA */}
       <td>
         {(desvio as any).ccas?.codigo
           ? `${(desvio as any).ccas.codigo} - ${(desvio as any).ccas.nome}`
           : "N/A"}
       </td>
+
+      {/* Descrição (completa) */}
       <td className="whitespace-pre-wrap break-words">
         {desvio.descricao_desvio || "-"}
       </td>
-      <td className="max-w-[150px] truncate">
+
+      {/* Base Legal (nova coluna, logo após Descrição) */}
+      <td className="max-w-[180px] truncate" title={(desvio as any).base_legal_opcoes?.nome || ""}>
+        {(desvio as any).base_legal_opcoes?.nome || "N/A"}
+      </td>
+
+      {/* Empresa */}
+      <td className="max-w-[150px] truncate" title={(desvio as any).empresas?.nome || ""}>
         {(desvio as any).empresas?.nome || "N/A"}
       </td>
-      <td className="max-w-[150px] truncate">
+
+      {/* Disciplina */}
+      <td className="max-w-[150px] truncate" title={(desvio as any).disciplinas?.nome || ""}>
         {(desvio as any).disciplinas?.nome || "N/A"}
       </td>
+
+      {/* Risco */}
       <td>
         <RiskBadge risk={desvio.classificacao_risco} />
       </td>
+
+      {/* Status */}
       <td>
         <StatusBadge status={displayStatus} />
       </td>
+
+      {/* Ações */}
       <td className="text-right">
         <div className="flex justify-end gap-2">
-          <DesvioDetailsDialog
-            desvio={desvio}
-            onStatusUpdated={onStatusUpdated}
-          />
+          <DesvioDetailsDialog desvio={desvio} onStatusUpdated={onStatusUpdated} />
+
           <Button variant="ghost" size="icon" onClick={() => onEditClick(desvio)}>
             <span className="sr-only">Editar</span>
             <svg
@@ -95,10 +109,9 @@ const DesviosTableRow = ({
               />
             </svg>
           </Button>
-          <DeleteDesvioDialog
-            desvio={desvio}
-            onDesvioDeleted={onDesvioDeleted}
-          />
+
+          <DeleteDesvioDialog desvio={desvio} onDesvioDeleted={onDesvioDeleted} />
+
           {/* Modal de edição fora para garantir consistência do dialog em múltiplas linhas */}
           {editDesvioId === desvio.id && (
             <EditDesvioDialog
