@@ -211,13 +211,13 @@ const DesviosConsulta = () => {
       company: "",
       status: "",
       risk: "",
-      disciplina: "",
+      disciplina: "todas",
       empresa: "",
       classificacao: "",
-      tipo: "",
-      evento: "",
-      processo: "",
-      baseLegal: "",
+      tipo: "todos",
+      evento: "todos",
+      processo: "todos",
+      baseLegal: "todas",
     };
     setFilters(clearedFilters);
     setSearchTerm("");
@@ -272,19 +272,19 @@ const DesviosConsulta = () => {
       if (filters.risk && filters.risk !== "todos") {
         exportFilters.classificacaoRisco = filters.risk;
       }
-      if (filters.disciplina) {
+      if (filters.disciplina && filters.disciplina !== "todas") {
         exportFilters.disciplina = filters.disciplina;
       }
-      if (filters.tipo) {
+      if (filters.tipo && filters.tipo !== "todos") {
         exportFilters.tipo = filters.tipo;
       }
-      if (filters.evento) {
+      if (filters.evento && filters.evento !== "todos") {
         exportFilters.evento = filters.evento;
       }
-      if (filters.processo) {
+      if (filters.processo && filters.processo !== "todos") {
         exportFilters.processo = filters.processo;
       }
-      if (filters.baseLegal) {
+      if (filters.baseLegal && filters.baseLegal !== "todas") {
         exportFilters.baseLegal = filters.baseLegal;
       }
       if (searchTerm) {
@@ -506,7 +506,7 @@ const DesviosConsulta = () => {
                   <SelectValue placeholder="Todas as disciplinas" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todas</SelectItem>
+                  <SelectItem value="todas">Todas</SelectItem>
                   {disciplinas.map((disciplina) => (
                     <SelectItem key={disciplina.nome} value={disciplina.nome}>
                       {disciplina.nome}
@@ -528,7 +528,7 @@ const DesviosConsulta = () => {
                   <SelectValue placeholder="Todos os tipos" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todos</SelectItem>
+                  <SelectItem value="todos">Todos</SelectItem>
                   {tiposRegistro.map((tipo) => (
                     <SelectItem key={tipo.nome} value={tipo.nome}>
                       {tipo.nome}
@@ -550,7 +550,7 @@ const DesviosConsulta = () => {
                   <SelectValue placeholder="Todos os eventos" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todos</SelectItem>
+                  <SelectItem value="todos">Todos</SelectItem>
                   {eventosIdentificados.map((evento) => (
                     <SelectItem key={evento.nome} value={evento.nome}>
                       {evento.nome}
@@ -572,7 +572,7 @@ const DesviosConsulta = () => {
                   <SelectValue placeholder="Todos os processos" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todos</SelectItem>
+                  <SelectItem value="todos">Todos</SelectItem>
                   {processos.map((processo) => (
                     <SelectItem key={processo.nome} value={processo.nome}>
                       {processo.nome}
@@ -594,7 +594,7 @@ const DesviosConsulta = () => {
                   <SelectValue placeholder="Todas as bases legais" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todas</SelectItem>
+                  <SelectItem value="todas">Todas</SelectItem>
                   {basesLegais.map((base) => (
                     <SelectItem key={base.nome} value={base.nome}>
                       {base.nome}
