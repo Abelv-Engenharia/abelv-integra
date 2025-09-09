@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableHead, TableHeader, TableRow, TableCell } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
@@ -31,6 +31,7 @@ interface DesviosTableProps {
   searchTerm?: string;
 }
 
+// Converte o payload do banco para a interface
 const convertDbToDesvio = (dbDesvio: any): DesvioCompleto => {
   return {
     ...dbDesvio,
@@ -50,18 +51,27 @@ const convertDbToDesvio = (dbDesvio: any): DesvioCompleto => {
 const DesviosTable = ({ filters, searchTerm }: DesviosTableProps) => {
   const { toast } = useToast();
   const { data: userCCAs = [], isLoading: isLoadingCCAs } = useUserCCAs();
+
   const [desvios, setDesvios] = useState<DesvioCompleto[]>([]);
   const [editDesvio, setEditDesvio] = useState<DesvioCompleto | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editDesvioId, setEditDesvioId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  // >>> Controle de concorrência entre buscas
+  const fetchSeq = useRef(0); // id incremental de cada fetch
   const allowedCcaIds = userCCAs.map(cca => cca.id);
 
   const fetchDesvios = async () => {
+    const myId = ++fetchSeq.current; // gera um id para esta chamada
     setIsLoading(true);
+
     try {
       if (allowedCcaIds.length === 0 && !isLoadingCCAs) {
+        // aborta atualização se houver uma chamada mais nova
+        if (myId !== fetchSeq.current) return;
         setDesvios([]);
+        setIsLoading(false);
         return;
       }
 
@@ -76,6 +86,7 @@ const DesviosTable = ({ filters, searchTerm }: DesviosTableProps) => {
         `)
         .in("cca_id", allowedCcaIds);
 
+      // Filtros
       if (filters?.year && filters.year !== "") {
         const year = parseInt(filters.year);
         query = query
@@ -179,6 +190,9 @@ const DesviosTable = ({ filters, searchTerm }: DesviosTableProps) => {
 
       const { data, error } = await query.order("data_desvio", { ascending: false });
 
+      // >>> Se outra chamada mais nova foi iniciada, ignore esta resposta
+      if (myId !== fetchSeq.current) return;
+
       if (error) {
         console.error("Erro ao buscar desvios:", error);
         setDesvios([]);
@@ -199,10 +213,12 @@ const DesviosTable = ({ filters, searchTerm }: DesviosTableProps) => {
         setDesvios(convertedData);
       }
     } catch (error) {
+      // se já existe um fetch mais novo, ignora erros/updates desta chamada
+      if (myId !== fetchSeq.current) return;
       console.error("Erro ao buscar desvios:", error);
       setDesvios([]);
     } finally {
-      setIsLoading(false);
+      if (myId === fetchSeq.current) setIsLoading(false);
     }
   };
 
@@ -211,11 +227,13 @@ const DesviosTable = ({ filters, searchTerm }: DesviosTableProps) => {
       if (allowedCcaIds.length > 0) {
         fetchDesvios();
       } else {
+        // não há CCAs permitidos
         setDesvios([]);
         setIsLoading(false);
       }
     }
-  }, [allowedCcaIds.join(","), isLoadingCCAs, filters, searchTerm]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allowedCcaIds.join(","), isLoadingCCAs, JSON.stringify(filters), searchTerm]);
 
   const handleStatusUpdated = (id: string, newStatus: string) => {
     setDesvios(desvios.map(d => (d.id === id ? { ...d, status: newStatus } : d)));
@@ -236,7 +254,8 @@ const DesviosTable = ({ filters, searchTerm }: DesviosTableProps) => {
   const handleDesvioDeleted = async (id?: string, deleted?: boolean) => {
     if (deleted && id) {
       setDesvios(prev => prev.filter(d => d.id !== id));
-      setTimeout(async () => { await fetchDesvios(); }, 1000);
+      // recarrega confirmando no servidor
+      setTimeout(() => fetchDesvios(), 500);
     } else {
       await fetchDesvios();
     }
