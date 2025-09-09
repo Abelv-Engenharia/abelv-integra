@@ -119,9 +119,9 @@ const DesviosByBaseLegalChart = () => {
                   dataKey="value" 
                   fill="var(--color-value)" 
                   radius={[4, 4, 0, 0]}
-                  onClick={(data) => {
+                  onClick={async (data) => {
                     if (data && data.name) {
-                      navigateToConsulta({ baseLegal: data.name });
+                      await navigateToConsulta({ baseLegal: data.name });
                     }
                   }}
                   style={{ cursor: 'pointer' }}

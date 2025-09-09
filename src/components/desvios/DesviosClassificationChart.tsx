@@ -68,9 +68,9 @@ const DesviosClassificationChart = () => {
                 <Bar 
                   dataKey="value" 
                   radius={[4, 4, 0, 0]}
-                  onClick={(data) => {
+                  onClick={async (data) => {
                     if (data && data.name) {
-                      navigateToConsulta({ classificacao: data.name });
+                      await navigateToConsulta({ classificacao: data.name });
                     }
                   }}
                   style={{ cursor: 'pointer' }}

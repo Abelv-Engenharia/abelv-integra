@@ -88,9 +88,9 @@ const DesviosByEventChart = () => {
                     const pct = total > 0 ? Math.round((Number(value) * 100) / total) : 0;
                     return `${name} ${pct}%`;
                   }}
-                  onClick={(data) => {
+                  onClick={async (data) => {
                     if (data && data.name) {
-                      navigateToConsulta({ evento: data.name });
+                      await navigateToConsulta({ evento: data.name });
                     }
                   }}
                   style={{ cursor: 'pointer' }}

@@ -81,9 +81,9 @@ const DesviosByProcessoChart = () => {
                     const pct = total > 0 ? Math.round((Number(value) * 100) / total) : 0;
                     return `${name} ${pct}%`;
                   }}
-                  onClick={(data) => {
+                  onClick={async (data) => {
                     if (data && data.name) {
-                      navigateToConsulta({ processo: data.name });
+                      await navigateToConsulta({ processo: data.name });
                     }
                   }}
                   style={{ cursor: 'pointer' }}

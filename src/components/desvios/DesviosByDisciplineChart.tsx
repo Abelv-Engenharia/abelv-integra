@@ -109,9 +109,9 @@ const DesviosByDisciplineChart = () => {
                   dataKey="value" 
                   fill="var(--color-value)" 
                   radius={[4, 4, 0, 0]}
-                  onClick={(data) => {
+                  onClick={async (data) => {
                     if (data && data.name) {
-                      navigateToConsulta({ disciplina: data.name });
+                      await navigateToConsulta({ disciplina: data.name });
                     }
                   }}
                   style={{ cursor: 'pointer' }}

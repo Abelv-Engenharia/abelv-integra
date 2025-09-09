@@ -112,9 +112,9 @@ const DesviosByCompanyChart = () => {
                   dataKey="value" 
                   fill="var(--color-value)" 
                   radius={[4, 4, 0, 0]}
-                  onClick={(data) => {
+                  onClick={async (data) => {
                     if (data && data.name) {
-                      navigateToConsulta({ empresa: data.name });
+                      await navigateToConsulta({ empresa: data.name });
                     }
                   }}
                   style={{ cursor: 'pointer' }}

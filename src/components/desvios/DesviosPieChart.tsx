@@ -72,9 +72,9 @@ const DesviosPieChart = () => {
                   outerRadius={80}
                   dataKey="value"
                   label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                  onClick={(data) => {
+                  onClick={async (data) => {
                     if (data && data.name) {
-                      navigateToConsulta({ tipo: data.name });
+                      await navigateToConsulta({ tipo: data.name });
                     }
                   }}
                   style={{ cursor: 'pointer' }}

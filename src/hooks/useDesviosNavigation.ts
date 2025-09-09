@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useDesviosFilters } from "./useDesviosFilters";
+import { supabase } from "@/integrations/supabase/client";
 
 export interface NavigationFilters {
   disciplina?: string;
@@ -13,17 +14,48 @@ export interface NavigationFilters {
 
 export const useDesviosNavigation = () => {
   const navigate = useNavigate();
-  const { year, month, ccaId, disciplinaId, empresaId } = useDesviosFilters();
+  const context = useDesviosFilters();
 
-  const navigateToConsulta = (additionalFilters: NavigationFilters = {}) => {
+  const navigateToConsulta = async (additionalFilters: NavigationFilters = {}) => {
     const params = new URLSearchParams();
     
     // Adiciona filtros do dashboard atual
-    if (year && year !== "todos") params.set("year", year);
-    if (month && month !== "todos") params.set("month", month);
-    if (ccaId && ccaId !== "todos") params.set("cca", ccaId);
-    if (disciplinaId && disciplinaId !== "todos") params.set("disciplina", disciplinaId);
-    if (empresaId && empresaId !== "todos") params.set("empresa", empresaId);
+    if (context.year && context.year !== "todos") params.set("year", context.year);
+    if (context.month && context.month !== "todos") params.set("month", context.month);
+    
+    // Para CCA, precisamos converter o ID para código
+    if (context.ccaId && context.ccaId !== "todos") {
+      const selectedCca = context.userCCAs.find(cca => cca.id.toString() === context.ccaId);
+      if (selectedCca) {
+        params.set("cca", selectedCca.codigo);
+      }
+    }
+    
+    // Para disciplina, precisamos converter o ID para nome
+    if (context.disciplinaId && context.disciplinaId !== "todos") {
+      const { data: disciplinaData } = await supabase
+        .from('disciplinas')
+        .select('nome')
+        .eq('id', parseInt(context.disciplinaId))
+        .single();
+      
+      if (disciplinaData?.nome) {
+        params.set("disciplina", disciplinaData.nome);
+      }
+    }
+    
+    // Para empresa, precisamos converter o ID para nome
+    if (context.empresaId && context.empresaId !== "todos") {
+      const { data: empresaData } = await supabase
+        .from('empresas')
+        .select('nome')
+        .eq('id', parseInt(context.empresaId))
+        .single();
+      
+      if (empresaData?.nome) {
+        params.set("empresa", empresaData.nome);
+      }
+    }
     
     // Adiciona filtros específicos do clique no gráfico
     if (additionalFilters.disciplina) params.set("disciplina", additionalFilters.disciplina);
