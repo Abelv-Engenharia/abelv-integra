@@ -66,10 +66,21 @@ export const useDesviosNavigation = () => {
     if (additionalFilters.processo) params.set("processo", additionalFilters.processo);
     if (additionalFilters.baseLegal) params.set("baseLegal", additionalFilters.baseLegal);
     
+    // Adiciona estado para preservar filtros ao retornar
+    const dashboardState = {
+      filters: {
+        year: context.year,
+        month: context.month,
+        ccaId: context.ccaId,
+        disciplinaId: context.disciplinaId,
+        empresaId: context.empresaId
+      }
+    };
+    
     const queryString = params.toString();
     const path = queryString ? `/desvios/consulta?${queryString}` : "/desvios/consulta";
     
-    navigate(path);
+    navigate(path, { state: dashboardState });
   };
 
   return { navigateToConsulta };

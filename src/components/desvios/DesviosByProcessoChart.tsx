@@ -68,26 +68,28 @@ const DesviosByProcessoChart = () => {
           </div>
         ) : (
           <ChartContainer config={chartConfig} className="h-[300px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={data}
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={80}
-                  dataKey="value"
-                  // evita NaN% quando total é 0
-                  label={({ name, value }) => {
-                    const pct = total > 0 ? Math.round((Number(value) * 100) / total) : 0;
-                    return `${name} ${pct}%`;
-                  }}
-                  onClick={async (data) => {
-                    if (data && data.name) {
-                      await navigateToConsulta({ processo: data.name });
-                    }
-                  }}
-                  style={{ cursor: 'pointer' }}
-                >
+             <ResponsiveContainer width="100%" height="100%">
+               <PieChart
+                 onClick={async (data) => {
+                   if (data && data.activePayload?.[0]?.payload?.name) {
+                     await navigateToConsulta({ processo: data.activePayload[0].payload.name });
+                   }
+                 }}
+                 style={{ cursor: 'pointer' }}
+               >
+                 <Pie
+                   data={data}
+                   cx="50%"
+                   cy="50%"
+                   outerRadius={80}
+                   dataKey="value"
+                   // evita NaN% quando total é 0
+                   label={({ name, value }) => {
+                     const pct = total > 0 ? Math.round((Number(value) * 100) / total) : 0;
+                     return `${name} ${pct}%`;
+                   }}
+                   style={{ cursor: 'pointer' }}
+                 >
                   {data.map((entry, index) => (
                     <Cell
                       key={`cell-${index}`}

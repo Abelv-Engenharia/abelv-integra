@@ -63,22 +63,24 @@ const DesviosPieChart = () => {
           </div>
         ) : (
           <ChartContainer config={chartConfig} className="h-[300px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={data}
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={80}
-                  dataKey="value"
-                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                  onClick={async (data) => {
-                    if (data && data.name) {
-                      await navigateToConsulta({ tipo: data.name });
-                    }
-                  }}
-                  style={{ cursor: 'pointer' }}
-                >
+             <ResponsiveContainer width="100%" height="100%">
+               <PieChart
+                 onClick={async (data) => {
+                   if (data && data.activePayload?.[0]?.payload?.name) {
+                     await navigateToConsulta({ tipo: data.activePayload[0].payload.name });
+                   }
+                 }}
+                 style={{ cursor: 'pointer' }}
+               >
+                 <Pie
+                   data={data}
+                   cx="50%"
+                   cy="50%"
+                   outerRadius={80}
+                   dataKey="value"
+                   label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                   style={{ cursor: 'pointer' }}
+                 >
                   {data.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}

@@ -9,10 +9,12 @@ import DesviosDashboardStats from "@/components/desvios/DesviosDashboardStats";
 import DesviosChartRows from "@/components/desvios/DesviosChartRows";
 import { DesviosFiltersProvider } from "@/components/desvios/DesviosFiltersProvider";
 import { normalizeFilters } from "@/utils/dateFilters";
+import { useLocation } from "react-router-dom";
 
 const DesviosDashboard = () => {
   const { toast } = useToast();
   const { data: userCCAs = [] } = useUserCCAs();
+  const location = useLocation();
 
   const [year, setYear] = useState<string>("");
   const [month, setMonth] = useState<string>("");
@@ -20,6 +22,18 @@ const DesviosDashboard = () => {
   const [disciplinaId, setDisciplinaId] = useState<string>("");
   const [empresaId, setEmpresaId] = useState<string>("");
   const [filtersApplied, setFiltersApplied] = useState<boolean>(false);
+
+  // Restaurar filtros quando voltar da página de consulta
+  useEffect(() => {
+    const state = location.state as any;
+    if (state?.filters) {
+      setYear(state.filters.year || "");
+      setMonth(state.filters.month || "");
+      setCcaId(state.filters.ccaId || "");
+      setDisciplinaId(state.filters.disciplinaId || "");
+      setEmpresaId(state.filters.empresaId || "");
+    }
+  }, [location.state]);
 
   const [dashboardStats, setDashboardStats] = useState<DashboardStats>({
     totalDesvios: 0,

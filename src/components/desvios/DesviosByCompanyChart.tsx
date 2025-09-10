@@ -85,10 +85,16 @@ const DesviosByCompanyChart = () => {
         ) : (
           <ChartContainer config={chartConfig} className="h-[300px] w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart
+               <BarChart
                 data={data}
                 margin={{ top: 24, right: 16, left: 8, bottom: 64 }}
-              >
+                onClick={async (data) => {
+                  if (data && data.activePayload?.[0]?.payload?.name) {
+                    await navigateToConsulta({ empresa: data.activePayload[0].payload.name });
+                  }
+                }}
+                style={{ cursor: 'pointer' }}
+               >
                 <XAxis
                   dataKey="name"
                   tickFormatter={tickFormatter}
@@ -112,11 +118,6 @@ const DesviosByCompanyChart = () => {
                   dataKey="value" 
                   fill="var(--color-value)" 
                   radius={[4, 4, 0, 0]}
-                  onClick={async (data) => {
-                    if (data && data.name) {
-                      await navigateToConsulta({ empresa: data.name });
-                    }
-                  }}
                   style={{ cursor: 'pointer' }}
                 >
                   <LabelList dataKey="value" position="top" />

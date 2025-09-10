@@ -62,17 +62,21 @@ const DesviosClassificationChart = () => {
         ) : (
           <ChartContainer config={chartConfig} className="h-[300px] w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={data} margin={{ top: 40, right: 30, left: 20, bottom: 5 }}>
+               <BarChart 
+                data={data} 
+                margin={{ top: 40, right: 30, left: 20, bottom: 5 }}
+                onClick={async (data) => {
+                  if (data && data.activePayload?.[0]?.payload?.name) {
+                    await navigateToConsulta({ classificacao: data.activePayload[0].payload.name });
+                  }
+                }}
+                style={{ cursor: 'pointer' }}
+               >
                 <XAxis dataKey="name" />
                 <ChartTooltip content={<ChartTooltipContent />} />
                 <Bar 
                   dataKey="value" 
                   radius={[4, 4, 0, 0]}
-                  onClick={async (data) => {
-                    if (data && data.name) {
-                      await navigateToConsulta({ classificacao: data.name });
-                    }
-                  }}
                   style={{ cursor: 'pointer' }}
                 >
                   <LabelList dataKey="value" position="top" />
