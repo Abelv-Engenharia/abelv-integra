@@ -55,8 +55,7 @@ export const fetchDesviosByBaseLegal = async (filters?: FilterParams): Promise<C
         empresa_id,
         base_legal_opcoes ( codigo, nome )
       `)
-      .not("base_legal_opcao_id", "is", null)
-      .range(0, 99999); // Remove o limite padrão de 1000 registros
+      .not("base_legal_opcao_id", "is", null);
 
     if (filters) {
       // IDs numéricos

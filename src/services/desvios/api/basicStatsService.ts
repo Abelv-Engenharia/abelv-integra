@@ -10,8 +10,7 @@ export const fetchDashboardStats = async (filters?: FilterParams): Promise<Dashb
     // Buscar todos os desvios com os campos necessários para calcular o status
     let query = supabase
       .from('desvios_completos')
-      .select('id, situacao, status, prazo_conclusao, classificacao_risco')
-      .limit(50000); // Força um limite maior explicitamente
+      .select('id, situacao, status, prazo_conclusao, classificacao_risco');
 
     if (filters) {
       query = applyFiltersToQuery(query, filters);

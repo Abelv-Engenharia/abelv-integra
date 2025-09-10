@@ -15,8 +15,7 @@ export const fetchDesviosByType = async (filters?: FilterParams) => {
         empresa_id,
         tipos_registro:tipo_registro_id(nome)
       `)
-      .not('tipo_registro_id', 'is', null)
-      .limit(50000); // Força um limite maior explicitamente
+      .not('tipo_registro_id', 'is', null);
 
     // Apply standardized filters
     if (filters) {

@@ -54,8 +54,7 @@ export const fetchDesviosByRiskLevel = async (
     let query = supabase
       .from("desvios_completos")
       .select(`classificacao_risco, data_desvio, cca_id, disciplina_id, empresa_id`)
-      .not("classificacao_risco", "is", null)
-      .range(0, 99999); // Remove o limite padrão de 1000 registros
+      .not("classificacao_risco", "is", null);
 
     if (filters) {
       const ccaIdsNum = toNumArray(filters.ccaIds as any);
