@@ -119,8 +119,7 @@ export const fetchDesvios = async () => {
     const { data, error } = await supabase
       .from('desvios_completos')
       .select('*')
-      .order('created_at', { ascending: false })
-      .limit(50000); // Limite alto para garantir que pegue todos
+      .order('created_at', { ascending: false });
       
     if (error) {
       console.error('Erro ao buscar desvios:', error);
