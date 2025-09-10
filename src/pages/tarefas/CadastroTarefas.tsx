@@ -66,6 +66,7 @@ const CadastroTarefas = () => {
   });
 
   const watchRecorrencia = watch("configuracao.recorrencia.ativa");
+  const watchFrequencia = watch("configuracao.recorrencia.frequencia");
 
   // Função para transformar em letras maiúsculas e atualizar o valor do campo
   const handleUppercaseChange = (field: "titulo" | "descricao") => (
@@ -74,6 +75,50 @@ const CadastroTarefas = () => {
     const upperValue = event.target.value.toUpperCase();
     setValue(field, upperValue, { shouldValidate: true });
   };
+
+  // Função para calcular data de conclusão baseada na recorrência
+  const calculateDueDateFromRecurrence = (frequencia: string) => {
+    const now = new Date();
+    let dueDate = new Date(now);
+
+    switch (frequencia) {
+      case "diaria":
+        dueDate.setDate(now.getDate() + 1);
+        break;
+      case "semanal":
+        dueDate.setDate(now.getDate() + 7);
+        break;
+      case "mensal":
+        dueDate.setMonth(now.getMonth() + 1);
+        break;
+      case "trimestral":
+        dueDate.setMonth(now.getMonth() + 3);
+        break;
+      case "semestral":
+        dueDate.setMonth(now.getMonth() + 6);
+        break;
+      case "anual":
+        dueDate.setFullYear(now.getFullYear() + 1);
+        break;
+    }
+
+    // Formatar para datetime-local
+    const year = dueDate.getFullYear();
+    const month = String(dueDate.getMonth() + 1).padStart(2, '0');
+    const day = String(dueDate.getDate()).padStart(2, '0');
+    const hours = String(dueDate.getHours()).padStart(2, '0');
+    const minutes = String(dueDate.getMinutes()).padStart(2, '0');
+    
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  };
+
+  // Effect para atualizar data de conclusão quando recorrência mudou
+  useEffect(() => {
+    if (watchRecorrencia && watchFrequencia) {
+      const calculatedDate = calculateDueDateFromRecurrence(watchFrequencia);
+      setValue("data_conclusao", calculatedDate);
+    }
+  }, [watchRecorrencia, watchFrequencia, setValue]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -222,41 +267,76 @@ const CadastroTarefas = () => {
               )}
             </div>
 
-            {/* Responsável e Data de Conclusão */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Responsável */}
-              <div className="space-y-2">
-                <Label htmlFor="responsavel_id">Responsável *</Label>
-                <Select onValueChange={(value) => setValue("responsavel_id", value)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione o responsável" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {usuarios.map((usuario) => (
-                      <SelectItem key={usuario.id} value={usuario.id}>
-                        {usuario.nome}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {errors.responsavel_id && (
-                  <p className="text-sm text-red-500">{errors.responsavel_id.message}</p>
-                )}
+            {/* Responsável */}
+            <div className="space-y-2">
+              <Label htmlFor="responsavel_id">Responsável *</Label>
+              <Select onValueChange={(value) => setValue("responsavel_id", value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o responsável" />
+                </SelectTrigger>
+                <SelectContent>
+                  {usuarios.map((usuario) => (
+                    <SelectItem key={usuario.id} value={usuario.id}>
+                      {usuario.nome}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.responsavel_id && (
+                <p className="text-sm text-red-500">{errors.responsavel_id.message}</p>
+              )}
+            </div>
+
+            {/* Recorrência - Movida para antes da data */}
+            <div className="space-y-4">
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="recorrencia"
+                  onCheckedChange={(checked) => setValue("configuracao.recorrencia.ativa", !!checked)}
+                />
+                <Label htmlFor="recorrencia">Tarefa recorrente</Label>
               </div>
 
-              {/* Data de Conclusão */}
-              <div className="space-y-2">
-                <Label htmlFor="data_conclusao">Data de Conclusão *</Label>
-                <Input
-                  id="data_conclusao"
-                  type="datetime-local"
-                  className="max-w-xs md:w-56"
-                  {...register("data_conclusao")}
-                />
-                {errors.data_conclusao && (
-                  <p className="text-sm text-red-500">{errors.data_conclusao.message}</p>
+              {watchRecorrencia && (
+                <div className="ml-6 space-y-2">
+                  <Label htmlFor="frequencia">Frequência</Label>
+                  <Select onValueChange={(value) => setValue("configuracao.recorrencia.frequencia", value as any)}>
+                    <SelectTrigger className="w-[200px]">
+                      <SelectValue placeholder="Selecione a frequência" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="diaria">Diária</SelectItem>
+                      <SelectItem value="semanal">Semanal</SelectItem>
+                      <SelectItem value="mensal">Mensal</SelectItem>
+                      <SelectItem value="trimestral">Trimestral</SelectItem>
+                      <SelectItem value="semestral">Semestral</SelectItem>
+                      <SelectItem value="anual">Anual</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+            </div>
+
+            {/* Data de Conclusão */}
+            <div className="space-y-2">
+              <Label htmlFor="data_conclusao">
+                Data de Conclusão * 
+                {watchRecorrencia && (
+                  <span className="text-sm text-muted-foreground ml-2">
+                    (preenchida automaticamente pela recorrência)
+                  </span>
                 )}
-              </div>
+              </Label>
+              <Input
+                id="data_conclusao"
+                type="datetime-local"
+                className="max-w-xs md:w-56"
+                {...register("data_conclusao")}
+                disabled={watchRecorrencia}
+              />
+              {errors.data_conclusao && (
+                <p className="text-sm text-red-500">{errors.data_conclusao.message}</p>
+              )}
             </div>
 
             {/* Descrição */}
@@ -323,35 +403,6 @@ const CadastroTarefas = () => {
                 </div>
               </div>
 
-              {/* Recorrência */}
-              <div className="space-y-4">
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="recorrencia"
-                    onCheckedChange={(checked) => setValue("configuracao.recorrencia.ativa", !!checked)}
-                  />
-                  <Label htmlFor="recorrencia">Tarefa recorrente</Label>
-                </div>
-
-                {watchRecorrencia && (
-                  <div className="ml-6 space-y-2">
-                    <Label htmlFor="frequencia">Frequência</Label>
-                    <Select onValueChange={(value) => setValue("configuracao.recorrencia.frequencia", value as any)}>
-                      <SelectTrigger className="w-[200px]">
-                        <SelectValue placeholder="Selecione a frequência" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="diaria">Diária</SelectItem>
-                        <SelectItem value="semanal">Semanal</SelectItem>
-                        <SelectItem value="mensal">Mensal</SelectItem>
-                        <SelectItem value="trimestral">Trimestral</SelectItem>
-                        <SelectItem value="semestral">Semestral</SelectItem>
-                        <SelectItem value="anual">Anual</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
-              </div>
             </div>
 
             {/* Botões */}
