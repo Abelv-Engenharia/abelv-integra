@@ -1,53 +1,34 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
 import { useNavigate } from "react-router-dom";
 import SystemLogo from "@/components/common/SystemLogo";
-import { signIn } from "@/services/authService";
+import { signInWithAzure } from "@/services/authService";
 import { toast } from "@/hooks/use-toast";
 
 const Login = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleAzureLogin = async () => {
     setLoading(true);
     try {
-      const {
-        data,
-        error
-      } = await signIn(email, password);
+      const { data, error } = await signInWithAzure();
       if (error) {
         throw error;
       }
-      if (data?.user) {
-        toast({
-          title: "Login realizado com sucesso",
-          description: "Bem-vindo ao sistema"
-        });
-        window.location.href = "/dashboard";
-      }
+      // O redirecionamento será tratado automaticamente pelo Azure OAuth
     } catch (error: any) {
-      let errorMessage = "Erro ao fazer login";
+      let errorMessage = "Erro ao fazer login com Azure";
       if (error.message) {
-        if (error.message.includes("Invalid login credentials")) {
-          errorMessage = "Email ou senha incorretos";
-        } else {
-          errorMessage = error.message;
-        }
+        errorMessage = error.message;
       }
       toast({
         title: "Erro no login",
         description: errorMessage,
         variant: "destructive"
       });
-    } finally {
       setLoading(false);
     }
   };
@@ -67,31 +48,30 @@ const Login = () => {
           <CardHeader className="space-y-2">
             <CardTitle className="text-2xl text-center">Gestão de SMS </CardTitle>
             <CardDescription className="text-center">
-              Faça login para acessar o sistema
+              Entre com sua conta Azure
             </CardDescription>
           </CardHeader>
-          <form onSubmit={handleLogin}>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" placeholder="seu.email@empresa.com" value={email} onChange={e => setEmail(e.target.value)} required />
+          <CardContent className="space-y-6">
+            <div className="flex flex-col items-center space-y-4">
+              <div className="w-16 h-16 bg-blue-600 rounded-lg flex items-center justify-center">
+                <svg className="w-8 h-8 text-white" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M11.4 24H0V12.6h11.4V24zM24 24H12.6V12.6H24V24zM11.4 11.4H0V0h11.4v11.4zM24 11.4H12.6V0H24v11.4z"/>
+                </svg>
               </div>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="password">Senha</Label>
-                  <Button variant="link" className="p-0 text-sm" type="button" onClick={() => navigate("/auth/forgot-password")}>
-                    Esqueceu a senha?
-                  </Button>
-                </div>
-                <Input id="password" type="password" value={password} onChange={e => setPassword(e.target.value)} required />
-              </div>
-            </CardContent>
-            <CardFooter className="flex flex-col space-y-3">
-              <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? "Entrando..." : "Entrar"}
-              </Button>
-            </CardFooter>
-          </form>
+              <p className="text-sm text-muted-foreground text-center">
+                Use sua conta corporativa da Microsoft para acessar o sistema
+              </p>
+            </div>
+          </CardContent>
+          <CardFooter className="flex flex-col space-y-3">
+            <Button 
+              onClick={handleAzureLogin} 
+              className="w-full bg-blue-600 hover:bg-blue-700" 
+              disabled={loading}
+            >
+              {loading ? "Redirecionando..." : "Entrar com Microsoft Azure"}
+            </Button>
+          </CardFooter>
         </Card>
       </div>
     </div>

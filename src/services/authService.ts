@@ -69,6 +69,36 @@ export const signUp = async (email: string, password: string) => {
   }
 };
 
+export const signInWithAzure = async () => {
+  try {
+    // Clean up existing auth state before signing in
+    cleanupAuthState();
+    
+    // Try to sign out any existing session
+    try {
+      await supabase.auth.signOut({ scope: 'global' });
+    } catch (err) {
+      // Continue even if this fails
+      console.error("Error during sign out before Azure login:", err);
+    }
+    
+    // Sign in with Azure
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'azure',
+      options: {
+        scopes: 'email profile',
+        redirectTo: `${window.location.origin}/dashboard`
+      }
+    });
+    
+    if (error) throw error;
+    return { data, error: null };
+  } catch (error) {
+    console.error("Azure login error:", error);
+    return { data: null, error };
+  }
+};
+
 export const signOut = async () => {
   try {
     // Clean up auth state
