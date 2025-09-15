@@ -44,6 +44,63 @@ export type Database = {
         }
         Relationships: []
       }
+      alertas_esocial: {
+        Row: {
+          cca_id: number | null
+          created_at: string | null
+          data_referencia: string
+          descricao: string
+          empresa_id: number | null
+          evento: string
+          evento_id: string | null
+          funcionario_id: string | null
+          funcionario_nome: string | null
+          id: string
+          notificado_em: string | null
+          prazo_envio: string | null
+          resolvido_em: string | null
+          status: string | null
+          tipo_alerta: string
+          updated_at: string | null
+        }
+        Insert: {
+          cca_id?: number | null
+          created_at?: string | null
+          data_referencia: string
+          descricao: string
+          empresa_id?: number | null
+          evento: string
+          evento_id?: string | null
+          funcionario_id?: string | null
+          funcionario_nome?: string | null
+          id?: string
+          notificado_em?: string | null
+          prazo_envio?: string | null
+          resolvido_em?: string | null
+          status?: string | null
+          tipo_alerta: string
+          updated_at?: string | null
+        }
+        Update: {
+          cca_id?: number | null
+          created_at?: string | null
+          data_referencia?: string
+          descricao?: string
+          empresa_id?: number | null
+          evento?: string
+          evento_id?: string | null
+          funcionario_id?: string | null
+          funcionario_nome?: string | null
+          id?: string
+          notificado_em?: string | null
+          prazo_envio?: string | null
+          resolvido_em?: string | null
+          status?: string | null
+          tipo_alerta?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       audit_logs: {
         Row: {
           action: string
@@ -74,6 +131,42 @@ export type Database = {
           table_name?: string | null
           timestamp?: string
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      auditoria_exports: {
+        Row: {
+          arquivo_url: string | null
+          created_at: string
+          evento: string
+          filtros_json: Json
+          formato: string
+          id: string
+          quantidade: number
+          tabela: string
+          usuario_id: string
+        }
+        Insert: {
+          arquivo_url?: string | null
+          created_at?: string
+          evento: string
+          filtros_json?: Json
+          formato: string
+          id?: string
+          quantidade?: number
+          tabela: string
+          usuario_id: string
+        }
+        Update: {
+          arquivo_url?: string | null
+          created_at?: string
+          evento?: string
+          filtros_json?: Json
+          formato?: string
+          id?: string
+          quantidade?: number
+          tabela?: string
+          usuario_id?: string
         }
         Relationships: []
       }
@@ -194,6 +287,39 @@ export type Database = {
         }
         Relationships: []
       }
+      cid10_aux: {
+        Row: {
+          ativo: boolean | null
+          categoria: string | null
+          codigo: string
+          created_at: string | null
+          descricao: string
+          id: string
+          updated_at: string | null
+          versao: string | null
+        }
+        Insert: {
+          ativo?: boolean | null
+          categoria?: string | null
+          codigo: string
+          created_at?: string | null
+          descricao: string
+          id?: string
+          updated_at?: string | null
+          versao?: string | null
+        }
+        Update: {
+          ativo?: boolean | null
+          categoria?: string | null
+          codigo?: string
+          created_at?: string | null
+          descricao?: string
+          id?: string
+          updated_at?: string | null
+          versao?: string | null
+        }
+        Relationships: []
+      }
       classificacoes_ocorrencia: {
         Row: {
           ativo: boolean | null
@@ -221,6 +347,54 @@ export type Database = {
           id?: number
           nome?: string
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      configuracao_notificacoes: {
+        Row: {
+          app_cat_pendente: boolean | null
+          app_s2220_prazo: boolean | null
+          app_s2240_exposicao: boolean | null
+          ativo: boolean | null
+          created_at: string | null
+          email_cat_pendente: boolean | null
+          email_s2220_prazo: boolean | null
+          email_s2240_exposicao: boolean | null
+          emails_adicionais: string[] | null
+          horario_notificacao: string | null
+          id: string
+          updated_at: string | null
+          usuario_id: string | null
+        }
+        Insert: {
+          app_cat_pendente?: boolean | null
+          app_s2220_prazo?: boolean | null
+          app_s2240_exposicao?: boolean | null
+          ativo?: boolean | null
+          created_at?: string | null
+          email_cat_pendente?: boolean | null
+          email_s2220_prazo?: boolean | null
+          email_s2240_exposicao?: boolean | null
+          emails_adicionais?: string[] | null
+          horario_notificacao?: string | null
+          id?: string
+          updated_at?: string | null
+          usuario_id?: string | null
+        }
+        Update: {
+          app_cat_pendente?: boolean | null
+          app_s2220_prazo?: boolean | null
+          app_s2240_exposicao?: boolean | null
+          ativo?: boolean | null
+          created_at?: string | null
+          email_cat_pendente?: boolean | null
+          email_s2220_prazo?: boolean | null
+          email_s2240_exposicao?: boolean | null
+          emails_adicionais?: string[] | null
+          horario_notificacao?: string | null
+          id?: string
+          updated_at?: string | null
+          usuario_id?: string | null
         }
         Relationships: []
       }
@@ -846,6 +1020,758 @@ export type Database = {
           },
         ]
       }
+      epis_catalogo: {
+        Row: {
+          ativo: boolean | null
+          ca_numero: string
+          created_at: string | null
+          descricao: string
+          fabricante: string | null
+          id: string
+          norma_referencia: string | null
+          situacao: string | null
+          tipo: string
+          updated_at: string | null
+          validade_ca: string | null
+          versao: string | null
+        }
+        Insert: {
+          ativo?: boolean | null
+          ca_numero: string
+          created_at?: string | null
+          descricao: string
+          fabricante?: string | null
+          id?: string
+          norma_referencia?: string | null
+          situacao?: string | null
+          tipo: string
+          updated_at?: string | null
+          validade_ca?: string | null
+          versao?: string | null
+        }
+        Update: {
+          ativo?: boolean | null
+          ca_numero?: string
+          created_at?: string | null
+          descricao?: string
+          fabricante?: string | null
+          id?: string
+          norma_referencia?: string | null
+          situacao?: string | null
+          tipo?: string
+          updated_at?: string | null
+          validade_ca?: string | null
+          versao?: string | null
+        }
+        Relationships: []
+      }
+      esocial_config: {
+        Row: {
+          ambiente: string
+          ativo: boolean
+          certificado_cnpj: string | null
+          certificado_configurado: boolean | null
+          certificado_nome: string | null
+          certificado_url: string | null
+          certificado_validade_fim: string | null
+          certificado_validade_inicio: string | null
+          created_at: string
+          empresa_id: number
+          id: string
+          inscricao_numero: string
+          inscricao_tipo: number
+          transmissor_numero: string
+          transmissor_tipo: number
+          updated_at: string
+          versao_processo: string
+        }
+        Insert: {
+          ambiente?: string
+          ativo?: boolean
+          certificado_cnpj?: string | null
+          certificado_configurado?: boolean | null
+          certificado_nome?: string | null
+          certificado_url?: string | null
+          certificado_validade_fim?: string | null
+          certificado_validade_inicio?: string | null
+          created_at?: string
+          empresa_id: number
+          id?: string
+          inscricao_numero: string
+          inscricao_tipo?: number
+          transmissor_numero: string
+          transmissor_tipo?: number
+          updated_at?: string
+          versao_processo?: string
+        }
+        Update: {
+          ambiente?: string
+          ativo?: boolean
+          certificado_cnpj?: string | null
+          certificado_configurado?: boolean | null
+          certificado_nome?: string | null
+          certificado_url?: string | null
+          certificado_validade_fim?: string | null
+          certificado_validade_inicio?: string | null
+          created_at?: string
+          empresa_id?: number
+          id?: string
+          inscricao_numero?: string
+          inscricao_tipo?: number
+          transmissor_numero?: string
+          transmissor_tipo?: number
+          updated_at?: string
+          versao_processo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "esocial_config_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      esocial_envios: {
+        Row: {
+          ambiente: string
+          codigo_retorno: string | null
+          created_at: string
+          evento: string
+          evento_id: string
+          id: string
+          mensagem_retorno: string | null
+          protocolo_envio: string | null
+          proxima_tentativa: string | null
+          recibo: string | null
+          status: string
+          tentativas: number
+          updated_at: string
+          usuario_id: string
+          xml_assinado: string | null
+          xml_gerado: string
+          xml_retorno: string | null
+        }
+        Insert: {
+          ambiente?: string
+          codigo_retorno?: string | null
+          created_at?: string
+          evento: string
+          evento_id: string
+          id?: string
+          mensagem_retorno?: string | null
+          protocolo_envio?: string | null
+          proxima_tentativa?: string | null
+          recibo?: string | null
+          status?: string
+          tentativas?: number
+          updated_at?: string
+          usuario_id: string
+          xml_assinado?: string | null
+          xml_gerado: string
+          xml_retorno?: string | null
+        }
+        Update: {
+          ambiente?: string
+          codigo_retorno?: string | null
+          created_at?: string
+          evento?: string
+          evento_id?: string
+          id?: string
+          mensagem_retorno?: string | null
+          protocolo_envio?: string | null
+          proxima_tentativa?: string | null
+          recibo?: string | null
+          status?: string
+          tentativas?: number
+          updated_at?: string
+          usuario_id?: string
+          xml_assinado?: string | null
+          xml_gerado?: string
+          xml_retorno?: string | null
+        }
+        Relationships: []
+      }
+      esocial_s2210_cat: {
+        Row: {
+          agente_causador: number
+          cca_id: number | null
+          cid_principal: string
+          cnpj_local_acidente: string | null
+          cod_cnes: string | null
+          cpf: string
+          created_at: string | null
+          created_by: string | null
+          crm_medico: string | null
+          data_acidente: string
+          data_atendimento: string | null
+          data_envio: string | null
+          data_obito: string | null
+          dsc_complementar: string | null
+          dsc_lesao: string
+          dsc_local: string | null
+          duracao_tratamento: number | null
+          empresa_id: number | null
+          especificacao_local: string | null
+          funcionario_id: string | null
+          hora_acidente: string
+          hora_atendimento: string | null
+          houve_atestado: boolean | null
+          houve_morte: boolean | null
+          id: string
+          indica_afastamento: boolean | null
+          indica_internacao: boolean | null
+          iniciativa_cat: string | null
+          local_acidente: string
+          matricula: string
+          natureza_lesao: number
+          nome_medico: string | null
+          nome_trabalhador: string
+          observacoes: string | null
+          parte_corpo_atingida: number
+          protocolo_envio: string | null
+          recibo_envio: string | null
+          situacao_geradora: string
+          status_envio: string | null
+          tipo_acidente: string
+          tipo_local: string
+          uf_crm: string | null
+          updated_at: string | null
+          updated_by: string | null
+          xml_enviado: string | null
+          xml_retorno: string | null
+        }
+        Insert: {
+          agente_causador: number
+          cca_id?: number | null
+          cid_principal: string
+          cnpj_local_acidente?: string | null
+          cod_cnes?: string | null
+          cpf: string
+          created_at?: string | null
+          created_by?: string | null
+          crm_medico?: string | null
+          data_acidente: string
+          data_atendimento?: string | null
+          data_envio?: string | null
+          data_obito?: string | null
+          dsc_complementar?: string | null
+          dsc_lesao: string
+          dsc_local?: string | null
+          duracao_tratamento?: number | null
+          empresa_id?: number | null
+          especificacao_local?: string | null
+          funcionario_id?: string | null
+          hora_acidente: string
+          hora_atendimento?: string | null
+          houve_atestado?: boolean | null
+          houve_morte?: boolean | null
+          id?: string
+          indica_afastamento?: boolean | null
+          indica_internacao?: boolean | null
+          iniciativa_cat?: string | null
+          local_acidente: string
+          matricula: string
+          natureza_lesao: number
+          nome_medico?: string | null
+          nome_trabalhador: string
+          observacoes?: string | null
+          parte_corpo_atingida: number
+          protocolo_envio?: string | null
+          recibo_envio?: string | null
+          situacao_geradora: string
+          status_envio?: string | null
+          tipo_acidente: string
+          tipo_local: string
+          uf_crm?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+          xml_enviado?: string | null
+          xml_retorno?: string | null
+        }
+        Update: {
+          agente_causador?: number
+          cca_id?: number | null
+          cid_principal?: string
+          cnpj_local_acidente?: string | null
+          cod_cnes?: string | null
+          cpf?: string
+          created_at?: string | null
+          created_by?: string | null
+          crm_medico?: string | null
+          data_acidente?: string
+          data_atendimento?: string | null
+          data_envio?: string | null
+          data_obito?: string | null
+          dsc_complementar?: string | null
+          dsc_lesao?: string
+          dsc_local?: string | null
+          duracao_tratamento?: number | null
+          empresa_id?: number | null
+          especificacao_local?: string | null
+          funcionario_id?: string | null
+          hora_acidente?: string
+          hora_atendimento?: string | null
+          houve_atestado?: boolean | null
+          houve_morte?: boolean | null
+          id?: string
+          indica_afastamento?: boolean | null
+          indica_internacao?: boolean | null
+          iniciativa_cat?: string | null
+          local_acidente?: string
+          matricula?: string
+          natureza_lesao?: number
+          nome_medico?: string | null
+          nome_trabalhador?: string
+          observacoes?: string | null
+          parte_corpo_atingida?: number
+          protocolo_envio?: string | null
+          recibo_envio?: string | null
+          situacao_geradora?: string
+          status_envio?: string | null
+          tipo_acidente?: string
+          tipo_local?: string
+          uf_crm?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+          xml_enviado?: string | null
+          xml_retorno?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "esocial_s2210_cat_cca_id_fkey"
+            columns: ["cca_id"]
+            isOneToOne: false
+            referencedRelation: "ccas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "esocial_s2210_cat_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "esocial_s2210_cat_funcionario_id_fkey"
+            columns: ["funcionario_id"]
+            isOneToOne: false
+            referencedRelation: "funcionarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      esocial_s2220_exames: {
+        Row: {
+          cca_id: number | null
+          cpf: string
+          cpf_medico: string | null
+          created_at: string | null
+          created_by: string | null
+          crm_medico: string
+          data_envio: string | null
+          data_exame: string
+          data_fim_restricao: string | null
+          data_inicio_restricao: string | null
+          data_retorno_trabalho: string | null
+          descricao_restricao: string | null
+          empresa_id: number | null
+          exames_complementares: Json | null
+          funcionario_id: string | null
+          id: string
+          indica_retorno_trabalho: boolean | null
+          matricula: string
+          nome_medico: string
+          nome_trabalhador: string
+          observacoes: string | null
+          prazo_envio: string | null
+          protocolo_envio: string | null
+          recibo_envio: string | null
+          resultado_aso: string
+          status_envio: string | null
+          tipo_exame: string
+          uf_crm: string
+          updated_at: string | null
+          updated_by: string | null
+          xml_enviado: string | null
+          xml_retorno: string | null
+        }
+        Insert: {
+          cca_id?: number | null
+          cpf: string
+          cpf_medico?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          crm_medico: string
+          data_envio?: string | null
+          data_exame: string
+          data_fim_restricao?: string | null
+          data_inicio_restricao?: string | null
+          data_retorno_trabalho?: string | null
+          descricao_restricao?: string | null
+          empresa_id?: number | null
+          exames_complementares?: Json | null
+          funcionario_id?: string | null
+          id?: string
+          indica_retorno_trabalho?: boolean | null
+          matricula: string
+          nome_medico: string
+          nome_trabalhador: string
+          observacoes?: string | null
+          prazo_envio?: string | null
+          protocolo_envio?: string | null
+          recibo_envio?: string | null
+          resultado_aso: string
+          status_envio?: string | null
+          tipo_exame: string
+          uf_crm: string
+          updated_at?: string | null
+          updated_by?: string | null
+          xml_enviado?: string | null
+          xml_retorno?: string | null
+        }
+        Update: {
+          cca_id?: number | null
+          cpf?: string
+          cpf_medico?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          crm_medico?: string
+          data_envio?: string | null
+          data_exame?: string
+          data_fim_restricao?: string | null
+          data_inicio_restricao?: string | null
+          data_retorno_trabalho?: string | null
+          descricao_restricao?: string | null
+          empresa_id?: number | null
+          exames_complementares?: Json | null
+          funcionario_id?: string | null
+          id?: string
+          indica_retorno_trabalho?: boolean | null
+          matricula?: string
+          nome_medico?: string
+          nome_trabalhador?: string
+          observacoes?: string | null
+          prazo_envio?: string | null
+          protocolo_envio?: string | null
+          recibo_envio?: string | null
+          resultado_aso?: string
+          status_envio?: string | null
+          tipo_exame?: string
+          uf_crm?: string
+          updated_at?: string | null
+          updated_by?: string | null
+          xml_enviado?: string | null
+          xml_retorno?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "esocial_s2220_exames_cca_id_fkey"
+            columns: ["cca_id"]
+            isOneToOne: false
+            referencedRelation: "ccas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "esocial_s2220_exames_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "esocial_s2220_exames_funcionario_id_fkey"
+            columns: ["funcionario_id"]
+            isOneToOne: false
+            referencedRelation: "funcionarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      esocial_s2230_afastamentos: {
+        Row: {
+          anexos: Json | null
+          cca_id: number | null
+          codigo_cid: string | null
+          cpf: string
+          created_at: string | null
+          created_by: string | null
+          crm_medico: string | null
+          data_envio: string | null
+          data_fim_afastamento: string | null
+          data_inicio_afastamento: string
+          descricao_motivo: string | null
+          empresa_id: number | null
+          especie_beneficio: string | null
+          funcionario_id: string | null
+          id: string
+          matricula: string
+          motivo_afastamento: number
+          nome_medico: string | null
+          nome_trabalhador: string
+          numero_beneficio: string | null
+          observacoes: string | null
+          origem_s2210_id: string | null
+          protocolo_envio: string | null
+          recibo_envio: string | null
+          status_envio: string | null
+          uf_crm: string | null
+          updated_at: string | null
+          updated_by: string | null
+          xml_enviado: string | null
+          xml_retorno: string | null
+        }
+        Insert: {
+          anexos?: Json | null
+          cca_id?: number | null
+          codigo_cid?: string | null
+          cpf: string
+          created_at?: string | null
+          created_by?: string | null
+          crm_medico?: string | null
+          data_envio?: string | null
+          data_fim_afastamento?: string | null
+          data_inicio_afastamento: string
+          descricao_motivo?: string | null
+          empresa_id?: number | null
+          especie_beneficio?: string | null
+          funcionario_id?: string | null
+          id?: string
+          matricula: string
+          motivo_afastamento: number
+          nome_medico?: string | null
+          nome_trabalhador: string
+          numero_beneficio?: string | null
+          observacoes?: string | null
+          origem_s2210_id?: string | null
+          protocolo_envio?: string | null
+          recibo_envio?: string | null
+          status_envio?: string | null
+          uf_crm?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+          xml_enviado?: string | null
+          xml_retorno?: string | null
+        }
+        Update: {
+          anexos?: Json | null
+          cca_id?: number | null
+          codigo_cid?: string | null
+          cpf?: string
+          created_at?: string | null
+          created_by?: string | null
+          crm_medico?: string | null
+          data_envio?: string | null
+          data_fim_afastamento?: string | null
+          data_inicio_afastamento?: string
+          descricao_motivo?: string | null
+          empresa_id?: number | null
+          especie_beneficio?: string | null
+          funcionario_id?: string | null
+          id?: string
+          matricula?: string
+          motivo_afastamento?: number
+          nome_medico?: string | null
+          nome_trabalhador?: string
+          numero_beneficio?: string | null
+          observacoes?: string | null
+          origem_s2210_id?: string | null
+          protocolo_envio?: string | null
+          recibo_envio?: string | null
+          status_envio?: string | null
+          uf_crm?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+          xml_enviado?: string | null
+          xml_retorno?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "esocial_s2230_afastamentos_cca_id_fkey"
+            columns: ["cca_id"]
+            isOneToOne: false
+            referencedRelation: "ccas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "esocial_s2230_afastamentos_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "esocial_s2230_afastamentos_funcionario_id_fkey"
+            columns: ["funcionario_id"]
+            isOneToOne: false
+            referencedRelation: "funcionarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "esocial_s2230_afastamentos_origem_s2210_id_fkey"
+            columns: ["origem_s2210_id"]
+            isOneToOne: false
+            referencedRelation: "esocial_s2210_cat"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      esocial_s2240_exposicoes: {
+        Row: {
+          agente_nocivo_tabela24: number
+          ativo: boolean | null
+          cca_id: number | null
+          cpf: string
+          created_at: string | null
+          created_by: string | null
+          data_envio: string | null
+          data_fim_exposicao: string | null
+          data_inicio_exposicao: string
+          descricao_agente: string | null
+          descricao_epc: string | null
+          empresa_id: number | null
+          epc_eficaz: boolean | null
+          epi_json: Json | null
+          funcionario_id: string | null
+          id: string
+          intensidade_concentracao: number | null
+          matricula: string
+          nome_trabalhador: string
+          observacao_aposentadoria: string | null
+          observacoes: string | null
+          possivel_aposentadoria_especial: boolean | null
+          protocolo_envio: string | null
+          recibo_envio: string | null
+          responsavel_tecnico_conselho: string | null
+          responsavel_tecnico_cpf: string | null
+          responsavel_tecnico_nit: string | null
+          responsavel_tecnico_nome: string
+          responsavel_tecnico_numero_registro: string | null
+          responsavel_tecnico_uf_conselho: string | null
+          status_envio: string | null
+          tecnica_utilizada: string | null
+          unidade_medida: string | null
+          updated_at: string | null
+          updated_by: string | null
+          versao: number | null
+          versao_anterior_id: string | null
+          xml_enviado: string | null
+          xml_retorno: string | null
+        }
+        Insert: {
+          agente_nocivo_tabela24: number
+          ativo?: boolean | null
+          cca_id?: number | null
+          cpf: string
+          created_at?: string | null
+          created_by?: string | null
+          data_envio?: string | null
+          data_fim_exposicao?: string | null
+          data_inicio_exposicao: string
+          descricao_agente?: string | null
+          descricao_epc?: string | null
+          empresa_id?: number | null
+          epc_eficaz?: boolean | null
+          epi_json?: Json | null
+          funcionario_id?: string | null
+          id?: string
+          intensidade_concentracao?: number | null
+          matricula: string
+          nome_trabalhador: string
+          observacao_aposentadoria?: string | null
+          observacoes?: string | null
+          possivel_aposentadoria_especial?: boolean | null
+          protocolo_envio?: string | null
+          recibo_envio?: string | null
+          responsavel_tecnico_conselho?: string | null
+          responsavel_tecnico_cpf?: string | null
+          responsavel_tecnico_nit?: string | null
+          responsavel_tecnico_nome: string
+          responsavel_tecnico_numero_registro?: string | null
+          responsavel_tecnico_uf_conselho?: string | null
+          status_envio?: string | null
+          tecnica_utilizada?: string | null
+          unidade_medida?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+          versao?: number | null
+          versao_anterior_id?: string | null
+          xml_enviado?: string | null
+          xml_retorno?: string | null
+        }
+        Update: {
+          agente_nocivo_tabela24?: number
+          ativo?: boolean | null
+          cca_id?: number | null
+          cpf?: string
+          created_at?: string | null
+          created_by?: string | null
+          data_envio?: string | null
+          data_fim_exposicao?: string | null
+          data_inicio_exposicao?: string
+          descricao_agente?: string | null
+          descricao_epc?: string | null
+          empresa_id?: number | null
+          epc_eficaz?: boolean | null
+          epi_json?: Json | null
+          funcionario_id?: string | null
+          id?: string
+          intensidade_concentracao?: number | null
+          matricula?: string
+          nome_trabalhador?: string
+          observacao_aposentadoria?: string | null
+          observacoes?: string | null
+          possivel_aposentadoria_especial?: boolean | null
+          protocolo_envio?: string | null
+          recibo_envio?: string | null
+          responsavel_tecnico_conselho?: string | null
+          responsavel_tecnico_cpf?: string | null
+          responsavel_tecnico_nit?: string | null
+          responsavel_tecnico_nome?: string
+          responsavel_tecnico_numero_registro?: string | null
+          responsavel_tecnico_uf_conselho?: string | null
+          status_envio?: string | null
+          tecnica_utilizada?: string | null
+          unidade_medida?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+          versao?: number | null
+          versao_anterior_id?: string | null
+          xml_enviado?: string | null
+          xml_retorno?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "esocial_s2240_exposicoes_cca_id_fkey"
+            columns: ["cca_id"]
+            isOneToOne: false
+            referencedRelation: "ccas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "esocial_s2240_exposicoes_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "esocial_s2240_exposicoes_funcionario_id_fkey"
+            columns: ["funcionario_id"]
+            isOneToOne: false
+            referencedRelation: "funcionarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "esocial_s2240_exposicoes_versao_anterior_id_fkey"
+            columns: ["versao_anterior_id"]
+            isOneToOne: false
+            referencedRelation: "esocial_s2240_exposicoes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       eventos_identificados: {
         Row: {
           ativo: boolean | null
@@ -1150,6 +2076,7 @@ export type Database = {
           data_admissao: string | null
           foto: string | null
           funcao: string
+          funcao_id: string | null
           id: string
           matricula: string
           nome: string
@@ -1163,6 +2090,7 @@ export type Database = {
           data_admissao?: string | null
           foto?: string | null
           funcao: string
+          funcao_id?: string | null
           id?: string
           matricula: string
           nome: string
@@ -1176,6 +2104,7 @@ export type Database = {
           data_admissao?: string | null
           foto?: string | null
           funcao?: string
+          funcao_id?: string | null
           id?: string
           matricula?: string
           nome?: string
@@ -1187,6 +2116,429 @@ export type Database = {
             columns: ["cca_id"]
             isOneToOne: false
             referencedRelation: "ccas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "funcionarios_funcao_id_fkey"
+            columns: ["funcao_id"]
+            isOneToOne: false
+            referencedRelation: "funcoes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      funcoes: {
+        Row: {
+          ativo: boolean | null
+          cbo_codigo: string | null
+          codigo: string
+          created_at: string
+          descricao: string | null
+          id: string
+          nome: string
+          updated_at: string
+        }
+        Insert: {
+          ativo?: boolean | null
+          cbo_codigo?: string | null
+          codigo: string
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          nome: string
+          updated_at?: string
+        }
+        Update: {
+          ativo?: boolean | null
+          cbo_codigo?: string | null
+          codigo?: string
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          nome?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      gse_groups: {
+        Row: {
+          cca_id: number | null
+          codigo: string
+          created_at: string | null
+          data_fim_vigencia: string | null
+          data_inicio_vigencia: string
+          descricao: string | null
+          empresa_id: number
+          id: string
+          nome: string
+          responsavel_tecnico_json: Json | null
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          cca_id?: number | null
+          codigo: string
+          created_at?: string | null
+          data_fim_vigencia?: string | null
+          data_inicio_vigencia: string
+          descricao?: string | null
+          empresa_id: number
+          id?: string
+          nome: string
+          responsavel_tecnico_json?: Json | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          cca_id?: number | null
+          codigo?: string
+          created_at?: string | null
+          data_fim_vigencia?: string | null
+          data_inicio_vigencia?: string
+          descricao?: string | null
+          empresa_id?: number
+          id?: string
+          nome?: string
+          responsavel_tecnico_json?: Json | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gse_groups_cca_id_fkey"
+            columns: ["cca_id"]
+            isOneToOne: false
+            referencedRelation: "ccas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gse_groups_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gse_groups_agentes: {
+        Row: {
+          agente_tabela24: number
+          atividade: string | null
+          classificacao_risco: string | null
+          created_at: string | null
+          fonte_geradora: string | null
+          gse_id: string
+          id: string
+          intensidade_dose: number | null
+          jornada_exposicao: number | null
+          limite_tolerancia: number | null
+          observacoes: string | null
+          tecnica_avaliacao: string | null
+          unidade: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          agente_tabela24: number
+          atividade?: string | null
+          classificacao_risco?: string | null
+          created_at?: string | null
+          fonte_geradora?: string | null
+          gse_id: string
+          id?: string
+          intensidade_dose?: number | null
+          jornada_exposicao?: number | null
+          limite_tolerancia?: number | null
+          observacoes?: string | null
+          tecnica_avaliacao?: string | null
+          unidade?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          agente_tabela24?: number
+          atividade?: string | null
+          classificacao_risco?: string | null
+          created_at?: string | null
+          fonte_geradora?: string | null
+          gse_id?: string
+          id?: string
+          intensidade_dose?: number | null
+          jornada_exposicao?: number | null
+          limite_tolerancia?: number | null
+          observacoes?: string | null
+          tecnica_avaliacao?: string | null
+          unidade?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gse_groups_agentes_agente_tabela24_fkey"
+            columns: ["agente_tabela24"]
+            isOneToOne: false
+            referencedRelation: "tabela24_agentes_nocivos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gse_groups_agentes_gse_id_fkey"
+            columns: ["gse_id"]
+            isOneToOne: false
+            referencedRelation: "gse_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gse_groups_epc: {
+        Row: {
+          created_at: string | null
+          descricao: string
+          eficacia: boolean | null
+          gse_id: string
+          id: string
+          observacoes: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          descricao: string
+          eficacia?: boolean | null
+          gse_id: string
+          id?: string
+          observacoes?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          descricao?: string
+          eficacia?: boolean | null
+          gse_id?: string
+          id?: string
+          observacoes?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gse_groups_epc_gse_id_fkey"
+            columns: ["gse_id"]
+            isOneToOne: false
+            referencedRelation: "gse_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gse_groups_epi: {
+        Row: {
+          ca_numero: string | null
+          ca_validade: string | null
+          created_at: string | null
+          descricao: string
+          eficacia: boolean | null
+          epi_id: string | null
+          gse_id: string
+          higienizacao: boolean | null
+          id: string
+          observacoes: string | null
+          treinamento: boolean | null
+          updated_at: string | null
+          uso_adequado: boolean | null
+        }
+        Insert: {
+          ca_numero?: string | null
+          ca_validade?: string | null
+          created_at?: string | null
+          descricao: string
+          eficacia?: boolean | null
+          epi_id?: string | null
+          gse_id: string
+          higienizacao?: boolean | null
+          id?: string
+          observacoes?: string | null
+          treinamento?: boolean | null
+          updated_at?: string | null
+          uso_adequado?: boolean | null
+        }
+        Update: {
+          ca_numero?: string | null
+          ca_validade?: string | null
+          created_at?: string | null
+          descricao?: string
+          eficacia?: boolean | null
+          epi_id?: string | null
+          gse_id?: string
+          higienizacao?: boolean | null
+          id?: string
+          observacoes?: string | null
+          treinamento?: boolean | null
+          updated_at?: string | null
+          uso_adequado?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gse_groups_epi_epi_id_fkey"
+            columns: ["epi_id"]
+            isOneToOne: false
+            referencedRelation: "epis_catalogo"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gse_groups_epi_gse_id_fkey"
+            columns: ["gse_id"]
+            isOneToOne: false
+            referencedRelation: "gse_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gse_groups_funcoes: {
+        Row: {
+          created_at: string | null
+          escopo: string | null
+          funcao_id: string
+          gse_id: string
+          id: string
+          updated_at: string | null
+          vigencia_fim: string | null
+          vigencia_inicio: string
+        }
+        Insert: {
+          created_at?: string | null
+          escopo?: string | null
+          funcao_id: string
+          gse_id: string
+          id?: string
+          updated_at?: string | null
+          vigencia_fim?: string | null
+          vigencia_inicio: string
+        }
+        Update: {
+          created_at?: string | null
+          escopo?: string | null
+          funcao_id?: string
+          gse_id?: string
+          id?: string
+          updated_at?: string | null
+          vigencia_fim?: string | null
+          vigencia_inicio?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gse_groups_funcoes_funcao_id_fkey"
+            columns: ["funcao_id"]
+            isOneToOne: false
+            referencedRelation: "funcoes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gse_groups_funcoes_gse_id_fkey"
+            columns: ["gse_id"]
+            isOneToOne: false
+            referencedRelation: "gse_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gse_materialized_map: {
+        Row: {
+          consolidado_json: Json | null
+          created_at: string | null
+          funcionario_id: string
+          generated_at: string | null
+          gse_id: string
+          id: string
+          snapshot_hash: string
+          updated_at: string | null
+          vigencia_fim: string | null
+          vigencia_inicio: string
+        }
+        Insert: {
+          consolidado_json?: Json | null
+          created_at?: string | null
+          funcionario_id: string
+          generated_at?: string | null
+          gse_id: string
+          id?: string
+          snapshot_hash: string
+          updated_at?: string | null
+          vigencia_fim?: string | null
+          vigencia_inicio: string
+        }
+        Update: {
+          consolidado_json?: Json | null
+          created_at?: string | null
+          funcionario_id?: string
+          generated_at?: string | null
+          gse_id?: string
+          id?: string
+          snapshot_hash?: string
+          updated_at?: string | null
+          vigencia_fim?: string | null
+          vigencia_inicio?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gse_materialized_map_funcionario_id_fkey"
+            columns: ["funcionario_id"]
+            isOneToOne: false
+            referencedRelation: "funcionarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gse_materialized_map_gse_id_fkey"
+            columns: ["gse_id"]
+            isOneToOne: false
+            referencedRelation: "gse_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gse_overrides_colab: {
+        Row: {
+          created_at: string | null
+          funcionario_id: string
+          gse_id: string | null
+          id: string
+          motivo: string
+          payload_json: Json
+          tipo_override: string
+          updated_at: string | null
+          vigencia_fim: string | null
+          vigencia_inicio: string
+        }
+        Insert: {
+          created_at?: string | null
+          funcionario_id: string
+          gse_id?: string | null
+          id?: string
+          motivo: string
+          payload_json: Json
+          tipo_override: string
+          updated_at?: string | null
+          vigencia_fim?: string | null
+          vigencia_inicio: string
+        }
+        Update: {
+          created_at?: string | null
+          funcionario_id?: string
+          gse_id?: string | null
+          id?: string
+          motivo?: string
+          payload_json?: Json
+          tipo_override?: string
+          updated_at?: string | null
+          vigencia_fim?: string | null
+          vigencia_inicio?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gse_overrides_colab_funcionario_id_fkey"
+            columns: ["funcionario_id"]
+            isOneToOne: false
+            referencedRelation: "funcionarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gse_overrides_colab_gse_id_fkey"
+            columns: ["gse_id"]
+            isOneToOne: false
+            referencedRelation: "gse_groups"
             referencedColumns: ["id"]
           },
         ]
@@ -2329,6 +3681,138 @@ export type Database = {
           },
         ]
       }
+      tabela13_parte_corpo: {
+        Row: {
+          ativo: boolean | null
+          codigo: string
+          created_at: string | null
+          descricao: string
+          id: number
+        }
+        Insert: {
+          ativo?: boolean | null
+          codigo: string
+          created_at?: string | null
+          descricao: string
+          id: number
+        }
+        Update: {
+          ativo?: boolean | null
+          codigo?: string
+          created_at?: string | null
+          descricao?: string
+          id?: number
+        }
+        Relationships: []
+      }
+      tabela17_natureza_lesao: {
+        Row: {
+          ativo: boolean | null
+          codigo: string
+          created_at: string | null
+          descricao: string
+          id: number
+        }
+        Insert: {
+          ativo?: boolean | null
+          codigo: string
+          created_at?: string | null
+          descricao: string
+          id: number
+        }
+        Update: {
+          ativo?: boolean | null
+          codigo?: string
+          created_at?: string | null
+          descricao?: string
+          id?: number
+        }
+        Relationships: []
+      }
+      tabela18_motivos_afastamento: {
+        Row: {
+          ativo: boolean | null
+          codigo: string
+          created_at: string | null
+          descricao: string
+          id: number
+          tipo: string | null
+        }
+        Insert: {
+          ativo?: boolean | null
+          codigo: string
+          created_at?: string | null
+          descricao: string
+          id: number
+          tipo?: string | null
+        }
+        Update: {
+          ativo?: boolean | null
+          codigo?: string
+          created_at?: string | null
+          descricao?: string
+          id?: number
+          tipo?: string | null
+        }
+        Relationships: []
+      }
+      tabela24_agentes_nocivos: {
+        Row: {
+          aposentadoria_especial: boolean | null
+          ativo: boolean | null
+          categoria: string | null
+          codigo: string
+          created_at: string | null
+          descricao: string
+          id: number
+          tempo_exposicao_anos: number | null
+        }
+        Insert: {
+          aposentadoria_especial?: boolean | null
+          ativo?: boolean | null
+          categoria?: string | null
+          codigo: string
+          created_at?: string | null
+          descricao: string
+          id: number
+          tempo_exposicao_anos?: number | null
+        }
+        Update: {
+          aposentadoria_especial?: boolean | null
+          ativo?: boolean | null
+          categoria?: string | null
+          codigo?: string
+          created_at?: string | null
+          descricao?: string
+          id?: number
+          tempo_exposicao_anos?: number | null
+        }
+        Relationships: []
+      }
+      tabela27_exames_complementares: {
+        Row: {
+          ativo: boolean | null
+          codigo: string
+          created_at: string | null
+          descricao: string
+          id: number
+        }
+        Insert: {
+          ativo?: boolean | null
+          codigo: string
+          created_at?: string | null
+          descricao: string
+          id: number
+        }
+        Update: {
+          ativo?: boolean | null
+          codigo?: string
+          created_at?: string | null
+          descricao?: string
+          id?: number
+        }
+        Relationships: []
+      }
       tarefa_observacoes: {
         Row: {
           created_at: string
@@ -2878,7 +4362,15 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      vw_heatmap_funcao_agente: {
+        Row: {
+          agente_nocivo: string | null
+          funcao: string | null
+          media_intensidade: number | null
+          quantidade_expostos: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       get_hht_by_cca: {
@@ -2916,6 +4408,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      materialize_gse_to_funcionarios: {
+        Args: { p_funcionario_id?: string; p_gse_id?: string }
+        Returns: Json
+      }
       populate_missing_profiles: {
         Args: Record<PropertyKey, never>
         Returns: undefined
@@ -2931,6 +4427,10 @@ export type Database = {
       user_is_supervisor_of: {
         Args: { _funcionario_id: string; _user_id: string }
         Returns: boolean
+      }
+      verificar_alertas_diarios: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
       }
     }
     Enums: {
