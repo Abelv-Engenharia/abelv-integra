@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Home, Settings, User, Hexagon, Cog } from "lucide-react";
+import { Home, Settings, User } from "lucide-react";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import {
   Sidebar,
@@ -7,8 +7,6 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarHeader,
-  SidebarFooter,
   useSidebar,
 } from "@/components/ui/sidebar";
 import { Link, useLocation } from "react-router-dom";
@@ -20,7 +18,6 @@ import SidebarSectionRelatorios from "./SidebarSectionRelatorios";
 import SidebarSectionAdministracao from "./SidebarSectionAdministracao";
 import SidebarSearch from "./SidebarSearch";
 import { useProfile } from "@/hooks/useProfile";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 // helper simples para ler a whitelist do perfil
 function podeVerMenu(menu: string, menusSidebar?: string[]) {
@@ -59,7 +56,8 @@ export function AppSidebar() {
       return "gestao-sms";
     if (currentPath.startsWith("/tarefas")) return "tarefas";
     if (currentPath.startsWith("/relatorios")) return "relatorios";
-    if (currentPath.startsWith("/admin") || currentPath.startsWith("/tutoriais")) return "configuracoes";
+    if (currentPath.startsWith("/admin") || currentPath.startsWith("/tutoriais")) return "admin";
+    if (currentPath.startsWith("/account")) return "account";
     return null;
   });
 
@@ -70,120 +68,33 @@ export function AppSidebar() {
   };
 
   return (
-    <Sidebar className="border-r border-gray-700">
-      <SidebarHeader className="bg-slate-800 border-b border-gray-700">
-        {/* Logo ABELV INTEGRA */}
-        <div className="bg-white rounded-lg p-3 mx-4 mt-4 mb-3">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8">
-              <Hexagon className="w-full h-full text-blue-500" fill="currentColor" />
-            </div>
-            <div>
-              <div className="text-black font-bold text-sm">ABELV</div>
-              <div className="text-black text-xs">INTEGRA</div>
-            </div>
-          </div>
-        </div>
-        
-        {/* Título da empresa */}
-        <div className="text-white font-semibold text-sm px-4 pb-3">
-          ABELV ENGENHARIA
-        </div>
-      </SidebarHeader>
-
-      <SidebarContent className="bg-slate-800">
-        {/* Seção Navegação */}
-        <div className="px-4 py-2">
-          <h3 className="text-gray-400 text-xs font-medium mb-3">Navegação</h3>
-          
-          {/* Dashboard */}
-          <SidebarMenu>
-            {canSee("dashboard") && (
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
-                  className={
-                    currentPath === "/dashboard" || currentPath === "/"
-                      ? "bg-slate-600 text-white font-medium"
-                      : "text-white hover:bg-slate-600"
-                  }
-                >
-                  <Link to="/dashboard" className="flex items-center gap-2" onClick={handleLinkClick}>
-                    <Home className="h-4 w-4 flex-shrink-0" />
-                    <span className="break-words">Dashboard</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            )}
-          </SidebarMenu>
-        </div>
-
-        {/* Seção Configurações */}
-        <div className="px-4">
-          <SidebarMenu>
+    <Sidebar>
+      <SidebarContent className="bg-sky-900">
+        {/* Dashboard simples */}
+        <SidebarMenu>
+          {canSee("dashboard") && (
             <SidebarMenuItem>
-              <Collapsible open={openMenu === "configuracoes"}>
-                <CollapsibleTrigger asChild>
-                  <SidebarMenuButton 
-                    onClick={() => toggleMenu("configuracoes")} 
-                    className="text-white hover:bg-slate-600 w-full justify-between"
-                  >
-                    <div className="flex items-center gap-2">
-                      <Cog className="h-4 w-4 flex-shrink-0" />
-                      <span className="break-words">Configurações</span>
-                    </div>
-                    {openMenu === "configuracoes" ? (
-                      <ChevronDown className="h-4 w-4" />
-                    ) : (
-                      <ChevronRight className="h-4 w-4" />
-                    )}
-                  </SidebarMenuButton>
-                </CollapsibleTrigger>
-                <CollapsibleContent className="pl-6">
-                  {/* API's Subseção */}
-                  <div className="py-2">
-                    <div className="flex items-center gap-2 text-gray-400 text-xs mb-2">
-                      <Settings className="h-3 w-3" />
-                      <span>API's</span>
-                    </div>
-                    <SidebarMenu className="space-y-1">
-                      <SidebarMenuItem>
-                        <SidebarMenuButton className="text-white hover:bg-slate-600 text-xs pl-2">
-                          Sienge - Planejamento
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                      <SidebarMenuItem>
-                        <SidebarMenuButton className="text-white hover:bg-slate-600 text-xs pl-2">
-                          Sienge - Credenciamento
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                      <SidebarMenuItem>
-                        <SidebarMenuButton className="text-white hover:bg-slate-600 text-xs pl-2">
-                          Nydus - Colaboradores
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                      <SidebarMenuItem>
-                        <SidebarMenuButton className="text-white hover:bg-slate-600 text-xs pl-2">
-                          Log de execução
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                      <SidebarMenuItem>
-                        <SidebarMenuButton className="text-white hover:bg-slate-600 text-xs pl-2">
-                          Agendamentos
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                    </SidebarMenu>
-                  </div>
-                </CollapsibleContent>
-              </Collapsible>
+              <SidebarMenuButton
+                asChild
+                className={
+                  currentPath === "/dashboard" || currentPath === "/"
+                    ? "bg-slate-600 text-white font-medium"
+                    : "text-white hover:bg-slate-600"
+                }
+              >
+                <Link to="/dashboard" className="flex items-center gap-2" onClick={handleLinkClick}>
+                  <Home className="h-4 w-4 flex-shrink-0" />
+                  <span className="break-words">Dashboard</span>
+                </Link>
+              </SidebarMenuButton>
             </SidebarMenuItem>
-          </SidebarMenu>
-        </div>
+          )}
+        </SidebarMenu>
 
         {/* Busca (já filtrando pela whitelist via prop) */}
         <SidebarSearch menusSidebar={menusSidebar} />
 
-        {/* Seção: Gestão SMS */}
+        {/* Seção: Gestão SMS (renderiza se houver pelo menos 1 slug permitido dessa área) */}
         {[
           "idsms_dashboard",
           "idsms_relatorios",
@@ -259,6 +170,7 @@ export function AppSidebar() {
           "admin_templates",
           "admin_logo",
           "admin_modelos_inspecao",
+          // extras que você mencionou no JSON (se usar)
           "admin_importacao_funcionarios",
           "admin_importacao_execucao_treinamentos",
           "admin_upload_tutoriais",
@@ -276,20 +188,59 @@ export function AppSidebar() {
             canSee={canSee}
           />
         )}
-      </SidebarContent>
 
-      <SidebarFooter className="bg-slate-800 border-t border-gray-700">
-        <div className="flex items-center gap-3 p-4">
-          <Avatar className="w-8 h-8">
-            <AvatarImage src="" />
-            <AvatarFallback className="bg-blue-500 text-white text-xs">E</AvatarFallback>
-          </Avatar>
-          <div className="flex-1 min-w-0">
-            <div className="text-white text-sm truncate">elvio.gameiro@abelv.co...</div>
-            <div className="text-gray-400 text-xs">Engenheiro</div>
-          </div>
-        </div>
-      </SidebarFooter>
+        {/* Conta (sempre visível) */}
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <Collapsible open={openMenu === "account"}>
+              <CollapsibleTrigger asChild>
+                <SidebarMenuButton onClick={() => toggleMenu("account")} className="text-white hover:bg-slate-600">
+                  <User className="h-4 w-4 flex-shrink-0" />
+                  <span className="break-words">CONTA</span>
+                  {openMenu === "account" ? (
+                    <ChevronDown className="h-4 w-4 ml-auto" />
+                  ) : (
+                    <ChevronRight className="h-4 w-4 ml-auto" />
+                  )}
+                </SidebarMenuButton>
+              </CollapsibleTrigger>
+              <CollapsibleContent asChild>
+                <SidebarMenu>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      asChild
+                      className={
+                        currentPath === "/account/profile"
+                          ? "bg-slate-600 text-white font-medium"
+                          : "text-white hover:bg-slate-600"
+                      }
+                    >
+                      <Link to="/account/profile" className="flex items-center gap-2" onClick={handleLinkClick}>
+                        <span className="text-xs leading-tight break-words min-w-0">Perfil</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      asChild
+                      className={
+                        currentPath === "/account/settings"
+                          ? "bg-slate-600 text-white font-medium"
+                          : "text-white hover:bg-slate-600"
+                      }
+                    >
+                      <Link to="/account/settings" className="flex items-center gap-2" onClick={handleLinkClick}>
+                        <Settings className="h-3 w-3 flex-shrink-0" />
+                        <span className="text-xs leading-tight break-words min-w-0">Configuração da conta</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                </SidebarMenu>
+              </CollapsibleContent>
+            </Collapsible>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarContent>
     </Sidebar>
   );
 }
