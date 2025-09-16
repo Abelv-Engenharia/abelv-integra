@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Funcionario } from '@/types/treinamentos';
 
 /**
- * Fetch funcionários
+ * Fetch funcionários - agora com RLS adequado
  */
 export async function fetchFuncionarios(): Promise<Funcionario[]> {
   try {

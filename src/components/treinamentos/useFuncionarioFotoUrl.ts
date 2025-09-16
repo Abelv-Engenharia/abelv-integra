@@ -17,12 +17,7 @@ export function useFuncionarioFotoUrl(foto: string | undefined | null) {
     let path = foto;
     setImgError(null);
 
-    // Foto já é URL http(s)?
-    if (/^https?:\/\//.test(path)) {
-      setImgUrl(path);
-      setImgError(null);
-      return;
-    }
+    // Por segurança, sempre usar signed URL - não aceitar URLs públicas
 
     // Pode vir só "funcionarios/abc.jpg" ou só "abc.jpg"
     if (!path.startsWith("funcionarios/")) {

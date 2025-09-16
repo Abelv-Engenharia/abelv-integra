@@ -66,11 +66,8 @@ export const useFuncionarios = () => {
         throw uploadError;
       }
 
-      const { data: publicData } = supabase.storage
-        .from('funcionarios-fotos')
-        .getPublicUrl(filePath);
-
-      return publicData.publicUrl;
+      // Não salvar URL pública por segurança - retornar apenas path
+      return filePath;
     } catch (error) {
       console.error('Erro ao fazer upload da foto:', error);
       return null;
@@ -104,9 +101,9 @@ export const useFuncionarios = () => {
         if (photoRemoved) {
           fotoUrl = null;
         } else if (photoFile) {
-          const uploadedUrl = await uploadFoto(photoFile, editingFuncionario.id);
-          if (uploadedUrl) {
-            fotoUrl = uploadedUrl;
+          const uploadedPath = await uploadFoto(photoFile, editingFuncionario.id);
+          if (uploadedPath) {
+            fotoUrl = uploadedPath;
           }
         }
         
@@ -149,15 +146,15 @@ export const useFuncionarios = () => {
         }
 
         if (photoFile && novoFuncionario) {
-          const uploadedUrl = await uploadFoto(photoFile, novoFuncionario.id);
-          if (uploadedUrl) {
+          const uploadedPath = await uploadFoto(photoFile, novoFuncionario.id);
+          if (uploadedPath) {
             const { error: updatePhotoError } = await supabase
               .from('funcionarios')
-              .update({ foto: uploadedUrl })
+              .update({ foto: uploadedPath })
               .eq('id', novoFuncionario.id);
             
             if (updatePhotoError) {
-              console.error('Erro ao atualizar URL da foto:', updatePhotoError);
+              console.error('Erro ao atualizar path da foto:', updatePhotoError);
             }
           }
         }
