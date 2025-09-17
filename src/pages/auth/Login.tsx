@@ -43,7 +43,7 @@ const Login = () => {
         <div className="text-center mb-8">
           <div className="mx-auto w-40 h-40 bg-white rounded-full flex items-center justify-center mb-6 p-4">
             <img 
-              src="/public/lovable-uploads/c0dc6a51-83ae-4747-84d4-c2b1c6c9f9b2.png" 
+              src="/lovable-uploads/c0dc6a51-83ae-4747-84d4-c2b1c6c9f9b2.png" 
               alt="ABELV Engenharia Logo" 
               className="w-full h-full object-contain"
             />
