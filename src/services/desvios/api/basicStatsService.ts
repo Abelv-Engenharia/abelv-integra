@@ -33,6 +33,7 @@ export const fetchDashboardStats = async (filters?: FilterParams): Promise<Dashb
     }));
 
     const totalDesvios = desviosComStatusCalculado.length;
+    console.log(`Total de desvios encontrados com filtros aplicados: ${totalDesvios}`);
 
     // Contar ações por status calculado
     const acoesCompletas = desviosComStatusCalculado.filter(d => 
