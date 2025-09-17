@@ -29,56 +29,83 @@ const Login = () => {
       setLoading(false);
     }
   };
-  return <div 
-    className="flex items-center justify-center min-h-screen px-4 bg-cover bg-center bg-no-repeat bg-fixed"
-    style={{
-      backgroundImage: `url('/fundo-login-abelv.png')`,
+  return (
+    <div className="min-h-screen flex items-center justify-center p-4" style={{
+      backgroundImage: `url('/lovable-uploads/bcb6f0f0-6bf3-4d14-8797-8b7203e78c3f.png')`,
       backgroundSize: 'cover',
       backgroundPosition: 'center',
-      backgroundAttachment: 'fixed'
-    }}
-  >
-      <div className="flex items-center justify-center w-full">
-        <div className="ml-auto mr-8 lg:mr-16">
-          <Card className="w-full max-w-md shadow-xl bg-white/95 backdrop-blur-sm">
-            <CardHeader className="text-center space-y-2">
-              <CardTitle className="text-xl font-semibold text-gray-800">Acesso ao Sistema</CardTitle>
-              <CardDescription className="text-gray-600">
-                Faça login com sua conta Microsoft corporativa
-              </CardDescription>
-            </CardHeader>
-            
-            <CardContent className="space-y-4">
-              <Button 
-                onClick={handleAzureLogin} 
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 text-base font-medium"
-                disabled={loading}
-              >
-                <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M11.4 24H0V12.6h11.4V24zM24 24H12.6V12.6H24V24zM11.4 11.4H0V0h11.4v11.4zM24 11.4H12.6V0H24v11.4z" />
-                </svg>
-                {loading ? "Redirecionando..." : "Entrar com Microsoft"}
-              </Button>
-              
-              <p className="text-sm text-gray-600 text-center leading-relaxed">
+      backgroundRepeat: 'no-repeat'
+    }}>
+      <div className="w-full max-w-md">
+        {/* Logo and Header */}
+        <div className="text-center mb-8">
+          <div className="mx-auto w-40 h-40 bg-white rounded-full flex items-center justify-center mb-6 p-4">
+            <img 
+              src="/lovable-uploads/c0dc6a51-83ae-4747-84d4-c2b1c6c9f9b2.png" 
+              alt="ABELV Engenharia Logo" 
+              className="w-full h-full object-contain"
+            />
+          </div>
+          <h1 className="text-3xl font-bold text-foreground mb-2">
+            ABELV ENGENHARIA
+          </h1>
+          <p className="text-muted-foreground">
+            Sistema de Gestão Integrada
+          </p>
+        </div>
+
+        {/* Login Card */}
+        <Card className="shadow-lg">
+          <CardHeader className="text-center">
+            <CardTitle className="text-xl">Acesso ao Sistema</CardTitle>
+            <CardDescription>
+              Faça login com sua conta Microsoft corporativa
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Button 
+              onClick={signInWithAzure}
+              disabled={loading}
+              className="w-full h-12 bg-primary hover:bg-primary/90"
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Conectando...
+                </>
+              ) : (
+                <>
+                  <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
+                    <path fill="currentColor" d="M11.4 24H0V12.6h11.4V24zM24 24H12.6V12.6H24V24zM11.4 11.4H0V0h11.4v11.4zm12.6 0H12.6V0H24v11.4z"/>
+                  </svg>
+                  Entrar com Microsoft
+                </>
+              )}
+            </Button>
+
+            <div className="text-center">
+              <p className="text-sm text-muted-foreground">
                 Utilize suas credenciais corporativas da Microsoft para acessar o sistema
               </p>
-            </CardContent>
+            </div>
 
-            <CardFooter className="flex flex-col space-y-3 pt-4">
-              <div className="text-center">
-                <p className="text-sm font-medium text-gray-700 mb-1">Problemas para fazer login?</p>
-                <p className="text-sm text-gray-600">Entre em contato com o administrador do sistema</p>
-              </div>
-            </CardFooter>
-          </Card>
+            {/* Help Text */}
+            <div className="mt-6 p-4 bg-muted/50 rounded-lg">
+              <p className="text-sm text-muted-foreground text-center">
+                <strong>Problemas para fazer login?</strong><br />
+                Entre em contato com o administrador do sistema
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Footer */}
+        <div className="text-center mt-8">
+          <p className="text-sm text-muted-foreground">
+            © 2025 Abelv Engenharia Ltda. Todos os direitos reservados.
+          </p>
         </div>
       </div>
-
-      {/* Footer */}
-      <div className="absolute bottom-4 left-0 right-0 text-center">
-        <p className="text-sm text-white/80">© 2025 Abelv Engenharia Ltda. Todos os direitos reservados.</p>
-      </div>
-    </div>;
-};
+    </div>
+  );
 export default Login;
