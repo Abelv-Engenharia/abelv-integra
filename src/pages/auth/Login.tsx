@@ -33,7 +33,7 @@ const Login = () => {
     }
   };
   return <div className="flex items-center justify-center min-h-screen bg-cover bg-center bg-no-repeat bg-fixed" style={{
-    backgroundImage: `url('/lovable-uploads/bbe07e7e-feac-4840-b440-978fe4b9401d.png')`,
+    backgroundImage: `url('/fundo-login.png')`,
     backgroundSize: 'cover',
     backgroundPosition: 'center',
     backgroundAttachment: 'fixed'
