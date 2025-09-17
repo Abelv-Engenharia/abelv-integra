@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { signInWithAzure } from "@/services/authService";
 import { toast } from "@/hooks/use-toast";
+import { Loader2 } from "lucide-react";
 const Login = () => {
   const [loading, setLoading] = useState(false);
   const handleAzureLogin = async () => {
