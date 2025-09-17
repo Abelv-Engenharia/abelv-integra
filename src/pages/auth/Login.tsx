@@ -33,7 +33,7 @@ const Login = () => {
   
  return (
     <div className="min-h-screen flex items-center justify-center p-4" style={{
-      backgroundImage: `url('/lovable-uploads/bcb6f0f0-6bf3-4d14-8797-8b7203e78c3f.png')`,
+      backgroundImage: `url('/fundo-login-abelv.png')`,
       backgroundSize: 'cover',
       backgroundPosition: 'center',
       backgroundRepeat: 'no-repeat'
