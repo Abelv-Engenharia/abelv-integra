@@ -36,8 +36,18 @@ export const fetchFilteredDashboardStats = async (filters: FilterParams): Promis
       )
     }));
 
-    const totalDesvios = desviosComStatusCalculado.length;
-    console.log(`Total de desvios encontrados com filtros aplicados: ${totalDesvios}`);
+    // Buscar contagem exata respeitando filtros (não limitada pelo PostgREST)
+    let countQuery = supabase
+      .from('desvios_completos')
+      .select('id', { count: 'exact', head: true });
+    countQuery = applyFiltersToQuery(countQuery, filters);
+    const { count: totalCount, error: countError } = await countQuery;
+    if (countError) {
+      console.warn('Falha ao obter contagem exata, usando length do array:', countError);
+    }
+
+    const totalDesvios = totalCount ?? desviosComStatusCalculado.length;
+    console.log(`Total de desvios (count exato) com filtros: ${totalDesvios}`);
 
     // Contar ações por status calculado
     const acoesCompletas = desviosComStatusCalculado.filter(d => 
