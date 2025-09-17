@@ -29,15 +29,14 @@ const Login = () => {
       setLoading(false);
     }
   };
-  return <div 
-    className="flex items-center justify-center min-h-screen px-4 bg-cover bg-center bg-no-repeat bg-fixed"
-    style={{
-      backgroundImage: `url('/fundo-login-abelv.png')`,
+  
+ return (
+    <div className="min-h-screen flex items-center justify-center p-4" style={{
+      backgroundImage: `url('/lovable-uploads/bcb6f0f0-6bf3-4d14-8797-8b7203e78c3f.png')`,
       backgroundSize: 'cover',
       backgroundPosition: 'center',
-      backgroundAttachment: 'fixed'
-    }}
-  >
+      backgroundRepeat: 'no-repeat'
+    }}>
       <div className="w-full max-w-md">
         {/* Logo and Header */}
         <div className="text-center mb-8">
@@ -100,13 +99,15 @@ const Login = () => {
             </div>
           </CardContent>
         </Card>
-        
+
         {/* Footer */}
         <div className="text-center mt-8">
           <p className="text-sm text-muted-foreground">
             © 2025 Abelv Engenharia Ltda. Todos os direitos reservados.
           </p>
         </div>
-    </div>;
-};
+      </div>
+    </div>
+  );
+}
 export default Login;
