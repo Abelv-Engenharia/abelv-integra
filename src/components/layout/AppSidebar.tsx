@@ -75,7 +75,7 @@ export function AppSidebar() {
             <img src={logoAbelvIntegra} alt="ABELV Integra" className="w-full h-auto object-contain" />
           </div>
           {state !== 'collapsed' && (
-            <div className="flex flex-col items-center text-center">
+            <div className="w-full bg-white rounded-md p-2 text-center">
               <h2 className="text-lg font-bold text-sidebar-foreground">ABELV ENGENHARIA</h2>
             </div>
           )}
