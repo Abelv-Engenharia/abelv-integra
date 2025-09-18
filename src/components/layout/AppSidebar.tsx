@@ -93,9 +93,9 @@ export function AppSidebar() {
         </SidebarMenu>
 
         {/* Logo e Texto ABELV ENGENHARIA */}
-        <div className="flex flex-col items-center py-4 px-4">
+        <div className="w-full bg-white rounded-md p-2">
           <img src={logoAbelvIntegra} alt="ABELV Integra" className="w-full h-auto object-contain" />
-          <span className="text-white font-medium text-sm">ABELV ENGENHARIA</span>
+          <span className="text-lg font-bold text-sidebar-foreground">ABELV ENGENHARIA</span>
         </div>
 
         {/* Busca (já filtrando pela whitelist via prop) */}
