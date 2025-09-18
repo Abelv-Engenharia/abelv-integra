@@ -71,7 +71,7 @@ export function AppSidebar() {
   return (
     <Sidebar>
         {/* Logo e Texto ABELV ENGENHARIA */}
-      <div className="flex flex-col items-center rounded-md pt-2 px-2">
+      <div className="flex flex-col items-center rounded-md p-2">
           <div className="w-full p-2">
             <img src={logoAbelvIntegra} alt="ABELV Integra" className="w-full h-auto object-contain rounded-md" />
           </div>
