@@ -70,7 +70,7 @@ export function AppSidebar() {
 
   return (
     <Sidebar>
-        <div className="flex flex-col items-center gap-3 p-2">
+        <div className="flex flex-col items-center p-2">
           <div className="w-full rounded-md p-2">
             <img src={logoAbelvIntegra} alt="ABELV Integra" className="w-full h-auto object-contain" />
           </div>
