@@ -94,7 +94,7 @@ export function AppSidebar() {
 
         {/* Logo e Texto ABELV ENGENHARIA */}
         <div className="flex flex-col items-center py-4 px-4">
-          <img src={logoAbelvIntegra} alt="ABELV Integra" className="h-16 w-auto mb-2" />
+          <img src={logoAbelvIntegra} alt="ABELV Integra" className="w-full h-auto object-contain" />
           <span className="text-white font-medium text-sm">ABELV ENGENHARIA</span>
         </div>
 
