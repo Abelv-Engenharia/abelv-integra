@@ -95,9 +95,14 @@ export function AppSidebar() {
         {/* Logo e Texto ABELV ENGENHARIA */}
         <div className="w-full bg-white rounded-md p-2">
           <img src={logoAbelvIntegra} alt="ABELV Integra" className="w-full h-auto object-contain" />
-          <span className="text-lg font-bold text-sidebar-foreground">ABELV ENGENHARIA</span>
         </div>
-
+        
+        {!isCollapsed && (
+          <div className="flex flex-col items-center text-center">
+            <h2 className="text-lg font-bold text-sidebar-foreground">ABELV ENGENHARIA</h2>
+          </div>
+        )}
+        
         {/* Busca (já filtrando pela whitelist via prop) */}
         <SidebarSearch menusSidebar={menusSidebar} />
 
