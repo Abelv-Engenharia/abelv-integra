@@ -18,6 +18,7 @@ import SidebarSectionRelatorios from "./SidebarSectionRelatorios";
 import SidebarSectionAdministracao from "./SidebarSectionAdministracao";
 import SidebarSearch from "./SidebarSearch";
 import { useProfile } from "@/hooks/useProfile";
+import logoAbelvIntegra from "@/assets/logo-abelv-integra.png";
 
 // helper simples para ler a whitelist do perfil
 function podeVerMenu(menu: string, menusSidebar?: string[]) {
@@ -90,6 +91,12 @@ export function AppSidebar() {
             </SidebarMenuItem>
           )}
         </SidebarMenu>
+
+        {/* Logo e Texto ABELV ENGENHARIA */}
+        <div className="flex flex-col items-center py-4 px-4">
+          <img src={logoAbelvIntegra} alt="ABELV Integra" className="h-16 w-auto mb-2" />
+          <span className="text-white font-medium text-sm">ABELV ENGENHARIA</span>
+        </div>
 
         {/* Busca (já filtrando pela whitelist via prop) */}
         <SidebarSearch menusSidebar={menusSidebar} />
