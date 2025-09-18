@@ -71,11 +71,11 @@ export function AppSidebar() {
   return (
     <Sidebar>
         <div className="flex flex-col items-center gap-3 p-2">
-          <div className="w-full rounded-md p-2">
+          <div className="w-full bg-white rounded-md p-2">
             <img src={logoAbelvIntegra} alt="ABELV Integra" className="w-full h-auto object-contain" />
           </div>
           {state !== 'collapsed' && (
-            <div className="flex flex-col bg-white items-center gap-3 p-2 text-center">
+            <div className="flex flex-col items-center text-center">
               <h2 className="text-lg font-bold text-sidebar-foreground">ABELV ENGENHARIA</h2>
             </div>
           )}
