@@ -70,12 +70,13 @@ export function AppSidebar() {
 
   return (
     <Sidebar>
-        <div className="flex flex-col items-center pt-2 px-2">
+        {/* Logo e Texto ABELV ENGENHARIA */}
+      <div className="flex flex-col items-center rounded-md pt-2 px-2">
           <div className="w-full p-2">
             <img src={logoAbelvIntegra} alt="ABELV Integra" className="w-full h-auto object-contain rounded-md" />
           </div>
           {state !== 'collapsed' && (
-            <div className="w-full rounded-md p-2 text-center">
+            <div className="w-full text-center">
               <h2 className="text-lg font-bold text-sidebar-foreground">ABELV ENGENHARIA</h2>
             </div>
           )}
@@ -83,36 +84,6 @@ export function AppSidebar() {
 
       
       <SidebarContent className="bg-sky-900">
-        {/* Dashboard simples */}
-        <SidebarMenu>
-          {canSee("dashboard") && (
-            <SidebarMenuItem>
-              <SidebarMenuButton
-                asChild
-                className={
-                  currentPath === "/dashboard" || currentPath === "/"
-                    ? "bg-slate-600 text-white font-medium"
-                    : "text-white hover:bg-slate-600"
-                }
-              >
-                <Link to="/dashboard" className="flex items-center gap-2" onClick={handleLinkClick}>
-                  <Home className="h-4 w-4 flex-shrink-0" />
-                  <span className="break-words">Dashboard</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          )}
-        </SidebarMenu>
-
-        {/* Logo e Texto ABELV ENGENHARIA */}
-        <div className="w-full bg-white rounded-md p-2">
-          <img src={logoAbelvIntegra} alt="ABELV Integra" className="w-full h-auto object-contain" />
-        </div>
-        
-        <div className="flex flex-col items-center text-center">
-          <h2 className="text-lg font-bold text-sidebar-foreground">ABELV ENGENHARIA</h2>
-        </div>
-        
         {/* Busca (já filtrando pela whitelist via prop) */}
         <SidebarSearch menusSidebar={menusSidebar} />
 
