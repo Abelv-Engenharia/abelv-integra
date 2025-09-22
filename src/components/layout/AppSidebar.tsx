@@ -181,58 +181,6 @@ export function AppSidebar() {
             canSee={canSee}
           />
         )}
-
-        {/* Conta (sempre visível) */}
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <Collapsible open={openMenu === "account"}>
-              <CollapsibleTrigger asChild>
-                <SidebarMenuButton onClick={() => toggleMenu("account")} className="text-white hover:bg-slate-600">
-                  <User className="h-4 w-4 flex-shrink-0" />
-                  <span className="break-words">CONTA</span>
-                  {openMenu === "account" ? (
-                    <ChevronDown className="h-4 w-4 ml-auto" />
-                  ) : (
-                    <ChevronRight className="h-4 w-4 ml-auto" />
-                  )}
-                </SidebarMenuButton>
-              </CollapsibleTrigger>
-              <CollapsibleContent asChild>
-                <SidebarMenu>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton
-                      asChild
-                      className={
-                        currentPath === "/account/profile"
-                          ? "bg-slate-600 text-white font-medium"
-                          : "text-white hover:bg-slate-600"
-                      }
-                    >
-                      <Link to="/account/profile" className="flex items-center gap-2" onClick={handleLinkClick}>
-                        <span className="text-xs leading-tight break-words min-w-0">Perfil</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton
-                      asChild
-                      className={
-                        currentPath === "/account/settings"
-                          ? "bg-slate-600 text-white font-medium"
-                          : "text-white hover:bg-slate-600"
-                      }
-                    >
-                      <Link to="/account/settings" className="flex items-center gap-2" onClick={handleLinkClick}>
-                        <Settings className="h-3 w-3 flex-shrink-0" />
-                        <span className="text-xs leading-tight break-words min-w-0">Configuração da conta</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                </SidebarMenu>
-              </CollapsibleContent>
-            </Collapsible>
-          </SidebarMenuItem>
-        </SidebarMenu>
       </SidebarContent>
     </Sidebar>
   );
