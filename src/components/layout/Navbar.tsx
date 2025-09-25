@@ -1,4 +1,4 @@
-import { Bell, User, ChevronDown } from "lucide-react";
+import { Bell, User, ChevronDown, Home, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -49,10 +49,25 @@ const Navbar = () => {
           
           <div className="flex items-center gap-1 sm:gap-2 min-w-0">
             <SystemLogo className="h-6 sm:h-8 flex-shrink-0" />
-            <h1 className="text-sm sm:text-lg lg:text-xl font-bold text-gray-900 truncate">
-              <span className="hidden sm:inline">ABELV</span>
-              <span className="sm:hidden">SMS ABELV</span>
-            </h1>
+            <div className="flex items-center gap-1 sm:gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate('/dashboard')}
+                className="h-8 w-8 p-0"
+                title="Página inicial"
+              >
+                <Home className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 w-8 p-0"
+                title="Páginas favoritas"
+              >
+                <Star className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
         </div>
 
