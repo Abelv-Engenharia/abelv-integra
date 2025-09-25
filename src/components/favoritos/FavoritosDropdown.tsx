@@ -1,24 +1,47 @@
-import { useState } from "react";
 import { Star, X, Plus } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
 import { useFavoritos } from "@/hooks/useFavoritos";
 
 const FavoritosDropdown = () => {
   const { favoritos, loading, removerFavorito, toggleFavoritoAtual } = useFavoritos();
-  const [mostrarFormulario, setMostrarFormulario] = useState(false);
-  const [nomePagina, setNomePagina] = useState("");
   const location = useLocation();
 
-  const handleAdicionarPaginaAtual = async () => {
-    if (!nomePagina.trim()) return;
+  const obterTituloPagina = () => {
+    // Primeiro, tenta obter do document.title (removendo " | Gestão de SMS" se existir)
+    let titulo = document.title.replace(/\s*\|\s*.*$/, '').trim();
     
-    const sucesso = await toggleFavoritoAtual(nomePagina.trim());
+    // Se não encontrar no document.title ou estiver genérico, busca no h1
+    if (!titulo || titulo === 'Gestão de SMS' || titulo === '') {
+      const h1Element = document.querySelector('h1');
+      if (h1Element && h1Element.textContent) {
+        titulo = h1Element.textContent.trim();
+      }
+    }
+    
+    // Se ainda não encontrar, usa o pathname como fallback
+    if (!titulo) {
+      const pathSegments = location.pathname.split('/').filter(Boolean);
+      if (pathSegments.length > 0) {
+        titulo = pathSegments[pathSegments.length - 1]
+          .split('-')
+          .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+          .join(' ');
+      } else {
+        titulo = 'Página Atual';
+      }
+    }
+    
+    return titulo;
+  };
+
+  const handleAdicionarPaginaAtual = async () => {
+    const nomePagina = obterTituloPagina();
+    
+    const sucesso = await toggleFavoritoAtual(nomePagina);
     if (sucesso) {
-      setNomePagina("");
-      setMostrarFormulario(false);
+      // Não precisa resetar nenhum estado pois não há mais input manual
     }
   };
 
@@ -83,54 +106,13 @@ const FavoritosDropdown = () => {
         
         <DropdownMenuSeparator />
         
-        {!mostrarFormulario ? (
-          <DropdownMenuItem 
-            onClick={() => setMostrarFormulario(true)}
-            className="cursor-pointer"
-          >
-            <Plus className="mr-2 h-4 w-4" />
-            Adicionar página atual
-          </DropdownMenuItem>
-        ) : (
-          <div className="px-3 py-2 space-y-2">
-            <Input
-              placeholder="Nome da página"
-              value={nomePagina}
-              onChange={(e) => setNomePagina(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  handleAdicionarPaginaAtual();
-                } else if (e.key === 'Escape') {
-                  setMostrarFormulario(false);
-                  setNomePagina("");
-                }
-              }}
-              autoFocus
-            />
-            <div className="flex gap-2">
-              <Button
-                size="sm"
-                onClick={handleAdicionarPaginaAtual}
-                disabled={!nomePagina.trim()}
-              >
-                Adicionar
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => {
-                  setMostrarFormulario(false);
-                  setNomePagina("");
-                }}
-              >
-                Cancelar
-              </Button>
-            </div>
-            <div className="text-xs text-muted-foreground">
-              Página atual: {location.pathname}
-            </div>
-          </div>
-        )}
+        <DropdownMenuItem 
+          onClick={handleAdicionarPaginaAtual}
+          className="cursor-pointer"
+        >
+          <Plus className="mr-2 h-4 w-4" />
+          Adicionar página atual
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
