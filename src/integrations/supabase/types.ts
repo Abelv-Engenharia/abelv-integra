@@ -3355,6 +3355,36 @@ export type Database = {
           },
         ]
       }
+      paginas_favoritas: {
+        Row: {
+          created_at: string
+          icone: string | null
+          id: string
+          nome_pagina: string
+          updated_at: string
+          url_pagina: string
+          usuario_id: string
+        }
+        Insert: {
+          created_at?: string
+          icone?: string | null
+          id?: string
+          nome_pagina: string
+          updated_at?: string
+          url_pagina: string
+          usuario_id: string
+        }
+        Update: {
+          created_at?: string
+          icone?: string | null
+          id?: string
+          nome_pagina?: string
+          updated_at?: string
+          url_pagina?: string
+          usuario_id?: string
+        }
+        Relationships: []
+      }
       parte_corpo_atingida: {
         Row: {
           ativo: boolean | null

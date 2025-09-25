@@ -11,6 +11,7 @@ import { toast } from "@/hooks/use-toast";
 import NotificacoesDropdown from "@/components/notificacoes/NotificacoesDropdown";
 import SystemLogo from "@/components/common/SystemLogo";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import FavoritosDropdown from "@/components/favoritos/FavoritosDropdown";
 const Navbar = () => {
   const {
     profile
@@ -59,14 +60,7 @@ const Navbar = () => {
               >
                 <Home className="h-4 w-4" />
               </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-8 w-8 p-0"
-                title="Páginas favoritas"
-              >
-                <Star className="h-4 w-4" />
-              </Button>
+              <FavoritosDropdown />
             </div>
           </div>
         </div>
