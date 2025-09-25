@@ -4,8 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Plus, Eye, Edit, RefreshCw, Trash2 } from "lucide-react";
 import DocumentosAnexados from "@/components/ocorrencias/DocumentosAnexados";
-import { getAllOcorrencias, deleteOcorrencia } from "@/services/ocorrencias/ocorrenciasService";
+import OcorrenciasConsultaFilters from "@/components/ocorrencias/OcorrenciasConsultaFilters";
+import { getAllOcorrencias, deleteOcorrencia, OcorrenciasFilters } from "@/services/ocorrencias/ocorrenciasService";
 import { useUserCCAs } from "@/hooks/useUserCCAs";
+import { useOcorrenciasEmpresas } from "@/hooks/useOcorrenciasEmpresas";
 import useOverdueActionsMonitor from "@/hooks/useOverdueActionsMonitor";
 import { toast } from "sonner";
 import {
@@ -24,8 +26,21 @@ const OcorrenciasConsulta = () => {
   const [loading, setLoading] = useState(true);
   const [deleteConfirmationOpen, setDeleteConfirmationOpen] = useState(false);
   const [ocorrenciaToDeleteId, setOcorrenciaToDeleteId] = useState<string | null>(null);
+  
+  // Estados dos filtros
+  const [filters, setFilters] = useState<OcorrenciasFilters>({
+    ano: "todos",
+    mes: "todos",
+    cca: "todos",
+    empresa: "todos",
+    tipo: "todos",
+    status: "todos",
+    risco: "todos"
+  });
+
   const navigate = useNavigate();
   const { data: userCCAs = [], isLoading: ccasLoading } = useUserCCAs();
+  const { data: empresas = [] } = useOcorrenciasEmpresas();
 
   // Ativar monitoramento de ações em atraso
   useOverdueActionsMonitor();
@@ -35,8 +50,8 @@ const OcorrenciasConsulta = () => {
     
     setLoading(true);
     try {
-      const data = await getAllOcorrencias();
-      console.log('Ocorrências carregadas:', data);
+      const data = await getAllOcorrencias(filters);
+      console.log('Ocorrências carregadas com filtros:', data, filters);
       
       // Filtrar ocorrências baseado nos CCAs permitidos ao usuário
       if (userCCAs.length > 0) {
@@ -60,7 +75,7 @@ const OcorrenciasConsulta = () => {
 
   useEffect(() => {
     loadOcorrencias();
-  }, [userCCAs, ccasLoading]);
+  }, [userCCAs, ccasLoading, filters]);
 
   // Recarregar dados quando a página recebe foco (útil quando volta de outras páginas)
   useEffect(() => {
@@ -106,6 +121,18 @@ const OcorrenciasConsulta = () => {
     setDeleteConfirmationOpen(true);
   };
 
+  const handleClearFilters = () => {
+    setFilters({
+      ano: "todos",
+      mes: "todos",
+      cca: "todos",
+      empresa: "todos",
+      tipo: "todos",
+      status: "todos",
+      risco: "todos"
+    });
+  };
+
   const confirmDelete = async () => {
     if (ocorrenciaToDeleteId) {
       try {
@@ -137,6 +164,25 @@ const OcorrenciasConsulta = () => {
           </Button>
         </div>
       </div>
+
+      <OcorrenciasConsultaFilters
+        ano={filters.ano || "todos"}
+        mes={filters.mes || "todos"}
+        cca={filters.cca || "todos"}
+        empresa={filters.empresa || "todos"}
+        tipo={filters.tipo || "todos"}
+        status={filters.status || "todos"}
+        risco={filters.risco || "todos"}
+        setAno={(ano) => setFilters(prev => ({ ...prev, ano }))}
+        setMes={(mes) => setFilters(prev => ({ ...prev, mes }))}
+        setCca={(cca) => setFilters(prev => ({ ...prev, cca }))}
+        setEmpresa={(empresa) => setFilters(prev => ({ ...prev, empresa }))}
+        setTipo={(tipo) => setFilters(prev => ({ ...prev, tipo }))}
+        setStatus={(status) => setFilters(prev => ({ ...prev, status }))}
+        setRisco={(risco) => setFilters(prev => ({ ...prev, risco }))}
+        onClearFilters={handleClearFilters}
+        empresas={empresas}
+      />
 
       <Card>
         <CardHeader>

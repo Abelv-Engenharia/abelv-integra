@@ -1,5 +1,15 @@
 import { supabase } from '@/integrations/supabase/client';
 
+export interface OcorrenciasFilters {
+  ano?: string;
+  mes?: string;
+  cca?: string;
+  empresa?: string;
+  tipo?: string;
+  status?: string;
+  risco?: string;
+}
+
 export interface OcorrenciaFormData {
   data: Date | null;
   hora: string;
@@ -321,12 +331,46 @@ export const getOcorrenciaById = async (id: string) => {
   }
 };
 
-export const getAllOcorrencias = async () => {
+export const getAllOcorrencias = async (filters?: OcorrenciasFilters) => {
   try {
-    // Buscar todas as ocorrências primeiro
-    const { data: ocorrencias, error: ocorrenciasError } = await supabase
+    // Construir query base
+    let query = supabase
       .from('ocorrencias')
-      .select('*')
+      .select('*');
+
+    // Aplicar filtros
+    if (filters) {
+      if (filters.ano && filters.ano !== 'todos') {
+        query = query.gte('data', `${filters.ano}-01-01`)
+                     .lte('data', `${filters.ano}-12-31`);
+      }
+      
+      if (filters.mes && filters.mes !== 'todos' && filters.ano && filters.ano !== 'todos') {
+        const mesFormatado = filters.mes.padStart(2, '0');
+        const ultimoDiaMes = new Date(parseInt(filters.ano), parseInt(filters.mes), 0).getDate();
+        query = query.gte('data', `${filters.ano}-${mesFormatado}-01`)
+                     .lte('data', `${filters.ano}-${mesFormatado}-${ultimoDiaMes}`);
+      }
+      
+      if (filters.cca && filters.cca !== 'todos') {
+        query = query.eq('cca', filters.cca);
+      }
+      
+      if (filters.tipo && filters.tipo !== 'todos') {
+        query = query.eq('classificacao_ocorrencia', filters.tipo);
+      }
+      
+      if (filters.status && filters.status !== 'todos') {
+        query = query.eq('status', filters.status);
+      }
+      
+      if (filters.risco && filters.risco !== 'todos') {
+        query = query.eq('classificacao_risco', filters.risco);
+      }
+    }
+
+    // Ordenar por data decrescente
+    const { data: ocorrencias, error: ocorrenciasError } = await query
       .order('data', { ascending: false });
 
     if (ocorrenciasError) throw ocorrenciasError;
@@ -370,12 +414,19 @@ export const getAllOcorrencias = async () => {
     }
     
     // Transformar os dados para incluir os nomes das empresas e CCAs
-    const transformedData = ocorrencias.map(ocorrencia => ({
+    let transformedData = ocorrencias.map(ocorrencia => ({
       ...ocorrencia,
       empresa: empresasMap.get(ocorrencia.empresa) || ocorrencia.empresa,
       cca_nome: ccasMap.get(ocorrencia.cca)?.nome || ocorrencia.cca,
       cca_codigo: ccasMap.get(ocorrencia.cca)?.codigo || ''
     }));
+
+    // Aplicar filtro de empresa pelo nome se especificado
+    if (filters?.empresa && filters.empresa !== 'todos') {
+      transformedData = transformedData.filter(ocorrencia => 
+        ocorrencia.empresa === filters.empresa
+      );
+    }
     
     return transformedData;
   } catch (error) {
