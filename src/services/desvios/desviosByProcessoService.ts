@@ -7,13 +7,14 @@ type ChartItem = { name: string; value: number };
 
 export const fetchDesviosByProcesso = async (filters?: FilterParams): Promise<ChartItem[]> => {
   try {
-    // Use optimized query with only necessary fields
+    // Use optimized query with range to get all records
     let query = supabase
       .from('desvios_completos')
       .select(`
         processos:processo_id(nome)
       `)
-      .not('processo_id', 'is', null);
+      .not('processo_id', 'is', null)
+      .range(0, 10000); // Ensure we get all records, not just 1000
 
     // Apply standardized filters
     if (filters) {
@@ -34,7 +35,7 @@ export const fetchDesviosByProcesso = async (filters?: FilterParams): Promise<Ch
       processCounts[processo] = (processCounts[processo] || 0) + 1;
     });
 
-    // Convert to array format for the chart - show all results (removed limit)
+    // Convert to array format for the chart - show all results
     return Object.entries(processCounts)
       .map(([name, value]) => ({ name, value }))
       .sort((a, b) => b.value - a.value);

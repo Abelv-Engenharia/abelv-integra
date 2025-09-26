@@ -15,11 +15,12 @@ const COLOR_MAP: Record<string, string> = {
 
 export const fetchDesviosByClassification = async (filters?: FilterParams) => {
   try {
-    // Use optimized query with only necessary fields
+    // Use optimized query with range to get all records
     let query = supabase
       .from('desvios_completos')
       .select('classificacao_risco')
-      .not('classificacao_risco', 'is', null);
+      .not('classificacao_risco', 'is', null)
+      .range(0, 10000); // Ensure we get all records, not just 1000
 
     // Apply standardized filters
     if (filters) {

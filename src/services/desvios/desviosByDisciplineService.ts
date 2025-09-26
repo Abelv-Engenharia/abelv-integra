@@ -5,13 +5,14 @@ import { applyFiltersToQuery } from "./utils/filterUtils";
 
 export const fetchDesviosByDiscipline = async (filters?: FilterParams) => {
   try {
-    // Use optimized query with only necessary fields
+    // Use optimized query with range to get all records
     let query = supabase
       .from('desvios_completos')
       .select(`
         disciplinas:disciplina_id(codigo, nome)
       `)
-      .not('disciplina_id', 'is', null);
+      .not('disciplina_id', 'is', null)
+      .range(0, 10000); // Ensure we get all records, not just 1000
 
     // Apply standardized filters
     if (filters) {

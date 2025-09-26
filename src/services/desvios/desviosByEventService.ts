@@ -5,13 +5,14 @@ import { applyFiltersToQuery } from "./utils/filterUtils";
 
 export const fetchDesviosByEvent = async (filters?: FilterParams) => {
   try {
-    // Use optimized query with only necessary fields
+    // Use optimized query with range to get all records
     let query = supabase
       .from('desvios_completos')
       .select(`
         eventos_identificados:evento_identificado_id(codigo, nome)
       `)
-      .not('evento_identificado_id', 'is', null);
+      .not('evento_identificado_id', 'is', null)
+      .range(0, 10000); // Ensure we get all records, not just 1000
 
     // Apply standardized filters
     if (filters) {
@@ -32,7 +33,7 @@ export const fetchDesviosByEvent = async (filters?: FilterParams) => {
       eventCounts[evento] = (eventCounts[evento] || 0) + 1;
     });
 
-    // Convert to array format for the chart - show all results (removed slice limit)
+    // Convert to array format for the chart - show all results
     return Object.entries(eventCounts)
       .map(([name, value]) => ({ name, value }))
       .sort((a, b) => b.value - a.value);

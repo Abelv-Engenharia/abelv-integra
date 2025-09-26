@@ -5,13 +5,14 @@ import { applyFiltersToQuery } from "./utils/filterUtils";
 
 export const fetchDesviosByCompany = async (filters?: FilterParams) => {
   try {
-    // Use optimized query with only necessary fields
+    // Use optimized query with range to get all records
     let query = supabase
       .from('desvios_completos')
       .select(`
         empresas:empresa_id(nome)
       `)
-      .not('empresa_id', 'is', null);
+      .not('empresa_id', 'is', null)
+      .range(0, 10000); // Ensure we get all records, not just 1000
 
     // Apply standardized filters
     if (filters) {
