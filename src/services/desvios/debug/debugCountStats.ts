@@ -18,46 +18,39 @@ export const debugCountStats = async (filters?: FilterParams) => {
   const { count: total, error: totalError } = await totalQuery;
   console.log('📊 Total de registros:', total, totalError ? 'Erro:' : '', totalError);
   
-  // 2. Verificar distribuição por situação
-  let situacaoQuery = supabase
+  // 2. Verificar distribuição por situacao E status
+  let dataQuery = supabase
     .from('desvios_completos')
-    .select('situacao')
+    .select('situacao, status')
     .limit(1000);
     
   if (filters) {
-    situacaoQuery = applyFiltersToQuery(situacaoQuery, filters);
+    dataQuery = applyFiltersToQuery(dataQuery, filters);
   }
   
-  const { data: situacaoData, error: situacaoError } = await situacaoQuery;
+  const { data: dataResult, error: dataError } = await dataQuery;
   
-  if (!situacaoError && situacaoData) {
-    const situacaoCount = situacaoData.reduce((acc: Record<string, number>, item) => {
+  if (!dataError && dataResult) {
+    const situacaoCount = dataResult.reduce((acc: Record<string, number>, item) => {
       const situacao = item.situacao || 'NULL';
       acc[situacao] = (acc[situacao] || 0) + 1;
       return acc;
     }, {});
     
-    console.log('📋 Distribuição por situação:', situacaoCount);
-  } else {
-    console.error('❌ Erro ao buscar situações:', situacaoError);
-  }
-  
-  // 3. Testar query específica para TRATADO
-  let tratadoQuery = supabase
-    .from('desvios_completos')
-    .select('id', { count: 'exact', head: true })
-    .eq('situacao', 'TRATADO');
+    const statusCount = dataResult.reduce((acc: Record<string, number>, item) => {
+      const status = item.status || 'NULL';
+      acc[status] = (acc[status] || 0) + 1;
+      return acc;
+    }, {});
     
-  if (filters) {
-    tratadoQuery = applyFiltersToQuery(tratadoQuery, filters);
+    console.log('📋 Distribuição por situação:', situacaoCount);
+    console.log('📋 Distribuição por status:', statusCount);
+  } else {
+    console.error('❌ Erro ao buscar dados:', dataError);
   }
-  
-  const { count: tratadoCount, error: tratadoError } = await tratadoQuery;
-  console.log('✅ Count TRATADO:', tratadoCount, tratadoError ? 'Erro:' : '', tratadoError);
   
   return {
     total,
-    situacaoData: situacaoData || [],
-    tratadoCount
+    dataResult: dataResult || []
   };
 };
