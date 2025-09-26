@@ -24,26 +24,26 @@ export const useFuncionarioImport = () => {
       const invalid: { data: FuncionarioImportData; errors: string[] }[] = [];
       const duplicates: FuncionarioImportData[] = [];
       const updates: FuncionarioImportData[] = [];
-      const seenCpfs = new Set<string>();
+      const seenMatriculas = new Set<string>();
 
-      // Buscar funcionários existentes por CPF
-      const cpfs = data.filter(d => d.cpf).map(d => d.cpf);
-      console.log('CPFs para verificar:', cpfs);
+      // Buscar funcionários existentes por matrícula
+      const matriculas = data.filter(d => d.matricula).map(d => d.matricula);
+      console.log('Matrículas para verificar:', matriculas);
       
-      let existingCpfs = new Set<string>();
-      if (cpfs.length > 0) {
+      let existingMatriculas = new Set<string>();
+      if (matriculas.length > 0) {
         const { data: existingFuncionarios, error } = await supabase
           .from('funcionarios')
-          .select('cpf')
-          .in('cpf', cpfs);
+          .select('matricula')
+          .in('matricula', matriculas);
 
         if (error) {
           console.error('Erro ao buscar funcionários existentes:', error);
           throw new Error(`Erro ao verificar funcionários existentes: ${error.message}`);
         }
 
-        existingCpfs = new Set(existingFuncionarios?.map(f => f.cpf) || []);
-        console.log('CPFs existentes encontrados:', Array.from(existingCpfs));
+        existingMatriculas = new Set(existingFuncionarios?.map(f => f.matricula) || []);
+        console.log('Matrículas existentes encontradas:', Array.from(existingMatriculas));
       }
 
       // Buscar CCAs válidos
@@ -89,11 +89,8 @@ export const useFuncionarioImport = () => {
         if (!item.matricula || typeof item.matricula !== 'string' || !item.matricula.trim()) {
           errors.push('Matrícula é obrigatória');
         }
-        if (!item.cpf || typeof item.cpf !== 'string' || !item.cpf.trim()) {
-          errors.push('CPF é obrigatório');
-        }
 
-        // Validar formato do CPF
+        // Validar formato do CPF (opcional)
         if (item.cpf && typeof item.cpf === 'string') {
           const cpfLimpo = item.cpf.replace(/\D/g, '');
           
@@ -121,36 +118,40 @@ export const useFuncionarioImport = () => {
         // Validar data de admissão se fornecida
         if (item.data_admissao) {
           if (typeof item.data_admissao === 'string') {
-            const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+            const dateRegex = /^\d{2}\/\d{2}\/\d{4}$/;
             if (!dateRegex.test(item.data_admissao)) {
-              errors.push(`Data de admissão "${item.data_admissao}" deve estar no formato YYYY-MM-DD (ex: 2024-01-15)`);
+              errors.push(`Data de admissão "${item.data_admissao}" deve estar no formato DD/MM/AAAA (ex: 15/01/2024)`);
             } else {
-              // Validar se é uma data válida
-              const date = new Date(item.data_admissao);
-              if (isNaN(date.getTime())) {
+              // Validar se é uma data válida (converter DD/MM/AAAA para Date)
+              const [day, month, year] = item.data_admissao.split('/');
+              const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+              if (isNaN(date.getTime()) || 
+                  date.getDate() !== parseInt(day) || 
+                  date.getMonth() !== parseInt(month) - 1 || 
+                  date.getFullYear() !== parseInt(year)) {
                 errors.push(`Data de admissão "${item.data_admissao}" não é uma data válida`);
               }
             }
           } else {
-            errors.push(`Data de admissão deve ser uma string no formato YYYY-MM-DD`);
+            errors.push(`Data de admissão deve ser uma string no formato DD/MM/AAAA`);
           }
         }
 
-        // Verificar duplicatas no arquivo
-        if (item.cpf && seenCpfs.has(item.cpf)) {
+        // Verificar duplicatas no arquivo (por matrícula)
+        if (item.matricula && seenMatriculas.has(item.matricula)) {
           duplicates.push(item);
-          console.log(`CPF duplicado encontrado no arquivo: ${item.cpf}`);
+          console.log(`Matrícula duplicada encontrada no arquivo: ${item.matricula}`);
           continue;
         }
         
-        if (item.cpf) {
-          seenCpfs.add(item.cpf);
+        if (item.matricula) {
+          seenMatriculas.add(item.matricula);
         }
 
         if (errors.length > 0) {
           invalid.push({ data: item, errors });
           console.log(`Item ${i + 1} inválido:`, item, 'Erros:', errors);
-        } else if (item.cpf && existingCpfs.has(item.cpf)) {
+        } else if (item.matricula && existingMatriculas.has(item.matricula)) {
           updates.push(item);
           console.log(`Item ${i + 1} para atualização:`, item);
         } else {
@@ -223,16 +224,23 @@ export const useFuncionarioImport = () => {
           
           console.log('Criando funcionário:', funcionario.nome, 'CCA:', funcionario.cca_codigo, 'CCA ID:', ccaId);
           
+          // Converter data DD/MM/AAAA para YYYY-MM-DD se necessário
+          let dataAdmissaoFormatada = null;
+          if (funcionario.data_admissao) {
+            const [day, month, year] = funcionario.data_admissao.split('/');
+            dataAdmissaoFormatada = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+          }
+          
           const { error } = await supabase
             .from('funcionarios')
             .insert({
               nome: funcionario.nome,
               funcao: funcionario.funcao,
               matricula: funcionario.matricula,
-              cpf: funcionario.cpf,
+              cpf: funcionario.cpf || null,
               cca_id: ccaId,
-              data_admissao: funcionario.data_admissao || null,
-              ativo: true
+              data_admissao: dataAdmissaoFormatada,
+              ativo: funcionario.ativo !== undefined ? funcionario.ativo : true
             });
 
           if (error) {
@@ -252,14 +260,26 @@ export const useFuncionarioImport = () => {
         try {
           const ccaId = funcionario.cca_codigo ? ccaMap.get(funcionario.cca_codigo.toLowerCase().trim()) : null;
           
-          console.log('Atualizando funcionário:', funcionario.nome, 'CPF:', funcionario.cpf, 'CCA:', funcionario.cca_codigo, 'CCA ID:', ccaId);
+          console.log('Atualizando funcionário:', funcionario.nome, 'Matrícula:', funcionario.matricula, 'CCA:', funcionario.cca_codigo, 'CCA ID:', ccaId);
+          
+          // Converter data DD/MM/AAAA para YYYY-MM-DD se necessário
+          let dataAdmissaoFormatada = null;
+          if (funcionario.data_admissao) {
+            const [day, month, year] = funcionario.data_admissao.split('/');
+            dataAdmissaoFormatada = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+          }
           
           const updateData: any = {
             nome: funcionario.nome,
             funcao: funcionario.funcao,
-            matricula: funcionario.matricula,
-            data_admissao: funcionario.data_admissao || null
+            data_admissao: dataAdmissaoFormatada,
+            ativo: funcionario.ativo !== undefined ? funcionario.ativo : true
           };
+
+          // Adicionar CPF se fornecido
+          if (funcionario.cpf) {
+            updateData.cpf = funcionario.cpf;
+          }
 
           // Só adicionar cca_id se houver código CCA válido
           if (funcionario.cca_codigo && ccaId) {
@@ -269,7 +289,7 @@ export const useFuncionarioImport = () => {
           const { error, data: updateResult } = await supabase
             .from('funcionarios')
             .update(updateData)
-            .eq('cpf', funcionario.cpf)
+            .eq('matricula', funcionario.matricula)
             .select();
 
           if (error) {
@@ -279,8 +299,8 @@ export const useFuncionarioImport = () => {
             console.log('Funcionário atualizado com sucesso:', updateResult[0]);
             results.updated++;
           } else {
-            console.warn('Nenhum funcionário foi atualizado para CPF:', funcionario.cpf);
-            results.errors.push(`Funcionário ${funcionario.nome} com CPF ${funcionario.cpf} não foi encontrado para atualização`);
+            console.warn('Nenhum funcionário foi atualizado para matrícula:', funcionario.matricula);
+            results.errors.push(`Funcionário ${funcionario.nome} com matrícula ${funcionario.matricula} não foi encontrado para atualização`);
           }
         } catch (error) {
           console.error('Erro inesperado ao atualizar funcionário:', error);

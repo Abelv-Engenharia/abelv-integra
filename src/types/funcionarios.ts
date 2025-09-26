@@ -31,7 +31,8 @@ export interface FuncionarioImportData {
   nome: string;
   funcao: string;
   matricula: string;
-  cpf: string;
+  cpf?: string;
   cca_codigo?: string;
   data_admissao?: string;
+  ativo?: boolean;
 }

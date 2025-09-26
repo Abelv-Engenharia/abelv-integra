@@ -48,10 +48,10 @@ const ImportacaoFuncionarios = () => {
   const downloadTemplate = () => {
     // Criar dados do template
     const templateData = [
-      ['nome', 'funcao', 'matricula', 'cpf', 'cca_codigo', 'data_admissao'],
-      ['João Silva', 'Técnico', '12345', '123.456.789-00', 'CCA01', '2024-01-15'],
-      ['Maria Santos', 'Engenheira', '67890', '987.654.321-00', 'CCA02', '2024-02-01'],
-      ['Pedro Oliveira', 'Analista', '11111', '111.222.333-44', 'CCA01', '2024-03-10']
+      ['nome', 'funcao', 'matricula', 'cpf', 'cca_codigo', 'data_admissao', 'ativo'],
+      ['João Silva', 'Técnico', '12345', '123.456.789-00', 'CCA01', '15/01/2024', 'Sim'],
+      ['Maria Santos', 'Engenheira', '67890', '987.654.321-00', 'CCA02', '01/02/2024', 'Ativo'],
+      ['Pedro Oliveira', 'Analista', '11111', '111.222.333-44', 'CCA01', '10/03/2024', '1']
     ];
 
     // Criar workbook
@@ -65,7 +65,8 @@ const ImportacaoFuncionarios = () => {
       { wch: 12 }, // matricula
       { wch: 18 }, // cpf
       { wch: 12 }, // cca_codigo
-      { wch: 15 }  // data_admissao
+      { wch: 15 }, // data_admissao
+      { wch: 10 }  // ativo
     ];
     worksheet['!cols'] = colWidths;
 
@@ -113,9 +114,11 @@ const ImportacaoFuncionarios = () => {
               <strong>Instruções:</strong>
               <ul className="list-disc list-inside mt-2 space-y-1">
                 <li>Baixe o template Excel e preencha com os dados dos funcionários</li>
-                <li>O CPF será usado para identificar funcionários existentes (atualizações)</li>
-                <li>Campos obrigatórios: nome, funcao, matricula, cpf</li>
-                <li>Data de admissão deve estar no formato YYYY-MM-DD (ex: 2024-01-15)</li>
+                <li>A <strong>matrícula</strong> será usada para identificar funcionários existentes (atualizações)</li>
+                <li>Campos obrigatórios: nome, funcao, matricula</li>
+                <li>CPF é opcional mas recomendado</li>
+                <li>Data de admissão deve estar no formato <strong>DD/MM/AAAA</strong> (ex: 15/01/2024)</li>
+                <li>Campo Ativo aceita: Sim/Não, Ativo/Inativo, 1/0, true/false (padrão: Ativo)</li>
                 <li>CCA deve usar o código do CCA (opcional) - veja a aba "Códigos de CCA"</li>
                 <li>Utilize apenas arquivos .xlsx ou .xls</li>
               </ul>

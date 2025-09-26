@@ -23,11 +23,62 @@ export const ExcelUpload = ({ onFileProcessed, isProcessing }: ExcelUploadProps)
     }
   
     const date = new Date((excelDate - (25567 + 1)) * 86400 * 1000);
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
   
-    return `${year}-${month}-${day}`;
+    return `${day}/${month}/${year}`;
+  };
+
+  const parseBrazilianDate = (dateStr: string): string | null => {
+    if (!dateStr || typeof dateStr !== 'string') return null;
+    
+    const cleanDate = dateStr.trim();
+    
+    // Formato DD/MM/AAAA ou DD/MM/AA
+    const dateRegex = /^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/;
+    const match = cleanDate.match(dateRegex);
+    
+    if (!match) return null;
+    
+    let [, day, month, year] = match;
+    
+    // Normalizar ano de 2 dígitos
+    if (year.length === 2) {
+      const yearNum = parseInt(year);
+      year = yearNum >= 50 ? `19${year}` : `20${year}`;
+    }
+    
+    // Validar se é uma data válida
+    const dateObj = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+    if (dateObj.getDate() !== parseInt(day) || 
+        dateObj.getMonth() !== parseInt(month) - 1 || 
+        dateObj.getFullYear() !== parseInt(year)) {
+      return null;
+    }
+    
+    return `${day.padStart(2, '0')}/${month.padStart(2, '0')}/${year}`;
+  };
+
+  const parseAtivoStatus = (value: any): boolean => {
+    if (value === null || value === undefined || value === '') {
+      return true; // Padrão: ativo se não informado
+    }
+    
+    const strValue = String(value).toLowerCase().trim();
+    
+    // Valores que indicam ativo
+    if (['sim', 's', 'ativo', 'true', '1'].includes(strValue)) {
+      return true;
+    }
+    
+    // Valores que indicam inativo
+    if (['não', 'nao', 'n', 'inativo', 'demitido', 'false', '0'].includes(strValue)) {
+      return false;
+    }
+    
+    // Padrão: ativo se não reconhecido
+    return true;
   };
 
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
@@ -86,17 +137,21 @@ export const ExcelUpload = ({ onFileProcessed, isProcessing }: ExcelUploadProps)
           cca_codigo: row[4] ? String(row[4]).trim() : '',
         };
 
-        // Processar data de admissão
+        // Processar data de admissão (posição 5)
         if (row[5]) {
           if (typeof row[5] === 'number') {
             const parsedDate = parseExcelDate(row[5]);
             item.data_admissao = parsedDate;
           } else if (typeof row[5] === 'string') {
-            item.data_admissao = row[5].trim();
+            const parsedBrazilianDate = parseBrazilianDate(row[5]);
+            item.data_admissao = parsedBrazilianDate || row[5].trim();
           } else {
             console.warn(`Data de admissão inválida na linha ${index + 2}:`, row[5]);
           }
         }
+
+        // Processar status ativo (posição 6)
+        item.ativo = parseAtivoStatus(row[6]);
 
         return item;
       });
