@@ -9,27 +9,58 @@ const FavoritosDropdown = () => {
   const location = useLocation();
 
   const obterTituloPagina = () => {
-    // Primeiro, tenta obter do document.title (removendo " | Gestão de SMS" se existir)
-    let titulo = document.title.replace(/\s*\|\s*.*$/, '').trim();
-    
-    // Se não encontrar no document.title ou estiver genérico, busca no h1
-    if (!titulo || titulo === 'Gestão de SMS' || titulo === '') {
-      const h1Element = document.querySelector('h1');
-      if (h1Element && h1Element.textContent) {
-        titulo = h1Element.textContent.trim();
+    // Primeiro, busca no h1 da página (mais confiável)
+    const h1Element = document.querySelector('h1');
+    if (h1Element && h1Element.textContent) {
+      const h1Text = h1Element.textContent.trim();
+      // Evita títulos genéricos
+      if (h1Text && h1Text !== 'Dashboard SMS' && h1Text !== 'Gestão de SMS') {
+        return h1Text;
       }
     }
     
-    // Se ainda não encontrar, usa o pathname como fallback
+    // Tenta obter do document.title (removendo " | Gestão de SMS" se existir)
+    let titulo = document.title.replace(/\s*\|\s*.*$/, '').trim();
+    
+    // Se o título do document for genérico, ignora
+    if (!titulo || titulo === 'Gestão de SMS' || titulo === 'Dashboard SMS' || titulo === 'Abelv Integra') {
+      titulo = '';
+    }
+    
+    // Se ainda não encontrou um título específico, usa mapeamento baseado na rota
     if (!titulo) {
-      const pathSegments = location.pathname.split('/').filter(Boolean);
-      if (pathSegments.length > 0) {
-        titulo = pathSegments[pathSegments.length - 1]
-          .split('-')
-          .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-          .join(' ');
-      } else {
-        titulo = 'Página Atual';
+      const pathname = location.pathname;
+      const routeNames: Record<string, string> = {
+        '/': 'Dashboard Principal',
+        '/dashboard': 'Dashboard Principal',
+        '/treinamentos': 'Treinamentos',
+        '/treinamentos/dashboard': 'Dashboard de Treinamentos',
+        '/treinamentos/novo': 'Novo Treinamento',
+        '/treinamentos/matriculas': 'Matrículas',
+        '/ocorrencias': 'Ocorrências',
+        '/ocorrencias/consulta': 'Consulta de Ocorrências',
+        '/ocorrencias/nova': 'Nova Ocorrência',
+        '/funcionarios': 'Funcionários',
+        '/admin': 'Administração',
+        '/admin/funcionarios': 'Cadastro de Funcionários',
+        '/admin/importacao-funcionarios': 'Importação de Funcionários',
+        '/profile': 'Perfil',
+        '/settings': 'Configurações'
+      };
+      
+      titulo = routeNames[pathname];
+      
+      // Se não encontrou no mapeamento, usa o último segmento da URL
+      if (!titulo) {
+        const pathSegments = pathname.split('/').filter(Boolean);
+        if (pathSegments.length > 0) {
+          titulo = pathSegments[pathSegments.length - 1]
+            .split('-')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(' ');
+        } else {
+          titulo = 'Página Atual';
+        }
       }
     }
     
