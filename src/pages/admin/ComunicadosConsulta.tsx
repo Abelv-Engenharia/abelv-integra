@@ -216,10 +216,18 @@ const ComunicadosConsulta = () => {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center gap-2 justify-end">
-                        <Button variant="ghost" size="sm">
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => navigate(`/admin/comunicados/detalhe/${comunicado.id}`)}
+                        >
                           <Eye className="h-4 w-4" />
                         </Button>
-                        <Button variant="ghost" size="sm">
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => navigate(`/admin/comunicados/edicao/${comunicado.id}`)}
+                        >
                           <Edit className="h-4 w-4" />
                         </Button>
                         <AlertDialog>

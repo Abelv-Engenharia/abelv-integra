@@ -110,6 +110,18 @@ export const comunicadosService = {
     return (data as Comunicado[]) || [];
   },
 
+  // Buscar comunicado por ID
+  async getComunicadoPorId(id: string): Promise<Comunicado> {
+    const { data, error } = await supabase
+      .from('comunicados')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error) throw error;
+    return data as Comunicado;
+  },
+
   // Buscar ciências de um comunicado (admin)
   async getCienciasComunicado(comunicadoId: string): Promise<ComunicadoCiencia[]> {
     const { data, error } = await supabase

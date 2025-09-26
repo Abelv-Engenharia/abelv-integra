@@ -111,3 +111,11 @@ export const useRegistrarCiencia = () => {
     },
   });
 };
+
+export const useComunicadoPorId = (id: string) => {
+  return useQuery({
+    queryKey: ['comunicado', id],
+    queryFn: () => comunicadosService.getComunicadoPorId(id),
+    enabled: !!id,
+  });
+};

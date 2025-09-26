@@ -12,6 +12,8 @@ import Layout from "@/components/layout/Layout";
 import Dashboard from "./pages/Dashboard";
 import ComunicadosCadastro from "./pages/admin/ComunicadosCadastro";
 import ComunicadosConsulta from "./pages/admin/ComunicadosConsulta";
+import ComunicadoDetalhe from "./pages/admin/ComunicadoDetalhe";
+import ComunicadoEdicao from "./pages/admin/ComunicadoEdicao";
 import MeusComunicados from "./pages/comunicados/MeusComunicados";
 import NotFound from "./pages/NotFound";
 
@@ -210,6 +212,8 @@ function App() {
                 {/* Comunicados routes */}
                 <Route path="admin/comunicados/cadastro" element={<ComunicadosCadastro />} />
                 <Route path="admin/comunicados/consulta" element={<ComunicadosConsulta />} />
+                <Route path="admin/comunicados/detalhe/:id" element={<ComunicadoDetalhe />} />
+                <Route path="admin/comunicados/edicao/:id" element={<ComunicadoEdicao />} />
                 <Route path="comunicados/meus-comunicados" element={<MeusComunicados />} />
 
                 {/* Tarefas routes */}

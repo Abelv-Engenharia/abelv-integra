@@ -66,8 +66,8 @@ const ComunicadoModal: React.FC<ComunicadoModalProps> = ({
           <img
             src={fileUrl}
             alt={fileName}
-            className="max-w-full h-auto rounded-lg border"
-            style={{ maxHeight: '400px' }}
+            className="max-w-full h-auto rounded-lg border shadow-sm"
+            style={{ maxHeight: '600px' }}
           />
         </div>
       );
@@ -82,7 +82,7 @@ const ComunicadoModal: React.FC<ComunicadoModalProps> = ({
           </div>
           <iframe
             src={fileUrl}
-            className="w-full h-96 border rounded-lg"
+            className="w-full h-[500px] border rounded-lg shadow-sm"
             title={fileName}
           />
           <div className="mt-2">
@@ -123,18 +123,18 @@ const ComunicadoModal: React.FC<ComunicadoModalProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={() => {}}>
-      <DialogContent className="max-w-2xl max-h-[90vh]">
+      <DialogContent className="max-w-5xl max-h-[90vh]">
         <DialogHeader>
-          <DialogTitle className="text-xl font-semibold">
+          <DialogTitle className="text-2xl font-semibold">
             {comunicado.titulo}
           </DialogTitle>
         </DialogHeader>
         
-        <ScrollArea className="max-h-[60vh] pr-4">
-          <div className="space-y-4">
+        <ScrollArea className="max-h-[75vh] pr-4">
+          <div className="space-y-6 p-2">
             {comunicado.descricao && (
-              <div>
-                <p className="text-muted-foreground whitespace-pre-wrap">
+              <div className="prose max-w-none">
+                <p className="text-foreground whitespace-pre-wrap leading-relaxed text-base">
                   {comunicado.descricao}
                 </p>
               </div>
