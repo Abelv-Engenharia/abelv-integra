@@ -124,31 +124,70 @@ export function getMenusHierarchy(): MenuSection[] {
       ]
     },
     {
+      key: "comunicados",
+      label: "Comunicados",
+      items: [
+        { key: "admin_comunicados", label: "Cadastro de Comunicados" },
+        { key: "consulta_comunicados", label: "Consulta de Comunicados" },
+        { key: "meus_comunicados", label: "Meus Comunicados" }
+      ]
+    },
+    {
       key: "administracao",
       label: "Administração",
       items: [
-        { key: "admin_configuracoes", label: "Configurações" },
-        { key: "admin_usuarios", label: "Usuários" },
-        { key: "admin_usuarios_auth", label: "Usuários Auth" },
-        { key: "admin_perfis", label: "Perfis" },
-        { key: "admin_empresas", label: "Empresas" },
-        { key: "admin_ccas", label: "CCAs" },
-        { key: "admin_engenheiros", label: "Engenheiros" },
-        { key: "admin_supervisores", label: "Supervisores" },
-        { key: "admin_encarregados", label: "Encarregados" },
-        { key: "admin_funcionarios", label: "Funcionários" },
-        { key: "admin_importacao_funcionarios", label: "Importação de Funcionários" },
-        { key: "admin_checklists", label: "Cadastro de Checklists" },
-        { key: "admin_exportacao_dados", label: "Exportação de Dados" },
-        { key: "admin_criar_usuario", label: "Criar Usuário" },
-        { key: "admin_metas_indicadores", label: "Metas e Indicadores" },
-        { key: "admin_registro_hht", label: "Registro HHT" },
-        { key: "admin_importacao_execucao_treinamentos", label: "Importação Execução Treinamentos" },
-        { key: "admin_importacao_hsa", label: "Importação HSA" },
-        { key: "admin_templates", label: "Templates" },
-        { key: "admin_logo", label: "Logo" },
-        { key: "configuracao_emails", label: "Configuração de Emails" },
-        { key: "upload_tutoriais", label: "Upload de Tutoriais" }
+        {
+          key: "configuracoes_sistema",
+          label: "Configurações do Sistema",
+          submenus: [
+            { key: "admin_configuracoes", label: "Configurações Gerais" },
+            { key: "admin_templates", label: "Templates" },
+            { key: "admin_logo", label: "Logo" },
+            { key: "admin_checklists", label: "Cadastro de Checklists" },
+            { key: "admin_configuracao_emails", label: "Configuração de E-mails" },
+            { key: "admin_upload_tutoriais", label: "Upload de Tutoriais" }
+          ]
+        },
+        {
+          key: "usuarios_perfis",
+          label: "Usuários e Perfis",
+          submenus: [
+            { key: "admin_usuarios", label: "Usuários" },
+            { key: "admin_usuarios_auth", label: "Usuários Auth" },
+            { key: "admin_perfis", label: "Perfis" },
+            { key: "admin_criar_usuario", label: "Criar Usuário" }
+          ]
+        },
+        {
+          key: "gestao_organizacional",
+          label: "Gestão Organizacional",
+          submenus: [
+            { key: "admin_empresas", label: "Empresas" },
+            { key: "admin_ccas", label: "CCAs" },
+            { key: "admin_engenheiros", label: "Engenheiros" },
+            { key: "admin_supervisores", label: "Supervisores" },
+            { key: "admin_encarregados", label: "Encarregados" },
+            { key: "admin_funcionarios", label: "Funcionários" }
+          ]
+        },
+        {
+          key: "importacoes",
+          label: "Importações",
+          submenus: [
+            { key: "admin_importacao_funcionarios", label: "Importação de Funcionários" },
+            { key: "admin_importacao_execucao_treinamentos", label: "Importação Execução Treinamentos" },
+            { key: "admin_importacao_hsa", label: "Importação HSA" }
+          ]
+        },
+        {
+          key: "dados_sistema",
+          label: "Dados do Sistema",
+          submenus: [
+            { key: "admin_exportacao_dados", label: "Exportação de Dados" },
+            { key: "admin_registro_hht", label: "Registro HHT" },
+            { key: "admin_metas_indicadores", label: "Metas e Indicadores" }
+          ]
+        }
       ]
     },
     {
