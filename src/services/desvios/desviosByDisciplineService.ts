@@ -5,13 +5,10 @@ import { applyFiltersToQuery } from "./utils/filterUtils";
 
 export const fetchDesviosByDiscipline = async (filters?: FilterParams) => {
   try {
+    // Use optimized query with only necessary fields
     let query = supabase
       .from('desvios_completos')
       .select(`
-        disciplina_id,
-        data_desvio,
-        cca_id,
-        empresa_id,
         disciplinas:disciplina_id(codigo, nome)
       `)
       .not('disciplina_id', 'is', null);
@@ -35,7 +32,7 @@ export const fetchDesviosByDiscipline = async (filters?: FilterParams) => {
       disciplineCounts[disciplina] = (disciplineCounts[disciplina] || 0) + 1;
     });
 
-    // Convert to array format for the chart
+    // Convert to array format for the chart - show all results
     return Object.entries(disciplineCounts)
       .map(([name, value]) => ({ name, value }))
       .sort((a, b) => b.value - a.value);

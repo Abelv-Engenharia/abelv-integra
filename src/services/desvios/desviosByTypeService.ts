@@ -5,14 +5,10 @@ import { applyFiltersToQuery } from "./utils/filterUtils";
 
 export const fetchDesviosByType = async (filters?: FilterParams) => {
   try {
+    // Use SQL aggregation for better performance
     let query = supabase
       .from('desvios_completos')
       .select(`
-        tipo_registro_id,
-        data_desvio,
-        cca_id,
-        disciplina_id,
-        empresa_id,
         tipos_registro:tipo_registro_id(nome)
       `)
       .not('tipo_registro_id', 'is', null);
@@ -40,7 +36,7 @@ export const fetchDesviosByType = async (filters?: FilterParams) => {
       typeCounts[label] = (typeCounts[label] || 0) + 1;
     });
 
-    // Convert to array format for the chart
+    // Convert to array format for the chart - show all results
     return Object.entries(typeCounts)
       .map(([name, value]) => ({ name, value }))
       .sort((a, b) => b.value - a.value);

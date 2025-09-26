@@ -32,8 +32,7 @@ export const fetchDashboardStats = async (filters?: FilterParams): Promise<Dashb
     // Buscar dados para cálculo de risco (apenas classificacao_risco)
     let riskQuery = supabase
       .from('desvios_completos')
-      .select('classificacao_risco')
-      .range(0, 9999); // Limite menor para cálculo de risco
+      .select('classificacao_risco');
 
     if (filters) {
       riskQuery = applyFiltersToQuery(riskQuery, filters);

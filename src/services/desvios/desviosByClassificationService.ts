@@ -15,15 +15,10 @@ const COLOR_MAP: Record<string, string> = {
 
 export const fetchDesviosByClassification = async (filters?: FilterParams) => {
   try {
+    // Use optimized query with only necessary fields
     let query = supabase
       .from('desvios_completos')
-      .select(`
-        classificacao_risco,
-        data_desvio,
-        cca_id,
-        disciplina_id,
-        empresa_id
-      `)
+      .select('classificacao_risco')
       .not('classificacao_risco', 'is', null);
 
     // Apply standardized filters
@@ -45,7 +40,7 @@ export const fetchDesviosByClassification = async (filters?: FilterParams) => {
       classificationCounts[key] = (classificationCounts[key] || 0) + 1;
     });
 
-    // Convert to array format for the chart
+    // Convert to array format for the chart - show all results
     return Object.entries(classificationCounts)
       .map(([name, value]) => ({
         name,
