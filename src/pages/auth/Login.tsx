@@ -43,9 +43,7 @@ const Login = () => {
             <img src="/lovable-uploads/c0dc6a51-83ae-4747-84d4-c2b1c6c9f9b2.png" alt="ABELV Engenharia Logo" className="w-full h-full object-contain" />
           </div>
           <h1 className="text-3xl font-bold text-foreground mb-2">ABELV INTEGRA</h1>
-          <p className="text-muted-foreground">
-            Sistema de Gestão Integrada
-          </p>
+          <p className="text-muted-foreground">Sistema de Gestão</p>
         </div>
 
         {/* Login Card */}
