@@ -207,6 +207,11 @@ function App() {
                 <Route path="admin/importacao-hsa" element={<ImportacaoHSA />} />
                 <Route path="admin/atualizar-perfis" element={<AtualizarPerfis />} />
 
+                {/* Comunicados routes */}
+                <Route path="admin/comunicados/cadastro" element={<ComunicadosCadastro />} />
+                <Route path="admin/comunicados/consulta" element={<ComunicadosConsulta />} />
+                <Route path="comunicados/meus-comunicados" element={<MeusComunicados />} />
+
                 {/* Tarefas routes */}
                 <Route path="tarefas/dashboard" element={<TarefasDashboard />} />
                 <Route path="tarefas/cadastro" element={<CadastroTarefas />} />
