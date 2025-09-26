@@ -22,6 +22,10 @@ import {
   Lock,
   UserPlus,
   UploadCloud,
+  MessageSquare,
+  Plus,
+  Search,
+  User,
 } from "lucide-react";
 import {
   SidebarMenu,
@@ -66,8 +70,6 @@ export default function SidebarSectionAdministracao({ openMenu, toggleMenu, onLi
 
     { label: "Upload de Tutoriais", to: "/admin/upload-tutoriais", slug: "admin_upload_tutoriais", Icon: Upload },
     { label: "Configuração de E-mails", to: "/admin/configuracao-emails", slug: "admin_configuracao_emails", Icon: Mail },
-    { label: "Comunicados - Cadastro", to: "/admin/comunicados/cadastro", slug: "admin_comunicados", Icon: Mail },
-    { label: "Comunicados - Consulta", to: "/admin/comunicados/consulta", slug: "admin_comunicados", Icon: Database },
     { label: "Exportação de Dados", to: "/admin/exportacao-dados", slug: "admin_exportacao_dados", Icon: Database },
 
     { label: "Importação de Funcionários", to: "/admin/importacao-funcionarios", slug: "admin_importacao_funcionarios", Icon: UploadCloud },
@@ -86,9 +88,10 @@ export default function SidebarSectionAdministracao({ openMenu, toggleMenu, onLi
     // { label: "Manutenção", to: "/admin/manutencao", slug: "adm_manutencao", Icon: Wrench }
   ].filter((i) => can(i.slug));
 
-  if (items.length === 0) return null;
+  if (items.length === 0 && !can("admin_comunicados")) return null;
 
   const isOpen = openMenu === "admin";
+  const isComunicadosOpen = openMenu === "comunicados";
 
   return (
     <SidebarMenu>
@@ -119,6 +122,61 @@ export default function SidebarSectionAdministracao({ openMenu, toggleMenu, onLi
                   </SidebarMenuSubButton>
                 </SidebarMenuSubItem>
               ))}
+              
+              {/* Submenu Comunicados */}
+              {can("admin_comunicados") && (
+                <SidebarMenuSubItem>
+                  <Collapsible open={isComunicadosOpen}>
+                    <CollapsibleTrigger asChild>
+                      <SidebarMenuSubButton 
+                        onClick={() => toggleMenu("comunicados")}
+                        className="text-white hover:bg-slate-600"
+                      >
+                        <MessageSquare className="h-3 w-3 flex-shrink-0" />
+                        <span className="text-xs leading-tight break-words min-w-0">Comunicados</span>
+                        {isComunicadosOpen ? <ChevronDown className="h-3 w-3 ml-auto" /> : <ChevronRight className="h-3 w-3 ml-auto" />}
+                      </SidebarMenuSubButton>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                      <div className="ml-4 space-y-1">
+                        <SidebarMenuSubButton
+                          asChild
+                          className={
+                            pathname === "/admin/comunicados/cadastro" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"
+                          }
+                        >
+                          <Link to="/admin/comunicados/cadastro" onClick={onLinkClick} className="flex items-center gap-2">
+                            <Plus className="h-3 w-3 flex-shrink-0" />
+                            <span className="text-xs leading-tight break-words min-w-0">Cadastro</span>
+                          </Link>
+                        </SidebarMenuSubButton>
+                        <SidebarMenuSubButton
+                          asChild
+                          className={
+                            pathname === "/admin/comunicados/consulta" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"
+                          }
+                        >
+                          <Link to="/admin/comunicados/consulta" onClick={onLinkClick} className="flex items-center gap-2">
+                            <Search className="h-3 w-3 flex-shrink-0" />
+                            <span className="text-xs leading-tight break-words min-w-0">Consulta</span>
+                          </Link>
+                        </SidebarMenuSubButton>
+                        <SidebarMenuSubButton
+                          asChild
+                          className={
+                            pathname === "/comunicados/meus-comunicados" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"
+                          }
+                        >
+                          <Link to="/comunicados/meus-comunicados" onClick={onLinkClick} className="flex items-center gap-2">
+                            <User className="h-3 w-3 flex-shrink-0" />
+                            <span className="text-xs leading-tight break-words min-w-0">Meus Comunicados</span>
+                          </Link>
+                        </SidebarMenuSubButton>
+                      </div>
+                    </CollapsibleContent>
+                  </Collapsible>
+                </SidebarMenuSubItem>
+              )}
             </SidebarMenuSub>
           </CollapsibleContent>
         </Collapsible>
