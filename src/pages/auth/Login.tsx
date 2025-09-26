@@ -30,27 +30,19 @@ const Login = () => {
       setLoading(false);
     }
   };
-  
- return (
-    <div className="min-h-screen flex items-center justify-center p-4" style={{
-      backgroundImage: `url('/fundo-login-abelv.png')`,
-      backgroundSize: 'cover',
-      backgroundPosition: 'center',
-      backgroundRepeat: 'no-repeat'
-    }}>
+  return <div className="min-h-screen flex items-center justify-center p-4" style={{
+    backgroundImage: `url('/fundo-login-abelv.png')`,
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    backgroundRepeat: 'no-repeat'
+  }}>
       <div className="w-full max-w-md">
         {/* Logo and Header */}
         <div className="text-center mb-8">
           <div className="mx-auto w-40 h-40 bg-white rounded-full flex items-center justify-center mb-6 p-4">
-            <img 
-              src="/lovable-uploads/c0dc6a51-83ae-4747-84d4-c2b1c6c9f9b2.png" 
-              alt="ABELV Engenharia Logo" 
-              className="w-full h-full object-contain"
-            />
+            <img src="/lovable-uploads/c0dc6a51-83ae-4747-84d4-c2b1c6c9f9b2.png" alt="ABELV Engenharia Logo" className="w-full h-full object-contain" />
           </div>
-          <h1 className="text-3xl font-bold text-foreground mb-2">
-            ABELV ENGENHARIA
-          </h1>
+          <h1 className="text-3xl font-bold text-foreground mb-2">ABELV INTEGRA</h1>
           <p className="text-muted-foreground">
             Sistema de Gestão Integrada
           </p>
@@ -65,24 +57,16 @@ const Login = () => {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <Button 
-              onClick={signInWithAzure}
-              disabled={loading}
-              className="w-full h-12 bg-primary hover:bg-primary/90"
-            >
-              {loading ? (
-                <>
+            <Button onClick={signInWithAzure} disabled={loading} className="w-full h-12 bg-primary hover:bg-primary/90">
+              {loading ? <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Conectando...
-                </>
-              ) : (
-                <>
+                </> : <>
                   <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
-                    <path fill="currentColor" d="M11.4 24H0V12.6h11.4V24zM24 24H12.6V12.6H24V24zM11.4 11.4H0V0h11.4v11.4zm12.6 0H12.6V0H24v11.4z"/>
+                    <path fill="currentColor" d="M11.4 24H0V12.6h11.4V24zM24 24H12.6V12.6H24V24zM11.4 11.4H0V0h11.4v11.4zm12.6 0H12.6V0H24v11.4z" />
                   </svg>
                   Entrar com Microsoft
-                </>
-              )}
+                </>}
             </Button>
 
             <div className="text-center">
@@ -108,7 +92,6 @@ const Login = () => {
           </p>
         </div>
       </div>
-    </div>
-  );
-}
+    </div>;
+};
 export default Login;
