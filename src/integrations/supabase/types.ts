@@ -350,6 +350,83 @@ export type Database = {
         }
         Relationships: []
       }
+      comunicados: {
+        Row: {
+          arquivo_nome: string | null
+          arquivo_url: string | null
+          ativo: boolean
+          created_at: string
+          created_by: string | null
+          data_fim: string
+          data_inicio: string
+          descricao: string | null
+          id: string
+          publico_alvo: Json
+          titulo: string
+          updated_at: string
+        }
+        Insert: {
+          arquivo_nome?: string | null
+          arquivo_url?: string | null
+          ativo?: boolean
+          created_at?: string
+          created_by?: string | null
+          data_fim: string
+          data_inicio: string
+          descricao?: string | null
+          id?: string
+          publico_alvo?: Json
+          titulo: string
+          updated_at?: string
+        }
+        Update: {
+          arquivo_nome?: string | null
+          arquivo_url?: string | null
+          ativo?: boolean
+          created_at?: string
+          created_by?: string | null
+          data_fim?: string
+          data_inicio?: string
+          descricao?: string | null
+          id?: string
+          publico_alvo?: Json
+          titulo?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      comunicados_ciencia: {
+        Row: {
+          comunicado_id: string
+          created_at: string
+          data_ciencia: string
+          id: string
+          usuario_id: string
+        }
+        Insert: {
+          comunicado_id: string
+          created_at?: string
+          data_ciencia?: string
+          id?: string
+          usuario_id: string
+        }
+        Update: {
+          comunicado_id?: string
+          created_at?: string
+          data_ciencia?: string
+          id?: string
+          usuario_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comunicados_ciencia_comunicado_id_fkey"
+            columns: ["comunicado_id"]
+            isOneToOne: false
+            referencedRelation: "comunicados"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       configuracao_notificacoes: {
         Row: {
           app_cat_pendente: boolean | null
