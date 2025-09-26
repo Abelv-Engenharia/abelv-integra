@@ -9,10 +9,14 @@ import {
   countAcoesPendentes, 
   countTotalDesvios 
 } from "./countStatsService";
+import { debugCountStats } from "../debug/debugCountStats";
 
 export const fetchFilteredDashboardStats = async (filters: FilterParams): Promise<DashboardStats> => {
   try {
     console.log('fetchFilteredDashboardStats iniciado com filtros:', filters);
+    
+    // Debug: Analisar os dados para entender o problema
+    await debugCountStats(filters);
     
     // Fazer contagens paralelas otimizadas usando COUNT direto no Supabase
     const [totalDesvios, acoesCompletas, acoesAndamento, acoesPendentes] = await Promise.all([
