@@ -9,58 +9,105 @@ const FavoritosDropdown = () => {
   const location = useLocation();
 
   const obterTituloPagina = () => {
-    // Primeiro, busca no h1 da página (mais confiável)
-    const h1Element = document.querySelector('h1');
+    // 1. Busca no h1 principal da página (mais confiável para títulos específicos)
+    const h1Element = document.querySelector('main h1, .main h1, [role="main"] h1, h1');
     if (h1Element && h1Element.textContent) {
       const h1Text = h1Element.textContent.trim();
-      // Evita títulos genéricos
-      if (h1Text && h1Text !== 'Dashboard SMS' && h1Text !== 'Gestão de SMS') {
+      // Evita títulos muito genéricos
+      if (h1Text && 
+          h1Text !== 'Dashboard SMS' && 
+          h1Text !== 'Gestão de SMS' && 
+          h1Text !== 'Dashboard' &&
+          h1Text !== 'Sistema') {
         return h1Text;
       }
     }
     
-    // Tenta obter do document.title (removendo " | Gestão de SMS" se existir)
-    let titulo = document.title.replace(/\s*\|\s*.*$/, '').trim();
+    // 2. Busca por títulos em elementos com classes específicas que podem conter o nome da página
+    const titleSelectors = [
+      '.page-title',
+      '.page-header h1',
+      '.page-header h2',
+      '[data-page-title]',
+      '.main-title',
+      '.content-title'
+    ];
     
-    // Se o título do document for genérico, ignora
-    if (!titulo || titulo === 'Gestão de SMS' || titulo === 'Dashboard SMS' || titulo === 'Abelv Integra') {
-      titulo = '';
+    for (const selector of titleSelectors) {
+      const element = document.querySelector(selector);
+      if (element && element.textContent) {
+        const text = element.textContent.trim();
+        if (text && text !== 'Dashboard SMS' && text !== 'Gestão de SMS') {
+          return text;
+        }
+      }
     }
     
-    // Se ainda não encontrou um título específico, usa mapeamento baseado na rota
+    // 3. Tenta obter do document.title (removendo sufixos genéricos)
+    let titulo = document.title
+      .replace(/\s*\|\s*.*$/, '')
+      .replace(/\s*-\s*.*$/, '')
+      .trim();
+    
+    // Se o título do document for específico, usa ele
+    if (titulo && 
+        titulo !== 'Gestão de SMS' && 
+        titulo !== 'Dashboard SMS' && 
+        titulo !== 'Abelv Integra' &&
+        titulo !== 'Dashboard') {
+      return titulo;
+    }
+    
+    // 4. Mapeamento específico baseado na rota atual
+    const pathname = location.pathname;
+    const routeNames: Record<string, string> = {
+      '/': 'Dashboard Principal',
+      '/dashboard': 'Dashboard Principal',
+      '/treinamentos': 'Treinamentos',
+      '/treinamentos/dashboard': 'Dashboard de Treinamentos',
+      '/treinamentos/novo': 'Novo Treinamento',
+      '/treinamentos/matriculas': 'Matrículas de Treinamentos',
+      '/desvios': 'Desvios',
+      '/desvios/dashboard': 'Dashboard de Desvios',
+      '/desvios/cadastro': 'Cadastro de Desvios',
+      '/desvios/consulta': 'Consulta de Desvios',
+      '/hora-seguranca': 'Hora da Segurança',
+      '/hora-seguranca/dashboard': 'Hora da Segurança',
+      '/ocorrencias': 'Ocorrências',
+      '/ocorrencias/consulta': 'Consulta de Ocorrências',
+      '/ocorrencias/nova': 'Nova Ocorrência',
+      '/funcionarios': 'Funcionários',
+      '/funcionarios/cadastro': 'Cadastro de Funcionários',
+      '/admin': 'Administração',
+      '/admin/funcionarios': 'Cadastro de Funcionários',
+      '/admin/importacao-funcionarios': 'Importação de Funcionários',
+      '/profile': 'Perfil do Usuário',
+      '/settings': 'Configurações do Sistema'
+    };
+    
+    titulo = routeNames[pathname];
+    
+    // 5. Se não encontrou no mapeamento exato, tenta mapeamento parcial
     if (!titulo) {
-      const pathname = location.pathname;
-      const routeNames: Record<string, string> = {
-        '/': 'Dashboard Principal',
-        '/dashboard': 'Dashboard Principal',
-        '/treinamentos': 'Treinamentos',
-        '/treinamentos/dashboard': 'Dashboard de Treinamentos',
-        '/treinamentos/novo': 'Novo Treinamento',
-        '/treinamentos/matriculas': 'Matrículas',
-        '/ocorrencias': 'Ocorrências',
-        '/ocorrencias/consulta': 'Consulta de Ocorrências',
-        '/ocorrencias/nova': 'Nova Ocorrência',
-        '/funcionarios': 'Funcionários',
-        '/admin': 'Administração',
-        '/admin/funcionarios': 'Cadastro de Funcionários',
-        '/admin/importacao-funcionarios': 'Importação de Funcionários',
-        '/profile': 'Perfil',
-        '/settings': 'Configurações'
-      };
-      
-      titulo = routeNames[pathname];
-      
-      // Se não encontrou no mapeamento, usa o último segmento da URL
-      if (!titulo) {
-        const pathSegments = pathname.split('/').filter(Boolean);
-        if (pathSegments.length > 0) {
-          titulo = pathSegments[pathSegments.length - 1]
-            .split('-')
-            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-            .join(' ');
-        } else {
-          titulo = 'Página Atual';
+      for (const [route, name] of Object.entries(routeNames)) {
+        if (pathname.startsWith(route) && route !== '/') {
+          titulo = name;
+          break;
         }
+      }
+    }
+    
+    // 6. Como último recurso, transforma o último segmento da URL
+    if (!titulo) {
+      const pathSegments = pathname.split('/').filter(Boolean);
+      if (pathSegments.length > 0) {
+        const lastSegment = pathSegments[pathSegments.length - 1];
+        titulo = lastSegment
+          .split('-')
+          .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+          .join(' ');
+      } else {
+        titulo = 'Página Inicial';
       }
     }
     
