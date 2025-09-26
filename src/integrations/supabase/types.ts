@@ -4480,6 +4480,57 @@ export type Database = {
       }
     }
     Functions: {
+      get_desvios_by_base_legal: {
+        Args: { filtros?: Json }
+        Returns: {
+          fullname: string
+          nome: string
+          value: number
+        }[]
+      }
+      get_desvios_by_classification: {
+        Args: { filtros?: Json }
+        Returns: {
+          color: string
+          nome: string
+          value: number
+        }[]
+      }
+      get_desvios_by_company: {
+        Args: { filtros?: Json }
+        Returns: {
+          nome: string
+          value: number
+        }[]
+      }
+      get_desvios_by_discipline: {
+        Args: { filtros?: Json }
+        Returns: {
+          nome: string
+          value: number
+        }[]
+      }
+      get_desvios_by_event: {
+        Args: { filtros?: Json }
+        Returns: {
+          nome: string
+          value: number
+        }[]
+      }
+      get_desvios_by_processo: {
+        Args: { filtros?: Json }
+        Returns: {
+          nome: string
+          value: number
+        }[]
+      }
+      get_desvios_by_type: {
+        Args: { filtros?: Json }
+        Returns: {
+          nome: string
+          value: number
+        }[]
+      }
       get_hht_by_cca: {
         Args: Record<PropertyKey, never>
         Returns: {
