@@ -1,31 +1,42 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { FilterParams } from "./types/dashboardTypes";
+import { applyFiltersToQuery } from "./utils/filterUtils";
 
 export const fetchDesviosByEvent = async (filters?: FilterParams) => {
   try {
-    // Convert filters to jsonb format for RPC
-    const filtros = filters ? {
-      year: filters.year,
-      month: filters.month,
-      ccaId: filters.ccaId,
-      disciplinaId: filters.disciplinaId,
-      empresaId: filters.empresaId,
-      ccaIds: filters.ccaIds?.join(',')
-    } : {};
+    // Use large range to get ALL records
+    let query = supabase
+      .from('desvios_completos')
+      .select(`
+        eventos_identificados:evento_identificado_id(codigo, nome)
+      `)
+      .not('evento_identificado_id', 'is', null)
+      .range(0, 100000); // Increased range to ensure all records
 
-    const { data, error } = await supabase.rpc('get_desvios_by_event', { filtros });
+    // Apply standardized filters
+    if (filters) {
+      query = applyFiltersToQuery(query, filters);
+    }
+
+    const { data, error } = await query;
     
     if (error) {
       console.error('Error fetching desvios by event:', error);
       return [];
     }
 
-    // Convert bigint to number and return in expected format
-    return data?.map(item => ({ 
-      name: item.nome, 
-      value: Number(item.value) 
-    })) || [];
+    // Count occurrences by event
+    const eventCounts: Record<string, number> = {};
+    data?.forEach(desvio => {
+      const evento = desvio.eventos_identificados?.nome || "OUTROS";
+      eventCounts[evento] = (eventCounts[evento] || 0) + 1;
+    });
+
+    // Convert to array format for the chart
+    return Object.entries(eventCounts)
+      .map(([name, value]) => ({ name, value }))
+      .sort((a, b) => b.value - a.value);
   } catch (error) {
     console.error('Exception fetching desvios by event:', error);
     return [];
