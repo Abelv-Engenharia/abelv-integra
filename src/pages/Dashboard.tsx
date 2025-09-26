@@ -2,11 +2,15 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useProfile } from "@/hooks/useProfile";
+import { useComunicadosPendentes } from "@/hooks/useComunicados";
+import ComunicadosSequence from "@/components/comunicados/ComunicadosSequence";
 
 const Dashboard = () => {
   const { user } = useAuth();
   const { profile } = useProfile();
+  const { data: comunicadosPendentes, refetch: refetchComunicados } = useComunicadosPendentes();
   const [currentDateTime, setCurrentDateTime] = useState(new Date());
+  const [showComunicados, setShowComunicados] = useState(false);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -15,6 +19,18 @@ const Dashboard = () => {
 
     return () => clearInterval(timer);
   }, []);
+
+  // Verificar comunicados pendentes após login
+  useEffect(() => {
+    if (user && comunicadosPendentes && comunicadosPendentes.length > 0) {
+      setShowComunicados(true);
+    }
+  }, [user, comunicadosPendentes]);
+
+  const handleComunicadosComplete = () => {
+    setShowComunicados(false);
+    refetchComunicados();
+  };
 
   const formatDateTime = (date: Date) => {
     return date.toLocaleString("pt-BR", {
@@ -72,6 +88,14 @@ const Dashboard = () => {
           className="max-w-[400px] w-full h-auto"
         />
       </div>
+
+      {/* Comunicados pendentes */}
+      {showComunicados && comunicadosPendentes && (
+        <ComunicadosSequence
+          comunicados={comunicadosPendentes}
+          onComplete={handleComunicadosComplete}
+        />
+      )}
     </div>
   );
 };

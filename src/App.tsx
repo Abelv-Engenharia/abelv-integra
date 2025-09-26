@@ -10,6 +10,9 @@ import Layout from "@/components/layout/Layout";
 
 // Import pages
 import Dashboard from "./pages/Dashboard";
+import ComunicadosCadastro from "./pages/admin/ComunicadosCadastro";
+import ComunicadosConsulta from "./pages/admin/ComunicadosConsulta";
+import MeusComunicados from "./pages/comunicados/MeusComunicados";
 import NotFound from "./pages/NotFound";
 
 // Auth pages

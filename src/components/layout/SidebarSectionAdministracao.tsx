@@ -66,6 +66,8 @@ export default function SidebarSectionAdministracao({ openMenu, toggleMenu, onLi
 
     { label: "Upload de Tutoriais", to: "/admin/upload-tutoriais", slug: "admin_upload_tutoriais", Icon: Upload },
     { label: "Configuração de E-mails", to: "/admin/configuracao-emails", slug: "admin_configuracao_emails", Icon: Mail },
+    { label: "Comunicados - Cadastro", to: "/admin/comunicados/cadastro", slug: "admin_comunicados", Icon: Mail },
+    { label: "Comunicados - Consulta", to: "/admin/comunicados/consulta", slug: "admin_comunicados", Icon: Database },
     { label: "Exportação de Dados", to: "/admin/exportacao-dados", slug: "admin_exportacao_dados", Icon: Database },
 
     { label: "Importação de Funcionários", to: "/admin/importacao-funcionarios", slug: "admin_importacao_funcionarios", Icon: UploadCloud },
