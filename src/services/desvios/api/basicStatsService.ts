@@ -3,63 +3,46 @@ import { supabase } from "@/integrations/supabase/client";
 import { DashboardStats, FilterParams } from "../types/dashboardTypes";
 import { calculatePercentages, calculateRiskLevel } from "../calculations/statsCalculator";
 import { applyFiltersToQuery } from "../utils/filterUtils";
-import { calculateStatusAcao } from "@/utils/desviosUtils";
+import { 
+  countAcoesCompletas, 
+  countAcoesAndamento, 
+  countAcoesPendentes, 
+  countTotalDesvios 
+} from "./countStatsService";
 
 export const fetchDashboardStats = async (filters?: FilterParams): Promise<DashboardStats> => {
   try {
-    // Buscar todos os desvios com os campos necessários para calcular o status
-    let query = supabase
+    console.log('Iniciando fetchDashboardStats com filtros:', filters);
+
+    // Fazer contagens paralelas otimizadas usando COUNT direto no Supabase
+    const [totalDesvios, acoesCompletas, acoesAndamento, acoesPendentes] = await Promise.all([
+      countTotalDesvios(filters),
+      countAcoesCompletas(filters),
+      countAcoesAndamento(filters),
+      countAcoesPendentes(filters)
+    ]);
+
+    console.log('Contagens obtidas:', {
+      totalDesvios,
+      acoesCompletas,
+      acoesAndamento,
+      acoesPendentes
+    });
+
+    // Buscar dados para cálculo de risco (apenas classificacao_risco)
+    let riskQuery = supabase
       .from('desvios_completos')
-      .select('id, situacao, status, prazo_conclusao, classificacao_risco')
-      .range(0, 99999); // Remove o limite padrão de 1000 registros
+      .select('classificacao_risco')
+      .range(0, 9999); // Limite menor para cálculo de risco
 
     if (filters) {
-      query = applyFiltersToQuery(query, filters);
+      riskQuery = applyFiltersToQuery(riskQuery, filters);
     }
 
-    const { data: desviosData, error } = await query;
-
-    if (error) {
-      console.error('Erro ao buscar desvios:', error);
-      throw error;
+    const { data: riskData, error: riskError } = await riskQuery;
+    if (riskError) {
+      console.warn('Erro ao buscar dados de risco:', riskError);
     }
-
-    // Calcular status para cada desvio usando a nova lógica
-    const desviosComStatusCalculado = (desviosData || []).map(desvio => ({
-      ...desvio,
-      statusCalculado: calculateStatusAcao(
-        desvio.situacao || desvio.status || "", 
-        desvio.prazo_conclusao || ""
-      )
-    }));
-
-    // Buscar contagem exata respeitando filtros (não limitada pelo PostgREST)
-    let countQuery = supabase
-      .from('desvios_completos')
-      .select('id', { count: 'exact', head: true });
-    if (filters) {
-      countQuery = applyFiltersToQuery(countQuery, filters);
-    }
-    const { count: totalCount, error: countError } = await countQuery;
-    if (countError) {
-      console.warn('Falha ao obter contagem exata, usando length do array:', countError);
-    }
-
-    const totalDesvios = totalCount ?? desviosComStatusCalculado.length;
-    console.log(`Total de desvios (count exato): ${totalDesvios}`);
-
-    // Contar ações por status calculado
-    const acoesCompletas = desviosComStatusCalculado.filter(d => 
-      d.statusCalculado === 'CONCLUÍDO'
-    ).length;
-
-    const acoesAndamento = desviosComStatusCalculado.filter(d => 
-      d.statusCalculado === 'EM ANDAMENTO'
-    ).length;
-
-    const acoesPendentes = desviosComStatusCalculado.filter(d => 
-      d.statusCalculado === 'PENDENTE'
-    ).length;
       
     // Calcular percentuais
     const percentages = calculatePercentages(
@@ -69,8 +52,8 @@ export const fetchDashboardStats = async (filters?: FilterParams): Promise<Dashb
       totalDesvios
     );
 
-    // Calcular nível de risco médio com filtros
-    const riskLevel = calculateRiskLevel(desviosComStatusCalculado.map(d => ({ classificacao_risco: d.classificacao_risco })));
+    // Calcular nível de risco médio com dados de risco
+    const riskLevel = calculateRiskLevel(riskData?.map(d => ({ classificacao_risco: d.classificacao_risco })) || []);
 
     const stats = {
       totalDesvios,
@@ -81,7 +64,7 @@ export const fetchDashboardStats = async (filters?: FilterParams): Promise<Dashb
       riskLevel,
     };
 
-    console.log('Dashboard Stats with calculated status:', stats, filters);
+    console.log('Dashboard Stats otimizadas:', stats, filters);
     return stats;
   } catch (error) {
     console.error('Erro ao buscar estatísticas do dashboard:', error);
