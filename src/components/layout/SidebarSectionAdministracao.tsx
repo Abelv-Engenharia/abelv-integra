@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   ChevronDown,
   ChevronRight,
@@ -50,6 +50,9 @@ type Item = { label: string; to: string; slug: string; Icon: React.ComponentType
 export default function SidebarSectionAdministracao({ openMenu, toggleMenu, onLinkClick, canSee }: Props) {
   const { pathname } = useLocation();
   const can = (slug: string) => (canSee ? canSee(slug) : true);
+  
+  // Estado local para controlar o submenu Comunicados independentemente
+  const [isComunicadosOpen, setIsComunicadosOpen] = useState(false);
 
   // ⚠️ Slugs batendo 1:1 com o seu JSON de permissões
   const items: Item[] = [
@@ -91,7 +94,6 @@ export default function SidebarSectionAdministracao({ openMenu, toggleMenu, onLi
   if (items.length === 0 && !can("admin_comunicados")) return null;
 
   const isOpen = openMenu === "admin";
-  const isComunicadosOpen = openMenu === "comunicados";
 
   return (
     <SidebarMenu>
@@ -129,7 +131,7 @@ export default function SidebarSectionAdministracao({ openMenu, toggleMenu, onLi
                   <Collapsible open={isComunicadosOpen}>
                     <CollapsibleTrigger asChild>
                       <SidebarMenuSubButton 
-                        onClick={() => toggleMenu("comunicados")}
+                        onClick={() => setIsComunicadosOpen(!isComunicadosOpen)}
                         className="text-white hover:bg-slate-600"
                       >
                         <MessageSquare className="h-3 w-3 flex-shrink-0" />

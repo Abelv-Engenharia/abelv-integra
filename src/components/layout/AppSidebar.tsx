@@ -173,6 +173,7 @@ export function AppSidebar() {
           "admin_checklists",
           "admin_criar_usuario",
           "admin_importacao_hsa",
+          "admin_comunicados", // Adicionar permissão para comunicados
         ].some(canSee) && (
           <SidebarSectionAdministracao
             openMenu={openMenu}
