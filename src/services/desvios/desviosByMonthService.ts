@@ -12,7 +12,6 @@ export const fetchDesviosByMonth = async (filters?: FilterParams) => {
         data_desvio,
         created_at
       `)
-      .range(0, 100000) // Added range to ensure all records
       .order('created_at', { ascending: false });
 
     // Apply standardized filters

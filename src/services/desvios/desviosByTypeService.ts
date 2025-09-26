@@ -1,46 +1,31 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { FilterParams } from "./types/dashboardTypes";
-import { applyFiltersToQuery } from "./utils/filterUtils";
 
 export const fetchDesviosByType = async (filters?: FilterParams) => {
   try {
-    // Use large range to get ALL records
-    let query = supabase
-      .from('desvios_completos')
-      .select(`
-        tipos_registro:tipo_registro_id(nome)
-      `)
-      .not('tipo_registro_id', 'is', null)
-      .range(0, 100000); // Increased range to ensure all records
+    // Convert filters to jsonb format for RPC
+    const filtros = filters ? {
+      year: filters.year,
+      month: filters.month,
+      ccaId: filters.ccaId,
+      disciplinaId: filters.disciplinaId,
+      empresaId: filters.empresaId,
+      ccaIds: filters.ccaIds?.join(',')
+    } : {};
 
-    // Apply standardized filters
-    if (filters) {
-      query = applyFiltersToQuery(query, filters);
-    }
-
-    const { data, error } = await query;
+    const { data, error } = await supabase.rpc('get_desvios_by_type', { filtros });
     
     if (error) {
       console.error('Error fetching desvios by type:', error);
       return [];
     }
 
-    // Count occurrences by type
-    const typeCounts: Record<string, number> = {};
-    data?.forEach(desvio => {
-      const tipo = desvio.tipos_registro?.nome || "OUTROS";
-      let label = tipo;
-      const up = (label || "").toUpperCase();
-      if (up.includes("DESVIO")) label = "Desvios";
-      else if (up === "OM" || up.includes("OPORTUNIDADE")) label = "OM";
-      typeCounts[label] = (typeCounts[label] || 0) + 1;
-    });
-
-    // Convert to array format for the chart
-    return Object.entries(typeCounts)
-      .map(([name, value]) => ({ name, value }))
-      .sort((a, b) => b.value - a.value);
+    // Convert bigint to number and return in expected format
+    return data?.map(item => ({ 
+      name: item.nome, 
+      value: Number(item.value) 
+    })) || [];
   } catch (error) {
     console.error('Exception fetching desvios by type:', error);
     return [];
