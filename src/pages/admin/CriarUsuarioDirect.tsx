@@ -15,7 +15,7 @@ export const CriarUsuarioDirect = () => {
   const handleSuccess = () => {
     setShowSuccess(true);
     setTimeout(() => {
-      navigate('/admin/usuarios');
+      navigate('/admin/usuarios-direct');
     }, 2000);
   };
 

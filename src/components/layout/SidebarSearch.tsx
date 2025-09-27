@@ -91,7 +91,7 @@ export default function SidebarSearch({ menusSidebar = [] }: Props) {
     { name: "Relatórios ID SMS", path: "/relatorios/idsms", category: "RELATÓRIOS", slug: "relatorios_idsms" },
 
     // ADMINISTRAÇÃO (slugs “admin_*”, como no seu JSON)
-    { name: "Admin Usuários", path: "/admin/usuarios", category: "ADMINISTRAÇÃO", slug: "admin_usuarios" },
+    { name: "Admin Usuários", path: "/admin/usuarios-direct", category: "ADMINISTRAÇÃO", slug: "admin_usuarios" },
     { name: "Admin Perfis", path: "/admin/perfis", category: "ADMINISTRAÇÃO", slug: "admin_perfis" },
     { name: "Admin Empresas", path: "/admin/empresas", category: "ADMINISTRAÇÃO", slug: "admin_empresas" },
     { name: "Importação Funcionários", path: "/admin/importacao-funcionarios", category: "ADMINISTRAÇÃO", slug: "admin_importacao_funcionarios" },

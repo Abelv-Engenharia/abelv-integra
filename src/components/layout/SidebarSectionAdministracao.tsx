@@ -56,7 +56,7 @@ export default function SidebarSectionAdministracao({ openMenu, toggleMenu, onLi
 
   // ⚠️ Slugs batendo 1:1 com o seu JSON de permissões
   const items: Item[] = [
-    { label: "Usuários", to: "/admin/usuarios", slug: "admin_usuarios", Icon: Users },
+    { label: "Usuários", to: "/admin/usuarios-direct", slug: "admin_usuarios", Icon: Users },
     { label: "Perfis", to: "/admin/perfis", slug: "admin_perfis", Icon: Shield },
     { label: "Empresas", to: "/admin/empresas", slug: "admin_empresas", Icon: Building2 },
     { label: "CCAs", to: "/admin/ccas", slug: "admin_ccas", Icon: Layers },
@@ -84,8 +84,9 @@ export default function SidebarSectionAdministracao({ openMenu, toggleMenu, onLi
     },
     { label: "Importação de HSA", to: "/admin/importacao-hsa", slug: "admin_importacao_hsa", Icon: UploadCloud },
 
-    { label: "Usuários (Auth)", to: "/admin/usuarios-auth", slug: "admin_usuarios_auth", Icon: Lock },
-    { label: "Criar Usuário", to: "/admin/criar-usuario", slug: "admin_criar_usuario", Icon: UserPlus },
+    // Removidos os itens do sistema antigo:
+    // { label: "Usuários (Auth)", to: "/admin/usuarios-auth", slug: "admin_usuarios_auth", Icon: Lock },
+    { label: "Criar Usuário", to: "/admin/criar-usuario-direct", slug: "admin_criar_usuario", Icon: UserPlus },
     { label: "Modelos de Inspeção", to: "/admin/modelos-inspecao", slug: "admin_modelos_inspecao", Icon: ListChecks },
     // Se existir “adm_manutencao” como rota:
     // { label: "Manutenção", to: "/admin/manutencao", slug: "adm_manutencao", Icon: Wrench }

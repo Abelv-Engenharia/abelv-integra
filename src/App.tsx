@@ -31,8 +31,7 @@ import ConfiguracaoEmailsPage from "./pages/configuracao-emails/ConfiguracaoEmai
 import UploadTutoriaisPage from "./pages/configuracao-emails/UploadTutoriais";
 import Suporte from "./pages/Suporte";
 
-// Admin pages - NEW USER MANAGEMENT PAGE
-import GerenciarUsuarios from "./pages/admin/GerenciarUsuarios";
+// Admin pages - DIRECT USER MANAGEMENT ONLY
 import GerenciarUsuariosDirect from "./pages/admin/GerenciarUsuariosDirect";
 import AdminUsuariosAuth from "./pages/admin/AdminUsuariosAuth";
 import AdminCCAs from "./pages/admin/AdminCCAs";
@@ -47,7 +46,6 @@ import AdminTemplates from "./pages/AdminTemplates";
 import ExportacaoDados from "./pages/admin/ExportacaoDados";
 import CadastroFuncionarios from "./pages/admin/CadastroFuncionarios";
 import ImportacaoFuncionarios from "./pages/admin/ImportacaoFuncionarios";
-import CriarUsuario from "./pages/admin/CriarUsuario";
 import CriarUsuarioDirect from "./pages/admin/CriarUsuarioDirect";
 import MetasIndicadores from "./pages/admin/MetasIndicadores";
 import RegistroHHT from "./pages/admin/RegistroHHT";
@@ -184,10 +182,13 @@ function App() {
                 {/* Support route */}
                 <Route path="suporte" element={<Suporte />} />
 
-                {/* Admin routes - NEW USER MANAGEMENT */}
-                <Route path="admin/usuarios" element={<GerenciarUsuarios />} />
+                {/* Admin routes - DIRECT USER MANAGEMENT ONLY */}
+                <Route path="admin/usuarios" element={<Navigate to="/admin/usuarios-direct" replace />} />
                 <Route path="admin/usuarios-direct" element={<GerenciarUsuariosDirect />} />
-                <Route path="admin/usuarios-auth" element={<AdminUsuariosAuth />} />
+                <Route path="admin/criar-usuario-direct" element={<CriarUsuarioDirect />} />
+                
+                {/* Redirect old routes to new system */}
+                <Route path="admin/usuarios-auth" element={<Navigate to="/admin/usuarios-direct" replace />} />
                 <Route path="admin/ccas" element={<AdminCCAs />} />
                 <Route path="admin/perfis" element={<AdminPerfis />} />
                 <Route path="admin/empresas" element={<AdminEmpresas />} />
@@ -199,8 +200,7 @@ function App() {
                 
                 <Route path="admin/funcionarios" element={<CadastroFuncionarios />} />
                 <Route path="admin/importacao-funcionarios" element={<ImportacaoFuncionarios />} />
-                <Route path="admin/criar-usuario" element={<CriarUsuario />} />
-                <Route path="admin/criar-usuario-direct" element={<CriarUsuarioDirect />} />
+                <Route path="admin/criar-usuario" element={<Navigate to="/admin/criar-usuario-direct" replace />} />
                 <Route path="admin/metas-indicadores" element={<MetasIndicadores />} />
                 <Route path="admin/registro-hht" element={<RegistroHHT />} />
                 <Route path="admin/exportacao-dados" element={<ExportacaoDados />} />

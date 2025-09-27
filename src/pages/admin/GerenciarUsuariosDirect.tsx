@@ -7,7 +7,6 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ArrowLeft, Plus, Search, Edit, Trash2, Users, Shield, User } from 'lucide-react';
 import { AdminOnlySection } from '@/components/security/AdminOnlySection';
-import { MigrateUsersButton } from '@/components/admin/usuarios/MigrateUsersButton';
 import { EditUserDirectForm } from '@/components/admin/usuarios/EditUserDirectForm';
 import { useUpdateUserDirect } from '@/hooks/useUpdateUserDirect';
 import { useQuery } from '@tanstack/react-query';
@@ -141,10 +140,7 @@ export default function GerenciarUsuariosDirect() {
           </Button>
         </div>
 
-        {/* Migração */}
-        <MigrateUsersButton />
-
-        {/* Busca */}
+        {/* Lista de Usuários */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
