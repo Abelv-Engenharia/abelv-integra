@@ -47,6 +47,7 @@ import ExportacaoDados from "./pages/admin/ExportacaoDados";
 import CadastroFuncionarios from "./pages/admin/CadastroFuncionarios";
 import ImportacaoFuncionarios from "./pages/admin/ImportacaoFuncionarios";
 import CriarUsuario from "./pages/admin/CriarUsuario";
+import CriarUsuarioDirect from "./pages/admin/CriarUsuarioDirect";
 import MetasIndicadores from "./pages/admin/MetasIndicadores";
 import RegistroHHT from "./pages/admin/RegistroHHT";
 import ImportacaoExecucaoTreinamentos from "./pages/admin/ImportacaoExecucaoTreinamentos";
@@ -197,6 +198,7 @@ function App() {
                 <Route path="admin/funcionarios" element={<CadastroFuncionarios />} />
                 <Route path="admin/importacao-funcionarios" element={<ImportacaoFuncionarios />} />
                 <Route path="admin/criar-usuario" element={<CriarUsuario />} />
+                <Route path="admin/criar-usuario-direct" element={<CriarUsuarioDirect />} />
                 <Route path="admin/metas-indicadores" element={<MetasIndicadores />} />
                 <Route path="admin/registro-hht" element={<RegistroHHT />} />
                 <Route path="admin/exportacao-dados" element={<ExportacaoDados />} />

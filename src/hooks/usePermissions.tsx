@@ -11,9 +11,15 @@ interface UsePermissionsReturn {
 }
 
 export const usePermissions = (): UsePermissionsReturn => {
-  const { userPermissoes, userRole, loadingProfile } = useProfile();
+  const { userPermissoes, userRole, loadingProfile, profile } = useProfile();
 
   const isAdmin = useMemo(() => {
+    // Verificar primeiro o novo sistema (permissões diretas)
+    if (userRole && typeof userRole === "string" && profile?.tipo_usuario) {
+      return profile.tipo_usuario === 'administrador';
+    }
+    
+    // Fallback para o sistema antigo
     return (
       (userRole && typeof userRole === "string" && 
        (userRole.toLowerCase().includes("admin") || userRole.toLowerCase() === "administrador")) ||
@@ -21,12 +27,27 @@ export const usePermissions = (): UsePermissionsReturn => {
        typeof userPermissoes === "object" && 
        (userPermissoes as any).admin_funcionarios === true)
     );
-  }, [userRole, userPermissoes]);
+  }, [userRole, userPermissoes, profile]);
 
   const hasPermission = useMemo(() => {
     return (permission: string): boolean => {
       if (isAdmin) return true;
       
+      // Verificar primeiro o novo sistema (permissões diretas)
+      if (profile?.tipo_usuario && profile?.permissoes_customizadas) {
+        const permissions = profile.permissoes_customizadas as any;
+        if (permissions[permission] === true) {
+          return true;
+        }
+        
+        // Verificar nos menus_sidebar do novo sistema
+        if (Array.isArray(profile.menus_sidebar) && 
+            profile.menus_sidebar.includes(permission)) {
+          return true;
+        }
+      }
+      
+      // Fallback para o sistema antigo
       if (!userPermissoes || typeof userPermissoes !== "object") {
         return false;
       }
@@ -38,7 +59,7 @@ export const usePermissions = (): UsePermissionsReturn => {
         return true;
       }
       
-      // Verificar nos menus_sidebar
+      // Verificar nos menus_sidebar do sistema antigo
       if (Array.isArray(permissions.menus_sidebar) && 
           permissions.menus_sidebar.includes(permission)) {
         return true;
@@ -46,7 +67,7 @@ export const usePermissions = (): UsePermissionsReturn => {
       
       return false;
     };
-  }, [isAdmin, userPermissoes]);
+  }, [isAdmin, userPermissoes, profile]);
 
   const hasAnyPermission = useMemo(() => {
     return (permissions: string[]): boolean => {

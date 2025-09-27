@@ -3653,33 +3653,45 @@ export type Database = {
           ativo: boolean
           avatar_url: string | null
           cargo: string | null
+          ccas_permitidas: Json | null
           created_at: string | null
           departamento: string | null
           email: string
           id: string
+          menus_sidebar: Json | null
           nome: string
+          permissoes_customizadas: Json | null
+          tipo_usuario: string | null
           updated_at: string | null
         }
         Insert: {
           ativo?: boolean
           avatar_url?: string | null
           cargo?: string | null
+          ccas_permitidas?: Json | null
           created_at?: string | null
           departamento?: string | null
           email: string
           id: string
+          menus_sidebar?: Json | null
           nome: string
+          permissoes_customizadas?: Json | null
+          tipo_usuario?: string | null
           updated_at?: string | null
         }
         Update: {
           ativo?: boolean
           avatar_url?: string | null
           cargo?: string | null
+          ccas_permitidas?: Json | null
           created_at?: string | null
           departamento?: string | null
           email?: string
           id?: string
+          menus_sidebar?: Json | null
           nome?: string
+          permissoes_customizadas?: Json | null
+          tipo_usuario?: string | null
           updated_at?: string | null
         }
         Relationships: []
