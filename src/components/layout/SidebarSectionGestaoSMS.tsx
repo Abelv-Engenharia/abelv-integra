@@ -108,7 +108,7 @@ export default function SidebarSectionGestaoSMS({
   const horaSegurancaItems: LinkItem[] = [
     { label: "Dashboard", to: "/hora-seguranca/dashboard", slug: "hora_seguranca_dashboard" },
     { label: "Cadastro", to: "/hora-seguranca/inspecao-cadastro-hsa", slug: "hora_seguranca_inspecoes_cadastro" },
-    { label: "Agenda", to: "/hora-seguranca/agenda-hsa", slug: "hora_seguranca_agenda" },
+    { label: "Agenda", to: "/hora-seguranca/agenda-hsa", slug: "hora_seguranca_agenda_hsa" },
     { label: "Acompanhamento", to: "/hora-seguranca/inspecoes-acompanhamento", slug: "hora_seguranca_acompanhamento" },
     { label: "Inspeção Não Programada", to: "/hora-seguranca/inspecao-nao-programada-hsa", slug: "hora_seguranca_inspecoes_nao_programadas" },
   ];

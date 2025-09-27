@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Plus, Eye, Edit, RefreshCw, Trash2 } from "lucide-react";
+import { PermissionGuard } from "@/components/security/PermissionGuard";
 import DocumentosAnexados from "@/components/ocorrencias/DocumentosAnexados";
 import OcorrenciasConsultaFilters from "@/components/ocorrencias/OcorrenciasConsultaFilters";
 import { getAllOcorrencias, deleteOcorrencia, OcorrenciasFilters } from "@/services/ocorrencias/ocorrenciasService";
@@ -279,14 +280,16 @@ const OcorrenciasConsulta = () => {
                           >
                             <Eye className="h-4 w-4" />
                           </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleEdit(ocorrencia.id)}
-                            title="Editar"
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
+                          <PermissionGuard requiredPermissions={["ocorrencias_edicao", "admin_funcionarios"]}>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleEdit(ocorrencia.id)}
+                              title="Editar"
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                          </PermissionGuard>
                           <Button
                             variant="outline"
                             size="sm"
@@ -296,15 +299,17 @@ const OcorrenciasConsulta = () => {
                             <RefreshCw className="h-4 w-4" />
                           </Button>
                           <DocumentosAnexados ocorrencia={ocorrencia} />
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleDelete(ocorrencia.id)}
-                            title="Excluir"
-                            className="text-red-600 hover:text-red-700"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+                          <PermissionGuard requiredPermissions={["ocorrencias_excluir", "admin_funcionarios"]}>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleDelete(ocorrencia.id)}
+                              title="Excluir"
+                              className="text-red-600 hover:text-red-700"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </PermissionGuard>
                         </div>
                       </td>
                     </tr>

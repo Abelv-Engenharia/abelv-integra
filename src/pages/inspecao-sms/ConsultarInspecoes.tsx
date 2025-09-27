@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { DatePickerWithManualInput } from "@/components/ui/date-picker-with-manual-input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { FileSearch, Eye, Download, Filter, Search, Trash2 } from "lucide-react";
+import { PermissionGuard } from "@/components/security/PermissionGuard";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserCCAs } from "@/hooks/useUserCCAs";
 import { format } from "date-fns";
@@ -393,39 +394,41 @@ const ConsultarInspecoes = () => {
                              <Download className="h-4 w-4" />
                              <span className="sr-only">Download PDF</span>
                            </Button>
-                           <AlertDialog>
-                             <AlertDialogTrigger asChild>
-                               <Button 
-                                 variant="outline" 
-                                 size="sm"
-                                 className="text-destructive hover:text-destructive"
-                               >
-                                 <Trash2 className="h-4 w-4" />
-                                 <span className="sr-only">Excluir</span>
-                               </Button>
-                             </AlertDialogTrigger>
-                             <AlertDialogContent>
-                               <AlertDialogHeader>
-                                 <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
-                                 <AlertDialogDescription>
-                                   Tem certeza de que deseja excluir esta inspeção? Esta ação não pode ser desfeita.
-                                   <br /><br />
-                                   <strong>Inspeção:</strong> {inspecao.checklists_avaliacao?.nome || 'N/A'}<br />
-                                   <strong>Local:</strong> {inspecao.local}<br />
-                                   <strong>Data:</strong> {format(new Date(inspecao.data_inspecao + 'T00:00:00'), 'dd/MM/yyyy', { locale: ptBR })}
-                                 </AlertDialogDescription>
-                               </AlertDialogHeader>
-                               <AlertDialogFooter>
-                                 <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                 <AlertDialogAction 
-                                   onClick={() => handleDeleteInspecao(inspecao)}
-                                   className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                 >
-                                   Excluir
-                                 </AlertDialogAction>
-                               </AlertDialogFooter>
-                             </AlertDialogContent>
-                           </AlertDialog>
+                            <PermissionGuard requiredPermissions={["inspecao_sms_excluir", "admin_funcionarios"]}>
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm"
+                                    className="text-destructive hover:text-destructive"
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                    <span className="sr-only">Excluir</span>
+                                  </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                      Tem certeza de que deseja excluir esta inspeção? Esta ação não pode ser desfeita.
+                                      <br /><br />
+                                      <strong>Inspeção:</strong> {inspecao.checklists_avaliacao?.nome || 'N/A'}<br />
+                                      <strong>Local:</strong> {inspecao.local}<br />
+                                      <strong>Data:</strong> {format(new Date(inspecao.data_inspecao + 'T00:00:00'), 'dd/MM/yyyy', { locale: ptBR })}
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                    <AlertDialogAction 
+                                      onClick={() => handleDeleteInspecao(inspecao)}
+                                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                    >
+                                      Excluir
+                                    </AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
+                            </PermissionGuard>
                          </div>
                        </TableCell>
                     </TableRow>
