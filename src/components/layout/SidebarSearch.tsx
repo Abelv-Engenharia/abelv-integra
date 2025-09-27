@@ -3,6 +3,7 @@ import { Search, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { usePermissionsDirect } from "@/hooks/usePermissionsDirect";
 
 type MenuItem = {
   name: string;
@@ -11,19 +12,13 @@ type MenuItem = {
   slug: string; // <-- usado para checar permissão
 };
 
-type Props = {
-  menusSidebar?: string[];
-};
-
-export default function SidebarSearch({ menusSidebar = [] }: Props) {
+export default function SidebarSearch() {
   const [searchTerm, setSearchTerm] = useState("");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const { hasPermission } = usePermissionsDirect();
 
-  // Predicado de permissão baseado no whitelist menus_sidebar
-  const canSee = useMemo(() => {
-    const set = new Set(menusSidebar ?? []);
-    return (slug: string) => set.has(slug);
-  }, [menusSidebar]);
+  // Predicado de permissão baseado no sistema direto
+  const canSee = (slug: string) => hasPermission(slug);
 
   // Todos os itens de menu disponíveis (agora com slug correspondente ao menus_sidebar)
   const allMenuItems: MenuItem[] = [
@@ -116,7 +111,7 @@ export default function SidebarSearch({ menusSidebar = [] }: Props) {
           item.category.toLowerCase().includes(searchTerm.toLowerCase())
       )
       .slice(0, 8); // limitar a 8 resultados
-  }, [searchTerm, canSee]);
+  }, [searchTerm, hasPermission]);
 
   const clearSearch = () => {
     setSearchTerm("");

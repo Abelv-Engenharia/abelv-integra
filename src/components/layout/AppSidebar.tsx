@@ -17,29 +17,17 @@ import SidebarSectionTarefas from "./SidebarSectionTarefas";
 import SidebarSectionRelatorios from "./SidebarSectionRelatorios";
 import SidebarSectionAdministracao from "./SidebarSectionAdministracao";
 import SidebarSearch from "./SidebarSearch";
-import { useProfile } from "@/hooks/useProfile";
+import { usePermissionsDirect } from "@/hooks/usePermissionsDirect";
 import logoAbelvIntegra from "@/assets/logo-abelv-integra.png";
-
-// helper simples para ler a whitelist do perfil
-function podeVerMenu(menu: string, menusSidebar?: string[]) {
-  if (!menusSidebar || !Array.isArray(menusSidebar)) return false;
-  return menusSidebar.includes(menu);
-}
 
 export function AppSidebar() {
   const location = useLocation();
   const currentPath = location.pathname;
-  const { userPermissoes } = useProfile();
+  const { hasPermission, loading } = usePermissionsDirect();
   const { isMobile, setOpenMobile, state } = useSidebar();
 
-  // pega os slugs do perfil
-  const menusSidebar =
-    userPermissoes && typeof userPermissoes === "object" && Array.isArray((userPermissoes as any).menus_sidebar)
-      ? (userPermissoes as any).menus_sidebar
-      : [];
-
   // predicado de visibilidade que será repassado às seções
-  const canSee = (slug: string) => podeVerMenu(slug, menusSidebar);
+  const canSee = (slug: string) => hasPermission(slug);
 
   // qual grupo começa aberto
   const [openMenu, setOpenMenu] = useState<string | null>(() => {
@@ -84,8 +72,8 @@ export function AppSidebar() {
 
       
       <SidebarContent className="bg-sky-900">
-        {/* Busca (já filtrando pela whitelist via prop) */}
-        <SidebarSearch menusSidebar={menusSidebar} />
+        {/* Busca (sem menusSidebar prop, pois SidebarSearch deve ter sua própria lógica) */}
+        <SidebarSearch />
 
         {/* Seção: Gestão SMS (renderiza se houver pelo menos 1 slug permitido dessa área) */}
         {[
