@@ -42,25 +42,81 @@ export const usePermissionsDirect = (): UsePermissionsDirectReturn => {
 
   const hasPermission = useMemo(() => {
     return (permission: string): boolean => {
-      if (isAdmin) return true;
+      console.log('🔍 [usePermissionsDirect] Verificando permissão:', permission);
+      
+      if (isAdmin) {
+        console.log('✅ [usePermissionsDirect] Admin tem acesso total');
+        return true;
+      }
       
       if (!userProfile?.permissoes_customizadas) {
+        console.log('❌ [usePermissionsDirect] Sem permissoes_customizadas');
         return false;
       }
+
+      console.log('📊 [usePermissionsDirect] Permissões disponíveis:', {
+        permissoes_customizadas: userProfile.permissoes_customizadas,
+        menus_sidebar: userProfile.menus_sidebar
+      });
 
       const permissions = userProfile.permissoes_customizadas as any;
       
       // Verificar permissão booleana direta
       if (permissions[permission] === true) {
+        console.log('✅ [usePermissionsDirect] Encontrada em permissoes_customizadas como boolean');
         return true;
       }
       
-      // Verificar nos menus_sidebar
+      // Verificar se há uma propriedade menus_sidebar dentro de permissoes_customizadas
+      if (permissions.menus_sidebar && Array.isArray(permissions.menus_sidebar)) {
+        if (permissions.menus_sidebar.includes(permission)) {
+          console.log('✅ [usePermissionsDirect] Encontrada em permissoes_customizadas.menus_sidebar');
+          return true;
+        }
+      }
+      
+      // Verificar nos menus_sidebar do nível raiz
       if (Array.isArray(userProfile.menus_sidebar) && 
           userProfile.menus_sidebar.includes(permission)) {
+        console.log('✅ [usePermissionsDirect] Encontrada em menus_sidebar raiz');
         return true;
       }
       
+      // Verificar variações comuns de slug que podem ter inconsistências
+      const slugVariations = [
+        // Para hora da segurança: tentar versão sem "_inspecao"
+        permission.replace('_cadastro_inspecao', '_cadastro'),
+        permission.replace('_inspecao', ''),
+        // Para outras possíveis variações
+        permission.replace('_consulta', ''),
+        permission.replace('_dashboard', ''),
+      ];
+      
+      for (const variation of slugVariations) {
+        if (variation !== permission) {
+          // Verificar boolean
+          if (permissions[variation] === true) {
+            console.log('✅ [usePermissionsDirect] Encontrada variação em permissoes_customizadas:', variation);
+            return true;
+          }
+          
+          // Verificar menus_sidebar dentro de permissoes_customizadas
+          if (permissions.menus_sidebar && Array.isArray(permissions.menus_sidebar)) {
+            if (permissions.menus_sidebar.includes(variation)) {
+              console.log('✅ [usePermissionsDirect] Encontrada variação em permissoes_customizadas.menus_sidebar:', variation);
+              return true;
+            }
+          }
+          
+          // Verificar menus_sidebar raiz
+          if (Array.isArray(userProfile.menus_sidebar) && userProfile.menus_sidebar.includes(variation)) {
+            console.log('✅ [usePermissionsDirect] Encontrada variação em menus_sidebar raiz:', variation);
+            return true;
+          }
+        }
+      }
+      
+      console.log('❌ [usePermissionsDirect] Permissão não encontrada:', permission);
       return false;
     };
   }, [isAdmin, userProfile?.permissoes_customizadas, userProfile?.menus_sidebar]);

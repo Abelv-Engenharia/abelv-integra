@@ -42,7 +42,13 @@ export default function SidebarSectionGestaoSMS({
   const location = useLocation();
   const currentPath = location.pathname;
 
-  const can = useMemo<(slug: string) => boolean>(() => canSee ?? (() => true), [canSee]);
+  const can = useMemo<(slug: string) => boolean>(() => {
+    return (slug: string) => {
+      const result = canSee ? canSee(slug) : true;
+      console.log('📱 [SidebarSMS] Testando slug:', slug, 'Resultado:', result);
+      return result;
+    };
+  }, [canSee]);
 
   const [openSubMenus, setOpenSubMenus] = useState<Record<string, boolean>>({});
 

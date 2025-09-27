@@ -49,7 +49,11 @@ type Item = { label: string; to: string; slug: string; Icon: React.ComponentType
 
 export default function SidebarSectionAdministracao({ openMenu, toggleMenu, onLinkClick, canSee }: Props) {
   const { pathname } = useLocation();
-  const can = (slug: string) => (canSee ? canSee(slug) : true);
+  const can = (slug: string) => {
+    const result = canSee ? canSee(slug) : true;
+    console.log('🔧 [SidebarAdmin] Testando slug:', slug, 'Resultado:', result);
+    return result;
+  };
   
   // Estado local para controlar o submenu Comunicados independentemente
   const [isComunicadosOpen, setIsComunicadosOpen] = useState(false);

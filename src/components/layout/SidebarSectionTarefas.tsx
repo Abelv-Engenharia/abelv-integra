@@ -22,7 +22,11 @@ type Item = { label: string; to: string; slug: string };
 
 export default function SidebarSectionTarefas({ openMenu, toggleMenu, onLinkClick, canSee }: Props) {
   const { pathname } = useLocation();
-  const can = (slug: string) => (canSee ? canSee(slug) : true);
+  const can = (slug: string) => {
+    const result = canSee ? canSee(slug) : true;
+    console.log('📋 [SidebarTarefas] Testando slug:', slug, 'Resultado:', result);
+    return result;
+  };
 
   const items: Item[] = [
     { label: "Dashboard", to: "/tarefas/dashboard", slug: "tarefas_dashboard" },
