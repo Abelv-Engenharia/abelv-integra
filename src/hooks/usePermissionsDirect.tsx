@@ -44,13 +44,19 @@ export const usePermissionsDirect = (): UsePermissionsDirectReturn => {
     return (permission: string): boolean => {
       console.log('🔍 [usePermissionsDirect] Verificando permissão:', permission);
       
+      // Guard clause: se não há userProfile, retornar false
+      if (!userProfile) {
+        console.log('⚠️ [usePermissionsDirect] userProfile não definido');
+        return false;
+      }
+      
       if (isAdmin) {
         console.log('✅ [usePermissionsDirect] Admin tem acesso total');
         return true;
       }
       
       // Se não há permissões customizadas ou está vazio, verificar apenas menus_sidebar
-      if (!userProfile?.permissoes_customizadas || 
+      if (!userProfile.permissoes_customizadas || 
           (typeof userProfile.permissoes_customizadas === 'object' && 
            Object.keys(userProfile.permissoes_customizadas).length === 0)) {
         console.log('⚠️ [usePermissionsDirect] permissoes_customizadas vazio, verificando apenas menus_sidebar');
