@@ -14,26 +14,21 @@ export const useUserCCAs = () => {
       try {
         console.log('Buscando CCAs para usuário:', user.id);
         
-        // Buscar o perfil do usuário e seus CCAs permitidos em uma única query otimizada
-        const { data: userPerfil, error: userPerfilError } = await supabase
-          .from('usuario_perfis')
-          .select(`
-            perfil_id,
-            perfis!inner (
-              ccas_permitidas
-            )
-          `)
-          .eq('usuario_id', user.id)
+        // Buscar CCAs permitidos do novo sistema (profiles.ccas_permitidas)
+        const { data: userProfile, error: userProfileError } = await supabase
+          .from('profiles')
+          .select('ccas_permitidas')
+          .eq('id', user.id)
           .single();
 
-        if (userPerfilError) {
-          console.error("Erro ao buscar perfil do usuário:", userPerfilError);
+        if (userProfileError) {
+          console.error("Erro ao buscar perfil do usuário:", userProfileError);
           return [];
         }
 
-        console.log('Perfil do usuário encontrado:', userPerfil);
+        console.log('Perfil do usuário encontrado:', userProfile);
 
-        const ccasPermitidas = userPerfil?.perfis?.ccas_permitidas as number[] || [];
+        const ccasPermitidas = userProfile?.ccas_permitidas as number[] || [];
         console.log('CCAs permitidas:', ccasPermitidas);
         
         // Se não tem CCAs específicos, retorna vazio (sem acesso)
@@ -42,7 +37,7 @@ export const useUserCCAs = () => {
           return [];
         }
 
-        // Buscar os detalhes dos CCAs permitidos com cache otimizado
+        // Buscar os detalhes dos CCAs permitidos
         const { data: ccas, error: ccasError } = await supabase
           .from('ccas')
           .select('*')
