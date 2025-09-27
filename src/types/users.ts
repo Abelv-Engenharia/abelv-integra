@@ -99,7 +99,6 @@ export interface PermissoesCustomizadas {
   admin_usuarios_auth?: boolean;
   admin_criar_usuario?: boolean;
   admin_criar_usuario_direct?: boolean;
-  admin_perfis?: boolean;
   
   // Administração - Sistema
   admin_funcionarios?: boolean;
@@ -173,7 +172,6 @@ export interface Permissoes {
   
   // Administração
   admin_usuarios: boolean;
-  admin_perfis: boolean;
   admin_funcionarios: boolean;
   admin_hht: boolean;
   admin_templates: boolean;

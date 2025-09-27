@@ -163,9 +163,7 @@ export const COMPLETE_PERMISSIONS: PermissionCategory[] = [
       { key: 'admin_usuarios_direct', label: 'Usuários Diretos' },
       { key: 'admin_usuarios_auth', label: 'Usuários Auth' },
       { key: 'admin_criar_usuario', label: 'Criar Usuário' },
-      { key: 'admin_criar_usuario_direct', label: 'Criar Usuário Direto' },
-      { key: 'admin_perfis', label: 'Perfis' },
-      { key: 'admin_atualizar_perfis', label: 'Atualizar Perfis' }
+      { key: 'admin_criar_usuario_direct', label: 'Criar Usuário Direto' }
     ]
   },
   {

@@ -33,9 +33,7 @@ import Suporte from "./pages/Suporte";
 
 // Admin pages - DIRECT USER MANAGEMENT ONLY
 import GerenciarUsuariosDirect from "./pages/admin/GerenciarUsuariosDirect";
-import AdminUsuariosAuth from "./pages/admin/AdminUsuariosAuth";
 import AdminCCAs from "./pages/admin/AdminCCAs";
-import AdminPerfis from "./pages/admin/AdminPerfis";
 import AdminEmpresas from "./pages/admin/AdminEmpresas";
 import AdminEngenheiros from "./pages/admin/AdminEngenheiros";
 import AdminSupervisores from "./pages/admin/AdminSupervisores";
@@ -142,9 +140,6 @@ import InspecaoExtintores from "./pages/prevencao-incendio/InspecaoExtintores";
 import ConsultaInspecoesExtintores from "./pages/prevencao-incendio/ConsultaInspecoesExtintores";
 import VisualizarInspecaoExtintor from "./pages/prevencao-incendio/VisualizarInspecaoExtintor";
 
-// Atualização de Perfis
-import AtualizarPerfis from "./pages/admin/AtualizarPerfis";
-
 // Placeholder page
 import PlaceholderPage from "./pages/PlaceholderPage";
 
@@ -189,8 +184,8 @@ function App() {
                 
                 {/* Redirect old routes to new system */}
                 <Route path="admin/usuarios-auth" element={<Navigate to="/admin/usuarios-direct" replace />} />
+                <Route path="admin/perfis" element={<Navigate to="/admin/usuarios-direct" replace />} />
                 <Route path="admin/ccas" element={<AdminCCAs />} />
-                <Route path="admin/perfis" element={<AdminPerfis />} />
                 <Route path="admin/empresas" element={<AdminEmpresas />} />
                 <Route path="admin/engenheiros" element={<AdminEngenheiros />} />
                 <Route path="admin/supervisores" element={<AdminSupervisores />} />
@@ -211,7 +206,7 @@ function App() {
                 <Route path="upload-tutoriais" element={<UploadTutoriaisPage />} />
                 <Route path="admin/importacao-execucao-treinamentos" element={<ImportacaoExecucaoTreinamentos />} />
                 <Route path="admin/importacao-hsa" element={<ImportacaoHSA />} />
-                <Route path="admin/atualizar-perfis" element={<AtualizarPerfis />} />
+                <Route path="admin/atualizar-perfis" element={<Navigate to="/admin/usuarios-direct" replace />} />
 
                 {/* Comunicados routes */}
                 <Route path="admin/comunicados/cadastro" element={<ComunicadosCadastro />} />

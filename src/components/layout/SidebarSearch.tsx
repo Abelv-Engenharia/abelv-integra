@@ -55,7 +55,7 @@ export default function SidebarSearch({ menusSidebar = [] }: Props) {
     { name: "ADM Configurações", path: "/adm/configuracoes", category: "ADM MATRICIAL", slug: "adm_configuracoes" },
     { name: "ADM Usuários", path: "/adm/usuarios", category: "ADM MATRICIAL", slug: "adm_usuarios" },
     { name: "ADM Empresas", path: "/adm/empresas", category: "ADM MATRICIAL", slug: "adm_empresas" },
-    { name: "ADM Perfis", path: "/adm/perfis", category: "ADM MATRICIAL", slug: "adm_perfis" },
+    { name: "ADM Perfis", path: "/admin/usuarios-direct", category: "ADM MATRICIAL", slug: "admin_usuarios" },
 
     // ORÇAMENTOS
     { name: "Orçamentos Dashboard", path: "/orcamentos/dashboard", category: "ORÇAMENTOS", slug: "orcamentos_dashboard" },
@@ -92,7 +92,6 @@ export default function SidebarSearch({ menusSidebar = [] }: Props) {
 
     // ADMINISTRAÇÃO (slugs “admin_*”, como no seu JSON)
     { name: "Admin Usuários", path: "/admin/usuarios-direct", category: "ADMINISTRAÇÃO", slug: "admin_usuarios" },
-    { name: "Admin Perfis", path: "/admin/perfis", category: "ADMINISTRAÇÃO", slug: "admin_perfis" },
     { name: "Admin Empresas", path: "/admin/empresas", category: "ADMINISTRAÇÃO", slug: "admin_empresas" },
     { name: "Importação Funcionários", path: "/admin/importacao-funcionarios", category: "ADMINISTRAÇÃO", slug: "admin_importacao_funcionarios" },
     { name: "Importação Execução Treinamentos", path: "/admin/importacao-execucao-treinamentos", category: "ADMINISTRAÇÃO", slug: "admin_importacao_execucao_treinamentos" },

@@ -58,21 +58,20 @@ export const PermissionsAlert = ({ canManageUsers, permissions }: PermissionsAle
       {permissions && (
         <Alert>
           <AlertCircle className="h-4 w-4" />
-          <AlertDescription>
-            <div className="space-y-2">
-              <p>Suas permissões atuais:</p>
-              <div className="flex flex-wrap gap-1">
-                {permissions.admin_perfis && <Badge variant="secondary">Gerenciar perfis</Badge>}
-                {permissions.admin_funcionarios && <Badge variant="secondary">Gerenciar funcionários</Badge>}
-                {permissions.desvios && <Badge variant="secondary">Desvios</Badge>}
-                {permissions.ocorrencias && <Badge variant="secondary">Ocorrências</Badge>}
-                {permissions.treinamentos && <Badge variant="secondary">Treinamentos</Badge>}
-                {Object.values(permissions).every(v => v === false) && (
-                  <Badge variant="outline">Nenhuma permissão especial</Badge>
-                )}
+            <AlertDescription>
+              <div className="space-y-2">
+                <p>Suas permissões atuais:</p>
+                <div className="flex flex-wrap gap-1">
+                  {permissions.admin_funcionarios && <Badge variant="secondary">Gerenciar funcionários</Badge>}
+                  {permissions.desvios && <Badge variant="secondary">Desvios</Badge>}
+                  {permissions.ocorrencias && <Badge variant="secondary">Ocorrências</Badge>}
+                  {permissions.treinamentos && <Badge variant="secondary">Treinamentos</Badge>}
+                  {Object.values(permissions).every(v => v === false) && (
+                    <Badge variant="outline">Nenhuma permissão especial</Badge>
+                  )}
+                </div>
               </div>
-            </div>
-          </AlertDescription>
+            </AlertDescription>
         </Alert>
       )}
     </>

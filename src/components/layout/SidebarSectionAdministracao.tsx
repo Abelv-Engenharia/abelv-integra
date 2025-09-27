@@ -54,10 +54,9 @@ export default function SidebarSectionAdministracao({ openMenu, toggleMenu, onLi
   // Estado local para controlar o submenu Comunicados independentemente
   const [isComunicadosOpen, setIsComunicadosOpen] = useState(false);
 
-  // ⚠️ Slugs batendo 1:1 com o seu JSON de permissões
+  // Sistema de perfis removido - usando sistema direto
   const items: Item[] = [
     { label: "Usuários", to: "/admin/usuarios-direct", slug: "admin_usuarios", Icon: Users },
-    { label: "Perfis", to: "/admin/perfis", slug: "admin_perfis", Icon: Shield },
     { label: "Empresas", to: "/admin/empresas", slug: "admin_empresas", Icon: Building2 },
     { label: "CCAs", to: "/admin/ccas", slug: "admin_ccas", Icon: Layers },
     { label: "Engenheiros", to: "/admin/engenheiros", slug: "admin_engenheiros", Icon: Hammer },

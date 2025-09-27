@@ -152,7 +152,6 @@ export function AppSidebar() {
         {/* Seção: Administração */}
         {[
           "admin_usuarios",
-          "admin_perfis",
           "admin_empresas",
           "admin_ccas",
           "admin_engenheiros",
