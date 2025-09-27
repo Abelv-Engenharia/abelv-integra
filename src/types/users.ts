@@ -35,42 +35,80 @@ export interface AuthUser {
 export type TipoUsuario = 'administrador' | 'usuario';
 
 export interface PermissoesCustomizadas {
-  // Módulos principais
-  desvios?: boolean;
-  treinamentos?: boolean;
-  ocorrencias?: boolean;
-  tarefas?: boolean;
-  relatorios?: boolean;
-  hora_seguranca?: boolean;
-  medidas_disciplinares?: boolean;
+  // Dashboard
+  dashboard?: boolean;
   
-  // Administração
-  admin_usuarios?: boolean;
-  admin_perfis?: boolean;
-  admin_funcionarios?: boolean;
-  admin_hht?: boolean;
-  admin_templates?: boolean;
-  admin_empresas?: boolean;
-  admin_supervisores?: boolean;
-  admin_engenheiros?: boolean;
-  admin_ccas?: boolean;
+  // Desvios
+  desvios_dashboard?: boolean;
+  desvios_cadastro?: boolean;
+  desvios_consulta?: boolean;
+  desvios_nao_conformidade?: boolean;
+  desvios_insights?: boolean;
+  desvios_editar?: boolean;
+  desvios_excluir?: boolean;
+  
+  // Ocorrências
+  ocorrencias_dashboard?: boolean;
+  ocorrencias_cadastro?: boolean;
+  ocorrencias_consulta?: boolean;
+  ocorrencias_visualizacao?: boolean;
+  ocorrencias_detalhes?: boolean;
+  ocorrencias_edicao?: boolean;
+  ocorrencias_atualizar_status?: boolean;
+  
+  // Treinamentos
+  treinamentos_dashboard?: boolean;
+  treinamentos_execucao?: boolean;
+  treinamentos_consulta?: boolean;
+  treinamentos_cracha?: boolean;
+  treinamentos_normativo?: boolean;
+  treinamentos_editar_execucao?: boolean;
+  treinamentos_visualizar_execucao?: boolean;
+  
+  // Tarefas
+  tarefas_dashboard?: boolean;
+  tarefas_cadastro?: boolean;
+  tarefas_minhas_tarefas?: boolean;
+  tarefas_detalhe?: boolean;
+  tarefas_editar?: boolean;
+  
+  // HSA - Hora da Segurança
+  hora_seguranca_dashboard?: boolean;
+  hora_seguranca_inspecoes_cadastro?: boolean;
+  hora_seguranca_inspecoes_acompanhamento?: boolean;
+  hora_seguranca_inspecoes_nao_programadas?: boolean;
+  hora_seguranca_inspecao_cadastro_hsa?: boolean;
+  hora_seguranca_inspecao_nao_programada_hsa?: boolean;
+  hora_seguranca_painel_execucao_hsa?: boolean;
+  hora_seguranca_agenda_hsa?: boolean;
   
   // IDSMS
   idsms_dashboard?: boolean;
-  idsms_formularios?: boolean;
+  idsms_indicadores?: boolean;
+  idsms_ht?: boolean;
+  idsms_hsa?: boolean;
+  idsms_iid?: boolean;
+  idsms_ipom?: boolean;
+  idsms_indice_reativo?: boolean;
+  idsms_inspecao_alta_lideranca?: boolean;
+  idsms_inspecao_gestao_sms?: boolean;
   
-  // Configurações específicas de permissões
-  pode_editar_desvios?: boolean;
-  pode_excluir_desvios?: boolean;
-  pode_editar_ocorrencias?: boolean;
-  pode_excluir_ocorrencias?: boolean;
-  pode_editar_treinamentos?: boolean;
-  pode_excluir_treinamentos?: boolean;
-  pode_editar_tarefas?: boolean;
-  pode_excluir_tarefas?: boolean;
-  pode_aprovar_tarefas?: boolean;
-  pode_visualizar_relatorios_completos?: boolean;
-  pode_exportar_dados?: boolean;
+  // Administração - Usuários
+  admin_usuarios?: boolean;
+  admin_usuarios_direct?: boolean;
+  admin_usuarios_auth?: boolean;
+  admin_criar_usuario?: boolean;
+  admin_criar_usuario_direct?: boolean;
+  admin_perfis?: boolean;
+  
+  // Administração - Sistema
+  admin_funcionarios?: boolean;
+  admin_empresas?: boolean;
+  admin_ccas?: boolean;
+  admin_configuracoes?: boolean;
+  
+  // Demais permissões
+  [key: string]: boolean | undefined;
 }
 
 // Interface atualizada para perfil de usuário com permissões diretas
@@ -110,10 +148,11 @@ export const authUserCreateSchema = z.object({
 export const authUserCreateDirectSchema = z.object({
   nome: z.string().min(3, "O nome deve ter pelo menos 3 caracteres"),
   email: z.string().email("Digite um email válido"),
-  password: z.string().min(6, "A senha deve ter pelo menos 6 caracteres"),
+  senha: z.string().min(6, "A senha deve ter pelo menos 6 caracteres"),
   tipo_usuario: z.enum(['administrador', 'usuario']),
   permissoes_customizadas: z.record(z.boolean()).optional(),
   ccas_permitidas: z.array(z.number()).optional(),
+  menus_sidebar: z.array(z.string()).optional(),
 });
 
 export type SearchFormValues = z.infer<typeof searchFormSchema>;

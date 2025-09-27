@@ -1,67 +1,61 @@
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { z } from 'zod';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Separator } from '@/components/ui/separator';
-import { Loader2, CheckCircle, AlertCircle, User, Shield } from 'lucide-react';
-import { TipoUsuario } from '@/types/users';
-import { useToast } from '@/hooks/use-toast';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { CheckCircle } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { fetchCCAs } from '@/services/treinamentos/ccaService';
-import { z } from 'zod';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+import { 
+  COMPLETE_PERMISSIONS,
+  getAllPermissionsFromCategory,
+  areAllPermissionsSelected,
+  areSomePermissionsSelected,
+  convertPermissionsToMenusSidebar
+} from '@/services/permissionsService';
 
-// Schema para edição (sem senha obrigatória)
+// Schema para edição de usuário
 const editUserDirectSchema = z.object({
-  nome: z.string().min(3, "O nome deve ter pelo menos 3 caracteres"),
-  email: z.string().email("Digite um email válido"),
+  nome: z.string().min(1, 'Nome é obrigatório'),
+  email: z.string().email('Email inválido'),
   tipo_usuario: z.enum(['administrador', 'usuario']),
   permissoes_customizadas: z.record(z.boolean()).optional(),
-  ccas_permitidas: z.array(z.number()).optional(),
+  ccas_permitidas: z.array(z.number()).optional()
 });
 
 type EditUserDirectValues = z.infer<typeof editUserDirectSchema>;
 
 interface EditUserDirectFormProps {
-  user: any;
+  user: {
+    id: string;
+    nome: string;
+    email: string;
+    tipo_usuario?: string;
+    permissoes_customizadas?: Record<string, boolean>;
+    ccas_permitidas?: number[];
+  };
   onSuccess?: () => void;
-  onSubmit: (data: EditUserDirectValues & { id: string }) => Promise<boolean>;
+  onSubmit: (data: any) => Promise<boolean>;
   isSubmitting?: boolean;
-  onCancel?: () => void;
+  onCancel: () => void;
 }
 
-const PERMISSION_GROUPS = {
-  'Módulos Principais': [
-    { key: 'desvios', label: 'Desvios' },
-    { key: 'ocorrencias', label: 'Ocorrências' },
-    { key: 'treinamentos', label: 'Treinamentos' },
-    { key: 'tarefas', label: 'Tarefas' },
-    { key: 'relatorios', label: 'Relatórios' },
-    { key: 'hora_seguranca', label: 'HSA' },
-    { key: 'medidas_disciplinares', label: 'Medidas Disciplinares' },
-  ],
-  'Administração': [
-    { key: 'admin_usuarios', label: 'Usuários' },
-    { key: 'admin_perfis', label: 'Perfis' },
-    { key: 'admin_funcionarios', label: 'Funcionários' },
-    { key: 'admin_empresas', label: 'Empresas' },
-    { key: 'admin_ccas', label: 'CCAs' },
-    { key: 'admin_supervisores', label: 'Supervisores' },
-    { key: 'admin_engenheiros', label: 'Engenheiros' },
-  ],
-  'Ações Específicas': [
-    { key: 'pode_editar_desvios', label: 'Editar Desvios' },
-    { key: 'pode_excluir_desvios', label: 'Excluir Desvios' },
-    { key: 'pode_editar_ocorrencias', label: 'Editar Ocorrências' },
-    { key: 'pode_excluir_ocorrencias', label: 'Excluir Ocorrências' },
-    { key: 'pode_exportar_dados', label: 'Exportar Dados' },
-  ]
-};
+async function fetchCCAs() {
+  const { data, error } = await supabase
+    .from('ccas')
+    .select('id, codigo, nome')
+    .eq('ativo', true)
+    .order('codigo');
+  
+  if (error) throw error;
+  return data;
+}
 
 export const EditUserDirectForm: React.FC<EditUserDirectFormProps> = ({
   user,
@@ -78,107 +72,121 @@ export const EditUserDirectForm: React.FC<EditUserDirectFormProps> = ({
   const form = useForm<EditUserDirectValues>({
     resolver: zodResolver(editUserDirectSchema),
     defaultValues: {
-      nome: user?.nome || '',
-      email: user?.email || '',
-      tipo_usuario: user?.tipo_usuario || 'usuario',
-      permissoes_customizadas: {},
-      ccas_permitidas: []
+      nome: user.nome || '',
+      email: user.email || '',
+      tipo_usuario: (user.tipo_usuario as 'administrador' | 'usuario') || 'usuario'
     }
   });
 
-  const { data: ccas, isLoading: loadingCCAs } = useQuery({
+  const { data: ccas } = useQuery({
     queryKey: ['ccas'],
     queryFn: fetchCCAs
   });
 
-  const watchTipoUsuario = form.watch('tipo_usuario');
+  const userType = form.watch('tipo_usuario');
 
-  // Inicializar com dados do usuário
+  // Inicializar campos do formulário com dados do usuário
   useEffect(() => {
     if (user) {
-      const userPermissions = user.permissoes_customizadas || {};
-      const userCCAs = Array.isArray(user.ccas_permitidas) ? user.ccas_permitidas : [];
-      
-      setSelectedPermissions(
-        Object.keys(userPermissions).filter(key => userPermissions[key] === true)
-      );
-      setSelectedCCAs(userCCAs);
-    }
-  }, [user]);
+      form.reset({
+        nome: user.nome || '',
+        email: user.email || '',
+        tipo_usuario: (user.tipo_usuario as 'administrador' | 'usuario') || 'usuario'
+      });
 
-  // Quando tipo de usuário muda para administrador, selecionar todas as permissões
-  useEffect(() => {
-    if (watchTipoUsuario === 'administrador') {
-      const allPermissions = Object.values(PERMISSION_GROUPS).flat().map(p => p.key);
-      setSelectedPermissions(allPermissions);
-      setSelectedCCAs(ccas?.map(cca => cca.id) || []);
+      // Inicializar permissões selecionadas
+      if (user.permissoes_customizadas) {
+        const permissions = Object.keys(user.permissoes_customizadas).filter(
+          key => user.permissoes_customizadas[key] === true
+        );
+        setSelectedPermissions(permissions);
+      }
+
+      // Inicializar CCAs selecionadas
+      if (user.ccas_permitidas && Array.isArray(user.ccas_permitidas)) {
+        setSelectedCCAs(user.ccas_permitidas);
+      }
     }
-  }, [watchTipoUsuario, ccas]);
+  }, [user, form]);
+
+  // Atualizar permissões quando tipo de usuário muda para administrador
+  useEffect(() => {
+    if (form.watch('tipo_usuario') === 'administrador') {
+      // Selecionar todas as permissões
+      const allPermissions = COMPLETE_PERMISSIONS.flatMap(category => 
+        category.permissions.map(p => p.key)
+      );
+      setSelectedPermissions(allPermissions);
+      
+      // Selecionar todos os CCAs
+      if (ccas) {
+        setSelectedCCAs(ccas.map(cca => cca.id));
+      }
+    }
+  }, [form.watch('tipo_usuario'), ccas]);
 
   const handlePermissionChange = (permission: string, checked: boolean) => {
-    if (watchTipoUsuario === 'administrador') return; // Não permitir alterar se for admin
-    
-    setSelectedPermissions(prev => 
-      checked 
-        ? [...prev, permission]
-        : prev.filter(p => p !== permission)
-    );
+    if (checked) {
+      setSelectedPermissions(prev => [...prev, permission]);
+    } else {
+      setSelectedPermissions(prev => prev.filter(p => p !== permission));
+    }
   };
 
   const handleCCAChange = (ccaId: number, checked: boolean) => {
-    if (watchTipoUsuario === 'administrador') return; // Não permitir alterar se for admin
-    
-    setSelectedCCAs(prev => 
-      checked 
-        ? [...prev, ccaId]
-        : prev.filter(id => id !== ccaId)
-    );
+    if (checked) {
+      setSelectedCCAs(prev => [...prev, ccaId]);
+    } else {
+      setSelectedCCAs(prev => prev.filter(id => id !== ccaId));
+    }
   };
 
-  const handleFormSubmit = async (data: EditUserDirectValues) => {
+  const handleFormSubmit = async (values: EditUserDirectValues) => {
     try {
-      // Preparar permissões customizadas
-      const permissoes: Record<string, boolean> = {};
-      selectedPermissions.forEach(permission => {
-        permissoes[permission] = true;
-      });
-
-      const submitData = {
-        ...data,
+      const permissoesCustomizadas = selectedPermissions.reduce((acc, permission) => {
+        acc[permission] = true;
+        return acc;
+      }, {} as any);
+      
+      const userData = {
         id: user.id,
-        permissoes_customizadas: permissoes,
-        ccas_permitidas: selectedCCAs
+        nome: values.nome,
+        email: values.email,
+        tipo_usuario: values.tipo_usuario,
+        permissoes_customizadas: permissoesCustomizadas,
+        ccas_permitidas: selectedCCAs,
+        menus_sidebar: convertPermissionsToMenusSidebar(permissoesCustomizadas)
       };
 
-      const success = await onSubmit(submitData);
-      
+      const success = await onSubmit(userData);
       if (success) {
         setSuccess(true);
         setTimeout(() => {
-          setSuccess(false);
           onSuccess?.();
         }, 2000);
       }
     } catch (error) {
-      console.error('Erro ao editar usuário:', error);
+      console.error('Erro ao atualizar usuário:', error);
       toast({
-        title: "Erro",
-        description: "Ocorreu um erro ao editar o usuário. Tente novamente.",
-        variant: "destructive",
+        title: 'Erro',
+        description: 'Erro ao atualizar usuário. Tente novamente.',
+        variant: 'destructive',
       });
     }
   };
 
   if (success) {
     return (
-      <Card className="mx-auto max-w-2xl">
+      <Card className="max-w-md mx-auto">
         <CardContent className="pt-6">
           <div className="text-center space-y-4">
             <CheckCircle className="mx-auto h-12 w-12 text-green-500" />
             <div>
-              <h3 className="text-lg font-semibold text-green-700">Usuário atualizado com sucesso!</h3>
+              <h3 className="text-lg font-semibold text-green-700">
+                Usuário atualizado com sucesso!
+              </h3>
               <p className="text-sm text-muted-foreground">
-                As permissões foram atualizadas.
+                Redirecionando para a lista de usuários...
               </p>
             </div>
           </div>
@@ -188,105 +196,117 @@ export const EditUserDirectForm: React.FC<EditUserDirectFormProps> = ({
   }
 
   return (
-    <div className="space-y-6">
-      <Alert>
-        <AlertCircle className="h-4 w-4" />
-        <AlertDescription>
-          Edite o tipo de usuário e suas permissões específicas. Administradores têm acesso total ao sistema.
-        </AlertDescription>
-      </Alert>
+    <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6">
+      {/* Informações Básicas */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Informações Básicas</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <Label htmlFor="nome" className={!form.formState.dirtyFields.nome && !form.getValues().nome ? "text-red-500" : ""}>
+              Nome *
+            </Label>
+            <Input
+              id="nome"
+              {...form.register('nome')}
+              placeholder="Digite o nome completo"
+              className={form.formState.errors.nome ? 'border-red-500' : ''}
+            />
+            {form.formState.errors.nome && (
+              <p className="text-sm text-red-500">{form.formState.errors.nome.message}</p>
+            )}
+          </div>
 
-      <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6">
-        {/* Informações Básicas */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <User className="h-5 w-5" />
-              Informações Básicas
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="nome">Nome *</Label>
-                <Input
-                  id="nome"
-                  {...form.register('nome')}
-                  className={form.formState.errors.nome ? 'border-red-500' : ''}
-                />
-                {form.formState.errors.nome && (
-                  <p className="text-sm text-red-500">{form.formState.errors.nome.message}</p>
-                )}
-              </div>
+          <div>
+            <Label htmlFor="email" className={!form.formState.dirtyFields.email && !form.getValues().email ? "text-red-500" : ""}>
+              Email *
+            </Label>
+            <Input
+              id="email"
+              type="email"
+              {...form.register('email')}
+              placeholder="Digite o email"
+              className={form.formState.errors.email ? 'border-red-500' : ''}
+            />
+            {form.formState.errors.email && (
+              <p className="text-sm text-red-500">{form.formState.errors.email.message}</p>
+            )}
+          </div>
+        </CardContent>
+      </Card>
 
-              <div className="space-y-2">
-                <Label htmlFor="email">Email *</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  {...form.register('email')}
-                  className={form.formState.errors.email ? 'border-red-500' : ''}
-                  disabled // Email não pode ser alterado
-                />
-                {form.formState.errors.email && (
-                  <p className="text-sm text-red-500">{form.formState.errors.email.message}</p>
-                )}
-                <p className="text-xs text-muted-foreground">O email não pode ser alterado</p>
-              </div>
+      {/* Tipo de Usuário */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Tipo de Usuário</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <RadioGroup
+            value={form.watch('tipo_usuario')}
+            onValueChange={(value) => form.setValue('tipo_usuario', value as 'administrador' | 'usuario')}
+          >
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="administrador" id="administrador" />
+              <Label htmlFor="administrador">Administrador (acesso total)</Label>
             </div>
-          </CardContent>
-        </Card>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="usuario" id="usuario" />
+              <Label htmlFor="usuario">Usuário (permissões específicas)</Label>
+            </div>
+          </RadioGroup>
+        </CardContent>
+      </Card>
 
-        {/* Tipo de Usuário */}
+      {/* Permissões Específicas - apenas para usuário */}
+      {userType === 'usuario' && (
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Shield className="h-5 w-5" />
-              Tipo de Usuário
-            </CardTitle>
-            <CardDescription>
-              Administradores têm acesso completo ao sistema
-            </CardDescription>
+            <CardTitle>Permissões do Sistema</CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Selecione os módulos e funcionalidades que o usuário poderá acessar
+            </p>
           </CardHeader>
-          <CardContent>
-            <RadioGroup
-              value={watchTipoUsuario}
-              onValueChange={(value: TipoUsuario) => form.setValue('tipo_usuario', value)}
-              className="space-y-3"
-            >
-              <div className="flex items-center space-x-2 p-3 border rounded-lg">
-                <RadioGroupItem value="administrador" id="administrador" />
-                <Label htmlFor="administrador" className="flex-1">
-                  <div className="font-medium">Administrador</div>
-                  <div className="text-sm text-muted-foreground">Acesso total ao sistema</div>
-                </Label>
-              </div>
-              <div className="flex items-center space-x-2 p-3 border rounded-lg">
-                <RadioGroupItem value="usuario" id="usuario" />
-                <Label htmlFor="usuario" className="flex-1">
-                  <div className="font-medium">Usuário</div>
-                  <div className="text-sm text-muted-foreground">Permissões customizadas</div>
-                </Label>
-              </div>
-            </RadioGroup>
-          </CardContent>
-        </Card>
-
-        {/* Permissões Específicas */}
-        {watchTipoUsuario === 'usuario' && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Permissões</CardTitle>
-              <CardDescription>
-                Selecione as funcionalidades que o usuário pode acessar
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {Object.entries(PERMISSION_GROUPS).map(([groupName, permissions]) => (
-                <div key={groupName} className="space-y-3">
-                  <h4 className="font-medium text-sm text-muted-foreground">{groupName}</h4>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                    {permissions.map(permission => (
+          <CardContent className="space-y-6">
+            {COMPLETE_PERMISSIONS.map((category) => {
+              const categoryPermissions = category.permissions.map(p => p.key);
+              const allSelected = areAllPermissionsSelected(category.name, selectedPermissions);
+              const someSelected = areSomePermissionsSelected(category.name, selectedPermissions);
+              
+              return (
+                <div key={category.name} className="space-y-3">
+                  <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`category-${category.name}`}
+                        checked={allSelected}
+                        onCheckedChange={(checked) => {
+                        if (checked) {
+                          // Adicionar todas as permissões da categoria
+                          const newPermissions = [...selectedPermissions];
+                          categoryPermissions.forEach(permission => {
+                            if (!newPermissions.includes(permission)) {
+                              newPermissions.push(permission);
+                            }
+                          });
+                          setSelectedPermissions(newPermissions);
+                        } else {
+                          // Remover todas as permissões da categoria
+                          setSelectedPermissions(prev => 
+                            prev.filter(p => !categoryPermissions.includes(p))
+                          );
+                        }
+                      }}
+                    />
+                    <Label 
+                      htmlFor={`category-${category.name}`} 
+                      className="font-medium text-sm cursor-pointer"
+                    >
+                      {category.name}
+                    </Label>
+                  </div>
+                  
+                  <div className="ml-6 grid grid-cols-3 gap-3">
+                    {category.permissions.map((permission) => (
                       <div key={permission.key} className="flex items-center space-x-2">
                         <Checkbox
                           id={permission.key}
@@ -297,78 +317,65 @@ export const EditUserDirectForm: React.FC<EditUserDirectFormProps> = ({
                         />
                         <Label 
                           htmlFor={permission.key} 
-                          className="text-sm font-normal cursor-pointer"
+                          className="text-xs cursor-pointer"
                         >
                           {permission.label}
                         </Label>
                       </div>
                     ))}
                   </div>
-                  <Separator />
+                </div>
+              );
+            })}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* CCAs Permitidas - apenas para usuário */}
+      {userType === 'usuario' && (
+        <Card>
+          <CardHeader>
+            <CardTitle>CCAs Permitidas</CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Selecione quais CCAs o usuário poderá acessar
+            </p>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 gap-4 max-h-60 overflow-y-auto">
+              {ccas?.map((cca) => (
+                <div key={cca.id} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={`cca-${cca.id}`}
+                    checked={selectedCCAs.includes(cca.id)}
+                    onCheckedChange={(checked) => 
+                      handleCCAChange(cca.id, checked as boolean)
+                    }
+                  />
+                  <Label htmlFor={`cca-${cca.id}`} className="text-sm">
+                    {cca.codigo} - {cca.nome}
+                  </Label>
                 </div>
               ))}
-            </CardContent>
-          </Card>
-        )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
-        {/* CCAs Permitidas */}
-        {watchTipoUsuario === 'usuario' && (
-          <Card>
-            <CardHeader>
-              <CardTitle>CCAs Permitidas</CardTitle>
-              <CardDescription>
-                Selecione as CCAs que o usuário pode acessar
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {loadingCCAs ? (
-                <div className="flex justify-center py-4">
-                  <Loader2 className="h-6 w-6 animate-spin" />
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-60 overflow-y-auto">
-                  {ccas?.map(cca => (
-                    <div key={cca.id} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={`cca-${cca.id}`}
-                        checked={selectedCCAs.includes(cca.id)}
-                        onCheckedChange={(checked) => 
-                          handleCCAChange(cca.id, checked as boolean)
-                        }
-                      />
-                      <Label 
-                        htmlFor={`cca-${cca.id}`} 
-                        className="text-sm font-normal cursor-pointer"
-                      >
-                        {cca.codigo} - {cca.nome}
-                      </Label>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Botões */}
-        <div className="flex justify-end space-x-4">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onCancel}
-            disabled={isSubmitting}
-          >
-            Cancelar
-          </Button>
-          <Button 
-            type="submit" 
-            disabled={isSubmitting || !form.formState.isValid}
-          >
-            {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Salvar Alterações
-          </Button>
-        </div>
-      </form>
-    </div>
+      <div className="flex justify-end space-x-4">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onCancel}
+        >
+          Cancelar
+        </Button>
+        <Button
+          type="submit"
+          disabled={isSubmitting || !form.formState.isValid}
+        >
+          {isSubmitting ? 'Salvando...' : 'Salvar Alterações'}
+        </Button>
+      </div>
+    </form>
   );
 };

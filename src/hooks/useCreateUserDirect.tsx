@@ -23,7 +23,7 @@ export const useCreateUserDirect = () => {
         // 2. Criar usuário no Supabase Auth
         const { data: authData, error: authError } = await supabase.auth.signUp({
           email: userData.email,
-          password: userData.password,
+          password: userData.senha,
           options: {
             data: {
               nome: userData.nome,
