@@ -49,8 +49,20 @@ export const usePermissionsDirect = (): UsePermissionsDirectReturn => {
         return true;
       }
       
-      if (!userProfile?.permissoes_customizadas) {
-        console.log('❌ [usePermissionsDirect] Sem permissoes_customizadas');
+      // Se não há permissões customizadas ou está vazio, verificar apenas menus_sidebar
+      if (!userProfile?.permissoes_customizadas || 
+          (typeof userProfile.permissoes_customizadas === 'object' && 
+           Object.keys(userProfile.permissoes_customizadas).length === 0)) {
+        console.log('⚠️ [usePermissionsDirect] permissoes_customizadas vazio, verificando apenas menus_sidebar');
+        
+        // Verificar nos menus_sidebar do nível raiz
+        if (Array.isArray(userProfile.menus_sidebar) && 
+            userProfile.menus_sidebar.includes(permission)) {
+          console.log('✅ [usePermissionsDirect] Encontrada em menus_sidebar raiz');
+          return true;
+        }
+        
+        console.log('❌ [usePermissionsDirect] Permissão não encontrada em menus_sidebar');
         return false;
       }
 
@@ -84,10 +96,13 @@ export const usePermissionsDirect = (): UsePermissionsDirectReturn => {
       
       // Verificar variações comuns de slug que podem ter inconsistências
       const slugVariations = [
-        // Para hora da segurança: tentar versão sem "_inspecao"
+        // Mapeamento específico baseado nos dados do banco
+        permission.replace('inspecao_sms_cadastro', 'inspecao_sms_cadastrar'),
+        permission.replace('hora_seguranca_cadastro', 'hora_seguranca_inspecoes_cadastro'),
+        permission.replace('hora_seguranca_cadastro_nao_programada', 'hora_seguranca_inspecoes_nao_programadas'),
+        // Para outras possíveis variações
         permission.replace('_cadastro_inspecao', '_cadastro'),
         permission.replace('_inspecao', ''),
-        // Para outras possíveis variações
         permission.replace('_consulta', ''),
         permission.replace('_dashboard', ''),
       ];

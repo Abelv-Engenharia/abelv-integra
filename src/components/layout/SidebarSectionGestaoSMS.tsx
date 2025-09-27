@@ -107,15 +107,15 @@ export default function SidebarSectionGestaoSMS({
 
   const horaSegurancaItems: LinkItem[] = [
     { label: "Dashboard", to: "/hora-seguranca/dashboard", slug: "hora_seguranca_dashboard" },
-    { label: "Cadastro", to: "/hora-seguranca/inspecao-cadastro-hsa", slug: "hora_seguranca_cadastro" },
+    { label: "Cadastro", to: "/hora-seguranca/inspecao-cadastro-hsa", slug: "hora_seguranca_inspecoes_cadastro" },
     { label: "Agenda", to: "/hora-seguranca/agenda-hsa", slug: "hora_seguranca_agenda" },
     { label: "Acompanhamento", to: "/hora-seguranca/inspecoes-acompanhamento", slug: "hora_seguranca_acompanhamento" },
-    { label: "Inspeção Não Programada", to: "/hora-seguranca/inspecao-nao-programada-hsa", slug: "hora_seguranca_cadastro_nao_programada" },
+    { label: "Inspeção Não Programada", to: "/hora-seguranca/inspecao-nao-programada-hsa", slug: "hora_seguranca_inspecoes_nao_programadas" },
   ];
 
   const inspecaoSmsItems: LinkItem[] = [
     { label: "Dashboard", to: "/inspecao-sms/dashboard", slug: "inspecao_sms_dashboard" },
-    { label: "Cadastro", to: "/inspecao-sms/cadastrar", slug: "inspecao_sms_cadastro" },
+    { label: "Cadastro", to: "/inspecao-sms/cadastrar", slug: "inspecao_sms_cadastrar" },
     { label: "Consulta", to: "/inspecao-sms/consulta", slug: "inspecao_sms_consulta" },
   ];
 
