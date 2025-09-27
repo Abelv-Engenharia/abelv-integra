@@ -272,7 +272,7 @@ export const useGerenciarUsuarios = () => {
       }
 
       // Atualizar perfil de acesso
-      const profileId = perfis.find(p => p.nome === userData.perfil)?.id;
+      const profileId = perfis.find(p => p.id.toString() === userData.perfil)?.id;
       if (profileId) {
         // Remover associação existente
         await supabase
