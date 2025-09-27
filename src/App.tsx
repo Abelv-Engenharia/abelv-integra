@@ -33,6 +33,7 @@ import Suporte from "./pages/Suporte";
 
 // Admin pages - NEW USER MANAGEMENT PAGE
 import GerenciarUsuarios from "./pages/admin/GerenciarUsuarios";
+import GerenciarUsuariosDirect from "./pages/admin/GerenciarUsuariosDirect";
 import AdminUsuariosAuth from "./pages/admin/AdminUsuariosAuth";
 import AdminCCAs from "./pages/admin/AdminCCAs";
 import AdminPerfis from "./pages/admin/AdminPerfis";
@@ -185,6 +186,7 @@ function App() {
 
                 {/* Admin routes - NEW USER MANAGEMENT */}
                 <Route path="admin/usuarios" element={<GerenciarUsuarios />} />
+                <Route path="admin/usuarios-direct" element={<GerenciarUsuariosDirect />} />
                 <Route path="admin/usuarios-auth" element={<AdminUsuariosAuth />} />
                 <Route path="admin/ccas" element={<AdminCCAs />} />
                 <Route path="admin/perfis" element={<AdminPerfis />} />

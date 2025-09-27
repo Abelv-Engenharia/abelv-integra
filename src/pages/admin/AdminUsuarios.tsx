@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { UserMigrationStatus } from '@/components/admin/usuarios/UserMigrationStatus';
+import { SystemComparisonCard } from '@/components/admin/usuarios/SystemComparisonCard';
 import { AdminOnlySection } from "@/components/security/AdminOnlySection";
 import { SecurityGuard } from "@/components/security/SecurityGuard";
 import { UsersManagementCard } from "@/components/admin/usuarios/UsersManagementCard";
@@ -120,50 +122,61 @@ const AdminUsuarios = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div>
+    <div className="container mx-auto px-4 py-8 space-y-6">
+      <div className="flex items-center space-x-4">
         <Button
           variant="ghost"
           size="sm"
-          className="mb-2"
           onClick={() => navigate(-1)}
+          className="flex items-center"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Voltar
         </Button>
-        <h1 className="text-2xl font-bold tracking-tight">Administrar Usuários</h1>
-        <p className="text-muted-foreground">
-          Gerencie os usuários do sistema
-        </p>
+        <div>
+          <h1 className="text-2xl font-bold">Administração de Usuários</h1>
+          <p className="text-muted-foreground">
+            Gerencie usuários e suas permissões no sistema
+          </p>
+        </div>
       </div>
 
-      <SecurityGuard requiredPermission="admin_usuarios" requiredSecurityLevel="high">
-        <UsersManagementCard
-          filteredUsers={filteredUsers}
-          loadingUsuarios={loadingUsuarios}
-          canManageUsers={canManageUsers}
-          onSearch={onSearchSubmit}
-          onCreateClick={handleCreateClick}
-          onEditClick={handleEditClick}
-          onDeleteClick={handleDeleteClick}
-        />
+      {/* Status da Migração */}
+      <UserMigrationStatus />
 
-        <UserDialogManager
-          isCreateDialogOpen={isCreateDialogOpen}
-          isEditDialogOpen={isEditDialogOpen}
-          isDeleteDialogOpen={isDeleteDialogOpen}
-          canManageUsers={canManageUsers}
-          selectedUser={selectedUser}
-          profiles={profiles}
-          isCreating={createUsuarioMutation.isPending}
-          onCreateDialogChange={setIsCreateDialogOpen}
-          onEditDialogChange={setIsEditDialogOpen}
-          onDeleteDialogChange={setIsDeleteDialogOpen}
-          onCreateSubmit={onAuthUserSubmit}
-          onEditSubmit={onUserSubmit}
-          onDeleteConfirm={handleDeleteUser}
-        />
-      </SecurityGuard>
+      {/* Comparação dos Sistemas */}
+      <SystemComparisonCard />
+
+      {/* Sistema Atual (Antigo) */}
+      <div className="space-y-6">
+        <SecurityGuard requiredPermission="admin_usuarios" requiredSecurityLevel="high">
+          <UsersManagementCard
+            filteredUsers={filteredUsers}
+            loadingUsuarios={loadingUsuarios}
+            canManageUsers={canManageUsers}
+            onSearch={onSearchSubmit}
+            onCreateClick={handleCreateClick}
+            onEditClick={handleEditClick}
+            onDeleteClick={handleDeleteClick}
+          />
+
+          <UserDialogManager
+            isCreateDialogOpen={isCreateDialogOpen}
+            isEditDialogOpen={isEditDialogOpen}
+            isDeleteDialogOpen={isDeleteDialogOpen}
+            canManageUsers={canManageUsers}
+            selectedUser={selectedUser}
+            profiles={profiles}
+            isCreating={createUsuarioMutation.isPending}
+            onCreateDialogChange={setIsCreateDialogOpen}
+            onEditDialogChange={setIsEditDialogOpen}
+            onDeleteDialogChange={setIsDeleteDialogOpen}
+            onCreateSubmit={onAuthUserSubmit}
+            onEditSubmit={onUserSubmit}
+            onDeleteConfirm={handleDeleteUser}
+          />
+        </SecurityGuard>
+      </div>
     </div>
   );
 };
