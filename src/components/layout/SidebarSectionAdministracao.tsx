@@ -71,11 +71,10 @@ export default function SidebarSectionAdministracao({ openMenu, toggleMenu, onLi
     { label: "Metas & Indicadores", to: "/admin/metas-indicadores", slug: "admin_metas_indicadores", Icon: Target },
     { label: "Checklists", to: "/admin/checklists", slug: "admin_checklists", Icon: ListChecks },
     { label: "Templates", to: "/admin/templates", slug: "admin_templates", Icon: FileCode2 },
-    { label: "Logo do Sistema", to: "/admin/logo-sistema", slug: "admin_logo_sistema", Icon: ImageIcon },
     { label: "Logo", to: "/admin/logo", slug: "admin_logo", Icon: ImageIcon },
 
-    { label: "Upload de Tutoriais", to: "/admin/upload-tutoriais", slug: "admin_upload_tutoriais", Icon: Upload },
-    { label: "Configuração de E-mails", to: "/admin/configuracao-emails", slug: "admin_configuracao_emails", Icon: Mail },
+    { label: "Upload de Tutoriais", to: "/admin/upload-tutoriais", slug: "upload_tutoriais", Icon: Upload },
+    { label: "Configuração de E-mails", to: "/admin/configuracao-emails", slug: "configuracao_emails", Icon: Mail },
     { label: "Exportação de Dados", to: "/admin/exportacao-dados", slug: "admin_exportacao_dados", Icon: Database },
 
     { label: "Importação de Funcionários", to: "/admin/importacao-funcionarios", slug: "admin_importacao_funcionarios", Icon: UploadCloud },
@@ -90,7 +89,6 @@ export default function SidebarSectionAdministracao({ openMenu, toggleMenu, onLi
     // Removidos os itens do sistema antigo:
     // { label: "Usuários (Auth)", to: "/admin/usuarios-auth", slug: "admin_usuarios_auth", Icon: Lock },
     { label: "Criar Usuário", to: "/admin/criar-usuario-direct", slug: "admin_criar_usuario", Icon: UserPlus },
-    { label: "Modelos de Inspeção", to: "/admin/modelos-inspecao", slug: "admin_modelos_inspecao", Icon: ListChecks },
     // Se existir “adm_manutencao” como rota:
     // { label: "Manutenção", to: "/admin/manutencao", slug: "adm_manutencao", Icon: Wrench }
   ].filter((i) => can(i.slug));

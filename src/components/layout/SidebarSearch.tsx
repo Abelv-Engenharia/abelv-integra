@@ -26,55 +26,65 @@ export default function SidebarSearch() {
     { name: "Dashboard", path: "/dashboard", category: "Dashboard", slug: "dashboard" },
 
     // SMS / Desvios
+    { name: "Dashboard SMS", path: "/sms/dashboard", category: "SMS", slug: "sms_dashboard" },
     { name: "Desvios Dashboard", path: "/desvios/dashboard", category: "SMS", slug: "desvios_dashboard" },
     { name: "Desvios Cadastro", path: "/desvios/cadastro", category: "SMS", slug: "desvios_cadastro" },
+    { name: "Desvios Consulta", path: "/desvios/consulta", category: "SMS", slug: "desvios_consulta" },
+    { name: "Desvios Não Conformidade", path: "/desvios/nao-conformidade", category: "SMS", slug: "desvios_nao_conformidade" },
 
     // Treinamentos
     { name: "Treinamentos Dashboard", path: "/treinamentos/dashboard", category: "SMS", slug: "treinamentos_dashboard" },
     { name: "Treinamentos Execução", path: "/treinamentos/execucao", category: "SMS", slug: "treinamentos_execucao" },
+    { name: "Treinamentos Consulta", path: "/treinamentos/consulta", category: "SMS", slug: "treinamentos_consulta" },
+    { name: "Treinamentos Normativo", path: "/treinamentos/normativo", category: "SMS", slug: "treinamentos_normativo" },
+    { name: "Treinamentos Crachá", path: "/treinamentos/cracha", category: "SMS", slug: "treinamentos_cracha" },
 
-    // Hora de Segurança
-    { name: "Hora Segurança Dashboard", path: "/hora-seguranca/dashboard", category: "SMS", slug: "hora_seguranca_dashboard" },
+    // Hora da Segurança
+    { name: "HSA Dashboard", path: "/hora-seguranca/dashboard", category: "SMS", slug: "hora_seguranca_dashboard" },
+    { name: "HSA Cadastro", path: "/hora-seguranca/inspecao-cadastro-hsa", category: "SMS", slug: "hora_seguranca_inspecoes_cadastro" },
+    { name: "HSA Agenda", path: "/hora-seguranca/agenda-hsa", category: "SMS", slug: "hora_seguranca_agenda_hsa" },
+    { name: "HSA Acompanhamento", path: "/hora-seguranca/inspecoes-acompanhamento", category: "SMS", slug: "hora_seguranca_inspecoes_acompanhamento" },
+    { name: "HSA Não Programada", path: "/hora-seguranca/inspecao-nao-programada-hsa", category: "SMS", slug: "hora_seguranca_inspecoes_nao_programadas" },
+
+    // IDSMS
+    { name: "IDSMS Dashboard", path: "/idsms/dashboard", category: "SMS", slug: "idsms_dashboard" },
+    { name: "IDSMS Indicadores", path: "/idsms/indicadores", category: "SMS", slug: "idsms_indicadores" },
+    { name: "IDSMS HT", path: "/idsms/ht", category: "SMS", slug: "idsms_ht" },
+    { name: "IDSMS HSA", path: "/idsms/hsa", category: "SMS", slug: "idsms_hsa" },
+    { name: "IDSMS IID", path: "/idsms/iid", category: "SMS", slug: "idsms_iid" },
+    { name: "IDSMS IPOM", path: "/idsms/ipom", category: "SMS", slug: "idsms_ipom" },
+    { name: "IDSMS Índice Reativo", path: "/idsms/indice-reativo", category: "SMS", slug: "idsms_indice_reativo" },
+    { name: "IDSMS Inspeção Alta Liderança", path: "/idsms/inspecao-alta-lideranca", category: "SMS", slug: "idsms_inspecao_alta_lideranca" },
+    { name: "IDSMS Inspeção Gestão SMS", path: "/idsms/inspecao-gestao-sms", category: "SMS", slug: "idsms_inspecao_gestao_sms" },
 
     // Inspeção SMS
     { name: "Inspeção SMS Dashboard", path: "/inspecao-sms/dashboard", category: "SMS", slug: "inspecao_sms_dashboard" },
+    { name: "Inspeção SMS Cadastro", path: "/inspecao-sms/cadastrar", category: "SMS", slug: "inspecao_sms_cadastrar" },
+    { name: "Inspeção SMS Consulta", path: "/inspecao-sms/consulta", category: "SMS", slug: "inspecao_sms_consulta" },
 
     // Ocorrências
     { name: "Ocorrências Dashboard", path: "/ocorrencias/dashboard", category: "SMS", slug: "ocorrencias_dashboard" },
+    { name: "Ocorrências Cadastro", path: "/ocorrencias/cadastro", category: "SMS", slug: "ocorrencias_cadastro" },
+    { name: "Ocorrências Consulta", path: "/ocorrencias/consulta", category: "SMS", slug: "ocorrencias_consulta" },
 
     // Medidas Disciplinares
     { name: "Medidas Disciplinares Dashboard", path: "/medidas-disciplinares/dashboard", category: "SMS", slug: "medidas_disciplinares_dashboard" },
+    { name: "Medidas Disciplinares Cadastro", path: "/medidas-disciplinares/cadastro", category: "SMS", slug: "medidas_disciplinares_cadastro" },
+    { name: "Medidas Disciplinares Consulta", path: "/medidas-disciplinares/consulta", category: "SMS", slug: "medidas_disciplinares_consulta" },
 
-    // ADM MATRICIAL (slugs “adm_*”, como no seu JSON)
-    { name: "ADM Dashboard", path: "/adm/dashboard", category: "ADM MATRICIAL", slug: "adm_dashboard" },
-    { name: "ADM Configurações", path: "/adm/configuracoes", category: "ADM MATRICIAL", slug: "adm_configuracoes" },
-    { name: "ADM Usuários", path: "/adm/usuarios", category: "ADM MATRICIAL", slug: "adm_usuarios" },
-    { name: "ADM Empresas", path: "/adm/empresas", category: "ADM MATRICIAL", slug: "adm_empresas" },
-    { name: "ADM Perfis", path: "/admin/usuarios-direct", category: "ADM MATRICIAL", slug: "admin_usuarios" },
+    // GRO
+    { name: "GRO Dashboard", path: "/gro/dashboard", category: "SMS", slug: "gro_dashboard" },
+    { name: "GRO Cadastro Perigos", path: "/gro/cadastro-perigos", category: "SMS", slug: "gro_cadastro_perigos" },
+    { name: "GRO Avaliação Riscos", path: "/gro/avaliacao-riscos", category: "SMS", slug: "gro_avaliacao_riscos" },
+    { name: "GRO PGR", path: "/gro/pgr", category: "SMS", slug: "gro_pgr" },
+    { name: "GRO Cadastro", path: "/gro/cadastro", category: "SMS", slug: "gro_cadastro" },
+    { name: "GRO Consulta", path: "/gro/consulta", category: "SMS", slug: "gro_consulta" },
 
-    // ORÇAMENTOS
-    { name: "Orçamentos Dashboard", path: "/orcamentos/dashboard", category: "ORÇAMENTOS", slug: "orcamentos_dashboard" },
-    { name: "Orçamentos Projetos", path: "/orcamentos/projetos", category: "ORÇAMENTOS", slug: "orcamentos_projetos" },
-    { name: "Orçamentos Custos", path: "/orcamentos/custos", category: "ORÇAMENTOS", slug: "orcamentos_custos" },
-    { name: "Orçamentos Análises", path: "/orcamentos/analises", category: "ORÇAMENTOS", slug: "orcamentos_analises" },
-
-    // PRODUÇÃO
-    { name: "Produção Dashboard", path: "/producao/dashboard", category: "PRODUÇÃO", slug: "producao_dashboard" },
-    { name: "Produção Planejamento", path: "/producao/planejamento", category: "PRODUÇÃO", slug: "producao_planejamento" },
-    { name: "Produção Ordens", path: "/producao/ordens-producao", category: "PRODUÇÃO", slug: "producao_ordens_producao" },
-    { name: "Produção Controle", path: "/producao/controle-qualidade", category: "PRODUÇÃO", slug: "producao_controle_qualidade" },
-
-    // QUALIDADE
-    { name: "Qualidade Dashboard", path: "/qualidade/dashboard", category: "QUALIDADE", slug: "qualidade_dashboard" },
-    { name: "Qualidade Controle", path: "/qualidade/controle", category: "QUALIDADE", slug: "qualidade_controle" },
-    { name: "Qualidade Auditorias", path: "/qualidade/auditorias", category: "QUALIDADE", slug: "qualidade_auditorias" },
-    { name: "Qualidade Indicadores", path: "/qualidade/indicadores", category: "QUALIDADE", slug: "qualidade_indicadores" },
-
-    // SUPRIMENTOS
-    { name: "Suprimentos Dashboard", path: "/suprimentos/dashboard", category: "SUPRIMENTOS", slug: "suprimentos_dashboard" },
-    { name: "Suprimentos Fornecedores", path: "/suprimentos/fornecedores", category: "SUPRIMENTOS", slug: "suprimentos_fornecedores" },
-    { name: "Suprimentos Materiais", path: "/suprimentos/materiais", category: "SUPRIMENTOS", slug: "suprimentos_materiais" },
-    { name: "Suprimentos Compras", path: "/suprimentos/compras", category: "SUPRIMENTOS", slug: "suprimentos_compras" },
+    // Prevenção Incêndio
+    { name: "Prevenção Incêndio Dashboard", path: "/prevencao-incendio/dashboard", category: "SMS", slug: "prevencao_incendio_dashboard" },
+    { name: "Cadastro Extintores", path: "/prevencao-incendio/cadastro-extintores", category: "SMS", slug: "prevencao_incendio_cadastro_extintores" },
+    { name: "Inspeção Extintores", path: "/prevencao-incendio/inspecao-extintores", category: "SMS", slug: "prevencao_incendio_inspecao_extintores" },
+    { name: "Consulta Inspeções", path: "/prevencao-incendio/consulta-inspecoes", category: "SMS", slug: "prevencao_incendio_consulta_inspecoes" },
 
     // TAREFAS
     { name: "Tarefas Dashboard", path: "/tarefas/dashboard", category: "TAREFAS", slug: "tarefas_dashboard" },
@@ -83,13 +93,30 @@ export default function SidebarSearch() {
 
     // RELATÓRIOS
     { name: "Relatórios Dashboard", path: "/relatorios/dashboard", category: "RELATÓRIOS", slug: "relatorios_dashboard" },
-    { name: "Relatórios ID SMS", path: "/relatorios/idsms", category: "RELATÓRIOS", slug: "relatorios_idsms" },
+    { name: "Relatórios IDSMS", path: "/relatorios/idsms", category: "RELATÓRIOS", slug: "relatorios_idsms" },
+    { name: "Relatórios HSA", path: "/relatorios/hsa", category: "RELATÓRIOS", slug: "relatorios_hsa" },
+    { name: "Relatórios Ocorrências", path: "/relatorios/ocorrencias", category: "RELATÓRIOS", slug: "relatorios_ocorrencias" },
+    { name: "Relatórios Desvios", path: "/relatorios/desvios", category: "RELATÓRIOS", slug: "relatorios_desvios" },
+    { name: "Relatórios Treinamentos", path: "/relatorios/treinamentos", category: "RELATÓRIOS", slug: "relatorios_treinamentos" },
 
-    // ADMINISTRAÇÃO (slugs “admin_*”, como no seu JSON)
+    // ADMINISTRAÇÃO
     { name: "Admin Usuários", path: "/admin/usuarios-direct", category: "ADMINISTRAÇÃO", slug: "admin_usuarios" },
     { name: "Admin Empresas", path: "/admin/empresas", category: "ADMINISTRAÇÃO", slug: "admin_empresas" },
-    { name: "Importação Funcionários", path: "/admin/importacao-funcionarios", category: "ADMINISTRAÇÃO", slug: "admin_importacao_funcionarios" },
-    { name: "Importação Execução Treinamentos", path: "/admin/importacao-execucao-treinamentos", category: "ADMINISTRAÇÃO", slug: "admin_importacao_execucao_treinamentos" },
+    { name: "Admin CCAs", path: "/admin/ccas", category: "ADMINISTRAÇÃO", slug: "admin_ccas" },
+    { name: "Admin Engenheiros", path: "/admin/engenheiros", category: "ADMINISTRAÇÃO", slug: "admin_engenheiros" },
+    { name: "Admin Supervisores", path: "/admin/supervisores", category: "ADMINISTRAÇÃO", slug: "admin_supervisores" },
+    { name: "Admin Encarregados", path: "/admin/encarregados", category: "ADMINISTRAÇÃO", slug: "admin_encarregados" },
+    { name: "Admin Funcionários", path: "/admin/funcionarios", category: "ADMINISTRAÇÃO", slug: "admin_funcionarios" },
+    { name: "Upload Tutoriais", path: "/admin/upload-tutoriais", category: "ADMINISTRAÇÃO", slug: "upload_tutoriais" },
+    { name: "Configuração Emails", path: "/admin/configuracao-emails", category: "ADMINISTRAÇÃO", slug: "configuracao_emails" },
+    { name: "Admin Checklists", path: "/admin/checklists", category: "ADMINISTRAÇÃO", slug: "admin_checklists" },
+    { name: "Admin Templates", path: "/admin/templates", category: "ADMINISTRAÇÃO", slug: "admin_templates" },
+    { name: "Admin Logo", path: "/admin/logo", category: "ADMINISTRAÇÃO", slug: "admin_logo" },
+
+    // Comunicados
+    { name: "Comunicados Cadastro", path: "/admin/comunicados/cadastro", category: "COMUNICADOS", slug: "comunicados_cadastro" },
+    { name: "Comunicados Consulta", path: "/admin/comunicados/consulta", category: "COMUNICADOS", slug: "comunicados_consulta" },
+    { name: "Meus Comunicados", path: "/comunicados/meus-comunicados", category: "COMUNICADOS", slug: "comunicados_meus_comunicados" },
 
     // Conta
     { name: "Perfil", path: "/account/profile", category: "CONTA", slug: "account_profile" },

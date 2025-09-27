@@ -79,15 +79,14 @@ export default function SidebarSectionGestaoSMS({
   // ===== LINKS COM SLUGS 1:1 COM menus_sidebar =====
   const idsmsItems: LinkItem[] = [
     { label: "Dashboard", to: "/idsms/dashboard", slug: "idsms_dashboard" },
-    // Os itens abaixo compartilham o slug idsms_relatorios no teu JSON
-    { label: "Indicadores", to: "/idsms/indicadores", slug: "idsms_relatorios" },
-    { label: "HT", to: "/idsms/ht", slug: "idsms_relatorios" },
-    { label: "HSA", to: "/idsms/hsa", slug: "idsms_relatorios" },
-    { label: "IID", to: "/idsms/iid", slug: "idsms_relatorios" },
-    { label: "IPOM", to: "/idsms/ipom", slug: "idsms_relatorios" },
-    { label: "Índice Reativo", to: "/idsms/indice-reativo", slug: "idsms_relatorios" },
-    { label: "Inspeção Alta Liderança", to: "/idsms/inspecao-alta-lideranca", slug: "idsms_relatorios" },
-    { label: "Inspeção Gestão SMS", to: "/idsms/inspecao-gestao-sms", slug: "idsms_relatorios" },
+    { label: "Indicadores", to: "/idsms/indicadores", slug: "idsms_indicadores" },
+    { label: "HT", to: "/idsms/ht", slug: "idsms_ht" },
+    { label: "HSA", to: "/idsms/hsa", slug: "idsms_hsa" },
+    { label: "IID", to: "/idsms/iid", slug: "idsms_iid" },
+    { label: "IPOM", to: "/idsms/ipom", slug: "idsms_ipom" },
+    { label: "Índice Reativo", to: "/idsms/indice-reativo", slug: "idsms_indice_reativo" },
+    { label: "Inspeção Alta Liderança", to: "/idsms/inspecao-alta-lideranca", slug: "idsms_inspecao_alta_lideranca" },
+    { label: "Inspeção Gestão SMS", to: "/idsms/inspecao-gestao-sms", slug: "idsms_inspecao_gestao_sms" },
   ];
 
   const desviosItems: LinkItem[] = [
@@ -109,7 +108,7 @@ export default function SidebarSectionGestaoSMS({
     { label: "Dashboard", to: "/hora-seguranca/dashboard", slug: "hora_seguranca_dashboard" },
     { label: "Cadastro", to: "/hora-seguranca/inspecao-cadastro-hsa", slug: "hora_seguranca_inspecoes_cadastro" },
     { label: "Agenda", to: "/hora-seguranca/agenda-hsa", slug: "hora_seguranca_agenda_hsa" },
-    { label: "Acompanhamento", to: "/hora-seguranca/inspecoes-acompanhamento", slug: "hora_seguranca_acompanhamento" },
+    { label: "Acompanhamento", to: "/hora-seguranca/inspecoes-acompanhamento", slug: "hora_seguranca_inspecoes_acompanhamento" },
     { label: "Inspeção Não Programada", to: "/hora-seguranca/inspecao-nao-programada-hsa", slug: "hora_seguranca_inspecoes_nao_programadas" },
   ];
 

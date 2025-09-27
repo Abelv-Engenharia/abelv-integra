@@ -41,6 +41,7 @@ export const COMPLETE_PERMISSIONS: PermissionCategory[] = [
       { key: 'ocorrencias_visualizacao', label: 'Visualização' },
       { key: 'ocorrencias_detalhes', label: 'Detalhes' },
       { key: 'ocorrencias_edicao', label: 'Edição' },
+      { key: 'ocorrencias_excluir', label: 'Excluir' },
       { key: 'ocorrencias_atualizar_status', label: 'Atualizar Status' }
     ]
   },
@@ -53,7 +54,8 @@ export const COMPLETE_PERMISSIONS: PermissionCategory[] = [
       { key: 'treinamentos_cracha', label: 'Crachá' },
       { key: 'treinamentos_normativo', label: 'Normativo' },
       { key: 'treinamentos_editar_execucao', label: 'Editar Execução' },
-      { key: 'treinamentos_visualizar_execucao', label: 'Visualizar Execução' }
+      { key: 'treinamentos_visualizar_execucao', label: 'Visualizar Execução' },
+      { key: 'treinamentos_excluir', label: 'Excluir' }
     ]
   },
   {
@@ -96,6 +98,9 @@ export const COMPLETE_PERMISSIONS: PermissionCategory[] = [
   {
     name: 'GRO',
     permissions: [
+      { key: 'gro_dashboard', label: 'Dashboard' },
+      { key: 'gro_cadastro', label: 'Cadastro' },
+      { key: 'gro_consulta', label: 'Consulta' },
       { key: 'gro_avaliacao_riscos', label: 'Avaliação de Riscos' },
       { key: 'gro_cadastro_perigos', label: 'Cadastro de Perigos' },
       { key: 'gro_pgr', label: 'PGR' }
@@ -127,6 +132,7 @@ export const COMPLETE_PERMISSIONS: PermissionCategory[] = [
       { key: 'inspecao_sms_cadastrar', label: 'Cadastrar' },
       { key: 'inspecao_sms_consulta', label: 'Consulta' },
       { key: 'inspecao_sms_visualizar', label: 'Visualizar' },
+      { key: 'inspecao_sms_excluir', label: 'Excluir' },
       { key: 'inspecao_sms_hora_seguranca', label: 'Hora Segurança' }
     ]
   },
