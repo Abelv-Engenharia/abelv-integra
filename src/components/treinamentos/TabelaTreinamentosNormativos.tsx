@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
 import { getStatusColor } from "@/utils/treinamentosUtils";
 import { CertificadoLink } from "./CertificadoLink";
+import { PermissionGuard } from "@/components/security/PermissionGuard";
 
 interface TreinamentoNormativo {
   id: string;
@@ -86,15 +87,17 @@ export const TabelaTreinamentosNormativos: React.FC<Props> = ({ treinamentos, on
               </TableCell>
               {onExcluir && (
                 <TableCell className="text-center">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => onExcluir(tr.id)}
-                    title="Excluir treinamento"
-                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
+                  <PermissionGuard requiredPermissions={["treinamentos_excluir", "admin_funcionarios"]}>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => onExcluir(tr.id)}
+                      title="Excluir treinamento"
+                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </PermissionGuard>
                 </TableCell>
               )}
             </TableRow>

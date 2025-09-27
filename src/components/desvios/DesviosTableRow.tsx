@@ -8,6 +8,7 @@ import DeleteDesvioDialog from "./DeleteDesvioDialog";
 import { DesvioCompleto } from "@/services/desvios/desviosCompletosService";
 import { Button } from "@/components/ui/button";
 import { calculateStatusAcao } from "@/utils/desviosUtils";
+import { PermissionGuard } from "@/components/security/PermissionGuard";
 
 interface Props {
   desvio: DesvioCompleto;
@@ -83,15 +84,19 @@ const DesviosTableRow = ({
         <div className="flex justify-end gap-2">
           <DesvioDetailsDialog desvio={desvio} onStatusUpdated={onStatusUpdated} />
 
-          <Button variant="ghost" size="icon" onClick={() => onEditClick(desvio)}>
-            <span className="sr-only">Editar</span>
-            <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 20h9" />
-              <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 3.5l4 4L6 22H2v-4L16.5 3.5z" />
-            </svg>
-          </Button>
+          <PermissionGuard requiredPermissions={["desvios_editar", "admin_funcionarios"]}>
+            <Button variant="ghost" size="icon" onClick={() => onEditClick(desvio)}>
+              <span className="sr-only">Editar</span>
+              <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 20h9" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 3.5l4 4L6 22H2v-4L16.5 3.5z" />
+              </svg>
+            </Button>
+          </PermissionGuard>
 
-          <DeleteDesvioDialog desvio={desvio} onDesvioDeleted={onDesvioDeleted} />
+          <PermissionGuard requiredPermissions={["desvios_excluir", "admin_funcionarios"]}>
+            <DeleteDesvioDialog desvio={desvio} onDesvioDeleted={onDesvioDeleted} />
+          </PermissionGuard>
 
           {editDesvioId === desvio.id && (
             <EditDesvioDialog

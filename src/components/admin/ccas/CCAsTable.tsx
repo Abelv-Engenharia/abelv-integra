@@ -14,6 +14,7 @@ import { Edit, Trash2, CheckCircle, XCircle } from "lucide-react";
 import { CCA } from "@/services/admin/ccaService";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { PermissionGuard } from "@/components/security/PermissionGuard";
 
 interface CCAsTableProps {
   ccas: CCA[];
@@ -94,22 +95,26 @@ export const CCAsTable: React.FC<CCAsTableProps> = ({
               </TableCell>
               <TableCell>
                 <div className="flex items-center justify-center space-x-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => onEdit(cca)}
-                    className="h-8 w-8 p-0"
-                  >
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => onDelete(cca)}
-                    className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                  <PermissionGuard requiredPermission="admin_empresas">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => onEdit(cca)}
+                      className="h-8 w-8 p-0"
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                  </PermissionGuard>
+                  <PermissionGuard requiredPermission="admin_empresas">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => onDelete(cca)}
+                      className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </PermissionGuard>
                 </div>
               </TableCell>
             </TableRow>

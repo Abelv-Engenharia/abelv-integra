@@ -21,6 +21,7 @@ import { TabelaTreinamentosNormativos } from "@/components/treinamentos/TabelaTr
 import { TabelaHistoricoTreinamentos } from "@/components/treinamentos/TabelaHistoricoTreinamentos";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserCCAs } from "@/hooks/useUserCCAs";
+import { PermissionGuard } from "@/components/security/PermissionGuard";
 
 function TreinamentosNormativosPorFuncionarioTab() {
   const [selectedCcaId, setSelectedCcaId] = useState<string | null>(null);
@@ -570,18 +571,22 @@ const TreinamentosConsulta = () => {
                                 <Button variant="ghost" size="icon" onClick={() => handleView(execucao)} title="Visualizar">
                                   <Eye className="w-4 h-4" />
                                 </Button>
-                                <Button variant="ghost" size="icon" onClick={() => handleEdit(execucao)} title="Editar">
-                                  <Edit className="w-4 h-4" />
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  onClick={() => handleDelete(execucao)}
-                                  title="Excluir"
-                                  className="text-red-600"
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </Button>
+                                <PermissionGuard requiredPermissions={["treinamentos_editar", "admin_funcionarios"]}>
+                                  <Button variant="ghost" size="icon" onClick={() => handleEdit(execucao)} title="Editar">
+                                    <Edit className="w-4 h-4" />
+                                  </Button>
+                                </PermissionGuard>
+                                <PermissionGuard requiredPermissions={["treinamentos_excluir", "admin_funcionarios"]}>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => handleDelete(execucao)}
+                                    title="Excluir"
+                                    className="text-red-600"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </Button>
+                                </PermissionGuard>
                               </div>
                             </TableCell>
                           </TableRow>

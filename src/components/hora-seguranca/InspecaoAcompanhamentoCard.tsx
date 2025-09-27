@@ -9,6 +9,7 @@ import { FileText, X } from "lucide-react";
 import { useSignedUrl } from "@/hooks/useSignedUrl";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { PermissionGuard } from "@/components/security/PermissionGuard";
 
 interface InspecaoAcompanhamentoCardProps {
   inspecao: any;
@@ -144,14 +145,16 @@ export function InspecaoAcompanhamentoCard({
           >
             Atualizar Status
           </Button>
-          <Button
-            variant="destructive"
-            size="sm"
-            className="flex items-center gap-1 px-2 py-0.5 h-6 min-h-0 text-[10px] leading-none"
-            onClick={() => onDelete(inspecao.id)}
-          >
-            Excluir
-          </Button>
+          <PermissionGuard requiredPermissions={["hsa_excluir", "admin_funcionarios"]}>
+            <Button
+              variant="destructive"
+              size="sm"
+              className="flex items-center gap-1 px-2 py-0.5 h-6 min-h-0 text-[10px] leading-none"
+              onClick={() => onDelete(inspecao.id)}
+            >
+              Excluir
+            </Button>
+          </PermissionGuard>
         </div>
       </CardFooter>
     </Card>

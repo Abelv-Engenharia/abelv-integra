@@ -13,6 +13,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { PermissionGuard } from "@/components/security/PermissionGuard";
 
 interface FuncionariosTableProps {
   funcionarios: Funcionario[];
@@ -88,21 +89,25 @@ export const FuncionariosTable: React.FC<FuncionariosTableProps> = ({
               </TableCell>
               <TableCell>
                 <div className="flex space-x-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => onEdit(funcionario)}
-                  >
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => onDelete(funcionario.id)}
-                    className="text-red-600 hover:text-red-700"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                  <PermissionGuard requiredPermission="admin_funcionarios">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => onEdit(funcionario)}
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                  </PermissionGuard>
+                  <PermissionGuard requiredPermission="admin_funcionarios">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => onDelete(funcionario.id)}
+                      className="text-red-600 hover:text-red-700"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </PermissionGuard>
                 </div>
               </TableCell>
             </TableRow>
