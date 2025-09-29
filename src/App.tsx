@@ -82,6 +82,7 @@ import DesviosDashboard from "./pages/DesviosDashboard";
 import DesviosForm from "./pages/DesviosForm";
 import DesviosConsulta from "./pages/DesviosConsulta";
 import DesviosNaoConformidade from "./pages/DesviosNaoConformidade";
+import DesviosVisualizacao from "./pages/desvios/DesviosVisualizacao";
 import InsightsDesvios from "@/pages/desvios/InsightsDesvios";
 
 // Hora da Segurança pages
@@ -244,6 +245,7 @@ function App() {
                 <Route path="desvios/dashboard" element={<DesviosDashboard />} />
                 <Route path="desvios/cadastro" element={<DesviosForm />} />
                 <Route path="desvios/consulta" element={<DesviosConsulta />} />
+                <Route path="desvios/visualizacao/:id" element={<DesviosVisualizacao />} />
                 <Route path="desvios/nao-conformidade" element={<DesviosNaoConformidade />} />
                 <Route path="desvios/insights" element={<InsightsDesvios />} />
 

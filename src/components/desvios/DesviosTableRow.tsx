@@ -1,12 +1,14 @@
 
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import StatusBadge from "./StatusBadge";
 import RiskBadge from "./RiskBadge";
-import DesvioDetailsDialog from "./DesvioDetailsDialog";
+import StatusUpdateDialog from "./StatusUpdateDialog";
 import EditDesvioDialog from "./EditDesvioDialog";
 import DeleteDesvioDialog from "./DeleteDesvioDialog";
 import { DesvioCompleto } from "@/services/desvios/desviosCompletosService";
 import { Button } from "@/components/ui/button";
+import { Eye } from "lucide-react";
 import { calculateStatusAcao } from "@/utils/desviosUtils";
 import { PermissionGuard } from "@/components/security/PermissionGuard";
 
@@ -38,11 +40,16 @@ const DesviosTableRow = ({
   setEditDialogOpen,
   onDesvioUpdated,
 }: Props) => {
+  const navigate = useNavigate();
   const calculatedStatus = calculateStatusAcao(
     desvio.situacao || desvio.status || "",
     desvio.prazo_conclusao || ""
   );
   const displayStatus = calculatedStatus || desvio.status || "PENDENTE";
+
+  const handleViewDesvio = () => {
+    navigate(`/desvios/visualizacao/${desvio.id}`);
+  };
 
   return (
     <tr>
@@ -82,10 +89,19 @@ const DesviosTableRow = ({
 
       <td className="text-right">
         <div className="flex justify-end gap-2">
-          <DesvioDetailsDialog desvio={desvio} onStatusUpdated={onStatusUpdated} />
+          {/* Botão de Visualização */}
+          <Button variant="ghost" size="icon" onClick={handleViewDesvio} title="Visualizar Desvio">
+            <Eye className="h-4 w-4" />
+          </Button>
 
+          {/* Botão de Atualização de Status */}
           <PermissionGuard requiredPermissions={["desvios_editar", "admin_funcionarios"]}>
-            <Button variant="ghost" size="icon" onClick={() => onEditClick(desvio)}>
+            <StatusUpdateDialog desvio={desvio} onStatusUpdated={onStatusUpdated} />
+          </PermissionGuard>
+
+          {/* Botão de Edição */}
+          <PermissionGuard requiredPermissions={["desvios_editar", "admin_funcionarios"]}>
+            <Button variant="ghost" size="icon" onClick={() => onEditClick(desvio)} title="Editar Desvio">
               <span className="sr-only">Editar</span>
               <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 20h9" />
@@ -94,6 +110,7 @@ const DesviosTableRow = ({
             </Button>
           </PermissionGuard>
 
+          {/* Botão de Exclusão */}
           <PermissionGuard requiredPermissions={["desvios_excluir", "admin_funcionarios"]}>
             <DeleteDesvioDialog desvio={desvio} onDesvioDeleted={onDesvioDeleted} />
           </PermissionGuard>
