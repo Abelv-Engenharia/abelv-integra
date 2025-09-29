@@ -604,7 +604,7 @@ export default function SidebarSectionSMS({ openMenu, toggleMenu, onLinkClick }:
       )}
 
       {/* Seção Prevenção de Incêndio */}
-      {(isAdmin || canAccessMenu("prevencao_incendio_dashboard") || canAccessMenu("prevencao_incendio_cadastro_extintores") || canAccessMenu("prevencao_incendio_inspecao_extintores")) && (
+      {(isAdmin || canAccessMenu("prevencao_incendio_dashboard") || canAccessMenu("prevencao_incendio_cadastro_extintores") || canAccessMenu("prevencao_incendio_consulta_extintores") || canAccessMenu("prevencao_incendio_inspecao_extintores") || canAccessMenu("prevencao_incendio_consulta_inspecoes")) && (
         <SidebarMenu>
           <SidebarMenuItem>
             <Collapsible open={openMenu === "prevencao-incendio"}>
