@@ -3,17 +3,17 @@ import { FilterParams } from "../types/dashboardTypes";
 import { applyFiltersToQuery } from "../utils/filterUtils";
 
 export const countAcoesCompletas = async (filters?: FilterParams): Promise<number> => {
-  // Query para situacao = 'TRATADO' OU (situacao IS NULL E status = 'TRATADO')
+  // Query para situacao = 'CONCLUÍDO' (agora populado pelo trigger)
   let query = supabase
     .from('desvios_completos')
     .select('id', { count: 'exact', head: true })
-    .or('situacao.eq.TRATADO,and(situacao.is.null,status.eq.TRATADO)');
+    .eq('situacao', 'CONCLUÍDO');
 
   if (filters) {
     query = applyFiltersToQuery(query, filters);
   }
 
-  console.log('🔍 Contando ações completas (TRATADO em situacao ou status)...');
+  console.log('🔍 Contando ações completas (situacao = CONCLUÍDO)...');
   const { count, error } = await query;
   
   if (error) {
@@ -26,22 +26,17 @@ export const countAcoesCompletas = async (filters?: FilterParams): Promise<numbe
 };
 
 export const countAcoesAndamento = async (filters?: FilterParams): Promise<number> => {
-  const hoje = new Date().toISOString().split('T')[0];
-  
-  // Query para (situacao IN ('EM ANDAMENTO', 'EM TRATATIVA') OU (situacao IS NULL E status IN ('EM ANDAMENTO', 'EM TRATATIVA'))) 
-  // E prazo_conclusao >= hoje E prazo_conclusao IS NOT NULL
+  // Query para situacao = 'EM ANDAMENTO' (agora populado pelo trigger)
   let query = supabase
     .from('desvios_completos')
     .select('id', { count: 'exact', head: true })
-    .or('situacao.in.(EM ANDAMENTO,EM TRATATIVA),and(situacao.is.null,status.in.(EM ANDAMENTO,EM TRATATIVA))')
-    .not('prazo_conclusao', 'is', null)
-    .gte('prazo_conclusao', hoje);
+    .eq('situacao', 'EM ANDAMENTO');
 
   if (filters) {
     query = applyFiltersToQuery(query, filters);
   }
 
-  console.log('🔍 Contando ações em andamento (situacao/status EM ANDAMENTO/EM TRATATIVA + prazo >= hoje)...');
+  console.log('🔍 Contando ações em andamento (situacao = EM ANDAMENTO)...');
   const { count, error } = await query;
   
   if (error) {
@@ -54,27 +49,26 @@ export const countAcoesAndamento = async (filters?: FilterParams): Promise<numbe
 };
 
 export const countAcoesPendentes = async (filters?: FilterParams): Promise<number> => {
-  // Como a maioria dos registros tem situacao=null, vamos usar uma abordagem mais simples:
-  // Pendentes = Total - Completas - Em Andamento
-  
-  console.log('🔍 Contando ações pendentes por subtração...');
-  
-  const [total, completas, andamento] = await Promise.all([
-    countTotalDesvios(filters),
-    countAcoesCompletas(filters),
-    countAcoesAndamento(filters)
-  ]);
-  
-  const pendentes = total - completas - andamento;
-  
-  console.log('📊 Cálculo de pendentes:', { 
-    total, 
-    completas, 
-    andamento, 
-    pendentes 
-  });
+  // Query para situacao = 'PENDENTE' (agora populado pelo trigger)
+  let query = supabase
+    .from('desvios_completos')
+    .select('id', { count: 'exact', head: true })
+    .eq('situacao', 'PENDENTE');
 
-  return Math.max(0, pendentes); // Garantir que não seja negativo
+  if (filters) {
+    query = applyFiltersToQuery(query, filters);
+  }
+
+  console.log('🔍 Contando ações pendentes (situacao = PENDENTE)...');
+  const { count, error } = await query;
+  
+  if (error) {
+    console.error('❌ Erro ao contar ações pendentes:', error);
+    return 0;
+  }
+
+  console.log('✅ Ações pendentes encontradas:', count);
+  return count || 0;
 };
 
 export const countTotalDesvios = async (filters?: FilterParams): Promise<number> => {
