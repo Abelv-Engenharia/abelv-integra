@@ -1,8 +1,8 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DesvioCompleto } from "@/services/desvios/desviosCompletosService";
-import { Badge } from "@/components/ui/badge";
 import { format, parseISO } from "date-fns";
+import ColoredBadge from "./ColoredBadge";
 
 interface Props {
   desvio: DesvioCompleto;
@@ -21,7 +21,7 @@ const formatDate = (dateString?: string) => {
 
 const ReadOnlyAcaoCorretivaForm = ({ desvio }: Props) => {
   return (
-    <Card className="print:shadow-none print:border-2">
+    <Card className="print:shadow-none print:border-2 print-no-break">
       <CardHeader className="bg-orange-50 print:bg-gray-100">
         <CardTitle className="text-xl">3. AÇÃO CORRETIVA</CardTitle>
       </CardHeader>
@@ -49,13 +49,13 @@ const ReadOnlyAcaoCorretivaForm = ({ desvio }: Props) => {
                     <label className="text-sm font-semibold text-gray-700 block mb-1">Situação</label>
                     <p className="text-base font-medium">
                       {acao.situacao && (
-                        <Badge variant={
-                          acao.situacao === 'CONCLUÍDO' ? 'default' :
-                          acao.situacao === 'EM ANDAMENTO' ? 'secondary' :
-                          'destructive'
-                        }>
+                        <ColoredBadge 
+                          color={
+                            acao.situacao === 'TRATADO' ? 'green' : 'orange'
+                          }
+                        >
                           {acao.situacao}
-                        </Badge>
+                        </ColoredBadge>
                       )}
                     </p>
                   </div>
@@ -77,31 +77,18 @@ const ReadOnlyAcaoCorretivaForm = ({ desvio }: Props) => {
             <label className="text-sm font-semibold text-gray-700 block mb-1">Situação Geral</label>
             <p className="text-base font-medium">
               {desvio.situacao && (
-                <Badge variant={
-                  desvio.situacao === 'CONCLUÍDO' ? 'default' :
-                  desvio.situacao === 'EM ANDAMENTO' ? 'secondary' :
-                  'destructive'
-                }>
+                <ColoredBadge 
+                  color={
+                    desvio.situacao === 'CONCLUÍDO' ? 'green' :
+                    desvio.situacao === 'EM ANDAMENTO' ? 'orange' :
+                    'red'
+                  }
+                >
                   {desvio.situacao}
-                </Badge>
+                </ColoredBadge>
               )}
             </p>
           </div>
-        </div>
-
-        <div>
-          <label className="text-sm font-semibold text-gray-700 block mb-1">Status</label>
-          <p className="text-base font-medium">
-            {desvio.status && (
-              <Badge variant={
-                desvio.status === 'CONCLUÍDO' ? 'default' :
-                desvio.status === 'EM ANDAMENTO' ? 'secondary' :
-                'destructive'
-              }>
-                {desvio.status}
-              </Badge>
-            )}
-          </p>
         </div>
       </CardContent>
     </Card>

@@ -20,7 +20,7 @@ const formatDate = (dateString?: string) => {
 
 const ReadOnlyIdentificacaoForm = ({ desvio }: Props) => {
   return (
-    <Card className="print:shadow-none print:border-2">
+    <Card className="print:shadow-none print:border-2 print-no-break">
       <CardHeader className="bg-blue-50 print:bg-gray-100">
         <CardTitle className="text-xl">1. IDENTIFICAÇÃO</CardTitle>
       </CardHeader>
@@ -49,18 +49,14 @@ const ReadOnlyIdentificacaoForm = ({ desvio }: Props) => {
         <div>
           <label className="text-sm font-semibold text-gray-700 block mb-1">Tipo de Registro</label>
             <p className="text-base font-medium border-b border-gray-200 pb-1">
-              {(desvio as any).tipos_registro
-                ? `${(desvio as any).tipos_registro.codigo} - ${(desvio as any).tipos_registro.nome}`
-                : "N/A"}
+              {(desvio as any).tipos_registro?.nome || "N/A"}
             </p>
         </div>
 
         <div>
           <label className="text-sm font-semibold text-gray-700 block mb-1">Processo</label>
             <p className="text-base font-medium border-b border-gray-200 pb-1">
-              {(desvio as any).processos
-                ? `${(desvio as any).processos.codigo} - ${(desvio as any).processos.nome}`
-                : "N/A"}
+              {(desvio as any).processos?.nome || "N/A"}
             </p>
         </div>
 

@@ -31,7 +31,7 @@ const ReadOnlyClassificacaoRiscoForm = ({ desvio }: Props) => {
   };
 
   return (
-    <Card className="print:shadow-none print:border-2">
+    <Card className="print:shadow-none print:border-2 print-no-break">
       <CardHeader className="bg-purple-50 print:bg-gray-100">
         <CardTitle className="text-xl">4. CLASSIFICAÇÃO DE RISCO</CardTitle>
       </CardHeader>
@@ -44,17 +44,29 @@ const ReadOnlyClassificacaoRiscoForm = ({ desvio }: Props) => {
             
             <div>
               <label className="text-sm font-semibold text-gray-700 block mb-1">Exposição</label>
-              <p className="text-base font-medium border-b border-gray-200 pb-1">{desvio.exposicao || "-"}</p>
+              <p className="text-base font-medium border-b border-gray-200 pb-1">
+                {(desvio as any).exposicao_opcoes 
+                  ? `${(desvio as any).exposicao_opcoes.codigo} - ${(desvio as any).exposicao_opcoes.nome}`
+                  : "-"}
+              </p>
             </div>
 
             <div>
               <label className="text-sm font-semibold text-gray-700 block mb-1">Controle</label>
-              <p className="text-base font-medium border-b border-gray-200 pb-1">{desvio.controle || "-"}</p>
+              <p className="text-base font-medium border-b border-gray-200 pb-1">
+                {(desvio as any).controle_opcoes 
+                  ? `${(desvio as any).controle_opcoes.codigo} - ${(desvio as any).controle_opcoes.nome}`
+                  : "-"}
+              </p>
             </div>
 
             <div>
               <label className="text-sm font-semibold text-gray-700 block mb-1">Detecção</label>
-              <p className="text-base font-medium border-b border-gray-200 pb-1">{desvio.deteccao || "-"}</p>
+              <p className="text-base font-medium border-b border-gray-200 pb-1">
+                {(desvio as any).deteccao_opcoes 
+                  ? `${(desvio as any).deteccao_opcoes.codigo} - ${(desvio as any).deteccao_opcoes.nome}`
+                  : "-"}
+              </p>
             </div>
           </div>
 
@@ -64,12 +76,20 @@ const ReadOnlyClassificacaoRiscoForm = ({ desvio }: Props) => {
             
             <div>
               <label className="text-sm font-semibold text-gray-700 block mb-1">Efeito de Falha</label>
-              <p className="text-base font-medium border-b border-gray-200 pb-1">{desvio.efeito_falha || "-"}</p>
+              <p className="text-base font-medium border-b border-gray-200 pb-1">
+                {(desvio as any).efeito_falha_opcoes 
+                  ? `${(desvio as any).efeito_falha_opcoes.codigo} - ${(desvio as any).efeito_falha_opcoes.nome}`
+                  : "-"}
+              </p>
             </div>
 
             <div>
               <label className="text-sm font-semibold text-gray-700 block mb-1">Impacto</label>
-              <p className="text-base font-medium border-b border-gray-200 pb-1">{desvio.impacto || "-"}</p>
+              <p className="text-base font-medium border-b border-gray-200 pb-1">
+                {(desvio as any).impacto_opcoes 
+                  ? `${(desvio as any).impacto_opcoes.codigo} - ${(desvio as any).impacto_opcoes.nome}`
+                  : "-"}
+              </p>
             </div>
           </div>
         </div>

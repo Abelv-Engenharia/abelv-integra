@@ -228,3 +228,43 @@
     @apply p-4 sm:p-6 lg:p-8;
   }
 }
+
+/* Print Styles for PDF Generation */
+@media print {
+  .print-no-break {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+  
+  .print-color-adjust {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    color-adjust: exact;
+  }
+  
+  /* Garantir cores dos badges na impressão */
+  .bg-green-500 {
+    background-color: #22c55e !important;
+    color: white !important;
+  }
+  
+  .bg-orange-500 {
+    background-color: #f97316 !important;
+    color: white !important;
+  }
+  
+  .bg-red-500 {
+    background-color: #ef4444 !important;
+    color: white !important;
+  }
+  
+  /* Espaçamento entre cards */
+  .space-y-6 > * + * {
+    margin-top: 1.5rem;
+  }
+  
+  /* Evitar quebra de página entre elementos relacionados */
+  .grid > * {
+    page-break-inside: avoid;
+  }
+}

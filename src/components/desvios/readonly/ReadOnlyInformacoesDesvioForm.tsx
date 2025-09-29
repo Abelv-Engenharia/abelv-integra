@@ -8,7 +8,7 @@ interface Props {
 
 const ReadOnlyInformacoesDesvioForm = ({ desvio }: Props) => {
   return (
-    <Card className="print:shadow-none print:border-2">
+    <Card className="print:shadow-none print:border-2 print-no-break">
       <CardHeader className="bg-green-50 print:bg-gray-100">
         <CardTitle className="text-xl">2. INFORMAÇÕES DO DESVIO</CardTitle>
       </CardHeader>
@@ -25,9 +25,7 @@ const ReadOnlyInformacoesDesvioForm = ({ desvio }: Props) => {
           <div>
             <label className="text-sm font-semibold text-gray-700 block mb-1">Base Legal</label>
             <p className="text-base font-medium border-b border-gray-200 pb-1">
-              {(desvio as any).base_legal_opcoes
-                ? `${(desvio as any).base_legal_opcoes.codigo} - ${(desvio as any).base_legal_opcoes.nome}`
-                : "N/A"}
+              {(desvio as any).base_legal_opcoes?.nome || "N/A"}
             </p>
           </div>
 
@@ -69,15 +67,6 @@ const ReadOnlyInformacoesDesvioForm = ({ desvio }: Props) => {
           </div>
         )}
 
-        {/* Ação Imediata */}
-        {desvio.acao_imediata && (
-          <div className="mb-6">
-            <label className="text-sm font-semibold text-gray-700 block mb-2">Ação Imediata</label>
-            <div className="p-4 bg-gray-50 rounded border-2 border-gray-200 min-h-[100px]">
-              <p className="text-base whitespace-pre-wrap">{desvio.acao_imediata}</p>
-            </div>
-          </div>
-        )}
       </CardContent>
     </Card>
   );
