@@ -19,6 +19,7 @@ export interface MedidaDisciplinarFormData {
   data_aplicacao: string;
   descricao?: string;
   arquivo?: File | null;
+  desvio_id?: string;
 }
 
 // Corrigir o tipo e mapeamento para os valores aceitos pelo banco

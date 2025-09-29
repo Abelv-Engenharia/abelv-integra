@@ -50,7 +50,7 @@ export async function listarTiposMedidaDisciplinar() {
 
 /* Criar medida disciplinar - converter entre form e banco */
 export async function criarMedidaDisciplinar(form: MedidaDisciplinarFormData, arquivoUrl?: string) {
-  const { cca_id, funcionario_id, tipo_medida, data_aplicacao, descricao } = form;
+  const { cca_id, funcionario_id, tipo_medida, data_aplicacao, descricao, desvio_id } = form;
   const { ano, mes } = getAnoMes(data_aplicacao);
 
   // Converta o nome do tipo do UI (TipoMedidaAplicada) para formato banco
@@ -69,6 +69,7 @@ export async function criarMedidaDisciplinar(form: MedidaDisciplinarFormData, ar
     pdf_url: string | null;
     ano: string;
     mes: string;
+    desvio_id: string | null;
   } = {
     cca_id: parseInt(cca_id, 10),
     funcionario_id,
@@ -78,6 +79,7 @@ export async function criarMedidaDisciplinar(form: MedidaDisciplinarFormData, ar
     pdf_url: arquivoUrl || null,
     ano,
     mes,
+    desvio_id: desvio_id || null,
   };
 
   const { data, error } = await supabase

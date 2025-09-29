@@ -1,6 +1,7 @@
 
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { validateRequiredFields } from "@/utils/desviosValidation";
 import { desviosCompletosService } from "@/services/desvios/desviosCompletosService";
@@ -9,6 +10,7 @@ import { calculateStatusAcao } from "@/utils/desviosUtils";
 
 export const useDesviosForm = () => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("identificacao");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
@@ -128,11 +130,32 @@ export const useDesviosForm = () => {
       
       if (result && result.id) {
         console.log('Desvio criado com sucesso:', result);
-        setShowSuccessDialog(true);
-        toast({
-          title: "Desvio cadastrado com sucesso!",
-          description: "O desvio foi registrado no sistema.",
-        });
+        
+        // Verificar se deve aplicar medida disciplinar
+        if (formData.aplicacaoMedidaDisciplinar && formData.colaboradorInfrator) {
+          toast({
+            title: "Desvio cadastrado com sucesso!",
+            description: "Você será redirecionado para cadastrar a medida disciplinar.",
+          });
+          
+          // Redirecionar para cadastro de medida disciplinar com dados pré-preenchidos
+          navigate('/medidas-disciplinares/cadastro', {
+            state: {
+              fromDesvio: true,
+              cca_id: formData.ccaId,
+              funcionario_id: formData.colaboradorInfrator,
+              descricao: formData.descricaoDesvio,
+              desvio_id: result.id,
+            }
+          });
+        } else {
+          // Fluxo normal - apenas mostrar dialog
+          setShowSuccessDialog(true);
+          toast({
+            title: "Desvio cadastrado com sucesso!",
+            description: "O desvio foi registrado no sistema.",
+          });
+        }
       } else {
         throw new Error('Resposta inválida do servidor');
       }

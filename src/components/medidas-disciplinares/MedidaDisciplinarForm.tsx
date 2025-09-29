@@ -28,15 +28,25 @@ const schema = z.object({
 
 type Schema = z.infer<typeof schema>;
 
-export default function MedidaDisciplinarForm({ onSuccess }: { onSuccess: () => void }) {
+interface MedidaDisciplinarFormProps {
+  onSuccess: () => void;
+  initialData?: {
+    cca_id?: string;
+    funcionario_id?: string;
+    descricao?: string;
+    desvio_id?: string;
+  };
+}
+
+export default function MedidaDisciplinarForm({ onSuccess, initialData }: MedidaDisciplinarFormProps) {
   const methods = useForm<MedidaDisciplinarFormData>({
     resolver: zodResolver(schema),
     defaultValues: {
-      cca_id: "",
-      funcionario_id: "",
+      cca_id: initialData?.cca_id || "",
+      funcionario_id: initialData?.funcionario_id || "",
       tipo_medida: "",
       data_aplicacao: "",
-      descricao: "",
+      descricao: initialData?.descricao || "",
       arquivo: null,
     },
   });
@@ -53,12 +63,29 @@ export default function MedidaDisciplinarForm({ onSuccess }: { onSuccess: () => 
   });
 
   useEffect(() => {
-    setValue("funcionario_id", "");
-  }, [cca_id, setValue]);
+    // Só limpa funcionário se não vier de initialData
+    if (!initialData?.funcionario_id) {
+      setValue("funcionario_id", "");
+    }
+  }, [cca_id, setValue, initialData]);
 
   useEffect(() => {
     setValue("arquivo", pdfFile);
   }, [pdfFile, setValue]);
+
+  // Preencher CCA após carregar
+  useEffect(() => {
+    if (initialData?.cca_id && ccas && !ccasLoading) {
+      setValue("cca_id", initialData.cca_id);
+    }
+  }, [initialData, ccas, ccasLoading, setValue]);
+
+  // Preencher funcionário após carregar
+  useEffect(() => {
+    if (initialData?.funcionario_id && funcionarios && !funcLoading) {
+      setValue("funcionario_id", initialData.funcionario_id);
+    }
+  }, [initialData, funcionarios, funcLoading, setValue]);
 
   const onSubmit = async (data: MedidaDisciplinarFormData) => {
     if (!profile?.id) return;
@@ -70,6 +97,7 @@ export default function MedidaDisciplinarForm({ onSuccess }: { onSuccess: () => 
         data_aplicacao: data.data_aplicacao,
         descricao: data.descricao ?? "",
         arquivo: data.arquivo ?? null,
+        desvio_id: initialData?.desvio_id,
       },
       arquivo: pdfFile,
       userId: profile.id
