@@ -3,8 +3,9 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Edit, FileText, Image as ImageIcon, Download, CheckCircle, Users } from "lucide-react";
+import { ArrowLeft, Edit, FileText, Image as ImageIcon, Download, CheckCircle, Users, FileDown } from "lucide-react";
 import { useComunicadoPorId, useCienciasComunicado } from "@/hooks/useComunicados";
+import { useExportarComunicadoPdf } from "@/hooks/useExportarComunicadoPdf";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
 import { supabase } from "@/integrations/supabase/client";
@@ -14,6 +15,11 @@ const ComunicadoDetalhe = () => {
   const navigate = useNavigate();
   const { data: comunicado, isLoading } = useComunicadoPorId(id!);
   const { data: ciencias, isLoading: isLoadingCiencias } = useCienciasComunicado(id!);
+  
+  const { exportarPdf, isExporting } = useExportarComunicadoPdf({
+    comunicado: comunicado!,
+    ciencias: ciencias || []
+  });
 
   const getFileUrl = (url: string) => {
     if (url.includes('comunicados-anexos')) {
@@ -217,12 +223,22 @@ const ComunicadoDetalhe = () => {
           <span className="text-muted-foreground">/</span>
           <span className="font-medium">Detalhes do Comunicado</span>
         </div>
-        <Button
-          onClick={() => navigate(`/admin/comunicados/edicao/${comunicado.id}`)}
-        >
-          <Edit className="h-4 w-4 mr-2" />
-          Editar
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            onClick={exportarPdf}
+            disabled={isExporting}
+          >
+            <FileDown className="h-4 w-4 mr-2" />
+            {isExporting ? 'Gerando...' : 'Exportar PDF'}
+          </Button>
+          <Button
+            onClick={() => navigate(`/admin/comunicados/edicao/${comunicado.id}`)}
+          >
+            <Edit className="h-4 w-4 mr-2" />
+            Editar
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
