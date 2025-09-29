@@ -25,7 +25,9 @@ const ReadOnlyInformacoesDesvioForm = ({ desvio }: Props) => {
           <div>
             <label className="text-sm font-semibold text-gray-700 block mb-1">Base Legal</label>
             <p className="text-base font-medium border-b border-gray-200 pb-1">
-              {(desvio as any).base_legal_opcoes?.nome || "N/A"}
+              {(desvio as any).base_legal_opcoes
+                ? `${(desvio as any).base_legal_opcoes.codigo} - ${(desvio as any).base_legal_opcoes.nome}`
+                : "N/A"}
             </p>
           </div>
 

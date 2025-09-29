@@ -63,15 +63,20 @@ export const desviosCompletosService = {
       .from('desvios_completos')
       .select(`
         *,
-        ccas (nome),
-        empresas (nome),
-        disciplinas (nome),
-        causas_provaveis (nome),
-        eventos_identificados (nome),
-        base_legal_opcoes (nome)
+        ccas (id, codigo, nome),
+        empresas (id, nome),
+        disciplinas (id, nome),
+        causas_provaveis (id, nome),
+        eventos_identificados (id, nome),
+        processos (id, codigo, nome),
+        tipos_registro (id, codigo, nome),
+        base_legal_opcoes (id, codigo, nome),
+        supervisores:supervisor_responsavel_id (id, nome, matricula, funcao),
+        encarregados:encarregado_responsavel_id (id, nome, matricula, funcao),
+        engenheiros:engenheiro_responsavel_id (id, nome, matricula, funcao)
       `)
       .order('created_at', { ascending: false })
-      .range(0, 99999); // Remove o limite padrão de 1000 registros
+      .range(0, 99999);
 
     if (error) throw error;
     return (data || []).map(convertDbToDesvio);
@@ -82,12 +87,17 @@ export const desviosCompletosService = {
       .from('desvios_completos')
       .select(`
         *,
-        ccas (nome),
-        empresas (nome),
-        disciplinas (nome),
-        causas_provaveis (nome),
-        eventos_identificados (nome),
-        base_legal_opcoes (nome)
+        ccas (id, codigo, nome),
+        empresas (id, nome),
+        disciplinas (id, nome),
+        causas_provaveis (id, nome),
+        eventos_identificados (id, nome),
+        processos (id, codigo, nome),
+        tipos_registro (id, codigo, nome),
+        base_legal_opcoes (id, codigo, nome),
+        supervisores:supervisor_responsavel_id (id, nome, matricula, funcao),
+        encarregados:encarregado_responsavel_id (id, nome, matricula, funcao),
+        engenheiros:engenheiro_responsavel_id (id, nome, matricula, funcao)
       `)
       .eq('id', id)
       .single();

@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Printer } from "lucide-react";
 import { desviosCompletosService, DesvioCompleto } from "@/services/desvios/desviosCompletosService";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import ReadOnlyIdentificacaoForm from "@/components/desvios/readonly/ReadOnlyIdentificacaoForm";
 import ReadOnlyInformacoesDesvioForm from "@/components/desvios/readonly/ReadOnlyInformacoesDesvioForm";
@@ -21,6 +22,34 @@ const DesviosVisualizacao = () => {
       
       try {
         const data = await desviosCompletosService.getById(id);
+        
+        // Enriquecer funcionarios_envolvidos com nomes dos funcionários
+        if (data.funcionarios_envolvidos && Array.isArray(data.funcionarios_envolvidos)) {
+          const funcionariosEnriquecidos = await Promise.all(
+            data.funcionarios_envolvidos.map(async (func: any) => {
+              if (func.funcionario_id) {
+                const { data: funcionario } = await supabase
+                  .from('funcionarios')
+                  .select('nome, funcao, matricula')
+                  .eq('id', func.funcionario_id)
+                  .single();
+                
+                if (funcionario) {
+                  return {
+                    ...func,
+                    nome: funcionario.nome,
+                    funcao: func.funcao || funcionario.funcao,
+                    matricula: func.matricula || funcionario.matricula
+                  };
+                }
+              }
+              return func;
+            })
+          );
+          
+          data.funcionarios_envolvidos = funcionariosEnriquecidos;
+        }
+        
         setDesvio(data);
       } catch (error) {
         console.error('Erro ao carregar desvio:', error);

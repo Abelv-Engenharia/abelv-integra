@@ -48,16 +48,20 @@ const ReadOnlyIdentificacaoForm = ({ desvio }: Props) => {
 
         <div>
           <label className="text-sm font-semibold text-gray-700 block mb-1">Tipo de Registro</label>
-          <p className="text-base font-medium border-b border-gray-200 pb-1">
-            {(desvio as any).tipos_registro?.nome || "N/A"}
-          </p>
+            <p className="text-base font-medium border-b border-gray-200 pb-1">
+              {(desvio as any).tipos_registro
+                ? `${(desvio as any).tipos_registro.codigo} - ${(desvio as any).tipos_registro.nome}`
+                : "N/A"}
+            </p>
         </div>
 
         <div>
           <label className="text-sm font-semibold text-gray-700 block mb-1">Processo</label>
-          <p className="text-base font-medium border-b border-gray-200 pb-1">
-            {(desvio as any).processos?.nome || "N/A"}
-          </p>
+            <p className="text-base font-medium border-b border-gray-200 pb-1">
+              {(desvio as any).processos
+                ? `${(desvio as any).processos.codigo} - ${(desvio as any).processos.nome}`
+                : "N/A"}
+            </p>
         </div>
 
         <div>
@@ -97,9 +101,9 @@ const ReadOnlyIdentificacaoForm = ({ desvio }: Props) => {
 
         <div>
           <label className="text-sm font-semibold text-gray-700 block mb-1">Engenheiro Responsável</label>
-          <p className="text-base font-medium border-b border-gray-200 pb-1">
-            {(desvio as any).engenheiros?.nome || "N/A"}
-          </p>
+            <p className="text-base font-medium border-b border-gray-200 pb-1">
+              {(desvio as any).engenheiros?.nome || "N/A"}
+            </p>
         </div>
       </CardContent>
     </Card>
