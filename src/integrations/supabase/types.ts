@@ -2067,6 +2067,7 @@ export type Database = {
         Row: {
           ativo: boolean | null
           capacidade: string
+          cca_id: number | null
           codigo: string
           created_at: string | null
           data_fabricacao: string | null
@@ -2081,6 +2082,7 @@ export type Database = {
         Insert: {
           ativo?: boolean | null
           capacidade: string
+          cca_id?: number | null
           codigo: string
           created_at?: string | null
           data_fabricacao?: string | null
@@ -2095,6 +2097,7 @@ export type Database = {
         Update: {
           ativo?: boolean | null
           capacidade?: string
+          cca_id?: number | null
           codigo?: string
           created_at?: string | null
           data_fabricacao?: string | null
@@ -2106,7 +2109,15 @@ export type Database = {
           tipo?: string
           updated_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "extintores_cca_id_fkey"
+            columns: ["cca_id"]
+            isOneToOne: false
+            referencedRelation: "ccas"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       funcionario_supervisores: {
         Row: {

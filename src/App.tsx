@@ -302,6 +302,7 @@ function App() {
                 {/* Prevenção de Incêndio routes */}
                 <Route path="prevencao-incendio/dashboard" element={<PrevencaoIncendioDashboard />} />
                 <Route path="prevencao-incendio/cadastro-extintores" element={<CadastroExtintores />} />
+                <Route path="prevencao-incendio/consulta-extintores" element={<ConsultaExtintores />} />
                 <Route path="prevencao-incendio/inspecao-extintores" element={<InspecaoExtintores />} />
                 <Route path="prevencao-incendio/consulta-inspecoes" element={<ConsultaInspecoesExtintores />} />
                 <Route path="prevencao-incendio/inspecoes/:id" element={<VisualizarInspecaoExtintor />} />

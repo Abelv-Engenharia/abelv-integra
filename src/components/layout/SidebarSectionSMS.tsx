@@ -644,6 +644,18 @@ export default function SidebarSectionSMS({ openMenu, toggleMenu, onLinkClick }:
                       </SidebarMenuSubButton>
                     </SidebarMenuSubItem>
                   )}
+                  {(isAdmin || canAccessMenu("prevencao_incendio_consulta_extintores")) && (
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton 
+                        asChild
+                        className={currentPath === "/prevencao-incendio/consulta-extintores" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
+                      >
+                        <Link to="/prevencao-incendio/consulta-extintores" className="flex items-center gap-2" onClick={onLinkClick}>
+                          <span className="text-xs leading-tight break-words min-w-0">Consulta de Extintores</span>
+                        </Link>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+                  )}
                   {(isAdmin || canAccessMenu("prevencao_incendio_inspecao_extintores")) && (
                     <SidebarMenuSubItem>
                       <SidebarMenuSubButton 
