@@ -9,6 +9,7 @@ import ReadOnlyIdentificacaoForm from "@/components/desvios/readonly/ReadOnlyIde
 import ReadOnlyInformacoesDesvioForm from "@/components/desvios/readonly/ReadOnlyInformacoesDesvioForm";
 import ReadOnlyAcaoCorretivaForm from "@/components/desvios/readonly/ReadOnlyAcaoCorretivaForm";
 import ReadOnlyClassificacaoRiscoForm from "@/components/desvios/readonly/ReadOnlyClassificacaoRiscoForm";
+import "@/styles/print-desvios.css";
 
 const DesviosVisualizacao = () => {
   const { id } = useParams<{ id: string }>();
@@ -107,14 +108,23 @@ const DesviosVisualizacao = () => {
       </div>
 
       {/* Header para impressão */}
-      <div className="hidden print:block text-center mb-8 border-b-2 border-gray-300 pb-4">
-        <h1 className="text-3xl font-bold mb-2">RELATÓRIO DE DESVIO</h1>
-        <p className="text-lg text-gray-600">
-          Protocolo: {desvio.id?.substring(0, 8).toUpperCase()}
-        </p>
-        <p className="text-sm text-gray-500 mt-2">
-          Data de geração: {new Date().toLocaleDateString('pt-BR')} às {new Date().toLocaleTimeString('pt-BR')}
-        </p>
+      <div className="hidden print:block print-header">
+        <div className="print-header-logo">
+          ABELV Engenharia
+        </div>
+        <div className="print-header-title">
+          <h1>RELATÓRIO DE DESVIO</h1>
+        </div>
+        <div className="print-header-info">
+          <div>Protocolo: {desvio.id?.substring(0, 8).toUpperCase()}</div>
+          <div>Gerado em: {new Date().toLocaleString('pt-BR', { 
+            day: '2-digit', 
+            month: '2-digit', 
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          })}</div>
+        </div>
       </div>
 
       {/* 1. IDENTIFICAÇÃO */}

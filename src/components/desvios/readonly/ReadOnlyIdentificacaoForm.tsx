@@ -20,14 +20,14 @@ const formatDate = (dateString?: string) => {
 
 const ReadOnlyIdentificacaoForm = ({ desvio }: Props) => {
   return (
-    <Card className="print:shadow-none print:border-2 print-no-break">
-      <CardHeader className="bg-blue-50 print:bg-gray-100">
-        <CardTitle className="text-xl">1. IDENTIFICAÇÃO</CardTitle>
+    <Card className="print:shadow-none print:border-2 print-no-break print-section">
+      <CardHeader className="bg-blue-50 print:bg-gray-100 print-section-title">
+        <CardTitle className="text-xl">1. Identificação</CardTitle>
       </CardHeader>
-      <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-6 p-6">
+      <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-6 p-6 print-section-content print-grid-3">
         <div>
-          <label className="text-sm font-semibold text-gray-700 block mb-1">Data</label>
-          <p className="text-base font-medium border-b border-gray-200 pb-1">
+          <label className="text-sm font-semibold text-gray-700 block mb-1 print-label">Data</label>
+          <p className="text-base font-medium border-b border-gray-200 pb-1 print-value">
             {formatDate(desvio.data_desvio)}
           </p>
         </div>

@@ -1,0 +1,244 @@
+/* Estilos de Impressão para Relatório de Desvio */
+
+@media print {
+  /* Reset geral para impressão */
+  body {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  /* Ocultar elementos desnecessários */
+  .print\\:hidden {
+    display: none !important;
+  }
+
+  /* Container principal */
+  .print-container {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Cabeçalho de impressão */
+  .print-header {
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 24px;
+    border-bottom: 2px solid #000;
+    margin-bottom: 20px;
+    page-break-after: avoid;
+  }
+
+  .print-header-logo {
+    font-size: 20px;
+    font-weight: bold;
+    color: #000;
+  }
+
+  .print-header-title {
+    text-align: center;
+    flex: 1;
+  }
+
+  .print-header-title h1 {
+    font-size: 18px;
+    font-weight: bold;
+    margin: 0;
+    color: #000;
+  }
+
+  .print-header-info {
+    text-align: right;
+    font-size: 10px;
+    color: #333;
+  }
+
+  /* Cards - remover sombras e ajustar bordas */
+  .print\\:shadow-none {
+    box-shadow: none !important;
+  }
+
+  .print\\:border-2 {
+    border: 2px solid #000 !important;
+  }
+
+  .print\\:bg-gray-100 {
+    background-color: #f3f4f6 !important;
+  }
+
+  /* Evitar quebra de página dentro de seções */
+  .print-no-break {
+    page-break-inside: avoid;
+  }
+
+  /* Seções */
+  .print-section {
+    margin-bottom: 16px;
+    page-break-inside: avoid;
+  }
+
+  /* Tabelas */
+  .print-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 8px 0;
+  }
+
+  .print-table td,
+  .print-table th {
+    border: 1px solid #000;
+    padding: 6px 8px;
+    font-size: 11px;
+  }
+
+  .print-table th {
+    background-color: #f3f4f6;
+    font-weight: 600;
+    text-align: left;
+  }
+
+  /* Labels */
+  .print-label {
+    font-size: 10px;
+    font-weight: 600;
+    color: #000;
+    margin-bottom: 2px;
+  }
+
+  /* Valores */
+  .print-value {
+    font-size: 11px;
+    color: #000;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 2px;
+  }
+
+  /* Descrições longas */
+  .print-description {
+    background-color: #f9fafb;
+    border: 1px solid #000;
+    padding: 8px;
+    min-height: 60px;
+    font-size: 11px;
+  }
+
+  /* Badges - converter para texto simples na impressão */
+  .print-badge {
+    display: inline-block;
+    padding: 2px 6px;
+    border: 1px solid #000;
+    border-radius: 3px;
+    font-size: 10px;
+    font-weight: 600;
+  }
+
+  /* Cores de classificação de risco */
+  .print-risk-trivial {
+    background-color: #bfdbfe !important;
+    color: #000 !important;
+  }
+
+  .print-risk-toleravel {
+    background-color: #bbf7d0 !important;
+    color: #000 !important;
+  }
+
+  .print-risk-moderado {
+    background-color: #fef08a !important;
+    color: #000 !important;
+  }
+
+  .print-risk-substancial {
+    background-color: #fed7aa !important;
+    color: #000 !important;
+  }
+
+  .print-risk-intoleravel {
+    background-color: #fecaca !important;
+    color: #000 !important;
+  }
+
+  /* Legendas */
+  .print-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+  }
+
+  .print-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 10px;
+  }
+
+  .print-legend-color {
+    width: 12px;
+    height: 12px;
+    border: 1px solid #000;
+    border-radius: 2px;
+  }
+
+  /* Grid compacto para impressão */
+  .print-grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+
+  .print-grid-2 {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  /* Ajustes de espaçamento */
+  .print-spacing-sm {
+    margin-bottom: 8px;
+  }
+
+  .print-spacing-md {
+    margin-bottom: 12px;
+  }
+
+  /* Títulos de seção */
+  .print-section-title {
+    font-size: 14px;
+    font-weight: bold;
+    background-color: #f3f4f6;
+    padding: 8px 12px;
+    border: 2px solid #000;
+    border-bottom: none;
+    margin: 0;
+  }
+
+  /* Conteúdo de seção */
+  .print-section-content {
+    border: 2px solid #000;
+    padding: 12px;
+  }
+
+  /* Força remoção de cores de fundo em cards */
+  .bg-blue-50,
+  .bg-green-50,
+  .bg-orange-50,
+  .bg-purple-50 {
+    background-color: #ffffff !important;
+  }
+
+  /* Ajustes finais */
+  * {
+    box-shadow: none !important;
+  }
+
+  .space-y-6 > * + * {
+    margin-top: 12px !important;
+  }
+
+  .space-y-4 > * + * {
+    margin-top: 8px !important;
+  }
+}
