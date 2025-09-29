@@ -668,6 +668,18 @@ export default function SidebarSectionSMS({ openMenu, toggleMenu, onLinkClick }:
                       </SidebarMenuSubButton>
                     </SidebarMenuSubItem>
                   )}
+                  {(isAdmin || canAccessMenu("prevencao_incendio_consulta_inspecoes")) && (
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton 
+                        asChild
+                        className={currentPath === "/prevencao-incendio/consulta-inspecoes" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
+                      >
+                        <Link to="/prevencao-incendio/consulta-inspecoes" className="flex items-center gap-2" onClick={onLinkClick}>
+                          <span className="text-xs leading-tight break-words min-w-0">Consulta de Inspeções</span>
+                        </Link>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+                  )}
                 </SidebarMenuSub>
               </CollapsibleContent>
             </Collapsible>

@@ -215,7 +215,7 @@ const ConsultaInspecoesExtintores = () => {
 
   return (
     <PermissionGuard 
-      requiredPermissions={['prevencao_incendio_inspecao_extintores', 'prevencao_incendio']}
+      requiredPermissions={['prevencao_incendio_consulta_inspecoes']}
       requireAdmin={false}
       fallback={<AccessDenied title="Acesso Negado" description="Você não tem permissão para consultar inspeções de extintores." />}
     >
