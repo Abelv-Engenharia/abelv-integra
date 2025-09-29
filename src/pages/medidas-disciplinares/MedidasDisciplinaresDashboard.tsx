@@ -126,9 +126,9 @@ export default function MedidasDisciplinaresDashboard() {
       </div>
 
       {/* Gráficos */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <MedidasPieChart ccaIds={userCCAs.map(cca => cca.id)} />
+      <div className="space-y-4">
         <MedidasBarChart ccaIds={userCCAs.map(cca => cca.id)} />
+        <MedidasPieChart ccaIds={userCCAs.map(cca => cca.id)} />
       </div>
 
       <div className="text-sm text-muted-foreground mb-10">
