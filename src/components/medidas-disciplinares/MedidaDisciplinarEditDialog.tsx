@@ -1,4 +1,4 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { MedidaDisciplinar, MedidaDisciplinarFormData, tiposMedidaAplicada, TipoMedidaAplicada } from "@/types/medidasDisciplinares";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -85,7 +85,7 @@ const MedidaDisciplinarEditDialog = ({ medida, open, onOpenChange, onSuccess }: 
       const { error } = await supabase
         .from("medidas_disciplinares")
         .update({
-          medida: medidaBanco,
+          medida: medidaBanco as "ADVERTÊNCIA VERBAL" | "ADVERTÊNCIA ESCRITA" | "SUSPENSÃO" | "DEMISSÃO POR JUSTA CAUSA",
           data: data.data_aplicacao,
           motivo: data.descricao || "",
           pdf_url: pdfUrl,
@@ -120,6 +120,9 @@ const MedidaDisciplinarEditDialog = ({ medida, open, onOpenChange, onSuccess }: 
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Editar Medida Disciplinar</DialogTitle>
+          <DialogDescription>
+            Atualize os dados da medida disciplinar e anexe novos documentos se necessário
+          </DialogDescription>
         </DialogHeader>
         
         <Form {...form}>

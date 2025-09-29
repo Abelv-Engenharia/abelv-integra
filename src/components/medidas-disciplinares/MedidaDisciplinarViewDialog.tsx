@@ -1,4 +1,4 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { MedidaDisciplinar } from "@/types/medidasDisciplinares";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -50,6 +50,9 @@ const MedidaDisciplinarViewDialog = ({ medida, open, onOpenChange }: Props) => {
       <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>Detalhes da Medida Disciplinar</DialogTitle>
+          <DialogDescription>
+            Visualização completa dos dados registrados desta medida disciplinar
+          </DialogDescription>
         </DialogHeader>
         
         <div className="space-y-4">
