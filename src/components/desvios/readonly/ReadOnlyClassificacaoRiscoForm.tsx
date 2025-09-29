@@ -1,13 +1,75 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DesvioCompleto } from "@/services/desvios/desviosCompletosService";
 import RiskBadge from "../RiskBadge";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Props {
   desvio: DesvioCompleto;
 }
 
 const ReadOnlyClassificacaoRiscoForm = ({ desvio }: Props) => {
+  const [exposicaoOpcao, setExposicaoOpcao] = useState<any>(null);
+  const [controleOpcao, setControleOpcao] = useState<any>(null);
+  const [deteccaoOpcao, setDeteccaoOpcao] = useState<any>(null);
+  const [efeitoFalhaOpcao, setEfeitoFalhaOpcao] = useState<any>(null);
+  const [impactoOpcao, setImpactoOpcao] = useState<any>(null);
+
+  useEffect(() => {
+    const fetchOpcoes = async () => {
+      try {
+        if (desvio.exposicao) {
+          const { data } = await supabase
+            .from('exposicao_opcoes')
+            .select('id, codigo, nome')
+            .eq('id', desvio.exposicao)
+            .maybeSingle();
+          setExposicaoOpcao(data);
+        }
+
+        if (desvio.controle) {
+          const { data } = await supabase
+            .from('controle_opcoes')
+            .select('id, codigo, nome')
+            .eq('id', desvio.controle)
+            .maybeSingle();
+          setControleOpcao(data);
+        }
+
+        if (desvio.deteccao) {
+          const { data } = await supabase
+            .from('deteccao_opcoes')
+            .select('id, codigo, nome')
+            .eq('id', desvio.deteccao)
+            .maybeSingle();
+          setDeteccaoOpcao(data);
+        }
+
+        if (desvio.efeito_falha) {
+          const { data } = await supabase
+            .from('efeito_falha_opcoes')
+            .select('id, codigo, nome')
+            .eq('id', desvio.efeito_falha)
+            .maybeSingle();
+          setEfeitoFalhaOpcao(data);
+        }
+
+        if (desvio.impacto) {
+          const { data } = await supabase
+            .from('impacto_opcoes')
+            .select('id, codigo, nome')
+            .eq('id', desvio.impacto)
+            .maybeSingle();
+          setImpactoOpcao(data);
+        }
+      } catch (error) {
+        console.error('Erro ao carregar opções de classificação:', error);
+      }
+    };
+
+    fetchOpcoes();
+  }, [desvio]);
+
   // Função para obter a cor da classificação
   const getClassificacaoColor = (classificacao?: string) => {
     if (!classificacao) return "bg-gray-400 text-white";
@@ -45,8 +107,8 @@ const ReadOnlyClassificacaoRiscoForm = ({ desvio }: Props) => {
             <div>
               <label className="text-sm font-semibold text-gray-700 block mb-1">Exposição</label>
               <p className="text-base font-medium border-b border-gray-200 pb-1">
-                {(desvio as any).exposicao_opcoes 
-                  ? `${(desvio as any).exposicao_opcoes.codigo} - ${(desvio as any).exposicao_opcoes.nome}`
+                {exposicaoOpcao 
+                  ? `${exposicaoOpcao.codigo} - ${exposicaoOpcao.nome}`
                   : "-"}
               </p>
             </div>
@@ -54,8 +116,8 @@ const ReadOnlyClassificacaoRiscoForm = ({ desvio }: Props) => {
             <div>
               <label className="text-sm font-semibold text-gray-700 block mb-1">Controle</label>
               <p className="text-base font-medium border-b border-gray-200 pb-1">
-                {(desvio as any).controle_opcoes 
-                  ? `${(desvio as any).controle_opcoes.codigo} - ${(desvio as any).controle_opcoes.nome}`
+                {controleOpcao 
+                  ? `${controleOpcao.codigo} - ${controleOpcao.nome}`
                   : "-"}
               </p>
             </div>
@@ -63,8 +125,8 @@ const ReadOnlyClassificacaoRiscoForm = ({ desvio }: Props) => {
             <div>
               <label className="text-sm font-semibold text-gray-700 block mb-1">Detecção</label>
               <p className="text-base font-medium border-b border-gray-200 pb-1">
-                {(desvio as any).deteccao_opcoes 
-                  ? `${(desvio as any).deteccao_opcoes.codigo} - ${(desvio as any).deteccao_opcoes.nome}`
+                {deteccaoOpcao 
+                  ? `${deteccaoOpcao.codigo} - ${deteccaoOpcao.nome}`
                   : "-"}
               </p>
             </div>
@@ -77,8 +139,8 @@ const ReadOnlyClassificacaoRiscoForm = ({ desvio }: Props) => {
             <div>
               <label className="text-sm font-semibold text-gray-700 block mb-1">Efeito de Falha</label>
               <p className="text-base font-medium border-b border-gray-200 pb-1">
-                {(desvio as any).efeito_falha_opcoes 
-                  ? `${(desvio as any).efeito_falha_opcoes.codigo} - ${(desvio as any).efeito_falha_opcoes.nome}`
+                {efeitoFalhaOpcao 
+                  ? `${efeitoFalhaOpcao.codigo} - ${efeitoFalhaOpcao.nome}`
                   : "-"}
               </p>
             </div>
@@ -86,8 +148,8 @@ const ReadOnlyClassificacaoRiscoForm = ({ desvio }: Props) => {
             <div>
               <label className="text-sm font-semibold text-gray-700 block mb-1">Impacto</label>
               <p className="text-base font-medium border-b border-gray-200 pb-1">
-                {(desvio as any).impacto_opcoes 
-                  ? `${(desvio as any).impacto_opcoes.codigo} - ${(desvio as any).impacto_opcoes.nome}`
+                {impactoOpcao 
+                  ? `${impactoOpcao.codigo} - ${impactoOpcao.nome}`
                   : "-"}
               </p>
             </div>

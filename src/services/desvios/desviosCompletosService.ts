@@ -73,12 +73,7 @@ export const desviosCompletosService = {
         base_legal_opcoes (id, codigo, nome),
         supervisores:supervisor_responsavel_id (id, nome, matricula, funcao),
         encarregados:encarregado_responsavel_id (id, nome, matricula, funcao),
-        engenheiros:engenheiro_responsavel_id (id, nome, matricula, funcao),
-        exposicao_opcoes:exposicao (id, codigo, nome, valor),
-        controle_opcoes:controle (id, codigo, nome, valor),
-        deteccao_opcoes:deteccao (id, codigo, nome, valor),
-        efeito_falha_opcoes:efeito_falha (id, codigo, nome, valor),
-        impacto_opcoes:impacto (id, codigo, nome, valor)
+        engenheiros:engenheiro_responsavel_id (id, nome, matricula, funcao)
       `)
       .order('created_at', { ascending: false })
       .range(0, 99999);
@@ -102,12 +97,7 @@ export const desviosCompletosService = {
         base_legal_opcoes (id, codigo, nome),
         supervisores:supervisor_responsavel_id (id, nome, matricula, funcao),
         encarregados:encarregado_responsavel_id (id, nome, matricula, funcao),
-        engenheiros:engenheiro_responsavel_id (id, nome, matricula, funcao),
-        exposicao_opcoes:exposicao (id, codigo, nome, valor),
-        controle_opcoes:controle (id, codigo, nome, valor),
-        deteccao_opcoes:deteccao (id, codigo, nome, valor),
-        efeito_falha_opcoes:efeito_falha (id, codigo, nome, valor),
-        impacto_opcoes:impacto (id, codigo, nome, valor)
+        engenheiros:engenheiro_responsavel_id (id, nome, matricula, funcao)
       `)
       .eq('id', id)
       .single();
