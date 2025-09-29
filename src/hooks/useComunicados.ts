@@ -119,3 +119,11 @@ export const useComunicadoPorId = (id: string) => {
     enabled: !!id,
   });
 };
+
+export const useCienciasComunicado = (comunicadoId: string) => {
+  return useQuery({
+    queryKey: ['comunicado-ciencias', comunicadoId],
+    queryFn: () => comunicadosService.getCienciasComunicado(comunicadoId),
+    enabled: !!comunicadoId,
+  });
+};

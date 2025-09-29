@@ -22,6 +22,10 @@ export interface ComunicadoCiencia {
   usuario_id: string;
   data_ciencia: string;
   created_at: string;
+  profiles?: {
+    nome: string;
+    email: string;
+  };
 }
 
 export interface ComunicadoComCiencia extends Comunicado {

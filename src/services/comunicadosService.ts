@@ -124,20 +124,37 @@ export const comunicadosService = {
 
   // Buscar ciências de um comunicado (admin)
   async getCienciasComunicado(comunicadoId: string): Promise<ComunicadoCiencia[]> {
-    const { data, error } = await supabase
+    const { data: cienciasData, error: cienciasError } = await supabase
       .from('comunicados_ciencia')
       .select(`
-        *,
-        profiles (
-          nome,
-          email
-        )
+        id,
+        comunicado_id,
+        usuario_id,
+        data_ciencia,
+        created_at
       `)
       .eq('comunicado_id', comunicadoId)
       .order('data_ciencia', { ascending: false });
 
-    if (error) throw error;
-    return data || [];
+    if (cienciasError) throw cienciasError;
+
+    // Buscar os perfis separadamente
+    const userIds = cienciasData?.map(c => c.usuario_id) || [];
+    if (userIds.length === 0) return [];
+
+    const { data: profiles, error: profilesError } = await supabase
+      .from('profiles')
+      .select('id, nome, email')
+      .in('id', userIds);
+
+    if (profilesError) throw profilesError;
+
+    // Combinar os dados
+    const profilesMap = new Map(profiles?.map(p => [p.id, p]) || []);
+    return cienciasData?.map(ciencia => ({
+      ...ciencia,
+      profiles: profilesMap.get(ciencia.usuario_id)
+    })) as ComunicadoCiencia[] || [];
   },
 
   // Upload de arquivo anexo

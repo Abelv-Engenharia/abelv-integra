@@ -3,8 +3,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Edit, FileText, Image as ImageIcon, Download } from "lucide-react";
-import { useComunicadoPorId } from "@/hooks/useComunicados";
+import { ArrowLeft, Edit, FileText, Image as ImageIcon, Download, CheckCircle, Users } from "lucide-react";
+import { useComunicadoPorId, useCienciasComunicado } from "@/hooks/useComunicados";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
 import { supabase } from "@/integrations/supabase/client";
@@ -13,6 +13,7 @@ const ComunicadoDetalhe = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { data: comunicado, isLoading } = useComunicadoPorId(id!);
+  const { data: ciencias, isLoading: isLoadingCiencias } = useCienciasComunicado(id!);
 
   const getFileUrl = (url: string) => {
     if (url.includes('comunicados-anexos')) {
@@ -133,6 +134,48 @@ const ComunicadoDetalhe = () => {
     );
   };
 
+  const renderCienciasCard = () => {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <CheckCircle className="h-5 w-5" />
+            Ciências do Comunicado
+            {ciencias && ciencias.length > 0 && (
+              <Badge variant="secondary" className="ml-auto">
+                {ciencias.length}
+              </Badge>
+            )}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {isLoadingCiencias ? (
+            <div className="text-sm text-muted-foreground">Carregando ciências...</div>
+          ) : !ciencias || ciencias.length === 0 ? (
+            <div className="text-sm text-muted-foreground flex items-center gap-2">
+              <Users className="h-4 w-4" />
+              Nenhum usuário deu ciência ainda
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {ciencias.map((ciencia) => (
+                <div key={ciencia.id} className="flex items-start justify-between p-3 border rounded-lg">
+                  <div className="flex-1">
+                    <div className="font-medium text-sm">{ciencia.profiles?.nome || 'Nome não disponível'}</div>
+                    <div className="text-xs text-muted-foreground">{ciencia.profiles?.email || 'Email não disponível'}</div>
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    {format(new Date(ciencia.data_ciencia), "dd/MM/yyyy 'às' HH:mm", { locale: pt })}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    );
+  };
+
   if (isLoading) {
     return (
       <div className="container mx-auto p-6">
@@ -204,6 +247,8 @@ const ComunicadoDetalhe = () => {
           </Card>
 
           {comunicado.arquivo_url && renderAnexo()}
+          
+          {renderCienciasCard()}
         </div>
 
         {/* Coluna lateral - Informações */}
