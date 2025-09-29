@@ -137,9 +137,11 @@ import HoraSeguranca from "./pages/inspecao-sms/HoraSeguranca";
 // Prevenção de Incêndio pages
 import PrevencaoIncendioDashboard from "./pages/prevencao-incendio/PrevencaoIncendioDashboard";
 import CadastroExtintores from "./pages/prevencao-incendio/CadastroExtintores";
+import ConsultaExtintores from "./pages/prevencao-incendio/ConsultaExtintores";
 import InspecaoExtintores from "./pages/prevencao-incendio/InspecaoExtintores";
 import ConsultaInspecoesExtintores from "./pages/prevencao-incendio/ConsultaInspecoesExtintores";
 import VisualizarInspecaoExtintor from "./pages/prevencao-incendio/VisualizarInspecaoExtintor";
+import ExtintorPublico from "./pages/prevencao-incendio/ExtintorPublico";
 
 // Placeholder page
 import PlaceholderPage from "./pages/PlaceholderPage";
@@ -160,6 +162,7 @@ function App() {
               <Route path="/signup" element={<SignUp />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/reset-password" element={<ResetPassword />} />
+              <Route path="/prevencao-incendio/extintor/:codigo" element={<ExtintorPublico />} />
               
               {/* Protected routes with layout */}
               <Route path="/" element={
