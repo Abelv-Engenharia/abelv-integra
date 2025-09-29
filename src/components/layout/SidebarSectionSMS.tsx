@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Link, useLocation } from "react-router-dom";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { usePermissions } from "@/hooks/usePermissions";
+import { usePermissionsDirect } from "@/hooks/usePermissionsDirect";
 
 interface SidebarSectionSMSProps {
   openMenu: string | null;
@@ -21,7 +21,7 @@ interface SidebarSectionSMSProps {
 export default function SidebarSectionSMS({ openMenu, toggleMenu, onLinkClick }: SidebarSectionSMSProps) {
   const location = useLocation();
   const currentPath = location.pathname;
-  const { isAdmin, canAccessMenu } = usePermissions();
+  const { isAdmin, canAccessMenu } = usePermissionsDirect();
 
   return (
     <>
