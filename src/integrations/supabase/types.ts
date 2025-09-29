@@ -3068,6 +3068,7 @@ export type Database = {
           cca_id: number | null
           created_at: string | null
           data: string
+          desvio_id: string | null
           funcionario_id: string | null
           id: string
           medida: Database["public"]["Enums"]["medida_aplicada_enum"]
@@ -3080,6 +3081,7 @@ export type Database = {
           cca_id?: number | null
           created_at?: string | null
           data: string
+          desvio_id?: string | null
           funcionario_id?: string | null
           id?: string
           medida: Database["public"]["Enums"]["medida_aplicada_enum"]
@@ -3092,6 +3094,7 @@ export type Database = {
           cca_id?: number | null
           created_at?: string | null
           data?: string
+          desvio_id?: string | null
           funcionario_id?: string | null
           id?: string
           medida?: Database["public"]["Enums"]["medida_aplicada_enum"]
