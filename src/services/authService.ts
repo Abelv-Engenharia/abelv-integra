@@ -101,6 +101,10 @@ export const signInWithAzure = async () => {
 
 export const signOut = async () => {
   try {
+    // Invalidar todas as queries do React Query
+    const { queryClient } = await import('@/lib/queryClient');
+    queryClient.clear();
+    
     // Clean up auth state
     cleanupAuthState();
     

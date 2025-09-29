@@ -34,6 +34,10 @@ export const usePermissionsDirect = (): UsePermissionsDirectReturn => {
 
       return data;
     },
+    staleTime: 5 * 60 * 1000, // 5 minutos de cache
+    gcTime: 10 * 60 * 1000, // 10 minutos antes de garbage collect
+    refetchOnMount: true,
+    refetchOnWindowFocus: false,
   });
 
   const isAdmin = useMemo(() => {
