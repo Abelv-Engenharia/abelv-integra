@@ -21,7 +21,7 @@ const ReadOnlyClassificacaoRiscoForm = ({ desvio }: Props) => {
         if (desvio.exposicao) {
           const { data } = await supabase
             .from('exposicao_opcoes')
-            .select('id, codigo, nome')
+            .select('id, valor, nome')
             .eq('id', desvio.exposicao)
             .maybeSingle();
           setExposicaoOpcao(data);
@@ -30,7 +30,7 @@ const ReadOnlyClassificacaoRiscoForm = ({ desvio }: Props) => {
         if (desvio.controle) {
           const { data } = await supabase
             .from('controle_opcoes')
-            .select('id, codigo, nome')
+            .select('id, valor, nome')
             .eq('id', desvio.controle)
             .maybeSingle();
           setControleOpcao(data);
@@ -39,7 +39,7 @@ const ReadOnlyClassificacaoRiscoForm = ({ desvio }: Props) => {
         if (desvio.deteccao) {
           const { data } = await supabase
             .from('deteccao_opcoes')
-            .select('id, codigo, nome')
+            .select('id, valor, nome')
             .eq('id', desvio.deteccao)
             .maybeSingle();
           setDeteccaoOpcao(data);
@@ -48,7 +48,7 @@ const ReadOnlyClassificacaoRiscoForm = ({ desvio }: Props) => {
         if (desvio.efeito_falha) {
           const { data } = await supabase
             .from('efeito_falha_opcoes')
-            .select('id, codigo, nome')
+            .select('id, valor, nome')
             .eq('id', desvio.efeito_falha)
             .maybeSingle();
           setEfeitoFalhaOpcao(data);
@@ -57,7 +57,7 @@ const ReadOnlyClassificacaoRiscoForm = ({ desvio }: Props) => {
         if (desvio.impacto) {
           const { data } = await supabase
             .from('impacto_opcoes')
-            .select('id, codigo, nome')
+            .select('id, valor, nome')
             .eq('id', desvio.impacto)
             .maybeSingle();
           setImpactoOpcao(data);
@@ -108,7 +108,7 @@ const ReadOnlyClassificacaoRiscoForm = ({ desvio }: Props) => {
               <label className="text-sm font-semibold text-gray-700 block mb-1">Exposição</label>
               <p className="text-base font-medium border-b border-gray-200 pb-1">
                 {exposicaoOpcao 
-                  ? `${exposicaoOpcao.codigo} - ${exposicaoOpcao.nome}`
+                  ? `${exposicaoOpcao.valor} - ${exposicaoOpcao.nome}`
                   : "-"}
               </p>
             </div>
@@ -117,7 +117,7 @@ const ReadOnlyClassificacaoRiscoForm = ({ desvio }: Props) => {
               <label className="text-sm font-semibold text-gray-700 block mb-1">Controle</label>
               <p className="text-base font-medium border-b border-gray-200 pb-1">
                 {controleOpcao 
-                  ? `${controleOpcao.codigo} - ${controleOpcao.nome}`
+                  ? `${controleOpcao.valor} - ${controleOpcao.nome}`
                   : "-"}
               </p>
             </div>
@@ -126,7 +126,7 @@ const ReadOnlyClassificacaoRiscoForm = ({ desvio }: Props) => {
               <label className="text-sm font-semibold text-gray-700 block mb-1">Detecção</label>
               <p className="text-base font-medium border-b border-gray-200 pb-1">
                 {deteccaoOpcao 
-                  ? `${deteccaoOpcao.codigo} - ${deteccaoOpcao.nome}`
+                  ? `${deteccaoOpcao.valor} - ${deteccaoOpcao.nome}`
                   : "-"}
               </p>
             </div>
@@ -140,7 +140,7 @@ const ReadOnlyClassificacaoRiscoForm = ({ desvio }: Props) => {
               <label className="text-sm font-semibold text-gray-700 block mb-1">Efeito de Falha</label>
               <p className="text-base font-medium border-b border-gray-200 pb-1">
                 {efeitoFalhaOpcao 
-                  ? `${efeitoFalhaOpcao.codigo} - ${efeitoFalhaOpcao.nome}`
+                  ? `${efeitoFalhaOpcao.valor} - ${efeitoFalhaOpcao.nome}`
                   : "-"}
               </p>
             </div>
@@ -149,7 +149,7 @@ const ReadOnlyClassificacaoRiscoForm = ({ desvio }: Props) => {
               <label className="text-sm font-semibold text-gray-700 block mb-1">Impacto</label>
               <p className="text-base font-medium border-b border-gray-200 pb-1">
                 {impactoOpcao 
-                  ? `${impactoOpcao.codigo} - ${impactoOpcao.nome}`
+                  ? `${impactoOpcao.valor} - ${impactoOpcao.nome}`
                   : "-"}
               </p>
             </div>
