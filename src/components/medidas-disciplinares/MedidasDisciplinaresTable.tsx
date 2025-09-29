@@ -4,6 +4,11 @@ import { listarCCAs } from "@/services/medidasDisciplinaresService";
 import { supabase } from "@/integrations/supabase/client";
 import { MedidaDisciplinar, DB_TO_UI_TIPO_MAP, TipoMedidaAplicada } from "@/types/medidasDisciplinares";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Eye, Pencil, Trash2 } from "lucide-react";
+import MedidaDisciplinarViewDialog from "./MedidaDisciplinarViewDialog";
+import MedidaDisciplinarEditDialog from "./MedidaDisciplinarEditDialog";
+import MedidaDisciplinarDeleteDialog from "./MedidaDisciplinarDeleteDialog";
 
 interface Props {
   searchTerm: string;
@@ -31,6 +36,10 @@ const tiposBadgeColor: Record<string, string> = {
 const MedidasDisciplinaresTable = ({ searchTerm, filters }: Props) => {
   const [medidas, setMedidas] = useState<MedidaDisciplinar[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [selectedMedida, setSelectedMedida] = useState<MedidaDisciplinar | null>(null);
+  const [viewDialogOpen, setViewDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   useEffect(() => {
     async function fetchMedidas() {
@@ -78,6 +87,29 @@ const MedidasDisciplinaresTable = ({ searchTerm, filters }: Props) => {
     fetchMedidas();
   }, [searchTerm, filters]);
 
+  const handleView = (medida: MedidaDisciplinar) => {
+    setSelectedMedida(medida);
+    setViewDialogOpen(true);
+  };
+
+  const handleEdit = (medida: MedidaDisciplinar) => {
+    setSelectedMedida(medida);
+    setEditDialogOpen(true);
+  };
+
+  const handleDelete = (medida: MedidaDisciplinar) => {
+    setSelectedMedida(medida);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleRefresh = () => {
+    // Re-fetch data after edit or delete
+    setLoading(true);
+    setTimeout(() => {
+      window.location.reload();
+    }, 500);
+  };
+
   return (
     <div className="bg-white rounded-md border shadow-sm mt-4">
       <div className="relative w-full overflow-auto">
@@ -95,6 +127,7 @@ const MedidasDisciplinaresTable = ({ searchTerm, filters }: Props) => {
                 <TableHead>Descrição/Motivo</TableHead>
                 <TableHead>CCA</TableHead>
                 <TableHead>Anexo</TableHead>
+                <TableHead className="w-32">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -124,11 +157,39 @@ const MedidasDisciplinaresTable = ({ searchTerm, filters }: Props) => {
                           <a href={medida.arquivo_url} target="_blank" rel="noopener noreferrer" className="underline text-blue-600">PDF</a>
                         ) : "-"}
                     </TableCell>
+                    <TableCell>
+                      <div className="flex gap-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleView(medida)}
+                          title="Visualizar"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleEdit(medida)}
+                          title="Editar"
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDelete(medida)}
+                          title="Excluir"
+                        >
+                          <Trash2 className="h-4 w-4 text-red-600" />
+                        </Button>
+                      </div>
+                    </TableCell>
                   </TableRow>
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={6} className="h-24 text-center">
+                  <TableCell colSpan={7} className="h-24 text-center">
                     Nenhuma medida encontrada.
                   </TableCell>
                 </TableRow>
@@ -137,6 +198,29 @@ const MedidasDisciplinaresTable = ({ searchTerm, filters }: Props) => {
           </Table>
         )}
       </div>
+
+      {/* Dialogs */}
+      {selectedMedida && (
+        <>
+          <MedidaDisciplinarViewDialog
+            medida={selectedMedida}
+            open={viewDialogOpen}
+            onOpenChange={setViewDialogOpen}
+          />
+          <MedidaDisciplinarEditDialog
+            medida={selectedMedida}
+            open={editDialogOpen}
+            onOpenChange={setEditDialogOpen}
+            onSuccess={handleRefresh}
+          />
+          <MedidaDisciplinarDeleteDialog
+            medida={selectedMedida}
+            open={deleteDialogOpen}
+            onOpenChange={setDeleteDialogOpen}
+            onSuccess={handleRefresh}
+          />
+        </>
+      )}
     </div>
   );
 };
