@@ -2,6 +2,9 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { MedidaDisciplinar } from "@/types/medidasDisciplinares";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
+import { FileText } from "lucide-react";
 
 interface Props {
   medida: MedidaDisciplinar;
@@ -12,6 +15,38 @@ interface Props {
 const MedidaDisciplinarViewDialog = ({ medida, open, onOpenChange }: Props) => {
   const [funcionarioNome, setFuncionarioNome] = useState("");
   const [ccaNome, setCcaNome] = useState("");
+  const { toast } = useToast();
+
+  const handleViewPdf = async (pdfUrl: string) => {
+    try {
+      // Extrair o caminho do arquivo da URL
+      const urlParts = pdfUrl.split('/storage/v1/object/public/medidas_disciplinares/');
+      if (urlParts.length < 2) {
+        throw new Error("URL inválida");
+      }
+      
+      const filePath = urlParts[1];
+      
+      // Obter URL assinada do Supabase
+      const { data, error } = await supabase
+        .storage
+        .from('medidas_disciplinares')
+        .createSignedUrl(filePath, 3600); // URL válida por 1 hora
+      
+      if (error) throw error;
+      
+      if (data?.signedUrl) {
+        window.open(data.signedUrl, '_blank');
+      }
+    } catch (error) {
+      console.error("Erro ao abrir PDF:", error);
+      toast({
+        title: "Erro ao abrir arquivo",
+        description: "Não foi possível acessar o arquivo PDF.",
+        variant: "destructive"
+      });
+    }
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -88,14 +123,15 @@ const MedidaDisciplinarViewDialog = ({ medida, open, onOpenChange }: Props) => {
             <div>
               <label className="text-sm font-medium text-muted-foreground">Anexo</label>
               <div className="mt-1">
-                <a 
-                  href={medida.arquivo_url} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="text-sm text-blue-600 hover:underline"
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleViewPdf(medida.arquivo_url!)}
+                  className="gap-2"
                 >
+                  <FileText className="h-4 w-4" />
                   Abrir documento PDF
-                </a>
+                </Button>
               </div>
             </div>
           )}

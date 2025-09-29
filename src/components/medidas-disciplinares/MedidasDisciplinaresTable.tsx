@@ -5,10 +5,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { MedidaDisciplinar, DB_TO_UI_TIPO_MAP, TipoMedidaAplicada } from "@/types/medidasDisciplinares";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Eye, Pencil, Trash2 } from "lucide-react";
+import { Eye, Pencil, Trash2, FileText } from "lucide-react";
 import MedidaDisciplinarViewDialog from "./MedidaDisciplinarViewDialog";
 import MedidaDisciplinarEditDialog from "./MedidaDisciplinarEditDialog";
 import MedidaDisciplinarDeleteDialog from "./MedidaDisciplinarDeleteDialog";
+import { useToast } from "@/hooks/use-toast";
 
 interface Props {
   searchTerm: string;
@@ -40,6 +41,7 @@ const MedidasDisciplinaresTable = ({ searchTerm, filters }: Props) => {
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     async function fetchMedidas() {
@@ -92,6 +94,37 @@ const MedidasDisciplinaresTable = ({ searchTerm, filters }: Props) => {
     setViewDialogOpen(true);
   };
 
+  const handleViewPdf = async (pdfUrl: string) => {
+    try {
+      // Extrair o caminho do arquivo da URL
+      const urlParts = pdfUrl.split('/storage/v1/object/public/medidas_disciplinares/');
+      if (urlParts.length < 2) {
+        throw new Error("URL inválida");
+      }
+      
+      const filePath = urlParts[1];
+      
+      // Obter URL assinada do Supabase
+      const { data, error } = await supabase
+        .storage
+        .from('medidas_disciplinares')
+        .createSignedUrl(filePath, 3600); // URL válida por 1 hora
+      
+      if (error) throw error;
+      
+      if (data?.signedUrl) {
+        window.open(data.signedUrl, '_blank');
+      }
+    } catch (error) {
+      console.error("Erro ao abrir PDF:", error);
+      toast({
+        title: "Erro ao abrir arquivo",
+        description: "Não foi possível acessar o arquivo PDF. Verifique se ele ainda existe.",
+        variant: "destructive"
+      });
+    }
+  };
+
   const handleEdit = (medida: MedidaDisciplinar) => {
     setSelectedMedida(medida);
     setEditDialogOpen(true);
@@ -121,13 +154,12 @@ const MedidasDisciplinaresTable = ({ searchTerm, filters }: Props) => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-16">Data</TableHead>
-                <TableHead>Funcionário</TableHead>
-                <TableHead>Tipo</TableHead>
-                <TableHead>Descrição/Motivo</TableHead>
+                <TableHead className="w-28">Data</TableHead>
                 <TableHead>CCA</TableHead>
-                <TableHead>Anexo</TableHead>
-                <TableHead className="w-32">Ações</TableHead>
+                <TableHead>Tipo</TableHead>
+                <TableHead>Funcionário</TableHead>
+                <TableHead>Descrição/Motivo</TableHead>
+                <TableHead className="w-40">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -136,37 +168,41 @@ const MedidasDisciplinaresTable = ({ searchTerm, filters }: Props) => {
                   <TableRow key={medida.id}>
                     <TableCell>{formatDate(medida.data_aplicacao)}</TableCell>
                     <TableCell>
-                      {medida.funcionario_id
-                        ? <FuncionarioNome funcionarioId={medida.funcionario_id} />
-                        : "-"}
-                    </TableCell>
-                    <TableCell>
-                      <span className={`px-2 py-1 rounded ${tiposBadgeColor[medida.tipo_medida] || "bg-gray-100 text-gray-700"}`}>
-                        {medida.tipo_medida}
-                      </span>
-                    </TableCell>
-                    <TableCell>{medida.descricao || "-"}</TableCell>
-                    <TableCell>
                       {medida.cca_id
                         ? <CCAName ccaId={Number(medida.cca_id)} />
                         : "-"}
                     </TableCell>
                     <TableCell>
-                      {medida.arquivo_url
-                        ? (
-                          <a href={medida.arquivo_url} target="_blank" rel="noopener noreferrer" className="underline text-blue-600">PDF</a>
-                        ) : "-"}
+                      <span className={`px-2 py-1 rounded text-xs ${tiposBadgeColor[medida.tipo_medida] || "bg-gray-100 text-gray-700"}`}>
+                        {medida.tipo_medida}
+                      </span>
                     </TableCell>
+                    <TableCell>
+                      {medida.funcionario_id
+                        ? <FuncionarioNome funcionarioId={medida.funcionario_id} />
+                        : "-"}
+                    </TableCell>
+                    <TableCell className="max-w-xs truncate">{medida.descricao || "-"}</TableCell>
                     <TableCell>
                       <div className="flex gap-1">
                         <Button
                           variant="ghost"
                           size="sm"
                           onClick={() => handleView(medida)}
-                          title="Visualizar"
+                          title="Visualizar detalhes"
                         >
                           <Eye className="h-4 w-4" />
                         </Button>
+                        {medida.arquivo_url && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleViewPdf(medida.arquivo_url!)}
+                            title="Ver anexo PDF"
+                          >
+                            <FileText className="h-4 w-4 text-blue-600" />
+                          </Button>
+                        )}
                         <Button
                           variant="ghost"
                           size="sm"
@@ -189,7 +225,7 @@ const MedidasDisciplinaresTable = ({ searchTerm, filters }: Props) => {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={7} className="h-24 text-center">
+                  <TableCell colSpan={6} className="h-24 text-center">
                     Nenhuma medida encontrada.
                   </TableCell>
                 </TableRow>

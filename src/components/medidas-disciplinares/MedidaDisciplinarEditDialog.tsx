@@ -16,6 +16,8 @@ import { PdfUpload } from "./PdfUpload";
 import { uploadArquivoPdf } from "@/services/medidasDisciplinaresService";
 import { useProfile } from "@/hooks/useProfile";
 import { UI_TO_DB_TIPO_MAP } from "@/types/medidasDisciplinares";
+import { Button as ButtonUI } from "@/components/ui/button";
+import { FileText } from "lucide-react";
 
 interface Props {
   medida: MedidaDisciplinar;
@@ -36,6 +38,37 @@ const MedidaDisciplinarEditDialog = ({ medida, open, onOpenChange, onSuccess }: 
   const { profile } = useProfile();
   const [loading, setLoading] = useState(false);
   const [pdfFile, setPdfFile] = useState<File | null>(null);
+
+  const handleViewPdf = async (pdfUrl: string) => {
+    try {
+      // Extrair o caminho do arquivo da URL
+      const urlParts = pdfUrl.split('/storage/v1/object/public/medidas_disciplinares/');
+      if (urlParts.length < 2) {
+        throw new Error("URL inválida");
+      }
+      
+      const filePath = urlParts[1];
+      
+      // Obter URL assinada do Supabase
+      const { data, error } = await supabase
+        .storage
+        .from('medidas_disciplinares')
+        .createSignedUrl(filePath, 3600);
+      
+      if (error) throw error;
+      
+      if (data?.signedUrl) {
+        window.open(data.signedUrl, '_blank');
+      }
+    } catch (error) {
+      console.error("Erro ao abrir PDF:", error);
+      toast({
+        title: "Erro ao abrir arquivo",
+        description: "Não foi possível acessar o arquivo PDF.",
+        variant: "destructive"
+      });
+    }
+  };
 
   const form = useForm({
     resolver: zodResolver(schema),
@@ -190,9 +223,19 @@ const MedidaDisciplinarEditDialog = ({ medida, open, onOpenChange, onSuccess }: 
                     <PdfUpload file={pdfFile} onFileChange={setPdfFile} error={fieldState.error?.message} />
                   </FormControl>
                   {medida.arquivo_url && !pdfFile && (
-                    <p className="text-sm text-muted-foreground mt-1">
-                      Anexo atual: <a href={medida.arquivo_url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Ver PDF</a>
-                    </p>
+                    <div className="text-sm text-muted-foreground mt-1 flex items-center gap-2">
+                      Anexo atual: 
+                      <ButtonUI
+                        type="button"
+                        variant="link"
+                        size="sm"
+                        onClick={() => handleViewPdf(medida.arquivo_url!)}
+                        className="p-0 h-auto text-blue-600"
+                      >
+                        <FileText className="h-4 w-4 mr-1" />
+                        Ver PDF
+                      </ButtonUI>
+                    </div>
                   )}
                 </FormItem>
               )}
