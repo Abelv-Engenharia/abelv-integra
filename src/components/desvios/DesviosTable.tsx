@@ -2,6 +2,15 @@
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableHead, TableHeader, TableRow, TableCell } from "@/components/ui/table";
+import { 
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserCCAs } from "@/hooks/useUserCCAs";
@@ -58,6 +67,12 @@ const DesviosTable = ({ filters, searchTerm }: DesviosTableProps) => {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editDesvioId, setEditDesvioId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  
+  // Estados de paginação
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalRecords, setTotalRecords] = useState(0);
+  const [isLoadingCount, setIsLoadingCount] = useState(false);
+  const pageSize = 500;
 
   // Controle de concorrência entre buscas
   const fetchSeq = useRef(0);
@@ -71,11 +86,19 @@ const DesviosTable = ({ filters, searchTerm }: DesviosTableProps) => {
       if (allowedCcaIds.length === 0 && !isLoadingCCAs) {
         if (myId !== fetchSeq.current) return;
         setDesvios([]);
+        setTotalRecords(0);
         setIsLoading(false);
         return;
       }
 
-      let query = supabase
+      // Criar query base para aplicar filtros
+      let baseQuery = supabase
+        .from("desvios_completos")
+        .select()
+        .in("cca_id", allowedCcaIds);
+
+      // Query para dados com paginação
+      let dataQuery = supabase
         .from("desvios_completos")
         .select(`
           *,
@@ -86,14 +109,22 @@ const DesviosTable = ({ filters, searchTerm }: DesviosTableProps) => {
         `)
         .in("cca_id", allowedCcaIds);
 
-      // ====== Filtros ======
-      if (filters?.year && filters.year !== "") {
-        const year = parseInt(filters.year);
-        query = query
-          .gte("data_desvio", `${year}-01-01`)
-          .lte("data_desvio", `${year}-12-31`);
-      }
+      // ====== Aplicar filtros em ambas as queries ======
+      const applyFilters = (query: any) => {
+        if (filters?.year && filters.year !== "") {
+          const year = parseInt(filters.year);
+          query = query
+            .gte("data_desvio", `${year}-01-01`)
+            .lte("data_desvio", `${year}-12-31`);
+        }
+        return query;
+      };
 
+      // Aplicar filtros básicos
+      baseQuery = applyFilters(baseQuery);
+      dataQuery = applyFilters(dataQuery);
+
+      // Aplicar filtros avançados
       if (filters?.month && filters.month !== "" && filters.month !== "todos") {
         const month = parseInt(filters.month);
         const year = filters?.year && filters.year !== "" ? parseInt(filters.year) : new Date().getFullYear();
@@ -101,7 +132,8 @@ const DesviosTable = ({ filters, searchTerm }: DesviosTableProps) => {
         const endDate = new Date(year, month, 0);
         const startDateStr = startDate.toISOString().split("T")[0];
         const endDateStr = endDate.toISOString().split("T")[0];
-        query = query.gte("data_desvio", startDateStr).lte("data_desvio", endDateStr);
+        baseQuery = baseQuery.gte("data_desvio", startDateStr).lte("data_desvio", endDateStr);
+        dataQuery = dataQuery.gte("data_desvio", startDateStr).lte("data_desvio", endDateStr);
       }
 
       if (filters?.cca && filters.cca !== "" && filters.cca !== "todos") {
@@ -110,7 +142,10 @@ const DesviosTable = ({ filters, searchTerm }: DesviosTableProps) => {
           .select("id")
           .eq("codigo", filters.cca)
           .single();
-        if (ccaData) query = query.eq("cca_id", ccaData.id);
+        if (ccaData) {
+          baseQuery = baseQuery.eq("cca_id", ccaData.id);
+          dataQuery = dataQuery.eq("cca_id", ccaData.id);
+        }
       }
 
       if (filters?.company && filters.company !== "" && filters.company !== "todas") {
@@ -119,11 +154,15 @@ const DesviosTable = ({ filters, searchTerm }: DesviosTableProps) => {
           .select("id")
           .eq("nome", filters.company)
           .single();
-        if (empresaData) query = query.eq("empresa_id", empresaData.id);
+        if (empresaData) {
+          baseQuery = baseQuery.eq("empresa_id", empresaData.id);
+          dataQuery = dataQuery.eq("empresa_id", empresaData.id);
+        }
       }
 
       if (filters?.risk && filters.risk !== "" && filters.risk !== "todos") {
-        query = query.eq("classificacao_risco", filters.risk);
+        baseQuery = baseQuery.eq("classificacao_risco", filters.risk);
+        dataQuery = dataQuery.eq("classificacao_risco", filters.risk);
       }
 
       if (filters?.disciplina && filters.disciplina !== "" && filters.disciplina !== "todas") {
@@ -132,7 +171,10 @@ const DesviosTable = ({ filters, searchTerm }: DesviosTableProps) => {
           .select("id")
           .eq("nome", filters.disciplina)
           .single();
-        if (disciplinaData) query = query.eq("disciplina_id", disciplinaData.id);
+        if (disciplinaData) {
+          baseQuery = baseQuery.eq("disciplina_id", disciplinaData.id);
+          dataQuery = dataQuery.eq("disciplina_id", disciplinaData.id);
+        }
       }
 
       if (filters?.tipo && filters.tipo !== "" && filters.tipo !== "todos") {
@@ -141,7 +183,10 @@ const DesviosTable = ({ filters, searchTerm }: DesviosTableProps) => {
           .select("id")
           .eq("nome", filters.tipo)
           .single();
-        if (tipoData) query = query.eq("tipo_registro_id", tipoData.id);
+        if (tipoData) {
+          baseQuery = baseQuery.eq("tipo_registro_id", tipoData.id);
+          dataQuery = dataQuery.eq("tipo_registro_id", tipoData.id);
+        }
       }
 
       if (filters?.evento && filters.evento !== "" && filters.evento !== "todos") {
@@ -150,7 +195,10 @@ const DesviosTable = ({ filters, searchTerm }: DesviosTableProps) => {
           .select("id")
           .eq("nome", filters.evento)
           .single();
-        if (eventoData) query = query.eq("evento_identificado_id", eventoData.id);
+        if (eventoData) {
+          baseQuery = baseQuery.eq("evento_identificado_id", eventoData.id);
+          dataQuery = dataQuery.eq("evento_identificado_id", eventoData.id);
+        }
       }
 
       if (filters?.processo && filters.processo !== "" && filters.processo !== "todos") {
@@ -159,7 +207,10 @@ const DesviosTable = ({ filters, searchTerm }: DesviosTableProps) => {
           .select("id")
           .eq("nome", filters.processo)
           .single();
-        if (processoData) query = query.eq("processo_id", processoData.id);
+        if (processoData) {
+          baseQuery = baseQuery.eq("processo_id", processoData.id);
+          dataQuery = dataQuery.eq("processo_id", processoData.id);
+        }
       }
 
       // --- Base Legal (robusto: aceita ID ou nome parcial) ---
@@ -167,7 +218,8 @@ const DesviosTable = ({ filters, searchTerm }: DesviosTableProps) => {
         if (filters?.baseLegalId && filters.baseLegalId !== "") {
           const idNum = Number(filters.baseLegalId);
           if (Number.isFinite(idNum)) {
-            query = query.eq("base_legal_opcao_id", idNum);
+            baseQuery = baseQuery.eq("base_legal_opcao_id", idNum);
+            dataQuery = dataQuery.eq("base_legal_opcao_id", idNum);
           } else {
             console.warn("baseLegalId recebido não é numérico:", filters.baseLegalId);
           }
@@ -206,10 +258,12 @@ const DesviosTable = ({ filters, searchTerm }: DesviosTableProps) => {
           }
 
           if (baseData?.id !== undefined && baseData?.id !== null) {
-            query = query.eq("base_legal_opcao_id", baseData.id as number);
+            baseQuery = baseQuery.eq("base_legal_opcao_id", baseData.id as number);
+            dataQuery = dataQuery.eq("base_legal_opcao_id", baseData.id as number);
           } else {
             // força sem resultado com um número impossível
-            query = query.eq("base_legal_opcao_id", -1);
+            baseQuery = baseQuery.eq("base_legal_opcao_id", -1);
+            dataQuery = dataQuery.eq("base_legal_opcao_id", -1);
           }
         }
       }
@@ -220,18 +274,204 @@ const DesviosTable = ({ filters, searchTerm }: DesviosTableProps) => {
           .select("id")
           .eq("nome", filters.empresa)
           .single();
-        if (empresaData) query = query.eq("empresa_id", empresaData.id);
+        if (empresaData) {
+          baseQuery = baseQuery.eq("empresa_id", empresaData.id);
+          dataQuery = dataQuery.eq("empresa_id", empresaData.id);
+        }
       }
 
       if (filters?.classificacao && filters.classificacao !== "" && filters.classificacao !== "todos") {
-        query = query.eq("classificacao_risco", filters.classificacao);
+        baseQuery = baseQuery.eq("classificacao_risco", filters.classificacao);
+        dataQuery = dataQuery.eq("classificacao_risco", filters.classificacao);
       }
 
       if (searchTerm && searchTerm.trim() !== "") {
-        query = query.or(`descricao_desvio.ilike.%${searchTerm}%,responsavel_inspecao.ilike.%${searchTerm}%`);
+        const searchCondition = `descricao_desvio.ilike.%${searchTerm}%,responsavel_inspecao.ilike.%${searchTerm}%`;
+        baseQuery = baseQuery.or(searchCondition);
+        dataQuery = dataQuery.or(searchCondition);
       }
 
-      const { data, error } = await query.order("data_desvio", { ascending: false });
+      // Buscar contagem total (apenas quando necessário)
+      if (currentPage === 1 || totalRecords === 0) {
+        setIsLoadingCount(true);
+        
+        // Aplicar todos os filtros também na contagem
+        let countQuery = supabase
+          .from("desvios_completos")
+          .select('id', { count: 'exact', head: true })
+          .in("cca_id", allowedCcaIds);
+
+        // Aplicar os mesmos filtros da query de dados
+        if (filters?.year && filters.year !== "") {
+          const year = parseInt(filters.year);
+          countQuery = countQuery
+            .gte("data_desvio", `${year}-01-01`)
+            .lte("data_desvio", `${year}-12-31`);
+        }
+
+        if (filters?.month && filters.month !== "" && filters.month !== "todos") {
+          const month = parseInt(filters.month);
+          const year = filters?.year && filters.year !== "" ? parseInt(filters.year) : new Date().getFullYear();
+          const startDate = new Date(year, month - 1, 1);
+          const endDate = new Date(year, month, 0);
+          const startDateStr = startDate.toISOString().split("T")[0];
+          const endDateStr = endDate.toISOString().split("T")[0];
+          countQuery = countQuery.gte("data_desvio", startDateStr).lte("data_desvio", endDateStr);
+        }
+
+        if (filters?.cca && filters.cca !== "" && filters.cca !== "todos") {
+          const { data: ccaData } = await supabase
+            .from("ccas")
+            .select("id")
+            .eq("codigo", filters.cca)
+            .single();
+          if (ccaData) {
+            countQuery = countQuery.eq("cca_id", ccaData.id);
+          }
+        }
+
+        if (filters?.company && filters.company !== "" && filters.company !== "todas") {
+          const { data: empresaData } = await supabase
+            .from("empresas")
+            .select("id")
+            .eq("nome", filters.company)
+            .single();
+          if (empresaData) {
+            countQuery = countQuery.eq("empresa_id", empresaData.id);
+          }
+        }
+
+        if (filters?.risk && filters.risk !== "" && filters.risk !== "todos") {
+          countQuery = countQuery.eq("classificacao_risco", filters.risk);
+        }
+
+        if (filters?.disciplina && filters.disciplina !== "" && filters.disciplina !== "todas") {
+          const { data: disciplinaData } = await supabase
+            .from("disciplinas")
+            .select("id")
+            .eq("nome", filters.disciplina)
+            .single();
+          if (disciplinaData) {
+            countQuery = countQuery.eq("disciplina_id", disciplinaData.id);
+          }
+        }
+
+        if (filters?.tipo && filters.tipo !== "" && filters.tipo !== "todos") {
+          const { data: tipoData } = await supabase
+            .from("tipos_registro")
+            .select("id")
+            .eq("nome", filters.tipo)
+            .single();
+          if (tipoData) {
+            countQuery = countQuery.eq("tipo_registro_id", tipoData.id);
+          }
+        }
+
+        if (filters?.evento && filters.evento !== "" && filters.evento !== "todos") {
+          const { data: eventoData } = await supabase
+            .from("eventos_identificados")
+            .select("id")
+            .eq("nome", filters.evento)
+            .single();
+          if (eventoData) {
+            countQuery = countQuery.eq("evento_identificado_id", eventoData.id);
+          }
+        }
+
+        if (filters?.processo && filters.processo !== "" && filters.processo !== "todos") {
+          const { data: processoData } = await supabase
+            .from("processos")
+            .select("id")
+            .eq("nome", filters.processo)
+            .single();
+          if (processoData) {
+            countQuery = countQuery.eq("processo_id", processoData.id);
+          }
+        }
+
+        // Base Legal
+        if ((filters?.baseLegalId && filters.baseLegalId !== "") || (filters?.baseLegal && filters.baseLegal !== "" && filters.baseLegal !== "todas")) {
+          if (filters?.baseLegalId && filters.baseLegalId !== "") {
+            const idNum = Number(filters.baseLegalId);
+            if (Number.isFinite(idNum)) {
+              countQuery = countQuery.eq("base_legal_opcao_id", idNum);
+            }
+          } else if (filters?.baseLegal && filters.baseLegal !== "") {
+            const termo = String(filters.baseLegal).trim();
+            let { data: baseData } = await supabase
+              .from("base_legal_opcoes")
+              .select("id, nome")
+              .ilike("nome", termo)
+              .limit(1)
+              .maybeSingle();
+
+            if (!baseData) {
+              const { data: baseLike } = await supabase
+                .from("base_legal_opcoes")
+                .select("id, nome")
+                .ilike("nome", `%${termo}%`)
+                .order("nome", { ascending: true })
+                .limit(1);
+              baseData = baseLike?.[0];
+            }
+
+            if (!baseData && termo.includes(" - ")) {
+              const prefixo = termo.split(" - ")[0].trim();
+              const { data: basePrefix } = await supabase
+                .from("base_legal_opcoes")
+                .select("id, nome")
+                .ilike("nome", `${prefixo}%`)
+                .order("nome", { ascending: true })
+                .limit(1);
+              baseData = basePrefix?.[0];
+            }
+
+            if (baseData?.id !== undefined && baseData?.id !== null) {
+              countQuery = countQuery.eq("base_legal_opcao_id", baseData.id as number);
+            } else {
+              countQuery = countQuery.eq("base_legal_opcao_id", -1);
+            }
+          }
+        }
+
+        if (filters?.empresa && filters.empresa !== "" && filters.empresa !== "todas") {
+          const { data: empresaData } = await supabase
+            .from("empresas")
+            .select("id")
+            .eq("nome", filters.empresa)
+            .single();
+          if (empresaData) {
+            countQuery = countQuery.eq("empresa_id", empresaData.id);
+          }
+        }
+
+        if (filters?.classificacao && filters.classificacao !== "" && filters.classificacao !== "todos") {
+          countQuery = countQuery.eq("classificacao_risco", filters.classificacao);
+        }
+
+        if (searchTerm && searchTerm.trim() !== "") {
+          const searchCondition = `descricao_desvio.ilike.%${searchTerm}%,responsavel_inspecao.ilike.%${searchTerm}%`;
+          countQuery = countQuery.or(searchCondition);
+        }
+
+        const { count, error: countError } = await countQuery;
+        
+        if (countError) {
+          console.error("Erro ao contar desvios:", countError);
+        } else {
+          setTotalRecords(count || 0);
+        }
+        setIsLoadingCount(false);
+      }
+
+      // Calcular range para paginação
+      const startIndex = (currentPage - 1) * pageSize;
+      const endIndex = startIndex + pageSize - 1;
+
+      // Buscar dados da página atual
+      const { data, error } = await dataQuery
+        .order("data_desvio", { ascending: false })
+        .range(startIndex, endIndex);
 
       if (myId !== fetchSeq.current) return; // ignora se outra chamada mais nova foi feita
 
@@ -269,10 +509,41 @@ const DesviosTable = ({ filters, searchTerm }: DesviosTableProps) => {
         fetchDesvios();
       } else {
         setDesvios([]);
+        setTotalRecords(0);
         setIsLoading(false);
       }
     }
-  }, [allowedCcaIds.join(","), isLoadingCCAs, JSON.stringify(filters), searchTerm]);
+  }, [allowedCcaIds.join(","), isLoadingCCAs, JSON.stringify(filters), searchTerm, currentPage]);
+
+  // Reset para primeira página quando filtros mudam
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [JSON.stringify(filters), searchTerm]);
+
+  // Funções de navegação
+  const totalPages = Math.ceil(totalRecords / pageSize);
+  
+  const handlePageChange = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
+
+  const handlePreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  // Calcular range de registros mostrados
+  const startRecord = totalRecords === 0 ? 0 : (currentPage - 1) * pageSize + 1;
+  const endRecord = Math.min(currentPage * pageSize, totalRecords);
 
   const handleStatusUpdated = (id: string, newStatus: string) => {
     setDesvios(desvios.map(d => (d.id === id ? { ...d, status: newStatus } : d)));
@@ -399,16 +670,87 @@ const DesviosTable = ({ filters, searchTerm }: DesviosTableProps) => {
 
         <div className="flex flex-col sm:flex-row items-center justify-between p-3 sm:p-4 border-t gap-3">
           <div className="text-xs sm:text-sm text-muted-foreground order-2 sm:order-1">
-            Mostrando {desvios.length} de {desvios.length} desvios dos CCAs permitidos
+            {isLoadingCount ? (
+              "Carregando contagem..."
+            ) : totalRecords > 0 ? (
+              `Mostrando ${startRecord}-${endRecord} de ${totalRecords} desvios`
+            ) : (
+              "Nenhum desvio encontrado"
+            )}
           </div>
-          <div className="button-group order-1 sm:order-2">
-            <Button variant="outline" disabled size="sm" className="text-xs sm:text-sm">
-              Anterior
-            </Button>
-            <Button variant="outline" disabled size="sm" className="text-xs sm:text-sm">
-              Próximo
-            </Button>
-          </div>
+          
+          {totalPages > 1 && (
+            <div className="order-1 sm:order-2">
+              <Pagination>
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious 
+                      onClick={handlePreviousPage}
+                      className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                    />
+                  </PaginationItem>
+                  
+                  {/* Primeira página */}
+                  {currentPage > 3 && (
+                    <>
+                      <PaginationItem>
+                        <PaginationLink onClick={() => handlePageChange(1)} className="cursor-pointer">
+                          1
+                        </PaginationLink>
+                      </PaginationItem>
+                      {currentPage > 4 && (
+                        <PaginationItem>
+                          <PaginationEllipsis />
+                        </PaginationItem>
+                      )}
+                    </>
+                  )}
+                  
+                  {/* Páginas ao redor da atual */}
+                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                    const pageNumber = Math.max(1, Math.min(totalPages - 4, currentPage - 2)) + i;
+                    if (pageNumber <= totalPages) {
+                      return (
+                        <PaginationItem key={pageNumber}>
+                          <PaginationLink 
+                            onClick={() => handlePageChange(pageNumber)}
+                            isActive={pageNumber === currentPage}
+                            className="cursor-pointer"
+                          >
+                            {pageNumber}
+                          </PaginationLink>
+                        </PaginationItem>
+                      );
+                    }
+                    return null;
+                  })}
+                  
+                  {/* Última página */}
+                  {currentPage < totalPages - 2 && (
+                    <>
+                      {currentPage < totalPages - 3 && (
+                        <PaginationItem>
+                          <PaginationEllipsis />
+                        </PaginationItem>
+                      )}
+                      <PaginationItem>
+                        <PaginationLink onClick={() => handlePageChange(totalPages)} className="cursor-pointer">
+                          {totalPages}
+                        </PaginationLink>
+                      </PaginationItem>
+                    </>
+                  )}
+                  
+                  <PaginationItem>
+                    <PaginationNext 
+                      onClick={handleNextPage}
+                      className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            </div>
+          )}
         </div>
       </div>
     </>
