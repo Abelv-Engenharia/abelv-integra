@@ -58,8 +58,10 @@ export const useUserCCAs = () => {
       }
     },
     enabled: !!user?.id,
-    staleTime: 10 * 60 * 1000, // 10 minutos de cache
-    gcTime: 15 * 60 * 1000, // 15 minutos antes de garbage collect
+    staleTime: 5 * 60 * 1000, // 5 minutos de cache
+    gcTime: 10 * 60 * 1000, // 10 minutos antes de garbage collect
+    refetchOnMount: true,
+    refetchOnWindowFocus: false,
     retry: 2,
     retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
