@@ -40,7 +40,7 @@ const Navbar = () => {
       });
     }
   };
-  return <nav className="bg-white border-b border-gray-200 px-2 sm:px-4 py-2 sm:py-3">
+  return <nav className="bg-white border-b border-gray-200 px-2 sm:px-4 py-2 sm:py-3 print:hidden">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 sm:gap-3 min-w-0">
           {/* Botão de toggle da sidebar - visível em telas pequenas */}

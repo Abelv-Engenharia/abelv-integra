@@ -57,7 +57,7 @@ export function AppSidebar() {
   };
 
   return (
-    <Sidebar>
+    <Sidebar className="print:hidden">
         {/* Logo e Texto ABELV ENGENHARIA */}
       <div className="flex flex-col items-center rounded-md p-2">
           <div className="w-full p-2">

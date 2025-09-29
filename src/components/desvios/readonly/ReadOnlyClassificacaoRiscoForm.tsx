@@ -177,7 +177,7 @@ const ReadOnlyClassificacaoRiscoForm = ({ desvio }: Props) => {
           {/* Legendas de Classificação */}
           <div className="space-y-2 print-spacing-sm">
             <h4 className="font-medium text-sm text-gray-700 print-label">Legendas de Classificação</h4>
-            <div className="flex flex-wrap gap-3 text-xs print-legend">
+            <div className="flex flex-wrap gap-3 text-xs print-legend page-break-inside-avoid">
               <div className="flex items-center gap-2 print-legend-item">
                 <div className="w-3 h-3 bg-cyan-400 rounded print-legend-color print-risk-trivial"></div>
                 <span>TRIVIAL (≤10)</span>

@@ -166,6 +166,8 @@
     flex-wrap: wrap;
     gap: 8px;
     margin-top: 8px;
+    page-break-inside: avoid;
+    page-break-before: avoid;
   }
 
   .print-legend-item {
@@ -221,12 +223,21 @@
     padding: 12px;
   }
 
-  /* Força remoção de cores de fundo em cards */
-  .bg-blue-50,
-  .bg-green-50,
-  .bg-orange-50,
+  /* Manter cores de fundo dos cards para impressão colorida */
+  .bg-blue-50 {
+    background-color: #eff6ff !important;
+  }
+  
+  .bg-green-50 {
+    background-color: #f0fdf4 !important;
+  }
+  
+  .bg-orange-50 {
+    background-color: #fff7ed !important;
+  }
+  
   .bg-purple-50 {
-    background-color: #ffffff !important;
+    background-color: #faf5ff !important;
   }
 
   /* Ajustes finais */

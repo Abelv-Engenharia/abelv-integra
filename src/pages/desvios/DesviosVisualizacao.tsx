@@ -9,6 +9,7 @@ import ReadOnlyIdentificacaoForm from "@/components/desvios/readonly/ReadOnlyIde
 import ReadOnlyInformacoesDesvioForm from "@/components/desvios/readonly/ReadOnlyInformacoesDesvioForm";
 import ReadOnlyAcaoCorretivaForm from "@/components/desvios/readonly/ReadOnlyAcaoCorretivaForm";
 import ReadOnlyClassificacaoRiscoForm from "@/components/desvios/readonly/ReadOnlyClassificacaoRiscoForm";
+import logoAbelvIntegra from "@/assets/abelv-logo.png";
 import "@/styles/print-desvios.css";
 
 const DesviosVisualizacao = () => {
@@ -110,7 +111,7 @@ const DesviosVisualizacao = () => {
       {/* Header para impressão */}
       <div className="hidden print:block print-header">
         <div className="print-header-logo">
-          ABELV Engenharia
+          <img src={logoAbelvIntegra} alt="ABELV Engenharia" className="h-12" />
         </div>
         <div className="print-header-title">
           <h1>RELATÓRIO DE DESVIO</h1>
