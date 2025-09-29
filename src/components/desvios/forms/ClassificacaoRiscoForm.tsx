@@ -130,7 +130,7 @@ const ClassificacaoRiscoForm = () => {
                   <SelectContent>
                     {exposicaoOpcoes.map((opcao) => (
                       <SelectItem key={opcao.id} value={opcao.id.toString()}>
-                        {opcao.nome}
+                        {opcao.codigo} - {opcao.nome}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -155,7 +155,7 @@ const ClassificacaoRiscoForm = () => {
                   <SelectContent>
                     {controleOpcoes.map((opcao) => (
                       <SelectItem key={opcao.id} value={opcao.id.toString()}>
-                        {opcao.nome}
+                        {opcao.codigo} - {opcao.nome}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -180,7 +180,7 @@ const ClassificacaoRiscoForm = () => {
                   <SelectContent>
                     {deteccaoOpcoes.map((opcao) => (
                       <SelectItem key={opcao.id} value={opcao.id.toString()}>
-                        {opcao.nome}
+                        {opcao.codigo} - {opcao.nome}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -210,7 +210,7 @@ const ClassificacaoRiscoForm = () => {
                   <SelectContent>
                     {efeitoFalhaOpcoes.map((opcao) => (
                       <SelectItem key={opcao.id} value={opcao.id.toString()}>
-                        {opcao.nome}
+                        {opcao.codigo} - {opcao.nome}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -235,7 +235,7 @@ const ClassificacaoRiscoForm = () => {
                   <SelectContent>
                     {impactoOpcoes.map((opcao) => (
                       <SelectItem key={opcao.id} value={opcao.id.toString()}>
-                        {opcao.nome}
+                        {opcao.codigo} - {opcao.nome}
                       </SelectItem>
                     ))}
                   </SelectContent>
