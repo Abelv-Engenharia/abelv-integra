@@ -211,13 +211,13 @@ const DesviosConsulta = () => {
       company: "",
       status: "",
       risk: "",
-      disciplina: "todas",
+      disciplina: "",
       empresa: "",
       classificacao: "",
-      tipo: "todos",
-      evento: "todos",
-      processo: "todos",
-      baseLegal: "todas",
+      tipo: "",
+      evento: "",
+      processo: "",
+      baseLegal: "",
     };
     setFilters(clearedFilters);
     setSearchTerm("");

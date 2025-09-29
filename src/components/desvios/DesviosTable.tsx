@@ -126,7 +126,7 @@ const DesviosTable = ({ filters, searchTerm }: DesviosTableProps) => {
         query = query.eq("classificacao_risco", filters.risk);
       }
 
-      if (filters?.disciplina && filters.disciplina !== "") {
+      if (filters?.disciplina && filters.disciplina !== "" && filters.disciplina !== "todas") {
         const { data: disciplinaData } = await supabase
           .from("disciplinas")
           .select("id")
@@ -135,7 +135,7 @@ const DesviosTable = ({ filters, searchTerm }: DesviosTableProps) => {
         if (disciplinaData) query = query.eq("disciplina_id", disciplinaData.id);
       }
 
-      if (filters?.tipo && filters.tipo !== "") {
+      if (filters?.tipo && filters.tipo !== "" && filters.tipo !== "todos") {
         const { data: tipoData } = await supabase
           .from("tipos_registro")
           .select("id")
@@ -144,7 +144,7 @@ const DesviosTable = ({ filters, searchTerm }: DesviosTableProps) => {
         if (tipoData) query = query.eq("tipo_registro_id", tipoData.id);
       }
 
-      if (filters?.evento && filters.evento !== "") {
+      if (filters?.evento && filters.evento !== "" && filters.evento !== "todos") {
         const { data: eventoData } = await supabase
           .from("eventos_identificados")
           .select("id")
@@ -153,7 +153,7 @@ const DesviosTable = ({ filters, searchTerm }: DesviosTableProps) => {
         if (eventoData) query = query.eq("evento_identificado_id", eventoData.id);
       }
 
-      if (filters?.processo && filters.processo !== "") {
+      if (filters?.processo && filters.processo !== "" && filters.processo !== "todos") {
         const { data: processoData } = await supabase
           .from("processos")
           .select("id")
@@ -163,7 +163,7 @@ const DesviosTable = ({ filters, searchTerm }: DesviosTableProps) => {
       }
 
       // --- Base Legal (robusto: aceita ID ou nome parcial) ---
-      if ((filters?.baseLegalId && filters.baseLegalId !== "") || (filters?.baseLegal && filters.baseLegal !== "")) {
+      if ((filters?.baseLegalId && filters.baseLegalId !== "") || (filters?.baseLegal && filters.baseLegal !== "" && filters.baseLegal !== "todas")) {
         if (filters?.baseLegalId && filters.baseLegalId !== "") {
           const idNum = Number(filters.baseLegalId);
           if (Number.isFinite(idNum)) {
@@ -214,7 +214,7 @@ const DesviosTable = ({ filters, searchTerm }: DesviosTableProps) => {
         }
       }
 
-      if (filters?.empresa && filters.empresa !== "") {
+      if (filters?.empresa && filters.empresa !== "" && filters.empresa !== "todas") {
         const { data: empresaData } = await supabase
           .from("empresas")
           .select("id")
@@ -223,7 +223,7 @@ const DesviosTable = ({ filters, searchTerm }: DesviosTableProps) => {
         if (empresaData) query = query.eq("empresa_id", empresaData.id);
       }
 
-      if (filters?.classificacao && filters.classificacao !== "") {
+      if (filters?.classificacao && filters.classificacao !== "" && filters.classificacao !== "todos") {
         query = query.eq("classificacao_risco", filters.classificacao);
       }
 
