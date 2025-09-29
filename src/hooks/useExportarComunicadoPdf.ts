@@ -14,6 +14,36 @@ interface UseExportarComunicadoPdfProps {
 export const useExportarComunicadoPdf = ({ comunicado, ciencias }: UseExportarComunicadoPdfProps) => {
   const [isExporting, setIsExporting] = useState(false);
 
+  const getFileUrl = (url: string) => {
+    if (!url) return '';
+    if (url.startsWith('http')) return url;
+    return `https://xexgdtlctyuycohzhmuu.supabase.co/storage/v1/object/public/comunicados-anexos/${url}`;
+  };
+
+  const isImage = (fileName: string) => {
+    if (!fileName) return false;
+    const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp'];
+    return imageExtensions.some(ext => fileName.toLowerCase().endsWith(ext));
+  };
+
+  const loadImageAsBase64 = async (imageUrl: string): Promise<string | null> => {
+    try {
+      const response = await fetch(imageUrl);
+      if (!response.ok) throw new Error('Erro ao carregar imagem');
+      
+      const blob = await response.blob();
+      return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = () => resolve(null);
+        reader.readAsDataURL(blob);
+      });
+    } catch (error) {
+      console.error('Erro ao converter imagem para base64:', error);
+      return null;
+    }
+  };
+
   const getStatusText = () => {
     const today = new Date().toISOString().split('T')[0];
     
@@ -82,16 +112,37 @@ export const useExportarComunicadoPdf = ({ comunicado, ciencias }: UseExportarCo
     if (comunicado.arquivo_url && comunicado.arquivo_nome) {
       const anexoSection = document.createElement('div');
       anexoSection.style.marginBottom = '30px';
-      anexoSection.innerHTML = `
+      
+      let anexoContent = `
         <h2 style="color: #333; border-bottom: 1px solid #ddd; padding-bottom: 10px;">Anexo</h2>
         <div style="margin-top: 15px;">
           <p><strong>Arquivo:</strong> ${comunicado.arquivo_nome}</p>
-          ${comunicado.arquivo_url.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? 
-            `<p style="color: #666; font-style: italic;">Imagem anexada ao comunicado</p>` : 
-            `<p style="color: #666; font-style: italic;">Arquivo disponível para download</p>`
-          }
-        </div>
       `;
+
+      // Se for imagem, tentar carregar e exibir
+      if (isImage(comunicado.arquivo_nome)) {
+        try {
+          const imageUrl = getFileUrl(comunicado.arquivo_url);
+          const base64Image = await loadImageAsBase64(imageUrl);
+          
+          if (base64Image) {
+            anexoContent += `
+              <div style="margin-top: 15px; text-align: center;">
+                <img src="${base64Image}" style="max-width: 100%; max-height: 400px; border: 1px solid #ddd; border-radius: 4px;" />
+              </div>
+            `;
+          } else {
+            anexoContent += `<p style="color: #666; font-style: italic;">Imagem não pôde ser carregada</p>`;
+          }
+        } catch (error) {
+          anexoContent += `<p style="color: #666; font-style: italic;">Erro ao carregar imagem</p>`;
+        }
+      } else {
+        anexoContent += `<p style="color: #666; font-style: italic;">Arquivo disponível para download</p>`;
+      }
+
+      anexoContent += `</div>`;
+      anexoSection.innerHTML = anexoContent;
       container.appendChild(anexoSection);
     }
 
