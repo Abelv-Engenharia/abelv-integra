@@ -4604,6 +4604,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      replace_in_jsonb_array: {
+        Args: { arr: Json; new_val: string; old_val: string }
+        Returns: Json
+      }
       user_can_manage_funcionarios: {
         Args: { user_id_param: string }
         Returns: boolean
