@@ -72,13 +72,13 @@ export const COMPLETE_PERMISSIONS: PermissionCategory[] = [
     name: 'HSA - Hora da Segurança',
     permissions: [
       { key: 'hora_seguranca_dashboard', label: 'Dashboard' },
-      { key: 'hora_seguranca_inspecoes_cadastro', label: 'Cadastro Inspeções' },
-      { key: 'hora_seguranca_inspecoes_acompanhamento', label: 'Acompanhamento' },
-      { key: 'hora_seguranca_inspecoes_nao_programadas', label: 'Não Programadas' },
-      { key: 'hora_seguranca_inspecao_cadastro_hsa', label: 'Cadastro HSA' },
-      { key: 'hora_seguranca_inspecao_nao_programada_hsa', label: 'Não Programada HSA' },
+      { key: 'hora_seguranca_cadastro_inspecao', label: 'Cadastro Inspeções' },
+      { key: 'hora_seguranca_acompanhamento', label: 'Acompanhamento' },
+      { key: 'hora_seguranca_cadastro_nao_programada', label: 'Não Programadas' },
+      { key: 'hora_seguranca_cadastro_hsa', label: 'Cadastro HSA' },
+      { key: 'hora_seguranca_nao_programada_hsa', label: 'Não Programada HSA' },
       { key: 'hora_seguranca_painel_execucao_hsa', label: 'Painel Execução' },
-      { key: 'hora_seguranca_agenda_hsa', label: 'Agenda HSA' }
+      { key: 'hora_seguranca_agenda', label: 'Agenda HSA' }
     ]
   },
   {
@@ -129,7 +129,7 @@ export const COMPLETE_PERMISSIONS: PermissionCategory[] = [
     name: 'Inspeção SMS',
     permissions: [
       { key: 'inspecao_sms_dashboard', label: 'Dashboard' },
-      { key: 'inspecao_sms_cadastrar', label: 'Cadastrar' },
+      { key: 'inspecao_sms_cadastro', label: 'Cadastrar' },
       { key: 'inspecao_sms_consulta', label: 'Consulta' },
       { key: 'inspecao_sms_visualizar', label: 'Visualizar' },
       { key: 'inspecao_sms_excluir', label: 'Excluir' },
@@ -143,6 +143,7 @@ export const COMPLETE_PERMISSIONS: PermissionCategory[] = [
       { key: 'prevencao_incendio_cadastro_extintores', label: 'Cadastro Extintores' },
       { key: 'prevencao_incendio_inspecao_extintores', label: 'Inspeção Extintores' },
       { key: 'prevencao_incendio_consulta_inspecoes', label: 'Consulta Inspeções' },
+      { key: 'prevencao_incendio_consulta_extintores', label: 'Consulta Extintores' },
       { key: 'prevencao_incendio_visualizar_inspecao', label: 'Visualizar Inspeção' }
     ]
   },
