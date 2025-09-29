@@ -124,37 +124,47 @@ export const comunicadosService = {
 
   // Buscar ciências de um comunicado (admin)
   async getCienciasComunicado(comunicadoId: string): Promise<ComunicadoCiencia[]> {
+    // Primeiro buscar todas as ciências do comunicado
     const { data: cienciasData, error: cienciasError } = await supabase
       .from('comunicados_ciencia')
-      .select(`
-        id,
-        comunicado_id,
-        usuario_id,
-        data_ciencia,
-        created_at
-      `)
+      .select('*')
       .eq('comunicado_id', comunicadoId)
       .order('data_ciencia', { ascending: false });
 
-    if (cienciasError) throw cienciasError;
+    if (cienciasError) {
+      console.error('Erro ao buscar ciências:', cienciasError);
+      throw cienciasError;
+    }
 
-    // Buscar os perfis separadamente
-    const userIds = cienciasData?.map(c => c.usuario_id) || [];
-    if (userIds.length === 0) return [];
+    console.log('Ciências encontradas:', cienciasData);
 
+    if (!cienciasData || cienciasData.length === 0) {
+      return [];
+    }
+
+    // Buscar os perfis dos usuários
+    const userIds = cienciasData.map(c => c.usuario_id);
     const { data: profiles, error: profilesError } = await supabase
       .from('profiles')
       .select('id, nome, email')
       .in('id', userIds);
 
-    if (profilesError) throw profilesError;
+    if (profilesError) {
+      console.error('Erro ao buscar profiles:', profilesError);
+      throw profilesError;
+    }
 
-    // Combinar os dados
+    console.log('Profiles encontrados:', profiles);
+
+    // Mapear os dados combinando ciências com profiles
     const profilesMap = new Map(profiles?.map(p => [p.id, p]) || []);
-    return cienciasData?.map(ciencia => ({
+    const resultado = cienciasData.map(ciencia => ({
       ...ciencia,
-      profiles: profilesMap.get(ciencia.usuario_id)
-    })) as ComunicadoCiencia[] || [];
+      profiles: profilesMap.get(ciencia.usuario_id) || { nome: 'Usuário não encontrado', email: 'N/A' }
+    })) as ComunicadoCiencia[];
+
+    console.log('Resultado final:', resultado);
+    return resultado;
   },
 
   // Upload de arquivo anexo
