@@ -6,6 +6,8 @@ import { LayoutDashboard } from "lucide-react";
 import { useUserCCAs } from "@/hooks/useUserCCAs";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { MedidasPieChart } from "@/components/medidas-disciplinares/MedidasPieChart";
+import { MedidasBarChart } from "@/components/medidas-disciplinares/MedidasBarChart";
 
 export default function MedidasDisciplinaresDashboard() {
   const { data: userCCAs = [] } = useUserCCAs();
@@ -121,6 +123,12 @@ export default function MedidasDisciplinaresDashboard() {
             <div className="text-xs text-muted-foreground">Data mais recente</div>
           </CardContent>
         </Card>
+      </div>
+
+      {/* Gráficos */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <MedidasPieChart ccaIds={userCCAs.map(cca => cca.id)} />
+        <MedidasBarChart ccaIds={userCCAs.map(cca => cca.id)} />
       </div>
 
       <div className="text-sm text-muted-foreground mb-10">
