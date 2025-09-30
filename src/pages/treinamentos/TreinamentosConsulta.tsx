@@ -571,7 +571,7 @@ const TreinamentosConsulta = () => {
                                 <Button variant="ghost" size="icon" onClick={() => handleView(execucao)} title="Visualizar">
                                   <Eye className="w-4 h-4" />
                                 </Button>
-                                <PermissionGuard requiredPermissions={["treinamentos_editar", "admin_funcionarios"]}>
+                                <PermissionGuard requiredPermissions={["treinamentos_editar_execucao", "admin_funcionarios"]}>
                                   <Button variant="ghost" size="icon" onClick={() => handleEdit(execucao)} title="Editar">
                                     <Edit className="w-4 h-4" />
                                   </Button>

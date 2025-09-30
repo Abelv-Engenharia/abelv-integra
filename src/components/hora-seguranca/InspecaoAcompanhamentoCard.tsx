@@ -137,15 +137,17 @@ export function InspecaoAcompanhamentoCard({
               {loading ? "Carregando..." : "Relatório"}
             </Button>
           )}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => onUpdateStatus(inspecao)}
-            className="flex items-center gap-1 px-2 py-0.5 h-6 min-h-0 text-[10px] leading-none"
-          >
-            Atualizar Status
-          </Button>
-          <PermissionGuard requiredPermissions={["hsa_excluir", "admin_funcionarios"]}>
+          <PermissionGuard requiredPermissions={["admin_funcionarios", "hora_seguranca_acompanhamento"]}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onUpdateStatus(inspecao)}
+              className="flex items-center gap-1 px-2 py-0.5 h-6 min-h-0 text-[10px] leading-none"
+            >
+              Atualizar Status
+            </Button>
+          </PermissionGuard>
+          <PermissionGuard requiredPermissions={["admin_funcionarios", "hora_seguranca_acompanhamento"]}>
             <Button
               variant="destructive"
               size="sm"

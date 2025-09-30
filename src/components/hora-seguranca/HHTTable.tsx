@@ -12,6 +12,7 @@ import { fetchHHTByCCA } from "@/services/hora-seguranca/horasTrabalhadasService
 import { Skeleton } from "@/components/ui/skeleton";
 import { EditHHTDialog } from "./EditHHTDialog";
 import { DeleteHHTDialog } from "./DeleteHHTDialog";
+import { PermissionGuard } from "@/components/security/PermissionGuard";
 
 type HHTByCCAItem = {
   id: string;
@@ -87,8 +88,12 @@ export function HHTTable() {
                 </TableCell>
                 <TableCell className="text-center">
                   <div className="flex justify-center space-x-2">
-                    <EditHHTDialog hht={item} onSuccess={handleSuccess} />
-                    <DeleteHHTDialog hht={item} onSuccess={handleSuccess} />
+                    <PermissionGuard requiredPermissions={["admin_registro_hht", "admin_funcionarios"]}>
+                      <EditHHTDialog hht={item} onSuccess={handleSuccess} />
+                    </PermissionGuard>
+                    <PermissionGuard requiredPermissions={["admin_registro_hht", "admin_funcionarios"]}>
+                      <DeleteHHTDialog hht={item} onSuccess={handleSuccess} />
+                    </PermissionGuard>
                   </div>
                 </TableCell>
               </TableRow>
