@@ -1,4 +1,4 @@
-import { useProfile } from "@/hooks/useProfile";
+import { usePermissionsDirect } from "@/hooks/usePermissionsDirect";
 import { ReactNode } from "react";
 
 interface PermissionGuardProps {
@@ -16,58 +16,35 @@ export const PermissionGuard = ({
   requireAdmin = false,
   fallback = null 
 }: PermissionGuardProps) => {
-  const { userPermissoes, userRole } = useProfile();
+  const { isAdmin, hasPermission, hasAnyPermission, loading } = usePermissionsDirect();
 
-  // Verificar se é admin de forma robusta
-  const isAdmin = 
-    (userRole && typeof userRole === "string" && 
-     (userRole.toLowerCase().includes("admin") || userRole.toLowerCase() === "administrador")) ||
-    (userPermissoes && 
-     typeof userPermissoes === "object" && 
-     (userPermissoes as any).admin_funcionarios === true);
+  // Se ainda está carregando, não mostrar nada
+  if (loading) {
+    return <>{fallback}</>;
+  }
 
   // Se requer admin e usuário é admin, liberar acesso
   if (requireAdmin && isAdmin) {
     return <>{children}</>;
   }
 
-  // Se não tem permissões carregadas ainda, não mostrar nada
-  if (!userPermissoes || typeof userPermissoes !== "object") {
-    return <>{fallback}</>;
+  // Se é admin, sempre liberar acesso
+  if (isAdmin) {
+    return <>{children}</>;
   }
-
-  const permissions = userPermissoes as any;
 
   // Verificar permissão individual
   if (requiredPermission) {
-    // Verificar se tem a permissão booleana
-    if (permissions[requiredPermission] === true) {
-      return <>{children}</>;
-    }
-    
-    // Verificar se tem nos menus_sidebar
-    if (Array.isArray(permissions.menus_sidebar) && 
-        permissions.menus_sidebar.includes(requiredPermission)) {
+    if (hasPermission(requiredPermission)) {
       return <>{children}</>;
     }
   }
 
   // Verificar múltiplas permissões (pelo menos uma deve ser verdadeira)
   if (requiredPermissions.length > 0) {
-    const hasAnyPermission = requiredPermissions.some(perm => {
-      return permissions[perm] === true || 
-             (Array.isArray(permissions.menus_sidebar) && 
-              permissions.menus_sidebar.includes(perm));
-    });
-    
-    if (hasAnyPermission) {
+    if (hasAnyPermission(requiredPermissions)) {
       return <>{children}</>;
     }
-  }
-
-  // Se chegou até aqui e é admin, liberar acesso
-  if (isAdmin) {
-    return <>{children}</>;
   }
 
   return <>{fallback}</>;
