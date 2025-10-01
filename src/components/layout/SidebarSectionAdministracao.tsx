@@ -141,13 +141,13 @@ export default function SidebarSectionAdministracao({ openMenu, toggleMenu, onLi
                           <SidebarMenuSubButton
                             key={slug}
                             asChild
-                            className={
+                            className={`h-auto py-2 [&>span:last-child]:!whitespace-normal [&>span:last-child]:!overflow-visible [&>span:last-child]:!text-clip ${
                               pathname === to ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"
-                            }
+                            }`}
                           >
                             <Link to={to} onClick={onLinkClick} className="flex items-center gap-2">
                               <Icon className="h-3 w-3 flex-shrink-0" />
-                              <span className="text-xs leading-tight break-words min-w-0 whitespace-normal">{label}</span>
+                              <span className="text-xs leading-normal break-words whitespace-normal max-w-[140px]">{label}</span>
                             </Link>
                           </SidebarMenuSubButton>
                         ))}
