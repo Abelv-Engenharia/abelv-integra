@@ -45,6 +45,8 @@ export default function SidebarSearch() {
     { name: "HSA Agenda", path: "/hora-seguranca/agenda-hsa", category: "SMS", slug: "hora_seguranca_agenda_hsa" },
     { name: "HSA Acompanhamento", path: "/hora-seguranca/inspecoes-acompanhamento", category: "SMS", slug: "hora_seguranca_inspecoes_acompanhamento" },
     { name: "HSA Não Programada", path: "/hora-seguranca/inspecao-nao-programada-hsa", category: "SMS", slug: "hora_seguranca_inspecoes_nao_programadas" },
+    { name: "Hora da Segurança", path: "/inspecao-sms/hora-seguranca", category: "SMS", slug: "inspecao_sms_cadastrar" },
+    { name: "Painel Execução HSA", path: "/hora-seguranca/painel-execucao-hsa", category: "SMS", slug: "hora_seguranca_painel_execucao" },
 
     // IDSMS
     { name: "IDSMS Dashboard", path: "/idsms/dashboard", category: "SMS", slug: "idsms_dashboard" },
@@ -101,6 +103,7 @@ export default function SidebarSearch() {
 
     // ADMINISTRAÇÃO
     { name: "Admin Usuários", path: "/admin/usuarios-direct", category: "ADMINISTRAÇÃO", slug: "admin_usuarios" },
+    { name: "Criar Usuário", path: "/admin/criar-usuario-direct", category: "ADMINISTRAÇÃO", slug: "admin_usuarios" },
     { name: "Admin Empresas", path: "/admin/empresas", category: "ADMINISTRAÇÃO", slug: "admin_empresas" },
     { name: "Admin CCAs", path: "/admin/ccas", category: "ADMINISTRAÇÃO", slug: "admin_ccas" },
     { name: "Admin Engenheiros", path: "/admin/engenheiros", category: "ADMINISTRAÇÃO", slug: "admin_engenheiros" },
@@ -112,6 +115,16 @@ export default function SidebarSearch() {
     { name: "Admin Checklists", path: "/admin/checklists", category: "ADMINISTRAÇÃO", slug: "admin_checklists" },
     { name: "Admin Templates", path: "/admin/templates", category: "ADMINISTRAÇÃO", slug: "admin_templates" },
     { name: "Admin Logo", path: "/admin/logo", category: "ADMINISTRAÇÃO", slug: "admin_logo" },
+    { name: "Registro HHT", path: "/admin/registro-hht", category: "ADMINISTRAÇÃO", slug: "admin_registro_hht" },
+    { name: "Metas & Indicadores", path: "/admin/metas-indicadores", category: "ADMINISTRAÇÃO", slug: "admin_metas_indicadores" },
+    { name: "Exportação de Dados", path: "/admin/exportacao-dados", category: "ADMINISTRAÇÃO", slug: "admin_exportacao_dados" },
+    
+    // IMPORTAÇÃO DE DADOS
+    { name: "Importação Funcionários", path: "/admin/importacao/funcionarios", category: "IMPORTAÇÃO", slug: "admin_importacao_funcionarios" },
+    { name: "Importação Treinamentos", path: "/admin/importacao/execucao-treinamentos", category: "IMPORTAÇÃO", slug: "admin_importacao_execucao_treinamentos" },
+    { name: "Importação Desvios", path: "/admin/importacao/desvios", category: "IMPORTAÇÃO", slug: "admin_importacao_desvios" },
+    { name: "Importação Ocorrências", path: "/admin/importacao/ocorrencias", category: "IMPORTAÇÃO", slug: "admin_importacao_ocorrencias" },
+    { name: "Importação HHT", path: "/admin/importacao/hht", category: "IMPORTAÇÃO", slug: "admin_importacao_hht" },
 
     // Comunicados
     { name: "Comunicados Cadastro", path: "/admin/comunicados/cadastro", category: "COMUNICADOS", slug: "comunicados_cadastro" },

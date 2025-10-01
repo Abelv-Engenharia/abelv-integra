@@ -330,11 +330,13 @@ export default function SidebarSectionGestaoSMS({
                           <SidebarMenuSubButton
                             key={it.slug}
                             asChild
-                            className={
+                            className={`h-auto py-2 [&>span:last-child]:!whitespace-normal [&>span:last-child]:!overflow-visible [&>span:last-child]:!text-clip ${
                               currentPath === it.to ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"
-                            }
+                            }`}
                           >
-                            <Link to={it.to}>{it.label}</Link>
+                            <Link to={it.to} className="flex items-center gap-2">
+                              <span className="text-xs leading-normal whitespace-normal max-w-[140px]">{it.label}</span>
+                            </Link>
                           </SidebarMenuSubButton>
                         ))}
                       </div>
