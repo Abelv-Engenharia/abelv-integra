@@ -4,7 +4,6 @@ import {
   ChevronRight,
   Settings,
   Users,
-  Shield,
   Building2,
   Layers,
   Hammer,
@@ -19,7 +18,6 @@ import {
   Upload,
   Mail,
   Database,
-  Lock,
   UserPlus,
   UploadCloud,
   MessageSquare,
@@ -42,7 +40,7 @@ type Props = {
   openMenu: string | null;
   toggleMenu: (menuName: string) => void;
   onLinkClick?: () => void;
-  canSee?: (slug: string) => boolean; // ← controle por permissões
+  canSee?: (slug: string) => boolean;
 };
 
 type Item = { label: string; to: string; slug: string; Icon: React.ComponentType<any> };
@@ -55,10 +53,9 @@ export default function SidebarSectionAdministracao({ openMenu, toggleMenu, onLi
     return result;
   };
   
-  // Estado local para controlar o submenu Comunicados independentemente
   const [isComunicadosOpen, setIsComunicadosOpen] = useState(false);
+  const [isImportacaoDadosOpen, setIsImportacaoDadosOpen] = useState(false);
 
-  // Sistema de perfis removido - usando sistema direto
   const items: Item[] = [
     { label: "Usuários", to: "/admin/usuarios-direct", slug: "admin_usuarios", Icon: Users },
     { label: "Empresas", to: "/admin/empresas", slug: "admin_empresas", Icon: Building2 },
@@ -72,11 +69,13 @@ export default function SidebarSectionAdministracao({ openMenu, toggleMenu, onLi
     { label: "Checklists", to: "/admin/checklists", slug: "admin_checklists", Icon: ListChecks },
     { label: "Templates", to: "/admin/templates", slug: "admin_templates", Icon: FileCode2 },
     { label: "Logo", to: "/admin/logo", slug: "admin_logo", Icon: ImageIcon },
-
     { label: "Upload de Tutoriais", to: "/admin/upload-tutoriais", slug: "upload_tutoriais", Icon: Upload },
     { label: "Configuração de E-mails", to: "/admin/configuracao-emails", slug: "configuracao_emails", Icon: Mail },
     { label: "Exportação de Dados", to: "/admin/exportacao-dados", slug: "admin_exportacao_dados", Icon: Database },
+    { label: "Criar Usuário", to: "/admin/criar-usuario-direct", slug: "admin_criar_usuario", Icon: UserPlus },
+  ].filter((i) => can(i.slug));
 
+  const importacaoItems: Item[] = [
     { label: "Importação de Funcionários", to: "/admin/importacao-funcionarios", slug: "admin_importacao_funcionarios", Icon: UploadCloud },
     {
       label: "Importação Execução Treinamentos",
@@ -85,15 +84,10 @@ export default function SidebarSectionAdministracao({ openMenu, toggleMenu, onLi
       Icon: UploadCloud,
     },
     { label: "Importação de HSA", to: "/admin/importacao-hsa", slug: "admin_importacao_hsa", Icon: UploadCloud },
-
-    // Removidos os itens do sistema antigo:
-    // { label: "Usuários (Auth)", to: "/admin/usuarios-auth", slug: "admin_usuarios_auth", Icon: Lock },
-    { label: "Criar Usuário", to: "/admin/criar-usuario-direct", slug: "admin_criar_usuario", Icon: UserPlus },
-    // Se existir “adm_manutencao” como rota:
-    // { label: "Manutenção", to: "/admin/manutencao", slug: "adm_manutencao", Icon: Wrench }
+    { label: "Importação de Desvios", to: "/admin/importacao-desvios", slug: "admin_importacao_desvios", Icon: UploadCloud },
   ].filter((i) => can(i.slug));
 
-  if (items.length === 0 && !can("admin_comunicados")) return null;
+  if (items.length === 0 && !can("admin_comunicados") && importacaoItems.length === 0) return null;
 
   const isOpen = openMenu === "admin";
 
@@ -127,7 +121,41 @@ export default function SidebarSectionAdministracao({ openMenu, toggleMenu, onLi
                 </SidebarMenuSubItem>
               ))}
               
-              {/* Submenu Comunicados */}
+              {importacaoItems.length > 0 && (
+                <SidebarMenuSubItem>
+                  <Collapsible open={isImportacaoDadosOpen}>
+                    <CollapsibleTrigger asChild>
+                      <SidebarMenuSubButton 
+                        onClick={() => setIsImportacaoDadosOpen(!isImportacaoDadosOpen)}
+                        className="text-white hover:bg-slate-600"
+                      >
+                        <Database className="h-3 w-3 flex-shrink-0" />
+                        <span className="text-xs leading-tight break-words min-w-0">Importação de Dados</span>
+                        {isImportacaoDadosOpen ? <ChevronDown className="h-3 w-3 ml-auto" /> : <ChevronRight className="h-3 w-3 ml-auto" />}
+                      </SidebarMenuSubButton>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                      <div className="ml-4 space-y-1">
+                        {importacaoItems.map(({ slug, to, label, Icon }) => (
+                          <SidebarMenuSubButton
+                            key={slug}
+                            asChild
+                            className={
+                              pathname === to ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"
+                            }
+                          >
+                            <Link to={to} onClick={onLinkClick} className="flex items-center gap-2">
+                              <Icon className="h-3 w-3 flex-shrink-0" />
+                              <span className="text-xs leading-tight break-words min-w-0">{label}</span>
+                            </Link>
+                          </SidebarMenuSubButton>
+                        ))}
+                      </div>
+                    </CollapsibleContent>
+                  </Collapsible>
+                </SidebarMenuSubItem>
+              )}
+
               {can("admin_comunicados") && (
                 <SidebarMenuSubItem>
                   <Collapsible open={isComunicadosOpen}>

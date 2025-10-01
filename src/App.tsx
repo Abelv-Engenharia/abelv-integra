@@ -50,6 +50,7 @@ import MetasIndicadores from "./pages/admin/MetasIndicadores";
 import RegistroHHT from "./pages/admin/RegistroHHT";
 import ImportacaoExecucaoTreinamentos from "./pages/admin/ImportacaoExecucaoTreinamentos";
 import ImportacaoHSA from "./pages/admin/ImportacaoHSA";
+import ImportacaoDesvios from "./pages/admin/ImportacaoDesvios";
 import AdminConfiguracoes from "./pages/admin/AdminConfiguracoes";
 import AdminChecklists from "./pages/admin/AdminChecklists";
 
@@ -209,6 +210,7 @@ function App() {
                 <Route path="upload-tutoriais" element={<UploadTutoriaisPage />} />
                 <Route path="admin/importacao-execucao-treinamentos" element={<ImportacaoExecucaoTreinamentos />} />
                 <Route path="admin/importacao-hsa" element={<ImportacaoHSA />} />
+                <Route path="admin/importacao-desvios" element={<ImportacaoDesvios />} />
                 <Route path="admin/atualizar-perfis" element={<Navigate to="/admin/usuarios-direct" replace />} />
 
                 {/* Comunicados routes */}

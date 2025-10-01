@@ -1,0 +1,31 @@
+export interface DesvioImportData {
+  data_desvio?: string | null;
+  hora_desvio?: string | null;
+  cca_codigo?: string;
+  tipo_registro?: string;
+  processo?: string;
+  evento_identificado?: string;
+  causa_provavel?: string;
+  responsavel_inspecao?: string;
+  empresa?: string;
+  disciplina?: string;
+  engenheiro_responsavel?: string;
+  supervisor_responsavel?: string;
+  encarregado_responsavel?: string;
+  descricao_desvio?: string;
+  base_legal?: string;
+  colaborador_infrator?: string;
+  funcao?: string;
+  matricula?: string;
+  acao_imediata?: string;
+  tratativa_aplicada?: string;
+  responsavel_acao?: string;
+  prazo_conclusao?: string | null;
+  status?: string;
+  exposicao?: string;
+  controle?: string;
+  deteccao?: string;
+  efeito_falha?: string;
+  impacto?: string;
+  imagem_url?: string;
+}
