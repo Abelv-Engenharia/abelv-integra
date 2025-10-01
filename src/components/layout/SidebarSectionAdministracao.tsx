@@ -45,6 +45,7 @@ type Props = {
 
 type Item = { label: string; to: string; slug: string; Icon: React.ComponentType<any> };
 
+// Sidebar para administração com submenus expansíveis
 export default function SidebarSectionAdministracao({ openMenu, toggleMenu, onLinkClick, canSee }: Props) {
   const { pathname } = useLocation();
   const can = (slug: string) => {
