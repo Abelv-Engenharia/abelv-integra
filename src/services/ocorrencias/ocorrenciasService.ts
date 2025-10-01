@@ -407,16 +407,17 @@ export const getAllOcorrencias = async (filters?: OcorrenciasFilters) => {
 
     // Aplicar filtros
     if (filters) {
-      if (filters.ano && filters.ano !== 'todos') {
-        query = query.gte('data', `${filters.ano}-01-01`)
-                     .lte('data', `${filters.ano}-12-31`);
-      }
-      
-      if (filters.mes && filters.mes !== 'todos' && filters.ano && filters.ano !== 'todos') {
+      if (filters.mes && filters.mes !== 'todos') {
+        const anoParaUsar = filters.ano && filters.ano !== 'todos' ? filters.ano : new Date().getFullYear().toString();
         const mesFormatado = filters.mes.padStart(2, '0');
-        const ultimoDiaMes = new Date(parseInt(filters.ano), parseInt(filters.mes), 0).getDate();
-        query = query.gte('data', `${filters.ano}-${mesFormatado}-01`)
-                     .lte('data', `${filters.ano}-${mesFormatado}-${ultimoDiaMes}`);
+        const ultimoDiaMes = new Date(parseInt(anoParaUsar), parseInt(filters.mes), 0).getDate();
+        query = query
+          .gte('data', `${anoParaUsar}-${mesFormatado}-01`)
+          .lte('data', `${anoParaUsar}-${mesFormatado}-${ultimoDiaMes}`);
+      } else if (filters.ano && filters.ano !== 'todos') {
+        query = query
+          .gte('data', `${filters.ano}-01-01`)
+          .lte('data', `${filters.ano}-12-31`);
       }
       
       if (filters.cca && filters.cca !== 'todos') {

@@ -188,7 +188,7 @@ const OcorrenciasConsultaFilters = ({
               <SelectContent className="bg-background border z-50">
                 <SelectItem value="todos">Todos</SelectItem>
                 {classificacoesOcorrencia.map((classificacao) => (
-                  <SelectItem key={classificacao.id} value={classificacao.codigo}>
+                  <SelectItem key={classificacao.id} value={classificacao.nome}>
                     {classificacao.codigo} - {classificacao.nome}
                   </SelectItem>
                 ))}
