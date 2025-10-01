@@ -123,7 +123,7 @@ const OcorrenciasTimelineChart = () => {
 
   if (loading) {
     return (
-      <div className="h-[300px] flex items-center justify-center">
+      <div className="h-[400px] flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
       </div>
     );
@@ -131,7 +131,7 @@ const OcorrenciasTimelineChart = () => {
 
   if (error) {
     return (
-      <div className="h-[300px] flex items-center justify-center">
+      <div className="h-[400px] flex items-center justify-center">
         <p className="text-red-500">{error}</p>
       </div>
     );
@@ -139,7 +139,7 @@ const OcorrenciasTimelineChart = () => {
 
   if (data.length === 0) {
     return (
-      <div className="h-[300px] flex items-center justify-center">
+      <div className="h-[400px] flex items-center justify-center">
         <p className="text-muted-foreground">Nenhum dado disponível</p>
       </div>
     );
@@ -166,7 +166,7 @@ const OcorrenciasTimelineChart = () => {
     .concat(todasClassificacoes.filter(c => !ordemClassificacoes.includes(c)));
 
   return (
-    <div className="h-[300px]">
+    <div className="h-[400px]">
       <ResponsiveContainer width="100%" height="100%">
         <BarChart
           width={500}
