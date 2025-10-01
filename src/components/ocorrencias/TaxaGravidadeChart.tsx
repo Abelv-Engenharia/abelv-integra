@@ -99,7 +99,7 @@ const TaxaGravidadeChart = () => {
       />
       
       <ResponsiveContainer width="100%" height={300}>
-        <ComposedChart data={data} margin={{ top: 20, right: 80, left: 20, bottom: 60 }}>
+        <ComposedChart data={data} margin={{ top: 20, right: 120, left: 20, bottom: 60 }}>
           <XAxis 
             dataKey="mes" 
             tick={{ fontSize: 14 }}
@@ -173,7 +173,7 @@ const TaxaGravidadeChart = () => {
               label={{ 
                 value: `Meta: ${meta.toFixed(2)}`, 
                 position: "right",
-                offset: 10,
+                offset: 20,
                 style: { 
                   fontSize: '16px', 
                   fontWeight: 'bold',
