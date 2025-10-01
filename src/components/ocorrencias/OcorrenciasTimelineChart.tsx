@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { BarChart, Bar, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis, Legend, LabelList } from "recharts";
+import { BarChart, Bar, ResponsiveContainer, Tooltip, XAxis, YAxis, Legend, LabelList } from "recharts";
 import { supabase } from '@/integrations/supabase/client';
 import { useUserCCAs } from "@/hooks/useUserCCAs";
 import { useOcorrenciasFilter } from "@/contexts/OcorrenciasFilterContext";
@@ -164,15 +164,14 @@ const OcorrenciasTimelineChart = () => {
           data={data}
           margin={{
             top: 20,
-            right: 30,
+            right: 50,
             left: 20,
             bottom: 60,
           }}
         >
-          <CartesianGrid strokeDasharray="3 3" />
           <XAxis 
             dataKey="name" 
-            tick={{ fontSize: 13 }}
+            tick={{ fontSize: 16 }}
             angle={-45}
             textAnchor="end"
             height={60}

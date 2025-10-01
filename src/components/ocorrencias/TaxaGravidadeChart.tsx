@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, LabelList } from "recharts";
+import { ComposedChart, Bar, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine, LabelList } from "recharts";
 import { fetchTaxaGravidadePorMes, fetchMetaIndicador } from "@/services/ocorrencias/ocorrenciasStatsService";
 import { useUserCCAs } from "@/hooks/useUserCCAs";
 import { useOcorrenciasFilter } from "@/contexts/OcorrenciasFilterContext";
@@ -99,11 +99,10 @@ const TaxaGravidadeChart = () => {
       />
       
       <ResponsiveContainer width="100%" height={300}>
-        <ComposedChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
-          <CartesianGrid strokeDasharray="3 3" />
+        <ComposedChart data={data} margin={{ top: 20, right: 80, left: 20, bottom: 60 }}>
           <XAxis 
             dataKey="mes" 
-            tick={{ fontSize: 11 }}
+            tick={{ fontSize: 14 }}
             tickFormatter={(value) => {
               const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
               return meses[value - 1] || value;
@@ -173,10 +172,10 @@ const TaxaGravidadeChart = () => {
               strokeWidth={2}
               label={{ 
                 value: `Meta: ${meta.toFixed(2)}`, 
-                position: "top",
+                position: "right",
                 offset: 10,
                 style: { 
-                  fontSize: '12px', 
+                  fontSize: '16px', 
                   fontWeight: 'bold',
                   fill: '#059669'
                 }
