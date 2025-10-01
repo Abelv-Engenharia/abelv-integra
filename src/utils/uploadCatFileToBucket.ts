@@ -39,15 +39,6 @@ export async function uploadCatFileToBucket(
     return null;
   }
 
-  // Obter URL assinada (válida por 10 minutos)
-  const { data: signedUrlData, error: signedUrlError } = await supabase.storage
-    .from("ocorrencias")
-    .createSignedUrl(fileName, 600);
-
-  if (signedUrlError || !signedUrlData?.signedUrl) {
-    console.error("Erro ao gerar URL assinada do arquivo CAT:", signedUrlError);
-    return null;
-  }
-
-  return signedUrlData.signedUrl;
+  // Retornar apenas o nome do arquivo (não a URL temporária)
+  return fileName;
 }

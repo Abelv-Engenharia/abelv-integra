@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import { FileText, Download, Eye } from "lucide-react";
 import { useSignedUrl } from "@/hooks/useSignedUrl";
+import { supabase } from "@/integrations/supabase/client";
 
 interface DocumentosAnexadosProps {
   ocorrencia: {
@@ -57,25 +58,41 @@ const DocumentosAnexados: React.FC<DocumentosAnexadosProps> = ({ ocorrencia }) =
   const documentosDisponiveis = documentos.filter(doc => doc.url);
   const hasDocuments = documentosDisponiveis.length > 0;
 
-  const handleViewDocument = async (url: string) => {
-    setSelectedDoc(url);
-    // Extrair o nome do arquivo da URL para gerar signed URL
-    const fileName = url.split('/').pop();
-    if (fileName) {
-      await generate('ocorrencias', fileName, 3600); // URL válida por 1 hora
-    }
+  const handleViewDocument = async (fileName: string) => {
+    setSelectedDoc(fileName);
+    // Extrair apenas o nome do arquivo caso seja uma URL completa
+    const extractedFileName = fileName.includes('/') 
+      ? fileName.split('/').pop() || fileName
+      : fileName;
+    
+    await generate('ocorrencias', extractedFileName, 600);
   };
 
-  const handleDownload = (url: string, nome: string) => {
-    if (selectedDoc === url && signedUrl) {
+  const handleDownload = async (fileName: string, nome: string) => {
+    try {
+      // Extrair apenas o nome do arquivo caso seja uma URL
+      const extractedFileName = fileName.includes('/') 
+        ? fileName.split('/').pop() || fileName
+        : fileName;
+      
+      // Gerar signed URL para download
+      const { data, error } = await supabase.storage
+        .from("ocorrencias")
+        .createSignedUrl(extractedFileName, 600);
+      
+      if (error || !data?.signedUrl) {
+        console.error("Erro ao gerar URL para download:", error);
+        return;
+      }
+
       const link = document.createElement('a');
-      link.href = signedUrl;
+      link.href = data.signedUrl;
       link.download = nome;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-    } else {
-      handleViewDocument(url);
+    } catch (error) {
+      console.error("Erro ao fazer download:", error);
     }
   };
 
