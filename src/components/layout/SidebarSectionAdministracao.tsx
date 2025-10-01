@@ -147,7 +147,7 @@ export default function SidebarSectionAdministracao({ openMenu, toggleMenu, onLi
                           >
                             <Link to={to} onClick={onLinkClick} className="flex items-center gap-2">
                               <Icon className="h-3 w-3 flex-shrink-0" />
-                              <span className="text-xs leading-tight break-words min-w-0">{label}</span>
+                              <span className="text-xs leading-tight break-words min-w-0 whitespace-normal">{label}</span>
                             </Link>
                           </SidebarMenuSubButton>
                         ))}
