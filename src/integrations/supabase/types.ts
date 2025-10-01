@@ -3571,6 +3571,54 @@ export type Database = {
         }
         Relationships: []
       }
+      personnel_snapshots: {
+        Row: {
+          cca_info: Json | null
+          created_at: string | null
+          email: string | null
+          empresa_info: Json | null
+          funcao: string | null
+          id: string
+          matricula: string | null
+          nome: string
+          original_id: string
+          person_type: string
+          snapshot_date: string | null
+          updated_at: string | null
+          was_active: boolean | null
+        }
+        Insert: {
+          cca_info?: Json | null
+          created_at?: string | null
+          email?: string | null
+          empresa_info?: Json | null
+          funcao?: string | null
+          id?: string
+          matricula?: string | null
+          nome: string
+          original_id: string
+          person_type: string
+          snapshot_date?: string | null
+          updated_at?: string | null
+          was_active?: boolean | null
+        }
+        Update: {
+          cca_info?: Json | null
+          created_at?: string | null
+          email?: string | null
+          empresa_info?: Json | null
+          funcao?: string | null
+          id?: string
+          matricula?: string | null
+          nome?: string
+          original_id?: string
+          person_type?: string
+          snapshot_date?: string | null
+          updated_at?: string | null
+          was_active?: boolean | null
+        }
+        Relationships: []
+      }
       pgr_medidas: {
         Row: {
           atualizado_em: string | null
@@ -4547,6 +4595,22 @@ export type Database = {
       }
     }
     Functions: {
+      create_encarregado_snapshot: {
+        Args: { p_encarregado_id: string }
+        Returns: string
+      }
+      create_engenheiro_snapshot: {
+        Args: { p_engenheiro_id: string }
+        Returns: string
+      }
+      create_funcionario_snapshot: {
+        Args: { p_funcionario_id: string }
+        Returns: string
+      }
+      create_supervisor_snapshot: {
+        Args: { p_supervisor_id: string }
+        Returns: string
+      }
       get_desvios_by_base_legal: {
         Args: { filtros?: Json }
         Returns: {
@@ -4614,6 +4678,14 @@ export type Database = {
           mes: number
           total_horas: number
         }[]
+      }
+      get_personnel_data: {
+        Args: {
+          p_person_id: string
+          p_person_type: string
+          p_prefer_current?: boolean
+        }
+        Returns: Json
       }
       get_user_allowed_ccas: {
         Args: { user_id_param: string }

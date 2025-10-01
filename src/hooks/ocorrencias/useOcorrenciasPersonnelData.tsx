@@ -29,7 +29,7 @@ export const useOcorrenciasPersonnelData = () => {
     enabled: allowedCcaIds.length > 0,
   });
 
-  // Engenheiros com CCAs
+  // Engenheiros com CCAs (incluindo inativos para preservar dados)
   const { data: allEngenheiros = [] } = useQuery({
     queryKey: ['engenheiros-ccas-ocorrencias', allowedCcaIds],
     queryFn: async () => {
@@ -42,7 +42,6 @@ export const useOcorrenciasPersonnelData = () => {
           cca_id,
           engenheiros!inner(id, nome, funcao, matricula, email, ativo)
         `)
-        .eq('engenheiros.ativo', true)
         .in('cca_id', allowedCcaIds);
       
       console.log('Engenheiros filtrados por CCA:', data);
@@ -51,7 +50,7 @@ export const useOcorrenciasPersonnelData = () => {
     enabled: allowedCcaIds.length > 0,
   });
 
-  // Supervisores com CCAs
+  // Supervisores com CCAs (incluindo inativos para preservar dados)
   const { data: allSupervisores = [] } = useQuery({
     queryKey: ['supervisores-ccas-ocorrencias', allowedCcaIds],
     queryFn: async () => {
@@ -64,7 +63,6 @@ export const useOcorrenciasPersonnelData = () => {
           cca_id,
           supervisores!inner(id, nome, funcao, matricula, email, ativo)
         `)
-        .eq('supervisores.ativo', true)
         .in('cca_id', allowedCcaIds);
       
       console.log('Supervisores filtrados por CCA:', data);
@@ -73,7 +71,7 @@ export const useOcorrenciasPersonnelData = () => {
     enabled: allowedCcaIds.length > 0,
   });
 
-  // Encarregados com CCAs
+  // Encarregados com CCAs (incluindo inativos para preservar dados)
   const { data: allEncarregados = [] } = useQuery({
     queryKey: ['encarregados-ccas-ocorrencias', allowedCcaIds],
     queryFn: async () => {
@@ -86,7 +84,6 @@ export const useOcorrenciasPersonnelData = () => {
           cca_id,
           encarregados!inner(id, nome, funcao, matricula, email, ativo)
         `)
-        .eq('encarregados.ativo', true)
         .in('cca_id', allowedCcaIds);
       
       console.log('Encarregados filtrados por CCA:', data);
@@ -95,7 +92,7 @@ export const useOcorrenciasPersonnelData = () => {
     enabled: allowedCcaIds.length > 0,
   });
 
-  // Funcionários
+  // Funcionários (incluindo inativos para preservar dados)
   const { data: allFuncionarios = [] } = useQuery({
     queryKey: ['funcionarios-ocorrencias', allowedCcaIds],
     queryFn: async () => {
@@ -103,9 +100,9 @@ export const useOcorrenciasPersonnelData = () => {
       
       const { data } = await supabase
         .from('funcionarios')
-        .select('id, nome, funcao, matricula, cca_id')
-        .eq('ativo', true)
+        .select('id, nome, funcao, matricula, cca_id, ativo')
         .in('cca_id', allowedCcaIds)
+        .order('ativo', { ascending: false })
         .order('nome');
       return data || [];
     },

@@ -8,7 +8,7 @@ export const useFuncionarios = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Buscar funcionários
+  // Buscar funcionários (incluindo inativos para preservar dados históricos)
   const { data: funcionarios = [], isLoading: loadingFuncionarios } = useQuery({
     queryKey: ['admin-funcionarios'],
     queryFn: async () => {
@@ -27,6 +27,7 @@ export const useFuncionarios = () => {
           updated_at,
           data_admissao
         `)
+        .order('ativo', { ascending: false })
         .order('nome');
       if (error) throw error;
       return data || [];
