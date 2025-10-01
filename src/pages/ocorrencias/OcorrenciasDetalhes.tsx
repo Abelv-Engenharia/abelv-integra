@@ -3,9 +3,10 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Printer, Edit } from "lucide-react";
+import { ArrowLeft, Printer, Edit, FileText } from "lucide-react";
 import { getOcorrenciaById } from "@/services/ocorrencias/ocorrenciasService";
 import { toast } from "sonner";
+import DocumentosAnexados from "@/components/ocorrencias/DocumentosAnexados";
 
 const OcorrenciasDetalhes = () => {
   const { id } = useParams<{ id: string }>();
@@ -75,6 +76,7 @@ const OcorrenciasDetalhes = () => {
             <Printer className="mr-2 h-4 w-4" />
             Imprimir
           </Button>
+          <DocumentosAnexados ocorrencia={ocorrencia} />
           <Button onClick={handleEdit}>
             <Edit className="mr-2 h-4 w-4" />
             Editar
@@ -105,12 +107,16 @@ const OcorrenciasDetalhes = () => {
             <p className="text-sm">{ocorrencia.hora || '-'}</p>
           </div>
           <div>
-            <label className="text-sm font-medium text-muted-foreground">CCA</label>
-            <p className="text-sm">{ocorrencia.cca || '-'}</p>
+            <label className="text-sm font-medium text-muted-foreground">Cca</label>
+            <p className="text-sm">
+              {ocorrencia.cca_nome 
+                ? `${ocorrencia.cca_codigo} - ${ocorrencia.cca_nome}` 
+                : ocorrencia.cca_codigo || ocorrencia.cca || '-'}
+            </p>
           </div>
           <div>
             <label className="text-sm font-medium text-muted-foreground">Empresa</label>
-            <p className="text-sm">{ocorrencia.empresa || '-'}</p>
+            <p className="text-sm">{ocorrencia.empresa_nome || ocorrencia.empresa || '-'}</p>
           </div>
           <div>
             <label className="text-sm font-medium text-muted-foreground">Disciplina</label>
@@ -247,6 +253,57 @@ const OcorrenciasDetalhes = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Plano de Ação */}
+      {ocorrencia.acoes && ocorrencia.acoes.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Plano de Ação</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {ocorrencia.acoes.map((acao: any, index: number) => (
+                <div key={index} className="p-4 border rounded-lg space-y-3">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="md:col-span-2">
+                      <label className="text-sm font-medium text-muted-foreground">Tratativa Aplicada</label>
+                      <p className="text-sm mt-1">{acao.tratativa_aplicada || '-'}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-muted-foreground">Data de Adequação</label>
+                      <p className="text-sm">{acao.data_adequacao ? new Date(acao.data_adequacao).toLocaleDateString('pt-BR') : '-'}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-muted-foreground">Responsável</label>
+                      <p className="text-sm">{acao.responsavel_acao || '-'}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-muted-foreground">Função do Responsável</label>
+                      <p className="text-sm">{acao.funcao_responsavel || '-'}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-muted-foreground">Status</label>
+                      <p className="text-sm">
+                        <span className={`px-2 py-1 rounded-full text-xs ${
+                          acao.status?.toUpperCase() === 'CONCLUÍDO' || acao.status?.toUpperCase() === 'CONCLUIDO'
+                            ? 'bg-green-100 text-green-800'
+                            : acao.status?.toUpperCase() === 'ATRASADO'
+                            ? 'bg-red-100 text-red-800'
+                            : acao.status?.toUpperCase().includes('EXECUÇÃO') || acao.status?.toUpperCase().includes('EXECUCAO')
+                            ? 'bg-blue-100 text-blue-800'
+                            : 'bg-yellow-100 text-yellow-800'
+                        }`}>
+                          {acao.status || '-'}
+                        </span>
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Status */}
       <Card>

@@ -317,14 +317,81 @@ export const deleteOcorrencia = async (id: string) => {
 
 export const getOcorrenciaById = async (id: string) => {
   try {
-    const { data, error } = await supabase
+    const { data: ocorrencia, error } = await supabase
       .from('ocorrencias')
       .select('*')
       .eq('id', id)
       .single();
 
     if (error) throw error;
-    return data;
+    if (!ocorrencia) return null;
+
+    // Buscar dados do CCA
+    let ccaData = null;
+    if (ocorrencia.cca) {
+      const ccaId = parseInt(ocorrencia.cca);
+      if (!isNaN(ccaId)) {
+        const { data: cca } = await supabase
+          .from('ccas')
+          .select('id, codigo, nome')
+          .eq('id', ccaId)
+          .single();
+        ccaData = cca;
+      }
+    }
+
+    // Buscar dados da empresa
+    let empresaData = null;
+    if (ocorrencia.empresa) {
+      const empresaId = parseInt(ocorrencia.empresa);
+      if (!isNaN(empresaId)) {
+        const { data: empresa } = await supabase
+          .from('empresas')
+          .select('id, nome')
+          .eq('id', empresaId)
+          .single();
+        empresaData = empresa;
+      }
+    }
+
+    // Buscar nomes dos colaboradores acidentados
+    let colaboradoresEnriquecidos = [];
+    if (ocorrencia.colaboradores_acidentados && Array.isArray(ocorrencia.colaboradores_acidentados)) {
+      const colaboradorIds = ocorrencia.colaboradores_acidentados
+        .map((c: any) => c.colaborador)
+        .filter((id: string) => id);
+
+      if (colaboradorIds.length > 0) {
+        const { data: funcionarios } = await supabase
+          .from('funcionarios')
+          .select('id, nome, funcao, matricula')
+          .in('id', colaboradorIds);
+
+        colaboradoresEnriquecidos = ocorrencia.colaboradores_acidentados.map((c: any) => {
+          const funcionario = funcionarios?.find((f: any) => f.id === c.colaborador);
+          return {
+            colaborador: funcionario?.nome || c.colaborador,
+            funcao: funcionario?.funcao || c.funcao,
+            matricula: funcionario?.matricula || c.matricula,
+            colaborador_id: c.colaborador
+          };
+        });
+      }
+    }
+
+    // Converter acoes do banco para o formato do formulário
+    const acoesConvertidas = Array.isArray(ocorrencia.acoes) 
+      ? convertAcoesFromDatabase(ocorrencia.acoes) 
+      : [];
+
+    return {
+      ...ocorrencia,
+      cca_codigo: ccaData?.codigo || ocorrencia.cca,
+      cca_nome: ccaData?.nome || null,
+      empresa_nome: empresaData?.nome || ocorrencia.empresa,
+      colaboradores_acidentados: colaboradoresEnriquecidos,
+      acoes: acoesConvertidas
+    };
   } catch (error) {
     console.error('Erro ao buscar ocorrência:', error);
     throw error;
