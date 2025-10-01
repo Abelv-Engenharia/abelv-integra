@@ -112,7 +112,7 @@ export function InspecoesBarChart({ dataType }: InspecoesBarChartProps) {
         >
           <XAxis 
             dataKey={getDataKey()} 
-            angle={-45} 
+            angle={-90} 
             textAnchor="end" 
             height={120}
             interval={0}
