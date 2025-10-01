@@ -153,7 +153,7 @@ const TaxaGravidadeChart = () => {
             <LabelList 
               dataKey="mensal" 
               position="top" 
-              fontSize={10} 
+              fontSize={14} 
               formatter={(value: any) => value > 0 ? value.toFixed(2) : ''} 
             />
           </Bar>
