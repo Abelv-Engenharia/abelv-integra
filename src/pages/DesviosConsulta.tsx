@@ -1,17 +1,9 @@
-
 import { useState, useEffect } from "react";
 import { ArrowLeft, Download, Filter, Printer, Search } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { exportDesviosToExcel } from "@/services/desvios/exportService";
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardFooter, 
-  CardHeader, 
-  CardTitle 
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
@@ -21,11 +13,14 @@ import { useUserCCAs } from "@/hooks/useUserCCAs";
 
 // Mock data
 const currentYear = new Date().getFullYear();
-
 const DesviosConsulta = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
-  const { data: userCCAs = [] } = useUserCCAs();
+  const {
+    toast
+  } = useToast();
+  const {
+    data: userCCAs = []
+  } = useUserCCAs();
   const [searchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState("");
   const [filters, setFilters] = useState({
@@ -41,36 +36,58 @@ const DesviosConsulta = () => {
     tipo: "",
     evento: "",
     processo: "",
-    baseLegal: "",
+    baseLegal: ""
   });
-  
+
   // Estados para dados dinâmicos da base de dados
-  const [ccas, setCcas] = useState<Array<{codigo: string, nome: string, id: number}>>([]);
-  const [empresas, setEmpresas] = useState<Array<{nome: string}>>([]);
-  const [riskOptions, setRiskOptions] = useState<Array<{classificacao_risco: string}>>([]);
-  const [disciplinas, setDisciplinas] = useState<Array<{nome: string}>>([]);
-  const [tiposRegistro, setTiposRegistro] = useState<Array<{nome: string}>>([]);
-  const [eventosIdentificados, setEventosIdentificados] = useState<Array<{nome: string}>>([]);
-  const [processos, setProcessos] = useState<Array<{nome: string}>>([]);
-  const [basesLegais, setBasesLegais] = useState<Array<{nome: string}>>([]);
+  const [ccas, setCcas] = useState<Array<{
+    codigo: string;
+    nome: string;
+    id: number;
+  }>>([]);
+  const [empresas, setEmpresas] = useState<Array<{
+    nome: string;
+  }>>([]);
+  const [riskOptions, setRiskOptions] = useState<Array<{
+    classificacao_risco: string;
+  }>>([]);
+  const [disciplinas, setDisciplinas] = useState<Array<{
+    nome: string;
+  }>>([]);
+  const [tiposRegistro, setTiposRegistro] = useState<Array<{
+    nome: string;
+  }>>([]);
+  const [eventosIdentificados, setEventosIdentificados] = useState<Array<{
+    nome: string;
+  }>>([]);
+  const [processos, setProcessos] = useState<Array<{
+    nome: string;
+  }>>([]);
+  const [basesLegais, setBasesLegais] = useState<Array<{
+    nome: string;
+  }>>([]);
 
   // Opções fixas de status padronizadas
-  const statusOptions = [
-    { status: "CONCLUÍDO" },
-    { status: "EM ANDAMENTO" },
-    { status: "PENDENTE" }
-  ];
+  const statusOptions = [{
+    status: "CONCLUÍDO"
+  }, {
+    status: "EM ANDAMENTO"
+  }, {
+    status: "PENDENTE"
+  }];
 
   // Aplicar filtros da URL quando a página carregar
   useEffect(() => {
     const applyUrlFilters = () => {
-      const newFilters = { ...filters };
-      
+      const newFilters = {
+        ...filters
+      };
+
       // Aplicar filtros básicos da URL
       if (searchParams.get("year")) newFilters.year = searchParams.get("year")!;
       if (searchParams.get("month")) newFilters.month = searchParams.get("month")!;
       if (searchParams.get("cca")) newFilters.cca = searchParams.get("cca")!;
-      
+
       // Aplicar filtros específicos dos gráficos
       if (searchParams.get("disciplina")) newFilters.disciplina = searchParams.get("disciplina")!;
       if (searchParams.get("empresa")) newFilters.empresa = searchParams.get("empresa")!;
@@ -79,10 +96,8 @@ const DesviosConsulta = () => {
       if (searchParams.get("evento")) newFilters.evento = searchParams.get("evento")!;
       if (searchParams.get("processo")) newFilters.processo = searchParams.get("processo")!;
       if (searchParams.get("baseLegal")) newFilters.baseLegal = searchParams.get("baseLegal")!;
-      
       setFilters(newFilters);
     };
-    
     applyUrlFilters();
   }, [searchParams]);
 
@@ -90,11 +105,10 @@ const DesviosConsulta = () => {
   useEffect(() => {
     const loadFilterData = async () => {
       if (userCCAs.length === 0) return;
-      
       try {
         // Buscar apenas CCAs que o usuário tem acesso
         const allowedCcaIds = userCCAs.map(cca => cca.id);
-        
+
         // Usar os CCAs do usuário diretamente
         const userCcasFormatted = userCCAs.map(cca => ({
           codigo: cca.codigo,
@@ -102,65 +116,55 @@ const DesviosConsulta = () => {
           id: cca.id
         }));
         setCcas(userCcasFormatted.sort((a, b) => a.codigo.localeCompare(b.codigo)));
-        
+
         // Buscar empresas únicas apenas de desvios dos CCAs permitidos
-        const { data: empresasData } = await supabase
-          .from('desvios_completos')
-          .select(`
+        const {
+          data: empresasData
+        } = await supabase.from('desvios_completos').select(`
             empresas!inner(nome)
-          `)
-          .in('cca_id', allowedCcaIds)
-          .not('empresas.nome', 'is', null);
-        
+          `).in('cca_id', allowedCcaIds).not('empresas.nome', 'is', null);
+
         // Buscar classificações de risco únicas apenas de desvios dos CCAs permitidos
-        const { data: riskData } = await supabase
-          .from('desvios_completos')
-          .select('classificacao_risco')
-          .in('cca_id', allowedCcaIds)
-          .not('classificacao_risco', 'is', null);
+        const {
+          data: riskData
+        } = await supabase.from('desvios_completos').select('classificacao_risco').in('cca_id', allowedCcaIds).not('classificacao_risco', 'is', null);
 
         // Buscar disciplinas ativas
-        const { data: disciplinasData } = await supabase
-          .from('disciplinas')
-          .select('nome')
-          .eq('ativo', true);
+        const {
+          data: disciplinasData
+        } = await supabase.from('disciplinas').select('nome').eq('ativo', true);
 
         // Buscar tipos de registro ativos
-        const { data: tiposData } = await supabase
-          .from('tipos_registro')
-          .select('nome')
-          .eq('ativo', true);
+        const {
+          data: tiposData
+        } = await supabase.from('tipos_registro').select('nome').eq('ativo', true);
 
         // Buscar eventos identificados ativos
-        const { data: eventosData } = await supabase
-          .from('eventos_identificados')
-          .select('nome')
-          .eq('ativo', true);
+        const {
+          data: eventosData
+        } = await supabase.from('eventos_identificados').select('nome').eq('ativo', true);
 
         // Buscar processos ativos
-        const { data: processosData } = await supabase
-          .from('processos')
-          .select('nome')
-          .eq('ativo', true);
+        const {
+          data: processosData
+        } = await supabase.from('processos').select('nome').eq('ativo', true);
 
         // Buscar bases legais ativas
-        const { data: basesData } = await supabase
-          .from('base_legal_opcoes')
-          .select('nome')
-          .eq('ativo', true);
+        const {
+          data: basesData
+        } = await supabase.from('base_legal_opcoes').select('nome').eq('ativo', true);
 
         // Processar dados únicos
         if (empresasData) {
-          const uniqueEmpresas = Array.from(new Set(
-            empresasData.map((item: any) => item.empresas.nome)
-          )).map(nome => ({ nome }));
+          const uniqueEmpresas = Array.from(new Set(empresasData.map((item: any) => item.empresas.nome))).map(nome => ({
+            nome
+          }));
           setEmpresas(uniqueEmpresas.sort((a, b) => a.nome.localeCompare(b.nome)));
         }
-
         if (riskData) {
-          const uniqueRisk = Array.from(new Set(
-            riskData.map((item: any) => item.classificacao_risco)
-          )).map(classificacao_risco => ({ classificacao_risco }));
+          const uniqueRisk = Array.from(new Set(riskData.map((item: any) => item.classificacao_risco))).map(classificacao_risco => ({
+            classificacao_risco
+          }));
           setRiskOptions(uniqueRisk.sort((a, b) => a.classificacao_risco.localeCompare(b.classificacao_risco)));
         }
 
@@ -192,17 +196,14 @@ const DesviosConsulta = () => {
         console.error('Erro ao carregar dados dos filtros:', error);
       }
     };
-
     loadFilterData();
   }, [userCCAs]);
-
   const handleFilterChange = (field: string, value: string) => {
     setFilters({
       ...filters,
-      [field]: value,
+      [field]: value
     });
   };
-
   const clearFilters = () => {
     const clearedFilters = {
       year: currentYear.toString(),
@@ -217,23 +218,24 @@ const DesviosConsulta = () => {
       tipo: "",
       evento: "",
       processo: "",
-      baseLegal: "",
+      baseLegal: ""
     };
     setFilters(clearedFilters);
     setSearchTerm("");
     // Limpar também os parâmetros da URL
-    navigate("/desvios/consulta", { replace: true });
+    navigate("/desvios/consulta", {
+      replace: true
+    });
     toast({
       title: "Filtros limpos",
-      description: "Todos os filtros foram removidos.",
+      description: "Todos os filtros foram removidos."
     });
   };
-
   const handleExport = async () => {
     try {
       // Preparar filtros para exportação
       const exportFilters: any = {};
-      
+
       // Aplicar filtros de data se selecionados
       if (filters.year) {
         if (filters.month && filters.month !== "todos") {
@@ -249,7 +251,7 @@ const DesviosConsulta = () => {
           exportFilters.dataFinal = `${parseInt(filters.year) + 1}-01-01`;
         }
       }
-      
+
       // Aplicar filtro de CCA se selecionado
       if (filters.cca && filters.cca !== "todos") {
         const selectedCca = ccas.find(c => c.codigo === filters.cca);
@@ -257,11 +259,11 @@ const DesviosConsulta = () => {
           exportFilters.ccaId = selectedCca.id.toString();
         }
       }
-      
+
       // Aplicar restrições de CCAs do usuário
       const allowedCcaIds = userCCAs.map(cca => cca.id);
       exportFilters.allowedCcaIds = allowedCcaIds;
-      
+
       // Aplicar outros filtros
       if (filters.company && filters.company !== "todas") {
         exportFilters.empresa = filters.company;
@@ -290,31 +292,23 @@ const DesviosConsulta = () => {
       if (searchTerm) {
         exportFilters.searchTerm = searchTerm;
       }
-      
       await exportDesviosToExcel(exportFilters);
       toast({
         title: "Exportação concluída",
-        description: "Os dados foram exportados para Excel com sucesso.",
+        description: "Os dados foram exportados para Excel com sucesso."
       });
     } catch (error) {
       console.error('Erro na exportação:', error);
       toast({
         title: "Erro na exportação",
         description: "Não foi possível exportar os dados. Tente novamente.",
-        variant: "destructive",
+        variant: "destructive"
       });
     }
   };
-
-  return (
-    <div className="space-y-6">
+  return <div className="space-y-6">
       <div>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="mb-2"
-          onClick={() => navigate("/desvios/dashboard")}
-        >
+        <Button variant="ghost" size="sm" className="mb-2" onClick={() => navigate("/desvios/dashboard")}>
           <ArrowLeft className="mr-2 h-4 w-4" />
           Voltar para Dashboard
         </Button>
@@ -328,23 +322,11 @@ const DesviosConsulta = () => {
       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
         <div className="relative w-full sm:w-80">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            type="search"
-            placeholder="Buscar desvio..."
-            className="pl-8"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
+          <Input type="search" placeholder="Buscar desvio..." className="pl-8" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
         </div>
         <div className="flex items-center gap-2 ml-auto">
-          <Button variant="outline" onClick={() => toast({ title: "Relatório gerado", description: "O relatório foi gerado com sucesso." })}>
-            <Printer className="mr-2 h-4 w-4" />
-            Imprimir
-          </Button>
-          <Button variant="outline" onClick={handleExport}>
-            <Download className="mr-2 h-4 w-4" />
-            Exportar
-          </Button>
+          
+          
         </div>
       </div>
 
@@ -362,10 +344,7 @@ const DesviosConsulta = () => {
               <label htmlFor="filter-year" className="text-sm font-medium">
                 Ano
               </label>
-              <Select
-                value={filters.year}
-                onValueChange={(value) => handleFilterChange("year", value)}
-              >
+              <Select value={filters.year} onValueChange={value => handleFilterChange("year", value)}>
                 <SelectTrigger id="filter-year">
                   <SelectValue placeholder="Selecione o ano" />
                 </SelectTrigger>
@@ -381,10 +360,7 @@ const DesviosConsulta = () => {
               <label htmlFor="filter-month" className="text-sm font-medium">
                 Mês
               </label>
-              <Select
-                value={filters.month}
-                onValueChange={(value) => handleFilterChange("month", value)}
-              >
+              <Select value={filters.month} onValueChange={value => handleFilterChange("month", value)}>
                 <SelectTrigger id="filter-month">
                   <SelectValue placeholder="Todos os meses" />
                 </SelectTrigger>
@@ -410,20 +386,15 @@ const DesviosConsulta = () => {
               <label htmlFor="filter-cca" className="text-sm font-medium">
                 CCA
               </label>
-              <Select
-                value={filters.cca}
-                onValueChange={(value) => handleFilterChange("cca", value)}
-              >
+              <Select value={filters.cca} onValueChange={value => handleFilterChange("cca", value)}>
                 <SelectTrigger id="filter-cca">
                   <SelectValue placeholder="Todos os CCAs" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="todos">Todos</SelectItem>
-                  {ccas.map((cca) => (
-                    <SelectItem key={cca.id} value={cca.codigo}>
+                  {ccas.map(cca => <SelectItem key={cca.id} value={cca.codigo}>
                       {cca.codigo} - {cca.nome}
-                    </SelectItem>
-                  ))}
+                    </SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
@@ -432,20 +403,15 @@ const DesviosConsulta = () => {
               <label htmlFor="filter-company" className="text-sm font-medium">
                 Empresa
               </label>
-              <Select
-                value={filters.company}
-                onValueChange={(value) => handleFilterChange("company", value)}
-              >
+              <Select value={filters.company} onValueChange={value => handleFilterChange("company", value)}>
                 <SelectTrigger id="filter-company">
                   <SelectValue placeholder="Todas as empresas" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="todas">Todas</SelectItem>
-                  {empresas.map((empresa) => (
-                    <SelectItem key={empresa.nome} value={empresa.nome}>
+                  {empresas.map(empresa => <SelectItem key={empresa.nome} value={empresa.nome}>
                       {empresa.nome}
-                    </SelectItem>
-                  ))}
+                    </SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
@@ -454,20 +420,15 @@ const DesviosConsulta = () => {
               <label htmlFor="filter-status" className="text-sm font-medium">
                 Status da Ação
               </label>
-              <Select
-                value={filters.status}
-                onValueChange={(value) => handleFilterChange("status", value)}
-              >
+              <Select value={filters.status} onValueChange={value => handleFilterChange("status", value)}>
                 <SelectTrigger id="filter-status">
                   <SelectValue placeholder="Todos os status" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="todos">Todos</SelectItem>
-                  {statusOptions.map((status) => (
-                    <SelectItem key={status.status} value={status.status}>
+                  {statusOptions.map(status => <SelectItem key={status.status} value={status.status}>
                       {status.status}
-                    </SelectItem>
-                  ))}
+                    </SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
@@ -476,20 +437,15 @@ const DesviosConsulta = () => {
               <label htmlFor="filter-risk" className="text-sm font-medium">
                 Nível de Risco
               </label>
-              <Select
-                value={filters.risk}
-                onValueChange={(value) => handleFilterChange("risk", value)}
-              >
+              <Select value={filters.risk} onValueChange={value => handleFilterChange("risk", value)}>
                 <SelectTrigger id="filter-risk">
                   <SelectValue placeholder="Todos os níveis" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="todos">Todos</SelectItem>
-                  {riskOptions.map((risk) => (
-                    <SelectItem key={risk.classificacao_risco} value={risk.classificacao_risco}>
+                  {riskOptions.map(risk => <SelectItem key={risk.classificacao_risco} value={risk.classificacao_risco}>
                       {risk.classificacao_risco}
-                    </SelectItem>
-                  ))}
+                    </SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
@@ -498,20 +454,15 @@ const DesviosConsulta = () => {
               <label htmlFor="filter-disciplina" className="text-sm font-medium">
                 Disciplina
               </label>
-              <Select
-                value={filters.disciplina}
-                onValueChange={(value) => handleFilterChange("disciplina", value)}
-              >
+              <Select value={filters.disciplina} onValueChange={value => handleFilterChange("disciplina", value)}>
                 <SelectTrigger id="filter-disciplina">
                   <SelectValue placeholder="Todas as disciplinas" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="todas">Todas</SelectItem>
-                  {disciplinas.map((disciplina) => (
-                    <SelectItem key={disciplina.nome} value={disciplina.nome}>
+                  {disciplinas.map(disciplina => <SelectItem key={disciplina.nome} value={disciplina.nome}>
                       {disciplina.nome}
-                    </SelectItem>
-                  ))}
+                    </SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
@@ -520,20 +471,15 @@ const DesviosConsulta = () => {
               <label htmlFor="filter-tipo" className="text-sm font-medium">
                 Tipo de Registro
               </label>
-              <Select
-                value={filters.tipo}
-                onValueChange={(value) => handleFilterChange("tipo", value)}
-              >
+              <Select value={filters.tipo} onValueChange={value => handleFilterChange("tipo", value)}>
                 <SelectTrigger id="filter-tipo">
                   <SelectValue placeholder="Todos os tipos" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="todos">Todos</SelectItem>
-                  {tiposRegistro.map((tipo) => (
-                    <SelectItem key={tipo.nome} value={tipo.nome}>
+                  {tiposRegistro.map(tipo => <SelectItem key={tipo.nome} value={tipo.nome}>
                       {tipo.nome}
-                    </SelectItem>
-                  ))}
+                    </SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
@@ -542,20 +488,15 @@ const DesviosConsulta = () => {
               <label htmlFor="filter-evento" className="text-sm font-medium">
                 Evento Identificado
               </label>
-              <Select
-                value={filters.evento}
-                onValueChange={(value) => handleFilterChange("evento", value)}
-              >
+              <Select value={filters.evento} onValueChange={value => handleFilterChange("evento", value)}>
                 <SelectTrigger id="filter-evento">
                   <SelectValue placeholder="Todos os eventos" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="todos">Todos</SelectItem>
-                  {eventosIdentificados.map((evento) => (
-                    <SelectItem key={evento.nome} value={evento.nome}>
+                  {eventosIdentificados.map(evento => <SelectItem key={evento.nome} value={evento.nome}>
                       {evento.nome}
-                    </SelectItem>
-                  ))}
+                    </SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
@@ -564,20 +505,15 @@ const DesviosConsulta = () => {
               <label htmlFor="filter-processo" className="text-sm font-medium">
                 Processo
               </label>
-              <Select
-                value={filters.processo}
-                onValueChange={(value) => handleFilterChange("processo", value)}
-              >
+              <Select value={filters.processo} onValueChange={value => handleFilterChange("processo", value)}>
                 <SelectTrigger id="filter-processo">
                   <SelectValue placeholder="Todos os processos" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="todos">Todos</SelectItem>
-                  {processos.map((processo) => (
-                    <SelectItem key={processo.nome} value={processo.nome}>
+                  {processos.map(processo => <SelectItem key={processo.nome} value={processo.nome}>
                       {processo.nome}
-                    </SelectItem>
-                  ))}
+                    </SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
@@ -586,20 +522,15 @@ const DesviosConsulta = () => {
               <label htmlFor="filter-base-legal" className="text-sm font-medium">
                 Base Legal
               </label>
-              <Select
-                value={filters.baseLegal}
-                onValueChange={(value) => handleFilterChange("baseLegal", value)}
-              >
+              <Select value={filters.baseLegal} onValueChange={value => handleFilterChange("baseLegal", value)}>
                 <SelectTrigger id="filter-base-legal">
                   <SelectValue placeholder="Todas as bases legais" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="todas">Todas</SelectItem>
-                  {basesLegais.map((base) => (
-                    <SelectItem key={base.nome} value={base.nome}>
+                  {basesLegais.map(base => <SelectItem key={base.nome} value={base.nome}>
                       {base.nome}
-                    </SelectItem>
-                  ))}
+                    </SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
@@ -614,8 +545,6 @@ const DesviosConsulta = () => {
 
       {/* Deviations Table */}
       <DesviosTable filters={filters} searchTerm={searchTerm} />
-    </div>
-  );
+    </div>;
 };
-
 export default DesviosConsulta;
