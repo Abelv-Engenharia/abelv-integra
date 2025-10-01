@@ -98,7 +98,7 @@ const TaxaFrequenciaAcSpdChart = () => {
         className="absolute top-2 right-2 z-10"
       />
       
-      <ResponsiveContainer width="100%" height={300}>
+      <ResponsiveContainer width="100%" height={400}>
         <ComposedChart data={data} margin={{ top: 20, right: 80, left: 20, bottom: 60 }}>
           <XAxis 
             dataKey="mes" 
