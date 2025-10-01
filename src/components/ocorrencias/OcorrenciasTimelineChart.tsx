@@ -222,7 +222,7 @@ const OcorrenciasTimelineChart = () => {
                 dataKey={classificacao} 
                 position="top" 
                 fill="#000" 
-                fontSize={12} 
+                fontSize={14} 
                 formatter={(value: any) => value > 0 ? value : ''} 
               />
             </Bar>
