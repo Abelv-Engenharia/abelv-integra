@@ -145,15 +145,25 @@ const OcorrenciasTimelineChart = () => {
     );
   }
 
-  // Obter todas as classificações para criar as barras
-  const classificacoes = data.length > 0 ? 
-    Object.keys(data[0]).filter(key => key !== 'name' && key !== 'nomeCompleto') : [];
+  // Ordem específica das classificações
+  const ordemClassificacoes = ['AC CPD', 'AC SPD', 'INC DM', 'INC SDM', 'INC AMB'];
+  
+  // Cores específicas para cada tipo
+  const coresEspecificas: Record<string, string> = {
+    'AC CPD': '#E53935',    // Vermelho
+    'AC SPD': '#FF6F00',    // Laranja
+    'INC DM': '#1976D2',    // Azul
+    'INC SDM': '#757575',   // Cinza
+    'INC AMB': '#388E3C'    // Verde
+  };
 
-  // Cores para as barras
-  const cores = [
-    '#4285F4', '#43A047', '#E53935', '#FFA000', '#757575', 
-    '#9C27B0', '#FF5722', '#607D8B', '#795548', '#009688'
-  ];
+  // Obter todas as classificações para criar as barras
+  const todasClassificacoes = data.length > 0 ? 
+    Object.keys(data[0]).filter(key => key !== 'name' && key !== 'nomeCompleto') : [];
+  
+  // Ordenar classificações de acordo com a ordem especificada
+  const classificacoes = ordemClassificacoes.filter(c => todasClassificacoes.includes(c))
+    .concat(todasClassificacoes.filter(c => !ordemClassificacoes.includes(c)));
 
   return (
     <div className="h-[300px]">
@@ -163,18 +173,18 @@ const OcorrenciasTimelineChart = () => {
           height={300}
           data={data}
           margin={{
-            top: 20,
+            top: 40,
             right: 50,
             left: 20,
-            bottom: 60,
+            bottom: 80,
           }}
         >
           <XAxis 
             dataKey="name" 
             tick={{ fontSize: 16 }}
-            angle={-45}
+            angle={-90}
             textAnchor="end"
-            height={60}
+            height={80}
             interval={0}
           />
           <YAxis />
@@ -201,17 +211,17 @@ const OcorrenciasTimelineChart = () => {
               top: '0px'
             }}
           />
-          {classificacoes.map((classificacao, index) => (
+          {classificacoes.map((classificacao) => (
             <Bar 
               key={classificacao}
               dataKey={classificacao} 
               name={classificacao}
-              fill={cores[index % cores.length]}
+              fill={coresEspecificas[classificacao] || '#757575'}
             >
               <LabelList 
                 dataKey={classificacao} 
-                position="inside" 
-                fill="white" 
+                position="top" 
+                fill="#000" 
                 fontSize={12} 
                 formatter={(value: any) => value > 0 ? value : ''} 
               />
