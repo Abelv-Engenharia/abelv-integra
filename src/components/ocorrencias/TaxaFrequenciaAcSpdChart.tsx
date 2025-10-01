@@ -151,14 +151,15 @@ const TaxaFrequenciaAcSpdChart = () => {
             name="Taxa Acumulada"
           />
           {meta > 0 && (
-            <ReferenceLine 
-              y={meta} 
-              stroke="#059669" 
+            <ReferenceLine
+              y={meta}
+              stroke="#6B7280"
               strokeDasharray="5 5"
-              label={{ 
-                value: `Meta: ${meta.toFixed(2)}`, 
-                position: "right", 
-                style: { fontSize: '16px' },
+              strokeWidth={2}
+              label={{
+                value: `Meta: ${meta.toFixed(2)}`,
+                position: "right",
+                style: { fontSize: '16px', fontWeight: 'bold', fill: '#6B7280' },
                 offset: 10 
               }}
             />
