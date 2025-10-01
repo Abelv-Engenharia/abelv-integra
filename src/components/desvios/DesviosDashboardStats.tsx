@@ -26,26 +26,18 @@ const DesviosDashboardStats = ({ loading, stats }: DesviosDashboardStatsProps) =
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
       <div className="relative">
+        <Badge 
+          className={`absolute top-2 right-2 z-10 text-xs font-semibold ${
+            stats.indiceDesviosStatus === 'positivo' 
+              ? "bg-green-500 hover:bg-green-600 text-white" 
+              : "bg-red-500 hover:bg-red-600 text-white"
+          }`}
+        >
+          {stats.indiceDesviosStatus === 'positivo' ? 'Positivo' : 'Negativo'}
+        </Badge>
         <StatCard
           title="Índice de Desvios"
-          value={
-            loading ? (
-              "..."
-            ) : (
-              <div className="flex items-center gap-2">
-                <span>{stats.indiceDesvios.toFixed(2)}</span>
-                <Badge 
-                  className={`text-xs font-semibold ${
-                    stats.indiceDesviosStatus === 'positivo' 
-                      ? "bg-green-500 hover:bg-green-600 text-white" 
-                      : "bg-red-500 hover:bg-red-600 text-white"
-                  }`}
-                >
-                  {stats.indiceDesviosStatus === 'positivo' ? 'Positivo' : 'Negativo'}
-                </Badge>
-              </div>
-            )
-          }
+          value={loading ? "..." : stats.indiceDesvios.toFixed(2)}
           icon={stats.indiceDesviosStatus === 'positivo' ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />}
           description="Desvios por funcionário ativo"
           trend={stats.indiceDesviosStatus === 'positivo' ? 'up' : 'down'}
