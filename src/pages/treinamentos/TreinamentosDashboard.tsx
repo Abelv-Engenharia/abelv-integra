@@ -47,7 +47,6 @@ const TreinamentosDashboard = () => {
 
   return (
     <div className="space-y-6">
-      <TreinamentosDashboardFilters year={year} setYear={setYear} month={month} setMonth={setMonth} ccaId={ccaId} setCcaId={setCcaId} />
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Dashboard de Treinamentos</h1>
@@ -70,6 +69,7 @@ const TreinamentosDashboard = () => {
           </Button>
         </div>
       </div>
+      <TreinamentosDashboardFilters year={year} setYear={setYear} month={month} setMonth={setMonth} ccaId={ccaId} setCcaId={setCcaId} />
 
       <TreinamentosSummaryCards filters={filters} />
 
