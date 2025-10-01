@@ -98,12 +98,12 @@ const DesviosByDisciplineChart = () => {
                 <XAxis
                   dataKey="name"
                   tickFormatter={tickFormatter}
-                  angle={-45}
+                  angle={-90}
                   textAnchor="end"
                   height={64}
                   interval={0}
                 />
-                <YAxis allowDecimals={false} />
+                <YAxis allowDecimals={false} hide={true} />
                 <ChartTooltip
                   content={
                     <ChartTooltipContent

@@ -104,12 +104,12 @@ const DesviosByBaseLegalChart = () => {
                 <XAxis
                   dataKey="name"
                   tickFormatter={tickFormatter}
-                  angle={-45}
+                  angle={-90}
                   textAnchor="end"
                   height={64}
                   interval={0}
                 />
-                <YAxis allowDecimals={false} />
+                <YAxis allowDecimals={false} hide={true} />
                 <ChartTooltip
                   // Usa o Tooltip pronto; se preferir custom, pode manter o seu JSX
                   content={
