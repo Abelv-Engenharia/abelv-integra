@@ -1,5 +1,7 @@
 
 export interface DashboardStats {
+  indiceDesvios: number;
+  indiceDesviosStatus: 'positivo' | 'negativo';
   totalDesvios: number;
   acoesCompletas: number;
   acoesAndamento: number;

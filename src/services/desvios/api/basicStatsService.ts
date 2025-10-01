@@ -9,6 +9,7 @@ import {
   countAcoesPendentes, 
   countTotalDesvios 
 } from "./countStatsService";
+import { calculateIndiceDesvios } from "./indiceDesviosService";
 
 export const fetchDashboardStats = async (filters?: FilterParams): Promise<DashboardStats> => {
   try {
@@ -54,7 +55,12 @@ export const fetchDashboardStats = async (filters?: FilterParams): Promise<Dashb
     // Calcular nível de risco médio com dados de risco
     const riskLevel = calculateRiskLevel(riskData?.map(d => ({ classificacao_risco: d.classificacao_risco })) || []);
 
+    // Calcular índice de desvios
+    const { indiceDesvios, indiceDesviosStatus } = await calculateIndiceDesvios(totalDesvios, filters);
+
     const stats = {
+      indiceDesvios,
+      indiceDesviosStatus,
       totalDesvios,
       acoesCompletas,
       acoesAndamento,
@@ -68,6 +74,8 @@ export const fetchDashboardStats = async (filters?: FilterParams): Promise<Dashb
   } catch (error) {
     console.error('Erro ao buscar estatísticas do dashboard:', error);
     return {
+      indiceDesvios: 0,
+      indiceDesviosStatus: 'negativo',
       totalDesvios: 0,
       acoesCompletas: 0,
       acoesAndamento: 0,

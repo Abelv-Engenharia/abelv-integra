@@ -1,10 +1,12 @@
 
-import { CheckCircle, Clock, AlertTriangle, Activity } from "lucide-react";
+import { CheckCircle, Clock, AlertTriangle, Activity, TrendingUp, TrendingDown } from "lucide-react";
 import StatCard from "@/components/dashboard/StatCard";
 
 interface DesviosDashboardStatsProps {
   loading: boolean;
   stats: {
+    indiceDesvios: number;
+    indiceDesviosStatus: 'positivo' | 'negativo';
     totalDesvios: number;
     acoesCompletas: number;
     acoesAndamento: number;
@@ -21,7 +23,17 @@ const DesviosDashboardStats = ({ loading, stats }: DesviosDashboardStatsProps) =
   console.log('Stats recebidos:', JSON.stringify(stats, null, 2));
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+      <StatCard
+        title="Índice de Desvios"
+        value={loading ? "..." : stats.indiceDesvios.toFixed(2)}
+        icon={stats.indiceDesviosStatus === 'positivo' ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />}
+        description="Desvios por funcionário ativo"
+        trend={stats.indiceDesviosStatus === 'positivo' ? 'up' : 'down'}
+        trendValue={`${stats.indiceDesviosStatus === 'positivo' ? '≥' : '<'} 1.0`}
+        className={`border-l-4 ${stats.indiceDesviosStatus === 'positivo' ? 'border-green-500' : 'border-red-500'}`}
+        loading={loading}
+      />
       <StatCard
         title="Total de Desvios"
         value={loading ? "..." : stats.totalDesvios.toString()}

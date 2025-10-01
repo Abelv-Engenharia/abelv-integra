@@ -2215,6 +2215,47 @@ export type Database = {
           },
         ]
       }
+      funcionarios_mensal_snapshot: {
+        Row: {
+          ano: number
+          cca_id: number | null
+          created_at: string | null
+          funcionarios_ativos: number
+          id: string
+          mes: number
+          total_funcionarios: number
+          updated_at: string | null
+        }
+        Insert: {
+          ano: number
+          cca_id?: number | null
+          created_at?: string | null
+          funcionarios_ativos?: number
+          id?: string
+          mes: number
+          total_funcionarios?: number
+          updated_at?: string | null
+        }
+        Update: {
+          ano?: number
+          cca_id?: number | null
+          created_at?: string | null
+          funcionarios_ativos?: number
+          id?: string
+          mes?: number
+          total_funcionarios?: number
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "funcionarios_mensal_snapshot_cca_id_fkey"
+            columns: ["cca_id"]
+            isOneToOne: false
+            referencedRelation: "ccas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       funcoes: {
         Row: {
           ativo: boolean | null

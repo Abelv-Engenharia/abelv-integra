@@ -36,6 +36,8 @@ const DesviosDashboard = () => {
   }, [location.state]);
 
   const [dashboardStats, setDashboardStats] = useState<DashboardStats>({
+    indiceDesvios: 0,
+    indiceDesviosStatus: 'negativo',
     totalDesvios: 0,
     acoesCompletas: 0,
     acoesAndamento: 0,
@@ -53,6 +55,8 @@ const DesviosDashboard = () => {
     try {
       if (userCCAs.length === 0) {
         setDashboardStats({
+          indiceDesvios: 0,
+          indiceDesviosStatus: 'negativo',
           totalDesvios: 0,
           acoesCompletas: 0,
           acoesAndamento: 0,

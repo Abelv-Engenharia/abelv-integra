@@ -41,6 +41,8 @@ const RelatoriosDesvios = () => {
   
   // Stats state
   const [dashboardStats, setDashboardStats] = useState<DashboardStats>({
+    indiceDesvios: 0,
+    indiceDesviosStatus: 'negativo',
     totalDesvios: 0,
     acoesCompletas: 0,
     acoesAndamento: 0,
@@ -60,6 +62,8 @@ const RelatoriosDesvios = () => {
       
       if (userCCAs.length === 0) {
         setDashboardStats({
+          indiceDesvios: 0,
+          indiceDesviosStatus: 'negativo',
           totalDesvios: 0,
           acoesCompletas: 0,
           acoesAndamento: 0,
