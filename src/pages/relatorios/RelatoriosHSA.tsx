@@ -565,13 +565,12 @@ const RelatoriosHSA = () => {
                           data={respData}
                           margin={{ top: 20, right: 30, left: 20, bottom: 160 }}
                           >
-                            <CartesianGrid strokeDasharray="3 3" />
                             
                              <XAxis
                                type="category"
                                dataKey="name"
                                interval={0}
-                               angle={-45}
+                               angle={-90}
                                textAnchor="end"
                                height={140}
                                tick={{
