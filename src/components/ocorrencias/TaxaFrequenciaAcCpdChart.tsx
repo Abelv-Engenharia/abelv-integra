@@ -144,7 +144,7 @@ const TaxaFrequenciaAcCpdChart = () => {
               label={{
                 value: `Meta: ${meta.toFixed(2)}`,
                 position: "right",
-                style: { fontSize: '16px', fill: '#6B7280' },
+                style: { fontSize: '16px', fontWeight: 'bold', fill: '#6B7280' },
                 offset: 10
               }}
             />
