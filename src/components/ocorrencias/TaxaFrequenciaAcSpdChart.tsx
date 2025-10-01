@@ -99,7 +99,7 @@ const TaxaFrequenciaAcSpdChart = () => {
       />
       
       <ResponsiveContainer width="100%" height={400}>
-        <ComposedChart data={data} margin={{ top: 20, right: 80, left: 20, bottom: 60 }}>
+        <ComposedChart data={data} margin={{ top: 20, right: 130, left: 20, bottom: 60 }}>
           <XAxis 
             dataKey="mes" 
             tick={{ fontSize: 14 }}
