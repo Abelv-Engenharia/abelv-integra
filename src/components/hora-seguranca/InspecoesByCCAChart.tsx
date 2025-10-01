@@ -69,7 +69,7 @@ export const InspecoesByCCAChart = ({ filters }: InspecoesByCCAChartProps) => {
         >
           <XAxis 
             dataKey="ccaCode"
-            angle={-45}
+            angle={-90}
             textAnchor="end"
             height={80}
             interval={0}

@@ -271,7 +271,7 @@ const HoraSegurancaDashboard = () => {
                     }}>
                           
                           
-                          <XAxis type="category" dataKey="name" interval={0} angle={-45} textAnchor="end" height={140} tick={{
+                          <XAxis type="category" dataKey="name" interval={0} angle={-90} textAnchor="end" height={140} tick={{
                         fontSize: 12
                       }} />
                       
