@@ -5,7 +5,7 @@ import { ReactNode } from "react";
 
 interface StatCardProps {
   title: string;
-  value: string | number;
+  value: string | number | ReactNode;
   icon: ReactNode;
   description?: string;
   trend?: "up" | "down" | "neutral";

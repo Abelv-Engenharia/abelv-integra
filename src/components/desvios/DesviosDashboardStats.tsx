@@ -1,6 +1,7 @@
 
 import { CheckCircle, Clock, AlertTriangle, Activity, TrendingUp, TrendingDown } from "lucide-react";
 import StatCard from "@/components/dashboard/StatCard";
+import { Badge } from "@/components/ui/badge";
 
 interface DesviosDashboardStatsProps {
   loading: boolean;
@@ -24,16 +25,35 @@ const DesviosDashboardStats = ({ loading, stats }: DesviosDashboardStatsProps) =
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
-      <StatCard
-        title="Índice de Desvios"
-        value={loading ? "..." : stats.indiceDesvios.toFixed(2)}
-        icon={stats.indiceDesviosStatus === 'positivo' ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />}
-        description="Desvios por funcionário ativo"
-        trend={stats.indiceDesviosStatus === 'positivo' ? 'up' : 'down'}
-        trendValue={`${stats.indiceDesviosStatus === 'positivo' ? '≥' : '<'} 1.0`}
-        className={`border-l-4 ${stats.indiceDesviosStatus === 'positivo' ? 'border-green-500' : 'border-red-500'}`}
-        loading={loading}
-      />
+      <div className="relative">
+        <StatCard
+          title="Índice de Desvios"
+          value={
+            loading ? (
+              "..."
+            ) : (
+              <div className="flex items-center gap-2">
+                <span>{stats.indiceDesvios.toFixed(2)}</span>
+                <Badge 
+                  className={`text-xs font-semibold ${
+                    stats.indiceDesviosStatus === 'positivo' 
+                      ? "bg-green-500 hover:bg-green-600 text-white" 
+                      : "bg-red-500 hover:bg-red-600 text-white"
+                  }`}
+                >
+                  {stats.indiceDesviosStatus === 'positivo' ? 'Positivo' : 'Negativo'}
+                </Badge>
+              </div>
+            )
+          }
+          icon={stats.indiceDesviosStatus === 'positivo' ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />}
+          description="Desvios por funcionário ativo"
+          trend={stats.indiceDesviosStatus === 'positivo' ? 'up' : 'down'}
+          trendValue={`${stats.indiceDesviosStatus === 'positivo' ? '≥' : '<'} 1.0`}
+          className={`border-l-4 ${stats.indiceDesviosStatus === 'positivo' ? 'border-green-500' : 'border-red-500'}`}
+          loading={loading}
+        />
+      </div>
       <StatCard
         title="Total de Desvios"
         value={loading ? "..." : stats.totalDesvios.toString()}
