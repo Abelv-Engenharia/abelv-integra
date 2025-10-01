@@ -6,12 +6,16 @@ import { useUserCCAs } from "@/hooks/useUserCCAs";
 import { useOcorrenciasFilter } from "@/contexts/OcorrenciasFilterContext";
 
 const colorMap: Record<string, string> = {
-  "AC CPD": "#ef4444", // Red - Acidente com Perda de Dias
-  "AC SPD": "#f59e0b", // Yellow - Acidente sem Perda de Dias  
-  "INC DM": "#3b82f6", // Blue - Incidente com Dano Material
-  "INC SDM": "#10b981", // Green - Incidente sem Dano Material
-  "QA": "#8b5cf6", // Purple - Quase Acidente
+  "AC CPD": "#E53935", // Vermelho - Acidente com Perda de Dias
+  "AC SPD": "#FF6F00", // Laranja - Acidente sem Perda de Dias  
+  "INC DM": "#1976D2", // Azul - Incidente com Dano Material
+  "INC SDM": "#757575", // Cinza - Incidente sem Dano Material
+  "INC AMB": "#388E3C", // Verde - Incidente Ambiental
+  "QA": "#8b5cf6", // Roxo - Quase Acidente
 };
+
+// Ordem específica para a legenda
+const legendOrder = ["AC CPD", "AC SPD", "INC DM", "INC SDM", "INC AMB", "QA"];
 
 const OcorrenciasByTipoChart = () => {
   const [data, setData] = useState<any[]>([]);
@@ -41,7 +45,16 @@ const OcorrenciasByTipoChart = () => {
           color: colorMap[item.tipo] || "#9ca3af" // Default gray color if no matching color
         }));
         
-        setData(dataWithColors);
+        // Ordenar dados conforme a ordem da legenda
+        const sortedData = dataWithColors.sort((a, b) => {
+          const indexA = legendOrder.indexOf(a.name);
+          const indexB = legendOrder.indexOf(b.name);
+          const posA = indexA === -1 ? legendOrder.length : indexA;
+          const posB = indexB === -1 ? legendOrder.length : indexB;
+          return posA - posB;
+        });
+        
+        setData(sortedData);
       } catch (err) {
         console.error("Error loading ocorrencias by tipo:", err);
         setError("Erro ao carregar dados por tipo de ocorrência");
