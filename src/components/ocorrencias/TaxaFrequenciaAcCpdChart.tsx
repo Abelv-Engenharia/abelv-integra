@@ -18,37 +18,25 @@ const TaxaFrequenciaAcCpdChart = () => {
         setLoading(true);
         const anoAtual = year !== 'todos' ? parseInt(year) : new Date().getFullYear();
         const mesAtual = month !== 'todos' ? parseInt(month) : undefined;
-        
-        console.log('Carregando dados AC CPD para o ano:', anoAtual, 'mês:', mesAtual);
-        
-        // Aplicar filtros
+
         let ccaIds = userCCAs.length > 0 ? userCCAs.map(cca => cca.id) : undefined;
-        
-        // Se um CCA específico foi selecionado, usar apenas ele
         if (ccaId !== 'todos') {
           ccaIds = [parseInt(ccaId)];
         }
-        
+
         const [dadosMensais, metaAnual] = await Promise.all([
           fetchTaxaFrequenciaAcCpdPorMes(anoAtual, ccaIds, mesAtual),
           fetchMetaIndicador(anoAtual, 'meta_taxa_frequencia_ac_cpd')
         ]);
 
-        console.log('Dados mensais AC CPD carregados (filtrado):', dadosMensais);
-        console.log('Meta AC CPD carregada:', metaAnual);
-
-        // Se um mês específico foi selecionado, mostrar apenas esse mês
         let dadosParaExibir = dadosMensais;
         if (mesAtual) {
           dadosParaExibir = dadosMensais.filter(item => item.mes === mesAtual);
         } else {
-          // Filtrar apenas meses com dados válidos ou que já passaram
           const mesAtualReal = new Date().getMonth() + 1;
           const anoAtualReal = new Date().getFullYear();
-          
-          // Se estamos vendo o ano atual, mostrar apenas meses que já passaram ou com dados
           if (anoAtual === anoAtualReal) {
-            dadosParaExibir = dadosMensais.filter(item => 
+            dadosParaExibir = dadosMensais.filter(item =>
               item.mes <= mesAtualReal || item.mensal > 0 || item.acumulada > 0
             );
           }
@@ -63,7 +51,6 @@ const TaxaFrequenciaAcCpdChart = () => {
       }
     };
 
-    // Só carrega se já temos dados dos CCAs ou se não há CCAs (para mostrar vazio)
     if (userCCAs.length > 0 || userCCAs.length === 0) {
       loadData();
     }
@@ -85,23 +72,21 @@ const TaxaFrequenciaAcCpdChart = () => {
     );
   }
 
-  // Obter a taxa acumulada mais recente
   const ultimosDados = data[data.length - 1];
   const taxaAcumuladaAtual = ultimosDados?.acumulada || 0;
 
   return (
     <div className="relative">
-      {/* Flag do indicador no canto superior direito */}
-      <IndicadorFlag 
+      <IndicadorFlag
         taxaAcumulada={taxaAcumuladaAtual}
         meta={meta}
         className="absolute top-2 right-2 z-10"
       />
-      
+
       <ResponsiveContainer width="100%" height={400}>
         <ComposedChart data={data} margin={{ top: 20, right: 130, left: 20, bottom: 60 }}>
-          <XAxis 
-            dataKey="mes" 
+          <XAxis
+            dataKey="mes"
             tick={{ fontSize: 14 }}
             tickFormatter={(value) => {
               const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
@@ -109,10 +94,10 @@ const TaxaFrequenciaAcCpdChart = () => {
             }}
           />
           <YAxis />
-          <Tooltip 
+          <Tooltip
             content={({ active, payload, label }) => {
               if (active && payload && payload.length) {
-                const meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
+                const meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
                               'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
                 return (
                   <div className="bg-white p-3 border border-gray-300 rounded shadow">
@@ -123,7 +108,7 @@ const TaxaFrequenciaAcCpdChart = () => {
                       </p>
                     ))}
                     {meta > 0 && (
-                      <p style={{ color: '#059669' }}>Meta: {meta.toFixed(2)}</p>
+                      <p style={{ color: '#6B7280' }}>Meta: {meta.toFixed(2)}</p>
                     )}
                   </div>
                 );
@@ -131,35 +116,36 @@ const TaxaFrequenciaAcCpdChart = () => {
               return null;
             }}
           />
-          <Bar 
-            dataKey="mensal" 
+          <Bar
+            dataKey="mensal"
             fill="#dc2626"
             name="Taxa Mensal"
           >
-            <LabelList 
-              dataKey="mensal" 
-              position="top" 
-              fontSize={14} 
-              formatter={(value: any) => value > 0 ? value.toFixed(2) : ''} 
+            <LabelList
+              dataKey="mensal"
+              position="top"
+              fontSize={14}
+              formatter={(value: any) => value > 0 ? value.toFixed(2) : ''}
             />
           </Bar>
-          <Line 
-            type="monotone" 
-            dataKey="acumulada" 
+          <Line
+            type="monotone"
+            dataKey="acumulada"
             stroke="#991b1b"
             strokeWidth={2}
             name="Taxa Acumulada"
           />
           {meta > 0 && (
-            <ReferenceLine 
-              y={meta} 
-              stroke="#059669" 
+            <ReferenceLine
+              y={meta}
+              stroke="#6B7280"
               strokeDasharray="5 5"
-              label={{ 
-                value: `Meta: ${meta.toFixed(2)}`, 
-                position: "right", 
-                style: { fontSize: '16px' },
-                offset: 10 
+              strokeWidth={2}
+              label={{
+                value: `Meta: ${meta.toFixed(2)}`,
+                position: "right",
+                style: { fontSize: '16px', fill: '#6B7280' },
+                offset: 10
               }}
             />
           )}
@@ -170,3 +156,4 @@ const TaxaFrequenciaAcCpdChart = () => {
 };
 
 export default TaxaFrequenciaAcCpdChart;
+
