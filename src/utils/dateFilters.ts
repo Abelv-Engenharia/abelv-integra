@@ -37,7 +37,8 @@ export function normalizeFilters(raw: NormalizableFilters): NormalizedFilters {
 
   if (monthProvided) {
     const key = raw.month.trim();
-    filters.month = MONTH_MAP[key] ?? key.padStart(2, '0'); // permite já receber "09" e normaliza "9" -> "09"
+    const monthNum = MONTH_MAP[key] ?? key;
+    filters.month = String(parseInt(monthNum)); // normaliza para formato sem zero à esquerda: "09" -> "9"
   }
 
   if (raw.ccaId && raw.ccaId !== "todos") {
