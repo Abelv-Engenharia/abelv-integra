@@ -46,6 +46,7 @@ const TaxaGravidadeChart = () => {
           const mesAtualReal = new Date().getMonth() + 1;
           const anoAtualReal = new Date().getFullYear();
           
+          // Se estamos vendo o ano atual, mostrar apenas meses que já passaram ou com dados
           if (anoAtual === anoAtualReal) {
             dadosParaExibir = dadosMensais.filter(item => 
               item.mes <= mesAtualReal || item.mensal > 0 || item.acumulada > 0
@@ -62,6 +63,7 @@ const TaxaGravidadeChart = () => {
       }
     };
 
+    // Só carrega se já temos dados dos CCAs ou se não há CCAs (para mostrar vazio)
     if (userCCAs.length > 0 || userCCAs.length === 0) {
       loadData();
     }
@@ -83,11 +85,13 @@ const TaxaGravidadeChart = () => {
     );
   }
 
+  // Obter a taxa acumulada mais recente
   const ultimosDados = data[data.length - 1];
   const taxaAcumuladaAtual = ultimosDados?.acumulada || 0;
 
   return (
     <div className="relative">
+      {/* Flag do indicador no canto superior direito */}
       <IndicadorFlag 
         taxaAcumulada={taxaAcumuladaAtual}
         meta={meta}
@@ -133,7 +137,7 @@ const TaxaGravidadeChart = () => {
                       </p>
                     ))}
                     {meta > 0 && (
-                      <p style={{ color: '#6B7280' }}>Meta: {meta.toFixed(2)}</p> {/* Cinza */}
+                      <p style={{ color: '#059669' }}>Meta: {meta.toFixed(2)}</p>
                     )}
                   </div>
                 );
@@ -163,7 +167,7 @@ const TaxaGravidadeChart = () => {
           {meta > 0 && (
             <ReferenceLine 
               y={meta} 
-              stroke="#6B7280"          // Cinza na linha
+              stroke="#059669" 
               strokeDasharray="5 5"
               strokeWidth={2}
               label={{ 
@@ -173,7 +177,7 @@ const TaxaGravidadeChart = () => {
                 style: { 
                   fontSize: '16px', 
                   fontWeight: 'bold',
-                  fill: '#6B7280'      // Cinza no texto
+                  fill: '#059669'
                 }
               }}
             />
@@ -185,4 +189,3 @@ const TaxaGravidadeChart = () => {
 };
 
 export default TaxaGravidadeChart;
-
