@@ -2,7 +2,7 @@
 import * as z from "zod";
 
 export const ocorrenciaFormSchema = z.object({
-  // Aba 1: Identificação
+  // Aba 1: Informações da Ocorrência (antiga Identificação)
   data: z.coerce.date({ required_error: "Campo obrigatório" }),
   hora: z.string().min(1, "Campo obrigatório"),
   mes: z.string().min(1, "Campo obrigatório"),
@@ -13,20 +13,35 @@ export const ocorrenciaFormSchema = z.object({
   engenheiro_responsavel: z.string().optional(),
   supervisor_responsavel: z.string().optional(),
   encarregado_responsavel: z.string().optional(),
-  colaboradores_acidentados: z
-    .array(
-      z.object({
-        colaborador: z.string().optional(),
-        funcao: z.string().optional(),
-        matricula: z.string().optional(),
-      })
-    )
-    .optional(),
   tipoOcorrencia: z.string().min(1, "Campo obrigatório"),
   tipoEvento: z.string().min(1, "Campo obrigatório"),
   classificacaoOcorrencia: z.string().min(1, "Campo obrigatório"),
+  descricaoOcorrencia: z.string().optional(),
 
-  // Informações Ocorrência
+  // Aba 2: Informações de Saúde (antiga Informações da Ocorrência)
+  colaboradores_acidentados: z
+    .array(
+      z.object({
+        envolvido: z.boolean().optional(),
+        colaborador: z.string().optional(),
+        funcao: z.string().optional(),
+        matricula: z.string().optional(),
+        houve_afastamento: z.string().optional(),
+        dias_perdidos: z.union([z.number(), z.null()]).optional(),
+        dias_debitados: z.union([z.number(), z.null()]).optional(),
+        parte_corpo_atingida: z.string().optional(),
+        lateralidade: z.string().optional(),
+        agente_causador: z.string().optional(),
+        situacao_geradora: z.string().optional(),
+        natureza_lesao: z.string().optional(),
+        numero_cat: z.string().optional(),
+        cid: z.string().optional(),
+        arquivo_cat: z.any().optional(),
+      })
+    )
+    .optional(),
+
+  // Campos legados (manter para compatibilidade)
   houve_afastamento: z.string().optional(),
   dias_perdidos: z.union([z.number(), z.null()]).optional(),
   dias_debitados: z.union([z.number(), z.null()]).optional(),
@@ -35,7 +50,6 @@ export const ocorrenciaFormSchema = z.object({
   agente_causador: z.string().optional(),
   situacao_geradora: z.string().optional(),
   natureza_lesao: z.string().optional(),
-  descricaoOcorrencia: z.string().optional(),
   numeroCat: z.string().optional(),
   cid: z.string().optional(),
   arquivo_cat: z.any().optional(),

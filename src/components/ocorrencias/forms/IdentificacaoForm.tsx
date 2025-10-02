@@ -2,14 +2,21 @@
 import React from "react";
 import { useFormContext } from "react-hook-form";
 import { useOcorrenciasFormData } from "@/hooks/useOcorrenciasFormData";
+import {
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage
+} from "@/components/ui/form";
+import { Textarea } from "@/components/ui/textarea";
 import DateTimeFields from "./components/DateTimeFields";
 import CompanyLocationFields from "./components/CompanyLocationFields";
 import ResponsiblePersonFields from "./components/ResponsiblePersonFields";
-import AccidentedEmployeeFields from "./components/AccidentedEmployeeFields";
 import OccurrenceTypeFields from "./components/OccurrenceTypeFields";
 
 const IdentificacaoForm = () => {
-  const { watch, setValue } = useFormContext();
+  const { control, watch, setValue } = useFormContext();
   const watchedCca = watch("cca");
   const watchedEmpresa = watch("empresa");
   
@@ -25,19 +32,11 @@ const IdentificacaoForm = () => {
     disciplinas, 
     engenheiros, 
     supervisores, 
-    encarregados, 
-    funcionarios,
+    encarregados,
     tiposOcorrencia,
     tiposEvento,
     classificacoesOcorrencia
   } = useOcorrenciasFormData({ selectedCcaId });
-
-  console.log('Current CCA:', watchedCca);
-  console.log('Selected CCA ID:', selectedCcaId);
-  console.log('Available ccas:', ccas);
-  console.log('Available empresas:', empresas);
-  console.log('Available engenheiros:', engenheiros);
-  console.log('Available supervisores:', supervisores);
 
   // Auto-popular ano e mês quando a data for selecionada
   const watchData = watch("data");
@@ -48,18 +47,6 @@ const IdentificacaoForm = () => {
       setValue("mes", (date.getMonth() + 1).toString().padStart(2, '0'));
     }
   }, [watchData, setValue]);
-
-  // Auto-popular função e matrícula quando colaborador for selecionado
-  const watchColaborador = watch("colaboradores_acidentados.0.colaborador");
-  React.useEffect(() => {
-    if (watchColaborador && funcionarios.length > 0) {
-      const funcionario = funcionarios.find(f => f.id.toString() === watchColaborador);
-      if (funcionario) {
-        setValue("colaboradores_acidentados.0.funcao", funcionario.funcao || "");
-        setValue("colaboradores_acidentados.0.matricula", funcionario.matricula || "");
-      }
-    }
-  }, [watchColaborador, funcionarios, setValue]);
 
   // Verificar se há CCAs disponíveis
   if (!ccas || ccas.length === 0) {
@@ -85,25 +72,39 @@ const IdentificacaoForm = () => {
         selectedCcaId={selectedCcaId}
       />
 
-        <ResponsiblePersonFields
-          engenheiros={engenheiros}
-          supervisores={supervisores}
-          encarregados={encarregados}
-          selectedCcaId={selectedCcaId}
-          selectedEmpresaId={watchedEmpresa}
-        />
-        
-        <AccidentedEmployeeFields
-          funcionarios={funcionarios}
-          selectedCcaId={selectedCcaId}
-          selectedEmpresaId={watchedEmpresa}
-          namePrefix="colaboradores_acidentados"
-        />
+      <ResponsiblePersonFields
+        engenheiros={engenheiros}
+        supervisores={supervisores}
+        encarregados={encarregados}
+        selectedCcaId={selectedCcaId}
+        selectedEmpresaId={watchedEmpresa}
+      />
 
       <OccurrenceTypeFields
         tiposOcorrencia={tiposOcorrencia}
         tiposEvento={tiposEvento}
         classificacoesOcorrencia={classificacoesOcorrencia}
+      />
+
+      {/* Descrição da ocorrência */}
+      <FormField
+        control={control}
+        name="descricaoOcorrencia"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Descrição da ocorrência</FormLabel>
+            <FormControl>
+              <Textarea 
+                rows={5} 
+                placeholder="Descreva a ocorrência em detalhes" 
+                className="resize-none"
+                {...field}
+                onChange={(e) => field.onChange(e.target.value.toUpperCase())}
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
       />
     </div>
   );

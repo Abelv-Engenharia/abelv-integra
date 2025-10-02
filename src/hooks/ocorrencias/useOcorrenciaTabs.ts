@@ -2,8 +2,8 @@
 import { useState } from "react";
 
 export const ocorrenciaTabs = [
-  { id: "identificacao", label: "Identificação" },
-  { id: "informacoes", label: "Informações da Ocorrência" },
+  { id: "identificacao", label: "Informações da Ocorrência" },
+  { id: "informacoes", label: "Informações de Saúde" },
   { id: "classificacaoRisco", label: "Classificação de Risco" },
   { id: "planoAcao", label: "Plano de Ação" },
   { id: "fechamento", label: "Fechamento" },

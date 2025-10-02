@@ -17,7 +17,23 @@ import { useOcorrenciaTabs } from "@/hooks/ocorrencias/useOcorrenciaTabs";
 import { ocorrenciaFormSchema, OcorrenciaFormSchema } from "@/schemas/ocorrencias/ocorrenciaFormSchema";
 
 const defaultValues: Partial<OcorrenciaFormSchema> = {
-  colaboradores_acidentados: [{ colaborador: "", funcao: "", matricula: "" }],
+  colaboradores_acidentados: [{
+    envolvido: false,
+    colaborador: "",
+    funcao: "",
+    matricula: "",
+    houve_afastamento: "",
+    dias_perdidos: null,
+    dias_debitados: null,
+    parte_corpo_atingida: "",
+    lateralidade: "",
+    agente_causador: "",
+    situacao_geradora: "",
+    natureza_lesao: "",
+    numero_cat: "",
+    cid: "",
+    arquivo_cat: null,
+  }],
   acoes: [
     {
       tratativa_aplicada: "",
@@ -109,7 +125,7 @@ export const OcorrenciaFormProvider: React.FC = () => {
         supervisor_responsavel: formData.supervisor_responsavel || null,
         encarregado_responsavel: formData.encarregado_responsavel || null,
         
-        // Colaboradores
+        // Colaboradores com informações de saúde
         colaboradores_acidentados: formData.colaboradores_acidentados || [],
         
         // Tipos e classificações (camelCase para snake_case)
@@ -117,19 +133,21 @@ export const OcorrenciaFormProvider: React.FC = () => {
         tipo_evento: formData.tipoEvento,
         classificacao_ocorrencia: formData.classificacaoOcorrencia,
         
-        // Informações da ocorrência (camelCase para snake_case)
-        houve_afastamento: formData.houve_afastamento || null,
-        dias_perdidos: formData.dias_perdidos || null,
-        dias_debitados: formData.dias_debitados || null,
-        parte_corpo_atingida: formData.parte_corpo_atingida || null,
-        lateralidade: formData.lateralidade || null,
-        agente_causador: formData.agente_causador || null,
-        situacao_geradora: formData.situacao_geradora || null,
-        natureza_lesao: formData.natureza_lesao || null,
+        // Descrição da ocorrência
         descricao_ocorrencia: formData.descricaoOcorrencia || null,
-        numero_cat: formData.numeroCat || null,
-        cid: formData.cid || null,
-        arquivo_cat: formData.arquivo_cat || null,
+        
+        // Campos legados - pegar do primeiro colaborador para compatibilidade
+        houve_afastamento: formData.colaboradores_acidentados?.[0]?.houve_afastamento || formData.houve_afastamento || null,
+        dias_perdidos: formData.colaboradores_acidentados?.[0]?.dias_perdidos || formData.dias_perdidos || null,
+        dias_debitados: formData.colaboradores_acidentados?.[0]?.dias_debitados || formData.dias_debitados || null,
+        parte_corpo_atingida: formData.colaboradores_acidentados?.[0]?.parte_corpo_atingida || formData.parte_corpo_atingida || null,
+        lateralidade: formData.colaboradores_acidentados?.[0]?.lateralidade || formData.lateralidade || null,
+        agente_causador: formData.colaboradores_acidentados?.[0]?.agente_causador || formData.agente_causador || null,
+        situacao_geradora: formData.colaboradores_acidentados?.[0]?.situacao_geradora || formData.situacao_geradora || null,
+        natureza_lesao: formData.colaboradores_acidentados?.[0]?.natureza_lesao || formData.natureza_lesao || null,
+        numero_cat: formData.colaboradores_acidentados?.[0]?.numero_cat || formData.numeroCat || null,
+        cid: formData.colaboradores_acidentados?.[0]?.cid || formData.cid || null,
+        arquivo_cat: formData.colaboradores_acidentados?.[0]?.arquivo_cat || formData.arquivo_cat || null,
         
         // Classificação de risco (camelCase para snake_case)
         exposicao: formData.exposicao || null,
