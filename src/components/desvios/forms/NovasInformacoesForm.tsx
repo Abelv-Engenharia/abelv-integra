@@ -36,7 +36,12 @@ const NovasInformacoesForm = ({ context }: NovasInformacoesFormProps) => {
   // Watch do CCA selecionado para filtrar os outros campos
   const selectedCcaId = watch("ccaId");
   const empresaId = watch("empresa");
+  
+  // Debug: verificar o valor da empresa
+  console.log("🔍 Empresa ID selecionado:", empresaId, "Tipo:", typeof empresaId);
+  
   const isAbelvSelecionada = empresaId?.toString() === "6";
+  console.log("✅ É ABELV?", isAbelvSelecionada);
   
   // Usar dados filtrados baseados no CCA selecionado
   const filteredData = useFilteredFormData({ selectedCcaId });
