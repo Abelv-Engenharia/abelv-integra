@@ -23,6 +23,11 @@ const OcorrenciasVisualizacao = () => {
   const [ccaInfo, setCcaInfo] = useState<any>(null);
   const [empresaInfo, setEmpresaInfo] = useState<any>(null);
   const [colaboradoresInfo, setColaboradoresInfo] = useState<any[]>([]);
+  const [parteCorpoNome, setParteCorpoNome] = useState<string>('');
+  const [lateralidadeNome, setLateralidadeNome] = useState<string>('');
+  const [agenteCausadorNome, setAgenteCausadorNome] = useState<string>('');
+  const [situacaoGeradoraNome, setSituacaoGeradoraNome] = useState<string>('');
+  const [naturezaLesaoNome, setNaturezaLesaoNome] = useState<string>('');
 
   useEffect(() => {
     const loadOcorrencia = async () => {
@@ -79,6 +84,52 @@ const OcorrenciasVisualizacao = () => {
             }
           }
           setColaboradoresInfo(colaboradoresCompletos);
+        }
+        
+        // Buscar nomes das tabelas de referência
+        if (data.parte_corpo_atingida) {
+          const { data: parteCorp } = await supabase
+            .from('parte_corpo_atingida')
+            .select('nome')
+            .eq('id', Number(data.parte_corpo_atingida))
+            .maybeSingle();
+          if (parteCorp) setParteCorpoNome(parteCorp.nome);
+        }
+        
+        if (data.lateralidade) {
+          const { data: lat } = await supabase
+            .from('lateralidade')
+            .select('nome')
+            .eq('id', Number(data.lateralidade))
+            .maybeSingle();
+          if (lat) setLateralidadeNome(lat.nome);
+        }
+        
+        if (data.agente_causador) {
+          const { data: agente } = await supabase
+            .from('agente_causador')
+            .select('nome')
+            .eq('id', Number(data.agente_causador))
+            .maybeSingle();
+          if (agente) setAgenteCausadorNome(agente.nome);
+        }
+        
+        if (data.situacao_geradora) {
+          const { data: situacao } = await supabase
+            .from('situacao_geradora')
+            .select('nome')
+            .eq('id', Number(data.situacao_geradora))
+            .maybeSingle();
+          if (situacao) setSituacaoGeradoraNome(situacao.nome);
+        }
+        
+        if (data.natureza_lesao) {
+          const { data: natureza } = await supabase
+            .from('natureza_lesao')
+            .select('nome')
+            .eq('id', Number(data.natureza_lesao))
+            .maybeSingle();
+          if (natureza) setNaturezaLesaoNome(natureza.nome);
         }
         
       } catch (error) {
@@ -283,23 +334,23 @@ const OcorrenciasVisualizacao = () => {
             </div>
             <div>
               <label className="text-sm font-semibold text-gray-700 block mb-1">Parte do Corpo Atingida</label>
-              <p className="text-base font-medium border-b border-gray-200 pb-1">{ocorrencia.parte_corpo_atingida || '-'}</p>
+              <p className="text-base font-medium border-b border-gray-200 pb-1">{parteCorpoNome || ocorrencia.parte_corpo_atingida || '-'}</p>
             </div>
             <div>
               <label className="text-sm font-semibold text-gray-700 block mb-1">Lateralidade</label>
-              <p className="text-base font-medium border-b border-gray-200 pb-1">{ocorrencia.lateralidade || '-'}</p>
+              <p className="text-base font-medium border-b border-gray-200 pb-1">{lateralidadeNome || ocorrencia.lateralidade || '-'}</p>
             </div>
             <div>
               <label className="text-sm font-semibold text-gray-700 block mb-1">Agente Causador</label>
-              <p className="text-base font-medium border-b border-gray-200 pb-1">{ocorrencia.agente_causador || '-'}</p>
+              <p className="text-base font-medium border-b border-gray-200 pb-1">{agenteCausadorNome || ocorrencia.agente_causador || '-'}</p>
             </div>
             <div>
               <label className="text-sm font-semibold text-gray-700 block mb-1">Situação Geradora</label>
-              <p className="text-base font-medium border-b border-gray-200 pb-1">{ocorrencia.situacao_geradora || '-'}</p>
+              <p className="text-base font-medium border-b border-gray-200 pb-1">{situacaoGeradoraNome || ocorrencia.situacao_geradora || '-'}</p>
             </div>
             <div>
               <label className="text-sm font-semibold text-gray-700 block mb-1">Natureza da Lesão</label>
-              <p className="text-base font-medium border-b border-gray-200 pb-1">{ocorrencia.natureza_lesao || '-'}</p>
+              <p className="text-base font-medium border-b border-gray-200 pb-1">{naturezaLesaoNome || ocorrencia.natureza_lesao || '-'}</p>
             </div>
             <div>
               <label className="text-sm font-semibold text-gray-700 block mb-1">Número CAT</label>

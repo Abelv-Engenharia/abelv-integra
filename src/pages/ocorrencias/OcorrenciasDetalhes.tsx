@@ -13,6 +13,11 @@ const OcorrenciasDetalhes = () => {
   const navigate = useNavigate();
   const [ocorrencia, setOcorrencia] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [parteCorpoNome, setParteCorpoNome] = useState<string>('');
+  const [lateralidadeNome, setLateralidadeNome] = useState<string>('');
+  const [agenteCausadorNome, setAgenteCausadorNome] = useState<string>('');
+  const [situacaoGeradoraNome, setSituacaoGeradoraNome] = useState<string>('');
+  const [naturezaLesaoNome, setNaturezaLesaoNome] = useState<string>('');
 
   useEffect(() => {
     const loadOcorrencia = async () => {
@@ -21,6 +26,54 @@ const OcorrenciasDetalhes = () => {
       try {
         const data = await getOcorrenciaById(id);
         setOcorrencia(data);
+        
+        // Buscar nomes das tabelas de referência
+        const { supabase } = await import("@/integrations/supabase/client");
+        
+        if (data.parte_corpo_atingida) {
+          const { data: parteCorp } = await supabase
+            .from('parte_corpo_atingida')
+            .select('nome')
+            .eq('id', Number(data.parte_corpo_atingida))
+            .maybeSingle();
+          if (parteCorp) setParteCorpoNome(parteCorp.nome);
+        }
+        
+        if (data.lateralidade) {
+          const { data: lat } = await supabase
+            .from('lateralidade')
+            .select('nome')
+            .eq('id', Number(data.lateralidade))
+            .maybeSingle();
+          if (lat) setLateralidadeNome(lat.nome);
+        }
+        
+        if (data.agente_causador) {
+          const { data: agente } = await supabase
+            .from('agente_causador')
+            .select('nome')
+            .eq('id', Number(data.agente_causador))
+            .maybeSingle();
+          if (agente) setAgenteCausadorNome(agente.nome);
+        }
+        
+        if (data.situacao_geradora) {
+          const { data: situacao } = await supabase
+            .from('situacao_geradora')
+            .select('nome')
+            .eq('id', Number(data.situacao_geradora))
+            .maybeSingle();
+          if (situacao) setSituacaoGeradoraNome(situacao.nome);
+        }
+        
+        if (data.natureza_lesao) {
+          const { data: natureza } = await supabase
+            .from('natureza_lesao')
+            .select('nome')
+            .eq('id', Number(data.natureza_lesao))
+            .maybeSingle();
+          if (natureza) setNaturezaLesaoNome(natureza.nome);
+        }
       } catch (error) {
         console.error('Erro ao carregar ocorrência:', error);
         toast.error("Erro ao carregar dados da ocorrência");
@@ -200,15 +253,15 @@ const OcorrenciasDetalhes = () => {
             </div>
             <div>
               <label className="text-sm font-medium text-muted-foreground">Parte do Corpo Atingida</label>
-              <p className="text-sm">{ocorrencia.parte_corpo_atingida || '-'}</p>
+              <p className="text-sm">{parteCorpoNome || ocorrencia.parte_corpo_atingida || '-'}</p>
             </div>
             <div>
               <label className="text-sm font-medium text-muted-foreground">Lateralidade</label>
-              <p className="text-sm">{ocorrencia.lateralidade || '-'}</p>
+              <p className="text-sm">{lateralidadeNome || ocorrencia.lateralidade || '-'}</p>
             </div>
             <div>
               <label className="text-sm font-medium text-muted-foreground">Agente Causador</label>
-              <p className="text-sm">{ocorrencia.agente_causador || '-'}</p>
+              <p className="text-sm">{agenteCausadorNome || ocorrencia.agente_causador || '-'}</p>
             </div>
           </div>
           {ocorrencia.descricao_ocorrencia && (
