@@ -55,6 +55,8 @@ export async function uploadLicoesAprendidasToBucket(
     .from("ocorrencias")
     .getPublicUrl(fileName);
 
+  console.log(`[UPLOAD] Lições Aprendidas enviado com sucesso: ${fileName}`);
+  console.log(`[UPLOAD] URL pública gerada: ${publicUrl}`);
   return publicUrl;
 }
 

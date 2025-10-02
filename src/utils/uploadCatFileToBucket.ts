@@ -44,5 +44,7 @@ export async function uploadCatFileToBucket(
     .from("ocorrencias")
     .getPublicUrl(fileName);
 
+  console.log(`[UPLOAD] CAT enviada com sucesso: ${fileName}`);
+  console.log(`[UPLOAD] URL pública gerada: ${publicUrl}`);
   return publicUrl;
 }

@@ -41,7 +41,7 @@ const AccidentedEmployeeHealthFields: React.FC<AccidentedEmployeeHealthFieldsPro
   naturezasLesao,
   selectedEmpresaId,
 }) => {
-  const { control, watch, setValue } = useFormContext();
+  const { control, watch, setValue, getValues } = useFormContext();
   const [uploadingCat, setUploadingCat] = React.useState(false);
   
   const isAbelvSelecionada = selectedEmpresaId === "6";
@@ -410,6 +410,9 @@ const AccidentedEmployeeHealthFields: React.FC<AccidentedEmployeeHealthFieldsPro
                       setUploadingCat(false);
                       if (url) {
                         onChange(url);
+                        setValue(`colaboradores_acidentados.${index}.arquivo_cat`, url);
+                        console.log(`[CAT] URL salva para colaborador ${index}:`, url);
+                        console.log(`[CAT] Valor atual:`, getValues(`colaboradores_acidentados.${index}.arquivo_cat`));
                       } else {
                         alert("Erro ao fazer upload do arquivo CAT.");
                       }
@@ -421,7 +424,7 @@ const AccidentedEmployeeHealthFields: React.FC<AccidentedEmployeeHealthFieldsPro
                 {uploadingCat && (
                   <span className="text-sm text-gray-500">Enviando arquivo...</span>
                 )}
-                {value && typeof value === "string" && (
+                {value && typeof value === "string" && value.trim() !== "" && (
                   <div className="flex items-center space-x-2 mt-2">
                     <Button
                       asChild

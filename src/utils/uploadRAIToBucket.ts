@@ -56,5 +56,7 @@ export async function uploadRAIToBucket(
     .from("ocorrencias")
     .getPublicUrl(fileName);
 
+  console.log(`[UPLOAD] RAI enviado com sucesso: ${fileName}`);
+  console.log(`[UPLOAD] URL pública gerada: ${publicUrl}`);
   return publicUrl;
 }

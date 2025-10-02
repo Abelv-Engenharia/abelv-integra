@@ -55,6 +55,8 @@ export async function uploadInformePreliminarToBucket(
     .from("ocorrencias")
     .getPublicUrl(fileName);
 
+  console.log(`[UPLOAD] Informe Preliminar enviado com sucesso: ${fileName}`);
+  console.log(`[UPLOAD] URL pública gerada: ${publicUrl}`);
   return publicUrl;
 }
 

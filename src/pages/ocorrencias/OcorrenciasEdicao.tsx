@@ -224,7 +224,7 @@ const OcorrenciasEdicao = () => {
           status: acao.status || ""
         })) || [],
         investigacao_realizada: formData.investigacao_realizada,
-        arquivo_cat: formData.arquivo_cat,
+        arquivo_cat: formData.colaboradores_acidentados?.[0]?.arquivo_cat || formData.arquivo_cat || null,
         informe_preliminar: formData.informe_preliminar,
         relatorio_analise: formData.relatorio_analise,
         licoes_aprendidas_enviada: formData.licoes_aprendidas_enviada,

@@ -165,6 +165,20 @@ const FechamentoForm = () => {
                       const foundCca = ccas.find((c: any) => (c.id?.toString() ?? c.id) === selectedCcaId?.toString());
                       codigoCca = foundCca?.codigo || null;
                     }
+                    
+                    // Fallback: buscar CCA do banco se não encontrado
+                    if (!codigoCca && selectedCcaId) {
+                      console.log(`[UPLOAD] Buscando código do CCA ${selectedCcaId} no banco...`);
+                      const { supabase } = await import("@/integrations/supabase/client");
+                      const { data: ccaData } = await supabase
+                        .from('ccas')
+                        .select('codigo')
+                        .eq('id', selectedCcaId)
+                        .maybeSingle();
+                      codigoCca = ccaData?.codigo || null;
+                      console.log(`[UPLOAD] Código do CCA encontrado: ${codigoCca}`);
+                    }
+                    
                     // Logs para debug
                     console.log("UP-INFORME: Data:", dataOcorrencia, "Classificacao:", classificacaoOcorrencia, "selectedCcaId:", selectedCcaId, "codigoCca:", codigoCca);
                     if (file && file.size <= 5 * 1024 * 1024) { // 5MB limit
@@ -178,6 +192,8 @@ const FechamentoForm = () => {
                       if (url) {
                         onChange(url);
                         setValue("informe_preliminar", url);
+                        console.log(`[FORM] Informe Preliminar - Campo atualizado com URL: ${url}`);
+                        console.log(`[FORM] Informe Preliminar - Valor atual no formulário:`, getValues("informe_preliminar"));
                       } else {
                         alert("Erro ao fazer upload do arquivo do informe preliminar.");
                       }
@@ -186,7 +202,7 @@ const FechamentoForm = () => {
                     }
                   }}
                 />
-                {value && typeof value === "string" && (
+                {value && typeof value === "string" && value.trim() !== "" && (
                   <div className="flex items-center space-x-2 mt-2">
                     <Button
                       asChild
@@ -251,6 +267,20 @@ const FechamentoForm = () => {
                       const foundCca = ccas.find((c: any) => (c.id?.toString() ?? c.id) === selectedCcaId?.toString());
                       codigoCca = foundCca?.codigo || null;
                     }
+                    
+                    // Fallback: buscar CCA do banco se não encontrado
+                    if (!codigoCca && selectedCcaId) {
+                      console.log(`[UPLOAD] Buscando código do CCA ${selectedCcaId} no banco...`);
+                      const { supabase } = await import("@/integrations/supabase/client");
+                      const { data: ccaData } = await supabase
+                        .from('ccas')
+                        .select('codigo')
+                        .eq('id', selectedCcaId)
+                        .maybeSingle();
+                      codigoCca = ccaData?.codigo || null;
+                      console.log(`[UPLOAD] Código do CCA encontrado: ${codigoCca}`);
+                    }
+                    
                     console.log("UP-RAI: Data:", dataOcorrencia, "Classificacao:", classificacaoOcorrencia, "selectedCcaId:", selectedCcaId, "codigoCca:", codigoCca);
                     if (file && file.size <= 5 * 1024 * 1024) { // 5MB limit
                       if (!dataOcorrencia || !classificacaoOcorrencia || !codigoCca) {
@@ -263,6 +293,8 @@ const FechamentoForm = () => {
                       if (url) {
                         onChange(url);
                         setValue("relatorio_analise", url);
+                        console.log(`[FORM] RAI - Campo atualizado com URL: ${url}`);
+                        console.log(`[FORM] RAI - Valor atual no formulário:`, getValues("relatorio_analise"));
                       } else {
                         alert("Erro ao fazer upload do arquivo RAI.");
                       }
@@ -271,7 +303,7 @@ const FechamentoForm = () => {
                     }
                   }}
                 />
-                {value && typeof value === "string" && (
+                {value && typeof value === "string" && value.trim() !== "" && (
                   <div className="flex items-center space-x-2 mt-2">
                     <Button
                       asChild
@@ -363,6 +395,20 @@ const FechamentoForm = () => {
                     const foundCca = ccas.find((c: any) => (c.id?.toString() ?? c.id) === selectedCcaId?.toString());
                     codigoCca = foundCca?.codigo || null;
                   }
+                  
+                  // Fallback: buscar CCA do banco se não encontrado
+                  if (!codigoCca && selectedCcaId) {
+                    console.log(`[UPLOAD] Buscando código do CCA ${selectedCcaId} no banco...`);
+                    const { supabase } = await import("@/integrations/supabase/client");
+                    const { data: ccaData } = await supabase
+                      .from('ccas')
+                      .select('codigo')
+                      .eq('id', selectedCcaId)
+                      .maybeSingle();
+                    codigoCca = ccaData?.codigo || null;
+                    console.log(`[UPLOAD] Código do CCA encontrado: ${codigoCca}`);
+                  }
+                  
                   console.log("UP-LICOES: Data:", dataOcorrencia, "Classificacao:", classificacaoOcorrencia, "selectedCcaId:", selectedCcaId, "codigoCca:", codigoCca);
                   if (file && file.size <= 5 * 1024 * 1024) {
                     if (!dataOcorrencia || !classificacaoOcorrencia || !codigoCca) {
@@ -375,6 +421,8 @@ const FechamentoForm = () => {
                     if (url) {
                       onChange(url);
                       setValue("arquivo_licoes_aprendidas", url);
+                      console.log(`[FORM] Lições Aprendidas - Campo atualizado com URL: ${url}`);
+                      console.log(`[FORM] Lições Aprendidas - Valor atual no formulário:`, getValues("arquivo_licoes_aprendidas"));
                     } else {
                       alert("Erro ao fazer upload do arquivo de lições aprendidas.");
                     }
@@ -383,7 +431,7 @@ const FechamentoForm = () => {
                   }
                 }}
               />
-              {value && typeof value === "string" && (
+              {value && typeof value === "string" && value.trim() !== "" && (
                 <div className="flex items-center space-x-2 mt-2">
                   <Button
                     asChild
