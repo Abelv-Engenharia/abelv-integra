@@ -190,10 +190,14 @@ const FechamentoForm = () => {
                         file, dataOcorrencia, classificacaoOcorrencia, codigoCca
                       );
                       if (url) {
+                        setValue("informe_preliminar", url, { 
+                          shouldDirty: true, 
+                          shouldTouch: true,
+                          shouldValidate: true 
+                        });
                         onChange(url);
-                        setValue("informe_preliminar", url);
-                        console.log(`[FORM] Informe Preliminar - Campo atualizado com URL: ${url}`);
-                        console.log(`[FORM] Informe Preliminar - Valor atual no formulário:`, getValues("informe_preliminar"));
+                        console.log(`[FORM] ✅ Informe Preliminar salvo: ${url}`);
+                        console.log(`[FORM] ✅ Verificação:`, getValues("informe_preliminar"));
                       } else {
                         alert("Erro ao fazer upload do arquivo do informe preliminar.");
                       }
@@ -291,10 +295,14 @@ const FechamentoForm = () => {
                         file, dataOcorrencia, classificacaoOcorrencia, codigoCca
                       );
                       if (url) {
+                        setValue("relatorio_analise", url, { 
+                          shouldDirty: true, 
+                          shouldTouch: true,
+                          shouldValidate: true 
+                        });
                         onChange(url);
-                        setValue("relatorio_analise", url);
-                        console.log(`[FORM] RAI - Campo atualizado com URL: ${url}`);
-                        console.log(`[FORM] RAI - Valor atual no formulário:`, getValues("relatorio_analise"));
+                        console.log(`[FORM] ✅ RAI salvo: ${url}`);
+                        console.log(`[FORM] ✅ Verificação:`, getValues("relatorio_analise"));
                       } else {
                         alert("Erro ao fazer upload do arquivo RAI.");
                       }
@@ -419,10 +427,14 @@ const FechamentoForm = () => {
                       file, dataOcorrencia, classificacaoOcorrencia, codigoCca
                     );
                     if (url) {
+                      setValue("arquivo_licoes_aprendidas", url, { 
+                        shouldDirty: true, 
+                        shouldTouch: true,
+                        shouldValidate: true 
+                      });
                       onChange(url);
-                      setValue("arquivo_licoes_aprendidas", url);
-                      console.log(`[FORM] Lições Aprendidas - Campo atualizado com URL: ${url}`);
-                      console.log(`[FORM] Lições Aprendidas - Valor atual no formulário:`, getValues("arquivo_licoes_aprendidas"));
+                      console.log(`[FORM] ✅ Lições Aprendidas salvo: ${url}`);
+                      console.log(`[FORM] ✅ Verificação:`, getValues("arquivo_licoes_aprendidas"));
                     } else {
                       alert("Erro ao fazer upload do arquivo de lições aprendidas.");
                     }

@@ -231,6 +231,13 @@ const OcorrenciasEdicao = () => {
         arquivo_licoes_aprendidas: formData.arquivo_licoes_aprendidas,
       };
 
+      console.log('=== DOCUMENTOS ANEXADOS ===');
+      console.log('📄 arquivo_cat:', updateData.arquivo_cat);
+      console.log('📄 informe_preliminar:', updateData.informe_preliminar);
+      console.log('📄 relatorio_analise:', updateData.relatorio_analise);
+      console.log('📄 arquivo_licoes_aprendidas:', updateData.arquivo_licoes_aprendidas);
+      console.log('============================');
+
       console.log('=== CAMPOS ESPECÍFICOS ANTES DE ENVIAR ===');
       console.log('houve_afastamento:', updateData.houve_afastamento);
       console.log('dias_perdidos:', updateData.dias_perdidos);
