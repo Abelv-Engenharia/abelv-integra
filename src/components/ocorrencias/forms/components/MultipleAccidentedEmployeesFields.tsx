@@ -50,7 +50,9 @@ const MultipleAccidentedEmployeesFields: React.FC<MultipleAccidentedEmployeesFie
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 border-t pt-4">
+      <h3 className="text-md font-semibold">Colaboradores acidentados</h3>
+      
       {fields.map((field, index) => (
         <div key={field.id} className="p-4 border rounded-lg bg-muted/30 space-y-4">
           <div className="flex justify-between items-center">

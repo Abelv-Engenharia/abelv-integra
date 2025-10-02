@@ -19,6 +19,7 @@ export const ocorrenciaFormSchema = z.object({
   descricaoOcorrencia: z.string().optional(),
 
   // Aba 2: Informações de Saúde (antiga Informações da Ocorrência)
+  colaboradoresEnvolvidos: z.boolean().optional().default(false),
   colaboradores_acidentados: z
     .array(
       z.object({
