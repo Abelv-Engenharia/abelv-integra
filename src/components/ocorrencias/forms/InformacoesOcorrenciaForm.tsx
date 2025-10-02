@@ -7,10 +7,18 @@ import MultipleAccidentedEmployeesFields from "./components/MultipleAccidentedEm
 
 const InformacoesOcorrenciaForm = () => {
   const { watch, control } = useFormContext();
-  const { partesCorpo, lateralidades, agentesCausadores, situacoesGeradoras, naturezasLesao, funcionarios } = useOcorrenciasFormData();
   
+  const watchedCca = watch("cca");
   const watchedEmpresa = watch("empresa");
   const colaboradoresEnvolvidos = watch("colaboradoresEnvolvidos");
+
+  // Extrair o ID do CCA selecionado
+  const selectedCcaId = React.useMemo(() => {
+    if (!watchedCca) return undefined;
+    return watchedCca;
+  }, [watchedCca]);
+
+  const { partesCorpo, lateralidades, agentesCausadores, situacoesGeradoras, naturezasLesao, funcionarios } = useOcorrenciasFormData({ selectedCcaId });
 
   return (
     <div className="space-y-6">
