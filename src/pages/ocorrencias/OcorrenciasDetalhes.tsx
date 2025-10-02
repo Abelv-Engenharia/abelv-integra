@@ -90,7 +90,7 @@ const OcorrenciasDetalhes = () => {
   };
 
   const handleEdit = () => {
-    navigate(`/ocorrencias/editar/${id}`);
+    navigate(`/ocorrencias/${id}/editar`);
   };
 
   if (loading) {
