@@ -151,6 +151,10 @@ export const createOcorrencia = async (data: any) => {
       acoes: convertAcoesForDatabase(data.acoes || []),
       investigacao_realizada: data.investigacao_realizada || '',
       licoes_aprendidas_enviada: data.licoes_aprendidas_enviada || '',
+      arquivo_cat: data.arquivo_cat || '',
+      informe_preliminar: data.informe_preliminar || '',
+      relatorio_analise: data.relatorio_analise || '',
+      arquivo_licoes_aprendidas: data.arquivo_licoes_aprendidas || '',
       descricao: data.descricao_ocorrencia || ''
     };
 
