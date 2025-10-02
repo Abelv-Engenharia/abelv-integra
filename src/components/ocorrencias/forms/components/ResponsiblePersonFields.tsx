@@ -2,20 +2,32 @@
 import React from "react";
 import { useFormContext } from "react-hook-form";
 import { PersonnelSelect } from "@/components/common/PersonnelSelect";
+import {
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 
 interface ResponsiblePersonFieldsProps {
   engenheiros: any[];
   supervisores: any[];
   encarregados: any[];
   selectedCcaId?: string;
+  selectedEmpresaId?: string;
 }
 
 const ResponsiblePersonFields: React.FC<ResponsiblePersonFieldsProps> = ({
   engenheiros,
   supervisores,
   encarregados,
-  selectedCcaId
+  selectedCcaId,
+  selectedEmpresaId
 }) => {
+  const { control } = useFormContext();
+  const isAbelvSelecionada = selectedEmpresaId === "6";
   // Mapear dados para o formato esperado pelo PersonnelSelect
   const mappedEngenheiros = engenheiros.map(item => {
     const eng = item.engenheiros || item;
@@ -52,32 +64,92 @@ const ResponsiblePersonFields: React.FC<ResponsiblePersonFieldsProps> = ({
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <PersonnelSelect
-        name="engenheiro_responsavel"
-        label="Engenheiro responsável"
-        placeholder={!selectedCcaId ? "Selecione um CCA primeiro" : "Selecione o engenheiro"}
-        people={mappedEngenheiros}
-        disabled={!selectedCcaId}
-        showInactive={true}
-      />
+      {isAbelvSelecionada ? (
+        <PersonnelSelect
+          name="engenheiro_responsavel"
+          label="Engenheiro responsável"
+          placeholder={!selectedCcaId ? "Selecione um CCA primeiro" : "Selecione o engenheiro"}
+          people={mappedEngenheiros}
+          disabled={!selectedCcaId}
+          showInactive={true}
+        />
+      ) : (
+        <FormField
+          control={control}
+          name="engenheiro_responsavel"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Engenheiro responsável</FormLabel>
+              <FormControl>
+                <Input 
+                  placeholder="Digite o nome do engenheiro"
+                  value={field.value || ''}
+                  onChange={(e) => field.onChange(e.target.value.toUpperCase())}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      )}
       
-      <PersonnelSelect
-        name="supervisor_responsavel"
-        label="Supervisor responsável"
-        placeholder={!selectedCcaId ? "Selecione um CCA primeiro" : "Selecione o supervisor"}
-        people={mappedSupervisores}
-        disabled={!selectedCcaId}
-        showInactive={true}
-      />
+      {isAbelvSelecionada ? (
+        <PersonnelSelect
+          name="supervisor_responsavel"
+          label="Supervisor responsável"
+          placeholder={!selectedCcaId ? "Selecione um CCA primeiro" : "Selecione o supervisor"}
+          people={mappedSupervisores}
+          disabled={!selectedCcaId}
+          showInactive={true}
+        />
+      ) : (
+        <FormField
+          control={control}
+          name="supervisor_responsavel"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Supervisor responsável</FormLabel>
+              <FormControl>
+                <Input 
+                  placeholder="Digite o nome do supervisor"
+                  value={field.value || ''}
+                  onChange={(e) => field.onChange(e.target.value.toUpperCase())}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      )}
       
-      <PersonnelSelect
-        name="encarregado_responsavel"
-        label="Encarregado responsável"
-        placeholder={!selectedCcaId ? "Selecione um CCA primeiro" : "Selecione o encarregado"}
-        people={mappedEncarregados}
-        disabled={!selectedCcaId}
-        showInactive={true}
-      />
+      {isAbelvSelecionada ? (
+        <PersonnelSelect
+          name="encarregado_responsavel"
+          label="Encarregado responsável"
+          placeholder={!selectedCcaId ? "Selecione um CCA primeiro" : "Selecione o encarregado"}
+          people={mappedEncarregados}
+          disabled={!selectedCcaId}
+          showInactive={true}
+        />
+      ) : (
+        <FormField
+          control={control}
+          name="encarregado_responsavel"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Encarregado responsável</FormLabel>
+              <FormControl>
+                <Input 
+                  placeholder="Digite o nome do encarregado"
+                  value={field.value || ''}
+                  onChange={(e) => field.onChange(e.target.value.toUpperCase())}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      )}
     </div>
   );
 };

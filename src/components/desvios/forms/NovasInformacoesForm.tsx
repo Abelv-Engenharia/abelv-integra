@@ -35,6 +35,8 @@ const NovasInformacoesForm = ({ context }: NovasInformacoesFormProps) => {
 
   // Watch do CCA selecionado para filtrar os outros campos
   const selectedCcaId = watch("ccaId");
+  const empresaId = watch("empresaId");
+  const isAbelvSelecionada = empresaId === "6";
   
   // Usar dados filtrados baseados no CCA selecionado
   const filteredData = useFilteredFormData({ selectedCcaId });
@@ -95,21 +97,31 @@ const NovasInformacoesForm = ({ context }: NovasInformacoesFormProps) => {
             name="supervisorResponsavel"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Supervisor Responsável</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormLabel>Supervisor responsável</FormLabel>
+                {isAbelvSelecionada ? (
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder={selectedCcaId ? "Selecione o supervisor" : "Primeiro selecione um CCA"} />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {filteredData.supervisores.map((supervisor) => (
+                        <SelectItem key={supervisor.id} value={supervisor.id}>
+                          {supervisor.nome}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                ) : (
                   <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder={selectedCcaId ? "Selecione o supervisor" : "Primeiro selecione um CCA"} />
-                    </SelectTrigger>
+                    <Input 
+                      placeholder="Digite o nome do supervisor"
+                      value={field.value || ''}
+                      onChange={(e) => field.onChange(e.target.value.toUpperCase())}
+                    />
                   </FormControl>
-                  <SelectContent>
-                    {filteredData.supervisores.map((supervisor) => (
-                      <SelectItem key={supervisor.id} value={supervisor.id}>
-                        {supervisor.nome}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                )}
                 <FormMessage />
               </FormItem>
             )}
@@ -120,21 +132,31 @@ const NovasInformacoesForm = ({ context }: NovasInformacoesFormProps) => {
             name="encarregadoResponsavel"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Encarregado Responsável</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormLabel>Encarregado responsável</FormLabel>
+                {isAbelvSelecionada ? (
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder={selectedCcaId ? "Selecione o encarregado" : "Primeiro selecione um CCA"} />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {filteredData.encarregados.map((encarregado) => (
+                        <SelectItem key={encarregado.id} value={encarregado.id}>
+                          {encarregado.nome}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                ) : (
                   <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder={selectedCcaId ? "Selecione o encarregado" : "Primeiro selecione um CCA"} />
-                    </SelectTrigger>
+                    <Input 
+                      placeholder="Digite o nome do encarregado"
+                      value={field.value || ''}
+                      onChange={(e) => field.onChange(e.target.value.toUpperCase())}
+                    />
                   </FormControl>
-                  <SelectContent>
-                    {filteredData.encarregados.map((encarregado) => (
-                      <SelectItem key={encarregado.id} value={encarregado.id}>
-                        {encarregado.nome}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                )}
                 <FormMessage />
               </FormItem>
             )}
@@ -146,21 +168,31 @@ const NovasInformacoesForm = ({ context }: NovasInformacoesFormProps) => {
           name="colaboradorInfrator"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Colaborador Infrator</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <FormLabel>Colaborador infrator</FormLabel>
+              {isAbelvSelecionada ? (
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder={selectedCcaId ? "Selecione o colaborador" : "Primeiro selecione um CCA"} />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {filteredData.funcionarios.map((funcionario) => (
+                      <SelectItem key={funcionario.id} value={funcionario.id}>
+                        {funcionario.nome} - {funcionario.matricula}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
                 <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder={selectedCcaId ? "Selecione o colaborador" : "Primeiro selecione um CCA"} />
-                  </SelectTrigger>
+                  <Input 
+                    placeholder="Digite o nome do colaborador"
+                    value={field.value || ''}
+                    onChange={(e) => field.onChange(e.target.value.toUpperCase())}
+                  />
                 </FormControl>
-                <SelectContent>
-                  {filteredData.funcionarios.map((funcionario) => (
-                    <SelectItem key={funcionario.id} value={funcionario.id}>
-                      {funcionario.nome} - {funcionario.matricula}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              )}
               <FormMessage />
             </FormItem>
           )}
@@ -174,7 +206,12 @@ const NovasInformacoesForm = ({ context }: NovasInformacoesFormProps) => {
               <FormItem>
                 <FormLabel>Função</FormLabel>
                 <FormControl>
-                  <Input {...field} readOnly />
+                  <Input 
+                    {...field} 
+                    readOnly={isAbelvSelecionada}
+                    placeholder={!isAbelvSelecionada ? "Digite a função" : ""}
+                    onChange={!isAbelvSelecionada ? (e) => field.onChange(e.target.value.toUpperCase()) : field.onChange}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -188,7 +225,12 @@ const NovasInformacoesForm = ({ context }: NovasInformacoesFormProps) => {
               <FormItem>
                 <FormLabel>Matrícula</FormLabel>
                 <FormControl>
-                  <Input {...field} readOnly />
+                  <Input 
+                    {...field} 
+                    readOnly={isAbelvSelecionada}
+                    placeholder={!isAbelvSelecionada ? "Digite a matrícula" : ""}
+                    onChange={!isAbelvSelecionada ? (e) => field.onChange(e.target.value.toUpperCase()) : field.onChange}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>

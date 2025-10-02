@@ -20,15 +20,18 @@ import {
 interface AccidentedEmployeeFieldsProps {
   funcionarios: any[];
   selectedCcaId?: string;
+  selectedEmpresaId?: string;
   namePrefix?: string;
 }
 
 const AccidentedEmployeeFields: React.FC<AccidentedEmployeeFieldsProps> = ({
   funcionarios,
   selectedCcaId,
+  selectedEmpresaId,
   namePrefix = "colaboradores_acidentados",
 }) => {
   const { control } = useFormContext();
+  const isAbelvSelecionada = selectedEmpresaId === "6";
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -38,20 +41,30 @@ const AccidentedEmployeeFields: React.FC<AccidentedEmployeeFieldsProps> = ({
         render={({ field }) => (
           <FormItem>
             <FormLabel>Colaborador acidentado *</FormLabel>
-            <Select onValueChange={field.onChange} defaultValue={field.value} disabled={!selectedCcaId}>
+            {isAbelvSelecionada ? (
+              <Select onValueChange={field.onChange} defaultValue={field.value} disabled={!selectedCcaId}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder={!selectedCcaId ? "Selecione um CCA primeiro" : "Selecione o colaborador"} />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {funcionarios.map((funcionario) => (
+                    <SelectItem key={funcionario.id} value={funcionario.id.toString()}>
+                      {funcionario.nome}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            ) : (
               <FormControl>
-                <SelectTrigger>
-                  <SelectValue placeholder={!selectedCcaId ? "Selecione um CCA primeiro" : "Selecione o colaborador"} />
-                </SelectTrigger>
+                <Input 
+                  placeholder="Digite o nome do colaborador"
+                  value={field.value || ''}
+                  onChange={(e) => field.onChange(e.target.value.toUpperCase())}
+                />
               </FormControl>
-              <SelectContent>
-                {funcionarios.map((funcionario) => (
-                  <SelectItem key={funcionario.id} value={funcionario.id.toString()}>
-                    {funcionario.nome}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            )}
             <FormMessage />
           </FormItem>
         )}
@@ -64,7 +77,13 @@ const AccidentedEmployeeFields: React.FC<AccidentedEmployeeFieldsProps> = ({
           <FormItem>
             <FormLabel>Função</FormLabel>
             <FormControl>
-              <Input {...field} readOnly disabled />
+              <Input 
+                {...field} 
+                readOnly={isAbelvSelecionada} 
+                disabled={isAbelvSelecionada}
+                placeholder={!isAbelvSelecionada ? "Digite a função" : ""}
+                onChange={!isAbelvSelecionada ? (e) => field.onChange(e.target.value.toUpperCase()) : field.onChange}
+              />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -78,7 +97,13 @@ const AccidentedEmployeeFields: React.FC<AccidentedEmployeeFieldsProps> = ({
           <FormItem>
             <FormLabel>Matrícula</FormLabel>
             <FormControl>
-              <Input {...field} readOnly disabled />
+              <Input 
+                {...field} 
+                readOnly={isAbelvSelecionada} 
+                disabled={isAbelvSelecionada}
+                placeholder={!isAbelvSelecionada ? "Digite a matrícula" : ""}
+                onChange={!isAbelvSelecionada ? (e) => field.onChange(e.target.value.toUpperCase()) : field.onChange}
+              />
             </FormControl>
             <FormMessage />
           </FormItem>

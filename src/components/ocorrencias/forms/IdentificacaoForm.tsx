@@ -11,6 +11,7 @@ import OccurrenceTypeFields from "./components/OccurrenceTypeFields";
 const IdentificacaoForm = () => {
   const { watch, setValue } = useFormContext();
   const watchedCca = watch("cca");
+  const watchedEmpresa = watch("empresa");
   
   // Extrair o ID do CCA selecionado
   const selectedCcaId = React.useMemo(() => {
@@ -84,18 +85,20 @@ const IdentificacaoForm = () => {
         selectedCcaId={selectedCcaId}
       />
 
-      <ResponsiblePersonFields
-        engenheiros={engenheiros}
-        supervisores={supervisores}
-        encarregados={encarregados}
-        selectedCcaId={selectedCcaId}
-      />
-
-      <AccidentedEmployeeFields
-        funcionarios={funcionarios}
-        selectedCcaId={selectedCcaId}
-        namePrefix="colaboradores_acidentados"
-      />
+        <ResponsiblePersonFields
+          engenheiros={engenheiros}
+          supervisores={supervisores}
+          encarregados={encarregados}
+          selectedCcaId={selectedCcaId}
+          selectedEmpresaId={watchedEmpresa}
+        />
+        
+        <AccidentedEmployeeFields
+          funcionarios={funcionarios}
+          selectedCcaId={selectedCcaId}
+          selectedEmpresaId={watchedEmpresa}
+          namePrefix="colaboradores_acidentados"
+        />
 
       <OccurrenceTypeFields
         tiposOcorrencia={tiposOcorrencia}
