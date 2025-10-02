@@ -55,9 +55,10 @@ const OcorrenciasEdicao = () => {
         // Safely handle colaboradores_acidentados data
         const colaboradores = Array.isArray(data.colaboradores_acidentados) 
           ? data.colaboradores_acidentados.map((col: any) => ({
-              colaborador: col.colaborador || "",
+              ...col, // Preserva TODOS os campos originais do banco
+              colaborador: col.colaborador_id || col.colaborador || "",
               funcao: col.funcao || "",
-              matricula: col.matricula || ""
+              matricula: col.matricula || "",
             }))
           : [];
 

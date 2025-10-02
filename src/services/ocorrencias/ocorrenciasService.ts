@@ -418,6 +418,7 @@ export const getOcorrenciaById = async (id: string) => {
         colaboradoresEnriquecidos = ocorrencia.colaboradores_acidentados.map((c: any) => {
           const funcionario = funcionarios?.find((f: any) => f.id === c.colaborador);
           return {
+            ...c, // Mantém TODOS os campos originais (houve_afastamento, dias_perdidos, etc.)
             colaborador: funcionario?.nome || `Funcionário não encontrado (ID: ${c.colaborador})`,
             funcao: funcionario?.funcao || c.funcao,
             matricula: funcionario?.matricula || c.matricula,
