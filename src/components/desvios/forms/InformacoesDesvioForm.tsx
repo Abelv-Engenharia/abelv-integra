@@ -30,7 +30,11 @@ interface InformacoesDesvioFormProps {
 }
 
 const InformacoesDesvioForm = ({ context }: InformacoesDesvioFormProps) => {
-  const { control } = useFormContext();
+  const { control, watch } = useFormContext();
+  
+  // Watch da empresa selecionada para determinar se é ABELV
+  const empresaId = watch("empresa");
+  const isAbelvSelecionada = empresaId?.toString() === "6";
 
   return (
     <Card>
@@ -88,21 +92,31 @@ const InformacoesDesvioForm = ({ context }: InformacoesDesvioFormProps) => {
             name="supervisorResponsavel"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Supervisor Responsável</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormLabel>Supervisor responsável</FormLabel>
+                {isAbelvSelecionada ? (
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione o supervisor" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {(context.supervisores || []).map(sup => (
+                        <SelectItem key={sup.id} value={sup.id}>
+                          {sup.nome}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                ) : (
                   <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione o supervisor" />
-                    </SelectTrigger>
+                    <Input 
+                      placeholder="Digite o nome do supervisor"
+                      value={field.value || ''}
+                      onChange={(e) => field.onChange(e.target.value.toUpperCase())}
+                    />
                   </FormControl>
-                  <SelectContent>
-                    {(context.supervisores || []).map(sup => (
-                      <SelectItem key={sup.id} value={sup.id}>
-                        {sup.nome}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                )}
                 <FormMessage />
               </FormItem>
             )}
@@ -113,21 +127,31 @@ const InformacoesDesvioForm = ({ context }: InformacoesDesvioFormProps) => {
             name="encarregadoResponsavel"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Encarregado Responsável</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormLabel>Encarregado responsável</FormLabel>
+                {isAbelvSelecionada ? (
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione o encarregado" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {(context.encarregados || []).map(enc => (
+                        <SelectItem key={enc.id} value={enc.id}>
+                          {enc.nome}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                ) : (
                   <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione o encarregado" />
-                    </SelectTrigger>
+                    <Input 
+                      placeholder="Digite o nome do encarregado"
+                      value={field.value || ''}
+                      onChange={(e) => field.onChange(e.target.value.toUpperCase())}
+                    />
                   </FormControl>
-                  <SelectContent>
-                    {(context.encarregados || []).map(enc => (
-                      <SelectItem key={enc.id} value={enc.id}>
-                        {enc.nome}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                )}
                 <FormMessage />
               </FormItem>
             )}
@@ -139,27 +163,37 @@ const InformacoesDesvioForm = ({ context }: InformacoesDesvioFormProps) => {
           name="colaboradorInfrator"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Colaborador Infrator</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <FormLabel>Colaborador infrator</FormLabel>
+              {isAbelvSelecionada ? (
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione o colaborador" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {(context.funcionarios || []).map(func => (
+                      <SelectItem key={func.id} value={func.id}>
+                        {func.nome}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
                 <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione o colaborador" />
-                  </SelectTrigger>
+                  <Input 
+                    placeholder="Digite o nome do colaborador"
+                    value={field.value || ''}
+                    onChange={(e) => field.onChange(e.target.value.toUpperCase())}
+                  />
                 </FormControl>
-                <SelectContent>
-                  {(context.funcionarios || []).map(func => (
-                    <SelectItem key={func.id} value={func.id}>
-                      {func.nome}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              )}
               <FormMessage />
             </FormItem>
           )}
         />
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
            <FormField
             control={control}
             name="funcao"
@@ -167,7 +201,12 @@ const InformacoesDesvioForm = ({ context }: InformacoesDesvioFormProps) => {
               <FormItem>
                 <FormLabel>Função</FormLabel>
                 <FormControl>
-                  <Input placeholder="Função do colaborador" {...field} readOnly />
+                  <Input 
+                    placeholder={isAbelvSelecionada ? "Função do colaborador" : "Digite a função"}
+                    {...field} 
+                    readOnly={isAbelvSelecionada}
+                    onChange={!isAbelvSelecionada ? (e) => field.onChange(e.target.value.toUpperCase()) : field.onChange}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -180,7 +219,12 @@ const InformacoesDesvioForm = ({ context }: InformacoesDesvioFormProps) => {
               <FormItem>
                 <FormLabel>Matrícula</FormLabel>
                 <FormControl>
-                  <Input placeholder="Matrícula do colaborador" {...field} readOnly />
+                  <Input 
+                    placeholder={isAbelvSelecionada ? "Matrícula do colaborador" : "Digite a matrícula"}
+                    {...field} 
+                    readOnly={isAbelvSelecionada}
+                    onChange={!isAbelvSelecionada ? (e) => field.onChange(e.target.value.toUpperCase()) : field.onChange}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
