@@ -45,7 +45,6 @@ const AccidentedEmployeeHealthFields: React.FC<AccidentedEmployeeHealthFieldsPro
   const [uploadingCat, setUploadingCat] = React.useState(false);
   
   const isAbelvSelecionada = selectedEmpresaId === "6";
-  const envolvido = watch(`colaboradores_acidentados.${index}.envolvido`);
   const colaboradorId = watch(`colaboradores_acidentados.${index}.colaborador`);
   const dataOcorrencia = watch("data") as Date | null;
 
@@ -73,45 +72,20 @@ const AccidentedEmployeeHealthFields: React.FC<AccidentedEmployeeHealthFieldsPro
 
   return (
     <div className="space-y-4">
-      {/* Toggle Colaborador Envolvido */}
-      <FormField
-        control={control}
-        name={`colaboradores_acidentados.${index}.envolvido`}
-        render={({ field }) => (
-          <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-            <div className="space-y-0.5">
-              <FormLabel className="text-base">Colaborador envolvido?</FormLabel>
-              <div className="text-sm text-muted-foreground">
-                Ative para tornar os campos obrigatórios
-              </div>
-            </div>
-            <FormControl>
-              <Switch
-                checked={field.value}
-                onCheckedChange={field.onChange}
-              />
-            </FormControl>
-          </FormItem>
-        )}
-      />
-
-      {/* TODOS OS CAMPOS - SÓ APARECEM SE TOGGLE ATIVO */}
-      {envolvido && (
-        <>
-          {/* Colaborador, Função e Matrícula */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {/* Colaborador, Função e Matrícula */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <FormField
               control={control}
               name={`colaboradores_acidentados.${index}.colaborador`}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className={envolvido ? "text-red-500" : ""}>
-                    Colaborador {envolvido ? "*" : ""}
+                  <FormLabel className="text-red-500">
+                    Colaborador *
                   </FormLabel>
                   {isAbelvSelecionada ? (
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
-                        <SelectTrigger className={envolvido && !field.value ? "border-red-500" : ""}>
+                        <SelectTrigger className={!field.value ? "border-red-500" : ""}>
                           <SelectValue placeholder="Selecione o colaborador" />
                         </SelectTrigger>
                       </FormControl>
@@ -129,7 +103,7 @@ const AccidentedEmployeeHealthFields: React.FC<AccidentedEmployeeHealthFieldsPro
                         placeholder="Digite o nome do colaborador"
                         value={field.value || ""}
                         onChange={(e) => field.onChange(e.target.value.toUpperCase())}
-                        className={envolvido && !field.value ? "border-red-500" : ""}
+                        className={!field.value ? "border-red-500" : ""}
                       />
                     </FormControl>
                   )}
@@ -143,8 +117,8 @@ const AccidentedEmployeeHealthFields: React.FC<AccidentedEmployeeHealthFieldsPro
               name={`colaboradores_acidentados.${index}.funcao`}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className={envolvido ? "text-red-500" : ""}>
-                    Função {envolvido ? "*" : ""}
+                  <FormLabel className="text-red-500">
+                    Função *
                   </FormLabel>
                   <FormControl>
                     <Input
@@ -153,7 +127,7 @@ const AccidentedEmployeeHealthFields: React.FC<AccidentedEmployeeHealthFieldsPro
                       disabled={isAbelvSelecionada}
                       placeholder={!isAbelvSelecionada ? "Digite a função" : ""}
                       onChange={!isAbelvSelecionada ? (e) => field.onChange(e.target.value.toUpperCase()) : field.onChange}
-                      className={envolvido && !field.value ? "border-red-500" : ""}
+                      className={!field.value ? "border-red-500" : ""}
                     />
                   </FormControl>
                   <FormMessage />
@@ -166,8 +140,8 @@ const AccidentedEmployeeHealthFields: React.FC<AccidentedEmployeeHealthFieldsPro
               name={`colaboradores_acidentados.${index}.matricula`}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className={envolvido ? "text-red-500" : ""}>
-                    Matrícula {envolvido ? "*" : ""}
+                  <FormLabel className="text-red-500">
+                    Matrícula *
                   </FormLabel>
                   <FormControl>
                     <Input
@@ -176,7 +150,7 @@ const AccidentedEmployeeHealthFields: React.FC<AccidentedEmployeeHealthFieldsPro
                       disabled={isAbelvSelecionada}
                       placeholder={!isAbelvSelecionada ? "Digite a matrícula" : ""}
                       onChange={!isAbelvSelecionada ? (e) => field.onChange(e.target.value.toUpperCase()) : field.onChange}
-                      className={envolvido && !field.value ? "border-red-500" : ""}
+                      className={!field.value ? "border-red-500" : ""}
                     />
                   </FormControl>
                   <FormMessage />
@@ -477,8 +451,6 @@ const AccidentedEmployeeHealthFields: React.FC<AccidentedEmployeeHealthFieldsPro
               </div>
             )}
           />
-        </>
-      )}
     </div>
   );
 };
