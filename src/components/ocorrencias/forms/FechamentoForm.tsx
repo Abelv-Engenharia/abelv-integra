@@ -30,9 +30,9 @@ const FechamentoForm = () => {
   const licoes_aprendidas_enviada = watch("licoes_aprendidas_enviada");
   const acoes = watch("acoes") || [];
   
-  // Corrigir os nomes para snake_case conforme schema dos dados
+  // Buscar dados do formulário (camelCase)
   const dataOcorrencia = watch("data") as Date | null;
-  const classificacaoOcorrencia = watch("classificacao_ocorrencia") || null; // corrigido para snake_case
+  const classificacaoOcorrencia = watch("classificacaoOcorrencia") || null;
   const selectedCcaId = watch("cca") || null;
   const ccas = watch("ccas") || [];
   let codigoCca: string | null = null;
@@ -152,7 +152,7 @@ const FechamentoForm = () => {
                     // Usar getValues para garantir dados fresh
                     const values = getValues([
                       "data",
-                      "classificacao_ocorrencia",
+                      "classificacaoOcorrencia",
                       "cca",
                       "ccas"
                     ]);
@@ -258,7 +258,7 @@ const FechamentoForm = () => {
                     // Usar getValues para garantir dados atualizados
                     const values = getValues([
                       "data",
-                      "classificacao_ocorrencia",
+                      "classificacaoOcorrencia",
                       "cca",
                       "ccas"
                     ]);
@@ -390,7 +390,7 @@ const FechamentoForm = () => {
                   // Pega valores com getValues (garante frescor dos dados)
                   const values = getValues([
                     "data",
-                    "classificacao_ocorrencia",
+                    "classificacaoOcorrencia",
                     "cca",
                     "ccas"
                   ]);
