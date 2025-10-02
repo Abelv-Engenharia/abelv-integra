@@ -50,7 +50,11 @@ export async function uploadLicoesAprendidasToBucket(
     return null;
   }
 
-  // Retornar apenas o nome do arquivo (não a URL temporária)
-  return fileName;
+  // Gerar URL pública do arquivo
+  const { data: { publicUrl } } = supabase.storage
+    .from("ocorrencias")
+    .getPublicUrl(fileName);
+
+  return publicUrl;
 }
 

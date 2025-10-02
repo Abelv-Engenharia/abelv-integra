@@ -87,6 +87,7 @@ const OcorrenciasEdicao = () => {
           supervisor_responsavel: data.supervisor_responsavel || "",
           encarregado_responsavel: data.encarregado_responsavel || "",
           colaboradores_acidentados: colaboradores,
+          colaboradoresEnvolvidos: colaboradores.length > 0,
           tipoOcorrencia: data.tipo_ocorrencia || "",
           tipoEvento: data.tipo_evento || "",
           classificacaoOcorrencia: data.classificacao_ocorrencia || "",
@@ -179,7 +180,18 @@ const OcorrenciasEdicao = () => {
         colaboradores_acidentados: formData.colaboradores_acidentados?.map(col => ({
           colaborador: col.colaborador || "",
           funcao: col.funcao || "",
-          matricula: col.matricula || ""
+          matricula: col.matricula || "",
+          houve_afastamento: col.houve_afastamento || "",
+          dias_perdidos: col.dias_perdidos || null,
+          dias_debitados: col.dias_debitados || null,
+          parte_corpo_atingida: col.parte_corpo_atingida || "",
+          lateralidade: col.lateralidade || "",
+          agente_causador: col.agente_causador || "",
+          situacao_geradora: col.situacao_geradora || "",
+          natureza_lesao: col.natureza_lesao || "",
+          numero_cat: col.numero_cat || "",
+          cid: col.cid || "",
+          arquivo_cat: col.arquivo_cat || null
         })) || [],
         tipo_ocorrencia: formData.tipoOcorrencia,
         tipo_evento: formData.tipoEvento,

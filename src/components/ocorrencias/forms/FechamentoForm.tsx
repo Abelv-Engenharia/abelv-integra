@@ -140,7 +140,7 @@ const FechamentoForm = () => {
             render={({ field: { value, onChange, ...field } }) => (
               <div className="grid w-full gap-1.5">
                 <Label htmlFor="informe-upload">
-                  Informe preliminar (PDF, máx. 2MB)
+                  Informe preliminar (PDF, máx. 5MB)
                 </Label>
                 <Input
                   id="informe-upload"
@@ -167,7 +167,7 @@ const FechamentoForm = () => {
                     }
                     // Logs para debug
                     console.log("UP-INFORME: Data:", dataOcorrencia, "Classificacao:", classificacaoOcorrencia, "selectedCcaId:", selectedCcaId, "codigoCca:", codigoCca);
-                    if (file && file.size <= 2 * 1024 * 1024) { // 2MB limit
+                    if (file && file.size <= 5 * 1024 * 1024) { // 5MB limit
                       if (!dataOcorrencia || !classificacaoOcorrencia || !codigoCca) {
                         alert("Preencha a data da ocorrência, a classificação e o CCA antes de anexar o informe.");
                         return;
@@ -182,7 +182,7 @@ const FechamentoForm = () => {
                         alert("Erro ao fazer upload do arquivo do informe preliminar.");
                       }
                     } else if (file) {
-                      alert("O arquivo deve ter no máximo 2MB");
+                      alert("O arquivo deve ter no máximo 5MB");
                     }
                   }}
                 />
@@ -226,7 +226,7 @@ const FechamentoForm = () => {
             render={({ field: { value, onChange, ...field } }) => (
               <div className="grid w-full gap-1.5">
                 <Label htmlFor="rai-upload">
-                  Relatório de análise e investigação - RAI (PDF, máx. 2MB)
+                  Relatório de análise e investigação - RAI (PDF, máx. 5MB)
                 </Label>
                 <Input
                   id="rai-upload"
@@ -252,7 +252,7 @@ const FechamentoForm = () => {
                       codigoCca = foundCca?.codigo || null;
                     }
                     console.log("UP-RAI: Data:", dataOcorrencia, "Classificacao:", classificacaoOcorrencia, "selectedCcaId:", selectedCcaId, "codigoCca:", codigoCca);
-                    if (file && file.size <= 2 * 1024 * 1024) { // 2MB limit
+                    if (file && file.size <= 5 * 1024 * 1024) { // 5MB limit
                       if (!dataOcorrencia || !classificacaoOcorrencia || !codigoCca) {
                         alert("Preencha a data da ocorrência, a classificação e o CCA antes de anexar o RAI.");
                         return;
@@ -267,7 +267,7 @@ const FechamentoForm = () => {
                         alert("Erro ao fazer upload do arquivo RAI.");
                       }
                     } else if (file) {
-                      alert("O arquivo deve ter no máximo 2MB");
+                      alert("O arquivo deve ter no máximo 5MB");
                     }
                   }}
                 />
@@ -338,7 +338,7 @@ const FechamentoForm = () => {
           render={({ field: { value, onChange, ...field } }) => (
             <div className="grid w-full gap-1.5">
               <Label htmlFor="licoes-upload">
-                Anexar lições aprendidas (PDF, máx. 2MB)
+                Anexar lições aprendidas (PDF, máx. 5MB)
               </Label>
               <Input
                 id="licoes-upload"
@@ -364,7 +364,7 @@ const FechamentoForm = () => {
                     codigoCca = foundCca?.codigo || null;
                   }
                   console.log("UP-LICOES: Data:", dataOcorrencia, "Classificacao:", classificacaoOcorrencia, "selectedCcaId:", selectedCcaId, "codigoCca:", codigoCca);
-                  if (file && file.size <= 2 * 1024 * 1024) {
+                  if (file && file.size <= 5 * 1024 * 1024) {
                     if (!dataOcorrencia || !classificacaoOcorrencia || !codigoCca) {
                       alert("Preencha a data da ocorrência, a classificação e o CCA antes de anexar o arquivo de lições aprendidas.");
                       return;
@@ -379,7 +379,7 @@ const FechamentoForm = () => {
                       alert("Erro ao fazer upload do arquivo de lições aprendidas.");
                     }
                   } else if (file) {
-                    alert("O arquivo deve ter no máximo 2MB");
+                    alert("O arquivo deve ter no máximo 5MB");
                   }
                 }}
               />

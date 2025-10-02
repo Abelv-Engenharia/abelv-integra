@@ -392,7 +392,7 @@ const AccidentedEmployeeHealthFields: React.FC<AccidentedEmployeeHealthFieldsPro
             name={`colaboradores_acidentados.${index}.arquivo_cat`}
             render={({ field: { value, onChange, ...field } }) => (
               <div className="grid w-full gap-1.5">
-                <Label htmlFor={`cat-upload-${index}`}>Anexar CAT (PDF, máx. 2MB)</Label>
+                <Label htmlFor={`cat-upload-${index}`}>Anexar CAT (PDF, máx. 5MB)</Label>
                 <Input
                   id={`cat-upload-${index}`}
                   type="file"
@@ -400,7 +400,7 @@ const AccidentedEmployeeHealthFields: React.FC<AccidentedEmployeeHealthFieldsPro
                   {...field}
                   onChange={async (e) => {
                     const file = e.target.files?.[0];
-                    if (file && file.size <= 2 * 1024 * 1024) {
+                    if (file && file.size <= 5 * 1024 * 1024) {
                       if (!dataOcorrencia || !colaboradorNome) {
                         alert("Preencha a data da ocorrência e o colaborador antes de anexar o CAT.");
                         return;
@@ -414,7 +414,7 @@ const AccidentedEmployeeHealthFields: React.FC<AccidentedEmployeeHealthFieldsPro
                         alert("Erro ao fazer upload do arquivo CAT.");
                       }
                     } else if (file) {
-                      alert("O arquivo deve ter no máximo 2MB");
+                      alert("O arquivo deve ter no máximo 5MB");
                     }
                   }}
                 />
