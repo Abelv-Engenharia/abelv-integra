@@ -182,7 +182,7 @@ const FechamentoForm = () => {
                     // Logs para debug
                     console.log("UP-INFORME: Data:", dataOcorrencia, "Classificacao:", classificacaoOcorrencia, "selectedCcaId:", selectedCcaId, "codigoCca:", codigoCca);
                     if (file && file.size <= 5 * 1024 * 1024) { // 5MB limit
-                      if (!dataOcorrencia || !classificacaoOcorrencia || !codigoCca) {
+                      if (dataOcorrencia == null || classificacaoOcorrencia == null || codigoCca == null) {
                         alert("Preencha a data da ocorrência, a classificação e o CCA antes de anexar o informe.");
                         return;
                       }
@@ -287,7 +287,7 @@ const FechamentoForm = () => {
                     
                     console.log("UP-RAI: Data:", dataOcorrencia, "Classificacao:", classificacaoOcorrencia, "selectedCcaId:", selectedCcaId, "codigoCca:", codigoCca);
                     if (file && file.size <= 5 * 1024 * 1024) { // 5MB limit
-                      if (!dataOcorrencia || !classificacaoOcorrencia || !codigoCca) {
+                      if (dataOcorrencia == null || classificacaoOcorrencia == null || codigoCca == null) {
                         alert("Preencha a data da ocorrência, a classificação e o CCA antes de anexar o RAI.");
                         return;
                       }
@@ -419,7 +419,7 @@ const FechamentoForm = () => {
                   
                   console.log("UP-LICOES: Data:", dataOcorrencia, "Classificacao:", classificacaoOcorrencia, "selectedCcaId:", selectedCcaId, "codigoCca:", codigoCca);
                   if (file && file.size <= 5 * 1024 * 1024) {
-                    if (!dataOcorrencia || !classificacaoOcorrencia || !codigoCca) {
+                    if (dataOcorrencia == null || classificacaoOcorrencia == null || codigoCca == null) {
                       alert("Preencha a data da ocorrência, a classificação e o CCA antes de anexar o arquivo de lições aprendidas.");
                       return;
                     }
