@@ -64,34 +64,14 @@ const ResponsiblePersonFields: React.FC<ResponsiblePersonFieldsProps> = ({
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-      {isAbelvSelecionada ? (
-        <PersonnelSelect
-          name="engenheiro_responsavel"
-          label="Engenheiro responsável"
-          placeholder={!selectedCcaId ? "Selecione um CCA primeiro" : "Selecione o engenheiro"}
-          people={mappedEngenheiros}
-          disabled={!selectedCcaId}
-          showInactive={true}
-        />
-      ) : (
-        <FormField
-          control={control}
-          name="engenheiro_responsavel"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Engenheiro responsável</FormLabel>
-              <FormControl>
-                <Input 
-                  placeholder="Digite o nome do engenheiro"
-                  value={field.value || ''}
-                  onChange={(e) => field.onChange(e.target.value.toUpperCase())}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      )}
+      <PersonnelSelect
+        name="engenheiro_responsavel"
+        label="Engenheiro responsável"
+        placeholder={!selectedCcaId ? "Selecione um CCA primeiro" : "Selecione o engenheiro"}
+        people={mappedEngenheiros}
+        disabled={!selectedCcaId}
+        showInactive={true}
+      />
       
       {isAbelvSelecionada ? (
         <PersonnelSelect
