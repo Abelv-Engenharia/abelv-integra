@@ -359,6 +359,49 @@ export const getOcorrenciaById = async (id: string) => {
       }
     }
 
+    // Buscar nomes dos responsáveis usando get_personnel_data
+    let engenheiroNome = null;
+    if (ocorrencia.engenheiro_responsavel) {
+      try {
+        const { data: engenheiroData } = await supabase.rpc('get_personnel_data', {
+          p_person_id: ocorrencia.engenheiro_responsavel,
+          p_person_type: 'engenheiro',
+          p_prefer_current: true
+        });
+        engenheiroNome = (engenheiroData as any)?.nome || null;
+      } catch (err) {
+        console.warn('Erro ao buscar engenheiro:', err);
+      }
+    }
+
+    let supervisorNome = null;
+    if (ocorrencia.supervisor_responsavel) {
+      try {
+        const { data: supervisorData } = await supabase.rpc('get_personnel_data', {
+          p_person_id: ocorrencia.supervisor_responsavel,
+          p_person_type: 'supervisor',
+          p_prefer_current: true
+        });
+        supervisorNome = (supervisorData as any)?.nome || null;
+      } catch (err) {
+        console.warn('Erro ao buscar supervisor:', err);
+      }
+    }
+
+    let encarregadoNome = null;
+    if (ocorrencia.encarregado_responsavel) {
+      try {
+        const { data: encarregadoData } = await supabase.rpc('get_personnel_data', {
+          p_person_id: ocorrencia.encarregado_responsavel,
+          p_person_type: 'encarregado',
+          p_prefer_current: true
+        });
+        encarregadoNome = (encarregadoData as any)?.nome || null;
+      } catch (err) {
+        console.warn('Erro ao buscar encarregado:', err);
+      }
+    }
+
     // Buscar nomes dos colaboradores acidentados
     let colaboradoresEnriquecidos = [];
     if (ocorrencia.colaboradores_acidentados && Array.isArray(ocorrencia.colaboradores_acidentados)) {
@@ -375,7 +418,7 @@ export const getOcorrenciaById = async (id: string) => {
         colaboradoresEnriquecidos = ocorrencia.colaboradores_acidentados.map((c: any) => {
           const funcionario = funcionarios?.find((f: any) => f.id === c.colaborador);
           return {
-            colaborador: funcionario?.nome || c.colaborador,
+            colaborador: funcionario?.nome || `Funcionário não encontrado (ID: ${c.colaborador})`,
             funcao: funcionario?.funcao || c.funcao,
             matricula: funcionario?.matricula || c.matricula,
             colaborador_id: c.colaborador
@@ -394,6 +437,9 @@ export const getOcorrenciaById = async (id: string) => {
       cca_codigo: ccaData?.codigo || ocorrencia.cca,
       cca_nome: ccaData?.nome || null,
       empresa_nome: empresaData?.nome || ocorrencia.empresa,
+      engenheiro_responsavel_nome: engenheiroNome,
+      supervisor_responsavel_nome: supervisorNome,
+      encarregado_responsavel_nome: encarregadoNome,
       colaboradores_acidentados: colaboradoresEnriquecidos,
       acoes: acoesConvertidas
     };

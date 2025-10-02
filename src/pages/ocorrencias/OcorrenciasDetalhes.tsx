@@ -134,20 +134,20 @@ const OcorrenciasDetalhes = () => {
         <CardHeader>
           <CardTitle>Responsáveis</CardTitle>
         </CardHeader>
-        <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <label className="text-sm font-medium text-muted-foreground">Engenheiro Responsável</label>
-            <p className="text-sm">{ocorrencia.engenheiro_responsavel || '-'}</p>
-          </div>
-          <div>
-            <label className="text-sm font-medium text-muted-foreground">Supervisor Responsável</label>
-            <p className="text-sm">{ocorrencia.supervisor_responsavel || '-'}</p>
-          </div>
-          <div>
-            <label className="text-sm font-medium text-muted-foreground">Encarregado Responsável</label>
-            <p className="text-sm">{ocorrencia.encarregado_responsavel || '-'}</p>
-          </div>
-        </CardContent>
+          <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="text-sm font-medium text-muted-foreground">Engenheiro Responsável</label>
+              <p className="text-sm">{ocorrencia.engenheiro_responsavel_nome || ocorrencia.engenheiro_responsavel || '-'}</p>
+            </div>
+            <div>
+              <label className="text-sm font-medium text-muted-foreground">Supervisor Responsável</label>
+              <p className="text-sm">{ocorrencia.supervisor_responsavel_nome || ocorrencia.supervisor_responsavel || '-'}</p>
+            </div>
+            <div>
+              <label className="text-sm font-medium text-muted-foreground">Encarregado Responsável</label>
+              <p className="text-sm">{ocorrencia.encarregado_responsavel_nome || ocorrencia.encarregado_responsavel || '-'}</p>
+            </div>
+          </CardContent>
       </Card>
 
       {/* Colaboradores Acidentados */}
