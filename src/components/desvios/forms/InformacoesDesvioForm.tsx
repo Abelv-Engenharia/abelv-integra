@@ -16,9 +16,11 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Funcionario } from "@/types/funcionarios";
 import { BaseLegalOpcao } from "@/services/desviosService";
+import MultipleInfratoresFields from "./components/MultipleInfratoresFields";
 
 interface InformacoesDesvioFormProps {
   context: {
@@ -32,8 +34,8 @@ interface InformacoesDesvioFormProps {
 const InformacoesDesvioForm = ({ context }: InformacoesDesvioFormProps) => {
   const { control, watch } = useFormContext();
   
-  // Watch da empresa selecionada para determinar se é ABELV
   const empresaId = watch("empresa");
+  const colaboradoresEnvolvidos = watch("colaboradoresEnvolvidos");
   const isAbelvSelecionada = empresaId?.toString() === "6";
 
   return (
@@ -160,77 +162,31 @@ const InformacoesDesvioForm = ({ context }: InformacoesDesvioFormProps) => {
 
         <FormField
           control={control}
-          name="colaboradorInfrator"
+          name="colaboradoresEnvolvidos"
           render={({ field }) => (
-            <FormItem>
-              <FormLabel>Colaborador infrator</FormLabel>
-              {isAbelvSelecionada ? (
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione o colaborador" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {(context.funcionarios || []).map(func => (
-                      <SelectItem key={func.id} value={func.id}>
-                        {func.nome}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              ) : (
-                <FormControl>
-                  <Input 
-                    placeholder="Digite o nome do colaborador"
-                    value={field.value || ''}
-                    onChange={(e) => field.onChange(e.target.value.toUpperCase())}
-                  />
-                </FormControl>
-              )}
-              <FormMessage />
+            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+              <div className="space-y-0.5">
+                <FormLabel className="text-base">Há colaboradores envolvidos no desvio?</FormLabel>
+                <div className="text-sm text-muted-foreground">
+                  Ative para incluir colaboradores infratores
+                </div>
+              </div>
+              <FormControl>
+                <Switch
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+              </FormControl>
             </FormItem>
           )}
         />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-           <FormField
-            control={control}
-            name="funcao"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Função</FormLabel>
-                <FormControl>
-                  <Input 
-                    placeholder={isAbelvSelecionada ? "Função do colaborador" : "Digite a função"}
-                    {...field} 
-                    readOnly={isAbelvSelecionada}
-                    onChange={!isAbelvSelecionada ? (e) => field.onChange(e.target.value.toUpperCase()) : field.onChange}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+        {colaboradoresEnvolvidos && (
+          <MultipleInfratoresFields
+            funcionarios={context.funcionarios}
+            selectedEmpresaId={empresaId}
           />
-           <FormField
-            control={control}
-            name="matricula"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Matrícula</FormLabel>
-                <FormControl>
-                  <Input 
-                    placeholder={isAbelvSelecionada ? "Matrícula do colaborador" : "Digite a matrícula"}
-                    {...field} 
-                    readOnly={isAbelvSelecionada}
-                    onChange={!isAbelvSelecionada ? (e) => field.onChange(e.target.value.toUpperCase()) : field.onChange}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
+        )}
       </CardContent>
     </Card>
   );

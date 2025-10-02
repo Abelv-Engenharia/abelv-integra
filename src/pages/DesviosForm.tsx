@@ -65,17 +65,6 @@ const DesviosForm = () => {
     }
   }, [watchData, form]);
 
-  // Watch colaboradorInfrator to auto-populate funcao and matricula
-  const watchColaborador = form.watch("colaboradorInfrator");
-  React.useEffect(() => {
-    if (watchColaborador) {
-      const funcionario = contextValue.funcionarios.find(f => f.id === watchColaborador);
-      if (funcionario) {
-        form.setValue("funcao", funcionario.funcao);
-        form.setValue("matricula", funcionario.matricula);
-      }
-    }
-  }, [watchColaborador, contextValue.funcionarios, form]);
 
   return (
     <div className="container mx-auto py-6 space-y-6">

@@ -16,13 +16,18 @@ export interface DesvioFormData {
   engenheiroResponsavel: string;
   
   // Novas Informações
-  descricaoDesvio: string; // Campo corrigido para mapear para descricao_desvio
+  descricaoDesvio: string;
   baseLegal: string;
   supervisorResponsavel: string;
   encarregadoResponsavel: string;
-  colaboradorInfrator: string;
-  funcao: string;
-  matricula: string;
+  
+  // Colaboradores Infratores
+  colaboradoresEnvolvidos: boolean;
+  funcionarios_infratores: Array<{
+    colaborador: string;
+    funcao: string;
+    matricula: string;
+  }>;
   
   // Ação Corretiva
   tratativaAplicada: string;

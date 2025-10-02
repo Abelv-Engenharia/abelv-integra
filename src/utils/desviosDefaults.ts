@@ -19,9 +19,14 @@ export const getDefaultFormValues = (): DesvioFormData => ({
   baseLegal: "",
   supervisorResponsavel: "",
   encarregadoResponsavel: "",
-  colaboradorInfrator: "",
-  funcao: "",
-  matricula: "",
+  colaboradoresEnvolvidos: false,
+  funcionarios_infratores: [
+    {
+      colaborador: "",
+      funcao: "",
+      matricula: ""
+    }
+  ],
   tratativaAplicada: "",
   responsavelAcao: "",
   prazoCorrecao: "",

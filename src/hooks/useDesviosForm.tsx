@@ -37,9 +37,14 @@ export const useDesviosForm = () => {
       baseLegal: "",
       supervisorResponsavel: "",
       encarregadoResponsavel: "",
-      colaboradorInfrator: "",
-      funcao: "",
-      matricula: "",
+      colaboradoresEnvolvidos: false,
+      funcionarios_infratores: [
+        {
+          colaborador: "",
+          funcao: "",
+          matricula: ""
+        }
+      ],
       
       // Ação Corretiva
       tratativaAplicada: "",
@@ -82,6 +87,18 @@ export const useDesviosForm = () => {
       // Calcular situação da ação automaticamente
       const situacaoAcaoCalculada = calculateStatusAcao(formData.situacao, formData.prazoCorrecao);
       
+      // Processar infratores apenas se toggle ativado
+      const funcionarios_envolvidos = formData.colaboradoresEnvolvidos
+        ? (formData.funcionarios_infratores || [])
+            .filter(f => f.colaborador) // Apenas com colaborador preenchido
+            .map(f => ({
+              funcionario_id: f.colaborador,
+              tipo: 'infrator',
+              funcao: f.funcao || '',
+              matricula: f.matricula || ''
+            }))
+        : [];
+
       const desvioData = {
         data_desvio: formData.data,
         hora_desvio: formData.hora || '00:00',
@@ -92,12 +109,7 @@ export const useDesviosForm = () => {
         engenheiro_responsavel_id: formData.engenheiroResponsavel || null,
         supervisor_responsavel_id: formData.supervisorResponsavel || null,
         encarregado_responsavel_id: formData.encarregadoResponsavel || null,
-        funcionarios_envolvidos: formData.colaboradorInfrator ? [{
-          funcionario_id: formData.colaboradorInfrator,
-          tipo: 'infrator',
-          funcao: formData.funcao || '',
-          matricula: formData.matricula || ''
-        }] : [],
+        funcionarios_envolvidos,
         tipo_registro_id: formData.tipoRegistro ? parseInt(formData.tipoRegistro) : null,
         processo_id: formData.processo ? parseInt(formData.processo) : null,
         evento_identificado_id: formData.eventoIdentificado ? parseInt(formData.eventoIdentificado) : null,
@@ -132,20 +144,24 @@ export const useDesviosForm = () => {
         console.log('Desvio criado com sucesso:', result);
         
         // Verificar se deve aplicar medida disciplinar
-        if (formData.aplicacaoMedidaDisciplinar && formData.colaboradorInfrator) {
+        if (formData.aplicacaoMedidaDisciplinar && funcionarios_envolvidos.length > 0) {
           toast({
             title: "Desvio cadastrado com sucesso!",
             description: "Você será redirecionado para cadastrar a medida disciplinar.",
           });
+          
+          const primeiroInfrator = funcionarios_envolvidos[0];
           
           // Redirecionar para cadastro de medida disciplinar com dados pré-preenchidos
           navigate('/medidas-disciplinares/cadastro', {
             state: {
               fromDesvio: true,
               cca_id: formData.ccaId,
-              funcionario_id: formData.colaboradorInfrator,
+              funcionario_id: primeiroInfrator.funcionario_id,
               descricao: formData.descricaoDesvio,
               desvio_id: result.id,
+              multiplosInfratores: funcionarios_envolvidos.length > 1,
+              todosInfratores: funcionarios_envolvidos
             }
           });
         } else {

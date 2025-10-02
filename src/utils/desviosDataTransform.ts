@@ -12,11 +12,16 @@ export const transformFormDataToDesvio = (formData: DesvioFormData) => {
     engenheiro_responsavel_id: formData.engenheiroResponsavel || null,
     supervisor_responsavel_id: formData.supervisorResponsavel || null,
     encarregado_responsavel_id: formData.encarregadoResponsavel || null,
-    funcionarios_envolvidos: formData.colaboradorInfrator ? [{ 
-      id: formData.colaboradorInfrator, 
-      funcao: formData.funcao, 
-      matricula: formData.matricula 
-    }] : [],
+    funcionarios_envolvidos: formData.colaboradoresEnvolvidos
+      ? (formData.funcionarios_infratores || [])
+          .filter(f => f.colaborador)
+          .map(f => ({
+            funcionario_id: f.colaborador,
+            tipo: 'infrator',
+            funcao: f.funcao || '',
+            matricula: f.matricula || ''
+          }))
+      : [],
     tipo_registro_id: formData.tipoRegistro ? parseInt(formData.tipoRegistro) : null,
     processo_id: formData.processo ? parseInt(formData.processo) : null,
     evento_identificado_id: formData.eventoIdentificado ? parseInt(formData.eventoIdentificado) : null,
