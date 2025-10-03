@@ -292,7 +292,7 @@ export default function SidebarSectionSMS({ openMenu, toggleMenu, onLinkClick }:
       )}
 
       {/* Seção Hora de Segurança */}
-      {(isAdmin || canAccessMenu("hora_seguranca_dashboard") || canAccessMenu("hora_seguranca_agenda") || canAccessMenu("hora_seguranca_cadastro")) && (
+      {(isAdmin || canAccessMenu("hora_seguranca_dashboard") || canAccessMenu("hora_seguranca_agenda") || canAccessMenu("hora_seguranca_cadastro") || canAccessMenu("hora_seguranca_cadastro_hsa") || canAccessMenu("hora_seguranca_nao_programada_hsa") || canAccessMenu("hora_seguranca_painel_execucao_hsa")) && (
         <SidebarMenu>
           <SidebarMenuItem>
             <Collapsible open={openMenu === "hora-seguranca"}>
@@ -364,6 +364,42 @@ export default function SidebarSectionSMS({ openMenu, toggleMenu, onLinkClick }:
                       >
                         <Link to="/hora-seguranca/cadastro-inspecao-nao-planejada" className="flex items-center gap-2">
                           <span className="text-xs leading-tight break-words min-w-0">Inspeção Não Programada</span>
+                        </Link>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+                  )}
+                  {(isAdmin || canAccessMenu("hora_seguranca_cadastro_hsa")) && (
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton 
+                        asChild
+                        className={currentPath === "/hora-seguranca/cadastro-hsa" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
+                      >
+                        <Link to="/hora-seguranca/cadastro-hsa" className="flex items-center gap-2">
+                          <span className="text-xs leading-tight break-words min-w-0">Cadastro HSA</span>
+                        </Link>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+                  )}
+                  {(isAdmin || canAccessMenu("hora_seguranca_nao_programada_hsa")) && (
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton 
+                        asChild
+                        className={currentPath === "/hora-seguranca/nao-programada-hsa" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
+                      >
+                        <Link to="/hora-seguranca/nao-programada-hsa" className="flex items-center gap-2">
+                          <span className="text-xs leading-tight break-words min-w-0">HSA Não Programada</span>
+                        </Link>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+                  )}
+                  {(isAdmin || canAccessMenu("hora_seguranca_painel_execucao_hsa")) && (
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton 
+                        asChild
+                        className={currentPath === "/hora-seguranca/painel-execucao-hsa" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
+                      >
+                        <Link to="/hora-seguranca/painel-execucao-hsa" className="flex items-center gap-2">
+                          <span className="text-xs leading-tight break-words min-w-0">Painel Execução HSA</span>
                         </Link>
                       </SidebarMenuSubButton>
                     </SidebarMenuSubItem>
