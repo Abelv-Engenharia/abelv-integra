@@ -44,63 +44,6 @@ export type Database = {
         }
         Relationships: []
       }
-      alertas_esocial: {
-        Row: {
-          cca_id: number | null
-          created_at: string | null
-          data_referencia: string
-          descricao: string
-          empresa_id: number | null
-          evento: string
-          evento_id: string | null
-          funcionario_id: string | null
-          funcionario_nome: string | null
-          id: string
-          notificado_em: string | null
-          prazo_envio: string | null
-          resolvido_em: string | null
-          status: string | null
-          tipo_alerta: string
-          updated_at: string | null
-        }
-        Insert: {
-          cca_id?: number | null
-          created_at?: string | null
-          data_referencia: string
-          descricao: string
-          empresa_id?: number | null
-          evento: string
-          evento_id?: string | null
-          funcionario_id?: string | null
-          funcionario_nome?: string | null
-          id?: string
-          notificado_em?: string | null
-          prazo_envio?: string | null
-          resolvido_em?: string | null
-          status?: string | null
-          tipo_alerta: string
-          updated_at?: string | null
-        }
-        Update: {
-          cca_id?: number | null
-          created_at?: string | null
-          data_referencia?: string
-          descricao?: string
-          empresa_id?: number | null
-          evento?: string
-          evento_id?: string | null
-          funcionario_id?: string | null
-          funcionario_nome?: string | null
-          id?: string
-          notificado_em?: string | null
-          prazo_envio?: string | null
-          resolvido_em?: string | null
-          status?: string | null
-          tipo_alerta?: string
-          updated_at?: string | null
-        }
-        Relationships: []
-      }
       audit_logs: {
         Row: {
           action: string
@@ -131,42 +74,6 @@ export type Database = {
           table_name?: string | null
           timestamp?: string
           user_id?: string | null
-        }
-        Relationships: []
-      }
-      auditoria_exports: {
-        Row: {
-          arquivo_url: string | null
-          created_at: string
-          evento: string
-          filtros_json: Json
-          formato: string
-          id: string
-          quantidade: number
-          tabela: string
-          usuario_id: string
-        }
-        Insert: {
-          arquivo_url?: string | null
-          created_at?: string
-          evento: string
-          filtros_json?: Json
-          formato: string
-          id?: string
-          quantidade?: number
-          tabela: string
-          usuario_id: string
-        }
-        Update: {
-          arquivo_url?: string | null
-          created_at?: string
-          evento?: string
-          filtros_json?: Json
-          formato?: string
-          id?: string
-          quantidade?: number
-          tabela?: string
-          usuario_id?: string
         }
         Relationships: []
       }
