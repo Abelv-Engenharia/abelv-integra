@@ -87,16 +87,32 @@ export const useDesviosForm = () => {
       // Calcular situação da ação automaticamente
       const situacaoAcaoCalculada = calculateStatusAcao(formData.situacao, formData.prazoCorrecao);
       
+      // Detectar se é empresa ABELV (ID = 6)
+      const isAbelv = formData.empresa === "6";
+      
       // Processar infratores apenas se toggle ativado
       const funcionarios_envolvidos = formData.colaboradoresEnvolvidos
         ? (formData.funcionarios_infratores || [])
             .filter(f => f.colaborador) // Apenas com colaborador preenchido
-            .map(f => ({
-              funcionario_id: f.colaborador,
-              tipo: 'infrator',
-              funcao: f.funcao || '',
-              matricula: f.matricula || ''
-            }))
+            .map(f => {
+              // Se for ABELV, usar UUID. Se não, usar nome
+              if (isAbelv) {
+                return {
+                  funcionario_id: f.colaborador,
+                  tipo: 'infrator',
+                  funcao: f.funcao || '',
+                  matricula: f.matricula || ''
+                };
+              } else {
+                return {
+                  funcionario_id: null,
+                  funcionario_nome: f.colaborador,
+                  tipo: 'infrator',
+                  funcao: f.funcao || '',
+                  matricula: f.matricula || ''
+                };
+              }
+            })
         : [];
 
       const desvioData = {
@@ -107,8 +123,12 @@ export const useDesviosForm = () => {
         empresa_id: formData.empresa ? parseInt(formData.empresa) : null,
         base_legal_opcao_id: formData.baseLegal ? parseInt(formData.baseLegal) : null,
         engenheiro_responsavel_id: formData.engenheiroResponsavel || null,
-        supervisor_responsavel_id: formData.supervisorResponsavel || null,
-        encarregado_responsavel_id: formData.encarregadoResponsavel || null,
+        // Supervisor: UUID se ABELV, nome se outra empresa
+        supervisor_responsavel_id: isAbelv ? (formData.supervisorResponsavel || null) : null,
+        supervisor_responsavel_nome: !isAbelv ? (formData.supervisorResponsavel || null) : null,
+        // Encarregado: UUID se ABELV, nome se outra empresa
+        encarregado_responsavel_id: isAbelv ? (formData.encarregadoResponsavel || null) : null,
+        encarregado_responsavel_nome: !isAbelv ? (formData.encarregadoResponsavel || null) : null,
         funcionarios_envolvidos,
         tipo_registro_id: formData.tipoRegistro ? parseInt(formData.tipoRegistro) : null,
         processo_id: formData.processo ? parseInt(formData.processo) : null,

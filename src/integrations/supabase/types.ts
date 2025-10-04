@@ -477,6 +477,39 @@ export type Database = {
         }
         Relationships: []
       }
+      credores: {
+        Row: {
+          ativo: boolean
+          cnpj_cpf: string | null
+          codigo: string
+          created_at: string
+          fantasia: string | null
+          id: string
+          razao: string
+          updated_at: string
+        }
+        Insert: {
+          ativo?: boolean
+          cnpj_cpf?: string | null
+          codigo: string
+          created_at?: string
+          fantasia?: string | null
+          id?: string
+          razao: string
+          updated_at?: string
+        }
+        Update: {
+          ativo?: boolean
+          cnpj_cpf?: string | null
+          codigo?: string
+          created_at?: string
+          fantasia?: string | null
+          id?: string
+          razao?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       desvios_completos: {
         Row: {
           acao_imediata: string | null
@@ -494,6 +527,7 @@ export type Database = {
           efeito_falha: number | null
           empresa_id: number | null
           encarregado_responsavel_id: string | null
+          encarregado_responsavel_nome: string | null
           engenheiro_responsavel_id: string | null
           evento_identificado_id: number | null
           exposicao: number | null
@@ -511,6 +545,7 @@ export type Database = {
           situacao: string | null
           status: string | null
           supervisor_responsavel_id: string | null
+          supervisor_responsavel_nome: string | null
           tipo_registro_id: number | null
           updated_at: string | null
         }
@@ -530,6 +565,7 @@ export type Database = {
           efeito_falha?: number | null
           empresa_id?: number | null
           encarregado_responsavel_id?: string | null
+          encarregado_responsavel_nome?: string | null
           engenheiro_responsavel_id?: string | null
           evento_identificado_id?: number | null
           exposicao?: number | null
@@ -547,6 +583,7 @@ export type Database = {
           situacao?: string | null
           status?: string | null
           supervisor_responsavel_id?: string | null
+          supervisor_responsavel_nome?: string | null
           tipo_registro_id?: number | null
           updated_at?: string | null
         }
@@ -566,6 +603,7 @@ export type Database = {
           efeito_falha?: number | null
           empresa_id?: number | null
           encarregado_responsavel_id?: string | null
+          encarregado_responsavel_nome?: string | null
           engenheiro_responsavel_id?: string | null
           evento_identificado_id?: number | null
           exposicao?: number | null
@@ -583,6 +621,7 @@ export type Database = {
           situacao?: string | null
           status?: string | null
           supervisor_responsavel_id?: string | null
+          supervisor_responsavel_nome?: string | null
           tipo_registro_id?: number | null
           updated_at?: string | null
         }
@@ -3604,6 +3643,45 @@ export type Database = {
           descricao?: string | null
           id?: string
           nome?: string
+        }
+        Relationships: []
+      }
+      plano_financeiro: {
+        Row: {
+          adiantamento: boolean
+          ativa: boolean
+          conta: string
+          created_at: string
+          descricao: string
+          id: string
+          imposto: boolean
+          redutora: boolean
+          tipoconta: string
+          updated_at: string
+        }
+        Insert: {
+          adiantamento: boolean
+          ativa: boolean
+          conta: string
+          created_at?: string
+          descricao: string
+          id?: string
+          imposto: boolean
+          redutora: boolean
+          tipoconta: string
+          updated_at?: string
+        }
+        Update: {
+          adiantamento?: boolean
+          ativa?: boolean
+          conta?: string
+          created_at?: string
+          descricao?: string
+          id?: string
+          imposto?: boolean
+          redutora?: boolean
+          tipoconta?: string
+          updated_at?: string
         }
         Relationships: []
       }
