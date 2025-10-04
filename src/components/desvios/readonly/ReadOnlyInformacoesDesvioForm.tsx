@@ -32,14 +32,14 @@ const ReadOnlyInformacoesDesvioForm = ({ desvio }: Props) => {
           <div>
             <label className="text-sm font-semibold text-gray-700 block mb-1 print-label">Supervisor Responsável</label>
             <p className="text-base font-medium border-b border-gray-200 pb-1 print-value">
-              {(desvio as any).supervisores?.nome || "N/A"}
+              {desvio.supervisor_responsavel_nome || (desvio as any).supervisores?.nome || "N/A"}
             </p>
           </div>
 
           <div>
             <label className="text-sm font-semibold text-gray-700 block mb-1 print-label">Encarregado Responsável</label>
             <p className="text-base font-medium border-b border-gray-200 pb-1 print-value">
-              {(desvio as any).encarregados?.nome || "N/A"}
+              {desvio.encarregado_responsavel_nome || (desvio as any).encarregados?.nome || "N/A"}
             </p>
           </div>
         </div>
@@ -52,7 +52,7 @@ const ReadOnlyInformacoesDesvioForm = ({ desvio }: Props) => {
               <div key={index} className="grid grid-cols-1 md:grid-cols-3 gap-4 p-3 border border-gray-300 rounded print:border-black">
                 <div>
                   <label className="text-sm font-semibold text-gray-700 block mb-1 print-label">Nome do Funcionário</label>
-                  <p className="text-base font-medium border-b border-gray-200 pb-1 print-value">{funcionario.nome || "-"}</p>
+                  <p className="text-base font-medium border-b border-gray-200 pb-1 print-value">{funcionario.funcionario_nome || funcionario.nome || "-"}</p>
                 </div>
                 <div>
                   <label className="text-sm font-semibold text-gray-700 block mb-1 print-label">Função</label>

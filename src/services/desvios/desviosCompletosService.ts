@@ -15,7 +15,9 @@ export interface DesvioCompleto {
   funcionarios_envolvidos?: any[];
   responsavel_id?: string;
   encarregado_responsavel_id?: string;
+  encarregado_responsavel_nome?: string;
   supervisor_responsavel_id?: string;
+  supervisor_responsavel_nome?: string;
   engenheiro_responsavel_id?: string;
   disciplina_id?: number;
   causa_provavel_id?: number;
