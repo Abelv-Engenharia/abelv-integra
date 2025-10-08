@@ -159,7 +159,7 @@ export function AppSidebar() {
         )}
 
         {/* Seção: Apoio Geral */}
-        {["admin_empresas", "admin_ccas"].some(canSee) && (
+        {["admin_empresas", "admin_ccas", "admin_unidades_medidas"].some(canSee) && (
           <SidebarSectionApoioGeral
             openMenu={openMenu}
             toggleMenu={toggleMenu}
