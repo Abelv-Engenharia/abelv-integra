@@ -4,6 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useProfile } from "@/hooks/useProfile";
 import { useComunicadosPendentes } from "@/hooks/useComunicados";
 import ComunicadosSequence from "@/components/comunicados/ComunicadosSequence";
+import esferaIntegra from "@/assets/esfera-integra.png";
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -83,7 +84,7 @@ const Dashboard = () => {
 
       <div className="flex justify-center items-center flex-1 mt-32">
         <img
-          src="https://xexgdtlctyuycohzhmuu.supabase.co/storage/v1/object/public/public-assets/SaaS_Integra%20(2).png"
+          src={esferaIntegra}
           alt="Abelv Integra"
           className="max-w-[400px] w-full h-auto"
         />
