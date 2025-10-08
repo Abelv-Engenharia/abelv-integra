@@ -51,8 +51,7 @@ export function AppSidebar() {
       currentPath === "/admin/perfis" ||
       currentPath === "/admin/usuarios-perfis" ||
       currentPath === "/admin/usuarios-ccas" ||
-      currentPath === "/admin/usuarios-direct" ||
-      currentPath === "/admin/criar-usuario-direct"
+      currentPath === "/admin/usuarios-direct"
     )
       return "seguranca";
     if (currentPath.startsWith("/admin") || currentPath.startsWith("/tutoriais")) return "admin";
