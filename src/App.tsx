@@ -32,7 +32,13 @@ import ConfiguracaoEmailsPage from "./pages/configuracao-emails/ConfiguracaoEmai
 import UploadTutoriaisPage from "./pages/configuracao-emails/UploadTutoriais";
 import Suporte from "./pages/Suporte";
 
-// Admin pages - DIRECT USER MANAGEMENT ONLY
+// Admin pages - NEW ACCESS CONTROL SYSTEM
+import AdminSistema from "./pages/admin/AdminSistema";
+import Perfis from "./pages/admin/Perfis";
+import UsuariosPerfis from "./pages/admin/UsuariosPerfis";
+import UsuariosCCAs from "./pages/admin/UsuariosCCAs";
+
+// Admin pages - DIRECT USER MANAGEMENT
 import GerenciarUsuariosDirect from "./pages/admin/GerenciarUsuariosDirect";
 import AdminCCAs from "./pages/admin/AdminCCAs";
 import AdminEmpresas from "./pages/admin/AdminEmpresas";
@@ -181,14 +187,19 @@ function App() {
                 {/* Support route */}
                 <Route path="suporte" element={<Suporte />} />
 
-                {/* Admin routes - DIRECT USER MANAGEMENT ONLY */}
+                {/* Admin routes - NEW ACCESS CONTROL SYSTEM */}
+                <Route path="admin/admin-sistema" element={<AdminSistema />} />
+                <Route path="admin/perfis" element={<Perfis />} />
+                <Route path="admin/usuarios-perfis" element={<UsuariosPerfis />} />
+                <Route path="admin/usuarios-ccas" element={<UsuariosCCAs />} />
+                
+                {/* Admin routes - DIRECT USER MANAGEMENT */}
                 <Route path="admin/usuarios" element={<Navigate to="/admin/usuarios-direct" replace />} />
                 <Route path="admin/usuarios-direct" element={<GerenciarUsuariosDirect />} />
                 <Route path="admin/criar-usuario-direct" element={<CriarUsuarioDirect />} />
                 
-                {/* Redirect old routes to new system */}
+                {/* Redirect old routes */}
                 <Route path="admin/usuarios-auth" element={<Navigate to="/admin/usuarios-direct" replace />} />
-                <Route path="admin/perfis" element={<Navigate to="/admin/usuarios-direct" replace />} />
                 <Route path="admin/ccas" element={<AdminCCAs />} />
                 <Route path="admin/empresas" element={<AdminEmpresas />} />
                 <Route path="admin/engenheiros" element={<AdminEngenheiros />} />

@@ -1,38 +1,55 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { TipoUsuario, PermissoesCustomizadas } from "@/types/users";
 
 interface UsePermissionsDirectReturn {
   isAdmin: boolean;
+  isAdminSistema: boolean;
   hasPermission: (permission: string) => boolean;
   hasAnyPermission: (permissions: string[]) => boolean;
   canAccessMenu: (menu: string) => boolean;
-  permissions: PermissoesCustomizadas;
+  permissions: string[];
   allowedCCAs: number[];
-  userType: TipoUsuario | null;
+  userType: 'admin_sistema' | 'usuario' | null;
   loading: boolean;
 }
 
 export const usePermissionsDirect = (): UsePermissionsDirectReturn => {
-  const { data: userProfile, isLoading: loadingProfile } = useQuery({
+  // Buscar dados do usuário usando as novas funções e estruturas
+  const { data: userData, isLoading: loadingProfile } = useQuery({
     queryKey: ['user-profile-direct'],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user?.id) return null;
       
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('tipo_usuario, permissoes_customizadas, ccas_permitidas, menus_sidebar')
-        .eq('id', user.id)
+      // 1. Buscar role do usuário
+      const { data: roleData } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id)
         .single();
-
-      if (error) {
-        console.error('Erro ao buscar perfil do usuário:', error);
-        return null;
-      }
-
-      return data;
+      
+      // 2. Buscar permissões usando a função do banco
+      const { data: permissionsData } = await supabase.rpc('get_user_permissions', {
+        user_id_param: user.id
+      });
+      
+      // 3. Buscar CCAs usando a função do banco
+      const { data: ccasData } = await supabase.rpc('get_user_allowed_ccas', {
+        user_id_param: user.id
+      });
+      
+      console.log('🔍 [usePermissionsDirect] Dados carregados:', {
+        role: roleData?.role,
+        permissions: permissionsData,
+        ccas: ccasData
+      });
+      
+      return {
+        role: roleData?.role || 'usuario',
+        permissions: permissionsData || [],
+        ccas: ccasData || []
+      };
     },
     staleTime: 5 * 60 * 1000, // 5 minutos de cache
     gcTime: 10 * 60 * 1000, // 10 minutos antes de garbage collect
@@ -40,138 +57,71 @@ export const usePermissionsDirect = (): UsePermissionsDirectReturn => {
     refetchOnWindowFocus: false,
   });
 
-  const isAdmin = useMemo(() => {
-    return userProfile?.tipo_usuario === 'administrador';
-  }, [userProfile?.tipo_usuario]);
+  const isAdminSistema = useMemo(() => {
+    return userData?.role === 'admin_sistema';
+  }, [userData?.role]);
+
+  const isAdmin = isAdminSistema; // Alias para compatibilidade
 
   const hasPermission = useMemo(() => {
     return (permission: string): boolean => {
       console.log('🔍 [usePermissionsDirect] Verificando permissão:', permission);
       
-      // Guard clause: se não há userProfile, retornar false
-      if (!userProfile) {
-        console.log('⚠️ [usePermissionsDirect] userProfile não definido');
+      // Guard clause: se não há userData, retornar false
+      if (!userData) {
+        console.log('⚠️ [usePermissionsDirect] userData não definido');
         return false;
       }
       
-      if (isAdmin) {
-        console.log('✅ [usePermissionsDirect] Admin tem acesso total');
+      // Se é admin_sistema, tem acesso total
+      if (isAdminSistema) {
+        console.log('✅ [usePermissionsDirect] Admin sistema tem acesso total');
         return true;
       }
       
-      // Se não há permissões customizadas ou está vazio, verificar apenas menus_sidebar
-      if (!userProfile.permissoes_customizadas || 
-          (typeof userProfile.permissoes_customizadas === 'object' && 
-           Object.keys(userProfile.permissoes_customizadas).length === 0)) {
-        console.log('⚠️ [usePermissionsDirect] permissoes_customizadas vazio, verificando apenas menus_sidebar');
-        
-        // Verificar nos menus_sidebar do nível raiz
-        if (Array.isArray(userProfile.menus_sidebar) && 
-            userProfile.menus_sidebar.includes(permission)) {
-          console.log('✅ [usePermissionsDirect] Encontrada em menus_sidebar raiz');
-          return true;
-        }
-        
-        console.log('❌ [usePermissionsDirect] Permissão não encontrada em menus_sidebar');
-        return false;
-      }
-
-      console.log('📊 [usePermissionsDirect] Permissões disponíveis:', {
-        permissoes_customizadas: userProfile.permissoes_customizadas,
-        menus_sidebar: userProfile.menus_sidebar
-      });
-
-      const permissions = userProfile.permissoes_customizadas as any;
-      
-      // Verificar permissão booleana direta
-      if (permissions[permission] === true) {
-        console.log('✅ [usePermissionsDirect] Encontrada em permissoes_customizadas como boolean');
+      // Se permissões incluem '*', tem acesso total
+      if (userData.permissions.includes('*')) {
+        console.log('✅ [usePermissionsDirect] Permissões incluem acesso total (*)');
         return true;
       }
       
-      // Verificar se há uma propriedade menus_sidebar dentro de permissoes_customizadas
-      if (permissions.menus_sidebar && Array.isArray(permissions.menus_sidebar)) {
-        if (permissions.menus_sidebar.includes(permission)) {
-          console.log('✅ [usePermissionsDirect] Encontrada em permissoes_customizadas.menus_sidebar');
-          return true;
-        }
-      }
-      
-      // Verificar nos menus_sidebar do nível raiz
-      if (Array.isArray(userProfile.menus_sidebar) && 
-          userProfile.menus_sidebar.includes(permission)) {
-        console.log('✅ [usePermissionsDirect] Encontrada em menus_sidebar raiz');
+      // Verificar se a permissão específica está na lista
+      if (userData.permissions.includes(permission)) {
+        console.log('✅ [usePermissionsDirect] Permissão encontrada:', permission);
         return true;
-      }
-      
-      // Verificar variações comuns de slug que podem ter inconsistências
-      const slugVariations = [
-        // Mapeamento específico baseado nos dados do banco
-        permission.replace('inspecao_sms_cadastro', 'inspecao_sms_cadastrar'),
-        permission.replace('hora_seguranca_cadastro', 'hora_seguranca_inspecoes_cadastro'),
-        permission.replace('hora_seguranca_cadastro_nao_programada', 'hora_seguranca_inspecoes_nao_programadas'),
-        // Para outras possíveis variações
-        permission.replace('_cadastro_inspecao', '_cadastro'),
-        permission.replace('_inspecao', ''),
-        permission.replace('_consulta', ''),
-        permission.replace('_dashboard', ''),
-      ];
-      
-      for (const variation of slugVariations) {
-        if (variation !== permission) {
-          // Verificar boolean
-          if (permissions[variation] === true) {
-            console.log('✅ [usePermissionsDirect] Encontrada variação em permissoes_customizadas:', variation);
-            return true;
-          }
-          
-          // Verificar menus_sidebar dentro de permissoes_customizadas
-          if (permissions.menus_sidebar && Array.isArray(permissions.menus_sidebar)) {
-            if (permissions.menus_sidebar.includes(variation)) {
-              console.log('✅ [usePermissionsDirect] Encontrada variação em permissoes_customizadas.menus_sidebar:', variation);
-              return true;
-            }
-          }
-          
-          // Verificar menus_sidebar raiz
-          if (Array.isArray(userProfile.menus_sidebar) && userProfile.menus_sidebar.includes(variation)) {
-            console.log('✅ [usePermissionsDirect] Encontrada variação em menus_sidebar raiz:', variation);
-            return true;
-          }
-        }
       }
       
       console.log('❌ [usePermissionsDirect] Permissão não encontrada:', permission);
+      console.log('📊 [usePermissionsDirect] Permissões disponíveis:', userData.permissions);
       return false;
     };
-  }, [isAdmin, userProfile?.permissoes_customizadas, userProfile?.menus_sidebar]);
+  }, [isAdminSistema, userData?.permissions]);
 
   const hasAnyPermission = useMemo(() => {
     return (permissions: string[]): boolean => {
-      if (isAdmin) return true;
+      if (isAdminSistema) return true;
       
       return permissions.some(permission => hasPermission(permission));
     };
-  }, [isAdmin, hasPermission]);
+  }, [isAdminSistema, hasPermission]);
 
   const canAccessMenu = useMemo(() => {
     return (menu: string): boolean => {
-      if (isAdmin) return true;
+      if (isAdminSistema) return true;
       
       return hasPermission(menu);
     };
-  }, [isAdmin, hasPermission]);
+  }, [isAdminSistema, hasPermission]);
 
   return {
     isAdmin,
+    isAdminSistema,
     hasPermission,
     hasAnyPermission,
     canAccessMenu,
-    permissions: (userProfile?.permissoes_customizadas as PermissoesCustomizadas) || {},
-    allowedCCAs: Array.isArray(userProfile?.ccas_permitidas) 
-      ? userProfile.ccas_permitidas as number[]
-      : [],
-    userType: (userProfile?.tipo_usuario as TipoUsuario) || null,
+    permissions: userData?.permissions || [],
+    allowedCCAs: userData?.ccas || [],
+    userType: userData?.role || null,
     loading: loadingProfile
   };
 };

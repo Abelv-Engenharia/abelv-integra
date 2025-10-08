@@ -3500,6 +3500,7 @@ export type Database = {
           id: number
           nome: string
           permissoes: Json
+          telas_liberadas: string[] | null
         }
         Insert: {
           ccas_permitidas?: Json | null
@@ -3507,6 +3508,7 @@ export type Database = {
           id?: number
           nome: string
           permissoes?: Json
+          telas_liberadas?: string[] | null
         }
         Update: {
           ccas_permitidas?: Json | null
@@ -3514,6 +3516,7 @@ export type Database = {
           id?: number
           nome?: string
           permissoes?: Json
+          telas_liberadas?: string[] | null
         }
         Relationships: []
       }
@@ -4498,6 +4501,35 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          created_at: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_roles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_settings: {
         Row: {
           created_at: string
@@ -4533,6 +4565,48 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      usuario_ccas: {
+        Row: {
+          ativo: boolean | null
+          cca_id: number
+          created_at: string | null
+          id: string
+          updated_at: string | null
+          usuario_id: string
+        }
+        Insert: {
+          ativo?: boolean | null
+          cca_id: number
+          created_at?: string | null
+          id?: string
+          updated_at?: string | null
+          usuario_id: string
+        }
+        Update: {
+          ativo?: boolean | null
+          cca_id?: number
+          created_at?: string | null
+          id?: string
+          updated_at?: string | null
+          usuario_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "usuario_ccas_cca_id_fkey"
+            columns: ["cca_id"]
+            isOneToOne: false
+            referencedRelation: "ccas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "usuario_ccas_usuario_id_fkey"
+            columns: ["usuario_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       usuario_perfis: {
         Row: {
@@ -4674,11 +4748,18 @@ export type Database = {
       }
       get_user_allowed_ccas: {
         Args: { user_id_param: string }
-        Returns: Json
+        Returns: number[]
       }
       get_user_permissions: {
         Args: { user_id_param: string }
-        Returns: Json
+        Returns: string[]
+      }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
       }
       log_audit_event: {
         Args: {
@@ -4720,6 +4801,7 @@ export type Database = {
       }
     }
     Enums: {
+      app_role: "admin_sistema" | "usuario"
       medida_aplicada_enum:
         | "ADVERTÊNCIA VERBAL"
         | "ADVERTÊNCIA ESCRITA"
@@ -4852,6 +4934,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      app_role: ["admin_sistema", "usuario"],
       medida_aplicada_enum: [
         "ADVERTÊNCIA VERBAL",
         "ADVERTÊNCIA ESCRITA",
