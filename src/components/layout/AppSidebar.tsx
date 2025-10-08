@@ -53,7 +53,8 @@ export function AppSidebar() {
       currentPath === "/admin/usuarios-ccas" ||
       currentPath === "/admin/usuarios-direct" ||
       currentPath === "/admin/criar-usuario-direct"
-    ) return "seguranca";
+    )
+      return "seguranca";
     if (currentPath.startsWith("/admin") || currentPath.startsWith("/tutoriais")) return "admin";
     if (currentPath.startsWith("/account")) return "account";
     return null;
@@ -67,19 +68,18 @@ export function AppSidebar() {
 
   return (
     <Sidebar className="print:hidden">
-        {/* Logo e Texto ABELV ENGENHARIA */}
+      {/* Logo e Texto ABELV ENGENHARIA */}
       <div className="flex flex-col items-center rounded-md p-2">
-          <div className="w-full p-2">
-            <img src={logoAbelvIntegra} alt="ABELV Integra" className="w-full h-auto object-contain rounded-md" />
-          </div>
-          {state !== 'collapsed' && (
-            <div className="w-full text-center">
-              <h2 className="text-lg font-bold text-sidebar-foreground">ABELV ENGENHARIA</h2>
-            </div>
-          )}
+        <div className="w-full p-2">
+          <img src={logoAbelvIntegra} alt="ABELV Integra" className="w-full h-auto object-contain rounded-md" />
         </div>
+        {state !== "collapsed" && (
+          <div className="w-full text-center">
+            <h2 className="text-lg font-bold text-sidebar-foreground">ABELV ENGENHARIA</h2>
+          </div>
+        )}
+      </div>
 
-      
       <SidebarContent className="bg-sky-900">
         {/* Busca (sem menusSidebar prop, pois SidebarSearch deve ter sua própria lógica) */}
         <SidebarSearch />
@@ -147,14 +147,9 @@ export function AppSidebar() {
         )}
 
         {/* Seção: Segurança */}
-        {[
-          "admin_sistema",
-          "admin_perfis",
-          "admin_usuarios_perfis",
-          "admin_usuarios_ccas",
-          "admin_usuarios",
-          "admin_criar_usuario",
-        ].some(canSee) && (
+        {["admin_sistema", "admin_perfis", "admin_usuarios_perfis", "admin_usuarios_ccas", "admin_usuarios"].some(
+          canSee,
+        ) && (
           <SidebarSectionSeguranca
             openMenu={openMenu}
             toggleMenu={toggleMenu}
