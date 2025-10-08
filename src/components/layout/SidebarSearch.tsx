@@ -41,12 +41,12 @@ export default function SidebarSearch() {
 
     // Hora da Segurança
     { name: "HSA Dashboard", path: "/hora-seguranca/dashboard", category: "SMS", slug: "hora_seguranca_dashboard" },
-    { name: "HSA Cadastro", path: "/hora-seguranca/inspecao-cadastro-hsa", category: "SMS", slug: "hora_seguranca_inspecoes_cadastro" },
-    { name: "HSA Agenda", path: "/hora-seguranca/agenda-hsa", category: "SMS", slug: "hora_seguranca_agenda_hsa" },
-    { name: "HSA Acompanhamento", path: "/hora-seguranca/inspecoes-acompanhamento", category: "SMS", slug: "hora_seguranca_inspecoes_acompanhamento" },
-    { name: "HSA Não Programada", path: "/hora-seguranca/inspecao-nao-programada-hsa", category: "SMS", slug: "hora_seguranca_inspecoes_nao_programadas" },
+    { name: "HSA Cadastro", path: "/hora-seguranca/inspecao-cadastro-hsa", category: "SMS", slug: "hora_seguranca_cadastro_inspecao" },
+    { name: "HSA Agenda", path: "/hora-seguranca/agenda-hsa", category: "SMS", slug: "hora_seguranca_agenda" },
+    { name: "HSA Acompanhamento", path: "/hora-seguranca/inspecoes-acompanhamento", category: "SMS", slug: "hora_seguranca_acompanhamento" },
+    { name: "HSA Não Programada", path: "/hora-seguranca/inspecao-nao-programada-hsa", category: "SMS", slug: "hora_seguranca_cadastro_nao_programada" },
     { name: "Hora da Segurança", path: "/inspecao-sms/hora-seguranca", category: "SMS", slug: "inspecao_sms_cadastrar" },
-    { name: "Painel Execução HSA", path: "/hora-seguranca/painel-execucao-hsa", category: "SMS", slug: "hora_seguranca_painel_execucao" },
+    { name: "Painel Execução HSA", path: "/hora-seguranca/painel-execucao-hsa", category: "SMS", slug: "hora_seguranca_painel_execucao_hsa" },
 
     // IDSMS
     { name: "IDSMS Dashboard", path: "/idsms/dashboard", category: "SMS", slug: "idsms_dashboard" },
