@@ -58,8 +58,6 @@ export default function SidebarSectionAdministracao({ openMenu, toggleMenu, onLi
   const [isImportacaoDadosOpen, setIsImportacaoDadosOpen] = useState(false);
 
   const items: Item[] = [
-    { label: "Empresas", to: "/admin/empresas", slug: "admin_empresas", Icon: Building2 },
-    { label: "CCAs", to: "/admin/ccas", slug: "admin_ccas", Icon: Layers },
     { label: "Engenheiros", to: "/admin/engenheiros", slug: "admin_engenheiros", Icon: Hammer },
     { label: "Supervisores", to: "/admin/supervisores", slug: "admin_supervisores", Icon: UserCog },
     { label: "Encarregados", to: "/admin/encarregados", slug: "admin_encarregados", Icon: UserCheck },

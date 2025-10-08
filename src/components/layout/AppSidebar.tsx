@@ -17,6 +17,7 @@ import SidebarSectionTarefas from "./SidebarSectionTarefas";
 import SidebarSectionRelatorios from "./SidebarSectionRelatorios";
 import SidebarSectionAdministracao from "./SidebarSectionAdministracao";
 import SidebarSectionSeguranca from "./SidebarSectionSeguranca";
+import SidebarSectionApoioGeral from "./SidebarSectionApoioGeral";
 import SidebarSearch from "./SidebarSearch";
 import { usePermissionsDirect } from "@/hooks/usePermissionsDirect";
 import logoAbelvIntegra from "@/assets/logo-abelv-integra.png";
@@ -157,10 +158,18 @@ export function AppSidebar() {
           />
         )}
 
+        {/* Seção: Apoio Geral */}
+        {["admin_empresas", "admin_ccas"].some(canSee) && (
+          <SidebarSectionApoioGeral
+            openMenu={openMenu}
+            toggleMenu={toggleMenu}
+            onLinkClick={handleLinkClick}
+            canSee={canSee}
+          />
+        )}
+
         {/* Seção: Administração */}
         {[
-          "admin_empresas",
-          "admin_ccas",
           "admin_engenheiros",
           "admin_supervisores",
           "admin_funcionarios",

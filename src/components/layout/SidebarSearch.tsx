@@ -109,9 +109,11 @@ export default function SidebarSearch() {
     { name: "Usuários", path: "/admin/usuarios-direct", category: "SEGURANÇA", slug: "admin_usuarios" },
     { name: "Criar Usuário", path: "/admin/criar-usuario-direct", category: "SEGURANÇA", slug: "admin_criar_usuario" },
 
+    // APOIO GERAL
+    { name: "Empresas", path: "/admin/empresas", category: "APOIO GERAL", slug: "admin_empresas" },
+    { name: "CCAs", path: "/admin/ccas", category: "APOIO GERAL", slug: "admin_ccas" },
+
     // ADMINISTRAÇÃO
-    { name: "Empresas", path: "/admin/empresas", category: "ADMINISTRAÇÃO", slug: "admin_empresas" },
-    { name: "CCAs", path: "/admin/ccas", category: "ADMINISTRAÇÃO", slug: "admin_ccas" },
     { name: "Engenheiros", path: "/admin/engenheiros", category: "ADMINISTRAÇÃO", slug: "admin_engenheiros" },
     { name: "Supervisores", path: "/admin/supervisores", category: "ADMINISTRAÇÃO", slug: "admin_supervisores" },
     { name: "Encarregados", path: "/admin/encarregados", category: "ADMINISTRAÇÃO", slug: "admin_encarregados" },
