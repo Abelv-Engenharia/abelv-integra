@@ -145,13 +145,9 @@ export const authUserCreateSchema = z.object({
 
 // Schema para criação de usuário com permissões diretas
 export const authUserCreateDirectSchema = z.object({
-  nome: z.string().min(3, "O nome deve ter pelo menos 3 caracteres"),
-  email: z.string().email("Digite um email válido"),
-  senha: z.string().min(6, "A senha deve ter pelo menos 6 caracteres"),
-  tipo_usuario: z.enum(['administrador', 'usuario']),
-  permissoes_customizadas: z.record(z.boolean()).optional(),
-  ccas_permitidas: z.array(z.number()).optional(),
-  menus_sidebar: z.array(z.string()).optional(),
+  nome: z.string().min(1, "Nome é obrigatório"),
+  email: z.string().email("Email inválido"),
+  senha: z.string().min(6, "Senha deve ter no mínimo 6 caracteres"),
 });
 
 export type SearchFormValues = z.infer<typeof searchFormSchema>;

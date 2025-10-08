@@ -6,9 +6,6 @@ interface UpdateUserDirectData {
   id: string;
   nome: string;
   email: string;
-  tipo_usuario: 'administrador' | 'usuario';
-  permissoes_customizadas?: Record<string, boolean>;
-  ccas_permitidas?: number[];
 }
 
 export const useUpdateUserDirect = () => {
@@ -18,17 +15,11 @@ export const useUpdateUserDirect = () => {
   const updateUserMutation = useMutation({
     mutationFn: async (userData: UpdateUserDirectData) => {
       try {
-        // Atualizar o perfil do usuário com as novas informações
+        // Atualizar o perfil do usuário apenas com o nome
         const { error: profileError } = await supabase
           .from('profiles')
           .update({
-            nome: userData.nome,
-            tipo_usuario: userData.tipo_usuario,
-            permissoes_customizadas: userData.permissoes_customizadas || {},
-            ccas_permitidas: userData.ccas_permitidas || [],
-            menus_sidebar: Object.keys(userData.permissoes_customizadas || {}).filter(
-              key => userData.permissoes_customizadas?.[key] === true
-            )
+            nome: userData.nome
           })
           .eq('id', userData.id);
 

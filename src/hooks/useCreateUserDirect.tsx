@@ -41,17 +41,11 @@ export const useCreateUserDirect = () => {
           throw new Error('Usuário não foi criado no Auth');
         }
 
-        // 3. Atualizar o perfil do usuário com as novas colunas
+        // 3. Atualizar o perfil do usuário apenas com o nome
         const { error: profileError } = await supabase
           .from('profiles')
           .update({
-            nome: userData.nome,
-            tipo_usuario: userData.tipo_usuario,
-            permissoes_customizadas: userData.permissoes_customizadas || {},
-            ccas_permitidas: userData.ccas_permitidas || [],
-            menus_sidebar: Object.keys(userData.permissoes_customizadas || {}).filter(
-              key => userData.permissoes_customizadas?.[key] === true
-            )
+            nome: userData.nome
           })
           .eq('id', authData.user.id);
 
