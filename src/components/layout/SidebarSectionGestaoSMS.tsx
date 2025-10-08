@@ -114,7 +114,7 @@ export default function SidebarSectionGestaoSMS({
 
   const inspecaoSmsItems: LinkItem[] = [
     { label: "Dashboard", to: "/inspecao-sms/dashboard", slug: "inspecao_sms_dashboard" },
-    { label: "Cadastro", to: "/inspecao-sms/cadastrar", slug: "inspecao_sms_cadastrar" },
+    { label: "Cadastro", to: "/inspecao-sms/cadastrar", slug: "inspecao_sms_cadastro" },
     { label: "Consulta", to: "/inspecao-sms/consulta", slug: "inspecao_sms_consulta" },
   ];
 

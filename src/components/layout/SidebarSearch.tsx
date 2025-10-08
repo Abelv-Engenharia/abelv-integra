@@ -61,7 +61,7 @@ export default function SidebarSearch() {
 
     // Inspeção SMS
     { name: "Inspeção SMS Dashboard", path: "/inspecao-sms/dashboard", category: "SMS", slug: "inspecao_sms_dashboard" },
-    { name: "Inspeção SMS Cadastro", path: "/inspecao-sms/cadastrar", category: "SMS", slug: "inspecao_sms_cadastrar" },
+    { name: "Inspeção SMS Cadastro", path: "/inspecao-sms/cadastrar", category: "SMS", slug: "inspecao_sms_cadastro" },
     { name: "Inspeção SMS Consulta", path: "/inspecao-sms/consulta", category: "SMS", slug: "inspecao_sms_consulta" },
 
     // Ocorrências
@@ -129,16 +129,15 @@ export default function SidebarSearch() {
     { name: "Exportação de Dados", path: "/admin/exportacao-dados", category: "ADMINISTRAÇÃO", slug: "admin_exportacao_dados" },
     
     // IMPORTAÇÃO DE DADOS
-    { name: "Importação Funcionários", path: "/admin/importacao/funcionarios", category: "IMPORTAÇÃO", slug: "admin_importacao_funcionarios" },
-    { name: "Importação Treinamentos", path: "/admin/importacao/execucao-treinamentos", category: "IMPORTAÇÃO", slug: "admin_importacao_execucao_treinamentos" },
-    { name: "Importação Desvios", path: "/admin/importacao/desvios", category: "IMPORTAÇÃO", slug: "admin_importacao_desvios" },
-    { name: "Importação Ocorrências", path: "/admin/importacao/ocorrencias", category: "IMPORTAÇÃO", slug: "admin_importacao_ocorrencias" },
-    { name: "Importação HHT", path: "/admin/importacao/hht", category: "IMPORTAÇÃO", slug: "admin_importacao_hht" },
+    { name: "Importação Funcionários", path: "/admin/importacao-funcionarios", category: "IMPORTAÇÃO", slug: "admin_importacao_funcionarios" },
+    { name: "Importação Treinamentos", path: "/admin/importacao-execucao-treinamentos", category: "IMPORTAÇÃO", slug: "admin_importacao_execucao_treinamentos" },
+    { name: "Importação Desvios", path: "/admin/importacao-desvios", category: "IMPORTAÇÃO", slug: "admin_importacao_desvios" },
+    { name: "Importação HSA", path: "/admin/importacao-hsa", category: "IMPORTAÇÃO", slug: "admin_importacao_hsa" },
 
     // Comunicados
-    { name: "Comunicados Cadastro", path: "/admin/comunicados/cadastro", category: "COMUNICADOS", slug: "comunicados_cadastro" },
-    { name: "Comunicados Consulta", path: "/admin/comunicados/consulta", category: "COMUNICADOS", slug: "comunicados_consulta" },
-    { name: "Meus Comunicados", path: "/comunicados/meus-comunicados", category: "COMUNICADOS", slug: "comunicados_meus_comunicados" },
+    { name: "Comunicados Cadastro", path: "/admin/comunicados/cadastro", category: "COMUNICADOS", slug: "admin_comunicados" },
+    { name: "Comunicados Consulta", path: "/admin/comunicados/consulta", category: "COMUNICADOS", slug: "admin_comunicados" },
+    { name: "Meus Comunicados", path: "/comunicados/meus-comunicados", category: "COMUNICADOS", slug: "admin_comunicados" },
 
     // Conta
     { name: "Perfil", path: "/account/profile", category: "CONTA", slug: "account_profile" },
