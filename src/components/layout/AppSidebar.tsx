@@ -16,6 +16,7 @@ import SidebarSectionGestaoSMS from "./SidebarSectionGestaoSMS";
 import SidebarSectionTarefas from "./SidebarSectionTarefas";
 import SidebarSectionRelatorios from "./SidebarSectionRelatorios";
 import SidebarSectionAdministracao from "./SidebarSectionAdministracao";
+import SidebarSectionSeguranca from "./SidebarSectionSeguranca";
 import SidebarSearch from "./SidebarSearch";
 import { usePermissionsDirect } from "@/hooks/usePermissionsDirect";
 import logoAbelvIntegra from "@/assets/logo-abelv-integra.png";
@@ -45,6 +46,14 @@ export function AppSidebar() {
       return "gestao-sms";
     if (currentPath.startsWith("/tarefas")) return "tarefas";
     if (currentPath.startsWith("/relatorios")) return "relatorios";
+    if (
+      currentPath === "/admin/admin-sistema" ||
+      currentPath === "/admin/perfis" ||
+      currentPath === "/admin/usuarios-perfis" ||
+      currentPath === "/admin/usuarios-ccas" ||
+      currentPath === "/admin/usuarios-direct" ||
+      currentPath === "/admin/criar-usuario-direct"
+    ) return "seguranca";
     if (currentPath.startsWith("/admin") || currentPath.startsWith("/tutoriais")) return "admin";
     if (currentPath.startsWith("/account")) return "account";
     return null;
@@ -137,9 +146,25 @@ export function AppSidebar() {
           />
         )}
 
+        {/* Seção: Segurança */}
+        {[
+          "admin_sistema",
+          "admin_perfis",
+          "admin_usuarios_perfis",
+          "admin_usuarios_ccas",
+          "admin_usuarios",
+          "admin_criar_usuario",
+        ].some(canSee) && (
+          <SidebarSectionSeguranca
+            openMenu={openMenu}
+            toggleMenu={toggleMenu}
+            onLinkClick={handleLinkClick}
+            canSee={canSee}
+          />
+        )}
+
         {/* Seção: Administração */}
         {[
-          "admin_usuarios",
           "admin_empresas",
           "admin_ccas",
           "admin_engenheiros",
@@ -150,17 +175,14 @@ export function AppSidebar() {
           "admin_templates",
           "admin_logo",
           "admin_modelos_inspecao",
-          // extras que você mencionou no JSON (se usar)
           "admin_importacao_funcionarios",
           "admin_importacao_execucao_treinamentos",
           "admin_upload_tutoriais",
           "admin_configuracao_emails",
           "admin_exportacao_dados",
-          "admin_usuarios_auth",
           "admin_checklists",
-          "admin_criar_usuario",
           "admin_importacao_hsa",
-          "admin_comunicados", // Adicionar permissão para comunicados
+          "admin_comunicados",
         ].some(canSee) && (
           <SidebarSectionAdministracao
             openMenu={openMenu}
