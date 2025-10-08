@@ -37,6 +37,8 @@ const RelatoriosDesvios = () => {
   const [ccaId, setCcaId] = useState<string>("");
   const [disciplinaId, setDisciplinaId] = useState<string>("");
   const [empresaId, setEmpresaId] = useState<string>("");
+  const [dataInicio, setDataInicio] = useState<Date | undefined>(undefined);
+  const [dataFim, setDataFim] = useState<Date | undefined>(undefined);
   const [filtersApplied, setFiltersApplied] = useState<boolean>(false);
   
   // Stats state
@@ -120,10 +122,12 @@ const RelatoriosDesvios = () => {
         }
         if (disciplinaId && disciplinaId !== "todos") filters.disciplinaId = disciplinaId;
         if (empresaId && empresaId !== "todos") filters.empresaId = empresaId;
+        if (dataInicio) filters.dataInicio = dataInicio.toISOString().split('T')[0];
+        if (dataFim) filters.dataFim = dataFim.toISOString().split('T')[0];
 
         await updateDashboardStats(filters);
         
-        const hasFilters = year !== "" || month !== "" || ccaId !== "" || disciplinaId !== "" || empresaId !== "";
+        const hasFilters = year !== "" || month !== "" || ccaId !== "" || disciplinaId !== "" || empresaId !== "" || dataInicio !== undefined || dataFim !== undefined;
         setFiltersApplied(hasFilters);
       } catch (error) {
         console.error('Erro ao aplicar filtros automaticamente no relatório:', error);
@@ -133,7 +137,7 @@ const RelatoriosDesvios = () => {
     if (userCCAs.length > 0) {
       applyFiltersAutomatically();
     }
-  }, [year, month, ccaId, disciplinaId, empresaId, userCCAs]);
+  }, [year, month, ccaId, disciplinaId, empresaId, dataInicio, dataFim, userCCAs]);
 
   // Clear filters function
   const handleClearFilters = async () => {
@@ -142,6 +146,8 @@ const RelatoriosDesvios = () => {
     setCcaId("");
     setDisciplinaId("");
     setEmpresaId("");
+    setDataInicio(undefined);
+    setDataFim(undefined);
     setFiltersApplied(false);
     
     try {
@@ -415,11 +421,15 @@ const RelatoriosDesvios = () => {
         ccaId={ccaId}
         disciplinaId={disciplinaId}
         empresaId={empresaId}
+        dataInicio={dataInicio}
+        dataFim={dataFim}
         setYear={setYear} 
         setMonth={setMonth} 
         setCcaId={setCcaId}
         setDisciplinaId={setDisciplinaId}
         setEmpresaId={setEmpresaId}
+        setDataInicio={setDataInicio}
+        setDataFim={setDataFim}
         onClearFilters={handleClearFilters}
       />
 

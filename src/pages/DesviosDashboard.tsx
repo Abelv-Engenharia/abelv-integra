@@ -21,6 +21,8 @@ const DesviosDashboard = () => {
   const [ccaId, setCcaId] = useState<string>("");
   const [disciplinaId, setDisciplinaId] = useState<string>("");
   const [empresaId, setEmpresaId] = useState<string>("");
+  const [dataInicio, setDataInicio] = useState<Date | undefined>(undefined);
+  const [dataFim, setDataFim] = useState<Date | undefined>(undefined);
   const [filtersApplied, setFiltersApplied] = useState<boolean>(false);
 
   // Restaurar filtros quando voltar da página de consulta
@@ -32,6 +34,8 @@ const DesviosDashboard = () => {
       setCcaId(state.filters.ccaId || "");
       setDisciplinaId(state.filters.disciplinaId || "");
       setEmpresaId(state.filters.empresaId || "");
+      setDataInicio(state.filters.dataInicio ? new Date(state.filters.dataInicio) : undefined);
+      setDataFim(state.filters.dataFim ? new Date(state.filters.dataFim) : undefined);
     }
   }, [location.state]);
 
@@ -97,7 +101,8 @@ const DesviosDashboard = () => {
     const apply = async () => {
       const allowedCcaIds = userCCAs.map(cca => cca.id.toString());
       const normalized = normalizeFilters({
-        year, month, ccaId, disciplinaId, empresaId, userCcaIds: allowedCcaIds
+        year, month, ccaId, disciplinaId, empresaId, userCcaIds: allowedCcaIds,
+        dataInicio, dataFim
       });
 
       await updateDashboardStats(normalized);
@@ -106,13 +111,14 @@ const DesviosDashboard = () => {
         !!normalized.year ||
         !!normalized.month ||
         (normalized.ccaIds && normalized.ccaIds.length === 1) ||
-        !!disciplinaId || !!empresaId;
+        !!disciplinaId || !!empresaId ||
+        !!dataInicio || !!dataFim;
 
       setFiltersApplied(hasFilters);
     };
 
     apply();
-  }, [year, month, ccaId, disciplinaId, empresaId, userCCAs]);
+  }, [year, month, ccaId, disciplinaId, empresaId, dataInicio, dataFim, userCCAs]);
 
   const handleClearFilters = async () => {
     setYear("");
@@ -120,13 +126,16 @@ const DesviosDashboard = () => {
     setCcaId("");
     setDisciplinaId("");
     setEmpresaId("");
+    setDataInicio(undefined);
+    setDataFim(undefined);
     setFiltersApplied(false);
     await updateDashboardStats({ ccaIds: userCCAs.map(cca => cca.id.toString()) });
   };
 
   const allowedCcaIds = userCCAs.map(cca => cca.id.toString());
   const normalizedForCharts = normalizeFilters({
-    year, month, ccaId, disciplinaId, empresaId, userCcaIds: allowedCcaIds
+    year, month, ccaId, disciplinaId, empresaId, userCcaIds: allowedCcaIds,
+    dataInicio, dataFim
   });
 
   return (
@@ -138,11 +147,15 @@ const DesviosDashboard = () => {
         ccaId={ccaId}
         disciplinaId={disciplinaId}
         empresaId={empresaId}
+        dataInicio={dataInicio}
+        dataFim={dataFim}
         setYear={setYear}
         setMonth={setMonth}
         setCcaId={setCcaId}
         setDisciplinaId={setDisciplinaId}
         setEmpresaId={setEmpresaId}
+        setDataInicio={setDataInicio}
+        setDataFim={setDataFim}
         onClearFilters={handleClearFilters}
       />
       <DesviosDashboardStats loading={loading} stats={dashboardStats} />

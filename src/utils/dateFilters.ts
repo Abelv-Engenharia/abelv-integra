@@ -13,6 +13,8 @@ export type NormalizableFilters = {
   disciplinaId: string;
   empresaId: string;
   userCcaIds: string[];
+  dataInicio?: Date;
+  dataFim?: Date;
 };
 
 export type NormalizedFilters = {
@@ -21,6 +23,8 @@ export type NormalizedFilters = {
   ccaIds?: string[];   // sempre aplicar CCAs permitidos
   disciplinaId?: string;
   empresaId?: string;
+  dataInicio?: string; // ISO date string
+  dataFim?: string;    // ISO date string
 };
 
 export function normalizeFilters(raw: NormalizableFilters): NormalizedFilters {
@@ -46,6 +50,14 @@ export function normalizeFilters(raw: NormalizableFilters): NormalizedFilters {
   }
   if (raw.disciplinaId && raw.disciplinaId !== "todos") filters.disciplinaId = raw.disciplinaId;
   if (raw.empresaId    && raw.empresaId    !== "todos") filters.empresaId    = raw.empresaId;
+
+  // Adicionar filtros de data de período
+  if (raw.dataInicio) {
+    filters.dataInicio = raw.dataInicio.toISOString().split('T')[0];
+  }
+  if (raw.dataFim) {
+    filters.dataFim = raw.dataFim.toISOString().split('T')[0];
+  }
 
   return filters;
 }

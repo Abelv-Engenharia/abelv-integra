@@ -10,7 +10,18 @@ export const applyFiltersToQuery = (query: any, filters: FilterParams) => {
   // Aplicar filtros de data com lógica padronizada usando dayjs
   const DATE_COL = "data_desvio";
 
-  if (filters.month && filters.year) {
+  // Prioridade: período (dataInicio/dataFim) > mês/ano > ano
+  if (filters.dataInicio || filters.dataFim) {
+    // Filtro de período customizado
+    if (filters.dataInicio) {
+      console.log(`Filtrando por data início: ${filters.dataInicio}`);
+      filteredQuery = filteredQuery.gte(DATE_COL, filters.dataInicio);
+    }
+    if (filters.dataFim) {
+      console.log(`Filtrando por data fim: ${filters.dataFim}`);
+      filteredQuery = filteredQuery.lte(DATE_COL, filters.dataFim);
+    }
+  } else if (filters.month && filters.year) {
     // Quando temos ano e mês específicos
     const start = dayjs(`${filters.year}-${filters.month}-01`).format("YYYY-MM-DD");
     const end = dayjs(start).add(1, "month").format("YYYY-MM-DD");

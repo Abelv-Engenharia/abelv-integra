@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserCCAs } from "@/hooks/useUserCCAs";
+import { DatePickerWithManualInput } from "@/components/ui/date-picker-with-manual-input";
 
 interface DesviosDashboardFiltersProps {
   year: string;
@@ -13,11 +14,15 @@ interface DesviosDashboardFiltersProps {
   ccaId: string;
   disciplinaId: string;
   empresaId: string;
+  dataInicio: Date | undefined;
+  dataFim: Date | undefined;
   setYear: (year: string) => void;
   setMonth: (month: string) => void;
   setCcaId: (ccaId: string) => void;
   setDisciplinaId: (disciplinaId: string) => void;
   setEmpresaId: (empresaId: string) => void;
+  setDataInicio: (date: Date | undefined) => void;
+  setDataFim: (date: Date | undefined) => void;
   onClearFilters: () => void;
 }
 
@@ -38,11 +43,15 @@ const DesviosDashboardFilters = ({
   ccaId,
   disciplinaId,
   empresaId,
+  dataInicio,
+  dataFim,
   setYear,
   setMonth,
   setCcaId,
   setDisciplinaId,
   setEmpresaId,
+  setDataInicio,
+  setDataFim,
   onClearFilters
 }: DesviosDashboardFiltersProps) => {
   const { toast } = useToast();
@@ -96,7 +105,7 @@ const DesviosDashboardFilters = ({
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-7 gap-4 mb-4">
           <div className="grid gap-1">
             <label htmlFor="year" className="text-sm font-medium">
               Ano
@@ -210,6 +219,26 @@ const DesviosDashboardFilters = ({
                 ))}
               </SelectContent>
             </Select>
+          </div>
+
+          <div className="grid gap-1">
+            <label htmlFor="dataInicio" className="text-sm font-medium">
+              Data início
+            </label>
+            <DatePickerWithManualInput
+              value={dataInicio}
+              onChange={setDataInicio}
+            />
+          </div>
+
+          <div className="grid gap-1">
+            <label htmlFor="dataFim" className="text-sm font-medium">
+              Data fim
+            </label>
+            <DatePickerWithManualInput
+              value={dataFim}
+              onChange={setDataFim}
+            />
           </div>
         </div>
 
