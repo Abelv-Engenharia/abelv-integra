@@ -4,6 +4,7 @@ import {
   ChevronRight,
   Building2,
   Layers,
+  Ruler,
 } from "lucide-react";
 import {
   SidebarMenu,
@@ -32,6 +33,7 @@ export default function SidebarSectionApoioGeral({ openMenu, toggleMenu, onLinkC
   const items: Item[] = [
     { label: "Empresas", to: "/admin/empresas", slug: "admin_empresas", Icon: Building2 },
     { label: "CCAs", to: "/admin/ccas", slug: "admin_ccas", Icon: Layers },
+    { label: "Unidades de Medidas", to: "/admin/unidades-medidas", slug: "admin_unidades_medidas", Icon: Ruler },
   ].filter((i) => can(i.slug));
 
   if (items.length === 0) return null;

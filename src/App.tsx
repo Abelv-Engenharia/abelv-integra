@@ -45,6 +45,7 @@ import AdminEmpresas from "./pages/admin/AdminEmpresas";
 import AdminEngenheiros from "./pages/admin/AdminEngenheiros";
 import AdminSupervisores from "./pages/admin/AdminSupervisores";
 import AdminEncarregados from "./pages/admin/AdminEncarregados";
+import AdminUnidadesMedidas from "./pages/admin/AdminUnidadesMedidas";
 import AdminLogo from "./pages/admin/AdminLogo";
 import AdminTemplates from "./pages/AdminTemplates";
 
@@ -202,6 +203,7 @@ function App() {
                 <Route path="admin/usuarios-auth" element={<Navigate to="/admin/usuarios-direct" replace />} />
                 <Route path="admin/ccas" element={<AdminCCAs />} />
                 <Route path="admin/empresas" element={<AdminEmpresas />} />
+                <Route path="admin/unidades-medidas" element={<AdminUnidadesMedidas />} />
                 <Route path="admin/engenheiros" element={<AdminEngenheiros />} />
                 <Route path="admin/supervisores" element={<AdminSupervisores />} />
                 <Route path="admin/encarregados" element={<AdminEncarregados />} />

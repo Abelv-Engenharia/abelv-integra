@@ -112,6 +112,7 @@ export default function SidebarSearch() {
     // APOIO GERAL
     { name: "Empresas", path: "/admin/empresas", category: "APOIO GERAL", slug: "admin_empresas" },
     { name: "CCAs", path: "/admin/ccas", category: "APOIO GERAL", slug: "admin_ccas" },
+    { name: "Unidades de Medidas", path: "/admin/unidades-medidas", category: "APOIO GERAL", slug: "admin_unidades_medidas" },
 
     // ADMINISTRAÇÃO
     { name: "Engenheiros", path: "/admin/engenheiros", category: "ADMINISTRAÇÃO", slug: "admin_engenheiros" },
