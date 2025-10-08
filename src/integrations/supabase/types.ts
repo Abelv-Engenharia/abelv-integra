@@ -4501,6 +4501,36 @@ export type Database = {
         }
         Relationships: []
       }
+      unidades_medidas: {
+        Row: {
+          ativo: boolean | null
+          codigo: number
+          created_at: string | null
+          descricao: string
+          id: string
+          simbolo: string
+          updated_at: string | null
+        }
+        Insert: {
+          ativo?: boolean | null
+          codigo: number
+          created_at?: string | null
+          descricao: string
+          id?: string
+          simbolo: string
+          updated_at?: string | null
+        }
+        Update: {
+          ativo?: boolean | null
+          codigo?: number
+          created_at?: string | null
+          descricao?: string
+          id?: string
+          simbolo?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string | null
