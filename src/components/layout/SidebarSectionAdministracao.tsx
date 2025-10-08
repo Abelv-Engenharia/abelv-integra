@@ -50,10 +50,10 @@ export default function SidebarSectionAdministracao({ openMenu, toggleMenu, onLi
   const { pathname } = useLocation();
   const can = (slug: string) => {
     const result = canSee ? canSee(slug) : true;
-    console.log('🔧 [SidebarAdmin] Testando slug:', slug, 'Resultado:', result);
+    console.log("🔧 [SidebarAdmin] Testando slug:", slug, "Resultado:", result);
     return result;
   };
-  
+
   const [isComunicadosOpen, setIsComunicadosOpen] = useState(false);
   const [isImportacaoDadosOpen, setIsImportacaoDadosOpen] = useState(false);
 
@@ -72,11 +72,15 @@ export default function SidebarSectionAdministracao({ openMenu, toggleMenu, onLi
     { label: "Upload de Tutoriais", to: "/admin/upload-tutoriais", slug: "upload_tutoriais", Icon: Upload },
     { label: "Configuração de E-mails", to: "/admin/configuracao-emails", slug: "configuracao_emails", Icon: Mail },
     { label: "Exportação de Dados", to: "/admin/exportacao-dados", slug: "admin_exportacao_dados", Icon: Database },
-    { label: "Criar Usuário", to: "/admin/criar-usuario-direct", slug: "admin_criar_usuario", Icon: UserPlus },
   ].filter((i) => can(i.slug));
 
   const importacaoItems: Item[] = [
-    { label: "Importação de Funcionários", to: "/admin/importacao-funcionarios", slug: "admin_importacao_funcionarios", Icon: UploadCloud },
+    {
+      label: "Importação de Funcionários",
+      to: "/admin/importacao-funcionarios",
+      slug: "admin_importacao_funcionarios",
+      Icon: UploadCloud,
+    },
     {
       label: "Importação Execução Treinamentos",
       to: "/admin/importacao-execucao-treinamentos",
@@ -84,7 +88,12 @@ export default function SidebarSectionAdministracao({ openMenu, toggleMenu, onLi
       Icon: UploadCloud,
     },
     { label: "Importação de HSA", to: "/admin/importacao-hsa", slug: "admin_importacao_hsa", Icon: UploadCloud },
-    { label: "Importação de Desvios", to: "/admin/importacao-desvios", slug: "admin_importacao_desvios", Icon: UploadCloud },
+    {
+      label: "Importação de Desvios",
+      to: "/admin/importacao-desvios",
+      slug: "admin_importacao_desvios",
+      Icon: UploadCloud,
+    },
   ].filter((i) => can(i.slug));
 
   if (items.length === 0 && !can("admin_comunicados") && importacaoItems.length === 0) return null;
@@ -120,18 +129,22 @@ export default function SidebarSectionAdministracao({ openMenu, toggleMenu, onLi
                   </SidebarMenuSubButton>
                 </SidebarMenuSubItem>
               ))}
-              
+
               {importacaoItems.length > 0 && (
                 <SidebarMenuSubItem>
                   <Collapsible open={isImportacaoDadosOpen}>
                     <CollapsibleTrigger asChild>
-                      <SidebarMenuSubButton 
+                      <SidebarMenuSubButton
                         onClick={() => setIsImportacaoDadosOpen(!isImportacaoDadosOpen)}
                         className="text-white hover:bg-slate-600"
                       >
                         <Database className="h-3 w-3 flex-shrink-0" />
                         <span className="text-xs leading-tight break-words min-w-0">Importação de Dados</span>
-                        {isImportacaoDadosOpen ? <ChevronDown className="h-3 w-3 ml-auto" /> : <ChevronRight className="h-3 w-3 ml-auto" />}
+                        {isImportacaoDadosOpen ? (
+                          <ChevronDown className="h-3 w-3 ml-auto" />
+                        ) : (
+                          <ChevronRight className="h-3 w-3 ml-auto" />
+                        )}
                       </SidebarMenuSubButton>
                     </CollapsibleTrigger>
                     <CollapsibleContent>
@@ -146,7 +159,9 @@ export default function SidebarSectionAdministracao({ openMenu, toggleMenu, onLi
                           >
                             <Link to={to} onClick={onLinkClick} className="flex items-center gap-2">
                               <Icon className="h-3 w-3 flex-shrink-0" />
-                              <span className="text-xs leading-normal break-words whitespace-normal max-w-[140px]">{label}</span>
+                              <span className="text-xs leading-normal break-words whitespace-normal max-w-[140px]">
+                                {label}
+                              </span>
                             </Link>
                           </SidebarMenuSubButton>
                         ))}
@@ -160,13 +175,17 @@ export default function SidebarSectionAdministracao({ openMenu, toggleMenu, onLi
                 <SidebarMenuSubItem>
                   <Collapsible open={isComunicadosOpen}>
                     <CollapsibleTrigger asChild>
-                      <SidebarMenuSubButton 
+                      <SidebarMenuSubButton
                         onClick={() => setIsComunicadosOpen(!isComunicadosOpen)}
                         className="text-white hover:bg-slate-600"
                       >
                         <MessageSquare className="h-3 w-3 flex-shrink-0" />
                         <span className="text-xs leading-tight break-words min-w-0">Comunicados</span>
-                        {isComunicadosOpen ? <ChevronDown className="h-3 w-3 ml-auto" /> : <ChevronRight className="h-3 w-3 ml-auto" />}
+                        {isComunicadosOpen ? (
+                          <ChevronDown className="h-3 w-3 ml-auto" />
+                        ) : (
+                          <ChevronRight className="h-3 w-3 ml-auto" />
+                        )}
                       </SidebarMenuSubButton>
                     </CollapsibleTrigger>
                     <CollapsibleContent>
@@ -174,10 +193,16 @@ export default function SidebarSectionAdministracao({ openMenu, toggleMenu, onLi
                         <SidebarMenuSubButton
                           asChild
                           className={
-                            pathname === "/admin/comunicados/cadastro" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"
+                            pathname === "/admin/comunicados/cadastro"
+                              ? "bg-slate-600 text-white font-medium"
+                              : "text-white hover:bg-slate-600"
                           }
                         >
-                          <Link to="/admin/comunicados/cadastro" onClick={onLinkClick} className="flex items-center gap-2">
+                          <Link
+                            to="/admin/comunicados/cadastro"
+                            onClick={onLinkClick}
+                            className="flex items-center gap-2"
+                          >
                             <Plus className="h-3 w-3 flex-shrink-0" />
                             <span className="text-xs leading-tight break-words min-w-0">Cadastro</span>
                           </Link>
@@ -185,10 +210,16 @@ export default function SidebarSectionAdministracao({ openMenu, toggleMenu, onLi
                         <SidebarMenuSubButton
                           asChild
                           className={
-                            pathname === "/admin/comunicados/consulta" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"
+                            pathname === "/admin/comunicados/consulta"
+                              ? "bg-slate-600 text-white font-medium"
+                              : "text-white hover:bg-slate-600"
                           }
                         >
-                          <Link to="/admin/comunicados/consulta" onClick={onLinkClick} className="flex items-center gap-2">
+                          <Link
+                            to="/admin/comunicados/consulta"
+                            onClick={onLinkClick}
+                            className="flex items-center gap-2"
+                          >
                             <Search className="h-3 w-3 flex-shrink-0" />
                             <span className="text-xs leading-tight break-words min-w-0">Consulta</span>
                           </Link>
@@ -196,10 +227,16 @@ export default function SidebarSectionAdministracao({ openMenu, toggleMenu, onLi
                         <SidebarMenuSubButton
                           asChild
                           className={
-                            pathname === "/comunicados/meus-comunicados" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"
+                            pathname === "/comunicados/meus-comunicados"
+                              ? "bg-slate-600 text-white font-medium"
+                              : "text-white hover:bg-slate-600"
                           }
                         >
-                          <Link to="/comunicados/meus-comunicados" onClick={onLinkClick} className="flex items-center gap-2">
+                          <Link
+                            to="/comunicados/meus-comunicados"
+                            onClick={onLinkClick}
+                            className="flex items-center gap-2"
+                          >
                             <User className="h-3 w-3 flex-shrink-0" />
                             <span className="text-xs leading-tight break-words min-w-0">Meus Comunicados</span>
                           </Link>
