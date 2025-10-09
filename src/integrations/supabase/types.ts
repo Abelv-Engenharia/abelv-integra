@@ -481,30 +481,30 @@ export type Database = {
         Row: {
           ativo: boolean
           cnpj_cpf: string | null
-          codigo: string
           created_at: string
           fantasia: string | null
           id: string
+          id_sienge: string
           razao: string
           updated_at: string
         }
         Insert: {
           ativo?: boolean
           cnpj_cpf?: string | null
-          codigo: string
           created_at?: string
           fantasia?: string | null
           id?: string
+          id_sienge: string
           razao: string
           updated_at?: string
         }
         Update: {
           ativo?: boolean
           cnpj_cpf?: string | null
-          codigo?: string
           created_at?: string
           fantasia?: string | null
           id?: string
+          id_sienge?: string
           razao?: string
           updated_at?: string
         }
@@ -905,6 +905,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      empresas_sienge: {
+        Row: {
+          cnpj: string | null
+          created_at: string
+          id: string
+          id_sienge: number
+          name: string
+          tradeName: string | null
+        }
+        Insert: {
+          cnpj?: string | null
+          created_at?: string
+          id?: string
+          id_sienge: number
+          name: string
+          tradeName?: string | null
+        }
+        Update: {
+          cnpj?: string | null
+          created_at?: string
+          id?: string
+          id_sienge?: number
+          name?: string
+          tradeName?: string | null
+        }
+        Relationships: []
       }
       encarregado_ccas: {
         Row: {
@@ -4282,6 +4309,27 @@ export type Database = {
           id?: string
           nome?: string
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      tipos_documentos: {
+        Row: {
+          codigo: string
+          created_at: string
+          descricao: string
+          id: string
+        }
+        Insert: {
+          codigo: string
+          created_at?: string
+          descricao: string
+          id?: string
+        }
+        Update: {
+          codigo?: string
+          created_at?: string
+          descricao?: string
+          id?: string
         }
         Relationships: []
       }
