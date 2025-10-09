@@ -58,7 +58,7 @@ function getDocumentosPendentes(ocorrencia: any): DocumentoPendente[] {
 }
 
 export async function fetchOcorrenciasDocumentosIncompletos(filters: OcorrenciaPendenteFilters = {}) {
-  let query = supabase
+  let query: any = supabase
     .from('ocorrencias')
     .select(`
       id,
