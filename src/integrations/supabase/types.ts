@@ -3262,15 +3262,58 @@ export type Database = {
       }
       nfe_compra: {
         Row: {
-          id: number
+          created_at: string
+          id: string
+          id_credor: string
+          id_documento: string
+          id_empresa: number
+          numero: string
+          sequencial: number | null
+          titulo: number
         }
         Insert: {
-          id?: number
+          created_at?: string
+          id?: string
+          id_credor: string
+          id_documento: string
+          id_empresa: number
+          numero: string
+          sequencial?: number | null
+          titulo: number
         }
         Update: {
-          id?: number
+          created_at?: string
+          id?: string
+          id_credor?: string
+          id_documento?: string
+          id_empresa?: number
+          numero?: string
+          sequencial?: number | null
+          titulo?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "nfe_compra_id_credor_fkey"
+            columns: ["id_credor"]
+            isOneToOne: false
+            referencedRelation: "credores"
+            referencedColumns: ["id_sienge"]
+          },
+          {
+            foreignKeyName: "nfe_compra_id_documento_fkey"
+            columns: ["id_documento"]
+            isOneToOne: false
+            referencedRelation: "tipos_documentos"
+            referencedColumns: ["codigo"]
+          },
+          {
+            foreignKeyName: "nfe_compra_id_empresa_fkey"
+            columns: ["id_empresa"]
+            isOneToOne: false
+            referencedRelation: "empresas_sienge"
+            referencedColumns: ["id_sienge"]
+          },
+        ]
       }
       notificacoes: {
         Row: {
@@ -3870,6 +3913,51 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      subcentros_custos: {
+        Row: {
+          cca_id: number
+          created_at: string | null
+          empresa_sienge_id: string
+          faturamento: string
+          id: string
+          id_sienge: number
+          updated_at: string | null
+        }
+        Insert: {
+          cca_id: number
+          created_at?: string | null
+          empresa_sienge_id: string
+          faturamento: string
+          id?: string
+          id_sienge: number
+          updated_at?: string | null
+        }
+        Update: {
+          cca_id?: number
+          created_at?: string | null
+          empresa_sienge_id?: string
+          faturamento?: string
+          id?: string
+          id_sienge?: number
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subcentros_custos_cca_id_fkey"
+            columns: ["cca_id"]
+            isOneToOne: false
+            referencedRelation: "ccas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subcentros_custos_empresa_sienge_id_fkey"
+            columns: ["empresa_sienge_id"]
+            isOneToOne: false
+            referencedRelation: "empresas_sienge"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       supervisor_ccas: {
         Row: {
