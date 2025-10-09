@@ -54,18 +54,28 @@ export const useFormData = () => {
         .eq('empresas.ativo', true)
         .in('cca_id', allowedCcaIds);
       
-      console.log('useFormData - Empresas encontradas:', data?.length || 0);
+      console.log('useFormData - Registros empresa_ccas:', data?.length || 0);
       
-      // Remover duplicatas e retornar apenas os dados da empresa
-      const uniqueEmpresas = data?.reduce((acc, item) => {
+      // Agrupar empresas com seus CCAs
+      const empresasMap = new Map();
+      data?.forEach(item => {
         const empresa = item.empresas;
-        if (!acc.find(e => e.id === empresa.id)) {
-          acc.push(empresa);
+        if (!empresasMap.has(empresa.id)) {
+          empresasMap.set(empresa.id, {
+            ...empresa,
+            empresa_ccas: [{ cca_id: item.cca_id }]
+          });
+        } else {
+          empresasMap.get(empresa.id).empresa_ccas.push({ cca_id: item.cca_id });
         }
-        return acc;
-      }, [] as any[]) || [];
+      });
       
-      return uniqueEmpresas.sort((a, b) => a.nome.localeCompare(b.nome));
+      const empresasArray = Array.from(empresasMap.values()).sort((a, b) => 
+        a.nome.localeCompare(b.nome)
+      );
+      
+      console.log('useFormData - Empresas únicas:', empresasArray.length);
+      return empresasArray;
     },
     enabled: allowedCcaIds.length > 0 && !ccasLoading,
   });
@@ -93,17 +103,27 @@ export const useFormData = () => {
         .eq('engenheiros.ativo', true)
         .in('cca_id', allowedCcaIds);
       
-      console.log('useFormData - Engenheiros encontrados:', data?.length || 0);
+      console.log('useFormData - Registros engenheiro_ccas:', data?.length || 0);
       
-      const uniqueEngenheiros = data?.reduce((acc, item) => {
+      const engenheirosMap = new Map();
+      data?.forEach(item => {
         const engenheiro = item.engenheiros;
-        if (!acc.find(e => e.id === engenheiro.id)) {
-          acc.push(engenheiro);
+        if (!engenheirosMap.has(engenheiro.id)) {
+          engenheirosMap.set(engenheiro.id, {
+            ...engenheiro,
+            engenheiro_ccas: [{ cca_id: item.cca_id }]
+          });
+        } else {
+          engenheirosMap.get(engenheiro.id).engenheiro_ccas.push({ cca_id: item.cca_id });
         }
-        return acc;
-      }, [] as any[]) || [];
+      });
       
-      return uniqueEngenheiros.sort((a, b) => a.nome.localeCompare(b.nome));
+      const engenheirosArray = Array.from(engenheirosMap.values()).sort((a, b) => 
+        a.nome.localeCompare(b.nome)
+      );
+      
+      console.log('useFormData - Engenheiros únicos:', engenheirosArray.length);
+      return engenheirosArray;
     },
     enabled: allowedCcaIds.length > 0 && !ccasLoading,
   });
@@ -131,17 +151,27 @@ export const useFormData = () => {
         .eq('supervisores.ativo', true)
         .in('cca_id', allowedCcaIds);
       
-      console.log('useFormData - Supervisores encontrados:', data?.length || 0);
+      console.log('useFormData - Registros supervisor_ccas:', data?.length || 0);
       
-      const uniqueSupervisores = data?.reduce((acc, item) => {
+      const supervisoresMap = new Map();
+      data?.forEach(item => {
         const supervisor = item.supervisores;
-        if (!acc.find(e => e.id === supervisor.id)) {
-          acc.push(supervisor);
+        if (!supervisoresMap.has(supervisor.id)) {
+          supervisoresMap.set(supervisor.id, {
+            ...supervisor,
+            supervisor_ccas: [{ cca_id: item.cca_id }]
+          });
+        } else {
+          supervisoresMap.get(supervisor.id).supervisor_ccas.push({ cca_id: item.cca_id });
         }
-        return acc;
-      }, [] as any[]) || [];
+      });
       
-      return uniqueSupervisores.sort((a, b) => a.nome.localeCompare(b.nome));
+      const supervisoresArray = Array.from(supervisoresMap.values()).sort((a, b) => 
+        a.nome.localeCompare(b.nome)
+      );
+      
+      console.log('useFormData - Supervisores únicos:', supervisoresArray.length);
+      return supervisoresArray;
     },
     enabled: allowedCcaIds.length > 0 && !ccasLoading,
   });
@@ -164,17 +194,27 @@ export const useFormData = () => {
         .eq('encarregados.ativo', true)
         .in('cca_id', allowedCcaIds);
       
-      console.log('useFormData - Encarregados encontrados:', data?.length || 0);
+      console.log('useFormData - Registros encarregado_ccas:', data?.length || 0);
       
-      const uniqueEncarregados = data?.reduce((acc, item) => {
+      const encarregadosMap = new Map();
+      data?.forEach(item => {
         const encarregado = item.encarregados;
-        if (!acc.find(e => e.id === encarregado.id)) {
-          acc.push(encarregado);
+        if (!encarregadosMap.has(encarregado.id)) {
+          encarregadosMap.set(encarregado.id, {
+            ...encarregado,
+            encarregado_ccas: [{ cca_id: item.cca_id }]
+          });
+        } else {
+          encarregadosMap.get(encarregado.id).encarregado_ccas.push({ cca_id: item.cca_id });
         }
-        return acc;
-      }, [] as any[]) || [];
+      });
       
-      return uniqueEncarregados.sort((a, b) => a.nome.localeCompare(b.nome));
+      const encarregadosArray = Array.from(encarregadosMap.values()).sort((a, b) => 
+        a.nome.localeCompare(b.nome)
+      );
+      
+      console.log('useFormData - Encarregados únicos:', encarregadosArray.length);
+      return encarregadosArray;
     },
     enabled: allowedCcaIds.length > 0 && !ccasLoading,
   });
