@@ -36,7 +36,9 @@ const OcorrenciasConsulta = () => {
     empresa: "todos",
     tipo: "todos",
     status: "todos",
-    risco: "todos"
+    risco: "todos",
+    dataInicio: undefined,
+    dataFim: undefined
   });
 
   const navigate = useNavigate();
@@ -130,7 +132,9 @@ const OcorrenciasConsulta = () => {
       empresa: "todos",
       tipo: "todos",
       status: "todos",
-      risco: "todos"
+      risco: "todos",
+      dataInicio: undefined,
+      dataFim: undefined
     });
   };
 
@@ -174,6 +178,8 @@ const OcorrenciasConsulta = () => {
         tipo={filters.tipo || "todos"}
         status={filters.status || "todos"}
         risco={filters.risco || "todos"}
+        dataInicio={filters.dataInicio}
+        dataFim={filters.dataFim}
         setAno={(ano) => setFilters(prev => ({ ...prev, ano }))}
         setMes={(mes) => setFilters(prev => ({ ...prev, mes }))}
         setCca={(cca) => setFilters(prev => ({ ...prev, cca }))}
@@ -181,6 +187,8 @@ const OcorrenciasConsulta = () => {
         setTipo={(tipo) => setFilters(prev => ({ ...prev, tipo }))}
         setStatus={(status) => setFilters(prev => ({ ...prev, status }))}
         setRisco={(risco) => setFilters(prev => ({ ...prev, risco }))}
+        setDataInicio={(dataInicio) => setFilters(prev => ({ ...prev, dataInicio }))}
+        setDataFim={(dataFim) => setFilters(prev => ({ ...prev, dataFim }))}
         onClearFilters={handleClearFilters}
         empresas={empresas}
       />

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useUserCCAs } from "@/hooks/useUserCCAs";
 import { useOcorrenciasBasicData } from "@/hooks/ocorrencias/useOcorrenciasBasicData";
 import { RefreshCw } from "lucide-react";
+import { DatePickerWithManualInput } from "@/components/ui/date-picker-with-manual-input";
 
 interface OcorrenciasConsultaFiltersProps {
   ano: string;
@@ -14,6 +15,8 @@ interface OcorrenciasConsultaFiltersProps {
   tipo: string;
   status: string;
   risco: string;
+  dataInicio?: Date;
+  dataFim?: Date;
   setAno: (ano: string) => void;
   setMes: (mes: string) => void;
   setCca: (cca: string) => void;
@@ -21,6 +24,8 @@ interface OcorrenciasConsultaFiltersProps {
   setTipo: (tipo: string) => void;
   setStatus: (status: string) => void;
   setRisco: (risco: string) => void;
+  setDataInicio: (date?: Date) => void;
+  setDataFim: (date?: Date) => void;
   onClearFilters: () => void;
   empresas: Array<{ id: string; nome: string }>;
 }
@@ -33,6 +38,8 @@ const OcorrenciasConsultaFilters = ({
   tipo,
   status,
   risco,
+  dataInicio,
+  dataFim,
   setAno,
   setMes,
   setCca,
@@ -40,6 +47,8 @@ const OcorrenciasConsultaFilters = ({
   setTipo,
   setStatus,
   setRisco,
+  setDataInicio,
+  setDataFim,
   onClearFilters,
   empresas
 }: OcorrenciasConsultaFiltersProps) => {
@@ -95,7 +104,27 @@ const OcorrenciasConsultaFilters = ({
         </div>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-9 gap-4">
+          <div className="space-y-1">
+            <label className="text-sm font-medium">
+              Data Início
+            </label>
+            <DatePickerWithManualInput
+              value={dataInicio}
+              onChange={setDataInicio}
+            />
+          </div>
+
+          <div className="space-y-1">
+            <label className="text-sm font-medium">
+              Data Fim
+            </label>
+            <DatePickerWithManualInput
+              value={dataFim}
+              onChange={setDataFim}
+            />
+          </div>
+
           <div className="space-y-1">
             <label htmlFor="ano" className="text-sm font-medium">
               Ano

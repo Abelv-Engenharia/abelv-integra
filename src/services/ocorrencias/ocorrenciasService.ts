@@ -8,6 +8,8 @@ export interface OcorrenciasFilters {
   tipo?: string;
   status?: string;
   risco?: string;
+  dataInicio?: Date;
+  dataFim?: Date;
 }
 
 export interface OcorrenciaFormData {
@@ -459,7 +461,16 @@ export const getAllOcorrencias = async (filters?: OcorrenciasFilters) => {
 
     // Aplicar filtros
     if (filters) {
-      if (filters.mes && filters.mes !== 'todos') {
+      // Filtro por período (data início e data fim tem prioridade)
+      if (filters.dataInicio && filters.dataFim) {
+        query = query
+          .gte('data', filters.dataInicio.toISOString())
+          .lte('data', filters.dataFim.toISOString());
+      } else if (filters.dataInicio) {
+        query = query.gte('data', filters.dataInicio.toISOString());
+      } else if (filters.dataFim) {
+        query = query.lte('data', filters.dataFim.toISOString());
+      } else if (filters.mes && filters.mes !== 'todos') {
         const anoParaUsar = filters.ano && filters.ano !== 'todos' ? filters.ano : new Date().getFullYear().toString();
         const mesFormatado = filters.mes.padStart(2, '0');
         const ultimoDiaMes = new Date(parseInt(anoParaUsar), parseInt(filters.mes), 0).getDate();
