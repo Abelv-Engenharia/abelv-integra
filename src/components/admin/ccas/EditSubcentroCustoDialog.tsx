@@ -98,7 +98,15 @@ const EditSubcentroCustoDialog = ({
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form 
+            onSubmit={form.handleSubmit(onSubmit)} 
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && e.target instanceof HTMLInputElement) {
+                e.preventDefault();
+              }
+            }}
+            className="space-y-4"
+          >
             <SubcentroCustoFormFields />
 
             <div className="flex justify-end gap-3 pt-4">
