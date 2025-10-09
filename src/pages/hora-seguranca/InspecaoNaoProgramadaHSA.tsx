@@ -53,30 +53,38 @@ const useTiposInspecao = () => {
 
 const useFuncionarios = (ccaCodigo?: string) => {
   const [funcionarios, setFuncionarios] = React.useState([]);
+  
   React.useEffect(() => {
     if (!ccaCodigo) {
       setFuncionarios([]);
       return;
     }
-    supabase.from("funcionarios").select("id, nome, funcao, cca_id, ativo, matricula").eq("ativo", true).order("nome").then(({
-      data
-    }) => {
-      if (!data) {
-        setFuncionarios([]);
-        return;
-      }
-      supabase.from("ccas").select("id").eq("codigo", ccaCodigo).maybeSingle().then(({
-        data: ccaData
-      }) => {
-        if (!ccaData) {
+    
+    // Query única com JOIN para buscar funcionários do CCA
+    supabase
+      .from("funcionarios")
+      .select(`
+        id, 
+        nome, 
+        funcao, 
+        cca_id, 
+        ativo, 
+        matricula,
+        ccas!inner(id, codigo, nome)
+      `)
+      .eq("ativo", true)
+      .eq("ccas.codigo", ccaCodigo)
+      .order("nome")
+      .then(({ data, error }) => {
+        if (error) {
+          console.error("Erro ao buscar funcionários:", error);
           setFuncionarios([]);
           return;
         }
-        const filtered = data.filter((f: any) => f.cca_id === ccaData.id);
-        setFuncionarios(filtered);
+        setFuncionarios(data || []);
       });
-    });
   }, [ccaCodigo]);
+  
   return funcionarios;
 };
 
