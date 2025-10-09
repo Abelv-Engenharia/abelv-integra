@@ -91,7 +91,7 @@ export default function RelatoriosOcorrenciasPendentes() {
       'Tipo': o.tipo_evento,
       'Risco': o.classificacao_risco,
       'Descrição': o.descricao_ocorrencia.substring(0, 100),
-      'Status': o.status_ocorrencia,
+      'Status': o.status,
       'Documentos Pendentes': o.documentos_pendentes.map(d => d.tipo).join(', '),
     }));
 

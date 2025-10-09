@@ -21,13 +21,13 @@ export interface OcorrenciaPendente {
   tipo_evento: string;
   classificacao_risco: string;
   descricao_ocorrencia: string;
-  status_ocorrencia: string;
+  status: string;
   houve_afastamento: string;
-  arquivo_cat_url?: string;
-  informe_preliminar_url?: string;
-  relatorio_analise_url?: string;
+  arquivo_cat?: string;
+  informe_preliminar?: string;
+  relatorio_analise?: string;
   licoes_aprendidas_enviada: string;
-  arquivo_licoes_aprendidas_url?: string;
+  arquivo_licoes_aprendidas?: string;
   documentos_pendentes: DocumentoPendente[];
 }
 
@@ -35,22 +35,22 @@ function getDocumentosPendentes(ocorrencia: any): DocumentoPendente[] {
   const pendentes: DocumentoPendente[] = [];
 
   // CAT: Obrigatório quando houver afastamento
-  if (ocorrencia.houve_afastamento === 'Sim' && !ocorrencia.arquivo_cat_url) {
+  if (ocorrencia.houve_afastamento === 'Sim' && !ocorrencia.arquivo_cat) {
     pendentes.push({ tipo: 'CAT', pendente: true });
   }
 
   // Informe Preliminar: Sempre obrigatório
-  if (!ocorrencia.informe_preliminar_url) {
+  if (!ocorrencia.informe_preliminar) {
     pendentes.push({ tipo: 'Informe Preliminar', pendente: true });
   }
 
   // Relatório de Análise: Obrigatório para acidentes graves
-  if (ocorrencia.tipo_evento === 'Acidente' && !ocorrencia.relatorio_analise_url) {
+  if (ocorrencia.tipo_evento === 'Acidente' && !ocorrencia.relatorio_analise) {
     pendentes.push({ tipo: 'Relatório de Análise', pendente: true });
   }
 
   // Lições Aprendidas: Obrigatório quando marcado como enviado
-  if (ocorrencia.licoes_aprendidas_enviada === 'Sim' && !ocorrencia.arquivo_licoes_aprendidas_url) {
+  if (ocorrencia.licoes_aprendidas_enviada === 'Sim' && !ocorrencia.arquivo_licoes_aprendidas) {
     pendentes.push({ tipo: 'Lições Aprendidas', pendente: true });
   }
 
@@ -68,13 +68,13 @@ export async function fetchOcorrenciasDocumentosIncompletos(filters: OcorrenciaP
       tipo_evento,
       classificacao_risco,
       descricao_ocorrencia,
-      status_ocorrencia,
+      status,
       houve_afastamento,
-      arquivo_cat_url,
-      informe_preliminar_url,
-      relatorio_analise_url,
+      arquivo_cat,
+      informe_preliminar,
+      relatorio_analise,
       licoes_aprendidas_enviada,
-      arquivo_licoes_aprendidas_url
+      arquivo_licoes_aprendidas
     `)
     .order('data', { ascending: false });
 
@@ -87,11 +87,11 @@ export async function fetchOcorrenciasDocumentosIncompletos(filters: OcorrenciaP
   }
 
   if (filters.ccaId) {
-    query = query.eq('cca_id', parseInt(filters.ccaId));
+    query = query.eq('cca', filters.ccaId);
   }
 
   if (filters.empresaId) {
-    query = query.eq('empresa_id', parseInt(filters.empresaId));
+    query = query.eq('empresa', filters.empresaId);
   }
 
   const { data, error } = await query;
@@ -124,12 +124,12 @@ export async function fetchOcorrenciasPendentesPorTipo() {
     .from('ocorrencias')
     .select(`
       houve_afastamento,
-      arquivo_cat_url,
-      informe_preliminar_url,
-      relatorio_analise_url,
+      arquivo_cat,
+      informe_preliminar,
+      relatorio_analise,
       tipo_evento,
       licoes_aprendidas_enviada,
-      arquivo_licoes_aprendidas_url
+      arquivo_licoes_aprendidas
     `);
 
   if (error) {
