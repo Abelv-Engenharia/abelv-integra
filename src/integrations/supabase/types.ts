@@ -2742,6 +2742,21 @@ export type Database = {
         }
         Relationships: []
       }
+      info_sienge: {
+        Row: {
+          id: string
+          nfe_sequencial: number
+        }
+        Insert: {
+          id?: string
+          nfe_sequencial: number
+        }
+        Update: {
+          id?: string
+          nfe_sequencial?: number
+        }
+        Relationships: []
+      }
       inspecoes_extintores: {
         Row: {
           checklist_id: string
