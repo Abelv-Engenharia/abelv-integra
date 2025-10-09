@@ -106,26 +106,6 @@ const OcorrenciasConsultaFilters = ({
       <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-9 gap-4">
           <div className="space-y-1">
-            <label className="text-sm font-medium">
-              Data Início
-            </label>
-            <DatePickerWithManualInput
-              value={dataInicio}
-              onChange={setDataInicio}
-            />
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-sm font-medium">
-              Data Fim
-            </label>
-            <DatePickerWithManualInput
-              value={dataFim}
-              onChange={setDataFim}
-            />
-          </div>
-
-          <div className="space-y-1">
             <label htmlFor="ano" className="text-sm font-medium">
               Ano
             </label>
@@ -261,6 +241,26 @@ const OcorrenciasConsultaFilters = ({
                 ))}
               </SelectContent>
             </Select>
+          </div>
+
+          <div className="space-y-1">
+            <label className="text-sm font-medium">
+              Data Início
+            </label>
+            <DatePickerWithManualInput
+              value={dataInicio}
+              onChange={setDataInicio}
+            />
+          </div>
+
+          <div className="space-y-1">
+            <label className="text-sm font-medium">
+              Data Fim
+            </label>
+            <DatePickerWithManualInput
+              value={dataFim}
+              onChange={setDataFim}
+            />
           </div>
         </div>
       </CardContent>
