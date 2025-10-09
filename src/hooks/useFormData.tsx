@@ -46,23 +46,26 @@ export const useFormData = () => {
       
       console.log('useFormData - Buscando empresas para CCAs:', allowedCcaIds);
       const { data } = await supabase
-        .from('empresas')
+        .from('empresa_ccas')
         .select(`
-          id,
-          nome,
-          cnpj,
-          ativo,
-          empresa_ccas!inner(
-            cca_id,
-            ccas:cca_id(id, codigo, nome)
-          )
+          cca_id,
+          empresas!inner(id, nome, cnpj, ativo)
         `)
-        .eq('ativo', true)
-        .in('empresa_ccas.cca_id', allowedCcaIds)
-        .order('nome');
+        .eq('empresas.ativo', true)
+        .in('cca_id', allowedCcaIds);
       
       console.log('useFormData - Empresas encontradas:', data?.length || 0);
-      return data || [];
+      
+      // Remover duplicatas e retornar apenas os dados da empresa
+      const uniqueEmpresas = data?.reduce((acc, item) => {
+        const empresa = item.empresas;
+        if (!acc.find(e => e.id === empresa.id)) {
+          acc.push(empresa);
+        }
+        return acc;
+      }, [] as any[]) || [];
+      
+      return uniqueEmpresas.sort((a, b) => a.nome.localeCompare(b.nome));
     },
     enabled: allowedCcaIds.length > 0 && !ccasLoading,
   });
@@ -82,25 +85,25 @@ export const useFormData = () => {
       
       console.log('useFormData - Buscando engenheiros para CCAs:', allowedCcaIds);
       const { data } = await supabase
-        .from('engenheiros')
+        .from('engenheiro_ccas')
         .select(`
-          id,
-          nome,
-          funcao,
-          matricula,
-          email,
-          ativo,
-          engenheiro_ccas!inner(
-            cca_id,
-            ccas:cca_id(id, codigo, nome)
-          )
+          cca_id,
+          engenheiros!inner(id, nome, funcao, matricula, email, ativo)
         `)
-        .eq('ativo', true)
-        .in('engenheiro_ccas.cca_id', allowedCcaIds)
-        .order('nome');
+        .eq('engenheiros.ativo', true)
+        .in('cca_id', allowedCcaIds);
       
       console.log('useFormData - Engenheiros encontrados:', data?.length || 0);
-      return data || [];
+      
+      const uniqueEngenheiros = data?.reduce((acc, item) => {
+        const engenheiro = item.engenheiros;
+        if (!acc.find(e => e.id === engenheiro.id)) {
+          acc.push(engenheiro);
+        }
+        return acc;
+      }, [] as any[]) || [];
+      
+      return uniqueEngenheiros.sort((a, b) => a.nome.localeCompare(b.nome));
     },
     enabled: allowedCcaIds.length > 0 && !ccasLoading,
   });
@@ -120,25 +123,25 @@ export const useFormData = () => {
       
       console.log('useFormData - Buscando supervisores para CCAs:', allowedCcaIds);
       const { data } = await supabase
-        .from('supervisores')
+        .from('supervisor_ccas')
         .select(`
-          id,
-          nome,
-          funcao,
-          matricula,
-          email,
-          ativo,
-          supervisor_ccas!inner(
-            cca_id,
-            ccas:cca_id(id, codigo, nome)
-          )
+          cca_id,
+          supervisores!inner(id, nome, funcao, matricula, email, ativo)
         `)
-        .eq('ativo', true)
-        .in('supervisor_ccas.cca_id', allowedCcaIds)
-        .order('nome');
+        .eq('supervisores.ativo', true)
+        .in('cca_id', allowedCcaIds);
       
       console.log('useFormData - Supervisores encontrados:', data?.length || 0);
-      return data || [];
+      
+      const uniqueSupervisores = data?.reduce((acc, item) => {
+        const supervisor = item.supervisores;
+        if (!acc.find(e => e.id === supervisor.id)) {
+          acc.push(supervisor);
+        }
+        return acc;
+      }, [] as any[]) || [];
+      
+      return uniqueSupervisores.sort((a, b) => a.nome.localeCompare(b.nome));
     },
     enabled: allowedCcaIds.length > 0 && !ccasLoading,
   });
@@ -153,25 +156,25 @@ export const useFormData = () => {
       
       console.log('useFormData - Buscando encarregados para CCAs:', allowedCcaIds);
       const { data } = await supabase
-        .from('encarregados')
+        .from('encarregado_ccas')
         .select(`
-          id,
-          nome,
-          funcao,
-          matricula,
-          email,
-          ativo,
-          encarregado_ccas!inner(
-            cca_id,
-            ccas:cca_id(id, codigo, nome)
-          )
+          cca_id,
+          encarregados!inner(id, nome, funcao, matricula, email, ativo)
         `)
-        .eq('ativo', true)
-        .in('encarregado_ccas.cca_id', allowedCcaIds)
-        .order('nome');
+        .eq('encarregados.ativo', true)
+        .in('cca_id', allowedCcaIds);
       
       console.log('useFormData - Encarregados encontrados:', data?.length || 0);
-      return data || [];
+      
+      const uniqueEncarregados = data?.reduce((acc, item) => {
+        const encarregado = item.encarregados;
+        if (!acc.find(e => e.id === encarregado.id)) {
+          acc.push(encarregado);
+        }
+        return acc;
+      }, [] as any[]) || [];
+      
+      return uniqueEncarregados.sort((a, b) => a.nome.localeCompare(b.nome));
     },
     enabled: allowedCcaIds.length > 0 && !ccasLoading,
   });
