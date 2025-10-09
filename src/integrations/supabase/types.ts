@@ -3260,6 +3260,18 @@ export type Database = {
         }
         Relationships: []
       }
+      nfe_compra: {
+        Row: {
+          id: number
+        }
+        Insert: {
+          id?: number
+        }
+        Update: {
+          id?: number
+        }
+        Relationships: []
+      }
       notificacoes: {
         Row: {
           created_at: string
