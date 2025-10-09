@@ -33,6 +33,7 @@ export default function SidebarSectionApoioGeral({ openMenu, toggleMenu, onLinkC
 
   const items: Item[] = [
     { label: "Empresas", to: "/admin/empresas", slug: "admin_empresas", Icon: Building2 },
+    { label: "Empresas (sienge)", to: "/admin/empresas-sienge", slug: "admin_empresas_sienge", Icon: Building2 },
     { label: "CCAs", to: "/admin/ccas", slug: "admin_ccas", Icon: Layers },
     { label: "Unidades de Medidas", to: "/admin/unidades-medidas", slug: "admin_unidades_medidas", Icon: Ruler },
     { label: "Documentos", to: "/admin/tipos-documentos", slug: "admin_tipos_documentos", Icon: FileText },
