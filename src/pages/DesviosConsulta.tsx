@@ -10,6 +10,8 @@ import { useToast } from "@/hooks/use-toast";
 import DesviosTable from "@/components/desvios/DesviosTable";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserCCAs } from "@/hooks/useUserCCAs";
+import { DatePickerWithManualInput } from "@/components/ui/date-picker-with-manual-input";
+import { format } from "date-fns";
 
 // Mock data
 const currentYear = new Date().getFullYear();
@@ -66,6 +68,10 @@ const DesviosConsulta = () => {
   const [basesLegais, setBasesLegais] = useState<Array<{
     nome: string;
   }>>([]);
+  
+  // Estados para filtros de período
+  const [dataInicio, setDataInicio] = useState<Date | undefined>();
+  const [dataFim, setDataFim] = useState<Date | undefined>();
 
   // Opções fixas de status padronizadas
   const statusOptions = [{
@@ -222,6 +228,8 @@ const DesviosConsulta = () => {
     };
     setFilters(clearedFilters);
     setSearchTerm("");
+    setDataInicio(undefined);
+    setDataFim(undefined);
     // Limpar também os parâmetros da URL
     navigate("/desvios/consulta", {
       replace: true
@@ -236,8 +244,16 @@ const DesviosConsulta = () => {
       // Preparar filtros para exportação
       const exportFilters: any = {};
 
-      // Aplicar filtros de data se selecionados
-      if (filters.year) {
+      // Aplicar filtros de período customizado (prioridade sobre ano/mês)
+      if (dataInicio || dataFim) {
+        if (dataInicio) {
+          exportFilters.dataInicial = format(dataInicio, 'yyyy-MM-dd');
+        }
+        if (dataFim) {
+          exportFilters.dataFinal = format(dataFim, 'yyyy-MM-dd');
+        }
+      } else if (filters.year) {
+        // Aplicar filtros de data se selecionados (apenas se não houver período customizado)
         if (filters.month && filters.month !== "todos") {
           // Mês específico
           const month = filters.month.padStart(2, '0');
@@ -534,6 +550,26 @@ const DesviosConsulta = () => {
                 </SelectContent>
               </Select>
             </div>
+            
+            <div className="grid gap-1.5">
+              <label htmlFor="filter-data-inicio" className="text-sm font-medium">
+                Data início
+              </label>
+              <DatePickerWithManualInput
+                value={dataInicio}
+                onChange={setDataInicio}
+              />
+            </div>
+            
+            <div className="grid gap-1.5">
+              <label htmlFor="filter-data-fim" className="text-sm font-medium">
+                Data fim
+              </label>
+              <DatePickerWithManualInput
+                value={dataFim}
+                onChange={setDataFim}
+              />
+            </div>
           </div>
         </CardContent>
         <CardFooter>
@@ -544,7 +580,14 @@ const DesviosConsulta = () => {
       </Card>
 
       {/* Deviations Table */}
-      <DesviosTable filters={filters} searchTerm={searchTerm} />
+      <DesviosTable 
+        filters={{
+          ...filters,
+          dataInicio,
+          dataFim
+        }} 
+        searchTerm={searchTerm} 
+      />
     </div>;
 };
 export default DesviosConsulta;

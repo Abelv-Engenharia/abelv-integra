@@ -37,6 +37,8 @@ interface DesviosTableProps {
     processo?: string;
     baseLegal?: string;    // nome vindo do gráfico
     baseLegalId?: string;  // id vindo do gráfico
+    dataInicio?: Date;     // data início do período
+    dataFim?: Date;        // data fim do período
   };
   searchTerm?: string;
 }
@@ -111,7 +113,19 @@ const DesviosTable = ({ filters, searchTerm }: DesviosTableProps) => {
 
       // ====== Aplicar filtros em ambas as queries ======
       const applyFilters = (query: any) => {
-        if (filters?.year && filters.year !== "") {
+        // Prioridade: período customizado (dataInicio/dataFim) > mês/ano > ano
+        if (filters?.dataInicio || filters?.dataFim) {
+          // Filtro de período customizado
+          if (filters.dataInicio) {
+            const dataInicioStr = filters.dataInicio.toISOString().split("T")[0];
+            query = query.gte("data_desvio", dataInicioStr);
+          }
+          if (filters.dataFim) {
+            const dataFimStr = filters.dataFim.toISOString().split("T")[0];
+            query = query.lte("data_desvio", dataFimStr);
+          }
+        } else if (filters?.year && filters.year !== "") {
+          // Filtro de ano (ou mês/ano se month estiver preenchido)
           const year = parseInt(filters.year);
           query = query
             .gte("data_desvio", `${year}-01-01`)
@@ -124,8 +138,8 @@ const DesviosTable = ({ filters, searchTerm }: DesviosTableProps) => {
       baseQuery = applyFilters(baseQuery);
       dataQuery = applyFilters(dataQuery);
 
-      // Aplicar filtros avançados
-      if (filters?.month && filters.month !== "" && filters.month !== "todos") {
+      // Aplicar filtro de mês (apenas se não houver período customizado)
+      if (!filters?.dataInicio && !filters?.dataFim && filters?.month && filters.month !== "" && filters.month !== "todos") {
         const month = parseInt(filters.month);
         const year = filters?.year && filters.year !== "" ? parseInt(filters.year) : new Date().getFullYear();
         const startDate = new Date(year, month - 1, 1);
