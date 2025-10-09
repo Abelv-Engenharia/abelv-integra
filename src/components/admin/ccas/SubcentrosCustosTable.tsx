@@ -56,6 +56,7 @@ const SubcentrosCustosTable = ({ ccaId, onEdit, onDelete }: SubcentrosCustosTabl
               <TableCell>
                 <div className="flex gap-2">
                   <Button
+                    type="button"
                     variant="ghost"
                     size="icon"
                     onClick={() => onEdit(subcentro)}
@@ -63,6 +64,7 @@ const SubcentrosCustosTable = ({ ccaId, onEdit, onDelete }: SubcentrosCustosTabl
                     <Edit className="h-4 w-4" />
                   </Button>
                   <Button
+                    type="button"
                     variant="ghost"
                     size="icon"
                     onClick={() => onDelete(subcentro)}
