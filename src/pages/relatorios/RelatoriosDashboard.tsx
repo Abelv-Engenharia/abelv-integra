@@ -1,7 +1,7 @@
 
 import React, { useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { FileText, BarChart3, Shield } from "lucide-react";
+import { FileText, BarChart3, Shield, AlertCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 import { relatoriosService } from "@/services/relatoriosService";
 
@@ -36,6 +36,24 @@ const RelatoriosDashboard = () => {
       description: "Análise de inspeções de segurança por CCA, responsável e desvios",
       icon: <Shield className="h-8 w-8" />,
       link: "/relatorios/hsa",
+    },
+    {
+      title: "Treinamentos Sem Anexo",
+      description: "Listagem de treinamentos executados sem lista de presença anexada",
+      icon: <AlertCircle className="h-8 w-8" />,
+      link: "/relatorios/treinamentos-pendentes",
+    },
+    {
+      title: "Inspeções HSA Sem Anexo",
+      description: "Listagem de inspeções da hora da segurança sem relatório anexado",
+      icon: <AlertCircle className="h-8 w-8" />,
+      link: "/relatorios/hsa-pendentes",
+    },
+    {
+      title: "Ocorrências com Documentos Incompletos",
+      description: "Listagem de ocorrências sem todos os documentos obrigatórios",
+      icon: <AlertCircle className="h-8 w-8" />,
+      link: "/relatorios/ocorrencias-pendentes",
     },
   ];
 
