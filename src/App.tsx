@@ -181,6 +181,7 @@ import EstoqueProcessarDevolucao from "./pages/suprimentos/estoque/requisicoes/P
 import EstoqueRelacaoRequisicoesEmitidas from "./pages/suprimentos/estoque/requisicoes/RelacaoRequisicoesEmitidas";
 import EstoqueRelacaoRequisicoesPendentes from "./pages/suprimentos/estoque/requisicoes/RelacaoRequisicoesPendentes";
 import EstoqueTransferenciaAlmoxarifados from "./pages/suprimentos/estoque/transferencias/TransferenciaAlmoxarifados";
+import EstoqueNovaTransferenciaAlmoxarifados from "./pages/suprimentos/estoque/transferencias/NovaTransferenciaAlmoxarifados";
 import EstoqueTransferenciaCCAs from "./pages/suprimentos/estoque/transferencias/TransferenciaCCAs";
 import EstoqueRelatorioTransferencias from "./pages/suprimentos/estoque/transferencias/RelatorioTransferencias";
 import EstoqueRelacaoTransferencias from "./pages/suprimentos/estoque/transferencias/RelacaoTransferencias";
@@ -391,6 +392,7 @@ function App() {
                 
                 {/* Transferências */}
                 <Route path="suprimentos/estoque/transferencias/transferencia-almoxarifados" element={<EstoqueTransferenciaAlmoxarifados />} />
+                <Route path="suprimentos/estoque/transferencias/nova-transferencia-almoxarifados" element={<EstoqueNovaTransferenciaAlmoxarifados />} />
                 <Route path="suprimentos/estoque/transferencias/transferencia-ccas" element={<EstoqueTransferenciaCCAs />} />
                 <Route path="suprimentos/estoque/transferencias/relatorio-transferencias" element={<EstoqueRelatorioTransferencias />} />
                 <Route path="suprimentos/estoque/transferencias/relacao-transferencias" element={<EstoqueRelacaoTransferencias />} />

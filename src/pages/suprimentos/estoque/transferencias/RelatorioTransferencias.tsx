@@ -1,33 +1,30 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FileText, Download } from "lucide-react";
+import { FileText } from "lucide-react";
 
 const EstoqueRelatorioTransferencias = () => {
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-start">
+      <div className="flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Relatório de Transferências</h1>
           <p className="text-muted-foreground">
-            Relatório detalhado de transferências de materiais
+            Relatórios de transferências de materiais
           </p>
         </div>
         <Button>
-          <Download className="h-4 w-4 mr-2" />
-          Exportar
+          <FileText className="mr-2 h-4 w-4" />
+          Gerar Relatório
         </Button>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <FileText className="h-5 w-5" />
-            Relatório de Transferências
-          </CardTitle>
+          <CardTitle>Parâmetros do Relatório</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-muted-foreground text-center py-8">
-            Página em construção - Relatório de transferências
+          <p className="text-muted-foreground">
+            Selecione os parâmetros para gerar o relatório de transferências.
           </p>
         </CardContent>
       </Card>
