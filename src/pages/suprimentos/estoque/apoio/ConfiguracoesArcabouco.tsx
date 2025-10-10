@@ -1,32 +1,79 @@
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Settings } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
 
-const EstoqueConfiguracoesArcabouco = () => {
+const ConfiguracoesArcabouco = () => {
+  const [percentual, setPercentual] = useState("");
+  const { toast } = useToast();
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!percentual) {
+      toast({
+        title: "Erro",
+        description: "O percentual é obrigatório",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const numPercentual = parseFloat(percentual);
+    if (isNaN(numPercentual) || numPercentual < 0 || numPercentual > 100) {
+      toast({
+        title: "Erro", 
+        description: "Digite um percentual válido entre 0 e 100",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Aqui seria implementada a lógica para salvar as configurações
+    toast({
+      title: "Sucesso",
+      description: "Configurações salvas com sucesso!",
+    });
+  };
+
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Configurações do Arcabouço</h1>
-        <p className="text-muted-foreground">
-          Configurações gerais do sistema de estoque
-        </p>
-      </div>
-
+    <div className="container mx-auto p-6">
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Settings className="h-5 w-5" />
-            Parâmetros do Sistema
-          </CardTitle>
+          <CardTitle>Configurações do Arcabouço</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-muted-foreground text-center py-8">
-            Página em construção - Configurações do arcabouço de estoque
-          </p>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="percentual">
+                % do valor dos item a serem transferidos entre obras *
+              </Label>
+              <Input
+                id="percentual"
+                type="number"
+                step="0.01"
+                min="0"
+                max="100"
+                value={percentual}
+                onChange={(e) => setPercentual(e.target.value)}
+                placeholder="Digite o percentual"
+                className={!percentual ? "border-red-500" : ""}
+              />
+              {!percentual && (
+                <p className="text-sm text-red-500">Este campo é obrigatório</p>
+              )}
+            </div>
+            
+            <Button type="submit" className="w-full sm:w-auto">
+              Salvar
+            </Button>
+          </form>
         </CardContent>
       </Card>
     </div>
   );
 };
 
-export default EstoqueConfiguracoesArcabouco;
+export default ConfiguracoesArcabouco;

@@ -1,38 +1,33 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FileText, Download } from "lucide-react";
+import { FileText } from "lucide-react";
 
-const EstoqueRelacaoAlmoxarifados = () => {
+export default function RelacaoAlmoxarifados() {
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-start">
+      <div className="flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Relação de Almoxarifados</h1>
           <p className="text-muted-foreground">
-            Lista completa de almoxarifados cadastrados
+            Relatório de todos os almoxarifados
           </p>
         </div>
         <Button>
-          <Download className="h-4 w-4 mr-2" />
-          Exportar
+          <FileText className="mr-2 h-4 w-4" />
+          Gerar Relatório
         </Button>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <FileText className="h-5 w-5" />
-            Relação de Almoxarifados
-          </CardTitle>
+          <CardTitle>Parâmetros do Relatório</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-muted-foreground text-center py-8">
-            Página em construção - Relação de almoxarifados
+          <p className="text-muted-foreground">
+            Selecione os parâmetros para gerar a relação de almoxarifados.
           </p>
         </CardContent>
       </Card>
     </div>
   );
-};
-
-export default EstoqueRelacaoAlmoxarifados;
+}
