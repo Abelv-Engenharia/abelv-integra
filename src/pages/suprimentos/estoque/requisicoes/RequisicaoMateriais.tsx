@@ -11,6 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Plus, CalendarIcon, Search, Edit } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import { useCCAs } from "@/hooks/useCCAs";
 
 interface Requisicao {
   id: string;
@@ -24,6 +25,7 @@ interface Requisicao {
 
 export default function RequisicaoMateriais() {
   const navigate = useNavigate();
+  const { data: ccas, isLoading: isLoadingCcas } = useCCAs();
   
   // Estados dos filtros
   const [filtros, setFiltros] = useState({
@@ -93,13 +95,18 @@ export default function RequisicaoMateriais() {
               <Label htmlFor="cca">
                 CCA
               </Label>
-              <Input
-                id="cca"
-                type="number"
-                value={filtros.cca}
-                onChange={(e) => setFiltros({...filtros, cca: e.target.value})}
-                placeholder="Digite o CCA"
-              />
+              <Select value={filtros.cca} onValueChange={(value) => setFiltros({...filtros, cca: value})} disabled={isLoadingCcas}>
+                <SelectTrigger>
+                  <SelectValue placeholder={isLoadingCcas ? "Carregando..." : "Selecione o CCA"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {ccas?.map((ccaItem) => (
+                    <SelectItem key={ccaItem.id} value={ccaItem.id.toString()}>
+                      {ccaItem.codigo} - {ccaItem.nome}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             {/* Requisitante */}

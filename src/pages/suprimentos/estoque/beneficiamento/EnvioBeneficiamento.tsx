@@ -12,9 +12,11 @@ import { useNavigate, Link } from "react-router-dom";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { DateRange } from "react-day-picker";
+import { useCCAs } from "@/hooks/useCCAs";
 
 const EstoqueEnvioBeneficiamento = () => {
   const navigate = useNavigate();
+  const { data: ccas, isLoading: isLoadingCcas } = useCCAs();
   const [cca, setCca] = useState("");
   const [almoxarifadoOrigem, setAlmoxarifadoOrigem] = useState("");
   const [fornecedorDestino, setFornecedorDestino] = useState("");
@@ -70,13 +72,18 @@ const EstoqueEnvioBeneficiamento = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label htmlFor="filter-cca">Cca</Label>
-              <Input
-                id="filter-cca"
-                type="number"
-                placeholder="Digite o CCA"
-                value={cca}
-                onChange={(e) => setCca(e.target.value)}
-              />
+              <Select value={cca} onValueChange={setCca} disabled={isLoadingCcas}>
+                <SelectTrigger>
+                  <SelectValue placeholder={isLoadingCcas ? "Carregando..." : "Selecione o CCA"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {ccas?.map((ccaItem) => (
+                    <SelectItem key={ccaItem.id} value={ccaItem.id.toString()}>
+                      {ccaItem.codigo} - {ccaItem.nome}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="space-y-2">

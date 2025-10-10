@@ -9,6 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { ArrowLeft, Plus, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { useCCAs } from "@/hooks/useCCAs";
 
 interface ItemTransferencia {
   id: string;
@@ -20,6 +21,7 @@ interface ItemTransferencia {
 const EstoqueNovaTransferenciaAlmoxarifados = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { data: ccas, isLoading: isLoadingCcas } = useCCAs();
 
   // Estados do formulário
   const [cca, setCca] = useState("");
@@ -178,13 +180,18 @@ const EstoqueNovaTransferenciaAlmoxarifados = () => {
                 <Label htmlFor="cca" className={!cca ? "text-destructive" : ""}>
                   Cca *
                 </Label>
-                <Input
-                  id="cca"
-                  type="number"
-                  value={cca}
-                  onChange={(e) => setCca(e.target.value)}
-                  className={!cca ? "border-destructive" : ""}
-                />
+                <Select value={cca} onValueChange={setCca} disabled={isLoadingCcas}>
+                  <SelectTrigger className={!cca ? "border-destructive" : ""}>
+                    <SelectValue placeholder={isLoadingCcas ? "Carregando..." : "Selecione o CCA"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {ccas?.map((ccaItem) => (
+                      <SelectItem key={ccaItem.id} value={ccaItem.id.toString()}>
+                        {ccaItem.codigo} - {ccaItem.nome}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="space-y-2">

@@ -13,10 +13,12 @@ import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
+import { useCCAs } from "@/hooks/useCCAs";
 
 export default function DevolucaoMateriais() {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { data: ccas, isLoading: isLoadingCcas } = useCCAs();
   const [cca, setCca] = useState("");
   const [requisitante, setRequisitante] = useState("");
   const [dataMovimento, setDataMovimento] = useState<Date>();
@@ -77,13 +79,18 @@ export default function DevolucaoMateriais() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label htmlFor="cca">CCA</Label>
-              <Input
-                id="cca"
-                type="number"
-                placeholder="Digite o CCA"
-                value={cca}
-                onChange={(e) => setCca(e.target.value)}
-              />
+              <Select value={cca} onValueChange={setCca} disabled={isLoadingCcas}>
+                <SelectTrigger>
+                  <SelectValue placeholder={isLoadingCcas ? "Carregando..." : "Selecione o CCA"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {ccas?.map((ccaItem) => (
+                    <SelectItem key={ccaItem.id} value={ccaItem.id.toString()}>
+                      {ccaItem.codigo} - {ccaItem.nome}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="space-y-2">

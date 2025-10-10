@@ -7,6 +7,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Edit, Trash2, ChevronDown, ChevronRight, Download, Upload } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useCCAs } from "@/hooks/useCCAs";
 import * as XLSX from 'xlsx';
 
 interface EAPNode {
@@ -19,6 +20,7 @@ interface EAPNode {
 export default function EAP() {
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { data: ccas, isLoading: isLoadingCcas } = useCCAs();
   
   const [eapData, setEapData] = useState<EAPNode>({
     id: "1",
@@ -613,15 +615,16 @@ export default function EAP() {
           <CardTitle>CCA</CardTitle>
         </CardHeader>
         <CardContent>
-          <Select value={selectedCca} onValueChange={setSelectedCca}>
+          <Select value={selectedCca} onValueChange={setSelectedCca} disabled={isLoadingCcas}>
             <SelectTrigger className="w-full">
-              <SelectValue placeholder="Selecione o CCA" />
+              <SelectValue placeholder={isLoadingCcas ? "Carregando..." : "Selecione o CCA"} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="cca001">CCA 001 - Centro de Custo A</SelectItem>
-              <SelectItem value="cca002">CCA 002 - Centro de Custo B</SelectItem>
-              <SelectItem value="cca003">CCA 003 - Centro de Custo C</SelectItem>
-              <SelectItem value="cca004">CCA 004 - Centro de Custo D</SelectItem>
+              {ccas?.map((cca) => (
+                <SelectItem key={cca.id} value={cca.id.toString()}>
+                  {cca.codigo} - {cca.nome}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </CardContent>

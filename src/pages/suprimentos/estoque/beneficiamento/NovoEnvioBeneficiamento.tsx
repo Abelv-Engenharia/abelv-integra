@@ -15,6 +15,7 @@ import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
+import { useCCAs } from "@/hooks/useCCAs";
 
 const itemSchema = z.object({
   descricao: z.string().min(1, "Descrição é obrigatória"),
@@ -43,6 +44,7 @@ const EstoqueNovoEnvioBeneficiamento = () => {
   const { toast } = useToast();
   const [items, setItems] = useState<Item[]>([]);
   const [isAddingItem, setIsAddingItem] = useState(false);
+  const { data: ccas, isLoading: isLoadingCcas } = useCCAs();
 
   const form = useForm<EnvioFormData>({
     resolver: zodResolver(envioSchema),
@@ -158,12 +160,22 @@ const EstoqueNovoEnvioBeneficiamento = () => {
               <Label htmlFor="cca" className={!form.watch("cca") ? "text-destructive" : ""}>
                 Cca *
               </Label>
-              <Input
-                id="cca"
-                type="number"
-                {...form.register("cca", { valueAsNumber: true })}
-                className={!form.watch("cca") ? "border-destructive" : ""}
-              />
+              <Select 
+                value={form.watch("cca")?.toString() || ""} 
+                onValueChange={(value) => form.setValue("cca", parseInt(value))}
+                disabled={isLoadingCcas}
+              >
+                <SelectTrigger className={!form.watch("cca") ? "border-destructive" : ""}>
+                  <SelectValue placeholder={isLoadingCcas ? "Carregando..." : "Selecione o CCA"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {ccas?.map((cca) => (
+                    <SelectItem key={cca.id} value={cca.id.toString()}>
+                      {cca.codigo} - {cca.nome}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               {form.formState.errors.cca && (
                 <p className="text-sm text-destructive">{form.formState.errors.cca.message}</p>
               )}

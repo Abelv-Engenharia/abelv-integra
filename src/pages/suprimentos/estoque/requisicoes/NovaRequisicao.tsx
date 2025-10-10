@@ -12,6 +12,7 @@ import { CalendarIcon, Plus, Trash2, ArrowLeft, Edit } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
+import { useCCAs } from "@/hooks/useCCAs";
 
 interface ItemRequisicao {
   id: string;
@@ -23,6 +24,7 @@ interface ItemRequisicao {
 export default function NovaRequisicao() {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { data: ccas, isLoading: isLoadingCcas } = useCCAs();
   
   const [cca, setCca] = useState("");
   const [requisitante, setRequisitante] = useState("");
@@ -151,14 +153,18 @@ export default function NovaRequisicao() {
               <Label htmlFor="cca">
                 CCA <span className="text-destructive">*</span>
               </Label>
-              <Input
-                id="cca"
-                type="number"
-                placeholder="Digite o CCA"
-                value={cca}
-                onChange={(e) => setCca(e.target.value)}
-                className={cn(!cca && "border-destructive")}
-              />
+              <Select value={cca} onValueChange={setCca} disabled={isLoadingCcas}>
+                <SelectTrigger className={cn(!cca && "border-destructive")}>
+                  <SelectValue placeholder={isLoadingCcas ? "Carregando..." : "Selecione o CCA"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {ccas?.map((ccaItem) => (
+                    <SelectItem key={ccaItem.id} value={ccaItem.id.toString()}>
+                      {ccaItem.codigo} - {ccaItem.nome}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="space-y-2">

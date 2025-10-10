@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useCCAs } from "@/hooks/useCCAs";
 
 interface Item {
   id: string;
@@ -18,6 +19,7 @@ interface Item {
 }
 
 const EstoqueNovoRetornoBeneficiamento = () => {
+  const { data: ccas, isLoading: isLoadingCcas } = useCCAs();
   const [cca, setCca] = useState("");
   const [fornecedorOrigem, setFornecedorOrigem] = useState("");
   const [almoxarifadoDestino, setAlmoxarifadoDestino] = useState("");
@@ -131,13 +133,18 @@ const EstoqueNovoRetornoBeneficiamento = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="cca">CCA</Label>
-              <Input
-                id="cca"
-                type="number"
-                value={cca}
-                onChange={(e) => setCca(e.target.value)}
-                placeholder="Digite o CCA"
-              />
+              <Select value={cca} onValueChange={setCca} disabled={isLoadingCcas}>
+                <SelectTrigger>
+                  <SelectValue placeholder={isLoadingCcas ? "Carregando..." : "Selecione o CCA"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {ccas?.map((ccaItem) => (
+                    <SelectItem key={ccaItem.id} value={ccaItem.id.toString()}>
+                      {ccaItem.codigo} - {ccaItem.nome}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             
             <div className="space-y-2">
