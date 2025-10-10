@@ -17,10 +17,13 @@ import { useCriarComunicado } from "@/hooks/useComunicados";
 import { comunicadosService } from "@/services/comunicadosService";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useCCAs } from "@/hooks/useCCAs";
+import { UsuariosSelector } from "@/components/admin/comunicados/UsuariosSelector";
 
 const ComunicadosCadastro = () => {
   const navigate = useNavigate();
   const criarComunicado = useCriarComunicado();
+  const { data: ccas = [] } = useCCAs();
   
   const [formData, setFormData] = useState({
     titulo: "",
@@ -28,7 +31,11 @@ const ComunicadosCadastro = () => {
     data_inicio: new Date(),
     data_fim: new Date(),
     ativo: true,
-    publico_alvo: { tipo: "todos" as "todos" | "ccas" }
+    publico_alvo: { 
+      tipo: "todos" as "todos" | "cca" | "usuarios",
+      cca_id: undefined as number | undefined,
+      usuarios_ids: [] as string[]
+    }
   });
   
   const [arquivo, setArquivo] = useState<File | null>(null);
@@ -69,6 +76,25 @@ const ComunicadosCadastro = () => {
       toast({
         title: "Erro",
         description: "O título é obrigatório.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validações de público-alvo
+    if (formData.publico_alvo.tipo === 'cca' && !formData.publico_alvo.cca_id) {
+      toast({
+        title: "Erro",
+        description: "Selecione um CCA.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (formData.publico_alvo.tipo === 'usuarios' && formData.publico_alvo.usuarios_ids.length === 0) {
+      toast({
+        title: "Erro",
+        description: "Selecione pelo menos um usuário.",
         variant: "destructive",
       });
       return;
@@ -203,13 +229,17 @@ const ComunicadosCadastro = () => {
               </div>
 
               <div>
-                <Label>Público-Alvo</Label>
+                <Label>Público-Alvo *</Label>
                 <Select
                   value={formData.publico_alvo.tipo}
                   onValueChange={(value) => 
                     setFormData(prev => ({ 
                       ...prev, 
-                      publico_alvo: { tipo: value as "todos" | "ccas" } 
+                      publico_alvo: { 
+                        tipo: value as "todos" | "cca" | "usuarios",
+                        cca_id: undefined,
+                        usuarios_ids: []
+                      } 
                     }))
                   }
                 >
@@ -218,10 +248,58 @@ const ComunicadosCadastro = () => {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="todos">Todos os usuários</SelectItem>
-                    <SelectItem value="ccas">Por CCA</SelectItem>
+                    <SelectItem value="cca">Usuários de um CCA específico</SelectItem>
+                    <SelectItem value="usuarios">Usuários específicos</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
+
+              {formData.publico_alvo.tipo === 'cca' && (
+                <div>
+                  <Label>Selecionar CCA *</Label>
+                  <Select
+                    value={formData.publico_alvo.cca_id?.toString() || ""}
+                    onValueChange={(value) => 
+                      setFormData(prev => ({ 
+                        ...prev, 
+                        publico_alvo: { 
+                          ...prev.publico_alvo,
+                          cca_id: parseInt(value)
+                        } 
+                      }))
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione o CCA" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {ccas.map((cca) => (
+                        <SelectItem key={cca.id} value={cca.id.toString()}>
+                          {cca.codigo} - {cca.nome}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
+              {formData.publico_alvo.tipo === 'usuarios' && (
+                <div>
+                  <Label>Selecionar Usuários *</Label>
+                  <UsuariosSelector
+                    selectedIds={formData.publico_alvo.usuarios_ids}
+                    onChange={(ids) => 
+                      setFormData(prev => ({ 
+                        ...prev, 
+                        publico_alvo: { 
+                          ...prev.publico_alvo,
+                          usuarios_ids: ids
+                        } 
+                      }))
+                    }
+                  />
+                </div>
+              )}
 
               <div>
                 <Label htmlFor="arquivo">Anexo (PDF, JPEG ou PNG)</Label>

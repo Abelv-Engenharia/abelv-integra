@@ -4,6 +4,18 @@ import { Comunicado, ComunicadoCiencia } from "@/types/comunicados";
 export const comunicadosService = {
   // Buscar comunicados ativos para o usuário
   async getComunicadosAtivos(): Promise<Comunicado[]> {
+    const { data: user } = await supabase.auth.getUser();
+    if (!user.user) throw new Error('Usuário não autenticado');
+
+    // Buscar CCAs do usuário
+    const { data: usuarioCcas } = await supabase
+      .from('usuario_ccas')
+      .select('cca_id')
+      .eq('usuario_id', user.user.id)
+      .eq('ativo', true);
+    
+    const ccasDoUsuario = usuarioCcas?.map(uc => uc.cca_id) || [];
+
     const { data, error } = await supabase
       .from('comunicados')
       .select('*')
@@ -13,13 +25,40 @@ export const comunicadosService = {
       .order('created_at', { ascending: false });
 
     if (error) throw error;
-    return (data as Comunicado[]) || [];
+
+    // Filtrar por público-alvo
+    const comunicadosFiltrados = (data as Comunicado[]).filter(comunicado => {
+      const { tipo, cca_id, usuarios_ids } = comunicado.publico_alvo;
+      
+      if (tipo === 'todos') return true;
+      
+      if (tipo === 'cca') {
+        return cca_id && ccasDoUsuario.includes(cca_id);
+      }
+      
+      if (tipo === 'usuarios') {
+        return usuarios_ids && usuarios_ids.includes(user.user.id);
+      }
+      
+      return false;
+    });
+
+    return comunicadosFiltrados;
   },
 
   // Buscar comunicados pendentes (sem ciência)
   async getComunicadosPendentes(): Promise<Comunicado[]> {
     const { data: user } = await supabase.auth.getUser();
     if (!user.user) throw new Error('Usuário não autenticado');
+
+    // Buscar CCAs do usuário
+    const { data: usuarioCcas } = await supabase
+      .from('usuario_ccas')
+      .select('cca_id')
+      .eq('usuario_id', user.user.id)
+      .eq('ativo', true);
+    
+    const ccasDoUsuario = usuarioCcas?.map(uc => uc.cca_id) || [];
 
     // Buscar todos os comunicados ativos
     const { data: comunicados, error: comunicadosError } = await supabase
@@ -40,11 +79,28 @@ export const comunicadosService = {
 
     if (cienciasError) throw cienciasError;
 
+    // Filtrar por público-alvo
+    const comunicadosFiltradosPorAlvo = (comunicados as Comunicado[]).filter(comunicado => {
+      const { tipo, cca_id, usuarios_ids } = comunicado.publico_alvo;
+      
+      if (tipo === 'todos') return true;
+      
+      if (tipo === 'cca') {
+        return cca_id && ccasDoUsuario.includes(cca_id);
+      }
+      
+      if (tipo === 'usuarios') {
+        return usuarios_ids && usuarios_ids.includes(user.user.id);
+      }
+      
+      return false;
+    });
+
     // Filtrar comunicados sem ciência
     const comunicadosComCiencia = new Set(ciencias?.map(c => c.comunicado_id) || []);
-    const comunicadosPendentes = (comunicados as Comunicado[])?.filter(
+    const comunicadosPendentes = comunicadosFiltradosPorAlvo.filter(
       comunicado => !comunicadosComCiencia.has(comunicado.id)
-    ) || [];
+    );
 
     return comunicadosPendentes;
   },

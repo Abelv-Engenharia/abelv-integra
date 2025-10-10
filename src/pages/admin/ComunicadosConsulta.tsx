@@ -6,10 +6,13 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Search, Eye, Edit, Trash2, FileText } from "lucide-react";
+import { Plus, Search, Eye, Edit, Trash2, FileText, Users } from "lucide-react";
 import { useComunicados, useExcluirComunicado } from "@/hooks/useComunicados";
+import { useCCAs } from "@/hooks/useCCAs";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { 
   AlertDialog, 
   AlertDialogAction, 
@@ -25,7 +28,19 @@ import {
 const ComunicadosConsulta = () => {
   const navigate = useNavigate();
   const { data: comunicados, isLoading } = useComunicados();
+  const { data: ccas = [] } = useCCAs();
   const excluirComunicado = useExcluirComunicado();
+
+  const { data: usuarios = [] } = useQuery({
+    queryKey: ['usuarios-lista'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id, nome, email');
+      if (error) throw error;
+      return data || [];
+    },
+  });
   
   const [filtros, setFiltros] = useState({
     busca: "",
@@ -72,6 +87,30 @@ const ComunicadosConsulta = () => {
     }
     
     return <Badge variant="default">Ativo</Badge>;
+  };
+
+  const getPublicoAlvoText = (comunicado: any) => {
+    const { tipo, cca_id, usuarios_ids } = comunicado.publico_alvo;
+    
+    if (tipo === 'todos') {
+      return <span className="flex items-center gap-1"><Users className="h-4 w-4" />Todos os usuários</span>;
+    }
+    
+    if (tipo === 'cca') {
+      const cca = ccas.find(c => c.id === cca_id);
+      return cca ? (
+        <span className="flex items-center gap-1">
+          <Users className="h-4 w-4" />
+          CCA: {cca.codigo}
+        </span>
+      ) : 'CCA não encontrado';
+    }
+    
+    if (tipo === 'usuarios') {
+      return <span className="flex items-center gap-1"><Users className="h-4 w-4" />{usuarios_ids?.length || 0} usuário(s)</span>;
+    }
+    
+    return 'Não definido';
   };
 
   const handleExcluir = async (id: string) => {
@@ -158,6 +197,7 @@ const ComunicadosConsulta = () => {
             <TableHeader>
               <TableRow>
                 <TableHead>Título</TableHead>
+                <TableHead>Público-Alvo</TableHead>
                 <TableHead>Período</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Anexo</TableHead>
@@ -168,7 +208,7 @@ const ComunicadosConsulta = () => {
             <TableBody>
               {comunicadosFiltrados.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-8">
+                  <TableCell colSpan={7} className="text-center py-8">
                     <div className="text-muted-foreground">
                       <Search className="h-8 w-8 mx-auto mb-2" />
                       Nenhum comunicado encontrado
@@ -186,6 +226,11 @@ const ComunicadosConsulta = () => {
                             {comunicado.descricao}
                           </div>
                         )}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="text-sm">
+                        {getPublicoAlvoText(comunicado)}
                       </div>
                     </TableCell>
                     <TableCell>

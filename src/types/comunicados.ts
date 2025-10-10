@@ -8,8 +8,9 @@ export interface Comunicado {
   arquivo_nome: string | null;
   ativo: boolean;
   publico_alvo: {
-    tipo: 'todos' | 'ccas';
-    ccas?: number[];
+    tipo: 'todos' | 'cca' | 'usuarios';
+    cca_id?: number;
+    usuarios_ids?: string[];
   };
   created_by: string | null;
   created_at: string;

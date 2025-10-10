@@ -11,8 +11,11 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ArrowLeft, Upload, Trash2, FileText } from "lucide-react";
 import { useComunicadoPorId, useAtualizarComunicado } from "@/hooks/useComunicados";
+import { useCCAs } from "@/hooks/useCCAs";
 import { comunicadosService } from "@/services/comunicadosService";
 import { toast } from "@/hooks/use-toast";
+import { UsuariosSelector } from "@/components/admin/comunicados/UsuariosSelector";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface ComunicadoForm {
   titulo: string;
@@ -21,8 +24,9 @@ interface ComunicadoForm {
   data_fim: string;
   ativo: boolean;
   publico_alvo: {
-    tipo: 'todos' | 'ccas';
-    ccas?: number[];
+    tipo: 'todos' | 'cca' | 'usuarios';
+    cca_id?: number;
+    usuarios_ids?: string[];
   };
   arquivo?: File;
   manterAnexo: boolean;
@@ -32,8 +36,14 @@ const ComunicadoEdicao = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { data: comunicado, isLoading } = useComunicadoPorId(id!);
+  const { data: ccas = [] } = useCCAs();
   const atualizarComunicado = useAtualizarComunicado();
   const [uploading, setUploading] = useState(false);
+  const [publicoAlvo, setPublicoAlvo] = useState<ComunicadoForm['publico_alvo']>({
+    tipo: 'todos',
+    cca_id: undefined,
+    usuarios_ids: []
+  });
 
   const {
     register,
@@ -53,6 +63,7 @@ const ComunicadoEdicao = () => {
       setValue('data_inicio', comunicado.data_inicio);
       setValue('data_fim', comunicado.data_fim);
       setValue('ativo', comunicado.ativo);
+      setPublicoAlvo(comunicado.publico_alvo);
       setValue('publico_alvo', comunicado.publico_alvo);
       setValue('manterAnexo', !!comunicado.arquivo_url);
     }
@@ -100,7 +111,7 @@ const ComunicadoEdicao = () => {
         data_inicio: data.data_inicio,
         data_fim: data.data_fim,
         ativo: data.ativo,
-        publico_alvo: data.publico_alvo,
+        publico_alvo: publicoAlvo,
         arquivo_url,
         arquivo_nome,
       });
@@ -235,28 +246,67 @@ const ComunicadoEdicao = () => {
             <CardTitle>Público-alvo</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <RadioGroup
-              defaultValue={comunicado.publico_alvo.tipo}
-              onValueChange={(value: 'todos' | 'ccas') => 
-                setValue('publico_alvo', { tipo: value, ccas: value === 'ccas' ? [] : undefined })
-              }
-            >
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="todos" id="todos" />
-                <Label htmlFor="todos">Todos os usuários</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="ccas" id="ccas" />
-                <Label htmlFor="ccas">CCAs específicos</Label>
-              </div>
-            </RadioGroup>
+            <div>
+              <Label>Tipo de Público-Alvo *</Label>
+              <Select
+                value={publicoAlvo.tipo}
+                onValueChange={(value: 'todos' | 'cca' | 'usuarios') => 
+                  setPublicoAlvo({ 
+                    tipo: value,
+                    cca_id: undefined,
+                    usuarios_ids: []
+                  })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="todos">Todos os usuários</SelectItem>
+                  <SelectItem value="cca">Usuários de um CCA específico</SelectItem>
+                  <SelectItem value="usuarios">Usuários específicos</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-            {watchPublicoTipo === 'ccas' && (
-              <div className="pl-6 space-y-2">
-                <Label>Selecione os CCAs:</Label>
-                <p className="text-sm text-muted-foreground">
-                  Funcionalidade de seleção de CCAs será implementada
-                </p>
+            {publicoAlvo.tipo === 'cca' && (
+              <div>
+                <Label>Selecionar CCA *</Label>
+                <Select
+                  value={publicoAlvo.cca_id?.toString() || ""}
+                  onValueChange={(value) => 
+                    setPublicoAlvo(prev => ({ 
+                      ...prev,
+                      cca_id: parseInt(value)
+                    }))
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione o CCA" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {ccas.map((cca) => (
+                      <SelectItem key={cca.id} value={cca.id.toString()}>
+                        {cca.codigo} - {cca.nome}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
+            {publicoAlvo.tipo === 'usuarios' && (
+              <div>
+                <Label>Selecionar Usuários *</Label>
+                <UsuariosSelector
+                  selectedIds={publicoAlvo.usuarios_ids || []}
+                  onChange={(ids) => 
+                    setPublicoAlvo(prev => ({ 
+                      ...prev,
+                      usuarios_ids: ids
+                    }))
+                  }
+                />
               </div>
             )}
           </CardContent>
