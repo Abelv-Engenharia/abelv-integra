@@ -160,6 +160,29 @@ import ExtintorPublico from "./pages/prevencao-incendio/ExtintorPublico";
 // Placeholder page
 import PlaceholderPage from "./pages/PlaceholderPage";
 
+// Suprimentos - Estoque pages
+import EstoqueDashboard from "./pages/suprimentos/estoque/Dashboard";
+import EstoqueEAP from "./pages/suprimentos/estoque/apoio/EAP";
+import EstoqueAlmoxarifados from "./pages/suprimentos/estoque/apoio/Almoxarifados";
+import EstoqueConfiguracoesArcabouco from "./pages/suprimentos/estoque/apoio/ConfiguracoesArcabouco";
+import EstoqueRelatorioEAP from "./pages/suprimentos/estoque/apoio/RelatorioEAP";
+import EstoqueRelacaoAlmoxarifados from "./pages/suprimentos/estoque/apoio/RelacaoAlmoxarifados";
+import EstoqueEntradaMateriais from "./pages/suprimentos/estoque/entradas/EntradaMateriais";
+import EstoqueRelatorioEntrada from "./pages/suprimentos/estoque/entradas/RelatorioEntrada";
+import EstoqueRelacaoEntradas from "./pages/suprimentos/estoque/entradas/RelacaoEntradas";
+import EstoqueRequisicaoMateriais from "./pages/suprimentos/estoque/requisicoes/RequisicaoMateriais";
+import EstoqueDevolucaoMateriais from "./pages/suprimentos/estoque/requisicoes/DevolucaoMateriais";
+import EstoqueRelatorioRequisicao from "./pages/suprimentos/estoque/requisicoes/RelatorioRequisicao";
+import EstoqueRelacaoRequisicoes from "./pages/suprimentos/estoque/requisicoes/RelacaoRequisicoes";
+import EstoqueRelacaoDevolucoes from "./pages/suprimentos/estoque/requisicoes/RelacaoDevolucoes";
+import EstoqueTransferenciaAlmoxarifados from "./pages/suprimentos/estoque/transferencias/TransferenciaAlmoxarifados";
+import EstoqueTransferenciaCCAs from "./pages/suprimentos/estoque/transferencias/TransferenciaCCAs";
+import EstoqueRelatorioTransferencias from "./pages/suprimentos/estoque/transferencias/RelatorioTransferencias";
+import EstoqueRelacaoTransferencias from "./pages/suprimentos/estoque/transferencias/RelacaoTransferencias";
+import EstoqueEnvioBeneficiamento from "./pages/suprimentos/estoque/beneficiamento/EnvioBeneficiamento";
+import EstoqueRetornoBeneficiamento from "./pages/suprimentos/estoque/beneficiamento/RetornoBeneficiamento";
+import EstoqueRelacaoMateriaisBeneficiamento from "./pages/suprimentos/estoque/beneficiamento/RelacaoMateriaisBeneficiamento";
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
@@ -333,6 +356,39 @@ function App() {
                 <Route path="prevencao-incendio/inspecao-extintores" element={<InspecaoExtintores />} />
                 <Route path="prevencao-incendio/consulta-inspecoes" element={<ConsultaInspecoesExtintores />} />
                 <Route path="prevencao-incendio/inspecoes/:id" element={<VisualizarInspecaoExtintor />} />
+
+                {/* Suprimentos - Estoque routes */}
+                <Route path="suprimentos/estoque/dashboard" element={<EstoqueDashboard />} />
+                
+                {/* Apoio */}
+                <Route path="suprimentos/estoque/apoio/eap" element={<EstoqueEAP />} />
+                <Route path="suprimentos/estoque/apoio/almoxarifados" element={<EstoqueAlmoxarifados />} />
+                <Route path="suprimentos/estoque/apoio/configuracoes-arcabouco" element={<EstoqueConfiguracoesArcabouco />} />
+                <Route path="suprimentos/estoque/apoio/relatorio-eap" element={<EstoqueRelatorioEAP />} />
+                <Route path="suprimentos/estoque/apoio/relacao-almoxarifados" element={<EstoqueRelacaoAlmoxarifados />} />
+                
+                {/* Entradas */}
+                <Route path="suprimentos/estoque/entradas/entrada-materiais" element={<EstoqueEntradaMateriais />} />
+                <Route path="suprimentos/estoque/entradas/relatorio-entrada" element={<EstoqueRelatorioEntrada />} />
+                <Route path="suprimentos/estoque/entradas/relacao-entradas" element={<EstoqueRelacaoEntradas />} />
+                
+                {/* Requisições */}
+                <Route path="suprimentos/estoque/requisicoes/requisicao-materiais" element={<EstoqueRequisicaoMateriais />} />
+                <Route path="suprimentos/estoque/requisicoes/devolucao-materiais" element={<EstoqueDevolucaoMateriais />} />
+                <Route path="suprimentos/estoque/requisicoes/relatorio-requisicao" element={<EstoqueRelatorioRequisicao />} />
+                <Route path="suprimentos/estoque/requisicoes/relacao-requisicoes" element={<EstoqueRelacaoRequisicoes />} />
+                <Route path="suprimentos/estoque/requisicoes/relacao-devolucoes" element={<EstoqueRelacaoDevolucoes />} />
+                
+                {/* Transferências */}
+                <Route path="suprimentos/estoque/transferencias/transferencia-almoxarifados" element={<EstoqueTransferenciaAlmoxarifados />} />
+                <Route path="suprimentos/estoque/transferencias/transferencia-ccas" element={<EstoqueTransferenciaCCAs />} />
+                <Route path="suprimentos/estoque/transferencias/relatorio-transferencias" element={<EstoqueRelatorioTransferencias />} />
+                <Route path="suprimentos/estoque/transferencias/relacao-transferencias" element={<EstoqueRelacaoTransferencias />} />
+                
+                {/* Beneficiamento */}
+                <Route path="suprimentos/estoque/beneficiamento/envio-beneficiamento" element={<EstoqueEnvioBeneficiamento />} />
+                <Route path="suprimentos/estoque/beneficiamento/retorno-beneficiamento" element={<EstoqueRetornoBeneficiamento />} />
+                <Route path="suprimentos/estoque/beneficiamento/relacao-materiais-beneficiamento" element={<EstoqueRelacaoMateriaisBeneficiamento />} />
 
                 {/* Placeholder routes */}
                 <Route path="placeholder" element={<PlaceholderPage />} />

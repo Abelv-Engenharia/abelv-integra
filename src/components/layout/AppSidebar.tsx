@@ -18,6 +18,7 @@ import SidebarSectionRelatorios from "./SidebarSectionRelatorios";
 import SidebarSectionAdministracao from "./SidebarSectionAdministracao";
 import SidebarSectionSeguranca from "./SidebarSectionSeguranca";
 import SidebarSectionApoioGeral from "./SidebarSectionApoioGeral";
+import { SidebarSectionSuprimentos } from "./SidebarSectionSuprimentos";
 import SidebarSearch from "./SidebarSearch";
 import { usePermissionsDirect } from "@/hooks/usePermissionsDirect";
 import logoAbelvIntegra from "@/assets/logo-abelv-integra.png";
@@ -56,6 +57,7 @@ export function AppSidebar() {
     )
       return "seguranca";
     if (currentPath.startsWith("/admin") || currentPath.startsWith("/tutoriais")) return "admin";
+    if (currentPath.startsWith("/suprimentos/estoque")) return "suprimentos";
     if (currentPath.startsWith("/account")) return "account";
     return null;
   });
@@ -196,6 +198,20 @@ export function AppSidebar() {
             toggleMenu={toggleMenu}
             onLinkClick={handleLinkClick}
             canSee={canSee}
+          />
+        )}
+
+        {/* Seção: Suprimentos - Estoque */}
+        {canSee("estoque_acesso") && (
+          <SidebarSectionSuprimentos
+            isOpen={{
+              "suprimentos-estoque": openMenu === "suprimentos",
+              ...Object.fromEntries(
+                Array.from({ length: 20 }, (_, i) => [`estoque-item-${i}`, false])
+              )
+            }}
+            toggleMenu={toggleMenu}
+            onLinkClick={handleLinkClick}
           />
         )}
       </SidebarContent>

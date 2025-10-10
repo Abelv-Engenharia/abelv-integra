@@ -219,6 +219,17 @@ export const COMPLETE_PERMISSIONS: PermissionCategory[] = [
       { key: 'account_support', label: 'Suporte da Conta' },
       { key: 'suporte', label: 'Suporte Geral' }
     ]
+  },
+  {
+    name: 'Suprimentos - Estoque',
+    permissions: [
+      { key: 'estoque_acesso', label: 'Acesso ao Estoque', description: 'Visualizar módulo de controle de estoque' },
+      { key: 'estoque_apoio', label: 'Apoio', description: 'Gerenciar configurações de apoio (EAP, Almoxarifados, etc)' },
+      { key: 'estoque_entradas', label: 'Entradas', description: 'Registrar entradas de materiais' },
+      { key: 'estoque_requisicoes', label: 'Requisições', description: 'Gerenciar requisições e devoluções' },
+      { key: 'estoque_transferencias', label: 'Transferências', description: 'Gerenciar transferências de estoque' },
+      { key: 'estoque_beneficiamento', label: 'Beneficiamento', description: 'Gerenciar envio e retorno de beneficiamento' }
+    ]
   }
 ];
 
