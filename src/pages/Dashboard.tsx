@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useProfile } from "@/hooks/useProfile";
@@ -46,13 +45,58 @@ const Dashboard = () => {
 
   const getGreeting = (name: string) => {
     const femaleNames = [
-      "ana", "maria", "joana", "carla", "fernanda", "juliana", "amanda", "patricia",
-      "sandra", "monica", "lucia", "rita", "rosa", "helena", "beatriz", "camila",
-      "daniela", "gabriela", "isabela", "leticia", "mariana", "natalia", "paula",
-      "renata", "silvia", "tatiana", "vanessa", "viviane", "adriana", "andrea",
-      "cristina", "debora", "elizabete", "fabiana", "gloria", "ingrid", "jessica",
-      "karina", "larissa", "marcela", "nicole", "olivia", "priscila", "raquel",
-      "sabrina", "tania", "ursula", "valeria", "wanderlea", "ximena", "yara", "zelia",
+      "ana",
+      "maria",
+      "joana",
+      "carla",
+      "fernanda",
+      "juliana",
+      "amanda",
+      "patricia",
+      "sandra",
+      "monica",
+      "lucia",
+      "rita",
+      "rosa",
+      "helena",
+      "beatriz",
+      "camila",
+      "daniela",
+      "gabriela",
+      "isabela",
+      "leticia",
+      "mariana",
+      "natalia",
+      "paula",
+      "catarine",
+      "silvia",
+      "tatiana",
+      "vanessa",
+      "naiara",
+      "adriana",
+      "andrea",
+      "cristina",
+      "debora",
+      "rebeca",
+      "fabiana",
+      "gloria",
+      "ingrid",
+      "jessica",
+      "karina",
+      "larissa",
+      "marcela",
+      "fabricia",
+      "mayla",
+      "yasmim",
+      "keite",
+      "sabrina",
+      "isabela",
+      "thais",
+      "valeria",
+      "geiviane",
+      "ana",
+      "silvana",
+      "aline",
     ];
 
     const firstName = name.split(" ")[0].toLowerCase();
@@ -61,11 +105,7 @@ const Dashboard = () => {
     return isFeminine ? "Seja bem-vinda" : "Seja bem-vindo";
   };
 
-  const userName =
-    profile?.nome ||
-    user?.user_metadata?.nome ||
-    user?.email?.split("@")[0] ||
-    "Usuário";
+  const userName = profile?.nome || user?.user_metadata?.nome || user?.email?.split("@")[0] || "Usuário";
 
   return (
     <div className="min-h-screen p-6">
@@ -76,26 +116,17 @@ const Dashboard = () => {
           </h1>
         </div>
         <div>
-          <p className="text-lg text-muted-foreground">
-            {formatDateTime(currentDateTime)}
-          </p>
+          <p className="text-lg text-muted-foreground">{formatDateTime(currentDateTime)}</p>
         </div>
       </div>
 
       <div className="flex justify-center items-center flex-1 mt-32">
-        <img
-          src={esferaIntegra}
-          alt="Abelv Integra"
-          className="max-w-[400px] w-full h-auto"
-        />
+        <img src={esferaIntegra} alt="Abelv Integra" className="max-w-[400px] w-full h-auto" />
       </div>
 
       {/* Comunicados pendentes */}
       {showComunicados && comunicadosPendentes && (
-        <ComunicadosSequence
-          comunicados={comunicadosPendentes}
-          onComplete={handleComunicadosComplete}
-        />
+        <ComunicadosSequence comunicados={comunicadosPendentes} onComplete={handleComunicadosComplete} />
       )}
     </div>
   );
