@@ -3268,8 +3268,8 @@ export type Database = {
           id_documento: string
           id_empresa: number
           numero: string
-          sequencial: number | null
-          titulo: number
+          sequencial: number
+          titulo: number | null
         }
         Insert: {
           created_at?: string
@@ -3278,8 +3278,8 @@ export type Database = {
           id_documento: string
           id_empresa: number
           numero: string
-          sequencial?: number | null
-          titulo: number
+          sequencial: number
+          titulo?: number | null
         }
         Update: {
           created_at?: string
@@ -3288,8 +3288,8 @@ export type Database = {
           id_documento?: string
           id_empresa?: number
           numero?: string
-          sequencial?: number | null
-          titulo?: number
+          sequencial?: number
+          titulo?: number | null
         }
         Relationships: [
           {
@@ -3312,6 +3312,61 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "empresas_sienge"
             referencedColumns: ["id_sienge"]
+          },
+        ]
+      }
+      nfe_compra_itens: {
+        Row: {
+          created_at: string
+          descricao: string
+          id: string
+          id_cca_sienge: number
+          id_nfe: string | null
+          id_unidade: number
+          quantidade: number
+          unitario: number
+        }
+        Insert: {
+          created_at?: string
+          descricao: string
+          id?: string
+          id_cca_sienge: number
+          id_nfe?: string | null
+          id_unidade: number
+          quantidade: number
+          unitario: number
+        }
+        Update: {
+          created_at?: string
+          descricao?: string
+          id?: string
+          id_cca_sienge?: number
+          id_nfe?: string | null
+          id_unidade?: number
+          quantidade?: number
+          unitario?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nfe_compra_itens_id_cca_sienge_fkey"
+            columns: ["id_cca_sienge"]
+            isOneToOne: false
+            referencedRelation: "subcentros_custos"
+            referencedColumns: ["id_sienge"]
+          },
+          {
+            foreignKeyName: "nfe_compra_itens_id_nfe_fkey"
+            columns: ["id_nfe"]
+            isOneToOne: false
+            referencedRelation: "nfe_compra"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nfe_compra_itens_id_unidade_fkey"
+            columns: ["id_unidade"]
+            isOneToOne: false
+            referencedRelation: "unidades_medidas"
+            referencedColumns: ["codigo"]
           },
         ]
       }
