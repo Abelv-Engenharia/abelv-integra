@@ -176,6 +176,10 @@ import EstoqueDevolucaoMateriais from "./pages/suprimentos/estoque/requisicoes/D
 import EstoqueRelatorioRequisicao from "./pages/suprimentos/estoque/requisicoes/RelatorioRequisicao";
 import EstoqueRelacaoRequisicoes from "./pages/suprimentos/estoque/requisicoes/RelacaoRequisicoes";
 import EstoqueRelacaoDevolucoes from "./pages/suprimentos/estoque/requisicoes/RelacaoDevolucoes";
+import EstoqueNovaRequisicao from "./pages/suprimentos/estoque/requisicoes/NovaRequisicao";
+import EstoqueProcessarDevolucao from "./pages/suprimentos/estoque/requisicoes/ProcessarDevolucao";
+import EstoqueRelacaoRequisicoesEmitidas from "./pages/suprimentos/estoque/requisicoes/RelacaoRequisicoesEmitidas";
+import EstoqueRelacaoRequisicoesPendentes from "./pages/suprimentos/estoque/requisicoes/RelacaoRequisicoesPendentes";
 import EstoqueTransferenciaAlmoxarifados from "./pages/suprimentos/estoque/transferencias/TransferenciaAlmoxarifados";
 import EstoqueTransferenciaCCAs from "./pages/suprimentos/estoque/transferencias/TransferenciaCCAs";
 import EstoqueRelatorioTransferencias from "./pages/suprimentos/estoque/transferencias/RelatorioTransferencias";
@@ -376,10 +380,14 @@ function App() {
                 
                 {/* Requisições */}
                 <Route path="suprimentos/estoque/requisicoes/requisicao-materiais" element={<EstoqueRequisicaoMateriais />} />
+                <Route path="suprimentos/estoque/requisicoes/nova-requisicao" element={<EstoqueNovaRequisicao />} />
                 <Route path="suprimentos/estoque/requisicoes/devolucao-materiais" element={<EstoqueDevolucaoMateriais />} />
+                <Route path="suprimentos/estoque/requisicoes/processar-devolucao/:id" element={<EstoqueProcessarDevolucao />} />
                 <Route path="suprimentos/estoque/requisicoes/relatorio-requisicao" element={<EstoqueRelatorioRequisicao />} />
                 <Route path="suprimentos/estoque/requisicoes/relacao-requisicoes" element={<EstoqueRelacaoRequisicoes />} />
                 <Route path="suprimentos/estoque/requisicoes/relacao-devolucoes" element={<EstoqueRelacaoDevolucoes />} />
+                <Route path="suprimentos/estoque/requisicoes/requisicoes-emitidas" element={<EstoqueRelacaoRequisicoesEmitidas />} />
+                <Route path="suprimentos/estoque/requisicoes/requisicoes-pendentes" element={<EstoqueRelacaoRequisicoesPendentes />} />
                 
                 {/* Transferências */}
                 <Route path="suprimentos/estoque/transferencias/transferencia-almoxarifados" element={<EstoqueTransferenciaAlmoxarifados />} />

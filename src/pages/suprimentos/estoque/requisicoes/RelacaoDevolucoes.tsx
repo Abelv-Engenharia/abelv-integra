@@ -1,38 +1,33 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FileText, Download } from "lucide-react";
+import { FileText } from "lucide-react";
 
-const EstoqueRelacaoDevolucoes = () => {
+export default function RelacaoDevolucoes() {
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-start">
+      <div className="flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Relação de Devoluções</h1>
           <p className="text-muted-foreground">
-            Lista completa de devoluções de materiais
+            Listagem de todas as devoluções de materiais
           </p>
         </div>
         <Button>
-          <Download className="h-4 w-4 mr-2" />
-          Exportar
+          <FileText className="mr-2 h-4 w-4" />
+          Gerar Relatório
         </Button>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <FileText className="h-5 w-5" />
-            Relação de Devoluções
-          </CardTitle>
+          <CardTitle>Parâmetros do Relatório</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-muted-foreground text-center py-8">
-            Página em construção - Relação de devoluções
+          <p className="text-muted-foreground">
+            Selecione os parâmetros para gerar a relação de devoluções.
           </p>
         </CardContent>
       </Card>
     </div>
   );
-};
-
-export default EstoqueRelacaoDevolucoes;
+}
