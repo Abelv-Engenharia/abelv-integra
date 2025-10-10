@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { ChevronRight, Package, Home, Settings, FileText, Upload, Download, ArrowLeftRight, Wrench } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -14,7 +13,7 @@ import {
 } from "@/components/ui/collapsible";
 
 interface SidebarSectionSuprimentosProps {
-  isOpen: { [key: string]: boolean };
+  openMenu: string | null;
   toggleMenu: (key: string) => void;
   onLinkClick?: () => void;
 }
@@ -98,7 +97,7 @@ const estoqueMenuItems = [
 ];
 
 export const SidebarSectionSuprimentos = ({
-  isOpen,
+  openMenu,
   toggleMenu,
   onLinkClick,
 }: SidebarSectionSuprimentosProps) => {
@@ -115,20 +114,22 @@ export const SidebarSectionSuprimentos = ({
     });
   };
 
-  const renderSubMenu = (items: any[], level: number = 0) => {
+  // Determinar se o menu principal deve estar aberto
+  const isSuprimentosOpen = openMenu === "suprimentos" || currentPath.startsWith("/suprimentos");
+
+  const renderSubMenu = (items: any[], level: number = 0, parentKey: string = "") => {
     return items.map((item, index) => {
       const hasChildren = item.items && item.items.length > 0;
-      const menuKey = `estoque-${item.title}-${level}-${index}`;
+      const menuKey = `${parentKey}-${item.title.toLowerCase().replace(/\s+/g, "-")}-${index}`;
       const isActive = item.href ? isActiveRoute(item.href) : false;
       const hasActiveDescendant = hasChildren ? hasActiveChild(item.items) : false;
-      const shouldBeOpen = isOpen[menuKey] || hasActiveDescendant;
+      const shouldBeOpen = hasActiveDescendant;
 
       if (hasChildren) {
         return (
           <Collapsible
             key={menuKey}
-            open={shouldBeOpen}
-            onOpenChange={() => toggleMenu(menuKey)}
+            defaultOpen={shouldBeOpen}
           >
             <CollapsibleTrigger asChild>
               <SidebarMenuButton className={cn("w-full justify-between", level > 0 && "pl-6")}>
@@ -139,14 +140,14 @@ export const SidebarSectionSuprimentos = ({
                 <ChevronRight
                   className={cn(
                     "h-4 w-4 transition-transform",
-                    shouldBeOpen && "rotate-90"
+                    "group-data-[state=open]:rotate-90"
                   )}
                 />
               </SidebarMenuButton>
             </CollapsibleTrigger>
             <CollapsibleContent>
               <SidebarMenu className="ml-2">
-                {renderSubMenu(item.items, level + 1)}
+                {renderSubMenu(item.items, level + 1, menuKey)}
               </SidebarMenu>
             </CollapsibleContent>
           </Collapsible>
@@ -172,26 +173,46 @@ export const SidebarSectionSuprimentos = ({
 
   return (
     <Collapsible
-      open={isOpen["suprimentos-estoque"]}
-      onOpenChange={() => toggleMenu("suprimentos-estoque")}
+      open={isSuprimentosOpen}
+      onOpenChange={() => toggleMenu("suprimentos")}
     >
       <CollapsibleTrigger asChild>
         <SidebarMenuButton className="w-full justify-between">
           <span className="flex items-center gap-2">
             <Package className="h-4 w-4" />
-            Suprimentos - Estoque
+            Suprimentos
           </span>
           <ChevronRight
             className={cn(
               "h-4 w-4 transition-transform",
-              isOpen["suprimentos-estoque"] && "rotate-90"
+              isSuprimentosOpen && "rotate-90"
             )}
           />
         </SidebarMenuButton>
       </CollapsibleTrigger>
       <CollapsibleContent>
         <SidebarMenu className="ml-2">
-          {renderSubMenu(estoqueMenuItems)}
+          <Collapsible defaultOpen={currentPath.startsWith("/suprimentos/estoque")}>
+            <CollapsibleTrigger asChild>
+              <SidebarMenuButton className="w-full justify-between pl-4">
+                <span className="flex items-center gap-2">
+                  <Package className="h-4 w-4" />
+                  Estoque
+                </span>
+                <ChevronRight
+                  className={cn(
+                    "h-4 w-4 transition-transform",
+                    "group-data-[state=open]:rotate-90"
+                  )}
+                />
+              </SidebarMenuButton>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <SidebarMenu className="ml-2">
+                {renderSubMenu(estoqueMenuItems, 0, "estoque")}
+              </SidebarMenu>
+            </CollapsibleContent>
+          </Collapsible>
         </SidebarMenu>
       </CollapsibleContent>
     </Collapsible>

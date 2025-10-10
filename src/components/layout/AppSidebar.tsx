@@ -204,12 +204,7 @@ export function AppSidebar() {
         {/* Seção: Suprimentos - Estoque */}
         {canSee("estoque_acesso") && (
           <SidebarSectionSuprimentos
-            isOpen={{
-              "suprimentos-estoque": openMenu === "suprimentos",
-              ...Object.fromEntries(
-                Array.from({ length: 20 }, (_, i) => [`estoque-item-${i}`, false])
-              )
-            }}
+            openMenu={openMenu}
             toggleMenu={toggleMenu}
             onLinkClick={handleLinkClick}
           />
