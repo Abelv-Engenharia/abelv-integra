@@ -186,7 +186,9 @@ import EstoqueTransferenciaCCAs from "./pages/suprimentos/estoque/transferencias
 import EstoqueRelatorioTransferencias from "./pages/suprimentos/estoque/transferencias/RelatorioTransferencias";
 import EstoqueRelacaoTransferencias from "./pages/suprimentos/estoque/transferencias/RelacaoTransferencias";
 import EstoqueEnvioBeneficiamento from "./pages/suprimentos/estoque/beneficiamento/EnvioBeneficiamento";
+import EstoqueNovoEnvioBeneficiamento from "./pages/suprimentos/estoque/beneficiamento/NovoEnvioBeneficiamento";
 import EstoqueRetornoBeneficiamento from "./pages/suprimentos/estoque/beneficiamento/RetornoBeneficiamento";
+import EstoqueNovoRetornoBeneficiamento from "./pages/suprimentos/estoque/beneficiamento/NovoRetornoBeneficiamento";
 import EstoqueRelacaoMateriaisBeneficiamento from "./pages/suprimentos/estoque/beneficiamento/RelacaoMateriaisBeneficiamento";
 
 function App() {
@@ -399,7 +401,10 @@ function App() {
                 
                 {/* Beneficiamento */}
                 <Route path="suprimentos/estoque/beneficiamento/envio-beneficiamento" element={<EstoqueEnvioBeneficiamento />} />
+                <Route path="suprimentos/estoque/beneficiamento/novo-envio-beneficiamento" element={<EstoqueNovoEnvioBeneficiamento />} />
                 <Route path="suprimentos/estoque/beneficiamento/retorno-beneficiamento" element={<EstoqueRetornoBeneficiamento />} />
+                <Route path="suprimentos/estoque/beneficiamento/novo-retorno-beneficiamento" element={<EstoqueNovoRetornoBeneficiamento />} />
+                <Route path="suprimentos/estoque/beneficiamento/relacao-materiais" element={<EstoqueRelacaoMateriaisBeneficiamento />} />
                 <Route path="suprimentos/estoque/beneficiamento/relacao-materiais-beneficiamento" element={<EstoqueRelacaoMateriaisBeneficiamento />} />
 
                 {/* Placeholder routes */}
