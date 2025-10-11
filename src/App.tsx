@@ -156,6 +156,7 @@ import InspecaoExtintores from "./pages/prevencao-incendio/InspecaoExtintores";
 import ConsultaInspecoesExtintores from "./pages/prevencao-incendio/ConsultaInspecoesExtintores";
 import VisualizarInspecaoExtintor from "./pages/prevencao-incendio/VisualizarInspecaoExtintor";
 import ExtintorPublico from "./pages/prevencao-incendio/ExtintorPublico";
+import InspecaoExtintorPublico from "./pages/prevencao-incendio/InspecaoExtintorPublico";
 
 // Placeholder page
 import PlaceholderPage from "./pages/PlaceholderPage";
@@ -206,6 +207,7 @@ function App() {
               <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/prevencao-incendio/extintor/:codigo" element={<ExtintorPublico />} />
+              <Route path="/prevencao-incendio/inspecao/:id" element={<InspecaoExtintorPublico />} />
               
               {/* Protected routes with layout */}
               <Route path="/" element={

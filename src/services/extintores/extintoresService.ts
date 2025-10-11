@@ -132,3 +132,28 @@ export async function deleteExtintor(id: string) {
     throw error;
   }
 }
+
+/**
+ * Busca detalhes completos de uma inspeção (acesso público)
+ */
+export async function fetchInspecaoPublica(inspecaoId: string) {
+  const { data, error } = await supabase
+    .from('inspecoes_extintores')
+    .select(`
+      *,
+      extintores(codigo, tipo, capacidade, fabricante, localizacao, data_fabricacao, data_vencimento, 
+        ccas(codigo, nome)
+      ),
+      checklists_avaliacao(nome, descricao),
+      profiles(nome, email)
+    `)
+    .eq('id', inspecaoId)
+    .maybeSingle();
+  
+  if (error) {
+    console.error('Erro ao buscar inspeção pública:', error);
+    throw error;
+  }
+  
+  return data;
+}

@@ -1,9 +1,9 @@
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Flame, Calendar, MapPin, Factory, AlertCircle, CheckCircle2, LogIn } from "lucide-react";
+import { Flame, Calendar, MapPin, Factory, AlertCircle, CheckCircle2, LogIn, FileText } from "lucide-react";
 import { fetchExtintorByCodigo, fetchInspecoesByExtintor } from "@/services/extintores/extintoresService";
 import { formatarTipoExtintor, getStatusExtintorTexto, getStatusExtintorBadgeClass } from "@/utils/extintorUtils";
 import { format } from "date-fns";
@@ -12,6 +12,7 @@ import QRCode from "react-qr-code";
 
 const ExtintorPublico = () => {
   const { codigo } = useParams<{ codigo: string }>();
+  const navigate = useNavigate();
 
   const { data: extintor, isLoading: loadingExtintor } = useQuery({
     queryKey: ["extintor-publico", codigo],
@@ -184,13 +185,23 @@ const ExtintorPublico = () => {
                     </div>
 
                     <div className="flex-1 space-y-1">
-                      <div className="flex items-center justify-between">
+                      <div className="flex items-center justify-between gap-2">
                         <p className="font-medium">
                           {format(new Date(inspecao.data_inspecao), "dd/MM/yyyy", { locale: ptBR })}
                         </p>
-                        <Badge variant={inspecao.status === "conforme" ? "default" : "destructive"}>
-                          {inspecao.status === "conforme" ? "Conforme" : "Não Conforme"}
-                        </Badge>
+                        <div className="flex items-center gap-2">
+                          <Badge variant={inspecao.status === "conforme" ? "default" : "destructive"}>
+                            {inspecao.status === "conforme" ? "Conforme" : "Não Conforme"}
+                          </Badge>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => navigate(`/prevencao-incendio/inspecao/${inspecao.id}`)}
+                          >
+                            <FileText className="h-4 w-4 mr-1" />
+                            Ver Detalhes
+                          </Button>
+                        </div>
                       </div>
                       {inspecao.observacoes && (
                         <p className="text-sm text-muted-foreground">{inspecao.observacoes}</p>
