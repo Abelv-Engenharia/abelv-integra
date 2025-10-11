@@ -6,9 +6,9 @@ import { Badge } from "@/components/ui/badge";
 import { Flame, Calendar, MapPin, Factory, AlertCircle, CheckCircle2, LogIn, FileText } from "lucide-react";
 import { fetchExtintorByCodigo, fetchInspecoesByExtintor } from "@/services/extintores/extintoresService";
 import { formatarTipoExtintor, getStatusExtintorTexto, getStatusExtintorBadgeClass } from "@/utils/extintorUtils";
-import { format } from "date-fns";
+import { format, addDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import QRCode from "react-qr-code";
+import { ExtintorIcon } from "@/components/prevencao-incendio/ExtintorIcon";
 
 const ExtintorPublico = () => {
   const { codigo } = useParams<{ codigo: string }>();
@@ -57,7 +57,20 @@ const ExtintorPublico = () => {
 
   const statusTexto = getStatusExtintorTexto(extintor.data_vencimento);
   const statusClass = getStatusExtintorBadgeClass(extintor.data_vencimento);
-  const qrValue = `${window.location.origin}/prevencao-incendio/extintor/${extintor.codigo}`;
+  
+  // Calcular próxima inspeção baseado na última inspeção
+  const calcularProximaInspecao = () => {
+    if (!inspecoes || inspecoes.length === 0) return null;
+    
+    const ultimaInspecao = inspecoes[0]; // já está ordenada por data desc
+    const dataUltimaInspecao = new Date(ultimaInspecao.data_inspecao + 'T00:00:00');
+    
+    // Se não conforme: +1 dia, se conforme: +30 dias
+    const diasParaProxima = ultimaInspecao.tem_nao_conformidade ? 1 : 30;
+    return addDays(dataUltimaInspecao, diasParaProxima);
+  };
+  
+  const proximaInspecao = calcularProximaInspecao();
 
   return (
     <div className="min-h-screen bg-background">
@@ -87,11 +100,11 @@ const ExtintorPublico = () => {
         <Card>
           <CardContent className="pt-6">
             <div className="grid md:grid-cols-3 gap-6">
-              {/* QR Code */}
+              {/* Ilustração do Extintor */}
               <div className="flex flex-col items-center justify-center p-6 bg-muted rounded-lg">
-                <QRCode value={qrValue} size={150} />
+                <ExtintorIcon size={150} />
                 <p className="text-xs text-muted-foreground mt-3 text-center">
-                  Escaneie para acessar
+                  Extintor de Incêndio
                 </p>
               </div>
 
@@ -104,8 +117,10 @@ const ExtintorPublico = () => {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1">
-                    <p className="text-sm text-muted-foreground">CCA</p>
-                    <p className="font-medium">{extintor.ccas?.codigo} - {extintor.ccas?.nome}</p>
+                    <p className="text-sm text-muted-foreground">Cca</p>
+                    <p className="font-medium">
+                      {extintor.ccas?.codigo ? `${extintor.ccas.codigo} - ${extintor.ccas.nome}` : '—'}
+                    </p>
                   </div>
 
                   <div className="space-y-1">
@@ -135,13 +150,13 @@ const ExtintorPublico = () => {
                   </div>
                 </div>
 
-                {extintor.data_vencimento && (
+                {proximaInspecao && (
                   <div className="flex items-start gap-2 p-3 bg-muted rounded-lg">
                     <Calendar className="h-4 w-4 mt-0.5 text-muted-foreground" />
                     <div>
                       <p className="text-sm text-muted-foreground">Próxima Inspeção</p>
                       <p className="font-medium">
-                        {format(new Date(extintor.data_vencimento), "dd/MM/yyyy", { locale: ptBR })}
+                        {format(proximaInspecao, "dd/MM/yyyy", { locale: ptBR })}
                       </p>
                     </div>
                   </div>
@@ -169,11 +184,11 @@ const ExtintorPublico = () => {
                   >
                     <div className="flex flex-col items-center">
                       <div className={`rounded-full p-2 ${
-                        inspecao.status === "conforme" 
+                        !inspecao.tem_nao_conformidade 
                           ? "bg-success/20 text-success" 
                           : "bg-destructive/20 text-destructive"
                       }`}>
-                        {inspecao.status === "conforme" ? (
+                        {!inspecao.tem_nao_conformidade ? (
                           <CheckCircle2 className="h-4 w-4" />
                         ) : (
                           <AlertCircle className="h-4 w-4" />
@@ -187,11 +202,14 @@ const ExtintorPublico = () => {
                     <div className="flex-1 space-y-1">
                       <div className="flex items-center justify-between gap-2">
                         <p className="font-medium">
-                          {format(new Date(inspecao.data_inspecao), "dd/MM/yyyy", { locale: ptBR })}
+                          {format(new Date(inspecao.data_inspecao + 'T00:00:00'), "dd/MM/yyyy", { locale: ptBR })}
                         </p>
                         <div className="flex items-center gap-2">
-                          <Badge variant={inspecao.status === "conforme" ? "default" : "destructive"}>
-                            {inspecao.status === "conforme" ? "Conforme" : "Não Conforme"}
+                          <Badge 
+                            variant={!inspecao.tem_nao_conformidade ? "default" : "destructive"}
+                            className={!inspecao.tem_nao_conformidade ? 'bg-green-600 hover:bg-green-700' : ''}
+                          >
+                            {!inspecao.tem_nao_conformidade ? "Conforme" : "Não Conforme"}
                           </Badge>
                           <Button 
                             variant="outline" 

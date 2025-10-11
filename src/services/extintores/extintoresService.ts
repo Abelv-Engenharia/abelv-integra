@@ -22,6 +22,7 @@ export interface InspecaoExtintor {
   data_inspecao: string;
   responsavel_id: string;
   status: string;
+  tem_nao_conformidade: boolean;
   observacoes: string | null;
   created_at: string;
 }

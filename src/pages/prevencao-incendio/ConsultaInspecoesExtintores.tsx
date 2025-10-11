@@ -201,7 +201,7 @@ const ConsultaInspecoesExtintores = () => {
     };
 
     return (
-      <Badge variant={variants[status] || 'outline'}>
+      <Badge variant={variants[status] || 'outline'} className={status === 'concluida' ? 'bg-green-600 hover:bg-green-700' : ''}>
         {status === 'concluida' ? 'Concluída' : 
          status === 'pendente' ? 'Pendente' : 
          status === 'cancelada' ? 'Cancelada' : status}
@@ -211,7 +211,7 @@ const ConsultaInspecoesExtintores = () => {
 
   const getConformidadeBadge = (temNaoConformidade: boolean) => {
     return (
-      <Badge variant={temNaoConformidade ? 'destructive' : 'default'}>
+      <Badge variant={temNaoConformidade ? 'destructive' : 'default'} className={!temNaoConformidade ? 'bg-green-600 hover:bg-green-700' : ''}>
         {temNaoConformidade ? 'Não Conforme' : 'Conforme'}
       </Badge>
     );
@@ -398,7 +398,7 @@ const ConsultaInspecoesExtintores = () => {
                     {filteredInspecoes.map((inspecao) => (
                       <TableRow key={inspecao.id}>
                         <TableCell>
-                          {format(new Date(inspecao.data_inspecao), 'dd/MM/yyyy', { locale: ptBR })}
+                          {format(new Date(inspecao.data_inspecao + 'T00:00:00'), 'dd/MM/yyyy', { locale: ptBR })}
                         </TableCell>
                         <TableCell className="font-medium">
                           {inspecao.extintores?.codigo}

@@ -83,10 +83,16 @@ const InspecaoExtintorPublico = () => {
 
         {/* Status da Inspeção */}
         <div className="flex items-center gap-2 flex-wrap">
-          <Badge variant={inspecao.status === 'concluida' ? 'default' : 'secondary'}>
+          <Badge 
+            variant={inspecao.status === 'concluida' ? 'default' : 'secondary'}
+            className={inspecao.status === 'concluida' ? 'bg-green-600 hover:bg-green-700' : ''}
+          >
             {inspecao.status === 'concluida' ? 'Concluída' : inspecao.status}
           </Badge>
-          <Badge variant={inspecao.tem_nao_conformidade ? 'destructive' : 'default'}>
+          <Badge 
+            variant={inspecao.tem_nao_conformidade ? 'destructive' : 'default'}
+            className={!inspecao.tem_nao_conformidade ? 'bg-green-600 hover:bg-green-700' : ''}
+          >
             {inspecao.tem_nao_conformidade ? 'Não Conforme' : 'Conforme'}
           </Badge>
         </div>
@@ -105,7 +111,7 @@ const InspecaoExtintorPublico = () => {
               <div className="flex items-center gap-2">
                 <Calendar className="h-4 w-4 text-muted-foreground" />
                 <span className="font-medium">Data:</span>
-                <span>{format(new Date(inspecao.data_inspecao), 'dd/MM/yyyy', { locale: ptBR })}</span>
+                <span>{format(new Date(inspecao.data_inspecao + 'T00:00:00'), 'dd/MM/yyyy', { locale: ptBR })}</span>
               </div>
               
               <div className="flex items-center gap-2">
@@ -203,7 +209,7 @@ const InspecaoExtintorPublico = () => {
                           
                           <div className="flex items-center gap-2">
                             {item.status === 'conforme' && (
-                              <Badge variant="default" className="flex items-center gap-1">
+                              <Badge variant="default" className="flex items-center gap-1 bg-green-600 hover:bg-green-700">
                                 <CheckCircle className="h-3 w-3" />
                                 Conforme
                               </Badge>
