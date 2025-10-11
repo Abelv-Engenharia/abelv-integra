@@ -332,6 +332,52 @@ const VisualizarInspecaoExtintor = () => {
             </div>
           </CardContent>
         </Card>
+
+        {/* Assinatura Digital */}
+        {inspecao.dados_preenchidos?.assinatura_responsavel && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Shield className="h-5 w-5" />
+                Assinatura Digital
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <span className="font-medium">Responsável pela Inspeção:</span>
+                <span className="ml-2">
+                  {inspecao.dados_preenchidos.responsavel_nome || inspecao.profiles?.nome}
+                </span>
+              </div>
+              
+              {inspecao.dados_preenchidos.data_assinatura && (
+                <div>
+                  <span className="font-medium">Data da Assinatura:</span>
+                  <span className="ml-2">
+                    {format(
+                      new Date(inspecao.dados_preenchidos.data_assinatura), 
+                      "dd/MM/yyyy 'às' HH:mm", 
+                      { locale: ptBR }
+                    )}
+                  </span>
+                </div>
+              )}
+              
+              <div className="border rounded-lg p-4 bg-muted">
+                <img 
+                  src={inspecao.dados_preenchidos.assinatura_responsavel} 
+                  alt="Assinatura do responsável" 
+                  className="max-w-full h-auto mx-auto"
+                  style={{ maxHeight: '200px' }}
+                />
+              </div>
+              
+              <p className="text-xs text-muted-foreground text-center">
+                Assinatura digital capturada e vinculada ao usuário {inspecao.profiles?.nome}
+              </p>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </PermissionGuard>
   );

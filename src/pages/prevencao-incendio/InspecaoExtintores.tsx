@@ -14,6 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useProfile } from "@/hooks/useProfile";
 import { toast } from "@/hooks/use-toast";
 import { format } from "date-fns";
+import { DigitalSignature } from "@/components/ui/digital-signature";
 
 const InspecaoExtintores = () => {
   const navigate = useNavigate();
@@ -25,11 +26,12 @@ const InspecaoExtintores = () => {
   const [itensInspecao, setItensInspecao] = useState<any[]>([]);
   const [inspecaoData, setInspecaoData] = useState({
     dataInspecao: new Date(),
-    observacoes: '',
-    assinatura_responsavel: ''
+    observacoes: ''
   });
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showSignatureModal, setShowSignatureModal] = useState(false);
+  const [assinaturaResponsavel, setAssinaturaResponsavel] = useState('');
 
   // Carregar extintores cadastrados
   const loadExtintores = async () => {
@@ -164,11 +166,21 @@ const InspecaoExtintores = () => {
       return;
     }
 
+    // Validar usuário logado
+    if (!profile?.id) {
+      toast({
+        title: "Erro de autenticação",
+        description: "Usuário não identificado. Faça login novamente.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     // Validar assinatura se requerida
-    if (checklistExtintor?.requer_assinatura && !inspecaoData.assinatura_responsavel?.trim()) {
+    if (checklistExtintor?.requer_assinatura && !assinaturaResponsavel) {
       toast({
         title: "Assinatura obrigatória",
-        description: "Por favor, assine digitalmente a inspeção.",
+        description: "Por favor, capture sua assinatura antes de finalizar.",
         variant: "destructive"
       });
       return;
@@ -192,7 +204,10 @@ const InspecaoExtintores = () => {
             localizacao: extintorSelecionado.localizacao
           },
           itens: itensInspecao,
-          assinatura_responsavel: inspecaoData.assinatura_responsavel,
+          assinatura_responsavel: assinaturaResponsavel,
+          responsavel_id: profile.id,
+          responsavel_nome: profile.nome,
+          responsavel_email: profile.email,
           data_assinatura: new Date().toISOString(),
           data_preenchimento: new Date().toISOString()
         },
@@ -220,9 +235,10 @@ const InspecaoExtintores = () => {
         setItensInspecao([]);
         setInspecaoData({
           dataInspecao: new Date(),
-          observacoes: '',
-          assinatura_responsavel: ''
+          observacoes: ''
         });
+        setAssinaturaResponsavel('');
+        setShowSignatureModal(false);
       }, 1500);
 
     } catch (error: any) {
@@ -457,24 +473,44 @@ const InspecaoExtintores = () => {
 
                 {checklistExtintor?.requer_assinatura && (
                   <div className="mt-6 space-y-2">
-                    <Label htmlFor="assinatura" className="flex items-center gap-1">
+                    <Label className="flex items-center gap-1">
                       Assinatura do Responsável
                       <span className="text-red-500">*</span>
                     </Label>
-                    <Input
-                      id="assinatura"
-                      type="text"
-                      placeholder="Digite seu nome completo para assinar"
-                      value={inspecaoData.assinatura_responsavel}
-                      onChange={(e) => setInspecaoData(prev => ({
-                        ...prev,
-                        assinatura_responsavel: e.target.value
-                      }))}
-                      required={checklistExtintor?.requer_assinatura}
-                      className={!inspecaoData.assinatura_responsavel && checklistExtintor?.requer_assinatura ? 'border-red-500' : ''}
-                    />
+                    
+                    {assinaturaResponsavel ? (
+                      <div className="space-y-2">
+                        <div className="border rounded-lg p-4 bg-muted">
+                          <img 
+                            src={assinaturaResponsavel} 
+                            alt="Assinatura do responsável" 
+                            className="max-w-full h-auto"
+                          />
+                        </div>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => {
+                            setAssinaturaResponsavel('');
+                            setShowSignatureModal(true);
+                          }}
+                        >
+                          Refazer Assinatura
+                        </Button>
+                      </div>
+                    ) : (
+                      <Button 
+                        variant="outline"
+                        onClick={() => setShowSignatureModal(true)}
+                        className="w-full"
+                      >
+                        <Shield className="h-4 w-4 mr-2" />
+                        Capturar Assinatura
+                      </Button>
+                    )}
+                    
                     <p className="text-sm text-muted-foreground">
-                      Ao assinar, você confirma que realizou esta inspeção
+                      Assinatura do usuário: {profile?.nome || 'Não identificado'}
                     </p>
                   </div>
                 )}
@@ -499,6 +535,22 @@ const InspecaoExtintores = () => {
               </CardContent>
             </Card>
           </>
+        )}
+
+        {/* Modal de Assinatura Digital */}
+        {showSignatureModal && (
+          <DigitalSignature
+            onSave={(signatureData) => {
+              setAssinaturaResponsavel(signatureData);
+              setShowSignatureModal(false);
+              toast({
+                title: "Assinatura capturada",
+                description: "Assinatura registrada com sucesso."
+              });
+            }}
+            onCancel={() => setShowSignatureModal(false)}
+            title="Assinatura do Responsável"
+          />
         )}
       </div>
     </PermissionGuard>
