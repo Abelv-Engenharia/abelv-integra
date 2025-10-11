@@ -94,6 +94,7 @@ export function AppSidebar() {
           "gro_avaliacao_riscos",
           "prevencao_incendio_dashboard",
           "prevencao_incendio_cadastro_extintores",
+          "prevencao_incendio_consulta_extintores",
           "prevencao_incendio_inspecao_extintores",
           "desvios_dashboard",
           "desvios_cadastro",

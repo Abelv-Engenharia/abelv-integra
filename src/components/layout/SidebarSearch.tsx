@@ -85,6 +85,7 @@ export default function SidebarSearch() {
     // Prevenção Incêndio
     { name: "Prevenção Incêndio Dashboard", path: "/prevencao-incendio/dashboard", category: "SMS", slug: "prevencao_incendio_dashboard" },
     { name: "Cadastro Extintores", path: "/prevencao-incendio/cadastro-extintores", category: "SMS", slug: "prevencao_incendio_cadastro_extintores" },
+    { name: "Consulta Extintores", path: "/prevencao-incendio/consulta-extintores", category: "SMS", slug: "prevencao_incendio_consulta_extintores" },
     { name: "Inspeção Extintores", path: "/prevencao-incendio/inspecao-extintores", category: "SMS", slug: "prevencao_incendio_inspecao_extintores" },
     { name: "Consulta Inspeções", path: "/prevencao-incendio/consulta-inspecoes", category: "SMS", slug: "prevencao_incendio_consulta_inspecoes" },
 

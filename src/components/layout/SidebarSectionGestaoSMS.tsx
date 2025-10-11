@@ -142,6 +142,7 @@ export default function SidebarSectionGestaoSMS({
   const prevIncendioItems: LinkItem[] = [
     { label: "Dashboard", to: "/prevencao-incendio/dashboard", slug: "prevencao_incendio_dashboard" },
     { label: "Cadastro de Extintores", to: "/prevencao-incendio/cadastro-extintores", slug: "prevencao_incendio_cadastro_extintores" },
+    { label: "Consulta de Extintores", to: "/prevencao-incendio/consulta-extintores", slug: "prevencao_incendio_consulta_extintores" },
     { label: "Inspeção de Extintores", to: "/prevencao-incendio/inspecao-extintores", slug: "prevencao_incendio_inspecao_extintores" },
     { label: "Consulta de Inspeções", to: "/prevencao-incendio/consulta-inspecoes", slug: "prevencao_incendio_consulta_inspecoes" },
   ];
