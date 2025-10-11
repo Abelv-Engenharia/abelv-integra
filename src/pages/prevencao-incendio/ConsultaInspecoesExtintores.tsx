@@ -47,7 +47,7 @@ const ConsultaInspecoesExtintores = () => {
     try {
       setIsLoading(true);
       
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('inspecoes_extintores')
         .select(`
           *,
@@ -57,17 +57,34 @@ const ConsultaInspecoesExtintores = () => {
         `)
         .order('created_at', { ascending: false });
 
-      if (data) {
+      // Log para debug
+      console.log('Query result:', { data, error });
+
+      if (error) {
+        console.error('Erro na query:', error);
+        throw error;
+      }
+
+      // Validação defensiva
+      if (data && Array.isArray(data)) {
+        console.log(`${data.length} inspeções carregadas`);
         setInspecoes(data);
         setFilteredInspecoes(data);
+      } else {
+        console.warn('Dados inválidos retornados:', data);
+        setInspecoes([]);
+        setFilteredInspecoes([]);
       }
     } catch (error) {
       console.error('Erro ao carregar inspeções:', error);
       toast({
         title: "Erro",
-        description: "Erro ao carregar lista de inspeções.",
+        description: "Erro ao carregar lista de inspeções. Por favor, tente novamente.",
         variant: "destructive"
       });
+      // Garantir que os estados fiquem vazios em caso de erro
+      setInspecoes([]);
+      setFilteredInspecoes([]);
     } finally {
       setIsLoading(false);
     }
