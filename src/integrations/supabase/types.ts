@@ -2826,6 +2826,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "fk_inspecoes_responsavel"
+            columns: ["responsavel_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "inspecoes_extintores_checklist_id_fkey"
             columns: ["checklist_id"]
             isOneToOne: false
