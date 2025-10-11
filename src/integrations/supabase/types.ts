@@ -159,6 +159,7 @@ export type Database = {
         Row: {
           ativo: boolean
           campos_cabecalho: Json | null
+          contexto_uso: string[]
           created_at: string
           descricao: string | null
           id: string
@@ -171,6 +172,7 @@ export type Database = {
         Insert: {
           ativo?: boolean
           campos_cabecalho?: Json | null
+          contexto_uso?: string[]
           created_at?: string
           descricao?: string | null
           id?: string
@@ -183,6 +185,7 @@ export type Database = {
         Update: {
           ativo?: boolean
           campos_cabecalho?: Json | null
+          contexto_uso?: string[]
           created_at?: string
           descricao?: string | null
           id?: string

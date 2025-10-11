@@ -50,6 +50,7 @@ interface ChecklistAvaliacao {
   itens_avaliacao: Json;
   secoes?: Json;
   requer_assinatura?: boolean;
+  contexto_uso?: string[];
   created_at: string;
 }
 
@@ -68,7 +69,8 @@ const AdminChecklists = () => {
     campos_manuais: [] as CampoManual[],
     itens_avaliacao: [] as ItemAvaliacao[],
     secoes: [] as Secao[],
-    requer_assinatura: false
+    requer_assinatura: false,
+    contexto_uso: ['geral'] as string[]
   });
   const [novoItem, setNovoItem] = useState('');
   const [novaSecao, setNovaSecao] = useState({ nome: '', descricao: '' });
@@ -130,7 +132,8 @@ const AdminChecklists = () => {
         } as unknown as Json,
         itens_avaliacao: formData.itens_avaliacao as unknown as Json,
         secoes: formData.secoes as unknown as Json,
-        requer_assinatura: formData.requer_assinatura
+        requer_assinatura: formData.requer_assinatura,
+        contexto_uso: formData.contexto_uso
       };
 
       if (editingChecklist) {
@@ -205,7 +208,8 @@ const AdminChecklists = () => {
       campos_manuais: [],
       itens_avaliacao: [],
       secoes: [],
-      requer_assinatura: false
+      requer_assinatura: false,
+      contexto_uso: ['geral']
     });
     setNovoItem('');
     setNovaSecao({ nome: '', descricao: '' });
@@ -246,7 +250,8 @@ const AdminChecklists = () => {
       campos_manuais: camposManuais,
       itens_avaliacao: Array.isArray(checklist.itens_avaliacao) ? checklist.itens_avaliacao as unknown as ItemAvaliacao[] : [],
       secoes: Array.isArray(checklist.secoes) ? checklist.secoes as unknown as Secao[] : [],
-      requer_assinatura: checklist.requer_assinatura || false
+      requer_assinatura: checklist.requer_assinatura || false,
+      contexto_uso: checklist.contexto_uso || ['geral']
     });
     setDialogOpen(true);
   };
@@ -261,6 +266,20 @@ const AdminChecklists = () => {
       setFormData(prev => ({
         ...prev,
         campos_cabecalho: prev.campos_cabecalho.filter(campo => campo !== campoId)
+      }));
+    }
+  };
+
+  const handleContextoChange = (contexto: string, checked: boolean) => {
+    if (checked) {
+      setFormData(prev => ({
+        ...prev,
+        contexto_uso: [...prev.contexto_uso, contexto]
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        contexto_uso: prev.contexto_uso.filter(c => c !== contexto)
       }));
     }
   };
@@ -609,6 +628,50 @@ const AdminChecklists = () => {
               </div>
 
               <div>
+                <Label>Contexto de Uso *</Label>
+                <p className="text-sm text-muted-foreground mb-3">
+                  Selecione onde este checklist poderá ser utilizado
+                </p>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Checkbox 
+                      id="ctx_sms"
+                      checked={formData.contexto_uso.includes('inspecao_sms')}
+                      onCheckedChange={(checked) => handleContextoChange('inspecao_sms', checked as boolean)}
+                    />
+                    <Label htmlFor="ctx_sms" className="cursor-pointer">Inspeção SMS</Label>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Checkbox 
+                      id="ctx_incendio"
+                      checked={formData.contexto_uso.includes('prevencao_incendio')}
+                      onCheckedChange={(checked) => handleContextoChange('prevencao_incendio', checked as boolean)}
+                    />
+                    <Label htmlFor="ctx_incendio" className="cursor-pointer">Prevenção de Incêndio</Label>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Checkbox 
+                      id="ctx_geral"
+                      checked={formData.contexto_uso.includes('geral')}
+                      onCheckedChange={(checked) => handleContextoChange('geral', checked as boolean)}
+                    />
+                    <Label htmlFor="ctx_geral" className="cursor-pointer">Geral (todas as páginas)</Label>
+                  </div>
+                </div>
+                {formData.contexto_uso.length > 0 && (
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {formData.contexto_uso.map((ctx) => (
+                      <Badge key={ctx} variant="secondary">
+                        {ctx === 'inspecao_sms' ? 'Inspeção SMS' : 
+                         ctx === 'prevencao_incendio' ? 'Prevenção de Incêndio' : 
+                         'Geral'}
+                      </Badge>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div>
                 <Label htmlFor="descricao">Descrição</Label>
                 <Textarea
                   id="descricao"
@@ -934,6 +997,7 @@ const AdminChecklists = () => {
                 <TableHead>Campos Cabeçalho</TableHead>
                 <TableHead>Seções</TableHead>
                 <TableHead>Itens</TableHead>
+                <TableHead>Contexto</TableHead>
                 <TableHead>Assinatura</TableHead>
                 <TableHead>Data Cadastro</TableHead>
                 <TableHead className="text-right">Ações</TableHead>
@@ -942,7 +1006,7 @@ const AdminChecklists = () => {
             <TableBody>
               {checklists.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center py-4">
+                  <TableCell colSpan={9} className="text-center py-4">
                     Nenhum checklist cadastrado
                   </TableCell>
                 </TableRow>
@@ -988,6 +1052,17 @@ const AdminChecklists = () => {
                       <Badge variant="secondary">
                         {getItensAvaliacao(checklist.itens_avaliacao).length} itens
                       </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex flex-wrap gap-1">
+                        {(checklist.contexto_uso || ['geral']).map((ctx) => (
+                          <Badge key={ctx} variant="outline" className="text-xs">
+                            {ctx === 'inspecao_sms' ? 'SMS' : 
+                             ctx === 'prevencao_incendio' ? 'Incêndio' : 
+                             'Geral'}
+                          </Badge>
+                        ))}
+                      </div>
                     </TableCell>
                     <TableCell>
                       <Badge variant={checklist.requer_assinatura ? "default" : "secondary"}>

@@ -25,7 +25,8 @@ const InspecaoExtintores = () => {
   const [itensInspecao, setItensInspecao] = useState<any[]>([]);
   const [inspecaoData, setInspecaoData] = useState({
     dataInspecao: new Date(),
-    observacoes: ''
+    observacoes: '',
+    assinatura_responsavel: ''
   });
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -163,6 +164,16 @@ const InspecaoExtintores = () => {
       return;
     }
 
+    // Validar assinatura se requerida
+    if (checklistExtintor?.requer_assinatura && !inspecaoData.assinatura_responsavel?.trim()) {
+      toast({
+        title: "Assinatura obrigatória",
+        description: "Por favor, assine digitalmente a inspeção.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     try {
       setIsSubmitting(true);
       
@@ -181,6 +192,8 @@ const InspecaoExtintores = () => {
             localizacao: extintorSelecionado.localizacao
           },
           itens: itensInspecao,
+          assinatura_responsavel: inspecaoData.assinatura_responsavel,
+          data_assinatura: new Date().toISOString(),
           data_preenchimento: new Date().toISOString()
         },
         tem_nao_conformidade: temNaoConformidade,
@@ -207,7 +220,8 @@ const InspecaoExtintores = () => {
         setItensInspecao([]);
         setInspecaoData({
           dataInspecao: new Date(),
-          observacoes: ''
+          observacoes: '',
+          assinatura_responsavel: ''
         });
       }, 1500);
 
@@ -440,6 +454,30 @@ const InspecaoExtintores = () => {
                     rows={3}
                   />
                 </div>
+
+                {checklistExtintor?.requer_assinatura && (
+                  <div className="mt-6 space-y-2">
+                    <Label htmlFor="assinatura" className="flex items-center gap-1">
+                      Assinatura do Responsável
+                      <span className="text-red-500">*</span>
+                    </Label>
+                    <Input
+                      id="assinatura"
+                      type="text"
+                      placeholder="Digite seu nome completo para assinar"
+                      value={inspecaoData.assinatura_responsavel}
+                      onChange={(e) => setInspecaoData(prev => ({
+                        ...prev,
+                        assinatura_responsavel: e.target.value
+                      }))}
+                      required={checklistExtintor?.requer_assinatura}
+                      className={!inspecaoData.assinatura_responsavel && checklistExtintor?.requer_assinatura ? 'border-red-500' : ''}
+                    />
+                    <p className="text-sm text-muted-foreground">
+                      Ao assinar, você confirma que realizou esta inspeção
+                    </p>
+                  </div>
+                )}
 
                 <div className="flex gap-4 mt-6">
                   <Button 
