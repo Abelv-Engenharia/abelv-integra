@@ -18,6 +18,7 @@ const HoraSeguranca = () => {
         .from('checklists_avaliacao')
         .select('*')
         .eq('ativo', true)
+        .or('contexto_uso.cs.{inspecao_sms},contexto_uso.cs.{geral}')
         .ilike('nome', 'HORA DA SEGURANÇA%')
         .order('nome');
       if (data) {
