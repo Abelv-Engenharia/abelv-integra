@@ -119,12 +119,12 @@ export async function updateExtintor(
 }
 
 /**
- * Exclui um extintor (soft delete)
+ * Exclui um extintor (hard delete)
  */
 export async function deleteExtintor(id: string) {
   const { error } = await supabase
     .from("extintores")
-    .update({ ativo: false })
+    .delete()
     .eq("id", id);
   
   if (error) {
