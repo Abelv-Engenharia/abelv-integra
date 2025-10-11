@@ -138,23 +138,62 @@ export async function deleteExtintor(id: string) {
  * Busca detalhes completos de uma inspeção (acesso público)
  */
 export async function fetchInspecaoPublica(inspecaoId: string) {
-  const { data, error } = await supabase
+  // 1. Buscar a inspeção
+  const { data: inspecao, error: inspecaoError } = await supabase
     .from('inspecoes_extintores')
-    .select(`
-      *,
-      extintores(codigo, tipo, capacidade, fabricante, localizacao, data_fabricacao, data_vencimento, 
-        ccas(codigo, nome)
-      ),
-      checklists_avaliacao(nome, descricao),
-      profiles(nome, email)
-    `)
+    .select('*')
     .eq('id', inspecaoId)
     .maybeSingle();
   
-  if (error) {
-    console.error('Erro ao buscar inspeção pública:', error);
-    throw error;
+  if (inspecaoError) {
+    console.error('Erro ao buscar inspeção:', inspecaoError);
+    throw inspecaoError;
   }
   
-  return data;
+  if (!inspecao) {
+    return null;
+  }
+
+  // 2. Buscar o extintor
+  const { data: extintor } = await supabase
+    .from('extintores')
+    .select('codigo, tipo, capacidade, fabricante, localizacao, data_fabricacao, data_vencimento, cca_id')
+    .eq('id', inspecao.extintor_id)
+    .maybeSingle();
+
+  // 3. Buscar o CCA se o extintor tiver um
+  let cca = null;
+  if (extintor?.cca_id) {
+    const { data: ccaData } = await supabase
+      .from('ccas')
+      .select('codigo, nome')
+      .eq('id', extintor.cca_id)
+      .maybeSingle();
+    cca = ccaData;
+  }
+
+  // 4. Buscar o checklist
+  const { data: checklist } = await supabase
+    .from('checklists_avaliacao')
+    .select('nome, descricao')
+    .eq('id', inspecao.checklist_id)
+    .maybeSingle();
+
+  // 5. Buscar o profile do responsável
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('nome, email')
+    .eq('id', inspecao.responsavel_id)
+    .maybeSingle();
+
+  // 6. Montar o objeto completo no formato esperado
+  return {
+    ...inspecao,
+    extintores: extintor ? {
+      ...extintor,
+      ccas: cca
+    } : null,
+    checklists_avaliacao: checklist,
+    profiles: profile
+  };
 }
