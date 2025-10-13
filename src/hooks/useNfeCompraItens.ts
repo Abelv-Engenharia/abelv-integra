@@ -3,15 +3,12 @@ import { supabase } from "@/integrations/supabase/client";
 
 export interface NfeCompraItem {
   id: string;
-  nfe_compra_id: string;
-  codigo_produto: string;
+  id_nfe?: string;
   descricao: string;
-  ncm?: string;
-  cfop?: string;
-  unidade: string;
+  id_unidade: number;
   quantidade: number;
-  valor_unitario: number;
-  valor_total: number;
+  unitario: number;
+  id_cca_sienge: number;
   created_at?: string;
 }
 

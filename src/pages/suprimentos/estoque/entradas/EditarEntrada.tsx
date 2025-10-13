@@ -122,14 +122,14 @@ export default function EditarEntrada() {
                 ) : (
                   itens.map((item) => (
                     <TableRow key={item.id}>
-                      <TableCell>{item.codigo_produto}</TableCell>
+                      <TableCell>-</TableCell>
                       <TableCell>{item.descricao}</TableCell>
-                      <TableCell>{item.ncm || "-"}</TableCell>
-                      <TableCell>{item.cfop || "-"}</TableCell>
-                      <TableCell>{item.unidade}</TableCell>
-                      <TableCell className="text-right">{item.quantidade.toFixed(2)}</TableCell>
-                      <TableCell className="text-right">R$ {item.valor_unitario.toFixed(2)}</TableCell>
-                      <TableCell className="text-right">R$ {item.valor_total.toFixed(2)}</TableCell>
+                      <TableCell>-</TableCell>
+                      <TableCell>-</TableCell>
+                      <TableCell>{item.id_unidade ?? "-"}</TableCell>
+                      <TableCell className="text-right">{(item.quantidade ?? 0).toFixed(2)}</TableCell>
+                      <TableCell className="text-right">R$ {Number(item.unitario ?? 0).toFixed(2)}</TableCell>
+                      <TableCell className="text-right">R$ {((item.quantidade ?? 0) * Number(item.unitario ?? 0)).toFixed(2)}</TableCell>
                     </TableRow>
                   ))
                 )}
