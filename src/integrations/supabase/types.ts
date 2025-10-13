@@ -4911,6 +4911,39 @@ export type Database = {
           },
         ]
       }
+      usuarios_engenharia_matricial: {
+        Row: {
+          ativo: boolean
+          created_at: string
+          created_by: string | null
+          disciplina_preferida: Database["public"]["Enums"]["disciplina_engenharia_matricial"]
+          id: string
+          updated_at: string
+          updated_by: string | null
+          usuario_id: string
+        }
+        Insert: {
+          ativo?: boolean
+          created_at?: string
+          created_by?: string | null
+          disciplina_preferida?: Database["public"]["Enums"]["disciplina_engenharia_matricial"]
+          id?: string
+          updated_at?: string
+          updated_by?: string | null
+          usuario_id: string
+        }
+        Update: {
+          ativo?: boolean
+          created_at?: string
+          created_by?: string | null
+          disciplina_preferida?: Database["public"]["Enums"]["disciplina_engenharia_matricial"]
+          id?: string
+          updated_at?: string
+          updated_by?: string | null
+          usuario_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       vw_heatmap_funcao_agente: {
@@ -5072,6 +5105,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin_sistema" | "usuario"
+      disciplina_engenharia_matricial: "ELETRICA" | "MECANICA" | "AMBAS"
       medida_aplicada_enum:
         | "ADVERTÊNCIA VERBAL"
         | "ADVERTÊNCIA ESCRITA"
@@ -5205,6 +5239,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin_sistema", "usuario"],
+      disciplina_engenharia_matricial: ["ELETRICA", "MECANICA", "AMBAS"],
       medida_aplicada_enum: [
         "ADVERTÊNCIA VERBAL",
         "ADVERTÊNCIA ESCRITA",
