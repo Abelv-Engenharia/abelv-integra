@@ -20,7 +20,7 @@ export default function OSEmPlanejamento() {
   const [hhPlanejado, setHhPlanejado] = useState("");
   const [hhAdicional, setHhAdicional] = useState("");
   const [valorSAO, setValorSAO] = useState("");
-  
+
   const osEmPlanejamento = osList;
 
   const capitalizarTexto = (texto: string) => {
@@ -28,25 +28,25 @@ export default function OSEmPlanejamento() {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('pt-BR');
+    return new Date(dateString).toLocaleDateString("pt-BR");
   };
 
   const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
+    return new Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: "BRL",
     }).format(value);
   };
 
   const calcularValorEstimado = () => {
     const hhPlanejadoNum = parseFloat(hhPlanejado) || 0;
     const hhAdicionalNum = parseFloat(hhAdicional) || 0;
-    const valorHora = 95.00;
-    return ((hhPlanejadoNum + hhAdicionalNum) * valorHora);
+    const valorHora = 95.0;
+    return (hhPlanejadoNum + hhAdicionalNum) * valorHora;
   };
 
   const handleIniciarPlanejamento = (osId: string) => {
-    const os = osList.find(o => o.id === osId);
+    const os = osList.find((o) => o.id === osId);
     setOsEmEdicao(osId);
     setDataInicioPrevista("");
     setDataFimPrevista("");
@@ -65,8 +65,8 @@ export default function OSEmPlanejamento() {
   };
 
   const handleFinalizarPlanejamento = (osId: string) => {
-    const os = osList.find(o => o.id === osId);
-    
+    const os = osList.find((o) => o.id === osId);
+
     // Se valorSAO não foi preenchido inicialmente, validar agora
     if (!os?.valor_orcamento && !valorSAO) {
       toast.error("Valor SAO é obrigatório! Preencha antes de finalizar o planejamento.");
@@ -106,24 +106,27 @@ export default function OSEmPlanejamento() {
           data_fim_prevista: dataFimPrevista,
           hh_planejado: hhPlanejadoNum,
           hh_adicional: hhAdicionalNum,
-          ...(valorSAONum > 0 && { valor_orcamento: valorSAONum })
-        }
+          ...(valorSAONum > 0 && { valor_orcamento: valorSAONum }),
+        },
       },
       {
         onSuccess: () => {
           // Avançar para próxima fase
-          avancarFaseMutation.mutate({ id: osId }, {
-            onSuccess: () => {
-              toast.success("Planejamento finalizado com sucesso! OS enviada para aguardando aceite.");
-              handleCancelarPlanejamento();
-            }
-          });
+          avancarFaseMutation.mutate(
+            { id: osId },
+            {
+              onSuccess: () => {
+                toast.success("Planejamento finalizado com sucesso! OS enviada para aguardando aceite.");
+                handleCancelarPlanejamento();
+              },
+            },
+          );
         },
         onError: (error) => {
           console.error("Erro ao finalizar planejamento:", error);
           toast.error("Erro ao finalizar planejamento. Tente novamente.");
-        }
-      }
+        },
+      },
     );
   };
 
@@ -141,7 +144,7 @@ export default function OSEmPlanejamento() {
         <div>
           <h1 className="text-3xl font-bold">OS Em planejamento</h1>
           <p className="text-muted-foreground">
-            {osEmPlanejamento.length} ordem{osEmPlanejamento.length !== 1 ? 's' : ''} de serviço em planejamento
+            {osEmPlanejamento.length} ordem{osEmPlanejamento.length !== 1 ? "s" : ""} de serviço em planejamento
           </p>
         </div>
       </div>
@@ -155,141 +158,143 @@ export default function OSEmPlanejamento() {
       ) : (
         <div className="grid gap-6">
           {/* Formulário de Planejamento */}
-          {osEmEdicao && (() => {
-            const os = osList.find(o => o.id === osEmEdicao);
-            if (!os) return null;
-            
-            return (
-              <Card className="border-primary">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-primary">
-                    <Calendar className="h-5 w-5" />
-                    Planejamento da OS Nº {(os as any).numero || os.id}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                 {/* Valor SAO (se não foi preenchido) */}
-                {!os.valor_orcamento && (
-                  <div className="bg-amber-50 border border-amber-200 p-4 rounded-lg">
-                    <p className="text-sm text-amber-800 mb-3">
-                      ⚠️ O Valor SAO não foi preenchido pelo solicitante. É necessário preencher antes de finalizar o planejamento.
-                    </p>
-                    <div className="space-y-2">
-                      <Label htmlFor="valorSAO" className="text-red-600">
-                        Valor SAO (custo de venda) *
-                      </Label>
-                      <Input
-                        id="valorSAO"
-                        type="number"
-                        step="0.01"
-                        placeholder="0,00"
-                        value={valorSAO}
-                        onChange={(e) => setValorSAO(e.target.value)}
-                        className={!valorSAO ? "border-red-500" : ""}
-                      />
-                    </div>
-                  </div>
-                )}
+          {osEmEdicao &&
+            (() => {
+              const os = osList.find((o) => o.id === osEmEdicao);
+              if (!os) return null;
 
-                {/* Período de Execução */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="dataInicio" className="flex items-center gap-2">
-                      <Calendar className="h-4 w-4" />
-                      Data início prevista <span className="text-red-500">*</span>
-                    </Label>
-                    <Input
-                      id="dataInicio"
-                      type="date"
-                      value={dataInicioPrevista}
-                      onChange={(e) => setDataInicioPrevista(e.target.value)}
-                      className={!dataInicioPrevista ? "border-red-300" : ""}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="dataFim" className="flex items-center gap-2">
-                      <Calendar className="h-4 w-4" />
-                      Data fim prevista <span className="text-red-500">*</span>
-                    </Label>
-                    <Input
-                      id="dataFim"
-                      type="date"
-                      value={dataFimPrevista}
-                      onChange={(e) => setDataFimPrevista(e.target.value)}
-                      className={!dataFimPrevista ? "border-red-300" : ""}
-                    />
-                  </div>
-                </div>
+              return (
+                <Card className="border-primary">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-primary">
+                      <Calendar className="h-5 w-5" />
+                      Planejamento da OS Nº {(os as any).numero || os.id}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    {/* Valor SAO (se não foi preenchido) */}
+                    {!os.valor_orcamento && (
+                      <div className="bg-amber-50 border border-amber-200 p-4 rounded-lg">
+                        <p className="text-sm text-amber-800 mb-3">
+                          ⚠️ O Valor SAO não foi preenchido pelo solicitante. É necessário preencher antes de finalizar
+                          o planejamento.
+                        </p>
+                        <div className="space-y-2">
+                          <Label htmlFor="valorSAO" className="text-red-600">
+                            Valor SAO (custo de venda) *
+                          </Label>
+                          <Input
+                            id="valorSAO"
+                            type="number"
+                            step="0.01"
+                            placeholder="0,00"
+                            value={valorSAO}
+                            onChange={(e) => setValorSAO(e.target.value)}
+                            className={!valorSAO ? "border-red-500" : ""}
+                          />
+                        </div>
+                      </div>
+                    )}
 
-                {/* HH Planejado e Adicional */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="hhPlanejado" className="flex items-center gap-2">
-                      <Clock className="h-4 w-4" />
-                      HH planejado <span className="text-red-500">*</span>
-                    </Label>
-                    <Input
-                      id="hhPlanejado"
-                      type="number"
-                      step="0.5"
-                      min="0.5"
-                      placeholder="Ex: 40"
-                      value={hhPlanejado}
-                      onChange={(e) => setHhPlanejado(e.target.value)}
-                      className={!hhPlanejado ? "border-red-300" : ""}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="hhAdicional" className="flex items-center gap-2">
-                      <Clock className="h-4 w-4" />
-                      HH adicional (opcional)
-                    </Label>
-                    <Input
-                      id="hhAdicional"
-                      type="number"
-                      step="0.5"
-                      min="0"
-                      placeholder="Ex: 8"
-                      value={hhAdicional}
-                      onChange={(e) => setHhAdicional(e.target.value)}
-                    />
-                  </div>
-                </div>
-
-                {/* Resumo Financeiro */}
-                {(hhPlanejado || hhAdicional) && (
-                  <div className="bg-primary/5 p-4 rounded-lg space-y-2">
-                    <h4 className="font-medium">Resumo financeiro</h4>
-                    <div className="text-sm space-y-1">
-                      <div>HH planejado: {hhPlanejado || 0}h</div>
-                      <div>HH adicional: {hhAdicional || 0}h</div>
-                      <div>Total HH: {(parseFloat(hhPlanejado) || 0) + (parseFloat(hhAdicional) || 0)}h</div>
-                      <div>Valor por hora: {formatCurrency(95)}</div>
-                      <Separator className="my-2" />
-                      <div className="font-medium text-lg">
-                        Valor total estimado: {formatCurrency(calcularValorEstimado())}
+                    {/* Período de Execução */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="dataInicio" className="flex items-center gap-2">
+                          <Calendar className="h-4 w-4" />
+                          Data início prevista <span className="text-red-500">*</span>
+                        </Label>
+                        <Input
+                          id="dataInicio"
+                          type="date"
+                          value={dataInicioPrevista}
+                          onChange={(e) => setDataInicioPrevista(e.target.value)}
+                          className={!dataInicioPrevista ? "border-red-300" : ""}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="dataFim" className="flex items-center gap-2">
+                          <Calendar className="h-4 w-4" />
+                          Data fim prevista <span className="text-red-500">*</span>
+                        </Label>
+                        <Input
+                          id="dataFim"
+                          type="date"
+                          value={dataFimPrevista}
+                          onChange={(e) => setDataFimPrevista(e.target.value)}
+                          className={!dataFimPrevista ? "border-red-300" : ""}
+                        />
                       </div>
                     </div>
-                  </div>
-                )}
 
-                {/* Botões de Ação */}
-                <div className="flex gap-2 justify-end">
-                  <Button variant="outline" onClick={handleCancelarPlanejamento}>
-                    Cancelar
-                  </Button>
-                  <Button 
-                    onClick={() => handleFinalizarPlanejamento(osEmEdicao)}
-                    disabled={!dataInicioPrevista || !dataFimPrevista || !hhPlanejado}
-                  >
-                    <CheckCircle2 className="h-4 w-4 mr-2" />
-                    Finalizar planejamento
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-            );
-          })()}
+                    {/* HH Planejado e Adicional */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="hhPlanejado" className="flex items-center gap-2">
+                          <Clock className="h-4 w-4" />
+                          HH planejado <span className="text-red-500">*</span>
+                        </Label>
+                        <Input
+                          id="hhPlanejado"
+                          type="number"
+                          step="0.5"
+                          min="0.5"
+                          placeholder="Ex: 40"
+                          value={hhPlanejado}
+                          onChange={(e) => setHhPlanejado(e.target.value)}
+                          className={!hhPlanejado ? "border-red-300" : ""}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="hhAdicional" className="flex items-center gap-2">
+                          <Clock className="h-4 w-4" />
+                          HH adicional (opcional)
+                        </Label>
+                        <Input
+                          id="hhAdicional"
+                          type="number"
+                          step="0.5"
+                          min="0"
+                          placeholder="Ex: 8"
+                          value={hhAdicional}
+                          onChange={(e) => setHhAdicional(e.target.value)}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Resumo Financeiro */}
+                    {(hhPlanejado || hhAdicional) && (
+                      <div className="bg-primary/5 p-4 rounded-lg space-y-2">
+                        <h4 className="font-medium">Resumo financeiro</h4>
+                        <div className="text-sm space-y-1">
+                          <div>HH planejado: {hhPlanejado || 0}h</div>
+                          <div>HH adicional: {hhAdicional || 0}h</div>
+                          <div>Total HH: {(parseFloat(hhPlanejado) || 0) + (parseFloat(hhAdicional) || 0)}h</div>
+                          <div>Valor por hora: {formatCurrency(95)}</div>
+                          <Separator className="my-2" />
+                          <div className="font-medium text-lg">
+                            Valor total estimado: {formatCurrency(calcularValorEstimado())}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Botões de Ação */}
+                    <div className="flex gap-2 justify-end">
+                      <Button variant="outline" onClick={handleCancelarPlanejamento}>
+                        Cancelar
+                      </Button>
+                      <Button
+                        onClick={() => handleFinalizarPlanejamento(osEmEdicao)}
+                        disabled={!dataInicioPrevista || !dataFimPrevista || !hhPlanejado}
+                      >
+                        <CheckCircle2 className="h-4 w-4 mr-2" />
+                        Finalizar planejamento
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })()}
 
           {/* Lista de OS */}
           {osEmPlanejamento.map((os) => (
@@ -298,22 +303,16 @@ export default function OSEmPlanejamento() {
                 <div className="flex justify-between items-start">
                   <CardTitle className="flex items-center gap-2">
                     OS Nº {os.numero} - CCA {os.cca?.codigo || os.cca_id}
-                    <Badge variant="outline">
-                      Em planejamento
-                    </Badge>
+                    <Badge variant="outline">Em planejamento</Badge>
                   </CardTitle>
                   <div className="flex gap-2">
                     {osEmEdicao !== os.id && (
-                      <Button 
-                        variant="default" 
-                        size="sm"
-                        onClick={() => handleIniciarPlanejamento(os.id)}
-                      >
+                      <Button variant="default" size="sm" onClick={() => handleIniciarPlanejamento(os.id)}>
                         <Calendar className="h-4 w-4 mr-2" />
                         Iniciar planejamento
                       </Button>
                     )}
-                    <Link to={`/os/${os.id}`}>
+                    <Link to={`/engenharia-matricial/os/${os.id}`}>
                       <Button variant="outline" size="sm">
                         <Eye className="h-4 w-4" />
                       </Button>

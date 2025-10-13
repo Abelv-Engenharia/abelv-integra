@@ -3,7 +3,14 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { Eye, CheckCircle, XCircle, Calendar, Clock, RotateCcw, ArrowRight, AlertTriangle } from "lucide-react";
 import { useOS } from "@/contexts/engenharia-matricial/OSContext";
@@ -16,9 +23,9 @@ export default function OSAguardandoAceiteReplanejamento() {
   const [osParaRejeitar, setOsParaRejeitar] = useState<number | null>(null);
   const [justificativaRejeicao, setJustificativaRejeicao] = useState("");
   const [loading, setLoading] = useState(false);
-  
-  const osAguardandoAceiteReplanejamento = osList.filter(os => 
-    os.status === "aguardando-aceite" && os.historicoReplanejamentos && os.historicoReplanejamentos.length > 0
+
+  const osAguardandoAceiteReplanejamento = osList.filter(
+    (os) => os.status === "aguardando-aceite" && os.historicoReplanejamentos && os.historicoReplanejamentos.length > 0,
   );
 
   const capitalizarTexto = (texto: string) => {
@@ -26,13 +33,13 @@ export default function OSAguardandoAceiteReplanejamento() {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('pt-BR');
+    return new Date(dateString).toLocaleDateString("pt-BR");
   };
 
   const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
+    return new Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: "BRL",
     }).format(value);
   };
 
@@ -80,7 +87,7 @@ export default function OSAguardandoAceiteReplanejamento() {
   const calcularNovoValorEstimado = (os: any, replanejamento: any) => {
     const hhTotalAtual = os.hhPlanejado + (os.hhAdicional || 0);
     const hhTotalNovo = hhTotalAtual + replanejamento.hhAdicional;
-    const valorHora = 95.00;
+    const valorHora = 95.0;
     return hhTotalNovo * valorHora;
   };
 
@@ -90,7 +97,8 @@ export default function OSAguardandoAceiteReplanejamento() {
         <div>
           <h1 className="text-3xl font-bold">OS Aguardando aceite de replanejamento</h1>
           <p className="text-muted-foreground">
-            {osAguardandoAceiteReplanejamento.length} ordem{osAguardandoAceiteReplanejamento.length !== 1 ? 's' : ''} de serviço aguardando aprovação do replanejamento
+            {osAguardandoAceiteReplanejamento.length} ordem{osAguardandoAceiteReplanejamento.length !== 1 ? "s" : ""} de
+            serviço aguardando aprovação do replanejamento
           </p>
         </div>
       </div>
@@ -119,7 +127,7 @@ export default function OSAguardandoAceiteReplanejamento() {
                       </Badge>
                     </CardTitle>
                     <div className="flex gap-2">
-                      <Button 
+                      <Button
                         variant="default"
                         size="sm"
                         onClick={() => handleAprovarReplanejamento(os.id)}
@@ -128,8 +136,8 @@ export default function OSAguardandoAceiteReplanejamento() {
                         <CheckCircle className="h-4 w-4 mr-2" />
                         Aprovar replanejamento
                       </Button>
-                      <Button 
-                        variant="outline" 
+                      <Button
+                        variant="outline"
                         size="sm"
                         onClick={() => handleIniciarRejeicaoReplanejamento(os.id)}
                         className="text-red-600 hover:text-red-700"
@@ -137,7 +145,7 @@ export default function OSAguardandoAceiteReplanejamento() {
                         <XCircle className="h-4 w-4 mr-2" />
                         Rejeitar
                       </Button>
-                      <Link to={`/os/${os.id}`}>
+                      <Link to={`/engenharia-matricial/os/${os.id}`}>
                         <Button variant="outline" size="sm">
                           <Eye className="h-4 w-4" />
                         </Button>
@@ -181,7 +189,8 @@ export default function OSAguardandoAceiteReplanejamento() {
                           <div>
                             <p className="text-sm text-muted-foreground">Período original</p>
                             <p className="font-medium">
-                              {os.dataInicioPrevista ? formatDate(os.dataInicioPrevista) : "N/A"} - {os.dataFimPrevista ? formatDate(os.dataFimPrevista) : "N/A"}
+                              {os.dataInicioPrevista ? formatDate(os.dataInicioPrevista) : "N/A"} -{" "}
+                              {os.dataFimPrevista ? formatDate(os.dataFimPrevista) : "N/A"}
                             </p>
                           </div>
                           <div>
@@ -190,7 +199,9 @@ export default function OSAguardandoAceiteReplanejamento() {
                           </div>
                           <div>
                             <p className="text-sm text-muted-foreground">Valor original</p>
-                            <p className="font-medium">{formatCurrency((os.hhPlanejado + (os.hhAdicional || 0)) * 95)}</p>
+                            <p className="font-medium">
+                              {formatCurrency((os.hhPlanejado + (os.hhAdicional || 0)) * 95)}
+                            </p>
                           </div>
                         </div>
                       </div>
@@ -205,7 +216,8 @@ export default function OSAguardandoAceiteReplanejamento() {
                           <div>
                             <p className="text-sm text-muted-foreground">Novo período</p>
                             <p className="font-medium text-orange-700">
-                              {formatDate(ultimoReplanejamento.novaDataInicio)} - {formatDate(ultimoReplanejamento.novaDataFim)}
+                              {formatDate(ultimoReplanejamento.novaDataInicio)} -{" "}
+                              {formatDate(ultimoReplanejamento.novaDataFim)}
                             </p>
                           </div>
                           <div>
@@ -283,15 +295,13 @@ export default function OSAguardandoAceiteReplanejamento() {
                 className={!justificativaRejeicao.trim() ? "border-red-300" : ""}
                 rows={4}
               />
-              {!justificativaRejeicao.trim() && (
-                <p className="text-sm text-red-600">Campo obrigatório</p>
-              )}
+              {!justificativaRejeicao.trim() && <p className="text-sm text-red-600">Campo obrigatório</p>}
             </div>
 
             <div className="bg-red-50 border border-red-200 p-3 rounded-lg">
               <p className="text-sm text-red-700">
-                <strong>Atenção:</strong> Ao rejeitar o replanejamento, a OS retornará para execução 
-                mantendo o planejamento original sem as alterações solicitadas.
+                <strong>Atenção:</strong> Ao rejeitar o replanejamento, a OS retornará para execução mantendo o
+                planejamento original sem as alterações solicitadas.
               </p>
             </div>
           </div>
@@ -300,7 +310,7 @@ export default function OSAguardandoAceiteReplanejamento() {
             <Button variant="outline" onClick={handleCancelarRejeicao} disabled={loading}>
               Cancelar
             </Button>
-            <Button 
+            <Button
               variant="destructive"
               onClick={handleConfirmarRejeicaoReplanejamento}
               disabled={loading || !justificativaRejeicao.trim()}

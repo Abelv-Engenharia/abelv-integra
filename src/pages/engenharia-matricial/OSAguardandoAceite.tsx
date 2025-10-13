@@ -4,7 +4,14 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Eye, Check, X, AlertTriangle } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -16,8 +23,8 @@ export default function OSAguardandoAceite() {
   const [osParaRejeitar, setOsParaRejeitar] = useState<string | null>(null);
   const [justificativaRejeicao, setJustificativaRejeicao] = useState("");
   const [loading, setLoading] = useState(false);
-  
-  const { data: osList = [], isLoading } = useOSList({ status: 'aguardando-aceite' });
+
+  const { data: osList = [], isLoading } = useOSList({ status: "aguardando-aceite" });
   const { mutateAsync: updateOS } = useUpdateOS();
   const { mutateAsync: avancarFase } = useAvancarFaseOS();
 
@@ -26,13 +33,13 @@ export default function OSAguardandoAceite() {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('pt-BR');
+    return new Date(dateString).toLocaleDateString("pt-BR");
   };
 
   const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
+    return new Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: "BRL",
     }).format(value);
   };
 
@@ -47,7 +54,7 @@ export default function OSAguardandoAceite() {
       toast({
         title: "Erro",
         description: "Erro ao aprovar planejamento. Tente novamente.",
-        variant: "destructive"
+        variant: "destructive",
       });
     }
   };
@@ -67,7 +74,7 @@ export default function OSAguardandoAceite() {
       toast({
         title: "Justificativa obrigatória",
         description: "Por favor, informe o motivo da rejeição.",
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
@@ -77,22 +84,22 @@ export default function OSAguardandoAceite() {
     try {
       await updateOS({
         id: osParaRejeitar,
-        data: { 
+        data: {
           status: "aberta",
-          justificativa_engenharia: justificativaRejeicao.trim()
-        }
+          justificativa_engenharia: justificativaRejeicao.trim(),
+        },
       });
       toast({
         title: "Planejamento rejeitado",
         description: "OS retornada para status aberta com justificativa.",
-        variant: "destructive"
+        variant: "destructive",
       });
       handleCancelarRejeicao();
     } catch (error) {
       toast({
         title: "Erro",
         description: "Erro ao rejeitar planejamento. Tente novamente.",
-        variant: "destructive"
+        variant: "destructive",
       });
     }
   };
@@ -113,7 +120,7 @@ export default function OSAguardandoAceite() {
         <div>
           <h1 className="text-3xl font-bold">OS Aguardando aceite</h1>
           <p className="text-muted-foreground">
-            {osList.length} ordem{osList.length !== 1 ? 's' : ''} de serviço aguardando aceite
+            {osList.length} ordem{osList.length !== 1 ? "s" : ""} de serviço aguardando aceite
           </p>
         </div>
       </div>
@@ -131,22 +138,16 @@ export default function OSAguardandoAceite() {
               <CardHeader>
                 <div className="flex justify-between items-start">
                   <CardTitle className="flex items-center gap-2">
-                    OS Nº {os.numero || os.id} - CCA {os.cca?.codigo || 'N/A'}
-                    <Badge variant="outline">
-                      Aguardando aceite
-                    </Badge>
+                    OS Nº {os.numero || os.id} - CCA {os.cca?.codigo || "N/A"}
+                    <Badge variant="outline">Aguardando aceite</Badge>
                   </CardTitle>
                   <div className="flex gap-2">
-                    <Button 
-                      variant="default" 
-                      size="sm"
-                      onClick={() => handleAprovar(os.id)}
-                    >
+                    <Button variant="default" size="sm" onClick={() => handleAprovar(os.id)}>
                       <Check className="h-4 w-4 mr-2" />
                       Aprovar planejamento
                     </Button>
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       size="sm"
                       onClick={() => handleIniciarRejeicao(os.id)}
                       className="text-red-600 hover:text-red-700"
@@ -154,7 +155,7 @@ export default function OSAguardandoAceite() {
                       <X className="h-4 w-4 mr-2" />
                       Rejeitar
                     </Button>
-                    <Link to={`/os/${os.id}`}>
+                    <Link to={`/engenharia-matricial/os/${os.id}`}>
                       <Button variant="outline" size="sm">
                         <Eye className="h-4 w-4" />
                       </Button>
@@ -186,7 +187,7 @@ export default function OSAguardandoAceite() {
                   )}
                   <div>
                     <p className="text-sm text-muted-foreground">Responsável EM</p>
-                    <p className="font-medium">{os.responsavel_em?.nome || 'N/A'}</p>
+                    <p className="font-medium">{os.responsavel_em?.nome || "N/A"}</p>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Solicitante</p>
@@ -211,9 +212,7 @@ export default function OSAguardandoAceite() {
               <AlertTriangle className="h-5 w-5 text-red-500" />
               Rejeitar planejamento
             </DialogTitle>
-            <DialogDescription>
-              Informe o motivo da rejeição do planejamento da OS #{osParaRejeitar}
-            </DialogDescription>
+            <DialogDescription>Informe o motivo da rejeição do planejamento da OS #{osParaRejeitar}</DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">
@@ -230,15 +229,13 @@ export default function OSAguardandoAceite() {
                 className={!justificativaRejeicao.trim() ? "border-red-300" : ""}
                 rows={4}
               />
-              {!justificativaRejeicao.trim() && (
-                <p className="text-sm text-red-600">Campo obrigatório</p>
-              )}
+              {!justificativaRejeicao.trim() && <p className="text-sm text-red-600">Campo obrigatório</p>}
             </div>
 
             <div className="bg-red-50 border border-red-200 p-3 rounded-lg">
               <p className="text-sm text-red-700">
-                <strong>Atenção:</strong> Ao rejeitar o planejamento, a OS retornará para o status "Aberta" 
-                e precisará ser replanejada novamente.
+                <strong>Atenção:</strong> Ao rejeitar o planejamento, a OS retornará para o status "Aberta" e precisará
+                ser replanejada novamente.
               </p>
             </div>
           </div>
@@ -247,7 +244,7 @@ export default function OSAguardandoAceite() {
             <Button variant="outline" onClick={handleCancelarRejeicao} disabled={loading}>
               Cancelar
             </Button>
-            <Button 
+            <Button
               variant="destructive"
               onClick={handleConfirmarRejeicao}
               disabled={loading || !justificativaRejeicao.trim()}

@@ -137,7 +137,7 @@ export default function OSAguardandoAceiteFechamento() {
                       <X className="h-4 w-4 mr-2" />
                       Rejeitar
                     </Button>
-                    <Link to={`/os/${os.id}`}>
+                    <Link to={`/engenharia-matricial/os/${os.id}`}>
                       <Button variant="outline" size="sm" title="Ver detalhes">
                         <Eye className="h-4 w-4" />
                       </Button>

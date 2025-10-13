@@ -12,14 +12,14 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 export default function OSReplanejamento() {
-  const { data: osList = [], isLoading } = useOSList({ status: 'em-execucao' });
+  const { data: osList = [], isLoading } = useOSList({ status: "em-execucao" });
   const updateOS = useUpdateOS();
   const [osEmReplanejamento, setOsEmReplanejamento] = useState<string | null>(null);
   const [novaDataInicio, setNovaDataInicio] = useState("");
   const [novaDataFim, setNovaDataFim] = useState("");
   const [hhAdicional, setHhAdicional] = useState("");
   const [motivo, setMotivo] = useState("");
-  
+
   const osParaReplanejamento = osList;
 
   const capitalizarTexto = (texto: string) => {
@@ -27,13 +27,13 @@ export default function OSReplanejamento() {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('pt-BR');
+    return new Date(dateString).toLocaleDateString("pt-BR");
   };
 
   const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
+    return new Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: "BRL",
     }).format(value);
   };
 
@@ -41,7 +41,7 @@ export default function OSReplanejamento() {
     const hhTotalAtual = (os.hh_planejado || 0) + (os.hh_adicional || 0);
     const hhAdicionalNum = parseFloat(hhAdicional) || 0;
     const hhTotalNovo = hhTotalAtual + hhAdicionalNum;
-    const valorHora = 95.00;
+    const valorHora = 95.0;
     return hhTotalNovo * valorHora;
   };
 
@@ -80,17 +80,17 @@ export default function OSReplanejamento() {
     }
 
     try {
-      const osAtual = osList.find(o => o.id === osId);
+      const osAtual = osList.find((o) => o.id === osId);
       const hhTotalAtual = (osAtual?.hh_planejado || 0) + (osAtual?.hh_adicional || 0);
-      
+
       await updateOS.mutateAsync({
         id: osId,
         data: {
           data_inicio_prevista: novaDataInicio,
           data_fim_prevista: novaDataFim,
           hh_adicional: hhTotalAtual - (osAtual?.hh_planejado || 0) + hhAdicionalNum,
-          justificativa_engenharia: motivo.trim()
-        }
+          justificativa_engenharia: motivo.trim(),
+        },
       });
 
       toast.success("Replanejamento aplicado com sucesso!");
@@ -115,7 +115,8 @@ export default function OSReplanejamento() {
         <div>
           <h1 className="text-3xl font-bold">Replanejamento de OS</h1>
           <p className="text-muted-foreground">
-            {osParaReplanejamento.length} ordem{osParaReplanejamento.length !== 1 ? 's' : ''} de serviço disponível{osParaReplanejamento.length !== 1 ? 'is' : ''} para replanejamento
+            {osParaReplanejamento.length} ordem{osParaReplanejamento.length !== 1 ? "s" : ""} de serviço disponível
+            {osParaReplanejamento.length !== 1 ? "is" : ""} para replanejamento
           </p>
         </div>
       </div>
@@ -139,7 +140,7 @@ export default function OSReplanejamento() {
               </CardHeader>
               <CardContent className="space-y-6">
                 {(() => {
-                  const os = osList.find(o => o.id === osEmReplanejamento);
+                  const os = osList.find((o) => o.id === osEmReplanejamento);
                   if (!os) return null;
 
                   return (
@@ -156,7 +157,8 @@ export default function OSReplanejamento() {
                             <div>
                               <Label className="text-sm text-muted-foreground">Período atual:</Label>
                               <p className="font-medium">
-                                {os.data_inicio_prevista ? formatDate(os.data_inicio_prevista) : "N/A"} - {os.data_fim_prevista ? formatDate(os.data_fim_prevista) : "N/A"}
+                                {os.data_inicio_prevista ? formatDate(os.data_inicio_prevista) : "N/A"} -{" "}
+                                {os.data_fim_prevista ? formatDate(os.data_fim_prevista) : "N/A"}
                               </p>
                             </div>
                             <div>
@@ -165,7 +167,9 @@ export default function OSReplanejamento() {
                             </div>
                             <div>
                               <Label className="text-sm text-muted-foreground">Valor atual estimado:</Label>
-                              <p className="font-medium">{formatCurrency(((os.hh_planejado || 0) + (os.hh_adicional || 0)) * 95)}</p>
+                              <p className="font-medium">
+                                {formatCurrency(((os.hh_planejado || 0) + (os.hh_adicional || 0)) * 95)}
+                              </p>
                             </div>
                           </div>
                         </div>
@@ -227,7 +231,10 @@ export default function OSReplanejamento() {
                             {hhAdicional && (
                               <div className="bg-orange-50 border border-orange-200 p-3 rounded-lg">
                                 <div className="text-sm space-y-1">
-                                  <div>Novo HH total: {(os.hh_planejado || 0) + (os.hh_adicional || 0) + (parseFloat(hhAdicional) || 0)}h</div>
+                                  <div>
+                                    Novo HH total:{" "}
+                                    {(os.hh_planejado || 0) + (os.hh_adicional || 0) + (parseFloat(hhAdicional) || 0)}h
+                                  </div>
                                   <div>HH adicional: +{hhAdicional}h</div>
                                   <div className="font-medium text-orange-700">
                                     Novo valor estimado: {formatCurrency(calcularNovoValorEstimado(os))}
@@ -262,7 +269,7 @@ export default function OSReplanejamento() {
                         <Button variant="outline" onClick={handleCancelarReplanejamento}>
                           Cancelar
                         </Button>
-                        <Button 
+                        <Button
                           onClick={() => handleSubmitReplanejamento(osEmReplanejamento)}
                           disabled={!novaDataInicio || !novaDataFim || !hhAdicional || !motivo.trim()}
                           className="bg-orange-600 hover:bg-orange-700"
@@ -284,15 +291,13 @@ export default function OSReplanejamento() {
               <CardHeader>
                 <div className="flex justify-between items-start">
                   <CardTitle className="flex items-center gap-2">
-                    OS Nº {os.numero || os.id} - CCA {os.cca?.codigo || 'N/A'}
-                    <Badge variant="default">
-                      Em execução
-                    </Badge>
+                    OS Nº {os.numero || os.id} - CCA {os.cca?.codigo || "N/A"}
+                    <Badge variant="default">Em execução</Badge>
                   </CardTitle>
                   <div className="flex gap-2">
                     {osEmReplanejamento !== os.id && (
-                      <Button 
-                        variant="default" 
+                      <Button
+                        variant="default"
                         size="sm"
                         onClick={() => handleIniciarReplanejamento(os.id, os)}
                         className="bg-orange-600 hover:bg-orange-700"
@@ -301,7 +306,7 @@ export default function OSReplanejamento() {
                         Iniciar replanejamento
                       </Button>
                     )}
-                    <Link to={`/os/${os.id}`}>
+                    <Link to={`/engenharia-matricial/os/${os.id}`}>
                       <Button variant="outline" size="sm">
                         <Eye className="h-4 w-4" />
                       </Button>
@@ -317,7 +322,7 @@ export default function OSReplanejamento() {
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Disciplina</p>
-                    <p className="font-medium">{capitalizarTexto(os.disciplina || '')}</p>
+                    <p className="font-medium">{capitalizarTexto(os.disciplina || "")}</p>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">HH planejado</p>
@@ -333,7 +338,7 @@ export default function OSReplanejamento() {
                   )}
                   <div>
                     <p className="text-sm text-muted-foreground">Responsável EM</p>
-                    <p className="font-medium">{os.responsavel_em?.nome || 'N/A'}</p>
+                    <p className="font-medium">{os.responsavel_em?.nome || "N/A"}</p>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Solicitante</p>

@@ -62,7 +62,7 @@ export default function OSConcluidas() {
                     <Badge variant="secondary">Concluída</Badge>
                   </CardTitle>
                   <div className="flex gap-2">
-                    <Link to={`/os/${os.id}`}>
+                    <Link to={`/engenharia-matricial/os/${os.id}`}>
                       <Button variant="outline" size="sm">
                         <Eye className="h-4 w-4" />
                       </Button>

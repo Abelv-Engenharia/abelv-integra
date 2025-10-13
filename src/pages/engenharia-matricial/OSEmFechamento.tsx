@@ -5,14 +5,23 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
-import { Eye, Calculator, DollarSign, TrendingUp, TrendingDown, AlertTriangle, CheckCircle2, RotateCcw } from "lucide-react";
+import {
+  Eye,
+  Calculator,
+  DollarSign,
+  TrendingUp,
+  TrendingDown,
+  AlertTriangle,
+  CheckCircle2,
+  RotateCcw,
+} from "lucide-react";
 import { useOSList, useUpdateOS } from "@/hooks/engenharia-matricial/useOSEngenhariaMatricial";
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { toast } from "sonner";
 
 export default function OSEmFechamento() {
-  const { data: osList = [], isLoading } = useOSList({ status: 'em-execucao' });
+  const { data: osList = [], isLoading } = useOSList({ status: "em-execucao" });
   const updateOS = useUpdateOS();
   const [osEmFechamento, setOsEmFechamento] = useState<string | null>(null);
   const [valorSAO, setValorSAO] = useState("");
@@ -20,7 +29,7 @@ export default function OSEmFechamento() {
   const [valorSuprimentos, setValorSuprimentos] = useState("");
   const [justificativaEngenharia, setJustificativaEngenharia] = useState("");
   const [justificativaSuprimentos, setJustificativaSuprimentos] = useState("");
-  
+
   const osParaFechamento = osList;
 
   const capitalizarTexto = (texto: string) => {
@@ -28,13 +37,13 @@ export default function OSEmFechamento() {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('pt-BR');
+    return new Date(dateString).toLocaleDateString("pt-BR");
   };
 
   const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
+    return new Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: "BRL",
     }).format(value);
   };
 
@@ -107,9 +116,9 @@ export default function OSEmFechamento() {
         data: {
           valor_engenharia: valorEngenhariaNum,
           valor_suprimentos: valorSuprimentosNum,
-          justificativa_engenharia: justificativas.join(' | '),
-          status: 'aguardando-aceite-fechamento'
-        }
+          justificativa_engenharia: justificativas.join(" | "),
+          status: "aguardando-aceite-fechamento",
+        },
       });
 
       toast.success("OS enviada para aceite de fechamento do solicitante!");
@@ -144,7 +153,8 @@ export default function OSEmFechamento() {
         <div>
           <h1 className="text-3xl font-bold">OS Em fechamento</h1>
           <p className="text-muted-foreground">
-            {osParaFechamento.length} ordem{osParaFechamento.length !== 1 ? 's' : ''} de serviço disponível{osParaFechamento.length !== 1 ? 'is' : ''} para fechamento
+            {osParaFechamento.length} ordem{osParaFechamento.length !== 1 ? "s" : ""} de serviço disponível
+            {osParaFechamento.length !== 1 ? "is" : ""} para fechamento
           </p>
         </div>
       </div>
@@ -158,31 +168,41 @@ export default function OSEmFechamento() {
       ) : (
         <div className="grid gap-6">
           {/* Formulário de Fechamento */}
-          {osEmFechamento && (() => {
-            const os = osList.find(o => o.id === osEmFechamento);
-            if (!os) return null;
-            
-            return (
-              <Card className="border-green-200 bg-green-50/50">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-green-700">
-                    <Calculator className="h-5 w-5" />
-                    Fechamento da OS Nº {(os as any).numero || os.id}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <>
-                     {/* Informações da OS */}
-                    <div className="bg-muted/50 p-4 rounded-lg space-y-2">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
-                        <div><span className="font-medium">Cliente:</span> {os.solicitante_nome}</div>
-                        <div><span className="font-medium">Disciplina:</span> {capitalizarTexto(os.disciplina || '')}</div>
-                        <div><span className="font-medium">HH Total:</span> {(os.hh_planejado || 0) + (os.hh_adicional || 0)}h</div>
-                        <div><span className="font-medium">Valor OS:</span> {formatCurrency(os.valor_orcamento || 0)}</div>
-                      </div>
-                    </div>
+          {osEmFechamento &&
+            (() => {
+              const os = osList.find((o) => o.id === osEmFechamento);
+              if (!os) return null;
 
-                    <Separator />
+              return (
+                <Card className="border-green-200 bg-green-50/50">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-green-700">
+                      <Calculator className="h-5 w-5" />
+                      Fechamento da OS Nº {(os as any).numero || os.id}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <>
+                      {/* Informações da OS */}
+                      <div className="bg-muted/50 p-4 rounded-lg space-y-2">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                          <div>
+                            <span className="font-medium">Cliente:</span> {os.solicitante_nome}
+                          </div>
+                          <div>
+                            <span className="font-medium">Disciplina:</span> {capitalizarTexto(os.disciplina || "")}
+                          </div>
+                          <div>
+                            <span className="font-medium">HH Total:</span>{" "}
+                            {(os.hh_planejado || 0) + (os.hh_adicional || 0)}h
+                          </div>
+                          <div>
+                            <span className="font-medium">Valor OS:</span> {formatCurrency(os.valor_orcamento || 0)}
+                          </div>
+                        </div>
+                      </div>
+
+                      <Separator />
 
                       {/* Valores Financeiros */}
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -200,11 +220,9 @@ export default function OSEmFechamento() {
                             disabled
                             className="bg-muted"
                           />
-                          <p className="text-xs text-muted-foreground">
-                            Valor do orçamento informado pelo solicitante
-                          </p>
+                          <p className="text-xs text-muted-foreground">Valor do orçamento informado pelo solicitante</p>
                         </div>
-                        
+
                         <div className="space-y-2">
                           <Label htmlFor="valorEngenharia" className="flex items-center gap-2">
                             <DollarSign className="h-4 w-4" />
@@ -220,7 +238,7 @@ export default function OSEmFechamento() {
                             onChange={(e) => setValorEngenharia(e.target.value)}
                           />
                         </div>
-                        
+
                         <div className="space-y-2">
                           <Label htmlFor="valorSuprimentos" className="flex items-center gap-2">
                             <DollarSign className="h-4 w-4" />
@@ -239,7 +257,7 @@ export default function OSEmFechamento() {
                       </div>
 
                       {/* Resultados Calculados */}
-                      {(valorSAO && valorEngenharia && valorSuprimentos) && (
+                      {valorSAO && valorEngenharia && valorSuprimentos && (
                         <Card className="bg-muted/30">
                           <CardHeader>
                             <CardTitle className="text-sm flex items-center gap-2">
@@ -259,13 +277,15 @@ export default function OSEmFechamento() {
                                 <span className="font-medium">Resultado Engenharia:</span>
                               </div>
                               <div className="flex items-center gap-2">
-                                <Badge 
+                                <Badge
                                   variant={isEngenhariaPositiva ? "default" : "destructive"}
                                   className={isEngenhariaPositiva ? "bg-green-100 text-green-800 border-green-300" : ""}
                                 >
                                   {percentualEngenharia.toFixed(2)}%
                                 </Badge>
-                                <span className={`text-sm font-medium ${isEngenhariaPositiva ? 'text-green-600' : 'text-red-600'}`}>
+                                <span
+                                  className={`text-sm font-medium ${isEngenhariaPositiva ? "text-green-600" : "text-red-600"}`}
+                                >
                                   ({formatCurrency(parseFloat(valorEngenharia) - parseFloat(valorSAO))})
                                 </span>
                               </div>
@@ -282,13 +302,17 @@ export default function OSEmFechamento() {
                                 <span className="font-medium">Saving Suprimentos:</span>
                               </div>
                               <div className="flex items-center gap-2">
-                                <Badge 
+                                <Badge
                                   variant={isSuprimentosPositivo ? "default" : "destructive"}
-                                  className={isSuprimentosPositivo ? "bg-green-100 text-green-800 border-green-300" : ""}
+                                  className={
+                                    isSuprimentosPositivo ? "bg-green-100 text-green-800 border-green-300" : ""
+                                  }
                                 >
                                   {savingSuprimentos.toFixed(2)}%
                                 </Badge>
-                                <span className={`text-sm font-medium ${isSuprimentosPositivo ? 'text-green-600' : 'text-red-600'}`}>
+                                <span
+                                  className={`text-sm font-medium ${isSuprimentosPositivo ? "text-green-600" : "text-red-600"}`}
+                                >
                                   ({formatCurrency(parseFloat(valorSAO) - parseFloat(valorSuprimentos))})
                                 </span>
                               </div>
@@ -302,33 +326,49 @@ export default function OSEmFechamento() {
                         <div className="space-y-4">
                           {needsEngenhariaJustification && (
                             <div className="space-y-2">
-                              <Label htmlFor="justificativaEngenharia" className="flex items-center gap-2 text-orange-600">
+                              <Label
+                                htmlFor="justificativaEngenharia"
+                                className="flex items-center gap-2 text-orange-600"
+                              >
                                 <AlertTriangle className="h-4 w-4" />
-                                Justificativa para gasto maior que SAO na engenharia <span className="text-red-500">*</span>
+                                Justificativa para gasto maior que SAO na engenharia{" "}
+                                <span className="text-red-500">*</span>
                               </Label>
                               <Textarea
                                 id="justificativaEngenharia"
                                 placeholder="Explique os motivos do gasto maior que o valor SAO na engenharia..."
                                 value={justificativaEngenharia}
                                 onChange={(e) => setJustificativaEngenharia(e.target.value)}
-                                className={needsEngenhariaJustification && !justificativaEngenharia.trim() ? "border-red-300" : ""}
+                                className={
+                                  needsEngenhariaJustification && !justificativaEngenharia.trim()
+                                    ? "border-red-300"
+                                    : ""
+                                }
                                 rows={3}
                               />
                             </div>
                           )}
-                          
+
                           {needsSuprimentosJustification && (
                             <div className="space-y-2">
-                              <Label htmlFor="justificativaSuprimentos" className="flex items-center gap-2 text-orange-600">
+                              <Label
+                                htmlFor="justificativaSuprimentos"
+                                className="flex items-center gap-2 text-orange-600"
+                              >
                                 <AlertTriangle className="h-4 w-4" />
-                                Justificativa para ausência de saving em suprimentos <span className="text-red-500">*</span>
+                                Justificativa para ausência de saving em suprimentos{" "}
+                                <span className="text-red-500">*</span>
                               </Label>
                               <Textarea
                                 id="justificativaSuprimentos"
                                 placeholder="Explique os motivos da ausência de saving em suprimentos..."
                                 value={justificativaSuprimentos}
                                 onChange={(e) => setJustificativaSuprimentos(e.target.value)}
-                                className={needsSuprimentosJustification && !justificativaSuprimentos.trim() ? "border-red-300" : ""}
+                                className={
+                                  needsSuprimentosJustification && !justificativaSuprimentos.trim()
+                                    ? "border-red-300"
+                                    : ""
+                                }
                                 rows={3}
                               />
                             </div>
@@ -341,9 +381,12 @@ export default function OSEmFechamento() {
                         <Button variant="outline" onClick={handleCancelarFechamento}>
                           Cancelar
                         </Button>
-                        <Button 
+                        <Button
                           onClick={() => handleFinalizarFechamento(osEmFechamento)}
-                          disabled={!valorSAO || !valorEngenharia || !valorSuprimentos || 
+                          disabled={
+                            !valorSAO ||
+                            !valorEngenharia ||
+                            !valorSuprimentos ||
                             (needsEngenhariaJustification && !justificativaEngenharia.trim()) ||
                             (needsSuprimentosJustification && !justificativaSuprimentos.trim())
                           }
@@ -365,15 +408,13 @@ export default function OSEmFechamento() {
               <CardHeader>
                 <div className="flex justify-between items-start">
                   <CardTitle className="flex items-center gap-2">
-                    OS Nº {os.numero || os.id} - CCA {os.cca?.codigo || 'N/A'}
-                    <Badge variant="default">
-                      Em execução
-                    </Badge>
+                    OS Nº {os.numero || os.id} - CCA {os.cca?.codigo || "N/A"}
+                    <Badge variant="default">Em execução</Badge>
                   </CardTitle>
                   <div className="flex gap-2">
                     {osEmFechamento !== os.id && (
-                      <Button 
-                        variant="default" 
+                      <Button
+                        variant="default"
                         size="sm"
                         onClick={() => handleIniciarFechamento(os.id, os)}
                         className="bg-green-600 hover:bg-green-700"
@@ -382,7 +423,7 @@ export default function OSEmFechamento() {
                         Iniciar fechamento
                       </Button>
                     )}
-                    <Link to={`/os/${os.id}`}>
+                    <Link to={`/engenharia-matricial/os/${os.id}`}>
                       <Button variant="outline" size="sm">
                         <Eye className="h-4 w-4" />
                       </Button>
@@ -398,16 +439,14 @@ export default function OSEmFechamento() {
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Disciplina</p>
-                    <p className="font-medium">{capitalizarTexto(os.disciplina || '')}</p>
+                    <p className="font-medium">{capitalizarTexto(os.disciplina || "")}</p>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">HH total</p>
                     <p className="font-medium">
                       {(os.hh_planejado || 0) + (os.hh_adicional || 0)}h
                       {os.hh_adicional && os.hh_adicional > 0 && (
-                        <span className="text-orange-600 text-xs ml-1">
-                          (+{os.hh_adicional}h adicional)
-                        </span>
+                        <span className="text-orange-600 text-xs ml-1">(+{os.hh_adicional}h adicional)</span>
                       )}
                     </p>
                   </div>
@@ -427,7 +466,7 @@ export default function OSEmFechamento() {
                   )}
                   <div>
                     <p className="text-sm text-muted-foreground">Responsável EM</p>
-                    <p className="font-medium">{os.responsavel_em?.nome || 'N/A'}</p>
+                    <p className="font-medium">{os.responsavel_em?.nome || "N/A"}</p>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Solicitante</p>
