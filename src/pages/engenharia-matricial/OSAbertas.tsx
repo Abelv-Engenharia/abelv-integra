@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Eye, PlayCircle, X } from "lucide-react";
+import { Eye, PlayCircle, X, Pencil } from "lucide-react";
 import { useOSList, useAvancarFaseOS, useUpdateOS } from "@/hooks/engenharia-matricial/useOSEngenhariaMatricial";
 import { Link, useLocation } from "react-router-dom";
 import { toast } from "sonner";
@@ -132,7 +132,7 @@ export default function OSAbertas() {
               <CardHeader>
                 <div className="flex justify-between items-start">
                   <CardTitle className="flex items-center gap-2">
-                    OS Nº {os.numero} - CCA {os.cca_id}
+                    OS Nº {os.numero} - CCA {os.cca?.codigo || os.cca_id}
                     <Badge variant="secondary">{capitalizarTexto(os.status)}</Badge>
                   </CardTitle>
                   <div className="flex gap-2">
@@ -149,6 +149,11 @@ export default function OSAbertas() {
                       <X className="h-4 w-4 mr-2" />
                       Rejeitar
                     </Button>
+                    <Link to={`/os/${os.id}/editar`}>
+                      <Button variant="outline" size="sm">
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                    </Link>
                     <Link to={`/os/${os.id}`}>
                       <Button variant="outline" size="sm">
                         <Eye className="h-4 w-4" />
@@ -169,7 +174,7 @@ export default function OSAbertas() {
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Responsável EM</p>
-                    <p className="font-medium">{os.responsavel_em_id}</p>
+                    <p className="font-medium">{os.responsavel_em?.nome || "Não atribuído"}</p>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Data de abertura</p>

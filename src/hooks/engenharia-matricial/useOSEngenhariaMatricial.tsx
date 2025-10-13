@@ -8,7 +8,10 @@ type OSInsert = Database["public"]["Tables"]["os_engenharia_matricial"]["Insert"
 type OSUpdate = Database["public"]["Tables"]["os_engenharia_matricial"]["Update"];
 type OSStatus = Database["public"]["Enums"]["os_status_enum"];
 
-export type OSEngenhariaMatricial = OSRow;
+export type OSEngenhariaMatricial = OSRow & {
+  cca?: { codigo: string; nome: string };
+  responsavel_em?: { nome: string };
+};
 
 export interface CreateOSData {
   cca_id: number;
@@ -42,7 +45,11 @@ export const useOSList = (filters?: OSFilters) => {
     queryFn: async () => {
       let query = supabase
         .from("os_engenharia_matricial")
-        .select("*")
+        .select(`
+          *,
+          cca:ccas(codigo, nome),
+          responsavel_em:profiles!os_engenharia_matricial_responsavel_em_id_fkey(nome)
+        `)
         .order("data_abertura", { ascending: false });
 
       if (filters?.status) {
@@ -83,7 +90,11 @@ export const useOSById = (id?: string) => {
 
       const { data, error } = await supabase
         .from("os_engenharia_matricial")
-        .select("*")
+        .select(`
+          *,
+          cca:ccas(codigo, nome),
+          responsavel_em:profiles!os_engenharia_matricial_responsavel_em_id_fkey(nome)
+        `)
         .eq("id", id)
         .single();
 
