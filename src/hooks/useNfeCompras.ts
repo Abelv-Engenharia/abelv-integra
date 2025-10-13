@@ -20,12 +20,12 @@ export const useNfeCompras = () => {
     queryKey: ["nfe_compras"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("nfe_compras")
+        .from("nfe_compras" as any)
         .select("*")
         .order("data_emissao", { ascending: false });
 
       if (error) throw error;
-      return data as NfeCompra[];
+      return (data || []) as unknown as NfeCompra[];
     },
   });
 };
@@ -37,13 +37,13 @@ export const useNfeCompra = (id: string | undefined) => {
       if (!id) return null;
       
       const { data, error } = await supabase
-        .from("nfe_compras")
+        .from("nfe_compras" as any)
         .select("*")
         .eq("id", id)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
-      return data as NfeCompra;
+      return data as unknown as NfeCompra | null;
     },
     enabled: !!id,
   });
