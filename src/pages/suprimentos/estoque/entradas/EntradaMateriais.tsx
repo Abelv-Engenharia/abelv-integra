@@ -12,10 +12,12 @@ import { Plus, Edit, CalendarIcon, Filter } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { useCCAs } from "@/hooks/useCCAs";
+import { useNfeCompras } from "@/hooks/useNfeCompras";
 
 export default function EntradaMateriais() {
   const navigate = useNavigate();
   const { data: ccas = [], isLoading: ccasLoading } = useCCAs();
+  const { data: nfeCompras = [], isLoading: nfeLoading } = useNfeCompras();
   
   // Estados para filtros
   const [filtros, setFiltros] = useState({
@@ -30,31 +32,6 @@ export default function EntradaMateriais() {
     pcCliente: ""
   });
 
-  // Mock de entradas para exemplo
-  const [entradas] = useState([
-    {
-      id: 1,
-      documento: "NFe",
-      numeroDocumento: "123456",
-      dataEmissao: new Date("2024-01-15"),
-      dataMovimento: new Date("2024-01-16"),
-      pcAbelv: 1001,
-      pcCliente: 2001,
-      itens: 5,
-      valorTotal: 1250.50
-    },
-    {
-      id: 2,
-      documento: "ROM",
-      numeroDocumento: "ROM001",
-      dataEmissao: new Date("2024-01-20"),
-      dataMovimento: new Date("2024-01-20"),
-      pcAbelv: 1002,
-      pcCliente: null,
-      itens: 3,
-      valorTotal: 850.00
-    }
-  ]);
 
   const handleFiltroChange = (campo: string, valor: any) => {
     setFiltros(prev => ({ ...prev, [campo]: valor }));
@@ -65,7 +42,7 @@ export default function EntradaMateriais() {
     // Aqui seria implementada a lógica de filtro
   };
 
-  const handleEditarEntrada = (id: number) => {
+  const handleEditarEntrada = (id: string) => {
     navigate(`/suprimentos/estoque/entradas/editar/${id}`);
   };
 
@@ -267,37 +244,51 @@ export default function EntradaMateriais() {
               <TableRow>
                 <TableHead>Documento</TableHead>
                 <TableHead>Número</TableHead>
-                <TableHead>Data Emissão</TableHead>
-                <TableHead>Data Movimento</TableHead>
-                <TableHead>PC Abelv</TableHead>
-                <TableHead>PC Cliente</TableHead>
+                <TableHead>Data emissão</TableHead>
+                <TableHead>Data movimento</TableHead>
+                <TableHead>Fornecedor</TableHead>
+                <TableHead>CNPJ</TableHead>
                 <TableHead>Itens</TableHead>
-                <TableHead>Valor Total</TableHead>
+                <TableHead>Valor total</TableHead>
                 <TableHead>Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {entradas.map((entrada) => (
-                <TableRow key={entrada.id}>
-                  <TableCell>{entrada.documento}</TableCell>
-                  <TableCell>{entrada.numeroDocumento}</TableCell>
-                  <TableCell>{format(entrada.dataEmissao, "dd/MM/yyyy")}</TableCell>
-                  <TableCell>{format(entrada.dataMovimento, "dd/MM/yyyy")}</TableCell>
-                  <TableCell>{entrada.pcAbelv}</TableCell>
-                  <TableCell>{entrada.pcCliente || "-"}</TableCell>
-                  <TableCell>{entrada.itens}</TableCell>
-                  <TableCell>R$ {entrada.valorTotal.toFixed(2)}</TableCell>
-                  <TableCell>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleEditarEntrada(entrada.id)}
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
+              {nfeLoading ? (
+                <TableRow>
+                  <TableCell colSpan={9} className="text-center">
+                    Carregando...
                   </TableCell>
                 </TableRow>
-              ))}
+              ) : nfeCompras.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={9} className="text-center">
+                    Nenhuma entrada encontrada
+                  </TableCell>
+                </TableRow>
+              ) : (
+                nfeCompras.map((nfe) => (
+                  <TableRow key={nfe.id}>
+                    <TableCell>NFe</TableCell>
+                    <TableCell>{nfe.numero_nota}/{nfe.serie}</TableCell>
+                    <TableCell>{format(new Date(nfe.data_emissao), "dd/MM/yyyy")}</TableCell>
+                    <TableCell>{format(new Date(nfe.data_movimento), "dd/MM/yyyy")}</TableCell>
+                    <TableCell>{nfe.fornecedor}</TableCell>
+                    <TableCell>{nfe.cnpj_fornecedor}</TableCell>
+                    <TableCell>-</TableCell>
+                    <TableCell>R$ {nfe.valor_total.toFixed(2)}</TableCell>
+                    <TableCell>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleEditarEntrada(nfe.id)}
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         </CardContent>
