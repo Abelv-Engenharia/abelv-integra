@@ -93,7 +93,7 @@ export default function RelatoriosEMDepartamento() {
     if (os.status === "concluida" && os.dataConclusao) {
       const dataConclusao = new Date(os.dataConclusao);
       if (dataConclusao.getMonth() === mesAnterior && dataConclusao.getFullYear() === anoAnterior) {
-        const ccaDisplay = formatarCCAComCliente(os.cca, os.cliente);
+        const ccaDisplay = formatarCCAComCliente(String(os.cca), os.cliente);
         const hh = (os.hhPlanejado || 0) + (os.hhAdicional || 0);
         const disc = (os.disciplina || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
         
@@ -119,7 +119,7 @@ export default function RelatoriosEMDepartamento() {
     if (os.status === "concluida" && os.dataConclusao) {
       const dataConclusao = new Date(os.dataConclusao);
       if (dataConclusao.getMonth() === mesAtual && dataConclusao.getFullYear() === anoAtual) {
-        const ccaDisplay = formatarCCAComCliente(os.cca, os.cliente);
+        const ccaDisplay = formatarCCAComCliente(String(os.cca), os.cliente);
         const hh = (os.hhPlanejado || 0) + (os.hhAdicional || 0);
         const disc = (os.disciplina || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
         

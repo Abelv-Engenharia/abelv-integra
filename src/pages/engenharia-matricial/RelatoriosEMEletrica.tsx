@@ -213,7 +213,7 @@ export default function RelatoriosEMEletrica() {
                 });
 
                 const hhPorCCA = osConcluidasMesAnterior.reduce((acc, os) => {
-                  const ccaDisplay = formatarCCAComCliente(os.cca, os.cliente);
+                  const ccaDisplay = formatarCCAComCliente(String(os.cca), os.cliente);
                   const hh = (os.hhPlanejado || 0) + (os.hhAdicional || 0);
                   
                   if (!acc[ccaDisplay]) {
@@ -280,7 +280,7 @@ export default function RelatoriosEMEletrica() {
                 });
 
                 const hhPorCCA = osConcluidasMesAtual.reduce((acc, os) => {
-                  const ccaDisplay = formatarCCAComCliente(os.cca, os.cliente);
+                  const ccaDisplay = formatarCCAComCliente(String(os.cca), os.cliente);
                   const hh = (os.hhPlanejado || 0) + (os.hhAdicional || 0);
                   
                   if (!acc[ccaDisplay]) {
