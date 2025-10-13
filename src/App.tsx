@@ -164,6 +164,7 @@ import PlaceholderPage from "./pages/PlaceholderPage";
 // Engenharia Matricial pages
 import EngenhariaMatricialIndex from "./pages/engenharia-matricial/Index";
 import OSAbertas from "./pages/engenharia-matricial/OSAbertas";
+import NovaOrdemServico from "./pages/engenharia-matricial/NovaOrdemServico";
 import OSEmPlanejamento from "./pages/engenharia-matricial/OSEmPlanejamento";
 import OSAguardandoAceite from "./pages/engenharia-matricial/OSAguardandoAceite";
 import OSEmExecucao from "./pages/engenharia-matricial/OSEmExecucao";
@@ -434,6 +435,7 @@ function App() {
                 {/* Engenharia Matricial routes */}
                 <Route path="engenharia-matricial" element={<EngenhariaMatricialIndex />} />
                 <Route path="engenharia-matricial/os-abertas" element={<OSAbertas />} />
+                <Route path="os/nova" element={<NovaOrdemServico />} />
                 <Route path="engenharia-matricial/os-em-planejamento" element={<OSEmPlanejamento />} />
                 <Route path="engenharia-matricial/os-aguardando-aceite" element={<OSAguardandoAceite />} />
                 <Route path="engenharia-matricial/os-em-execucao" element={<OSEmExecucao />} />
