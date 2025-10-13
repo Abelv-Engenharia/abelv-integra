@@ -163,6 +163,7 @@ import PlaceholderPage from "./pages/PlaceholderPage";
 
 // Engenharia Matricial pages
 import EngenhariaMatricialIndex from "./pages/engenharia-matricial/Index";
+import OrdemServicoList from "./pages/engenharia-matricial/OrdemServicoList";
 import OSAbertas from "./pages/engenharia-matricial/OSAbertas";
 import NovaOrdemServico from "./pages/engenharia-matricial/NovaOrdemServico";
 import EditarOS from "./pages/engenharia-matricial/EditarOS";
@@ -435,6 +436,7 @@ function App() {
                 
                 {/* Engenharia Matricial routes */}
                 <Route path="engenharia-matricial" element={<EngenhariaMatricialIndex />} />
+                <Route path="engenharia-matricial/ordens-servico" element={<OrdemServicoList />} />
                 <Route path="engenharia-matricial/os-abertas" element={<OSAbertas />} />
                 <Route path="os/nova" element={<NovaOrdemServico />} />
                 <Route path="os/:id/editar" element={<EditarOS />} />

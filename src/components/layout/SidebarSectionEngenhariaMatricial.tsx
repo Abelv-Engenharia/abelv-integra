@@ -1,4 +1,4 @@
-import { Building2, FolderOpen, Clock, CheckCircle, Play, Archive, Calculator, ClipboardCheck, RotateCcw, AlertTriangle, Calendar, Zap, Cog, BarChart3 } from "lucide-react";
+import { Building2, FolderOpen, Clock, CheckCircle, Play, Archive, Calculator, ClipboardCheck, RotateCcw, AlertTriangle, Calendar, Zap, Cog, BarChart3, FileText } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import {
@@ -23,13 +23,14 @@ interface Props {
 }
 
 const fluxoOSItems = [
-  { title: "Abertura de OS", url: "/engenharia-matricial/os-abertas", icon: FolderOpen },
-  { title: "OS Em planejamento", url: "/engenharia-matricial/os-em-planejamento", icon: Clock },
-  { title: "OS Aguardando aceite", url: "/engenharia-matricial/os-aguardando-aceite", icon: CheckCircle },
-  { title: "OS Em execução", url: "/engenharia-matricial/os-em-execucao", icon: Play },
-  { title: "OS Em fechamento", url: "/engenharia-matricial/os-em-fechamento", icon: Calculator },
+  { title: "Ordens de serviço", url: "/engenharia-matricial/ordens-servico", icon: FileText },
+  { title: "Abertura de os", url: "/engenharia-matricial/os-abertas", icon: FolderOpen },
+  { title: "Os em planejamento", url: "/engenharia-matricial/os-em-planejamento", icon: Clock },
+  { title: "Os aguardando aceite", url: "/engenharia-matricial/os-aguardando-aceite", icon: CheckCircle },
+  { title: "Os em execução", url: "/engenharia-matricial/os-em-execucao", icon: Play },
+  { title: "Os em fechamento", url: "/engenharia-matricial/os-em-fechamento", icon: Calculator },
   { title: "Aguardando aceite fechamento", url: "/engenharia-matricial/os-aguardando-aceite-fechamento", icon: ClipboardCheck },
-  { title: "OS Concluídas", url: "/engenharia-matricial/os-concluidas", icon: Archive },
+  { title: "Os concluídas", url: "/engenharia-matricial/os-concluidas", icon: Archive },
 ];
 
 const replanejamentoItems = [
@@ -59,7 +60,7 @@ export default function SidebarSectionEngenhariaMatricial({ openMenu, toggleMenu
       set_open_submenu("em-replanejamento");
     } else if (currentPath.startsWith("/engenharia-matricial/relatorios")) {
       set_open_submenu("em-relatorios");
-    } else if (currentPath.startsWith("/engenharia-matricial/os-")) {
+    } else if (currentPath.startsWith("/engenharia-matricial/os-") || currentPath === "/engenharia-matricial/ordens-servico") {
       set_open_submenu("em-fluxo-os");
     } else {
       set_open_submenu(null);
