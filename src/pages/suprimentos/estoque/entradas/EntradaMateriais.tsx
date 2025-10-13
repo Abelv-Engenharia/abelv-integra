@@ -294,13 +294,13 @@ export default function EntradaMateriais() {
                 nfeCompras.map((nfe) => (
                   <TableRow key={nfe.id}>
                     <TableCell>NFe</TableCell>
-                    <TableCell>{nfe.numero_nota}/{nfe.serie}</TableCell>
-                    <TableCell>{format(new Date(nfe.data_emissao), "dd/MM/yyyy")}</TableCell>
-                    <TableCell>{format(new Date(nfe.data_movimento), "dd/MM/yyyy")}</TableCell>
-                    <TableCell>{nfe.fornecedor}</TableCell>
-                    <TableCell>{nfe.cnpj_fornecedor}</TableCell>
+                    <TableCell>{nfe.numero}/{nfe.id_documento}</TableCell>
+                    <TableCell>{format(new Date(nfe.emissao), "dd/MM/yyyy")}</TableCell>
+                    <TableCell>{format(new Date(nfe.Movimenbto), "dd/MM/yyyy")}</TableCell>
+                    <TableCell>{nfe.id_credor}</TableCell>
                     <TableCell>-</TableCell>
-                    <TableCell>R$ {nfe.valor_total.toFixed(2)}</TableCell>
+                    <TableCell>-</TableCell>
+                    <TableCell>-</TableCell>
                     <TableCell>
                       <Button
                         variant="outline"

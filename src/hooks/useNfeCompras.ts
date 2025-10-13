@@ -3,16 +3,16 @@ import { supabase } from "@/integrations/supabase/client";
 
 export interface NfeCompra {
   id: string;
-  numero_nota: string;
-  serie: string;
-  data_emissao: string;
-  data_movimento: string;
-  cca_id: number;
-  credor_id?: string;
-  fornecedor: string;
-  cnpj_fornecedor: string;
-  valor_total: number;
-  chave_acesso?: string;
+  numero: string;
+  id_documento: string;
+  emissao: string;
+  Movimenbto: string;
+  id_empresa: number;
+  id_credor: string;
+  titulo?: number;
+  sequencial: number;
+  PC_Abelv?: string;
+  PC_Cliente?: string;
   created_at?: string;
 }
 
@@ -23,7 +23,7 @@ export const useNfeCompras = () => {
       const { data, error } = await supabase
         .from("nfe_compra" as any)
         .select("*")
-        .order("data_emissao", { ascending: false });
+        .order("emissao", { ascending: false });
 
       if (error) throw error;
       return (data || []) as unknown as NfeCompra[];

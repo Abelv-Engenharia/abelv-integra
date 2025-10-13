@@ -15,7 +15,7 @@ export default function EditarEntrada() {
   const { data: itens = [], isLoading: itensLoading } = useNfeCompraItens(id);
   const { data: credores = [] } = useCredores();
 
-  const credor = credores.find(c => c.id === nfe?.credor_id);
+  const credor = credores.find(c => c.id === nfe?.id_credor);
 
   if (nfeLoading) {
     return (
@@ -45,7 +45,7 @@ export default function EditarEntrada() {
         </Button>
         <div>
           <h1 className="text-2xl font-bold tracking-tight">
-            Entrada de Material - NFe {nfe.numero_nota}/{nfe.serie}
+            Entrada de Material - NFe {nfe.numero}/{nfe.id_documento}
           </h1>
           <p className="text-muted-foreground">
             Visualização dos dados da nota fiscal
@@ -62,15 +62,15 @@ export default function EditarEntrada() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <div>
               <p className="text-sm font-medium text-muted-foreground">Número/série</p>
-              <p className="text-lg font-semibold">{nfe.numero_nota}/{nfe.serie}</p>
+              <p className="text-lg font-semibold">{nfe.numero}/{nfe.id_documento}</p>
             </div>
             <div>
               <p className="text-sm font-medium text-muted-foreground">Data emissão</p>
-              <p className="text-lg">{format(new Date(nfe.data_emissao), "dd/MM/yyyy")}</p>
+              <p className="text-lg">{format(new Date(nfe.emissao), "dd/MM/yyyy")}</p>
             </div>
             <div>
               <p className="text-sm font-medium text-muted-foreground">Data movimento</p>
-              <p className="text-lg">{format(new Date(nfe.data_movimento), "dd/MM/yyyy")}</p>
+              <p className="text-lg">{format(new Date(nfe.Movimenbto), "dd/MM/yyyy")}</p>
             </div>
             {credor && (
               <div>
@@ -79,23 +79,13 @@ export default function EditarEntrada() {
               </div>
             )}
             <div>
-              <p className="text-sm font-medium text-muted-foreground">Fornecedor</p>
-              <p className="text-lg">{nfe.fornecedor}</p>
+              <p className="text-sm font-medium text-muted-foreground">ID Credor</p>
+              <p className="text-lg">{nfe.id_credor}</p>
             </div>
             <div>
-              <p className="text-sm font-medium text-muted-foreground">CNPJ</p>
-              <p className="text-lg">{nfe.cnpj_fornecedor}</p>
+              <p className="text-sm font-medium text-muted-foreground">ID Empresa</p>
+              <p className="text-lg">{nfe.id_empresa}</p>
             </div>
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">Valor total</p>
-              <p className="text-lg font-semibold">R$ {nfe.valor_total.toFixed(2)}</p>
-            </div>
-            {nfe.chave_acesso && (
-              <div className="col-span-full">
-                <p className="text-sm font-medium text-muted-foreground">Chave de acesso</p>
-                <p className="text-sm font-mono">{nfe.chave_acesso}</p>
-              </div>
-            )}
           </div>
         </CardContent>
       </Card>
