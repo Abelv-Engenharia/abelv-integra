@@ -27,10 +27,16 @@ serve(async (req) => {
       );
     }
 
-    // Cria um cliente Supabase com o token do usuário
+    // Cria um cliente Supabase com service role key para operações admin
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    );
+    
+    // Verificar se o usuário autenticado tem permissão (usando token do usuário)
+    const supabaseUser = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
       {
         global: {
           headers: { Authorization: authHeader },
