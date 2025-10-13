@@ -25,7 +25,7 @@ export default function OSAguardandoAceiteReplanejamento() {
   const [loading, setLoading] = useState(false);
 
   const osAguardandoAceiteReplanejamento = osList.filter(
-    (os) => os.status === "aguardando-aceite" && os.historicoReplanejamentos && os.historicoReplanejamentos.length > 0,
+    (os) => os.status === "aguardando-aceite-replanejamento" && os.historicoReplanejamentos && os.historicoReplanejamentos.length > 0,
   );
 
   const capitalizarTexto = (texto: string) => {
