@@ -2,15 +2,18 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Eye, Check, X, FileText } from "lucide-react";
-import { useOS } from "@/contexts/engenharia-matricial/OSContext";
 import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { useOSList, useUpdateOS } from "@/hooks/engenharia-matricial/useOSEngenhariaMatricial";
+import { useState } from "react";
 
 export default function OSAguardandoAceiteFechamento() {
-  const { osList, aceitarFechamento, rejeitarFechamento } = useOS();
   const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(false);
+  const { data: osList = [], isLoading: isLoadingList } = useOSList({ status: 'aguardando-aceite-fechamento' });
+  const updateOS = useUpdateOS();
   
-  const osAguardandoAceiteFechamento = osList.filter(os => os.status === "aguardando-aceite-fechamento");
+  const osAguardandoAceiteFechamento = osList;
 
   const capitalizarTexto = (texto: string) => {
     return texto.charAt(0).toUpperCase() + texto.slice(1).toLowerCase();
@@ -27,22 +30,62 @@ export default function OSAguardandoAceiteFechamento() {
     }).format(value);
   };
 
-  const handleAceitarFechamento = (osId: number) => {
-    aceitarFechamento(osId);
-    toast({
-      title: "Fechamento aceito",
-      description: "OS finalizada com sucesso.",
-    });
+  const handleAceitarFechamento = async (osId: string) => {
+    try {
+      setIsLoading(true);
+      await updateOS.mutateAsync({
+        id: osId,
+        data: {
+          status: 'concluida'
+        }
+      });
+      toast({
+        title: "Fechamento aceito",
+        description: "OS finalizada com sucesso.",
+      });
+    } catch (error) {
+      toast({
+        title: "Erro ao aceitar fechamento",
+        description: "Não foi possível aceitar o fechamento da OS.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleRejeitarFechamento = (osId: number) => {
-    rejeitarFechamento(osId);
-    toast({
-      title: "Fechamento rejeitado",
-      description: "OS retornada para execução.",
-      variant: "destructive"
-    });
+  const handleRejeitarFechamento = async (osId: string) => {
+    try {
+      setIsLoading(true);
+      await updateOS.mutateAsync({
+        id: osId,
+        data: {
+          status: 'em-execucao'
+        }
+      });
+      toast({
+        title: "Fechamento rejeitado",
+        description: "OS retornada para execução.",
+        variant: "destructive"
+      });
+    } catch (error) {
+      toast({
+        title: "Erro ao rejeitar fechamento",
+        description: "Não foi possível rejeitar o fechamento da OS.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
+
+  if (isLoadingList) {
+    return (
+      <div className="container mx-auto p-6">
+        <p>Carregando...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto p-6">
@@ -69,7 +112,7 @@ export default function OSAguardandoAceiteFechamento() {
               <CardHeader>
                 <div className="flex justify-between items-start">
                   <CardTitle className="flex items-center gap-2">
-                    OS Nº {os.numero || os.id} - CCA {os.cca}
+                    OS Nº {os.numero || os.id} - CCA {os.cca?.codigo}
                     <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">
                       Aguardando aceite fechamento
                     </Badge>
@@ -113,33 +156,33 @@ export default function OSAguardandoAceiteFechamento() {
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Solicitante</p>
-                    <p className="font-medium text-primary">{os.nomeSolicitante}</p>
+                    <p className="font-medium text-primary">{os.solicitante_nome}</p>
                   </div>
-                  {os.dataConclusao && (
+                  {os.data_conclusao && (
                     <div>
                       <p className="text-sm text-muted-foreground">Data conclusão</p>
-                      <p className="font-medium">{formatDate(os.dataConclusao)}</p>
+                      <p className="font-medium">{formatDate(os.data_conclusao)}</p>
                     </div>
                   )}
-                  {os.valorEngenharia && (
+                  {os.valor_engenharia && (
                     <div>
                       <p className="text-sm text-muted-foreground">Valor engenharia</p>
-                      <p className="font-medium">{formatCurrency(os.valorEngenharia)}</p>
+                      <p className="font-medium">{formatCurrency(os.valor_engenharia)}</p>
                     </div>
                   )}
-                  {os.valorSuprimentos && (
+                  {os.valor_suprimentos && (
                     <div>
                       <p className="text-sm text-muted-foreground">Valor suprimentos</p>
-                      <p className="font-medium">{formatCurrency(os.valorSuprimentos)}</p>
+                      <p className="font-medium">{formatCurrency(os.valor_suprimentos)}</p>
                     </div>
                   )}
                   <div>
                     <p className="text-sm text-muted-foreground">HH executado</p>
-                    <p className="font-medium">{os.hhPlanejado + (os.hhAdicional || 0)}h</p>
+                    <p className="font-medium">{os.hh_planejado + (os.hh_adicional || 0)}h</p>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Responsável EM</p>
-                    <p className="font-medium">{os.responsavelEM}</p>
+                    <p className="font-medium">{os.responsavel_em?.nome}</p>
                   </div>
                   {os.competencia && (
                     <div>
@@ -154,18 +197,18 @@ export default function OSAguardandoAceiteFechamento() {
                   <p className="text-sm bg-muted p-3 rounded-md">{os.descricao}</p>
                 </div>
 
-                {os.justificativaEngenharia && (
+                {os.justificativa_engenharia && (
                   <div className="mt-4">
                     <p className="text-sm text-muted-foreground">Justificativa engenharia</p>
-                    <p className="text-sm bg-blue-50 p-3 rounded-md border-l-4 border-blue-200">{os.justificativaEngenharia}</p>
+                    <p className="text-sm bg-blue-50 p-3 rounded-md border-l-4 border-blue-200">{os.justificativa_engenharia}</p>
                   </div>
                 )}
 
-                {os.percentualSaving && (
+                {os.percentual_saving && (
                   <div className="mt-4 p-3 bg-green-50 rounded-md border-l-4 border-green-200">
                     <p className="text-sm text-muted-foreground">Saving obtido</p>
                     <p className="font-medium text-green-700">
-                      {os.percentualSaving > 0 ? '+' : ''}{os.percentualSaving.toFixed(1)}%
+                      {os.percentual_saving > 0 ? '+' : ''}{os.percentual_saving.toFixed(1)}%
                     </p>
                   </div>
                 )}
