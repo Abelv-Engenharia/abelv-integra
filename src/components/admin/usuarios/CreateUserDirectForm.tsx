@@ -26,6 +26,7 @@ export const CreateUserDirectForm = ({
     defaultValues: {
       nome: "",
       email: "",
+      senha: "",
     },
   });
 
@@ -90,6 +91,19 @@ export const CreateUserDirectForm = ({
             />
             {form.formState.errors.email && (
               <p className="text-sm text-destructive">{form.formState.errors.email.message}</p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="senha">Senha</Label>
+            <Input
+              id="senha"
+              type="password"
+              {...form.register("senha")}
+              placeholder="Digite a senha (mínimo 6 caracteres)"
+            />
+            {form.formState.errors.senha && (
+              <p className="text-sm text-destructive">{form.formState.errors.senha.message}</p>
             )}
           </div>
         </CardContent>

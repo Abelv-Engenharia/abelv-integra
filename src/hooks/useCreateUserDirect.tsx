@@ -20,38 +20,49 @@ export const useCreateUserDirect = () => {
           throw new Error('Email já está em uso');
         }
 
-        // 2. Obter token de autenticação
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session) {
-          throw new Error('Usuário não autenticado');
-        }
-
-        // 3. Criar usuário via edge function admin (sem senha, sem email)
-        const response = await fetch(
-          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-users/create`,
-          {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${session.access_token}`,
-              'Content-Type': 'application/json',
+        // 2. Criar usuário no Supabase Auth
+        const { data: authData, error: authError } = await supabase.auth.signUp({
+          email: userData.email,
+          password: userData.senha,
+          options: {
+            data: {
+              nome: userData.nome,
             },
-            body: JSON.stringify({
-              email: userData.email,
-              userData: {
-                nome: userData.nome,
-              },
-              emailConfirm: false, // Não enviar email
-            }),
-          }
-        );
+            emailRedirectTo: `${window.location.origin}/`,
+          },
+        });
 
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => null);
-          throw new Error(errorData?.error || 'Erro ao criar usuário');
+        if (authError) {
+          console.error('Erro no signup:', authError);
+          throw new Error(authError.message);
         }
 
-        const result = await response.json();
-        return result.user;
+        if (!authData.user) {
+          throw new Error('Usuário não foi criado no Auth');
+        }
+
+        // 3. Atualizar o perfil do usuário apenas com o nome
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .update({
+            nome: userData.nome
+          })
+          .eq('id', authData.user.id);
+
+        if (profileError) {
+          console.error('Erro ao atualizar perfil:', profileError);
+          
+          // Rollback: deletar usuário do Auth se falhou ao criar perfil
+          try {
+            await supabase.auth.admin.deleteUser(authData.user.id);
+          } catch (rollbackError) {
+            console.error('Erro no rollback:', rollbackError);
+          }
+          
+          throw new Error('Erro ao configurar perfil do usuário');
+        }
+
+        return authData.user;
       } catch (error) {
         console.error('Erro na criação do usuário:', error);
         throw error;
