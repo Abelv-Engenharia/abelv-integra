@@ -279,81 +279,82 @@ export default function AdminUsuarios() {
               <DialogTitle>{usuarioEdicao ? "Editar Usuário" : "Novo Usuário"}</DialogTitle>
             </DialogHeader>
 
-            <div className="space-y-4 max-w-2xl mx-auto">{/* Formulário */}
-                <div>
-                  <Label htmlFor="email">E-mail *</Label>
-                  <Select
-                    value={formData.email}
-                    onValueChange={(value) => {
-                      const usuarioSelecionado = usuariosSupabase?.find((u) => u.email === value);
-                      setFormData((prev) => ({
-                        ...prev,
-                        email: value,
-                        nome: usuarioSelecionado?.nome || "",
-                      }));
-                    }}
-                  >
-                    <SelectTrigger className={!formData.email ? "border-red-500" : ""}>
-                      <SelectValue placeholder="Selecione o e-mail" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-background border shadow-lg z-50">
-                      {usuariosSupabase?.map((usuario) => (
-                        <SelectItem key={usuario.id} value={usuario.email}>
-                          {usuario.email}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+            <div className="space-y-4 max-w-2xl mx-auto">
+              {/* Formulário */}
+              <div>
+                <Label htmlFor="email">E-mail *</Label>
+                <Select
+                  value={formData.email}
+                  onValueChange={(value) => {
+                    const usuarioSelecionado = usuariosSupabase?.find((u) => u.email === value);
+                    setFormData((prev) => ({
+                      ...prev,
+                      email: value,
+                      nome: usuarioSelecionado?.nome || "",
+                    }));
+                  }}
+                >
+                  <SelectTrigger className={!formData.email ? "border-red-500" : ""}>
+                    <SelectValue placeholder="Selecione o e-mail" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-background border shadow-lg z-50">
+                    {usuariosSupabase?.map((usuario) => (
+                      <SelectItem key={usuario.id} value={usuario.email}>
+                        {usuario.email}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-                <div>
-                  <Label htmlFor="nome">Nome</Label>
-                  <Input
-                    id="nome"
-                    value={formData.nome}
-                    readOnly
-                    className="bg-muted"
-                    placeholder="Será preenchido automaticamente"
-                  />
-                </div>
+              <div>
+                <Label htmlFor="nome">Nome</Label>
+                <Input
+                  id="nome"
+                  value={formData.nome}
+                  readOnly
+                  className="bg-muted"
+                  placeholder="Será preenchido automaticamente"
+                />
+              </div>
 
-                <div>
-                  <Label htmlFor="disciplina">Disciplina Preferida</Label>
-                  <Select
-                    value={formData.disciplinaPreferida}
-                    onValueChange={(value: Disciplina) =>
-                      setFormData((prev) => ({ ...prev, disciplinaPreferida: value }))
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione a disciplina" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-background border shadow-lg z-50">
-                      <SelectItem value="ELETRICA">Elétrica</SelectItem>
-                      <SelectItem value="MECANICA">Mecânica</SelectItem>
-                      <SelectItem value="AMBAS">Ambas</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <p className="text-sm text-muted-foreground mt-1">Se não informado, será definido como "Ambas"</p>
-                </div>
+              <div>
+                <Label htmlFor="disciplina">Disciplina Preferida</Label>
+                <Select
+                  value={formData.disciplinaPreferida}
+                  onValueChange={(value: Disciplina) =>
+                    setFormData((prev) => ({ ...prev, disciplinaPreferida: value }))
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione a disciplina" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-background border shadow-lg z-50">
+                    <SelectItem value="ELETRICA">Elétrica</SelectItem>
+                    <SelectItem value="MECANICA">Mecânica</SelectItem>
+                    <SelectItem value="AMBAS">Ambas</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-sm text-muted-foreground mt-1">Se não informado, será definido como "Ambas"</p>
+              </div>
 
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="ativo"
-                    checked={formData.ativo}
-                    onCheckedChange={(checked) => setFormData((prev) => ({ ...prev, ativo: !!checked }))}
-                  />
-                  <Label htmlFor="ativo">Usuário ativo</Label>
-                </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="ativo"
+                  checked={formData.ativo}
+                  onCheckedChange={(checked) => setFormData((prev) => ({ ...prev, ativo: !!checked }))}
+                />
+                <Label htmlFor="ativo">Usuário ativo</Label>
+              </div>
 
-                <div className="flex gap-2 pt-4">
-                  <Button onClick={salvarUsuario} className="flex-1">
-                    {usuarioEdicao ? "Atualizar" : "Criar"}
-                  </Button>
-                  <Button variant="outline" onClick={() => setDialogAberto(false)}>
-                    Cancelar
-                  </Button>
-                </div>
+              <div className="flex gap-2 pt-4">
+                <Button onClick={salvarUsuario} className="flex-1">
+                  {usuarioEdicao ? "Atualizar" : "Criar"}
+                </Button>
+                <Button variant="outline" onClick={() => setDialogAberto(false)}>
+                  Cancelar
+                </Button>
+              </div>
             </div>
           </DialogContent>
         </Dialog>
@@ -371,12 +372,7 @@ export default function AdminUsuarios() {
                 <TableRow>
                   <TableHead>Nome</TableHead>
                   <TableHead>E-mail</TableHead>
-                  <TableHead>Função</TableHead>
-                  <TableHead>Cliente/CCA</TableHead>
                   <TableHead>Disciplina</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Criado em</TableHead>
-                  <TableHead>Atualizado em</TableHead>
                   <TableHead>Ações</TableHead>
                 </TableRow>
               </TableHeader>
@@ -385,52 +381,13 @@ export default function AdminUsuarios() {
                   <TableRow key={usuario.id}>
                     <TableCell className="font-medium">{usuario.nome}</TableCell>
                     <TableCell>{usuario.email}</TableCell>
-                    <TableCell>{getPapelBadge(usuario.papel, usuario.ccas)}</TableCell>
-                    <TableCell>
-                      {usuario.papel === "OBRA" && usuario.ccas && usuario.ccas.length > 0 ? (
-                        <div className="flex flex-col">
-                          <span className="text-xs text-muted-foreground">CCA {usuario.ccas.join(", ")}</span>
-                        </div>
-                      ) : (
-                        <span className="text-muted-foreground">-</span>
-                      )}
-                    </TableCell>
                     <TableCell>
                       {usuario.disciplinaPreferida && <Badge variant="outline">{usuario.disciplinaPreferida}</Badge>}
                     </TableCell>
                     <TableCell>
-                      <Badge variant={usuario.ativo ? "default" : "secondary"}>
-                        {usuario.ativo ? "Ativo" : "Inativo"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>{new Date(usuario.criadoEm).toLocaleDateString("pt-BR")}</TableCell>
-                    <TableCell>{new Date(usuario.atualizadoEm).toLocaleDateString("pt-BR")}</TableCell>
-                    <TableCell>
                       <div className="flex gap-1">
                         <Button variant="ghost" size="sm" onClick={() => abrirFormulario(usuario)} title="Editar">
                           <Edit className="h-4 w-4" />
-                        </Button>
-
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => toggleAtivo(usuario.id)}
-                          title={usuario.ativo ? "Desativar" : "Ativar"}
-                        >
-                          {usuario.ativo ? (
-                            <UserX className="h-4 w-4 text-red-600" />
-                          ) : (
-                            <UserCheck className="h-4 w-4 text-green-600" />
-                          )}
-                        </Button>
-
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => enviarMagicLink(usuario.email)}
-                          title="Enviar Magic Link"
-                        >
-                          <Mail className="h-4 w-4 text-blue-600" />
                         </Button>
                       </div>
                     </TableCell>
