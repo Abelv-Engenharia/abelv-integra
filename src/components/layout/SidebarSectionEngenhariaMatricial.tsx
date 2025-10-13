@@ -53,16 +53,37 @@ export default function SidebarSectionEngenhariaMatricial({ openMenu, toggleMenu
 
   const isInEngenhariaMatricial = currentPath.startsWith("/engenharia-matricial");
 
+  // Determinar qual submenu deve estar aberto baseado na rota
+  const getActiveSubmenu = () => {
+    if (currentPath.startsWith("/engenharia-matricial/os-")) return "em-fluxo-os";
+    if (currentPath.startsWith("/engenharia-matricial/relatorios")) return "em-relatorios";
+    if (currentPath.startsWith("/engenharia-matricial/admin")) return "em-admin";
+    return null;
+  };
+
+  const activeSubmenu = getActiveSubmenu();
+
   return (
     <SidebarMenu>
       <SidebarMenuItem>
         <Collapsible
-          open={openMenu === "engenharia-matricial" || isInEngenhariaMatricial}
-          onOpenChange={() => toggleMenu("engenharia-matricial")}
+          open={isInEngenhariaMatricial}
+          onOpenChange={() => {
+            if (!isInEngenhariaMatricial) {
+              toggleMenu("engenharia-matricial");
+            }
+          }}
           className="group/collapsible"
         >
           <CollapsibleTrigger asChild>
-            <SidebarMenuButton onClick={() => toggleMenu("engenharia-matricial")} className="text-white hover:bg-slate-600">
+            <SidebarMenuButton 
+              onClick={(e) => {
+                if (!isInEngenhariaMatricial) {
+                  toggleMenu("engenharia-matricial");
+                }
+              }} 
+              className="text-white hover:bg-slate-600"
+            >
               <Building2 className="h-4 w-4" />
               <span>Engenharia Matricial</span>
               <ChevronDown className="ml-auto h-4 w-4 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-180" />
@@ -74,7 +95,7 @@ export default function SidebarSectionEngenhariaMatricial({ openMenu, toggleMenu
               {/* Fluxo de OS */}
               <SidebarMenuSubItem>
                 <Collapsible
-                  open={openMenu === "em-fluxo-os"}
+                  open={openMenu === "em-fluxo-os" || activeSubmenu === "em-fluxo-os"}
                   onOpenChange={() => toggleMenu("em-fluxo-os")}
                   className="group/subcollapsible"
                 >
@@ -115,7 +136,7 @@ export default function SidebarSectionEngenhariaMatricial({ openMenu, toggleMenu
               {/* Replanejamento */}
               <SidebarMenuSubItem>
                 <Collapsible
-                  open={openMenu === "em-replanejamento"}
+                  open={openMenu === "em-replanejamento" || (activeSubmenu === "em-fluxo-os" && currentPath.includes("replanejamento"))}
                   onOpenChange={() => toggleMenu("em-replanejamento")}
                   className="group/subcollapsible"
                 >
@@ -156,7 +177,7 @@ export default function SidebarSectionEngenhariaMatricial({ openMenu, toggleMenu
               {/* Relatórios */}
               <SidebarMenuSubItem>
                 <Collapsible
-                  open={openMenu === "em-relatorios"}
+                  open={openMenu === "em-relatorios" || activeSubmenu === "em-relatorios"}
                   onOpenChange={() => toggleMenu("em-relatorios")}
                   className="group/subcollapsible"
                 >
@@ -197,7 +218,7 @@ export default function SidebarSectionEngenhariaMatricial({ openMenu, toggleMenu
               {/* Admin */}
               <SidebarMenuSubItem>
                 <Collapsible
-                  open={openMenu === "em-admin"}
+                  open={openMenu === "em-admin" || activeSubmenu === "em-admin"}
                   onOpenChange={() => toggleMenu("em-admin")}
                   className="group/subcollapsible"
                 >
