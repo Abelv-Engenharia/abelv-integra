@@ -23,35 +23,40 @@ export const useUsuariosEngenhariaMatricial = () => {
   const { data: usuarios, isLoading, error, refetch } = useQuery({
     queryKey: ["usuarios-engenharia-matricial"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      // Primeiro buscar os usuários da engenharia matricial
+      const { data: usuariosEM, error: errorEM } = await supabase
         .from("usuarios_engenharia_matricial")
-        .select(`
-          id,
-          usuario_id,
-          disciplina_preferida,
-          ativo,
-          created_at,
-          updated_at,
-          profiles:usuario_id (
-            nome,
-            email
-          )
-        `)
-        .order("profiles(nome)");
+        .select("*")
+        .order("created_at", { ascending: false });
 
-      if (error) throw error;
+      if (errorEM) throw errorEM;
+      if (!usuariosEM || usuariosEM.length === 0) return [];
 
-      // Transformar os dados para o formato esperado
-      return (data || []).map((item: any) => ({
-        id: item.id,
-        usuario_id: item.usuario_id,
-        nome: item.profiles?.nome || "",
-        email: item.profiles?.email || "",
-        disciplina_preferida: item.disciplina_preferida,
-        ativo: item.ativo,
-        created_at: item.created_at,
-        updated_at: item.updated_at,
-      })) as UsuarioEngenhariaMatricial[];
+      // Buscar os dados dos profiles
+      const usuarioIds = usuariosEM.map((u) => u.usuario_id);
+      const { data: profiles, error: errorProfiles } = await supabase
+        .from("profiles")
+        .select("id, nome, email")
+        .in("id", usuarioIds);
+
+      if (errorProfiles) throw errorProfiles;
+
+      // Mapear os dados combinados
+      const profilesMap = new Map(profiles?.map((p) => [p.id, p]) || []);
+
+      return usuariosEM.map((item) => {
+        const profile = profilesMap.get(item.usuario_id);
+        return {
+          id: item.id,
+          usuario_id: item.usuario_id,
+          nome: profile?.nome || "",
+          email: profile?.email || "",
+          disciplina_preferida: item.disciplina_preferida,
+          ativo: item.ativo,
+          created_at: item.created_at,
+          updated_at: item.updated_at,
+        };
+      }) as UsuarioEngenhariaMatricial[];
     },
   });
 
