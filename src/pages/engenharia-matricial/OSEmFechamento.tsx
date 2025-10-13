@@ -6,21 +6,22 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { Eye, Calculator, DollarSign, TrendingUp, TrendingDown, AlertTriangle, CheckCircle2, RotateCcw } from "lucide-react";
-import { useOS } from "@/contexts/engenharia-matricial/OSContext";
+import { useOSList, useUpdateOS } from "@/hooks/engenharia-matricial/useOSEngenhariaMatricial";
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { toast } from "sonner";
 
 export default function OSEmFechamento() {
-  const { osList, finalizarOS, updateOSStatus } = useOS();
-  const [osEmFechamento, setOsEmFechamento] = useState<number | null>(null);
+  const { data: osList = [], isLoading } = useOSList({ status: 'em-execucao' });
+  const updateOS = useUpdateOS();
+  const [osEmFechamento, setOsEmFechamento] = useState<string | null>(null);
   const [valorSAO, setValorSAO] = useState("");
   const [valorEngenharia, setValorEngenharia] = useState("");
   const [valorSuprimentos, setValorSuprimentos] = useState("");
   const [justificativaEngenharia, setJustificativaEngenharia] = useState("");
   const [justificativaSuprimentos, setJustificativaSuprimentos] = useState("");
   
-  const osParaFechamento = osList.filter(os => os.status === "em-execucao");
+  const osParaFechamento = osList;
 
   const capitalizarTexto = (texto: string) => {
     return texto.charAt(0).toUpperCase() + texto.slice(1).toLowerCase();
@@ -51,10 +52,10 @@ export default function OSEmFechamento() {
     return ((sao - sup) / sao) * 100; // Percentual de economia em relação ao SAO
   };
 
-  const handleIniciarFechamento = (osId: number, os: any) => {
+  const handleIniciarFechamento = (osId: string, os: any) => {
     setOsEmFechamento(osId);
     // Pré-preencher valor SAO com o orçamento
-    setValorSAO(os.valorOrcamento.toString());
+    setValorSAO(os.valor_orcamento?.toString() || "");
     setValorEngenharia("");
     setValorSuprimentos("");
     setJustificativaEngenharia("");
@@ -70,7 +71,7 @@ export default function OSEmFechamento() {
     setJustificativaSuprimentos("");
   };
 
-  const handleFinalizarFechamento = (osId: number) => {
+  const handleFinalizarFechamento = async (osId: string) => {
     // Validação apenas do Valor SAO (que é preenchido automaticamente)
     if (!valorSAO) {
       toast.error("Erro: Valor SAO não encontrado!");
@@ -100,17 +101,23 @@ export default function OSEmFechamento() {
       justificativas.push(`Suprimentos: ${justificativaSuprimentos.trim()}`);
     }
 
-    finalizarOS(
-      osId,
-      valorEngenhariaNum.toString(),
-      valorSuprimentosNum.toString(),
-      new Date().toISOString().split('T')[0],
-      new Date().toISOString().split('-')[0] + '-' + new Date().toISOString().split('-')[1],
-      justificativas.join(' | ')
-    );
+    try {
+      await updateOS.mutateAsync({
+        id: osId,
+        data: {
+          valor_engenharia: valorEngenhariaNum,
+          valor_suprimentos: valorSuprimentosNum,
+          justificativa_engenharia: justificativas.join(' | '),
+          status: 'aguardando-aceite-fechamento'
+        }
+      });
 
-    toast.success("OS enviada para aceite de fechamento do solicitante!");
-    handleCancelarFechamento();
+      toast.success("OS enviada para aceite de fechamento do solicitante!");
+      handleCancelarFechamento();
+    } catch (error) {
+      toast.error("Erro ao finalizar fechamento da OS");
+      console.error(error);
+    }
   };
 
   const percentualEngenharia = calcularPercentualEngenharia();
@@ -122,6 +129,14 @@ export default function OSEmFechamento() {
   const isSuprimentosPositivo = valorSuprimentosNum < valorSAONum && valorSAONum > 0; // Positivo quando sup < sao (há saving)
   const needsEngenhariaJustification = valorEngenhariaNum > valorSAONum && valorSAONum > 0;
   const needsSuprimentosJustification = valorSuprimentosNum >= valorSAONum && valorSAONum > 0;
+
+  if (isLoading) {
+    return (
+      <div className="container mx-auto p-6">
+        <p>Carregando...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto p-6">
@@ -157,13 +172,13 @@ export default function OSEmFechamento() {
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <>
-                    {/* Informações da OS */}
+                     {/* Informações da OS */}
                     <div className="bg-muted/50 p-4 rounded-lg space-y-2">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
-                        <div><span className="font-medium">Cliente:</span> {os.cliente}</div>
-                        <div><span className="font-medium">Disciplina:</span> {os.disciplina}</div>
-                        <div><span className="font-medium">HH Total:</span> {os.hhPlanejado + (os.hhAdicional || 0)}h</div>
-                        <div><span className="font-medium">Valor OS:</span> {formatCurrency(os.valorOrcamento)}</div>
+                        <div><span className="font-medium">Cliente:</span> {os.solicitante_nome}</div>
+                        <div><span className="font-medium">Disciplina:</span> {capitalizarTexto(os.disciplina || '')}</div>
+                        <div><span className="font-medium">HH Total:</span> {(os.hh_planejado || 0) + (os.hh_adicional || 0)}h</div>
+                        <div><span className="font-medium">Valor OS:</span> {formatCurrency(os.valor_orcamento || 0)}</div>
                       </div>
                     </div>
 
@@ -350,7 +365,7 @@ export default function OSEmFechamento() {
               <CardHeader>
                 <div className="flex justify-between items-start">
                   <CardTitle className="flex items-center gap-2">
-                    OS Nº {os.numero || os.id} - CCA {os.cca}
+                    OS Nº {os.numero || os.id} - CCA {os.cca?.codigo || 'N/A'}
                     <Badge variant="default">
                       Em execução
                     </Badge>
@@ -379,19 +394,19 @@ export default function OSEmFechamento() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
                     <p className="text-sm text-muted-foreground">Cliente</p>
-                    <p className="font-medium">{os.cliente}</p>
+                    <p className="font-medium">{os.solicitante_nome}</p>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Disciplina</p>
-                    <p className="font-medium">{capitalizarTexto(os.disciplina)}</p>
+                    <p className="font-medium">{capitalizarTexto(os.disciplina || '')}</p>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">HH total</p>
                     <p className="font-medium">
-                      {os.hhPlanejado + (os.hhAdicional || 0)}h
-                      {os.hhAdicional && os.hhAdicional > 0 && (
+                      {(os.hh_planejado || 0) + (os.hh_adicional || 0)}h
+                      {os.hh_adicional && os.hh_adicional > 0 && (
                         <span className="text-orange-600 text-xs ml-1">
-                          (+{os.hhAdicional}h adicional)
+                          (+{os.hh_adicional}h adicional)
                         </span>
                       )}
                     </p>
@@ -399,36 +414,36 @@ export default function OSEmFechamento() {
                   <div>
                     <p className="text-sm text-muted-foreground">Valor estimado</p>
                     <p className="font-medium">
-                      {formatCurrency((os.hhPlanejado + (os.hhAdicional || 0)) * 95)}
+                      {formatCurrency(((os.hh_planejado || 0) + (os.hh_adicional || 0)) * 95)}
                     </p>
                   </div>
-                  {os.dataInicioPrevista && os.dataFimPrevista && (
+                  {os.data_inicio_prevista && os.data_fim_prevista && (
                     <div className="md:col-span-2">
                       <p className="text-sm text-muted-foreground">Período previsto</p>
                       <p className="font-medium">
-                        {formatDate(os.dataInicioPrevista)} - {formatDate(os.dataFimPrevista)}
+                        {formatDate(os.data_inicio_prevista)} - {formatDate(os.data_fim_prevista)}
                       </p>
                     </div>
                   )}
                   <div>
                     <p className="text-sm text-muted-foreground">Responsável EM</p>
-                    <p className="font-medium">{os.responsavelEM}</p>
+                    <p className="font-medium">{os.responsavel_em?.nome || 'N/A'}</p>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Solicitante</p>
-                    <p className="font-medium">{os.nomeSolicitante}</p>
+                    <p className="font-medium">{os.solicitante_nome}</p>
                   </div>
                 </div>
 
-                {/* Histórico de Replanejamentos */}
-                {os.historicoReplanejamentos && os.historicoReplanejamentos.length > 0 && (
+                {/* Histórico de Replanejamentos - Comentado temporariamente */}
+                {/* {os.historico_replanejamentos && os.historico_replanejamentos.length > 0 && (
                   <div className="mt-4 p-3 bg-orange-50 border border-orange-200 rounded-lg">
                     <h4 className="font-medium text-orange-800 mb-2 flex items-center gap-2">
                       <RotateCcw className="h-4 w-4" />
-                      Histórico de Replanejamentos ({os.historicoReplanejamentos.length})
+                      Histórico de Replanejamentos ({os.historico_replanejamentos.length})
                     </h4>
                     <div className="space-y-2">
-                      {os.historicoReplanejamentos.map((replan, index) => (
+                      {os.historico_replanejamentos.map((replan, index) => (
                         <div key={index} className="text-sm border-l-2 border-orange-300 pl-3">
                           <div className="flex justify-between items-start">
                             <div>
@@ -448,7 +463,7 @@ export default function OSEmFechamento() {
                       ))}
                     </div>
                   </div>
-                )}
+                )} */}
 
                 <div className="mt-4">
                   <p className="text-sm text-muted-foreground">Descrição</p>

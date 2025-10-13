@@ -6,20 +6,21 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { Eye, Calendar, Clock, CheckCircle2, RotateCcw, ArrowRight } from "lucide-react";
-import { useOS } from "@/contexts/engenharia-matricial/OSContext";
+import { useOSList, useUpdateOS } from "@/hooks/engenharia-matricial/useOSEngenhariaMatricial";
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { toast } from "sonner";
 
 export default function OSReplanejamento() {
-  const { osList, replanejamentoOS } = useOS();
-  const [osEmReplanejamento, setOsEmReplanejamento] = useState<number | null>(null);
+  const { data: osList = [], isLoading } = useOSList({ status: 'em-execucao' });
+  const updateOS = useUpdateOS();
+  const [osEmReplanejamento, setOsEmReplanejamento] = useState<string | null>(null);
   const [novaDataInicio, setNovaDataInicio] = useState("");
   const [novaDataFim, setNovaDataFim] = useState("");
   const [hhAdicional, setHhAdicional] = useState("");
   const [motivo, setMotivo] = useState("");
   
-  const osParaReplanejamento = osList.filter(os => os.status === "em-execucao");
+  const osParaReplanejamento = osList;
 
   const capitalizarTexto = (texto: string) => {
     return texto.charAt(0).toUpperCase() + texto.slice(1).toLowerCase();
@@ -37,18 +38,18 @@ export default function OSReplanejamento() {
   };
 
   const calcularNovoValorEstimado = (os: any) => {
-    const hhTotalAtual = os.hhPlanejado + (os.hhAdicional || 0);
+    const hhTotalAtual = (os.hh_planejado || 0) + (os.hh_adicional || 0);
     const hhAdicionalNum = parseFloat(hhAdicional) || 0;
     const hhTotalNovo = hhTotalAtual + hhAdicionalNum;
     const valorHora = 95.00;
     return hhTotalNovo * valorHora;
   };
 
-  const handleIniciarReplanejamento = (osId: number, os: any) => {
+  const handleIniciarReplanejamento = (osId: string, os: any) => {
     setOsEmReplanejamento(osId);
     // Pré-preencher com valores atuais
-    setNovaDataInicio(os.dataInicioPrevista || "");
-    setNovaDataFim(os.dataFimPrevista || "");
+    setNovaDataInicio(os.data_inicio_prevista || "");
+    setNovaDataFim(os.data_fim_prevista || "");
     setHhAdicional("");
     setMotivo("");
   };
@@ -61,7 +62,7 @@ export default function OSReplanejamento() {
     setMotivo("");
   };
 
-  const handleSubmitReplanejamento = (osId: number) => {
+  const handleSubmitReplanejamento = async (osId: string) => {
     if (!novaDataInicio || !novaDataFim || !hhAdicional || !motivo.trim()) {
       toast.error("Preencha todos os campos obrigatórios!");
       return;
@@ -78,16 +79,35 @@ export default function OSReplanejamento() {
       return;
     }
 
-    replanejamentoOS(osId, {
-      novaDataInicio,
-      novaDataFim,
-      hhAdicional: hhAdicionalNum,
-      motivo: motivo.trim()
-    });
+    try {
+      const osAtual = osList.find(o => o.id === osId);
+      const hhTotalAtual = (osAtual?.hh_planejado || 0) + (osAtual?.hh_adicional || 0);
+      
+      await updateOS.mutateAsync({
+        id: osId,
+        data: {
+          data_inicio_prevista: novaDataInicio,
+          data_fim_prevista: novaDataFim,
+          hh_adicional: hhTotalAtual - (osAtual?.hh_planejado || 0) + hhAdicionalNum,
+          justificativa_engenharia: motivo.trim()
+        }
+      });
 
-    toast.success("Replanejamento enviado para aceite do solicitante!");
-    handleCancelarReplanejamento();
+      toast.success("Replanejamento aplicado com sucesso!");
+      handleCancelarReplanejamento();
+    } catch (error) {
+      toast.error("Erro ao enviar replanejamento");
+      console.error(error);
+    }
   };
+
+  if (isLoading) {
+    return (
+      <div className="container mx-auto p-6">
+        <p>Carregando...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto p-6">
@@ -136,16 +156,16 @@ export default function OSReplanejamento() {
                             <div>
                               <Label className="text-sm text-muted-foreground">Período atual:</Label>
                               <p className="font-medium">
-                                {os.dataInicioPrevista ? formatDate(os.dataInicioPrevista) : "N/A"} - {os.dataFimPrevista ? formatDate(os.dataFimPrevista) : "N/A"}
+                                {os.data_inicio_prevista ? formatDate(os.data_inicio_prevista) : "N/A"} - {os.data_fim_prevista ? formatDate(os.data_fim_prevista) : "N/A"}
                               </p>
                             </div>
                             <div>
                               <Label className="text-sm text-muted-foreground">HH total atual:</Label>
-                              <p className="font-medium">{os.hhPlanejado + (os.hhAdicional || 0)}h</p>
+                              <p className="font-medium">{(os.hh_planejado || 0) + (os.hh_adicional || 0)}h</p>
                             </div>
                             <div>
                               <Label className="text-sm text-muted-foreground">Valor atual estimado:</Label>
-                              <p className="font-medium">{formatCurrency((os.hhPlanejado + (os.hhAdicional || 0)) * 95)}</p>
+                              <p className="font-medium">{formatCurrency(((os.hh_planejado || 0) + (os.hh_adicional || 0)) * 95)}</p>
                             </div>
                           </div>
                         </div>
@@ -207,7 +227,7 @@ export default function OSReplanejamento() {
                             {hhAdicional && (
                               <div className="bg-orange-50 border border-orange-200 p-3 rounded-lg">
                                 <div className="text-sm space-y-1">
-                                  <div>Novo HH total: {os.hhPlanejado + (os.hhAdicional || 0) + (parseFloat(hhAdicional) || 0)}h</div>
+                                  <div>Novo HH total: {(os.hh_planejado || 0) + (os.hh_adicional || 0) + (parseFloat(hhAdicional) || 0)}h</div>
                                   <div>HH adicional: +{hhAdicional}h</div>
                                   <div className="font-medium text-orange-700">
                                     Novo valor estimado: {formatCurrency(calcularNovoValorEstimado(os))}
@@ -264,7 +284,7 @@ export default function OSReplanejamento() {
               <CardHeader>
                 <div className="flex justify-between items-start">
                   <CardTitle className="flex items-center gap-2">
-                    OS Nº {os.numero || os.id} - CCA {os.cca}
+                    OS Nº {os.numero || os.id} - CCA {os.cca?.codigo || 'N/A'}
                     <Badge variant="default">
                       Em execução
                     </Badge>
@@ -293,31 +313,31 @@ export default function OSReplanejamento() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
                     <p className="text-sm text-muted-foreground">Cliente</p>
-                    <p className="font-medium">{os.cliente}</p>
+                    <p className="font-medium">{os.solicitante_nome}</p>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Disciplina</p>
-                    <p className="font-medium">{capitalizarTexto(os.disciplina)}</p>
+                    <p className="font-medium">{capitalizarTexto(os.disciplina || '')}</p>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">HH planejado</p>
-                    <p className="font-medium">{os.hhPlanejado + (os.hhAdicional || 0)}h</p>
+                    <p className="font-medium">{(os.hh_planejado || 0) + (os.hh_adicional || 0)}h</p>
                   </div>
-                  {os.dataInicioPrevista && os.dataFimPrevista && (
+                  {os.data_inicio_prevista && os.data_fim_prevista && (
                     <div className="md:col-span-3">
                       <p className="text-sm text-muted-foreground">Período atual</p>
                       <p className="font-medium">
-                        {formatDate(os.dataInicioPrevista)} - {formatDate(os.dataFimPrevista)}
+                        {formatDate(os.data_inicio_prevista)} - {formatDate(os.data_fim_prevista)}
                       </p>
                     </div>
                   )}
                   <div>
                     <p className="text-sm text-muted-foreground">Responsável EM</p>
-                    <p className="font-medium">{os.responsavelEM}</p>
+                    <p className="font-medium">{os.responsavel_em?.nome || 'N/A'}</p>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Solicitante</p>
-                    <p className="font-medium">{os.nomeSolicitante}</p>
+                    <p className="font-medium">{os.solicitante_nome}</p>
                   </div>
                 </div>
                 <div className="mt-4">
