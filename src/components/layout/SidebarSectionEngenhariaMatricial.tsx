@@ -1,4 +1,4 @@
-import { Building2, FolderOpen, Clock, CheckCircle, Play, Archive, Calculator, ClipboardCheck, RotateCcw, AlertTriangle, Calendar, Zap, Cog, BarChart3, Users, Settings } from "lucide-react";
+import { Building2, FolderOpen, Clock, CheckCircle, Play, Archive, Calculator, ClipboardCheck, RotateCcw, AlertTriangle, Calendar, Zap, Cog, BarChart3 } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import {
@@ -44,10 +44,6 @@ const relatoriosItems = [
   { title: "Relatórios EM Departamento", url: "/engenharia-matricial/relatorios-em-departamento", icon: BarChart3 },
 ];
 
-const adminItems = [
-  { title: "Usuários", url: "/engenharia-matricial/admin/usuarios", icon: Users },
-];
-
 export default function SidebarSectionEngenhariaMatricial({ openMenu, toggleMenu, onLinkClick }: Props) {
   const location = useLocation();
   const currentPath = location.pathname;
@@ -63,8 +59,6 @@ export default function SidebarSectionEngenhariaMatricial({ openMenu, toggleMenu
       set_open_submenu("em-replanejamento");
     } else if (currentPath.startsWith("/engenharia-matricial/relatorios")) {
       set_open_submenu("em-relatorios");
-    } else if (currentPath.startsWith("/engenharia-matricial/admin")) {
-      set_open_submenu("em-admin");
     } else if (currentPath.startsWith("/engenharia-matricial/os-")) {
       set_open_submenu("em-fluxo-os");
     } else {
@@ -174,45 +168,6 @@ export default function SidebarSectionEngenhariaMatricial({ openMenu, toggleMenu
                 </Collapsible>
               </SidebarMenuSubItem>
 
-              {/* Admin */}
-              <SidebarMenuSubItem>
-                <Collapsible
-                  open={open_submenu === "em-admin"}
-                  className="group/subcollapsible"
-                >
-                  <CollapsibleTrigger asChild>
-                    <SidebarMenuSubButton
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        set_open_submenu(open_submenu === "em-admin" ? null : "em-admin");
-                      }}
-                      className="text-white hover:bg-slate-700"
-                    >
-                      <Settings className="h-4 w-4" />
-                      <span>Admin</span>
-                      <ChevronDown className="ml-auto h-4 w-4 transition-transform duration-200 group-data-[state=open]/subcollapsible:rotate-180" />
-                    </SidebarMenuSubButton>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent>
-                    <SidebarMenuSub className="pl-4">
-                      {adminItems.map((item) => (
-                        <SidebarMenuSubItem key={item.url}>
-                          <SidebarMenuSubButton
-                            asChild
-                            isActive={currentPath === item.url}
-                            className="text-white hover:bg-slate-700"
-                          >
-                            <NavLink to={item.url} onClick={(e) => { e.stopPropagation(); onLinkClick?.(); }}>
-                              <item.icon className="h-4 w-4" />
-                              <span>{item.title}</span>
-                            </NavLink>
-                          </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
-                      ))}
-                    </SidebarMenuSub>
-                  </CollapsibleContent>
-                </Collapsible>
-              </SidebarMenuSubItem>
             </SidebarMenuSub>
           </CollapsibleContent>
         </Collapsible>

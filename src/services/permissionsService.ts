@@ -174,6 +174,12 @@ export const COMPLETE_PERMISSIONS: PermissionCategory[] = [
     ]
   },
   {
+    name: 'Configuração por Módulos - Engenharia Matricial',
+    permissions: [
+      { key: 'config_modulo_engenharia_matricial_usuarios', label: 'Usuários Engenharia Matricial' }
+    ]
+  },
+  {
     name: 'Administração - Empresas',
     permissions: [
       { key: 'admin_empresas', label: 'Empresas' },

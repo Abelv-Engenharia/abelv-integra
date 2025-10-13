@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   ChevronDown,
   ChevronRight,
@@ -7,6 +7,7 @@ import {
   UserCog,
   Users,
   Building2,
+  Settings,
 } from "lucide-react";
 import {
   SidebarMenu,
@@ -35,6 +36,8 @@ export default function SidebarSectionSeguranca({ openMenu, toggleMenu, onLinkCl
     return result;
   };
 
+  const [openConfigModulos, setOpenConfigModulos] = useState(false);
+
   const items: Item[] = [
     { label: "Administradores Sistema", to: "/admin/admin-sistema", slug: "admin_sistema", Icon: UserPlus },
     { label: "Perfis de Acesso", to: "/admin/perfis", slug: "admin_perfis", Icon: UserCog },
@@ -43,7 +46,19 @@ export default function SidebarSectionSeguranca({ openMenu, toggleMenu, onLinkCl
     { label: "Usuários", to: "/admin/usuarios-direct", slug: "admin_usuarios", Icon: Users },
   ].filter((i) => can(i.slug));
 
-  if (items.length === 0) return null;
+  const configModulosItems: Item[] = [
+    { label: "Engenharia Matricial", to: "/engenharia-matricial/admin/usuarios", slug: "config_modulo_engenharia_matricial_usuarios", Icon: Building2 },
+  ].filter((i) => can(i.slug));
+
+  useEffect(() => {
+    if (pathname.startsWith("/engenharia-matricial/admin")) {
+      setOpenConfigModulos(true);
+    }
+  }, [pathname]);
+
+  const hasConfigModulos = configModulosItems.length > 0;
+
+  if (items.length === 0 && !hasConfigModulos) return null;
 
   const isOpen = openMenu === "seguranca";
 
@@ -76,6 +91,42 @@ export default function SidebarSectionSeguranca({ openMenu, toggleMenu, onLinkCl
                   </SidebarMenuSubButton>
                 </SidebarMenuSubItem>
               ))}
+
+              {hasConfigModulos && (
+                <SidebarMenuSubItem>
+                  <Collapsible open={openConfigModulos} className="group/subcollapsible">
+                    <CollapsibleTrigger asChild>
+                      <SidebarMenuSubButton
+                        onClick={() => setOpenConfigModulos(!openConfigModulos)}
+                        className="text-white hover:bg-slate-600"
+                      >
+                        <Settings className="h-3 w-3 flex-shrink-0" />
+                        <span className="text-xs leading-tight break-words min-w-0">Configuração por Módulos</span>
+                        <ChevronDown className="ml-auto h-3 w-3 transition-transform duration-200 group-data-[state=open]/subcollapsible:rotate-180" />
+                      </SidebarMenuSubButton>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                      <SidebarMenuSub className="pl-4">
+                        {configModulosItems.map(({ slug, to, label, Icon }) => (
+                          <SidebarMenuSubItem key={slug}>
+                            <SidebarMenuSubButton
+                              asChild
+                              className={
+                                pathname === to ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"
+                              }
+                            >
+                              <Link to={to} onClick={onLinkClick} className="flex items-center gap-2">
+                                <Icon className="h-3 w-3 flex-shrink-0" />
+                                <span className="text-xs leading-tight break-words min-w-0">{label}</span>
+                              </Link>
+                            </SidebarMenuSubButton>
+                          </SidebarMenuSubItem>
+                        ))}
+                      </SidebarMenuSub>
+                    </CollapsibleContent>
+                  </Collapsible>
+                </SidebarMenuSubItem>
+              )}
             </SidebarMenuSub>
           </CollapsibleContent>
         </Collapsible>
