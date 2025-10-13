@@ -22,10 +22,10 @@ export const useNfeCompraItens = (nfeCompraId: string | undefined) => {
       if (!nfeCompraId) return [];
       
       const { data, error } = await supabase
-        .from("nfe_compra_item" as any)
+        .from("nfe_compra_itens" as any)
         .select("*")
-        .eq("nfe_compra_id", nfeCompraId)
-        .order("codigo_produto", { ascending: true });
+        .eq("id_nfe", nfeCompraId)
+        .order("descricao", { ascending: true });
 
       if (error) throw error;
       return (data || []) as unknown as NfeCompraItem[];
