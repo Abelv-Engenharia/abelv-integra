@@ -5,21 +5,23 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Eye, Calendar, Clock, CheckCircle2 } from "lucide-react";
-import { useOS } from "@/contexts/engenharia-matricial/OSContext";
+import { useOSList, useUpdateOS, useAvancarFaseOS } from "@/hooks/engenharia-matricial/useOSEngenhariaMatricial";
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { toast } from "sonner";
 
 export default function OSEmPlanejamento() {
-  const { osList, updateOSPlanejamento } = useOS();
-  const [osEmEdicao, setOsEmEdicao] = useState<number | null>(null);
+  const { data: osList = [], isLoading } = useOSList({ status: "em-planejamento" });
+  const updateOSMutation = useUpdateOS();
+  const avancarFaseMutation = useAvancarFaseOS();
+  const [osEmEdicao, setOsEmEdicao] = useState<string | null>(null);
   const [dataInicioPrevista, setDataInicioPrevista] = useState("");
   const [dataFimPrevista, setDataFimPrevista] = useState("");
   const [hhPlanejado, setHhPlanejado] = useState("");
   const [hhAdicional, setHhAdicional] = useState("");
   const [valorSAO, setValorSAO] = useState("");
   
-  const osEmPlanejamento = osList.filter(os => os.status === "em-planejamento");
+  const osEmPlanejamento = osList;
 
   const capitalizarTexto = (texto: string) => {
     return texto.charAt(0).toUpperCase() + texto.slice(1).toLowerCase();
@@ -43,14 +45,14 @@ export default function OSEmPlanejamento() {
     return ((hhPlanejadoNum + hhAdicionalNum) * valorHora);
   };
 
-  const handleIniciarPlanejamento = (osId: number) => {
+  const handleIniciarPlanejamento = (osId: string) => {
     const os = osList.find(o => o.id === osId);
     setOsEmEdicao(osId);
     setDataInicioPrevista("");
     setDataFimPrevista("");
     setHhPlanejado("");
     setHhAdicional("");
-    setValorSAO(os?.valorOrcamento ? os.valorOrcamento.toString() : "");
+    setValorSAO(os?.valor_orcamento ? os.valor_orcamento.toString() : "");
   };
 
   const handleCancelarPlanejamento = () => {
@@ -62,11 +64,11 @@ export default function OSEmPlanejamento() {
     setValorSAO("");
   };
 
-  const handleFinalizarPlanejamento = (osId: number) => {
+  const handleFinalizarPlanejamento = (osId: string) => {
     const os = osList.find(o => o.id === osId);
     
     // Se valorSAO não foi preenchido inicialmente, validar agora
-    if (!os?.valorOrcamento && !valorSAO) {
+    if (!os?.valor_orcamento && !valorSAO) {
       toast.error("Valor SAO é obrigatório! Preencha antes de finalizar o planejamento.");
       return;
     }
@@ -90,22 +92,48 @@ export default function OSEmPlanejamento() {
     }
 
     const valorSAONum = parseFloat(valorSAO);
-    if (!os?.valorOrcamento && (!valorSAONum || valorSAONum <= 0)) {
+    if (!os?.valor_orcamento && (!valorSAONum || valorSAONum <= 0)) {
       toast.error("Valor SAO deve ser maior que zero!");
       return;
     }
 
-    updateOSPlanejamento(osId, {
-      dataInicioPrevista,
-      dataFimPrevista,
-      hhPlanejado: hhPlanejadoNum,
-      hhAdicional: hhAdicionalNum,
-      ...(valorSAONum > 0 && { valorOrcamento: valorSAONum })
-    });
-
-    toast.success("Planejamento finalizado com sucesso! OS enviada para aguardando aceite.");
-    handleCancelarPlanejamento();
+    // Atualizar dados do planejamento
+    updateOSMutation.mutate(
+      {
+        id: osId,
+        data: {
+          data_inicio_prevista: dataInicioPrevista,
+          data_fim_prevista: dataFimPrevista,
+          hh_planejado: hhPlanejadoNum,
+          hh_adicional: hhAdicionalNum,
+          ...(valorSAONum > 0 && { valor_orcamento: valorSAONum })
+        }
+      },
+      {
+        onSuccess: () => {
+          // Avançar para próxima fase
+          avancarFaseMutation.mutate({ id: osId }, {
+            onSuccess: () => {
+              toast.success("Planejamento finalizado com sucesso! OS enviada para aguardando aceite.");
+              handleCancelarPlanejamento();
+            }
+          });
+        },
+        onError: (error) => {
+          console.error("Erro ao finalizar planejamento:", error);
+          toast.error("Erro ao finalizar planejamento. Tente novamente.");
+        }
+      }
+    );
   };
+
+  if (isLoading) {
+    return (
+      <div className="container mx-auto p-6">
+        <p>Carregando...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto p-6">
@@ -140,8 +168,8 @@ export default function OSEmPlanejamento() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                {/* Valor SAO (se não foi preenchido) */}
-                {!os.valorOrcamento && (
+                 {/* Valor SAO (se não foi preenchido) */}
+                {!os.valor_orcamento && (
                   <div className="bg-amber-50 border border-amber-200 p-4 rounded-lg">
                     <p className="text-sm text-amber-800 mb-3">
                       ⚠️ O Valor SAO não foi preenchido pelo solicitante. É necessário preencher antes de finalizar o planejamento.
@@ -269,7 +297,7 @@ export default function OSEmPlanejamento() {
               <CardHeader>
                 <div className="flex justify-between items-start">
                   <CardTitle className="flex items-center gap-2">
-                    OS Nº {os.numero || os.id} - CCA {os.cca}
+                    OS Nº {os.numero} - CCA {os.cca?.codigo || os.cca_id}
                     <Badge variant="outline">
                       Em planejamento
                     </Badge>
@@ -305,8 +333,8 @@ export default function OSEmPlanejamento() {
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Valor SAO</p>
-                    {os.valorOrcamento > 0 ? (
-                      <p className="font-medium">{formatCurrency(os.valorOrcamento)}</p>
+                    {os.valor_orcamento && os.valor_orcamento > 0 ? (
+                      <p className="font-medium">{formatCurrency(os.valor_orcamento)}</p>
                     ) : (
                       <>
                         <p className="font-medium text-amber-600">Não informado</p>
@@ -316,15 +344,15 @@ export default function OSEmPlanejamento() {
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Data compromissada</p>
-                    <p className="font-medium">{formatDate(os.dataCompromissada)}</p>
+                    <p className="font-medium">{formatDate(os.data_compromissada)}</p>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Responsável EM</p>
-                    <p className="font-medium">{os.responsavelEM}</p>
+                    <p className="font-medium">{os.responsavel_em?.nome || "Não atribuído"}</p>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Solicitante</p>
-                    <p className="font-medium">{os.nomeSolicitante}</p>
+                    <p className="font-medium">{os.solicitante_nome}</p>
                   </div>
                 </div>
                 <div className="mt-4">
