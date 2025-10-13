@@ -13,15 +13,18 @@ import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { useCCAs } from "@/hooks/useCCAs";
 import { useNfeCompras } from "@/hooks/useNfeCompras";
+import { useCredores } from "@/hooks/useCredores";
 
 export default function EntradaMateriais() {
   const navigate = useNavigate();
   const { data: ccas = [], isLoading: ccasLoading } = useCCAs();
   const { data: nfeCompras = [], isLoading: nfeLoading } = useNfeCompras();
+  const { data: credores = [], isLoading: credoresLoading } = useCredores();
   
   // Estados para filtros
   const [filtros, setFiltros] = useState({
     cca: "all",
+    credor: "all",
     documento: "",
     numeroDocumento: "",
     dataEmissaoInicio: undefined as Date | undefined,
@@ -149,6 +152,27 @@ export default function EntradaMateriais() {
                   {ccas.filter(cca => cca.ativo).map((cca) => (
                     <SelectItem key={cca.id} value={cca.id.toString()}>
                       {cca.codigo} - {cca.nome}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="credor">Credor</Label>
+              <Select 
+                value={filtros.credor} 
+                onValueChange={(value) => handleFiltroChange("credor", value)}
+                disabled={credoresLoading}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={credoresLoading ? "Carregando..." : "Selecione o credor"} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos</SelectItem>
+                  {credores.map((credor) => (
+                    <SelectItem key={credor.id} value={credor.id}>
+                      {credor.razao}
                     </SelectItem>
                   ))}
                 </SelectContent>

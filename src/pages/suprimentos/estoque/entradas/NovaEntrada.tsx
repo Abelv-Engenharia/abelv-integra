@@ -16,6 +16,7 @@ import { Plus, Trash2, CalendarIcon, Upload, X, ArrowLeft } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { useCCAs } from "@/hooks/useCCAs";
+import { useCredores } from "@/hooks/useCredores";
 
 const MAX_FILE_SIZE = 3 * 1024 * 1024; // 3MB
 const ACCEPTED_FILE_TYPES = ["application/pdf", "image/png", "image/jpeg", "image/jpg"];
@@ -30,6 +31,7 @@ const itemSchema = z.object({
 
 const entradaSchema = z.object({
   cca: z.number({ required_error: "CCA é obrigatório" }).min(1, "CCA deve ser maior que 0"),
+  credor: z.string().optional(),
   documento: z.string().min(1, "Tipo de documento é obrigatório"),
   numerodocumento: z.string().min(1, "Número do documento é obrigatório"),
   dataemissao: z.date({ required_error: "Data de emissão é obrigatória" }),
@@ -46,11 +48,13 @@ export default function NovaEntrada() {
   const navigate = useNavigate();
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const { data: ccas = [], isLoading: ccasLoading } = useCCAs();
+  const { data: credores = [], isLoading: credoresLoading } = useCredores();
 
   const form = useForm<EntradaFormData>({
     resolver: zodResolver(entradaSchema),
     defaultValues: {
       cca: undefined,
+      credor: "",
       documento: "",
       numerodocumento: "",
       pcabelv: undefined,
@@ -185,6 +189,35 @@ export default function NovaEntrada() {
                           {ccas.filter(cca => cca.ativo).map((cca) => (
                             <SelectItem key={cca.id} value={cca.id.toString()}>
                               {cca.codigo} - {cca.nome}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="credor"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Credor</FormLabel>
+                      <Select 
+                        onValueChange={field.onChange} 
+                        value={field.value}
+                        disabled={credoresLoading}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder={credoresLoading ? "Carregando..." : "Selecione o credor"} />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {credores.map((credor) => (
+                            <SelectItem key={credor.id} value={credor.id}>
+                              {credor.razao}
                             </SelectItem>
                           ))}
                         </SelectContent>

@@ -6,12 +6,16 @@ import { ArrowLeft } from "lucide-react";
 import { format } from "date-fns";
 import { useNfeCompra } from "@/hooks/useNfeCompras";
 import { useNfeCompraItens } from "@/hooks/useNfeCompraItens";
+import { useCredores } from "@/hooks/useCredores";
 
 export default function EditarEntrada() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { data: nfe, isLoading: nfeLoading } = useNfeCompra(id);
   const { data: itens = [], isLoading: itensLoading } = useNfeCompraItens(id);
+  const { data: credores = [] } = useCredores();
+
+  const credor = credores.find(c => c.id === nfe?.credor_id);
 
   if (nfeLoading) {
     return (
@@ -68,6 +72,12 @@ export default function EditarEntrada() {
               <p className="text-sm font-medium text-muted-foreground">Data movimento</p>
               <p className="text-lg">{format(new Date(nfe.data_movimento), "dd/MM/yyyy")}</p>
             </div>
+            {credor && (
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Credor</p>
+                <p className="text-lg">{credor.razao}</p>
+              </div>
+            )}
             <div>
               <p className="text-sm font-medium text-muted-foreground">Fornecedor</p>
               <p className="text-lg">{nfe.fornecedor}</p>

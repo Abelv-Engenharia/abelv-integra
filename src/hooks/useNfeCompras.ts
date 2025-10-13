@@ -8,6 +8,7 @@ export interface NfeCompra {
   data_emissao: string;
   data_movimento: string;
   cca_id: number;
+  credor_id?: string;
   fornecedor: string;
   cnpj_fornecedor: string;
   valor_total: number;
