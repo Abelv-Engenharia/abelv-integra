@@ -1,5 +1,6 @@
 import { Building2, FolderOpen, Clock, CheckCircle, Play, Archive, Calculator, ClipboardCheck, RotateCcw, AlertTriangle, Calendar, Zap, Cog, BarChart3, Users, Settings } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
+import { useEffect, useState } from "react";
 import {
   Collapsible,
   CollapsibleContent,
@@ -53,15 +54,23 @@ export default function SidebarSectionEngenhariaMatricial({ openMenu, toggleMenu
 
   const isInEngenhariaMatricial = currentPath.startsWith("/engenharia-matricial");
 
-  // Determinar qual submenu deve estar aberto baseado na rota
-  const getActiveSubmenu = () => {
-    if (currentPath.startsWith("/engenharia-matricial/os-")) return "em-fluxo-os";
-    if (currentPath.startsWith("/engenharia-matricial/relatorios")) return "em-relatorios";
-    if (currentPath.startsWith("/engenharia-matricial/admin")) return "em-admin";
-    return null;
-  };
+  // estado local para controlar qual submenu está aberto
+  const [open_submenu, set_open_submenu] = useState<string | null>(null);
 
-  const activeSubmenu = getActiveSubmenu();
+  // sincroniza com a rota atual
+  useEffect(() => {
+    if (currentPath.includes("replanejamento")) {
+      set_open_submenu("em-replanejamento");
+    } else if (currentPath.startsWith("/engenharia-matricial/relatorios")) {
+      set_open_submenu("em-relatorios");
+    } else if (currentPath.startsWith("/engenharia-matricial/admin")) {
+      set_open_submenu("em-admin");
+    } else if (currentPath.startsWith("/engenharia-matricial/os-")) {
+      set_open_submenu("em-fluxo-os");
+    } else {
+      set_open_submenu(null);
+    }
+  }, [currentPath]);
 
   return (
     <SidebarMenu>
@@ -86,14 +95,14 @@ export default function SidebarSectionEngenhariaMatricial({ openMenu, toggleMenu
               {/* Fluxo de OS */}
               <SidebarMenuSubItem>
                 <Collapsible
-                  open={openMenu === "em-fluxo-os" || activeSubmenu === "em-fluxo-os"}
+                  open={open_submenu === "em-fluxo-os"}
                   className="group/subcollapsible"
                 >
                   <CollapsibleTrigger asChild>
                     <SidebarMenuSubButton
                       onClick={(e) => {
                         e.stopPropagation();
-                        toggleMenu("em-fluxo-os");
+                        set_open_submenu(open_submenu === "em-fluxo-os" ? null : "em-fluxo-os");
                       }}
                       className="text-white hover:bg-slate-700"
                     >
@@ -126,14 +135,14 @@ export default function SidebarSectionEngenhariaMatricial({ openMenu, toggleMenu
               {/* Replanejamento */}
               <SidebarMenuSubItem>
                 <Collapsible
-                  open={openMenu === "em-replanejamento" || (activeSubmenu === "em-fluxo-os" && currentPath.includes("replanejamento"))}
+                  open={open_submenu === "em-replanejamento"}
                   className="group/subcollapsible"
                 >
                   <CollapsibleTrigger asChild>
                     <SidebarMenuSubButton
                       onClick={(e) => {
                         e.stopPropagation();
-                        toggleMenu("em-replanejamento");
+                        set_open_submenu(open_submenu === "em-replanejamento" ? null : "em-replanejamento");
                       }}
                       className="text-white hover:bg-slate-700"
                     >
@@ -166,14 +175,14 @@ export default function SidebarSectionEngenhariaMatricial({ openMenu, toggleMenu
               {/* Relatórios */}
               <SidebarMenuSubItem>
                 <Collapsible
-                  open={openMenu === "em-relatorios" || activeSubmenu === "em-relatorios"}
+                  open={open_submenu === "em-relatorios"}
                   className="group/subcollapsible"
                 >
                   <CollapsibleTrigger asChild>
                     <SidebarMenuSubButton
                       onClick={(e) => {
                         e.stopPropagation();
-                        toggleMenu("em-relatorios");
+                        set_open_submenu(open_submenu === "em-relatorios" ? null : "em-relatorios");
                       }}
                       className="text-white hover:bg-slate-700"
                     >
@@ -206,14 +215,14 @@ export default function SidebarSectionEngenhariaMatricial({ openMenu, toggleMenu
               {/* Admin */}
               <SidebarMenuSubItem>
                 <Collapsible
-                  open={openMenu === "em-admin" || activeSubmenu === "em-admin"}
+                  open={open_submenu === "em-admin"}
                   className="group/subcollapsible"
                 >
                   <CollapsibleTrigger asChild>
                     <SidebarMenuSubButton
                       onClick={(e) => {
                         e.stopPropagation();
-                        toggleMenu("em-admin");
+                        set_open_submenu(open_submenu === "em-admin" ? null : "em-admin");
                       }}
                       className="text-white hover:bg-slate-700"
                     >
