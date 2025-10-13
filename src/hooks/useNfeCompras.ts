@@ -21,7 +21,7 @@ export const useNfeCompras = () => {
     queryKey: ["nfe_compras"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("nfe_compras" as any)
+        .from("nfe_compra" as any)
         .select("*")
         .order("data_emissao", { ascending: false });
 
@@ -38,7 +38,7 @@ export const useNfeCompra = (id: string | undefined) => {
       if (!id) return null;
       
       const { data, error } = await supabase
-        .from("nfe_compras" as any)
+        .from("nfe_compra" as any)
         .select("*")
         .eq("id", id)
         .maybeSingle();
