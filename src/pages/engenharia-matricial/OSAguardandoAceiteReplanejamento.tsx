@@ -19,14 +19,13 @@ import { toast } from "sonner";
 import { useState } from "react";
 
 export default function OSAguardandoAceiteReplanejamento() {
-  const { osList, aprovarPlanejamento, updateOSStatus } = useOS();
-  const [osParaRejeitar, setOsParaRejeitar] = useState<number | null>(null);
+  const { data: osAguardandoAceiteReplanejamento = [], isLoading } = useOSList({
+    status: "aguardando-aceite-replanejamento" as any,
+  });
+  const updateOS = useUpdateOS();
+  const [osParaRejeitar, setOsParaRejeitar] = useState<string | null>(null);
   const [justificativaRejeicao, setJustificativaRejeicao] = useState("");
   const [loading, setLoading] = useState(false);
-
-  const osAguardandoAceiteReplanejamento = osList.filter(
-    (os) => os.status === "aguardando-aceite-replanejamento"
-  );
 
   const capitalizarTexto = (texto: string) => {
     return texto.charAt(0).toUpperCase() + texto.slice(1).toLowerCase();
@@ -43,16 +42,18 @@ export default function OSAguardandoAceiteReplanejamento() {
     }).format(value);
   };
 
-  const handleAprovarReplanejamento = (osId: number) => {
-    aprovarPlanejamento(osId);
-    toast.success("Replanejamento aprovado! OS retornada para execução.");
+  const handleAprovarReplanejamento = async (osId: string) => {
+    try {
+      await updateOS.mutateAsync({ id: osId, data: { status: "em-execucao" as any } });
+      toast.success("Replanejamento aprovado! OS retornada para execução.");
+    } catch (error) {
+      toast.error("Erro ao aprovar replanejamento.");
+    }
   };
-
-  const handleIniciarRejeicaoReplanejamento = (osId: number) => {
+  const handleIniciarRejeicaoReplanejamento = (osId: string) => {
     setOsParaRejeitar(osId);
     setJustificativaRejeicao("");
   };
-
   const handleCancelarRejeicao = () => {
     setOsParaRejeitar(null);
     setJustificativaRejeicao("");
@@ -68,8 +69,13 @@ export default function OSAguardandoAceiteReplanejamento() {
 
     setLoading(true);
     try {
-      // Volta para execução sem as alterações do replanejamento
-      updateOSStatus(osParaRejeitar, "em-execucao", `Replanejamento rejeitado: ${justificativaRejeicao.trim()}`);
+      await updateOS.mutateAsync({
+        id: osParaRejeitar,
+        data: {
+          status: "em-execucao" as any,
+          justificativa_engenharia: `Replanejamento rejeitado: ${justificativaRejeicao.trim()}`,
+        },
+      });
       toast.error("Replanejamento rejeitado. OS mantida no planejamento original.");
       handleCancelarRejeicao();
     } catch (error) {
@@ -120,7 +126,7 @@ export default function OSAguardandoAceiteReplanejamento() {
                 <CardHeader>
                   <div className="flex justify-between items-start">
                     <CardTitle className="flex items-center gap-2">
-                      OS Nº {os.numero || os.id} - CCA {os.cca}
+                      OS Nº {os.numero || os.id} - CCA {os.cca?.codigo || "N/A"}
                       <Badge variant="outline" className="border-orange-200 text-orange-700">
                         <RotateCcw className="h-3 w-3 mr-1" />
                         Replanejamento pendente
@@ -166,7 +172,7 @@ export default function OSAguardandoAceiteReplanejamento() {
                     </div>
                     <div>
                       <p className="text-sm text-muted-foreground">Solicitante</p>
-                      <p className="font-medium">{os.nomeSolicitante}</p>
+                      <p className="font-medium">{os.solicitante_nome}</p>
                     </div>
                   </div>
 
