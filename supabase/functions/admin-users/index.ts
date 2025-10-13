@@ -111,21 +111,24 @@ serve(async (req) => {
     
     // Criar novo usuário
     else if (req.method === 'POST' && path === 'create') {
-      const { email, password, userData } = await req.json();
+      const { email, password, userData, emailConfirm } = await req.json();
       
       // Validações básicas
-      if (!email || !password) {
+      if (!email) {
         return new Response(
-          JSON.stringify({ error: 'Email e senha são obrigatórios' }),
+          JSON.stringify({ error: 'Email é obrigatório' }),
           { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
       
+      // Gerar senha temporária aleatória se não fornecida (usuário via Azure AD)
+      const userPassword = password || `${Math.random().toString(36).substring(2)}${Math.random().toString(36).substring(2)}`;
+      
       // Criar usuário usando a API admin
       const { data, error } = await supabaseAdmin.auth.admin.createUser({
         email,
-        password,
-        email_confirm: true,
+        password: userPassword,
+        email_confirm: emailConfirm !== false, // Default true, mas pode ser false
         user_metadata: userData
       });
       
@@ -137,7 +140,7 @@ serve(async (req) => {
       }
       
       return new Response(
-        JSON.stringify(data),
+        JSON.stringify({ user: data }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
