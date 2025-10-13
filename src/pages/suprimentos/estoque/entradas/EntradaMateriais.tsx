@@ -11,9 +11,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Plus, Edit, CalendarIcon, Filter } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import { useCCAs } from "@/hooks/useCCAs";
 
 export default function EntradaMateriais() {
   const navigate = useNavigate();
+  const { data: ccas = [], isLoading: ccasLoading } = useCCAs();
   
   // Estados para filtros
   const [filtros, setFiltros] = useState({
@@ -157,13 +159,23 @@ export default function EntradaMateriais() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label htmlFor="cca">CCA</Label>
-              <Input
-                id="cca"
-                type="number"
-                value={filtros.cca}
-                onChange={(e) => handleFiltroChange("cca", e.target.value)}
-                placeholder="Digite o CCA"
-              />
+              <Select 
+                value={filtros.cca} 
+                onValueChange={(value) => handleFiltroChange("cca", value)}
+                disabled={ccasLoading}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={ccasLoading ? "Carregando..." : "Selecione o CCA"} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Todos</SelectItem>
+                  {ccas.filter(cca => cca.ativo).map((cca) => (
+                    <SelectItem key={cca.id} value={cca.id.toString()}>
+                      {cca.codigo} - {cca.nome}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="space-y-2">

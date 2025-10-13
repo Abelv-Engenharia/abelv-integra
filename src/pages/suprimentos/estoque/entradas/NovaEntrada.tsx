@@ -15,6 +15,7 @@ import { toast } from "@/components/ui/use-toast";
 import { Plus, Trash2, CalendarIcon, Upload, X, ArrowLeft } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import { useCCAs } from "@/hooks/useCCAs";
 
 const MAX_FILE_SIZE = 3 * 1024 * 1024; // 3MB
 const ACCEPTED_FILE_TYPES = ["application/pdf", "image/png", "image/jpeg", "image/jpg"];
@@ -44,6 +45,7 @@ type EntradaFormData = z.infer<typeof entradaSchema>;
 export default function NovaEntrada() {
   const navigate = useNavigate();
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const { data: ccas = [], isLoading: ccasLoading } = useCCAs();
 
   const form = useForm<EntradaFormData>({
     resolver: zodResolver(entradaSchema),
@@ -169,15 +171,24 @@ export default function NovaEntrada() {
                       <FormLabel className={cn(!field.value && "text-destructive")}>
                         CCA *
                       </FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          {...field}
-                          onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
-                          placeholder="Digite o CCA"
-                          className={cn(!field.value && "border-destructive")}
-                        />
-                      </FormControl>
+                      <Select 
+                        onValueChange={(value) => field.onChange(parseInt(value))} 
+                        value={field.value?.toString()}
+                        disabled={ccasLoading}
+                      >
+                        <FormControl>
+                          <SelectTrigger className={cn(!field.value && "border-destructive")}>
+                            <SelectValue placeholder={ccasLoading ? "Carregando..." : "Selecione o CCA"} />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {ccas.filter(cca => cca.ativo).map((cca) => (
+                            <SelectItem key={cca.id} value={cca.id.toString()}>
+                              {cca.codigo} - {cca.nome}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}
