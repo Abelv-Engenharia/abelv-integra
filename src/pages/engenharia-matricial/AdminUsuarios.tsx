@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Separator } from "@/components/ui/separator";
 import { Plus, Edit, UserX, UserCheck, Mail, Trash2, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { Usuario, Papel, Disciplina, mockUsuarios, getPapelLabel } from "@/lib/engenharia-matricial/usuarios";
+import { Usuario, Disciplina, mockUsuarios } from "@/lib/engenharia-matricial/usuarios";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 
