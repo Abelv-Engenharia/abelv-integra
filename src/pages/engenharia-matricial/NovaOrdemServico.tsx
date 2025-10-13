@@ -11,13 +11,13 @@ import { ArrowLeft, Save, Upload } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useOS } from "@/contexts/engenharia-matricial/OSContext";
-import { getUsuariosParaOS, getCCAs, getClientes, getPapelLabel, Usuario } from "@/lib/engenharia-matricial/usuarios";
+import { getUsuariosParaOS, Usuario } from "@/lib/engenharia-matricial/usuarios";
 
 const NovaOrdemServico = () => {
   const { toast } = useToast();
   const { addOS } = useOS();
   const navigate = useNavigate();
-  
+
   const [solicitantesAtivos, setSolicitantesAtivos] = useState<Usuario[]>([]);
   const [ccasDisponiveis, setCCAsDisponiveis] = useState<number[]>([]);
   const [clientesDisponiveis, setClientesDisponiveis] = useState<string[]>([]);
@@ -31,25 +31,25 @@ const NovaOrdemServico = () => {
     };
 
     carregarDados();
-    
+
     // Escutar mudanças no localStorage para recarregar dados
     const handleStorageChange = () => {
       carregarDados();
     };
-    
-    window.addEventListener('storage', handleStorageChange);
-    
+
+    window.addEventListener("storage", handleStorageChange);
+
     // Também escutar mudanças internas (quando o mesmo tab modifica o localStorage)
     const originalSetItem = localStorage.setItem;
-    localStorage.setItem = function(key, value) {
+    localStorage.setItem = function (key, value) {
       originalSetItem.apply(this, [key, value]);
-      if (key === 'admin_usuarios') {
+      if (key === "admin_usuarios") {
         carregarDados();
       }
     };
 
     return () => {
-      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener("storage", handleStorageChange);
       localStorage.setItem = originalSetItem;
     };
   }, []);
@@ -64,56 +64,56 @@ const NovaOrdemServico = () => {
     dataCompromissada: "",
     valorOrcamento: "",
     anexos: [] as File[],
-    responsavelEM: ""
+    responsavelEM: "",
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => {
+    setFormData((prev) => {
       const newData = {
         ...prev,
-        [field]: value
+        [field]: value,
       };
-      
+
       // Atualizar automaticamente o responsável EM baseado na disciplina
       if (field === "disciplina") {
         const responsaveis = {
-          "mecanica": "Ricardo Cunha",
-          "eletrica": "Elton Anthony"
+          mecanica: "Ricardo Cunha",
+          eletrica: "Elton Anthony",
         };
         newData.responsavelEM = responsaveis[value as keyof typeof responsaveis] || "";
       }
-      
+
       return newData;
     });
-    
+
     // Limpar erro quando o usuário começar a digitar
     if (errors[field]) {
-      setErrors(prev => ({
+      setErrors((prev) => ({
         ...prev,
-        [field]: ""
+        [field]: "",
       }));
     }
   };
 
   const handleDisciplinaChange = (disciplina: string, checked: boolean) => {
-    setFormData(prev => {
+    setFormData((prev) => {
       const disciplinasEnvolvidas = checked
         ? [...prev.disciplinasEnvolvidas, disciplina]
-        : prev.disciplinasEnvolvidas.filter(d => d !== disciplina);
-      
+        : prev.disciplinasEnvolvidas.filter((d) => d !== disciplina);
+
       return {
         ...prev,
-        disciplinasEnvolvidas
+        disciplinasEnvolvidas,
       };
     });
 
     // Limpar erro quando houver mudança
     if (errors.disciplinasEnvolvidas) {
-      setErrors(prev => ({
+      setErrors((prev) => ({
         ...prev,
-        disciplinasEnvolvidas: ""
+        disciplinasEnvolvidas: "",
       }));
     }
   };
@@ -157,7 +157,7 @@ const NovaOrdemServico = () => {
       const dataCompromissada = new Date(formData.dataCompromissada);
       const hoje = new Date();
       hoje.setHours(0, 0, 0, 0);
-      
+
       if (dataCompromissada < hoje) {
         newErrors.dataCompromissada = "Data compromissada não pode ser anterior à data atual";
       }
@@ -175,19 +175,19 @@ const NovaOrdemServico = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       toast({
         title: "Erro na validação",
         description: "Por favor, corrija os campos em vermelho.",
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
 
     // Adicionar a OS ao contexto
     addOS(formData);
-    
+
     toast({
       title: "OS criada com sucesso!",
       description: `OS ${formData.cca} foi criada e enviada para a Engenharia Matricial.`,
@@ -199,16 +199,16 @@ const NovaOrdemServico = () => {
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      anexos: [...prev.anexos, ...files]
+      anexos: [...prev.anexos, ...files],
     }));
   };
 
   const removeFile = (index: number) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      anexos: prev.anexos.filter((_, i) => i !== index)
+      anexos: prev.anexos.filter((_, i) => i !== index),
     }));
   };
 
@@ -233,9 +233,7 @@ const NovaOrdemServico = () => {
         <Card>
           <CardHeader>
             <CardTitle>Dados Básicos</CardTitle>
-            <CardDescription>
-              Informações principais da Ordem de Serviço
-            </CardDescription>
+            <CardDescription>Informações principais da Ordem de Serviço</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -245,9 +243,11 @@ const NovaOrdemServico = () => {
                 </Label>
                 {(() => {
                   // Verificar se o solicitante selecionado tem CCA livre
-                  const solicitanteSelecionado = solicitantesAtivos.find(s => s.nome === formData.nomeSolicitante);
-                  const temCCALivre = solicitanteSelecionado && (solicitanteSelecionado.papel === "EM" || solicitanteSelecionado.papel === "ADMIN");
-                  
+                  const solicitanteSelecionado = solicitantesAtivos.find((s) => s.nome === formData.nomeSolicitante);
+                  const temCCALivre =
+                    solicitanteSelecionado &&
+                    (solicitanteSelecionado.papel === "EM" || solicitanteSelecionado.papel === "ADMIN");
+
                   if (temCCALivre) {
                     // CCA livre - input de texto
                     return (
@@ -261,7 +261,8 @@ const NovaOrdemServico = () => {
                           className={errors.cca ? "border-destructive" : ""}
                         />
                         <p className="text-xs text-muted-foreground mt-1">
-                          Como {solicitanteSelecionado?.papel === "EM" ? "Engenheiro Matricial" : "Administrador"}, você pode trabalhar com qualquer CCA
+                          Como {solicitanteSelecionado?.papel === "EM" ? "Engenheiro Matricial" : "Administrador"}, você
+                          pode trabalhar com qualquer CCA
                         </p>
                       </div>
                     );
@@ -283,16 +284,17 @@ const NovaOrdemServico = () => {
                     );
                   }
                 })()}
-                {errors.cca && (
-                  <p className="text-sm text-destructive">{errors.cca}</p>
-                )}
+                {errors.cca && <p className="text-sm text-destructive">{errors.cca}</p>}
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="nomeSolicitante" className={errors.nomeSolicitante ? "text-destructive" : ""}>
                   Nome do solicitante *
                 </Label>
-                <Select value={formData.nomeSolicitante} onValueChange={(value) => handleInputChange("nomeSolicitante", value.trim())}>
+                <Select
+                  value={formData.nomeSolicitante}
+                  onValueChange={(value) => handleInputChange("nomeSolicitante", value.trim())}
+                >
                   <SelectTrigger className={errors.nomeSolicitante ? "border-destructive" : ""}>
                     <SelectValue placeholder="Selecione o solicitante" />
                   </SelectTrigger>
@@ -309,9 +311,7 @@ const NovaOrdemServico = () => {
                     ))}
                   </SelectContent>
                 </Select>
-                {errors.nomeSolicitante && (
-                  <p className="text-sm text-destructive">{errors.nomeSolicitante}</p>
-                )}
+                {errors.nomeSolicitante && <p className="text-sm text-destructive">{errors.nomeSolicitante}</p>}
               </div>
             </div>
 
@@ -331,9 +331,7 @@ const NovaOrdemServico = () => {
                   ))}
                 </SelectContent>
               </Select>
-              {errors.cliente && (
-                <p className="text-sm text-destructive">{errors.cliente}</p>
-              )}
+              {errors.cliente && <p className="text-sm text-destructive">{errors.cliente}</p>}
             </div>
           </CardContent>
         </Card>
@@ -342,15 +340,11 @@ const NovaOrdemServico = () => {
         <Card>
           <CardHeader>
             <CardTitle>Especificações Técnicas</CardTitle>
-            <CardDescription>
-              Definições técnicas da OS
-            </CardDescription>
+            <CardDescription>Definições técnicas da OS</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-3">
-              <Label className={errors.disciplina ? "text-destructive" : ""}>
-                Disciplina *
-              </Label>
+              <Label className={errors.disciplina ? "text-destructive" : ""}>Disciplina *</Label>
               <RadioGroup
                 value={formData.disciplina}
                 onValueChange={(value) => handleInputChange("disciplina", value)}
@@ -365,9 +359,7 @@ const NovaOrdemServico = () => {
                   <Label htmlFor="mecanica">Mecânica</Label>
                 </div>
               </RadioGroup>
-              {errors.disciplina && (
-                <p className="text-sm text-destructive">{errors.disciplina}</p>
-              )}
+              {errors.disciplina && <p className="text-sm text-destructive">{errors.disciplina}</p>}
             </div>
 
             {formData.disciplina && (
@@ -383,13 +375,11 @@ const NovaOrdemServico = () => {
             )}
 
             <div className="space-y-2">
-              <Label className={errors.disciplinasEnvolvidas ? "text-destructive" : ""}>
-                Disciplinas envolvidas *
-              </Label>
+              <Label className={errors.disciplinasEnvolvidas ? "text-destructive" : ""}>Disciplinas envolvidas *</Label>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3 p-4 border rounded-lg">
                 {[
                   "Mecânica",
-                  "Tubulação", 
+                  "Tubulação",
                   "Hidráulica",
                   "Combate a Incêndio",
                   "Elétrica",
@@ -397,7 +387,7 @@ const NovaOrdemServico = () => {
                   "Sistemas Especiais",
                   "HVAC",
                   "Civil",
-                  "Equipamentos"
+                  "Equipamentos",
                 ].map((disciplina) => (
                   <div key={disciplina} className="flex items-center space-x-2">
                     <Checkbox
@@ -427,9 +417,7 @@ const NovaOrdemServico = () => {
                 onChange={(e) => handleInputChange("familiaSAO", e.target.value)}
                 className={errors.familiaSAO ? "border-destructive" : ""}
               />
-              {errors.familiaSAO && (
-                <p className="text-sm text-destructive">{errors.familiaSAO}</p>
-              )}
+              {errors.familiaSAO && <p className="text-sm text-destructive">{errors.familiaSAO}</p>}
             </div>
 
             <div className="space-y-2">
@@ -444,9 +432,7 @@ const NovaOrdemServico = () => {
                 className={errors.descricao ? "border-destructive" : ""}
                 rows={4}
               />
-              {errors.descricao && (
-                <p className="text-sm text-destructive">{errors.descricao}</p>
-              )}
+              {errors.descricao && <p className="text-sm text-destructive">{errors.descricao}</p>}
             </div>
 
             <div className="space-y-2">
@@ -463,9 +449,7 @@ const NovaOrdemServico = () => {
               <p className="text-sm text-muted-foreground">
                 Data limite para atendimento da OS pela Engenharia Matricial
               </p>
-              {errors.dataCompromissada && (
-                <p className="text-sm text-destructive">{errors.dataCompromissada}</p>
-              )}
+              {errors.dataCompromissada && <p className="text-sm text-destructive">{errors.dataCompromissada}</p>}
             </div>
           </CardContent>
         </Card>
@@ -474,9 +458,7 @@ const NovaOrdemServico = () => {
         <Card>
           <CardHeader>
             <CardTitle>Valores</CardTitle>
-            <CardDescription>
-              Informações financeiras da OS
-            </CardDescription>
+            <CardDescription>Informações financeiras da OS</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 gap-4">
@@ -493,12 +475,8 @@ const NovaOrdemServico = () => {
                   onChange={(e) => handleInputChange("valorOrcamento", e.target.value)}
                   className={errors.valorOrcamento ? "border-destructive" : ""}
                 />
-                <p className="text-sm text-muted-foreground">
-                  Informe o custo de venda (SAO) da ordem de serviço
-                </p>
-                {errors.valorOrcamento && (
-                  <p className="text-sm text-destructive">{errors.valorOrcamento}</p>
-                )}
+                <p className="text-sm text-muted-foreground">Informe o custo de venda (SAO) da ordem de serviço</p>
+                {errors.valorOrcamento && <p className="text-sm text-destructive">{errors.valorOrcamento}</p>}
               </div>
             </div>
           </CardContent>
@@ -508,21 +486,13 @@ const NovaOrdemServico = () => {
         <Card>
           <CardHeader>
             <CardTitle>Anexos</CardTitle>
-            <CardDescription>
-              Documentos de apoio (opcional)
-            </CardDescription>
+            <CardDescription>Documentos de apoio (opcional)</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="anexos">Arquivos</Label>
               <div className="flex items-center gap-2">
-                <Input
-                  id="anexos"
-                  type="file"
-                  multiple
-                  onChange={handleFileUpload}
-                  className="hidden"
-                />
+                <Input id="anexos" type="file" multiple onChange={handleFileUpload} className="hidden" />
                 <Button
                   type="button"
                   variant="outline"
@@ -535,18 +505,11 @@ const NovaOrdemServico = () => {
               </div>
               {formData.anexos.length > 0 && (
                 <div className="space-y-2">
-                  <p className="text-sm text-muted-foreground">
-                    {formData.anexos.length} arquivo(s) selecionado(s):
-                  </p>
+                  <p className="text-sm text-muted-foreground">{formData.anexos.length} arquivo(s) selecionado(s):</p>
                   {formData.anexos.map((file, index) => (
                     <div key={index} className="flex items-center justify-between p-2 bg-muted rounded">
                       <span className="text-sm">{file.name}</span>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => removeFile(index)}
-                      >
+                      <Button type="button" variant="ghost" size="sm" onClick={() => removeFile(index)}>
                         Remover
                       </Button>
                     </div>
@@ -560,9 +523,7 @@ const NovaOrdemServico = () => {
         {/* Ações */}
         <div className="flex justify-end gap-4">
           <Link to="/engenharia-matricial/os-abertas">
-            <Button variant="outline">
-              Cancelar
-            </Button>
+            <Button variant="outline">Cancelar</Button>
           </Link>
           <Button type="submit" className="gap-2">
             <Save className="h-4 w-4" />
