@@ -90,6 +90,7 @@ export default function OSReplanejamento() {
           data_fim_prevista: novaDataFim,
           hh_adicional: hhTotalAtual - (osAtual?.hh_planejado || 0) + hhAdicionalNum,
           justificativa_engenharia: motivo.trim(),
+          status: "aguardando-aceite-replanejamento" as any,
         },
       });
 
