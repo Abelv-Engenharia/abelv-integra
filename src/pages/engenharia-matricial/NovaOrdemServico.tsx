@@ -11,7 +11,7 @@ import { ArrowLeft, Save, Upload } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useOS } from "@/contexts/engenharia-matricial/OSContext";
-import { getUsuariosParaOS, Usuario } from "@/lib/engenharia-matricial/usuarios";
+import { getUsuariosParaOS, Usuario, getCCAs, getClientes, getPapelLabel } from "@/lib/engenharia-matricial/usuarios";
 
 const NovaOrdemServico = () => {
   const { toast } = useToast();

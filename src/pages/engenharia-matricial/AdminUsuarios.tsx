@@ -31,6 +31,7 @@ export default function AdminUsuarios() {
     email: "",
     ativo: true,
     disciplinaPreferida: "" as Disciplina | "",
+    papel: "" as "EM" | "OBRA" | "CONTROLADORIA" | "ADMIN" | "",
   });
   const { toast } = useToast();
 
@@ -53,6 +54,7 @@ export default function AdminUsuarios() {
         email: usuario.email,
         ativo: usuario.ativo,
         disciplinaPreferida: usuario.disciplinaPreferida || "",
+        papel: usuario.papel || "",
       });
     } else {
       setUsuarioEdicao(null);
@@ -61,6 +63,7 @@ export default function AdminUsuarios() {
         email: "",
         ativo: true,
         disciplinaPreferida: "",
+        papel: "",
       });
     }
     setDialogAberto(true);
