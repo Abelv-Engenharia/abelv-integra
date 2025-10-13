@@ -3273,31 +3273,43 @@ export type Database = {
       nfe_compra: {
         Row: {
           created_at: string
+          emissao: string | null
           id: string
           id_credor: string
           id_documento: string
           id_empresa: number
+          Movimenbto: string | null
           numero: string
+          PC_Abelv: string | null
+          PC_Cliente: string | null
           sequencial: number
           titulo: number | null
         }
         Insert: {
           created_at?: string
+          emissao?: string | null
           id?: string
           id_credor: string
           id_documento: string
           id_empresa: number
+          Movimenbto?: string | null
           numero: string
+          PC_Abelv?: string | null
+          PC_Cliente?: string | null
           sequencial: number
           titulo?: number | null
         }
         Update: {
           created_at?: string
+          emissao?: string | null
           id?: string
           id_credor?: string
           id_documento?: string
           id_empresa?: number
+          Movimenbto?: string | null
           numero?: string
+          PC_Abelv?: string | null
+          PC_Cliente?: string | null
           sequencial?: number
           titulo?: number | null
         }
