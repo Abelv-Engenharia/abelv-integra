@@ -130,22 +130,20 @@ export default function OSReplanejamento() {
       ) : (
         <div className="grid gap-6">
           {/* Formulário de Replanejamento */}
-          {osEmReplanejamento && (
-            <Card className="border-orange-200 bg-orange-50/50">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-orange-700">
-                  <RotateCcw className="h-5 w-5" />
-                  Replanejamento da OS #{os.numero}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {(() => {
-                  const os = osList.find((o) => o.id === osEmReplanejamento);
-                  if (!os) return null;
+          {osEmReplanejamento && (() => {
+            const os = osList.find((o) => o.id === osEmReplanejamento);
+            if (!os) return null;
 
-                  return (
-                    <>
-                      {/* Comparação Planejamento Atual vs Novo */}
+            return (
+              <Card className="border-orange-200 bg-orange-50/50">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-orange-700">
+                    <RotateCcw className="h-5 w-5" />
+                    Replanejamento da OS #{os.numero}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {/* Comparação Planejamento Atual vs Novo */}
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {/* Planejamento Atual */}
                         <div className="space-y-4">
@@ -274,16 +272,14 @@ export default function OSReplanejamento() {
                           disabled={!novaDataInicio || !novaDataFim || !hhAdicional || !motivo.trim()}
                           className="bg-orange-600 hover:bg-orange-700"
                         >
-                          <CheckCircle2 className="h-4 w-4 mr-2" />
-                          Enviar replanejamento
-                        </Button>
-                      </div>
-                    </>
-                  );
-                })()}
-              </CardContent>
-            </Card>
-          )}
+                      <CheckCircle2 className="h-4 w-4 mr-2" />
+                      Enviar replanejamento
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })()}
 
           {/* Lista de OS em Execução */}
           {osParaReplanejamento.map((os) => (
