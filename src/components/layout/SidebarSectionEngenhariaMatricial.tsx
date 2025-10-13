@@ -94,82 +94,44 @@ export default function SidebarSectionEngenhariaMatricial({ openMenu, toggleMenu
             <SidebarMenuSub>
               {/* Fluxo de OS */}
               <SidebarMenuSubItem>
-                <Collapsible
-                  open={open_submenu === "em-fluxo-os"}
-                  className="group/subcollapsible"
-                >
-                  <CollapsibleTrigger asChild>
-                    <SidebarMenuSubButton
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        set_open_submenu(open_submenu === "em-fluxo-os" ? null : "em-fluxo-os");
-                      }}
-                      className="text-white hover:bg-slate-700"
-                    >
-                      <FolderOpen className="h-4 w-4" />
-                      <span>Fluxo de OS</span>
-                      <ChevronDown className="ml-auto h-4 w-4 transition-transform duration-200 group-data-[state=open]/subcollapsible:rotate-180" />
-                    </SidebarMenuSubButton>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent>
-                    <SidebarMenuSub className="pl-4">
-                      {fluxoOSItems.map((item) => (
-                        <SidebarMenuSubItem key={item.url}>
-                          <SidebarMenuSubButton
-                            asChild
-                            isActive={currentPath === item.url}
-                            className="text-white hover:bg-slate-700"
-                          >
-                            <NavLink to={item.url} onClick={(e) => { e.stopPropagation(); onLinkClick?.(); }}>
-                              <item.icon className="h-4 w-4" />
-                              <span>{item.title}</span>
-                            </NavLink>
-                          </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
-                      ))}
-                    </SidebarMenuSub>
-                  </CollapsibleContent>
-                </Collapsible>
+                <div className="px-2 py-1 text-[10px] uppercase tracking-wide text-sidebar-foreground/70">Fluxo de OS</div>
+                <SidebarMenuSub className="pl-2">
+                  {fluxoOSItems.map((item) => (
+                    <SidebarMenuSubItem key={item.url}>
+                      <SidebarMenuSubButton
+                        asChild
+                        isActive={currentPath === item.url}
+                        className="text-white hover:bg-slate-700"
+                      >
+                        <NavLink to={item.url} onClick={onLinkClick}>
+                          <item.icon className="h-4 w-4" />
+                          <span>{item.title}</span>
+                        </NavLink>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+                  ))}
+                </SidebarMenuSub>
               </SidebarMenuSubItem>
 
               {/* Replanejamento */}
               <SidebarMenuSubItem>
-                <Collapsible
-                  open={open_submenu === "em-replanejamento"}
-                  className="group/subcollapsible"
-                >
-                  <CollapsibleTrigger asChild>
-                    <SidebarMenuSubButton
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        set_open_submenu(open_submenu === "em-replanejamento" ? null : "em-replanejamento");
-                      }}
-                      className="text-white hover:bg-slate-700"
-                    >
-                      <RotateCcw className="h-4 w-4" />
-                      <span>Replanejamento</span>
-                      <ChevronDown className="ml-auto h-4 w-4 transition-transform duration-200 group-data-[state=open]/subcollapsible:rotate-180" />
-                    </SidebarMenuSubButton>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent>
-                    <SidebarMenuSub className="pl-4">
-                      {replanejamentoItems.map((item) => (
-                        <SidebarMenuSubItem key={item.url}>
-                          <SidebarMenuSubButton
-                            asChild
-                            isActive={currentPath === item.url}
-                            className="text-white hover:bg-slate-700"
-                          >
-                            <NavLink to={item.url} onClick={(e) => { e.stopPropagation(); onLinkClick?.(); }}>
-                              <item.icon className="h-4 w-4" />
-                              <span>{item.title}</span>
-                            </NavLink>
-                          </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
-                      ))}
-                    </SidebarMenuSub>
-                  </CollapsibleContent>
-                </Collapsible>
+                <div className="px-2 py-1 text-[10px] uppercase tracking-wide text-sidebar-foreground/70">Replanejamento</div>
+                <SidebarMenuSub className="pl-2">
+                  {replanejamentoItems.map((item) => (
+                    <SidebarMenuSubItem key={item.url}>
+                      <SidebarMenuSubButton
+                        asChild
+                        isActive={currentPath === item.url}
+                        className="text-white hover:bg-slate-700"
+                      >
+                        <NavLink to={item.url} onClick={onLinkClick}>
+                          <item.icon className="h-4 w-4" />
+                          <span>{item.title}</span>
+                        </NavLink>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+                  ))}
+                </SidebarMenuSub>
               </SidebarMenuSubItem>
 
               {/* Relatórios */}
