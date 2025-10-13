@@ -15,87 +15,6 @@ import { Usuario, Papel, Disciplina, mockUsuarios, getPapelLabel } from "@/lib/e
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 
-// Matriz de permissões
-const permissoes = {
-  "Acessar Relatórios (todos)": {
-    EM: true,
-    OBRA: false,
-    CONTROLADORIA: true,
-    ADMIN: true,
-  },
-  "Abrir OS": {
-    EM: true,
-    OBRA: true,
-    CONTROLADORIA: false,
-    ADMIN: true,
-  },
-  "Planejar OS (definir HH e Data)": {
-    EM: true,
-    OBRA: false,
-    CONTROLADORIA: false,
-    ADMIN: true,
-  },
-  "Aceitar Planejamento": {
-    EM: false,
-    OBRA: true,
-    CONTROLADORIA: false,
-    ADMIN: true,
-  },
-  "Entregar OS / Upload de anexos": {
-    EM: true,
-    OBRA: false,
-    CONTROLADORIA: false,
-    ADMIN: true,
-  },
-  "Validar Entrega": {
-    EM: false,
-    OBRA: true,
-    CONTROLADORIA: false,
-    ADMIN: true,
-  },
-  "Solicitar HH adicional": {
-    EM: true,
-    OBRA: false,
-    CONTROLADORIA: false,
-    ADMIN: true,
-  },
-  "Aprovar HH adicional": {
-    EM: false,
-    OBRA: true,
-    CONTROLADORIA: false,
-    ADMIN: true,
-  },
-  "Ver todas as OS": {
-    EM: true,
-    OBRA: false,
-    CONTROLADORIA: true,
-    ADMIN: true,
-  },
-  "Ver OS da sua obra": {
-    EM: true,
-    OBRA: true,
-    CONTROLADORIA: false,
-    ADMIN: true,
-  },
-  "Gestão de usuários": {
-    EM: false,
-    OBRA: false,
-    CONTROLADORIA: false,
-    ADMIN: true,
-  },
-};
-
-const getPapelBadge = (papel: Papel, ccas?: number[]) => {
-  const variants = {
-    EM: "bg-blue-100 text-blue-800",
-    OBRA: "bg-green-100 text-green-800",
-    CONTROLADORIA: "bg-yellow-100 text-yellow-800",
-    ADMIN: "bg-purple-100 text-purple-800",
-  };
-
-  return <Badge className={variants[papel]}>{getPapelLabel(papel, ccas)}</Badge>;
-};
-
 export default function AdminUsuarios() {
   const [usuarios, setUsuarios] = useState<Usuario[]>(() => {
     try {
@@ -110,10 +29,8 @@ export default function AdminUsuarios() {
   const [formData, setFormData] = useState({
     nome: "",
     email: "",
-    papel: "" as Papel | "",
     ativo: true,
     disciplinaPreferida: "" as Disciplina | "",
-    ccas: [] as number[],
   });
   const { toast } = useToast();
 
@@ -128,43 +45,22 @@ export default function AdminUsuarios() {
     },
   });
 
-  // Buscar CCAs ativos do Supabase
-  const { data: ccasAtivos } = useQuery({
-    queryKey: ["ccas-ativos"],
-    queryFn: async () => {
-      const { data, error } = await supabase.from("ccas").select("id, codigo, nome").eq("ativo", true).order("codigo");
-
-      if (error) throw error;
-      return data || [];
-    },
-  });
-
-  useEffect(() => {
-    try {
-      localStorage.setItem("admin_usuarios", JSON.stringify(usuarios));
-    } catch {}
-  }, [usuarios]);
-
   const abrirFormulario = (usuario?: Usuario) => {
     if (usuario) {
       setUsuarioEdicao(usuario);
       setFormData({
         nome: usuario.nome,
         email: usuario.email,
-        papel: usuario.papel,
         ativo: usuario.ativo,
         disciplinaPreferida: usuario.disciplinaPreferida || "",
-        ccas: usuario.ccas || [],
       });
     } else {
       setUsuarioEdicao(null);
       setFormData({
         nome: "",
         email: "",
-        papel: "",
         ativo: true,
         disciplinaPreferida: "",
-        ccas: [],
       });
     }
     setDialogAberto(true);
@@ -172,10 +68,6 @@ export default function AdminUsuarios() {
 
   const salvarUsuario = () => {
     // Validações
-    if (!formData.nome.trim()) {
-      toast({ title: "Erro", description: "Nome é obrigatório", variant: "destructive" });
-      return;
-    }
     if (!formData.email.trim()) {
       toast({ title: "Erro", description: "E-mail é obrigatório", variant: "destructive" });
       return;
@@ -185,10 +77,6 @@ export default function AdminUsuarios() {
     const emailExiste = usuarios.some(
       (u) => u.email.toLowerCase() === formData.email.toLowerCase() && u.id !== usuarioEdicao?.id,
     );
-    if (emailExiste) {
-      toast({ title: "Erro", description: "E-mail já está em uso", variant: "destructive" });
-      return;
-    }
 
     // Disciplina padrão para EM
     let disciplinaFinal = formData.disciplinaPreferida;
@@ -207,11 +95,8 @@ export default function AdminUsuarios() {
                 ...u,
                 nome: formData.nome.trim(),
                 email: formData.email.trim(),
-                papel: formData.papel as Papel,
                 ativo: formData.ativo,
                 disciplinaPreferida: disciplinaFinal as Disciplina,
-                ccas: formData.papel === "OBRA" ? formData.ccas : undefined,
-                atualizadoEm: agora,
               }
             : u,
         ),
@@ -224,12 +109,8 @@ export default function AdminUsuarios() {
         id: novoId,
         nome: formData.nome.trim(),
         email: formData.email.trim(),
-        papel: formData.papel as Papel,
         ativo: formData.ativo,
         disciplinaPreferida: disciplinaFinal as Disciplina,
-        ccas: formData.papel === "OBRA" ? formData.ccas : undefined,
-        criadoEm: agora,
-        atualizadoEm: agora,
       };
       setUsuarios((prev) => [...prev, novoUsuario]);
       toast({ title: "Sucesso", description: "Usuário criado com sucesso" });
@@ -252,10 +133,6 @@ export default function AdminUsuarios() {
       title: "Sucesso",
       description: `Usuário ${novoStatus ? "ativado" : "desativado"} com sucesso`,
     });
-  };
-
-  const enviarMagicLink = (email: string) => {
-    toast({ title: "Magic Link", description: `Link de acesso enviado para ${email}` });
   };
 
   return (
@@ -373,6 +250,7 @@ export default function AdminUsuarios() {
                   <TableHead>Nome</TableHead>
                   <TableHead>E-mail</TableHead>
                   <TableHead>Disciplina</TableHead>
+                  <TableHead>Status</TableHead>
                   <TableHead>Ações</TableHead>
                 </TableRow>
               </TableHeader>
@@ -383,6 +261,11 @@ export default function AdminUsuarios() {
                     <TableCell>{usuario.email}</TableCell>
                     <TableCell>
                       {usuario.disciplinaPreferida && <Badge variant="outline">{usuario.disciplinaPreferida}</Badge>}
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={usuario.ativo ? "default" : "secondary"}>
+                        {usuario.ativo ? "Ativo" : "Inativo"}
+                      </Badge>
                     </TableCell>
                     <TableCell>
                       <div className="flex gap-1">
