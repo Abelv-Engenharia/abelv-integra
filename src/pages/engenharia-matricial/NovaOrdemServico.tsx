@@ -10,7 +10,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { ArrowLeft, Save, Upload } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { useOS } from "@/contexts/engenharia-matricial/OSContext";
+import { useCreateOS } from "@/hooks/engenharia-matricial/useOSEngenhariaMatricial";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserCCAs } from "@/hooks/useUserCCAs";
 import { useUsuariosEngenhariaMatricial } from "@/hooks/useUsuariosEngenhariaMatricial";
@@ -19,11 +19,11 @@ import { useQuery } from "@tanstack/react-query";
 
 const NovaOrdemServico = () => {
   const { toast } = useToast();
-  const { addOS } = useOS();
   const navigate = useNavigate();
   const { user } = useAuth();
   const { data: ccasDisponiveis, isLoading: isLoadingCCAs } = useUserCCAs();
   const { usuarios: usuariosEM, isLoading: isLoadingUsuarios } = useUsuariosEngenhariaMatricial();
+  const createOSMutation = useCreateOS();
 
   // Buscar perfil do usuário atual
   const { data: userProfile } = useQuery({
@@ -162,21 +162,23 @@ const NovaOrdemServico = () => {
       return;
     }
 
-    // Adicionar a OS ao contexto
     const nomeSolicitante = userProfile?.nome || user?.email || "Usuário";
-    addOS({
-      ...formData,
-      nomeSolicitante,
-      cliente: "N/A", // Campo removido da interface mas necessário para compatibilidade
-    });
 
-    toast({
-      title: "OS criada com sucesso!",
-      description: `OS ${formData.cca} foi criada e enviada para a Engenharia Matricial.`,
+    createOSMutation.mutate({
+      cca_id: parseInt(formData.cca),
+      disciplina: formData.disciplina,
+      disciplinas_envolvidas: formData.disciplinasEnvolvidas,
+      familia_sao: formData.familiaSAO,
+      descricao: formData.descricao,
+      valor_orcamento: parseFloat(formData.valorOrcamento),
+      data_compromissada: formData.dataCompromissada,
+      responsavel_em_id: formData.responsavelEM,
+      solicitante_nome: nomeSolicitante,
+    }, {
+      onSuccess: () => {
+        navigate("/engenharia-matricial/os-abertas");
+      },
     });
-
-    // Redirecionar para a lista de OS
-    navigate("/engenharia-matricial/os-abertas");
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {

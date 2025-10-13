@@ -3607,6 +3607,300 @@ export type Database = {
           },
         ]
       }
+      os_anexos: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          nome_arquivo: string
+          os_id: string
+          tamanho: number | null
+          tipo_mime: string | null
+          url_arquivo: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          nome_arquivo: string
+          os_id: string
+          tamanho?: number | null
+          tipo_mime?: string | null
+          url_arquivo: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          nome_arquivo?: string
+          os_id?: string
+          tamanho?: number | null
+          tipo_mime?: string | null
+          url_arquivo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "os_anexos_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "os_anexos_os_id_fkey"
+            columns: ["os_id"]
+            isOneToOne: false
+            referencedRelation: "os_engenharia_matricial"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      os_engenharia_matricial: {
+        Row: {
+          cca_id: number | null
+          cliente: string
+          competencia: string
+          created_at: string
+          created_by: string | null
+          data_abertura: string
+          data_atendimento: string | null
+          data_compromissada: string
+          data_conclusao: string | null
+          data_entrega_real: string | null
+          data_fim_prevista: string | null
+          data_inicio_prevista: string | null
+          descricao: string
+          disciplina: string
+          disciplinas_envolvidas: string[]
+          familia_sao: string
+          hh_adicional: number
+          hh_planejado: number
+          id: string
+          justificativa_engenharia: string | null
+          numero: string | null
+          percentual_saving: number | null
+          responsavel_em_id: string | null
+          responsavel_obra: string
+          sla_status: string
+          solicitante_id: string
+          solicitante_nome: string
+          status: Database["public"]["Enums"]["os_status_enum"]
+          updated_at: string
+          updated_by: string | null
+          valor_engenharia: number | null
+          valor_final: number | null
+          valor_hora_hh: number
+          valor_orcamento: number
+          valor_sao: number | null
+          valor_suprimentos: number | null
+        }
+        Insert: {
+          cca_id?: number | null
+          cliente?: string
+          competencia?: string
+          created_at?: string
+          created_by?: string | null
+          data_abertura?: string
+          data_atendimento?: string | null
+          data_compromissada: string
+          data_conclusao?: string | null
+          data_entrega_real?: string | null
+          data_fim_prevista?: string | null
+          data_inicio_prevista?: string | null
+          descricao: string
+          disciplina: string
+          disciplinas_envolvidas?: string[]
+          familia_sao: string
+          hh_adicional?: number
+          hh_planejado?: number
+          id?: string
+          justificativa_engenharia?: string | null
+          numero?: string | null
+          percentual_saving?: number | null
+          responsavel_em_id?: string | null
+          responsavel_obra?: string
+          sla_status?: string
+          solicitante_id: string
+          solicitante_nome: string
+          status?: Database["public"]["Enums"]["os_status_enum"]
+          updated_at?: string
+          updated_by?: string | null
+          valor_engenharia?: number | null
+          valor_final?: number | null
+          valor_hora_hh?: number
+          valor_orcamento?: number
+          valor_sao?: number | null
+          valor_suprimentos?: number | null
+        }
+        Update: {
+          cca_id?: number | null
+          cliente?: string
+          competencia?: string
+          created_at?: string
+          created_by?: string | null
+          data_abertura?: string
+          data_atendimento?: string | null
+          data_compromissada?: string
+          data_conclusao?: string | null
+          data_entrega_real?: string | null
+          data_fim_prevista?: string | null
+          data_inicio_prevista?: string | null
+          descricao?: string
+          disciplina?: string
+          disciplinas_envolvidas?: string[]
+          familia_sao?: string
+          hh_adicional?: number
+          hh_planejado?: number
+          id?: string
+          justificativa_engenharia?: string | null
+          numero?: string | null
+          percentual_saving?: number | null
+          responsavel_em_id?: string | null
+          responsavel_obra?: string
+          sla_status?: string
+          solicitante_id?: string
+          solicitante_nome?: string
+          status?: Database["public"]["Enums"]["os_status_enum"]
+          updated_at?: string
+          updated_by?: string | null
+          valor_engenharia?: number | null
+          valor_final?: number | null
+          valor_hora_hh?: number
+          valor_orcamento?: number
+          valor_sao?: number | null
+          valor_suprimentos?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "os_engenharia_matricial_cca_id_fkey"
+            columns: ["cca_id"]
+            isOneToOne: false
+            referencedRelation: "ccas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "os_engenharia_matricial_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "os_engenharia_matricial_responsavel_em_id_fkey"
+            columns: ["responsavel_em_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "os_engenharia_matricial_solicitante_id_fkey"
+            columns: ["solicitante_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "os_engenharia_matricial_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      os_hh_historico: {
+        Row: {
+          cca: string
+          cliente: string
+          created_at: string
+          disciplina: string
+          hh_apropriado: number
+          id: string
+          mes: string
+          meta_mensal: number
+          percentual_meta: number
+          status_meta: string
+        }
+        Insert: {
+          cca: string
+          cliente: string
+          created_at?: string
+          disciplina: string
+          hh_apropriado: number
+          id?: string
+          mes: string
+          meta_mensal: number
+          percentual_meta: number
+          status_meta: string
+        }
+        Update: {
+          cca?: string
+          cliente?: string
+          created_at?: string
+          disciplina?: string
+          hh_apropriado?: number
+          id?: string
+          mes?: string
+          meta_mensal?: number
+          percentual_meta?: number
+          status_meta?: string
+        }
+        Relationships: []
+      }
+      os_replanejamentos: {
+        Row: {
+          created_at: string
+          data: string
+          hh_adicional: number
+          id: string
+          motivo: string
+          nova_data_fim: string
+          nova_data_inicio: string
+          os_id: string
+          usuario_id: string | null
+          usuario_nome: string
+        }
+        Insert: {
+          created_at?: string
+          data?: string
+          hh_adicional: number
+          id?: string
+          motivo: string
+          nova_data_fim: string
+          nova_data_inicio: string
+          os_id: string
+          usuario_id?: string | null
+          usuario_nome: string
+        }
+        Update: {
+          created_at?: string
+          data?: string
+          hh_adicional?: number
+          id?: string
+          motivo?: string
+          nova_data_fim?: string
+          nova_data_inicio?: string
+          os_id?: string
+          usuario_id?: string | null
+          usuario_nome?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "os_replanejamentos_os_id_fkey"
+            columns: ["os_id"]
+            isOneToOne: false
+            referencedRelation: "os_engenharia_matricial"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "os_replanejamentos_usuario_id_fkey"
+            columns: ["usuario_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       paginas_favoritas: {
         Row: {
           created_at: string
@@ -4973,6 +5267,10 @@ export type Database = {
         Args: { p_supervisor_id: string }
         Returns: string
       }
+      gerar_numero_os: {
+        Args: { p_cca_id: number }
+        Returns: string
+      }
       get_desvios_by_base_legal: {
         Args: { filtros?: Json }
         Returns: {
@@ -5111,6 +5409,15 @@ export type Database = {
         | "ADVERTÊNCIA ESCRITA"
         | "SUSPENSÃO"
         | "DEMISSÃO POR JUSTA CAUSA"
+      os_status_enum:
+        | "aberta"
+        | "em-planejamento"
+        | "aguardando-aceite"
+        | "em-execucao"
+        | "aguardando-aceite-fechamento"
+        | "concluida"
+        | "cancelada"
+        | "rejeitada"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -5245,6 +5552,16 @@ export const Constants = {
         "ADVERTÊNCIA ESCRITA",
         "SUSPENSÃO",
         "DEMISSÃO POR JUSTA CAUSA",
+      ],
+      os_status_enum: [
+        "aberta",
+        "em-planejamento",
+        "aguardando-aceite",
+        "em-execucao",
+        "aguardando-aceite-fechamento",
+        "concluida",
+        "cancelada",
+        "rejeitada",
       ],
     },
   },
