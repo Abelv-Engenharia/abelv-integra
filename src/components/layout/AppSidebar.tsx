@@ -19,6 +19,7 @@ import SidebarSectionAdministracao from "./SidebarSectionAdministracao";
 import SidebarSectionSeguranca from "./SidebarSectionSeguranca";
 import SidebarSectionApoioGeral from "./SidebarSectionApoioGeral";
 import { SidebarSectionSuprimentos } from "./SidebarSectionSuprimentos";
+import SidebarSectionEngenhariaMatricial from "./SidebarSectionEngenhariaMatricial";
 import SidebarSearch from "./SidebarSearch";
 import { usePermissionsDirect } from "@/hooks/usePermissionsDirect";
 import logoAbelvIntegra from "@/assets/logo-abelv-integra.png";
@@ -58,6 +59,7 @@ export function AppSidebar() {
       return "seguranca";
     if (currentPath.startsWith("/admin") || currentPath.startsWith("/tutoriais")) return "admin";
     if (currentPath.startsWith("/suprimentos/estoque")) return "suprimentos";
+    if (currentPath.startsWith("/engenharia-matricial")) return "engenharia-matricial";
     if (currentPath.startsWith("/account")) return "account";
     return null;
   });
@@ -210,6 +212,13 @@ export function AppSidebar() {
             onLinkClick={handleLinkClick}
           />
         )}
+
+        {/* Seção: Engenharia Matricial */}
+        <SidebarSectionEngenhariaMatricial
+          openMenu={openMenu}
+          toggleMenu={toggleMenu}
+          onLinkClick={handleLinkClick}
+        />
       </SidebarContent>
     </Sidebar>
   );

@@ -161,6 +161,23 @@ import InspecaoExtintorPublico from "./pages/prevencao-incendio/InspecaoExtintor
 // Placeholder page
 import PlaceholderPage from "./pages/PlaceholderPage";
 
+// Engenharia Matricial pages
+import EngenhariaMatricialIndex from "./pages/engenharia-matricial/Index";
+import OSAbertas from "./pages/engenharia-matricial/OSAbertas";
+import OSEmPlanejamento from "./pages/engenharia-matricial/OSEmPlanejamento";
+import OSAguardandoAceite from "./pages/engenharia-matricial/OSAguardandoAceite";
+import OSEmExecucao from "./pages/engenharia-matricial/OSEmExecucao";
+import OSEmFechamento from "./pages/engenharia-matricial/OSEmFechamento";
+import OSAguardandoAceiteFechamento from "./pages/engenharia-matricial/OSAguardandoAceiteFechamento";
+import OSConcluidas from "./pages/engenharia-matricial/OSConcluidas";
+import OSReplanejamento from "./pages/engenharia-matricial/OSReplanejamento";
+import OSAguardandoAceiteReplanejamento from "./pages/engenharia-matricial/OSAguardandoAceiteReplanejamento";
+import RelatoriosAnual from "./pages/engenharia-matricial/RelatoriosAnual";
+import RelatoriosEMEletrica from "./pages/engenharia-matricial/RelatoriosEMEletrica";
+import RelatoriosEMMecanica from "./pages/engenharia-matricial/RelatoriosEMMecanica";
+import RelatoriosEMDepartamento from "./pages/engenharia-matricial/RelatoriosEMDepartamento";
+import AdminUsuariosEM from "./pages/engenharia-matricial/AdminUsuarios";
+
 // Suprimentos - Estoque pages
 import EstoqueDashboard from "./pages/suprimentos/estoque/Dashboard";
 import EstoqueEAP from "./pages/suprimentos/estoque/apoio/EAP";
@@ -413,6 +430,23 @@ function App() {
 
                 {/* Placeholder routes */}
                 <Route path="placeholder" element={<PlaceholderPage />} />
+                
+                {/* Engenharia Matricial routes */}
+                <Route path="engenharia-matricial" element={<EngenhariaMatricialIndex />} />
+                <Route path="engenharia-matricial/os-abertas" element={<OSAbertas />} />
+                <Route path="engenharia-matricial/os-em-planejamento" element={<OSEmPlanejamento />} />
+                <Route path="engenharia-matricial/os-aguardando-aceite" element={<OSAguardandoAceite />} />
+                <Route path="engenharia-matricial/os-em-execucao" element={<OSEmExecucao />} />
+                <Route path="engenharia-matricial/os-em-fechamento" element={<OSEmFechamento />} />
+                <Route path="engenharia-matricial/os-aguardando-aceite-fechamento" element={<OSAguardandoAceiteFechamento />} />
+                <Route path="engenharia-matricial/os-concluidas" element={<OSConcluidas />} />
+                <Route path="engenharia-matricial/os-replanejamento" element={<OSReplanejamento />} />
+                <Route path="engenharia-matricial/os-aguardando-aceite-replanejamento" element={<OSAguardandoAceiteReplanejamento />} />
+                <Route path="engenharia-matricial/relatorios-anual" element={<RelatoriosAnual />} />
+                <Route path="engenharia-matricial/relatorios-em-eletrica" element={<RelatoriosEMEletrica />} />
+                <Route path="engenharia-matricial/relatorios-em-mecanica" element={<RelatoriosEMMecanica />} />
+                <Route path="engenharia-matricial/relatorios-em-departamento" element={<RelatoriosEMDepartamento />} />
+                <Route path="engenharia-matricial/admin/usuarios" element={<AdminUsuariosEM />} />
               </Route>
 
               {/* 404 route */}
