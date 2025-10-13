@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,52 +11,36 @@ import { ArrowLeft, Save, Upload } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useOS } from "@/contexts/engenharia-matricial/OSContext";
-import { getUsuariosParaOS, Usuario, getCCAs, getClientes, getPapelLabel } from "@/lib/engenharia-matricial/usuarios";
+import { useAuth } from "@/contexts/AuthContext";
+import { useUserCCAs } from "@/hooks/useUserCCAs";
+import { useUsuariosEngenhariaMatricial } from "@/hooks/useUsuariosEngenhariaMatricial";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
 
 const NovaOrdemServico = () => {
   const { toast } = useToast();
   const { addOS } = useOS();
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { data: ccasDisponiveis, isLoading: isLoadingCCAs } = useUserCCAs();
+  const { usuarios: usuariosEM, isLoading: isLoadingUsuarios } = useUsuariosEngenhariaMatricial();
 
-  const [solicitantesAtivos, setSolicitantesAtivos] = useState<Usuario[]>([]);
-  const [ccasDisponiveis, setCCAsDisponiveis] = useState<number[]>([]);
-  const [clientesDisponiveis, setClientesDisponiveis] = useState<string[]>([]);
-
-  // Carregar dados dos usuários
-  useEffect(() => {
-    const carregarDados = () => {
-      setSolicitantesAtivos(getUsuariosParaOS());
-      setCCAsDisponiveis(getCCAs());
-      setClientesDisponiveis(getClientes());
-    };
-
-    carregarDados();
-
-    // Escutar mudanças no localStorage para recarregar dados
-    const handleStorageChange = () => {
-      carregarDados();
-    };
-
-    window.addEventListener("storage", handleStorageChange);
-
-    // Também escutar mudanças internas (quando o mesmo tab modifica o localStorage)
-    const originalSetItem = localStorage.setItem;
-    localStorage.setItem = function (key, value) {
-      originalSetItem.apply(this, [key, value]);
-      if (key === "admin_usuarios") {
-        carregarDados();
-      }
-    };
-
-    return () => {
-      window.removeEventListener("storage", handleStorageChange);
-      localStorage.setItem = originalSetItem;
-    };
-  }, []);
+  // Buscar perfil do usuário atual
+  const { data: userProfile } = useQuery({
+    queryKey: ['user-profile', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return null;
+      const { data } = await supabase
+        .from('profiles')
+        .select('nome, email')
+        .eq('id', user.id)
+        .single();
+      return data;
+    },
+    enabled: !!user?.id,
+  });
   const [formData, setFormData] = useState({
     cca: "",
-    nomeSolicitante: "",
-    cliente: "",
     disciplina: "",
     disciplinasEnvolvidas: [] as string[],
     familiaSAO: "",
@@ -70,23 +54,10 @@ const NovaOrdemServico = () => {
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData((prev) => {
-      const newData = {
-        ...prev,
-        [field]: value,
-      };
-
-      // Atualizar automaticamente o responsável EM baseado na disciplina
-      if (field === "disciplina") {
-        const responsaveis = {
-          mecanica: "Ricardo Cunha",
-          eletrica: "Elton Anthony",
-        };
-        newData.responsavelEM = responsaveis[value as keyof typeof responsaveis] || "";
-      }
-
-      return newData;
-    });
+    setFormData((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
 
     // Limpar erro quando o usuário começar a digitar
     if (errors[field]) {
@@ -96,6 +67,18 @@ const NovaOrdemServico = () => {
       }));
     }
   };
+
+  // Filtrar usuários por disciplina selecionada
+  const usuariosFiltrados = formData.disciplina
+    ? usuariosEM?.filter((usuario) => {
+        if (formData.disciplina === "eletrica") {
+          return usuario.disciplina_preferida === "ELETRICA" || usuario.disciplina_preferida === "AMBAS";
+        } else if (formData.disciplina === "mecanica") {
+          return usuario.disciplina_preferida === "MECANICA" || usuario.disciplina_preferida === "AMBAS";
+        }
+        return false;
+      })
+    : [];
 
   const handleDisciplinaChange = (disciplina: string, checked: boolean) => {
     setFormData((prev) => {
@@ -122,21 +105,15 @@ const NovaOrdemServico = () => {
     const newErrors: Record<string, string> = {};
 
     if (!formData.cca) {
-      newErrors.cca = "Número do CCA é obrigatório";
-    } else if (!/^\d+$/.test(formData.cca) || parseInt(formData.cca) <= 0) {
-      newErrors.cca = "CCA deve ser um número inteiro positivo";
-    }
-
-    if (!formData.nomeSolicitante.trim()) {
-      newErrors.nomeSolicitante = "Nome do solicitante é obrigatório";
-    }
-
-    if (!formData.cliente) {
-      newErrors.cliente = "Cliente é obrigatório";
+      newErrors.cca = "CCA é obrigatório";
     }
 
     if (!formData.disciplina) {
       newErrors.disciplina = "Disciplina é obrigatória";
+    }
+
+    if (!formData.responsavelEM) {
+      newErrors.responsavelEM = "Responsável EM é obrigatório";
     }
 
     if (!formData.disciplinasEnvolvidas || formData.disciplinasEnvolvidas.length === 0) {
@@ -186,7 +163,12 @@ const NovaOrdemServico = () => {
     }
 
     // Adicionar a OS ao contexto
-    addOS(formData);
+    const nomeSolicitante = userProfile?.nome || user?.email || "Usuário";
+    addOS({
+      ...formData,
+      nomeSolicitante,
+      cliente: "N/A", // Campo removido da interface mas necessário para compatibilidade
+    });
 
     toast({
       title: "OS criada com sucesso!",
@@ -239,99 +221,34 @@ const NovaOrdemServico = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="cca" className={errors.cca ? "text-destructive" : ""}>
-                  Número do CCA *
+                  CCA *
                 </Label>
-                {(() => {
-                  // Verificar se o solicitante selecionado tem CCA livre
-                  const solicitanteSelecionado = solicitantesAtivos.find((s) => s.nome === formData.nomeSolicitante);
-                  const temCCALivre =
-                    solicitanteSelecionado &&
-                    (solicitanteSelecionado.papel === "EM" || solicitanteSelecionado.papel === "ADMIN");
-
-                  if (temCCALivre) {
-                    // CCA livre - input de texto
-                    return (
-                      <div>
-                        <Input
-                          id="cca"
-                          type="number"
-                          placeholder="Digite o número do CCA"
-                          value={formData.cca}
-                          onChange={(e) => handleInputChange("cca", e.target.value)}
-                          className={errors.cca ? "border-destructive" : ""}
-                        />
-                        <p className="text-xs text-muted-foreground mt-1">
-                          Como {solicitanteSelecionado?.papel === "EM" ? "Engenheiro Matricial" : "Administrador"}, você
-                          pode trabalhar com qualquer CCA
-                        </p>
-                      </div>
-                    );
-                  } else {
-                    // Solicitante OBRA - select com CCAs cadastrados
-                    return (
-                      <Select value={formData.cca} onValueChange={(value) => handleInputChange("cca", value)}>
-                        <SelectTrigger className={errors.cca ? "border-destructive" : ""}>
-                          <SelectValue placeholder="Selecione o CCA" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {ccasDisponiveis.map((cca) => (
-                            <SelectItem key={cca} value={cca.toString()}>
-                              CCA {cca}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    );
-                  }
-                })()}
-                {errors.cca && <p className="text-sm text-destructive">{errors.cca}</p>}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="nomeSolicitante" className={errors.nomeSolicitante ? "text-destructive" : ""}>
-                  Nome do solicitante *
-                </Label>
-                <Select
-                  value={formData.nomeSolicitante}
-                  onValueChange={(value) => handleInputChange("nomeSolicitante", value.trim())}
-                >
-                  <SelectTrigger className={errors.nomeSolicitante ? "border-destructive" : ""}>
-                    <SelectValue placeholder="Selecione o solicitante" />
+                <Select value={formData.cca} onValueChange={(value) => handleInputChange("cca", value)} disabled={isLoadingCCAs}>
+                  <SelectTrigger className={errors.cca ? "border-destructive" : ""}>
+                    <SelectValue placeholder="Selecione o CCA" />
                   </SelectTrigger>
                   <SelectContent>
-                    {solicitantesAtivos.map((solicitante) => (
-                      <SelectItem key={solicitante.id} value={solicitante.nome}>
-                        <div className="flex flex-col">
-                          <span className="font-medium">{solicitante.nome}</span>
-                          <span className="text-xs text-muted-foreground">
-                            {getPapelLabel(solicitante.papel, solicitante.ccas)} • {solicitante.email}
-                          </span>
-                        </div>
+                    {ccasDisponiveis?.map((cca) => (
+                      <SelectItem key={cca.id} value={cca.id.toString()}>
+                        {cca.codigo} - {cca.nome}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
-                {errors.nomeSolicitante && <p className="text-sm text-destructive">{errors.nomeSolicitante}</p>}
+                {errors.cca && <p className="text-sm text-destructive">{errors.cca}</p>}
               </div>
-            </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="cliente" className={errors.cliente ? "text-destructive" : ""}>
-                Cliente *
-              </Label>
-              <Select value={formData.cliente} onValueChange={(value) => handleInputChange("cliente", value)}>
-                <SelectTrigger className={errors.cliente ? "border-destructive" : ""}>
-                  <SelectValue placeholder="Selecione o cliente" />
-                </SelectTrigger>
-                <SelectContent>
-                  {clientesDisponiveis.map((cliente) => (
-                    <SelectItem key={cliente} value={cliente.toLowerCase()}>
-                      {cliente}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {errors.cliente && <p className="text-sm text-destructive">{errors.cliente}</p>}
+              <div className="space-y-2">
+                <Label htmlFor="nomeSolicitante">
+                  Solicitante
+                </Label>
+                <Input
+                  id="nomeSolicitante"
+                  value={userProfile?.nome || user?.email || ""}
+                  readOnly
+                  className="bg-muted"
+                />
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -364,13 +281,29 @@ const NovaOrdemServico = () => {
 
             {formData.disciplina && (
               <div className="space-y-2">
-                <Label>Engenheiro Matricial Responsável</Label>
-                <div className="p-3 bg-muted rounded-lg">
-                  <p className="font-medium text-foreground">{formData.responsavelEM}</p>
-                  <p className="text-sm text-muted-foreground">
-                    Responsável pela disciplina {formData.disciplina === "eletrica" ? "Elétrica" : "Mecânica"}
-                  </p>
-                </div>
+                <Label htmlFor="responsavelEM" className={errors.responsavelEM ? "text-destructive" : ""}>
+                  Engenheiro Matricial Responsável *
+                </Label>
+                <Select
+                  value={formData.responsavelEM}
+                  onValueChange={(value) => handleInputChange("responsavelEM", value)}
+                  disabled={isLoadingUsuarios}
+                >
+                  <SelectTrigger className={errors.responsavelEM ? "border-destructive" : ""}>
+                    <SelectValue placeholder="Selecione o responsável" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {usuariosFiltrados?.map((usuario) => (
+                      <SelectItem key={usuario.id} value={usuario.usuario_id}>
+                        <div className="flex flex-col">
+                          <span className="font-medium">{usuario.nome}</span>
+                          <span className="text-xs text-muted-foreground">{usuario.email}</span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {errors.responsavelEM && <p className="text-sm text-destructive">{errors.responsavelEM}</p>}
               </div>
             )}
 
