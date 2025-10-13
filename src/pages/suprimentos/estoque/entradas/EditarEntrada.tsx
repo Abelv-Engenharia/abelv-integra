@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -43,7 +43,7 @@ export default function EditarEntrada() {
   const [isSaving, setIsSaving] = useState(false);
 
   // Atualizar dados quando carregar
-  useState(() => {
+  useEffect(() => {
     if (nfe) {
       setFormData({
         numero: nfe.numero || "",
@@ -56,10 +56,13 @@ export default function EditarEntrada() {
         PC_Cliente: nfe.PC_Cliente || "",
       });
     }
+  }, [nfe]);
+
+  useEffect(() => {
     if (itensOriginais.length > 0) {
       setItens(itensOriginais);
     }
-  });
+  }, [itensOriginais]);
 
   const handleAddItem = () => {
     const novoItem: NfeCompraItem = {
