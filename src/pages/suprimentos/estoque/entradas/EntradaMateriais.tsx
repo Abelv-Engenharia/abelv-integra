@@ -18,7 +18,8 @@ import { useCredores } from "@/hooks/useCredores";
 export default function EntradaMateriais() {
   const navigate = useNavigate();
   const { data: ccas = [], isLoading: ccasLoading } = useCCAs();
-  const { data: nfeCompras = [], isLoading: nfeLoading } = useNfeCompras();
+  const [ccaIdFiltro, setCcaIdFiltro] = useState<number | undefined>(undefined);
+  const { data: nfeCompras = [], isLoading: nfeLoading } = useNfeCompras(ccaIdFiltro);
   const { data: credores = [], isLoading: credoresLoading } = useCredores();
   
   // Estados para filtros
@@ -38,6 +39,15 @@ export default function EntradaMateriais() {
 
   const handleFiltroChange = (campo: string, valor: any) => {
     setFiltros(prev => ({ ...prev, [campo]: valor }));
+    
+    // Aplicar filtro de CCA imediatamente
+    if (campo === "cca") {
+      if (valor === "all") {
+        setCcaIdFiltro(undefined);
+      } else {
+        setCcaIdFiltro(parseInt(valor));
+      }
+    }
   };
 
   const handleFiltrar = () => {
