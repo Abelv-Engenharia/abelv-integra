@@ -64,13 +64,13 @@ export default function OSEmExecucao() {
                     <Badge variant="default">Em execução</Badge>
                   </CardTitle>
                   <div className="flex gap-2">
-                    <Link to="/os-em-fechamento">
+                    <Link to="/engenharia-matricial/os-em-fechamento">
                       <Button variant="default" size="sm">
                         <CheckCircle className="h-4 w-4 mr-2" />
                         Iniciar fechamento
                       </Button>
                     </Link>
-                    <Link to="/os-replanejamento">
+                    <Link to="/engenharia-matricial/os-replanejamento">
                       <Button variant="outline" size="sm" className="text-orange-600 hover:text-orange-700">
                         <RotateCcw className="h-4 w-4 mr-2" />
                         Replanejar
