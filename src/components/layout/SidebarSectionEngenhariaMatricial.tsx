@@ -67,21 +67,13 @@ export default function SidebarSectionEngenhariaMatricial({ openMenu, toggleMenu
     <SidebarMenu>
       <SidebarMenuItem>
         <Collapsible
-          open={isInEngenhariaMatricial}
-          onOpenChange={() => {
-            if (!isInEngenhariaMatricial) {
-              toggleMenu("engenharia-matricial");
-            }
-          }}
+          open={openMenu === "engenharia-matricial" || isInEngenhariaMatricial}
+          onOpenChange={() => toggleMenu("engenharia-matricial")}
           className="group/collapsible"
         >
           <CollapsibleTrigger asChild>
             <SidebarMenuButton 
-              onClick={(e) => {
-                if (!isInEngenhariaMatricial) {
-                  toggleMenu("engenharia-matricial");
-                }
-              }} 
+              onClick={() => toggleMenu("engenharia-matricial")}
               className="text-white hover:bg-slate-600"
             >
               <Building2 className="h-4 w-4" />
@@ -121,7 +113,7 @@ export default function SidebarSectionEngenhariaMatricial({ openMenu, toggleMenu
                             isActive={currentPath === item.url}
                             className="text-white hover:bg-slate-700"
                           >
-                            <NavLink to={item.url}>
+                            <NavLink to={item.url} onClick={(e) => e.stopPropagation()}>
                               <item.icon className="h-4 w-4" />
                               <span>{item.title}</span>
                             </NavLink>
@@ -162,7 +154,7 @@ export default function SidebarSectionEngenhariaMatricial({ openMenu, toggleMenu
                             isActive={currentPath === item.url}
                             className="text-white hover:bg-slate-700"
                           >
-                            <NavLink to={item.url}>
+                            <NavLink to={item.url} onClick={(e) => e.stopPropagation()}>
                               <item.icon className="h-4 w-4" />
                               <span>{item.title}</span>
                             </NavLink>
@@ -203,7 +195,7 @@ export default function SidebarSectionEngenhariaMatricial({ openMenu, toggleMenu
                             isActive={currentPath === item.url}
                             className="text-white hover:bg-slate-700"
                           >
-                            <NavLink to={item.url}>
+                            <NavLink to={item.url} onClick={(e) => e.stopPropagation()}>
                               <item.icon className="h-4 w-4" />
                               <span>{item.title}</span>
                             </NavLink>
@@ -244,7 +236,7 @@ export default function SidebarSectionEngenhariaMatricial({ openMenu, toggleMenu
                             isActive={currentPath === item.url}
                             className="text-white hover:bg-slate-700"
                           >
-                            <NavLink to={item.url}>
+                            <NavLink to={item.url} onClick={(e) => e.stopPropagation()}>
                               <item.icon className="h-4 w-4" />
                               <span>{item.title}</span>
                             </NavLink>
