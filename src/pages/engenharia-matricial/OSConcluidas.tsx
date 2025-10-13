@@ -6,20 +6,20 @@ import { useOSList } from "@/hooks/engenharia-matricial/useOSEngenhariaMatricial
 import { Link } from "react-router-dom";
 
 export default function OSConcluidas() {
-  const { data: osConcluidas = [], isLoading } = useOSList({ status: 'concluida' });
+  const { data: osConcluidas = [], isLoading } = useOSList({ status: "concluida" });
 
   const capitalizarTexto = (texto: string) => {
     return texto.charAt(0).toUpperCase() + texto.slice(1).toLowerCase();
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('pt-BR');
+    return new Date(dateString).toLocaleDateString("pt-BR");
   };
 
   const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
+    return new Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: "BRL",
     }).format(value);
   };
 
@@ -39,7 +39,8 @@ export default function OSConcluidas() {
         <div>
           <h1 className="text-3xl font-bold">OS Concluídas</h1>
           <p className="text-muted-foreground">
-            {osConcluidas.length} ordem{osConcluidas.length !== 1 ? 's' : ''} de serviço concluída{osConcluidas.length !== 1 ? 's' : ''}
+            {osConcluidas.length} ordem{osConcluidas.length !== 1 ? "s" : ""} de serviço concluída
+            {osConcluidas.length !== 1 ? "s" : ""}
           </p>
         </div>
       </div>
@@ -57,10 +58,8 @@ export default function OSConcluidas() {
               <CardHeader>
                 <div className="flex justify-between items-start">
                   <CardTitle className="flex items-center gap-2">
-                    OS Nº {os.numero || os.id} - CCA {os.cca?.codigo || 'N/A'}
-                    <Badge variant="secondary">
-                      Concluída
-                    </Badge>
+                    OS Nº {os.numero || os.id} - CCA {os.cca?.codigo || "N/A"}
+                    <Badge variant="secondary">Concluída</Badge>
                   </CardTitle>
                   <div className="flex gap-2">
                     <Link to={`/os/${os.id}`}>
@@ -73,10 +72,6 @@ export default function OSConcluidas() {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Cliente</p>
-                    <p className="font-medium">{os.cliente}</p>
-                  </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Disciplina</p>
                     <p className="font-medium">{capitalizarTexto(os.disciplina)}</p>
@@ -105,7 +100,7 @@ export default function OSConcluidas() {
                   )}
                   <div>
                     <p className="text-sm text-muted-foreground">Responsável EM</p>
-                    <p className="font-medium">{os.responsavel_em?.nome || 'N/A'}</p>
+                    <p className="font-medium">{os.responsavel_em?.nome || "N/A"}</p>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Solicitante</p>
