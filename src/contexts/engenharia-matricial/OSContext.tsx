@@ -257,7 +257,7 @@ export const OSProvider = ({ children }: { children: ReactNode }) => {
       os.id === osId 
         ? { 
             ...os, 
-            status: "aguardando-aceite",
+            status: "aguardando-aceite-replanejamento",
             dataInicioPrevista: replanejamentoData.novaDataInicio,
             dataFimPrevista: replanejamentoData.novaDataFim,
             hhAdicional: (os.hhAdicional || 0) + replanejamentoData.hhAdicional,
