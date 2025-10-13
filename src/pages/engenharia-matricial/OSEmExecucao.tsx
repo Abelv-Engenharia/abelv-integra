@@ -9,20 +9,20 @@ import { useState } from "react";
 import { useOSList } from "@/hooks/engenharia-matricial/useOSEngenhariaMatricial";
 
 export default function OSEmExecucao() {
-  const { data: osList = [], isLoading } = useOSList({ status: 'em-execucao' });
+  const { data: osList = [], isLoading } = useOSList({ status: "em-execucao" });
 
   const capitalizarTexto = (texto: string) => {
     return texto.charAt(0).toUpperCase() + texto.slice(1).toLowerCase();
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('pt-BR');
+    return new Date(dateString).toLocaleDateString("pt-BR");
   };
 
   const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
+    return new Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: "BRL",
     }).format(value);
   };
 
@@ -42,7 +42,7 @@ export default function OSEmExecucao() {
         <div>
           <h1 className="text-3xl font-bold">OS Em execução</h1>
           <p className="text-muted-foreground">
-            {osList.length} ordem{osList.length !== 1 ? 's' : ''} de serviço em execução
+            {osList.length} ordem{osList.length !== 1 ? "s" : ""} de serviço em execução
           </p>
         </div>
       </div>
@@ -60,27 +60,18 @@ export default function OSEmExecucao() {
               <CardHeader>
                 <div className="flex justify-between items-start">
                   <CardTitle className="flex items-center gap-2">
-                    OS Nº {os.numero || os.id} - CCA {os.cca?.codigo || 'N/A'}
-                    <Badge variant="default">
-                      Em execução
-                    </Badge>
+                    OS Nº {os.numero || os.id} - CCA {os.cca?.codigo || "N/A"}
+                    <Badge variant="default">Em execução</Badge>
                   </CardTitle>
                   <div className="flex gap-2">
-                    <Link to="/os-em-fechamento">
-                      <Button 
-                        variant="default" 
-                        size="sm"
-                      >
+                    <Link to="engenharia-matricial/os-em-fechamento">
+                      <Button variant="default" size="sm">
                         <CheckCircle className="h-4 w-4 mr-2" />
                         Iniciar fechamento
                       </Button>
                     </Link>
-                    <Link to="/os-replanejamento">
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        className="text-orange-600 hover:text-orange-700"
-                      >
+                    <Link to="engenharia-matricial/os-replanejamento">
+                      <Button variant="outline" size="sm" className="text-orange-600 hover:text-orange-700">
                         <RotateCcw className="h-4 w-4 mr-2" />
                         Replanejar
                       </Button>
@@ -108,9 +99,7 @@ export default function OSEmExecucao() {
                     <p className="font-medium">
                       {os.hh_planejado + (os.hh_adicional || 0)}h
                       {os.hh_adicional && os.hh_adicional > 0 && (
-                        <span className="text-orange-600 text-xs ml-1">
-                          (+{os.hh_adicional}h adicional)
-                        </span>
+                        <span className="text-orange-600 text-xs ml-1">(+{os.hh_adicional}h adicional)</span>
                       )}
                     </p>
                   </div>
@@ -130,7 +119,7 @@ export default function OSEmExecucao() {
                   )}
                   <div>
                     <p className="text-sm text-muted-foreground">Responsável EM</p>
-                    <p className="font-medium">{os.responsavel_em?.nome || 'N/A'}</p>
+                    <p className="font-medium">{os.responsavel_em?.nome || "N/A"}</p>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Solicitante</p>
