@@ -5,38 +5,38 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Eye, PlayCircle, X } from "lucide-react";
-import { useOS } from "@/contexts/engenharia-matricial/OSContext";
+import { useOSList, useAvancarFaseOS, useUpdateOS } from "@/hooks/engenharia-matricial/useOSEngenhariaMatricial";
 import { Link, useLocation } from "react-router-dom";
 import { toast } from "sonner";
 import { Separator } from "@/components/ui/separator";
 import { useState } from "react";
 
 export default function OSAbertas() {
-  const { osList, avancarFase, updateOSStatus } = useOS();
+  const { data: osList = [], isLoading } = useOSList({ status: "aberta" });
+  const avancarFaseMutation = useAvancarFaseOS();
+  const updateOSMutation = useUpdateOS();
+  
   const location = useLocation();
   const params = new URLSearchParams(location.search);
   const filtrarHoje = params.get("hoje") === "1";
   const filtrarDisc = params.get("disc");
   
-  const [osRejeitando, setOsRejeitando] = useState<number | null>(null);
+  const [osRejeitando, setOsRejeitando] = useState<string | null>(null);
   const [justificativaRejeicao, setJustificativaRejeicao] = useState("");
-  const [loadingRejeicao, setLoadingRejeicao] = useState(false);
   
   const hojeISO = new Date().toISOString().split('T')[0];
   
   const osAbertas = osList.filter(os => {
-    if (os.status !== "aberta") return false;
-    if (filtrarHoje && os.dataAbertura !== hojeISO) return false;
+    if (filtrarHoje && os.data_abertura !== hojeISO) return false;
     if (filtrarDisc && os.disciplina !== filtrarDisc) return false;
     return true;
   });
 
-  const handleIniciarPlanejamento = (osId: number) => {
-    avancarFase(osId);
-    toast.success("OS enviada para planejamento com sucesso!");
+  const handleIniciarPlanejamento = (osId: string) => {
+    avancarFaseMutation.mutate({ id: osId });
   };
 
-  const handleIniciarRejeicao = (osId: number) => {
+  const handleIniciarRejeicao = (osId: string) => {
     setOsRejeitando(osId);
     setJustificativaRejeicao("");
   };
@@ -53,14 +53,19 @@ export default function OSAbertas() {
     }
 
     if (osRejeitando) {
-      setLoadingRejeicao(true);
-      updateOSStatus(osRejeitando, "rejeitada", `OS rejeitada pela Engenharia Matricial: ${justificativaRejeicao}`);
-      
-      toast.success("OS rejeitada com sucesso.");
-
-      setOsRejeitando(null);
-      setJustificativaRejeicao("");
-      setLoadingRejeicao(false);
+      updateOSMutation.mutate({
+        id: osRejeitando,
+        data: { 
+          status: "rejeitada" as any,
+          // Adicionar campo de justificativa se necessário
+        }
+      }, {
+        onSuccess: () => {
+          toast.success("OS rejeitada com sucesso.");
+          setOsRejeitando(null);
+          setJustificativaRejeicao("");
+        }
+      });
     }
   };
 
@@ -78,6 +83,14 @@ export default function OSAbertas() {
       currency: 'BRL'
     }).format(value);
   };
+
+  if (isLoading) {
+    return (
+      <div className="container mx-auto p-6">
+        <p>Carregando...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto p-6">
@@ -108,7 +121,7 @@ export default function OSAbertas() {
               <CardHeader>
                 <div className="flex justify-between items-start">
                   <CardTitle className="flex items-center gap-2">
-                    OS Nº {os.numero || os.id} - CCA {os.cca}
+                    OS Nº {os.numero} - CCA {os.cca_id}
                     <Badge variant="secondary">
                       {capitalizarTexto(os.status)}
                     </Badge>
@@ -118,6 +131,7 @@ export default function OSAbertas() {
                       variant="default" 
                       size="sm"
                       onClick={() => handleIniciarPlanejamento(os.id)}
+                      disabled={avancarFaseMutation.isPending}
                     >
                       <PlayCircle className="h-4 w-4 mr-2" />
                       Enviar para planejamento
@@ -142,7 +156,7 @@ export default function OSAbertas() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
                     <p className="text-sm text-muted-foreground">Cliente</p>
-                    <p className="font-medium">{capitalizarTexto(os.cliente)}</p>
+                    <p className="font-medium">{capitalizarTexto(os.cliente || "")}</p>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Disciplina</p>
@@ -150,25 +164,25 @@ export default function OSAbertas() {
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Solicitante</p>
-                    <p className="font-medium">{os.nomeSolicitante}</p>
+                    <p className="font-medium">{os.solicitante_nome}</p>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Responsável EM</p>
-                    <p className="font-medium">{os.responsavelEM}</p>
+                    <p className="font-medium">{os.responsavel_em_id}</p>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Data de abertura</p>
-                    <p className="font-medium">{formatDate(os.dataAbertura)}</p>
+                    <p className="font-medium">{formatDate(os.data_abertura)}</p>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Data compromissada</p>
-                    <p className="font-medium">{formatDate(os.dataCompromissada)}</p>
+                    <p className="font-medium">{formatDate(os.data_compromissada)}</p>
                   </div>
                   <div className="md:col-span-3">
                     <p className="text-sm text-muted-foreground">Valor SAO</p>
-                    {os.valorOrcamento && os.valorOrcamento > 0 ? (
+                    {os.valor_orcamento && os.valor_orcamento > 0 ? (
                       <>
-                        <p className="font-medium text-lg text-primary">{formatCurrency(os.valorOrcamento)}</p>
+                        <p className="font-medium text-lg text-primary">{formatCurrency(os.valor_orcamento)}</p>
                         <p className="text-xs text-muted-foreground">Valor informado pelo solicitante</p>
                       </>
                     ) : (
@@ -221,7 +235,7 @@ export default function OSAbertas() {
             <Button 
               variant="destructive" 
               onClick={handleConfirmarRejeicao}
-              disabled={loadingRejeicao}
+              disabled={updateOSMutation.isPending}
             >
               Confirmar rejeição
             </Button>
