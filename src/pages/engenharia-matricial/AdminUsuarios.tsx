@@ -16,9 +16,11 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
-import { Plus, Edit, UserX, UserCheck, Mail, Trash2 } from "lucide-react";
+import { Plus, Edit, UserX, UserCheck, Mail, Trash2, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Usuario, Papel, Disciplina, mockUsuarios, getPapelLabel } from "@/lib/engenharia-matricial/usuarios";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
 
 // Matriz de permissões
 const permissoes = {
@@ -90,7 +92,7 @@ const permissoes = {
   }
 };
 
-const getPapelBadge = (papel: Papel, cca?: string) => {
+const getPapelBadge = (papel: Papel, ccas?: number[]) => {
   const variants = {
     EM: "bg-blue-100 text-blue-800",
     OBRA: "bg-green-100 text-green-800", 
@@ -100,7 +102,7 @@ const getPapelBadge = (papel: Papel, cca?: string) => {
   
   return (
     <Badge className={variants[papel]}>
-      {getPapelLabel(papel, cca)}
+      {getPapelLabel(papel, ccas)}
     </Badge>
   );
 };
@@ -122,10 +124,38 @@ export default function AdminUsuarios() {
     papel: "" as Papel | "",
     ativo: true,
     disciplinaPreferida: "" as Disciplina | "",
-    cca: "",
-    cliente: ""
+    ccas: [] as number[]
   });
   const { toast } = useToast();
+
+  // Buscar usuários ativos do Supabase
+  const { data: usuariosSupabase } = useQuery({
+    queryKey: ['usuarios-supabase-ativos'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id, nome, email')
+        .order('nome');
+      
+      if (error) throw error;
+      return data || [];
+    }
+  });
+
+  // Buscar CCAs ativos do Supabase
+  const { data: ccasAtivos } = useQuery({
+    queryKey: ['ccas-ativos'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('ccas')
+        .select('id, codigo, nome')
+        .eq('ativo', true)
+        .order('codigo');
+      
+      if (error) throw error;
+      return data || [];
+    }
+  });
 
   useEffect(() => {
     try {
@@ -142,8 +172,7 @@ export default function AdminUsuarios() {
         papel: usuario.papel,
         ativo: usuario.ativo,
         disciplinaPreferida: usuario.disciplinaPreferida || "",
-        cca: usuario.cca || "",
-        cliente: usuario.cliente || ""
+        ccas: usuario.ccas || []
       });
     } else {
       setUsuarioEdicao(null);
@@ -153,8 +182,7 @@ export default function AdminUsuarios() {
         papel: "",
         ativo: true,
         disciplinaPreferida: "",
-        cca: "",
-        cliente: ""
+        ccas: []
       });
     }
     setDialogAberto(true);
@@ -174,16 +202,8 @@ export default function AdminUsuarios() {
       toast({ title: "Erro", description: "Função é obrigatória", variant: "destructive" });
       return;
     }
-    if (formData.papel === "OBRA" && (!formData.cca || !formData.cca.trim())) {
-      toast({ title: "Erro", description: "CCA é obrigatório para solicitantes", variant: "destructive" });
-      return;
-    }
-    if (formData.papel === "OBRA" && formData.cca && (!/^\d+$/.test(formData.cca) || parseInt(formData.cca) <= 0)) {
-      toast({ title: "Erro", description: "CCA deve ser um número inteiro positivo", variant: "destructive" });
-      return;
-    }
-    if (formData.papel === "OBRA" && (!formData.cliente || !formData.cliente.trim())) {
-      toast({ title: "Erro", description: "Cliente é obrigatório para solicitantes", variant: "destructive" });
+    if (formData.papel === "OBRA" && (!formData.ccas || formData.ccas.length === 0)) {
+      toast({ title: "Erro", description: "Pelo menos um CCA é obrigatório para solicitantes", variant: "destructive" });
       return;
     }
 
@@ -216,8 +236,7 @@ export default function AdminUsuarios() {
             papel: formData.papel as Papel,
             ativo: formData.ativo,
             disciplinaPreferida: disciplinaFinal as Disciplina,
-            cca: formData.papel === "OBRA" ? formData.cca.trim() : undefined,
-            cliente: formData.papel === "OBRA" ? formData.cliente.trim() : undefined,
+            ccas: formData.papel === "OBRA" ? formData.ccas : undefined,
             atualizadoEm: agora
             }
           : u
@@ -233,8 +252,7 @@ export default function AdminUsuarios() {
         papel: formData.papel as Papel,
         ativo: formData.ativo,
         disciplinaPreferida: disciplinaFinal as Disciplina,
-        cca: formData.papel === "OBRA" ? formData.cca.trim() : undefined,
-        cliente: formData.papel === "OBRA" ? formData.cliente.trim() : undefined,
+        ccas: formData.papel === "OBRA" ? formData.ccas : undefined,
         criadoEm: agora,
         atualizadoEm: agora
       };
@@ -290,25 +308,39 @@ export default function AdminUsuarios() {
               {/* Formulário */}
               <div className="space-y-4">
                 <div>
-                  <Label htmlFor="nome">Nome *</Label>
-                  <Input
-                    id="nome"
-                    value={formData.nome}
-                    onChange={(e) => setFormData(prev => ({ ...prev, nome: e.target.value }))}
-                    className={!formData.nome.trim() ? "border-red-500" : ""}
-                    placeholder="Nome completo"
-                  />
+                  <Label htmlFor="email">E-mail *</Label>
+                  <Select 
+                    value={formData.email} 
+                    onValueChange={(value) => {
+                      const usuarioSelecionado = usuariosSupabase?.find(u => u.email === value);
+                      setFormData(prev => ({ 
+                        ...prev, 
+                        email: value,
+                        nome: usuarioSelecionado?.nome || ""
+                      }));
+                    }}
+                  >
+                    <SelectTrigger className={!formData.email ? "border-red-500" : ""}>
+                      <SelectValue placeholder="Selecione o e-mail" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-background border shadow-lg z-50">
+                      {usuariosSupabase?.map((usuario) => (
+                        <SelectItem key={usuario.id} value={usuario.email}>
+                          {usuario.email}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div>
-                  <Label htmlFor="email">E-mail *</Label>
+                  <Label htmlFor="nome">Nome</Label>
                   <Input
-                    id="email"
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-                    className={!formData.email.trim() ? "border-red-500" : ""}
-                    placeholder="usuario@empresa.com"
+                    id="nome"
+                    value={formData.nome}
+                    readOnly
+                    className="bg-muted"
+                    placeholder="Será preenchido automaticamente"
                   />
                 </div>
 
@@ -355,30 +387,49 @@ export default function AdminUsuarios() {
                 {formData.papel === "OBRA" && (
                   <div className="space-y-4">
                     <div>
-                      <Label htmlFor="cca" className={!formData.cca ? "text-destructive" : ""}>
-                        Número do CCA *
+                      <Label htmlFor="ccas" className={formData.ccas.length === 0 ? "text-destructive" : ""}>
+                        CCA *
                       </Label>
-                      <Input
-                        id="cca"
-                        type="number"
-                        placeholder="Ex: 12345"
-                        value={formData.cca}
-                        onChange={(e) => setFormData(prev => ({ ...prev, cca: e.target.value }))}
-                        className={!formData.cca ? "border-destructive" : ""}
-                      />
-                    </div>
-                    
-                    <div>
-                      <Label htmlFor="cliente" className={!formData.cliente ? "text-destructive" : ""}>
-                        Nome do Cliente *
-                      </Label>
-                      <Input
-                        id="cliente"
-                        placeholder="Ex: Brainfarma"
-                        value={formData.cliente}
-                        onChange={(e) => setFormData(prev => ({ ...prev, cliente: e.target.value }))}
-                        className={!formData.cliente ? "border-destructive" : ""}
-                      />
+                      <Select 
+                        value="" 
+                        onValueChange={(value) => {
+                          const ccaId = parseInt(value);
+                          if (!formData.ccas.includes(ccaId)) {
+                            setFormData(prev => ({ ...prev, ccas: [...prev.ccas, ccaId] }));
+                          }
+                        }}
+                      >
+                        <SelectTrigger className={formData.ccas.length === 0 ? "border-destructive" : ""}>
+                          <SelectValue placeholder="Selecione os CCAs" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-background border shadow-lg z-50">
+                          {ccasAtivos?.filter(cca => !formData.ccas.includes(cca.id)).map((cca) => (
+                            <SelectItem key={cca.id} value={cca.id.toString()}>
+                              {cca.codigo} - {cca.nome}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      
+                      {formData.ccas.length > 0 && (
+                        <div className="flex flex-wrap gap-2 mt-2">
+                          {formData.ccas.map((ccaId) => {
+                            const cca = ccasAtivos?.find(c => c.id === ccaId);
+                            return (
+                              <Badge key={ccaId} variant="secondary" className="flex items-center gap-1">
+                                {cca?.codigo} - {cca?.nome}
+                                <X 
+                                  className="h-3 w-3 cursor-pointer" 
+                                  onClick={() => setFormData(prev => ({ 
+                                    ...prev, 
+                                    ccas: prev.ccas.filter(id => id !== ccaId) 
+                                  }))}
+                                />
+                              </Badge>
+                            );
+                          })}
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
@@ -464,12 +515,13 @@ export default function AdminUsuarios() {
                   <TableRow key={usuario.id}>
                     <TableCell className="font-medium">{usuario.nome}</TableCell>
                     <TableCell>{usuario.email}</TableCell>
-                    <TableCell>{getPapelBadge(usuario.papel, usuario.cca)}</TableCell>
+                    <TableCell>{getPapelBadge(usuario.papel, usuario.ccas)}</TableCell>
                     <TableCell>
-                      {usuario.papel === "OBRA" && usuario.cliente && usuario.cca ? (
+                      {usuario.papel === "OBRA" && usuario.ccas && usuario.ccas.length > 0 ? (
                         <div className="flex flex-col">
-                          <span className="font-medium">{usuario.cliente}</span>
-                          <span className="text-xs text-muted-foreground">CCA {usuario.cca}</span>
+                          <span className="text-xs text-muted-foreground">
+                            CCA {usuario.ccas.join(', ')}
+                          </span>
                         </div>
                       ) : (
                         <span className="text-muted-foreground">-</span>

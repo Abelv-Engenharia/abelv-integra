@@ -19,7 +19,7 @@ const NovaOrdemServico = () => {
   const navigate = useNavigate();
   
   const [solicitantesAtivos, setSolicitantesAtivos] = useState<Usuario[]>([]);
-  const [ccasDisponiveis, setCCAsDisponiveis] = useState<string[]>([]);
+  const [ccasDisponiveis, setCCAsDisponiveis] = useState<number[]>([]);
   const [clientesDisponiveis, setClientesDisponiveis] = useState<string[]>([]);
 
   // Carregar dados dos usuários
@@ -274,7 +274,7 @@ const NovaOrdemServico = () => {
                         </SelectTrigger>
                         <SelectContent>
                           {ccasDisponiveis.map((cca) => (
-                            <SelectItem key={cca} value={cca}>
+                            <SelectItem key={cca} value={cca.toString()}>
                               CCA {cca}
                             </SelectItem>
                           ))}
@@ -302,7 +302,7 @@ const NovaOrdemServico = () => {
                         <div className="flex flex-col">
                           <span className="font-medium">{solicitante.nome}</span>
                           <span className="text-xs text-muted-foreground">
-                            {getPapelLabel(solicitante.papel, solicitante.cca)} • {solicitante.email}
+                            {getPapelLabel(solicitante.papel, solicitante.ccas)} • {solicitante.email}
                           </span>
                         </div>
                       </SelectItem>

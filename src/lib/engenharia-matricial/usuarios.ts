@@ -9,8 +9,7 @@ export interface Usuario {
   papel: Papel;
   ativo: boolean;
   disciplinaPreferida?: Disciplina;
-  cca?: string; // Número do CCA para solicitantes (OBRA)
-  cliente?: string; // Nome do cliente para solicitantes (OBRA)
+  ccas?: number[]; // CCAs para solicitantes (OBRA)
   criadoEm: string;
   atualizadoEm: string;
 }
@@ -43,8 +42,7 @@ export const mockUsuarios: Usuario[] = [
     email: "maria@obra.com",
     papel: "OBRA",
     ativo: true,
-    cca: "12345",
-    cliente: "Brainfarma",
+    ccas: [12345],
     criadoEm: "2024-02-01",
     atualizadoEm: "2024-03-15"
   },
@@ -72,8 +70,7 @@ export const mockUsuarios: Usuario[] = [
     email: "carlos@obra2.com",
     papel: "OBRA",
     ativo: true,
-    cca: "67890",
-    cliente: "Libbs",
+    ccas: [67890],
     criadoEm: "2024-02-15",
     atualizadoEm: "2024-03-10"
   }
@@ -108,28 +105,18 @@ export const getUsuariosParaOS = (): Usuario[] => {
 };
 
 // Função para obter lista de CCAs únicos
-export const getCCAs = (): string[] => {
-  return getUsuarios()
-    .filter(usuario => usuario.papel === "OBRA" && usuario.ativo && usuario.cca)
-    .map(usuario => usuario.cca!)
-    .filter((cca, index, arr) => arr.indexOf(cca) === index)
-    .sort((a, b) => parseInt(a) - parseInt(b));
+export const getCCAs = (): number[] => {
+  const ccasSet = new Set<number>();
+  getUsuarios()
+    .filter(usuario => usuario.papel === "OBRA" && usuario.ativo && usuario.ccas)
+    .forEach(usuario => usuario.ccas?.forEach(cca => ccasSet.add(cca)));
+  return Array.from(ccasSet).sort((a, b) => a - b);
 };
 
-// Função para obter clientes únicos baseados nos usuários OBRA
+// Função para obter clientes únicos baseados nos CCAs
 export const getClientes = (): string[] => {
-  const usuarios = getUsuarios().filter(usuario => usuario.papel === "OBRA" && usuario.ativo && usuario.cliente);
-  
-  // Coletar clientes únicos dos usuários OBRA
+  // Clientes baseados nos CCAs
   const clientesSet = new Set<string>();
-  
-  usuarios.forEach(usuario => {
-    if (usuario.cliente) {
-      clientesSet.add(usuario.cliente);
-    }
-  });
-  
-  // Adicionar clientes fixos se não existirem
   clientesSet.add("Brainfarma");
   clientesSet.add("Libbs");
   
@@ -137,10 +124,10 @@ export const getClientes = (): string[] => {
 };
 
 // Função para obter label do papel
-export const getPapelLabel = (papel: Papel, cca?: string) => {
+export const getPapelLabel = (papel: Papel, ccas?: number[]) => {
   switch (papel) {
     case "EM": return "Engenharia Matricial (CCA livre)";
-    case "OBRA": return cca ? `Solicitante CCA ${cca}` : "Solicitante";
+    case "OBRA": return ccas && ccas.length > 0 ? `Solicitante CCA ${ccas.join(', ')}` : "Solicitante";
     case "CONTROLADORIA": return "Controladoria";
     case "ADMIN": return "Administrador (CCA livre)";
     default: return papel;
