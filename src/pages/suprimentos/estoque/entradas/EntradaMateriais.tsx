@@ -19,7 +19,7 @@ export default function EntradaMateriais() {
   
   // Estados para filtros
   const [filtros, setFiltros] = useState({
-    cca: "",
+    cca: "all",
     documento: "",
     numeroDocumento: "",
     dataEmissaoInicio: undefined as Date | undefined,
@@ -168,7 +168,7 @@ export default function EntradaMateriais() {
                   <SelectValue placeholder={ccasLoading ? "Carregando..." : "Selecione o CCA"} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todos</SelectItem>
+                  <SelectItem value="all">Todos</SelectItem>
                   {ccas.filter(cca => cca.ativo).map((cca) => (
                     <SelectItem key={cca.id} value={cca.id.toString()}>
                       {cca.codigo} - {cca.nome}
