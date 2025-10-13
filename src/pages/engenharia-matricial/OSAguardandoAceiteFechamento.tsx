@@ -10,9 +10,9 @@ import { useState } from "react";
 export default function OSAguardandoAceiteFechamento() {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
-  const { data: osList = [], isLoading: isLoadingList } = useOSList({ status: 'aguardando-aceite-fechamento' });
+  const { data: osList = [], isLoading: isLoadingList } = useOSList({ status: "aguardando-aceite-fechamento" });
   const updateOS = useUpdateOS();
-  
+
   const osAguardandoAceiteFechamento = osList;
 
   const capitalizarTexto = (texto: string) => {
@@ -20,13 +20,13 @@ export default function OSAguardandoAceiteFechamento() {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('pt-BR');
+    return new Date(dateString).toLocaleDateString("pt-BR");
   };
 
   const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
+    return new Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: "BRL",
     }).format(value);
   };
 
@@ -36,8 +36,8 @@ export default function OSAguardandoAceiteFechamento() {
       await updateOS.mutateAsync({
         id: osId,
         data: {
-          status: 'concluida'
-        }
+          status: "concluida",
+        },
       });
       toast({
         title: "Fechamento aceito",
@@ -47,7 +47,7 @@ export default function OSAguardandoAceiteFechamento() {
       toast({
         title: "Erro ao aceitar fechamento",
         description: "Não foi possível aceitar o fechamento da OS.",
-        variant: "destructive"
+        variant: "destructive",
       });
     } finally {
       setIsLoading(false);
@@ -60,19 +60,19 @@ export default function OSAguardandoAceiteFechamento() {
       await updateOS.mutateAsync({
         id: osId,
         data: {
-          status: 'em-execucao'
-        }
+          status: "em-execucao",
+        },
       });
       toast({
         title: "Fechamento rejeitado",
         description: "OS retornada para execução.",
-        variant: "destructive"
+        variant: "destructive",
       });
     } catch (error) {
       toast({
         title: "Erro ao rejeitar fechamento",
         description: "Não foi possível rejeitar o fechamento da OS.",
-        variant: "destructive"
+        variant: "destructive",
       });
     } finally {
       setIsLoading(false);
@@ -93,7 +93,8 @@ export default function OSAguardandoAceiteFechamento() {
         <div>
           <h1 className="text-3xl font-bold">OS Aguardando aceite fechamento</h1>
           <p className="text-muted-foreground">
-            {osAguardandoAceiteFechamento.length} ordem{osAguardandoAceiteFechamento.length !== 1 ? 's' : ''} de serviço aguardando aceite do fechamento pelo solicitante
+            {osAguardandoAceiteFechamento.length} ordem{osAguardandoAceiteFechamento.length !== 1 ? "s" : ""} de serviço
+            aguardando aceite do fechamento pelo solicitante
           </p>
         </div>
       </div>
@@ -118,8 +119,8 @@ export default function OSAguardandoAceiteFechamento() {
                     </Badge>
                   </CardTitle>
                   <div className="flex gap-2">
-                    <Button 
-                      variant="default" 
+                    <Button
+                      variant="default"
                       size="sm"
                       onClick={() => handleAceitarFechamento(os.id)}
                       className="bg-green-600 hover:bg-green-700"
@@ -127,8 +128,8 @@ export default function OSAguardandoAceiteFechamento() {
                       <Check className="h-4 w-4 mr-2" />
                       Aceitar fechamento
                     </Button>
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       size="sm"
                       onClick={() => handleRejeitarFechamento(os.id)}
                       className="text-red-600 hover:text-red-700 hover:bg-red-50"
@@ -146,10 +147,6 @@ export default function OSAguardandoAceiteFechamento() {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Cliente</p>
-                    <p className="font-medium">{os.cliente}</p>
-                  </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Disciplina</p>
                     <p className="font-medium">{capitalizarTexto(os.disciplina)}</p>
@@ -191,7 +188,7 @@ export default function OSAguardandoAceiteFechamento() {
                     </div>
                   )}
                 </div>
-                
+
                 <div className="mt-4">
                   <p className="text-sm text-muted-foreground">Descrição</p>
                   <p className="text-sm bg-muted p-3 rounded-md">{os.descricao}</p>
@@ -200,7 +197,9 @@ export default function OSAguardandoAceiteFechamento() {
                 {os.justificativa_engenharia && (
                   <div className="mt-4">
                     <p className="text-sm text-muted-foreground">Justificativa engenharia</p>
-                    <p className="text-sm bg-blue-50 p-3 rounded-md border-l-4 border-blue-200">{os.justificativa_engenharia}</p>
+                    <p className="text-sm bg-blue-50 p-3 rounded-md border-l-4 border-blue-200">
+                      {os.justificativa_engenharia}
+                    </p>
                   </div>
                 )}
 
@@ -208,7 +207,8 @@ export default function OSAguardandoAceiteFechamento() {
                   <div className="mt-4 p-3 bg-green-50 rounded-md border-l-4 border-green-200">
                     <p className="text-sm text-muted-foreground">Saving obtido</p>
                     <p className="font-medium text-green-700">
-                      {os.percentual_saving > 0 ? '+' : ''}{os.percentual_saving.toFixed(1)}%
+                      {os.percentual_saving > 0 ? "+" : ""}
+                      {os.percentual_saving.toFixed(1)}%
                     </p>
                   </div>
                 )}
