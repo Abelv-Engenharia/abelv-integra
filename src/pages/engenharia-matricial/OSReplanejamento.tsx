@@ -135,7 +135,7 @@ export default function OSReplanejamento() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-orange-700">
                   <RotateCcw className="h-5 w-5" />
-                  Replanejamento da OS #{osEmReplanejamento}
+                  Replanejamento da OS #{os.number}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
