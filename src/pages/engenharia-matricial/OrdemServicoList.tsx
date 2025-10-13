@@ -10,14 +10,26 @@ import { Link } from "react-router-dom";
 import { useOSList } from "@/hooks/engenharia-matricial/useOSEngenhariaMatricial";
 
 const statusConfig = {
-  "aberta": { label: "Os aberta", color: "bg-blue-100 text-blue-800", variant: "secondary" as const },
-  "em-planejamento": { label: "Em planejamento", color: "bg-yellow-100 text-yellow-800", variant: "secondary" as const },
-  "aguardando-aceite": { label: "Aguardando aceite do solicitante", color: "bg-orange-100 text-orange-800", variant: "secondary" as const },
+  aberta: { label: "Os aberta", color: "bg-blue-100 text-blue-800", variant: "secondary" as const },
+  "em-planejamento": {
+    label: "Em planejamento",
+    color: "bg-yellow-100 text-yellow-800",
+    variant: "secondary" as const,
+  },
+  "aguardando-aceite": {
+    label: "Aguardando aceite do solicitante",
+    color: "bg-orange-100 text-orange-800",
+    variant: "secondary" as const,
+  },
   "em-execucao": { label: "Em execução", color: "bg-green-100 text-green-800", variant: "secondary" as const },
-  "aguardando-aceite-fechamento": { label: "Aguardando aceite fechamento", color: "bg-purple-100 text-purple-800", variant: "secondary" as const },
-  "cancelada": { label: "Cancelada", color: "bg-red-100 text-red-800", variant: "destructive" as const },
-  "concluida": { label: "Concluída", color: "bg-emerald-100 text-emerald-800", variant: "secondary" as const },
-  "rejeitada": { label: "Rejeitada", color: "bg-red-200 text-red-900", variant: "destructive" as const }
+  "aguardando-aceite-fechamento": {
+    label: "Aguardando aceite fechamento",
+    color: "bg-purple-100 text-purple-800",
+    variant: "secondary" as const,
+  },
+  cancelada: { label: "Cancelada", color: "bg-red-100 text-red-800", variant: "destructive" as const },
+  concluida: { label: "Concluída", color: "bg-emerald-100 text-emerald-800", variant: "secondary" as const },
+  rejeitada: { label: "Rejeitada", color: "bg-red-200 text-red-900", variant: "destructive" as const },
 };
 
 const OrdemServicoList = () => {
@@ -28,15 +40,15 @@ const OrdemServicoList = () => {
   const [buscaTexto, setBuscaTexto] = useState("");
 
   const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
+    return new Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: "BRL",
     }).format(value);
   };
 
   const formatDate = (dateString: string | null) => {
-    if (!dateString) return '-';
-    return new Date(dateString).toLocaleDateString('pt-BR');
+    if (!dateString) return "-";
+    return new Date(dateString).toLocaleDateString("pt-BR");
   };
 
   const calcularHHTotal = (hhPlanejado: number | null, hhAdicional: number | null) => {
@@ -44,28 +56,27 @@ const OrdemServicoList = () => {
   };
 
   const calcularPercentualAdicional = (hhPlanejado: number | null, hhAdicional: number | null) => {
-    if (!hhPlanejado || hhPlanejado === 0) return '0.0';
+    if (!hhPlanejado || hhPlanejado === 0) return "0.0";
     return (((hhAdicional || 0) / hhPlanejado) * 100).toFixed(1);
   };
 
   // Filtrar OS baseado nos filtros ativos
-  const osFiltradas = osList.filter(os => {
+  const osFiltradas = osList.filter((os) => {
     // Filtro por status
     if (filtroStatus !== "todos" && os.status !== filtroStatus) return false;
-    
+
     // Filtro por cliente
     if (filtroCliente !== "todos" && os.cca?.nome?.toLowerCase() !== filtroCliente) return false;
-    
+
     // Filtro por disciplina
     if (filtroDisciplina !== "todos" && os.disciplina?.toLowerCase() !== filtroDisciplina) return false;
-    
+
     // Filtro de busca por texto
     if (buscaTexto) {
       const texto = buscaTexto.toLowerCase();
-      return os.cca?.codigo?.toString().includes(texto) || 
-             os.descricao?.toLowerCase().includes(texto);
+      return os.cca?.codigo?.toString().includes(texto) || os.descricao?.toLowerCase().includes(texto);
     }
-    
+
     return true;
   });
 
@@ -223,9 +234,7 @@ const OrdemServicoList = () => {
       <Card>
         <CardHeader>
           <CardTitle>Lista de ordens de serviço</CardTitle>
-          <CardDescription>
-            {osFiltradas.length} os encontradas
-          </CardDescription>
+          <CardDescription>{osFiltradas.length} os encontradas</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
@@ -257,12 +266,12 @@ const OrdemServicoList = () => {
                 ) : (
                   osFiltradas.map((os) => (
                     <TableRow key={os.id}>
-                      <TableCell className="font-medium">#{os.id}</TableCell>
-                      <TableCell>{os.cca?.codigo || '-'}</TableCell>
+                      <TableCell className="font-medium">#{os.numero}</TableCell>
+                      <TableCell>{os.cca?.codigo || "-"}</TableCell>
                       <TableCell>{formatDate(os.data_abertura)}</TableCell>
-                      <TableCell>{os.disciplina || '-'}</TableCell>
-                      <TableCell className="max-w-[200px] truncate" title={os.descricao || ''}>
-                        {os.descricao || '-'}
+                      <TableCell>{os.disciplina || "-"}</TableCell>
+                      <TableCell className="max-w-[200px] truncate" title={os.descricao || ""}>
+                        {os.descricao || "-"}
                       </TableCell>
                       <TableCell>
                         <Badge variant={statusConfig[os.status as keyof typeof statusConfig]?.variant}>
