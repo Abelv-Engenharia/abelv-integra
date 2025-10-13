@@ -3,14 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -28,83 +21,79 @@ const permissoes = {
     EM: true,
     OBRA: false,
     CONTROLADORIA: true,
-    ADMIN: true
+    ADMIN: true,
   },
   "Abrir OS": {
     EM: true,
     OBRA: true,
     CONTROLADORIA: false,
-    ADMIN: true
+    ADMIN: true,
   },
   "Planejar OS (definir HH e Data)": {
     EM: true,
     OBRA: false,
     CONTROLADORIA: false,
-    ADMIN: true
+    ADMIN: true,
   },
   "Aceitar Planejamento": {
     EM: false,
     OBRA: true,
     CONTROLADORIA: false,
-    ADMIN: true
+    ADMIN: true,
   },
   "Entregar OS / Upload de anexos": {
     EM: true,
     OBRA: false,
     CONTROLADORIA: false,
-    ADMIN: true
+    ADMIN: true,
   },
   "Validar Entrega": {
     EM: false,
     OBRA: true,
     CONTROLADORIA: false,
-    ADMIN: true
+    ADMIN: true,
   },
   "Solicitar HH adicional": {
     EM: true,
     OBRA: false,
     CONTROLADORIA: false,
-    ADMIN: true
+    ADMIN: true,
   },
   "Aprovar HH adicional": {
     EM: false,
     OBRA: true,
     CONTROLADORIA: false,
-    ADMIN: true
+    ADMIN: true,
   },
   "Ver todas as OS": {
     EM: true,
     OBRA: false,
     CONTROLADORIA: true,
-    ADMIN: true
+    ADMIN: true,
   },
   "Ver OS da sua obra": {
     EM: true,
     OBRA: true,
     CONTROLADORIA: false,
-    ADMIN: true
+    ADMIN: true,
   },
   "Gestão de usuários": {
     EM: false,
     OBRA: false,
     CONTROLADORIA: false,
-    ADMIN: true
-  }
+    ADMIN: true,
+  },
 };
 
 const getPapelBadge = (papel: Papel, ccas?: number[]) => {
   const variants = {
     EM: "bg-blue-100 text-blue-800",
-    OBRA: "bg-green-100 text-green-800", 
+    OBRA: "bg-green-100 text-green-800",
     CONTROLADORIA: "bg-yellow-100 text-yellow-800",
-    ADMIN: "bg-purple-100 text-purple-800"
+    ADMIN: "bg-purple-100 text-purple-800",
   };
-  
-  return (
-    <Badge className={variants[papel]}>
-      {getPapelLabel(papel, ccas)}
-    </Badge>
-  );
+
+  return <Badge className={variants[papel]}>{getPapelLabel(papel, ccas)}</Badge>;
 };
 
 export default function AdminUsuarios() {
@@ -124,37 +113,30 @@ export default function AdminUsuarios() {
     papel: "" as Papel | "",
     ativo: true,
     disciplinaPreferida: "" as Disciplina | "",
-    ccas: [] as number[]
+    ccas: [] as number[],
   });
   const { toast } = useToast();
 
   // Buscar usuários ativos do Supabase
   const { data: usuariosSupabase } = useQuery({
-    queryKey: ['usuarios-supabase-ativos'],
+    queryKey: ["usuarios-supabase-ativos"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('id, nome, email')
-        .order('nome');
-      
+      const { data, error } = await supabase.from("profiles").select("id, nome, email").order("nome");
+
       if (error) throw error;
       return data || [];
-    }
+    },
   });
 
   // Buscar CCAs ativos do Supabase
   const { data: ccasAtivos } = useQuery({
-    queryKey: ['ccas-ativos'],
+    queryKey: ["ccas-ativos"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('ccas')
-        .select('id, codigo, nome')
-        .eq('ativo', true)
-        .order('codigo');
-      
+      const { data, error } = await supabase.from("ccas").select("id, codigo, nome").eq("ativo", true).order("codigo");
+
       if (error) throw error;
       return data || [];
-    }
+    },
   });
 
   useEffect(() => {
@@ -172,7 +154,7 @@ export default function AdminUsuarios() {
         papel: usuario.papel,
         ativo: usuario.ativo,
         disciplinaPreferida: usuario.disciplinaPreferida || "",
-        ccas: usuario.ccas || []
+        ccas: usuario.ccas || [],
       });
     } else {
       setUsuarioEdicao(null);
@@ -182,7 +164,7 @@ export default function AdminUsuarios() {
         papel: "",
         ativo: true,
         disciplinaPreferida: "",
-        ccas: []
+        ccas: [],
       });
     }
     setDialogAberto(true);
@@ -203,14 +185,17 @@ export default function AdminUsuarios() {
       return;
     }
     if (formData.papel === "OBRA" && (!formData.ccas || formData.ccas.length === 0)) {
-      toast({ title: "Erro", description: "Pelo menos um CCA é obrigatório para solicitantes", variant: "destructive" });
+      toast({
+        title: "Erro",
+        description: "Pelo menos um CCA é obrigatório para solicitantes",
+        variant: "destructive",
+      });
       return;
     }
 
     // Verificar email único
-    const emailExiste = usuarios.some(u => 
-      u.email.toLowerCase() === formData.email.toLowerCase() && 
-      u.id !== usuarioEdicao?.id
+    const emailExiste = usuarios.some(
+      (u) => u.email.toLowerCase() === formData.email.toLowerCase() && u.id !== usuarioEdicao?.id,
     );
     if (emailExiste) {
       toast({ title: "Erro", description: "E-mail já está em uso", variant: "destructive" });
@@ -223,28 +208,30 @@ export default function AdminUsuarios() {
       disciplinaFinal = "AMBAS";
     }
 
-    const agora = new Date().toISOString().split('T')[0];
-    
+    const agora = new Date().toISOString().split("T")[0];
+
     if (usuarioEdicao) {
       // Editar
-      setUsuarios(prev => prev.map(u => 
-        u.id === usuarioEdicao.id 
-          ? {
-              ...u,
-              nome: formData.nome.trim(),
-              email: formData.email.trim(),
-            papel: formData.papel as Papel,
-            ativo: formData.ativo,
-            disciplinaPreferida: disciplinaFinal as Disciplina,
-            ccas: formData.papel === "OBRA" ? formData.ccas : undefined,
-            atualizadoEm: agora
-            }
-          : u
-      ));
+      setUsuarios((prev) =>
+        prev.map((u) =>
+          u.id === usuarioEdicao.id
+            ? {
+                ...u,
+                nome: formData.nome.trim(),
+                email: formData.email.trim(),
+                papel: formData.papel as Papel,
+                ativo: formData.ativo,
+                disciplinaPreferida: disciplinaFinal as Disciplina,
+                ccas: formData.papel === "OBRA" ? formData.ccas : undefined,
+                atualizadoEm: agora,
+              }
+            : u,
+        ),
+      );
       toast({ title: "Sucesso", description: "Usuário atualizado com sucesso" });
     } else {
       // Criar
-      const novoId = (Math.max(0, ...usuarios.map(u => parseInt(u.id, 10))) + 1).toString();
+      const novoId = (Math.max(0, ...usuarios.map((u) => parseInt(u.id, 10))) + 1).toString();
       const novoUsuario: Usuario = {
         id: novoId,
         nome: formData.nome.trim(),
@@ -254,9 +241,9 @@ export default function AdminUsuarios() {
         disciplinaPreferida: disciplinaFinal as Disciplina,
         ccas: formData.papel === "OBRA" ? formData.ccas : undefined,
         criadoEm: agora,
-        atualizadoEm: agora
+        atualizadoEm: agora,
       };
-      setUsuarios(prev => [...prev, novoUsuario]);
+      setUsuarios((prev) => [...prev, novoUsuario]);
       toast({ title: "Sucesso", description: "Usuário criado com sucesso" });
     }
 
@@ -264,16 +251,18 @@ export default function AdminUsuarios() {
   };
 
   const toggleAtivo = (id: string) => {
-    const usuario = usuarios.find(u => u.id === id);
+    const usuario = usuarios.find((u) => u.id === id);
     const novoStatus = !usuario?.ativo;
-    
-    setUsuarios(prev => prev.map(u => 
-      u.id === id ? { ...u, ativo: novoStatus, atualizadoEm: new Date().toISOString().split('T')[0] } : u
-    ));
-    
-    toast({ 
-      title: "Sucesso", 
-      description: `Usuário ${novoStatus ? 'ativado' : 'desativado'} com sucesso` 
+
+    setUsuarios((prev) =>
+      prev.map((u) =>
+        u.id === id ? { ...u, ativo: novoStatus, atualizadoEm: new Date().toISOString().split("T")[0] } : u,
+      ),
+    );
+
+    toast({
+      title: "Sucesso",
+      description: `Usuário ${novoStatus ? "ativado" : "desativado"} com sucesso`,
     });
   };
 
@@ -288,7 +277,7 @@ export default function AdminUsuarios() {
           <h1 className="text-3xl font-bold">Gestão de Usuários</h1>
           <p className="text-muted-foreground">Cadastro e gerenciamento de usuários do sistema</p>
         </div>
-        
+
         <Dialog open={dialogAberto} onOpenChange={setDialogAberto}>
           <DialogTrigger asChild>
             <Button onClick={() => abrirFormulario()} className="flex items-center gap-2">
@@ -296,27 +285,25 @@ export default function AdminUsuarios() {
               Novo Usuário
             </Button>
           </DialogTrigger>
-          
+
           <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>
-                {usuarioEdicao ? "Editar Usuário" : "Novo Usuário"}
-              </DialogTitle>
+              <DialogTitle>{usuarioEdicao ? "Editar Usuário" : "Novo Usuário"}</DialogTitle>
             </DialogHeader>
-            
+
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Formulário */}
               <div className="space-y-4">
                 <div>
                   <Label htmlFor="email">E-mail *</Label>
-                  <Select 
-                    value={formData.email} 
+                  <Select
+                    value={formData.email}
                     onValueChange={(value) => {
-                      const usuarioSelecionado = usuariosSupabase?.find(u => u.email === value);
-                      setFormData(prev => ({ 
-                        ...prev, 
+                      const usuarioSelecionado = usuariosSupabase?.find((u) => u.email === value);
+                      setFormData((prev) => ({
+                        ...prev,
                         email: value,
-                        nome: usuarioSelecionado?.nome || ""
+                        nome: usuarioSelecionado?.nome || "",
                       }));
                     }}
                   >
@@ -346,9 +333,9 @@ export default function AdminUsuarios() {
 
                 <div>
                   <Label htmlFor="papel">Função *</Label>
-                  <Select 
-                    value={formData.papel} 
-                    onValueChange={(value: Papel) => setFormData(prev => ({ ...prev, papel: value }))}
+                  <Select
+                    value={formData.papel}
+                    onValueChange={(value: Papel) => setFormData((prev) => ({ ...prev, papel: value }))}
                   >
                     <SelectTrigger className={!formData.papel ? "border-red-500" : ""}>
                       <SelectValue placeholder="Selecione a função" />
@@ -365,9 +352,11 @@ export default function AdminUsuarios() {
                 {formData.papel === "EM" && (
                   <div>
                     <Label htmlFor="disciplina">Disciplina Preferida</Label>
-                    <Select 
-                      value={formData.disciplinaPreferida} 
-                      onValueChange={(value: Disciplina) => setFormData(prev => ({ ...prev, disciplinaPreferida: value }))}
+                    <Select
+                      value={formData.disciplinaPreferida}
+                      onValueChange={(value: Disciplina) =>
+                        setFormData((prev) => ({ ...prev, disciplinaPreferida: value }))
+                      }
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Selecione a disciplina" />
@@ -378,9 +367,7 @@ export default function AdminUsuarios() {
                         <SelectItem value="AMBAS">Ambas</SelectItem>
                       </SelectContent>
                     </Select>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      Se não informado, será definido como "Ambas"
-                    </p>
+                    <p className="text-sm text-muted-foreground mt-1">Se não informado, será definido como "Ambas"</p>
                   </div>
                 )}
 
@@ -390,12 +377,12 @@ export default function AdminUsuarios() {
                       <Label htmlFor="ccas" className={formData.ccas.length === 0 ? "text-destructive" : ""}>
                         CCA *
                       </Label>
-                      <Select 
-                        value="" 
+                      <Select
+                        value=""
                         onValueChange={(value) => {
                           const ccaId = parseInt(value);
                           if (!formData.ccas.includes(ccaId)) {
-                            setFormData(prev => ({ ...prev, ccas: [...prev.ccas, ccaId] }));
+                            setFormData((prev) => ({ ...prev, ccas: [...prev.ccas, ccaId] }));
                           }
                         }}
                       >
@@ -403,27 +390,31 @@ export default function AdminUsuarios() {
                           <SelectValue placeholder="Selecione os CCAs" />
                         </SelectTrigger>
                         <SelectContent className="bg-background border shadow-lg z-50">
-                          {ccasAtivos?.filter(cca => !formData.ccas.includes(cca.id)).map((cca) => (
-                            <SelectItem key={cca.id} value={cca.id.toString()}>
-                              {cca.codigo} - {cca.nome}
-                            </SelectItem>
-                          ))}
+                          {ccasAtivos
+                            ?.filter((cca) => !formData.ccas.includes(cca.id))
+                            .map((cca) => (
+                              <SelectItem key={cca.id} value={cca.id.toString()}>
+                                {cca.codigo} - {cca.nome}
+                              </SelectItem>
+                            ))}
                         </SelectContent>
                       </Select>
-                      
+
                       {formData.ccas.length > 0 && (
                         <div className="flex flex-wrap gap-2 mt-2">
                           {formData.ccas.map((ccaId) => {
-                            const cca = ccasAtivos?.find(c => c.id === ccaId);
+                            const cca = ccasAtivos?.find((c) => c.id === ccaId);
                             return (
                               <Badge key={ccaId} variant="secondary" className="flex items-center gap-1">
                                 {cca?.codigo} - {cca?.nome}
-                                <X 
-                                  className="h-3 w-3 cursor-pointer" 
-                                  onClick={() => setFormData(prev => ({ 
-                                    ...prev, 
-                                    ccas: prev.ccas.filter(id => id !== ccaId) 
-                                  }))}
+                                <X
+                                  className="h-3 w-3 cursor-pointer"
+                                  onClick={() =>
+                                    setFormData((prev) => ({
+                                      ...prev,
+                                      ccas: prev.ccas.filter((id) => id !== ccaId),
+                                    }))
+                                  }
                                 />
                               </Badge>
                             );
@@ -438,7 +429,7 @@ export default function AdminUsuarios() {
                   <Checkbox
                     id="ativo"
                     checked={formData.ativo}
-                    onCheckedChange={(checked) => setFormData(prev => ({ ...prev, ativo: !!checked }))}
+                    onCheckedChange={(checked) => setFormData((prev) => ({ ...prev, ativo: !!checked }))}
                   />
                   <Label htmlFor="ativo">Usuário ativo</Label>
                 </div>
@@ -456,10 +447,8 @@ export default function AdminUsuarios() {
               {/* Resumo de Permissões */}
               {formData.papel && (
                 <div>
-                  <h3 className="text-lg font-semibold mb-4">
-                    Permissões - {getPapelLabel(formData.papel as Papel)}
-                  </h3>
-                  
+                  <h3 className="text-lg font-semibold mb-4">Permissões - {getPapelLabel(formData.papel as Papel)}</h3>
+
                   <Card>
                     <CardContent className="p-4">
                       <div className="space-y-2">
@@ -478,7 +467,8 @@ export default function AdminUsuarios() {
                   {formData.papel === "OBRA" && (
                     <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
                       <p className="text-sm text-blue-800">
-                        <strong>Observação:</strong> Solicitantes podem aceitar planejamentos, validar entregas e aprovar HH adicional apenas das OS da sua obra.
+                        <strong>Observação:</strong> Solicitantes podem aceitar planejamentos, validar entregas e
+                        aprovar HH adicional apenas das OS da sua obra.
                       </p>
                     </div>
                   )}
@@ -519,37 +509,28 @@ export default function AdminUsuarios() {
                     <TableCell>
                       {usuario.papel === "OBRA" && usuario.ccas && usuario.ccas.length > 0 ? (
                         <div className="flex flex-col">
-                          <span className="text-xs text-muted-foreground">
-                            CCA {usuario.ccas.join(', ')}
-                          </span>
+                          <span className="text-xs text-muted-foreground">CCA {usuario.ccas.join(", ")}</span>
                         </div>
                       ) : (
                         <span className="text-muted-foreground">-</span>
                       )}
                     </TableCell>
                     <TableCell>
-                      {usuario.disciplinaPreferida && (
-                        <Badge variant="outline">{usuario.disciplinaPreferida}</Badge>
-                      )}
+                      {usuario.disciplinaPreferida && <Badge variant="outline">{usuario.disciplinaPreferida}</Badge>}
                     </TableCell>
                     <TableCell>
                       <Badge variant={usuario.ativo ? "default" : "secondary"}>
                         {usuario.ativo ? "Ativo" : "Inativo"}
                       </Badge>
                     </TableCell>
-                    <TableCell>{new Date(usuario.criadoEm).toLocaleDateString('pt-BR')}</TableCell>
-                    <TableCell>{new Date(usuario.atualizadoEm).toLocaleDateString('pt-BR')}</TableCell>
+                    <TableCell>{new Date(usuario.criadoEm).toLocaleDateString("pt-BR")}</TableCell>
+                    <TableCell>{new Date(usuario.atualizadoEm).toLocaleDateString("pt-BR")}</TableCell>
                     <TableCell>
                       <div className="flex gap-1">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => abrirFormulario(usuario)}
-                          title="Editar"
-                        >
+                        <Button variant="ghost" size="sm" onClick={() => abrirFormulario(usuario)} title="Editar">
                           <Edit className="h-4 w-4" />
                         </Button>
-                        
+
                         <Button
                           variant="ghost"
                           size="sm"
@@ -562,7 +543,7 @@ export default function AdminUsuarios() {
                             <UserCheck className="h-4 w-4 text-green-600" />
                           )}
                         </Button>
-                        
+
                         <Button
                           variant="ghost"
                           size="sm"
@@ -572,55 +553,6 @@ export default function AdminUsuarios() {
                           <Mail className="h-4 w-4 text-blue-600" />
                         </Button>
                       </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Resumo de Permissões Completo */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Matriz de Permissões Completa</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="min-w-[250px]">Permissão / Ação</TableHead>
-                  <TableHead className="text-center">EM</TableHead>
-                  <TableHead className="text-center">Solicitante (OBRA)</TableHead>
-                  <TableHead className="text-center">Controladoria</TableHead>
-                  <TableHead className="text-center">Admin</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {Object.entries(permissoes).map(([acao, perms]) => (
-                  <TableRow key={acao}>
-                    <TableCell className="font-medium">{acao}</TableCell>
-                    <TableCell className="text-center">
-                      <Badge variant={perms.EM ? "default" : "secondary"}>
-                        {perms.EM ? "Sim" : "Não"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-center">
-                      <Badge variant={perms.OBRA ? "default" : "secondary"}>
-                        {perms.OBRA ? "Sim" : "Não"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-center">
-                      <Badge variant={perms.CONTROLADORIA ? "default" : "secondary"}>
-                        {perms.CONTROLADORIA ? "Sim" : "Não"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-center">
-                      <Badge variant={perms.ADMIN ? "default" : "secondary"}>
-                        {perms.ADMIN ? "Sim" : "Não"}
-                      </Badge>
                     </TableCell>
                   </TableRow>
                 ))}
