@@ -2,16 +2,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Eye, CheckCircle, RotateCcw } from "lucide-react";
-import { useOS } from "@/contexts/engenharia-matricial/OSContext";
 import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import FinalizacaoOSModal from "@/components/engenharia-matricial/FinalizacaoOSModal";
 import { useState } from "react";
+import { useOSList } from "@/hooks/engenharia-matricial/useOSEngenhariaMatricial";
 
 export default function OSEmExecucao() {
-  const { osList } = useOS();
-  
-  const osEmExecucao = osList.filter(os => os.status === "em-execucao");
+  const { data: osList = [], isLoading } = useOSList({ status: 'em-execucao' });
 
   const capitalizarTexto = (texto: string) => {
     return texto.charAt(0).toUpperCase() + texto.slice(1).toLowerCase();
@@ -28,18 +26,28 @@ export default function OSEmExecucao() {
     }).format(value);
   };
 
+  if (isLoading) {
+    return (
+      <div className="container mx-auto p-6">
+        <div className="flex justify-center items-center py-8">
+          <p className="text-muted-foreground">Carregando...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="container mx-auto p-6">
       <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-3xl font-bold">OS Em execução</h1>
           <p className="text-muted-foreground">
-            {osEmExecucao.length} ordem{osEmExecucao.length !== 1 ? 's' : ''} de serviço em execução
+            {osList.length} ordem{osList.length !== 1 ? 's' : ''} de serviço em execução
           </p>
         </div>
       </div>
 
-      {osEmExecucao.length === 0 ? (
+      {osList.length === 0 ? (
         <Card>
           <CardContent className="text-center py-8">
             <p className="text-muted-foreground">Nenhuma OS em execução encontrada.</p>
@@ -47,12 +55,12 @@ export default function OSEmExecucao() {
         </Card>
       ) : (
         <div className="grid gap-4">
-          {osEmExecucao.map((os) => (
+          {osList.map((os) => (
             <Card key={os.id}>
               <CardHeader>
                 <div className="flex justify-between items-start">
                   <CardTitle className="flex items-center gap-2">
-                    OS Nº {os.numero || os.id} - CCA {os.cca}
+                    OS Nº {os.numero || os.id} - CCA {os.cca?.codigo || 'N/A'}
                     <Badge variant="default">
                       Em execução
                     </Badge>
@@ -98,10 +106,10 @@ export default function OSEmExecucao() {
                   <div>
                     <p className="text-sm text-muted-foreground">HH total</p>
                     <p className="font-medium">
-                      {os.hhPlanejado + (os.hhAdicional || 0)}h
-                      {os.hhAdicional && os.hhAdicional > 0 && (
+                      {os.hh_planejado + (os.hh_adicional || 0)}h
+                      {os.hh_adicional && os.hh_adicional > 0 && (
                         <span className="text-orange-600 text-xs ml-1">
-                          (+{os.hhAdicional}h adicional)
+                          (+{os.hh_adicional}h adicional)
                         </span>
                       )}
                     </p>
@@ -109,56 +117,28 @@ export default function OSEmExecucao() {
                   <div>
                     <p className="text-sm text-muted-foreground">Valor estimado</p>
                     <p className="font-medium">
-                      {formatCurrency((os.hhPlanejado + (os.hhAdicional || 0)) * 95)}
+                      {formatCurrency((os.hh_planejado + (os.hh_adicional || 0)) * (os.valor_hora_hh || 95))}
                     </p>
                   </div>
-                  {os.dataInicioPrevista && os.dataFimPrevista && (
+                  {os.data_inicio_prevista && os.data_fim_prevista && (
                     <div className="md:col-span-2">
                       <p className="text-sm text-muted-foreground">Período previsto</p>
                       <p className="font-medium">
-                        {formatDate(os.dataInicioPrevista)} - {formatDate(os.dataFimPrevista)}
+                        {formatDate(os.data_inicio_prevista)} - {formatDate(os.data_fim_prevista)}
                       </p>
                     </div>
                   )}
                   <div>
                     <p className="text-sm text-muted-foreground">Responsável EM</p>
-                    <p className="font-medium">{os.responsavelEM}</p>
+                    <p className="font-medium">{os.responsavel_em?.nome || 'N/A'}</p>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Solicitante</p>
-                    <p className="font-medium">{os.nomeSolicitante}</p>
+                    <p className="font-medium">{os.solicitante_nome}</p>
                   </div>
                 </div>
 
-                {/* Histórico de Replanejamentos */}
-                {os.historicoReplanejamentos && os.historicoReplanejamentos.length > 0 && (
-                  <div className="mt-4 p-3 bg-orange-50 border border-orange-200 rounded-lg">
-                    <h4 className="font-medium text-orange-800 mb-2 flex items-center gap-2">
-                      <RotateCcw className="h-4 w-4" />
-                      Histórico de Replanejamentos ({os.historicoReplanejamentos.length})
-                    </h4>
-                    <div className="space-y-2">
-                      {os.historicoReplanejamentos.map((replan, index) => (
-                        <div key={index} className="text-sm border-l-2 border-orange-300 pl-3">
-                          <div className="flex justify-between items-start">
-                            <div>
-                              <p className="font-medium text-orange-700">
-                                Replanejamento #{index + 1}
-                              </p>
-                              <p className="text-orange-600">
-                                +{replan.hhAdicional}h | {formatDate(replan.novaDataInicio)} - {formatDate(replan.novaDataFim)}
-                              </p>
-                              <p className="text-orange-600 text-xs">
-                                {formatDate(replan.data)} por {replan.usuario}
-                              </p>
-                            </div>
-                          </div>
-                          <p className="text-xs text-orange-600 mt-1">{replan.motivo}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
+                {/* Histórico de Replanejamentos - não implementado no banco ainda */}
 
                 <div className="mt-4">
                   <p className="text-sm text-muted-foreground">Descrição</p>
