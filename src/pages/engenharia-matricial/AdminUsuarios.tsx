@@ -180,18 +180,6 @@ export default function AdminUsuarios() {
       toast({ title: "Erro", description: "E-mail é obrigatório", variant: "destructive" });
       return;
     }
-    if (!formData.papel) {
-      toast({ title: "Erro", description: "Função é obrigatória", variant: "destructive" });
-      return;
-    }
-    if (formData.papel === "OBRA" && (!formData.ccas || formData.ccas.length === 0)) {
-      toast({
-        title: "Erro",
-        description: "Pelo menos um CCA é obrigatório para solicitantes",
-        variant: "destructive",
-      });
-      return;
-    }
 
     // Verificar email único
     const emailExiste = usuarios.some(
@@ -291,9 +279,7 @@ export default function AdminUsuarios() {
               <DialogTitle>{usuarioEdicao ? "Editar Usuário" : "Novo Usuário"}</DialogTitle>
             </DialogHeader>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Formulário */}
-              <div className="space-y-4">
+            <div className="space-y-4 max-w-2xl mx-auto">{/* Formulário */}
                 <div>
                   <Label htmlFor="email">E-mail *</Label>
                   <Select
@@ -332,98 +318,24 @@ export default function AdminUsuarios() {
                 </div>
 
                 <div>
-                  <Label htmlFor="papel">Função *</Label>
+                  <Label htmlFor="disciplina">Disciplina Preferida</Label>
                   <Select
-                    value={formData.papel}
-                    onValueChange={(value: Papel) => setFormData((prev) => ({ ...prev, papel: value }))}
+                    value={formData.disciplinaPreferida}
+                    onValueChange={(value: Disciplina) =>
+                      setFormData((prev) => ({ ...prev, disciplinaPreferida: value }))
+                    }
                   >
-                    <SelectTrigger className={!formData.papel ? "border-red-500" : ""}>
-                      <SelectValue placeholder="Selecione a função" />
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione a disciplina" />
                     </SelectTrigger>
                     <SelectContent className="bg-background border shadow-lg z-50">
-                      <SelectItem value="EM">Engenharia Matricial (EM)</SelectItem>
-                      <SelectItem value="OBRA">Solicitante (Obra)</SelectItem>
-                      <SelectItem value="CONTROLADORIA">Controladoria</SelectItem>
-                      <SelectItem value="ADMIN">Admin</SelectItem>
+                      <SelectItem value="ELETRICA">Elétrica</SelectItem>
+                      <SelectItem value="MECANICA">Mecânica</SelectItem>
+                      <SelectItem value="AMBAS">Ambas</SelectItem>
                     </SelectContent>
                   </Select>
+                  <p className="text-sm text-muted-foreground mt-1">Se não informado, será definido como "Ambas"</p>
                 </div>
-
-                {formData.papel === "EM" && (
-                  <div>
-                    <Label htmlFor="disciplina">Disciplina Preferida</Label>
-                    <Select
-                      value={formData.disciplinaPreferida}
-                      onValueChange={(value: Disciplina) =>
-                        setFormData((prev) => ({ ...prev, disciplinaPreferida: value }))
-                      }
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione a disciplina" />
-                      </SelectTrigger>
-                      <SelectContent className="bg-background border shadow-lg z-50">
-                        <SelectItem value="ELETRICA">Elétrica</SelectItem>
-                        <SelectItem value="MECANICA">Mecânica</SelectItem>
-                        <SelectItem value="AMBAS">Ambas</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <p className="text-sm text-muted-foreground mt-1">Se não informado, será definido como "Ambas"</p>
-                  </div>
-                )}
-
-                {formData.papel === "OBRA" && (
-                  <div className="space-y-4">
-                    <div>
-                      <Label htmlFor="ccas" className={formData.ccas.length === 0 ? "text-destructive" : ""}>
-                        CCA *
-                      </Label>
-                      <Select
-                        value=""
-                        onValueChange={(value) => {
-                          const ccaId = parseInt(value);
-                          if (!formData.ccas.includes(ccaId)) {
-                            setFormData((prev) => ({ ...prev, ccas: [...prev.ccas, ccaId] }));
-                          }
-                        }}
-                      >
-                        <SelectTrigger className={formData.ccas.length === 0 ? "border-destructive" : ""}>
-                          <SelectValue placeholder="Selecione os CCAs" />
-                        </SelectTrigger>
-                        <SelectContent className="bg-background border shadow-lg z-50">
-                          {ccasAtivos
-                            ?.filter((cca) => !formData.ccas.includes(cca.id))
-                            .map((cca) => (
-                              <SelectItem key={cca.id} value={cca.id.toString()}>
-                                {cca.codigo} - {cca.nome}
-                              </SelectItem>
-                            ))}
-                        </SelectContent>
-                      </Select>
-
-                      {formData.ccas.length > 0 && (
-                        <div className="flex flex-wrap gap-2 mt-2">
-                          {formData.ccas.map((ccaId) => {
-                            const cca = ccasAtivos?.find((c) => c.id === ccaId);
-                            return (
-                              <Badge key={ccaId} variant="secondary" className="flex items-center gap-1">
-                                {cca?.codigo} - {cca?.nome}
-                                <X
-                                  className="h-3 w-3 cursor-pointer"
-                                  onClick={() =>
-                                    setFormData((prev) => ({
-                                      ...prev,
-                                      ccas: prev.ccas.filter((id) => id !== ccaId),
-                                    }))
-                                  }
-                                />
-                              </Badge>
-                            );
-                          })}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
 
                 <div className="flex items-center space-x-2">
                   <Checkbox
@@ -442,38 +354,6 @@ export default function AdminUsuarios() {
                     Cancelar
                   </Button>
                 </div>
-              </div>
-
-              {/* Resumo de Permissões */}
-              {formData.papel && (
-                <div>
-                  <h3 className="text-lg font-semibold mb-4">Permissões - {getPapelLabel(formData.papel as Papel)}</h3>
-
-                  <Card>
-                    <CardContent className="p-4">
-                      <div className="space-y-2">
-                        {Object.entries(permissoes).map(([acao, perms]) => (
-                          <div key={acao} className="flex items-center justify-between py-2 border-b last:border-b-0">
-                            <span className="text-sm">{acao}</span>
-                            <Badge variant={perms[formData.papel as Papel] ? "default" : "secondary"}>
-                              {perms[formData.papel as Papel] ? "Sim" : "Não"}
-                            </Badge>
-                          </div>
-                        ))}
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  {formData.papel === "OBRA" && (
-                    <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                      <p className="text-sm text-blue-800">
-                        <strong>Observação:</strong> Solicitantes podem aceitar planejamentos, validar entregas e
-                        aprovar HH adicional apenas das OS da sua obra.
-                      </p>
-                    </div>
-                  )}
-                </div>
-              )}
             </div>
           </DialogContent>
         </Dialog>
