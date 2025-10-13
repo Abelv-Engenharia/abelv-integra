@@ -2,13 +2,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Eye } from "lucide-react";
-import { useOS } from "@/contexts/engenharia-matricial/OSContext";
+import { useOSList } from "@/hooks/engenharia-matricial/useOSEngenhariaMatricial";
 import { Link } from "react-router-dom";
 
 export default function OSConcluidas() {
-  const { osList } = useOS();
-  
-  const osConcluidas = osList.filter(os => os.status === "concluida");
+  const { data: osConcluidas = [], isLoading } = useOSList({ status: 'concluida' });
 
   const capitalizarTexto = (texto: string) => {
     return texto.charAt(0).toUpperCase() + texto.slice(1).toLowerCase();
@@ -24,6 +22,16 @@ export default function OSConcluidas() {
       currency: 'BRL'
     }).format(value);
   };
+
+  if (isLoading) {
+    return (
+      <div className="container mx-auto p-6">
+        <div className="flex justify-center items-center h-64">
+          <p className="text-muted-foreground">Carregando...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto p-6">
@@ -49,7 +57,7 @@ export default function OSConcluidas() {
               <CardHeader>
                 <div className="flex justify-between items-start">
                   <CardTitle className="flex items-center gap-2">
-                    OS Nº {os.numero || os.id} - CCA {os.cca || 'N/A'}
+                    OS Nº {os.numero || os.id} - CCA {os.cca?.codigo || 'N/A'}
                     <Badge variant="secondary">
                       Concluída
                     </Badge>
@@ -75,33 +83,33 @@ export default function OSConcluidas() {
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">HH planejado</p>
-                    <p className="font-medium">{os.hhPlanejado || 0}h</p>
+                    <p className="font-medium">{os.hh_planejado || 0}h</p>
                   </div>
-                  {os.dataConclusao && (
+                  {os.data_conclusao && (
                     <div>
                       <p className="text-sm text-muted-foreground">Data conclusão</p>
-                      <p className="font-medium">{formatDate(os.dataConclusao)}</p>
+                      <p className="font-medium">{formatDate(os.data_conclusao)}</p>
                     </div>
                   )}
-                  {os.valorFinal && os.valorFinal > 0 && (
+                  {os.valor_final && os.valor_final > 0 && (
                     <div>
                       <p className="text-sm text-muted-foreground">Valor final</p>
-                      <p className="font-medium">{formatCurrency(os.valorFinal)}</p>
+                      <p className="font-medium">{formatCurrency(os.valor_final)}</p>
                     </div>
                   )}
-                  {os.percentualSaving && !isNaN(os.percentualSaving) && (
+                  {os.percentual_saving && !isNaN(os.percentual_saving) && (
                     <div>
                       <p className="text-sm text-muted-foreground">Saving</p>
-                      <p className="font-medium">{os.percentualSaving.toFixed(1)}%</p>
+                      <p className="font-medium">{os.percentual_saving.toFixed(1)}%</p>
                     </div>
                   )}
                   <div>
                     <p className="text-sm text-muted-foreground">Responsável EM</p>
-                    <p className="font-medium">{os.responsavelEM}</p>
+                    <p className="font-medium">{os.responsavel_em?.nome || 'N/A'}</p>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Solicitante</p>
-                    <p className="font-medium">{os.nomeSolicitante}</p>
+                    <p className="font-medium">{os.solicitante_nome}</p>
                   </div>
                 </div>
                 <div className="mt-4">
