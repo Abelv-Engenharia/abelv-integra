@@ -6,19 +6,20 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Eye, Check, X, AlertTriangle } from "lucide-react";
-import { useOS } from "@/contexts/engenharia-matricial/OSContext";
 import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
+import { useOSList, useUpdateOS, useAvancarFaseOS } from "@/hooks/engenharia-matricial/useOSEngenhariaMatricial";
 
 export default function OSAguardandoAceite() {
-  const { osList, aprovarPlanejamento, updateOSStatus } = useOS();
   const { toast } = useToast();
-  const [osParaRejeitar, setOsParaRejeitar] = useState<number | null>(null);
+  const [osParaRejeitar, setOsParaRejeitar] = useState<string | null>(null);
   const [justificativaRejeicao, setJustificativaRejeicao] = useState("");
   const [loading, setLoading] = useState(false);
   
-  const osAguardandoAceite = osList.filter(os => os.status === "aguardando-aceite");
+  const { data: osList = [], isLoading } = useOSList({ status: 'aguardando-aceite' });
+  const { mutateAsync: updateOS } = useUpdateOS();
+  const { mutateAsync: avancarFase } = useAvancarFaseOS();
 
   const capitalizarTexto = (texto: string) => {
     return texto.charAt(0).toUpperCase() + texto.slice(1).toLowerCase();
@@ -35,15 +36,23 @@ export default function OSAguardandoAceite() {
     }).format(value);
   };
 
-  const handleAprovar = (osId: number) => {
-    aprovarPlanejamento(osId);
-    toast({
-      title: "Planejamento aprovado",
-      description: "OS iniciada com sucesso.",
-    });
+  const handleAprovar = async (osId: string) => {
+    try {
+      await avancarFase({ id: osId });
+      toast({
+        title: "Planejamento aprovado",
+        description: "OS iniciada com sucesso.",
+      });
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Erro ao aprovar planejamento. Tente novamente.",
+        variant: "destructive"
+      });
+    }
   };
 
-  const handleIniciarRejeicao = (osId: number) => {
+  const handleIniciarRejeicao = (osId: string) => {
     setOsParaRejeitar(osId);
     setJustificativaRejeicao("");
   };
@@ -65,9 +74,14 @@ export default function OSAguardandoAceite() {
 
     if (!osParaRejeitar) return;
 
-    setLoading(true);
     try {
-      updateOSStatus(osParaRejeitar, "aberta", justificativaRejeicao.trim());
+      await updateOS({
+        id: osParaRejeitar,
+        data: { 
+          status: "aberta",
+          justificativa_engenharia: justificativaRejeicao.trim()
+        }
+      });
       toast({
         title: "Planejamento rejeitado",
         description: "OS retornada para status aberta com justificativa.",
@@ -80,10 +94,18 @@ export default function OSAguardandoAceite() {
         description: "Erro ao rejeitar planejamento. Tente novamente.",
         variant: "destructive"
       });
-    } finally {
-      setLoading(false);
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="container mx-auto p-6">
+        <div className="flex justify-center items-center py-8">
+          <p className="text-muted-foreground">Carregando...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto p-6">
@@ -91,12 +113,12 @@ export default function OSAguardandoAceite() {
         <div>
           <h1 className="text-3xl font-bold">OS Aguardando aceite</h1>
           <p className="text-muted-foreground">
-            {osAguardandoAceite.length} ordem{osAguardandoAceite.length !== 1 ? 's' : ''} de serviço aguardando aceite
+            {osList.length} ordem{osList.length !== 1 ? 's' : ''} de serviço aguardando aceite
           </p>
         </div>
       </div>
 
-      {osAguardandoAceite.length === 0 ? (
+      {osList.length === 0 ? (
         <Card>
           <CardContent className="text-center py-8">
             <p className="text-muted-foreground">Nenhuma OS aguardando aceite encontrada.</p>
@@ -104,12 +126,12 @@ export default function OSAguardandoAceite() {
         </Card>
       ) : (
         <div className="grid gap-4">
-          {osAguardandoAceite.map((os) => (
+          {osList.map((os) => (
             <Card key={os.id}>
               <CardHeader>
                 <div className="flex justify-between items-start">
                   <CardTitle className="flex items-center gap-2">
-                    OS Nº {os.numero || os.id} - CCA {os.cca}
+                    OS Nº {os.numero || os.id} - CCA {os.cca?.codigo || 'N/A'}
                     <Badge variant="outline">
                       Aguardando aceite
                     </Badge>
@@ -152,23 +174,23 @@ export default function OSAguardandoAceite() {
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">HH planejado</p>
-                    <p className="font-medium">{os.hhPlanejado}h</p>
+                    <p className="font-medium">{os.hh_planejado}h</p>
                   </div>
-                  {os.dataInicioPrevista && os.dataFimPrevista && (
+                  {os.data_inicio_prevista && os.data_fim_prevista && (
                     <div className="md:col-span-3">
                       <p className="text-sm text-muted-foreground">Período previsto</p>
                       <p className="font-medium">
-                        {formatDate(os.dataInicioPrevista)} - {formatDate(os.dataFimPrevista)}
+                        {formatDate(os.data_inicio_prevista)} - {formatDate(os.data_fim_prevista)}
                       </p>
                     </div>
                   )}
                   <div>
                     <p className="text-sm text-muted-foreground">Responsável EM</p>
-                    <p className="font-medium">{os.responsavelEM}</p>
+                    <p className="font-medium">{os.responsavel_em?.nome || 'N/A'}</p>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Solicitante</p>
-                    <p className="font-medium">{os.nomeSolicitante}</p>
+                    <p className="font-medium">{os.solicitante_nome}</p>
                   </div>
                 </div>
                 <div className="mt-4">
