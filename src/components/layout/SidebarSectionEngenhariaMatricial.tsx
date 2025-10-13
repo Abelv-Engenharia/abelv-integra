@@ -68,7 +68,6 @@ export default function SidebarSectionEngenhariaMatricial({ openMenu, toggleMenu
       <SidebarMenuItem>
         <Collapsible
           open={openMenu === "engenharia-matricial" || isInEngenhariaMatricial}
-          onOpenChange={() => toggleMenu("engenharia-matricial")}
           className="group/collapsible"
         >
           <CollapsibleTrigger asChild>
@@ -88,7 +87,6 @@ export default function SidebarSectionEngenhariaMatricial({ openMenu, toggleMenu
               <SidebarMenuSubItem>
                 <Collapsible
                   open={openMenu === "em-fluxo-os" || activeSubmenu === "em-fluxo-os"}
-                  onOpenChange={() => toggleMenu("em-fluxo-os")}
                   className="group/subcollapsible"
                 >
                   <CollapsibleTrigger asChild>
@@ -113,7 +111,7 @@ export default function SidebarSectionEngenhariaMatricial({ openMenu, toggleMenu
                             isActive={currentPath === item.url}
                             className="text-white hover:bg-slate-700"
                           >
-                            <NavLink to={item.url} onClick={(e) => e.stopPropagation()}>
+                            <NavLink to={item.url} onClick={(e) => { e.stopPropagation(); onLinkClick?.(); }}>
                               <item.icon className="h-4 w-4" />
                               <span>{item.title}</span>
                             </NavLink>
@@ -129,7 +127,6 @@ export default function SidebarSectionEngenhariaMatricial({ openMenu, toggleMenu
               <SidebarMenuSubItem>
                 <Collapsible
                   open={openMenu === "em-replanejamento" || (activeSubmenu === "em-fluxo-os" && currentPath.includes("replanejamento"))}
-                  onOpenChange={() => toggleMenu("em-replanejamento")}
                   className="group/subcollapsible"
                 >
                   <CollapsibleTrigger asChild>
@@ -154,7 +151,7 @@ export default function SidebarSectionEngenhariaMatricial({ openMenu, toggleMenu
                             isActive={currentPath === item.url}
                             className="text-white hover:bg-slate-700"
                           >
-                            <NavLink to={item.url} onClick={(e) => e.stopPropagation()}>
+                            <NavLink to={item.url} onClick={(e) => { e.stopPropagation(); onLinkClick?.(); }}>
                               <item.icon className="h-4 w-4" />
                               <span>{item.title}</span>
                             </NavLink>
@@ -170,7 +167,6 @@ export default function SidebarSectionEngenhariaMatricial({ openMenu, toggleMenu
               <SidebarMenuSubItem>
                 <Collapsible
                   open={openMenu === "em-relatorios" || activeSubmenu === "em-relatorios"}
-                  onOpenChange={() => toggleMenu("em-relatorios")}
                   className="group/subcollapsible"
                 >
                   <CollapsibleTrigger asChild>
@@ -195,7 +191,7 @@ export default function SidebarSectionEngenhariaMatricial({ openMenu, toggleMenu
                             isActive={currentPath === item.url}
                             className="text-white hover:bg-slate-700"
                           >
-                            <NavLink to={item.url} onClick={(e) => e.stopPropagation()}>
+                            <NavLink to={item.url} onClick={(e) => { e.stopPropagation(); onLinkClick?.(); }}>
                               <item.icon className="h-4 w-4" />
                               <span>{item.title}</span>
                             </NavLink>
@@ -211,7 +207,6 @@ export default function SidebarSectionEngenhariaMatricial({ openMenu, toggleMenu
               <SidebarMenuSubItem>
                 <Collapsible
                   open={openMenu === "em-admin" || activeSubmenu === "em-admin"}
-                  onOpenChange={() => toggleMenu("em-admin")}
                   className="group/subcollapsible"
                 >
                   <CollapsibleTrigger asChild>
@@ -236,7 +231,7 @@ export default function SidebarSectionEngenhariaMatricial({ openMenu, toggleMenu
                             isActive={currentPath === item.url}
                             className="text-white hover:bg-slate-700"
                           >
-                            <NavLink to={item.url} onClick={(e) => e.stopPropagation()}>
+                            <NavLink to={item.url} onClick={(e) => { e.stopPropagation(); onLinkClick?.(); }}>
                               <item.icon className="h-4 w-4" />
                               <span>{item.title}</span>
                             </NavLink>
