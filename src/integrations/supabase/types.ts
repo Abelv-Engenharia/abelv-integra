@@ -5500,6 +5500,38 @@ export type Database = {
         }
         Relationships: []
       }
+      vendedores_comercial: {
+        Row: {
+          ativo: boolean
+          created_at: string
+          id: string
+          updated_at: string
+          usuario_id: string
+        }
+        Insert: {
+          ativo?: boolean
+          created_at?: string
+          id?: string
+          updated_at?: string
+          usuario_id: string
+        }
+        Update: {
+          ativo?: boolean
+          created_at?: string
+          id?: string
+          updated_at?: string
+          usuario_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendedores_comercial_usuario_id_fkey"
+            columns: ["usuario_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       vw_heatmap_funcao_agente: {
