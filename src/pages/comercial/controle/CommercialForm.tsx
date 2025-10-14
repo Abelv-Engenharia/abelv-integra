@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,6 +14,7 @@ import { statusOptions } from "@/data/commercialMockData";
 import { useToast } from "@/hooks/use-toast";
 import { useSegmentos } from "@/hooks/comercial/useSegmentos";
 import { useVendedores } from "@/hooks/comercial/useVendedores";
+import { usePropostasComerciais, useProposta } from "@/hooks/comercial/usePropostasComerciais";
 
 const commercialSchema = z.object({
   pc: z.string()
@@ -51,6 +52,8 @@ const CommercialForm = () => {
   
   const { segmentos, isLoading: isLoadingSegmentos } = useSegmentos();
   const { vendedores, isLoading: isLoadingVendedores } = useVendedores();
+  const { createProposta, updateProposta, isCreating, isUpdating } = usePropostasComerciais();
+  const { proposta, isLoading: isLoadingProposta } = useProposta(id);
 
   const form = useForm<CommercialFormData>({
     resolver: zodResolver(commercialSchema),
@@ -70,12 +73,47 @@ const CommercialForm = () => {
     }
   });
 
+  useEffect(() => {
+    if (proposta && isEditing) {
+      form.reset({
+        pc: proposta.pc,
+        dataSaidaProposta: proposta.data_saida_proposta,
+        orcamentoDuplicado: proposta.orcamento_duplicado,
+        segmento: proposta.segmento_id,
+        cliente: proposta.cliente,
+        obra: proposta.obra,
+        vendedor: proposta.vendedor_id,
+        numeroRevisao: proposta.numero_revisao,
+        valorVenda: proposta.valor_venda,
+        margemPercentual: proposta.margem_percentual,
+        margemValor: proposta.margem_valor,
+        status: proposta.status
+      });
+    }
+  }, [proposta, isEditing, form]);
+
   const onSubmit = (data: CommercialFormData) => {
-    console.log("Dados do formulário:", data);
-    toast({
-      title: isEditing ? "Registro atualizado!" : "Registro criado!",
-      description: "Os dados foram salvos com sucesso.",
-    });
+    const propostaData = {
+      pc: data.pc,
+      data_saida_proposta: data.dataSaidaProposta,
+      orcamento_duplicado: data.orcamentoDuplicado,
+      segmento_id: data.segmento,
+      cliente: data.cliente,
+      obra: data.obra,
+      vendedor_id: data.vendedor,
+      numero_revisao: data.numeroRevisao,
+      valor_venda: data.valorVenda,
+      margem_percentual: data.margemPercentual,
+      margem_valor: data.margemValor,
+      status: data.status
+    };
+
+    if (isEditing && id) {
+      updateProposta({ id, ...propostaData });
+    } else {
+      createProposta(propostaData);
+    }
+    
     navigate("/comercial/controle/performance");
   };
 
@@ -384,11 +422,11 @@ const CommercialForm = () => {
                 </div>
 
                 <div className="flex gap-4 pt-6">
-                  <Button type="submit" className="gap-2">
+                  <Button type="submit" className="gap-2" disabled={isCreating || isUpdating || isLoadingProposta}>
                     <Save className="h-4 w-4" />
-                    Salvar
+                    {isCreating || isUpdating ? "Salvando..." : "Salvar"}
                   </Button>
-                  <Button type="button" variant="outline" onClick={() => navigate("/comercial")} className="gap-2">
+                  <Button type="button" variant="outline" onClick={() => navigate("/comercial/controle/performance")} className="gap-2">
                     <X className="h-4 w-4" />
                     Cancelar
                   </Button>

@@ -4300,6 +4300,81 @@ export type Database = {
         }
         Relationships: []
       }
+      propostas_comerciais: {
+        Row: {
+          cliente: string
+          created_at: string
+          created_by: string | null
+          data_saida_proposta: string
+          id: string
+          margem_percentual: number
+          margem_valor: number
+          numero_revisao: number
+          obra: string
+          orcamento_duplicado: string
+          pc: string
+          segmento_id: string
+          status: string
+          updated_at: string
+          updated_by: string | null
+          valor_venda: number
+          vendedor_id: string
+        }
+        Insert: {
+          cliente: string
+          created_at?: string
+          created_by?: string | null
+          data_saida_proposta: string
+          id?: string
+          margem_percentual?: number
+          margem_valor?: number
+          numero_revisao?: number
+          obra: string
+          orcamento_duplicado: string
+          pc: string
+          segmento_id: string
+          status: string
+          updated_at?: string
+          updated_by?: string | null
+          valor_venda?: number
+          vendedor_id: string
+        }
+        Update: {
+          cliente?: string
+          created_at?: string
+          created_by?: string | null
+          data_saida_proposta?: string
+          id?: string
+          margem_percentual?: number
+          margem_valor?: number
+          numero_revisao?: number
+          obra?: string
+          orcamento_duplicado?: string
+          pc?: string
+          segmento_id?: string
+          status?: string
+          updated_at?: string
+          updated_by?: string | null
+          valor_venda?: number
+          vendedor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "propostas_comerciais_segmento_id_fkey"
+            columns: ["segmento_id"]
+            isOneToOne: false
+            referencedRelation: "segmentos_comercial"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "propostas_comerciais_vendedor_id_fkey"
+            columns: ["vendedor_id"]
+            isOneToOne: false
+            referencedRelation: "vendedores_comercial"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       repositorio_categorias: {
         Row: {
           ativo: boolean | null
