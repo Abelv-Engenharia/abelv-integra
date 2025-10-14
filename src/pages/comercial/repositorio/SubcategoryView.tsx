@@ -1,5 +1,5 @@
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { ArrowLeft, FileText, Download, Eye, Trash2, AlertTriangle, CheckCircle, Clock } from "lucide-react";
+import { ArrowLeft, FileText, Download, Eye, AlertTriangle, CheckCircle, Clock } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -9,6 +9,8 @@ import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbP
 import { useRepositorioSubcategoria } from "@/hooks/useRepositorioCategorias";
 import { useRepositorioDocumentos } from "@/hooks/useRepositorioDocumentos";
 import { format } from "date-fns";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 export default function SubcategoryView() {
   const { categoriaId, subcategoriaId } = useParams<{ categoriaId: string; subcategoriaId: string }>();
@@ -82,6 +84,50 @@ export default function SubcategoryView() {
         return 'bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-400';
       default:
         return 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400';
+    }
+  };
+
+  const handleViewDocument = async (arquivoUrl: string) => {
+    try {
+      const { data, error } = await supabase.storage
+        .from('repositorio-documentos')
+        .createSignedUrl(arquivoUrl, 3600);
+
+      if (error) throw error;
+      
+      if (data?.signedUrl) {
+        window.open(data.signedUrl, '_blank');
+      }
+    } catch (error) {
+      console.error('Erro ao visualizar documento:', error);
+      toast.error('Erro ao visualizar documento');
+    }
+  };
+
+  const handleDownloadDocument = async (arquivoUrl: string, nomeOriginal: string) => {
+    try {
+      const { data, error } = await supabase.storage
+        .from('repositorio-documentos')
+        .createSignedUrl(arquivoUrl, 60);
+
+      if (error) throw error;
+      
+      if (data?.signedUrl) {
+        const response = await fetch(data.signedUrl);
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = nomeOriginal;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        toast.success('Download iniciado');
+      }
+    } catch (error) {
+      console.error('Erro ao baixar documento:', error);
+      toast.error('Erro ao baixar documento');
     }
   };
 
@@ -249,14 +295,19 @@ export default function SubcategoryView() {
                           </TableCell>
                           <TableCell className="text-right">
                             <div className="flex items-center justify-end space-x-2">
-                              <Button variant="ghost" size="sm">
+                              <Button 
+                                variant="ghost" 
+                                size="sm"
+                                onClick={() => handleViewDocument(documento.arquivo_url)}
+                              >
                                 <Eye className="h-4 w-4" />
                               </Button>
-                              <Button variant="ghost" size="sm">
+                              <Button 
+                                variant="ghost" 
+                                size="sm"
+                                onClick={() => handleDownloadDocument(documento.arquivo_url, documento.arquivo_nome_original)}
+                              >
                                 <Download className="h-4 w-4" />
-                              </Button>
-                              <Button variant="ghost" size="sm">
-                                <Trash2 className="h-4 w-4" />
                               </Button>
                             </div>
                           </TableCell>
