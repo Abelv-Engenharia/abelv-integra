@@ -118,6 +118,7 @@ export default function OSEmFechamento() {
           valor_suprimentos: valorSuprimentosNum,
           justificativa_engenharia: justificativas.join(" | "),
           status: "aguardando-aceite-fechamento",
+          data_conclusao: new Date().toISOString().split('T')[0],
         },
       });
 
