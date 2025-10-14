@@ -23,7 +23,7 @@ export default function OSAguardandoAceiteReplanejamento() {
     status: "aguardando-aceite-replanejamento" as any,
   });
   const updateOS = useUpdateOS();
-  const [osParaRejeitar, setOsParaRejeitar] = useState<string | null>(null);
+  const [osParaRejeitar, setOsParaRejeitar] = useState<{ id: string; numero: string } | null>(null);
   const [justificativaRejeicao, setJustificativaRejeicao] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -50,8 +50,8 @@ export default function OSAguardandoAceiteReplanejamento() {
       toast.error("Erro ao aprovar replanejamento.");
     }
   };
-  const handleIniciarRejeicaoReplanejamento = (osId: string) => {
-    setOsParaRejeitar(osId);
+  const handleIniciarRejeicaoReplanejamento = (osId: string, osNumero: string) => {
+    setOsParaRejeitar({ id: osId, numero: osNumero });
     setJustificativaRejeicao("");
   };
   const handleCancelarRejeicao = () => {
@@ -70,7 +70,7 @@ export default function OSAguardandoAceiteReplanejamento() {
     setLoading(true);
     try {
       await updateOS.mutateAsync({
-        id: osParaRejeitar,
+        id: osParaRejeitar.id,
         data: {
           status: "em-execucao" as any,
           justificativa_engenharia: `Replanejamento rejeitado: ${justificativaRejeicao.trim()}`,
@@ -144,7 +144,7 @@ export default function OSAguardandoAceiteReplanejamento() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => handleIniciarRejeicaoReplanejamento(os.id)}
+                        onClick={() => handleIniciarRejeicaoReplanejamento(os.id, os.numero || os.id)}
                         className="text-red-600 hover:text-red-700"
                       >
                         <XCircle className="h-4 w-4 mr-2" />
@@ -298,7 +298,7 @@ export default function OSAguardandoAceiteReplanejamento() {
               <AlertTriangle className="h-5 w-5 text-red-500" />
               Rejeitar replanejamento
             </DialogTitle>
-            <DialogDescription>Informe o motivo da rejeição do replanejamento da OS #{osParaRejeitar}</DialogDescription>
+            <DialogDescription>Informe o motivo da rejeição do replanejamento da OS #{osParaRejeitar?.numero}</DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">
