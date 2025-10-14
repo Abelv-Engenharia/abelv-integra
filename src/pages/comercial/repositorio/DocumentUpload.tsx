@@ -7,19 +7,25 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Link } from "react-router-dom";
-import { categoriasmock } from "@/data/repositorioMockData";
+import { Link, useNavigate } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
 import { fetchUsers } from "@/services/authAdminService";
 import { User } from "@/types/users";
+import { useRepositorioCategorias } from "@/hooks/useRepositorioCategorias";
+import { useDocumentUpload } from "@/hooks/useDocumentUpload";
 const DocumentUpload = () => {
+  const navigate = useNavigate();
+  const { data: categorias, isLoading: loadingCategorias } = useRepositorioCategorias();
+  const uploadMutation = useDocumentUpload();
+  
   const [formData, setFormData] = useState({
     nomearquivo: "",
-    categoria: "",
-    subcategoria: "",
+    categoriaId: "",
+    subcategoriaId: "",
     datavalidade: "",
-    responsavel: "",
-    emailresponsavel: "",
+    responsavelNome: "",
+    responsavelEmail: "",
+    responsavelId: "",
     descricao: "",
     arquivo: null as File | null
   });
@@ -65,25 +71,47 @@ const DocumentUpload = () => {
       }));
     }
   };
-  const handleSubmit = (event: React.FormEvent) => {
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    toast({
-      title: "Documento enviado com sucesso!",
-      description: `O arquivo "${formData.nomearquivo || formData.arquivo?.name}" foi enviado para "${formData.categoria} > ${formData.subcategoria}" com responsável ${formData.responsavel}.`
-    });
-    setFormData({
-      nomearquivo: "",
-      categoria: "",
-      subcategoria: "",
-      datavalidade: "",
-      responsavel: "",
-      emailresponsavel: "",
-      descricao: "",
-      arquivo: null
-    });
+    
+    if (!formData.arquivo) return;
+    
+    try {
+      await uploadMutation.mutateAsync({
+        nomearquivo: formData.nomearquivo,
+        categoriaId: formData.categoriaId,
+        subcategoriaId: formData.subcategoriaId,
+        datavalidade: formData.datavalidade,
+        responsavelEmail: formData.responsavelEmail,
+        responsavelNome: formData.responsavelNome,
+        responsavelId: formData.responsavelId,
+        descricao: formData.descricao,
+        arquivo: formData.arquivo,
+      });
+      
+      // Reset form
+      setFormData({
+        nomearquivo: "",
+        categoriaId: "",
+        subcategoriaId: "",
+        datavalidade: "",
+        responsavelNome: "",
+        responsavelEmail: "",
+        responsavelId: "",
+        descricao: "",
+        arquivo: null
+      });
+      
+      // Redirecionar para a lista
+      setTimeout(() => navigate("/comercial/repositorio"), 1500);
+    } catch (error) {
+      console.error("Erro ao enviar documento:", error);
+    }
   };
-  const isFormValid = formData.nomearquivo && formData.categoria && formData.subcategoria && formData.datavalidade && formData.responsavel && formData.emailresponsavel && formData.arquivo;
-  const categoriasSelecionada = categoriasmock.find(cat => cat.nome === formData.categoria);
+  
+  const isFormValid = formData.nomearquivo && formData.categoriaId && formData.subcategoriaId && formData.datavalidade && formData.responsavelNome && formData.responsavelEmail && formData.arquivo;
+  const categoriaSelecionada = categorias?.find(cat => cat.id === formData.categoriaId);
+  const subcategorias = categoriaSelecionada?.subcategorias || [];
   return <div className="p-6 space-y-6 animate-fade-in">
       <div className="flex items-center gap-4">
         <Link to="/comercial/repositorio">
@@ -120,40 +148,53 @@ const DocumentUpload = () => {
                 <Label htmlFor="categoria" className="text-sm font-medium">
                   Categoria <span className="text-destructive">*</span>
                 </Label>
-                <Select value={formData.categoria} onValueChange={value => setFormData(prev => ({
-                ...prev,
-                categoria: value,
-                subcategoria: ""
-              }))}>
-                  <SelectTrigger className={!formData.categoria ? "border-destructive" : ""}>
-                    <SelectValue placeholder="Selecione uma categoria" />
+                <Select 
+                  value={formData.categoriaId} 
+                  onValueChange={value => setFormData(prev => ({
+                    ...prev,
+                    categoriaId: value,
+                    subcategoriaId: ""
+                  }))}
+                  disabled={loadingCategorias}
+                >
+                  <SelectTrigger className={!formData.categoriaId ? "border-destructive" : ""}>
+                    <SelectValue placeholder={loadingCategorias ? "Carregando..." : "Selecione uma categoria"} />
                   </SelectTrigger>
                   <SelectContent>
-                    {categoriasmock.map(categoria => <SelectItem key={categoria.id} value={categoria.nome}>
+                    {categorias?.map(categoria => (
+                      <SelectItem key={categoria.id} value={categoria.id}>
                         {categoria.nome}
-                      </SelectItem>)}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
 
-              {formData.categoria && categoriasSelecionada && <div className="space-y-2">
+              {formData.categoriaId && subcategorias.length > 0 && (
+                <div className="space-y-2">
                   <Label htmlFor="subcategoria" className="text-sm font-medium">
                     Subpasta <span className="text-destructive">*</span>
                   </Label>
-                  <Select value={formData.subcategoria} onValueChange={value => setFormData(prev => ({
-                ...prev,
-                subcategoria: value
-              }))}>
-                    <SelectTrigger className={!formData.subcategoria ? "border-destructive" : ""}>
+                  <Select 
+                    value={formData.subcategoriaId} 
+                    onValueChange={value => setFormData(prev => ({
+                      ...prev,
+                      subcategoriaId: value
+                    }))}
+                  >
+                    <SelectTrigger className={!formData.subcategoriaId ? "border-destructive" : ""}>
                       <SelectValue placeholder="Selecione uma subpasta" />
                     </SelectTrigger>
                     <SelectContent>
-                      {categoriasSelecionada.subcategorias.map(subcategoria => <SelectItem key={subcategoria.id} value={subcategoria.nome}>
+                      {subcategorias.map(subcategoria => (
+                        <SelectItem key={subcategoria.id} value={subcategoria.id}>
                           {subcategoria.nome}
-                        </SelectItem>)}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
-                </div>}
+                </div>
+              )}
 
               <div className="space-y-2">
                 <Label htmlFor="datavalidade" className="text-sm font-medium">
@@ -170,18 +211,19 @@ const DocumentUpload = () => {
                   E-mail do Responsável <span className="text-destructive">*</span>
                 </Label>
                 <Select 
-                  value={formData.emailresponsavel} 
+                  value={formData.responsavelEmail} 
                   onValueChange={value => {
                     const usuarioSelecionado = usuarios.find(u => u.email === value);
                     setFormData(prev => ({
                       ...prev,
-                      emailresponsavel: value,
-                      responsavel: usuarioSelecionado?.nome || ""
+                      responsavelEmail: value,
+                      responsavelNome: usuarioSelecionado?.nome || "",
+                      responsavelId: usuarioSelecionado?.id?.toString() || ""
                     }));
                   }}
                   disabled={loadingUsuarios}
                 >
-                  <SelectTrigger className={!formData.emailresponsavel ? "border-destructive" : ""}>
+                  <SelectTrigger className={!formData.responsavelEmail ? "border-destructive" : ""}>
                     <SelectValue placeholder={loadingUsuarios ? "Carregando usuários..." : "Selecione um usuário"} />
                   </SelectTrigger>
                   <SelectContent>
@@ -201,9 +243,9 @@ const DocumentUpload = () => {
                 <Input 
                   id="responsavel" 
                   placeholder="Nome do responsável" 
-                  value={formData.responsavel} 
+                  value={formData.responsavelNome} 
                   readOnly 
-                  className={`bg-muted ${!formData.responsavel ? "border-destructive" : ""}`} 
+                  className={`bg-muted ${!formData.responsavelNome ? "border-destructive" : ""}`} 
                 />
               </div>
 
@@ -217,9 +259,13 @@ const DocumentUpload = () => {
               }))} rows={3} />
               </div>
 
-              <Button type="submit" disabled={!isFormValid} className="w-full bg-gradient-primary hover:opacity-90 text-sky-50 bg-sky-900 hover:bg-sky-800">
+              <Button 
+                type="submit" 
+                disabled={!isFormValid || uploadMutation.isPending} 
+                className="w-full bg-gradient-primary hover:opacity-90 text-sky-50 bg-sky-900 hover:bg-sky-800"
+              >
                 <Upload className="mr-2 h-4 w-4" />
-                Enviar Documento
+                {uploadMutation.isPending ? "Enviando..." : "Enviar Documento"}
               </Button>
             </form>
           </CardContent>
