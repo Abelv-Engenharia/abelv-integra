@@ -7,7 +7,6 @@ import { useNavigate } from "react-router-dom";
 import { commercialMockData, segmentoOptions, statusOptions, vendedorOptions } from "@/data/commercialMockData";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
-
 const CommercialDashboard = () => {
   const navigate = useNavigate();
   const currentYear = new Date().getFullYear();
@@ -55,13 +54,12 @@ const CommercialDashboard = () => {
     }).format(value);
   };
 
-  // Dados para o gráfico de pizza de Positivação
+  // Processamento dos dados para os gráficos
   const contempladosData = filteredData.filter(item => item.status === 'Contemplado');
   const totalContempladoValor = contempladosData.reduce((sum, item) => sum + item.valorVenda, 0);
   const totalContempladoQtd = contempladosData.length;
   const totalGeralValor = filteredData.reduce((sum, item) => sum + item.valorVenda, 0);
   const totalGeralQtd = filteredData.length;
-
   const positivacaoData = [{
     name: 'Contemplado',
     valor: totalContempladoValor,
@@ -76,24 +74,40 @@ const CommercialDashboard = () => {
   const vendedorData = filteredData.reduce((acc, item) => {
     const vendedor = item.vendedor;
     if (!acc[vendedor]) {
-      acc[vendedor] = { vendedor, valor: 0, quantidade: 0 };
+      acc[vendedor] = {
+        vendedor,
+        valor: 0,
+        quantidade: 0
+      };
     }
     acc[vendedor].valor += item.valorVenda;
     acc[vendedor].quantidade += 1;
     return acc;
-  }, {} as Record<string, { vendedor: string; valor: number; quantidade: number; }>);
+  }, {} as Record<string, {
+    vendedor: string;
+    valor: number;
+    quantidade: number;
+  }>);
   const vendedorChartData = Object.values(vendedorData);
 
   // Dados por Segmento
   const segmentoData = filteredData.reduce((acc, item) => {
     const segmento = item.segmento;
     if (!acc[segmento]) {
-      acc[segmento] = { segmento, valor: 0, quantidade: 0 };
+      acc[segmento] = {
+        segmento,
+        valor: 0,
+        quantidade: 0
+      };
     }
     acc[segmento].valor += item.valorVenda;
     acc[segmento].quantidade += 1;
     return acc;
-  }, {} as Record<string, { segmento: string; valor: number; quantidade: number; }>);
+  }, {} as Record<string, {
+    segmento: string;
+    valor: number;
+    quantidade: number;
+  }>);
   const segmentoChartData = Object.values(segmentoData);
 
   // Dados por Status
@@ -101,12 +115,20 @@ const CommercialDashboard = () => {
   const statusData = filteredData.filter(item => statusFiltrados.includes(item.status)).reduce((acc, item) => {
     const status = item.status;
     if (!acc[status]) {
-      acc[status] = { status, valor: 0, quantidade: 0 };
+      acc[status] = {
+        status,
+        valor: 0,
+        quantidade: 0
+      };
     }
     acc[status].valor += item.valorVenda;
     acc[status].quantidade += 1;
     return acc;
-  }, {} as Record<string, { status: string; valor: number; quantidade: number; }>);
+  }, {} as Record<string, {
+    status: string;
+    valor: number;
+    quantidade: number;
+  }>);
   const statusChartData = Object.values(statusData);
 
   // Desempenho por Vendedor - Status das Propostas
@@ -145,29 +167,40 @@ const CommercialDashboard = () => {
         break;
     }
     return acc;
-  }, {} as Record<string, any>);
+  }, {} as Record<string, {
+    vendedor: string;
+    contemplado: number;
+    perdido: number;
+    estimativa: number;
+    preVenda: number;
+    contempladoQtd: number;
+    perdidoQtd: number;
+    estimativaQtd: number;
+    preVendaQtd: number;
+  }>);
   const vendedorStatusChartData = Object.values(vendedorStatusData);
-
   const chartConfig = {
-    valor: { label: "Valor (R$)", color: "hsl(var(--primary))" },
-    quantidade: { label: "Quantidade", color: "hsl(var(--secondary))" }
+    valor: {
+      label: "Valor (R$)",
+      color: "hsl(var(--primary))"
+    },
+    quantidade: {
+      label: "Quantidade",
+      color: "hsl(var(--secondary))"
+    }
   };
-
   const statusColors = {
     contemplado: 'hsl(142, 76%, 36%)',
     estimativa: 'hsl(217, 91%, 60%)',
     preVenda: 'hsl(280, 65%, 60%)',
     perdido: 'hsl(0, 84%, 60%)'
   };
-
   const pieColors = ['hsl(var(--primary))', 'hsl(var(--secondary))', 'hsl(var(--accent))', 'hsl(var(--muted-foreground))', 'hsl(var(--destructive))'];
-
-  return (
-    <div className="min-h-screen bg-background">
+  return <div className="min-h-screen bg-background">
       <div className="p-6 space-y-6">
         {/* Header */}
         <div className="flex items-center gap-4">
-          <Button variant="ghost" onClick={() => navigate("/comercial/controle")}>
+          <Button variant="ghost" onClick={() => navigate("/comercial")}>
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div>
@@ -176,6 +209,7 @@ const CommercialDashboard = () => {
           </div>
         </div>
 
+        {/* Filtros */}
         <Card>
           <CardHeader>
             <CardTitle>Filtros</CardTitle>
@@ -246,8 +280,7 @@ const CommercialDashboard = () => {
         </Card>
 
         {/* Resumo */}
-        {filteredData.length > 0 && (
-          <Card>
+        {filteredData.length > 0 && <Card>
             <CardHeader>
               <CardTitle>Resumo</CardTitle>
             </CardHeader>
@@ -271,131 +304,231 @@ const CommercialDashboard = () => {
                 </div>
               </div>
             </CardContent>
-          </Card>
-        )}
+          </Card>}
 
-        {filteredData.length === 0 ? (
-          <Card>
+        {filteredData.length === 0 ? <Card>
             <CardContent className="p-8 text-center">
               <p className="text-muted-foreground">Nenhum dado disponível para os filtros selecionados.</p>
             </CardContent>
-          </Card>
-        ) : (
-          <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {/* Gráfico de Pizza - Positivação */}
+          </Card> : <>
+            {/* Volume de Positivação Anual */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <Card>
                 <CardHeader>
-                  <CardTitle>Positivação</CardTitle>
-                  <CardDescription>Propostas Contempladas vs Total</CardDescription>
+                  <CardTitle className="flex items-center gap-2">
+                    <TrendingUp className="h-5 w-5 text-primary" />
+                    Volume de Positivação Anual (R$)
+                  </CardTitle>
+                  <CardDescription>Propostas contempladas vs total de propostas</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <ChartContainer config={chartConfig} className="h-[300px]">
-                    <ResponsiveContainer width="100%" height="100%">
+                  <ChartContainer config={chartConfig}>
+                    <ResponsiveContainer width="100%" height={300}>
+                      <BarChart data={positivacaoData}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="name" />
+                        <YAxis tickFormatter={value => formatCurrency(value)} />
+                        <ChartTooltip content={<ChartTooltipContent />} formatter={value => [formatCurrency(Number(value)), "Valor"]} />
+                        <Bar dataKey="valor" fill="var(--color-valor)" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </ChartContainer>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Hash className="h-5 w-5 text-secondary" />
+                    Volume de Positivação Anual (Qtd)
+                  </CardTitle>
+                  <CardDescription>Quantidade de propostas contempladas vs total</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ChartContainer config={chartConfig}>
+                    <ResponsiveContainer width="100%" height={300}>
+                      <BarChart data={positivacaoData}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="name" />
+                        <YAxis />
+                        <ChartTooltip content={<ChartTooltipContent />} formatter={value => [value, "Quantidade"]} />
+                        <Bar dataKey="quantidade" fill="var(--color-quantidade)" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </ChartContainer>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Propostas por Vendedor */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Users className="h-5 w-5 text-primary" />
+                    Propostas por Vendedor (R$)
+                  </CardTitle>
+                  <CardDescription>Comparativo de valores por vendedor</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ChartContainer config={chartConfig}>
+                    <ResponsiveContainer width="100%" height={300}>
+                      <BarChart data={vendedorChartData}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="vendedor" />
+                        <YAxis tickFormatter={value => formatCurrency(value)} />
+                        <ChartTooltip content={<ChartTooltipContent />} formatter={value => [formatCurrency(Number(value)), "Valor"]} />
+                        <Bar dataKey="valor" fill="var(--color-valor)" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </ChartContainer>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Hash className="h-5 w-5 text-secondary" />
+                    Propostas por Vendedor (Qtd)
+                  </CardTitle>
+                  <CardDescription>Quantidade de propostas por vendedor</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ChartContainer config={chartConfig}>
+                    <ResponsiveContainer width="100%" height={300}>
+                      <BarChart data={vendedorChartData}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="vendedor" />
+                        <YAxis />
+                        <ChartTooltip content={<ChartTooltipContent />} formatter={value => [value, "Quantidade"]} />
+                        <Bar dataKey="quantidade" fill="var(--color-quantidade)" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </ChartContainer>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Propostas por Segmento */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <BarChart3 className="h-5 w-5 text-primary" />
+                    Propostas por Segmento (R$)
+                  </CardTitle>
+                  <CardDescription>Distribuição de valores por segmento</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ChartContainer config={chartConfig}>
+                    <ResponsiveContainer width="100%" height={300}>
                       <PieChart>
-                        <Pie
-                          data={positivacaoData}
-                          dataKey="valor"
-                          nameKey="name"
-                          cx="50%"
-                          cy="50%"
-                          outerRadius={80}
-                          fill="#8884d8"
-                          label
-                        >
-                          {positivacaoData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={pieColors[index % pieColors.length]} />
-                          ))}
+                        <Pie data={segmentoChartData} cx="50%" cy="50%" labelLine={false} label={({
+                      segmento,
+                      valor
+                    }) => `${segmento}: ${formatCurrency(valor)}`} outerRadius={80} fill="#8884d8" dataKey="valor">
+                          {segmentoChartData.map((entry, index) => <Cell key={`cell-${index}`} fill={pieColors[index % pieColors.length]} />)}
                         </Pie>
-                        <Tooltip content={<ChartTooltipContent />} formatter={(value) => formatCurrency(Number(value))} />
-                        <Legend />
+                        <ChartTooltip content={<ChartTooltipContent />} formatter={value => [formatCurrency(Number(value)), "Valor"]} />
                       </PieChart>
                     </ResponsiveContainer>
                   </ChartContainer>
                 </CardContent>
               </Card>
 
-              {/* Gráfico de Barras - Vendedores */}
               <Card>
                 <CardHeader>
-                  <CardTitle>Vendas por Vendedor</CardTitle>
-                  <CardDescription>Valor total de vendas por vendedor</CardDescription>
+                  <CardTitle className="flex items-center gap-2">
+                    <Hash className="h-5 w-5 text-secondary" />
+                    Propostas por Segmento (Qtd)
+                  </CardTitle>
+                  <CardDescription>Quantidade de propostas por segmento</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <ChartContainer config={chartConfig} className="h-[300px]">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={vendedorChartData}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="vendedor" />
-                        <YAxis tickFormatter={(value) => formatCurrency(Number(value))} />
-                        <Tooltip content={<ChartTooltipContent />} formatter={(value) => formatCurrency(Number(value))} />
-                        <Legend />
-                        <Bar dataKey="valor" fill={chartConfig.valor.color} name={chartConfig.valor.label} />
-                      </BarChart>
+                  <ChartContainer config={chartConfig}>
+                    <ResponsiveContainer width="100%" height={300}>
+                      <PieChart>
+                        <Pie data={segmentoChartData} cx="50%" cy="50%" labelLine={false} label={({
+                      segmento,
+                      quantidade
+                    }) => `${segmento}: ${quantidade}`} outerRadius={80} fill="#8884d8" dataKey="quantidade">
+                          {segmentoChartData.map((entry, index) => <Cell key={`cell-${index}`} fill={pieColors[index % pieColors.length]} />)}
+                        </Pie>
+                        <ChartTooltip content={<ChartTooltipContent />} formatter={value => [value, "Quantidade"]} />
+                      </PieChart>
                     </ResponsiveContainer>
                   </ChartContainer>
                 </CardContent>
               </Card>
+            </div>
 
-              {/* Gráfico de Barras - Segmentos */}
+            {/* Propostas por Status */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <Card>
                 <CardHeader>
-                  <CardTitle>Vendas por Segmento</CardTitle>
-                  <CardDescription>Valor total de vendas por segmento</CardDescription>
+                  <CardTitle className="flex items-center gap-2">
+                    <FileText className="h-5 w-5 text-primary" />
+                    Propostas por Status (R$)
+                  </CardTitle>
+                  <CardDescription>Valores por status das propostas</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <ChartContainer config={chartConfig} className="h-[300px]">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={segmentoChartData}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="segmento" />
-                        <YAxis tickFormatter={(value) => formatCurrency(Number(value))} />
-                        <Tooltip content={<ChartTooltipContent />} formatter={(value) => formatCurrency(Number(value))} />
-                        <Legend />
-                        <Bar dataKey="valor" fill={chartConfig.valor.color} name={chartConfig.valor.label} />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </ChartContainer>
-                </CardContent>
-              </Card>
-
-              {/* Gráfico de Barras - Status */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Vendas por Status</CardTitle>
-                  <CardDescription>Valor total de vendas por status</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <ChartContainer config={chartConfig} className="h-[300px]">
-                    <ResponsiveContainer width="100%" height="100%">
+                  <ChartContainer config={chartConfig}>
+                    <ResponsiveContainer width="100%" height={300}>
                       <BarChart data={statusChartData}>
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis dataKey="status" />
-                        <YAxis tickFormatter={(value) => formatCurrency(Number(value))} />
-                        <Tooltip content={<ChartTooltipContent />} formatter={(value) => formatCurrency(Number(value))} />
-                        <Legend />
-                        <Bar dataKey="valor" fill={chartConfig.valor.color} name={chartConfig.valor.label} />
+                        <YAxis tickFormatter={value => formatCurrency(value)} />
+                        <ChartTooltip content={<ChartTooltipContent />} formatter={value => [formatCurrency(Number(value)), "Valor"]} />
+                        <Bar dataKey="valor" fill="var(--color-valor)" />
                       </BarChart>
                     </ResponsiveContainer>
                   </ChartContainer>
                 </CardContent>
               </Card>
 
-              {/* Gráfico de Barras Empilhadas - Desempenho por Vendedor */}
               <Card>
                 <CardHeader>
-                  <CardTitle>Desempenho por Vendedor</CardTitle>
-                  <CardDescription>Status das propostas por vendedor</CardDescription>
+                  <CardTitle className="flex items-center gap-2">
+                    <Hash className="h-5 w-5 text-secondary" />
+                    Propostas por Status (Qtd)
+                  </CardTitle>
+                  <CardDescription>Quantidade de propostas por status</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <ChartContainer config={chartConfig} className="h-[300px]">
-                    <ResponsiveContainer width="100%" height="100%">
+                  <ChartContainer config={chartConfig}>
+                    <ResponsiveContainer width="100%" height={300}>
+                      <BarChart data={statusChartData}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="status" />
+                        <YAxis />
+                        <ChartTooltip content={<ChartTooltipContent />} formatter={value => [value, "Quantidade"]} />
+                        <Bar dataKey="quantidade" fill="var(--color-quantidade)" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </ChartContainer>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Desempenho por Vendedor - Status das Propostas */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Users className="h-5 w-5 text-primary" />
+                    Desempenho por Vendedor – Status das Propostas (R$)
+                  </CardTitle>
+                  <CardDescription>Distribuição de valores por vendedor e status</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ChartContainer config={chartConfig}>
+                    <ResponsiveContainer width="100%" height={300}>
                       <BarChart data={vendedorStatusChartData}>
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis dataKey="vendedor" />
-                        <YAxis tickFormatter={(value) => formatCurrency(Number(value))} />
-                        <Tooltip content={<ChartTooltipContent />} formatter={(value) => formatCurrency(Number(value))} />
-                        <Legend />
+                        <YAxis tickFormatter={value => formatCurrency(value)} />
+                        <ChartTooltip content={<ChartTooltipContent />} />
                         <Bar dataKey="contemplado" stackId="a" fill={statusColors.contemplado} name="Contemplado" />
                         <Bar dataKey="estimativa" stackId="a" fill={statusColors.estimativa} name="Estimativa" />
                         <Bar dataKey="preVenda" stackId="a" fill={statusColors.preVenda} name="Pré-Venda" />
@@ -405,12 +538,35 @@ const CommercialDashboard = () => {
                   </ChartContainer>
                 </CardContent>
               </Card>
-            </div>
-          </>
-        )}
-      </div>
-    </div>
-  );
-};
 
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Hash className="h-5 w-5 text-secondary" />
+                    Desempenho por Vendedor – Status das Propostas (Qtd)
+                  </CardTitle>
+                  <CardDescription>Quantidade de propostas por vendedor e status</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ChartContainer config={chartConfig}>
+                    <ResponsiveContainer width="100%" height={300}>
+                      <BarChart data={vendedorStatusChartData}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="vendedor" />
+                        <YAxis />
+                        <ChartTooltip content={<ChartTooltipContent />} />
+                        <Bar dataKey="contempladoQtd" stackId="a" fill={statusColors.contemplado} name="Contemplado" />
+                        <Bar dataKey="estimativaQtd" stackId="a" fill={statusColors.estimativa} name="Estimativa" />
+                        <Bar dataKey="preVendaQtd" stackId="a" fill={statusColors.preVenda} name="Pré-Venda" />
+                        <Bar dataKey="perdidoQtd" stackId="a" fill={statusColors.perdido} name="Perdido" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </ChartContainer>
+                </CardContent>
+              </Card>
+            </div>
+          </>}
+      </div>
+    </div>;
+};
 export default CommercialDashboard;
