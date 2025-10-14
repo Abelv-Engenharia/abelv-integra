@@ -7,14 +7,18 @@ import { Target, CheckCircle, AlertTriangle, Calendar, TrendingUp, History } fro
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell, ComposedChart, LabelList, Line } from 'recharts';
 import { formatarCCAComCliente } from "@/lib/engenharia-matricial/utils";
 import { obterHHPorDisciplinaAnual, calcularTotais } from "@/lib/engenharia-matricial/dadosAnuais";
+import { normalizarOS } from "@/lib/engenharia-matricial/relatoriosUtils";
 
 export default function RelatoriosEMDepartamento() {
   // Buscar OS do banco de dados
   const { data: osListData, isLoading } = useOSList();
-  const osList = osListData || [];
+  const osListRaw = osListData || [];
+  
+  // Normalizar OS para ter propriedades camelCase
+  const osList = useMemo(() => osListRaw.map(normalizarOS), [osListRaw]);
   
   // Obter dados consolidados usando memo para evitar recalculos
-  const hhPorDisciplinaAnual = useMemo(() => obterHHPorDisciplinaAnual(osList), [osList]);
+  const hhPorDisciplinaAnual = useMemo(() => obterHHPorDisciplinaAnual(osListRaw), [osListRaw]);
   
   // Filtrar OS por disciplina
   const osEletrica = useMemo(

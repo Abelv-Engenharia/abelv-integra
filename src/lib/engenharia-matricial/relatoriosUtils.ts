@@ -4,6 +4,8 @@ import { OSEngenhariaMatricial } from "@/hooks/engenharia-matricial/useOSEngenha
 export const normalizarOS = (os: OSEngenhariaMatricial) => ({
   ...os,
   dataConclusao: os.data_conclusao,
+  dataCompromissada: os.data_compromissada,
+  responsavelEM: typeof os.responsavel_em === 'object' && os.responsavel_em !== null ? (os.responsavel_em as any).nome : os.responsavel_em,
   hhPlanejado: os.hh_planejado,
   hhAdicional: os.hh_adicional,
   valorOrcamento: os.valor_orcamento,

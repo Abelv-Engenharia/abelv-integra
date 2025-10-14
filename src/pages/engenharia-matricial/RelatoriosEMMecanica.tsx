@@ -9,14 +9,18 @@ import { Eye, TrendingUp, Clock, CheckCircle, DollarSign, Target, Calendar, Aler
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell, ComposedChart, LabelList } from 'recharts';
 import { formatarCCAComCliente } from "@/lib/engenharia-matricial/utils";
 import { obterHHPorDisciplinaAnual, calcularTotais } from "@/lib/engenharia-matricial/dadosAnuais";
+import { normalizarOS } from "@/lib/engenharia-matricial/relatoriosUtils";
 
 export default function RelatoriosEMMecanica() {
   // Buscar OS do banco de dados
   const { data: osListData, isLoading } = useOSList();
-  const osList = osListData || [];
+  const osListRaw = osListData || [];
+  
+  // Normalizar OS para ter propriedades camelCase
+  const osList = useMemo(() => osListRaw.map(normalizarOS), [osListRaw]);
   
   // Obter dados consolidados usando memo para evitar recalculos
-  const hhPorDisciplinaAnual = useMemo(() => obterHHPorDisciplinaAnual(osList), [osList]);
+  const hhPorDisciplinaAnual = useMemo(() => obterHHPorDisciplinaAnual(osListRaw), [osListRaw]);
   
   // Filtrar apenas OS da disciplina mecânica
   const osMecanica = useMemo(
@@ -456,110 +460,6 @@ export default function RelatoriosEMMecanica() {
         </CardContent>
       </Card>
 
-
-      {/* Histórico Mensal Jan-Ago */}
-      {(() => {
-        const historicosMecanica = hhHistoricos.filter(hh => 
-          hh.disciplina.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '') === 'mecanica'
-        );
-
-        if (historicosMecanica.length === 0) return null;
-
-        // Agrupar por mês
-        const meses = ['01/2025', '02/2025', '03/2025', '04/2025', '05/2025', '06/2025', '07/2025', '08/2025'];
-        const nomeMeses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto'];
-        
-        const dadosPorMes = meses.map((mes, idx) => {
-          const hhMes = historicosMecanica.filter(hh => hh.mes === mes);
-          const totalHH = hhMes.reduce((acc, hh) => acc + hh.hhApropriado, 0);
-          const [mesNum] = mes.split('/');
-          const metaPorcentagem = parseInt(mesNum) <= 3 ? 70 : 80;
-          const percentualMeta = (totalHH / META_HH_MENSAL) * 100;
-          const atingiu = percentualMeta >= metaPorcentagem;
-          
-          return {
-            mes: nomeMeses[idx],
-            mesCompleto: mes,
-            totalHH,
-            metaPorcentagem,
-            percentualMeta,
-            atingiu
-          };
-        }).filter(d => d.totalHH > 0);
-
-        if (dadosPorMes.length === 0) return null;
-
-        // Dados para gráfico de pizza
-        const dadosPizza = dadosPorMes.map(d => ({
-          name: d.mes,
-          value: d.totalHH
-        }));
-
-        const COLORS = ['#3b82f6', '#f97316', '#10b981', '#8b5cf6', '#ec4899', '#f59e0b', '#14b8a6', '#ef4444'];
-
-        return (
-          <Card className="mb-6">
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <History className="h-5 w-5 text-orange-600" />
-                Histórico Mensal - Janeiro a Agosto 2025
-              </CardTitle>
-              <CardDescription>Registro histórico de HH apropriado por mês</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Cards compactos */}
-                <div>
-                  <h3 className="text-sm font-semibold mb-3">Resumo por Mês</h3>
-                  <div className="grid grid-cols-2 gap-3">
-                    {dadosPorMes.map((dados) => (
-                      <div key={dados.mesCompleto} className="border rounded-lg p-3 flex items-center justify-between">
-                        <div>
-                          <p className="text-sm font-semibold">{dados.mes}</p>
-                          <p className="text-lg font-bold text-primary">{dados.totalHH}h</p>
-                        </div>
-                        {dados.atingiu ? (
-                          <CheckCircle className="h-5 w-5 text-green-600" />
-                        ) : (
-                          <AlertTriangle className="h-5 w-5 text-destructive" />
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-3">
-                    ✓ Meta atingida | ⚠ Meta não atingida (Jan-Mar: 70% | Abr-Ago: 80%)
-                  </p>
-                </div>
-
-                {/* Gráfico de Pizza */}
-                <div>
-                  <h3 className="text-sm font-semibold mb-3">Distribuição de HH por Mês</h3>
-                  <ResponsiveContainer width="100%" height={300}>
-                    <PieChart>
-                      <Pie
-                        data={dadosPizza}
-                        cx="50%"
-                        cy="50%"
-                        labelLine={false}
-                        label={({ name, value, percent }) => `${name}: ${value}h (${(percent * 100).toFixed(0)}%)`}
-                        outerRadius={80}
-                        fill="#8884d8"
-                        dataKey="value"
-                      >
-                        {dadosPizza.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                        ))}
-                      </Pie>
-                      <Tooltip />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        );
-      })()}
-
       {/* Gráficos de Resultados Financeiros */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         {/* Gráfico Mensal */}
@@ -923,7 +823,7 @@ export default function RelatoriosEMMecanica() {
                 {osMecanica.map((os) => (
                   <TableRow key={os.id}>
                     <TableCell className="font-medium">
-                      OS Nº {os.numero || os.id} - CCA {os.cca}
+                      OS Nº {os.numero || os.id} - CCA {os.ccaDisplay}
                     </TableCell>
                     <TableCell>{os.cliente}</TableCell>
                     <TableCell>
@@ -946,7 +846,7 @@ export default function RelatoriosEMMecanica() {
                       )}
                     </TableCell>
                     <TableCell>{formatDate(os.dataCompromissada)}</TableCell>
-                    <TableCell>{os.responsavelEM}</TableCell>
+                    <TableCell>{os.responsavelEM || '-'}</TableCell>
                     <TableCell>
                       <Link to={`/os/${os.id}`}>
                         <Button variant="outline" size="sm">

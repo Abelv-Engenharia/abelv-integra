@@ -9,14 +9,18 @@ import { Eye, TrendingUp, Clock, CheckCircle, DollarSign, Target, Calendar, Aler
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell, ComposedChart, LabelList } from 'recharts';
 import { formatarCCAComCliente } from "@/lib/engenharia-matricial/utils";
 import { obterHHPorDisciplinaAnual, calcularTotais } from "@/lib/engenharia-matricial/dadosAnuais";
+import { normalizarOS } from "@/lib/engenharia-matricial/relatoriosUtils";
 
 export default function RelatoriosEMEletrica() {
   // Buscar OS do banco de dados
   const { data: osListData, isLoading } = useOSList();
-  const osList = osListData || [];
+  const osListRaw = osListData || [];
+  
+  // Normalizar OS para ter propriedades camelCase
+  const osList = useMemo(() => osListRaw.map(normalizarOS), [osListRaw]);
   
   // Obter dados consolidados usando memo para evitar recalculos
-  const hhPorDisciplinaAnual = useMemo(() => obterHHPorDisciplinaAnual(osList), [osList]);
+  const hhPorDisciplinaAnual = useMemo(() => obterHHPorDisciplinaAnual(osListRaw), [osListRaw]);
   
   // Filtrar apenas OS da disciplina elétrica
   const osEletrica = useMemo(
@@ -848,7 +852,7 @@ export default function RelatoriosEMEletrica() {
                       )}
                     </TableCell>
                     <TableCell>{formatDate(os.dataCompromissada)}</TableCell>
-                    <TableCell>{os.responsavelEM}</TableCell>
+                    <TableCell>{os.responsavelEM || '-'}</TableCell>
                     <TableCell>
                       <Link to={`/os/${os.id}`}>
                         <Button variant="outline" size="sm">
