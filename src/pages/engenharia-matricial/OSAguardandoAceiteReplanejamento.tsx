@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { Eye, CheckCircle, XCircle, Calendar, Clock, RotateCcw, ArrowRight, AlertTriangle } from "lucide-react";
-import { useOS } from "@/contexts/engenharia-matricial/OSContext";
+import { useOSList, useUpdateOS } from "@/hooks/engenharia-matricial/useOSEngenhariaMatricial";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { useState } from "react";
@@ -91,7 +91,7 @@ export default function OSAguardandoAceiteReplanejamento() {
   };
 
   const calcularNovoValorEstimado = (os: any, replanejamento: any) => {
-    const hhTotalAtual = os.hhPlanejado + (os.hhAdicional || 0);
+    const hhTotalAtual = os.hh_planejado + (os.hh_adicional || 0);
     const hhTotalNovo = hhTotalAtual + replanejamento.hhAdicional;
     const valorHora = 95.0;
     return hhTotalNovo * valorHora;
@@ -195,18 +195,18 @@ export default function OSAguardandoAceiteReplanejamento() {
                           <div>
                             <p className="text-sm text-muted-foreground">Período original</p>
                             <p className="font-medium">
-                              {os.dataInicioPrevista ? formatDate(os.dataInicioPrevista) : "N/A"} -{" "}
-                              {os.dataFimPrevista ? formatDate(os.dataFimPrevista) : "N/A"}
+                              {os.data_inicio_prevista ? formatDate(os.data_inicio_prevista) : "N/A"} -{" "}
+                              {os.data_fim_prevista ? formatDate(os.data_fim_prevista) : "N/A"}
                             </p>
                           </div>
                           <div>
                             <p className="text-sm text-muted-foreground">HH original</p>
-                            <p className="font-medium">{os.hhPlanejado + (os.hhAdicional || 0)}h</p>
+                            <p className="font-medium">{os.hh_planejado + (os.hh_adicional || 0)}h</p>
                           </div>
                           <div>
                             <p className="text-sm text-muted-foreground">Valor original</p>
                             <p className="font-medium">
-                              {formatCurrency((os.hhPlanejado + (os.hhAdicional || 0)) * 95)}
+                              {formatCurrency((os.hh_planejado + (os.hh_adicional || 0)) * 95)}
                             </p>
                           </div>
                         </div>
@@ -233,7 +233,7 @@ export default function OSAguardandoAceiteReplanejamento() {
                           <div>
                             <p className="text-sm text-muted-foreground">Novo HH total</p>
                             <p className="font-medium text-orange-700">
-                              {os.hhPlanejado + (os.hhAdicional || 0) + ultimoReplanejamento.hhAdicional}h
+                              {os.hh_planejado + (os.hh_adicional || 0) + ultimoReplanejamento.hhAdicional}h
                             </p>
                           </div>
                           <div>
