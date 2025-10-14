@@ -115,10 +115,7 @@ export default function SidebarSectionComercial({ openMenu, toggleMenu, onLinkCl
                         asChild
                         className={isActive("/comercial/repositorio/categoria/1") ? "bg-muted" : ""}
                       >
-                        <Link
-                          to="/comercial/repositorio/categoria/154d9884-092f-402a-beae-331755b3b348"
-                          onClick={onLinkClick}
-                        >
+                        <Link to="/comercial/repositorio/categoria/1" onClick={onLinkClick}>
                           <Building2 className="h-4 w-4 mr-2" />
                           <span>Empresarial</span>
                         </Link>
@@ -130,7 +127,10 @@ export default function SidebarSectionComercial({ openMenu, toggleMenu, onLinkCl
                         asChild
                         className={isActive("/comercial/repositorio/categoria/2") ? "bg-muted" : ""}
                       >
-                        <Link to="/comercial/repositorio/categoria/2" onClick={onLinkClick}>
+                        <Link
+                          to="/comercial/repositorio/categoria/2720b38c-65cc-488b-8253-fa31ed1e2131"
+                          onClick={onLinkClick}
+                        >
                           <UserCheck className="h-4 w-4 mr-2" />
                           <span>Habilitação</span>
                         </Link>
@@ -142,7 +142,10 @@ export default function SidebarSectionComercial({ openMenu, toggleMenu, onLinkCl
                         asChild
                         className={isActive("/comercial/repositorio/categoria/3") ? "bg-muted" : ""}
                       >
-                        <Link to="/comercial/repositorio/categoria/3" onClick={onLinkClick}>
+                        <Link
+                          to="/comercial/repositorio/categoria/3e8f5d43-de7e-4a64-918f-6ea80d0ee8c4"
+                          onClick={onLinkClick}
+                        >
                           <DollarSign className="h-4 w-4 mr-2" />
                           <span>Financeiro</span>
                         </Link>
@@ -154,7 +157,10 @@ export default function SidebarSectionComercial({ openMenu, toggleMenu, onLinkCl
                         asChild
                         className={isActive("/comercial/repositorio/categoria/4") ? "bg-muted" : ""}
                       >
-                        <Link to="/comercial/repositorio/categoria/4" onClick={onLinkClick}>
+                        <Link
+                          to="/comercial/repositorio/categoria/3f6a700b-e85f-4576-88ef-6fa271f066ec"
+                          onClick={onLinkClick}
+                        >
                           <FileCheck className="h-4 w-4 mr-2" />
                           <span>Certidões</span>
                         </Link>
@@ -166,7 +172,10 @@ export default function SidebarSectionComercial({ openMenu, toggleMenu, onLinkCl
                         asChild
                         className={isActive("/comercial/repositorio/categoria/5") ? "bg-muted" : ""}
                       >
-                        <Link to="/comercial/repositorio/categoria/5" onClick={onLinkClick}>
+                        <Link
+                          to="/comercial/repositorio/categoria/843b9d8c-1b5f-4216-8574-2bac83bbdb85"
+                          onClick={onLinkClick}
+                        >
                           <BookOpen className="h-4 w-4 mr-2" />
                           <span>Políticas e Código de Conduta</span>
                         </Link>
