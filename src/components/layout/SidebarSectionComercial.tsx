@@ -115,7 +115,10 @@ export default function SidebarSectionComercial({ openMenu, toggleMenu, onLinkCl
                         asChild
                         className={isActive("/comercial/repositorio/categoria/1") ? "bg-muted" : ""}
                       >
-                        <Link to="/comercial/repositorio/categoria/1" onClick={onLinkClick}>
+                        <Link
+                          to="/comercial/repositorio/categoria/154d9884-092f-402a-beae-331755b3b348"
+                          onClick={onLinkClick}
+                        >
                           <Building2 className="h-4 w-4 mr-2" />
                           <span>Empresarial</span>
                         </Link>
