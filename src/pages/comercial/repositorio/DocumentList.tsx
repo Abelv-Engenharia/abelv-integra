@@ -16,10 +16,13 @@ const DocumentList = () => {
   const [filtroValidade, setFiltroValidade] = useState("todos");
   const [filtroCategoria, setFiltroCategoria] = useState("todos");
   const [filtroTipo, setFiltroTipo] = useState("todos");
-  
-  const { data: documentos = [], isLoading } = useRepositorioDocumentos();
-  const { data: categorias = [] } = useRepositorioCategorias();
-  
+  const {
+    data: documentos = [],
+    isLoading
+  } = useRepositorioDocumentos();
+  const {
+    data: categorias = []
+  } = useRepositorioCategorias();
   const getValidadeStatus = (dataValidade: Date) => {
     const hoje = new Date();
     const validade = new Date(dataValidade);
@@ -41,9 +44,7 @@ const DocumentList = () => {
     }
   };
   const documentosFiltrados = documentos.filter(doc => {
-    const matchesSearch = doc.arquivo_nome_original.toLowerCase().includes(searchTerm.toLowerCase()) || 
-      (doc.categoria?.nome || "").toLowerCase().includes(searchTerm.toLowerCase()) || 
-      (doc.subcategoria?.nome || "").toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = doc.arquivo_nome_original.toLowerCase().includes(searchTerm.toLowerCase()) || (doc.categoria?.nome || "").toLowerCase().includes(searchTerm.toLowerCase()) || (doc.subcategoria?.nome || "").toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategoria = filtroCategoria === "todos" || doc.categoria_id === filtroCategoria;
     const matchesTipo = filtroTipo === "todos" || doc.arquivo_tipo === filtroTipo;
     if (filtroValidade === "todos") return matchesSearch && matchesCategoria && matchesTipo;
@@ -51,7 +52,6 @@ const DocumentList = () => {
     const status = getValidadeStatus(new Date(doc.data_validade));
     return matchesSearch && status === filtroValidade && matchesCategoria && matchesTipo;
   });
-  
   const tipos: string[] = [...new Set(documentos.map(doc => doc.arquivo_tipo).filter(Boolean))] as string[];
   const getFileIcon = (tipo: string) => {
     return <FileText className="h-4 w-4 text-blue-500" />;
@@ -102,7 +102,7 @@ const DocumentList = () => {
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium">Pesquisar</label>
+              <label className="text-sm font-medium">Nome do Documento</label>
               <Input placeholder="Nome do documento..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="w-full" />
             </div>
 
@@ -193,8 +193,7 @@ const DocumentList = () => {
                       </TableCell>
                       <TableCell>{documento.created_at ? format(new Date(documento.created_at), "dd/MM/yyyy") : "-"}</TableCell>
                       <TableCell>
-                        {documento.data_validade ? (
-                          <Tooltip>
+                        {documento.data_validade ? <Tooltip>
                             <TooltipTrigger asChild>
                               <div className="flex items-center gap-2 cursor-help">
                                 {getValidadeIcon(statusValidade)}
@@ -209,10 +208,7 @@ const DocumentList = () => {
                                 {statusValidade === "vencido" ? "Vencido" : statusValidade === "proximo" ? "Próximo do vencimento" : "Válido"}
                               </p>
                             </TooltipContent>
-                          </Tooltip>
-                        ) : (
-                          <span className="text-sm text-muted-foreground">-</span>
-                        )}
+                          </Tooltip> : <span className="text-sm text-muted-foreground">-</span>}
                       </TableCell>
                       <TableCell>{documento.responsavel_nome || "-"}</TableCell>
                       <TableCell>{documento.responsavel_email || "-"}</TableCell>
