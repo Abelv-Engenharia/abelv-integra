@@ -1,6 +1,25 @@
 import { useState, useEffect } from "react";
 import { useLocation, Link } from "react-router-dom";
-import { ChevronDown, ChevronRight, BarChart3, FolderOpen, LayoutDashboard, Building2, UserCheck, DollarSign, FileCheck, BookOpen, PieChart, FileText, Search, Target, FileSpreadsheet, Settings, Folder, Users } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronRight,
+  BarChart3,
+  FolderOpen,
+  LayoutDashboard,
+  Building2,
+  UserCheck,
+  DollarSign,
+  FileCheck,
+  BookOpen,
+  PieChart,
+  FileText,
+  Search,
+  Target,
+  FileSpreadsheet,
+  Settings,
+  Folder,
+  Users,
+} from "lucide-react";
 import {
   SidebarMenu,
   SidebarMenuButton,
@@ -94,7 +113,11 @@ export default function SidebarSectionComercial({ openMenu, toggleMenu, onLinkCl
                     <SidebarMenuSubItem>
                       <SidebarMenuSubButton
                         asChild
-                        className={isActive("/comercial/repositorio/categoria/1") ? "bg-muted" : ""}
+                        className={
+                          isActive("/comercial/repositorio/categoria/154d9884-092f-402a-beae-331755b3b348")
+                            ? "bg-muted"
+                            : ""
+                        }
                       >
                         <Link to="/comercial/repositorio/categoria/1" onClick={onLinkClick}>
                           <Building2 className="h-4 w-4 mr-2" />
@@ -211,10 +234,7 @@ export default function SidebarSectionComercial({ openMenu, toggleMenu, onLinkCl
                     </SidebarMenuSubItem>
 
                     <SidebarMenuSubItem>
-                      <SidebarMenuSubButton
-                        asChild
-                        className={isActive("/comercial/controle/metas") ? "bg-muted" : ""}
-                      >
+                      <SidebarMenuSubButton asChild className={isActive("/comercial/controle/metas") ? "bg-muted" : ""}>
                         <Link to="/comercial/controle/metas" onClick={onLinkClick}>
                           <Target className="h-4 w-4 mr-2" />
                           <span>Metas Anuais</span>
