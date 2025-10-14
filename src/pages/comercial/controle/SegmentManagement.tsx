@@ -1,14 +1,20 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Trash2 } from "lucide-react";
 import { useSegmentos } from "@/hooks/comercial/useSegmentos";
 import AddSegmentDialog from "@/components/comercial/AddSegmentDialog";
+import EditSegmentDialog from "@/components/comercial/EditSegmentDialog";
 
 export default function SegmentManagement() {
-  const { segmentos, isLoading, addSegmento, removeSegmento } = useSegmentos();
+  const { segmentos, isLoading, addSegmento, updateSegmento, removeSegmento } = useSegmentos();
 
   const handleAdicionar = (nome: string) => {
     addSegmento.mutate(nome);
+  };
+
+  const handleEditar = (id: string, nome: string, ativo: boolean) => {
+    updateSegmento.mutate({ id, nome, ativo });
   };
 
   const handleRemover = (id: string) => {
@@ -56,15 +62,27 @@ export default function SegmentManagement() {
                   key={segmento.id}
                   className="flex items-center justify-between p-3 border rounded-lg hover:bg-accent"
                 >
-                  <span>{segmento.nome}</span>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleRemover(segmento.id)}
-                    disabled={removeSegmento.isPending}
-                  >
-                    <Trash2 className="h-4 w-4 text-destructive" />
-                  </Button>
+                  <div className="flex items-center gap-3">
+                    <span>{segmento.nome}</span>
+                    <Badge variant={segmento.ativo ? "default" : "secondary"}>
+                      {segmento.ativo ? "Ativo" : "Inativo"}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <EditSegmentDialog
+                      segmento={segmento}
+                      onUpdate={handleEditar}
+                      isLoading={updateSegmento.isPending}
+                    />
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleRemover(segmento.id)}
+                      disabled={removeSegmento.isPending}
+                    >
+                      <Trash2 className="h-4 w-4 text-destructive" />
+                    </Button>
+                  </div>
                 </div>
               ))}
             </div>
