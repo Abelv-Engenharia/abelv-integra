@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
-import { FileText, Upload, Search, Download, Eye, Trash2, Shield, AlertTriangle, CheckCircle, Filter } from "lucide-react";
+import { FileText, Upload, Search, Download, Eye, Shield, AlertTriangle, CheckCircle, Filter } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -96,6 +98,55 @@ const DocumentList = () => {
       PNG: "bg-purple-100 text-purple-800"
     };
     return colors[tipo] || "bg-gray-100 text-gray-800";
+  };
+
+  const extractPathFromUrl = (url: string): string => {
+    try {
+      const urlObj = new URL(url);
+      const pathParts = urlObj.pathname.split('/storage/v1/object/public/repositorio-documentos/');
+      return pathParts[1] || url;
+    } catch {
+      return url;
+    }
+  };
+
+  const handleViewDocument = async (documento: any) => {
+    try {
+      const filePath = extractPathFromUrl(documento.arquivo_url);
+      const { data, error } = await supabase.storage
+        .from('repositorio-documentos')
+        .createSignedUrl(filePath, 3600);
+
+      if (error) throw error;
+      if (data?.signedUrl) {
+        window.open(data.signedUrl, '_blank');
+      }
+    } catch (error) {
+      console.error('Erro ao visualizar documento:', error);
+      toast.error('Erro ao visualizar documento');
+    }
+  };
+
+  const handleDownloadDocument = async (documento: any) => {
+    try {
+      const filePath = extractPathFromUrl(documento.arquivo_url);
+      const { data, error } = await supabase.storage
+        .from('repositorio-documentos')
+        .createSignedUrl(filePath, 60);
+
+      if (error) throw error;
+      if (data?.signedUrl) {
+        const link = document.createElement('a');
+        link.href = data.signedUrl;
+        link.download = documento.arquivo_nome_original;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+    } catch (error) {
+      console.error('Erro ao baixar documento:', error);
+      toast.error('Erro ao baixar documento');
+    }
   };
   return <div className="p-6 space-y-6 animate-fade-in">
       {/* Header */}
@@ -272,8 +323,6 @@ const DocumentList = () => {
                   <TableHead>Data de Upload</TableHead>
                   <TableHead>Validade</TableHead>
                   <TableHead>Responsável</TableHead>
-                  <TableHead>E-mail</TableHead>
-                  <TableHead>Tamanho</TableHead>
                   <TableHead>Tipo</TableHead>
                   <TableHead className="text-right">Ações</TableHead>
                 </TableRow>
@@ -310,22 +359,27 @@ const DocumentList = () => {
                           </Tooltip> : <span className="text-sm text-muted-foreground">-</span>}
                       </TableCell>
                       <TableCell>{documento.responsavel_nome || "-"}</TableCell>
-                      <TableCell>{documento.responsavel_email || "-"}</TableCell>
-                      <TableCell>{documento.arquivo_tamanho ? `${(documento.arquivo_tamanho / 1024 / 1024).toFixed(2)} MB` : "-"}</TableCell>
                       <TableCell>
                         <Badge className={getTipoColor(documento.arquivo_tipo || "")}>{documento.arquivo_tipo || "-"}</Badge>
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
-                          <Button variant="ghost" size="sm">
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                          <Button variant="ghost" size="sm">
-                            <Download className="h-4 w-4" />
-                          </Button>
-                          <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive">
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button variant="ghost" size="sm" onClick={() => handleViewDocument(documento)}>
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>Visualizar</TooltipContent>
+                          </Tooltip>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button variant="ghost" size="sm" onClick={() => handleDownloadDocument(documento)}>
+                                <Download className="h-4 w-4" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>Baixar</TooltipContent>
+                          </Tooltip>
                         </div>
                       </TableCell>
                     </TableRow>;
