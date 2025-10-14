@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ArrowLeft, Upload, FileText, AlertCircle } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Link } from "react-router-dom";
 import { categoriasmock } from "@/data/repositorioMockData";
 import { toast } from "@/hooks/use-toast";
+import { fetchUsers } from "@/services/authAdminService";
+import { User } from "@/types/users";
 const DocumentUpload = () => {
   const [formData, setFormData] = useState({
     nomearquivo: "",
@@ -22,6 +24,27 @@ const DocumentUpload = () => {
     arquivo: null as File | null
   });
   const [dragOver, setDragOver] = useState(false);
+  const [usuarios, setUsuarios] = useState<User[]>([]);
+  const [loadingUsuarios, setLoadingUsuarios] = useState(true);
+
+  useEffect(() => {
+    const loadUsuarios = async () => {
+      try {
+        const result = await fetchUsers(1, 1000, "", "Ativo");
+        setUsuarios(result.users || []);
+      } catch (error) {
+        console.error("Erro ao carregar usuários:", error);
+        toast({
+          title: "Erro ao carregar usuários",
+          description: "Não foi possível carregar a lista de usuários.",
+          variant: "destructive",
+        });
+      } finally {
+        setLoadingUsuarios(false);
+      }
+    };
+    loadUsuarios();
+  }, []);
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -143,23 +166,45 @@ const DocumentUpload = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="responsavel" className="text-sm font-medium">
-                  Responsável <span className="text-destructive">*</span>
-                </Label>
-                <Input id="responsavel" placeholder="Digite o nome do responsável" value={formData.responsavel} onChange={e => setFormData(prev => ({
-                ...prev,
-                responsavel: e.target.value
-              }))} className={!formData.responsavel ? "border-destructive" : ""} />
-              </div>
-
-              <div className="space-y-2">
                 <Label htmlFor="emailresponsavel" className="text-sm font-medium">
                   E-mail do Responsável <span className="text-destructive">*</span>
                 </Label>
-                <Input id="emailresponsavel" type="email" placeholder="Digite o e-mail do responsável" value={formData.emailresponsavel} onChange={e => setFormData(prev => ({
-                ...prev,
-                emailresponsavel: e.target.value
-              }))} className={!formData.emailresponsavel ? "border-destructive" : ""} />
+                <Select 
+                  value={formData.emailresponsavel} 
+                  onValueChange={value => {
+                    const usuarioSelecionado = usuarios.find(u => u.email === value);
+                    setFormData(prev => ({
+                      ...prev,
+                      emailresponsavel: value,
+                      responsavel: usuarioSelecionado?.nome || ""
+                    }));
+                  }}
+                  disabled={loadingUsuarios}
+                >
+                  <SelectTrigger className={!formData.emailresponsavel ? "border-destructive" : ""}>
+                    <SelectValue placeholder={loadingUsuarios ? "Carregando usuários..." : "Selecione um usuário"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {usuarios.map(usuario => (
+                      <SelectItem key={usuario.id} value={usuario.email}>
+                        {usuario.nome} - {usuario.email}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="responsavel" className="text-sm font-medium">
+                  Responsável <span className="text-destructive">*</span>
+                </Label>
+                <Input 
+                  id="responsavel" 
+                  placeholder="Nome do responsável" 
+                  value={formData.responsavel} 
+                  readOnly 
+                  className={`bg-muted ${!formData.responsavel ? "border-destructive" : ""}`} 
+                />
               </div>
 
               <div className="space-y-2">
