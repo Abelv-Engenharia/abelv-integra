@@ -26,8 +26,9 @@ const DocumentList = () => {
   const [filtroResponsavel, setFiltroResponsavel] = useState("todos");
   const [filtroVencimentoInicio, setFiltroVencimentoInicio] = useState<Date | undefined>();
   const [filtroVencimentoFim, setFiltroVencimentoFim] = useState<Date | undefined>();
-  const [usuarios, setUsuarios] = useState<Array<{ email: string }>>([]);
-  
+  const [usuarios, setUsuarios] = useState<Array<{
+    email: string;
+  }>>([]);
   const {
     data: documentos = [],
     isLoading
@@ -35,12 +36,13 @@ const DocumentList = () => {
   const {
     data: categorias = []
   } = useRepositorioCategorias();
-
   useEffect(() => {
     const loadUsuarios = async () => {
       const users = await fetchUsers();
       const emailsUnicos = [...new Set(users.map(u => u.email).filter(Boolean))];
-      setUsuarios(emailsUnicos.map(email => ({ email })));
+      setUsuarios(emailsUnicos.map(email => ({
+        email
+      })));
     };
     loadUsuarios();
   }, []);
@@ -69,7 +71,6 @@ const DocumentList = () => {
     const matchesCategoria = filtroCategoria === "todos" || doc.categoria_id === filtroCategoria;
     const matchesTipo = filtroTipo === "todos" || doc.arquivo_tipo === filtroTipo;
     const matchesResponsavel = filtroResponsavel === "todos" || doc.responsavel_email === filtroResponsavel;
-    
     let matchesVencimento = true;
     if (filtroVencimentoInicio && doc.data_validade) {
       const dataValidade = new Date(doc.data_validade);
@@ -79,7 +80,6 @@ const DocumentList = () => {
       const dataValidade = new Date(doc.data_validade);
       matchesVencimento = matchesVencimento && dataValidade <= filtroVencimentoFim;
     }
-    
     if (filtroValidade === "todos") return matchesSearch && matchesCategoria && matchesTipo && matchesResponsavel && matchesVencimento;
     if (!doc.data_validade) return false;
     const status = getValidadeStatus(new Date(doc.data_validade));
@@ -99,7 +99,6 @@ const DocumentList = () => {
     };
     return colors[tipo] || "bg-gray-100 text-gray-800";
   };
-
   const extractPathFromUrl = (url: string): string => {
     try {
       const urlObj = new URL(url);
@@ -109,14 +108,13 @@ const DocumentList = () => {
       return url;
     }
   };
-
   const handleViewDocument = async (documento: any) => {
     try {
       const filePath = extractPathFromUrl(documento.arquivo_url);
-      const { data, error } = await supabase.storage
-        .from('repositorio-documentos')
-        .createSignedUrl(filePath, 3600);
-
+      const {
+        data,
+        error
+      } = await supabase.storage.from('repositorio-documentos').createSignedUrl(filePath, 3600);
       if (error) throw error;
       if (data?.signedUrl) {
         window.open(data.signedUrl, '_blank');
@@ -126,14 +124,13 @@ const DocumentList = () => {
       toast.error('Erro ao visualizar documento');
     }
   };
-
   const handleDownloadDocument = async (documento: any) => {
     try {
       const filePath = extractPathFromUrl(documento.arquivo_url);
-      const { data, error } = await supabase.storage
-        .from('repositorio-documentos')
-        .createSignedUrl(filePath, 60);
-
+      const {
+        data,
+        error
+      } = await supabase.storage.from('repositorio-documentos').createSignedUrl(filePath, 60);
       if (error) throw error;
       if (data?.signedUrl) {
         const link = document.createElement('a');
@@ -164,10 +161,7 @@ const DocumentList = () => {
             </Button>
           </Link>
           <Link to="/comercial/repositorio/busca">
-            <Button variant="outline">
-              <Search className="mr-2 h-4 w-4" />
-              Busca Avançada
-            </Button>
+            
           </Link>
         </div>
       </div>
@@ -253,49 +247,25 @@ const DocumentList = () => {
               <div className="flex gap-2">
                 <Popover>
                   <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        "w-full justify-start text-left font-normal",
-                        !filtroVencimentoInicio && "text-muted-foreground"
-                      )}
-                    >
+                    <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !filtroVencimentoInicio && "text-muted-foreground")}>
                       <CalendarIcon className="mr-2 h-4 w-4" />
                       {filtroVencimentoInicio ? format(filtroVencimentoInicio, "dd/MM/yyyy") : <span>De</span>}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={filtroVencimentoInicio}
-                      onSelect={setFiltroVencimentoInicio}
-                      initialFocus
-                      className="pointer-events-auto"
-                    />
+                    <Calendar mode="single" selected={filtroVencimentoInicio} onSelect={setFiltroVencimentoInicio} initialFocus className="pointer-events-auto" />
                   </PopoverContent>
                 </Popover>
 
                 <Popover>
                   <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        "w-full justify-start text-left font-normal",
-                        !filtroVencimentoFim && "text-muted-foreground"
-                      )}
-                    >
+                    <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !filtroVencimentoFim && "text-muted-foreground")}>
                       <CalendarIcon className="mr-2 h-4 w-4" />
                       {filtroVencimentoFim ? format(filtroVencimentoFim, "dd/MM/yyyy") : <span>Até</span>}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={filtroVencimentoFim}
-                      onSelect={setFiltroVencimentoFim}
-                      initialFocus
-                      className="pointer-events-auto"
-                    />
+                    <Calendar mode="single" selected={filtroVencimentoFim} onSelect={setFiltroVencimentoFim} initialFocus className="pointer-events-auto" />
                   </PopoverContent>
                 </Popover>
               </div>
