@@ -1,27 +1,44 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid, Line, ComposedChart, LabelList } from 'recharts';
-import { obterHHPorDisciplinaAnual, hhPorCCAAnual, calcularTotais } from "@/lib/engenharia-matricial/dadosAnuais";
-import { useOS } from "@/contexts/engenharia-matricial/OSContext";
+import { obterHHPorDisciplinaAnual, obterHHPorCCAAnual, calcularTotais } from "@/lib/engenharia-matricial/dadosAnuais";
+import { useOSList } from "@/hooks/engenharia-matricial/useOSEngenhariaMatricial";
 
 const COLORS = ['#3b82f6', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444', '#06b6d4', '#ec4899', '#84cc16'];
 
 export default function RelatoriosAnual() {
   const [abaSelecionada, setAbaSelecionada] = useState("disciplina");
-  const { osList } = useOS();
+  
+  // Buscar OS do banco de dados
+  const { data: osListData, isLoading } = useOSList({ status: 'concluida' as any });
+  const osList = osListData || [];
 
-  // Obter dados consolidados (histórico + OS concluídas)
-  const hhPorDisciplinaAnual = obterHHPorDisciplinaAnual(osList);
+  // Obter dados consolidados usando memo para evitar recalculos
+  const hhPorDisciplinaAnual = useMemo(() => obterHHPorDisciplinaAnual(osList), [osList]);
+  const hhPorCCAAnual = useMemo(() => obterHHPorCCAAnual(osList), [osList]);
   
   console.log("=== DEBUG RelatoriosAnual ===");
   console.log("hhPorDisciplinaAnual:", hhPorDisciplinaAnual);
+  console.log("hhPorCCAAnual:", hhPorCCAAnual);
   
   // Calcula totais usando a função auxiliar com OS
-  const { totalEletrica, totalMecanica, totalGeral, mediaEletrica, mediaMecanica, mediaGeral, mesesDecorridos } = calcularTotais(osList);
+  const { totalEletrica, totalMecanica, totalGeral, mediaEletrica, mediaMecanica, mediaGeral, mesesDecorridos } = useMemo(
+    () => calcularTotais(osList), 
+    [osList]
+  );
   
   console.log("Totais calculados:", { totalEletrica, totalMecanica, totalGeral, mediaEletrica, mediaMecanica, mediaGeral, mesesDecorridos });
+  
+  // Mostrar loading enquanto busca dados
+  if (isLoading) {
+    return (
+      <div className="container mx-auto p-6 flex items-center justify-center">
+        <p className="text-muted-foreground">Carregando relatórios...</p>
+      </div>
+    );
+  }
   
   // Meta mensal de 190 HH por disciplina
   const metaMensal = 190;
