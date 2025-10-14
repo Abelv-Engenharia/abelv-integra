@@ -1,29 +1,42 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Save } from "lucide-react";
-import { AnnualGoals } from "@/types/commercial";
+import { Save, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useMetasAnuais, MetaAnual } from "@/hooks/comercial/useMetasAnuais";
 
 interface EditMetaDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  meta: AnnualGoals;
-  onSave: (meta: AnnualGoals) => void;
+  meta: MetaAnual;
 }
 
-export const EditMetaDialog = ({ open, onOpenChange, meta, onSave }: EditMetaDialogProps) => {
+export const EditMetaDialog = ({ open, onOpenChange, meta }: EditMetaDialogProps) => {
   const { toast } = useToast();
+  const { updateMeta } = useMetasAnuais();
   const [formData, setFormData] = useState({
-    metaAnual: meta.metaAnual,
-    metaT1: meta.metaT1,
-    metaT2: meta.metaT2,
-    metaT3: meta.metaT3,
-    metaT4: meta.metaT4
+    metaAnual: meta.meta_anual,
+    metaT1: meta.meta_t1,
+    metaT2: meta.meta_t2,
+    metaT3: meta.meta_t3,
+    metaT4: meta.meta_t4
   });
 
   const [errors, setErrors] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    if (open && meta) {
+      setFormData({
+        metaAnual: meta.meta_anual,
+        metaT1: meta.meta_t1,
+        metaT2: meta.meta_t2,
+        metaT3: meta.meta_t3,
+        metaT4: meta.meta_t4
+      });
+      setErrors({});
+    }
+  }, [open, meta]);
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -45,7 +58,7 @@ export const EditMetaDialog = ({ open, onOpenChange, meta, onSave }: EditMetaDia
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!validateForm()) {
       toast({
         title: "Erro de validação",
@@ -55,17 +68,25 @@ export const EditMetaDialog = ({ open, onOpenChange, meta, onSave }: EditMetaDia
       return;
     }
 
-    onSave({
-      ...meta,
-      ...formData
-    });
+    try {
+      await updateMeta.mutateAsync({
+        id: meta.id,
+        meta_anual: formData.metaAnual,
+        meta_t1: formData.metaT1,
+        meta_t2: formData.metaT2,
+        meta_t3: formData.metaT3,
+        meta_t4: formData.metaT4,
+      });
 
-    toast({
-      title: "Meta atualizada!",
-      description: `Meta para ${meta.ano} foi atualizada com sucesso.`,
-    });
+      toast({
+        title: "Meta atualizada!",
+        description: `Meta para ${meta.ano} foi atualizada com sucesso.`,
+      });
 
-    onOpenChange(false);
+      onOpenChange(false);
+    } catch (error) {
+      // Error já tratado no hook
+    }
   };
 
   const totalTrimestral = formData.metaT1 + formData.metaT2 + formData.metaT3 + formData.metaT4;
@@ -175,11 +196,23 @@ export const EditMetaDialog = ({ open, onOpenChange, meta, onSave }: EditMetaDia
           )}
 
           <div className="flex gap-4">
-            <Button onClick={handleSave} className="gap-2">
-              <Save className="h-4 w-4" />
-              Salvar Alterações
+            <Button 
+              onClick={handleSave} 
+              className="gap-2"
+              disabled={updateMeta.isPending}
+            >
+              {updateMeta.isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Save className="h-4 w-4" />
+              )}
+              {updateMeta.isPending ? "Salvando..." : "Salvar Alterações"}
             </Button>
-            <Button variant="outline" onClick={() => onOpenChange(false)}>
+            <Button 
+              variant="outline" 
+              onClick={() => onOpenChange(false)}
+              disabled={updateMeta.isPending}
+            >
               Cancelar
             </Button>
           </div>

@@ -3169,6 +3169,51 @@ export type Database = {
           },
         ]
       }
+      metas_anuais: {
+        Row: {
+          ano: number
+          ativo: boolean
+          created_at: string
+          created_by: string | null
+          id: string
+          meta_anual: number
+          meta_t1: number
+          meta_t2: number
+          meta_t3: number
+          meta_t4: number
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          ano: number
+          ativo?: boolean
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          meta_anual: number
+          meta_t1: number
+          meta_t2: number
+          meta_t3: number
+          meta_t4: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          ano?: number
+          ativo?: boolean
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          meta_anual?: number
+          meta_t1?: number
+          meta_t2?: number
+          meta_t3?: number
+          meta_t4?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       metas_indicadores: {
         Row: {
           ano: number
