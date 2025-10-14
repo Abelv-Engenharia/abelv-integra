@@ -8,60 +8,77 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Plus, Search, Filter, Download, Eye } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useOSList } from "@/hooks/engenharia-matricial/useOSEngenhariaMatricial";
-
 const statusConfig = {
-  aberta: { label: "Os aberta", color: "bg-blue-100 text-blue-800", variant: "secondary" as const },
+  aberta: {
+    label: "Os aberta",
+    color: "bg-blue-100 text-blue-800",
+    variant: "secondary" as const
+  },
   "em-planejamento": {
     label: "Em planejamento",
     color: "bg-yellow-100 text-yellow-800",
-    variant: "secondary" as const,
+    variant: "secondary" as const
   },
   "aguardando-aceite": {
     label: "Aguardando aceite do solicitante",
     color: "bg-orange-100 text-orange-800",
-    variant: "secondary" as const,
+    variant: "secondary" as const
   },
-  "em-execucao": { label: "Em execução", color: "bg-green-100 text-green-800", variant: "secondary" as const },
+  "em-execucao": {
+    label: "Em execução",
+    color: "bg-green-100 text-green-800",
+    variant: "secondary" as const
+  },
   "aguardando-aceite-fechamento": {
     label: "Aguardando aceite fechamento",
     color: "bg-purple-100 text-purple-800",
-    variant: "secondary" as const,
+    variant: "secondary" as const
   },
-  cancelada: { label: "Cancelada", color: "bg-red-100 text-red-800", variant: "destructive" as const },
-  concluida: { label: "Concluída", color: "bg-emerald-100 text-emerald-800", variant: "secondary" as const },
-  rejeitada: { label: "Rejeitada", color: "bg-red-200 text-red-900", variant: "destructive" as const },
+  cancelada: {
+    label: "Cancelada",
+    color: "bg-red-100 text-red-800",
+    variant: "destructive" as const
+  },
+  concluida: {
+    label: "Concluída",
+    color: "bg-emerald-100 text-emerald-800",
+    variant: "secondary" as const
+  },
+  rejeitada: {
+    label: "Rejeitada",
+    color: "bg-red-200 text-red-900",
+    variant: "destructive" as const
+  }
 };
-
 const OrdemServicoList = () => {
-  const { data: osList = [], isLoading } = useOSList();
+  const {
+    data: osList = [],
+    isLoading
+  } = useOSList();
   const [filtroStatus, setFiltroStatus] = useState<string>("todos");
   const [filtroCliente, setFiltroCliente] = useState<string>("todos");
   const [filtroDisciplina, setFiltroDisciplina] = useState<string>("todos");
   const [buscaTexto, setBuscaTexto] = useState("");
-
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("pt-BR", {
       style: "currency",
-      currency: "BRL",
+      currency: "BRL"
     }).format(value);
   };
-
   const formatDate = (dateString: string | null) => {
     if (!dateString) return "-";
     return new Date(dateString).toLocaleDateString("pt-BR");
   };
-
   const calcularHHTotal = (hhPlanejado: number | null, hhAdicional: number | null) => {
     return (hhPlanejado || 0) + (hhAdicional || 0);
   };
-
   const calcularPercentualAdicional = (hhPlanejado: number | null, hhAdicional: number | null) => {
     if (!hhPlanejado || hhPlanejado === 0) return "0.0";
-    return (((hhAdicional || 0) / hhPlanejado) * 100).toFixed(1);
+    return ((hhAdicional || 0) / hhPlanejado * 100).toFixed(1);
   };
 
   // Filtrar OS baseado nos filtros ativos
-  const osFiltradas = osList.filter((os) => {
+  const osFiltradas = osList.filter(os => {
     // Filtro por status
     if (filtroStatus !== "todos" && os.status !== filtroStatus) return false;
 
@@ -76,20 +93,14 @@ const OrdemServicoList = () => {
       const texto = buscaTexto.toLowerCase();
       return os.cca?.codigo?.toString().includes(texto) || os.descricao?.toLowerCase().includes(texto);
     }
-
     return true;
   });
-
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
+    return <div className="flex items-center justify-center min-h-screen">
         <p>Carregando...</p>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="p-6 space-y-6">
+  return <div className="p-6 space-y-6">
       {/* Cabeçalho */}
       <div className="flex justify-between items-center">
         <div>
@@ -97,10 +108,7 @@ const OrdemServicoList = () => {
           <p className="text-muted-foreground">Gerencie as os da engenharia matricial</p>
         </div>
         <Link to="/engenharia-matricial/nova-os">
-          <Button className="gap-2">
-            <Plus className="h-4 w-4" />
-            Nova os
-          </Button>
+          
         </Link>
       </div>
 
@@ -119,12 +127,7 @@ const OrdemServicoList = () => {
               <label className="text-sm font-medium">Buscar</label>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Cca, descrição..."
-                  value={buscaTexto}
-                  onChange={(e) => setBuscaTexto(e.target.value)}
-                  className="pl-10"
-                />
+                <Input placeholder="Cca, descrição..." value={buscaTexto} onChange={e => setBuscaTexto(e.target.value)} className="pl-10" />
               </div>
             </div>
 
@@ -132,60 +135,28 @@ const OrdemServicoList = () => {
             <div className="space-y-3">
               <label className="text-sm font-medium">Status</label>
               <div className="flex flex-wrap gap-2">
-                <Button
-                  variant={filtroStatus === "todos" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setFiltroStatus("todos")}
-                >
+                <Button variant={filtroStatus === "todos" ? "default" : "outline"} size="sm" onClick={() => setFiltroStatus("todos")}>
                   Todos
                 </Button>
-                <Button
-                  variant={filtroStatus === "aberta" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setFiltroStatus("aberta")}
-                >
+                <Button variant={filtroStatus === "aberta" ? "default" : "outline"} size="sm" onClick={() => setFiltroStatus("aberta")}>
                   Os aberta
                 </Button>
-                <Button
-                  variant={filtroStatus === "em-planejamento" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setFiltroStatus("em-planejamento")}
-                >
+                <Button variant={filtroStatus === "em-planejamento" ? "default" : "outline"} size="sm" onClick={() => setFiltroStatus("em-planejamento")}>
                   Em planejamento
                 </Button>
-                <Button
-                  variant={filtroStatus === "aguardando-aceite" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setFiltroStatus("aguardando-aceite")}
-                >
+                <Button variant={filtroStatus === "aguardando-aceite" ? "default" : "outline"} size="sm" onClick={() => setFiltroStatus("aguardando-aceite")}>
                   Aguardando aceite
                 </Button>
-                <Button
-                  variant={filtroStatus === "em-execucao" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setFiltroStatus("em-execucao")}
-                >
+                <Button variant={filtroStatus === "em-execucao" ? "default" : "outline"} size="sm" onClick={() => setFiltroStatus("em-execucao")}>
                   Em execução
                 </Button>
-                <Button
-                  variant={filtroStatus === "aguardando-aceite-fechamento" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setFiltroStatus("aguardando-aceite-fechamento")}
-                >
+                <Button variant={filtroStatus === "aguardando-aceite-fechamento" ? "default" : "outline"} size="sm" onClick={() => setFiltroStatus("aguardando-aceite-fechamento")}>
                   Aguardando aceite fechamento
                 </Button>
-                <Button
-                  variant={filtroStatus === "cancelada" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setFiltroStatus("cancelada")}
-                >
+                <Button variant={filtroStatus === "cancelada" ? "default" : "outline"} size="sm" onClick={() => setFiltroStatus("cancelada")}>
                   Cancelada
                 </Button>
-                <Button
-                  variant={filtroStatus === "concluida" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setFiltroStatus("concluida")}
-                >
+                <Button variant={filtroStatus === "concluida" ? "default" : "outline"} size="sm" onClick={() => setFiltroStatus("concluida")}>
                   Concluída
                 </Button>
               </div>
@@ -195,25 +166,13 @@ const OrdemServicoList = () => {
             <div className="space-y-3">
               <label className="text-sm font-medium">Disciplina</label>
               <div className="flex flex-wrap gap-2">
-                <Button
-                  variant={filtroDisciplina === "todos" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setFiltroDisciplina("todos")}
-                >
+                <Button variant={filtroDisciplina === "todos" ? "default" : "outline"} size="sm" onClick={() => setFiltroDisciplina("todos")}>
                   Todas
                 </Button>
-                <Button
-                  variant={filtroDisciplina === "eletrica" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setFiltroDisciplina("eletrica")}
-                >
+                <Button variant={filtroDisciplina === "eletrica" ? "default" : "outline"} size="sm" onClick={() => setFiltroDisciplina("eletrica")}>
                   Elétrica
                 </Button>
-                <Button
-                  variant={filtroDisciplina === "mecanica" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setFiltroDisciplina("mecanica")}
-                >
+                <Button variant={filtroDisciplina === "mecanica" ? "default" : "outline"} size="sm" onClick={() => setFiltroDisciplina("mecanica")}>
                   Mecânica
                 </Button>
               </div>
@@ -257,15 +216,11 @@ const OrdemServicoList = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {osFiltradas.length === 0 ? (
-                  <TableRow>
+                {osFiltradas.length === 0 ? <TableRow>
                     <TableCell colSpan={13} className="text-center text-muted-foreground">
                       Nenhuma os encontrada
                     </TableCell>
-                  </TableRow>
-                ) : (
-                  osFiltradas.map((os) => (
-                    <TableRow key={os.id}>
+                  </TableRow> : osFiltradas.map(os => <TableRow key={os.id}>
                       <TableCell className="font-medium">#{os.numero}</TableCell>
                       <TableCell>{os.cca?.codigo || "-"}</TableCell>
                       <TableCell>{formatDate(os.data_abertura)}</TableCell>
@@ -293,16 +248,12 @@ const OrdemServicoList = () => {
                           </Link>
                         </div>
                       </TableCell>
-                    </TableRow>
-                  ))
-                )}
+                    </TableRow>)}
               </TableBody>
             </Table>
           </div>
         </CardContent>
       </Card>
-    </div>
-  );
+    </div>;
 };
-
 export default OrdemServicoList;
