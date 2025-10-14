@@ -10,8 +10,10 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { segmentoOptions, statusOptions, vendedorOptions } from "@/data/commercialMockData";
+import { statusOptions } from "@/data/commercialMockData";
 import { useToast } from "@/hooks/use-toast";
+import { useSegmentos } from "@/hooks/comercial/useSegmentos";
+import { useVendedores } from "@/hooks/comercial/useVendedores";
 
 const commercialSchema = z.object({
   pc: z.string()
@@ -46,6 +48,9 @@ const CommercialForm = () => {
   const { id } = useParams();
   const { toast } = useToast();
   const isEditing = !!id;
+  
+  const { segmentos, isLoading: isLoadingSegmentos } = useSegmentos();
+  const { vendedores, isLoading: isLoadingVendedores } = useVendedores();
 
   const form = useForm<CommercialFormData>({
     resolver: zodResolver(commercialSchema),
@@ -172,16 +177,16 @@ const CommercialForm = () => {
                         <FormLabel className="text-destructive">
                           Segmento *
                         </FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isLoadingSegmentos}>
                           <FormControl>
                             <SelectTrigger className={!field.value ? "border-destructive" : ""}>
-                              <SelectValue placeholder="Selecione um segmento" />
+                              <SelectValue placeholder={isLoadingSegmentos ? "Carregando..." : "Selecione um segmento"} />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {segmentoOptions.map(segmento => (
-                              <SelectItem key={segmento} value={segmento}>
-                                {segmento}
+                            {segmentos.filter(s => s.ativo).map(segmento => (
+                              <SelectItem key={segmento.id} value={segmento.id}>
+                                {segmento.nome}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -239,16 +244,16 @@ const CommercialForm = () => {
                         <FormLabel className="text-destructive">
                           Vendedor *
                         </FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isLoadingVendedores}>
                           <FormControl>
                             <SelectTrigger className={!field.value ? "border-destructive" : ""}>
-                              <SelectValue placeholder="Selecione um vendedor" />
+                              <SelectValue placeholder={isLoadingVendedores ? "Carregando..." : "Selecione um vendedor"} />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {vendedorOptions.map(vendedor => (
-                              <SelectItem key={vendedor} value={vendedor}>
-                                {vendedor}
+                            {vendedores.filter(v => v.ativo).map(vendedor => (
+                              <SelectItem key={vendedor.id} value={vendedor.id}>
+                                {vendedor.profiles.nome}
                               </SelectItem>
                             ))}
                           </SelectContent>
