@@ -1,8 +1,9 @@
+import { useMemo } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { useOS } from "@/contexts/engenharia-matricial/OSContext";
+import { useOSList } from "@/hooks/engenharia-matricial/useOSEngenhariaMatricial";
 import { Link } from "react-router-dom";
 import { Eye, TrendingUp, Clock, CheckCircle, DollarSign, Target, Calendar, AlertTriangle, History } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell, ComposedChart, LabelList } from 'recharts';
@@ -10,13 +11,27 @@ import { formatarCCAComCliente } from "@/lib/engenharia-matricial/utils";
 import { obterHHPorDisciplinaAnual, calcularTotais } from "@/lib/engenharia-matricial/dadosAnuais";
 
 export default function RelatoriosEMMecanica() {
-  const { osList, hhHistoricos } = useOS();
+  // Buscar OS do banco de dados
+  const { data: osListData, isLoading } = useOSList();
+  const osList = osListData || [];
   
-  // Obter dados consolidados
-  const hhPorDisciplinaAnual = obterHHPorDisciplinaAnual(osList);
+  // Obter dados consolidados usando memo para evitar recalculos
+  const hhPorDisciplinaAnual = useMemo(() => obterHHPorDisciplinaAnual(osList), [osList]);
   
   // Filtrar apenas OS da disciplina mecânica
-  const osMecanica = osList.filter(os => (os.disciplina || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '') === "mecanica");
+  const osMecanica = useMemo(
+    () => osList.filter(os => (os.disciplina || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '') === "mecanica"),
+    [osList]
+  );
+  
+  // Mostrar loading enquanto busca dados
+  if (isLoading) {
+    return (
+      <div className="container mx-auto p-6 flex items-center justify-center">
+        <p className="text-muted-foreground">Carregando relatórios...</p>
+      </div>
+    );
+  }
   
   const statusConfig = {
     "aberta": { label: "Aberta", color: "bg-blue-500", variant: "secondary" as const },
@@ -55,14 +70,14 @@ export default function RelatoriosEMMecanica() {
     const anoAtual = hoje.getFullYear();
     
     const osConcluidasMesAtual = osMecanica.filter(os => {
-      if (os.status === "concluida" && os.dataConclusao) {
-        const dataConclusao = new Date(os.dataConclusao);
+      if (os.status === "concluida" && os.data_conclusao) {
+        const dataConclusao = new Date(os.data_conclusao);
         return dataConclusao.getMonth() === mesAtual && dataConclusao.getFullYear() === anoAtual;
       }
       return false;
     });
     
-    return osConcluidasMesAtual.reduce((acc, os) => acc + (os.hhPlanejado + (os.hhAdicional || 0)), 0);
+    return osConcluidasMesAtual.reduce((acc, os) => acc + (os.hh_planejado + (os.hh_adicional || 0)), 0);
   };
 
   // Calcular HH apropriadas do mês anterior
@@ -72,20 +87,20 @@ export default function RelatoriosEMMecanica() {
     const anoAnterior = hoje.getMonth() === 0 ? hoje.getFullYear() - 1 : hoje.getFullYear();
     
     const osConcluidasMesAnterior = osMecanica.filter(os => {
-      if (os.status === "concluida" && os.dataConclusao) {
-        const dataConclusao = new Date(os.dataConclusao);
+      if (os.status === "concluida" && os.data_conclusao) {
+        const dataConclusao = new Date(os.data_conclusao);
         return dataConclusao.getMonth() === mesAnterior && dataConclusao.getFullYear() === anoAnterior;
       }
       return false;
     });
     
-    return osConcluidasMesAnterior.reduce((acc, os) => acc + (os.hhPlanejado + (os.hhAdicional || 0)), 0);
+    return osConcluidasMesAnterior.reduce((acc, os) => acc + (os.hh_planejado + (os.hh_adicional || 0)), 0);
   };
   
   // Calcular HH apropriadas no ano
   const hhApropriadasAnual = osMecanica
-    .filter(os => os.status === "concluida" && os.dataConclusao && new Date(os.dataConclusao).getFullYear() === new Date().getFullYear())
-    .reduce((acc, os) => acc + (os.hhPlanejado + (os.hhAdicional || 0)), 0);
+    .filter(os => os.status === "concluida" && os.data_conclusao && new Date(os.data_conclusao).getFullYear() === new Date().getFullYear())
+    .reduce((acc, os) => acc + (os.hh_planejado + (os.hh_adicional || 0)), 0);
   
   const hhMesAtual = hhApropriadasMensal();
   const hhMesAnterior = hhApropriadasMesAnterior();
@@ -105,8 +120,8 @@ export default function RelatoriosEMMecanica() {
   const totalOS = osMecanica.length;
   const osConcluidas = osMecanica.filter(os => os.status === "concluida").length;
   const osEmAndamento = osMecanica.filter(os => ["em-planejamento", "aguardando-aceite", "em-execucao"].includes(os.status)).length;
-  const valorTotalOrcado = osMecanica.reduce((acc, os) => acc + os.valorOrcamento, 0);
-  const valorTotalFinal = osMecanica.filter(os => os.status === "concluida" && os.valorSAO).reduce((acc, os) => acc + (os.valorSAO || 0), 0);
+  const valorTotalOrcado = osMecanica.reduce((acc, os) => acc + os.valor_orcamento, 0);
+  const valorTotalFinal = osMecanica.filter(os => os.status === "concluida" && os.valor_sao).reduce((acc, os) => acc + (os.valor_sao || 0), 0);
 
 
   return (

@@ -1,21 +1,39 @@
+import { useMemo } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { useOS } from "@/contexts/engenharia-matricial/OSContext";
+import { useOSList } from "@/hooks/engenharia-matricial/useOSEngenhariaMatricial";
 import { Target, CheckCircle, AlertTriangle, Calendar, TrendingUp, History } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell, ComposedChart, LabelList, Line } from 'recharts';
 import { formatarCCAComCliente } from "@/lib/engenharia-matricial/utils";
 import { obterHHPorDisciplinaAnual, calcularTotais } from "@/lib/engenharia-matricial/dadosAnuais";
 
 export default function RelatoriosEMDepartamento() {
-  const { osList, hhHistoricos } = useOS();
+  // Buscar OS do banco de dados
+  const { data: osListData, isLoading } = useOSList();
+  const osList = osListData || [];
   
-  // Obter dados consolidados
-  const hhPorDisciplinaAnual = obterHHPorDisciplinaAnual(osList);
+  // Obter dados consolidados usando memo para evitar recalculos
+  const hhPorDisciplinaAnual = useMemo(() => obterHHPorDisciplinaAnual(osList), [osList]);
   
   // Filtrar OS por disciplina
-  const osEletrica = osList.filter(os => (os.disciplina || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '') === "eletrica");
-  const osMecanica = osList.filter(os => (os.disciplina || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '') === "mecanica");
+  const osEletrica = useMemo(
+    () => osList.filter(os => (os.disciplina || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '') === "eletrica"),
+    [osList]
+  );
+  const osMecanica = useMemo(
+    () => osList.filter(os => (os.disciplina || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '') === "mecanica"),
+    [osList]
+  );
+  
+  // Mostrar loading enquanto busca dados
+  if (isLoading) {
+    return (
+      <div className="container mx-auto p-6 flex items-center justify-center">
+        <p className="text-muted-foreground">Carregando relatórios...</p>
+      </div>
+    );
+  }
   
   // Metas
   const META_HH_MENSAL_POR_DISCIPLINA = 190;
@@ -39,20 +57,20 @@ export default function RelatoriosEMDepartamento() {
   const calcularHHMes = (osDisciplina: typeof osList, mes: number, ano: number) => {
     return osDisciplina
       .filter(os => {
-        if (os.status === "concluida" && os.dataConclusao) {
-          const dataConclusao = new Date(os.dataConclusao);
+        if (os.status === "concluida" && os.data_conclusao) {
+          const dataConclusao = new Date(os.data_conclusao);
           return dataConclusao.getMonth() === mes && dataConclusao.getFullYear() === ano;
         }
         return false;
       })
-      .reduce((acc, os) => acc + (os.hhPlanejado || 0) + (os.hhAdicional || 0), 0);
+      .reduce((acc, os) => acc + (os.hh_planejado || 0) + (os.hh_adicional || 0), 0);
   };
 
   // Função para calcular HH de uma disciplina no ano
   const calcularHHAno = (osDisciplina: typeof osList) => {
     return osDisciplina
-      .filter(os => os.status === "concluida" && os.dataConclusao && new Date(os.dataConclusao).getFullYear() === anoAtual)
-      .reduce((acc, os) => acc + (os.hhPlanejado || 0) + (os.hhAdicional || 0), 0);
+      .filter(os => os.status === "concluida" && os.data_conclusao && new Date(os.data_conclusao).getFullYear() === anoAtual)
+      .reduce((acc, os) => acc + (os.hh_planejado || 0) + (os.hh_adicional || 0), 0);
   };
 
   // HH por disciplina
@@ -90,11 +108,11 @@ export default function RelatoriosEMDepartamento() {
   const ccaMesAnterior: Record<string, { cca: string; eletrica: number; mecanica: number; qtdEletrica: number; qtdMecanica: number }> = {};
   
   [...osEletrica, ...osMecanica].forEach(os => {
-    if (os.status === "concluida" && os.dataConclusao) {
-      const dataConclusao = new Date(os.dataConclusao);
+    if (os.status === "concluida" && os.data_conclusao) {
+      const dataConclusao = new Date(os.data_conclusao);
       if (dataConclusao.getMonth() === mesAnterior && dataConclusao.getFullYear() === anoAnterior) {
-        const ccaDisplay = formatarCCAComCliente(String(os.cca), os.cliente);
-        const hh = (os.hhPlanejado || 0) + (os.hhAdicional || 0);
+        const ccaDisplay = formatarCCAComCliente(os.cca?.codigo || String(os.cca_id), os.cliente);
+        const hh = (os.hh_planejado || 0) + (os.hh_adicional || 0);
         const disc = (os.disciplina || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
         
         if (!ccaMesAnterior[ccaDisplay]) {
@@ -103,10 +121,10 @@ export default function RelatoriosEMDepartamento() {
         
         if (disc === "eletrica") {
           ccaMesAnterior[ccaDisplay].eletrica += hh;
-          ccaMesAnterior[ccaDisplay].qtdEletrica += 1;
+          ccaMesAnterior[ccaDisplay].qtdEletrica++;
         } else if (disc === "mecanica") {
           ccaMesAnterior[ccaDisplay].mecanica += hh;
-          ccaMesAnterior[ccaDisplay].qtdMecanica += 1;
+          ccaMesAnterior[ccaDisplay].qtdMecanica++;
         }
       }
     }
@@ -116,11 +134,11 @@ export default function RelatoriosEMDepartamento() {
   const ccaMesAtual: Record<string, { cca: string; eletrica: number; mecanica: number; qtdEletrica: number; qtdMecanica: number }> = {};
   
   [...osEletrica, ...osMecanica].forEach(os => {
-    if (os.status === "concluida" && os.dataConclusao) {
-      const dataConclusao = new Date(os.dataConclusao);
+    if (os.status === "concluida" && os.data_conclusao) {
+      const dataConclusao = new Date(os.data_conclusao);
       if (dataConclusao.getMonth() === mesAtual && dataConclusao.getFullYear() === anoAtual) {
-        const ccaDisplay = formatarCCAComCliente(String(os.cca), os.cliente);
-        const hh = (os.hhPlanejado || 0) + (os.hhAdicional || 0);
+        const ccaDisplay = formatarCCAComCliente(os.cca?.codigo || String(os.cca_id), os.cliente);
+        const hh = (os.hh_planejado || 0) + (os.hh_adicional || 0);
         const disc = (os.disciplina || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
         
         if (!ccaMesAtual[ccaDisplay]) {
@@ -129,10 +147,10 @@ export default function RelatoriosEMDepartamento() {
         
         if (disc === "eletrica") {
           ccaMesAtual[ccaDisplay].eletrica += hh;
-          ccaMesAtual[ccaDisplay].qtdEletrica += 1;
+          ccaMesAtual[ccaDisplay].qtdEletrica++;
         } else if (disc === "mecanica") {
           ccaMesAtual[ccaDisplay].mecanica += hh;
-          ccaMesAtual[ccaDisplay].qtdMecanica += 1;
+          ccaMesAtual[ccaDisplay].qtdMecanica++;
         }
       }
     }
@@ -545,127 +563,8 @@ export default function RelatoriosEMDepartamento() {
           </CardContent>
         </Card>
       )}
-
-
-      {/* Histórico Mensal Consolidado Jan-Ago */}
-      {(() => {
-        if (hhHistoricos.length === 0) return null;
-
-        // Agrupar por mês
-        const meses = ['01/2025', '02/2025', '03/2025', '04/2025', '05/2025', '06/2025', '07/2025', '08/2025'];
-        const nomeMeses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto'];
-        
-        const dadosPorMes = meses.map((mes, idx) => {
-          const hhMes = hhHistoricos.filter(hh => hh.mes === mes);
-          const eletrica = hhMes.filter(hh => hh.disciplina.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '') === 'eletrica').reduce((acc, hh) => acc + hh.hhApropriado, 0);
-          const mecanica = hhMes.filter(hh => hh.disciplina.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '') === 'mecanica').reduce((acc, hh) => acc + hh.hhApropriado, 0);
-          const totalHH = eletrica + mecanica;
-          const [mesNum] = mes.split('/');
-          const metaPorcentagem = parseInt(mesNum) <= 3 ? 70 : 80;
-          const percentualMeta = (totalHH / META_HH_MENSAL_DEPARTAMENTO) * 100;
-          const atingiu = percentualMeta >= metaPorcentagem;
-          
-          return {
-            mes: nomeMeses[idx],
-            mesCompleto: mes,
-            eletrica,
-            mecanica,
-            totalHH,
-            metaPorcentagem,
-            percentualMeta,
-            atingiu
-          };
-        }).filter(d => d.totalHH > 0);
-
-        if (dadosPorMes.length === 0) return null;
-
-        // Dados para gráfico de pizza
-        const dadosPizza = dadosPorMes.map(d => ({
-          name: d.mes,
-          value: d.totalHH,
-          eletrica: d.eletrica,
-          mecanica: d.mecanica
-        }));
-
-        const COLORS = ['#3b82f6', '#f97316', '#10b981', '#8b5cf6', '#ec4899', '#f59e0b', '#14b8a6', '#ef4444'];
-
-        return (
-          <Card className="mb-6">
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <History className="h-5 w-5 text-blue-600" />
-                Histórico Mensal Consolidado - Janeiro a Agosto 2025
-              </CardTitle>
-              <CardDescription>Registro histórico de HH apropriado por mês (Departamento)</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Cards compactos */}
-                <div>
-                  <h3 className="text-sm font-semibold mb-3">Resumo por Mês</h3>
-                  <div className="grid grid-cols-2 gap-3">
-                    {dadosPorMes.map((dados) => (
-                      <div key={dados.mesCompleto} className="border rounded-lg p-3">
-                        <div className="flex items-center justify-between mb-2">
-                          <p className="text-sm font-semibold">{dados.mes}</p>
-                          {dados.atingiu ? (
-                            <CheckCircle className="h-4 w-4 text-green-600" />
-                          ) : (
-                            <AlertTriangle className="h-4 w-4 text-destructive" />
-                          )}
-                        </div>
-                        <div className="space-y-1">
-                          <p className="text-lg font-bold text-primary">{dados.totalHH}h</p>
-                          <div className="flex gap-2 text-xs text-muted-foreground">
-                            <span>E: {dados.eletrica}h</span>
-                            <span>M: {dados.mecanica}h</span>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-3">
-                    ✓ Meta atingida | ⚠ Meta não atingida (Jan-Mar: 70% | Abr-Ago: 80%)<br/>
-                    E: Elétrica | M: Mecânica
-                  </p>
-                </div>
-
-                {/* Gráfico de Pizza */}
-                <div>
-                  <h3 className="text-sm font-semibold mb-3">Distribuição de HH por Mês</h3>
-                  <ResponsiveContainer width="100%" height={300}>
-                    <PieChart>
-                      <Pie
-                        data={dadosPizza}
-                        cx="50%"
-                        cy="50%"
-                        labelLine={false}
-                        label={({ name, value, percent }) => `${name}: ${value}h (${(percent * 100).toFixed(0)}%)`}
-                        outerRadius={80}
-                        fill="#8884d8"
-                        dataKey="value"
-                      >
-                        {dadosPizza.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                        ))}
-                      </Pie>
-                      <Tooltip 
-                        formatter={(value: number, name: string, props: any) => {
-                          const { eletrica, mecanica } = props.payload;
-                          return [
-                            `${value}h (E: ${eletrica}h | M: ${mecanica}h)`,
-                            'Total'
-                          ];
-                        }}
-                      />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        );
-      })()}
+      
+      {/* Fim dos cards de resumo */}
     </div>
   );
 }

@@ -1,8 +1,9 @@
+import { useMemo } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { useOS } from "@/contexts/engenharia-matricial/OSContext";
+import { useOSList } from "@/hooks/engenharia-matricial/useOSEngenhariaMatricial";
 import { Link } from "react-router-dom";
 import { Eye, TrendingUp, Clock, CheckCircle, DollarSign, Target, Calendar, AlertTriangle, History } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell, ComposedChart, LabelList } from 'recharts';
@@ -10,13 +11,27 @@ import { formatarCCAComCliente } from "@/lib/engenharia-matricial/utils";
 import { obterHHPorDisciplinaAnual, calcularTotais } from "@/lib/engenharia-matricial/dadosAnuais";
 
 export default function RelatoriosEMEletrica() {
-  const { osList, hhHistoricos } = useOS();
+  // Buscar OS do banco de dados
+  const { data: osListData, isLoading } = useOSList();
+  const osList = osListData || [];
   
-  // Obter dados consolidados
-  const hhPorDisciplinaAnual = obterHHPorDisciplinaAnual(osList);
+  // Obter dados consolidados usando memo para evitar recalculos
+  const hhPorDisciplinaAnual = useMemo(() => obterHHPorDisciplinaAnual(osList), [osList]);
   
   // Filtrar apenas OS da disciplina elétrica
-  const osEletrica = osList.filter(os => (os.disciplina || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '') === "eletrica");
+  const osEletrica = useMemo(
+    () => osList.filter(os => (os.disciplina || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '') === "eletrica"),
+    [osList]
+  );
+  
+  // Mostrar loading enquanto busca dados
+  if (isLoading) {
+    return (
+      <div className="container mx-auto p-6 flex items-center justify-center">
+        <p className="text-muted-foreground">Carregando relatórios...</p>
+      </div>
+    );
+  }
   
   const statusConfig = {
     "aberta": { label: "Aberta", color: "bg-blue-500", variant: "secondary" as const },
@@ -55,14 +70,14 @@ export default function RelatoriosEMEletrica() {
     const anoAtual = hoje.getFullYear();
     
     const osConcluidasMesAtual = osEletrica.filter(os => {
-      if (os.status === "concluida" && os.dataConclusao) {
-        const dataConclusao = new Date(os.dataConclusao);
+      if (os.status === "concluida" && os.data_conclusao) {
+        const dataConclusao = new Date(os.data_conclusao);
         return dataConclusao.getMonth() === mesAtual && dataConclusao.getFullYear() === anoAtual;
       }
       return false;
     });
     
-    return osConcluidasMesAtual.reduce((acc, os) => acc + (os.hhPlanejado + (os.hhAdicional || 0)), 0);
+    return osConcluidasMesAtual.reduce((acc, os) => acc + (os.hh_planejado + (os.hh_adicional || 0)), 0);
   };
 
   // Calcular HH apropriadas do mês anterior
@@ -72,20 +87,20 @@ export default function RelatoriosEMEletrica() {
     const anoAnterior = hoje.getMonth() === 0 ? hoje.getFullYear() - 1 : hoje.getFullYear();
     
     const osConcluidasMesAnterior = osEletrica.filter(os => {
-      if (os.status === "concluida" && os.dataConclusao) {
-        const dataConclusao = new Date(os.dataConclusao);
+      if (os.status === "concluida" && os.data_conclusao) {
+        const dataConclusao = new Date(os.data_conclusao);
         return dataConclusao.getMonth() === mesAnterior && dataConclusao.getFullYear() === anoAnterior;
       }
       return false;
     });
     
-    return osConcluidasMesAnterior.reduce((acc, os) => acc + (os.hhPlanejado + (os.hhAdicional || 0)), 0);
+    return osConcluidasMesAnterior.reduce((acc, os) => acc + (os.hh_planejado + (os.hh_adicional || 0)), 0);
   };
   
   // Calcular HH apropriadas no ano
   const hhApropriadasAnual = osEletrica
-    .filter(os => os.status === "concluida" && os.dataConclusao && new Date(os.dataConclusao).getFullYear() === new Date().getFullYear())
-    .reduce((acc, os) => acc + (os.hhPlanejado + (os.hhAdicional || 0)), 0);
+    .filter(os => os.status === "concluida" && os.data_conclusao && new Date(os.data_conclusao).getFullYear() === new Date().getFullYear())
+    .reduce((acc, os) => acc + (os.hh_planejado + (os.hh_adicional || 0)), 0);
   
   const hhMesAtual = hhApropriadasMensal();
   const hhMesAnterior = hhApropriadasMesAnterior();
@@ -105,8 +120,8 @@ export default function RelatoriosEMEletrica() {
   const totalOS = osEletrica.length;
   const osConcluidas = osEletrica.filter(os => os.status === "concluida").length;
   const osEmAndamento = osEletrica.filter(os => ["em-planejamento", "aguardando-aceite", "em-execucao"].includes(os.status)).length;
-  const valorTotalOrcado = osEletrica.reduce((acc, os) => acc + os.valorOrcamento, 0);
-  const valorTotalFinal = osEletrica.filter(os => os.status === "concluida" && os.valorSAO).reduce((acc, os) => acc + (os.valorSAO || 0), 0);
+  const valorTotalOrcado = osEletrica.reduce((acc, os) => acc + os.valor_orcamento, 0);
+  const valorTotalFinal = osEletrica.filter(os => os.status === "concluida" && os.valor_sao).reduce((acc, os) => acc + (os.valor_sao || 0), 0);
 
 
   return (
@@ -205,16 +220,16 @@ export default function RelatoriosEMEletrica() {
                 const anoAnterior = hoje.getMonth() === 0 ? hoje.getFullYear() - 1 : hoje.getFullYear();
                 
                 const osConcluidasMesAnterior = osEletrica.filter(os => {
-                  if (os.status === "concluida" && os.dataConclusao) {
-                    const dataConclusao = new Date(os.dataConclusao);
+                  if (os.status === "concluida" && os.data_conclusao) {
+                    const dataConclusao = new Date(os.data_conclusao);
                     return dataConclusao.getMonth() === mesAnterior && dataConclusao.getFullYear() === anoAnterior;
                   }
                   return false;
                 });
 
                 const hhPorCCA = osConcluidasMesAnterior.reduce((acc, os) => {
-                  const ccaDisplay = formatarCCAComCliente(String(os.cca), os.cliente);
-                  const hh = (os.hhPlanejado || 0) + (os.hhAdicional || 0);
+                  const ccaDisplay = formatarCCAComCliente(os.cca?.codigo || String(os.cca_id), os.cliente);
+                  const hh = (os.hh_planejado || 0) + (os.hh_adicional || 0);
                   
                   if (!acc[ccaDisplay]) {
                     acc[ccaDisplay] = { cca: ccaDisplay, hh: 0, quantidade: 0 };
@@ -272,16 +287,16 @@ export default function RelatoriosEMEletrica() {
                 const anoAtual = hoje.getFullYear();
                 
                 const osConcluidasMesAtual = osEletrica.filter(os => {
-                  if (os.status === "concluida" && os.dataConclusao) {
-                    const dataConclusao = new Date(os.dataConclusao);
+                  if (os.status === "concluida" && os.data_conclusao) {
+                    const dataConclusao = new Date(os.data_conclusao);
                     return dataConclusao.getMonth() === mesAtual && dataConclusao.getFullYear() === anoAtual;
                   }
                   return false;
                 });
 
                 const hhPorCCA = osConcluidasMesAtual.reduce((acc, os) => {
-                  const ccaDisplay = formatarCCAComCliente(String(os.cca), os.cliente);
-                  const hh = (os.hhPlanejado || 0) + (os.hhAdicional || 0);
+                  const ccaDisplay = formatarCCAComCliente(os.cca?.codigo || String(os.cca_id), os.cliente);
+                  const hh = (os.hh_planejado || 0) + (os.hh_adicional || 0);
                   
                   if (!acc[ccaDisplay]) {
                     acc[ccaDisplay] = { cca: ccaDisplay, hh: 0, quantidade: 0 };
@@ -442,109 +457,6 @@ export default function RelatoriosEMEletrica() {
       </Card>
 
 
-      {/* Histórico Mensal Jan-Ago */}
-      {(() => {
-        const historicosEletrica = hhHistoricos.filter(hh => 
-          hh.disciplina.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '') === 'eletrica'
-        );
-
-        if (historicosEletrica.length === 0) return null;
-
-        // Agrupar por mês
-        const meses = ['01/2025', '02/2025', '03/2025', '04/2025', '05/2025', '06/2025', '07/2025', '08/2025'];
-        const nomeMeses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto'];
-        
-        const dadosPorMes = meses.map((mes, idx) => {
-          const hhMes = historicosEletrica.filter(hh => hh.mes === mes);
-          const totalHH = hhMes.reduce((acc, hh) => acc + hh.hhApropriado, 0);
-          const [mesNum] = mes.split('/');
-          const metaPorcentagem = parseInt(mesNum) <= 3 ? 70 : 80;
-          const percentualMeta = (totalHH / META_HH_MENSAL) * 100;
-          const atingiu = percentualMeta >= metaPorcentagem;
-          
-          return {
-            mes: nomeMeses[idx],
-            mesCompleto: mes,
-            totalHH,
-            metaPorcentagem,
-            percentualMeta,
-            atingiu
-          };
-        }).filter(d => d.totalHH > 0);
-
-        if (dadosPorMes.length === 0) return null;
-
-        // Dados para gráfico de pizza
-        const dadosPizza = dadosPorMes.map(d => ({
-          name: d.mes,
-          value: d.totalHH
-        }));
-
-        const COLORS = ['#3b82f6', '#f97316', '#10b981', '#8b5cf6', '#ec4899', '#f59e0b', '#14b8a6', '#ef4444'];
-
-        return (
-          <Card className="mb-6">
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <History className="h-5 w-5 text-blue-600" />
-                Histórico Mensal - Janeiro a Agosto 2025
-              </CardTitle>
-              <CardDescription>Registro histórico de HH apropriado por mês</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Cards compactos */}
-                <div>
-                  <h3 className="text-sm font-semibold mb-3">Resumo por Mês</h3>
-                  <div className="grid grid-cols-2 gap-3">
-                    {dadosPorMes.map((dados) => (
-                      <div key={dados.mesCompleto} className="border rounded-lg p-3 flex items-center justify-between">
-                        <div>
-                          <p className="text-sm font-semibold">{dados.mes}</p>
-                          <p className="text-lg font-bold text-primary">{dados.totalHH}h</p>
-                        </div>
-                        {dados.atingiu ? (
-                          <CheckCircle className="h-5 w-5 text-green-600" />
-                        ) : (
-                          <AlertTriangle className="h-5 w-5 text-destructive" />
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-3">
-                    ✓ Meta atingida | ⚠ Meta não atingida (Jan-Mar: 70% | Abr-Ago: 80%)
-                  </p>
-                </div>
-
-                {/* Gráfico de Pizza */}
-                <div>
-                  <h3 className="text-sm font-semibold mb-3">Distribuição de HH por Mês</h3>
-                  <ResponsiveContainer width="100%" height={300}>
-                    <PieChart>
-                      <Pie
-                        data={dadosPizza}
-                        cx="50%"
-                        cy="50%"
-                        labelLine={false}
-                        label={({ name, value, percent }) => `${name}: ${value}h (${(percent * 100).toFixed(0)}%)`}
-                        outerRadius={80}
-                        fill="#8884d8"
-                        dataKey="value"
-                      >
-                        {dadosPizza.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                        ))}
-                      </Pie>
-                      <Tooltip />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        );
-      })()}
-
       {/* Gráficos de Resultados Financeiros */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         {/* Gráfico Mensal */}
@@ -574,19 +486,19 @@ export default function RelatoriosEMEletrica() {
                   const parsed = parseCompetencia(os.competencia);
                   if (parsed) return parsed.month === mesAtual && parsed.year === anoAtual;
                 }
-                if (os.dataConclusao) {
-                  const dataConclusao = new Date(os.dataConclusao);
+                if (os.data_conclusao) {
+                  const dataConclusao = new Date(os.data_conclusao);
                   return dataConclusao.getMonth() === mesAtual && dataConclusao.getFullYear() === anoAtual;
                 }
                 return false;
               });
 
-              const valorSAO = osDoMes.reduce((acc, os) => acc + (os.valorSAO ?? os.valorOrcamento ?? 0), 0);
+              const valorSAO = osDoMes.reduce((acc, os) => acc + (os.valor_sao ?? os.valor_orcamento ?? 0), 0);
               const valorEngenharia = osDoMes.reduce((acc, os) => {
-                const eng = os.valorEngenharia ?? (((os.hhPlanejado || 0) + (os.hhAdicional || 0)) * (os.valorHoraHH || 0));
+                const eng = os.valor_engenharia ?? (((os.hh_planejado || 0) + (os.hh_adicional || 0)) * (os.valor_hora_hh || 0));
                 return acc + (eng || 0);
               }, 0);
-              const valorSuprimentos = osDoMes.reduce((acc, os) => acc + (os.valorSuprimentos ?? os.valorFinal ?? 0), 0);
+              const valorSuprimentos = osDoMes.reduce((acc, os) => acc + (os.valor_suprimentos ?? os.valor_final ?? 0), 0);
 
               const dadosGrafico = [
                 { categoria: 'SAO', valor: valorSAO },
@@ -635,19 +547,19 @@ export default function RelatoriosEMEletrica() {
                   const parsed = parseCompetencia(os.competencia);
                   if (parsed) return parsed.year === anoAtual;
                 }
-                if (os.dataConclusao) {
-                  const dataConclusao = new Date(os.dataConclusao);
+                if (os.data_conclusao) {
+                  const dataConclusao = new Date(os.data_conclusao);
                   return dataConclusao.getFullYear() === anoAtual;
                 }
                 return false;
               });
 
-              const valorSAOAno = osDoAno.reduce((acc, os) => acc + (os.valorSAO ?? os.valorOrcamento ?? 0), 0);
+              const valorSAOAno = osDoAno.reduce((acc, os) => acc + (os.valor_sao ?? os.valor_orcamento ?? 0), 0);
               const valorEngenhariaAno = osDoAno.reduce((acc, os) => {
-                const eng = os.valorEngenharia ?? (((os.hhPlanejado || 0) + (os.hhAdicional || 0)) * (os.valorHoraHH || 0));
+                const eng = os.valor_engenharia ?? (((os.hh_planejado || 0) + (os.hh_adicional || 0)) * (os.valor_hora_hh || 0));
                 return acc + (eng || 0);
               }, 0);
-              const valorSuprimentosAno = osDoAno.reduce((acc, os) => acc + (os.valorSuprimentos ?? os.valorFinal ?? 0), 0);
+              const valorSuprimentosAno = osDoAno.reduce((acc, os) => acc + (os.valor_suprimentos ?? os.valor_final ?? 0), 0);
 
               const dadosGrafico = [
                 { categoria: 'SAO', valor: valorSAOAno },
@@ -699,20 +611,20 @@ export default function RelatoriosEMEletrica() {
                   const parsed = parseCompetencia(os.competencia);
                   if (parsed) return parsed.month === mesAtual && parsed.year === anoAtual;
                 }
-                if (os.dataConclusao) {
-                  const dataConclusao = new Date(os.dataConclusao);
+                if (os.data_conclusao) {
+                  const dataConclusao = new Date(os.data_conclusao);
                   return dataConclusao.getMonth() === mesAtual && dataConclusao.getFullYear() === anoAtual;
                 }
                 return false;
               });
 
-              const valorTotalMes = osDoMes.reduce((acc, os) => acc + (os.valorOrcamento || 0), 0);
-              const valorSAO = osDoMes.reduce((acc, os) => acc + (os.valorSAO ?? os.valorOrcamento ?? 0), 0);
+              const valorTotalMes = osDoMes.reduce((acc, os) => acc + (os.valor_orcamento || 0), 0);
+              const valorSAO = osDoMes.reduce((acc, os) => acc + (os.valor_sao ?? os.valor_orcamento ?? 0), 0);
               const valorEngenharia = osDoMes.reduce((acc, os) => {
-                const eng = os.valorEngenharia ?? (((os.hhPlanejado || 0) + (os.hhAdicional || 0)) * (os.valorHoraHH || 0));
+                const eng = os.valor_engenharia ?? (((os.hh_planejado || 0) + (os.hh_adicional || 0)) * (os.valor_hora_hh || 0));
                 return acc + (eng || 0);
               }, 0);
-              const valorSuprimentos = osDoMes.reduce((acc, os) => acc + (os.valorSuprimentos ?? os.valorFinal ?? 0), 0);
+              const valorSuprimentos = osDoMes.reduce((acc, os) => acc + (os.valor_suprimentos ?? os.valor_final ?? 0), 0);
               
               const percentualSAO = valorTotalMes > 0 ? (valorSAO / valorTotalMes) * 100 : 0;
               const percentualEngenharia = valorTotalMes > 0 ? (valorEngenharia / valorTotalMes) * 100 : 0;
@@ -779,20 +691,20 @@ export default function RelatoriosEMEletrica() {
                   const parsed = parseCompetencia(os.competencia);
                   if (parsed) return parsed.year === anoAtual;
                 }
-                if (os.dataConclusao) {
-                  const dataConclusao = new Date(os.dataConclusao);
+                if (os.data_conclusao) {
+                  const dataConclusao = new Date(os.data_conclusao);
                   return dataConclusao.getFullYear() === anoAtual;
                 }
                 return false;
               });
 
-              const valorTotalAno = osDoAno.reduce((acc, os) => acc + (os.valorOrcamento || 0), 0);
-              const valorSAOAno = osDoAno.reduce((acc, os) => acc + (os.valorSAO ?? os.valorOrcamento ?? 0), 0);
+              const valorTotalAno = osDoAno.reduce((acc, os) => acc + (os.valor_orcamento || 0), 0);
+              const valorSAOAno = osDoAno.reduce((acc, os) => acc + (os.valor_sao ?? os.valor_orcamento ?? 0), 0);
               const valorEngenhariaAno = osDoAno.reduce((acc, os) => {
-                const eng = os.valorEngenharia ?? (((os.hhPlanejado || 0) + (os.hhAdicional || 0)) * (os.valorHoraHH || 0));
+                const eng = os.valor_engenharia ?? (((os.hh_planejado || 0) + (os.hh_adicional || 0)) * (os.valor_hora_hh || 0));
                 return acc + (eng || 0);
               }, 0);
-              const valorSuprimentosAno = osDoAno.reduce((acc, os) => acc + (os.valorSuprimentos ?? os.valorFinal ?? 0), 0);
+              const valorSuprimentosAno = osDoAno.reduce((acc, os) => acc + (os.valor_suprimentos ?? os.valor_final ?? 0), 0);
               
               const percentualSAOAno = valorTotalAno > 0 ? (valorSAOAno / valorTotalAno) * 100 : 0;
               const percentualEngenhariaAno = valorTotalAno > 0 ? (valorEngenhariaAno / valorTotalAno) * 100 : 0;
@@ -908,7 +820,7 @@ export default function RelatoriosEMEletrica() {
                 {osEletrica.map((os) => (
                   <TableRow key={os.id}>
                     <TableCell className="font-medium">
-                      OS Nº {os.numero || os.id} - CCA {os.cca}
+                      OS Nº {os.numero || os.id} - CCA {os.cca?.codigo || os.cca_id}
                     </TableCell>
                     <TableCell>{os.cliente}</TableCell>
                     <TableCell>
@@ -916,16 +828,16 @@ export default function RelatoriosEMEletrica() {
                         {statusConfig[os.status as keyof typeof statusConfig]?.label || capitalizarTexto(os.status)}
                       </Badge>
                     </TableCell>
-                    <TableCell>{os.hhPlanejado}h</TableCell>
+                    <TableCell>{os.hh_planejado}h</TableCell>
                     <TableCell>
-                      {os.status === "concluida" && os.valorSAO && os.valorSAO > 0 ? (
+                      {os.status === "concluida" && os.valor_sao && os.valor_sao > 0 ? (
                         <div>
-                          <div className="font-medium">{formatCurrency(os.valorSAO)}</div>
+                          <div className="font-medium">{formatCurrency(os.valor_sao)}</div>
                           <div className="text-xs text-muted-foreground">Custo SAO</div>
                         </div>
-                      ) : os.valorOrcamento > 0 ? (
+                      ) : os.valor_orcamento > 0 ? (
                         <div>
-                          <div className="font-medium">{formatCurrency(os.valorOrcamento)}</div>
+                          <div className="font-medium">{formatCurrency(os.valor_orcamento)}</div>
                           <div className="text-xs text-muted-foreground">Orçamento</div>
                         </div>
                       ) : (
