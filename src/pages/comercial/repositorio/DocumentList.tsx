@@ -26,23 +26,22 @@ const DocumentList = () => {
   const [filtroResponsavel, setFiltroResponsavel] = useState("todos");
   const [filtroVencimentoInicio, setFiltroVencimentoInicio] = useState<Date | undefined>();
   const [filtroVencimentoFim, setFiltroVencimentoFim] = useState<Date | undefined>();
-  const [usuarios, setUsuarios] = useState<Array<{
-    email: string;
-  }>>([]);
-  const {
-    data: documentos = [],
-    isLoading
-  } = useRepositorioDocumentos();
-  const {
-    data: categorias = []
-  } = useRepositorioCategorias();
+  const [usuarios, setUsuarios] = useState<
+    Array<{
+      email: string;
+    }>
+  >([]);
+  const { data: documentos = [], isLoading } = useRepositorioDocumentos();
+  const { data: categorias = [] } = useRepositorioCategorias();
   useEffect(() => {
     const loadUsuarios = async () => {
       const users = await fetchUsers();
-      const emailsUnicos = [...new Set(users.map(u => u.email).filter(Boolean))];
-      setUsuarios(emailsUnicos.map(email => ({
-        email
-      })));
+      const emailsUnicos = [...new Set(users.map((u) => u.email).filter(Boolean))];
+      setUsuarios(
+        emailsUnicos.map((email) => ({
+          email,
+        })),
+      );
     };
     loadUsuarios();
   }, []);
@@ -66,8 +65,11 @@ const DocumentList = () => {
         return <Shield className="h-4 w-4 text-gray-500" />;
     }
   };
-  const documentosFiltrados = documentos.filter(doc => {
-    const matchesSearch = doc.arquivo_nome_original.toLowerCase().includes(searchTerm.toLowerCase()) || (doc.categoria?.nome || "").toLowerCase().includes(searchTerm.toLowerCase()) || (doc.subcategoria?.nome || "").toLowerCase().includes(searchTerm.toLowerCase());
+  const documentosFiltrados = documentos.filter((doc) => {
+    const matchesSearch =
+      doc.arquivo_nome_original.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (doc.categoria?.nome || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (doc.subcategoria?.nome || "").toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategoria = filtroCategoria === "todos" || doc.categoria_id === filtroCategoria;
     const matchesTipo = filtroTipo === "todos" || doc.arquivo_tipo === filtroTipo;
     const matchesResponsavel = filtroResponsavel === "todos" || doc.responsavel_email === filtroResponsavel;
@@ -80,12 +82,20 @@ const DocumentList = () => {
       const dataValidade = new Date(doc.data_validade);
       matchesVencimento = matchesVencimento && dataValidade <= filtroVencimentoFim;
     }
-    if (filtroValidade === "todos") return matchesSearch && matchesCategoria && matchesTipo && matchesResponsavel && matchesVencimento;
+    if (filtroValidade === "todos")
+      return matchesSearch && matchesCategoria && matchesTipo && matchesResponsavel && matchesVencimento;
     if (!doc.data_validade) return false;
     const status = getValidadeStatus(new Date(doc.data_validade));
-    return matchesSearch && status === filtroValidade && matchesCategoria && matchesTipo && matchesResponsavel && matchesVencimento;
+    return (
+      matchesSearch &&
+      status === filtroValidade &&
+      matchesCategoria &&
+      matchesTipo &&
+      matchesResponsavel &&
+      matchesVencimento
+    );
   });
-  const tipos: string[] = [...new Set(documentos.map(doc => doc.arquivo_tipo).filter(Boolean))] as string[];
+  const tipos: string[] = [...new Set(documentos.map((doc) => doc.arquivo_tipo).filter(Boolean))] as string[];
   const getFileIcon = (tipo: string) => {
     return <FileText className="h-4 w-4 text-blue-500" />;
   };
@@ -95,14 +105,14 @@ const DocumentList = () => {
       Excel: "bg-green-100 text-green-800",
       Word: "bg-blue-100 text-blue-800",
       PowerPoint: "bg-orange-100 text-orange-800",
-      PNG: "bg-purple-100 text-purple-800"
+      PNG: "bg-purple-100 text-purple-800",
     };
     return colors[tipo] || "bg-gray-100 text-gray-800";
   };
   const extractPathFromUrl = (url: string): string => {
     try {
       const urlObj = new URL(url);
-      const pathParts = urlObj.pathname.split('/storage/v1/object/public/repositorio-documentos/');
+      const pathParts = urlObj.pathname.split("/storage/v1/object/public/repositorio-documentos/");
       return pathParts[1] || url;
     } catch {
       return url;
@@ -111,29 +121,23 @@ const DocumentList = () => {
   const handleViewDocument = async (documento: any) => {
     try {
       const filePath = extractPathFromUrl(documento.arquivo_url);
-      const {
-        data,
-        error
-      } = await supabase.storage.from('repositorio-documentos').createSignedUrl(filePath, 3600);
+      const { data, error } = await supabase.storage.from("repositorio-documentos").createSignedUrl(filePath, 3600);
       if (error) throw error;
       if (data?.signedUrl) {
-        window.open(data.signedUrl, '_blank');
+        window.open(data.signedUrl, "_blank");
       }
     } catch (error) {
-      console.error('Erro ao visualizar documento:', error);
-      toast.error('Erro ao visualizar documento');
+      console.error("Erro ao visualizar documento:", error);
+      toast.error("Erro ao visualizar documento");
     }
   };
   const handleDownloadDocument = async (documento: any) => {
     try {
       const filePath = extractPathFromUrl(documento.arquivo_url);
-      const {
-        data,
-        error
-      } = await supabase.storage.from('repositorio-documentos').createSignedUrl(filePath, 60);
+      const { data, error } = await supabase.storage.from("repositorio-documentos").createSignedUrl(filePath, 60);
       if (error) throw error;
       if (data?.signedUrl) {
-        const link = document.createElement('a');
+        const link = document.createElement("a");
         link.href = data.signedUrl;
         link.download = documento.arquivo_nome_original;
         document.body.appendChild(link);
@@ -141,11 +145,12 @@ const DocumentList = () => {
         document.body.removeChild(link);
       }
     } catch (error) {
-      console.error('Erro ao baixar documento:', error);
-      toast.error('Erro ao baixar documento');
+      console.error("Erro ao baixar documento:", error);
+      toast.error("Erro ao baixar documento");
     }
   };
-  return <div className="p-6 space-y-6 animate-fade-in">
+  return (
+    <div className="p-6 space-y-6 animate-fade-in">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
@@ -159,9 +164,6 @@ const DocumentList = () => {
               <Upload className="mr-2 h-4 w-4" />
               Enviar Documento
             </Button>
-          </Link>
-          <Link to="/comercial/repositorio/busca">
-            
           </Link>
         </div>
       </div>
@@ -179,7 +181,12 @@ const DocumentList = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <div className="space-y-2">
               <label className="text-sm font-medium">Nome do Documento</label>
-              <Input placeholder="Nome do documento..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="w-full" />
+              <Input
+                placeholder="Nome do documento..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full"
+              />
             </div>
 
             <div className="space-y-2">
@@ -190,9 +197,11 @@ const DocumentList = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="todos">Todas as Categorias</SelectItem>
-                  {categorias.map(categoria => <SelectItem key={categoria.id} value={categoria.id}>
+                  {categorias.map((categoria) => (
+                    <SelectItem key={categoria.id} value={categoria.id}>
                       {categoria.nome}
-                    </SelectItem>)}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -220,9 +229,11 @@ const DocumentList = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="todos">Todos os Tipos</SelectItem>
-                  {tipos.map(tipo => <SelectItem key={tipo} value={tipo}>
+                  {tipos.map((tipo) => (
+                    <SelectItem key={tipo} value={tipo}>
                       {tipo}
-                    </SelectItem>)}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -235,9 +246,11 @@ const DocumentList = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="todos">Todos os Responsáveis</SelectItem>
-                  {usuarios.map(usuario => <SelectItem key={usuario.email} value={usuario.email}>
+                  {usuarios.map((usuario) => (
+                    <SelectItem key={usuario.email} value={usuario.email}>
                       {usuario.email}
-                    </SelectItem>)}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -247,25 +260,49 @@ const DocumentList = () => {
               <div className="flex gap-2">
                 <Popover>
                   <PopoverTrigger asChild>
-                    <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !filtroVencimentoInicio && "text-muted-foreground")}>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !filtroVencimentoInicio && "text-muted-foreground",
+                      )}
+                    >
                       <CalendarIcon className="mr-2 h-4 w-4" />
                       {filtroVencimentoInicio ? format(filtroVencimentoInicio, "dd/MM/yyyy") : <span>De</span>}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar mode="single" selected={filtroVencimentoInicio} onSelect={setFiltroVencimentoInicio} initialFocus className="pointer-events-auto" />
+                    <Calendar
+                      mode="single"
+                      selected={filtroVencimentoInicio}
+                      onSelect={setFiltroVencimentoInicio}
+                      initialFocus
+                      className="pointer-events-auto"
+                    />
                   </PopoverContent>
                 </Popover>
 
                 <Popover>
                   <PopoverTrigger asChild>
-                    <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !filtroVencimentoFim && "text-muted-foreground")}>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !filtroVencimentoFim && "text-muted-foreground",
+                      )}
+                    >
                       <CalendarIcon className="mr-2 h-4 w-4" />
                       {filtroVencimentoFim ? format(filtroVencimentoFim, "dd/MM/yyyy") : <span>Até</span>}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar mode="single" selected={filtroVencimentoFim} onSelect={setFiltroVencimentoFim} initialFocus className="pointer-events-auto" />
+                    <Calendar
+                      mode="single"
+                      selected={filtroVencimentoFim}
+                      onSelect={setFiltroVencimentoFim}
+                      initialFocus
+                      className="pointer-events-auto"
+                    />
                   </PopoverContent>
                 </Popover>
               </div>
@@ -298,9 +335,12 @@ const DocumentList = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {documentosFiltrados.map(documento => {
-                const statusValidade = documento.data_validade ? getValidadeStatus(new Date(documento.data_validade)) : "valido";
-                return <TableRow key={documento.id} className="hover:bg-muted/50">
+                {documentosFiltrados.map((documento) => {
+                  const statusValidade = documento.data_validade
+                    ? getValidadeStatus(new Date(documento.data_validade))
+                    : "valido";
+                  return (
+                    <TableRow key={documento.id} className="hover:bg-muted/50">
                       <TableCell>{getFileIcon(documento.arquivo_tipo || "")}</TableCell>
                       <TableCell className="font-medium">{documento.arquivo_nome_original}</TableCell>
                       <TableCell>
@@ -309,13 +349,18 @@ const DocumentList = () => {
                           <div className="text-xs text-muted-foreground">{documento.subcategoria?.nome || "-"}</div>
                         </div>
                       </TableCell>
-                      <TableCell>{documento.created_at ? format(new Date(documento.created_at), "dd/MM/yyyy") : "-"}</TableCell>
                       <TableCell>
-                        {documento.data_validade ? <Tooltip>
+                        {documento.created_at ? format(new Date(documento.created_at), "dd/MM/yyyy") : "-"}
+                      </TableCell>
+                      <TableCell>
+                        {documento.data_validade ? (
+                          <Tooltip>
                             <TooltipTrigger asChild>
                               <div className="flex items-center gap-2 cursor-help">
                                 {getValidadeIcon(statusValidade)}
-                                <span className="text-sm">{format(new Date(documento.data_validade), "dd/MM/yyyy")}</span>
+                                <span className="text-sm">
+                                  {format(new Date(documento.data_validade), "dd/MM/yyyy")}
+                                </span>
                               </div>
                             </TooltipTrigger>
                             <TooltipContent>
@@ -323,14 +368,23 @@ const DocumentList = () => {
                                 Validade: {format(new Date(documento.data_validade), "dd/MM/yyyy")}
                                 <br />
                                 Status:{" "}
-                                {statusValidade === "vencido" ? "Vencido" : statusValidade === "proximo" ? "Próximo do vencimento" : "Válido"}
+                                {statusValidade === "vencido"
+                                  ? "Vencido"
+                                  : statusValidade === "proximo"
+                                    ? "Próximo do vencimento"
+                                    : "Válido"}
                               </p>
                             </TooltipContent>
-                          </Tooltip> : <span className="text-sm text-muted-foreground">-</span>}
+                          </Tooltip>
+                        ) : (
+                          <span className="text-sm text-muted-foreground">-</span>
+                        )}
                       </TableCell>
                       <TableCell>{documento.responsavel_nome || "-"}</TableCell>
                       <TableCell>
-                        <Badge className={getTipoColor(documento.arquivo_tipo || "")}>{documento.arquivo_tipo || "-"}</Badge>
+                        <Badge className={getTipoColor(documento.arquivo_tipo || "")}>
+                          {documento.arquivo_tipo || "-"}
+                        </Badge>
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
@@ -352,13 +406,15 @@ const DocumentList = () => {
                           </Tooltip>
                         </div>
                       </TableCell>
-                    </TableRow>;
-              })}
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           </TooltipProvider>
         </CardContent>
       </Card>
-    </div>;
+    </div>
+  );
 };
 export default DocumentList;
