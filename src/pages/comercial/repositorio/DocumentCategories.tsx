@@ -66,7 +66,7 @@ const DocumentCategories = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div className="flex items-center gap-4">
-          <Link to="/comercial/repositorio">
+          <Link to="/comercial/repositorio/documentos">
             <Button variant="ghost" size="sm">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Voltar

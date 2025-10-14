@@ -165,11 +165,9 @@ import PlaceholderPage from "./pages/PlaceholderPage";
 import EngenhariaMatricialIndex from "./pages/engenharia-matricial/Index";
 
 // === COMERCIAL - Repositório de Documentos ===
-import DocumentRepository from "./pages/comercial/repositorio/DocumentRepository";
 import DocumentList from "./pages/comercial/repositorio/DocumentList";
 import DocumentUpload from "./pages/comercial/repositorio/DocumentUpload";
 import DocumentCategories from "./pages/comercial/repositorio/DocumentCategories";
-import DocumentSearch from "./pages/comercial/repositorio/DocumentSearch";
 import CategoryView from "./pages/comercial/repositorio/CategoryView";
 import SubcategoryView from "./pages/comercial/repositorio/SubcategoryView";
 
@@ -479,11 +477,9 @@ function App() {
                 {/* ========================================== */}
                 {/* COMERCIAL - Repositório de Documentos     */}
                 {/* ========================================== */}
-                <Route path="comercial/repositorio" element={<DocumentRepository />} />
                 <Route path="comercial/repositorio/documentos" element={<DocumentList />} />
                 <Route path="comercial/repositorio/upload" element={<DocumentUpload />} />
                 <Route path="comercial/repositorio/categorias" element={<DocumentCategories />} />
-                <Route path="comercial/repositorio/busca" element={<DocumentSearch />} />
                 <Route path="comercial/repositorio/categoria/:categoriaId" element={<CategoryView />} />
                 <Route path="comercial/repositorio/categoria/:categoriaId/subcategoria/:subcategoriaId" element={<SubcategoryView />} />
 

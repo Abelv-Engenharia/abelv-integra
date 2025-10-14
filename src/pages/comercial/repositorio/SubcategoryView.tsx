@@ -34,7 +34,7 @@ export default function SubcategoryView() {
       <div className="min-h-screen bg-background p-6">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-foreground">Subcategoria não encontrada</h1>
-          <Button onClick={() => navigate("/comercial/repositorio")} className="mt-4">
+          <Button onClick={() => navigate("/comercial/repositorio/documentos")} className="mt-4">
             <ArrowLeft className="mr-2 h-4 w-4" />
             Voltar ao Repositório
           </Button>
@@ -151,7 +151,7 @@ export default function SubcategoryView() {
               <BreadcrumbList>
                 <BreadcrumbItem>
                   <BreadcrumbLink asChild>
-                    <Link to="/comercial/repositorio">Repositório</Link>
+                    <Link to="/comercial/repositorio/documentos">Repositório</Link>
                   </BreadcrumbLink>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator />
