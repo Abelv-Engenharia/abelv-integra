@@ -87,11 +87,20 @@ export default function SubcategoryView() {
     }
   };
 
+  const extractPathFromUrl = (url: string): string => {
+    // Extrair o caminho do arquivo da URL completa
+    // URL format: https://.../storage/v1/object/public/repositorio-documentos/PATH
+    const parts = url.split('/repositorio-documentos/');
+    return parts.length > 1 ? parts[1] : url;
+  };
+
   const handleViewDocument = async (arquivoUrl: string) => {
     try {
+      const filePath = extractPathFromUrl(arquivoUrl);
+      
       const { data, error } = await supabase.storage
         .from('repositorio-documentos')
-        .createSignedUrl(arquivoUrl, 3600);
+        .createSignedUrl(filePath, 3600);
 
       if (error) throw error;
       
@@ -106,9 +115,11 @@ export default function SubcategoryView() {
 
   const handleDownloadDocument = async (arquivoUrl: string, nomeOriginal: string) => {
     try {
+      const filePath = extractPathFromUrl(arquivoUrl);
+      
       const { data, error } = await supabase.storage
         .from('repositorio-documentos')
-        .createSignedUrl(arquivoUrl, 60);
+        .createSignedUrl(filePath, 60);
 
       if (error) throw error;
       
