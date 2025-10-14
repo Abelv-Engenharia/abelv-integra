@@ -5,8 +5,34 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useOSList } from "@/hooks/engenharia-matricial/useOSEngenhariaMatricial";
 import { Link } from "react-router-dom";
-import { Eye, TrendingUp, Clock, CheckCircle, DollarSign, Target, Calendar, AlertTriangle, History } from "lucide-react";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell, ComposedChart, LabelList } from 'recharts';
+import {
+  Eye,
+  TrendingUp,
+  Clock,
+  CheckCircle,
+  DollarSign,
+  Target,
+  Calendar,
+  AlertTriangle,
+  History,
+} from "lucide-react";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  PieChart,
+  Pie,
+  Cell,
+  ComposedChart,
+  LabelList,
+} from "recharts";
 import { formatarCCAComCliente } from "@/lib/engenharia-matricial/utils";
 import { obterHHPorDisciplinaAnual, calcularTotais } from "@/lib/engenharia-matricial/dadosAnuais";
 import { normalizarOS } from "@/lib/engenharia-matricial/relatoriosUtils";
@@ -15,19 +41,26 @@ export default function RelatoriosEMEletrica() {
   // Buscar OS do banco de dados
   const { data: osListData, isLoading } = useOSList();
   const osListRaw = osListData || [];
-  
+
   // Normalizar OS para ter propriedades camelCase
   const osList = useMemo(() => osListRaw.map(normalizarOS), [osListRaw]);
-  
+
   // Obter dados consolidados usando memo para evitar recalculos
   const hhPorDisciplinaAnual = useMemo(() => obterHHPorDisciplinaAnual(osListRaw), [osListRaw]);
-  
+
   // Filtrar apenas OS da disciplina elétrica
   const osEletrica = useMemo(
-    () => osList.filter(os => (os.disciplina || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '') === "eletrica"),
-    [osList]
+    () =>
+      osList.filter(
+        (os) =>
+          (os.disciplina || "")
+            .toLowerCase()
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "") === "eletrica",
+      ),
+    [osList],
   );
-  
+
   // Mostrar loading enquanto busca dados
   if (isLoading) {
     return (
@@ -36,15 +69,19 @@ export default function RelatoriosEMEletrica() {
       </div>
     );
   }
-  
+
   const statusConfig = {
-    "aberta": { label: "Aberta", color: "bg-blue-500", variant: "secondary" as const },
+    aberta: { label: "Aberta", color: "bg-blue-500", variant: "secondary" as const },
     "em-planejamento": { label: "Em planejamento", color: "bg-orange-500", variant: "outline" as const },
     "aguardando-aceite": { label: "Aguardando aceite", color: "bg-yellow-500", variant: "outline" as const },
     "em-execucao": { label: "Em execução", color: "bg-green-500", variant: "default" as const },
-    "aguardando-aceite-fechamento": { label: "Aguardando aceite fechamento", color: "bg-purple-500", variant: "outline" as const },
-    "concluida": { label: "Concluída", color: "bg-gray-500", variant: "secondary" as const },
-    "cancelada": { label: "Cancelada", color: "bg-red-500", variant: "destructive" as const }
+    "aguardando-aceite-fechamento": {
+      label: "Aguardando aceite fechamento",
+      color: "bg-purple-500",
+      variant: "outline" as const,
+    },
+    concluida: { label: "Concluída", color: "bg-gray-500", variant: "secondary" as const },
+    cancelada: { label: "Cancelada", color: "bg-red-500", variant: "destructive" as const },
   };
 
   const capitalizarTexto = (texto: string) => {
@@ -52,13 +89,13 @@ export default function RelatoriosEMEletrica() {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('pt-BR');
+    return new Date(dateString).toLocaleDateString("pt-BR");
   };
 
   const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
+    return new Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: "BRL",
     }).format(value);
   };
 
@@ -66,21 +103,21 @@ export default function RelatoriosEMEletrica() {
   const META_HH_MENSAL = 190;
   const META_HH_ANUAL = META_HH_MENSAL * 12;
   const PERCENTUAL_MINIMO = 80;
-  
+
   // Calcular HH apropriadas por mês (baseado nas OS concluídas)
   const hhApropriadasMensal = () => {
     const hoje = new Date();
     const mesAtual = hoje.getMonth();
     const anoAtual = hoje.getFullYear();
-    
-    const osConcluidasMesAtual = osEletrica.filter(os => {
+
+    const osConcluidasMesAtual = osEletrica.filter((os) => {
       if (os.status === "concluida" && os.data_conclusao) {
         const dataConclusao = new Date(os.data_conclusao);
         return dataConclusao.getMonth() === mesAtual && dataConclusao.getFullYear() === anoAtual;
       }
       return false;
     });
-    
+
     return osConcluidasMesAtual.reduce((acc, os) => acc + (os.hh_planejado + (os.hh_adicional || 0)), 0);
   };
 
@@ -89,23 +126,28 @@ export default function RelatoriosEMEletrica() {
     const hoje = new Date();
     const mesAnterior = hoje.getMonth() === 0 ? 11 : hoje.getMonth() - 1;
     const anoAnterior = hoje.getMonth() === 0 ? hoje.getFullYear() - 1 : hoje.getFullYear();
-    
-    const osConcluidasMesAnterior = osEletrica.filter(os => {
+
+    const osConcluidasMesAnterior = osEletrica.filter((os) => {
       if (os.status === "concluida" && os.data_conclusao) {
         const dataConclusao = new Date(os.data_conclusao);
         return dataConclusao.getMonth() === mesAnterior && dataConclusao.getFullYear() === anoAnterior;
       }
       return false;
     });
-    
+
     return osConcluidasMesAnterior.reduce((acc, os) => acc + (os.hh_planejado + (os.hh_adicional || 0)), 0);
   };
-  
+
   // Calcular HH apropriadas no ano
   const hhApropriadasAnual = osEletrica
-    .filter(os => os.status === "concluida" && os.data_conclusao && new Date(os.data_conclusao).getFullYear() === new Date().getFullYear())
+    .filter(
+      (os) =>
+        os.status === "concluida" &&
+        os.data_conclusao &&
+        new Date(os.data_conclusao).getFullYear() === new Date().getFullYear(),
+    )
     .reduce((acc, os) => acc + (os.hh_planejado + (os.hh_adicional || 0)), 0);
-  
+
   const hhMesAtual = hhApropriadasMensal();
   const hhMesAnterior = hhApropriadasMesAnterior();
   const percentualMeta = (hhMesAtual / META_HH_MENSAL) * 100;
@@ -113,29 +155,30 @@ export default function RelatoriosEMEletrica() {
   const saldoAnualNecessario = META_HH_ANUAL - hhApropriadasAnual;
   const mesesRestantes = 12 - (new Date().getMonth() + 1);
   const hhMediaMensalNecessaria = mesesRestantes > 0 ? saldoAnualNecessario / mesesRestantes : 0;
-  
+
   // Nomes dos meses para exibição
   const hoje = new Date();
-  const nomeMesAtual = hoje.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+  const nomeMesAtual = hoje.toLocaleDateString("pt-BR", { month: "long", year: "numeric" });
   const mesAnteriorDate = new Date(hoje.getFullYear(), hoje.getMonth() - 1, 1);
-  const nomeMesAnterior = mesAnteriorDate.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+  const nomeMesAnterior = mesAnteriorDate.toLocaleDateString("pt-BR", { month: "long", year: "numeric" });
 
   // Métricas da disciplina elétrica
   const totalOS = osEletrica.length;
-  const osConcluidas = osEletrica.filter(os => os.status === "concluida").length;
-  const osEmAndamento = osEletrica.filter(os => ["em-planejamento", "aguardando-aceite", "em-execucao"].includes(os.status)).length;
+  const osConcluidas = osEletrica.filter((os) => os.status === "concluida").length;
+  const osEmAndamento = osEletrica.filter((os) =>
+    ["em-planejamento", "aguardando-aceite", "em-execucao"].includes(os.status),
+  ).length;
   const valorTotalOrcado = osEletrica.reduce((acc, os) => acc + os.valor_orcamento, 0);
-  const valorTotalFinal = osEletrica.filter(os => os.status === "concluida" && os.valor_sao).reduce((acc, os) => acc + (os.valor_sao || 0), 0);
-
+  const valorTotalFinal = osEletrica
+    .filter((os) => os.status === "concluida" && os.valor_sao)
+    .reduce((acc, os) => acc + (os.valor_sao || 0), 0);
 
   return (
     <div className="container mx-auto p-6">
       <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-3xl font-bold">Relatórios EM Elétrica</h1>
-          <p className="text-muted-foreground">
-            Análise e métricas da disciplina elétrica
-          </p>
+          <p className="text-muted-foreground">Análise e métricas da disciplina elétrica</p>
         </div>
       </div>
 
@@ -197,9 +240,11 @@ export default function RelatoriosEMEletrica() {
               </div>
             </div>
           </div>
-          
+
           <div className="text-center pt-4 border-t">
-            <p className="text-sm text-muted-foreground">Meta Mínima Mensal: {(META_HH_MENSAL * PERCENTUAL_MINIMO / 100).toFixed(0)}h (80%)</p>
+            <p className="text-sm text-muted-foreground">
+              Meta Mínima Mensal: {((META_HH_MENSAL * PERCENTUAL_MINIMO) / 100).toFixed(0)}h (80%)
+            </p>
           </div>
         </CardContent>
       </Card>
@@ -222,8 +267,8 @@ export default function RelatoriosEMEletrica() {
                 const hoje = new Date();
                 const mesAnterior = hoje.getMonth() === 0 ? 11 : hoje.getMonth() - 1;
                 const anoAnterior = hoje.getMonth() === 0 ? hoje.getFullYear() - 1 : hoje.getFullYear();
-                
-                const osConcluidasMesAnterior = osEletrica.filter(os => {
+
+                const osConcluidasMesAnterior = osEletrica.filter((os) => {
                   if (os.status === "concluida" && os.data_conclusao) {
                     const dataConclusao = new Date(os.data_conclusao);
                     return dataConclusao.getMonth() === mesAnterior && dataConclusao.getFullYear() === anoAnterior;
@@ -231,18 +276,21 @@ export default function RelatoriosEMEletrica() {
                   return false;
                 });
 
-                const hhPorCCA = osConcluidasMesAnterior.reduce((acc, os) => {
-                  const ccaDisplay = formatarCCAComCliente(os.cca?.codigo || String(os.cca_id), os.cliente);
-                  const hh = (os.hh_planejado || 0) + (os.hh_adicional || 0);
-                  
-                  if (!acc[ccaDisplay]) {
-                    acc[ccaDisplay] = { cca: ccaDisplay, hh: 0, quantidade: 0 };
-                  }
-                  acc[ccaDisplay].hh += hh;
-                  acc[ccaDisplay].quantidade += 1;
-                  
-                  return acc;
-                }, {} as Record<string, { cca: string; hh: number; quantidade: number }>);
+                const hhPorCCA = osConcluidasMesAnterior.reduce(
+                  (acc, os) => {
+                    const ccaDisplay = formatarCCAComCliente(os.cca?.codigo || String(os.cca_id), os.cliente);
+                    const hh = (os.hh_planejado || 0) + (os.hh_adicional || 0);
+
+                    if (!acc[ccaDisplay]) {
+                      acc[ccaDisplay] = { cca: ccaDisplay, hh: 0, quantidade: 0 };
+                    }
+                    acc[ccaDisplay].hh += hh;
+                    acc[ccaDisplay].quantidade += 1;
+
+                    return acc;
+                  },
+                  {} as Record<string, { cca: string; hh: number; quantidade: number }>,
+                );
 
                 const dados = Object.values(hhPorCCA).sort((a, b) => b.hh - a.hh);
 
@@ -289,8 +337,8 @@ export default function RelatoriosEMEletrica() {
                 const hoje = new Date();
                 const mesAtual = hoje.getMonth();
                 const anoAtual = hoje.getFullYear();
-                
-                const osConcluidasMesAtual = osEletrica.filter(os => {
+
+                const osConcluidasMesAtual = osEletrica.filter((os) => {
                   if (os.status === "concluida" && os.data_conclusao) {
                     const dataConclusao = new Date(os.data_conclusao);
                     return dataConclusao.getMonth() === mesAtual && dataConclusao.getFullYear() === anoAtual;
@@ -298,18 +346,21 @@ export default function RelatoriosEMEletrica() {
                   return false;
                 });
 
-                const hhPorCCA = osConcluidasMesAtual.reduce((acc, os) => {
-                  const ccaDisplay = formatarCCAComCliente(os.cca?.codigo || String(os.cca_id), os.cliente);
-                  const hh = (os.hh_planejado || 0) + (os.hh_adicional || 0);
-                  
-                  if (!acc[ccaDisplay]) {
-                    acc[ccaDisplay] = { cca: ccaDisplay, hh: 0, quantidade: 0 };
-                  }
-                  acc[ccaDisplay].hh += hh;
-                  acc[ccaDisplay].quantidade += 1;
-                  
-                  return acc;
-                }, {} as Record<string, { cca: string; hh: number; quantidade: number }>);
+                const hhPorCCA = osConcluidasMesAtual.reduce(
+                  (acc, os) => {
+                    const ccaDisplay = formatarCCAComCliente(os.cca?.codigo || String(os.cca_id), os.cliente);
+                    const hh = (os.hh_planejado || 0) + (os.hh_adicional || 0);
+
+                    if (!acc[ccaDisplay]) {
+                      acc[ccaDisplay] = { cca: ccaDisplay, hh: 0, quantidade: 0 };
+                    }
+                    acc[ccaDisplay].hh += hh;
+                    acc[ccaDisplay].quantidade += 1;
+
+                    return acc;
+                  },
+                  {} as Record<string, { cca: string; hh: number; quantidade: number }>,
+                );
 
                 const dados = Object.values(hhPorCCA).sort((a, b) => b.hh - a.hh);
 
@@ -354,7 +405,6 @@ export default function RelatoriosEMEletrica() {
 
       {/* Cards de controle de HH */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">HH anual</CardTitle>
@@ -375,9 +425,7 @@ export default function RelatoriosEMEletrica() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{META_HH_ANUAL - calcularTotais(osList).totalEletrica}h</div>
-            <p className="text-xs text-muted-foreground">
-              Para alcançar meta anual
-            </p>
+            <p className="text-xs text-muted-foreground">Para alcançar meta anual</p>
           </CardContent>
         </Card>
 
@@ -388,11 +436,12 @@ export default function RelatoriosEMEletrica() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {mesesRestantes > 0 ? Math.ceil((META_HH_ANUAL - calcularTotais(osList).totalEletrica) / mesesRestantes) : 0}h
+              {mesesRestantes > 0
+                ? Math.ceil((META_HH_ANUAL - calcularTotais(osList).totalEletrica) / mesesRestantes)
+                : 0}
+              h
             </div>
-            <p className="text-xs text-muted-foreground">
-              {mesesRestantes} meses restantes
-            </p>
+            <p className="text-xs text-muted-foreground">{mesesRestantes} meses restantes</p>
           </CardContent>
         </Card>
 
@@ -403,9 +452,7 @@ export default function RelatoriosEMEletrica() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{calcularTotais(osList).mediaEletrica}h</div>
-            <p className="text-xs text-muted-foreground">
-              Média Jan-Set 2025
-            </p>
+            <p className="text-xs text-muted-foreground">Média Jan-Set 2025</p>
           </CardContent>
         </Card>
       </div>
@@ -445,21 +492,20 @@ export default function RelatoriosEMEletrica() {
               <Tooltip />
               <Legend />
               <Bar dataKey="eletrica" fill="#3b82f6" name="HH Elétrica">
-                <LabelList dataKey="eletrica" position="top" style={{ fontSize: '12px', fontWeight: 'bold' }} />
+                <LabelList dataKey="eletrica" position="top" style={{ fontSize: "12px", fontWeight: "bold" }} />
               </Bar>
-              <Line 
-                type="monotone" 
-                dataKey="meta" 
-                stroke="#10b981" 
+              <Line
+                type="monotone"
+                dataKey="meta"
+                stroke="#10b981"
                 strokeWidth={2}
                 name="Meta 80% (152 HH/mês)"
-                dot={{ fill: '#10b981', r: 4 }}
+                dot={{ fill: "#10b981", r: 4 }}
               />
             </ComposedChart>
           </ResponsiveContainer>
         </CardContent>
       </Card>
-
 
       {/* Gráficos de Resultados Financeiros */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
@@ -468,7 +514,7 @@ export default function RelatoriosEMEletrica() {
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
               <DollarSign className="h-5 w-5 text-green-600" />
-              Comparativo Mensal - {new Date().toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}
+              Comparativo Mensal - {new Date().toLocaleDateString("pt-BR", { month: "long", year: "numeric" })}
             </CardTitle>
             <CardDescription>Valores SAO, Engenharia e Suprimentos</CardDescription>
           </CardHeader>
@@ -477,7 +523,7 @@ export default function RelatoriosEMEletrica() {
               const hoje = new Date();
               const mesAtual = hoje.getMonth();
               const anoAtual = hoje.getFullYear();
-              
+
               const parseCompetencia = (str: string) => {
                 const m1 = str.match(/^(\d{4})[-\/](\d{2})$/);
                 if (m1) return { month: parseInt(m1[2], 10) - 1, year: parseInt(m1[1], 10) };
@@ -485,7 +531,7 @@ export default function RelatoriosEMEletrica() {
                 if (m2) return { month: parseInt(m2[1], 10) - 1, year: parseInt(m2[2], 10) };
                 return null;
               };
-              const osDoMes = osEletrica.filter(os => {
+              const osDoMes = osEletrica.filter((os) => {
                 if (os.competencia) {
                   const parsed = parseCompetencia(os.competencia);
                   if (parsed) return parsed.month === mesAtual && parsed.year === anoAtual;
@@ -499,15 +545,19 @@ export default function RelatoriosEMEletrica() {
 
               const valorSAO = osDoMes.reduce((acc, os) => acc + (os.valor_sao ?? os.valor_orcamento ?? 0), 0);
               const valorEngenharia = osDoMes.reduce((acc, os) => {
-                const eng = os.valor_engenharia ?? (((os.hh_planejado || 0) + (os.hh_adicional || 0)) * (os.valor_hora_hh || 0));
+                const eng =
+                  os.valor_engenharia ?? ((os.hh_planejado || 0) + (os.hh_adicional || 0)) * (os.valor_hora_hh || 0);
                 return acc + (eng || 0);
               }, 0);
-              const valorSuprimentos = osDoMes.reduce((acc, os) => acc + (os.valor_suprimentos ?? os.valor_final ?? 0), 0);
+              const valorSuprimentos = osDoMes.reduce(
+                (acc, os) => acc + (os.valor_suprimentos ?? os.valor_final ?? 0),
+                0,
+              );
 
               const dadosGrafico = [
-                { categoria: 'SAO', valor: valorSAO },
-                { categoria: 'Engenharia', valor: valorEngenharia },
-                { categoria: 'Suprimentos', valor: valorSuprimentos }
+                { categoria: "SAO", valor: valorSAO },
+                { categoria: "Engenharia", valor: valorEngenharia },
+                { categoria: "Suprimentos", valor: valorSuprimentos },
               ];
 
               return (
@@ -537,7 +587,7 @@ export default function RelatoriosEMEletrica() {
           <CardContent>
             {(() => {
               const anoAtual = new Date().getFullYear();
-              
+
               const parseCompetencia = (str: string) => {
                 const m1 = str.match(/^(\d{4})[-\/](\d{2})$/);
                 if (m1) return { month: parseInt(m1[2], 10) - 1, year: parseInt(m1[1], 10) };
@@ -545,8 +595,8 @@ export default function RelatoriosEMEletrica() {
                 if (m2) return { month: parseInt(m2[1], 10) - 1, year: parseInt(m2[2], 10) };
                 return null;
               };
-              
-              const osDoAno = osEletrica.filter(os => {
+
+              const osDoAno = osEletrica.filter((os) => {
                 if (os.competencia) {
                   const parsed = parseCompetencia(os.competencia);
                   if (parsed) return parsed.year === anoAtual;
@@ -560,15 +610,19 @@ export default function RelatoriosEMEletrica() {
 
               const valorSAOAno = osDoAno.reduce((acc, os) => acc + (os.valor_sao ?? os.valor_orcamento ?? 0), 0);
               const valorEngenhariaAno = osDoAno.reduce((acc, os) => {
-                const eng = os.valor_engenharia ?? (((os.hh_planejado || 0) + (os.hh_adicional || 0)) * (os.valor_hora_hh || 0));
+                const eng =
+                  os.valor_engenharia ?? ((os.hh_planejado || 0) + (os.hh_adicional || 0)) * (os.valor_hora_hh || 0);
                 return acc + (eng || 0);
               }, 0);
-              const valorSuprimentosAno = osDoAno.reduce((acc, os) => acc + (os.valor_suprimentos ?? os.valor_final ?? 0), 0);
+              const valorSuprimentosAno = osDoAno.reduce(
+                (acc, os) => acc + (os.valor_suprimentos ?? os.valor_final ?? 0),
+                0,
+              );
 
               const dadosGrafico = [
-                { categoria: 'SAO', valor: valorSAOAno },
-                { categoria: 'Engenharia', valor: valorEngenhariaAno },
-                { categoria: 'Suprimentos', valor: valorSuprimentosAno }
+                { categoria: "SAO", valor: valorSAOAno },
+                { categoria: "Engenharia", valor: valorEngenhariaAno },
+                { categoria: "Suprimentos", valor: valorSuprimentosAno },
               ];
 
               return (
@@ -594,7 +648,7 @@ export default function RelatoriosEMEletrica() {
           <CardHeader>
             <CardTitle className="text-xl flex items-center gap-2">
               <DollarSign className="h-5 w-5 text-green-600" />
-              Resultados Mensais - {new Date().toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}
+              Resultados Mensais - {new Date().toLocaleDateString("pt-BR", { month: "long", year: "numeric" })}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -602,7 +656,7 @@ export default function RelatoriosEMEletrica() {
               const hoje = new Date();
               const mesAtual = hoje.getMonth();
               const anoAtual = hoje.getFullYear();
-              
+
               const parseCompetencia = (str: string) => {
                 const m1 = str.match(/^(\d{4})[-\/](\d{2})$/);
                 if (m1) return { month: parseInt(m1[2], 10) - 1, year: parseInt(m1[1], 10) };
@@ -610,7 +664,7 @@ export default function RelatoriosEMEletrica() {
                 if (m2) return { month: parseInt(m2[1], 10) - 1, year: parseInt(m2[2], 10) };
                 return null;
               };
-              const osDoMes = osEletrica.filter(os => {
+              const osDoMes = osEletrica.filter((os) => {
                 if (os.competencia) {
                   const parsed = parseCompetencia(os.competencia);
                   if (parsed) return parsed.month === mesAtual && parsed.year === anoAtual;
@@ -625,11 +679,15 @@ export default function RelatoriosEMEletrica() {
               const valorTotalMes = osDoMes.reduce((acc, os) => acc + (os.valor_orcamento || 0), 0);
               const valorSAO = osDoMes.reduce((acc, os) => acc + (os.valor_sao ?? os.valor_orcamento ?? 0), 0);
               const valorEngenharia = osDoMes.reduce((acc, os) => {
-                const eng = os.valor_engenharia ?? (((os.hh_planejado || 0) + (os.hh_adicional || 0)) * (os.valor_hora_hh || 0));
+                const eng =
+                  os.valor_engenharia ?? ((os.hh_planejado || 0) + (os.hh_adicional || 0)) * (os.valor_hora_hh || 0);
                 return acc + (eng || 0);
               }, 0);
-              const valorSuprimentos = osDoMes.reduce((acc, os) => acc + (os.valor_suprimentos ?? os.valor_final ?? 0), 0);
-              
+              const valorSuprimentos = osDoMes.reduce(
+                (acc, os) => acc + (os.valor_suprimentos ?? os.valor_final ?? 0),
+                0,
+              );
+
               const percentualSAO = valorTotalMes > 0 ? (valorSAO / valorTotalMes) * 100 : 0;
               const percentualEngenharia = valorTotalMes > 0 ? (valorEngenharia / valorTotalMes) * 100 : 0;
               const percentualSuprimentos = valorTotalMes > 0 ? (valorSuprimentos / valorTotalMes) * 100 : 0;
@@ -646,22 +704,29 @@ export default function RelatoriosEMEletrica() {
                   <div className="text-center p-4 bg-white rounded-lg shadow-sm">
                     <div className="text-xl font-bold text-green-600">{formatCurrency(valorSAO)}</div>
                     <p className="text-sm text-muted-foreground">R$ SAO</p>
-                    <p className={`text-xs font-semibold ${diferencaSAO >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                      {diferencaSAO >= 0 ? '+' : ''}{diferencaSAO.toFixed(1)}%
+                    <p className={`text-xs font-semibold ${diferencaSAO >= 0 ? "text-green-600" : "text-red-600"}`}>
+                      {diferencaSAO >= 0 ? "+" : ""}
+                      {diferencaSAO.toFixed(1)}%
                     </p>
                   </div>
                   <div className="text-center p-4 bg-white rounded-lg shadow-sm">
                     <div className="text-xl font-bold text-orange-600">{formatCurrency(valorEngenharia)}</div>
                     <p className="text-sm text-muted-foreground">R$ Engenharia</p>
-                    <p className={`text-xs font-semibold ${diferencaEngenharia >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                      {diferencaEngenharia >= 0 ? '+' : ''}{diferencaEngenharia.toFixed(1)}%
+                    <p
+                      className={`text-xs font-semibold ${diferencaEngenharia >= 0 ? "text-green-600" : "text-red-600"}`}
+                    >
+                      {diferencaEngenharia >= 0 ? "+" : ""}
+                      {diferencaEngenharia.toFixed(1)}%
                     </p>
                   </div>
                   <div className="text-center p-4 bg-white rounded-lg shadow-sm">
                     <div className="text-xl font-bold text-purple-600">{formatCurrency(valorSuprimentos)}</div>
                     <p className="text-sm text-muted-foreground">R$ Suprimentos</p>
-                    <p className={`text-xs font-semibold ${diferencaSuprimentos >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                      {diferencaSuprimentos >= 0 ? '+' : ''}{diferencaSuprimentos.toFixed(1)}%
+                    <p
+                      className={`text-xs font-semibold ${diferencaSuprimentos >= 0 ? "text-green-600" : "text-red-600"}`}
+                    >
+                      {diferencaSuprimentos >= 0 ? "+" : ""}
+                      {diferencaSuprimentos.toFixed(1)}%
                     </p>
                   </div>
                 </div>
@@ -681,7 +746,7 @@ export default function RelatoriosEMEletrica() {
           <CardContent>
             {(() => {
               const anoAtual = new Date().getFullYear();
-              
+
               const parseCompetencia = (str: string) => {
                 const m1 = str.match(/^(\d{4})[-\/](\d{2})$/);
                 if (m1) return { month: parseInt(m1[2], 10) - 1, year: parseInt(m1[1], 10) };
@@ -689,8 +754,8 @@ export default function RelatoriosEMEletrica() {
                 if (m2) return { month: parseInt(m2[1], 10) - 1, year: parseInt(m2[2], 10) };
                 return null;
               };
-              
-              const osDoAno = osEletrica.filter(os => {
+
+              const osDoAno = osEletrica.filter((os) => {
                 if (os.competencia) {
                   const parsed = parseCompetencia(os.competencia);
                   if (parsed) return parsed.year === anoAtual;
@@ -705,11 +770,15 @@ export default function RelatoriosEMEletrica() {
               const valorTotalAno = osDoAno.reduce((acc, os) => acc + (os.valor_orcamento || 0), 0);
               const valorSAOAno = osDoAno.reduce((acc, os) => acc + (os.valor_sao ?? os.valor_orcamento ?? 0), 0);
               const valorEngenhariaAno = osDoAno.reduce((acc, os) => {
-                const eng = os.valor_engenharia ?? (((os.hh_planejado || 0) + (os.hh_adicional || 0)) * (os.valor_hora_hh || 0));
+                const eng =
+                  os.valor_engenharia ?? ((os.hh_planejado || 0) + (os.hh_adicional || 0)) * (os.valor_hora_hh || 0);
                 return acc + (eng || 0);
               }, 0);
-              const valorSuprimentosAno = osDoAno.reduce((acc, os) => acc + (os.valor_suprimentos ?? os.valor_final ?? 0), 0);
-              
+              const valorSuprimentosAno = osDoAno.reduce(
+                (acc, os) => acc + (os.valor_suprimentos ?? os.valor_final ?? 0),
+                0,
+              );
+
               const percentualSAOAno = valorTotalAno > 0 ? (valorSAOAno / valorTotalAno) * 100 : 0;
               const percentualEngenhariaAno = valorTotalAno > 0 ? (valorEngenhariaAno / valorTotalAno) * 100 : 0;
               const percentualSuprimentosAno = valorTotalAno > 0 ? (valorSuprimentosAno / valorTotalAno) * 100 : 0;
@@ -726,22 +795,29 @@ export default function RelatoriosEMEletrica() {
                   <div className="text-center p-4 bg-white rounded-lg shadow-sm">
                     <div className="text-xl font-bold text-green-600">{formatCurrency(valorSAOAno)}</div>
                     <p className="text-sm text-muted-foreground">R$ SAO</p>
-                    <p className={`text-xs font-semibold ${diferencaSAOAno >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                      {diferencaSAOAno >= 0 ? '+' : ''}{diferencaSAOAno.toFixed(1)}%
+                    <p className={`text-xs font-semibold ${diferencaSAOAno >= 0 ? "text-green-600" : "text-red-600"}`}>
+                      {diferencaSAOAno >= 0 ? "+" : ""}
+                      {diferencaSAOAno.toFixed(1)}%
                     </p>
                   </div>
                   <div className="text-center p-4 bg-white rounded-lg shadow-sm">
                     <div className="text-xl font-bold text-orange-600">{formatCurrency(valorEngenhariaAno)}</div>
                     <p className="text-sm text-muted-foreground">R$ Engenharia</p>
-                    <p className={`text-xs font-semibold ${diferencaEngenhariaAno >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                      {diferencaEngenhariaAno >= 0 ? '+' : ''}{diferencaEngenhariaAno.toFixed(1)}%
+                    <p
+                      className={`text-xs font-semibold ${diferencaEngenhariaAno >= 0 ? "text-green-600" : "text-red-600"}`}
+                    >
+                      {diferencaEngenhariaAno >= 0 ? "+" : ""}
+                      {diferencaEngenhariaAno.toFixed(1)}%
                     </p>
                   </div>
                   <div className="text-center p-4 bg-white rounded-lg shadow-sm">
                     <div className="text-xl font-bold text-purple-600">{formatCurrency(valorSuprimentosAno)}</div>
                     <p className="text-sm text-muted-foreground">R$ Suprimentos</p>
-                    <p className={`text-xs font-semibold ${diferencaSuprimentosAno >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                      {diferencaSuprimentosAno >= 0 ? '+' : ''}{diferencaSuprimentosAno.toFixed(1)}%
+                    <p
+                      className={`text-xs font-semibold ${diferencaSuprimentosAno >= 0 ? "text-green-600" : "text-red-600"}`}
+                    >
+                      {diferencaSuprimentosAno >= 0 ? "+" : ""}
+                      {diferencaSuprimentosAno.toFixed(1)}%
                     </p>
                   </div>
                 </div>
@@ -760,9 +836,7 @@ export default function RelatoriosEMEletrica() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{totalOS}</div>
-            <p className="text-xs text-muted-foreground">
-              Ordens de serviço elétrica
-            </p>
+            <p className="text-xs text-muted-foreground">Ordens de serviço elétrica</p>
           </CardContent>
         </Card>
 
@@ -786,9 +860,7 @@ export default function RelatoriosEMEletrica() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{osEmAndamento}</div>
-            <p className="text-xs text-muted-foreground">
-              Planejamento + execução
-            </p>
+            <p className="text-xs text-muted-foreground">Planejamento + execução</p>
           </CardContent>
         </Card>
       </div>
@@ -797,9 +869,7 @@ export default function RelatoriosEMEletrica() {
       <Card>
         <CardHeader>
           <CardTitle>Ordens de serviço - Elétrica</CardTitle>
-          <CardDescription>
-            Lista completa das OS da disciplina elétrica
-          </CardDescription>
+          <CardDescription>Lista completa das OS da disciplina elétrica</CardDescription>
         </CardHeader>
         <CardContent>
           {osEletrica.length === 0 ? (
@@ -852,9 +922,9 @@ export default function RelatoriosEMEletrica() {
                       )}
                     </TableCell>
                     <TableCell>{formatDate(os.dataCompromissada)}</TableCell>
-                    <TableCell>{os.responsavelEM || '-'}</TableCell>
+                    <TableCell>{os.responsavelEM || "-"}</TableCell>
                     <TableCell>
-                      <Link to={`/os/${os.id}`}>
+                      <Link to={`/engenharia-matricial/os/${os.id}`}>
                         <Button variant="outline" size="sm">
                           <Eye className="h-4 w-4" />
                         </Button>
