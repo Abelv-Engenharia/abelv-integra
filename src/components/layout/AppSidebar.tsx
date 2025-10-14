@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Home, Settings, User } from "lucide-react";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import {
@@ -71,6 +71,43 @@ export function AppSidebar() {
   const handleLinkClick = () => {
     if (isMobile) setOpenMobile(false);
   };
+
+  // Mantém o menu correto aberto quando a rota muda
+  useEffect(() => {
+    if (currentPath.startsWith("/comercial")) {
+      setOpenMenu("comercial");
+    } else if (
+      currentPath.startsWith("/idsms") ||
+      currentPath.startsWith("/gro") ||
+      currentPath.startsWith("/prevencao-incendio") ||
+      currentPath.startsWith("/desvios") ||
+      currentPath.startsWith("/treinamentos") ||
+      currentPath.startsWith("/hora-seguranca") ||
+      currentPath.startsWith("/inspecao-sms") ||
+      currentPath.startsWith("/ocorrencias") ||
+      currentPath.startsWith("/medidas-disciplinares")
+    ) {
+      setOpenMenu("gestao-sms");
+    } else if (currentPath.startsWith("/tarefas")) {
+      setOpenMenu("tarefas");
+    } else if (currentPath.startsWith("/relatorios")) {
+      setOpenMenu("relatorios");
+    } else if (
+      currentPath === "/admin/admin-sistema" ||
+      currentPath === "/admin/perfis" ||
+      currentPath === "/admin/usuarios-perfis" ||
+      currentPath === "/admin/usuarios-ccas" ||
+      currentPath === "/admin/usuarios-direct"
+    ) {
+      setOpenMenu("seguranca");
+    } else if (currentPath.startsWith("/admin") || currentPath.startsWith("/tutoriais")) {
+      setOpenMenu("admin");
+    } else if (currentPath.startsWith("/suprimentos/estoque")) {
+      setOpenMenu("suprimentos");
+    } else if (currentPath.startsWith("/engenharia-matricial")) {
+      setOpenMenu("engenharia-matricial");
+    }
+  }, [currentPath]);
 
   return (
     <Sidebar className="print:hidden">
