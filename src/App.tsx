@@ -475,32 +475,33 @@ function App() {
                 <Route path="engenharia-matricial/relatorios-em-mecanica" element={<RelatoriosEMMecanica />} />
                 <Route path="engenharia-matricial/relatorios-em-departamento" element={<RelatoriosEMDepartamento />} />
                 <Route path="engenharia-matricial/admin/usuarios" element={<AdminUsuariosEM />} />
+
+                {/* ========================================== */}
+                {/* COMERCIAL - Repositório de Documentos     */}
+                {/* ========================================== */}
+                <Route path="comercial/repositorio" element={<DocumentRepository />} />
+                <Route path="comercial/repositorio/documentos" element={<DocumentList />} />
+                <Route path="comercial/repositorio/upload" element={<DocumentUpload />} />
+                <Route path="comercial/repositorio/categorias" element={<DocumentCategories />} />
+                <Route path="comercial/repositorio/busca" element={<DocumentSearch />} />
+                <Route path="comercial/repositorio/categoria/:categoriaId" element={<CategoryView />} />
+                <Route path="comercial/repositorio/categoria/:categoriaId/subcategoria/:subcategoriaId" element={<SubcategoryView />} />
+
+                {/* ========================================== */}
+                {/* COMERCIAL - Controle Comercial            */}
+                {/* ========================================== */}
+                <Route path="comercial/controle/dashboard" element={<CommercialDashboard />} />
+                <Route path="comercial/controle/performance" element={<CommercialSpreadsheet />} />
+                <Route path="comercial/controle/cadastro" element={<CommercialForm />} />
+                <Route path="comercial/controle/editar/:id" element={<CommercialForm />} />
+                <Route path="comercial/controle/registros" element={<CommercialRecords />} />
+                <Route path="comercial/controle/metas" element={<AnnualGoalsForm />} />
+                <Route path="comercial/controle/relatorios" element={<CommercialReports />} />
+                <Route path="comercial/controle/consolidacao/:id" element={<ConsolidationDetails />} />
+                <Route path="comercial/controle/cadastros/segmentos" element={<SegmentManagement />} />
+                <Route path="comercial/controle/cadastros/vendedores" element={<VendedorManagement />} />
               </Route>
 
-              {/* ========================================== */}
-              {/* COMERCIAL - Repositório de Documentos     */}
-              {/* ========================================== */}
-              <Route path="comercial/repositorio" element={<DocumentRepository />} />
-              <Route path="comercial/repositorio/documentos" element={<DocumentList />} />
-              <Route path="comercial/repositorio/upload" element={<DocumentUpload />} />
-              <Route path="comercial/repositorio/categorias" element={<DocumentCategories />} />
-              <Route path="comercial/repositorio/busca" element={<DocumentSearch />} />
-              <Route path="comercial/repositorio/categoria/:categoriaId" element={<CategoryView />} />
-              <Route path="comercial/repositorio/categoria/:categoriaId/subcategoria/:subcategoriaId" element={<SubcategoryView />} />
-
-              {/* ========================================== */}
-              {/* COMERCIAL - Controle Comercial            */}
-              {/* ========================================== */}
-              <Route path="comercial/controle/dashboard" element={<CommercialDashboard />} />
-              <Route path="comercial/controle/performance" element={<CommercialSpreadsheet />} />
-              <Route path="comercial/controle/cadastro" element={<CommercialForm />} />
-              <Route path="comercial/controle/editar/:id" element={<CommercialForm />} />
-              <Route path="comercial/controle/registros" element={<CommercialRecords />} />
-              <Route path="comercial/controle/metas" element={<AnnualGoalsForm />} />
-              <Route path="comercial/controle/relatorios" element={<CommercialReports />} />
-              <Route path="comercial/controle/consolidacao/:id" element={<ConsolidationDetails />} />
-              <Route path="comercial/controle/cadastros/segmentos" element={<SegmentManagement />} />
-              <Route path="comercial/controle/cadastros/vendedores" element={<VendedorManagement />} />
 
               {/* 404 route */}
               <Route path="*" element={<NotFound />} />
