@@ -119,7 +119,6 @@ export default function OSAguardandoAceiteReplanejamento() {
         <div className="grid gap-6">
           {osAguardandoAceiteReplanejamento.map((os) => {
             const ultimoReplanejamento = getUltimoReplanejamento(os);
-            if (!ultimoReplanejamento) return null;
 
             return (
               <Card key={os.id} className="border-orange-200">
@@ -218,49 +217,62 @@ export default function OSAguardandoAceiteReplanejamento() {
                           <ArrowRight className="h-4 w-4" />
                           Novo Planejamento
                         </h5>
-                        <div className="bg-orange-50 border border-orange-200 p-4 rounded-lg space-y-2">
-                          <div>
-                            <p className="text-sm text-muted-foreground">Novo período</p>
-                            <p className="font-medium text-orange-700">
-                              {formatDate(ultimoReplanejamento.nova_data_inicio)} -{" "}
-                              {formatDate(ultimoReplanejamento.nova_data_fim)}
-                            </p>
+                          <div className="bg-orange-50 border border-orange-200 p-4 rounded-lg space-y-2">
+                            {ultimoReplanejamento ? (
+                              <>
+                                <div>
+                                  <p className="text-sm text-muted-foreground">Novo período</p>
+                                  <p className="font-medium text-orange-700">
+                                    {formatDate(ultimoReplanejamento.nova_data_inicio)} -{" "}
+                                    {formatDate(ultimoReplanejamento.nova_data_fim)}
+                                  </p>
+                                </div>
+                                <div>
+                                  <p className="text-sm text-muted-foreground">HH adicional</p>
+                                  <p className="font-medium text-orange-700">+{ultimoReplanejamento.hh_adicional}h</p>
+                                </div>
+                                <div>
+                                  <p className="text-sm text-muted-foreground">Novo HH total</p>
+                                  <p className="font-medium text-orange-700">
+                                    {os.hh_planejado + (os.hh_adicional || 0) + ultimoReplanejamento.hh_adicional}h
+                                  </p>
+                                </div>
+                                <div>
+                                  <p className="text-sm text-muted-foreground">Novo valor estimado</p>
+                                  <p className="font-medium text-orange-700">
+                                    {formatCurrency(calcularNovoValorEstimado(os, ultimoReplanejamento))}
+                                  </p>
+                                </div>
+                                <div>
+                                  <p className="text-sm text-muted-foreground">Impacto financeiro</p>
+                                  <p className="font-medium text-red-600">
+                                    +{formatCurrency(ultimoReplanejamento.hh_adicional * 95)}
+                                  </p>
+                                </div>
+                              </>
+                            ) : (
+                              <div>
+                                <p className="text-sm text-muted-foreground">Dados de replanejamento não informados</p>
+                                <p className="text-sm">Esta OS está aguardando aceite, mas não há detalhes do replanejamento.</p>
+                              </div>
+                            )}
                           </div>
-                          <div>
-                            <p className="text-sm text-muted-foreground">HH adicional</p>
-                            <p className="font-medium text-orange-700">+{ultimoReplanejamento.hh_adicional}h</p>
-                          </div>
-                          <div>
-                            <p className="text-sm text-muted-foreground">Novo HH total</p>
-                            <p className="font-medium text-orange-700">
-                              {os.hh_planejado + (os.hh_adicional || 0) + ultimoReplanejamento.hh_adicional}h
-                            </p>
-                          </div>
-                          <div>
-                            <p className="text-sm text-muted-foreground">Novo valor estimado</p>
-                            <p className="font-medium text-orange-700">
-                              {formatCurrency(calcularNovoValorEstimado(os, ultimoReplanejamento))}
-                            </p>
-                          </div>
-                          <div>
-                            <p className="text-sm text-muted-foreground">Impacto financeiro</p>
-                            <p className="font-medium text-red-600">
-                              +{formatCurrency(ultimoReplanejamento.hh_adicional * 95)}
-                            </p>
-                          </div>
-                        </div>
                       </div>
                     </div>
                   </div>
 
                   {/* Motivo do Replanejamento */}
-                  <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg">
-                    <h5 className="font-medium text-yellow-800 mb-2">Motivo do Replanejamento:</h5>
-                    <p className="text-sm text-yellow-700">{ultimoReplanejamento.motivo}</p>
-                    <div className="mt-2 text-xs text-yellow-600">
-                      Solicitado em: {formatDate(ultimoReplanejamento.data)} por {ultimoReplanejamento.usuario}
-                    </div>
-                  </div>
+                   <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg">
+                     <h5 className="font-medium text-yellow-800 mb-2">Motivo do Replanejamento:</h5>
+                     <p className="text-sm text-yellow-700">{ultimoReplanejamento?.motivo ?? "Não informado"}</p>
+                     <div className="mt-2 text-xs text-yellow-600">
+                       {ultimoReplanejamento ? (
+                         <>Solicitado em: {formatDate(ultimoReplanejamento.data)} por {ultimoReplanejamento.usuario}</>
+                       ) : (
+                         <>Sem histórico de replanejamento vinculado.</>
+                       )}
+                     </div>
+                   </div>
 
                   {/* Descrição da OS */}
                   <div>
