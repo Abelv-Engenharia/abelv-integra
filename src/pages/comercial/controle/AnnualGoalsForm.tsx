@@ -2,11 +2,12 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Save, Target } from "lucide-react";
+import { ArrowLeft, Save, Target, Pencil } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { annualGoalsMockData } from "@/data/annualGoalsMockData";
 import { AnnualGoals } from "@/types/commercial";
 import { useToast } from "@/hooks/use-toast";
+import { EditMetaDialog } from "@/components/comercial/EditMetaDialog";
 
 const AnnualGoalsForm = () => {
   const navigate = useNavigate();
@@ -23,6 +24,7 @@ const AnnualGoalsForm = () => {
   });
 
   const [errors, setErrors] = useState<Record<string, boolean>>({});
+  const [editingMeta, setEditingMeta] = useState<AnnualGoals | null>(null);
 
   useEffect(() => {
     // Buscar meta existente para o ano atual se houver
@@ -81,6 +83,11 @@ const AnnualGoalsForm = () => {
     });
     
     navigate('/comercial/controle/dashboard');
+  };
+
+  const handleEditSave = (updatedMeta: AnnualGoals) => {
+    // Simular atualização
+    console.log("Meta atualizada:", updatedMeta);
   };
 
   const totalTrimestral = formData.metaT1 + formData.metaT2 + formData.metaT3 + formData.metaT4;
@@ -255,9 +262,20 @@ const AnnualGoalsForm = () => {
                     <div key={goal.id} className="border rounded-lg p-4 space-y-3">
                       <div className="flex justify-between items-center">
                         <h4 className="font-semibold text-lg">Ano {goal.ano}</h4>
-                        <span className="text-sm text-muted-foreground">
-                          {new Date(goal.criadoEm).toLocaleDateString('pt-BR')}
-                        </span>
+                        <div className="flex items-center gap-3">
+                          <span className="text-sm text-muted-foreground">
+                            {new Date(goal.criadoEm).toLocaleDateString('pt-BR')}
+                          </span>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setEditingMeta(goal)}
+                            className="gap-2"
+                          >
+                            <Pencil className="h-4 w-4" />
+                            Editar
+                          </Button>
+                        </div>
                       </div>
                       
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -265,20 +283,20 @@ const AnnualGoalsForm = () => {
                           <p className="text-sm text-muted-foreground">Meta Anual</p>
                           <p className="text-lg font-bold">{formatCurrency(goal.metaAnual)}</p>
                         </div>
-                        <div className="grid grid-cols-4 gap-2">
-                          <div>
+                        <div className="space-y-2">
+                          <div className="flex justify-between items-center">
                             <p className="text-xs text-muted-foreground">T1</p>
                             <p className="text-sm font-semibold">{formatCurrency(goal.metaT1)}</p>
                           </div>
-                          <div>
+                          <div className="flex justify-between items-center">
                             <p className="text-xs text-muted-foreground">T2</p>
                             <p className="text-sm font-semibold">{formatCurrency(goal.metaT2)}</p>
                           </div>
-                          <div>
+                          <div className="flex justify-between items-center">
                             <p className="text-xs text-muted-foreground">T3</p>
                             <p className="text-sm font-semibold">{formatCurrency(goal.metaT3)}</p>
                           </div>
-                          <div>
+                          <div className="flex justify-between items-center">
                             <p className="text-xs text-muted-foreground">T4</p>
                             <p className="text-sm font-semibold">{formatCurrency(goal.metaT4)}</p>
                           </div>
@@ -305,6 +323,15 @@ const AnnualGoalsForm = () => {
           </CardContent>
         </Card>
       </div>
+
+      {editingMeta && (
+        <EditMetaDialog
+          open={!!editingMeta}
+          onOpenChange={(open) => !open && setEditingMeta(null)}
+          meta={editingMeta}
+          onSave={handleEditSave}
+        />
+      )}
     </div>
   );
 };
