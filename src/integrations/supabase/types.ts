@@ -4255,6 +4255,244 @@ export type Database = {
         }
         Relationships: []
       }
+      repositorio_categorias: {
+        Row: {
+          ativo: boolean | null
+          created_at: string | null
+          created_by: string | null
+          descricao: string | null
+          icone: string | null
+          id: string
+          nome: string
+          ordem: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          ativo?: boolean | null
+          created_at?: string | null
+          created_by?: string | null
+          descricao?: string | null
+          icone?: string | null
+          id?: string
+          nome: string
+          ordem?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          ativo?: boolean | null
+          created_at?: string | null
+          created_by?: string | null
+          descricao?: string | null
+          icone?: string | null
+          id?: string
+          nome?: string
+          ordem?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      repositorio_documentos: {
+        Row: {
+          arquivo_nome_original: string
+          arquivo_tamanho: number | null
+          arquivo_tipo: string | null
+          arquivo_url: string
+          ativo: boolean | null
+          categoria_id: string
+          cca_id: number | null
+          created_at: string | null
+          created_by: string | null
+          data_validade: string
+          descricao: string | null
+          documento_pai_id: string | null
+          empresa_id: number | null
+          id: string
+          nome_arquivo: string
+          responsavel_email: string
+          responsavel_id: string
+          responsavel_nome: string
+          status: string | null
+          subcategoria_id: string
+          tags: string[] | null
+          updated_at: string | null
+          updated_by: string | null
+          versao: number | null
+        }
+        Insert: {
+          arquivo_nome_original: string
+          arquivo_tamanho?: number | null
+          arquivo_tipo?: string | null
+          arquivo_url: string
+          ativo?: boolean | null
+          categoria_id: string
+          cca_id?: number | null
+          created_at?: string | null
+          created_by?: string | null
+          data_validade: string
+          descricao?: string | null
+          documento_pai_id?: string | null
+          empresa_id?: number | null
+          id?: string
+          nome_arquivo: string
+          responsavel_email: string
+          responsavel_id: string
+          responsavel_nome: string
+          status?: string | null
+          subcategoria_id: string
+          tags?: string[] | null
+          updated_at?: string | null
+          updated_by?: string | null
+          versao?: number | null
+        }
+        Update: {
+          arquivo_nome_original?: string
+          arquivo_tamanho?: number | null
+          arquivo_tipo?: string | null
+          arquivo_url?: string
+          ativo?: boolean | null
+          categoria_id?: string
+          cca_id?: number | null
+          created_at?: string | null
+          created_by?: string | null
+          data_validade?: string
+          descricao?: string | null
+          documento_pai_id?: string | null
+          empresa_id?: number | null
+          id?: string
+          nome_arquivo?: string
+          responsavel_email?: string
+          responsavel_id?: string
+          responsavel_nome?: string
+          status?: string | null
+          subcategoria_id?: string
+          tags?: string[] | null
+          updated_at?: string | null
+          updated_by?: string | null
+          versao?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "repositorio_documentos_categoria_id_fkey"
+            columns: ["categoria_id"]
+            isOneToOne: false
+            referencedRelation: "repositorio_categorias"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "repositorio_documentos_cca_id_fkey"
+            columns: ["cca_id"]
+            isOneToOne: false
+            referencedRelation: "ccas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "repositorio_documentos_documento_pai_id_fkey"
+            columns: ["documento_pai_id"]
+            isOneToOne: false
+            referencedRelation: "repositorio_documentos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "repositorio_documentos_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "repositorio_documentos_subcategoria_id_fkey"
+            columns: ["subcategoria_id"]
+            isOneToOne: false
+            referencedRelation: "repositorio_subcategorias"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      repositorio_documentos_acessos: {
+        Row: {
+          created_at: string | null
+          documento_id: string
+          id: string
+          ip_address: string | null
+          tipo_acesso: string | null
+          user_agent: string | null
+          usuario_id: string
+          usuario_nome: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          documento_id: string
+          id?: string
+          ip_address?: string | null
+          tipo_acesso?: string | null
+          user_agent?: string | null
+          usuario_id: string
+          usuario_nome?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          documento_id?: string
+          id?: string
+          ip_address?: string | null
+          tipo_acesso?: string | null
+          user_agent?: string | null
+          usuario_id?: string
+          usuario_nome?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "repositorio_documentos_acessos_documento_id_fkey"
+            columns: ["documento_id"]
+            isOneToOne: false
+            referencedRelation: "repositorio_documentos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      repositorio_subcategorias: {
+        Row: {
+          ativo: boolean | null
+          categoria_id: string
+          created_at: string | null
+          created_by: string | null
+          descricao: string | null
+          id: string
+          nome: string
+          ordem: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          ativo?: boolean | null
+          categoria_id: string
+          created_at?: string | null
+          created_by?: string | null
+          descricao?: string | null
+          id?: string
+          nome: string
+          ordem?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          ativo?: boolean | null
+          categoria_id?: string
+          created_at?: string | null
+          created_by?: string | null
+          descricao?: string | null
+          id?: string
+          nome?: string
+          ordem?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "repositorio_subcategorias_categoria_id_fkey"
+            columns: ["categoria_id"]
+            isOneToOne: false
+            referencedRelation: "repositorio_categorias"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       situacao_geradora: {
         Row: {
           ativo: boolean | null
@@ -5418,6 +5656,7 @@ export type Database = {
         | "concluida"
         | "cancelada"
         | "rejeitada"
+        | "aguardando-aceite-replanejamento"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -5562,6 +5801,7 @@ export const Constants = {
         "concluida",
         "cancelada",
         "rejeitada",
+        "aguardando-aceite-replanejamento",
       ],
     },
   },
