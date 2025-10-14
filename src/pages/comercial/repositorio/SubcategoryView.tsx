@@ -5,7 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 import { useRepositorioSubcategoria } from "@/hooks/useRepositorioCategorias";
 import { useRepositorioDocumentos } from "@/hooks/useRepositorioDocumentos";
 import { format } from "date-fns";
@@ -15,10 +22,10 @@ import { toast } from "sonner";
 export default function SubcategoryView() {
   const { categoriaId, subcategoriaId } = useParams<{ categoriaId: string; subcategoriaId: string }>();
   const navigate = useNavigate();
-  
+
   const { data, isLoading } = useRepositorioSubcategoria(categoriaId || "", subcategoriaId || "");
   const { data: docs = [] } = useRepositorioDocumentos(subcategoriaId);
-  
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background p-6">
@@ -28,7 +35,7 @@ export default function SubcategoryView() {
       </div>
     );
   }
-  
+
   if (!data) {
     return (
       <div className="min-h-screen bg-background p-6">
@@ -42,26 +49,26 @@ export default function SubcategoryView() {
       </div>
     );
   }
-  
+
   const { categoria, subcategoria } = data;
 
-  const getValidadeStatus = (dataValidade: Date): 'vencido' | 'proximo' | 'valido' => {
+  const getValidadeStatus = (dataValidade: Date): "vencido" | "proximo" | "valido" => {
     const hoje = new Date();
     const validade = new Date(dataValidade);
     const diasRestantes = Math.ceil((validade.getTime() - hoje.getTime()) / (1000 * 60 * 60 * 24));
-    
-    if (diasRestantes < 0) return 'vencido';
-    if (diasRestantes <= 30) return 'proximo';
-    return 'valido';
+
+    if (diasRestantes < 0) return "vencido";
+    if (diasRestantes <= 30) return "proximo";
+    return "valido";
   };
 
   const getValidadeIcon = (status: string) => {
     switch (status) {
-      case 'vencido':
+      case "vencido":
         return <AlertTriangle className="h-4 w-4 text-red-500" />;
-      case 'proximo':
+      case "proximo":
         return <Clock className="h-4 w-4 text-yellow-500" />;
-      case 'valido':
+      case "valido":
         return <CheckCircle className="h-4 w-4 text-green-500" />;
       default:
         return <FileText className="h-4 w-4" />;
@@ -70,75 +77,71 @@ export default function SubcategoryView() {
 
   const getTipoColor = (tipo: string) => {
     switch (tipo.toLowerCase()) {
-      case 'pdf':
-        return 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400';
-      case 'doc':
-      case 'docx':
-        return 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400';
-      case 'xls':
-      case 'xlsx':
-        return 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400';
-      case 'jpg':
-      case 'jpeg':
-      case 'png':
-        return 'bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-400';
+      case "pdf":
+        return "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400";
+      case "doc":
+      case "docx":
+        return "bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400";
+      case "xls":
+      case "xlsx":
+        return "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400";
+      case "jpg":
+      case "jpeg":
+      case "png":
+        return "bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-400";
       default:
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400';
+        return "bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400";
     }
   };
 
   const extractPathFromUrl = (url: string): string => {
     // Extrair o caminho do arquivo da URL completa
     // URL format: https://.../storage/v1/object/public/repositorio-documentos/PATH
-    const parts = url.split('/repositorio-documentos/');
+    const parts = url.split("/repositorio-documentos/");
     return parts.length > 1 ? parts[1] : url;
   };
 
   const handleViewDocument = async (arquivoUrl: string) => {
     try {
       const filePath = extractPathFromUrl(arquivoUrl);
-      
-      const { data, error } = await supabase.storage
-        .from('repositorio-documentos')
-        .createSignedUrl(filePath, 3600);
+
+      const { data, error } = await supabase.storage.from("repositorio-documentos").createSignedUrl(filePath, 3600);
 
       if (error) throw error;
-      
+
       if (data?.signedUrl) {
-        window.open(data.signedUrl, '_blank');
+        window.open(data.signedUrl, "_blank");
       }
     } catch (error) {
-      console.error('Erro ao visualizar documento:', error);
-      toast.error('Erro ao visualizar documento');
+      console.error("Erro ao visualizar documento:", error);
+      toast.error("Erro ao visualizar documento");
     }
   };
 
   const handleDownloadDocument = async (arquivoUrl: string, nomeOriginal: string) => {
     try {
       const filePath = extractPathFromUrl(arquivoUrl);
-      
-      const { data, error } = await supabase.storage
-        .from('repositorio-documentos')
-        .createSignedUrl(filePath, 60);
+
+      const { data, error } = await supabase.storage.from("repositorio-documentos").createSignedUrl(filePath, 60);
 
       if (error) throw error;
-      
+
       if (data?.signedUrl) {
         const response = await fetch(data.signedUrl);
         const blob = await response.blob();
         const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
+        const a = document.createElement("a");
         a.href = url;
         a.download = nomeOriginal;
         document.body.appendChild(a);
         a.click();
         window.URL.revokeObjectURL(url);
         document.body.removeChild(a);
-        toast.success('Download iniciado');
+        toast.success("Download iniciado");
       }
     } catch (error) {
-      console.error('Erro ao baixar documento:', error);
-      toast.error('Erro ao baixar documento');
+      console.error("Erro ao baixar documento:", error);
+      toast.error("Erro ao baixar documento");
     }
   };
 
@@ -166,15 +169,13 @@ export default function SubcategoryView() {
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
-            
+
             <div>
               <h1 className="text-3xl font-bold text-foreground">{subcategoria.nome}</h1>
-              <p className="text-muted-foreground mt-2">
-                Documentos da categoria {categoria.nome}
-              </p>
+              <p className="text-muted-foreground mt-2">Documentos da categoria {categoria.nome}</p>
             </div>
           </div>
-          
+
           <Button onClick={() => navigate(`/comercial/repositorio/categoria/${categoriaId}`)} variant="outline">
             <ArrowLeft className="mr-2 h-4 w-4" />
             Voltar
@@ -202,7 +203,10 @@ export default function SubcategoryView() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-green-600">
-                {docs.filter(doc => doc.data_validade && getValidadeStatus(new Date(doc.data_validade)) === 'valido').length}
+                {
+                  docs.filter((doc) => doc.data_validade && getValidadeStatus(new Date(doc.data_validade)) === "valido")
+                    .length
+                }
               </div>
             </CardContent>
           </Card>
@@ -214,7 +218,11 @@ export default function SubcategoryView() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-yellow-600">
-                {docs.filter(doc => doc.data_validade && getValidadeStatus(new Date(doc.data_validade)) === 'proximo').length}
+                {
+                  docs.filter(
+                    (doc) => doc.data_validade && getValidadeStatus(new Date(doc.data_validade)) === "proximo",
+                  ).length
+                }
               </div>
             </CardContent>
           </Card>
@@ -226,7 +234,11 @@ export default function SubcategoryView() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-red-600">
-                {docs.filter(doc => doc.data_validade && getValidadeStatus(new Date(doc.data_validade)) === 'vencido').length}
+                {
+                  docs.filter(
+                    (doc) => doc.data_validade && getValidadeStatus(new Date(doc.data_validade)) === "vencido",
+                  ).length
+                }
               </div>
             </CardContent>
           </Card>
@@ -236,9 +248,7 @@ export default function SubcategoryView() {
         <Card>
           <CardHeader>
             <CardTitle>Documentos</CardTitle>
-            <CardDescription>
-              Lista de todos os documentos desta subcategoria
-            </CardDescription>
+            <CardDescription>Lista de todos os documentos desta subcategoria</CardDescription>
           </CardHeader>
           <CardContent>
             {docs.length > 0 ? (
@@ -250,16 +260,16 @@ export default function SubcategoryView() {
                       <TableHead>Data de Upload</TableHead>
                       <TableHead>Validade</TableHead>
                       <TableHead>Responsável</TableHead>
-                      <TableHead>E-mail</TableHead>
-                      <TableHead>Tamanho</TableHead>
                       <TableHead>Tipo</TableHead>
                       <TableHead className="text-right">Ações</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {docs.map((documento) => {
-                      const validadeStatus = documento.data_validade ? getValidadeStatus(new Date(documento.data_validade)) : 'valido';
-                      
+                      const validadeStatus = documento.data_validade
+                        ? getValidadeStatus(new Date(documento.data_validade))
+                        : "valido";
+
                       return (
                         <TableRow key={documento.id}>
                           <TableCell className="font-medium">
@@ -284,9 +294,9 @@ export default function SubcategoryView() {
                                 </TooltipTrigger>
                                 <TooltipContent>
                                   <p>
-                                    {validadeStatus === 'vencido' && 'Documento vencido'}
-                                    {validadeStatus === 'proximo' && 'Vence em breve'}
-                                    {validadeStatus === 'valido' && 'Documento válido'}
+                                    {validadeStatus === "vencido" && "Documento vencido"}
+                                    {validadeStatus === "proximo" && "Vence em breve"}
+                                    {validadeStatus === "valido" && "Documento válido"}
                                   </p>
                                 </TooltipContent>
                               </Tooltip>
@@ -295,10 +305,6 @@ export default function SubcategoryView() {
                             )}
                           </TableCell>
                           <TableCell>{documento.responsavel_nome || "-"}</TableCell>
-                          <TableCell>{documento.responsavel_email || "-"}</TableCell>
-                          <TableCell>
-                            {documento.arquivo_tamanho ? `${(documento.arquivo_tamanho / 1024 / 1024).toFixed(2)} MB` : "-"}
-                          </TableCell>
                           <TableCell>
                             <Badge variant="secondary" className={getTipoColor(documento.arquivo_tipo || "")}>
                               {(documento.arquivo_tipo || "").toUpperCase()}
@@ -306,17 +312,19 @@ export default function SubcategoryView() {
                           </TableCell>
                           <TableCell className="text-right">
                             <div className="flex items-center justify-end space-x-2">
-                              <Button 
-                                variant="ghost" 
+                              <Button
+                                variant="ghost"
                                 size="sm"
                                 onClick={() => handleViewDocument(documento.arquivo_url)}
                               >
                                 <Eye className="h-4 w-4" />
                               </Button>
-                              <Button 
-                                variant="ghost" 
+                              <Button
+                                variant="ghost"
                                 size="sm"
-                                onClick={() => handleDownloadDocument(documento.arquivo_url, documento.arquivo_nome_original)}
+                                onClick={() =>
+                                  handleDownloadDocument(documento.arquivo_url, documento.arquivo_nome_original)
+                                }
                               >
                                 <Download className="h-4 w-4" />
                               </Button>
@@ -332,9 +340,7 @@ export default function SubcategoryView() {
               <div className="text-center py-12">
                 <FileText className="mx-auto h-12 w-12 text-muted-foreground" />
                 <h3 className="mt-2 text-sm font-semibold text-foreground">Nenhum documento encontrado</h3>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Esta subcategoria ainda não possui documentos.
-                </p>
+                <p className="mt-1 text-sm text-muted-foreground">Esta subcategoria ainda não possui documentos.</p>
               </div>
             )}
           </CardContent>
