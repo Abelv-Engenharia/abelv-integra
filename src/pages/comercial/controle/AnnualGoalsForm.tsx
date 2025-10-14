@@ -236,6 +236,63 @@ const AnnualGoalsForm = () => {
 
         <Card>
           <CardHeader>
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-primary text-primary-foreground">
+                <Target className="h-6 w-6" />
+              </div>
+              <CardTitle>Metas Cadastradas</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {annualGoalsMockData.filter(goal => goal.ativo).length === 0 ? (
+              <p className="text-muted-foreground text-center py-4">Nenhuma meta cadastrada</p>
+            ) : (
+              <div className="space-y-4">
+                {annualGoalsMockData
+                  .filter(goal => goal.ativo)
+                  .sort((a, b) => b.ano - a.ano)
+                  .map((goal) => (
+                    <div key={goal.id} className="border rounded-lg p-4 space-y-3">
+                      <div className="flex justify-between items-center">
+                        <h4 className="font-semibold text-lg">Ano {goal.ano}</h4>
+                        <span className="text-sm text-muted-foreground">
+                          {new Date(goal.criadoEm).toLocaleDateString('pt-BR')}
+                        </span>
+                      </div>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <p className="text-sm text-muted-foreground">Meta Anual</p>
+                          <p className="text-lg font-bold">{formatCurrency(goal.metaAnual)}</p>
+                        </div>
+                        <div className="grid grid-cols-4 gap-2">
+                          <div>
+                            <p className="text-xs text-muted-foreground">T1</p>
+                            <p className="text-sm font-semibold">{formatCurrency(goal.metaT1)}</p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-muted-foreground">T2</p>
+                            <p className="text-sm font-semibold">{formatCurrency(goal.metaT2)}</p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-muted-foreground">T3</p>
+                            <p className="text-sm font-semibold">{formatCurrency(goal.metaT3)}</p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-muted-foreground">T4</p>
+                            <p className="text-sm font-semibold">{formatCurrency(goal.metaT4)}</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
             <CardTitle>Informações</CardTitle>
           </CardHeader>
           <CardContent>
