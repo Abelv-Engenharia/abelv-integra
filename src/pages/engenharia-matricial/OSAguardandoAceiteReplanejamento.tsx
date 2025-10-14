@@ -86,13 +86,13 @@ export default function OSAguardandoAceiteReplanejamento() {
   };
 
   const getUltimoReplanejamento = (os: any) => {
-    if (!os.historicoReplanejamentos || os.historicoReplanejamentos.length === 0) return null;
-    return os.historicoReplanejamentos[os.historicoReplanejamentos.length - 1];
+    if (!os.historico_replanejamentos || os.historico_replanejamentos.length === 0) return null;
+    return os.historico_replanejamentos[os.historico_replanejamentos.length - 1];
   };
 
   const calcularNovoValorEstimado = (os: any, replanejamento: any) => {
     const hhTotalAtual = os.hh_planejado + (os.hh_adicional || 0);
-    const hhTotalNovo = hhTotalAtual + replanejamento.hhAdicional;
+    const hhTotalNovo = hhTotalAtual + replanejamento.hh_adicional;
     const valorHora = 95.0;
     return hhTotalNovo * valorHora;
   };
@@ -222,18 +222,18 @@ export default function OSAguardandoAceiteReplanejamento() {
                           <div>
                             <p className="text-sm text-muted-foreground">Novo período</p>
                             <p className="font-medium text-orange-700">
-                              {formatDate(ultimoReplanejamento.novaDataInicio)} -{" "}
-                              {formatDate(ultimoReplanejamento.novaDataFim)}
+                              {formatDate(ultimoReplanejamento.nova_data_inicio)} -{" "}
+                              {formatDate(ultimoReplanejamento.nova_data_fim)}
                             </p>
                           </div>
                           <div>
                             <p className="text-sm text-muted-foreground">HH adicional</p>
-                            <p className="font-medium text-orange-700">+{ultimoReplanejamento.hhAdicional}h</p>
+                            <p className="font-medium text-orange-700">+{ultimoReplanejamento.hh_adicional}h</p>
                           </div>
                           <div>
                             <p className="text-sm text-muted-foreground">Novo HH total</p>
                             <p className="font-medium text-orange-700">
-                              {os.hh_planejado + (os.hh_adicional || 0) + ultimoReplanejamento.hhAdicional}h
+                              {os.hh_planejado + (os.hh_adicional || 0) + ultimoReplanejamento.hh_adicional}h
                             </p>
                           </div>
                           <div>
@@ -245,7 +245,7 @@ export default function OSAguardandoAceiteReplanejamento() {
                           <div>
                             <p className="text-sm text-muted-foreground">Impacto financeiro</p>
                             <p className="font-medium text-red-600">
-                              +{formatCurrency(ultimoReplanejamento.hhAdicional * 95)}
+                              +{formatCurrency(ultimoReplanejamento.hh_adicional * 95)}
                             </p>
                           </div>
                         </div>
