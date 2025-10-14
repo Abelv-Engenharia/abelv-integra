@@ -82,7 +82,7 @@ const DocumentList = () => {
 
         <div className="flex flex-wrap gap-3">
           <Link to="/comercial/repositorio/upload">
-            <Button className="bg-gradient-primary text-primary-foreground hover">
+            <Button className="bg-gradient-primary text-primary-foreground hover:opacity-90">
               <Upload className="mr-2 h-4 w-4" />
               Enviar Documento
             </Button>
