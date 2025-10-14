@@ -58,11 +58,32 @@ export const AddMetaDialog = ({ open, onOpenChange }: AddMetaDialogProps) => {
     if (!formData.metaT3 || formData.metaT3 <= 0) newErrors.metaT3 = true;
     if (!formData.metaT4 || formData.metaT4 <= 0) newErrors.metaT4 = true;
 
+    // Validar que a soma das metas trimestrais é igual à meta anual
+    const totalTrimestral = formData.metaT1 + formData.metaT2 + formData.metaT3 + formData.metaT4;
+    if (Math.abs(totalTrimestral - formData.metaAnual) > 0.01) {
+      newErrors.metaAnual = true;
+      newErrors.metaT1 = true;
+      newErrors.metaT2 = true;
+      newErrors.metaT3 = true;
+      newErrors.metaT4 = true;
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSave = async () => {
+    const totalTrimestral = formData.metaT1 + formData.metaT2 + formData.metaT3 + formData.metaT4;
+    
+    if (Math.abs(totalTrimestral - formData.metaAnual) > 0.01) {
+      toast({
+        title: "Erro de validação",
+        description: "A soma das metas trimestrais deve ser igual à meta anual.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     if (!validateForm()) {
       toast({
         title: "Erro de validação",
@@ -202,14 +223,19 @@ export const AddMetaDialog = ({ open, onOpenChange }: AddMetaDialogProps) => {
           </div>
 
           {totalTrimestral > 0 && (
-            <div className="bg-muted/50 rounded-lg p-4">
+            <div className={`rounded-lg p-4 ${Math.abs(totalTrimestral - formData.metaAnual) > 0.01 ? 'bg-destructive/10 border border-destructive' : 'bg-muted/50'}`}>
               <div className="flex justify-between items-center">
                 <span className="text-sm font-medium">Soma das Metas Trimestrais:</span>
                 <span className="text-lg font-bold">{formatCurrency(totalTrimestral)}</span>
               </div>
               {Math.abs(totalTrimestral - formData.metaAnual) > 0.01 && (
-                <p className="text-xs text-muted-foreground mt-2">
-                  Diferença com a meta anual: {formatCurrency(totalTrimestral - formData.metaAnual)}
+                <p className="text-xs text-destructive font-medium mt-2">
+                  ⚠️ A soma das metas trimestrais deve ser igual à meta anual. Diferença: {formatCurrency(Math.abs(totalTrimestral - formData.metaAnual))}
+                </p>
+              )}
+              {Math.abs(totalTrimestral - formData.metaAnual) <= 0.01 && totalTrimestral > 0 && (
+                <p className="text-xs text-green-600 font-medium mt-2">
+                  ✓ As metas trimestrais somam corretamente à meta anual
                 </p>
               )}
             </div>
