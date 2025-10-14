@@ -1,17 +1,28 @@
-import { useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { ArrowLeft, FolderOpen, FileText } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
-import { categoriasmock, documentosmock } from "@/data/repositorioMockData";
+import { useRepositorioCategoria } from "@/hooks/useRepositorioCategorias";
+import { useRepositorioDocumentos } from "@/hooks/useRepositorioDocumentos";
 
 export default function CategoryView() {
   const { categoriaId } = useParams<{ categoriaId: string }>();
   const navigate = useNavigate();
   
-  const categoria = categoriasmock.find(cat => cat.id === categoriaId);
+  const { data: categoria, isLoading } = useRepositorioCategoria(categoriaId || "");
+  const { data: documentos = [] } = useRepositorioDocumentos();
+  
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background p-6">
+        <div className="text-center">
+          <p className="text-muted-foreground">Carregando...</p>
+        </div>
+      </div>
+    );
+  }
   
   if (!categoria) {
     return (
@@ -28,7 +39,7 @@ export default function CategoryView() {
   }
 
   const getSubcategoryDocumentCount = (subcategoriaId: string) => {
-    return documentosmock.filter(doc => doc.subcategoria === subcategoriaId).length;
+    return documentos.filter(doc => doc.subcategoria_id === subcategoriaId).length;
   };
 
   return (
@@ -52,7 +63,7 @@ export default function CategoryView() {
             
             <div>
               <h1 className="text-3xl font-bold text-foreground">{categoria.nome}</h1>
-              <p className="text-muted-foreground mt-2">{categoria.descricao}</p>
+              <p className="text-muted-foreground mt-2">{categoria.descricao || "Sem descrição"}</p>
             </div>
           </div>
           
@@ -72,8 +83,8 @@ export default function CategoryView() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {categoria.subcategorias.map((subcategoria) => {
-            const documentCount = getSubcategoryDocumentCount(subcategoria.nome);
+          {categoria.subcategorias?.map((subcategoria) => {
+            const documentCount = getSubcategoryDocumentCount(subcategoria.id);
             
             return (
               <Card 
@@ -112,7 +123,7 @@ export default function CategoryView() {
           })}
         </div>
 
-        {categoria.subcategorias.length === 0 && (
+        {(!categoria.subcategorias || categoria.subcategorias.length === 0) && (
           <div className="text-center py-12">
             <FolderOpen className="mx-auto h-12 w-12 text-muted-foreground" />
             <h3 className="mt-2 text-sm font-semibold text-foreground">Nenhuma subpasta encontrada</h3>

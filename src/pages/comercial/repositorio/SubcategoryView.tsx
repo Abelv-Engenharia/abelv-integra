@@ -6,16 +6,28 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
-import { categoriasmock, documentosmock } from "@/data/repositorioMockData";
+import { useRepositorioSubcategoria } from "@/hooks/useRepositorioCategorias";
+import { useRepositorioDocumentos } from "@/hooks/useRepositorioDocumentos";
+import { format } from "date-fns";
 
 export default function SubcategoryView() {
   const { categoriaId, subcategoriaId } = useParams<{ categoriaId: string; subcategoriaId: string }>();
   const navigate = useNavigate();
   
-  const categoria = categoriasmock.find(cat => cat.id === categoriaId);
-  const subcategoria = categoria?.subcategorias.find(sub => sub.id === subcategoriaId);
+  const { data, isLoading } = useRepositorioSubcategoria(categoriaId || "", subcategoriaId || "");
+  const { data: docs = [] } = useRepositorioDocumentos(subcategoriaId);
   
-  if (!categoria || !subcategoria) {
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background p-6">
+        <div className="text-center">
+          <p className="text-muted-foreground">Carregando...</p>
+        </div>
+      </div>
+    );
+  }
+  
+  if (!data) {
     return (
       <div className="min-h-screen bg-background p-6">
         <div className="text-center">
@@ -28,10 +40,10 @@ export default function SubcategoryView() {
       </div>
     );
   }
+  
+  const { categoria, subcategoria } = data;
 
-  const documentos = documentosmock.filter(doc => doc.subcategoria === subcategoria.nome);
-
-  const getValidadeStatus = (dataValidade: string): 'vencido' | 'proximo' | 'valido' => {
+  const getValidadeStatus = (dataValidade: Date): 'vencido' | 'proximo' | 'valido' => {
     const hoje = new Date();
     const validade = new Date(dataValidade);
     const diasRestantes = Math.ceil((validade.getTime() - hoje.getTime()) / (1000 * 60 * 60 * 24));
@@ -59,10 +71,14 @@ export default function SubcategoryView() {
       case 'pdf':
         return 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400';
       case 'doc':
+      case 'docx':
         return 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400';
+      case 'xls':
       case 'xlsx':
         return 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400';
       case 'jpg':
+      case 'jpeg':
+      case 'png':
         return 'bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-400';
       default:
         return 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400';
@@ -118,7 +134,7 @@ export default function SubcategoryView() {
               <FileText className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{documentos.length}</div>
+              <div className="text-2xl font-bold">{docs.length}</div>
             </CardContent>
           </Card>
 
@@ -129,7 +145,7 @@ export default function SubcategoryView() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-green-600">
-                {documentos.filter(doc => getValidadeStatus(doc.datavalidade) === 'valido').length}
+                {docs.filter(doc => doc.data_validade && getValidadeStatus(new Date(doc.data_validade)) === 'valido').length}
               </div>
             </CardContent>
           </Card>
@@ -141,7 +157,7 @@ export default function SubcategoryView() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-yellow-600">
-                {documentos.filter(doc => getValidadeStatus(doc.datavalidade) === 'proximo').length}
+                {docs.filter(doc => doc.data_validade && getValidadeStatus(new Date(doc.data_validade)) === 'proximo').length}
               </div>
             </CardContent>
           </Card>
@@ -153,7 +169,7 @@ export default function SubcategoryView() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-red-600">
-                {documentos.filter(doc => getValidadeStatus(doc.datavalidade) === 'vencido').length}
+                {docs.filter(doc => doc.data_validade && getValidadeStatus(new Date(doc.data_validade)) === 'vencido').length}
               </div>
             </CardContent>
           </Card>
@@ -168,82 +184,88 @@ export default function SubcategoryView() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {documentos.length > 0 ? (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Documento</TableHead>
-                    <TableHead>Data de Upload</TableHead>
-                    <TableHead>Validade</TableHead>
-                    <TableHead>Responsável</TableHead>
-                    <TableHead>E-mail</TableHead>
-                    <TableHead>Tamanho</TableHead>
-                    <TableHead>Tipo</TableHead>
-                    <TableHead className="text-right">Ações</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {documentos.map((documento) => {
-                    const validadeStatus = getValidadeStatus(documento.datavalidade);
-                    
-                    return (
-                      <TableRow key={documento.id}>
-                        <TableCell className="font-medium">
-                          <div className="flex items-center space-x-2">
-                            <FileText className="h-4 w-4 text-muted-foreground" />
-                            <span>{documento.nome}</span>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          {new Date(documento.dataupload).toLocaleDateString('pt-BR')}
-                        </TableCell>
-                        <TableCell>
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <div className="flex items-center space-x-2">
-                                  {getValidadeIcon(validadeStatus)}
-                                  <span className="text-sm">
-                                    {new Date(documento.datavalidade).toLocaleDateString('pt-BR')}
-                                  </span>
-                                </div>
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                <p>
-                                  {validadeStatus === 'vencido' && 'Documento vencido'}
-                                  {validadeStatus === 'proximo' && 'Vence em breve'}
-                                  {validadeStatus === 'valido' && 'Documento válido'}
-                                </p>
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-                        </TableCell>
-                        <TableCell>{documento.responsavel}</TableCell>
-                        <TableCell>{documento.emailresponsavel}</TableCell>
-                        <TableCell>{documento.tamanho}</TableCell>
-                        <TableCell>
-                          <Badge variant="secondary" className={getTipoColor(documento.tipo)}>
-                            {documento.tipo.toUpperCase()}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex items-center justify-end space-x-2">
-                            <Button variant="ghost" size="sm">
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                            <Button variant="ghost" size="sm">
-                              <Download className="h-4 w-4" />
-                            </Button>
-                            <Button variant="ghost" size="sm">
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
+            {docs.length > 0 ? (
+              <TooltipProvider>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Documento</TableHead>
+                      <TableHead>Data de Upload</TableHead>
+                      <TableHead>Validade</TableHead>
+                      <TableHead>Responsável</TableHead>
+                      <TableHead>E-mail</TableHead>
+                      <TableHead>Tamanho</TableHead>
+                      <TableHead>Tipo</TableHead>
+                      <TableHead className="text-right">Ações</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {docs.map((documento) => {
+                      const validadeStatus = documento.data_validade ? getValidadeStatus(new Date(documento.data_validade)) : 'valido';
+                      
+                      return (
+                        <TableRow key={documento.id}>
+                          <TableCell className="font-medium">
+                            <div className="flex items-center space-x-2">
+                              <FileText className="h-4 w-4 text-muted-foreground" />
+                              <span>{documento.arquivo_nome_original}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            {documento.created_at ? format(new Date(documento.created_at), "dd/MM/yyyy") : "-"}
+                          </TableCell>
+                          <TableCell>
+                            {documento.data_validade ? (
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <div className="flex items-center space-x-2 cursor-help">
+                                    {getValidadeIcon(validadeStatus)}
+                                    <span className="text-sm">
+                                      {format(new Date(documento.data_validade), "dd/MM/yyyy")}
+                                    </span>
+                                  </div>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>
+                                    {validadeStatus === 'vencido' && 'Documento vencido'}
+                                    {validadeStatus === 'proximo' && 'Vence em breve'}
+                                    {validadeStatus === 'valido' && 'Documento válido'}
+                                  </p>
+                                </TooltipContent>
+                              </Tooltip>
+                            ) : (
+                              <span className="text-sm text-muted-foreground">-</span>
+                            )}
+                          </TableCell>
+                          <TableCell>{documento.responsavel_nome || "-"}</TableCell>
+                          <TableCell>{documento.responsavel_email || "-"}</TableCell>
+                          <TableCell>
+                            {documento.arquivo_tamanho ? `${(documento.arquivo_tamanho / 1024 / 1024).toFixed(2)} MB` : "-"}
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="secondary" className={getTipoColor(documento.arquivo_tipo || "")}>
+                              {(documento.arquivo_tipo || "").toUpperCase()}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex items-center justify-end space-x-2">
+                              <Button variant="ghost" size="sm">
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                              <Button variant="ghost" size="sm">
+                                <Download className="h-4 w-4" />
+                              </Button>
+                              <Button variant="ghost" size="sm">
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </TooltipProvider>
             ) : (
               <div className="text-center py-12">
                 <FileText className="mx-auto h-12 w-12 text-muted-foreground" />

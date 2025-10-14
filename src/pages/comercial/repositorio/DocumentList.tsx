@@ -8,15 +8,21 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Link } from "react-router-dom";
-import { documentosmock } from "@/data/repositorioMockData";
+import { useRepositorioDocumentos } from "@/hooks/useRepositorioDocumentos";
+import { useRepositorioCategorias } from "@/hooks/useRepositorioCategorias";
+import { format } from "date-fns";
 const DocumentList = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filtroValidade, setFiltroValidade] = useState("todos");
   const [filtroCategoria, setFiltroCategoria] = useState("todos");
   const [filtroTipo, setFiltroTipo] = useState("todos");
-  const getValidadeStatus = (dataValidade: string) => {
+  
+  const { data: documentos = [], isLoading } = useRepositorioDocumentos();
+  const { data: categorias = [] } = useRepositorioCategorias();
+  
+  const getValidadeStatus = (dataValidade: Date) => {
     const hoje = new Date();
-    const validade = new Date(dataValidade.split("/").reverse().join("-"));
+    const validade = new Date(dataValidade);
     const diffDias = Math.ceil((validade.getTime() - hoje.getTime()) / (1000 * 60 * 60 * 24));
     if (diffDias < 0) return "vencido";
     if (diffDias <= 30) return "proximo";
@@ -34,16 +40,19 @@ const DocumentList = () => {
         return <Shield className="h-4 w-4 text-gray-500" />;
     }
   };
-  const documentosFiltrados = documentosmock.filter(doc => {
-    const matchesSearch = doc.nome.toLowerCase().includes(searchTerm.toLowerCase()) || doc.categoria.toLowerCase().includes(searchTerm.toLowerCase()) || doc.subcategoria.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategoria = filtroCategoria === "todos" || doc.categoria === filtroCategoria;
-    const matchesTipo = filtroTipo === "todos" || doc.tipo === filtroTipo;
+  const documentosFiltrados = documentos.filter(doc => {
+    const matchesSearch = doc.arquivo_nome_original.toLowerCase().includes(searchTerm.toLowerCase()) || 
+      (doc.categoria?.nome || "").toLowerCase().includes(searchTerm.toLowerCase()) || 
+      (doc.subcategoria?.nome || "").toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategoria = filtroCategoria === "todos" || doc.categoria_id === filtroCategoria;
+    const matchesTipo = filtroTipo === "todos" || doc.arquivo_tipo === filtroTipo;
     if (filtroValidade === "todos") return matchesSearch && matchesCategoria && matchesTipo;
-    const status = getValidadeStatus(doc.datavalidade);
+    if (!doc.data_validade) return false;
+    const status = getValidadeStatus(new Date(doc.data_validade));
     return matchesSearch && status === filtroValidade && matchesCategoria && matchesTipo;
   });
-  const categorias: string[] = [...new Set(documentosmock.map(doc => doc.categoria))];
-  const tipos: string[] = [...new Set(documentosmock.map(doc => doc.tipo))];
+  
+  const tipos: string[] = [...new Set(documentos.map(doc => doc.arquivo_tipo).filter(Boolean))] as string[];
   const getFileIcon = (tipo: string) => {
     return <FileText className="h-4 w-4 text-blue-500" />;
   };
@@ -105,8 +114,8 @@ const DocumentList = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="todos">Todas as Categorias</SelectItem>
-                  {categorias.map(categoria => <SelectItem key={categoria} value={categoria}>
-                      {categoria}
+                  {categorias.map(categoria => <SelectItem key={categoria.id} value={categoria.id}>
+                      {categoria.nome}
                     </SelectItem>)}
                 </SelectContent>
               </Select>
@@ -150,7 +159,7 @@ const DocumentList = () => {
         <CardHeader>
           <CardTitle>Lista de Documentos</CardTitle>
           <CardDescription>
-            {documentosFiltrados.length} de {documentosmock.length} documentos
+            {isLoading ? "Carregando..." : `${documentosFiltrados.length} de ${documentos.length} documentos`}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -172,40 +181,44 @@ const DocumentList = () => {
               </TableHeader>
               <TableBody>
                 {documentosFiltrados.map(documento => {
-                const statusValidade = getValidadeStatus(documento.datavalidade);
+                const statusValidade = documento.data_validade ? getValidadeStatus(new Date(documento.data_validade)) : "valido";
                 return <TableRow key={documento.id} className="hover:bg-muted/50">
-                      <TableCell>{getFileIcon(documento.tipo)}</TableCell>
-                      <TableCell className="font-medium">{documento.nome}</TableCell>
+                      <TableCell>{getFileIcon(documento.arquivo_tipo || "")}</TableCell>
+                      <TableCell className="font-medium">{documento.arquivo_nome_original}</TableCell>
                       <TableCell>
                         <div className="space-y-1">
-                          <Badge variant="secondary">{documento.categoria}</Badge>
-                          <div className="text-xs text-muted-foreground">{documento.subcategoria}</div>
+                          <Badge variant="secondary">{documento.categoria?.nome || "-"}</Badge>
+                          <div className="text-xs text-muted-foreground">{documento.subcategoria?.nome || "-"}</div>
                         </div>
                       </TableCell>
-                      <TableCell>{documento.dataupload}</TableCell>
+                      <TableCell>{documento.created_at ? format(new Date(documento.created_at), "dd/MM/yyyy") : "-"}</TableCell>
                       <TableCell>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <div className="flex items-center gap-2 cursor-help">
-                              {getValidadeIcon(statusValidade)}
-                              <span className="text-sm">{documento.datavalidade}</span>
-                            </div>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>
-                              Validade: {documento.datavalidade}
-                              <br />
-                              Status:{" "}
-                              {statusValidade === "vencido" ? "Vencido" : statusValidade === "proximo" ? "Próximo do vencimento" : "Válido"}
-                            </p>
-                          </TooltipContent>
-                        </Tooltip>
+                        {documento.data_validade ? (
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <div className="flex items-center gap-2 cursor-help">
+                                {getValidadeIcon(statusValidade)}
+                                <span className="text-sm">{format(new Date(documento.data_validade), "dd/MM/yyyy")}</span>
+                              </div>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>
+                                Validade: {format(new Date(documento.data_validade), "dd/MM/yyyy")}
+                                <br />
+                                Status:{" "}
+                                {statusValidade === "vencido" ? "Vencido" : statusValidade === "proximo" ? "Próximo do vencimento" : "Válido"}
+                              </p>
+                            </TooltipContent>
+                          </Tooltip>
+                        ) : (
+                          <span className="text-sm text-muted-foreground">-</span>
+                        )}
                       </TableCell>
-                      <TableCell>{documento.responsavel}</TableCell>
-                      <TableCell>{documento.emailresponsavel}</TableCell>
-                      <TableCell>{documento.tamanho}</TableCell>
+                      <TableCell>{documento.responsavel_nome || "-"}</TableCell>
+                      <TableCell>{documento.responsavel_email || "-"}</TableCell>
+                      <TableCell>{documento.arquivo_tamanho ? `${(documento.arquivo_tamanho / 1024 / 1024).toFixed(2)} MB` : "-"}</TableCell>
                       <TableCell>
-                        <Badge className={getTipoColor(documento.tipo)}>{documento.tipo}</Badge>
+                        <Badge className={getTipoColor(documento.arquivo_tipo || "")}>{documento.arquivo_tipo || "-"}</Badge>
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">

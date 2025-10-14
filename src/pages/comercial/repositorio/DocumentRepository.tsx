@@ -5,15 +5,19 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Link, useNavigate } from "react-router-dom";
-import { categoriasmock, documentosmock } from "@/data/repositorioMockData";
+import { useRepositorioCategorias } from "@/hooks/useRepositorioCategorias";
+import { useRepositorioDocumentosStats } from "@/hooks/useRepositorioDocumentos";
 
 const DocumentRepository = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
   
-  const categoriasFiltradas = categoriasmock.filter(categoria =>
+  const { data: categorias = [], isLoading: loadingCategorias } = useRepositorioCategorias();
+  const { data: stats, isLoading: loadingStats } = useRepositorioDocumentosStats();
+  
+  const categoriasFiltradas = categorias.filter(categoria =>
     categoria.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    categoria.descricao.toLowerCase().includes(searchTerm.toLowerCase())
+    (categoria.descricao?.toLowerCase() || "").includes(searchTerm.toLowerCase())
   );
 
   const getCategoryIcon = (categoryName: string) => {
@@ -67,7 +71,7 @@ const DocumentRepository = () => {
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{documentosmock.length}</div>
+            <div className="text-2xl font-bold">{loadingStats ? "..." : stats?.total || 0}</div>
           </CardContent>
         </Card>
         
@@ -77,7 +81,7 @@ const DocumentRepository = () => {
             <Calendar className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">3</div>
+            <div className="text-2xl font-bold">{loadingStats ? "..." : stats?.hoje || 0}</div>
           </CardContent>
         </Card>
         
@@ -87,7 +91,7 @@ const DocumentRepository = () => {
             <FolderOpen className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">5</div>
+            <div className="text-2xl font-bold">{loadingStats ? "..." : stats?.categorias || 0}</div>
           </CardContent>
         </Card>
         
@@ -97,7 +101,7 @@ const DocumentRepository = () => {
             <User className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">6</div>
+            <div className="text-2xl font-bold">-</div>
           </CardContent>
         </Card>
       </div>
@@ -113,54 +117,61 @@ const DocumentRepository = () => {
       </div>
 
       {/* Categories Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {categoriasFiltradas.map((categoria) => (
-          <Card 
-            key={categoria.id} 
-            className="hover:shadow-lg transition-all duration-300 cursor-pointer group"
-            onClick={() => navigate(`/comercial/repositorio/categoria/${categoria.id}`)}
-          >
-            <CardHeader className="pb-3">
-              <div className="flex items-center gap-4">
-                <div className={`p-3 rounded-xl ${categoria.cor} bg-opacity-15 group-hover:bg-opacity-25 transition-all`}>
-                  {getCategoryIcon(categoria.nome)}
+      {loadingCategorias ? (
+        <div className="text-center py-12">
+          <p className="text-muted-foreground">Carregando categorias...</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {categoriasFiltradas.map((categoria) => (
+            <Card 
+              key={categoria.id} 
+              className="hover:shadow-lg transition-all duration-300 cursor-pointer group"
+              onClick={() => navigate(`/comercial/repositorio/categoria/${categoria.id}`)}
+            >
+              <CardHeader className="pb-3">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 rounded-xl bg-primary/10 group-hover:bg-primary/20 transition-all">
+                    {getCategoryIcon(categoria.nome)}
+                  </div>
+                  <div className="flex-1">
+                    <CardTitle className="text-xl group-hover:text-primary transition-colors">
+                      {categoria.nome}
+                    </CardTitle>
+                    <CardDescription className="text-sm mt-1">
+                      {categoria.subcategorias?.length || 0} subpasta{categoria.subcategorias?.length !== 1 ? 's' : ''}
+                    </CardDescription>
+                  </div>
                 </div>
-                <div className="flex-1">
-                  <CardTitle className="text-xl group-hover:text-primary transition-colors">
-                    {categoria.nome}
-                  </CardTitle>
-                  <CardDescription className="text-sm mt-1">
-                    {categoria.quantidadedocumentos} documento{categoria.quantidadedocumentos !== 1 ? 's' : ''}
-                  </CardDescription>
-                </div>
-              </div>
-            </CardHeader>
+              </CardHeader>
             
             <CardContent className="space-y-4">
               <p className="text-sm text-muted-foreground">
-                {categoria.descricao}
+                {categoria.descricao || "Sem descrição"}
               </p>
               
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium text-muted-foreground">Subpastas:</span>
                   <Badge variant="secondary" className="text-xs">
-                    {categoria.subcategorias.length}
+                    {categoria.subcategorias?.length || 0}
                   </Badge>
                 </div>
                 
-                <div className="flex flex-wrap gap-1">
-                  {categoria.subcategorias.slice(0, 3).map((subcategoria) => (
-                    <Badge key={subcategoria.id} variant="outline" className="text-xs">
-                      {subcategoria.nome}
-                    </Badge>
-                  ))}
-                  {categoria.subcategorias.length > 3 && (
-                    <Badge variant="outline" className="text-xs">
-                      +{categoria.subcategorias.length - 3}
-                    </Badge>
-                  )}
-                </div>
+                {categoria.subcategorias && categoria.subcategorias.length > 0 && (
+                  <div className="flex flex-wrap gap-1">
+                    {categoria.subcategorias.slice(0, 3).map((subcategoria) => (
+                      <Badge key={subcategoria.id} variant="outline" className="text-xs">
+                        {subcategoria.nome}
+                      </Badge>
+                    ))}
+                    {categoria.subcategorias.length > 3 && (
+                      <Badge variant="outline" className="text-xs">
+                        +{categoria.subcategorias.length - 3}
+                      </Badge>
+                    )}
+                  </div>
+                )}
               </div>
               
               <div className="pt-2 border-t">
@@ -172,9 +183,10 @@ const DocumentRepository = () => {
             </CardContent>
           </Card>
         ))}
-      </div>
+        </div>
+      )}
 
-      {categoriasFiltradas.length === 0 && (
+      {!loadingCategorias && categoriasFiltradas.length === 0 && (
         <div className="text-center py-12">
           <FolderOpen className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
           <h3 className="text-lg font-medium text-muted-foreground mb-2">
