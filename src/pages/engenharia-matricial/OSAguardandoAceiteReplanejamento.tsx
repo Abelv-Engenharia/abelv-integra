@@ -298,7 +298,7 @@ export default function OSAguardandoAceiteReplanejamento() {
               <AlertTriangle className="h-5 w-5 text-red-500" />
               Rejeitar replanejamento
             </DialogTitle>
-            <DialogDescription>Informe o motivo da rejeição do replanejamento da OS #{os.numero}</DialogDescription>
+            <DialogDescription>Informe o motivo da rejeição do replanejamento da OS #{osParaRejeitar}</DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">
