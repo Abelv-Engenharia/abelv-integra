@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FileText, Upload, Search, Download, Eye, Trash2, Shield, AlertTriangle, CheckCircle, Filter } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,11 +11,21 @@ import { Link } from "react-router-dom";
 import { useRepositorioDocumentos } from "@/hooks/useRepositorioDocumentos";
 import { useRepositorioCategorias } from "@/hooks/useRepositorioCategorias";
 import { format } from "date-fns";
+import { fetchUsers } from "@/services/usuariosService";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { CalendarIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
 const DocumentList = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filtroValidade, setFiltroValidade] = useState("todos");
   const [filtroCategoria, setFiltroCategoria] = useState("todos");
   const [filtroTipo, setFiltroTipo] = useState("todos");
+  const [filtroResponsavel, setFiltroResponsavel] = useState("todos");
+  const [filtroVencimentoInicio, setFiltroVencimentoInicio] = useState<Date | undefined>();
+  const [filtroVencimentoFim, setFiltroVencimentoFim] = useState<Date | undefined>();
+  const [usuarios, setUsuarios] = useState<Array<{ email: string }>>([]);
+  
   const {
     data: documentos = [],
     isLoading
@@ -23,6 +33,15 @@ const DocumentList = () => {
   const {
     data: categorias = []
   } = useRepositorioCategorias();
+
+  useEffect(() => {
+    const loadUsuarios = async () => {
+      const users = await fetchUsers();
+      const emailsUnicos = [...new Set(users.map(u => u.email).filter(Boolean))];
+      setUsuarios(emailsUnicos.map(email => ({ email })));
+    };
+    loadUsuarios();
+  }, []);
   const getValidadeStatus = (dataValidade: Date) => {
     const hoje = new Date();
     const validade = new Date(dataValidade);
@@ -47,10 +66,22 @@ const DocumentList = () => {
     const matchesSearch = doc.arquivo_nome_original.toLowerCase().includes(searchTerm.toLowerCase()) || (doc.categoria?.nome || "").toLowerCase().includes(searchTerm.toLowerCase()) || (doc.subcategoria?.nome || "").toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategoria = filtroCategoria === "todos" || doc.categoria_id === filtroCategoria;
     const matchesTipo = filtroTipo === "todos" || doc.arquivo_tipo === filtroTipo;
-    if (filtroValidade === "todos") return matchesSearch && matchesCategoria && matchesTipo;
+    const matchesResponsavel = filtroResponsavel === "todos" || doc.responsavel_email === filtroResponsavel;
+    
+    let matchesVencimento = true;
+    if (filtroVencimentoInicio && doc.data_validade) {
+      const dataValidade = new Date(doc.data_validade);
+      matchesVencimento = matchesVencimento && dataValidade >= filtroVencimentoInicio;
+    }
+    if (filtroVencimentoFim && doc.data_validade) {
+      const dataValidade = new Date(doc.data_validade);
+      matchesVencimento = matchesVencimento && dataValidade <= filtroVencimentoFim;
+    }
+    
+    if (filtroValidade === "todos") return matchesSearch && matchesCategoria && matchesTipo && matchesResponsavel && matchesVencimento;
     if (!doc.data_validade) return false;
     const status = getValidadeStatus(new Date(doc.data_validade));
-    return matchesSearch && status === filtroValidade && matchesCategoria && matchesTipo;
+    return matchesSearch && status === filtroValidade && matchesCategoria && matchesTipo && matchesResponsavel && matchesVencimento;
   });
   const tipos: string[] = [...new Set(documentos.map(doc => doc.arquivo_tipo).filter(Boolean))] as string[];
   const getFileIcon = (tipo: string) => {
@@ -100,7 +131,7 @@ const DocumentList = () => {
           <CardDescription>Utilize os filtros abaixo para encontrar documentos específicos</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <div className="space-y-2">
               <label className="text-sm font-medium">Nome do Documento</label>
               <Input placeholder="Nome do documento..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="w-full" />
@@ -149,6 +180,74 @@ const DocumentList = () => {
                     </SelectItem>)}
                 </SelectContent>
               </Select>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Usuário Responsável</label>
+              <Select value={filtroResponsavel} onValueChange={setFiltroResponsavel}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Selecione..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="todos">Todos os Responsáveis</SelectItem>
+                  {usuarios.map(usuario => <SelectItem key={usuario.email} value={usuario.email}>
+                      {usuario.email}
+                    </SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Vencimento</label>
+              <div className="flex gap-2">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !filtroVencimentoInicio && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {filtroVencimentoInicio ? format(filtroVencimentoInicio, "dd/MM/yyyy") : <span>De</span>}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={filtroVencimentoInicio}
+                      onSelect={setFiltroVencimentoInicio}
+                      initialFocus
+                      className="pointer-events-auto"
+                    />
+                  </PopoverContent>
+                </Popover>
+
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !filtroVencimentoFim && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {filtroVencimentoFim ? format(filtroVencimentoFim, "dd/MM/yyyy") : <span>Até</span>}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={filtroVencimentoFim}
+                      onSelect={setFiltroVencimentoFim}
+                      initialFocus
+                      className="pointer-events-auto"
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
             </div>
           </div>
         </CardContent>
