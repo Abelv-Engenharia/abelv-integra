@@ -23,6 +23,7 @@ import SidebarSectionEngenhariaMatricial from "./SidebarSectionEngenhariaMatrici
 import SidebarSearch from "./SidebarSearch";
 import { usePermissionsDirect } from "@/hooks/usePermissionsDirect";
 import logoAbelvIntegra from "@/assets/logo-abelv-integra.png";
+import SidebarSectionComercial from "./SidebarSectionComercial";
 
 export function AppSidebar() {
   const location = useLocation();
@@ -60,6 +61,7 @@ export function AppSidebar() {
     if (currentPath.startsWith("/admin") || currentPath.startsWith("/tutoriais")) return "admin";
     if (currentPath.startsWith("/suprimentos/estoque")) return "suprimentos";
     if (currentPath.startsWith("/engenharia-matricial")) return "engenharia-matricial";
+    if (currentPath.startsWith("/comercial")) return "comercial";
     if (currentPath.startsWith("/account")) return "account";
     return null;
   });
@@ -215,6 +217,13 @@ export function AppSidebar() {
 
         {/* Seção: Engenharia Matricial */}
         <SidebarSectionEngenhariaMatricial
+          openMenu={openMenu}
+          toggleMenu={toggleMenu}
+          onLinkClick={handleLinkClick}
+        />
+
+        {/* Seção: Comercial */}
+        <SidebarSectionComercial
           openMenu={openMenu}
           toggleMenu={toggleMenu}
           onLinkClick={handleLinkClick}

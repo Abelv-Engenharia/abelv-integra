@@ -163,6 +163,26 @@ import PlaceholderPage from "./pages/PlaceholderPage";
 
 // Engenharia Matricial pages
 import EngenhariaMatricialIndex from "./pages/engenharia-matricial/Index";
+
+// === COMERCIAL - Repositório de Documentos ===
+import DocumentRepository from "./pages/comercial/repositorio/DocumentRepository";
+import DocumentList from "./pages/comercial/repositorio/DocumentList";
+import DocumentUpload from "./pages/comercial/repositorio/DocumentUpload";
+import DocumentCategories from "./pages/comercial/repositorio/DocumentCategories";
+import DocumentSearch from "./pages/comercial/repositorio/DocumentSearch";
+import CategoryView from "./pages/comercial/repositorio/CategoryView";
+import SubcategoryView from "./pages/comercial/repositorio/SubcategoryView";
+
+// === COMERCIAL - Controle Comercial ===
+import CommercialSpreadsheet from "./pages/comercial/controle/CommercialSpreadsheet";
+import CommercialForm from "./pages/comercial/controle/CommercialForm";
+import CommercialDashboard from "./pages/comercial/controle/CommercialDashboard";
+import AnnualGoalsForm from "./pages/comercial/controle/AnnualGoalsForm";
+import CommercialRecords from "./pages/comercial/controle/CommercialRecords";
+import CommercialReports from "./pages/comercial/controle/CommercialReports";
+import ConsolidationDetails from "./pages/comercial/controle/ConsolidationDetails";
+import SegmentManagement from "./pages/comercial/controle/SegmentManagement";
+import VendedorManagement from "./pages/comercial/controle/VendedorManagement";
 import OrdemServicoList from "./pages/engenharia-matricial/OrdemServicoList";
 import OSAbertas from "./pages/engenharia-matricial/OSAbertas";
 import NovaOrdemServico from "./pages/engenharia-matricial/NovaOrdemServico";
@@ -456,6 +476,31 @@ function App() {
                 <Route path="engenharia-matricial/relatorios-em-departamento" element={<RelatoriosEMDepartamento />} />
                 <Route path="engenharia-matricial/admin/usuarios" element={<AdminUsuariosEM />} />
               </Route>
+
+              {/* ========================================== */}
+              {/* COMERCIAL - Repositório de Documentos     */}
+              {/* ========================================== */}
+              <Route path="comercial/repositorio" element={<DocumentRepository />} />
+              <Route path="comercial/repositorio/documentos" element={<DocumentList />} />
+              <Route path="comercial/repositorio/upload" element={<DocumentUpload />} />
+              <Route path="comercial/repositorio/categorias" element={<DocumentCategories />} />
+              <Route path="comercial/repositorio/busca" element={<DocumentSearch />} />
+              <Route path="comercial/repositorio/categoria/:categoriaId" element={<CategoryView />} />
+              <Route path="comercial/repositorio/categoria/:categoriaId/subcategoria/:subcategoriaId" element={<SubcategoryView />} />
+
+              {/* ========================================== */}
+              {/* COMERCIAL - Controle Comercial            */}
+              {/* ========================================== */}
+              <Route path="comercial/controle/dashboard" element={<CommercialDashboard />} />
+              <Route path="comercial/controle/performance" element={<CommercialSpreadsheet />} />
+              <Route path="comercial/controle/cadastro" element={<CommercialForm />} />
+              <Route path="comercial/controle/editar/:id" element={<CommercialForm />} />
+              <Route path="comercial/controle/registros" element={<CommercialRecords />} />
+              <Route path="comercial/controle/metas" element={<AnnualGoalsForm />} />
+              <Route path="comercial/controle/relatorios" element={<CommercialReports />} />
+              <Route path="comercial/controle/consolidacao/:id" element={<ConsolidationDetails />} />
+              <Route path="comercial/controle/cadastros/segmentos" element={<SegmentManagement />} />
+              <Route path="comercial/controle/cadastros/vendedores" element={<VendedorManagement />} />
 
               {/* 404 route */}
               <Route path="*" element={<NotFound />} />
