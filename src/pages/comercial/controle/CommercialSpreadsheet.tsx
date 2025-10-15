@@ -133,8 +133,8 @@ const CommercialSpreadsheet = () => {
                 }} tickFormatter={value => formatCurrency(value)} />
                   <ChartTooltip content={<ChartTooltipContent />} formatter={(value: number) => [formatCurrency(value), ""]} />
                   <Bar dataKey="realizado" fill="hsl(var(--chart-1))" name="Realizado" radius={[4, 4, 0, 0]} />
-                  <Line type="monotone" dataKey="meta" stroke="hsl(var(--chart-2))" strokeWidth={3} name="Meta" strokeDasharray="5 5" />
-                  <Line type="monotone" dataKey="margem" stroke="hsl(var(--chart-3))" strokeWidth={3} name="Margem" />
+                  <Line type="monotone" dataKey="meta" stroke="hsl(var(--chart-2))" strokeWidth={3} name="Meta" strokeDasharray="5 5" dot={{ fill: 'hsl(var(--chart-2))', r: 5 }} activeDot={{ r: 7 }} />
+                  <Line type="monotone" dataKey="margem" stroke="hsl(var(--chart-3))" strokeWidth={3} name="Margem" dot={{ fill: 'hsl(var(--chart-3))', r: 5 }} activeDot={{ r: 7 }} />
                 </ComposedChart>
               </ResponsiveContainer>
             </ChartContainer>
