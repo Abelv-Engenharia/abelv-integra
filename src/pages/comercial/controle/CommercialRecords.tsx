@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -7,16 +7,26 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Edit, Trash2, Search, AlertCircle, FileText } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import { commercialMockData, segmentoOptions, statusOptions, vendedorOptions } from "@/data/commercialMockData";
-import { CommercialFilters, CommercialSpreadsheet as CommercialSpreadsheetType } from "@/types/commercial";
+import { usePropostasComerciais, PropostaComercial } from "@/hooks/comercial/usePropostasComerciais";
+import { useSegmentos } from "@/hooks/comercial/useSegmentos";
+import { useVendedores } from "@/hooks/comercial/useVendedores";
 import { useToast } from "@/hooks/use-toast";
 const CommercialRecords = () => {
   const navigate = useNavigate();
-  const {
-    toast
-  } = useToast();
-  const [data, setData] = useState<CommercialSpreadsheetType[]>(commercialMockData);
-  const [filters, setFilters] = useState<CommercialFilters>({});
+  const { toast } = useToast();
+  const { propostas, isLoading, deleteProposta } = usePropostasComerciais();
+  const { segmentos } = useSegmentos();
+  const { vendedores } = useVendedores();
+  
+  const [filters, setFilters] = useState({
+    pc: '',
+    cliente: '',
+    segmento: '',
+    status: '',
+    vendedor: '',
+    dataInicio: '',
+    ano: ''
+  });
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
@@ -38,25 +48,67 @@ const CommercialRecords = () => {
     }
   };
   const handleDelete = (id: string, pc: string) => {
-    const updatedData = data.filter(item => item.id !== id);
-    setData(updatedData);
-    toast({
-      title: "Registro excluído",
-      description: `Proposta ${pc} foi removida com sucesso.`
-    });
+    if (confirm(`Tem certeza que deseja excluir a proposta ${pc}?`)) {
+      deleteProposta(id);
+    }
   };
-  const filteredData = data.filter(item => {
-    const itemYear = item.dataSaidaProposta.split('/')[2];
-    return (!filters.pc || item.pc.includes(filters.pc)) && (!filters.cliente || item.cliente.toLowerCase().includes(filters.cliente.toLowerCase())) && (!filters.segmento || item.segmento === filters.segmento) && (!filters.status || item.status === filters.status) && (!filters.vendedor || item.vendedor === filters.vendedor) && (!filters.dataInicio || new Date(item.dataSaidaProposta.split('/').reverse().join('-')) >= new Date(filters.dataInicio)) && (!filters.ano || itemYear === filters.ano);
-  });
+
+  // Filtrar dados
+  const filteredData = useMemo(() => {
+    return propostas.filter(item => {
+      const itemDate = new Date(item.data_saida_proposta);
+      const itemYear = itemDate.getFullYear().toString();
+      
+      return (
+        (!filters.pc || item.pc.includes(filters.pc)) &&
+        (!filters.cliente || item.cliente.toLowerCase().includes(filters.cliente.toLowerCase())) &&
+        (!filters.segmento || item.segmento_id === filters.segmento) &&
+        (!filters.status || item.status === filters.status) &&
+        (!filters.vendedor || item.vendedor_id === filters.vendedor) &&
+        (!filters.dataInicio || itemDate >= new Date(filters.dataInicio)) &&
+        (!filters.ano || itemYear === filters.ano)
+      );
+    });
+  }, [propostas, filters]);
+
+  // Extrair opções únicas dos dados
+  const statusOptions = useMemo(() => 
+    [...new Set(propostas.map(p => p.status))].filter(Boolean).sort(),
+    [propostas]
+  );
+
+  // Mapear nomes de segmentos e vendedores
+  const getSegmentoNome = (segmentoId: string) => {
+    const segmento = segmentos.find(s => s.id === segmentoId);
+    return segmento?.nome || segmentoId;
+  };
+
+  const getVendedorNome = (vendedorId: string) => {
+    const vendedor = vendedores.find(v => v.id === vendedorId);
+    return vendedor?.profiles?.nome || vendedorId;
+  };
   const clearFilters = () => {
-    setFilters({});
+    setFilters({
+      pc: '',
+      cliente: '',
+      segmento: '',
+      status: '',
+      vendedor: '',
+      dataInicio: '',
+      ano: ''
+    });
   };
 
   // Verifica se os campos de consolidação estão preenchidos
-  const isConsolidationComplete = (item: CommercialSpreadsheetType) => {
+  const isConsolidationComplete = (item: PropostaComercial) => {
     if (item.status !== 'Contemplado') return true;
-    return !!(item.dataassinaturacontratoreal && item.dataterminocontratoprevista && item.dataentregaorcamentoexecutivoprevista && item.dataentregaorcamentoexecutivoreal);
+    // TODO: Implementar verificação quando campos de consolidação forem adicionados
+    return true;
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('pt-BR');
   };
   return <div className="min-h-screen bg-background">
       <div className="p-6 space-y-6">
@@ -113,7 +165,7 @@ const CommercialRecords = () => {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Todos</SelectItem>
-                    {segmentoOptions.map(segmento => <SelectItem key={segmento} value={segmento}>{segmento}</SelectItem>)}
+                    {segmentos.filter(s => s.ativo).map(segmento => <SelectItem key={segmento.id} value={segmento.id}>{segmento.nome}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
@@ -145,7 +197,7 @@ const CommercialRecords = () => {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Todos</SelectItem>
-                    {vendedorOptions.map(vendedor => <SelectItem key={vendedor} value={vendedor}>{vendedor}</SelectItem>)}
+                    {vendedores.filter(v => v.ativo).map(vendedor => <SelectItem key={vendedor.id} value={vendedor.id}>{vendedor.profiles?.nome || 'N/A'}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
@@ -180,20 +232,20 @@ const CommercialRecords = () => {
         </Card>
 
         {/* Resumo */}
-        {filteredData.length > 0 && <Card>
+        {!isLoading && filteredData.length > 0 && <Card>
             <CardHeader>
               <CardTitle>Resumo</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
                 <div>
-                  <p className="text-muted-foreground">Total de Registros</p>
+                  <p className="text-muted-foreground">Total de registros</p>
                   <p className="text-2xl font-bold">{filteredData.length}</p>
                 </div>
                 <div>
-                  <p className="text-muted-foreground">Valor Total</p>
+                  <p className="text-muted-foreground">Valor total</p>
                   <p className="text-2xl font-bold">
-                    {formatCurrency(filteredData.reduce((sum, item) => sum + item.valorVenda, 0))}
+                    {formatCurrency(filteredData.reduce((sum, item) => sum + item.valor_venda, 0))}
                   </p>
                 </div>
                 <div>
@@ -252,63 +304,88 @@ const CommercialRecords = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredData.length === 0 ? <TableRow>
+                  {isLoading ? (
+                    <TableRow>
+                      <TableCell colSpan={13} className="text-center text-muted-foreground py-8">
+                        Carregando propostas...
+                      </TableCell>
+                    </TableRow>
+                  ) : filteredData.length === 0 ? (
+                    <TableRow>
                       <TableCell colSpan={13} className="text-center text-muted-foreground py-8">
                         Nenhum registro encontrado com os filtros aplicados.
                       </TableCell>
-                    </TableRow> : filteredData.map(item => {
-                  const needsConsolidation = !isConsolidationComplete(item);
-                  return <TableRow key={item.id} className={`hover:bg-muted/50 ${needsConsolidation ? 'bg-yellow-50 dark:bg-yellow-950/20' : ''}`}>
+                    </TableRow>
+                  ) : (
+                    filteredData.map(item => {
+                      const needsConsolidation = !isConsolidationComplete(item);
+                      return (
+                        <TableRow key={item.id} className={`hover:bg-muted/50 ${needsConsolidation ? 'bg-yellow-50 dark:bg-yellow-950/20' : ''}`}>
                           <TableCell className="font-medium">
                             <div className="flex items-center gap-2">
                               {item.pc}
                               {needsConsolidation && <AlertCircle className="h-4 w-4 text-yellow-600 dark:text-yellow-500" />}
                             </div>
                           </TableCell>
-                        <TableCell>{item.cliente}</TableCell>
-                        <TableCell>{item.obra}</TableCell>
-                        <TableCell>
-                          <span className="text-sm">{item.segmento}</span>
-                        </TableCell>
-                        <TableCell>{item.vendedor}</TableCell>
-                        <TableCell className="font-medium">{formatCurrency(item.valorVenda)}</TableCell>
-                        <TableCell className="font-medium text-blue-600">
-                          {item.margemPercentual.toFixed(1)}%
-                        </TableCell>
-                        <TableCell className="font-medium text-green-600">
-                          {formatCurrency(item.margemValor)}
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant={getStatusBadgeVariant(item.status)}>
-                            {item.status}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>{item.dataSaidaProposta}</TableCell>
-                        <TableCell className="text-center">{item.numeroRevisao}</TableCell>
-                        <TableCell>
-                          <Badge variant={item.orcamentoDuplicado === 'Sim' ? 'destructive' : 'secondary'}>
-                            {item.orcamentoDuplicado}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex gap-1">
-                            {item.status === 'Contemplado' && <Link to={`/comercial/controle/consolidacao/${item.id}`}>
-                                <Button variant={needsConsolidation ? "default" : "ghost"} size="sm" title={needsConsolidation ? "Preencher dados de consolidação" : "Ver detalhes da consolidação"} className={needsConsolidation ? "bg-yellow-600 hover:bg-yellow-700" : ""}>
-                                  <FileText className="h-4 w-4" />
+                          <TableCell>{item.cliente}</TableCell>
+                          <TableCell>{item.obra}</TableCell>
+                          <TableCell>
+                            <span className="text-sm">{getSegmentoNome(item.segmento_id)}</span>
+                          </TableCell>
+                          <TableCell>{getVendedorNome(item.vendedor_id)}</TableCell>
+                          <TableCell className="font-medium">{formatCurrency(item.valor_venda)}</TableCell>
+                          <TableCell className="font-medium text-blue-600">
+                            {item.margem_percentual.toFixed(1)}%
+                          </TableCell>
+                          <TableCell className="font-medium text-green-600">
+                            {formatCurrency(item.margem_valor)}
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant={getStatusBadgeVariant(item.status)}>
+                              {item.status}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>{formatDate(item.data_saida_proposta)}</TableCell>
+                          <TableCell className="text-center">{item.numero_revisao}</TableCell>
+                          <TableCell>
+                            <Badge variant={item.orcamento_duplicado === 'Sim' ? 'destructive' : 'secondary'}>
+                              {item.orcamento_duplicado}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex gap-1">
+                              {item.status === 'Contemplado' && (
+                                <Link to={`/comercial/controle/consolidacao/${item.id}`}>
+                                  <Button 
+                                    variant={needsConsolidation ? "default" : "ghost"} 
+                                    size="sm" 
+                                    title={needsConsolidation ? "Preencher dados de consolidação" : "Ver detalhes da consolidação"} 
+                                    className={needsConsolidation ? "bg-yellow-600 hover:bg-yellow-700" : ""}
+                                  >
+                                    <FileText className="h-4 w-4" />
+                                  </Button>
+                                </Link>
+                              )}
+                              <Link to={`/comercial/controle/editar/${item.id}`}>
+                                <Button variant="ghost" size="sm" title="Editar registro">
+                                  <Edit className="h-4 w-4" />
                                 </Button>
-                              </Link>}
-                            <Link to={`/comercial/controle/editar/${item.id}`}>
-                              <Button variant="ghost" size="sm" title="Editar registro">
-                                <Edit className="h-4 w-4" />
+                              </Link>
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                onClick={() => handleDelete(item.id, item.pc)} 
+                                title="Excluir registro" 
+                                className="text-destructive hover:text-destructive"
+                              >
+                                <Trash2 className="h-4 w-4" />
                               </Button>
-                            </Link>
-                            <Button variant="ghost" size="sm" onClick={() => handleDelete(item.id, item.pc)} title="Excluir registro" className="text-destructive hover:text-destructive">
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>;
-                })}
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })
+                  )}
                 </TableBody>
               </Table>
             </div>
