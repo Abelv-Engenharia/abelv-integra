@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useMemo } from "react";
 import { FileSpreadsheet, FileDown } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -26,23 +26,186 @@ import {
   ComposedChart,
   Line,
 } from "recharts";
-import { commercialMockData } from "@/data/commercialMockData";
-import {
-  agruparPorVendedor,
-  agruparPorSegmento,
-  agruparPorCliente,
-  contarPorStatus,
-  formatarMoeda,
-  agruparValoresPorStatus,
-  agruparValoresMonetariosPorStatus,
-  calcularMargemMediaContempladas,
-} from "@/utils/reportDataUtils";
+import { usePropostasComerciais } from "@/hooks/comercial/usePropostasComerciais";
+import { formatarMoeda } from "@/utils/reportDataUtils";
 import { exportarParaExcel, exportarParaPDF } from "@/utils/exportUtils";
 
 const COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6"];
 
+// Tipos para os dados agrupados
+interface StatusData {
+  name: string;
+  value: number;
+}
+
+interface VendedorData {
+  vendedor: string;
+  quantidade: number;
+  totalOrcado: number;
+  contemplado: number;
+  perdido: number;
+  estimativa: number;
+  contempladoValor: number;
+  perdidoValor: number;
+  estimativaValor: number;
+}
+
+interface SegmentoData {
+  segmento: string;
+  quantidade: number;
+  totalOrcado: number;
+  contemplado: number;
+  perdido: number;
+  estimativa: number;
+}
+
+interface ClienteData {
+  cliente: string;
+  quantidade: number;
+  totalOrcado: number;
+  contemplado: number;
+  perdido: number;
+  estimativa: number;
+  contempladoValor: number;
+  perdidoValor: number;
+  estimativaValor: number;
+}
+
+// Funções auxiliares para processar dados
+const contarPorStatus = (data: any[]): StatusData[] => {
+  const contagem = data.reduce((acc, item) => {
+    const status = item.status;
+    if (!acc[status]) {
+      acc[status] = { name: status, value: 0 };
+    }
+    acc[status].value += 1;
+    return acc;
+  }, {} as Record<string, StatusData>);
+  return Object.values(contagem);
+};
+
+const agruparValoresMonetariosPorStatus = (data: any[]): StatusData[] => {
+  const agrupado = data.reduce((acc, item) => {
+    const status = item.status;
+    if (!acc[status]) {
+      acc[status] = { name: status, value: 0 };
+    }
+    acc[status].value += item.valor_venda || 0;
+    return acc;
+  }, {} as Record<string, StatusData>);
+  return Object.values(agrupado);
+};
+
+const calcularMargemMediaContempladas = (data: any[]) => {
+  const contempladas = data.filter(item => item.status === 'Contemplado');
+  const totalMargens = contempladas.reduce((sum, item) => sum + (item.margem_percentual || 0), 0);
+  const valorTotal = contempladas.reduce((sum, item) => sum + (item.valor_venda || 0), 0);
+  return {
+    margemMedia: contempladas.length > 0 ? totalMargens / contempladas.length : 0,
+    quantidade: contempladas.length,
+    valorTotal
+  };
+};
+
+const agruparPorVendedor = (data: any[]): VendedorData[] => {
+  const agrupado = data.reduce((acc, item) => {
+    const vendedor = item.vendedor || 'Sem Vendedor';
+    if (!acc[vendedor]) {
+      acc[vendedor] = { 
+        vendedor, 
+        quantidade: 0, 
+        totalOrcado: 0,
+        contemplado: 0,
+        perdido: 0,
+        estimativa: 0,
+        contempladoValor: 0,
+        perdidoValor: 0,
+        estimativaValor: 0
+      };
+    }
+    acc[vendedor].quantidade += 1;
+    acc[vendedor].totalOrcado += item.valor_venda || 0;
+    
+    if (item.status === 'Contemplado') {
+      acc[vendedor].contemplado += 1;
+      acc[vendedor].contempladoValor += item.valor_venda || 0;
+    } else if (item.status === 'Perdido') {
+      acc[vendedor].perdido += 1;
+      acc[vendedor].perdidoValor += item.valor_venda || 0;
+    } else if (item.status === 'Estimativa' || item.status === 'Pré-Venda') {
+      acc[vendedor].estimativa += 1;
+      acc[vendedor].estimativaValor += item.valor_venda || 0;
+    }
+    return acc;
+  }, {} as Record<string, VendedorData>);
+  return Object.values(agrupado);
+};
+
+const agruparPorSegmento = (data: any[]): SegmentoData[] => {
+  const agrupado = data.reduce((acc, item) => {
+    const segmento = item.segmento || 'Sem Segmento';
+    if (!acc[segmento]) {
+      acc[segmento] = { 
+        segmento, 
+        quantidade: 0, 
+        totalOrcado: 0,
+        contemplado: 0,
+        perdido: 0,
+        estimativa: 0
+      };
+    }
+    acc[segmento].quantidade += 1;
+    acc[segmento].totalOrcado += item.valor_venda || 0;
+    
+    if (item.status === 'Contemplado') {
+      acc[segmento].contemplado += 1;
+    } else if (item.status === 'Perdido') {
+      acc[segmento].perdido += 1;
+    } else if (item.status === 'Estimativa' || item.status === 'Pré-Venda') {
+      acc[segmento].estimativa += 1;
+    }
+    return acc;
+  }, {} as Record<string, SegmentoData>);
+  return Object.values(agrupado);
+};
+
+const agruparPorCliente = (data: any[]): ClienteData[] => {
+  const agrupado = data.reduce((acc, item) => {
+    const cliente = item.cliente || 'Sem Cliente';
+    if (!acc[cliente]) {
+      acc[cliente] = { 
+        cliente, 
+        quantidade: 0, 
+        totalOrcado: 0,
+        contemplado: 0,
+        perdido: 0,
+        estimativa: 0,
+        contempladoValor: 0,
+        perdidoValor: 0,
+        estimativaValor: 0
+      };
+    }
+    acc[cliente].quantidade += 1;
+    acc[cliente].totalOrcado += item.valor_venda || 0;
+    
+    if (item.status === 'Contemplado') {
+      acc[cliente].contemplado += 1;
+      acc[cliente].contempladoValor += item.valor_venda || 0;
+    } else if (item.status === 'Perdido') {
+      acc[cliente].perdido += 1;
+      acc[cliente].perdidoValor += item.valor_venda || 0;
+    } else if (item.status === 'Estimativa' || item.status === 'Pré-Venda') {
+      acc[cliente].estimativa += 1;
+      acc[cliente].estimativaValor += item.valor_venda || 0;
+    }
+    return acc;
+  }, {} as Record<string, ClienteData>);
+  return Object.values(agrupado);
+};
+
 const CommercialReports = () => {
   const [activeTab, setActiveTab] = useState("propostas-emitidas");
+  const { propostas, isLoading } = usePropostasComerciais();
 
   // Refs para capturar gráficos
   const chartRef1 = useRef<HTMLDivElement>(null);
@@ -51,30 +214,46 @@ const CommercialReports = () => {
   const chartRef4 = useRef<HTMLDivElement>(null);
   const chartRef5 = useRef<HTMLDivElement>(null);
 
-  // Dados filtrados
-  const propostasEmitidas = commercialMockData;
-  const propostasEstimativas = commercialMockData.filter(
-    (p) => p.status === "Estimativa" || p.status === "Pré-Venda"
+  // Dados filtrados e processados
+  const propostasEmitidas = useMemo(() => propostas, [propostas]);
+  
+  const propostasEstimativas = useMemo(
+    () => propostas.filter((p) => p.status === "Estimativa" || p.status === "Pré-Venda"),
+    [propostas]
   );
-  const desempenhoPorVendedor = agruparPorVendedor(commercialMockData);
-  const desempenhoPorSegmento = agruparPorSegmento(commercialMockData);
-  const desempenhoPorCliente = agruparPorCliente(commercialMockData);
+  
+  const desempenhoPorVendedor = useMemo(() => agruparPorVendedor(propostas), [propostas]);
+  const desempenhoPorSegmento = useMemo(() => agruparPorSegmento(propostas), [propostas]);
+  const desempenhoPorCliente = useMemo(() => agruparPorCliente(propostas), [propostas]);
 
   // Dados para gráficos
-  const statusData1 = contarPorStatus(propostasEmitidas);
-  const statusData2 = contarPorStatus(propostasEstimativas);
-  const statusValoresData = agruparValoresPorStatus(commercialMockData);
-  const valoresMonetariosPorStatus = agruparValoresMonetariosPorStatus(propostasEmitidas);
-  const margemMediaData = calcularMargemMediaContempladas(propostasEmitidas);
+  const statusData1 = useMemo(() => contarPorStatus(propostasEmitidas), [propostasEmitidas]);
+  const statusData2 = useMemo(() => contarPorStatus(propostasEstimativas), [propostasEstimativas]);
+  const valoresMonetariosPorStatus = useMemo(
+    () => agruparValoresMonetariosPorStatus(propostasEmitidas),
+    [propostasEmitidas]
+  );
+  const margemMediaData = useMemo(
+    () => calcularMargemMediaContempladas(propostasEmitidas),
+    [propostasEmitidas]
+  );
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-muted-foreground">Carregando relatórios...</p>
+      </div>
+    );
+  }
 
   // Funções de exportação - Propostas Emitidas
   const exportarPropostasEmitidas = (formato: "excel" | "pdf") => {
     const dados = propostasEmitidas.map((p) => ({
       PC: p.pc,
       Cliente: p.cliente,
-      "Valor de Venda": formatarMoeda(p.valorVenda),
-      "Margem (%)": `${p.margemPercentual.toFixed(2)}%`,
-      Revisão: p.numeroRevisao,
+      "Valor de Venda": formatarMoeda(p.valor_venda || 0),
+      "Margem (%)": `${(p.margem_percentual || 0).toFixed(2)}%`,
+      Revisão: p.numero_revisao || 0,
       Status: p.status,
     }));
 
@@ -91,9 +270,9 @@ const CommercialReports = () => {
       const dadosTabela = propostasEmitidas.map((p) => [
         p.pc,
         p.cliente,
-        formatarMoeda(p.valorVenda),
-        `${p.margemPercentual.toFixed(2)}%`,
-        String(p.numeroRevisao),
+        formatarMoeda(p.valor_venda || 0),
+        `${(p.margem_percentual || 0).toFixed(2)}%`,
+        String(p.numero_revisao || 0),
         p.status,
       ]);
       exportarParaPDF(
@@ -110,9 +289,9 @@ const CommercialReports = () => {
     const dados = propostasEstimativas.map((p) => ({
       PC: p.pc,
       Cliente: p.cliente,
-      "Valor de Venda": formatarMoeda(p.valorVenda),
-      "Margem (%)": `${p.margemPercentual.toFixed(2)}%`,
-      Revisão: p.numeroRevisao,
+      "Valor de Venda": formatarMoeda(p.valor_venda || 0),
+      "Margem (%)": `${(p.margem_percentual || 0).toFixed(2)}%`,
+      Revisão: p.numero_revisao || 0,
       Status: p.status,
     }));
 
@@ -129,9 +308,9 @@ const CommercialReports = () => {
       const dadosTabela = propostasEstimativas.map((p) => [
         p.pc,
         p.cliente,
-        formatarMoeda(p.valorVenda),
-        `${p.margemPercentual.toFixed(2)}%`,
-        String(p.numeroRevisao),
+        formatarMoeda(p.valor_venda || 0),
+        `${(p.margem_percentual || 0).toFixed(2)}%`,
+        String(p.numero_revisao || 0),
         p.status,
       ]);
       exportarParaPDF(
@@ -299,9 +478,9 @@ const CommercialReports = () => {
                       <TableRow key={proposta.id}>
                         <TableCell>{proposta.pc}</TableCell>
                         <TableCell>{proposta.cliente}</TableCell>
-                        <TableCell>{formatarMoeda(proposta.valorVenda)}</TableCell>
-                        <TableCell>{proposta.margemPercentual.toFixed(2)}%</TableCell>
-                        <TableCell>{proposta.numeroRevisao}</TableCell>
+                        <TableCell>{formatarMoeda(proposta.valor_venda || 0)}</TableCell>
+                        <TableCell>{(proposta.margem_percentual || 0).toFixed(2)}%</TableCell>
+                        <TableCell>{proposta.numero_revisao || 0}</TableCell>
                         <TableCell>{proposta.status}</TableCell>
                       </TableRow>
                     ))}
@@ -460,9 +639,9 @@ const CommercialReports = () => {
                       <TableRow key={proposta.id}>
                         <TableCell>{proposta.pc}</TableCell>
                         <TableCell>{proposta.cliente}</TableCell>
-                        <TableCell>{formatarMoeda(proposta.valorVenda)}</TableCell>
-                        <TableCell>{proposta.margemPercentual.toFixed(2)}%</TableCell>
-                        <TableCell>{proposta.numeroRevisao}</TableCell>
+                        <TableCell>{formatarMoeda(proposta.valor_venda || 0)}</TableCell>
+                        <TableCell>{(proposta.margem_percentual || 0).toFixed(2)}%</TableCell>
+                        <TableCell>{proposta.numero_revisao || 0}</TableCell>
                         <TableCell>{proposta.status}</TableCell>
                       </TableRow>
                     ))}
