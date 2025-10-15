@@ -5,7 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Edit, Trash2, Search, AlertCircle, FileText } from "lucide-react";
+import { ArrowLeft, Edit, Search, AlertCircle, FileText } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { usePropostasComerciais, PropostaComercial } from "@/hooks/comercial/usePropostasComerciais";
 import { useSegmentos } from "@/hooks/comercial/useSegmentos";
@@ -45,11 +45,6 @@ const CommercialRecords = () => {
         return 'outline';
       default:
         return 'secondary';
-    }
-  };
-  const handleDelete = (id: string, pc: string) => {
-    if (confirm(`Tem certeza que deseja excluir a proposta ${pc}?`)) {
-      deleteProposta(id);
     }
   };
 
@@ -269,18 +264,12 @@ const CommercialRecords = () => {
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle>Propostas Emitidas ({filteredData.length})</CardTitle>
-              <div className="flex gap-2">
-                <Button variant="outline" size="sm" onClick={() => navigate("/comercial/controle/dashboard")} className="gap-2">
-                  <FileText className="h-4 w-4" />
-                  Detalhes da Consolidação
+              <Link to="/comercial/controle/cadastro">
+                <Button size="sm" className="gap-2">
+                  <Edit className="h-4 w-4" />
+                  Novo Registro
                 </Button>
-                <Link to="/comercial/controle/cadastro">
-                  <Button size="sm" className="gap-2">
-                    <Edit className="h-4 w-4" />
-                    Novo Registro
-                  </Button>
-                </Link>
-              </div>
+              </Link>
             </div>
           </CardHeader>
           <CardContent>
@@ -371,15 +360,6 @@ const CommercialRecords = () => {
                                   <Edit className="h-4 w-4" />
                                 </Button>
                               </Link>
-                              <Button 
-                                variant="ghost" 
-                                size="sm" 
-                                onClick={() => handleDelete(item.id, item.pc)} 
-                                title="Excluir registro" 
-                                className="text-destructive hover:text-destructive"
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
                             </div>
                           </TableCell>
                         </TableRow>
