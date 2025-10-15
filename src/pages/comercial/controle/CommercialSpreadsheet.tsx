@@ -26,10 +26,10 @@ const CommercialSpreadsheet = () => {
   // Agrupar dados por trimestre
   const getQuarterlyData = () => {
     const quarters = {
-      T1: 0,
-      T2: 0,
-      T3: 0,
-      T4: 0
+      T1: { vendas: 0, margem: 0 },
+      T2: { vendas: 0, margem: 0 },
+      T3: { vendas: 0, margem: 0 },
+      T4: { vendas: 0, margem: 0 }
     };
     currentYearData.forEach(item => {
       const dataPropostaStr = item.data_saida_proposta || '';
@@ -40,7 +40,8 @@ const CommercialSpreadsheet = () => {
 
       // Considerar apenas propostas "Contemplado" para positivação
       if (item.status === 'Contemplado') {
-        quarters[quarterKey] += item.valor_venda || 0;
+        quarters[quarterKey].vendas += item.valor_venda || 0;
+        quarters[quarterKey].margem += item.margem_valor || 0;
       }
     });
     return quarters;
@@ -55,19 +56,23 @@ const CommercialSpreadsheet = () => {
   // Preparar dados para o gráfico
   const chartData = [{
     quarter: 'T1',
-    realizado: quarterlyData.T1,
+    realizado: quarterlyData.T1.vendas,
+    margem: quarterlyData.T1.margem,
     meta: currentYearGoals?.meta_t1 || 0
   }, {
     quarter: 'T2',
-    realizado: quarterlyData.T2,
+    realizado: quarterlyData.T2.vendas,
+    margem: quarterlyData.T2.margem,
     meta: currentYearGoals?.meta_t2 || 0
   }, {
     quarter: 'T3',
-    realizado: quarterlyData.T3,
+    realizado: quarterlyData.T3.vendas,
+    margem: quarterlyData.T3.margem,
     meta: currentYearGoals?.meta_t3 || 0
   }, {
     quarter: 'T4',
-    realizado: quarterlyData.T4,
+    realizado: quarterlyData.T4.vendas,
+    margem: quarterlyData.T4.margem,
     meta: currentYearGoals?.meta_t4 || 0
   }];
   const chartConfig = {
@@ -78,6 +83,10 @@ const CommercialSpreadsheet = () => {
     meta: {
       label: "Meta",
       color: "hsl(var(--chart-2))"
+    },
+    margem: {
+      label: "Margem",
+      color: "hsl(var(--chart-3))"
     }
   };
   if (isLoading) {
@@ -125,6 +134,7 @@ const CommercialSpreadsheet = () => {
                   <ChartTooltip content={<ChartTooltipContent />} formatter={(value: number) => [formatCurrency(value), ""]} />
                   <Bar dataKey="realizado" fill="hsl(var(--chart-1))" name="Realizado" radius={[4, 4, 0, 0]} />
                   <Line type="monotone" dataKey="meta" stroke="hsl(var(--chart-2))" strokeWidth={3} name="Meta" strokeDasharray="5 5" />
+                  <Line type="monotone" dataKey="margem" stroke="hsl(var(--chart-3))" strokeWidth={3} name="Margem" />
                 </ComposedChart>
               </ResponsiveContainer>
             </ChartContainer>
@@ -142,6 +152,10 @@ const CommercialSpreadsheet = () => {
                   <div>
                     <p className="text-sm text-muted-foreground">Realizado</p>
                     <p className="text-2xl font-bold">{formatCurrency(quarter.realizado)}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Margem</p>
+                    <p className="text-lg font-medium text-chart-3">{formatCurrency(quarter.margem)}</p>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Meta</p>
