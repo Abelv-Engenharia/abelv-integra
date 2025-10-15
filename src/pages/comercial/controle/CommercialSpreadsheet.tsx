@@ -19,7 +19,14 @@ const CommercialSpreadsheet = () => {
   const currentYearData = propostas.filter(item => {
     const dataPropostaStr = item.data_saida_proposta || '';
     if (!dataPropostaStr) return false;
-    const year = parseInt(dataPropostaStr.split('/')[2]);
+    
+    // Suportar ambos os formatos: DD/MM/AAAA e YYYY-MM-DD
+    let year: number;
+    if (dataPropostaStr.includes('/')) {
+      year = parseInt(dataPropostaStr.split('/')[2]);
+    } else {
+      year = parseInt(dataPropostaStr.split('-')[0]);
+    }
     return year === currentYear;
   });
 
@@ -34,7 +41,14 @@ const CommercialSpreadsheet = () => {
     currentYearData.forEach(item => {
       const dataPropostaStr = item.data_saida_proposta || '';
       if (!dataPropostaStr) return;
-      const month = parseInt(dataPropostaStr.split('/')[1]);
+      
+      // Suportar ambos os formatos: DD/MM/AAAA e YYYY-MM-DD
+      let month: number;
+      if (dataPropostaStr.includes('/')) {
+        month = parseInt(dataPropostaStr.split('/')[1]);
+      } else {
+        month = parseInt(dataPropostaStr.split('-')[1]);
+      }
       const quarter = Math.ceil(month / 3);
       const quarterKey = `T${quarter}` as keyof typeof quarters;
 
