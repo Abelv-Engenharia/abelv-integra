@@ -1,13 +1,12 @@
-import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart3 } from "lucide-react";
-import { commercialMockData } from "@/data/commercialMockData";
-import { annualGoalsMockData } from "@/data/annualGoalsMockData";
-import { CommercialSpreadsheet as CommercialSpreadsheetType } from "@/types/commercial";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Line, ComposedChart, ResponsiveContainer } from "recharts";
+import { usePropostasComerciais } from "@/hooks/comercial/usePropostasComerciais";
+import { useMetasAnuais } from "@/hooks/comercial/useMetasAnuais";
 const CommercialSpreadsheet = () => {
-  const [data] = useState<CommercialSpreadsheetType[]>(commercialMockData);
+  const { propostas, isLoading: isLoadingPropostas } = usePropostasComerciais();
+  const { metas, isLoading: isLoadingMetas } = useMetasAnuais();
   const currentYear = new Date().getFullYear();
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -17,8 +16,10 @@ const CommercialSpreadsheet = () => {
   };
 
   // Filtrar dados do ano atual
-  const currentYearData = data.filter(item => {
-    const year = parseInt(item.dataSaidaProposta.split('/')[2]);
+  const currentYearData = propostas.filter(item => {
+    const dataPropostaStr = item.data_saida_proposta || '';
+    if (!dataPropostaStr) return false;
+    const year = parseInt(dataPropostaStr.split('/')[2]);
     return year === currentYear;
   });
 
@@ -31,39 +32,43 @@ const CommercialSpreadsheet = () => {
       T4: 0
     };
     currentYearData.forEach(item => {
-      const month = parseInt(item.dataSaidaProposta.split('/')[1]);
+      const dataPropostaStr = item.data_saida_proposta || '';
+      if (!dataPropostaStr) return;
+      const month = parseInt(dataPropostaStr.split('/')[1]);
       const quarter = Math.ceil(month / 3);
       const quarterKey = `T${quarter}` as keyof typeof quarters;
 
       // Considerar apenas propostas "Contemplado" para positivação
       if (item.status === 'Contemplado') {
-        quarters[quarterKey] += item.valorVenda;
+        quarters[quarterKey] += item.valor_venda || 0;
       }
     });
     return quarters;
   };
 
   // Buscar metas do ano atual
-  const currentYearGoals = annualGoalsMockData.find(goal => goal.ano === currentYear && goal.ativo);
+  const currentYearGoals = metas.find(goal => goal.ano === currentYear && goal.ativo);
   const quarterlyData = getQuarterlyData();
+
+  const isLoading = isLoadingPropostas || isLoadingMetas;
 
   // Preparar dados para o gráfico
   const chartData = [{
     quarter: 'T1',
     realizado: quarterlyData.T1,
-    meta: currentYearGoals?.metaT1 || 0
+    meta: currentYearGoals?.meta_t1 || 0
   }, {
     quarter: 'T2',
     realizado: quarterlyData.T2,
-    meta: currentYearGoals?.metaT2 || 0
+    meta: currentYearGoals?.meta_t2 || 0
   }, {
     quarter: 'T3',
     realizado: quarterlyData.T3,
-    meta: currentYearGoals?.metaT3 || 0
+    meta: currentYearGoals?.meta_t3 || 0
   }, {
     quarter: 'T4',
     realizado: quarterlyData.T4,
-    meta: currentYearGoals?.metaT4 || 0
+    meta: currentYearGoals?.meta_t4 || 0
   }];
   const chartConfig = {
     realizado: {
@@ -75,6 +80,12 @@ const CommercialSpreadsheet = () => {
       color: "hsl(var(--chart-2))"
     }
   };
+  if (isLoading) {
+    return <div className="min-h-screen bg-background flex items-center justify-center">
+        <p className="text-muted-foreground">Carregando dados de performance...</p>
+      </div>;
+  }
+
   return <div className="min-h-screen bg-background">
       <div className="p-6 space-y-6">
         <div className="flex items-center justify-between">
