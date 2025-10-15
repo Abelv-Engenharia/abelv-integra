@@ -6,13 +6,16 @@ import { Label } from "@/components/ui/label";
 import { ArrowLeft, Save } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useState, useEffect } from "react";
-import { usePropostasComerciais, PropostaComercial } from "@/hooks/comercial/usePropostasComerciais";
+import { usePropostasComerciais } from "@/hooks/comercial/usePropostasComerciais";
+import { useConsolidacao, useConsolidacoes } from "@/hooks/comercial/useConsolidacoes";
 
 const ConsolidationDetails = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const { toast } = useToast();
-  const { propostas, isLoading, updateProposta } = usePropostasComerciais();
+  const { propostas, isLoading: isLoadingPropostas } = usePropostasComerciais();
+  const { consolidacao, isLoading: isLoadingConsolidacao } = useConsolidacao(id);
+  const { createConsolidacao, updateConsolidacao } = useConsolidacoes();
 
   const [formData, setFormData] = useState({
     data_assinatura_contrato_real: "",
@@ -21,30 +24,23 @@ const ConsolidationDetails = () => {
     data_entrega_orcamento_executivo_real: "",
   });
 
-  const [proposta, setProposta] = useState<PropostaComercial | null>(null);
+  const proposta = propostas.find((item) => item.id === id);
+  const isLoading = isLoadingPropostas || isLoadingConsolidacao;
 
   useEffect(() => {
-    if (!isLoading && propostas.length > 0) {
-      const propostaEncontrada = propostas.find((item) => item.id === id);
-      
-      if (propostaEncontrada) {
-        setProposta(propostaEncontrada);
-        
-        // Carregar dados existentes se houver
-        setFormData({
-          data_assinatura_contrato_real: propostaEncontrada.data_assinatura_contrato_real || "",
-          data_termino_contrato_prevista: propostaEncontrada.data_termino_contrato_prevista || "",
-          data_entrega_orcamento_executivo_prevista: propostaEncontrada.data_entrega_orcamento_executivo_prevista || "",
-          data_entrega_orcamento_executivo_real: propostaEncontrada.data_entrega_orcamento_executivo_real || "",
-        });
-      }
+    if (consolidacao) {
+      setFormData({
+        data_assinatura_contrato_real: consolidacao.data_assinatura_contrato_real || "",
+        data_termino_contrato_prevista: consolidacao.data_termino_contrato_prevista || "",
+        data_entrega_orcamento_executivo_prevista: consolidacao.data_entrega_orcamento_executivo_prevista || "",
+        data_entrega_orcamento_executivo_real: consolidacao.data_entrega_orcamento_executivo_real || "",
+      });
     }
-  }, [id, propostas, isLoading]);
+  }, [consolidacao]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validar campos obrigatórios
     if (!formData.data_assinatura_contrato_real || 
         !formData.data_termino_contrato_prevista || 
         !formData.data_entrega_orcamento_executivo_prevista || 
@@ -57,23 +53,24 @@ const ConsolidationDetails = () => {
       return;
     }
 
-    if (!proposta) return;
+    if (!proposta || !id) return;
 
     try {
-      await updateProposta(proposta.id, formData);
-      
-      toast({
-        title: "Sucesso!",
-        description: "Detalhes da consolidação salvos com sucesso.",
-      });
+      if (consolidacao) {
+        await updateConsolidacao({
+          id: consolidacao.id,
+          ...formData,
+        });
+      } else {
+        await createConsolidacao({
+          proposta_id: id,
+          ...formData,
+        });
+      }
 
       navigate("/comercial/controle/registros");
     } catch (error) {
-      toast({
-        title: "Erro ao salvar",
-        description: "Não foi possível salvar os detalhes da consolidação.",
-        variant: "destructive",
-      });
+      console.error("Erro ao salvar consolidação:", error);
     }
   };
 

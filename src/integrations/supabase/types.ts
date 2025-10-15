@@ -447,6 +447,53 @@ export type Database = {
           },
         ]
       }
+      consolidacoes: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          data_assinatura_contrato_real: string
+          data_entrega_orcamento_executivo_prevista: string
+          data_entrega_orcamento_executivo_real: string
+          data_termino_contrato_prevista: string
+          id: string
+          proposta_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          data_assinatura_contrato_real: string
+          data_entrega_orcamento_executivo_prevista: string
+          data_entrega_orcamento_executivo_real: string
+          data_termino_contrato_prevista: string
+          id?: string
+          proposta_id: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          data_assinatura_contrato_real?: string
+          data_entrega_orcamento_executivo_prevista?: string
+          data_entrega_orcamento_executivo_real?: string
+          data_termino_contrato_prevista?: string
+          id?: string
+          proposta_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consolidacoes_proposta_id_fkey"
+            columns: ["proposta_id"]
+            isOneToOne: true
+            referencedRelation: "propostas_comerciais"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       controle_opcoes: {
         Row: {
           ativo: boolean | null
