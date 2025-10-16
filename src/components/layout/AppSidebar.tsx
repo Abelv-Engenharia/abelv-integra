@@ -242,18 +242,52 @@ export function AppSidebar() {
         )}
 
         {/* Seção: Engenharia Matricial */}
-        <SidebarSectionEngenhariaMatricial
-          openMenu={openMenu}
-          toggleMenu={toggleMenu}
-          onLinkClick={handleLinkClick}
-        />
+        {[
+          "engmat_os_abertura",
+          "engmat_os_planejamento",
+          "engmat_os_medicao",
+          "engmat_os_finalizacao",
+          "engmat_os_historico",
+          "engmat_replanejamento_visao_geral",
+          "engmat_replanejamento_unificado",
+          "engmat_relatorio_os_abertas",
+          "engmat_relatorio_os_encerradas",
+          "engmat_relatorio_os_planejamento",
+          "engmat_relatorio_hht",
+          "engmat_relatorio_engenheiro",
+          "engmat_relatorio_unificado",
+          "engmat_relatorio_acompanhamento_prod"
+        ].some(canSee) && (
+          <SidebarSectionEngenhariaMatricial
+            openMenu={openMenu}
+            toggleMenu={toggleMenu}
+            onLinkClick={handleLinkClick}
+          />
+        )}
 
         {/* Seção: Comercial */}
-        <SidebarSectionComercial
-          openMenu={openMenu}
-          toggleMenu={toggleMenu}
-          onLinkClick={handleLinkClick}
-        />
+        {[
+          "comercial_repositorio_empresarial",
+          "comercial_repositorio_habilitacao",
+          "comercial_repositorio_juridico",
+          "comercial_repositorio_tecnico",
+          "comercial_repositorio_editais",
+          "comercial_repositorio_geral",
+          "comercial_controle_dashboard",
+          "comercial_controle_cadastro",
+          "comercial_controle_registros",
+          "comercial_controle_metas",
+          "comercial_controle_performance",
+          "comercial_controle_relatorios",
+          "comercial_controle_segmentos",
+          "comercial_controle_vendedores"
+        ].some(canSee) && (
+          <SidebarSectionComercial
+            openMenu={openMenu}
+            toggleMenu={toggleMenu}
+            onLinkClick={handleLinkClick}
+          />
+        )}
       </SidebarContent>
     </Sidebar>
   );
