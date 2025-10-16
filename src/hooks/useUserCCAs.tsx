@@ -14,26 +14,21 @@ export const useUserCCAs = () => {
       try {
         console.log('Buscando CCAs para usuário:', user.id);
         
-        // Buscar CCAs permitidos do novo sistema (profiles.ccas_permitidas)
-        const { data: userProfile, error: userProfileError } = await supabase
-          .from('profiles')
-          .select('ccas_permitidas')
-          .eq('id', user.id)
-          .single();
+        // Buscar CCAs permitidos usando a função RPC (usuario_ccas)
+        const { data: ccaIds, error: ccaIdsError } = await supabase.rpc('get_user_allowed_ccas', {
+          user_id_param: user.id
+        });
 
-        if (userProfileError) {
-          console.error("Erro ao buscar perfil do usuário:", userProfileError);
+        if (ccaIdsError) {
+          console.error("Erro ao buscar CCAs permitidos:", ccaIdsError);
           return [];
         }
 
-        console.log('Perfil do usuário encontrado:', userProfile);
-
-        const ccasPermitidas = userProfile?.ccas_permitidas as number[] || [];
-        console.log('CCAs permitidas:', ccasPermitidas);
+        console.log('CCAs permitidos (IDs):', ccaIds);
         
         // Se não tem CCAs específicos, retorna vazio (sem acesso)
-        if (!ccasPermitidas || ccasPermitidas.length === 0) {
-          console.log('Usuário sem CCAs permitidas');
+        if (!ccaIds || ccaIds.length === 0) {
+          console.log('Usuário sem CCAs permitidos');
           return [];
         }
 
@@ -41,7 +36,7 @@ export const useUserCCAs = () => {
         const { data: ccas, error: ccasError } = await supabase
           .from('ccas')
           .select('*')
-          .in('id', ccasPermitidas)
+          .in('id', ccaIds)
           .eq('ativo', true)
           .order('nome');
 

@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
 import { useToast } from '@/hooks/use-toast';
 import { useSecurityAudit } from '@/hooks/useSecurityAudit';
+import { supabase } from '@/integrations/supabase/client';
 
 interface SecurityValidationResult {
   isValid: boolean;
@@ -29,40 +30,54 @@ export const useSecurityValidation = () => {
   });
 
   useEffect(() => {
-    if (!user || !userPermissoes) {
+    const fetchValidation = async () => {
+      if (!user || !userPermissoes) {
+        setValidation({
+          isValid: false,
+          hasAdminAccess: false,
+          canManageUsers: false,
+          canManageFuncionarios: false,
+          allowedCCAs: [],
+          securityLevel: 'low'
+        });
+        return;
+      }
+
+      const permissions = userPermissoes as any;
+      const hasAdminAccess = permissions?.admin_usuarios === true;
+      const canManageUsers = permissions?.admin_usuarios === true;
+      const canManageFuncionarios = permissions?.admin_funcionarios === true;
+      
+      // Buscar CCAs permitidos usando a função RPC (usuario_ccas)
+      let allowedCCAs: number[] = [];
+      try {
+        const { data: ccaIds } = await supabase.rpc('get_user_allowed_ccas', {
+          user_id_param: user.id
+        });
+        allowedCCAs = ccaIds || [];
+      } catch (error) {
+        console.error('Erro ao buscar CCAs permitidos:', error);
+      }
+
+      // Determine security level based on permissions
+      let securityLevel: 'low' | 'medium' | 'high' = 'low';
+      if (hasAdminAccess) {
+        securityLevel = 'high';
+      } else if (canManageFuncionarios || Object.values(permissions || {}).some(v => v === true)) {
+        securityLevel = 'medium';
+      }
+
       setValidation({
-        isValid: false,
-        hasAdminAccess: false,
-        canManageUsers: false,
-        canManageFuncionarios: false,
-        allowedCCAs: [],
-        securityLevel: 'low'
+        isValid: true,
+        hasAdminAccess,
+        canManageUsers,
+        canManageFuncionarios,
+        allowedCCAs,
+        securityLevel
       });
-      return;
-    }
+    };
 
-    const permissions = userPermissoes as any;
-    const hasAdminAccess = permissions?.admin_usuarios === true;
-    const canManageUsers = permissions?.admin_usuarios === true;
-    const canManageFuncionarios = permissions?.admin_funcionarios === true;
-    const allowedCCAs = Array.isArray(permissions?.ccas_permitidas) ? permissions.ccas_permitidas : [];
-
-    // Determine security level based on permissions
-    let securityLevel: 'low' | 'medium' | 'high' = 'low';
-    if (hasAdminAccess) {
-      securityLevel = 'high';
-    } else if (canManageFuncionarios || Object.values(permissions || {}).some(v => v === true)) {
-      securityLevel = 'medium';
-    }
-
-    setValidation({
-      isValid: true,
-      hasAdminAccess,
-      canManageUsers,
-      canManageFuncionarios,
-      allowedCCAs,
-      securityLevel
-    });
+    fetchValidation();
   }, [user, userPermissoes]);
 
   const validateAction = async (action: string, requiredPermission?: string) => {
