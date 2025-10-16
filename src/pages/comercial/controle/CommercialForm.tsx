@@ -215,7 +215,7 @@ const CommercialForm = () => {
                         <FormLabel className="text-destructive">
                           Segmento *
                         </FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isLoadingSegmentos}>
+                        <Select onValueChange={field.onChange} value={field.value} disabled={isLoadingSegmentos}>
                           <FormControl>
                             <SelectTrigger className={!field.value ? "border-destructive" : ""}>
                               <SelectValue placeholder={isLoadingSegmentos ? "Carregando..." : "Selecione um segmento"} />
@@ -282,7 +282,7 @@ const CommercialForm = () => {
                         <FormLabel className="text-destructive">
                           Vendedor *
                         </FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isLoadingVendedores}>
+                        <Select onValueChange={field.onChange} value={field.value} disabled={isLoadingVendedores}>
                           <FormControl>
                             <SelectTrigger className={!field.value ? "border-destructive" : ""}>
                               <SelectValue placeholder={isLoadingVendedores ? "Carregando..." : "Selecione um vendedor"} />
@@ -401,7 +401,7 @@ const CommercialForm = () => {
                         <FormLabel className="text-destructive">
                           Status *
                         </FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <Select onValueChange={field.onChange} value={field.value}>
                           <FormControl>
                             <SelectTrigger className={!field.value ? "border-destructive" : ""}>
                               <SelectValue placeholder="Selecione um status" />
