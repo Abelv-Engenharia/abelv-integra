@@ -94,13 +94,13 @@ export default function SidebarSearch() {
     { name: "Minhas Tarefas", path: "/tarefas/minhas-tarefas", category: "TAREFAS", slug: "tarefas_minhas_tarefas" },
     { name: "Cadastro de Tarefas", path: "/tarefas/cadastro", category: "TAREFAS", slug: "tarefas_cadastro" },
 
-    // RELATÓRIOS
-    { name: "Relatórios Dashboard", path: "/relatorios/dashboard", category: "RELATÓRIOS", slug: "relatorios_dashboard" },
-    { name: "Relatórios IDSMS", path: "/relatorios/idsms", category: "RELATÓRIOS", slug: "relatorios_idsms" },
-    { name: "Relatórios HSA", path: "/relatorios/hsa", category: "RELATÓRIOS", slug: "relatorios_hsa" },
-    { name: "Relatórios Ocorrências", path: "/relatorios/ocorrencias", category: "RELATÓRIOS", slug: "relatorios_ocorrencias" },
-    { name: "Relatórios Desvios", path: "/relatorios/desvios", category: "RELATÓRIOS", slug: "relatorios_desvios" },
-    { name: "Relatórios Treinamentos", path: "/relatorios/treinamentos", category: "RELATÓRIOS", slug: "relatorios_treinamentos" },
+    // RELATÓRIOS (dentro do menu SMS)
+    { name: "Relatórios Dashboard", path: "/relatorios/dashboard", category: "SMS - RELATÓRIOS", slug: "relatorios_dashboard" },
+    { name: "Relatórios IDSMS", path: "/relatorios/idsms", category: "SMS - RELATÓRIOS", slug: "relatorios_idsms" },
+    { name: "Relatórios HSA", path: "/relatorios/hsa", category: "SMS - RELATÓRIOS", slug: "relatorios_hsa" },
+    { name: "Relatórios Ocorrências", path: "/relatorios/ocorrencias", category: "SMS - RELATÓRIOS", slug: "relatorios_ocorrencias" },
+    { name: "Relatórios Desvios", path: "/relatorios/desvios", category: "SMS - RELATÓRIOS", slug: "relatorios_desvios" },
+    { name: "Relatórios Treinamentos", path: "/relatorios/treinamentos", category: "SMS - RELATÓRIOS", slug: "relatorios_treinamentos" },
 
     // SEGURANÇA
     { name: "Administradores Sistema", path: "/admin/admin-sistema", category: "SEGURANÇA", slug: "admin_sistema" },

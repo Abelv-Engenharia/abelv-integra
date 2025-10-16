@@ -115,17 +115,6 @@ export const COMPLETE_PERMISSIONS: PermissionCategory[] = [
     ]
   },
   {
-    name: 'Relatórios',
-    permissions: [
-      { key: 'relatorios_dashboard', label: 'Dashboard' },
-      { key: 'relatorios_ocorrencias', label: 'Ocorrências' },
-      { key: 'relatorios_desvios', label: 'Desvios' },
-      { key: 'relatorios_treinamentos', label: 'Treinamentos' },
-      { key: 'relatorios_idsms', label: 'IDSMS' },
-      { key: 'relatorios_hsa', label: 'HSA' }
-    ]
-  },
-  {
     name: 'Inspeção SMS',
     permissions: [
       { key: 'inspecao_sms_dashboard', label: 'Dashboard' },
@@ -148,9 +137,14 @@ export const COMPLETE_PERMISSIONS: PermissionCategory[] = [
     ]
   },
   {
-    name: 'SMS',
+    name: 'SMS - Relatórios',
     permissions: [
-      { key: 'sms_dashboard', label: 'Dashboard SMS' }
+      { key: 'relatorios_dashboard', label: 'Relatórios Dashboard' },
+      { key: 'relatorios_idsms', label: 'Relatórios IDSMS' },
+      { key: 'relatorios_ocorrencias', label: 'Relatórios Ocorrências' },
+      { key: 'relatorios_desvios', label: 'Relatórios Desvios' },
+      { key: 'relatorios_treinamentos', label: 'Relatórios Treinamentos' },
+      { key: 'relatorios_hsa', label: 'Relatórios HSA' }
     ]
   },
   {
