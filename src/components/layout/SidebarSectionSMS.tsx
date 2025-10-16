@@ -715,6 +715,53 @@ export default function SidebarSectionSMS({ openMenu, toggleMenu, onLinkClick }:
                         </Link>
                       </SidebarMenuSubButton>
                     </SidebarMenuSubItem>
+          )}
+        </SidebarMenuSub>
+      </CollapsibleContent>
+    </Collapsible>
+  </SidebarMenuItem>
+</SidebarMenu>
+)}
+
+      {/* Seção Relatórios */}
+      {(isAdmin || canAccessMenu("relatorios_dashboard") || canAccessMenu("relatorios_idsms")) && (
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <Collapsible open={openMenu === "relatorios"}>
+              <CollapsibleTrigger asChild>
+                <SidebarMenuButton 
+                  onClick={() => toggleMenu("relatorios")}
+                  className="text-white hover:bg-slate-600"
+                >
+                  <BarChart3 className="h-4 w-4 flex-shrink-0" />
+                  <span className="break-words">Relatórios</span>
+                </SidebarMenuButton>
+              </CollapsibleTrigger>
+              <CollapsibleContent asChild>
+                <SidebarMenuSub>
+                  {(isAdmin || canAccessMenu("relatorios_dashboard")) && (
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton 
+                        asChild
+                        className={currentPath === "/relatorios/dashboard" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
+                      >
+                        <Link to="/relatorios/dashboard" className="flex items-center gap-2" onClick={onLinkClick}>
+                          <span className="text-xs leading-tight break-words min-w-0">Dashboard</span>
+                        </Link>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+                  )}
+                  {(isAdmin || canAccessMenu("relatorios_idsms")) && (
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton 
+                        asChild
+                        className={currentPath === "/relatorios/idsms" ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"}
+                      >
+                        <Link to="/relatorios/idsms" className="flex items-center gap-2" onClick={onLinkClick}>
+                          <span className="text-xs leading-tight break-words min-w-0">IDSMS</span>
+                        </Link>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
                   )}
                 </SidebarMenuSub>
               </CollapsibleContent>

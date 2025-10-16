@@ -14,7 +14,6 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 
 import SidebarSectionGestaoSMS from "./SidebarSectionGestaoSMS";
 import SidebarSectionTarefas from "./SidebarSectionTarefas";
-import SidebarSectionRelatorios from "./SidebarSectionRelatorios";
 import SidebarSectionAdministracao from "./SidebarSectionAdministracao";
 import SidebarSectionSeguranca from "./SidebarSectionSeguranca";
 import SidebarSectionApoioGeral from "./SidebarSectionApoioGeral";
@@ -45,11 +44,11 @@ export function AppSidebar() {
       currentPath.startsWith("/hora-seguranca") ||
       currentPath.startsWith("/inspecao-sms") ||
       currentPath.startsWith("/ocorrencias") ||
-      currentPath.startsWith("/medidas-disciplinares")
+      currentPath.startsWith("/medidas-disciplinares") ||
+      currentPath.startsWith("/relatorios")
     )
       return "gestao-sms";
     if (currentPath.startsWith("/tarefas")) return "tarefas";
-    if (currentPath.startsWith("/relatorios")) return "relatorios";
     if (
       currentPath === "/admin/admin-sistema" ||
       currentPath === "/admin/perfis" ||
@@ -176,16 +175,6 @@ export function AppSidebar() {
         {/* Seção: Tarefas */}
         {["tarefas_dashboard", "tarefas_minhas_tarefas", "tarefas_cadastro"].some(canSee) && (
           <SidebarSectionTarefas
-            openMenu={openMenu}
-            toggleMenu={toggleMenu}
-            onLinkClick={handleLinkClick}
-            canSee={canSee}
-          />
-        )}
-
-        {/* Seção: Relatórios */}
-        {["relatorios_dashboard", "relatorios_idsms"].some(canSee) && (
-          <SidebarSectionRelatorios
             openMenu={openMenu}
             toggleMenu={toggleMenu}
             onLinkClick={handleLinkClick}
