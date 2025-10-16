@@ -109,7 +109,7 @@ const calcularMargemMediaContempladas = (data: any[]) => {
 
 const agruparPorVendedor = (data: any[]): VendedorData[] => {
   const agrupado = data.reduce((acc, item) => {
-    const vendedor = item.vendedor || 'Sem Vendedor';
+    const vendedor = item.vendedores_comercial?.profiles?.nome || 'Sem Vendedor';
     if (!acc[vendedor]) {
       acc[vendedor] = { 
         vendedor, 
@@ -143,7 +143,7 @@ const agruparPorVendedor = (data: any[]): VendedorData[] => {
 
 const agruparPorSegmento = (data: any[]): SegmentoData[] => {
   const agrupado = data.reduce((acc, item) => {
-    const segmento = item.segmento || 'Sem Segmento';
+    const segmento = item.segmentos_comercial?.nome || 'Sem Segmento';
     if (!acc[segmento]) {
       acc[segmento] = { 
         segmento, 

@@ -20,6 +20,14 @@ export interface PropostaComercial {
   updated_at?: string;
   created_by?: string;
   updated_by?: string;
+  segmentos_comercial?: {
+    nome: string;
+  };
+  vendedores_comercial?: {
+    profiles: {
+      nome: string;
+    };
+  };
 }
 
 export function usePropostasComerciais() {
@@ -31,7 +39,13 @@ export function usePropostasComerciais() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("propostas_comerciais")
-        .select("*")
+        .select(`
+          *,
+          segmentos_comercial!segmento_id(nome),
+          vendedores_comercial!vendedor_id(
+            profiles(nome)
+          )
+        `)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
@@ -141,7 +155,13 @@ export function useProposta(id?: string) {
       
       const { data, error } = await supabase
         .from("propostas_comerciais")
-        .select("*")
+        .select(`
+          *,
+          segmentos_comercial!segmento_id(nome),
+          vendedores_comercial!vendedor_id(
+            profiles(nome)
+          )
+        `)
         .eq("id", id)
         .maybeSingle();
 
