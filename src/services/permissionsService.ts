@@ -224,13 +224,77 @@ export const COMPLETE_PERMISSIONS: PermissionCategory[] = [
     name: 'Suprimentos - Estoque',
     permissions: [
       { key: 'estoque_acesso', label: 'Acesso ao Estoque', description: 'Visualizar módulo de controle de estoque' },
-      { key: 'estoque_apoio', label: 'Apoio', description: 'Gerenciar configurações de apoio (EAP, Almoxarifados, etc)' },
-      { key: 'estoque_entradas', label: 'Entradas', description: 'Registrar entradas de materiais' },
-      { key: 'estoque_requisicoes', label: 'Requisições', description: 'Gerenciar requisições e devoluções' },
-      { key: 'estoque_transferencias', label: 'Transferências', description: 'Gerenciar transferências de estoque' },
-      { key: 'estoque_beneficiamento', label: 'Beneficiamento', description: 'Gerenciar envio e retorno de beneficiamento' }
+      { key: 'estoque_dashboard', label: 'Dashboard' },
+      { key: 'estoque_apoio', label: 'Apoio - Menu Principal', description: 'Acesso ao menu Apoio' },
+      { key: 'estoque_apoio_eap', label: 'Apoio - EAP' },
+      { key: 'estoque_apoio_almoxarifados', label: 'Apoio - Almoxarifados' },
+      { key: 'estoque_apoio_configuracoes_arcabouco', label: 'Apoio - Configurações Arcabouço' },
+      { key: 'estoque_apoio_relatorio_eap', label: 'Apoio - Relatório de EAP' },
+      { key: 'estoque_apoio_relacao_almoxarifados', label: 'Apoio - Relação de Almoxarifados' },
+      { key: 'estoque_entradas', label: 'Entradas - Menu Principal', description: 'Acesso ao menu Entradas' },
+      { key: 'estoque_entradas_entrada_materiais', label: 'Entradas - Entrada de Materiais' },
+      { key: 'estoque_entradas_relatorio_entrada', label: 'Entradas - Relatório de Entrada' },
+      { key: 'estoque_entradas_relacao_entradas', label: 'Entradas - Relação de Entradas' },
+      { key: 'estoque_requisicoes', label: 'Requisições - Menu Principal', description: 'Acesso ao menu Requisições' },
+      { key: 'estoque_requisicoes_requisicao_materiais', label: 'Requisições - Requisição de Materiais' },
+      { key: 'estoque_requisicoes_devolucao_materiais', label: 'Requisições - Devolução de Materiais' },
+      { key: 'estoque_requisicoes_relatorio_requisicao', label: 'Requisições - Relatório de Requisição' },
+      { key: 'estoque_requisicoes_relacao_requisicoes', label: 'Requisições - Relação de Requisições' },
+      { key: 'estoque_requisicoes_relacao_devolucoes', label: 'Requisições - Relação de Devoluções' },
+      { key: 'estoque_transferencias', label: 'Transferências - Menu Principal', description: 'Acesso ao menu Transferências' },
+      { key: 'estoque_transferencias_transferencia_almoxarifados', label: 'Transferências - Entre Almoxarifados' },
+      { key: 'estoque_transferencias_transferencia_ccas', label: 'Transferências - Entre CCAs' },
+      { key: 'estoque_transferencias_relatorio_transferencias', label: 'Transferências - Relatório' },
+      { key: 'estoque_transferencias_relacao_transferencias', label: 'Transferências - Relação' },
+      { key: 'estoque_beneficiamento', label: 'Beneficiamento - Menu Principal', description: 'Acesso ao menu Beneficiamento' },
+      { key: 'estoque_beneficiamento_envio', label: 'Beneficiamento - Envio' },
+      { key: 'estoque_beneficiamento_retorno', label: 'Beneficiamento - Retorno' },
+      { key: 'estoque_beneficiamento_relacao_materiais', label: 'Beneficiamento - Relação de Materiais' }
     ]
-  }
+  },
+  {
+    name: 'Engenharia Matricial',
+    permissions: [
+      { key: 'em_ordens_servico', label: 'Ordens de Serviço' },
+      { key: 'em_os_abertas', label: 'Abertura de OS' },
+      { key: 'em_os_planejamento', label: 'OS em Planejamento' },
+      { key: 'em_os_aguardando_aceite', label: 'OS Aguardando Aceite' },
+      { key: 'em_os_execucao', label: 'OS em Execução' },
+      { key: 'em_os_fechamento', label: 'OS em Fechamento' },
+      { key: 'em_os_aguardando_aceite_fechamento', label: 'Aguardando Aceite Fechamento' },
+      { key: 'em_os_concluidas', label: 'OS Concluídas' },
+      { key: 'em_replanejamento', label: 'Replanejamento' },
+      { key: 'em_aceite_replanejamento', label: 'Aceite Replanejamento' },
+      { key: 'em_relatorios_anual', label: 'Relatório Anual' },
+      { key: 'em_relatorios_eletrica', label: 'Relatórios EM Elétrica' },
+      { key: 'em_relatorios_mecanica', label: 'Relatórios EM Mecânica' },
+      { key: 'em_relatorios_departamento', label: 'Relatórios EM Departamento' }
+    ]
+  },
+  {
+    name: 'Comercial - Repositório de Documentos',
+    permissions: [
+      { key: 'comercial_repositorio_consulta', label: 'Consulta de Documentos' },
+      { key: 'comercial_repositorio_empresarial', label: 'Empresarial' },
+      { key: 'comercial_repositorio_habilitacao', label: 'Habilitação' },
+      { key: 'comercial_repositorio_financeiro', label: 'Financeiro' },
+      { key: 'comercial_repositorio_certidoes', label: 'Certidões' },
+      { key: 'comercial_repositorio_politicas', label: 'Políticas e Código de Conduta' }
+    ]
+  },
+  {
+    name: 'Comercial - Controle Comercial',
+    permissions: [
+      { key: 'comercial_controle_dashboard', label: 'Dashboard' },
+      { key: 'comercial_controle_cadastro', label: 'Cadastro de Proposta' },
+      { key: 'comercial_controle_registros', label: 'Consulta de Propostas Emitidas' },
+      { key: 'comercial_controle_metas', label: 'Metas Anuais' },
+      { key: 'comercial_controle_performance', label: 'Performance de Vendas' },
+      { key: 'comercial_controle_relatorios', label: 'Relatórios' },
+      { key: 'comercial_controle_cadastros_segmentos', label: 'Alteração - Segmentos' },
+      { key: 'comercial_controle_cadastros_vendedores', label: 'Alteração - Vendedores' }
+    ]
+  },
 ];
 
 // Função para converter permissões customizadas em array de slugs para menus_sidebar
