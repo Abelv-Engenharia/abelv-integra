@@ -44,6 +44,47 @@ export type Database = {
         }
         Relationships: []
       }
+      almoxarifados: {
+        Row: {
+          ativo: boolean
+          cca_id: number
+          created_at: string | null
+          endereco: string | null
+          id: string
+          interno_cliente: boolean
+          nome: string
+          updated_at: string | null
+        }
+        Insert: {
+          ativo?: boolean
+          cca_id: number
+          created_at?: string | null
+          endereco?: string | null
+          id?: string
+          interno_cliente?: boolean
+          nome: string
+          updated_at?: string | null
+        }
+        Update: {
+          ativo?: boolean
+          cca_id?: number
+          created_at?: string | null
+          endereco?: string | null
+          id?: string
+          interno_cliente?: boolean
+          nome?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "almoxarifados_cca_id_fkey"
+            columns: ["cca_id"]
+            isOneToOne: false
+            referencedRelation: "ccas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       audit_logs: {
         Row: {
           action: string
