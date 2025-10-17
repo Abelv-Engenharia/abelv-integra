@@ -20,7 +20,7 @@ import {
 import { ChevronRight, ChevronDown, Plus, Edit, Trash2, Upload, Download, FileDown, Save } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import * as XLSX from 'xlsx';
-import { eapService, EAPNode, EAPEstrutura } from "@/services/eapService";
+import { eapService, EAPNode } from "@/services/eapService";
 import { supabase } from "@/integrations/supabase/client";
 
 export default function EAP() {
@@ -30,7 +30,6 @@ export default function EAP() {
   // Estados principais
   const [ccas, setCcas] = useState<Array<{ id: number; codigo: string; nome: string }>>([]);
   const [selectedCcaId, setSelectedCcaId] = useState<number | null>(null);
-  const [estruturaAtual, setEstruturaAtual] = useState<EAPEstrutura | null>(null);
   const [eapData, setEapData] = useState<EAPNode[]>([]);
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -79,15 +78,15 @@ export default function EAP() {
 
     setIsLoading(true);
     try {
-      // Buscar estrutura única do CCA
-      const estrutura = await eapService.getByCCA(selectedCcaId);
+      // Buscar itens EAP do CCA
+      const items = await eapService.getItemsByCCA(selectedCcaId);
       
-      if (estrutura) {
-        setEstruturaAtual(estrutura);
-        setEapData(estrutura.estrutura);
+      if (items.length > 0) {
+        // Converter itens em árvore
+        const tree = eapService.convertItemsToTree(items);
+        setEapData(tree);
       } else {
-        // Não existe estrutura, começar vazia
-        setEstruturaAtual(null);
+        // Não existem itens, começar vazio
         setEapData([]);
       }
     } catch (error) {
@@ -114,32 +113,12 @@ export default function EAP() {
 
     setIsSaving(true);
     try {
-      if (estruturaAtual) {
-        // Atualizar estrutura existente
-        await eapService.update(estruturaAtual.id, {
-          estrutura: eapData,
-        });
+      await eapService.saveEAPStructure(selectedCcaId, eapData);
 
-        toast({
-          title: "Sucesso",
-          description: "Estrutura EAP atualizada com sucesso!",
-        });
-      } else {
-        // Criar nova estrutura (nome automático: "EAP - [Nome do CCA]")
-        const cca = ccas.find(c => c.id === selectedCcaId);
-        const novaEstrutura = await eapService.create({
-          nome: `EAP - ${cca?.nome || 'CCA'}`,
-          cca_id: selectedCcaId,
-          estrutura: eapData,
-          ativo: true,
-        });
-
-        setEstruturaAtual(novaEstrutura);
-        toast({
-          title: "Sucesso",
-          description: "Estrutura EAP criada com sucesso!",
-        });
-      }
+      toast({
+        title: "Sucesso",
+        description: "Estrutura EAP salva com sucesso!",
+      });
     } catch (error) {
       console.error("Erro ao salvar estrutura:", error);
       toast({

@@ -819,93 +819,52 @@ export type Database = {
         }
         Relationships: []
       }
-      eap_estruturas: {
-        Row: {
-          ativo: boolean
-          cca_id: number
-          created_at: string
-          created_by: string | null
-          estrutura: Json
-          id: string
-          nome: string
-          updated_at: string
-          updated_by: string | null
-        }
-        Insert: {
-          ativo?: boolean
-          cca_id: number
-          created_at?: string
-          created_by?: string | null
-          estrutura?: Json
-          id?: string
-          nome: string
-          updated_at?: string
-          updated_by?: string | null
-        }
-        Update: {
-          ativo?: boolean
-          cca_id?: number
-          created_at?: string
-          created_by?: string | null
-          estrutura?: Json
-          id?: string
-          nome?: string
-          updated_at?: string
-          updated_by?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "eap_estruturas_cca_id_fkey"
-            columns: ["cca_id"]
-            isOneToOne: false
-            referencedRelation: "ccas"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       eap_itens: {
         Row: {
           ativo: boolean
+          cca_id: number
           codigo: string
           created_at: string
-          eap_estrutura_id: string
           id: string
           nivel: number
           nome: string
           ordem: number
+          parent_codigo: string | null
           parent_id: string | null
           updated_at: string
         }
         Insert: {
           ativo?: boolean
+          cca_id: number
           codigo: string
           created_at?: string
-          eap_estrutura_id: string
           id?: string
           nivel?: number
           nome: string
           ordem?: number
+          parent_codigo?: string | null
           parent_id?: string | null
           updated_at?: string
         }
         Update: {
           ativo?: boolean
+          cca_id?: number
           codigo?: string
           created_at?: string
-          eap_estrutura_id?: string
           id?: string
           nivel?: number
           nome?: string
           ordem?: number
+          parent_codigo?: string | null
           parent_id?: string | null
           updated_at?: string
         }
         Relationships: [
           {
-            foreignKeyName: "eap_itens_eap_estrutura_id_fkey"
-            columns: ["eap_estrutura_id"]
+            foreignKeyName: "eap_itens_cca_id_fkey"
+            columns: ["cca_id"]
             isOneToOne: false
-            referencedRelation: "eap_estruturas"
+            referencedRelation: "ccas"
             referencedColumns: ["id"]
           },
           {
