@@ -1,203 +1,321 @@
-import { useState, useRef } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Edit, Trash2, ChevronDown, ChevronRight, Download, Upload } from "lucide-react";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { ChevronRight, ChevronDown, Plus, Edit, Trash2, Upload, Download, FileDown, Save } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useCCAs } from "@/hooks/useCCAs";
 import * as XLSX from 'xlsx';
-
-interface EAPNode {
-  id: string;
-  name: string;
-  children: EAPNode[];
-  isExpanded: boolean;
-}
+import { eapService, EAPNode, EAPEstrutura } from "@/services/eapService";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function EAP() {
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { data: ccas, isLoading: isLoadingCcas } = useCCAs();
   
-  const [eapData, setEapData] = useState<EAPNode>({
-    id: "1",
-    name: "Projeto Final",
-    isExpanded: true,
-    children: [
-      {
-        id: "2",
-        name: "Planejamento",
-        isExpanded: true,
-        children: [
-          { id: "3", name: "Levantamento de Requisitos", isExpanded: false, children: [] },
-          { id: "4", name: "Planejamento de Recursos", isExpanded: false, children: [] }
-        ]
-      },
-      {
-        id: "5",
-        name: "Execução",
-        isExpanded: true,
-        children: [
-          {
-            id: "6",
-            name: "Desenvolvimento",
-            isExpanded: true,
-            children: [
-              { id: "7", name: "Design", isExpanded: false, children: [] },
-              { id: "8", name: "Codificação", isExpanded: false, children: [] }
-            ]
-          }
-        ]
-      }
-    ]
-  });
+  // Estados principais
+  const [ccas, setCcas] = useState<Array<{ id: number; codigo: string; nome: string }>>([]);
+  const [selectedCcaId, setSelectedCcaId] = useState<number | null>(null);
+  const [estruturas, setEstruturas] = useState<EAPEstrutura[]>([]);
+  const [estruturaAtual, setEstruturaAtual] = useState<EAPEstrutura | null>(null);
+  const [eapData, setEapData] = useState<EAPNode[]>([]);
+  const [estruturaNome, setEstruturaNome] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const [editingNode, setEditingNode] = useState<EAPNode | null>(null);
-  const [newNodeName, setNewNodeName] = useState("");
-  const [parentNode, setParentNode] = useState<EAPNode | null>(null);
+  // Estados para os diálogos
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [selectedCca, setSelectedCca] = useState<string>("");
+  const [isNewEstruturaDialogOpen, setIsNewEstruturaDialogOpen] = useState(false);
+  const [selectedNode, setSelectedNode] = useState<EAPNode | null>(null);
+  const [nodeName, setNodeName] = useState("");
   const [isImporting, setIsImporting] = useState(false);
 
-  const findNodeById = (node: EAPNode, id: string): EAPNode | null => {
-    if (node.id === id) return node;
-    for (const child of node.children) {
-      const found = findNodeById(child, id);
-      if (found) return found;
+  // Carregar CCAs ao montar o componente
+  useEffect(() => {
+    loadCcas();
+  }, []);
+
+  // Carregar estruturas quando CCA é selecionado
+  useEffect(() => {
+    if (selectedCcaId) {
+      loadEstruturas();
+    }
+  }, [selectedCcaId]);
+
+  const loadCcas = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("ccas")
+        .select("id, codigo, nome")
+        .eq("ativo", true)
+        .order("codigo");
+
+      if (error) throw error;
+      setCcas(data || []);
+    } catch (error) {
+      console.error("Erro ao carregar CCAs:", error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível carregar os CCAs",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const loadEstruturas = async () => {
+    if (!selectedCcaId) return;
+
+    setIsLoading(true);
+    try {
+      const data = await eapService.getByCC(selectedCcaId);
+      setEstruturas(data);
+      
+      // Se houver estruturas, carregar a primeira
+      if (data.length > 0) {
+        loadEstrutura(data[0].id);
+      } else {
+        setEstruturaAtual(null);
+        setEapData([]);
+      }
+    } catch (error) {
+      console.error("Erro ao carregar estruturas:", error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível carregar as estruturas EAP",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const loadEstrutura = async (estruturaId: string) => {
+    setIsLoading(true);
+    try {
+      const estrutura = await eapService.getById(estruturaId);
+      if (estrutura) {
+        setEstruturaAtual(estrutura);
+        setEapData(estrutura.estrutura);
+        setEstruturaNome(estrutura.nome);
+      }
+    } catch (error) {
+      console.error("Erro ao carregar estrutura:", error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível carregar a estrutura EAP",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const saveEstrutura = async () => {
+    if (!selectedCcaId || !estruturaNome.trim()) {
+      toast({
+        title: "Campos obrigatórios",
+        description: "Selecione um CCA e digite um nome para a estrutura",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      if (estruturaAtual) {
+        // Atualizar estrutura existente
+        await eapService.update(estruturaAtual.id, {
+          nome: estruturaNome,
+          estrutura: eapData,
+        });
+
+        toast({
+          title: "Sucesso",
+          description: "Estrutura EAP atualizada com sucesso!",
+        });
+      } else {
+        // Criar nova estrutura
+        const novaEstrutura = await eapService.create({
+          nome: estruturaNome,
+          cca_id: selectedCcaId,
+          estrutura: eapData,
+          ativo: true,
+        });
+
+        setEstruturaAtual(novaEstrutura);
+        toast({
+          title: "Sucesso",
+          description: "Estrutura EAP criada com sucesso!",
+        });
+      }
+
+      loadEstruturas();
+    } catch (error) {
+      console.error("Erro ao salvar estrutura:", error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível salvar a estrutura EAP",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const createNovaEstrutura = () => {
+    setEstruturaAtual(null);
+    setEapData([]);
+    setEstruturaNome("");
+    setIsNewEstruturaDialogOpen(false);
+  };
+
+  // Funções auxiliares para manipular a árvore
+  const findNodeById = (nodes: EAPNode[], id: string): EAPNode | null => {
+    for (const node of nodes) {
+      if (node.id === id) return node;
+      if (node.children) {
+        const found = findNodeById(node.children, id);
+        if (found) return found;
+      }
     }
     return null;
   };
 
-  const updateNodeInTree = (node: EAPNode, updatedNode: EAPNode): EAPNode => {
-    if (node.id === updatedNode.id) {
-      return { ...updatedNode };
-    }
-    return {
-      ...node,
-      children: node.children.map(child => updateNodeInTree(child, updatedNode))
-    };
+  const updateNodeInTree = (nodes: EAPNode[], updatedNode: EAPNode): EAPNode[] => {
+    return nodes.map(node => {
+      if (node.id === updatedNode.id) {
+        return { ...updatedNode };
+      }
+      return {
+        ...node,
+        children: node.children ? updateNodeInTree(node.children, updatedNode) : []
+      };
+    });
   };
 
-  const removeNodeFromTree = (node: EAPNode, nodeIdToRemove: string): EAPNode => {
-    return {
-      ...node,
-      children: node.children
-        .filter(child => child.id !== nodeIdToRemove)
-        .map(child => removeNodeFromTree(child, nodeIdToRemove))
-    };
+  const removeNodeFromTree = (nodes: EAPNode[], nodeIdToRemove: string): EAPNode[] => {
+    return nodes
+      .filter(node => node.id !== nodeIdToRemove)
+      .map(node => ({
+        ...node,
+        children: node.children ? removeNodeFromTree(node.children, nodeIdToRemove) : []
+      }));
   };
 
   const generateId = () => Math.random().toString(36).substr(2, 9);
 
   const toggleExpand = (nodeId: string) => {
-    const nodeToUpdate = findNodeById(eapData, nodeId);
-    if (nodeToUpdate) {
-      const updatedNode = { ...nodeToUpdate, isExpanded: !nodeToUpdate.isExpanded };
+    const allNodes = findNodeById(eapData, nodeId);
+    if (allNodes) {
+      const updatedNode = { ...allNodes, expanded: !allNodes.expanded };
       setEapData(updateNodeInTree(eapData, updatedNode));
     }
   };
 
   const addNode = () => {
-    if (!newNodeName.trim()) return;
+    if (!nodeName.trim()) return;
 
     const newNode: EAPNode = {
       id: generateId(),
-      name: newNodeName,
+      name: nodeName,
       children: [],
-      isExpanded: false
+      expanded: false
     };
 
-    if (parentNode) {
+    if (selectedNode) {
       const updatedParent = {
-        ...parentNode,
-        children: [...parentNode.children, newNode],
-        isExpanded: true
+        ...selectedNode,
+        children: [...(selectedNode.children || []), newNode],
+        expanded: true
       };
       setEapData(updateNodeInTree(eapData, updatedParent));
     } else {
-      setEapData({
-        ...eapData,
-        children: [...eapData.children, newNode]
-      });
+      setEapData([...eapData, newNode]);
     }
 
-    setNewNodeName("");
-    setParentNode(null);
+    setNodeName("");
+    setSelectedNode(null);
     setIsAddDialogOpen(false);
   };
 
   const editNode = () => {
-    if (!editingNode || !newNodeName.trim()) return;
+    if (!selectedNode || !nodeName.trim()) return;
 
-    const updatedNode = { ...editingNode, name: newNodeName };
+    const updatedNode = { ...selectedNode, name: nodeName };
     setEapData(updateNodeInTree(eapData, updatedNode));
     
-    setEditingNode(null);
-    setNewNodeName("");
+    setSelectedNode(null);
+    setNodeName("");
     setIsEditDialogOpen(false);
   };
 
   const deleteNode = (nodeId: string) => {
-    if (nodeId === eapData.id) return; // Não permitir deletar o nó raiz
     setEapData(removeNodeFromTree(eapData, nodeId));
   };
 
-  const openAddDialog = (parent?: EAPNode) => {
-    setParentNode(parent || null);
-    setNewNodeName("");
+  const openAddDialog = (parent: EAPNode | null) => {
+    setSelectedNode(parent);
+    setNodeName("");
     setIsAddDialogOpen(true);
   };
 
   const openEditDialog = (node: EAPNode) => {
-    setEditingNode(node);
-    setNewNodeName(node.name);
+    setSelectedNode(node);
+    setNodeName(node.name);
     setIsEditDialogOpen(true);
   };
 
   // Função para converter EAP em estrutura tabular
-  const convertEapToFlat = (node: EAPNode, level: number = 1, result: any[] = []): any[] => {
-    const row: any = {};
-    
-    // Preencher os níveis anteriores com vazios
-    for (let i = 1; i < level; i++) {
-      row[`nivel${i}`] = "";
-    }
-    
-    // Preencher o nível atual
-    row[`nivel${level}`] = node.name;
-    
-    // Preencher os níveis posteriores com vazios
-    for (let i = level + 1; i <= 10; i++) {
-      row[`nivel${i}`] = "";
-    }
-    
-    result.push(row);
-    
-    // Processar filhos
-    node.children.forEach(child => {
-      convertEapToFlat(child, level + 1, result);
+  const convertEapToFlat = (nodes: EAPNode[], level: number = 1, result: any[] = []): any[] => {
+    nodes.forEach(node => {
+      const row: any = {};
+      
+      for (let i = 1; i < level; i++) {
+        row[`nivel${i}`] = "";
+      }
+      
+      row[`nivel${level}`] = node.name;
+      
+      for (let i = level + 1; i <= 10; i++) {
+        row[`nivel${i}`] = "";
+      }
+      
+      result.push(row);
+      
+      if (node.children && node.children.length > 0) {
+        convertEapToFlat(node.children, level + 1, result);
+      }
     });
     
     return result;
   };
 
   // Função para converter estrutura tabular em EAP
-  const convertFlatToEap = (rows: any[]): EAPNode => {
+  const convertFlatToEap = (rows: any[]): EAPNode[] => {
     const rootNodes: EAPNode[] = [];
     const nodeMap = new Map<string, EAPNode>();
     
-    rows.forEach((row, index) => {
-      let currentLevel = 0;
+    rows.forEach((row) => {
       let parentPath = "";
       
       for (let level = 1; level <= 10; level++) {
         const cellValue = row[`nivel${level}`];
         if (cellValue && cellValue.trim()) {
-          currentLevel = level;
           const currentPath = parentPath + (parentPath ? "/" : "") + cellValue.trim();
           
           if (!nodeMap.has(currentPath)) {
@@ -205,7 +323,7 @@ export default function EAP() {
               id: generateId(),
               name: cellValue.trim(),
               children: [],
-              isExpanded: true
+              expanded: true
             };
             
             nodeMap.set(currentPath, newNode);
@@ -227,136 +345,22 @@ export default function EAP() {
       }
     });
     
-    // Se não há nós raiz, criar um nó padrão
-    if (rootNodes.length === 0) {
-      return {
-        id: generateId(),
-        name: "Projeto",
-        children: [],
-        isExpanded: true
-      };
-    }
-    
-    // Se há apenas um nó raiz, retorná-lo
-    if (rootNodes.length === 1) {
-      return rootNodes[0];
-    }
-    
-    // Se há múltiplos nós raiz, criar um nó contenedor
-    return {
-      id: generateId(),
-      name: "Projeto",
-      children: rootNodes,
-      isExpanded: true
-    };
+    return rootNodes;
   };
 
   // Função para baixar o modelo XLSX
   const downloadModelTemplate = () => {
     const modelData = [
-      {
-        nivel1: "Projeto",
-        nivel2: "",
-        nivel3: "",
-        nivel4: "",
-        nivel5: "",
-        nivel6: "",
-        nivel7: "",
-        nivel8: "",
-        nivel9: "",
-        nivel10: ""
-      },
-      {
-        nivel1: "Projeto",
-        nivel2: "Planejamento",
-        nivel3: "",
-        nivel4: "",
-        nivel5: "",
-        nivel6: "",
-        nivel7: "",
-        nivel8: "",
-        nivel9: "",
-        nivel10: ""
-      },
-      {
-        nivel1: "Projeto",
-        nivel2: "Planejamento",
-        nivel3: "Requisitos",
-        nivel4: "",
-        nivel5: "",
-        nivel6: "",
-        nivel7: "",
-        nivel8: "",
-        nivel9: "",
-        nivel10: ""
-      },
-      {
-        nivel1: "Projeto",
-        nivel2: "Planejamento",
-        nivel3: "Recursos",
-        nivel4: "",
-        nivel5: "",
-        nivel6: "",
-        nivel7: "",
-        nivel8: "",
-        nivel9: "",
-        nivel10: ""
-      },
-      {
-        nivel1: "Projeto",
-        nivel2: "Execução",
-        nivel3: "",
-        nivel4: "",
-        nivel5: "",
-        nivel6: "",
-        nivel7: "",
-        nivel8: "",
-        nivel9: "",
-        nivel10: ""
-      },
-      {
-        nivel1: "Projeto",
-        nivel2: "Execução",
-        nivel3: "Desenvolvimento",
-        nivel4: "",
-        nivel5: "",
-        nivel6: "",
-        nivel7: "",
-        nivel8: "",
-        nivel9: "",
-        nivel10: ""
-      },
-      {
-        nivel1: "Projeto",
-        nivel2: "Execução",
-        nivel3: "Desenvolvimento",
-        nivel4: "Frontend",
-        nivel5: "",
-        nivel6: "",
-        nivel7: "",
-        nivel8: "",
-        nivel9: "",
-        nivel10: ""
-      },
-      {
-        nivel1: "Projeto",
-        nivel2: "Execução",
-        nivel3: "Desenvolvimento",
-        nivel4: "Backend",
-        nivel5: "",
-        nivel6: "",
-        nivel7: "",
-        nivel8: "",
-        nivel9: "",
-        nivel10: ""
-      }
+      { nivel1: "Projeto", nivel2: "", nivel3: "", nivel4: "", nivel5: "", nivel6: "", nivel7: "", nivel8: "", nivel9: "", nivel10: "" },
+      { nivel1: "Projeto", nivel2: "Planejamento", nivel3: "", nivel4: "", nivel5: "", nivel6: "", nivel7: "", nivel8: "", nivel9: "", nivel10: "" },
+      { nivel1: "Projeto", nivel2: "Planejamento", nivel3: "Requisitos", nivel4: "", nivel5: "", nivel6: "", nivel7: "", nivel8: "", nivel9: "", nivel10: "" },
+      { nivel1: "Projeto", nivel2: "Execução", nivel3: "", nivel4: "", nivel5: "", nivel6: "", nivel7: "", nivel8: "", nivel9: "", nivel10: "" },
     ];
 
     const worksheet = XLSX.utils.json_to_sheet(modelData);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Modelo EAP");
     
-    // Ajustar largura das colunas
     const cols = Array(10).fill(0).map(() => ({ width: 20 }));
     worksheet['!cols'] = cols;
     
@@ -365,6 +369,33 @@ export default function EAP() {
     toast({
       title: "Modelo baixado",
       description: "O arquivo modelo foi baixado com sucesso.",
+    });
+  };
+
+  // Função para exportar EAP para Excel
+  const downloadExcel = () => {
+    if (eapData.length === 0) {
+      toast({
+        title: "Aviso",
+        description: "Não há dados para exportar",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const flatData = convertEapToFlat(eapData);
+    const worksheet = XLSX.utils.json_to_sheet(flatData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "EAP");
+    
+    const cols = Array(10).fill(0).map(() => ({ width: 20 }));
+    worksheet['!cols'] = cols;
+    
+    XLSX.writeFile(workbook, `EAP_${estruturaNome || 'Estrutura'}.xlsx`);
+    
+    toast({
+      title: "Exportação concluída",
+      description: "EAP exportada com sucesso!",
     });
   };
 
@@ -403,21 +434,6 @@ export default function EAP() {
           return;
         }
 
-        // Validar se pelo menos uma linha tem dados no Nível 1
-        const hasValidData = jsonData.some((row: any) => 
-          row.nivel1 || row.Nivel1 || row['Nível 1'] || row['nivel 1']
-        );
-
-        if (!hasValidData) {
-          toast({
-            title: "Erro",
-            description: "Não foram encontrados dados válidos. Verifique se a coluna 'nivel1' está preenchida.",
-            variant: "destructive"
-          });
-          setIsImporting(false);
-          return;
-        }
-
         // Normalizar os nomes das colunas
         const normalizedData = jsonData.map((row: any) => {
           const normalizedRow: any = {};
@@ -427,9 +443,7 @@ export default function EAP() {
               `Nivel${i}`,
               `Nível ${i}`,
               `nivel ${i}`,
-              `Nivel ${i}`,
-              `NIVEL${i}`,
-              `NÍVEL ${i}`
+              `NIVEL${i}`
             ];
             
             for (const key of possibleKeys) {
@@ -463,7 +477,6 @@ export default function EAP() {
         });
       } finally {
         setIsImporting(false);
-        // Limpar o input
         if (fileInputRef.current) {
           fileInputRef.current.value = '';
         }
@@ -474,12 +487,11 @@ export default function EAP() {
   };
 
   const renderNode = (node: EAPNode, level: number = 0) => {
-    const hasChildren = node.children.length > 0;
+    const hasChildren = node.children && node.children.length > 0;
     const marginLeft = level * 40;
 
     return (
       <div key={node.id} className="relative">
-        {/* Linhas conectoras */}
         {level > 0 && (
           <>
             <div 
@@ -498,173 +510,241 @@ export default function EAP() {
           style={{ marginLeft }}
         >
           {hasChildren ? (
-            <Collapsible open={node.isExpanded} onOpenChange={() => toggleExpand(node.id)}>
-              <CollapsibleTrigger className="p-1 hover:bg-accent rounded">
-                {node.isExpanded ? (
-                  <ChevronDown className="h-4 w-4" />
-                ) : (
-                  <ChevronRight className="h-4 w-4" />
-                )}
-              </CollapsibleTrigger>
-            </Collapsible>
-          ) : (
-            <div className="w-6 h-6 flex items-center justify-center">
-              <div className="w-2 h-2 rounded-full bg-muted-foreground/50" />
-            </div>
-          )}
-
-          <div className="flex-1 bg-primary text-primary-foreground px-4 py-2 rounded-full text-sm font-medium flex items-center justify-between group hover:bg-primary/90 transition-colors">
-            <span>{node.name}</span>
-            <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-              <Button
-                size="sm"
-                variant="ghost"
-                className="h-6 w-6 p-0 text-primary-foreground hover:bg-primary-foreground/20"
-                onClick={() => openAddDialog(node)}
-              >
-                <Plus className="h-3 w-3" />
-              </Button>
-              <Button
-                size="sm"
-                variant="ghost"
-                className="h-6 w-6 p-0 text-primary-foreground hover:bg-primary-foreground/20"
-                onClick={() => openEditDialog(node)}
-              >
-                <Edit className="h-3 w-3" />
-              </Button>
-              {node.id !== eapData.id && (
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  className="h-6 w-6 p-0 text-primary-foreground hover:bg-primary-foreground/20"
-                  onClick={() => deleteNode(node.id)}
-                >
-                  <Trash2 className="h-3 w-3" />
-                </Button>
+            <button
+              onClick={() => toggleExpand(node.id)}
+              className="p-1 hover:bg-accent rounded transition-colors"
+            >
+              {node.expanded ? (
+                <ChevronDown className="h-4 w-4" />
+              ) : (
+                <ChevronRight className="h-4 w-4" />
               )}
-            </div>
+            </button>
+          ) : (
+            <div className="w-6" />
+          )}
+          
+          <span className="flex-1 font-medium">{node.name}</span>
+          
+          <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => openAddDialog(node)}
+            >
+              <Plus className="h-4 w-4" />
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => openEditDialog(node)}
+            >
+              <Edit className="h-4 w-4" />
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => deleteNode(node.id)}
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
           </div>
         </div>
 
-        {hasChildren && (
-          <Collapsible open={node.isExpanded}>
-            <CollapsibleContent>
-              <div className="relative">
-                {/* Linha vertical para conectar filhos */}
-                {node.isExpanded && (
-                  <div 
-                    className="absolute w-px bg-border"
-                    style={{ 
-                      left: marginLeft + 20, 
-                      top: 0, 
-                      height: node.children.length * 50 - 10 
-                    }}
-                  />
-                )}
-                {node.children.map(child => renderNode(child, level + 1))}
-              </div>
-            </CollapsibleContent>
-          </Collapsible>
+        {hasChildren && node.expanded && (
+          <div>
+            {node.children.map((child) => renderNode(child, level + 1))}
+          </div>
         )}
       </div>
     );
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">EAP</h1>
-          <p className="text-muted-foreground">
-            Estrutura Analítica do Projeto
-          </p>
+    <div className="container mx-auto p-4 max-w-6xl space-y-6">
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold">EAP - Estrutura Analítica de Projeto</h1>
+            <p className="text-muted-foreground mt-1">
+              Organize e gerencie a estrutura hierárquica do seu projeto
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={saveEstrutura}
+              disabled={isSaving || !selectedCcaId || !estruturaNome}
+            >
+              <Save className="mr-2 h-4 w-4" />
+              {isSaving ? "Salvando..." : "Salvar"}
+            </Button>
+          </div>
         </div>
-        
+
+        {/* Seleção de CCA e Estrutura */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="space-y-2">
+            <Label>CCA *</Label>
+            <Select
+              value={selectedCcaId?.toString() || ""}
+              onValueChange={(value) => setSelectedCcaId(parseInt(value))}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione o CCA" />
+              </SelectTrigger>
+              <SelectContent>
+                {ccas.map((cca) => (
+                  <SelectItem key={cca.id} value={cca.id.toString()}>
+                    {cca.codigo} - {cca.nome}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Estrutura</Label>
+            <Select
+              value={estruturaAtual?.id || ""}
+              onValueChange={loadEstrutura}
+              disabled={!selectedCcaId || estruturas.length === 0}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder={estruturas.length === 0 ? "Nenhuma estrutura" : "Selecione a estrutura"} />
+              </SelectTrigger>
+              <SelectContent>
+                {estruturas.map((est) => (
+                  <SelectItem key={est.id} value={est.id}>
+                    {est.nome}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Nome da Estrutura *</Label>
+            <Input
+              value={estruturaNome}
+              onChange={(e) => setEstruturaNome(e.target.value)}
+              placeholder="Digite o nome da estrutura"
+              disabled={!selectedCcaId}
+            />
+          </div>
+        </div>
+
         <div className="flex gap-2">
-          <Button 
-            variant="outline" 
-            onClick={downloadModelTemplate}
-            className="flex items-center gap-2"
-          >
-            <Download className="h-4 w-4" />
-            Baixar modelo
+          <Dialog open={isNewEstruturaDialogOpen} onOpenChange={setIsNewEstruturaDialogOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline" disabled={!selectedCcaId}>
+                <Plus className="mr-2 h-4 w-4" />
+                Nova Estrutura
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Criar Nova Estrutura</DialogTitle>
+              </DialogHeader>
+              <p className="text-sm text-muted-foreground">
+                Isso irá limpar a estrutura atual. Certifique-se de ter salvado antes.
+              </p>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setIsNewEstruturaDialogOpen(false)}>
+                  Cancelar
+                </Button>
+                <Button onClick={createNovaEstrutura}>
+                  Criar Nova
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+
+          <Button variant="outline" size="sm" onClick={downloadModelTemplate}>
+            <FileDown className="mr-2 h-4 w-4" />
+            Baixar Modelo
           </Button>
-          
-          <Button 
-            variant="outline" 
-            onClick={() => fileInputRef.current?.click()}
-            disabled={isImporting}
-            className="flex items-center gap-2"
-          >
-            <Upload className="h-4 w-4" />
-            {isImporting ? "Importando..." : "Importar XLSX"}
-          </Button>
-          
+          <label htmlFor="file-upload">
+            <Button variant="outline" size="sm" asChild>
+              <span>
+                <Upload className="mr-2 h-4 w-4" />
+                Importar Excel
+              </span>
+            </Button>
+          </label>
           <input
-            ref={fileInputRef}
+            id="file-upload"
             type="file"
+            ref={fileInputRef}
             accept=".xlsx,.xls"
+            className="hidden"
             onChange={handleFileImport}
-            style={{ display: 'none' }}
           />
+          <Button variant="outline" size="sm" onClick={downloadExcel}>
+            <Download className="mr-2 h-4 w-4" />
+            Exportar Excel
+          </Button>
         </div>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>CCA</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Select value={selectedCca} onValueChange={setSelectedCca} disabled={isLoadingCcas}>
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder={isLoadingCcas ? "Carregando..." : "Selecione o CCA"} />
-            </SelectTrigger>
-            <SelectContent>
-              {ccas?.map((cca) => (
-                <SelectItem key={cca.id} value={cca.id.toString()}>
-                  {cca.codigo} - {cca.nome}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Estrutura do Projeto</CardTitle>
-        </CardHeader>
-        <CardContent className="p-6">
-          <div className="space-y-2">
-            {renderNode(eapData)}
+      {/* Árvore EAP */}
+      {selectedCcaId && (
+        <div className="bg-card rounded-lg border p-6 space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-semibold">Estrutura da EAP</h2>
+            <Button onClick={() => openAddDialog(null)} disabled={!estruturaNome}>
+              <Plus className="mr-2 h-4 w-4" />
+              Adicionar Item Raiz
+            </Button>
           </div>
-        </CardContent>
-      </Card>
+
+          {isLoading ? (
+            <div className="text-center py-12 text-muted-foreground">
+              <p>Carregando estrutura...</p>
+            </div>
+          ) : eapData.length === 0 ? (
+            <div className="text-center py-12 text-muted-foreground">
+              <p className="text-lg">Nenhum item na EAP</p>
+              <p className="text-sm mt-2">Clique em "Adicionar Item Raiz" para começar</p>
+            </div>
+          ) : (
+            <div className="space-y-2 group">
+              {eapData.map((node) => renderNode(node, 0))}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Dialog para adicionar nó */}
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {parentNode ? `Adicionar subnó a "${parentNode.name}"` : "Adicionar novo nó"}
+              {selectedNode ? `Adicionar item em "${selectedNode.name}"` : "Adicionar Item Raiz"}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <Input
-              placeholder="Nome do nó"
-              value={newNodeName}
-              onChange={(e) => setNewNodeName(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && addNode()}
-            />
-            <div className="flex gap-2 justify-end">
-              <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
-                Cancelar
-              </Button>
-              <Button onClick={addNode}>
-                Adicionar
-              </Button>
+            <div className="space-y-2">
+              <Label htmlFor="node-name">Nome do Item</Label>
+              <Input
+                id="node-name"
+                value={nodeName}
+                onChange={(e) => setNodeName(e.target.value)}
+                placeholder="Digite o nome do item"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") addNode();
+                }}
+              />
             </div>
           </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={addNode} disabled={!nodeName.trim()}>
+              Adicionar
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 
@@ -672,24 +752,30 @@ export default function EAP() {
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Editar Nó</DialogTitle>
+            <DialogTitle>Editar Item</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <Input
-              placeholder="Nome do nó"
-              value={newNodeName}
-              onChange={(e) => setNewNodeName(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && editNode()}
-            />
-            <div className="flex gap-2 justify-end">
-              <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
-                Cancelar
-              </Button>
-              <Button onClick={editNode}>
-                Salvar
-              </Button>
+            <div className="space-y-2">
+              <Label htmlFor="edit-node-name">Nome do Item</Label>
+              <Input
+                id="edit-node-name"
+                value={nodeName}
+                onChange={(e) => setNodeName(e.target.value)}
+                placeholder="Digite o nome do item"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") editNode();
+                }}
+              />
             </div>
           </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={editNode} disabled={!nodeName.trim()}>
+              Salvar
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
