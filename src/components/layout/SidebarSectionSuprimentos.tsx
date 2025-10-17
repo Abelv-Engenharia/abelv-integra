@@ -44,6 +44,7 @@ const estoqueMenuItems = [
     title: "Entradas",
     icon: Upload,
     items: [
+      { title: "Alocação das Entradas", href: "/suprimentos/estoque/entradas/alocacao-entradas" },
       { title: "Entrada de Materiais", href: "/suprimentos/estoque/entradas/entrada-materiais" },
       {
         title: "Relatórios",

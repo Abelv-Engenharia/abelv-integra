@@ -207,6 +207,7 @@ import EstoqueAlmoxarifados from "./pages/suprimentos/estoque/apoio/Almoxarifado
 import EstoqueConfiguracoesArcabouco from "./pages/suprimentos/estoque/apoio/ConfiguracoesArcabouco";
 import EstoqueRelatorioEAP from "./pages/suprimentos/estoque/apoio/RelatorioEAP";
 import EstoqueRelacaoAlmoxarifados from "./pages/suprimentos/estoque/apoio/RelacaoAlmoxarifados";
+import EstoqueAlocacaoEntradas from "./pages/suprimentos/estoque/entradas/AlocacaoEntradas";
 import EstoqueEntradaMateriais from "./pages/suprimentos/estoque/entradas/EntradaMateriais";
 import EstoqueNovaEntrada from "./pages/suprimentos/estoque/entradas/NovaEntrada";
 import EstoqueEditarEntrada from "./pages/suprimentos/estoque/entradas/EditarEntrada";
@@ -418,6 +419,7 @@ function App() {
                 <Route path="suprimentos/estoque/apoio/relacao-almoxarifados" element={<EstoqueRelacaoAlmoxarifados />} />
                 
                 {/* Entradas */}
+                <Route path="suprimentos/estoque/entradas/alocacao-entradas" element={<EstoqueAlocacaoEntradas />} />
                 <Route path="suprimentos/estoque/entradas/entrada-materiais" element={<EstoqueEntradaMateriais />} />
                 <Route path="suprimentos/estoque/entradas/nova-entrada" element={<EstoqueNovaEntrada />} />
                 <Route path="suprimentos/estoque/entradas/editar/:id" element={<EstoqueEditarEntrada />} />
