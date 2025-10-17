@@ -126,7 +126,7 @@ class EAPService {
   }
 
   // Sincronizar itens individuais da EAP (para referências)
-  private async syncItems(estruturaId: string, nodes: EAPNode[], parentId?: string, nivel: number = 1): Promise<void> {
+  private async syncItems(estruturaId: string, nodes: EAPNode[]): Promise<void> {
     // Deletar itens antigos
     await supabase
       .from("eap_itens")
@@ -136,28 +136,28 @@ class EAPService {
     // Inserir novos itens
     const items: Omit<EAPItem, "id" | "created_at" | "updated_at">[] = [];
     
-    const processNode = (node: EAPNode, parentId?: string, nivel: number = 1, ordem: number = 0) => {
-      const codigo = this.generateCodigo(node, parentId, ordem);
+    const processNode = (node: EAPNode, parentCodigo: string = "", nivel: number = 1, ordem: number = 0) => {
+      const codigo = this.generateCodigo(nodes, parentCodigo, node, ordem);
       
       items.push({
         eap_estrutura_id: estruturaId,
         codigo,
         nome: node.name,
         nivel,
-        parent_id: parentId,
+        parent_id: undefined, // Não usamos parent_id na inserção, apenas o código hierárquico
         ordem,
         ativo: true
       });
 
       if (node.children && node.children.length > 0) {
         node.children.forEach((child, index) => {
-          processNode(child, node.id, nivel + 1, index);
+          processNode(child, codigo, nivel + 1, index);
         });
       }
     };
 
     nodes.forEach((node, index) => {
-      processNode(node, parentId, nivel, index);
+      processNode(node, "", 1, index);
     });
 
     if (items.length > 0) {
@@ -169,9 +169,11 @@ class EAPService {
     }
   }
 
-  // Gerar código do item (ex: 1, 1.1, 1.1.1)
-  private generateCodigo(node: EAPNode, parentId?: string, ordem: number = 0): string {
-    // Aqui você pode implementar uma lógica mais sofisticada se necessário
+  // Gerar código do item de forma hierárquica
+  private generateCodigo(nodes: EAPNode[], parentCodigo: string = "", node: EAPNode, ordem: number): string {
+    if (parentCodigo) {
+      return `${parentCodigo}.${ordem + 1}`;
+    }
     return `${ordem + 1}`;
   }
 

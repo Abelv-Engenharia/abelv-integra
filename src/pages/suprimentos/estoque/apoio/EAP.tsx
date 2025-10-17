@@ -217,7 +217,7 @@ export default function EAP() {
       }));
   };
 
-  const generateId = () => Math.random().toString(36).substr(2, 9);
+  const generateId = () => crypto.randomUUID();
 
   const toggleExpand = (nodeId: string) => {
     const allNodes = findNodeById(eapData, nodeId);
