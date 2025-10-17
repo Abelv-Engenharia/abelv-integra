@@ -33,20 +33,21 @@ export interface EAPItem {
 }
 
 class EAPService {
-  // Buscar todas as estruturas EAP de um CCA
-  async getByCC(ccaId: number): Promise<EAPEstrutura[]> {
+  // Buscar estrutura EAP única de um CCA
+  async getByCCA(ccaId: number): Promise<EAPEstrutura | null> {
     const { data, error } = await supabase
       .from("eap_estruturas")
       .select("*")
       .eq("cca_id", ccaId)
       .eq("ativo", true)
-      .order("nome");
+      .maybeSingle();
 
     if (error) throw error;
-    return (data || []).map(item => ({
-      ...item,
-      estrutura: item.estrutura as unknown as EAPNode[]
-    }));
+    
+    return data ? {
+      ...data,
+      estrutura: data.estrutura as unknown as EAPNode[]
+    } : null;
   }
 
   // Buscar uma estrutura EAP específica

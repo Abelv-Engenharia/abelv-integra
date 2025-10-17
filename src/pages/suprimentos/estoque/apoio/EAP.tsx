@@ -30,17 +30,14 @@ export default function EAP() {
   // Estados principais
   const [ccas, setCcas] = useState<Array<{ id: number; codigo: string; nome: string }>>([]);
   const [selectedCcaId, setSelectedCcaId] = useState<number | null>(null);
-  const [estruturas, setEstruturas] = useState<EAPEstrutura[]>([]);
   const [estruturaAtual, setEstruturaAtual] = useState<EAPEstrutura | null>(null);
   const [eapData, setEapData] = useState<EAPNode[]>([]);
-  const [estruturaNome, setEstruturaNome] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   // Estados para os diálogos
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [isNewEstruturaDialogOpen, setIsNewEstruturaDialogOpen] = useState(false);
   const [selectedNode, setSelectedNode] = useState<EAPNode | null>(null);
   const [nodeName, setNodeName] = useState("");
   const [isImporting, setIsImporting] = useState(false);
@@ -50,10 +47,10 @@ export default function EAP() {
     loadCcas();
   }, []);
 
-  // Carregar estruturas quando CCA é selecionado
+  // Carregar estrutura quando CCA é selecionado
   useEffect(() => {
     if (selectedCcaId) {
-      loadEstruturas();
+      loadEstrutura();
     }
   }, [selectedCcaId]);
 
@@ -77,41 +74,21 @@ export default function EAP() {
     }
   };
 
-  const loadEstruturas = async () => {
+  const loadEstrutura = async () => {
     if (!selectedCcaId) return;
 
     setIsLoading(true);
     try {
-      const data = await eapService.getByCC(selectedCcaId);
-      setEstruturas(data);
+      // Buscar estrutura única do CCA
+      const estrutura = await eapService.getByCCA(selectedCcaId);
       
-      // Se houver estruturas, carregar a primeira
-      if (data.length > 0) {
-        loadEstrutura(data[0].id);
-      } else {
-        setEstruturaAtual(null);
-        setEapData([]);
-      }
-    } catch (error) {
-      console.error("Erro ao carregar estruturas:", error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível carregar as estruturas EAP",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const loadEstrutura = async (estruturaId: string) => {
-    setIsLoading(true);
-    try {
-      const estrutura = await eapService.getById(estruturaId);
       if (estrutura) {
         setEstruturaAtual(estrutura);
         setEapData(estrutura.estrutura);
-        setEstruturaNome(estrutura.nome);
+      } else {
+        // Não existe estrutura, começar vazia
+        setEstruturaAtual(null);
+        setEapData([]);
       }
     } catch (error) {
       console.error("Erro ao carregar estrutura:", error);
@@ -126,10 +103,10 @@ export default function EAP() {
   };
 
   const saveEstrutura = async () => {
-    if (!selectedCcaId || !estruturaNome.trim()) {
+    if (!selectedCcaId) {
       toast({
-        title: "Campos obrigatórios",
-        description: "Selecione um CCA e digite um nome para a estrutura",
+        title: "Campo obrigatório",
+        description: "Selecione um CCA",
         variant: "destructive",
       });
       return;
@@ -140,7 +117,6 @@ export default function EAP() {
       if (estruturaAtual) {
         // Atualizar estrutura existente
         await eapService.update(estruturaAtual.id, {
-          nome: estruturaNome,
           estrutura: eapData,
         });
 
@@ -149,9 +125,10 @@ export default function EAP() {
           description: "Estrutura EAP atualizada com sucesso!",
         });
       } else {
-        // Criar nova estrutura
+        // Criar nova estrutura (nome automático: "EAP - [Nome do CCA]")
+        const cca = ccas.find(c => c.id === selectedCcaId);
         const novaEstrutura = await eapService.create({
-          nome: estruturaNome,
+          nome: `EAP - ${cca?.nome || 'CCA'}`,
           cca_id: selectedCcaId,
           estrutura: eapData,
           ativo: true,
@@ -163,8 +140,6 @@ export default function EAP() {
           description: "Estrutura EAP criada com sucesso!",
         });
       }
-
-      loadEstruturas();
     } catch (error) {
       console.error("Erro ao salvar estrutura:", error);
       toast({
@@ -175,13 +150,6 @@ export default function EAP() {
     } finally {
       setIsSaving(false);
     }
-  };
-
-  const createNovaEstrutura = () => {
-    setEstruturaAtual(null);
-    setEapData([]);
-    setEstruturaNome("");
-    setIsNewEstruturaDialogOpen(false);
   };
 
   // Funções auxiliares para manipular a árvore
@@ -391,7 +359,9 @@ export default function EAP() {
     const cols = Array(10).fill(0).map(() => ({ width: 20 }));
     worksheet['!cols'] = cols;
     
-    XLSX.writeFile(workbook, `EAP_${estruturaNome || 'Estrutura'}.xlsx`);
+    const cca = ccas.find(c => c.id === selectedCcaId);
+    const nomeArquivo = cca ? `EAP_${cca.codigo}_${cca.nome}` : 'EAP_Estrutura';
+    XLSX.writeFile(workbook, `${nomeArquivo}.xlsx`);
     
     toast({
       title: "Exportação concluída",
@@ -574,7 +544,7 @@ export default function EAP() {
             <Button
               variant="outline"
               onClick={saveEstrutura}
-              disabled={isSaving || !selectedCcaId || !estruturaNome}
+              disabled={isSaving || !selectedCcaId}
             >
               <Save className="mr-2 h-4 w-4" />
               {isSaving ? "Salvando..." : "Salvar"}
@@ -582,8 +552,8 @@ export default function EAP() {
           </div>
         </div>
 
-        {/* Seleção de CCA e Estrutura */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Seleção de CCA */}
+        <div className="grid grid-cols-1 gap-4">
           <div className="space-y-2">
             <Label>CCA *</Label>
             <Select
@@ -602,63 +572,9 @@ export default function EAP() {
               </SelectContent>
             </Select>
           </div>
-
-          <div className="space-y-2">
-            <Label>Estrutura</Label>
-            <Select
-              value={estruturaAtual?.id || ""}
-              onValueChange={loadEstrutura}
-              disabled={!selectedCcaId || estruturas.length === 0}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder={estruturas.length === 0 ? "Nenhuma estrutura" : "Selecione a estrutura"} />
-              </SelectTrigger>
-              <SelectContent>
-                {estruturas.map((est) => (
-                  <SelectItem key={est.id} value={est.id}>
-                    {est.nome}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label>Nome da Estrutura *</Label>
-            <Input
-              value={estruturaNome}
-              onChange={(e) => setEstruturaNome(e.target.value)}
-              placeholder="Digite o nome da estrutura"
-              disabled={!selectedCcaId}
-            />
-          </div>
         </div>
 
         <div className="flex gap-2">
-          <Dialog open={isNewEstruturaDialogOpen} onOpenChange={setIsNewEstruturaDialogOpen}>
-            <DialogTrigger asChild>
-              <Button variant="outline" disabled={!selectedCcaId}>
-                <Plus className="mr-2 h-4 w-4" />
-                Nova Estrutura
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Criar Nova Estrutura</DialogTitle>
-              </DialogHeader>
-              <p className="text-sm text-muted-foreground">
-                Isso irá limpar a estrutura atual. Certifique-se de ter salvado antes.
-              </p>
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setIsNewEstruturaDialogOpen(false)}>
-                  Cancelar
-                </Button>
-                <Button onClick={createNovaEstrutura}>
-                  Criar Nova
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
 
           <Button variant="outline" size="sm" onClick={downloadModelTemplate}>
             <FileDown className="mr-2 h-4 w-4" />
@@ -692,7 +608,7 @@ export default function EAP() {
         <div className="bg-card rounded-lg border p-6 space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-semibold">Estrutura da EAP</h2>
-            <Button onClick={() => openAddDialog(null)} disabled={!estruturaNome}>
+            <Button onClick={() => openAddDialog(null)} disabled={!selectedCcaId}>
               <Plus className="mr-2 h-4 w-4" />
               Adicionar Item Raiz
             </Button>
