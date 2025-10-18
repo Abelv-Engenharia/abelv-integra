@@ -58,6 +58,22 @@ export interface PostImportCheck {
   }[];
 }
 
+export interface MenuDestination {
+  type: 'existing' | 'new';
+  existingSection?: 'admin' | 'gestao-sms' | 'tarefas' | 'seguranca' | 'apoio-geral' | 'suprimentos' | 'engenharia-matricial' | 'comercial';
+  newSectionName?: string;
+  newSectionIcon?: string;
+}
+
+export interface ImportSummary {
+  filesImported: number;
+  savedFiles: { source: string; destination: string }[];
+  routesCreated: RouteConfig[];
+  menuDestination: MenuDestination | null;
+  warnings: PostImportCheck[];
+  timestamp: Date;
+}
+
 export type ImportStep = 
   | 'connection'
   | 'selection'

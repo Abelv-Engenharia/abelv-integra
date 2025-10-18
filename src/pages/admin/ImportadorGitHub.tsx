@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -22,7 +23,9 @@ import {
   ImportLog as ImportLogType,
   RouteConfig,
   PostImportCheck,
-  ImportStep 
+  ImportStep,
+  MenuDestination,
+  ImportSummary 
 } from '@/types/githubImport';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
@@ -37,9 +40,16 @@ export default function ImportadorGitHub() {
   const [conflicts, setConflicts] = useState<ImportConflict[]>([]);
   const [logs, setLogs] = useState<ImportLogType[]>([]);
   const [routes, setRoutes] = useState<RouteConfig[]>([]);
+  const [registeredRoutes, setRegisteredRoutes] = useState<RouteConfig[]>([]);
+  const [menuDestination, setMenuDestination] = useState<MenuDestination>({
+    type: 'existing',
+    existingSection: 'admin',
+  });
   const [checks, setChecks] = useState<PostImportCheck[]>([]);
+  const [importedFiles, setImportedFiles] = useState<{ source: string; destination: string }[]>([]);
   
   const { toast } = useToast();
+  const navigate = useNavigate();
   const depAnalyzer = new DepAnalyzer();
   const fileService = new FileImportService();
   const routeGenerator = new RouteGenerator();
@@ -158,11 +168,63 @@ export default function ImportadorGitHub() {
     );
     
     setLogs(fileService.getLogs());
+    setImportedFiles(result.savedFiles);
     
     toast({
       title: 'Importação concluída',
       description: `${result.success} arquivos importados com sucesso`,
     });
+  };
+
+  const handleRegisterRoute = (route: RouteConfig, destination: MenuDestination) => {
+    setRegisteredRoutes(prev => {
+      const updated = [...prev, route];
+      toast({ 
+        title: 'Rota configurada', 
+        description: `${route.title} será adicionada ao menu` 
+      });
+      
+      // Se todas as rotas foram configuradas, avançar automaticamente
+      if (updated.length === routes.length) {
+        setTimeout(() => handleNextStep(), 500);
+      }
+      
+      return updated;
+    });
+  };
+
+  const handleFinish = async () => {
+    setLoading(true);
+    try {
+      // Gerar resumo da importação
+      const summary: ImportSummary = {
+        filesImported: importedFiles.length,
+        savedFiles: importedFiles,
+        routesCreated: registeredRoutes,
+        menuDestination: menuDestination,
+        warnings: checks.filter(c => c.status === 'pending'),
+        timestamp: new Date(),
+      };
+      
+      toast({
+        title: 'Importação finalizada!',
+        description: 'Redirecionando para o resumo...',
+      });
+      
+      // Redirecionar para página de resumo
+      setTimeout(() => {
+        navigate('/admin/importador-github/resumo', { state: { summary } });
+      }, 1000);
+      
+    } catch (error) {
+      toast({
+        title: 'Erro',
+        description: 'Falha ao finalizar importação',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const generateChecklist = async () => {
@@ -283,9 +345,9 @@ export default function ImportadorGitHub() {
         return (
           <RouteRegistration
             routes={routes}
-            onRegister={(route) => {
-              toast({ title: 'Rota registrada', description: route.title });
-            }}
+            menuDestination={menuDestination}
+            onMenuDestinationChange={setMenuDestination}
+            onRegister={handleRegisterRoute}
           />
         );
       
@@ -345,7 +407,7 @@ export default function ImportadorGitHub() {
                 <ChevronRight className="ml-2 h-4 w-4" />
               </Button>
             ) : (
-              <Button onClick={() => toast({ title: 'Concluído!' })}>
+              <Button onClick={handleFinish} disabled={loading}>
                 Concluir
               </Button>
             )}

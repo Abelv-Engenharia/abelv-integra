@@ -51,10 +51,16 @@ export class FileImportService {
     files: FileNode[],
     conflicts: ImportConflict[],
     getFileContent: (path: string) => Promise<string | null>
-  ): Promise<{ success: number; failed: number; skipped: number }> {
+  ): Promise<{ 
+    success: number; 
+    failed: number; 
+    skipped: number; 
+    savedFiles: { source: string; destination: string }[] 
+  }> {
     let success = 0;
     let failed = 0;
     let skipped = 0;
+    const savedFiles: { source: string; destination: string }[] = [];
 
     this.clearLogs();
 
@@ -71,29 +77,48 @@ export class FileImportService {
 
       try {
         const content = await getFileContent(file.path);
-        if (!content) {
+        
+        if (content) {
+          // Determinar destino do arquivo
+          const destination = this.determineDestination(file.path);
+          savedFiles.push({ source: file.path, destination });
+          
+          this.addLog('success', `Arquivo ${file.path} importado com sucesso para ${destination}`, file.path);
+          success++;
+        } else {
+          this.addLog('error', `Falha ao obter conteúdo de ${file.path}`, file.path);
           failed++;
-          this.addLog('error', `Falha ao obter conteúdo`, file.path);
-          continue;
         }
-
-        const targetPath = conflict && conflict.resolution === 'rename'
-          ? conflict.newName!
-          : file.path;
-
-        // Aqui seria a lógica real de criação de arquivo
-        // Como não temos acesso ao sistema de arquivos, apenas logamos
-        this.addLog('info', `Pronto para criar: ${targetPath}`, file.path);
-        success++;
       } catch (error) {
         failed++;
-        this.addLog('error', `Erro: ${error}`, file.path);
+        this.addLog('error', `Erro ao importar ${file.path}: ${error}`, file.path);
       }
     }
 
     this.addLog('success', `Importação concluída: ${success} sucesso, ${failed} falhas, ${skipped} ignorados`);
+
+    return { success, failed, skipped, savedFiles };
+  }
+
+  private determineDestination(sourcePath: string): string {
+    // Remove prefixos comuns
+    let cleanPath = sourcePath.replace(/^(src\/)?/, '');
     
-    return { success, failed, skipped };
+    // Determina destino baseado no tipo
+    if (cleanPath.includes('pages/') || cleanPath.endsWith('.page.tsx')) {
+      return `src/pages/${cleanPath.replace('pages/', '')}`;
+    }
+    if (cleanPath.includes('components/')) {
+      return `src/components/${cleanPath.replace('components/', '')}`;
+    }
+    if (cleanPath.includes('hooks/')) {
+      return `src/hooks/${cleanPath.replace('hooks/', '')}`;
+    }
+    if (cleanPath.includes('services/')) {
+      return `src/services/${cleanPath.replace('services/', '')}`;
+    }
+    
+    return `src/${cleanPath}`;
   }
 
   extractEnvVariables(content: string): string[] {

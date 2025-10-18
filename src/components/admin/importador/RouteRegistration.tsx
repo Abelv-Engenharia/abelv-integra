@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { RouteConfig } from '@/types/githubImport';
+import { RouteConfig, MenuDestination } from '@/types/githubImport';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -7,13 +7,16 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Code, Plus } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
+import { MenuDestinationSelector } from './MenuDestinationSelector';
 
 interface RouteRegistrationProps {
   routes: RouteConfig[];
-  onRegister: (route: RouteConfig) => void;
+  menuDestination: MenuDestination;
+  onMenuDestinationChange: (destination: MenuDestination) => void;
+  onRegister: (route: RouteConfig, destination: MenuDestination) => void;
 }
 
-export function RouteRegistration({ routes, onRegister }: RouteRegistrationProps) {
+export function RouteRegistration({ routes, menuDestination, onMenuDestinationChange, onRegister }: RouteRegistrationProps) {
   const [selectedRoute, setSelectedRoute] = useState<RouteConfig | null>(null);
   const [editedRoute, setEditedRoute] = useState<RouteConfig | null>(null);
 
@@ -24,7 +27,7 @@ export function RouteRegistration({ routes, onRegister }: RouteRegistrationProps
 
   const handleRegister = () => {
     if (editedRoute) {
-      onRegister(editedRoute);
+      onRegister(editedRoute, menuDestination);
       setSelectedRoute(null);
       setEditedRoute(null);
     }
@@ -39,9 +42,15 @@ export function RouteRegistration({ routes, onRegister }: RouteRegistrationProps
   }
 
   return (
-    <div className="grid grid-cols-2 gap-4">
-      <div className="space-y-2">
-        <Label>Páginas importadas</Label>
+    <div className="space-y-4">
+      <MenuDestinationSelector
+        value={menuDestination}
+        onChange={onMenuDestinationChange}
+      />
+      
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label>Páginas importadas</Label>
         <div className="border rounded-lg divide-y max-h-96 overflow-auto">
           {routes.map((route, index) => (
             <button
@@ -125,6 +134,7 @@ export function RouteRegistration({ routes, onRegister }: RouteRegistrationProps
             <p>Selecione uma página para configurar</p>
           </div>
         )}
+      </div>
       </div>
     </div>
   );
