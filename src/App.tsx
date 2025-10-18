@@ -149,6 +149,13 @@ import EmissaoPET from "./pages/documentacao-sms/EmissaoPET";
 import EmissaoOS from "./pages/documentacao-sms/EmissaoOS";
 import ListaPresenca from "./pages/documentacao-sms/ListaPresenca";
 import FichaEPI from "./pages/documentacao-sms/FichaEPI";
+import TermoAltura from "./pages/documentacao-sms/TermoAltura";
+import TermoEletricidade from "./pages/documentacao-sms/TermoEletricidade";
+import TermoConfinado from "./pages/documentacao-sms/TermoConfinado";
+import OrdemServico from "./pages/documentacao-sms/OrdemServico";
+import Certificados from "./pages/documentacao-sms/Certificados";
+import Turmas from "./pages/documentacao-sms/Turmas";
+import RiscosFuncao from "./pages/documentacao-sms/RiscosFuncao";
 
 // Inspeção SMS pages
 import CadastrarInspecao from "./pages/inspecao-sms/CadastrarInspecao";
@@ -398,6 +405,13 @@ function App() {
                 <Route path="documentacao-sms/emissao-os" element={<EmissaoOS />} />
                 <Route path="documentacao-sms/lista-presenca" element={<ListaPresenca />} />
                 <Route path="documentacao-sms/ficha-epi" element={<FichaEPI />} />
+                <Route path="documentacao-sms/termo-altura" element={<TermoAltura />} />
+                <Route path="documentacao-sms/termo-eletricidade" element={<TermoEletricidade />} />
+                <Route path="documentacao-sms/termo-confinado" element={<TermoConfinado />} />
+                <Route path="documentacao-sms/ordem-servico" element={<OrdemServico />} />
+                <Route path="documentacao-sms/certificados" element={<Certificados />} />
+                <Route path="documentacao-sms/turmas" element={<Turmas />} />
+                <Route path="documentacao-sms/riscos-funcao" element={<RiscosFuncao />} />
 
                 {/* Relatórios routes */}
                 <Route path="relatorios" element={<Navigate to="/relatorios/dashboard" replace />} />
