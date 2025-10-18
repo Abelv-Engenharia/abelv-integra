@@ -144,6 +144,11 @@ import RelatoriosOcorrenciasPendentes from "./pages/relatorios/RelatoriosOcorren
 // Documentação SMS pages
 import DocumentacaoSMSDashboard from "./pages/documentacao-sms/Dashboard";
 import DocumentacaoSMSModelos from "./pages/documentacao-sms/Modelos";
+import EmissaoAPR from "./pages/documentacao-sms/EmissaoAPR";
+import EmissaoPET from "./pages/documentacao-sms/EmissaoPET";
+import EmissaoOS from "./pages/documentacao-sms/EmissaoOS";
+import ListaPresenca from "./pages/documentacao-sms/ListaPresenca";
+import FichaEPI from "./pages/documentacao-sms/FichaEPI";
 
 // Inspeção SMS pages
 import CadastrarInspecao from "./pages/inspecao-sms/CadastrarInspecao";
@@ -388,6 +393,11 @@ function App() {
                 {/* Documentação SMS routes */}
                 <Route path="documentacao-sms/dashboard" element={<DocumentacaoSMSDashboard />} />
                 <Route path="documentacao-sms/modelos" element={<DocumentacaoSMSModelos />} />
+                <Route path="documentacao-sms/emissao-apr" element={<EmissaoAPR />} />
+                <Route path="documentacao-sms/emissao-pet" element={<EmissaoPET />} />
+                <Route path="documentacao-sms/emissao-os" element={<EmissaoOS />} />
+                <Route path="documentacao-sms/lista-presenca" element={<ListaPresenca />} />
+                <Route path="documentacao-sms/ficha-epi" element={<FichaEPI />} />
 
                 {/* Relatórios routes */}
                 <Route path="relatorios" element={<Navigate to="/relatorios/dashboard" replace />} />
