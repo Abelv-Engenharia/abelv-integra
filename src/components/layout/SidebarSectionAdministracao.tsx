@@ -92,12 +92,6 @@ export default function SidebarSectionAdministracao({ openMenu, toggleMenu, onLi
       slug: "admin_importacao_desvios",
       Icon: UploadCloud,
     },
-    {
-      label: "Importador Github",
-      to: "/admin/importador-github",
-      slug: "admin_importador_github",
-      Icon: Upload,
-    },
   ].filter((i) => can(i.slug));
 
   if (items.length === 0 && !can("admin_comunicados") && importacaoItems.length === 0) return null;
