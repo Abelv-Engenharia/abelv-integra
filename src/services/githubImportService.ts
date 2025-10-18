@@ -34,13 +34,39 @@ export class GitHubImportService {
     return null;
   }
 
-  async validateRepo(repo: GitHubRepo): Promise<boolean> {
+  async validateRepo(repo: GitHubRepo): Promise<{ valid: boolean; error?: string }> {
     try {
       const url = `${GITHUB_API_BASE}/repos/${repo.owner}/${repo.repo}`;
       const response = await fetch(url, { headers: this.getHeaders() });
-      return response.ok;
-    } catch {
-      return false;
+      
+      if (response.ok) {
+        return { valid: true };
+      }
+      
+      if (response.status === 404) {
+        return { 
+          valid: false, 
+          error: 'Repositório não encontrado. Verifique se o nome está correto ou se você tem permissão de acesso.' 
+        };
+      }
+      
+      if (response.status === 403) {
+        return { 
+          valid: false, 
+          error: 'Acesso negado. Para repositórios privados, forneça um Personal Access Token com permissões de leitura.' 
+        };
+      }
+      
+      if (response.status === 401) {
+        return { 
+          valid: false, 
+          error: 'Token inválido ou expirado. Gere um novo Personal Access Token no GitHub.' 
+        };
+      }
+      
+      return { valid: false, error: 'Erro ao conectar ao repositório. Tente novamente.' };
+    } catch (error) {
+      return { valid: false, error: 'Erro de conexão. Verifique sua internet e tente novamente.' };
     }
   }
 

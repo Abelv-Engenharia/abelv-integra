@@ -30,6 +30,7 @@ export default function ImportadorGitHub() {
   const [currentStep, setCurrentStep] = useState<ImportStep>('connection');
   const [loading, setLoading] = useState(false);
   const [repo, setRepo] = useState<GitHubRepo | null>(null);
+  const [githubToken, setGithubToken] = useState<string | undefined>();
   const [fileNodes, setFileNodes] = useState<FileNode[]>([]);
   const [dependencyDiff, setDependencyDiff] = useState<DependencyDiff | null>(null);
   const [selectedDeps, setSelectedDeps] = useState<Set<string>>(new Set());
@@ -39,7 +40,6 @@ export default function ImportadorGitHub() {
   const [checks, setChecks] = useState<PostImportCheck[]>([]);
   
   const { toast } = useToast();
-  const githubService = new GitHubImportService();
   const depAnalyzer = new DepAnalyzer();
   const fileService = new FileImportService();
   const routeGenerator = new RouteGenerator();
@@ -57,14 +57,17 @@ export default function ImportadorGitHub() {
   const currentStepIndex = steps.findIndex(s => s.key === currentStep);
   const progress = ((currentStepIndex + 1) / steps.length) * 100;
 
-  const handleConnect = async (repoData: GitHubRepo) => {
+  const handleConnect = async (repoData: GitHubRepo & { token?: string }) => {
     setLoading(true);
     try {
-      const isValid = await githubService.validateRepo(repoData);
-      if (!isValid) {
+      setGithubToken(repoData.token);
+      const githubServiceWithToken = new GitHubImportService(repoData.token);
+      
+      const validationResult = await githubServiceWithToken.validateRepo(repoData);
+      if (!validationResult.valid) {
         toast({
           title: 'Erro',
-          description: 'Repositório não encontrado ou inacessível',
+          description: validationResult.error || 'Repositório não encontrado ou inacessível',
           variant: 'destructive',
         });
         return;
@@ -72,7 +75,7 @@ export default function ImportadorGitHub() {
 
       setRepo(repoData);
       
-      const structure = await githubService.getRepoStructure(
+      const structure = await githubServiceWithToken.getRepoStructure(
         repoData.owner,
         repoData.repo,
         repoData.branch
@@ -94,6 +97,7 @@ export default function ImportadorGitHub() {
 
   const handleExpandNode = async (node: FileNode): Promise<FileNode[]> => {
     if (!repo) return [];
+    const githubService = new GitHubImportService(githubToken);
     return await githubService.expandDirectory(repo.owner, repo.repo, repo.branch, node);
   };
 
@@ -103,6 +107,7 @@ export default function ImportadorGitHub() {
       try {
         // Analisar dependências
         if (repo) {
+          const githubService = new GitHubImportService(githubToken);
           const sourcePackage = await githubService.getPackageJson(repo.owner, repo.repo, repo.branch);
           const currentPackage = await fetch('/package.json').then(r => r.json());
           
@@ -144,6 +149,7 @@ export default function ImportadorGitHub() {
   const performImport = async () => {
     if (!repo) return;
     
+    const githubService = new GitHubImportService(githubToken);
     const selectedFiles = getAllSelectedFiles(fileNodes);
     const result = await fileService.importFiles(
       selectedFiles,
@@ -160,6 +166,7 @@ export default function ImportadorGitHub() {
   };
 
   const generateChecklist = async () => {
+    const githubService = new GitHubImportService(githubToken);
     const selectedFiles = getAllSelectedFiles(fileNodes);
     const allContent = await Promise.all(
       selectedFiles
