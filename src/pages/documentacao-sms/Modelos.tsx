@@ -30,6 +30,9 @@ import {
 } from "@/components/ui/table";
 import { FileText, Upload, Plus, Eye, Edit, Trash2, Download } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { FileUpload } from "@/components/ui/file-upload";
+import { useModelos } from "@/hooks/useModelos";
+import { format } from "date-fns";
 
 const tiposDocumento = [
   { value: "OS", label: "Ordem de Serviço" },
@@ -57,13 +60,62 @@ const Modelos = () => {
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
   const [selectedTipo, setSelectedTipo] = useState("");
+  const [nomeModelo, setNomeModelo] = useState("");
+  const [descricao, setDescricao] = useState("");
+  const [arquivoUrl, setArquivoUrl] = useState("");
+  const [arquivoNome, setArquivoNome] = useState("");
+  const [erros, setErros] = useState<Record<string, boolean>>({});
+
+  const { modelos, totalModelos, totalAtivos, totalTipos, isLoading, createModelo, deleteModelo } = useModelos();
 
   const handleUpload = () => {
-    toast({
-      title: "Upload realizado",
-      description: "Modelo cadastrado com sucesso!",
-    });
-    setOpen(false);
+    const novosErros: Record<string, boolean> = {};
+    
+    if (!selectedTipo) novosErros.tipo = true;
+    if (!nomeModelo.trim()) novosErros.nome = true;
+    if (!arquivoUrl) novosErros.arquivo = true;
+
+    if (Object.keys(novosErros).length > 0) {
+      setErros(novosErros);
+      toast({
+        title: "Campos obrigatórios",
+        description: "Preencha todos os campos marcados em vermelho",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    createModelo.mutate(
+      {
+        tipo: selectedTipo,
+        nome: nomeModelo,
+        descricao: descricao || undefined,
+        arquivo_url: arquivoUrl,
+        arquivo_nome: arquivoNome,
+        codigos_disponiveis: codigosDisponiveis,
+      },
+      {
+        onSuccess: () => {
+          setOpen(false);
+          setSelectedTipo("");
+          setNomeModelo("");
+          setDescricao("");
+          setArquivoUrl("");
+          setArquivoNome("");
+          setErros({});
+        },
+      }
+    );
+  };
+
+  const handleDelete = (id: string) => {
+    if (confirm("Deseja realmente excluir este modelo?")) {
+      deleteModelo.mutate(id);
+    }
+  };
+
+  const handleDownload = (url: string) => {
+    window.open(url, "_blank");
   };
 
   return (
@@ -91,9 +143,17 @@ const Modelos = () => {
             </DialogHeader>
             <div className="space-y-4 mt-4">
               <div className="space-y-2">
-                <Label htmlFor="tipo">Tipo de Documento *</Label>
-                <Select value={selectedTipo} onValueChange={setSelectedTipo}>
-                  <SelectTrigger>
+                <Label htmlFor="tipo" className={erros.tipo ? "text-destructive" : ""}>
+                  Tipo de Documento *
+                </Label>
+                <Select 
+                  value={selectedTipo} 
+                  onValueChange={(value) => {
+                    setSelectedTipo(value);
+                    setErros((prev) => ({ ...prev, tipo: false }));
+                  }}
+                >
+                  <SelectTrigger className={erros.tipo ? "border-destructive" : ""}>
                     <SelectValue placeholder="Selecione o tipo" />
                   </SelectTrigger>
                   <SelectContent>
@@ -107,8 +167,19 @@ const Modelos = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="nome">Nome do Modelo *</Label>
-                <Input id="nome" placeholder="Ex: Ordem de Serviço Padrão V2" />
+                <Label htmlFor="nome" className={erros.nome ? "text-destructive" : ""}>
+                  Nome do Modelo *
+                </Label>
+                <Input 
+                  id="nome" 
+                  placeholder="Ex: Ordem de Serviço Padrão V2" 
+                  value={nomeModelo}
+                  onChange={(e) => {
+                    setNomeModelo(e.target.value);
+                    setErros((prev) => ({ ...prev, nome: false }));
+                  }}
+                  className={erros.nome ? "border-destructive" : ""}
+                />
               </div>
 
               <div className="space-y-2">
@@ -117,26 +188,29 @@ const Modelos = () => {
                   id="descricao"
                   placeholder="Descreva o modelo e quando deve ser usado"
                   rows={3}
+                  value={descricao}
+                  onChange={(e) => setDescricao(e.target.value)}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="arquivo">Arquivo do Modelo *</Label>
-                <div className="border-2 border-dashed rounded-lg p-6 text-center hover:bg-accent/50 transition-colors cursor-pointer">
-                  <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-                  <p className="text-sm text-muted-foreground">
-                    Clique para fazer upload ou arraste o arquivo
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Formatos: .docx, .xlsx (máx. 5MB)
-                  </p>
-                  <Input
-                    id="arquivo"
-                    type="file"
-                    accept=".docx,.xlsx"
-                    className="hidden"
-                  />
-                </div>
+                <Label htmlFor="arquivo" className={erros.arquivo ? "text-destructive" : ""}>
+                  Arquivo do Modelo *
+                </Label>
+                <FileUpload
+                  accept=".docx,.xlsx"
+                  onFileUpload={(url, nome) => {
+                    setArquivoUrl(url);
+                    setArquivoNome(nome);
+                    setErros((prev) => ({ ...prev, arquivo: false }));
+                  }}
+                  currentFile={arquivoUrl}
+                  onRemove={() => {
+                    setArquivoUrl("");
+                    setArquivoNome("");
+                  }}
+                  className={erros.arquivo ? "border-destructive border-2" : ""}
+                />
               </div>
 
               <div className="space-y-2">
@@ -159,9 +233,9 @@ const Modelos = () => {
                 <Button variant="outline" onClick={() => setOpen(false)}>
                   Cancelar
                 </Button>
-                <Button onClick={handleUpload}>
+                <Button onClick={handleUpload} disabled={createModelo.isPending}>
                   <Upload className="h-4 w-4 mr-2" />
-                  Cadastrar Modelo
+                  {createModelo.isPending ? "Cadastrando..." : "Cadastrar Modelo"}
                 </Button>
               </div>
             </div>
@@ -177,7 +251,7 @@ const Modelos = () => {
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">0</div>
+            <div className="text-2xl font-bold">{totalModelos}</div>
             <p className="text-xs text-muted-foreground">Templates cadastrados</p>
           </CardContent>
         </Card>
@@ -188,7 +262,7 @@ const Modelos = () => {
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">0</div>
+            <div className="text-2xl font-bold">{totalAtivos}</div>
             <p className="text-xs text-muted-foreground">Disponíveis para uso</p>
           </CardContent>
         </Card>
@@ -199,7 +273,7 @@ const Modelos = () => {
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">6</div>
+            <div className="text-2xl font-bold">{totalTipos}</div>
             <p className="text-xs text-muted-foreground">Categorias disponíveis</p>
           </CardContent>
         </Card>
@@ -211,15 +285,19 @@ const Modelos = () => {
           <CardTitle>Modelos Cadastrados</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-center py-12 text-muted-foreground">
-            <FileText className="h-16 w-16 mx-auto mb-4 opacity-50" />
-            <p className="text-lg font-medium">Nenhum modelo cadastrado</p>
-            <p className="text-sm mt-1">
-              Clique em "Novo Modelo" para cadastrar seu primeiro template
-            </p>
-          </div>
-          {/* Tabela será populada quando houver modelos cadastrados */}
-          <div className="hidden">
+          {isLoading ? (
+            <div className="text-center py-12 text-muted-foreground">
+              <p>Carregando modelos...</p>
+            </div>
+          ) : modelos.length === 0 ? (
+            <div className="text-center py-12 text-muted-foreground">
+              <FileText className="h-16 w-16 mx-auto mb-4 opacity-50" />
+              <p className="text-lg font-medium">Nenhum modelo cadastrado</p>
+              <p className="text-sm mt-1">
+                Clique em "Novo Modelo" para cadastrar seu primeiro template
+              </p>
+            </div>
+          ) : (
             <Table>
               <TableHeader>
                 <TableRow>
@@ -232,36 +310,47 @@ const Modelos = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                <TableRow>
-                  <TableCell>
-                    <Badge>OS</Badge>
-                  </TableCell>
-                  <TableCell className="font-medium">Ordem de Serviço Padrão</TableCell>
-                  <TableCell>V1</TableCell>
-                  <TableCell>
-                    <Badge variant="default">Ativo</Badge>
-                  </TableCell>
-                  <TableCell>20/01/2025</TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                      <Button variant="ghost" size="icon">
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="icon">
-                        <Download className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="icon">
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="icon" className="text-destructive">
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
+                {modelos.map((modelo) => (
+                  <TableRow key={modelo.id}>
+                    <TableCell>
+                      <Badge variant="secondary">{modelo.tipo}</Badge>
+                    </TableCell>
+                    <TableCell className="font-medium">{modelo.nome}</TableCell>
+                    <TableCell>V{modelo.versao}</TableCell>
+                    <TableCell>
+                      <Badge variant={modelo.ativo ? "default" : "secondary"}>
+                        {modelo.ativo ? "Ativo" : "Inativo"}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      {format(new Date(modelo.created_at), "dd/MM/yyyy")}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-2">
+                        <Button 
+                          variant="ghost" 
+                          size="icon"
+                          onClick={() => handleDownload(modelo.arquivo_url)}
+                          title="Download"
+                        >
+                          <Download className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="icon"
+                          onClick={() => handleDelete(modelo.id)}
+                          className="text-destructive hover:text-destructive"
+                          title="Excluir"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
               </TableBody>
             </Table>
-          </div>
+          )}
         </CardContent>
       </Card>
     </div>
