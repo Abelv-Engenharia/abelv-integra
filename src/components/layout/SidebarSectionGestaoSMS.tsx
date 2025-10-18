@@ -11,6 +11,7 @@ import {
   BarChart3,
   Shield,
   Flame,
+  FileText,
 } from "lucide-react";
 import {
   SidebarMenu,
@@ -62,6 +63,7 @@ export default function SidebarSectionGestaoSMS({
     if (path.startsWith("/medidas-disciplinares")) return "medidas-disciplinares";
     if (path.startsWith("/gro")) return "gro";
     if (path.startsWith("/prevencao-incendio")) return "prevencao-incendio";
+    if (path.startsWith("/documentacao-sms")) return "documentacao-sms";
     if (path.startsWith("/relatorios")) return "relatorios";
     return null;
   };
@@ -148,6 +150,19 @@ export default function SidebarSectionGestaoSMS({
     { label: "Consulta de Inspeções", to: "/prevencao-incendio/consulta-inspecoes", slug: "prevencao_incendio_consulta_inspecoes" },
   ];
 
+  const documentacaoItems: LinkItem[] = [
+    { label: "Dashboard", to: "/documentacao-sms/dashboard", slug: "documentacao_dashboard" },
+    { label: "Modelos", to: "/documentacao-sms/modelos", slug: "documentacao_modelos" },
+    { label: "Ordem de Serviço", to: "/documentacao-sms/ordem-servico", slug: "documentacao_os" },
+    { label: "Termo Altura", to: "/documentacao-sms/termo-altura", slug: "documentacao_altura" },
+    { label: "Termo Eletricidade", to: "/documentacao-sms/termo-eletricidade", slug: "documentacao_eletricidade" },
+    { label: "Termo Espaço Confinado", to: "/documentacao-sms/termo-espaco-confinado", slug: "documentacao_confinado" },
+    { label: "Lista de Presença", to: "/documentacao-sms/lista-presenca", slug: "documentacao_lista" },
+    { label: "Certificados", to: "/documentacao-sms/certificados", slug: "documentacao_certificados" },
+    { label: "Turmas", to: "/documentacao-sms/turmas", slug: "documentacao_turmas" },
+    { label: "Riscos por Função", to: "/documentacao-sms/riscos-funcao", slug: "documentacao_riscos" },
+  ];
+
   const relatoriosItems: LinkItem[] = [
     { label: "Dashboard", to: "/relatorios/dashboard", slug: "relatorios_dashboard" },
     { label: "IDSMS", to: "/relatorios/idsms", slug: "relatorios_idsms" },
@@ -168,6 +183,7 @@ export default function SidebarSectionGestaoSMS({
   const medidas = filterAllowed(medidasDiscItems);
   const gro = filterAllowed(groItems);
   const prevInc = filterAllowed(prevIncendioItems);
+  const documentacao = filterAllowed(documentacaoItems);
   const relatorios = filterAllowed(relatoriosItems);
 
   const showSmsDashboard = can("sms_dashboard");
@@ -183,6 +199,7 @@ export default function SidebarSectionGestaoSMS({
     medidas.length === 0 &&
     gro.length === 0 &&
     prevInc.length === 0 &&
+    documentacao.length === 0 &&
     relatorios.length === 0;
 
   if (sectionIsEmpty) return null;
@@ -515,6 +532,39 @@ export default function SidebarSectionGestaoSMS({
                             }
                           >
                             <Link to={it.to}>{it.label}</Link>
+                          </SidebarMenuSubButton>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </SidebarMenuSubItem>
+              )}
+
+              {/* Documentação SMS */}
+              {documentacao.length > 0 && (
+                <SidebarMenuSubItem>
+                  <div className="w-full">
+                    <button
+                      onClick={() => toggleSubMenu("documentacao-sms")}
+                      className="flex items-center justify-between w-full px-2 py-1 text-white hover:bg-slate-600 rounded text-xs"
+                    >
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-3 w-3 flex-shrink-0" />
+                        <span>Documentação SMS</span>
+                      </div>
+                      {openSubMenus["documentacao-sms"] ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
+                    </button>
+                    {openSubMenus["documentacao-sms"] && (
+                      <div className="ml-4 mt-1 space-y-1">
+                        {documentacao.map((it) => (
+                          <SidebarMenuSubButton
+                            key={it.slug}
+                            asChild
+                            className={
+                              currentPath === it.to ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"
+                            }
+                          >
+                            <Link to={it.to} onClick={onLinkClick}>{it.label}</Link>
                           </SidebarMenuSubButton>
                         ))}
                       </div>

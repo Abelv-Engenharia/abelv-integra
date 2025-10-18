@@ -860,6 +860,345 @@ export type Database = {
         }
         Relationships: []
       }
+      documentacao_gerada: {
+        Row: {
+          arquivo_nome: string
+          arquivo_url: string
+          cca_id: number | null
+          created_at: string | null
+          created_by: string | null
+          dados_preenchidos: Json | null
+          empresa_id: number | null
+          funcionario_id: string | null
+          id: string
+          modelo_id: string | null
+          risco_funcao_id: string | null
+          tipo: string
+          turma_id: string | null
+        }
+        Insert: {
+          arquivo_nome: string
+          arquivo_url: string
+          cca_id?: number | null
+          created_at?: string | null
+          created_by?: string | null
+          dados_preenchidos?: Json | null
+          empresa_id?: number | null
+          funcionario_id?: string | null
+          id?: string
+          modelo_id?: string | null
+          risco_funcao_id?: string | null
+          tipo: string
+          turma_id?: string | null
+        }
+        Update: {
+          arquivo_nome?: string
+          arquivo_url?: string
+          cca_id?: number | null
+          created_at?: string | null
+          created_by?: string | null
+          dados_preenchidos?: Json | null
+          empresa_id?: number | null
+          funcionario_id?: string | null
+          id?: string
+          modelo_id?: string | null
+          risco_funcao_id?: string | null
+          tipo?: string
+          turma_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "documentacao_gerada_cca_id_fkey"
+            columns: ["cca_id"]
+            isOneToOne: false
+            referencedRelation: "ccas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documentacao_gerada_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documentacao_gerada_funcionario_id_fkey"
+            columns: ["funcionario_id"]
+            isOneToOne: false
+            referencedRelation: "funcionarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documentacao_gerada_modelo_id_fkey"
+            columns: ["modelo_id"]
+            isOneToOne: false
+            referencedRelation: "documentacao_modelos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documentacao_gerada_risco_funcao_id_fkey"
+            columns: ["risco_funcao_id"]
+            isOneToOne: false
+            referencedRelation: "documentacao_riscos_funcao"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documentacao_gerada_turma_id_fkey"
+            columns: ["turma_id"]
+            isOneToOne: false
+            referencedRelation: "documentacao_turmas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      documentacao_modelos: {
+        Row: {
+          arquivo_nome: string
+          arquivo_url: string
+          ativo: boolean | null
+          codigos_disponiveis: Json
+          created_at: string | null
+          created_by: string | null
+          descricao: string | null
+          id: string
+          nome: string
+          tipo: string
+          updated_at: string | null
+          versao: number | null
+        }
+        Insert: {
+          arquivo_nome: string
+          arquivo_url: string
+          ativo?: boolean | null
+          codigos_disponiveis?: Json
+          created_at?: string | null
+          created_by?: string | null
+          descricao?: string | null
+          id?: string
+          nome: string
+          tipo: string
+          updated_at?: string | null
+          versao?: number | null
+        }
+        Update: {
+          arquivo_nome?: string
+          arquivo_url?: string
+          ativo?: boolean | null
+          codigos_disponiveis?: Json
+          created_at?: string | null
+          created_by?: string | null
+          descricao?: string | null
+          id?: string
+          nome?: string
+          tipo?: string
+          updated_at?: string | null
+          versao?: number | null
+        }
+        Relationships: []
+      }
+      documentacao_riscos_funcao: {
+        Row: {
+          ativo: boolean | null
+          cbo: string | null
+          cca_id: number
+          created_at: string | null
+          created_by: string | null
+          descricao_funcao: string
+          empresa_id: number
+          epis_requeridos: Json | null
+          funcao: string
+          id: string
+          riscos_acidentes: Json | null
+          riscos_biologicos: Json | null
+          riscos_ergonomicos: Json | null
+          riscos_fisicos: Json | null
+          riscos_quimicos: Json | null
+          tecnico_responsavel_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          ativo?: boolean | null
+          cbo?: string | null
+          cca_id: number
+          created_at?: string | null
+          created_by?: string | null
+          descricao_funcao: string
+          empresa_id: number
+          epis_requeridos?: Json | null
+          funcao: string
+          id?: string
+          riscos_acidentes?: Json | null
+          riscos_biologicos?: Json | null
+          riscos_ergonomicos?: Json | null
+          riscos_fisicos?: Json | null
+          riscos_quimicos?: Json | null
+          tecnico_responsavel_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          ativo?: boolean | null
+          cbo?: string | null
+          cca_id?: number
+          created_at?: string | null
+          created_by?: string | null
+          descricao_funcao?: string
+          empresa_id?: number
+          epis_requeridos?: Json | null
+          funcao?: string
+          id?: string
+          riscos_acidentes?: Json | null
+          riscos_biologicos?: Json | null
+          riscos_ergonomicos?: Json | null
+          riscos_fisicos?: Json | null
+          riscos_quimicos?: Json | null
+          tecnico_responsavel_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "documentacao_riscos_funcao_cca_id_fkey"
+            columns: ["cca_id"]
+            isOneToOne: false
+            referencedRelation: "ccas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documentacao_riscos_funcao_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documentacao_riscos_funcao_tecnico_responsavel_id_fkey"
+            columns: ["tecnico_responsavel_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      documentacao_turmas: {
+        Row: {
+          carga_horaria: number
+          cca_id: number | null
+          created_at: string | null
+          created_by: string | null
+          data_fim: string | null
+          data_inicio: string
+          empresa_id: number | null
+          id: string
+          instrutor: string
+          local: string
+          nome: string
+          observacoes: string | null
+          status: string | null
+          treinamento_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          carga_horaria: number
+          cca_id?: number | null
+          created_at?: string | null
+          created_by?: string | null
+          data_fim?: string | null
+          data_inicio: string
+          empresa_id?: number | null
+          id?: string
+          instrutor: string
+          local: string
+          nome: string
+          observacoes?: string | null
+          status?: string | null
+          treinamento_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          carga_horaria?: number
+          cca_id?: number | null
+          created_at?: string | null
+          created_by?: string | null
+          data_fim?: string | null
+          data_inicio?: string
+          empresa_id?: number | null
+          id?: string
+          instrutor?: string
+          local?: string
+          nome?: string
+          observacoes?: string | null
+          status?: string | null
+          treinamento_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "documentacao_turmas_cca_id_fkey"
+            columns: ["cca_id"]
+            isOneToOne: false
+            referencedRelation: "ccas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documentacao_turmas_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documentacao_turmas_treinamento_id_fkey"
+            columns: ["treinamento_id"]
+            isOneToOne: false
+            referencedRelation: "treinamentos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      documentacao_turmas_alunos: {
+        Row: {
+          created_at: string | null
+          funcionario_id: string | null
+          id: string
+          nota: number | null
+          observacoes: string | null
+          presente: boolean | null
+          turma_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          funcionario_id?: string | null
+          id?: string
+          nota?: number | null
+          observacoes?: string | null
+          presente?: boolean | null
+          turma_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          funcionario_id?: string | null
+          id?: string
+          nota?: number | null
+          observacoes?: string | null
+          presente?: boolean | null
+          turma_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "documentacao_turmas_alunos_funcionario_id_fkey"
+            columns: ["funcionario_id"]
+            isOneToOne: false
+            referencedRelation: "funcionarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documentacao_turmas_alunos_turma_id_fkey"
+            columns: ["turma_id"]
+            isOneToOne: false
+            referencedRelation: "documentacao_turmas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       eap_itens: {
         Row: {
           ativo: boolean

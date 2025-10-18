@@ -85,6 +85,7 @@ export function AppSidebar() {
       currentPath.startsWith("/inspecao-sms") ||
       currentPath.startsWith("/ocorrencias") ||
       currentPath.startsWith("/medidas-disciplinares") ||
+      currentPath.startsWith("/documentacao-sms") ||
       currentPath.startsWith("/relatorios")
     ) {
       setOpenMenu("gestao-sms");
@@ -170,6 +171,16 @@ export function AppSidebar() {
           "relatorios_ocorrencias",
           "relatorios_desvios",
           "relatorios_treinamentos",
+          "documentacao_dashboard",
+          "documentacao_modelos",
+          "documentacao_os",
+          "documentacao_altura",
+          "documentacao_eletricidade",
+          "documentacao_confinado",
+          "documentacao_lista",
+          "documentacao_certificados",
+          "documentacao_turmas",
+          "documentacao_riscos",
         ].some(canSee) && (
           <SidebarSectionGestaoSMS
             openMenu={openMenu}

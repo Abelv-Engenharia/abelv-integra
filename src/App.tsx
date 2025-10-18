@@ -141,6 +141,10 @@ import RelatoriosTreinamentosPendentes from "./pages/relatorios/RelatoriosTreina
 import RelatoriosHSAPendentes from "./pages/relatorios/RelatoriosHSAPendentes";
 import RelatoriosOcorrenciasPendentes from "./pages/relatorios/RelatoriosOcorrenciasPendentes";
 
+// Documentação SMS pages
+import DocumentacaoSMSDashboard from "./pages/documentacao-sms/Dashboard";
+import DocumentacaoSMSModelos from "./pages/documentacao-sms/Modelos";
+
 // Inspeção SMS pages
 import CadastrarInspecao from "./pages/inspecao-sms/CadastrarInspecao";
 import ConsultarInspecoes from "./pages/inspecao-sms/ConsultarInspecoes";
@@ -380,6 +384,10 @@ function App() {
                 <Route path="medidas-disciplinares/dashboard" element={<MedidasDisciplinaresDashboard />} />
                 <Route path="medidas-disciplinares/cadastro" element={<MedidasDisciplinaresCadastro />} />
                 <Route path="medidas-disciplinares/consulta" element={<MedidasDisciplinaresConsulta />} />
+
+                {/* Documentação SMS routes */}
+                <Route path="documentacao-sms/dashboard" element={<DocumentacaoSMSDashboard />} />
+                <Route path="documentacao-sms/modelos" element={<DocumentacaoSMSModelos />} />
 
                 {/* Relatórios routes */}
                 <Route path="relatorios" element={<Navigate to="/relatorios/dashboard" replace />} />
