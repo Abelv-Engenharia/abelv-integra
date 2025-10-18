@@ -239,21 +239,29 @@ export function ImportSummary({ summary }: ImportSummaryProps) {
             <TabsContent value="files" className="space-y-4">
               <ScrollArea className="h-[600px]">
                 <div className="space-y-4 pr-4">
-                  {summary.fileContents.map((file, index) => (
-                    <Card key={index}>
-                      <CardHeader>
-                        <CardTitle className="text-base flex items-center justify-between">
-                          <span className="font-mono text-sm">{file.path}</span>
-                          <CopyButton text={file.content} label={`arquivo-${index}`} />
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <pre className="bg-muted p-4 rounded-md overflow-x-auto text-xs">
-                          <code>{file.content}</code>
-                        </pre>
+                  {summary.fileContents && summary.fileContents.length > 0 ? (
+                    summary.fileContents.map((file, index) => (
+                      <Card key={index}>
+                        <CardHeader>
+                          <CardTitle className="text-base flex items-center justify-between">
+                            <span className="font-mono text-sm">{file.path}</span>
+                            <CopyButton text={file.content} label={`arquivo-${index}`} />
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <pre className="bg-muted p-4 rounded-md overflow-x-auto text-xs">
+                            <code>{file.content}</code>
+                          </pre>
+                        </CardContent>
+                      </Card>
+                    ))
+                  ) : (
+                    <Card>
+                      <CardContent className="py-8 text-center text-muted-foreground">
+                        Nenhum arquivo disponível
                       </CardContent>
                     </Card>
-                  ))}
+                  )}
                 </div>
               </ScrollArea>
             </TabsContent>
@@ -265,7 +273,7 @@ export function ImportSummary({ summary }: ImportSummaryProps) {
                   <CardTitle className="flex items-center justify-between">
                     Imports para App.tsx
                     <CopyButton 
-                      text={summary.generatedCode.appTsxImports} 
+                      text={summary.generatedCode?.appTsxImports || ''} 
                       label="imports" 
                     />
                   </CardTitle>
@@ -275,7 +283,7 @@ export function ImportSummary({ summary }: ImportSummaryProps) {
                 </CardHeader>
                 <CardContent>
                   <pre className="bg-muted p-4 rounded-md overflow-x-auto text-xs">
-                    <code>{summary.generatedCode.appTsxImports}</code>
+                    <code>{summary.generatedCode?.appTsxImports || '// Nenhum import disponível'}</code>
                   </pre>
                 </CardContent>
               </Card>
@@ -285,7 +293,7 @@ export function ImportSummary({ summary }: ImportSummaryProps) {
                   <CardTitle className="flex items-center justify-between">
                     Rotas para App.tsx
                     <CopyButton 
-                      text={summary.generatedCode.appTsxRoutes} 
+                      text={summary.generatedCode?.appTsxRoutes || ''} 
                       label="rotas" 
                     />
                   </CardTitle>
@@ -295,7 +303,7 @@ export function ImportSummary({ summary }: ImportSummaryProps) {
                 </CardHeader>
                 <CardContent>
                   <pre className="bg-muted p-4 rounded-md overflow-x-auto text-xs">
-                    <code>{summary.generatedCode.appTsxRoutes}</code>
+                    <code>{summary.generatedCode?.appTsxRoutes || '// Nenhuma rota disponível'}</code>
                   </pre>
                 </CardContent>
               </Card>
@@ -381,7 +389,7 @@ export function ImportSummary({ summary }: ImportSummaryProps) {
           </Tabs>
 
           {/* Avisos */}
-          {summary.warnings.length > 0 && (
+          {summary.warnings && summary.warnings.length > 0 && (
             <Card className="border-yellow-500/50">
               <CardHeader>
                 <CardTitle className="text-yellow-500">Pendências</CardTitle>
@@ -397,7 +405,7 @@ export function ImportSummary({ summary }: ImportSummaryProps) {
                       <div>
                         <div className="font-medium">{warning.category}</div>
                         <div className="text-muted-foreground">
-                          {warning.items.filter(i => !i.checked).map(i => i.name).join(', ')}
+                          {warning.items && warning.items.filter(i => !i.checked).map(i => i.name).join(', ')}
                         </div>
                       </div>
                     </li>
