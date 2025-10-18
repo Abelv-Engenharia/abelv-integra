@@ -325,15 +325,15 @@ export function ImportSummary({ summary }: ImportSummaryProps) {
                         <h4 className="font-medium mb-2 flex items-center justify-between">
                           1. Criar arquivo de sidebar
                           <CopyButton 
-                            text={summary.generatedCode.sidebarComponent || ''} 
+                            text={summary.generatedCode?.sidebarComponent || ''} 
                             label="sidebar-component" 
                           />
                         </h4>
                         <p className="text-sm text-muted-foreground mb-3">
-                          Caminho: <code className="bg-muted px-2 py-1 rounded">{summary.generatedCode.sidebarComponentPath}</code>
+                          Caminho: <code className="bg-muted px-2 py-1 rounded">{summary.generatedCode?.sidebarComponentPath || 'N/A'}</code>
                         </p>
                         <pre className="bg-muted p-4 rounded-md overflow-x-auto text-xs max-h-[400px]">
-                          <code>{summary.generatedCode.sidebarComponent}</code>
+                          <code>{summary.generatedCode?.sidebarComponent || '// Código não disponível'}</code>
                         </pre>
                       </div>
 
@@ -341,12 +341,12 @@ export function ImportSummary({ summary }: ImportSummaryProps) {
                         <h4 className="font-medium mb-2 flex items-center justify-between">
                           2. Adicionar import no AppSidebar.tsx
                           <CopyButton 
-                            text={summary.generatedCode.sidebarImport || ''} 
+                            text={summary.generatedCode?.sidebarImport || ''} 
                             label="sidebar-import" 
                           />
                         </h4>
                         <pre className="bg-muted p-4 rounded-md overflow-x-auto text-xs">
-                          <code>{summary.generatedCode.sidebarImport}</code>
+                          <code>{summary.generatedCode?.sidebarImport || '// Import não disponível'}</code>
                         </pre>
                       </div>
 
@@ -354,7 +354,7 @@ export function ImportSummary({ summary }: ImportSummaryProps) {
                         <h4 className="font-medium mb-2 flex items-center justify-between">
                           3. Adicionar componente no AppSidebar.tsx
                           <CopyButton 
-                            text={summary.generatedCode.sidebarUsage || ''} 
+                            text={summary.generatedCode?.sidebarUsage || ''} 
                             label="sidebar-usage" 
                           />
                         </h4>
@@ -362,7 +362,7 @@ export function ImportSummary({ summary }: ImportSummaryProps) {
                           Adicione dentro do &lt;SidebarContent&gt; do AppSidebar.tsx
                         </p>
                         <pre className="bg-muted p-4 rounded-md overflow-x-auto text-xs">
-                          <code>{summary.generatedCode.sidebarUsage}</code>
+                          <code>{summary.generatedCode?.sidebarUsage || '// Código não disponível'}</code>
                         </pre>
                       </div>
                     </>
@@ -371,15 +371,15 @@ export function ImportSummary({ summary }: ImportSummaryProps) {
                       <h4 className="font-medium mb-2 flex items-center justify-between">
                         Adicionar itens ao menu existente
                         <CopyButton 
-                          text={summary.generatedCode.sidebarUsage || ''} 
+                          text={summary.generatedCode?.sidebarUsage || ''} 
                           label="menu-items" 
                         />
                       </h4>
                       <p className="text-sm text-muted-foreground mb-3">
-                        {summary.generatedCode.sidebarImport}
+                        {summary.generatedCode?.sidebarImport || 'Informações não disponíveis'}
                       </p>
                       <pre className="bg-muted p-4 rounded-md overflow-x-auto text-xs">
-                        <code>{summary.generatedCode.sidebarUsage}</code>
+                        <code>{summary.generatedCode?.sidebarUsage || '// Código não disponível'}</code>
                       </pre>
                     </div>
                   )}
