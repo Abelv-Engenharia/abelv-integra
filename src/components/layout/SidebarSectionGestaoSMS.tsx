@@ -62,6 +62,7 @@ export default function SidebarSectionGestaoSMS({
     if (path.startsWith("/medidas-disciplinares")) return "medidas-disciplinares";
     if (path.startsWith("/gro")) return "gro";
     if (path.startsWith("/prevencao-incendio")) return "prevencao-incendio";
+    if (path.startsWith("/relatorios")) return "relatorios";
     return null;
   };
 
@@ -147,6 +148,15 @@ export default function SidebarSectionGestaoSMS({
     { label: "Consulta de Inspeções", to: "/prevencao-incendio/consulta-inspecoes", slug: "prevencao_incendio_consulta_inspecoes" },
   ];
 
+  const relatoriosItems: LinkItem[] = [
+    { label: "Dashboard", to: "/relatorios/dashboard", slug: "relatorios_dashboard" },
+    { label: "IDSMS", to: "/relatorios/idsms", slug: "relatorios_idsms" },
+    { label: "HSA", to: "/relatorios/hsa", slug: "relatorios_hsa" },
+    { label: "Ocorrências", to: "/relatorios/ocorrencias", slug: "relatorios_ocorrencias" },
+    { label: "Desvios", to: "/relatorios/desvios", slug: "relatorios_desvios" },
+    { label: "Treinamentos", to: "/relatorios/treinamentos", slug: "relatorios_treinamentos" },
+  ];
+
   const filterAllowed = (items: LinkItem[]) => items.filter((i) => can(i.slug));
 
   const idsms = filterAllowed(idsmsItems);
@@ -158,6 +168,7 @@ export default function SidebarSectionGestaoSMS({
   const medidas = filterAllowed(medidasDiscItems);
   const gro = filterAllowed(groItems);
   const prevInc = filterAllowed(prevIncendioItems);
+  const relatorios = filterAllowed(relatoriosItems);
 
   const showSmsDashboard = can("sms_dashboard");
 
@@ -171,7 +182,8 @@ export default function SidebarSectionGestaoSMS({
     ocorrencias.length === 0 &&
     medidas.length === 0 &&
     gro.length === 0 &&
-    prevInc.length === 0;
+    prevInc.length === 0 &&
+    relatorios.length === 0;
 
   if (sectionIsEmpty) return null;
 
@@ -503,6 +515,39 @@ export default function SidebarSectionGestaoSMS({
                             }
                           >
                             <Link to={it.to}>{it.label}</Link>
+                          </SidebarMenuSubButton>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </SidebarMenuSubItem>
+              )}
+
+              {/* Relatórios */}
+              {relatorios.length > 0 && (
+                <SidebarMenuSubItem>
+                  <div className="w-full">
+                    <button
+                      onClick={() => toggleSubMenu("relatorios")}
+                      className="flex items-center justify-between w-full px-2 py-1 text-white hover:bg-slate-600 rounded text-xs"
+                    >
+                      <div className="flex items-center gap-2">
+                        <BarChart3 className="h-3 w-3 flex-shrink-0" />
+                        <span>Relatórios</span>
+                      </div>
+                      {openSubMenus["relatorios"] ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
+                    </button>
+                    {openSubMenus["relatorios"] && (
+                      <div className="ml-4 mt-1 space-y-1">
+                        {relatorios.map((it) => (
+                          <SidebarMenuSubButton
+                            key={it.slug}
+                            asChild
+                            className={
+                              currentPath === it.to ? "bg-slate-600 text-white font-medium" : "text-white hover:bg-slate-600"
+                            }
+                          >
+                            <Link to={it.to} onClick={onLinkClick}>{it.label}</Link>
                           </SidebarMenuSubButton>
                         ))}
                       </div>

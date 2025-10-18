@@ -84,7 +84,8 @@ export function AppSidebar() {
       currentPath.startsWith("/hora-seguranca") ||
       currentPath.startsWith("/inspecao-sms") ||
       currentPath.startsWith("/ocorrencias") ||
-      currentPath.startsWith("/medidas-disciplinares")
+      currentPath.startsWith("/medidas-disciplinares") ||
+      currentPath.startsWith("/relatorios")
     ) {
       setOpenMenu("gestao-sms");
     } else if (currentPath.startsWith("/tarefas")) {
@@ -163,6 +164,12 @@ export function AppSidebar() {
           "ocorrencias_cadastro",
           "ocorrencias_consulta",
           "sms_dashboard",
+          "relatorios_dashboard",
+          "relatorios_idsms",
+          "relatorios_hsa",
+          "relatorios_ocorrencias",
+          "relatorios_desvios",
+          "relatorios_treinamentos",
         ].some(canSee) && (
           <SidebarSectionGestaoSMS
             openMenu={openMenu}
