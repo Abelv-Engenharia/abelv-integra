@@ -54,6 +54,7 @@ import AdminTemplates from "./pages/AdminTemplates";
 import ExportacaoDados from "./pages/admin/ExportacaoDados";
 import CadastroFuncionarios from "./pages/admin/CadastroFuncionarios";
 import ImportacaoFuncionarios from "./pages/admin/ImportacaoFuncionarios";
+import ImportadorGitHub from "./pages/admin/ImportadorGitHub";
 import CriarUsuarioDirect from "./pages/admin/CriarUsuarioDirect";
 import MetasIndicadores from "./pages/admin/MetasIndicadores";
 import RegistroHHT from "./pages/admin/RegistroHHT";
@@ -293,6 +294,7 @@ function App() {
                 
                 <Route path="admin/funcionarios" element={<CadastroFuncionarios />} />
                 <Route path="admin/importacao-funcionarios" element={<ImportacaoFuncionarios />} />
+                <Route path="admin/importador-github" element={<ImportadorGitHub />} />
                 <Route path="admin/criar-usuario" element={<Navigate to="/admin/criar-usuario-direct" replace />} />
                 <Route path="admin/metas-indicadores" element={<MetasIndicadores />} />
                 <Route path="admin/registro-hht" element={<RegistroHHT />} />

@@ -16,6 +16,12 @@ const configMenuItems = [
     href: "/admin/importacao-funcionarios",
     icon: Upload,
     description: "Importar funcionários via arquivo CSV"
+  },
+  {
+    title: "Importador Github",
+    href: "/admin/importador-github",
+    icon: Upload,
+    description: "Importar páginas e componentes de outros repositórios"
   }
 ];
 
