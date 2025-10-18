@@ -15,6 +15,7 @@ import { GitHubImportService } from '@/services/githubImportService';
 import { DependencyAnalyzer as DepAnalyzer } from '@/services/dependencyAnalyzer';
 import { FileImportService } from '@/services/fileImportService';
 import { RouteGenerator } from '@/services/routeGenerator';
+import { ProjectFileService } from '@/services/projectFileService';
 import { 
   GitHubRepo, 
   FileNode, 
@@ -194,9 +195,59 @@ export default function ImportadorGitHub() {
   };
 
   const handleFinish = async () => {
+    if (!menuDestination) {
+      toast({
+        title: 'Erro',
+        description: 'Selecione o destino do menu primeiro',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (!repo) {
+      toast({
+        title: 'Erro',
+        description: 'Informações do repositório não encontradas',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     setLoading(true);
+    const projectService = new ProjectFileService();
+
     try {
-      // Gerar resumo da importação
+      // Criar instância do GitHub service com token
+      const githubService = new GitHubImportService(githubToken);
+      
+      // Buscar conteúdo de todos os arquivos importados
+      const fileContents: { path: string; content: string }[] = [];
+      
+      for (const file of importedFiles) {
+        const content = await githubService.getFileContent(
+          repo.owner,
+          repo.repo,
+          file.source,
+          repo.branch
+        );
+        if (content) {
+          fileContents.push({
+            path: file.destination,
+            content
+          });
+        }
+      }
+
+      // Gerar código para App.tsx
+      const appTsxUpdates = projectService.generateAppTsxUpdates(registeredRoutes);
+      
+      // Gerar código para sidebar
+      const sidebarUpdate = projectService.generateSidebarUpdate(
+        menuDestination,
+        registeredRoutes
+      );
+
+      // Gerar resumo final
       const summary: ImportSummary = {
         filesImported: importedFiles.length,
         savedFiles: importedFiles,
@@ -204,6 +255,15 @@ export default function ImportadorGitHub() {
         menuDestination: menuDestination,
         warnings: checks.filter(c => c.status === 'pending'),
         timestamp: new Date(),
+        fileContents,
+        generatedCode: {
+          appTsxImports: appTsxUpdates.imports,
+          appTsxRoutes: appTsxUpdates.routes,
+          sidebarComponent: sidebarUpdate.componentCode,
+          sidebarComponentPath: sidebarUpdate.componentPath,
+          sidebarImport: sidebarUpdate.sidebarImport,
+          sidebarUsage: sidebarUpdate.sidebarUsage
+        }
       };
       
       toast({
@@ -217,6 +277,7 @@ export default function ImportadorGitHub() {
       }, 1000);
       
     } catch (error) {
+      console.error('Erro ao finalizar importação:', error);
       toast({
         title: 'Erro',
         description: 'Falha ao finalizar importação',

@@ -1,4 +1,4 @@
-import { RouteConfig } from '@/types/githubImport';
+import { RouteConfig, MenuDestination } from '@/types/githubImport';
 
 export class ProjectFileService {
   // Determina o destino de um arquivo baseado em seu caminho de origem
@@ -88,6 +88,50 @@ export class ProjectFileService {
           }`;
       })
       .join(',\n');
+  }
+
+  // Gera atualizações completas para o App.tsx
+  generateAppTsxUpdates(routes: RouteConfig[]): { imports: string; routes: string } {
+    return {
+      imports: this.generateImportCode(routes),
+      routes: this.generateRouteCode(routes)
+    };
+  }
+
+  // Gera atualizações completas para o sidebar
+  generateSidebarUpdate(
+    menuDestination: MenuDestination,
+    routes: RouteConfig[]
+  ): {
+    componentCode?: string;
+    componentPath?: string;
+    sidebarImport?: string;
+    sidebarUsage?: string;
+  } {
+    if (menuDestination.type === 'new') {
+      const sectionName = menuDestination.newSectionName || 'NovaSecao';
+      const icon = menuDestination.newSectionIcon || 'FolderGit2';
+      const componentPath = `src/components/layout/SidebarSection${sectionName.replace(/[^a-zA-Z0-9]/g, '')}.tsx`;
+      const componentName = `SidebarSection${sectionName.replace(/[^a-zA-Z0-9]/g, '')}`;
+      
+      return {
+        componentCode: this.generateSidebarSectionTemplate(sectionName, icon, routes),
+        componentPath,
+        sidebarImport: `import ${componentName} from './${componentPath.replace('src/components/layout/', '')}';`,
+        sidebarUsage: `<${componentName}
+  openMenu={openMenu}
+  toggleMenu={toggleMenu}
+  onLinkClick={handleLinkClick}
+  canSee={canSee}
+/>`
+      };
+    } else {
+      const sectionFile = this.getSidebarSectionFile(menuDestination.existingSection || '');
+      return {
+        sidebarImport: `// Adicionar itens no arquivo: ${sectionFile}`,
+        sidebarUsage: this.generateSidebarMenuItems(routes.filter(r => r.addToMenu))
+      };
+    }
   }
 
   // Gera template de uma nova seção de sidebar

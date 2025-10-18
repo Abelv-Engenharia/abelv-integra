@@ -72,6 +72,15 @@ export interface ImportSummary {
   menuDestination: MenuDestination | null;
   warnings: PostImportCheck[];
   timestamp: Date;
+  fileContents: { path: string; content: string }[];
+  generatedCode: {
+    appTsxImports: string;
+    appTsxRoutes: string;
+    sidebarComponent?: string;
+    sidebarComponentPath?: string;
+    sidebarImport?: string;
+    sidebarUsage?: string;
+  };
 }
 
 export type ImportStep = 
