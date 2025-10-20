@@ -177,6 +177,29 @@ import InspecaoExtintorPublico from "./pages/prevencao-incendio/InspecaoExtintor
 // Placeholder page
 import PlaceholderPage from "./pages/PlaceholderPage";
 
+// Gestão de Pessoas - Recursos & Benefícios
+import KPISolicitacoes from "./pages/gestao-pessoas/KPISolicitacoes";
+import SolicitacaoServicos from "./pages/gestao-pessoas/SolicitacaoServicos";
+import ControleSolicitacoes from "./pages/gestao-pessoas/ControleSolicitacoes";
+import AprovacaoSolicitacoes from "./pages/gestao-pessoas/AprovacaoSolicitacoes";
+import RelatoriosSolicitacoes from "./pages/gestao-pessoas/RelatoriosSolicitacoes";
+import GestaoViagensDashboard from "./pages/gestao-pessoas/GestaoViagensDashboard";
+import CadastroFatura from "./pages/gestao-pessoas/CadastroFatura";
+import ImportarFatura from "./pages/gestao-pessoas/ImportarFatura";
+import ConsultaFaturas from "./pages/gestao-pessoas/ConsultaFaturas";
+import RelatorioViagens from "./pages/gestao-pessoas/RelatorioViagens";
+import DashboardVeiculos from "./pages/gestao-pessoas/DashboardVeiculos";
+import RelatoriosVeiculos from "./pages/gestao-pessoas/RelatoriosVeiculos";
+import ChecklistVeiculos from "./pages/gestao-pessoas/ChecklistVeiculos";
+import ControleAbastecimento from "./pages/gestao-pessoas/ControleAbastecimento";
+import CalculoRotas from "./pages/gestao-pessoas/CalculoRotas";
+import CadastroVeiculo from "./pages/gestao-pessoas/CadastroVeiculo";
+import CadastroMulta from "./pages/gestao-pessoas/CadastroMulta";
+import CadastroCondutor from "./pages/gestao-pessoas/CadastroCondutor";
+import CadastroCartaoAbastecimento from "./pages/gestao-pessoas/CadastroCartaoAbastecimento";
+import CadastroPedagioEstacionamento from "./pages/gestao-pessoas/CadastroPedagioEstacionamento";
+import ConsultasVeiculos from "./pages/gestao-pessoas/ConsultasVeiculos";
+
 // Engenharia Matricial pages
 import EngenhariaMatricialIndex from "./pages/engenharia-matricial/Index";
 
@@ -530,6 +553,37 @@ function App() {
                 <Route path="comercial/controle/consolidacao/:id" element={<ConsolidationDetails />} />
                 <Route path="comercial/controle/cadastros/segmentos" element={<SegmentManagement />} />
                 <Route path="comercial/controle/cadastros/vendedores" element={<VendedorManagement />} />
+
+                {/* ========================================== */}
+                {/* GESTÃO DE PESSOAS - Recursos & Benefícios */}
+                {/* ========================================== */}
+                
+                {/* Solicitações de Serviços */}
+                <Route path="gestao-pessoas/kpi-solicitacoes" element={<KPISolicitacoes />} />
+                <Route path="gestao-pessoas/solicitacao-servicos" element={<SolicitacaoServicos />} />
+                <Route path="gestao-pessoas/controle-solicitacoes" element={<ControleSolicitacoes />} />
+                <Route path="gestao-pessoas/aprovacao-solicitacoes" element={<AprovacaoSolicitacoes />} />
+                <Route path="gestao-pessoas/relatorios-solicitacoes" element={<RelatoriosSolicitacoes />} />
+                
+                {/* Gestão de Viagens */}
+                <Route path="gestao-pessoas/gestao-viagens-dashboard" element={<GestaoViagensDashboard />} />
+                <Route path="gestao-pessoas/cadastro-fatura" element={<CadastroFatura />} />
+                <Route path="gestao-pessoas/importar-fatura" element={<ImportarFatura />} />
+                <Route path="gestao-pessoas/consulta-faturas" element={<ConsultaFaturas />} />
+                <Route path="gestao-pessoas/relatorio-viagens" element={<RelatorioViagens />} />
+                
+                {/* Gestão de Veículos */}
+                <Route path="gestao-pessoas/dashboard-veiculos" element={<DashboardVeiculos />} />
+                <Route path="gestao-pessoas/relatorios-veiculos" element={<RelatoriosVeiculos />} />
+                <Route path="gestao-pessoas/checklist-veiculos" element={<ChecklistVeiculos />} />
+                <Route path="gestao-pessoas/controle-abastecimento" element={<ControleAbastecimento />} />
+                <Route path="gestao-pessoas/calculo-rotas" element={<CalculoRotas />} />
+                <Route path="gestao-pessoas/cadastro-veiculo" element={<CadastroVeiculo />} />
+                <Route path="gestao-pessoas/cadastro-multa" element={<CadastroMulta />} />
+                <Route path="gestao-pessoas/cadastro-condutor" element={<CadastroCondutor />} />
+                <Route path="gestao-pessoas/cadastro-cartao-abastecimento" element={<CadastroCartaoAbastecimento />} />
+                <Route path="gestao-pessoas/cadastro-pedagio-estacionamento" element={<CadastroPedagioEstacionamento />} />
+                <Route path="gestao-pessoas/consultas-veiculos" element={<ConsultasVeiculos />} />
               </Route>
 
 

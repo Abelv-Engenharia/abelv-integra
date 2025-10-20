@@ -14,7 +14,7 @@ import {
   StatusSolicitacao, 
   TipoServico, 
   PrioridadeSolicitacao 
-} from "@/types/solicitacao";
+} from "@/types/gestao-pessoas/solicitacao";
 
 export default function AprovacaoSolicitacoes() {
   const { solicitacoes, updateSolicitacao } = useSolicitacoes();

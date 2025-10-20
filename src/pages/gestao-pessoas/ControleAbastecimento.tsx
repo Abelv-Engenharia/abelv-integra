@@ -17,7 +17,7 @@ import {
   MapaMOI,
   ProcessamentoQuinzenal,
   DashboardData
-} from "@/types/fuel";
+} from "@/types/gestao-pessoas/fuel";
 
 const ControleAbastecimento = () => {
   const [fuelData, setFuelData] = useState<FuelTransaction[]>([]);

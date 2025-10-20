@@ -15,7 +15,7 @@ import { Calendar } from "@/components/ui/calendar"
 import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/hooks/use-toast"
 import { DocumentUploadField } from "@/components/gestao-pessoas/veiculos/DocumentUploadField"
-import { MultaCompleta } from "@/types/multa"
+import { MultaCompleta } from "@/types/gestao-pessoas/multa"
 import { cn } from "@/lib/utils"
 
 const formSchema = z.object({
