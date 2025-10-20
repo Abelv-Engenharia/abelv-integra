@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ChevronDown, ChevronRight, ClipboardList, FileText, CheckSquare, CheckCircle, BarChart3, Plane, FileUp, Database, FilePlus, Car, Briefcase, UserPlus } from "lucide-react";
+import { ChevronDown, ChevronRight, ClipboardList, FileText, CheckSquare, CheckCircle, BarChart3, Plane, FileUp, Database, FilePlus, Car, Briefcase, UserPlus, User, CreditCard, Receipt, Ticket } from "lucide-react";
 import {
   SidebarMenu,
   SidebarMenuButton,
@@ -270,6 +270,51 @@ export default function SidebarSectionGestaoPessoas({
                                   <Link to="/gestao-pessoas/consultas-veiculos" onClick={onLinkClick}>
                                     <Database className="h-4 w-4" />
                                     <span>Consultas Veículos</span>
+                                  </Link>
+                                </SidebarMenuButton>
+                              </SidebarMenuItem>
+
+                              <SidebarMenuItem>
+                                <SidebarMenuButton asChild>
+                                  <Link to="/gestao-pessoas/cadastro-veiculo" onClick={onLinkClick}>
+                                    <FilePlus className="h-4 w-4" />
+                                    <span>Cadastro Veículo</span>
+                                  </Link>
+                                </SidebarMenuButton>
+                              </SidebarMenuItem>
+
+                              <SidebarMenuItem>
+                                <SidebarMenuButton asChild>
+                                  <Link to="/gestao-pessoas/cadastro-multa" onClick={onLinkClick}>
+                                    <Receipt className="h-4 w-4" />
+                                    <span>Cadastro Multa</span>
+                                  </Link>
+                                </SidebarMenuButton>
+                              </SidebarMenuItem>
+
+                              <SidebarMenuItem>
+                                <SidebarMenuButton asChild>
+                                  <Link to="/gestao-pessoas/cadastro-condutor" onClick={onLinkClick}>
+                                    <User className="h-4 w-4" />
+                                    <span>Cadastro Condutor</span>
+                                  </Link>
+                                </SidebarMenuButton>
+                              </SidebarMenuItem>
+
+                              <SidebarMenuItem>
+                                <SidebarMenuButton asChild>
+                                  <Link to="/gestao-pessoas/cadastro-cartao" onClick={onLinkClick}>
+                                    <CreditCard className="h-4 w-4" />
+                                    <span>Cadastro Cartão</span>
+                                  </Link>
+                                </SidebarMenuButton>
+                              </SidebarMenuItem>
+
+                              <SidebarMenuItem>
+                                <SidebarMenuButton asChild>
+                                  <Link to="/gestao-pessoas/cadastro-pedagio" onClick={onLinkClick}>
+                                    <Ticket className="h-4 w-4" />
+                                    <span>Cadastro Pedágio</span>
                                   </Link>
                                 </SidebarMenuButton>
                               </SidebarMenuItem>
