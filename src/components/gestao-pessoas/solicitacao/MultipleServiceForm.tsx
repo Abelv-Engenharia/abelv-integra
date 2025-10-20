@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -42,6 +42,12 @@ export function MultipleServiceForm({ onSubmit, onCancel, solicitante }: Multipl
   
   // Erros de validação
   const [errors, setErrors] = useState<any>({});
+
+  useEffect(() => {
+    if (solicitante) {
+      updateCommonData('solicitante', solicitante);
+    }
+  }, [solicitante]);
 
   const getTransportTipoServico = (): TipoServico => {
     if (!transportSubcategory) return TipoServico.VOUCHER_UBER;

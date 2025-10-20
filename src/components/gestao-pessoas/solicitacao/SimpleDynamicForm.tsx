@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -16,10 +16,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TipoServico, PrioridadeSolicitacao, TipoPassagem, Viajante, StatusSolicitacao } from "@/types/gestao-pessoas/solicitacao";
 import { TransportSubcategorySelector, TransportSubcategory } from "./TransportSubcategorySelector";
 import { cn } from "@/lib/utils";
+import { useUserCCAs } from "@/hooks/useUserCCAs";
 interface SimpleDynamicFormProps {
   tipoServico: TipoServico | TipoServico[];
   onSubmit: (data: any) => void;
   onCancel: () => void;
+  solicitante: string;
 }
 
 // Interface para viajantes múltiplos
@@ -41,10 +43,12 @@ const baseSchema = z.object({
 export function SimpleDynamicForm({
   tipoServico,
   onSubmit,
-  onCancel
+  onCancel,
+  solicitante
 }: SimpleDynamicFormProps) {
+  const { data: ccas, isLoading: isLoadingCCAs } = useUserCCAs();
   const [formData, setFormData] = useState<any>({
-    solicitante: "",
+    solicitante: solicitante,
     dataSolicitacao: new Date(),
     prioridade: PrioridadeSolicitacao.MEDIA,
     centroCusto: "",
@@ -63,6 +67,12 @@ export function SimpleDynamicForm({
   const [isMultiple, setIsMultiple] = useState(Array.isArray(tipoServico));
   const [selectedServices, setSelectedServices] = useState<TipoServico[]>(Array.isArray(tipoServico) ? tipoServico : [tipoServico]);
   const [selectedTransportSubcategory, setSelectedTransportSubcategory] = useState<TransportSubcategory>();
+
+  useEffect(() => {
+    if (solicitante) {
+      updateFormData('solicitante', solicitante);
+    }
+  }, [solicitante]);
   const validateAndSubmit = () => {
     const newErrors: any = {};
 
@@ -849,16 +859,20 @@ export function SimpleDynamicForm({
           </div>
 
           <div>
-            <Label className="text-destructive">Centro de Custo/Obra *</Label>
-            <Select onValueChange={value => updateFormData("centroCusto", value)}>
+            <Label className={errors.centroCusto ? "text-destructive" : ""}>Cca *</Label>
+            <Select 
+              onValueChange={value => updateFormData("centroCusto", value)}
+              disabled={isLoadingCCAs}
+            >
               <SelectTrigger className={errors.centroCusto ? "border-destructive" : ""}>
-                <SelectValue placeholder="Selecione o centro de custo" />
+                <SelectValue placeholder={isLoadingCCAs ? "Carregando CCAs..." : "Selecione o CCA"} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="obra-001">Obra 001 - Edifício Central</SelectItem>
-                <SelectItem value="obra-002">Obra 002 - Complexo Industrial</SelectItem>
-                <SelectItem value="administrativo">Administrativo</SelectItem>
-                <SelectItem value="manutencao">Manutenção</SelectItem>
+                {ccas?.map((cca) => (
+                  <SelectItem key={cca.id} value={cca.id.toString()}>
+                    {cca.codigo} - {cca.nome}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
             {errors.centroCusto && <p className="text-sm text-destructive mt-1">{errors.centroCusto}</p>}
