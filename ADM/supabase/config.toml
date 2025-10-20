@@ -1,0 +1,4 @@
+project_id = "jfpfkebrjhgurpohgran"
+
+[functions.gerar-alertas-transporte]
+verify_jwt = false
