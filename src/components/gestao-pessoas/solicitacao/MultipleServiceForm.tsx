@@ -16,15 +16,16 @@ import { Plane, Car, Building, Package } from "lucide-react";
 interface MultipleServiceFormProps {
   onSubmit: (data: any) => void;
   onCancel: () => void;
+  solicitante: string;
 }
 
-export function MultipleServiceForm({ onSubmit, onCancel }: MultipleServiceFormProps) {
+export function MultipleServiceForm({ onSubmit, onCancel, solicitante }: MultipleServiceFormProps) {
   const [selectedServices, setSelectedServices] = useState<TipoServico[]>([]);
   const [currentStep, setCurrentStep] = useState<'selection' | 'form'>('selection');
   
   // Dados comuns
   const [commonData, setCommonData] = useState({
-    solicitante: "",
+    solicitante: solicitante,
     prioridade: PrioridadeSolicitacao.MEDIA,
     centroCusto: "",
     observacoes: "",
@@ -106,7 +107,7 @@ export function MultipleServiceForm({ onSubmit, onCancel }: MultipleServiceFormP
       newErrors.solicitante = "Solicitante é obrigatório";
     }
     if (!commonData.centroCusto) {
-      newErrors.centroCusto = "Centro de custo é obrigatório";
+      newErrors.centroCusto = "CCA é obrigatório";
     }
 
     // Validar se transporte foi selecionado mas subcategoria não
@@ -336,17 +337,15 @@ export function MultipleServiceForm({ onSubmit, onCancel }: MultipleServiceFormP
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="solicitante" className={errors.solicitante ? "text-destructive" : ""}>
-                Solicitante *
+              <Label htmlFor="solicitante">
+                Solicitante
               </Label>
-              <Input
+              <Input 
                 id="solicitante"
                 value={commonData.solicitante}
-                onChange={(e) => updateCommonData('solicitante', e.target.value)}
-                className={errors.solicitante ? "border-destructive" : ""}
-                placeholder="Nome do solicitante"
+                disabled
+                className="bg-muted"
               />
-              {errors.solicitante && <p className="text-sm text-destructive">{errors.solicitante}</p>}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -369,14 +368,14 @@ export function MultipleServiceForm({ onSubmit, onCancel }: MultipleServiceFormP
 
               <div className="space-y-2">
                 <Label htmlFor="centroCusto" className={errors.centroCusto ? "text-destructive" : ""}>
-                  Centro de Custo *
+                  CCA *
                 </Label>
                 <Input
                   id="centroCusto"
                   value={commonData.centroCusto}
                   onChange={(e) => updateCommonData('centroCusto', e.target.value)}
                   className={errors.centroCusto ? "border-destructive" : ""}
-                  placeholder="Código do centro de custo"
+                  placeholder="Código do CCA"
                 />
                 {errors.centroCusto && <p className="text-sm text-destructive">{errors.centroCusto}</p>}
               </div>

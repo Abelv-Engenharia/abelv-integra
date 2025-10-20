@@ -126,7 +126,7 @@ export default function SolicitacaoServicos() {
           </Button>
         </div>
         
-        <MultipleServiceForm onSubmit={handleFormSubmit} onCancel={handleCancel} />
+        <MultipleServiceForm onSubmit={handleFormSubmit} onCancel={handleCancel} solicitante={usuarioAtivo.nome} />
       </div>;
   }
   if (showForm && selectedCategory) {
@@ -137,7 +137,7 @@ export default function SolicitacaoServicos() {
           </Button>
         </div>
         
-        <SimpleDynamicForm tipoServico={selectedCategory} onSubmit={handleFormSubmit} onCancel={handleCancel} />
+        <SimpleDynamicForm tipoServico={selectedCategory} onSubmit={handleFormSubmit} onCancel={handleCancel} solicitante={usuarioAtivo.nome} />
       </div>;
   }
   return <div className="container mx-auto px-4 py-6 space-y-8">

@@ -16,10 +16,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TipoServico, PrioridadeSolicitacao, TipoPassagem, Viajante, StatusSolicitacao } from "@/types/gestao-pessoas/solicitacao";
 import { TransportSubcategorySelector, TransportSubcategory } from "./TransportSubcategorySelector";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/contexts/AuthContext";
 interface SimpleDynamicFormProps {
   tipoServico: TipoServico | TipoServico[];
   onSubmit: (data: any) => void;
   onCancel: () => void;
+  solicitante: string;
 }
 
 // Interface para viajantes múltiplos
@@ -41,10 +43,11 @@ const baseSchema = z.object({
 export function SimpleDynamicForm({
   tipoServico,
   onSubmit,
-  onCancel
+  onCancel,
+  solicitante
 }: SimpleDynamicFormProps) {
   const [formData, setFormData] = useState<any>({
-    solicitante: "",
+    solicitante: solicitante,
     dataSolicitacao: new Date(),
     prioridade: PrioridadeSolicitacao.MEDIA,
     centroCusto: "",
@@ -855,10 +858,10 @@ export function SimpleDynamicForm({
           </div>
 
           <div>
-            <Label className="text-destructive">Centro de Custo/Obra *</Label>
+            <Label className="text-destructive">CCA *</Label>
             <Select onValueChange={value => updateFormData("centroCusto", value)}>
               <SelectTrigger className={errors.centroCusto ? "border-destructive" : ""}>
-                <SelectValue placeholder="Selecione o centro de custo" />
+                <SelectValue placeholder="Selecione o CCA" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="obra-001">Obra 001 - Edifício Central</SelectItem>
