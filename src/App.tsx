@@ -249,6 +249,14 @@ import EstoqueRetornoBeneficiamento from "./pages/suprimentos/estoque/beneficiam
 import EstoqueNovoRetornoBeneficiamento from "./pages/suprimentos/estoque/beneficiamento/NovoRetornoBeneficiamento";
 import EstoqueRelacaoMateriaisBeneficiamento from "./pages/suprimentos/estoque/beneficiamento/RelacaoMateriaisBeneficiamento";
 
+// Gestão de Pessoas - Solicitações
+import KPISolicitacoes from "./pages/gestao-pessoas/KPISolicitacoes";
+import SolicitacaoServicos from "./pages/gestao-pessoas/SolicitacaoServicos";
+import ControleSolicitacoes from "./pages/gestao-pessoas/ControleSolicitacoes";
+import AprovacaoSolicitacoes from "./pages/gestao-pessoas/AprovacaoSolicitacoes";
+import RelatoriosSolicitacoes from "./pages/gestao-pessoas/RelatoriosSolicitacoes";
+import { SolicitacoesProvider } from "./contexts/gestao-pessoas/SolicitacoesContext";
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
@@ -530,6 +538,13 @@ function App() {
                 <Route path="comercial/controle/consolidacao/:id" element={<ConsolidationDetails />} />
                 <Route path="comercial/controle/cadastros/segmentos" element={<SegmentManagement />} />
                 <Route path="comercial/controle/cadastros/vendedores" element={<VendedorManagement />} />
+                
+                {/* Gestão de Pessoas - Solicitações */}
+                <Route path="gestao-pessoas/kpi-solicitacoes" element={<SolicitacoesProvider><KPISolicitacoes /></SolicitacoesProvider>} />
+                <Route path="gestao-pessoas/solicitacao-servicos" element={<SolicitacoesProvider><SolicitacaoServicos /></SolicitacoesProvider>} />
+                <Route path="gestao-pessoas/controle-solicitacoes" element={<SolicitacoesProvider><ControleSolicitacoes /></SolicitacoesProvider>} />
+                <Route path="gestao-pessoas/aprovacao-solicitacoes" element={<SolicitacoesProvider><AprovacaoSolicitacoes /></SolicitacoesProvider>} />
+                <Route path="gestao-pessoas/relatorios-solicitacoes" element={<SolicitacoesProvider><RelatoriosSolicitacoes /></SolicitacoesProvider>} />
               </Route>
 
 
