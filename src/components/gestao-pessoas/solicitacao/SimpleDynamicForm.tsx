@@ -857,19 +857,7 @@ export function SimpleDynamicForm({
               <Input value={formData.solicitante} disabled className="bg-muted" />
             </div>
 
-            <div>
-              <Label className="text-destructive">Prioridade *</Label>
-              <Select onValueChange={value => updateFormData("prioridade", value)} defaultValue={formData.prioridade}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione a prioridade" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value={PrioridadeSolicitacao.BAIXA}>Baixa</SelectItem>
-                  <SelectItem value={PrioridadeSolicitacao.MEDIA}>Média</SelectItem>
-                  <SelectItem value={PrioridadeSolicitacao.ALTA}>Alta</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            
           </div>
 
           <div>
