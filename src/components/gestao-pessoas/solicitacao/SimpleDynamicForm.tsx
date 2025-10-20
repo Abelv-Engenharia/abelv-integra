@@ -283,7 +283,7 @@ export function SimpleDynamicForm({
                 <Label htmlFor="localRetirada" className={errors.localRetirada ? "text-destructive" : ""}>
                   Local de Retirada *
                 </Label>
-                <Input id="localRetirada" value={formData.localRetirada || ''} onChange={e => updateFormData('localRetirada', e.target.value)} className={errors.localRetirada ? "border-destructive" : ""} placeholder="Endereço para retirada do veículo" />
+                
                 {errors.localRetirada && <p className="text-sm text-destructive">{errors.localRetirada}</p>}
               </div>
             </>;
