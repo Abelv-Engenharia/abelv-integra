@@ -17,6 +17,7 @@ import { TipoServico, PrioridadeSolicitacao, TipoPassagem, Viajante, StatusSolic
 import { TransportSubcategorySelector, TransportSubcategory } from "./TransportSubcategorySelector";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
+import { useUserCCAs } from "@/hooks/useUserCCAs";
 interface SimpleDynamicFormProps {
   tipoServico: TipoServico | TipoServico[];
   onSubmit: (data: any) => void;
@@ -46,6 +47,8 @@ export function SimpleDynamicForm({
   onCancel,
   solicitante
 }: SimpleDynamicFormProps) {
+  const { data: ccas, isLoading: isLoadingCCAs } = useUserCCAs();
+  
   const [formData, setFormData] = useState<any>({
     solicitante: solicitante,
     dataSolicitacao: new Date(),
@@ -859,15 +862,20 @@ export function SimpleDynamicForm({
 
           <div>
             <Label className="text-destructive">CCA *</Label>
-            <Select onValueChange={value => updateFormData("centroCusto", value)}>
+            <Select 
+              value={formData.centroCusto || ''} 
+              onValueChange={value => updateFormData("centroCusto", value)}
+              disabled={isLoadingCCAs}
+            >
               <SelectTrigger className={errors.centroCusto ? "border-destructive" : ""}>
-                <SelectValue placeholder="Selecione o CCA" />
+                <SelectValue placeholder={isLoadingCCAs ? "Carregando CCAs..." : "Selecione o CCA"} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="obra-001">Obra 001 - Edifício Central</SelectItem>
-                <SelectItem value="obra-002">Obra 002 - Complexo Industrial</SelectItem>
-                <SelectItem value="administrativo">Administrativo</SelectItem>
-                <SelectItem value="manutencao">Manutenção</SelectItem>
+                {ccas?.map((cca) => (
+                  <SelectItem key={cca.id} value={cca.id.toString()}>
+                    {cca.codigo} - {cca.nome}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
             {errors.centroCusto && <p className="text-sm text-destructive mt-1">{errors.centroCusto}</p>}

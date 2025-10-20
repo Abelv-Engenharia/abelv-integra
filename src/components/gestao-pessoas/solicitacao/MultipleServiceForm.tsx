@@ -12,6 +12,7 @@ import { TransportSubcategorySelector, TransportSubcategory } from "./TransportS
 import { TipoServico, PrioridadeSolicitacao, StatusSolicitacao } from "@/types/gestao-pessoas/solicitacao";
 import { categoriesInfo } from "@/data/gestao-pessoas/mockSolicitacoes";
 import { Plane, Car, Building, Package } from "lucide-react";
+import { useUserCCAs } from "@/hooks/useUserCCAs";
 
 interface MultipleServiceFormProps {
   onSubmit: (data: any) => void;
@@ -20,6 +21,8 @@ interface MultipleServiceFormProps {
 }
 
 export function MultipleServiceForm({ onSubmit, onCancel, solicitante }: MultipleServiceFormProps) {
+  const { data: ccas, isLoading: isLoadingCCAs } = useUserCCAs();
+  
   const [selectedServices, setSelectedServices] = useState<TipoServico[]>([]);
   const [currentStep, setCurrentStep] = useState<'selection' | 'form'>('selection');
   
@@ -370,13 +373,22 @@ export function MultipleServiceForm({ onSubmit, onCancel, solicitante }: Multipl
                 <Label htmlFor="centroCusto" className={errors.centroCusto ? "text-destructive" : ""}>
                   CCA *
                 </Label>
-                <Input
-                  id="centroCusto"
-                  value={commonData.centroCusto}
-                  onChange={(e) => updateCommonData('centroCusto', e.target.value)}
-                  className={errors.centroCusto ? "border-destructive" : ""}
-                  placeholder="Código do CCA"
-                />
+                <Select 
+                  value={commonData.centroCusto} 
+                  onValueChange={(value) => updateCommonData('centroCusto', value)}
+                  disabled={isLoadingCCAs}
+                >
+                  <SelectTrigger className={errors.centroCusto ? "border-destructive" : ""}>
+                    <SelectValue placeholder={isLoadingCCAs ? "Carregando CCAs..." : "Selecione o CCA"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {ccas?.map((cca) => (
+                      <SelectItem key={cca.id} value={cca.id.toString()}>
+                        {cca.codigo} - {cca.nome}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 {errors.centroCusto && <p className="text-sm text-destructive">{errors.centroCusto}</p>}
               </div>
             </div>
