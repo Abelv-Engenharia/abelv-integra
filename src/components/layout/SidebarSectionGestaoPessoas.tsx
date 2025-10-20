@@ -1,4 +1,4 @@
-import { ChevronDown, ChevronRight, ClipboardList, FileText, CheckSquare, CheckCircle, BarChart3, Plane, FileUp, Database, FilePlus } from "lucide-react";
+import { ChevronDown, ChevronRight, ClipboardList, FileText, CheckSquare, CheckCircle, BarChart3, Plane, FileUp, Database, FilePlus, Car } from "lucide-react";
 import {
   Sidebar,
   SidebarMenu,
