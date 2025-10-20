@@ -7,11 +7,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Eye, Download, Edit, FileSpreadsheet } from "lucide-react";
-import { mockNotasFiscais } from "@/data/mockNotasFiscais";
-import { NotaFiscal } from "@/types/nf";
-import { StatusBadgeNF } from "@/components/nf/StatusBadgeNF";
-import { VisualizarNFModal } from "@/components/nf/VisualizarNFModal";
-import { EditarNFModal } from "@/components/nf/EditarNFModal";
+import { mockNotasFiscais } from "@/data/gestao-pessoas/mockNotasFiscais";
+import { NotaFiscal } from "@/types/gestao-pessoas/nf";
+import { StatusBadgeNF } from "@/components/gestao-pessoas/nf/StatusBadgeNF";
+import { VisualizarNFModal } from "@/components/gestao-pessoas/nf/VisualizarNFModal";
+import { EditarNFModal } from "@/components/gestao-pessoas/nf/EditarNFModal";
 import { toast } from "sonner";
 import * as XLSX from 'xlsx';
 

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Calendar, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { NovoControleFeriasModal } from "@/components/ferias/NovoControleFeriasModal";
+import { NovoControleFeriasModal } from "@/components/gestao-pessoas/ferias/NovoControleFeriasModal";
 
 export default function ControleFerias() {
   const [novoModalAberto, setNovoModalAberto] = useState(false);

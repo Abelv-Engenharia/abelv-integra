@@ -15,8 +15,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { VisualizarPrestadorModal } from "@/components/prestadores/VisualizarPrestadorModal";
-import { EditarPrestadorModal } from "@/components/prestadores/EditarPrestadorModal";
+import { VisualizarPrestadorModal } from "@/components/gestao-pessoas/prestadores/VisualizarPrestadorModal";
+import { EditarPrestadorModal } from "@/components/gestao-pessoas/prestadores/EditarPrestadorModal";
 
 export default function ConsultaPrestadores() {
   const [prestadores, setPrestadores] = useState<any[]>([]);

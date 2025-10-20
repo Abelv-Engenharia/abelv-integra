@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Search, CheckCircle, XCircle, Clock } from "lucide-react";
 import { useSolicitacoes } from "@/contexts/gestao-pessoas/SolicitacoesContext";
-import { useUsuarioAtivo } from "@/hooks/gestao-pessoas/useUsuarioAtivo";
+import { useUsuarioAtivo } from "@/hooks/useUsuarioAtivo";
 import { AprovarSolicitacaoModal } from "@/components/gestao-pessoas/solicitacao/AprovarSolicitacaoModal";
 import { format } from "date-fns";
 import { 

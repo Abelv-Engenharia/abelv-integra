@@ -5,10 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { VisualizarFeriasModal } from "@/components/ferias/VisualizarFeriasModal";
-import { EditarFeriasModal } from "@/components/ferias/EditarFeriasModal";
-import { FeriasStatusBadge } from "@/components/ferias/FeriasStatusBadge";
-import { ControleFérias, StatusFerias } from "@/types/ferias";
+import { VisualizarFeriasModal } from "@/components/gestao-pessoas/ferias/VisualizarFeriasModal";
+import { EditarFeriasModal } from "@/components/gestao-pessoas/ferias/EditarFeriasModal";
+import { FeriasStatusBadge } from "@/components/gestao-pessoas/ferias/FeriasStatusBadge";
+import { ControleFérias, StatusFerias } from "@/types/gestao-pessoas/ferias";
 import { toast } from "@/hooks/use-toast";
 
 export default function AprovacaoFerias() {

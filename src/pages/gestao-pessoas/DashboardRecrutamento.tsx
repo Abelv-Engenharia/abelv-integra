@@ -1,20 +1,20 @@
 import { useState } from "react";
-import { Layout } from "@/components/Layout";
+import Layout from "@/components/layout/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { FileDown } from "lucide-react";
-import { mockVagas } from "@/data/mockVagas";
-import { mockCandidatos } from "@/data/mockCandidatos";
-import { KPIsRecrutamento } from "@/components/recrutamento/dashboard/KPIsRecrutamento";
-import { FunilConversaoChart } from "@/components/recrutamento/dashboard/FunilConversaoChart";
-import { DistribuicaoVagasChart } from "@/components/recrutamento/dashboard/DistribuicaoVagasChart";
-import { VagasPorPrioridadeChart } from "@/components/recrutamento/dashboard/VagasPorPrioridadeChart";
-import { OrigemCandidatosChart } from "@/components/recrutamento/dashboard/OrigemCandidatosChart";
-import { TopCargosChart } from "@/components/recrutamento/dashboard/TopCargosChart";
-import { VagasPorContratoChart } from "@/components/recrutamento/dashboard/VagasPorContratoChart";
-import { CandidatosPorStatusChart } from "@/components/recrutamento/dashboard/CandidatosPorStatusChart";
-import { VagasAbertoTable } from "@/components/recrutamento/dashboard/VagasAbertoTable";
+import { mockVagas } from "@/data/gestao-pessoas/mockVagas";
+import { mockCandidatos } from "@/data/gestao-pessoas/mockCandidatos";
+import { KPIsRecrutamento } from "@/components/gestao-pessoas/recrutamento/dashboard/KPIsRecrutamento";
+import { FunilConversaoChart } from "@/components/gestao-pessoas/recrutamento/dashboard/FunilConversaoChart";
+import { DistribuicaoVagasChart } from "@/components/gestao-pessoas/recrutamento/dashboard/DistribuicaoVagasChart";
+import { VagasPorPrioridadeChart } from "@/components/gestao-pessoas/recrutamento/dashboard/VagasPorPrioridadeChart";
+import { OrigemCandidatosChart } from "@/components/gestao-pessoas/recrutamento/dashboard/OrigemCandidatosChart";
+import { TopCargosChart } from "@/components/gestao-pessoas/recrutamento/dashboard/TopCargosChart";
+import { VagasPorContratoChart } from "@/components/gestao-pessoas/recrutamento/dashboard/VagasPorContratoChart";
+import { CandidatosPorStatusChart } from "@/components/gestao-pessoas/recrutamento/dashboard/CandidatosPorStatusChart";
+import { VagasAbertoTable } from "@/components/gestao-pessoas/recrutamento/dashboard/VagasAbertoTable";
 
 export default function DashboardRecrutamento() {
   const [periodo, setPeriodo] = useState("30");
