@@ -180,6 +180,13 @@ import PlaceholderPage from "./pages/PlaceholderPage";
 // Engenharia Matricial pages
 import EngenhariaMatricialIndex from "./pages/engenharia-matricial/Index";
 
+// === GESTÃO DE PESSOAS - Recrutamento ===
+import DashboardRecrutamento from "./pages/gestao-pessoas/DashboardRecrutamento";
+import RhAberturaVaga from "./pages/gestao-pessoas/RhAberturaVaga";
+import GestaoVagas from "./pages/gestao-pessoas/GestaoVagas";
+import RhDetalhesVaga from "./pages/gestao-pessoas/RhDetalhesVaga";
+import AprovacaoVaga from "./pages/gestao-pessoas/AprovacaoVaga";
+
 // === COMERCIAL - Repositório de Documentos ===
 import DocumentList from "./pages/comercial/repositorio/DocumentList";
 import DocumentUpload from "./pages/comercial/repositorio/DocumentUpload";
@@ -565,6 +572,13 @@ function App() {
                 <Route path="gestao-pessoas/controle-solicitacoes" element={<SolicitacoesProvider><ControleSolicitacoes /></SolicitacoesProvider>} />
                 <Route path="gestao-pessoas/aprovacao-solicitacoes" element={<SolicitacoesProvider><AprovacaoSolicitacoes /></SolicitacoesProvider>} />
                 <Route path="gestao-pessoas/relatorios-solicitacoes" element={<SolicitacoesProvider><RelatoriosSolicitacoes /></SolicitacoesProvider>} />
+                
+                {/* Gestão de Pessoas - Recrutamento & Seleção */}
+                <Route path="gestao-pessoas/dashboard-recrutamento" element={<DashboardRecrutamento />} />
+                <Route path="gestao-pessoas/rh-abertura-vaga" element={<RhAberturaVaga />} />
+                <Route path="gestao-pessoas/gestao-vagas" element={<GestaoVagas />} />
+                <Route path="gestao-pessoas/rh-detalhes-vaga/:id" element={<RhDetalhesVaga />} />
+                <Route path="gestao-pessoas/aprovacao-vaga" element={<AprovacaoVaga />} />
                 
                 {/* Gestão de Pessoas - Viagens */}
                 <Route path="gestao-pessoas/gestao-viagens-dashboard" element={<GestaoViagensDashboard />} />

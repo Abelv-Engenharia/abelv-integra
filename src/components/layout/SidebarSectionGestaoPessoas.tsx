@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ChevronDown, ChevronRight, ClipboardList, FileText, CheckSquare, CheckCircle, BarChart3, Plane, FileUp, Database, FilePlus, Car, Briefcase } from "lucide-react";
+import { ChevronDown, ChevronRight, ClipboardList, FileText, CheckSquare, CheckCircle, BarChart3, Plane, FileUp, Database, FilePlus, Car, Briefcase, UserPlus } from "lucide-react";
 import {
   SidebarMenu,
   SidebarMenuButton,
@@ -31,11 +31,13 @@ export default function SidebarSectionGestaoPessoas({
     solicitacoes: boolean;
     viagens: boolean;
     veiculos: boolean;
+    recrutamento: boolean;
   }>({
     recursos: false,
     solicitacoes: false,
     viagens: false,
     veiculos: false,
+    recrutamento: false,
   });
 
   // Auto-expand based on current path
@@ -56,6 +58,9 @@ export default function SidebarSectionGestaoPessoas({
                   currentPath.includes('checklist') || 
                   currentPath.includes('rotas') || 
                   currentPath.includes('abastecimento'),
+        recrutamento: currentPath.includes('recrutamento') || 
+                      currentPath.includes('vaga') || 
+                      currentPath.includes('vagas'),
       };
       setOpenSubmenus(newState);
     }
@@ -299,6 +304,61 @@ export default function SidebarSectionGestaoPessoas({
                           </CollapsibleContent>
                         </SidebarMenuItem>
                       </Collapsible>
+                    </SidebarMenu>
+                  </CollapsibleContent>
+                </SidebarMenuItem>
+              </Collapsible>
+
+              {/* Recrutamento & Seleção */}
+              <Collapsible open={openSubmenus.recrutamento} onOpenChange={() => toggleSubmenu("recrutamento")}>
+                <SidebarMenuItem>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton className="w-full justify-between hover:bg-sidebar-accent">
+                      <div className="flex items-center gap-2">
+                        <UserPlus className="h-4 w-4" />
+                        <span>Recrutamento & Seleção</span>
+                      </div>
+                      {openSubmenus.recrutamento ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+
+                  <CollapsibleContent>
+                    <SidebarMenu className="ml-4 border-l border-sidebar-border">
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                          <Link to="/gestao-pessoas/dashboard-recrutamento" onClick={onLinkClick}>
+                            <BarChart3 className="h-4 w-4" />
+                            <span>Dashboard</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                          <Link to="/gestao-pessoas/rh-abertura-vaga" onClick={onLinkClick}>
+                            <FilePlus className="h-4 w-4" />
+                            <span>Abertura de Vaga</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                          <Link to="/gestao-pessoas/gestao-vagas" onClick={onLinkClick}>
+                            <Database className="h-4 w-4" />
+                            <span>Gestão de Vagas</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                          <Link to="/gestao-pessoas/aprovacao-vaga" onClick={onLinkClick}>
+                            <CheckCircle className="h-4 w-4" />
+                            <span>Aprovação de Vaga</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
                     </SidebarMenu>
                   </CollapsibleContent>
                 </SidebarMenuItem>
