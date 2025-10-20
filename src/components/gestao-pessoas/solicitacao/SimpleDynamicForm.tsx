@@ -16,13 +16,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TipoServico, PrioridadeSolicitacao, TipoPassagem, Viajante, StatusSolicitacao } from "@/types/gestao-pessoas/solicitacao";
 import { TransportSubcategorySelector, TransportSubcategory } from "./TransportSubcategorySelector";
 import { cn } from "@/lib/utils";
-import { useAuth } from "@/contexts/AuthContext";
-import { useUserCCAs } from "@/hooks/useUserCCAs";
 interface SimpleDynamicFormProps {
   tipoServico: TipoServico | TipoServico[];
   onSubmit: (data: any) => void;
   onCancel: () => void;
-  solicitante: string;
 }
 
 // Interface para viajantes múltiplos
@@ -44,13 +41,10 @@ const baseSchema = z.object({
 export function SimpleDynamicForm({
   tipoServico,
   onSubmit,
-  onCancel,
-  solicitante
+  onCancel
 }: SimpleDynamicFormProps) {
-  const { data: ccas, isLoading: isLoadingCCAs } = useUserCCAs();
-  
   const [formData, setFormData] = useState<any>({
-    solicitante: solicitante,
+    solicitante: "",
     dataSolicitacao: new Date(),
     prioridade: PrioridadeSolicitacao.MEDIA,
     centroCusto: "",
@@ -307,7 +301,7 @@ export function SimpleDynamicForm({
                     CCA *
                   </Label>
                   <Input id="cca" value={formData.cca || ''} onChange={e => updateFormData('cca', e.target.value)} className={errors.cca ? "border-destructive" : ""} placeholder="Código do centro de custo" />
-                  {errors.cca && <p className="text-sm text-destructive">{errors.cca}</p>}
+                  {errors.cca}
                 </div>
 
                 <div className="space-y-2">
@@ -861,21 +855,16 @@ export function SimpleDynamicForm({
           </div>
 
           <div>
-            <Label className="text-destructive">CCA *</Label>
-            <Select 
-              value={formData.centroCusto || ''} 
-              onValueChange={value => updateFormData("centroCusto", value)}
-              disabled={isLoadingCCAs}
-            >
+            <Label className="text-destructive">Centro de Custo/Obra *</Label>
+            <Select onValueChange={value => updateFormData("centroCusto", value)}>
               <SelectTrigger className={errors.centroCusto ? "border-destructive" : ""}>
-                <SelectValue placeholder={isLoadingCCAs ? "Carregando CCAs..." : "Selecione o CCA"} />
+                <SelectValue placeholder="Selecione o centro de custo" />
               </SelectTrigger>
               <SelectContent>
-                {ccas?.map((cca) => (
-                  <SelectItem key={cca.id} value={cca.id.toString()}>
-                    {cca.codigo} - {cca.nome}
-                  </SelectItem>
-                ))}
+                <SelectItem value="obra-001">Obra 001 - Edifício Central</SelectItem>
+                <SelectItem value="obra-002">Obra 002 - Complexo Industrial</SelectItem>
+                <SelectItem value="administrativo">Administrativo</SelectItem>
+                <SelectItem value="manutencao">Manutenção</SelectItem>
               </SelectContent>
             </Select>
             {errors.centroCusto && <p className="text-sm text-destructive mt-1">{errors.centroCusto}</p>}
