@@ -1,4 +1,4 @@
-import { ColunaRelatorio, ConfigModulo } from '@/types/relatorio-prestadores';
+import { ColunaRelatorio, ConfigModulo } from '@/types/gestao-pessoas/relatorio-prestadores';
 
 export const COLUNAS_CADASTRO_PJ: ColunaRelatorio[] = [
   { key: 'nomecompleto', label: 'Nome completo', type: 'text', modulo: 'cadastro_pj' },
