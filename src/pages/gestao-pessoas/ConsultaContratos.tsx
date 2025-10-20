@@ -1,5 +1,4 @@
 import { useState, useMemo } from "react";
-import { Layout } from "@/components/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -148,14 +147,13 @@ export default function ConsultaContratos() {
   };
 
   return (
-    <Layout>
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold">Consulta de contratos emitidos</h1>
-          <p className="text-muted-foreground">Visualize e gerencie os contratos de prestação de serviços</p>
-        </div>
+    <div className="container mx-auto p-6 space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold">Consulta de contratos emitidos</h1>
+        <p className="text-muted-foreground">Visualize e gerencie os contratos de prestação de serviços</p>
+      </div>
 
-        <Card>
+      <Card>
           <CardHeader>
             <CardTitle>Filtros de busca</CardTitle>
           </CardHeader>
@@ -333,13 +331,12 @@ export default function ConsultaContratos() {
             )}
           </CardContent>
         </Card>
-      </div>
 
-      <VisualizarContratoModal
-        contrato={contratoSelecionado}
-        open={modalAberto}
-        onOpenChange={setModalAberto}
-      />
-    </Layout>
+        <VisualizarContratoModal
+          contrato={contratoSelecionado}
+          open={modalAberto}
+          onOpenChange={setModalAberto}
+        />
+      </div>
   );
 }

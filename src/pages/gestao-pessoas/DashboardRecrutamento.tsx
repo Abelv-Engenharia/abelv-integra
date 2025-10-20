@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Layout } from "@/components/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
@@ -25,16 +24,15 @@ export default function DashboardRecrutamento() {
   };
 
   return (
-    <Layout>
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div>
-            <h1 className="text-3xl font-bold">Dashboard de Recrutamento & Seleção</h1>
-            <p className="text-muted-foreground mt-1">
-              Visão consolidada do processo de recrutamento e banco de talentos
-            </p>
-          </div>
+    <div className="container mx-auto p-6 space-y-6">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h1 className="text-3xl font-bold">Dashboard de Recrutamento & Seleção</h1>
+          <p className="text-muted-foreground mt-1">
+            Visão consolidada do processo de recrutamento e banco de talentos
+          </p>
+        </div>
           <Button onClick={handleExportPDF} variant="outline">
             <FileDown className="mr-2 h-4 w-4" />
             Exportar PDF
@@ -103,9 +101,8 @@ export default function DashboardRecrutamento() {
         {/* Gráfico - Quarta linha */}
         <TopCargosChart vagas={mockVagas} />
 
-        {/* Tabela de Vagas em Aberto */}
-        <VagasAbertoTable vagas={mockVagas} />
-      </div>
-    </Layout>
+      {/* Tabela de Vagas em Aberto */}
+      <VagasAbertoTable vagas={mockVagas} />
+    </div>
   );
 }

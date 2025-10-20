@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Layout } from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { ModuloSelector } from "@/components/gestao-pessoas/prestadores/relatorios/ModuloSelector";
 import { ColunasSelectorPorModulo } from "@/components/gestao-pessoas/prestadores/relatorios/ColunasSelectorPorModulo";
@@ -59,17 +58,16 @@ export default function RelatoriosPrestadores() {
   };
 
   return (
-    <Layout>
-      <div className="space-y-6">
-        <div className="flex items-center gap-3">
-          <FileBarChart className="h-8 w-8 text-primary" />
-          <div>
-            <h1 className="text-3xl font-bold">Relatórios de prestadores de serviço</h1>
-            <p className="text-muted-foreground">
-              Relatório dinâmico consolidando dados de todos os módulos de prestadores
-            </p>
-          </div>
+    <div className="container mx-auto p-6 space-y-6">
+      <div className="flex items-center gap-3">
+        <FileBarChart className="h-8 w-8 text-primary" />
+        <div>
+          <h1 className="text-3xl font-bold">Relatórios de prestadores de serviço</h1>
+          <p className="text-muted-foreground">
+            Relatório dinâmico consolidando dados de todos os módulos de prestadores
+          </p>
         </div>
+      </div>
 
         <ModuloSelector
           modulosSelecionados={modulosSelecionados}
@@ -98,36 +96,35 @@ export default function RelatoriosPrestadores() {
           />
         )}
 
-        {modulosSelecionados.length > 0 && (
-          <div className="flex justify-center">
-            <Button size="lg" onClick={handleGerarRelatorio} className="gap-2">
-              <BarChart3 className="h-5 w-5" />
-              Gerar relatório
-            </Button>
-          </div>
-        )}
+      {modulosSelecionados.length > 0 && (
+        <div className="flex justify-center">
+          <Button size="lg" onClick={handleGerarRelatorio} className="gap-2">
+            <BarChart3 className="h-5 w-5" />
+            Gerar relatório
+          </Button>
+        </div>
+      )}
 
-        {relatorioGerado && dadosModulos.length > 0 && (
-          <>
-            <div className="border-t pt-6">
-              <h2 className="text-2xl font-bold mb-6">Resultado</h2>
-              
-              <ResumoCards dadosModulos={dadosModulos} />
-              
-              <ExportButtons 
-                dadosModulos={dadosModulos} 
-                filtros={{ ...filtros, modulos: modulosSelecionados }} 
-              />
-              
-              <div className="space-y-6">
-                {dadosModulos.map((modulo) => (
-                  <TabelaDinamica key={modulo.modulo} dadosModulo={modulo} />
-                ))}
-              </div>
+      {relatorioGerado && dadosModulos.length > 0 && (
+        <>
+          <div className="border-t pt-6">
+            <h2 className="text-2xl font-bold mb-6">Resultado</h2>
+            
+            <ResumoCards dadosModulos={dadosModulos} />
+            
+            <ExportButtons 
+              dadosModulos={dadosModulos} 
+              filtros={{ ...filtros, modulos: modulosSelecionados }} 
+            />
+            
+            <div className="space-y-6">
+              {dadosModulos.map((modulo) => (
+                <TabelaDinamica key={modulo.modulo} dadosModulo={modulo} />
+              ))}
             </div>
-          </>
-        )}
-      </div>
-    </Layout>
+          </div>
+        </>
+      )}
+    </div>
   );
 }

@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { Layout } from "@/components/Layout";
 import { DemonstrativoPrestador, KPIData, FiltrosDashboard } from "@/types/gestao-pessoas/dashboard-prestadores";
 import { DashboardPrestadoresService } from "@/services/gestao-pessoas/DashboardPrestadoresService";
 import { KPICardsPrestadores } from "@/components/gestao-pessoas/prestadores/dashboard/KPICardsPrestadores";
@@ -168,22 +167,21 @@ export default function DashboardPrestadores() {
 
   if (carregando) {
     return (
-      <Layout>
+      <div className="container mx-auto p-6">
         <div className="flex items-center justify-center h-[80vh]">
           <p className="text-muted-foreground">Carregando dados...</p>
         </div>
-      </Layout>
+      </div>
     );
   }
 
   return (
-    <Layout>
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold">Dashboard de prestadores de serviço</h1>
-            <p className="text-muted-foreground">Visão geral financeira e operacional</p>
-          </div>
+    <div className="container mx-auto p-6 space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold">Dashboard de prestadores de serviço</h1>
+          <p className="text-muted-foreground">Visão geral financeira e operacional</p>
+        </div>
           <Button onClick={carregarDados} variant="outline" size="sm">
             <RefreshCw className="h-4 w-4 mr-2" />
             Atualizar
@@ -204,19 +202,18 @@ export default function DashboardPrestadores() {
           <EvolucaoTrimestralChart dados={dadosFiltrados} />
         </div>
 
-        <TabelaResumoPrestadores dados={dadosFiltrados} />
+      <TabelaResumoPrestadores dados={dadosFiltrados} />
 
-        <div className="flex gap-3">
-          <Button onClick={exportarExcel} className="gap-2">
-            <FileSpreadsheet className="h-4 w-4" />
-            Exportar excel
-          </Button>
-          <Button onClick={exportarPDF} variant="outline" className="gap-2">
-            <FileText className="h-4 w-4" />
-            Exportar PDF
-          </Button>
-        </div>
+      <div className="flex gap-3">
+        <Button onClick={exportarExcel} className="gap-2">
+          <FileSpreadsheet className="h-4 w-4" />
+          Exportar excel
+        </Button>
+        <Button onClick={exportarPDF} variant="outline" className="gap-2">
+          <FileText className="h-4 w-4" />
+          Exportar PDF
+        </Button>
       </div>
-    </Layout>
+    </div>
   );
 }

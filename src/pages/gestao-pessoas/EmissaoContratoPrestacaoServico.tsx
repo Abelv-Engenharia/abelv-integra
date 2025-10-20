@@ -17,9 +17,8 @@ import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
-import { Layout } from "@/components/Layout";
 import { 
-  Breadcrumb, 
+  Breadcrumb,
   BreadcrumbItem, 
   BreadcrumbLink, 
   BreadcrumbList, 
@@ -293,10 +292,9 @@ export default function EmissaoContratoPrestacaoServico() {
   );
 
   return (
-    <Layout>
-      <div className="container mx-auto p-6 space-y-6">
-        <Breadcrumb>
-          <BreadcrumbList>
+    <div className="container mx-auto p-6 space-y-6">
+      <Breadcrumb>
+        <BreadcrumbList>
             <BreadcrumbItem>
               <BreadcrumbLink href="/">Gestão de Pessoas</BreadcrumbLink>
             </BreadcrumbItem>
@@ -1086,6 +1084,6 @@ export default function EmissaoContratoPrestacaoServico() {
           </div>
         )}
       </div>
-    </Layout>
+    </div>
   );
 }
