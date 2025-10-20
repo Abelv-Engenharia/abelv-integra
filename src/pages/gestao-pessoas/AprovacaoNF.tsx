@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Layout } from "@/components/Layout";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -108,12 +107,11 @@ export default function AprovacaoNF() {
   };
 
   return (
-    <Layout>
-      <div className="space-y-6">
-        {/* Breadcrumb */}
-        <div className="text-sm text-muted-foreground">
-          Gestão de Pessoas &gt; Prestadores de Serviço &gt; Aprovação de NF
-        </div>
+    <div className="container mx-auto p-6 space-y-6">
+      {/* Breadcrumb */}
+      <div className="text-sm text-muted-foreground">
+        Gestão de Pessoas &gt; Prestadores de Serviço &gt; Aprovação de NF
+      </div>
 
         {/* Cabeçalho */}
         <div className="flex justify-between items-center">
@@ -282,21 +280,20 @@ export default function AprovacaoNF() {
             </div>
           </div>
         </Card>
+
+        {/* Modais */}
+        <VisualizarNFModal
+          open={visualizarModal}
+          onClose={() => setVisualizarModal(false)}
+          notaFiscal={nfSelecionada}
+        />
+
+        <EditarNFModal
+          open={editarModal}
+          onClose={() => setEditarModal(false)}
+          notaFiscal={nfSelecionada}
+          onSave={handleSalvarEdicao}
+        />
       </div>
-
-      {/* Modais */}
-      <VisualizarNFModal
-        open={visualizarModal}
-        onClose={() => setVisualizarModal(false)}
-        notaFiscal={nfSelecionada}
-      />
-
-      <EditarNFModal
-        open={editarModal}
-        onClose={() => setEditarModal(false)}
-        notaFiscal={nfSelecionada}
-        onSave={handleSalvarEdicao}
-      />
-    </Layout>
   );
 }

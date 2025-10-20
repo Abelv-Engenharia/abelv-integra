@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { Layout } from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -184,12 +183,11 @@ const CadastroEmissaoNF = () => {
     XLSX.writeFile(wb, `notas-fiscais-${format(new Date(), "yyyy-MM-dd")}.xlsx`);
     toast.success("Relatório exportado com sucesso!");
   };
-  return <Layout>
-      <div className="space-y-6">
-        {/* Breadcrumb */}
-        <div className="text-sm text-muted-foreground">
-          Gestão de Pessoas &gt; Prestadores de Serviço &gt; Cadastro de Emissão de NF
-        </div>
+  return <div className="container mx-auto p-6 space-y-6">
+      {/* Breadcrumb */}
+      <div className="text-sm text-muted-foreground">
+        Gestão de Pessoas &gt; Prestadores de Serviço &gt; Cadastro de Emissão de NF
+      </div>
 
         {/* Formulário de Emissão */}
         <Card>
@@ -389,28 +387,27 @@ const CadastroEmissaoNF = () => {
               </div>}
           </CardContent>
         </Card>
-      </div>
 
-      {/* Diálogo de Confirmação */}
-      <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Confirmar Envio para Sienge</AlertDialogTitle>
-            <AlertDialogDescription>
-              Tem certeza que deseja aprovar e enviar esta nota fiscal para o Sienge?
-              Esta ação não poderá ser desfeita.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setPendingSubmit(null)}>
-              Cancelar
-            </AlertDialogCancel>
-            <AlertDialogAction onClick={enviarParaSienge}>
-              Confirmar Envio
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </Layout>;
+        {/* Diálogo de Confirmação */}
+        <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Confirmar Envio para Sienge</AlertDialogTitle>
+              <AlertDialogDescription>
+                Tem certeza que deseja aprovar e enviar esta nota fiscal para o Sienge?
+                Esta ação não poderá ser desfeita.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={() => setPendingSubmit(null)}>
+                Cancelar
+              </AlertDialogCancel>
+              <AlertDialogAction onClick={enviarParaSienge}>
+                Confirmar Envio
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </div>;
 };
 export default CadastroEmissaoNF;
