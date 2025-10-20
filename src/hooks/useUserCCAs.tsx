@@ -38,7 +38,7 @@ export const useUserCCAs = () => {
           .select('*')
           .in('id', ccaIds)
           .eq('ativo', true)
-          .order('nome');
+          .order('codigo');
 
         if (ccasError) {
           console.error("Erro ao buscar CCAs:", ccasError);

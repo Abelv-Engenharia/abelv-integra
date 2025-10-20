@@ -859,7 +859,7 @@ export function SimpleDynamicForm({
           </div>
 
           <div>
-            <Label className={errors.centroCusto ? "text-destructive" : ""}>Cca *</Label>
+            <Label className={errors.centroCusto ? "text-destructive" : ""}>CCA *</Label>
             <Select 
               onValueChange={value => updateFormData("centroCusto", value)}
               disabled={isLoadingCCAs}
