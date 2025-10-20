@@ -218,13 +218,7 @@ export function SimpleDynamicForm({
         } else if (selectedTransportSubcategory === 'locacao_veiculo') {
           return <>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="cca" className={errors.cca ? "text-destructive" : ""}>
-                    CCA *
-                  </Label>
-                  <Input id="cca" value={formData.cca || ''} onChange={e => updateFormData('cca', e.target.value)} className={errors.cca ? "border-destructive" : ""} placeholder="Código do centro de custo" />
-                  {errors.cca && <p className="text-sm text-destructive">{errors.cca}</p>}
-                </div>
+                
 
                 <div className="space-y-2">
                   <Label htmlFor="nomeCondutor" className={errors.nomeCondutor ? "text-destructive" : ""}>
