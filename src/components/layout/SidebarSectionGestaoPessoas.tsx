@@ -32,12 +32,14 @@ export default function SidebarSectionGestaoPessoas({
     viagens: boolean;
     veiculos: boolean;
     recrutamento: boolean;
+    prestadores: boolean;
   }>({
     recursos: false,
     solicitacoes: false,
     viagens: false,
     veiculos: false,
     recrutamento: false,
+    prestadores: false,
   });
 
   // Auto-expand based on current path
@@ -61,6 +63,13 @@ export default function SidebarSectionGestaoPessoas({
         recrutamento: currentPath.includes('recrutamento') || 
                       currentPath.includes('vaga') || 
                       currentPath.includes('vagas'),
+        prestadores: currentPath.includes('prestadores') || 
+                     currentPath.includes('prestacao-servico') || 
+                     currentPath.includes('contratos') || 
+                     currentPath.includes('demonstrativo') || 
+                     currentPath.includes('ferias') || 
+                     currentPath.includes('passivos') ||
+                     currentPath.includes('pessoa-juridica'),
       };
       setOpenSubmenus(newState);
     }
@@ -356,6 +365,115 @@ export default function SidebarSectionGestaoPessoas({
                           <Link to="/gestao-pessoas/aprovacao-vaga" onClick={onLinkClick}>
                             <CheckCircle className="h-4 w-4" />
                             <span>Aprovação de Vaga</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    </SidebarMenu>
+                  </CollapsibleContent>
+                </SidebarMenuItem>
+              </Collapsible>
+
+              {/* Prestadores de Serviço */}
+              <Collapsible open={openSubmenus.prestadores} onOpenChange={() => toggleSubmenu("prestadores")}>
+                <SidebarMenuItem>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton className="w-full justify-between hover:bg-sidebar-accent">
+                      <div className="flex items-center gap-2">
+                        <Briefcase className="h-4 w-4" />
+                        <span>Prestadores de Serviço</span>
+                      </div>
+                      {openSubmenus.prestadores ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+
+                  <CollapsibleContent>
+                    <SidebarMenu className="ml-4 border-l border-sidebar-border">
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                          <Link to="/gestao-pessoas/dashboard-prestadores" onClick={onLinkClick}>
+                            <BarChart3 className="h-4 w-4" />
+                            <span>Dashboard</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                          <Link to="/gestao-pessoas/cadastro-pessoa-juridica" onClick={onLinkClick}>
+                            <FilePlus className="h-4 w-4" />
+                            <span>Cadastro Pessoa Jurídica</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                          <Link to="/gestao-pessoas/consulta-prestadores" onClick={onLinkClick}>
+                            <Database className="h-4 w-4" />
+                            <span>Consulta Prestadores</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                          <Link to="/gestao-pessoas/emissao-contrato-prestacao-servico" onClick={onLinkClick}>
+                            <FileText className="h-4 w-4" />
+                            <span>Emissão Contrato</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                          <Link to="/gestao-pessoas/consulta-contratos" onClick={onLinkClick}>
+                            <Database className="h-4 w-4" />
+                            <span>Consulta Contratos</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                          <Link to="/gestao-pessoas/demonstrativo-prestacao-servico" onClick={onLinkClick}>
+                            <FileText className="h-4 w-4" />
+                            <span>Demonstrativo</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                          <Link to="/gestao-pessoas/controle-ferias" onClick={onLinkClick}>
+                            <CheckSquare className="h-4 w-4" />
+                            <span>Controle Férias</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                          <Link to="/gestao-pessoas/aprovacao-ferias" onClick={onLinkClick}>
+                            <CheckCircle className="h-4 w-4" />
+                            <span>Aprovação Férias</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                          <Link to="/gestao-pessoas/controle-passivos" onClick={onLinkClick}>
+                            <FileText className="h-4 w-4" />
+                            <span>Controle Passivos</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                          <Link to="/gestao-pessoas/relatorios-prestadores" onClick={onLinkClick}>
+                            <BarChart3 className="h-4 w-4" />
+                            <span>Relatórios</span>
                           </Link>
                         </SidebarMenuButton>
                       </SidebarMenuItem>

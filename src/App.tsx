@@ -592,6 +592,18 @@ function App() {
                 <Route path="gestao-pessoas/rh-detalhes-vaga/:id" element={<RhDetalhesVaga />} />
                 <Route path="gestao-pessoas/aprovacao-vaga" element={<AprovacaoVaga />} />
                 
+                {/* Gestão de Pessoas - Prestadores de Serviço */}
+                <Route path="gestao-pessoas/dashboard-prestadores" element={<DashboardPrestadores />} />
+                <Route path="gestao-pessoas/cadastro-pessoa-juridica" element={<CadastroPessoaJuridica />} />
+                <Route path="gestao-pessoas/consulta-prestadores" element={<ConsultaPrestadores />} />
+                <Route path="gestao-pessoas/emissao-contrato-prestacao-servico" element={<EmissaoContratoPrestacaoServico />} />
+                <Route path="gestao-pessoas/consulta-contratos" element={<ConsultaContratos />} />
+                <Route path="gestao-pessoas/demonstrativo-prestacao-servico" element={<DemonstrativoPrestacaoServico />} />
+                <Route path="gestao-pessoas/relatorios-prestadores" element={<RelatoriosPrestadores />} />
+                <Route path="gestao-pessoas/controle-ferias" element={<ControleFerias />} />
+                <Route path="gestao-pessoas/aprovacao-ferias" element={<AprovacaoFerias />} />
+                <Route path="gestao-pessoas/controle-passivos" element={<ControlePassivos />} />
+                
                 {/* Gestão de Pessoas - Viagens */}
                 <Route path="gestao-pessoas/gestao-viagens-dashboard" element={<GestaoViagensDashboard />} />
                 <Route path="gestao-pessoas/cadastro-fatura" element={<CadastroFatura />} />
