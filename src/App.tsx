@@ -187,6 +187,18 @@ import GestaoVagas from "./pages/gestao-pessoas/GestaoVagas";
 import RhDetalhesVaga from "./pages/gestao-pessoas/RhDetalhesVaga";
 import AprovacaoVaga from "./pages/gestao-pessoas/AprovacaoVaga";
 
+// === GESTÃO DE PESSOAS - Prestadores ===
+import DashboardPrestadores from "./pages/gestao-pessoas/DashboardPrestadores";
+import CadastroPessoaJuridica from "./pages/gestao-pessoas/CadastroPessoaJuridica";
+import ConsultaPrestadores from "./pages/gestao-pessoas/ConsultaPrestadores";
+import EmissaoContratoPrestacaoServico from "./pages/gestao-pessoas/EmissaoContratoPrestacaoServico";
+import ConsultaContratos from "./pages/gestao-pessoas/ConsultaContratos";
+import DemonstrativoPrestacaoServico from "./pages/gestao-pessoas/DemonstrativoPrestacaoServico";
+import RelatoriosPrestadores from "./pages/gestao-pessoas/RelatoriosPrestadores";
+import ControleFerias from "./pages/gestao-pessoas/ControleFerias";
+import AprovacaoFerias from "./pages/gestao-pessoas/AprovacaoFerias";
+import ControlePassivos from "./pages/gestao-pessoas/ControlePassivos";
+
 // === COMERCIAL - Repositório de Documentos ===
 import DocumentList from "./pages/comercial/repositorio/DocumentList";
 import DocumentUpload from "./pages/comercial/repositorio/DocumentUpload";
