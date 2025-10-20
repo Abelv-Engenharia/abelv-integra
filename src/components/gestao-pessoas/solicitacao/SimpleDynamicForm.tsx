@@ -162,8 +162,6 @@ export function SimpleDynamicForm({
         if (selectedTransportSubcategory === 'voucher_uber') {
           return <>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                
-
                 <div className="space-y-2">
                   <Label htmlFor="valor" className={errors.valor ? "text-destructive" : ""}>
                     Valor *
@@ -171,24 +169,24 @@ export function SimpleDynamicForm({
                   <Input id="valor" type="number" step="0.01" value={formData.valor || ''} onChange={e => updateFormData('valor', parseFloat(e.target.value))} className={errors.valor ? "border-destructive" : ""} placeholder="0,00" />
                   {errors.valor && <p className="text-sm text-destructive">{errors.valor}</p>}
                 </div>
-              </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="dataUso" className={errors.dataUso ? "text-destructive" : ""}>
-                  Data de Uso *
-                </Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button variant="outline" className={cn("justify-start text-left font-normal w-full", !formData.dataUso && "text-muted-foreground", errors.dataUso && "border-destructive")}>
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {formData.dataUso ? format(formData.dataUso, "dd/MM/yyyy") : "Selecione uma data"}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
-                    <Calendar mode="single" selected={formData.dataUso} onSelect={date => updateFormData('dataUso', date)} initialFocus />
-                  </PopoverContent>
-                </Popover>
-                {errors.dataUso && <p className="text-sm text-destructive">{errors.dataUso}</p>}
+                <div className="space-y-2">
+                  <Label htmlFor="dataUso" className={errors.dataUso ? "text-destructive" : ""}>
+                    Data de Uso *
+                  </Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" className={cn("justify-start text-left font-normal w-full", !formData.dataUso && "text-muted-foreground", errors.dataUso && "border-destructive")}>
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {formData.dataUso ? format(formData.dataUso, "dd/MM/yyyy") : "Selecione uma data"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar mode="single" selected={formData.dataUso} onSelect={date => updateFormData('dataUso', date)} initialFocus />
+                    </PopoverContent>
+                  </Popover>
+                  {errors.dataUso && <p className="text-sm text-destructive">{errors.dataUso}</p>}
+                </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
