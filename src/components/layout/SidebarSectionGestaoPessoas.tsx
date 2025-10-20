@@ -518,6 +518,24 @@ export default function SidebarSectionGestaoPessoas({
 
                       <SidebarMenuItem>
                         <SidebarMenuButton asChild>
+                          <Link to="/gestao-pessoas/cadastro-emissao-nf" onClick={onLinkClick}>
+                            <FilePlus className="h-4 w-4" />
+                            <span>Cadastro Emissão Nf</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                          <Link to="/gestao-pessoas/aprovacao-nf" onClick={onLinkClick}>
+                            <CheckCircle className="h-4 w-4" />
+                            <span>Aprovação Nf</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
                           <Link to="/gestao-pessoas/controle-ferias" onClick={onLinkClick}>
                             <CheckSquare className="h-4 w-4" />
                             <span>Controle Férias</span>

@@ -299,6 +299,10 @@ import ControleAbastecimento from "./pages/gestao-pessoas/ControleAbastecimento"
 // Gestão de Pessoas - Recrutamento & Seleção
 import BancoTalentos from "./pages/gestao-pessoas/BancoTalentos";
 
+// Gestão de Pessoas - Prestadores de Serviço - NF
+import CadastroEmissaoNF from "./pages/gestao-pessoas/CadastroEmissaoNF";
+import AprovacaoNF from "./pages/gestao-pessoas/AprovacaoNF";
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
@@ -603,6 +607,8 @@ function App() {
                 <Route path="gestao-pessoas/emissao-contrato-prestacao-servico" element={<EmissaoContratoPrestacaoServico />} />
                 <Route path="gestao-pessoas/consulta-contratos" element={<ConsultaContratos />} />
                 <Route path="gestao-pessoas/demonstrativo-prestacao-servico" element={<DemonstrativoPrestacaoServico />} />
+                <Route path="gestao-pessoas/cadastro-emissao-nf" element={<CadastroEmissaoNF />} />
+                <Route path="gestao-pessoas/aprovacao-nf" element={<AprovacaoNF />} />
                 <Route path="gestao-pessoas/relatorios-prestadores" element={<RelatoriosPrestadores />} />
                 <Route path="gestao-pessoas/controle-ferias" element={<ControleFerias />} />
                 <Route path="gestao-pessoas/aprovacao-ferias" element={<AprovacaoFerias />} />
