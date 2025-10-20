@@ -461,11 +461,7 @@ export function SimpleDynamicForm({
               {errors.tipoPassagem && <p className="text-sm text-destructive mt-1">{errors.tipoPassagem}</p>}
             </div>
 
-            <div>
-              <Label className="text-destructive">CCA *</Label>
-              <Input placeholder="Código do Centro de Custo" value={formData.cca || ""} onChange={e => updateFormData("cca", e.target.value)} className={errors.cca ? "border-destructive" : ""} />
-              {errors.cca && <p className="text-sm text-destructive mt-1">{errors.cca}</p>}
-            </div>
+            
 
             <div>
               <Label className="text-destructive">Motivo da Viagem *</Label>
