@@ -130,6 +130,61 @@ export default function SidebarSectionGestaoPessoas({
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
+
+              {/* Veículos */}
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link to="/gestao-pessoas/dashboard-veiculos" onClick={onLinkClick}>
+                    <Car className="h-4 w-4" />
+                    <span>Dashboard Veículos</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link to="/gestao-pessoas/consultas-veiculos" onClick={onLinkClick}>
+                    <Database className="h-4 w-4" />
+                    <span>Consultas Veículos</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link to="/gestao-pessoas/checklist-veiculos" onClick={onLinkClick}>
+                    <CheckSquare className="h-4 w-4" />
+                    <span>Checklist Veículos</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link to="/gestao-pessoas/calculo-rotas" onClick={onLinkClick}>
+                    <FileText className="h-4 w-4" />
+                    <span>Cálculo Rotas</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link to="/gestao-pessoas/controle-abastecimento" onClick={onLinkClick}>
+                    <BarChart3 className="h-4 w-4" />
+                    <span>Controle Abastecimento</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link to="/gestao-pessoas/relatorios-veiculos" onClick={onLinkClick}>
+                    <FileText className="h-4 w-4" />
+                    <span>Relatórios Veículos</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           </CollapsibleContent>
         </SidebarMenuItem>

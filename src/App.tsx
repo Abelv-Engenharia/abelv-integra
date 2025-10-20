@@ -264,6 +264,19 @@ import ImportarFatura from "./pages/gestao-pessoas/ImportarFatura";
 import ConsultaFaturas from "./pages/gestao-pessoas/ConsultaFaturas";
 import RelatorioViagens from "./pages/gestao-pessoas/RelatorioViagens";
 
+// Gestão de Pessoas - Veículos
+import DashboardVeiculos from "./pages/gestao-pessoas/DashboardVeiculos";
+import CadastroVeiculo from "./pages/gestao-pessoas/CadastroVeiculo";
+import CadastroMulta from "./pages/gestao-pessoas/CadastroMulta";
+import CadastroCartaoAbastecimento from "./pages/gestao-pessoas/CadastroCartaoAbastecimento";
+import CadastroPedagioEstacionamento from "./pages/gestao-pessoas/CadastroPedagioEstacionamento";
+import CadastroCondutor from "./pages/gestao-pessoas/CadastroCondutor";
+import ChecklistVeiculos from "./pages/gestao-pessoas/ChecklistVeiculos";
+import ConsultasVeiculos from "./pages/gestao-pessoas/ConsultasVeiculos";
+import RelatoriosVeiculos from "./pages/gestao-pessoas/RelatoriosVeiculos";
+import CalculoRotas from "./pages/gestao-pessoas/CalculoRotas";
+import ControleAbastecimento from "./pages/gestao-pessoas/ControleAbastecimento";
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
@@ -559,6 +572,19 @@ function App() {
                 <Route path="gestao-pessoas/importar-fatura" element={<ImportarFatura />} />
                 <Route path="gestao-pessoas/consulta-faturas" element={<ConsultaFaturas />} />
                 <Route path="gestao-pessoas/relatorio-viagens" element={<RelatorioViagens />} />
+                
+                {/* Gestão de Pessoas - Veículos */}
+                <Route path="gestao-pessoas/dashboard-veiculos" element={<DashboardVeiculos />} />
+                <Route path="gestao-pessoas/cadastro-veiculo" element={<CadastroVeiculo />} />
+                <Route path="gestao-pessoas/cadastro-multa" element={<CadastroMulta />} />
+                <Route path="gestao-pessoas/cadastro-cartao" element={<CadastroCartaoAbastecimento />} />
+                <Route path="gestao-pessoas/cadastro-pedagio" element={<CadastroPedagioEstacionamento />} />
+                <Route path="gestao-pessoas/cadastro-condutor" element={<CadastroCondutor />} />
+                <Route path="gestao-pessoas/checklist-veiculos" element={<ChecklistVeiculos />} />
+                <Route path="gestao-pessoas/consultas-veiculos" element={<ConsultasVeiculos />} />
+                <Route path="gestao-pessoas/relatorios-veiculos" element={<RelatoriosVeiculos />} />
+                <Route path="gestao-pessoas/calculo-rotas" element={<CalculoRotas />} />
+                <Route path="gestao-pessoas/controle-abastecimento" element={<ControleAbastecimento />} />
               </Route>
 
 
