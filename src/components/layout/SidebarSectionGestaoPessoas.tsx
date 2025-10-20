@@ -1,4 +1,4 @@
-import { ChevronDown, ChevronRight, ClipboardList, FileText, CheckSquare, CheckCircle, BarChart3 } from "lucide-react";
+import { ChevronDown, ChevronRight, ClipboardList, FileText, CheckSquare, CheckCircle, BarChart3, Plane, FileUp, Database, FilePlus } from "lucide-react";
 import {
   Sidebar,
   SidebarMenu,
@@ -81,6 +81,52 @@ export default function SidebarSectionGestaoPessoas({
                   <Link to="/gestao-pessoas/relatorios-solicitacoes" onClick={onLinkClick}>
                     <FileText className="h-4 w-4" />
                     <span>Relatórios Solicitações</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+
+              {/* Gestão de Viagens */}
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link to="/gestao-pessoas/gestao-viagens-dashboard" onClick={onLinkClick}>
+                    <Plane className="h-4 w-4" />
+                    <span>Dashboard Viagens</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link to="/gestao-pessoas/cadastro-fatura" onClick={onLinkClick}>
+                    <FilePlus className="h-4 w-4" />
+                    <span>Cadastro Fatura</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link to="/gestao-pessoas/importar-fatura" onClick={onLinkClick}>
+                    <FileUp className="h-4 w-4" />
+                    <span>Importar Fatura</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link to="/gestao-pessoas/consulta-faturas" onClick={onLinkClick}>
+                    <Database className="h-4 w-4" />
+                    <span>Consulta Faturas</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link to="/gestao-pessoas/relatorio-viagens" onClick={onLinkClick}>
+                    <FileText className="h-4 w-4" />
+                    <span>Relatório Viagens</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>

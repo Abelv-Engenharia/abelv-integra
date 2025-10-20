@@ -257,6 +257,13 @@ import AprovacaoSolicitacoes from "./pages/gestao-pessoas/AprovacaoSolicitacoes"
 import RelatoriosSolicitacoes from "./pages/gestao-pessoas/RelatoriosSolicitacoes";
 import { SolicitacoesProvider } from "./contexts/gestao-pessoas/SolicitacoesContext";
 
+// Gestão de Pessoas - Viagens
+import GestaoViagensDashboard from "./pages/gestao-pessoas/GestaoViagensDashboard";
+import CadastroFatura from "./pages/gestao-pessoas/CadastroFatura";
+import ImportarFatura from "./pages/gestao-pessoas/ImportarFatura";
+import ConsultaFaturas from "./pages/gestao-pessoas/ConsultaFaturas";
+import RelatorioViagens from "./pages/gestao-pessoas/RelatorioViagens";
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
@@ -545,6 +552,13 @@ function App() {
                 <Route path="gestao-pessoas/controle-solicitacoes" element={<SolicitacoesProvider><ControleSolicitacoes /></SolicitacoesProvider>} />
                 <Route path="gestao-pessoas/aprovacao-solicitacoes" element={<SolicitacoesProvider><AprovacaoSolicitacoes /></SolicitacoesProvider>} />
                 <Route path="gestao-pessoas/relatorios-solicitacoes" element={<SolicitacoesProvider><RelatoriosSolicitacoes /></SolicitacoesProvider>} />
+                
+                {/* Gestão de Pessoas - Viagens */}
+                <Route path="gestao-pessoas/gestao-viagens-dashboard" element={<GestaoViagensDashboard />} />
+                <Route path="gestao-pessoas/cadastro-fatura" element={<CadastroFatura />} />
+                <Route path="gestao-pessoas/importar-fatura" element={<ImportarFatura />} />
+                <Route path="gestao-pessoas/consulta-faturas" element={<ConsultaFaturas />} />
+                <Route path="gestao-pessoas/relatorio-viagens" element={<RelatorioViagens />} />
               </Route>
 
 
