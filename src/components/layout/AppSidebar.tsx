@@ -23,6 +23,7 @@ import SidebarSearch from "./SidebarSearch";
 import { usePermissionsDirect } from "@/hooks/usePermissionsDirect";
 import logoAbelvIntegra from "@/assets/logo-abelv-integra.png";
 import SidebarSectionComercial from "./SidebarSectionComercial";
+import SidebarSectionGestaoPessoas from "./SidebarSectionGestaoPessoas";
 
 export function AppSidebar() {
   const location = useLocation();
@@ -107,6 +108,8 @@ export function AppSidebar() {
       setOpenMenu("suprimentos");
     } else if (currentPath.startsWith("/engenharia-matricial")) {
       setOpenMenu("engenharia-matricial");
+    } else if (currentPath.startsWith("/gestao-pessoas")) {
+      setOpenMenu("gestao-pessoas");
     }
   }, [currentPath]);
 
@@ -306,6 +309,14 @@ export function AppSidebar() {
             onLinkClick={handleLinkClick}
           />
         )}
+
+        {/* Seção: Gestão de Pessoas */}
+        <SidebarSectionGestaoPessoas
+          openMenu={openMenu}
+          toggleMenu={toggleMenu}
+          onLinkClick={handleLinkClick}
+          canSee={canSee}
+        />
       </SidebarContent>
     </Sidebar>
   );
