@@ -62,35 +62,57 @@ export default function SidebarSectionGestaoPessoas({
     prestadores: false,
   });
 
-  // Auto-expand based on current path
+  // Auto-expand based on current path - expand only the submenu containing the active page
   useEffect(() => {
     if (currentPath.includes('/gestao-pessoas/')) {
+      // Check which submenu contains the active route
+      const isSolicitacoes = currentPath.includes('kpi-solicitacoes') || 
+                            currentPath.includes('solicitacao-servicos') || 
+                            currentPath.includes('controle-solicitacoes') || 
+                            currentPath.includes('aprovacao-solicitacoes') || 
+                            currentPath.includes('relatorios-solicitacoes');
+      
+      const isViagens = currentPath.includes('viagens') || 
+                       currentPath.includes('fatura') || 
+                       currentPath.includes('faturas');
+      
+      const isVeiculos = currentPath.includes('veiculos') || 
+                        currentPath.includes('veiculo') || 
+                        currentPath.includes('checklist') || 
+                        currentPath.includes('rotas') || 
+                        currentPath.includes('abastecimento') ||
+                        currentPath.includes('condutor') ||
+                        currentPath.includes('cartao') ||
+                        currentPath.includes('pedagio') ||
+                        currentPath.includes('multa');
+      
+      const isRecrutamento = currentPath.includes('recrutamento') || 
+                            currentPath.includes('vaga') || 
+                            currentPath.includes('vagas') ||
+                            currentPath.includes('banco-talentos');
+      
+      const isPrestadores = currentPath.includes('prestadores') || 
+                           currentPath.includes('prestacao-servico') || 
+                           currentPath.includes('contratos') || 
+                           currentPath.includes('demonstrativo') || 
+                           currentPath.includes('ferias') || 
+                           currentPath.includes('passivos') ||
+                           currentPath.includes('pessoa-juridica') ||
+                           currentPath.includes('emissao-nf') ||
+                           currentPath.includes('aprovacao-nf');
+      
+      // Recursos & Benefícios should be open if any of its submenus are active
+      const isRecursos = isSolicitacoes || isViagens || isVeiculos;
+      
       const newState = {
-        recursos: true,
-        solicitacoes: currentPath.includes('kpi-solicitacoes') || 
-                      currentPath.includes('solicitacao-servicos') || 
-                      currentPath.includes('controle-solicitacoes') || 
-                      currentPath.includes('aprovacao-solicitacoes') || 
-                      currentPath.includes('relatorios-solicitacoes'),
-        viagens: currentPath.includes('viagens') || 
-                 currentPath.includes('fatura') || 
-                 currentPath.includes('faturas'),
-        veiculos: currentPath.includes('veiculos') || 
-                  currentPath.includes('veiculo') || 
-                  currentPath.includes('checklist') || 
-                  currentPath.includes('rotas') || 
-                  currentPath.includes('abastecimento'),
-        recrutamento: currentPath.includes('recrutamento') || 
-                      currentPath.includes('vaga') || 
-                      currentPath.includes('vagas'),
-        prestadores: currentPath.includes('prestadores') || 
-                     currentPath.includes('prestacao-servico') || 
-                     currentPath.includes('contratos') || 
-                     currentPath.includes('demonstrativo') || 
-                     currentPath.includes('ferias') || 
-                     currentPath.includes('passivos') ||
-                     currentPath.includes('pessoa-juridica'),
+        recursos: isRecursos,
+        solicitacoes: isSolicitacoes,
+        viagens: isViagens,
+        veiculos: isVeiculos,
+        recrutamento: isRecrutamento,
+        prestadores: isPrestadores,
       };
+      
       setOpenSubmenus(newState);
     }
   }, [currentPath]);
