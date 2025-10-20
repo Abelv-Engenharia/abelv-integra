@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Vaga, PrioridadeVaga, StatusAprovacao } from "@/types/vaga";
+import { Vaga, PrioridadeVaga, StatusAprovacao } from "@/types/gestao-pessoas/vaga";
 import { Eye, CheckCircle, XCircle, Briefcase, MapPin, Calendar, User } from "lucide-react";
 import { format } from "date-fns";
 

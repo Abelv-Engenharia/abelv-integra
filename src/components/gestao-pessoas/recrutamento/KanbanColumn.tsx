@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Vaga, EtapaProcesso } from "@/types/vaga";
+import { Vaga, EtapaProcesso } from "@/types/gestao-pessoas/vaga";
 import { VagaKanbanCard } from "./VagaKanbanCard";
 import { useDroppable } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";

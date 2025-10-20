@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Candidato, StatusCandidato } from "@/types/candidato";
+import { Candidato, StatusCandidato } from "@/types/gestao-pessoas/candidato";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
 
 interface CandidatosPorStatusChartProps {

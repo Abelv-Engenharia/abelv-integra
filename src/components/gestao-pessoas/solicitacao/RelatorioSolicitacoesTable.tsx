@@ -3,7 +3,7 @@ import { ChevronDown, ChevronRight } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { SolicitacaoServico, StatusSolicitacao } from "@/types/solicitacao";
+import { SolicitacaoServico, StatusSolicitacao } from "@/types/gestao-pessoas/solicitacao";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 

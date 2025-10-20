@@ -3,8 +3,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { StatusVaga, PrioridadeVaga } from "@/types/vaga";
-import { mockAreas, mockSetores, mockGestores } from "@/data/mockVagas";
+import { StatusVaga, PrioridadeVaga } from "@/types/gestao-pessoas/vaga";
+import { mockAreas, mockSetores, mockGestores } from "@/data/gestao-pessoas/mockVagas";
 import { Filter, X } from "lucide-react";
 
 export interface FiltrosState {

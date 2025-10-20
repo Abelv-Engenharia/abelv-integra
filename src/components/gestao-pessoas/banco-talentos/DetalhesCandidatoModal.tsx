@@ -1,6 +1,6 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Candidato } from "@/types/candidato";
+import { Candidato } from "@/types/gestao-pessoas/candidato";
 import { CandidatoStatusBadge } from "./CandidatoStatusBadge";
 import { EtapaProcessoBadge } from "./EtapaProcessoBadge";
 import { OrigemIcon } from "./OrigemIcon";

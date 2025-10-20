@@ -13,7 +13,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { TipoServico, PrioridadeSolicitacao, TipoPassagem, Viajante, StatusSolicitacao } from "@/types/solicitacao";
+import { TipoServico, PrioridadeSolicitacao, TipoPassagem, Viajante, StatusSolicitacao } from "@/types/gestao-pessoas/solicitacao";
 import { TransportSubcategorySelector, TransportSubcategory } from "./TransportSubcategorySelector";
 import { cn } from "@/lib/utils";
 

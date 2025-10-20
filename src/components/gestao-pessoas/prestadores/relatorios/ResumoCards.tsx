@@ -1,5 +1,5 @@
 import { Card } from "@/components/ui/card";
-import { DadosModulo } from "@/types/relatorio-prestadores";
+import { DadosModulo } from "@/types/gestao-pessoas/relatorio-prestadores";
 import { FileText, DollarSign, Users, CheckCircle } from "lucide-react";
 
 interface ResumoCardsProps {

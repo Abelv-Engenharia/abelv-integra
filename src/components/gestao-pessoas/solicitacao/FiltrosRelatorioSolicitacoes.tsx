@@ -10,7 +10,7 @@ import { CalendarIcon, X } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
-import { StatusSolicitacao, TipoServico, SolicitacaoServico } from "@/types/solicitacao";
+import { StatusSolicitacao, TipoServico, SolicitacaoServico } from "@/types/gestao-pessoas/solicitacao";
 
 interface FiltrosRelatorioSolicitacoesProps {
   filtros: any;

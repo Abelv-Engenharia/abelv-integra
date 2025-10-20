@@ -1,5 +1,5 @@
 import { Badge } from "@/components/ui/badge";
-import { NotaFiscal } from "@/types/nf";
+import { NotaFiscal } from "@/types/gestao-pessoas/nf";
 
 interface StatusBadgeNFProps {
   status: NotaFiscal["status"];

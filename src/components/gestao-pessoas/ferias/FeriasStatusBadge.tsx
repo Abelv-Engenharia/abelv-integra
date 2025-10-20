@@ -1,5 +1,5 @@
 import { Badge } from "@/components/ui/badge";
-import { StatusFerias } from "@/types/ferias";
+import { StatusFerias } from "@/types/gestao-pessoas/ferias";
 
 interface FeriasStatusBadgeProps {
   status: StatusFerias;

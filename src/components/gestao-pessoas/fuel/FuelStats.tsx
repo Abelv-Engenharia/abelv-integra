@@ -1,7 +1,7 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { FuelTransaction } from "@/types/fuel";
+import { FuelTransaction } from "@/types/gestao-pessoas/fuel";
 import { DollarSign, Fuel, Car, Users } from "lucide-react";
 
 interface FuelStatsProps {

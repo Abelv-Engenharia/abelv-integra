@@ -1,8 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { DemonstrativoPrestador } from "@/types/dashboard-prestadores";
+import { DemonstrativoPrestador } from "@/types/gestao-pessoas/dashboard-prestadores";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { useMemo } from "react";
-import { DashboardPrestadoresService } from "@/services/DashboardPrestadoresService";
+import { DashboardPrestadoresService } from "@/services/gestao-pessoas/DashboardPrestadoresService";
 
 interface ComparativoMensalChartProps {
   dados: DemonstrativoPrestador[];

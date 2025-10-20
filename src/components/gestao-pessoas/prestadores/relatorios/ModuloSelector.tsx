@@ -1,7 +1,7 @@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card } from "@/components/ui/card";
-import { ModuloPrestador } from "@/types/relatorio-prestadores";
-import { MODULOS_CONFIG } from "@/config/colunas-prestadores";
+import { ModuloPrestador } from "@/types/gestao-pessoas/relatorio-prestadores";
+import { MODULOS_CONFIG } from "@/config/gestao-pessoas/colunas-prestadores";
 import * as Icons from "lucide-react";
 
 interface ModuloSelectorProps {

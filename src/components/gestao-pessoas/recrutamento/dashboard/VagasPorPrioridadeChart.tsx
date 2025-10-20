@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Vaga, PrioridadeVaga } from "@/types/vaga";
+import { Vaga, PrioridadeVaga } from "@/types/gestao-pessoas/vaga";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
 
 interface VagasPorPrioridadeChartProps {

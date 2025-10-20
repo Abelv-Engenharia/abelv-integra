@@ -1,4 +1,4 @@
-import { EtapaProcesso } from "@/types/candidato";
+import { EtapaProcesso } from "@/types/gestao-pessoas/candidato";
 import { Badge } from "@/components/ui/badge";
 
 interface EtapaProcessoBadgeProps {

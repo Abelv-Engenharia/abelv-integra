@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { MapPin, Calendar, User, Eye } from "lucide-react";
-import { Vaga, PrioridadeVaga, StatusVaga } from "@/types/vaga";
+import { Vaga, PrioridadeVaga, StatusVaga } from "@/types/gestao-pessoas/vaga";
 import { StatusBadge } from "./StatusBadge";
 
 interface VagaCardProps {

@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Upload, Download, Eye, Edit, Save, X, Plus, Trash2, Calendar } from "lucide-react";
-import { MapaMOI, MotoristaDiv } from "@/types/fuel";
+import { MapaMOI, MotoristaDiv } from "@/types/gestao-pessoas/fuel";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";

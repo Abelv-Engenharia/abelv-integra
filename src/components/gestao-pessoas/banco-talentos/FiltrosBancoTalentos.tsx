@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { OrigemCandidato, EtapaProcesso, StatusCandidato } from "@/types/candidato";
+import { OrigemCandidato, EtapaProcesso, StatusCandidato } from "@/types/gestao-pessoas/candidato";
 import { Search, X, Filter } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useState } from "react";

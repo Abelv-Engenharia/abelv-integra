@@ -10,7 +10,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card } from "@/components/ui/card";
-import { TipoServico, TipoPassagem } from "@/types/solicitacao";
+import { TipoServico, TipoPassagem } from "@/types/gestao-pessoas/solicitacao";
 import { cn } from "@/lib/utils";
 interface ServiceSpecificFieldsProps {
   tipoServico: TipoServico;

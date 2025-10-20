@@ -2,7 +2,7 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { FileSpreadsheet, FileText } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { FuelTransaction, FuelFilters } from "@/types/fuel";
+import { FuelTransaction, FuelFilters } from "@/types/gestao-pessoas/fuel";
 import * as XLSX from 'xlsx';
 
 interface ExportButtonsProps {

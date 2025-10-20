@@ -1,6 +1,6 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { ControlePassivos } from "@/types/passivos";
+import { ControlePassivos } from "@/types/gestao-pessoas/passivos";
 import { PassivoStatusBadge } from "./PassivoStatusBadge";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";

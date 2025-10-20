@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Candidato, OrigemCandidato } from "@/types/candidato";
+import { Candidato, OrigemCandidato } from "@/types/gestao-pessoas/candidato";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
 
 interface OrigemCandidatosChartProps {

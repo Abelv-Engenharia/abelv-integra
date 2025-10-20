@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Vaga, StatusAprovacao } from "@/types/vaga";
+import { Vaga, StatusAprovacao } from "@/types/gestao-pessoas/vaga";
 import { VagaAprovacaoKanbanCard } from "./VagaAprovacaoKanbanCard";
 
 interface VagaAprovacaoKanbanColumnProps {

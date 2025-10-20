@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { FileSpreadsheet, FileText } from "lucide-react";
-import { DadosModulo, FiltrosRelatorioPrestadores } from "@/types/relatorio-prestadores";
-import { RelatorioPrestadoresExportService } from "@/services/RelatorioPrestadoresExportService";
+import { DadosModulo, FiltrosRelatorioPrestadores } from "@/types/gestao-pessoas/relatorio-prestadores";
+import { RelatorioPrestadoresExportService } from "@/services/gestao-pessoas/RelatorioPrestadoresExportService";
 import { toast } from "sonner";
 
 interface ExportButtonsProps {

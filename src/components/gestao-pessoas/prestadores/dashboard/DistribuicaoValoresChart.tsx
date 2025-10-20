@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { DemonstrativoPrestador } from "@/types/dashboard-prestadores";
+import { DemonstrativoPrestador } from "@/types/gestao-pessoas/dashboard-prestadores";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts";
 import { useMemo } from "react";
 

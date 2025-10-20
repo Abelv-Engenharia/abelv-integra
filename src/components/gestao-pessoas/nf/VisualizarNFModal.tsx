@@ -1,6 +1,6 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { NotaFiscal } from "@/types/nf";
+import { NotaFiscal } from "@/types/gestao-pessoas/nf";
 import { StatusBadgeNF } from "./StatusBadgeNF";
 import { Download } from "lucide-react";
 import { toast } from "sonner";

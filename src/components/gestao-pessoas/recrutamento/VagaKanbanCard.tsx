@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Eye, AlertCircle } from "lucide-react";
-import { Vaga, PrioridadeVaga } from "@/types/vaga";
+import { Vaga, PrioridadeVaga } from "@/types/gestao-pessoas/vaga";
 import { IndicadorPrazoVaga } from "./IndicadorPrazoVaga";
 import { format } from "date-fns";
 import { useSortable } from "@dnd-kit/sortable";

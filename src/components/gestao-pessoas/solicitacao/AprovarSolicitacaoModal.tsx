@@ -18,7 +18,7 @@ import {
   Hospedagem,
   Logistica,
   CorreiosLoggi
-} from "@/types/solicitacao";
+} from "@/types/gestao-pessoas/solicitacao";
 import { format } from "date-fns";
 import { CheckCircle, XCircle } from "lucide-react";
 

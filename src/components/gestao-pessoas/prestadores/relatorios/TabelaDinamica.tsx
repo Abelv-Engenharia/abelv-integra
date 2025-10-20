@@ -11,8 +11,8 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ChevronLeft, ChevronRight, ArrowUpDown } from "lucide-react";
-import { DadosModulo } from "@/types/relatorio-prestadores";
-import { MODULOS_CONFIG } from "@/config/colunas-prestadores";
+import { DadosModulo } from "@/types/gestao-pessoas/relatorio-prestadores";
+import { MODULOS_CONFIG } from "@/config/gestao-pessoas/colunas-prestadores";
 
 interface TabelaDinamicaProps {
   dadosModulo: DadosModulo;

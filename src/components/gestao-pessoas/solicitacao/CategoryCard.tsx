@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { CategoryInfo } from "@/types/solicitacao";
+import { CategoryInfo } from "@/types/gestao-pessoas/solicitacao";
 
 interface CategoryCardProps {
   category: CategoryInfo;

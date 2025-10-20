@@ -1,5 +1,5 @@
 import { Badge } from "@/components/ui/badge";
-import { TipoContrato } from "@/types/contrato";
+import { TipoContrato } from "@/types/gestao-pessoas/contrato";
 
 interface TipoContratoBadgeProps {
   tipo: TipoContrato;

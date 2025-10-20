@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Calendar, CheckCircle, Clock, AlertTriangle, Users, Fuel } from "lucide-react";
-import { DashboardData, MapaMOI, ProcessamentoQuinzenal } from "@/types/fuel";
+import { DashboardData, MapaMOI, ProcessamentoQuinzenal } from "@/types/gestao-pessoas/fuel";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 

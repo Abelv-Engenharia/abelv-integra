@@ -1,6 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { SolicitacaoServico, StatusSolicitacao } from "@/types/solicitacao";
+import { SolicitacaoServico, StatusSolicitacao } from "@/types/gestao-pessoas/solicitacao";
 import { SolicitacaoKanbanCard } from "./SolicitacaoKanbanCard";
 import { LucideIcon } from "lucide-react";
 

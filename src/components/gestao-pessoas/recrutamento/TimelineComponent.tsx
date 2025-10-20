@@ -1,4 +1,4 @@
-import { StatusVaga } from "@/types/vaga";
+import { StatusVaga } from "@/types/gestao-pessoas/vaga";
 import { CheckCircle, Circle, Clock } from "lucide-react";
 
 interface TimelineComponentProps {

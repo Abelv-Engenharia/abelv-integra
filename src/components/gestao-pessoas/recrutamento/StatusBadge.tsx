@@ -1,5 +1,5 @@
 import { Badge } from "@/components/ui/badge";
-import { StatusVaga, StatusAprovacao, PrioridadeVaga, StatusCandidato } from "@/types/vaga";
+import { StatusVaga, StatusAprovacao, PrioridadeVaga, StatusCandidato } from "@/types/gestao-pessoas/vaga";
 
 interface StatusBadgeProps {
   status: StatusVaga | StatusAprovacao | PrioridadeVaga | StatusCandidato;

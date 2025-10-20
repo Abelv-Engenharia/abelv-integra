@@ -1,5 +1,5 @@
 import { Badge } from "@/components/ui/badge";
-import { StatusPassivo } from "@/types/passivos";
+import { StatusPassivo } from "@/types/gestao-pessoas/passivos";
 
 interface PassivoStatusBadgeProps {
   status: StatusPassivo;

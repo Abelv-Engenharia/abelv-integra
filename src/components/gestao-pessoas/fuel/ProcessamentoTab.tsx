@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Upload, AlertTriangle, CheckCircle, Clock, FileSpreadsheet } from "lucide-react";
 import { FuelReportImportComponent } from "./FuelReportImportComponent";
-import { MapaMOI, ProcessamentoQuinzenal, FuelTransaction } from "@/types/fuel";
+import { MapaMOI, ProcessamentoQuinzenal, FuelTransaction } from "@/types/gestao-pessoas/fuel";
 import { useToast } from "@/hooks/use-toast";
 
 interface ProcessamentoTabProps {

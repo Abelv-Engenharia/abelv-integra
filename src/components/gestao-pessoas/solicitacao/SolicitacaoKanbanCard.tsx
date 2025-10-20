@@ -2,7 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { SolicitacaoServico, PrioridadeSolicitacao, TipoServico, StatusSolicitacao } from "@/types/solicitacao";
+import { SolicitacaoServico, PrioridadeSolicitacao, TipoServico, StatusSolicitacao } from "@/types/gestao-pessoas/solicitacao";
 import { 
   Car, 
   Plane, 

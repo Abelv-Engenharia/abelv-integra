@@ -11,8 +11,8 @@ import { CalendarIcon, InfoIcon } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { ControlePassivos, StatusPassivo } from "@/types/passivos";
-import { calcularDecimoTerceiro, calcularAvisoPreavio, calcularTotalPassivo } from "@/utils/passivosCalculos";
+import { ControlePassivos, StatusPassivo } from "@/types/gestao-pessoas/passivos";
+import { calcularDecimoTerceiro, calcularAvisoPreavio, calcularTotalPassivo } from "@/utils/gestao-pessoas/passivosCalculos";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface NovoPassivoModalProps {

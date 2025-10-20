@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Upload, FileText, AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { FuelTransaction, FuelImportResult } from "@/types/fuel";
+import { FuelTransaction, FuelImportResult } from "@/types/gestao-pessoas/fuel";
 import * as XLSX from 'xlsx';
 
 interface FuelReportImportComponentProps {

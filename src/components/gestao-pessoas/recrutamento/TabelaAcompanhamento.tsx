@@ -9,7 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Eye, Edit } from "lucide-react";
-import { Vaga, EtapaProcesso, PrioridadeVaga } from "@/types/vaga";
+import { Vaga, EtapaProcesso, PrioridadeVaga } from "@/types/gestao-pessoas/vaga";
 import { IndicadorPrazoVaga } from "./IndicadorPrazoVaga";
 import { format } from "date-fns";
 

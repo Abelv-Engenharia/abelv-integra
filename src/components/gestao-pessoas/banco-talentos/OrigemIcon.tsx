@@ -1,4 +1,4 @@
-import { OrigemCandidato } from "@/types/candidato";
+import { OrigemCandidato } from "@/types/gestao-pessoas/candidato";
 import { Users, Briefcase, Building, MessageCircle, HelpCircle, Linkedin } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 

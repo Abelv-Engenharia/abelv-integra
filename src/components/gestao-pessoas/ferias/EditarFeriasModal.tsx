@@ -16,7 +16,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
-import { ControleFérias } from "@/types/ferias";
+import { ControleFérias } from "@/types/gestao-pessoas/ferias";
 
 const editarFeriasSchema = z.object({
   nomePrestador: z.string().min(1, "Nome do prestador é obrigatório"),

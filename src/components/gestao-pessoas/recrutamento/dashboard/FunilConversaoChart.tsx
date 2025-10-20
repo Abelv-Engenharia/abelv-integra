@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Vaga, EtapaProcesso } from "@/types/vaga";
+import { Vaga, EtapaProcesso } from "@/types/gestao-pessoas/vaga";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell } from "recharts";
 
 interface FunilConversaoChartProps {

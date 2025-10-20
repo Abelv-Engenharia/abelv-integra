@@ -1,5 +1,5 @@
-import { KPIData } from "@/types/dashboard-prestadores";
-import { KPICard } from "@/components/veiculos/dashboard/KPICard";
+import { KPIData } from "@/types/gestao-pessoas/dashboard-prestadores";
+import { KPICard } from "@/components/gestao-pessoas/veiculos/dashboard/KPICard";
 import { FileText, Home, Heart, Receipt, AlertTriangle, Activity } from "lucide-react";
 
 interface KPICardsPrestadoresProps {

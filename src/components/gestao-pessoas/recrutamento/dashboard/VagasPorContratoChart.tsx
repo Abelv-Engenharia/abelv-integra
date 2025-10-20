@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Vaga, TipoContrato } from "@/types/vaga";
+import { Vaga, TipoContrato } from "@/types/gestao-pessoas/vaga";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
 
 interface VagasPorContratoChartProps {

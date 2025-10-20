@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { ContratoEmitido } from "@/types/contrato";
+import { ContratoEmitido } from "@/types/gestao-pessoas/contrato";
 import { Button } from "@/components/ui/button";
 import { StatusContratoBadge } from "./StatusContratoBadge";
 import { TipoContratoBadge } from "./TipoContratoBadge";

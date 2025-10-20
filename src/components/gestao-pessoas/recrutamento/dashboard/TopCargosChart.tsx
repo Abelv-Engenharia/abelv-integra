@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Vaga } from "@/types/vaga";
+import { Vaga } from "@/types/gestao-pessoas/vaga";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
 interface TopCargosChartProps {

@@ -1,4 +1,4 @@
-import { Candidato } from "@/types/candidato";
+import { Candidato } from "@/types/gestao-pessoas/candidato";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CandidatoStatusBadge } from "./CandidatoStatusBadge";

@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { FeriasStatusBadge } from "./FeriasStatusBadge";
-import { ControleFérias, StatusFerias } from "@/types/ferias";
+import { ControleFérias, StatusFerias } from "@/types/gestao-pessoas/ferias";
 
 interface VisualizarFeriasModalProps {
   aberto: boolean;

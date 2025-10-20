@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Vaga, StatusVaga, EtapaProcesso } from "@/types/vaga";
+import { Vaga, StatusVaga, EtapaProcesso } from "@/types/gestao-pessoas/vaga";
 import { Badge } from "@/components/ui/badge";
 import { differenceInDays } from "date-fns";
 

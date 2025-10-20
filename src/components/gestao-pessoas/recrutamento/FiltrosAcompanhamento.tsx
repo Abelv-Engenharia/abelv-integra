@@ -3,7 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search, X } from "lucide-react";
-import { EtapaProcesso } from "@/types/vaga";
+import { EtapaProcesso } from "@/types/gestao-pessoas/vaga";
 
 interface FiltrosAcompanhamentoProps {
   filtros: {

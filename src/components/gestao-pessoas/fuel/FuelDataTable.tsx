@@ -10,7 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
-import { FuelTransaction } from "@/types/fuel";
+import { FuelTransaction } from "@/types/gestao-pessoas/fuel";
 
 interface FuelDataTableProps {
   data: FuelTransaction[];

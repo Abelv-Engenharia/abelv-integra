@@ -1,4 +1,4 @@
-import { StatusCandidato } from "@/types/candidato";
+import { StatusCandidato } from "@/types/gestao-pessoas/candidato";
 import { Badge } from "@/components/ui/badge";
 
 interface CandidatoStatusBadgeProps {

@@ -1,8 +1,8 @@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ModuloPrestador } from "@/types/relatorio-prestadores";
-import { MODULOS_CONFIG } from "@/config/colunas-prestadores";
+import { ModuloPrestador } from "@/types/gestao-pessoas/relatorio-prestadores";
+import { MODULOS_CONFIG } from "@/config/gestao-pessoas/colunas-prestadores";
 import { Badge } from "@/components/ui/badge";
 
 interface ColunasSelectorPorModuloProps {

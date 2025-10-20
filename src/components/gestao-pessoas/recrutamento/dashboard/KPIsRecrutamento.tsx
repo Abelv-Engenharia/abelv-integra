@@ -1,6 +1,6 @@
-import { Vaga, StatusVaga } from "@/types/vaga";
-import { Candidato } from "@/types/candidato";
-import { KPICard } from "@/components/veiculos/dashboard/KPICard";
+import { Vaga, StatusVaga } from "@/types/gestao-pessoas/vaga";
+import { Candidato } from "@/types/gestao-pessoas/candidato";
+import { KPICard } from "@/components/gestao-pessoas/veiculos/dashboard/KPICard";
 import { Briefcase, Clock, AlertTriangle, UserCheck, Users, Calendar } from "lucide-react";
 
 interface KPIsRecrutamentoProps {

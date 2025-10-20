@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useEffect, useState } from "react";
-import { Candidato, OrigemCandidato, EtapaProcesso, StatusCandidato } from "@/types/candidato";
+import { Candidato, OrigemCandidato, EtapaProcesso, StatusCandidato } from "@/types/gestao-pessoas/candidato";
 import { toast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 

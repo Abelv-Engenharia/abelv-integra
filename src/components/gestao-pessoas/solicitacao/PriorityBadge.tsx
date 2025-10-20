@@ -1,5 +1,5 @@
 import { Badge } from "@/components/ui/badge";
-import { PrioridadeSolicitacao, StatusSolicitacao } from "@/types/solicitacao";
+import { PrioridadeSolicitacao, StatusSolicitacao } from "@/types/gestao-pessoas/solicitacao";
 
 interface PriorityBadgeProps {
   priority: PrioridadeSolicitacao;
