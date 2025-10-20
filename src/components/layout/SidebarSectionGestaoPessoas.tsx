@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ChevronDown, ChevronRight, ClipboardList, FileText, CheckSquare, CheckCircle, BarChart3, Plane, FileUp, Database, FilePlus, Car, Briefcase, UserPlus, User, CreditCard, Receipt, Ticket } from "lucide-react";
+import { ChevronDown, ChevronRight, ClipboardList, FileText, CheckSquare, CheckCircle, BarChart3, Plane, FileUp, Database, FilePlus, Car, Briefcase, UserPlus, User, CreditCard, Receipt, Ticket, Users } from "lucide-react";
 import {
   SidebarMenu,
   SidebarMenuButton,
@@ -410,6 +410,15 @@ export default function SidebarSectionGestaoPessoas({
                           <Link to="/gestao-pessoas/aprovacao-vaga" onClick={onLinkClick}>
                             <CheckCircle className="h-4 w-4" />
                             <span>Aprovação de Vaga</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                          <Link to="/gestao-pessoas/banco-talentos" onClick={onLinkClick}>
+                            <Users className="h-4 w-4" />
+                            <span>Banco de Talentos</span>
                           </Link>
                         </SidebarMenuButton>
                       </SidebarMenuItem>

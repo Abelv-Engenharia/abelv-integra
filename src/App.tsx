@@ -296,6 +296,9 @@ import RelatoriosVeiculos from "./pages/gestao-pessoas/RelatoriosVeiculos";
 import CalculoRotas from "./pages/gestao-pessoas/CalculoRotas";
 import ControleAbastecimento from "./pages/gestao-pessoas/ControleAbastecimento";
 
+// Gestão de Pessoas - Recrutamento & Seleção
+import BancoTalentos from "./pages/gestao-pessoas/BancoTalentos";
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
@@ -591,6 +594,7 @@ function App() {
                 <Route path="gestao-pessoas/gestao-vagas" element={<GestaoVagas />} />
                 <Route path="gestao-pessoas/rh-detalhes-vaga/:id" element={<RhDetalhesVaga />} />
                 <Route path="gestao-pessoas/aprovacao-vaga" element={<AprovacaoVaga />} />
+                <Route path="gestao-pessoas/banco-talentos" element={<BancoTalentos />} />
                 
                 {/* Gestão de Pessoas - Prestadores de Serviço */}
                 <Route path="gestao-pessoas/dashboard-prestadores" element={<DashboardPrestadores />} />
