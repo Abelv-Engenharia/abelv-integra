@@ -1,7 +1,7 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
-import { SolicitacaoServico, StatusSolicitacao } from '@/types/solicitacao';
+import { SolicitacaoServico, StatusSolicitacao } from '@/types/gestao-pessoas/solicitacao';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 

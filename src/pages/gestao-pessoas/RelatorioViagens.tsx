@@ -7,7 +7,7 @@ import { ColumnSelector, DEFAULT_COLUMNS } from "@/components/gestao-pessoas/tra
 import { ReportFilters as ReportFiltersComponent } from "@/components/gestao-pessoas/travel/ReportFilters";
 import { ReportSummary } from "@/components/gestao-pessoas/travel/ReportSummary";
 import { DynamicReportTable } from "@/components/gestao-pessoas/travel/DynamicReportTable";
-import { exportarRelatorioExcel, exportarRelatorioPDF } from "@/services/DynamicReportExportService";
+import { exportarRelatorioExcel, exportarRelatorioPDF } from "@/services/gestao-pessoas/DynamicReportExportService";
 import { toast } from "sonner";
 
 export default function RelatorioViagens() {

@@ -1,4 +1,4 @@
-import { SolicitacaoServico, StatusSolicitacao } from "@/types/solicitacao";
+import { SolicitacaoServico, StatusSolicitacao } from "@/types/gestao-pessoas/solicitacao";
 
 /**
  * Calcula o número de dias úteis entre duas datas

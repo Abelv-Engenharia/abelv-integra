@@ -1,14 +1,14 @@
 import { useState } from "react";
-import { Layout } from "@/components/Layout";
+import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
-import { ModuloSelector } from "@/components/prestadores/relatorios/ModuloSelector";
-import { ColunasSelectorPorModulo } from "@/components/prestadores/relatorios/ColunasSelectorPorModulo";
-import { FiltrosRelatorioPrestadores as FiltrosComponent } from "@/components/prestadores/relatorios/FiltrosRelatorioPrestadores";
-import { TabelaDinamica } from "@/components/prestadores/relatorios/TabelaDinamica";
-import { ResumoCards } from "@/components/prestadores/relatorios/ResumoCards";
-import { ExportButtons } from "@/components/prestadores/relatorios/ExportButtons";
-import { ModuloPrestador, FiltrosRelatorioPrestadores, DadosModulo } from "@/types/relatorio-prestadores";
-import { RelatorioPrestadoresDataService } from "@/services/RelatorioPrestadoresDataService";
+import { ModuloSelector } from "@/components/gestao-pessoas/prestadores/relatorios/ModuloSelector";
+import { ColunasSelectorPorModulo } from "@/components/gestao-pessoas/prestadores/relatorios/ColunasSelectorPorModulo";
+import { FiltrosRelatorioPrestadores as FiltrosComponent } from "@/components/gestao-pessoas/prestadores/relatorios/FiltrosRelatorioPrestadores";
+import { TabelaDinamica } from "@/components/gestao-pessoas/prestadores/relatorios/TabelaDinamica";
+import { ResumoCards } from "@/components/gestao-pessoas/prestadores/relatorios/ResumoCards";
+import { ExportButtons } from "@/components/gestao-pessoas/prestadores/relatorios/ExportButtons";
+import { ModuloPrestador, FiltrosRelatorioPrestadores, DadosModulo } from "@/types/gestao-pessoas/relatorio-prestadores";
+import { RelatorioPrestadoresDataService } from "@/services/gestao-pessoas/RelatorioPrestadoresDataService";
 import { BarChart3, FileBarChart } from "lucide-react";
 import { toast } from "sonner";
 

@@ -3,11 +3,9 @@ import { FileText, Download, Printer, RefreshCw } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
-import { useSolicitacoes } from "@/context/SolicitacoesContext";
-import { FiltrosRelatorioSolicitacoes } from "@/components/gestao-pessoas/solicitacao/FiltrosRelatorioSolicitacoes";
-import { RelatorioSolicitacoesTable } from "@/components/gestao-pessoas/solicitacao/RelatorioSolicitacoesTable";
-import { calcularEstatisticas, exportarRelatorioPDF, exportarRelatorioExcel } from "@/services/RelatorioSolicitacoesService";
-import { StatusSolicitacao } from "@/types/solicitacao";
+import { useSolicitacoes } from "@/contexts/gestao-pessoas/SolicitacoesContext";
+import { exportarRelatorioPDF, exportarRelatorioExcel, calcularEstatisticas } from "@/services/gestao-pessoas/RelatorioSolicitacoesService";
+import { StatusSolicitacao, SolicitacaoServico } from "@/types/gestao-pessoas/solicitacao";
 
 interface FiltrosSolicitacao {
   periodo: 'hoje' | 'semana' | 'mes' | 'trimestre' | 'ano' | 'personalizado';

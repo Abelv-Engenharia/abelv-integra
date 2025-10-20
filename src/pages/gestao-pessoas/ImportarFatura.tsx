@@ -7,7 +7,7 @@ import { Progress } from "@/components/ui/progress";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import * as XLSX from "xlsx";
-import { FaturaIntegra } from "@/types/travel";
+import { FaturaIntegra } from "@/types/gestao-pessoas/travel";
 
 const ImportarFatura = () => {
   const navigate = useNavigate();

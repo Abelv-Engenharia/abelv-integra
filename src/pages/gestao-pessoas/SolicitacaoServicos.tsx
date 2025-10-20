@@ -3,17 +3,17 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { CategoryCard } from "@/components/solicitacao/CategoryCard";
-import { SimpleDynamicForm } from "@/components/solicitacao/SimpleDynamicForm";
-import { MultipleServiceForm } from "@/components/solicitacao/MultipleServiceForm";
-import { TipoServico, SolicitacaoServico, StatusSolicitacao } from "@/types/solicitacao";
-import { categoriesInfo, responsavelAtendimento } from "@/data/mockSolicitacoes";
-import { Search, Plus, Layers, Clock, CheckCircle2, AlertCircle, CheckSquare, XCircle } from "lucide-react";
+import { CategoryCard } from "@/components/gestao-pessoas/solicitacao/CategoryCard";
+import { SimpleDynamicForm } from "@/components/gestao-pessoas/solicitacao/SimpleDynamicForm";
+import { MultipleServiceForm } from "@/components/gestao-pessoas/solicitacao/MultipleServiceForm";
+import { TipoServico, SolicitacaoServico, StatusSolicitacao, FormField } from "@/types/gestao-pessoas/solicitacao";
+import { serviceTypes, serviceConfigurations } from "@/data/gestao-pessoas/mockSolicitacoes";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useSolicitacoes } from "@/contexts/gestao-pessoas/SolicitacoesContext";
+import { SolicitacaoKanbanColumn } from "@/components/gestao-pessoas/solicitacao/SolicitacaoKanbanColumn";
+import { VisualizarSolicitacaoModal } from "@/components/gestao-pessoas/solicitacao/VisualizarSolicitacaoModal";
+import { Search, Clock, CheckCircle2, AlertCircle, XCircle, CheckSquare, Layers } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useSolicitacoes } from "@/context/SolicitacoesContext";
-import { useUsuarioAtivo } from "@/hooks/useUsuarioAtivo";
-import { SolicitacaoKanbanColumn } from "@/components/solicitacao/SolicitacaoKanbanColumn";
-import { VisualizarSolicitacaoModal } from "@/components/solicitacao/VisualizarSolicitacaoModal";
 export default function SolicitacaoServicos() {
   const [selectedCategory, setSelectedCategory] = useState<TipoServico | null>(null);
   const [showForm, setShowForm] = useState(false);
@@ -21,20 +21,14 @@ export default function SolicitacaoServicos() {
   const [searchTerm, setSearchTerm] = useState("");
   const [modalAberto, setModalAberto] = useState(false);
   const [solicitacaoSelecionada, setSolicitacaoSelecionada] = useState<SolicitacaoServico | null>(null);
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
   const {
     solicitacoes,
     addSolicitacao,
-    verificarEAtualizarStatusAutomatico
   } = useSolicitacoes();
-  const usuarioAtivo = useUsuarioAtivo();
-
-  // Verificar status automaticamente ao carregar a página
-  useEffect(() => {
-    verificarEAtualizarStatusAutomatico();
-  }, []);
+  const usuarioAtivo = { nome: "Usuário Ativo", id: "1" };
+  const responsavelAtendimento = "Equipe de Atendimento";
+  const categoriesInfo = serviceTypes;
 
   // Verificar status periodicamente (a cada 5 minutos)
   useEffect(() => {
@@ -212,5 +206,6 @@ export default function SolicitacaoServicos() {
       <div className="fixed bottom-6 right-6">
         
       </div>
-    </div>;
+    </div>
+  );
 }

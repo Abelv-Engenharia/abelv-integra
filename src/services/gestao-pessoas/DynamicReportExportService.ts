@@ -1,8 +1,8 @@
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import { FaturaIntegra, ReportFilters } from '@/types/travel';
-import { AVAILABLE_COLUMNS } from '@/components/travel/ColumnSelector';
+import { FaturaIntegra, ReportFilters } from '@/types/gestao-pessoas/travel';
+import { AVAILABLE_COLUMNS } from '@/components/gestao-pessoas/travel/ColumnSelector';
 
 export function exportarRelatorioExcel(
   dados: FaturaIntegra[],

@@ -17,10 +17,10 @@ import {
   FileText,
   Clock
 } from "lucide-react";
-import { StatusBadge } from "@/components/recrutamento/StatusBadge";
-import { TimelineComponent } from "@/components/recrutamento/TimelineComponent";
-import { mockVagas } from "@/data/mockVagas";
-import { MotivoAbertura, TipoContrato } from "@/types/vaga";
+import { StatusBadge } from "@/components/gestao-pessoas/recrutamento/StatusBadge";
+import { TimelineComponent } from "@/components/gestao-pessoas/recrutamento/TimelineComponent";
+import { mockVagas } from "@/data/gestao-pessoas/mockVagas";
+import { MotivoAbertura, TipoContrato } from "@/types/gestao-pessoas/vaga";
 import { toast } from "sonner";
 
 export default function RhDetalhesVaga() {

@@ -1,4 +1,4 @@
-import { DemonstrativoPrestador, KPIData, FiltrosDashboard, DadosGraficoMensal, TopPrestador } from '@/types/dashboard-prestadores';
+import { DemonstrativoPrestador, KPIData, FiltrosDashboard, DadosGraficoMensal, TopPrestador } from '@/types/gestao-pessoas/dashboard-prestadores';
 
 export class DashboardPrestadoresService {
   

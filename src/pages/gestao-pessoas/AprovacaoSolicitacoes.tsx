@@ -6,7 +6,6 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Search, CheckCircle, XCircle, Clock } from "lucide-react";
 import { useSolicitacoes } from "@/contexts/gestao-pessoas/SolicitacoesContext";
-import { useUsuarioAtivo } from "@/hooks/useUsuarioAtivo";
 import { AprovarSolicitacaoModal } from "@/components/gestao-pessoas/solicitacao/AprovarSolicitacaoModal";
 import { format } from "date-fns";
 import { 
@@ -18,7 +17,7 @@ import {
 
 export default function AprovacaoSolicitacoes() {
   const { solicitacoes, updateSolicitacao } = useSolicitacoes();
-  const usuarioAtivo = useUsuarioAtivo();
+  const usuarioAtivo = { nome: "Usuário Ativo", id: "1" };
   
   const [pesquisa, setPesquisa] = useState("");
   const [filtroPrioridade, setFiltroPrioridade] = useState<string>("todas");

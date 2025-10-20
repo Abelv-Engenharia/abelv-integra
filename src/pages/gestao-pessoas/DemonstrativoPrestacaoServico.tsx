@@ -6,10 +6,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "@/hooks/use-toast";
 import * as XLSX from 'xlsx';
-import { EnviarDemonstrativoModal } from "@/components/demonstrativo/EnviarDemonstrativoModal";
-import { downloadDemonstrativoPDF } from "@/components/demonstrativo/GenerateDemonstrativoPDF";
-import { NovoDemonstrativoModal } from "@/components/demonstrativo/NovoDemonstrativoModal";
-import { EditarDemonstrativoModal } from "@/components/demonstrativo/EditarDemonstrativoModal";
+import { EnviarDemonstrativoModal } from "@/components/gestao-pessoas/demonstrativo/EnviarDemonstrativoModal";
+import { downloadDemonstrativoPDF } from "@/components/gestao-pessoas/demonstrativo/GenerateDemonstrativoPDF";
+import { NovoDemonstrativoModal } from "@/components/gestao-pessoas/demonstrativo/NovoDemonstrativoModal";
+import { EditarDemonstrativoModal } from "@/components/gestao-pessoas/demonstrativo/EditarDemonstrativoModal";
 import { format } from "date-fns";
 
 // Dados mock para a tabela de demonstrativo

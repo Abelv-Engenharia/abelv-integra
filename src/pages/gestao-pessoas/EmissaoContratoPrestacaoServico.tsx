@@ -17,7 +17,7 @@ import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
-import { Layout } from "@/components/Layout";
+import Layout from "@/components/layout/Layout";
 import { 
   Breadcrumb, 
   BreadcrumbItem, 

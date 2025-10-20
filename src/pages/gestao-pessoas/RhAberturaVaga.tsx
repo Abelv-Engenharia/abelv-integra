@@ -11,8 +11,8 @@ import { Separator } from "@/components/ui/separator";
 import { ArrowLeft, Send, FileText, User, Building, Clock, UserCheck } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { MotivoAbertura, TipoContrato, StatusAprovacao } from "@/types/vaga";
-import { mockCargos, mockAreas, mockSetores, mockAprovadores } from "@/data/mockVagas";
+import { MotivoAbertura, TipoContrato, StatusAprovacao } from "@/types/gestao-pessoas/vaga";
+import { mockCargos, mockAreas, mockSetores, mockAprovadores } from "@/data/gestao-pessoas/mockVagas";
 interface FormData {
   // Bloco 1 - Identificação
   cargo: string;

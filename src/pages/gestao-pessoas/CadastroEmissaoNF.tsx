@@ -184,7 +184,8 @@ const CadastroEmissaoNF = () => {
     XLSX.writeFile(wb, `notas-fiscais-${format(new Date(), "yyyy-MM-dd")}.xlsx`);
     toast.success("Relatório exportado com sucesso!");
   };
-  return <Layout>
+  return (
+    <Layout>
       <div className="space-y-6">
         {/* Breadcrumb */}
         <div className="text-sm text-muted-foreground">
@@ -411,6 +412,7 @@ const CadastroEmissaoNF = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </Layout>;
+    </Layout>
+  );
 };
 export default CadastroEmissaoNF;

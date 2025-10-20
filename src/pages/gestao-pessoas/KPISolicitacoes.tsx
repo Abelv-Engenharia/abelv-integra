@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useSolicitacoes } from "@/context/SolicitacoesContext";
-import { StatusSolicitacao } from "@/types/solicitacao";
-import { FaturaIntegra } from "@/types/travel";
+import { useSolicitacoes } from "@/contexts/gestao-pessoas/SolicitacoesContext";
+import { StatusSolicitacao } from "@/types/gestao-pessoas/solicitacao";
+import { FaturaIntegra } from "@/types/gestao-pessoas/travel";
 import { ClipboardList, CheckCircle2, Clock, AlertCircle, Plane, BarChart3 } from "lucide-react";
 import { useMemo, useState, useEffect } from "react";
 import { Cell, Pie, PieChart, ResponsiveContainer, Legend, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid } from "recharts";

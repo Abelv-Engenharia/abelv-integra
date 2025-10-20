@@ -1,8 +1,8 @@
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import { DadosModulo, FiltrosRelatorioPrestadores, ColunaRelatorio } from '@/types/relatorio-prestadores';
-import { MODULOS_CONFIG } from '@/config/colunas-prestadores';
+import { DadosModulo, FiltrosRelatorioPrestadores, ColunaRelatorio } from '@/types/gestao-pessoas/relatorio-prestadores';
+import { MODULOS_CONFIG } from '@/config/gestao-pessoas/colunas-prestadores';
 
 export class RelatorioPrestadoresExportService {
   

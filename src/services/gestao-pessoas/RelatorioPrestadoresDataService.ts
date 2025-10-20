@@ -1,7 +1,7 @@
-import { ModuloPrestador, DadosModulo, FiltrosRelatorioPrestadores } from '@/types/relatorio-prestadores';
-import { MODULOS_CONFIG } from '@/config/colunas-prestadores';
-import { mockNotasFiscais } from '@/data/mockNotasFiscais';
-import { mockContratos } from '@/data/mockContratos';
+import { ModuloPrestador, DadosModulo, FiltrosRelatorioPrestadores } from '@/types/gestao-pessoas/relatorio-prestadores';
+import { MODULOS_CONFIG } from '@/config/gestao-pessoas/colunas-prestadores';
+import { mockNotasFiscais } from '@/data/gestao-pessoas/mockNotasFiscais';
+import { mockContratos } from '@/data/gestao-pessoas/mockContratos';
 
 export class RelatorioPrestadoresDataService {
   

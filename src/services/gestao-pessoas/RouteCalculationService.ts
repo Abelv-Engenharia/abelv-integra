@@ -1,4 +1,4 @@
-import type { EnderecoRota, ConfiguracaoVeiculoRota, ResultadoRotaCalculo, CalculoEstimativaCartao } from "@/types/route";
+import type { EnderecoRota, ConfiguracaoVeiculoRota, ResultadoRotaCalculo, CalculoEstimativaCartao } from "@/types/gestao-pessoas/route";
 
 interface RouteResponse {
   distanciaKm: number;
