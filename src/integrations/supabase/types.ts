@@ -5151,6 +5151,266 @@ export type Database = {
         }
         Relationships: []
       }
+      solicitacoes_dados_especificos: {
+        Row: {
+          created_at: string
+          dados: Json
+          id: string
+          solicitacao_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          dados?: Json
+          id?: string
+          solicitacao_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          dados?: Json
+          id?: string
+          solicitacao_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "solicitacoes_dados_especificos_solicitacao_id_fkey"
+            columns: ["solicitacao_id"]
+            isOneToOne: true
+            referencedRelation: "solicitacoes_servicos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "solicitacoes_dados_especificos_solicitacao_id_fkey"
+            columns: ["solicitacao_id"]
+            isOneToOne: true
+            referencedRelation: "v_solicitacoes_completas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      solicitacoes_historico: {
+        Row: {
+          automatico: boolean | null
+          data_mudanca: string
+          detalhes: Json | null
+          id: string
+          motivo: string | null
+          solicitacao_id: string
+          status_anterior:
+            | Database["public"]["Enums"]["status_solicitacao_enum"]
+            | null
+          status_novo: Database["public"]["Enums"]["status_solicitacao_enum"]
+          usuario_id: string | null
+          usuario_nome: string | null
+        }
+        Insert: {
+          automatico?: boolean | null
+          data_mudanca?: string
+          detalhes?: Json | null
+          id?: string
+          motivo?: string | null
+          solicitacao_id: string
+          status_anterior?:
+            | Database["public"]["Enums"]["status_solicitacao_enum"]
+            | null
+          status_novo: Database["public"]["Enums"]["status_solicitacao_enum"]
+          usuario_id?: string | null
+          usuario_nome?: string | null
+        }
+        Update: {
+          automatico?: boolean | null
+          data_mudanca?: string
+          detalhes?: Json | null
+          id?: string
+          motivo?: string | null
+          solicitacao_id?: string
+          status_anterior?:
+            | Database["public"]["Enums"]["status_solicitacao_enum"]
+            | null
+          status_novo?: Database["public"]["Enums"]["status_solicitacao_enum"]
+          usuario_id?: string | null
+          usuario_nome?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "solicitacoes_historico_solicitacao_id_fkey"
+            columns: ["solicitacao_id"]
+            isOneToOne: false
+            referencedRelation: "solicitacoes_servicos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "solicitacoes_historico_solicitacao_id_fkey"
+            columns: ["solicitacao_id"]
+            isOneToOne: false
+            referencedRelation: "v_solicitacoes_completas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      solicitacoes_servicos: {
+        Row: {
+          aprovado_por_id: string | null
+          cca_id: number | null
+          comprovante_conclusao: string | null
+          concluido_por_id: string | null
+          created_at: string
+          created_by: string | null
+          data_aprovacao: string | null
+          data_conclusao: string | null
+          data_mudanca_automatica: string | null
+          data_solicitacao: string
+          estimativa_valor: number | null
+          foi_movido_automaticamente: boolean | null
+          id: string
+          imagem_anexo: string | null
+          justificativa_aprovacao: string | null
+          justificativa_reprovacao: string | null
+          motivo_mudanca_automatica: string | null
+          observacoes: string | null
+          observacoes_conclusao: string | null
+          observacoes_gestao: string | null
+          prioridade: Database["public"]["Enums"]["prioridade_solicitacao_enum"]
+          responsavel_aprovacao_id: string | null
+          solicitante_id: string
+          solicitante_nome: string
+          status: Database["public"]["Enums"]["status_solicitacao_enum"]
+          status_anterior:
+            | Database["public"]["Enums"]["status_solicitacao_enum"]
+            | null
+          tipo_servico: Database["public"]["Enums"]["tipo_servico_enum"]
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          aprovado_por_id?: string | null
+          cca_id?: number | null
+          comprovante_conclusao?: string | null
+          concluido_por_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          data_aprovacao?: string | null
+          data_conclusao?: string | null
+          data_mudanca_automatica?: string | null
+          data_solicitacao?: string
+          estimativa_valor?: number | null
+          foi_movido_automaticamente?: boolean | null
+          id?: string
+          imagem_anexo?: string | null
+          justificativa_aprovacao?: string | null
+          justificativa_reprovacao?: string | null
+          motivo_mudanca_automatica?: string | null
+          observacoes?: string | null
+          observacoes_conclusao?: string | null
+          observacoes_gestao?: string | null
+          prioridade?: Database["public"]["Enums"]["prioridade_solicitacao_enum"]
+          responsavel_aprovacao_id?: string | null
+          solicitante_id: string
+          solicitante_nome: string
+          status?: Database["public"]["Enums"]["status_solicitacao_enum"]
+          status_anterior?:
+            | Database["public"]["Enums"]["status_solicitacao_enum"]
+            | null
+          tipo_servico: Database["public"]["Enums"]["tipo_servico_enum"]
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          aprovado_por_id?: string | null
+          cca_id?: number | null
+          comprovante_conclusao?: string | null
+          concluido_por_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          data_aprovacao?: string | null
+          data_conclusao?: string | null
+          data_mudanca_automatica?: string | null
+          data_solicitacao?: string
+          estimativa_valor?: number | null
+          foi_movido_automaticamente?: boolean | null
+          id?: string
+          imagem_anexo?: string | null
+          justificativa_aprovacao?: string | null
+          justificativa_reprovacao?: string | null
+          motivo_mudanca_automatica?: string | null
+          observacoes?: string | null
+          observacoes_conclusao?: string | null
+          observacoes_gestao?: string | null
+          prioridade?: Database["public"]["Enums"]["prioridade_solicitacao_enum"]
+          responsavel_aprovacao_id?: string | null
+          solicitante_id?: string
+          solicitante_nome?: string
+          status?: Database["public"]["Enums"]["status_solicitacao_enum"]
+          status_anterior?:
+            | Database["public"]["Enums"]["status_solicitacao_enum"]
+            | null
+          tipo_servico?: Database["public"]["Enums"]["tipo_servico_enum"]
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "solicitacoes_servicos_cca_id_fkey"
+            columns: ["cca_id"]
+            isOneToOne: false
+            referencedRelation: "ccas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      solicitacoes_viajantes: {
+        Row: {
+          cpf: string
+          created_at: string
+          data_nascimento: string
+          email: string
+          id: string
+          nome: string
+          rg: string
+          solicitacao_id: string
+          telefone: string
+        }
+        Insert: {
+          cpf: string
+          created_at?: string
+          data_nascimento: string
+          email: string
+          id?: string
+          nome: string
+          rg: string
+          solicitacao_id: string
+          telefone: string
+        }
+        Update: {
+          cpf?: string
+          created_at?: string
+          data_nascimento?: string
+          email?: string
+          id?: string
+          nome?: string
+          rg?: string
+          solicitacao_id?: string
+          telefone?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "solicitacoes_viajantes_solicitacao_id_fkey"
+            columns: ["solicitacao_id"]
+            isOneToOne: false
+            referencedRelation: "solicitacoes_servicos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "solicitacoes_viajantes_solicitacao_id_fkey"
+            columns: ["solicitacao_id"]
+            isOneToOne: false
+            referencedRelation: "v_solicitacoes_completas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       subcentros_custos: {
         Row: {
           cca_id: number
@@ -6138,6 +6398,58 @@ export type Database = {
       }
     }
     Views: {
+      v_solicitacoes_completas: {
+        Row: {
+          aprovado_por_id: string | null
+          cca_codigo: string | null
+          cca_id: number | null
+          cca_nome: string | null
+          comprovante_conclusao: string | null
+          concluido_por_id: string | null
+          created_at: string | null
+          created_by: string | null
+          dados_especificos: Json | null
+          data_aprovacao: string | null
+          data_conclusao: string | null
+          data_mudanca_automatica: string | null
+          data_solicitacao: string | null
+          estimativa_valor: number | null
+          foi_movido_automaticamente: boolean | null
+          id: string | null
+          imagem_anexo: string | null
+          justificativa_aprovacao: string | null
+          justificativa_reprovacao: string | null
+          motivo_mudanca_automatica: string | null
+          observacoes: string | null
+          observacoes_conclusao: string | null
+          observacoes_gestao: string | null
+          prioridade:
+            | Database["public"]["Enums"]["prioridade_solicitacao_enum"]
+            | null
+          responsavel_aprovacao_id: string | null
+          solicitante_id: string | null
+          solicitante_nome: string | null
+          solicitante_nome_profile: string | null
+          status: Database["public"]["Enums"]["status_solicitacao_enum"] | null
+          status_anterior:
+            | Database["public"]["Enums"]["status_solicitacao_enum"]
+            | null
+          tipo_servico: Database["public"]["Enums"]["tipo_servico_enum"] | null
+          total_mudancas_status: number | null
+          total_viajantes: number | null
+          updated_at: string | null
+          updated_by: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "solicitacoes_servicos_cca_id_fkey"
+            columns: ["cca_id"]
+            isOneToOne: false
+            referencedRelation: "ccas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vw_heatmap_funcao_agente: {
         Row: {
           agente_nocivo: string | null
@@ -6290,6 +6602,10 @@ export type Database = {
         Args: { user_id_param: string }
         Returns: boolean
       }
+      user_can_manage_solicitacoes: {
+        Args: { user_id_param: string }
+        Returns: boolean
+      }
       user_is_supervisor_of: {
         Args: { _funcionario_id: string; _user_id: string }
         Returns: boolean
@@ -6317,6 +6633,23 @@ export type Database = {
         | "cancelada"
         | "rejeitada"
         | "aguardando-aceite-replanejamento"
+      prioridade_solicitacao_enum: "baixa" | "media" | "alta"
+      status_solicitacao_enum:
+        | "pendente"
+        | "aprovado"
+        | "em_andamento"
+        | "aguardando_aprovacao"
+        | "concluido"
+        | "rejeitado"
+      tipo_servico_enum:
+        | "voucher_uber"
+        | "locacao_veiculo"
+        | "cartao_abastecimento"
+        | "veloe_go"
+        | "passagens"
+        | "hospedagem"
+        | "logistica"
+        | "correios_loggi"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -6462,6 +6795,25 @@ export const Constants = {
         "cancelada",
         "rejeitada",
         "aguardando-aceite-replanejamento",
+      ],
+      prioridade_solicitacao_enum: ["baixa", "media", "alta"],
+      status_solicitacao_enum: [
+        "pendente",
+        "aprovado",
+        "em_andamento",
+        "aguardando_aprovacao",
+        "concluido",
+        "rejeitado",
+      ],
+      tipo_servico_enum: [
+        "voucher_uber",
+        "locacao_veiculo",
+        "cartao_abastecimento",
+        "veloe_go",
+        "passagens",
+        "hospedagem",
+        "logistica",
+        "correios_loggi",
       ],
     },
   },
