@@ -6,10 +6,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { FaturaIntegra } from "@/types/travel";
+import { FaturaIntegra } from "@/types/gestao-pessoas/travel";
 import { toast } from "sonner";
-import { VisualizarFaturaModal } from "@/components/travel/VisualizarFaturaModal";
-import { EditarFaturaModal } from "@/components/travel/EditarFaturaModal";
+import { VisualizarFaturaModal } from "@/components/gestao-pessoas/travel/VisualizarFaturaModal";
+import { EditarFaturaModal } from "@/components/gestao-pessoas/travel/EditarFaturaModal";
 import { useNavigate } from "react-router-dom";
 import * as XLSX from "xlsx";
 

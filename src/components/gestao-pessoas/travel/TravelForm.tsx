@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Save } from "lucide-react";
-import { Agency, ServiceType, ReservationStatus, PaymentMethod, TravelRecord } from "@/types/travel";
+import { Agency, ServiceType, ReservationStatus, PaymentMethod, TravelRecord } from "@/types/gestao-pessoas/travel";
 import { toast } from "@/hooks/use-toast";
 
 interface TravelFormProps {

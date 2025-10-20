@@ -8,9 +8,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Search, Eye, Edit, FileSpreadsheet, FileText } from "lucide-react";
 import { format } from "date-fns";
-import type { MultaCompleta } from "@/types/multa";
-import { VisualizarMultaModal } from "@/components/veiculos/VisualizarMultaModal";
-import { NovaMultaModal } from "@/components/veiculos/NovaMultaModal";
+import type { MultaCompleta } from "@/types/gestao-pessoas/multa";
+import { VisualizarMultaModal } from "@/components/gestao-pessoas/veiculos/VisualizarMultaModal";
+import { NovaMultaModal } from "@/components/gestao-pessoas/veiculos/NovaMultaModal";
 
 export function ConsultaMultasTab() {
   const navigate = useNavigate();

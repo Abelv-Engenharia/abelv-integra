@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, DollarSign, FileText, Search } from "lucide-react";
-import { ColumnDefinition } from "@/types/travel";
+import { ColumnDefinition } from "@/types/gestao-pessoas/travel";
 
 interface ColumnSelectorProps {
   selectedColumns: string[];

@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import { differenceInDays } from "date-fns";
-import { MultaCompleta } from "@/types/multa";
+import { MultaCompleta } from "@/types/gestao-pessoas/multa";
 import { AlertCard } from "./AlertCard";
 
 interface Condutor {

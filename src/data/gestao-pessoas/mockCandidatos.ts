@@ -1,4 +1,4 @@
-import { Candidato, OrigemCandidato, EtapaProcesso, StatusCandidato } from "@/types/candidato";
+import { Candidato, OrigemCandidato, EtapaProcesso, StatusCandidato } from "@/types/gestao-pessoas/candidato";
 
 export const mockCandidatos: Candidato[] = [
   {

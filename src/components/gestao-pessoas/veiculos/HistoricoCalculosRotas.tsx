@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Eye, FileText, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import type { CalculoEstimativaCartao } from "@/types/route";
+import type { CalculoEstimativaCartao } from "@/types/gestao-pessoas/route";
 
 interface HistoricoCalculosRotasProps {
   calculos: CalculoEstimativaCartao[];

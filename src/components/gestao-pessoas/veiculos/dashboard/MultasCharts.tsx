@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LineChart, Line, PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { format, subMonths, isSameMonth } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { MultaCompleta } from "@/types/multa";
+import { MultaCompleta } from "@/types/gestao-pessoas/multa";
 
 interface MultasChartsProps {
   multas: MultaCompleta[];

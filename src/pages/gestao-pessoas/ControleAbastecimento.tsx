@@ -2,15 +2,15 @@ import { useState, useMemo } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { FuelReportImportComponent } from "@/components/fuel/FuelReportImportComponent";
-import { FuelDataTable } from "@/components/fuel/FuelDataTable";
-import { FuelFilters } from "@/components/fuel/FuelFilters";
-import { PlateSearchComponent } from "@/components/fuel/PlateSearchComponent";
-import { ExportButtons } from "@/components/fuel/ExportButtons";
-import { FuelStats } from "@/components/fuel/FuelStats";
-import { DashboardTab } from "@/components/fuel/DashboardTab";
-import { MapaMOITab } from "@/components/fuel/MapaMOITab";
-import { ProcessamentoTab } from "@/components/fuel/ProcessamentoTab";
+import { FuelReportImportComponent } from "@/components/gestao-pessoas/fuel/FuelReportImportComponent";
+import { FuelDataTable } from "@/components/gestao-pessoas/fuel/FuelDataTable";
+import { FuelFilters } from "@/components/gestao-pessoas/fuel/FuelFilters";
+import { PlateSearchComponent } from "@/components/gestao-pessoas/fuel/PlateSearchComponent";
+import { ExportButtons } from "@/components/gestao-pessoas/fuel/ExportButtons";
+import { FuelStats } from "@/components/gestao-pessoas/fuel/FuelStats";
+import { DashboardTab } from "@/components/gestao-pessoas/fuel/DashboardTab";
+import { MapaMOITab } from "@/components/gestao-pessoas/fuel/MapaMOITab";
+import { ProcessamentoTab } from "@/components/gestao-pessoas/fuel/ProcessamentoTab";
 import { 
   FuelTransaction, 
   FuelFilters as FuelFiltersType,

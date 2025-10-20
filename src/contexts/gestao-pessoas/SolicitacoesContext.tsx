@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { SolicitacaoServico, StatusSolicitacao } from '@/types/solicitacao';
-import { verificarEAtualizarStatus } from '@/utils/solicitacaoStatus';
+import { SolicitacaoServico, StatusSolicitacao } from '@/types/gestao-pessoas/solicitacao';
+import { verificarEAtualizarStatus } from '@/utils/gestao-pessoas/solicitacaoStatus';
 
 interface SolicitacoesContextType {
   solicitacoes: SolicitacaoServico[];

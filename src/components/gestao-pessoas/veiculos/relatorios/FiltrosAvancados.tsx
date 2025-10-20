@@ -9,7 +9,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { CalendarIcon, Filter, X } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
-import { FiltroRelatorio } from "@/types/relatorio";
+import { FiltroRelatorio } from "@/types/gestao-pessoas/relatorio";
 
 interface FiltrosAvancadosProps {
   filtros: FiltroRelatorio;

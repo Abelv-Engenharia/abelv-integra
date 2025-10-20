@@ -1,6 +1,6 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import type { CalculoEstimativaCartao } from '@/types/route';
+import type { CalculoEstimativaCartao } from '@/types/gestao-pessoas/route';
 
 export const generateRouteReportPDF = (calculo: CalculoEstimativaCartao) => {
   const doc = new jsPDF();

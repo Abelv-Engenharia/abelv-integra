@@ -11,7 +11,7 @@ import { format } from "date-fns"
 import { ptBR } from "date-fns/locale"
 import { Calendar as CalendarIcon, CheckCircle, XCircle, Clock } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { MultaCompleta } from "@/types/multa"
+import { MultaCompleta } from "@/types/gestao-pessoas/multa"
 import { toast } from "@/hooks/use-toast"
 
 interface DescontoConfirmationManagerProps {

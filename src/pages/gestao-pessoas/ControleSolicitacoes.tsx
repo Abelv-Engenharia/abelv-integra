@@ -8,7 +8,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { StatusSolicitacao, PrioridadeSolicitacao, TipoServico, SolicitacaoServico } from "@/types/solicitacao";
 import { useSolicitacoes } from "@/context/SolicitacoesContext";
 import { Search, Download, Clock, BarChart3, FileText, CheckCircle2, AlertCircle, CheckSquare, MoreVertical, Eye, Edit, XCircle, XSquare } from "lucide-react";
-import { VisualizarSolicitacaoModal } from "@/components/solicitacao/VisualizarSolicitacaoModal";
+import { VisualizarSolicitacaoModal } from "@/components/gestao-pessoas/solicitacao/VisualizarSolicitacaoModal";
 import { toast } from "sonner";
 
 const columns = [

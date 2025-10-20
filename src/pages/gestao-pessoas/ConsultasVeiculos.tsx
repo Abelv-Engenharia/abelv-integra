@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Car, AlertTriangle, ClipboardList, User, CreditCard, MapPin } from "lucide-react";
-import { ConsultaVeiculosTab } from "@/components/veiculos/consultas/ConsultaVeiculosTab";
-import { ConsultaMultasTab } from "@/components/veiculos/consultas/ConsultaMultasTab";
-import { ConsultaChecklistTab } from "@/components/veiculos/consultas/ConsultaChecklistTab";
-import { ConsultaCondutoresTab } from "@/components/veiculos/consultas/ConsultaCondutoresTab";
-import { ConsultaCartoesTab } from "@/components/veiculos/consultas/ConsultaCartoesTab";
-import { ConsultaPedagiosTab } from "@/components/veiculos/consultas/ConsultaPedagiosTab";
+import { ConsultaVeiculosTab } from "@/components/gestao-pessoas/veiculos/consultas/ConsultaVeiculosTab";
+import { ConsultaMultasTab } from "@/components/gestao-pessoas/veiculos/consultas/ConsultaMultasTab";
+import { ConsultaChecklistTab } from "@/components/gestao-pessoas/veiculos/consultas/ConsultaChecklistTab";
+import { ConsultaCondutoresTab } from "@/components/gestao-pessoas/veiculos/consultas/ConsultaCondutoresTab";
+import { ConsultaCartoesTab } from "@/components/gestao-pessoas/veiculos/consultas/ConsultaCartoesTab";
+import { ConsultaPedagiosTab } from "@/components/gestao-pessoas/veiculos/consultas/ConsultaPedagiosTab";
 
 export default function ConsultasVeiculos() {
   const [abaAtiva, setAbaAtiva] = useState(() => {

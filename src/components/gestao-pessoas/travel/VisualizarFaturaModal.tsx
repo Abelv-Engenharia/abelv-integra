@@ -1,4 +1,4 @@
-import { FaturaIntegra } from "@/types/travel";
+import { FaturaIntegra } from "@/types/gestao-pessoas/travel";
 import {
   Dialog,
   DialogContent,

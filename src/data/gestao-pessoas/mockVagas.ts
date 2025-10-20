@@ -1,4 +1,4 @@
-import { Vaga, StatusVaga, PrioridadeVaga, TipoContrato, MotivoAbertura, StatusAprovacao, StatusCandidato, EtapaProcesso } from '@/types/vaga';
+import { Vaga, StatusVaga, PrioridadeVaga, TipoContrato, MotivoAbertura, StatusAprovacao, StatusCandidato, EtapaProcesso } from '@/types/gestao-pessoas/vaga';
 
 export const mockVagas: Vaga[] = [
   {

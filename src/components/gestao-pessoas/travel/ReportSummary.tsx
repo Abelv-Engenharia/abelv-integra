@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { FaturaIntegra } from "@/types/travel";
+import { FaturaIntegra } from "@/types/gestao-pessoas/travel";
 import { BarChart3, Calendar, DollarSign, FileText, TrendingUp } from "lucide-react";
 
 interface ReportSummaryProps {

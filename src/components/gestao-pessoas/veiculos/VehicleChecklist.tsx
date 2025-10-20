@@ -3,7 +3,7 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { CalendarIcon, Car, Camera, FileCheck, Upload, Maximize2 } from "lucide-react";
 
-import ChecklistDataService from "@/services/ChecklistDataService";
+import ChecklistDataService from "@/services/gestao-pessoas/ChecklistDataService";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

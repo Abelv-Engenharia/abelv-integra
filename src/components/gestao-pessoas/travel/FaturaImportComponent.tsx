@@ -7,7 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { FaturaIntegra } from "@/types/travel";
+import { FaturaIntegra } from "@/types/gestao-pessoas/travel";
 import { toast } from "sonner";
 import * as XLSX from "xlsx";
 

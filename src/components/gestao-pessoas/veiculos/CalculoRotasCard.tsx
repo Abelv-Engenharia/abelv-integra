@@ -12,8 +12,8 @@ import { Progress } from "@/components/ui/progress";
 import { AlertCircle, Plus, Trash2, Loader2, MapPin, Route, FileText, Save } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { toast } from "@/hooks/use-toast";
-import type { EnderecoRota, CalculoEstimativaCartao } from "@/types/route";
-import { calcularEstimativaCompleta } from "@/services/RouteCalculationService";
+import type { EnderecoRota, CalculoEstimativaCartao } from "@/types/gestao-pessoas/route";
+import { calcularEstimativaCompleta } from "@/services/gestao-pessoas/RouteCalculationService";
 
 interface CalculoRotasCardProps {
   veiculos: Array<{

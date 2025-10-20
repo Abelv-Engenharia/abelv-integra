@@ -1,13 +1,13 @@
 import { useState } from "react";
-import { RelatoriosTab } from "@/components/veiculos/relatorios/RelatoriosTab";
+import { RelatoriosTab } from "@/components/gestao-pessoas/veiculos/relatorios/RelatoriosTab";
 import { 
   veiculosData, 
   multasDataInitial, 
   condutoresData, 
   cartoesData, 
   semPararData 
-} from "@/data/mockVeiculosData";
-import ChecklistDataService from "@/services/ChecklistDataService";
+} from "@/data/gestao-pessoas/mockVeiculosData";
+import ChecklistDataService from "@/services/gestao-pessoas/ChecklistDataService";
 
 export default function RelatoriosVeiculos() {
   const [historicoCalculos] = useState([]);

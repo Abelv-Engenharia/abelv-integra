@@ -7,7 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Search, Filter, Download } from "lucide-react";
-import { TravelDetailedRecord, Agency, ServiceType } from "@/types/travel";
+import { TravelDetailedRecord, Agency, ServiceType } from "@/types/gestao-pessoas/travel";
 
 interface TravelDetailedRecordsTableProps {
   records: TravelDetailedRecord[];

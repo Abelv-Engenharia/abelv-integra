@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Search, Filter, Download } from "lucide-react";
-import { TravelRecord, Agency, ServiceType, ReservationStatus, AirTicket, BusTicket, Hotel } from "@/types/travel";
+import { TravelRecord, Agency, ServiceType, ReservationStatus, AirTicket, BusTicket, Hotel } from "@/types/gestao-pessoas/travel";
 
 interface TravelRecordsTableProps {
   records: TravelRecord[];

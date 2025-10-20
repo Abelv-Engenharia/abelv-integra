@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
-import { DashboardStats } from "@/types/travel";
+import { DashboardStats } from "@/types/gestao-pessoas/travel";
 
 interface ServiceDistributionChartProps {
   stats: DashboardStats;

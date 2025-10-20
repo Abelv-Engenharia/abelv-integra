@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { CCASpendingData } from "@/types/travel";
+import { CCASpendingData } from "@/types/gestao-pessoas/travel";
 
 interface CCASpendingChartProps {
   data: CCASpendingData[];

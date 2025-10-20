@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { FileText, FileSpreadsheet, Mail, Printer, RefreshCw } from "lucide-react";
-import { exportarRelatorioPDF, exportarRelatorioExcel } from "@/services/RelatorioExportService";
+import { exportarRelatorioPDF, exportarRelatorioExcel } from "@/services/gestao-pessoas/RelatorioExportService";
 import { useToast } from "@/hooks/use-toast";
 
 interface ExportButtonsProps {

@@ -7,7 +7,7 @@ import { ExportButtons } from "./ExportButtons";
 import { RelatorioConsolidado } from "./RelatorioConsolidado";
 import { RelatorioMultas } from "./RelatorioMultas";
 import { RelatorioVeiculos } from "./RelatorioVeiculos";
-import { FiltroRelatorio, DadosRelatorioConsolidado } from "@/types/relatorio";
+import { FiltroRelatorio, DadosRelatorioConsolidado } from "@/types/gestao-pessoas/relatorio";
 
 interface RelatoriosTabProps {
   veiculos: any[];

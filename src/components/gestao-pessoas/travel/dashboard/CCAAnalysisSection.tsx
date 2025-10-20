@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Mail, TrendingUp, AlertCircle } from "lucide-react";
-import { CCASpendingData } from "@/types/travel";
+import { CCASpendingData } from "@/types/gestao-pessoas/travel";
 import { CCASpendingChart } from "./CCASpendingChart";
 interface CCAAnalysisSectionProps {
   ccaData: CCASpendingData[];

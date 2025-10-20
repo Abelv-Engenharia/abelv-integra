@@ -9,9 +9,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Plus, Search, Camera, Send, FileSpreadsheet, FileText, Settings } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "@/hooks/use-toast";
-import ChecklistDataService, { ChecklistRecord } from "@/services/ChecklistDataService";
-import { PhotoViewerModal } from "@/components/veiculos/PhotoViewerModal";
-import { EmailConfigModal } from "@/components/veiculos/EmailConfigModal";
+import ChecklistDataService, { ChecklistRecord } from "@/services/gestao-pessoas/ChecklistDataService";
+import { PhotoViewerModal } from "@/components/gestao-pessoas/veiculos/PhotoViewerModal";
+import { EmailConfigModal } from "@/components/gestao-pessoas/veiculos/EmailConfigModal";
 
 export function ConsultaChecklistTab() {
   const navigate = useNavigate();

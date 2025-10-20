@@ -2,13 +2,13 @@ import { useState, useEffect } from "react";
 import { Car, AlertTriangle, Users, Fuel, DollarSign, Receipt } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
-import { KPICard } from "@/components/veiculos/dashboard/KPICard";
-import { VeiculosCharts } from "@/components/veiculos/dashboard/VeiculosCharts";
-import { MultasCharts } from "@/components/veiculos/dashboard/MultasCharts";
-import { CondutoresCharts } from "@/components/veiculos/dashboard/CondutoresCharts";
-import { AbastecimentoCharts } from "@/components/veiculos/dashboard/AbastecimentoCharts";
-import { MultaCompleta } from "@/types/multa";
-import { FuelTransaction } from "@/types/fuel";
+import { KPICard } from "@/components/gestao-pessoas/veiculos/dashboard/KPICard";
+import { VeiculosCharts } from "@/components/gestao-pessoas/veiculos/dashboard/VeiculosCharts";
+import { MultasCharts } from "@/components/gestao-pessoas/veiculos/dashboard/MultasCharts";
+import { CondutoresCharts } from "@/components/gestao-pessoas/veiculos/dashboard/CondutoresCharts";
+import { AbastecimentoCharts } from "@/components/gestao-pessoas/veiculos/dashboard/AbastecimentoCharts";
+import { MultaCompleta } from "@/types/gestao-pessoas/multa";
+import { FuelTransaction } from "@/types/gestao-pessoas/fuel";
 import { differenceInDays, isSameMonth } from "date-fns";
 
 interface Veiculo {

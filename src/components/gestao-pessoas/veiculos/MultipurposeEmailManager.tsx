@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { useToast } from "@/hooks/use-toast"
 import { DocumentUploadField } from "./DocumentUploadField"
-import { MultaCompleta, EmailTemplate, MultaEmailLog } from "@/types/multa"
+import { MultaCompleta, EmailTemplate, MultaEmailLog } from "@/types/gestao-pessoas/multa"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 

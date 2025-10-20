@@ -1,4 +1,4 @@
-import { TravelDashboardData, CCASpendingData, EmailRecipients } from "@/types/travel";
+import { TravelDashboardData, CCASpendingData, EmailRecipients } from "@/types/gestao-pessoas/travel";
 
 export const mockCCASpending: CCASpendingData[] = [
   {

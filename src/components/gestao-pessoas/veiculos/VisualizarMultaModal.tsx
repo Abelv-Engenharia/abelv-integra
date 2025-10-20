@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { format } from "date-fns"
 import { ptBR } from "date-fns/locale"
-import { MultaCompleta } from "@/types/multa"
+import { MultaCompleta } from "@/types/gestao-pessoas/multa"
 
 interface VisualizarMultaModalProps {
   multa: MultaCompleta | null

@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { DashboardStats } from "@/types/travel";
+import { DashboardStats } from "@/types/gestao-pessoas/travel";
 
 interface MonthlySpendingChartProps {
   stats: DashboardStats;

@@ -4,8 +4,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 import { useSolicitacoes } from "@/context/SolicitacoesContext";
-import { FiltrosRelatorioSolicitacoes } from "@/components/solicitacao/FiltrosRelatorioSolicitacoes";
-import { RelatorioSolicitacoesTable } from "@/components/solicitacao/RelatorioSolicitacoesTable";
+import { FiltrosRelatorioSolicitacoes } from "@/components/gestao-pessoas/solicitacao/FiltrosRelatorioSolicitacoes";
+import { RelatorioSolicitacoesTable } from "@/components/gestao-pessoas/solicitacao/RelatorioSolicitacoesTable";
 import { calcularEstatisticas, exportarRelatorioPDF, exportarRelatorioExcel } from "@/services/RelatorioSolicitacoesService";
 import { StatusSolicitacao } from "@/types/solicitacao";
 

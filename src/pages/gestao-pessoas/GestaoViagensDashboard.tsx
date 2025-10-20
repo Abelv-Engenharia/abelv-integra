@@ -2,17 +2,17 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FileDown, Mail } from "lucide-react";
-import { mockTravelDashboard } from "@/data/mockTravelDashboard";
-import { ModalSummaryCards } from "@/components/travel/dashboard/ModalSummaryCards";
-import { ReservationsByModalChart } from "@/components/travel/dashboard/ReservationsByModalChart";
-import { AverageAdvanceChart } from "@/components/travel/dashboard/AverageAdvanceChart";
-import { CancellationsChart } from "@/components/travel/dashboard/CancellationsChart";
-import { ApprovalTimeTable } from "@/components/travel/dashboard/ApprovalTimeTable";
-import { AirDetailsSection } from "@/components/travel/dashboard/AirDetailsSection";
-import { HotelDetailsSection } from "@/components/travel/dashboard/HotelDetailsSection";
-import { BusDetailsSection } from "@/components/travel/dashboard/BusDetailsSection";
-import { CCAAnalysisSection } from "@/components/travel/dashboard/CCAAnalysisSection";
-import { SendSelectedChartsModal } from "@/components/travel/dashboard/SendSelectedChartsModal";
+import { mockTravelDashboard } from "@/data/gestao-pessoas/mockTravelDashboard";
+import { ModalSummaryCards } from "@/components/gestao-pessoas/travel/dashboard/ModalSummaryCards";
+import { ReservationsByModalChart } from "@/components/gestao-pessoas/travel/dashboard/ReservationsByModalChart";
+import { AverageAdvanceChart } from "@/components/gestao-pessoas/travel/dashboard/AverageAdvanceChart";
+import { CancellationsChart } from "@/components/gestao-pessoas/travel/dashboard/CancellationsChart";
+import { ApprovalTimeTable } from "@/components/gestao-pessoas/travel/dashboard/ApprovalTimeTable";
+import { AirDetailsSection } from "@/components/gestao-pessoas/travel/dashboard/AirDetailsSection";
+import { HotelDetailsSection } from "@/components/gestao-pessoas/travel/dashboard/HotelDetailsSection";
+import { BusDetailsSection } from "@/components/gestao-pessoas/travel/dashboard/BusDetailsSection";
+import { CCAAnalysisSection } from "@/components/gestao-pessoas/travel/dashboard/CCAAnalysisSection";
+import { SendSelectedChartsModal } from "@/components/gestao-pessoas/travel/dashboard/SendSelectedChartsModal";
 import { toast } from "sonner";
 
 const GestaoViagensDashboard = () => {

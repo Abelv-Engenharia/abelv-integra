@@ -1,4 +1,4 @@
-import { ContratoEmitido } from "@/types/contrato";
+import { ContratoEmitido } from "@/types/gestao-pessoas/contrato";
 
 export const mockContratos: ContratoEmitido[] = [
   {

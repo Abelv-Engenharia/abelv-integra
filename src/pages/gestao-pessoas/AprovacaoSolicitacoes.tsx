@@ -5,9 +5,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Search, CheckCircle, XCircle, Clock } from "lucide-react";
-import { useSolicitacoes } from "@/context/SolicitacoesContext";
-import { useUsuarioAtivo } from "@/hooks/useUsuarioAtivo";
-import { AprovarSolicitacaoModal } from "@/components/solicitacao/AprovarSolicitacaoModal";
+import { useSolicitacoes } from "@/contexts/gestao-pessoas/SolicitacoesContext";
+import { useUsuarioAtivo } from "@/hooks/gestao-pessoas/useUsuarioAtivo";
+import { AprovarSolicitacaoModal } from "@/components/gestao-pessoas/solicitacao/AprovarSolicitacaoModal";
 import { format } from "date-fns";
 import { 
   SolicitacaoServico, 

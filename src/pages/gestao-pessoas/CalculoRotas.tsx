@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CalculoRotasCard } from "@/components/veiculos/CalculoRotasCard";
-import { HistoricoCalculosRotas } from "@/components/veiculos/HistoricoCalculosRotas";
-import type { CalculoEstimativaCartao } from "@/types/route";
+import { CalculoRotasCard } from "@/components/gestao-pessoas/veiculos/CalculoRotasCard";
+import { HistoricoCalculosRotas } from "@/components/gestao-pessoas/veiculos/HistoricoCalculosRotas";
+import type { CalculoEstimativaCartao } from "@/types/gestao-pessoas/route";
 import { toast } from "@/hooks/use-toast";
 
 export default function CalculoRotas() {

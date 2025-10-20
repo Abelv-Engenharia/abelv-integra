@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { Car, AlertTriangle, CreditCard, Calendar, TrendingUp, TrendingDown } from "lucide-react";
-import { DadosRelatorioConsolidado } from "@/types/relatorio";
+import { DadosRelatorioConsolidado } from "@/types/gestao-pessoas/relatorio";
 
 interface RelatorioConsolidadoProps {
   dados: DadosRelatorioConsolidado;

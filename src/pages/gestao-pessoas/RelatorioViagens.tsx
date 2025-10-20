@@ -2,11 +2,11 @@ import { useState, useEffect, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { FileBarChart, FileSpreadsheet, FileText } from "lucide-react";
-import { FaturaIntegra, ReportFilters } from "@/types/travel";
-import { ColumnSelector, DEFAULT_COLUMNS } from "@/components/travel/ColumnSelector";
-import { ReportFilters as ReportFiltersComponent } from "@/components/travel/ReportFilters";
-import { ReportSummary } from "@/components/travel/ReportSummary";
-import { DynamicReportTable } from "@/components/travel/DynamicReportTable";
+import { FaturaIntegra, ReportFilters } from "@/types/gestao-pessoas/travel";
+import { ColumnSelector, DEFAULT_COLUMNS } from "@/components/gestao-pessoas/travel/ColumnSelector";
+import { ReportFilters as ReportFiltersComponent } from "@/components/gestao-pessoas/travel/ReportFilters";
+import { ReportSummary } from "@/components/gestao-pessoas/travel/ReportSummary";
+import { DynamicReportTable } from "@/components/gestao-pessoas/travel/DynamicReportTable";
 import { exportarRelatorioExcel, exportarRelatorioPDF } from "@/services/DynamicReportExportService";
 import { toast } from "sonner";
 

@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TrendingUp, Users, DollarSign, Percent } from "lucide-react";
-import { DashboardStats as Stats } from "@/types/travel";
+import { DashboardStats as Stats } from "@/types/gestao-pessoas/travel";
 
 interface DashboardStatsProps {
   stats: Stats;

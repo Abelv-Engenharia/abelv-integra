@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
-import { TravelDetailedRecord, Agency } from "@/types/travel";
+import { TravelDetailedRecord, Agency } from "@/types/gestao-pessoas/travel";
 import * as XLSX from 'xlsx';
 
 interface ReportUploadComponentProps {

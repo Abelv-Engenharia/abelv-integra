@@ -1,4 +1,4 @@
-import type { MultaCompleta } from "@/types/multa";
+import type { MultaCompleta } from "@/types/gestao-pessoas/multa";
 
 export const indicadores = {
   veiculosAtivos: 45,

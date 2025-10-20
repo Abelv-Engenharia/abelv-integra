@@ -4,7 +4,7 @@ import {
   StatusSolicitacao,
   TipoPassagem,
   CategoryInfo
-} from "@/types/solicitacao";
+} from "@/types/gestao-pessoas/solicitacao";
 import { 
   Car, 
   Plane, 

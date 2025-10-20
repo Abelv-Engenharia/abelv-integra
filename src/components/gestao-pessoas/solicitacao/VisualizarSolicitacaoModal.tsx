@@ -23,7 +23,7 @@ import {
   VeloeGo,
   PrioridadeSolicitacao,
   StatusSolicitacao
-} from "@/types/solicitacao";
+} from "@/types/gestao-pessoas/solicitacao";
 
 interface VisualizarSolicitacaoModalProps {
   open: boolean;

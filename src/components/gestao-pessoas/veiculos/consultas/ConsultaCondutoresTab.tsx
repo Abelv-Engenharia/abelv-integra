@@ -8,7 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Search, Eye, Edit, FileSpreadsheet, FileText, FileCheck } from "lucide-react";
 import { format, differenceInDays } from "date-fns";
-import type { MultaCompleta } from "@/types/multa";
+import type { MultaCompleta } from "@/types/gestao-pessoas/multa";
 
 interface Condutor {
   id: string;

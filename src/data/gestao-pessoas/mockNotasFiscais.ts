@@ -1,4 +1,4 @@
-import { NotaFiscal } from "@/types/nf";
+import { NotaFiscal } from "@/types/gestao-pessoas/nf";
 
 export const mockNotasFiscais: NotaFiscal[] = [
   {

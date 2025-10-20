@@ -6,8 +6,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { TravelDashboardData } from "@/types/travel";
-import { mockEmailRecipients } from "@/data/mockTravelDashboard";
+import { TravelDashboardData } from "@/types/gestao-pessoas/travel";
+import { mockEmailRecipients } from "@/data/gestao-pessoas/mockTravelDashboard";
 import { toast } from "sonner";
 import { FileDown, Mail } from "lucide-react";
 

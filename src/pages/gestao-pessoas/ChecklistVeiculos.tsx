@@ -1,4 +1,4 @@
-import { VehicleChecklist } from "@/components/veiculos/VehicleChecklist";
+import { VehicleChecklist } from "@/components/gestao-pessoas/veiculos/VehicleChecklist";
 
 const ChecklistVeiculos = () => {
   return <VehicleChecklist />;
