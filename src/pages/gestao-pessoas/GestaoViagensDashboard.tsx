@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FileDown, Mail } from "lucide-react";
+import { FileDown, Mail, Calendar } from "lucide-react";
 import { ModalSummaryCards } from "@/components/gestao-pessoas/travel/dashboard/ModalSummaryCards";
 import { ReservationsByModalChart } from "@/components/gestao-pessoas/travel/dashboard/ReservationsByModalChart";
 import { AverageAdvanceChart } from "@/components/gestao-pessoas/travel/dashboard/AverageAdvanceChart";
@@ -12,36 +12,19 @@ import { HotelDetailsSection } from "@/components/gestao-pessoas/travel/dashboar
 import { BusDetailsSection } from "@/components/gestao-pessoas/travel/dashboard/BusDetailsSection";
 import { CCAAnalysisSection } from "@/components/gestao-pessoas/travel/dashboard/CCAAnalysisSection";
 import { SendSelectedChartsModal } from "@/components/gestao-pessoas/travel/dashboard/SendSelectedChartsModal";
+import { useDashboardViagens } from "@/hooks/gestao-pessoas/useDashboardViagens";
 import { toast } from "sonner";
+import { format, subMonths } from "date-fns";
 
 const GestaoViagensDashboard = () => {
-  // TODO: Implementar queries reais do banco de dados
-  const [dashboardData] = useState({
-    periodo: { inicio: new Date().toISOString(), fim: new Date().toISOString() },
-    resumoGeral: { totalGeral: 0, aereo: 0, hotel: 0, automovel: 0, onibus: 0, total: 0 },
-    reservasPorModal: { aereo: 0, hotel: 0, onibus: 0, automovel: 0 },
-    antecedenciaMedia: { aereo: 0, hotel: 0, onibus: 0 },
-    cancelamentos: { aereo: 0, hotel: 0, onibus: 0 },
-    tempoAprovacao: [],
-    analisePorCCA: [],
-    detalhesAereo: { 
-      totalReservas: 0, valorTotal: 0, ticketMedioDentro: 0, ticketMedioFora: 0, 
-      antecedenciaMedia: 0, nacionais: 0, internacionais: 0, comAcordo: 0, semAcordo: 0, 
-      emissaoCO2: 0, companhias: [], trechosComuns: [], trechosMaisUtilizados: [], 
-      tipoTarifas: [], empresasAereas: [] 
-    },
-    detalhesHotel: { 
-      totalReservas: 0, valorTotal: 0, ticketMedio: 0, hoteisMaisUsados: [], 
-      cidadesMaisVisitadas: [], cidadesMaisUtilizadas: [], hotelsMaisUtilizados: [], 
-      tipoAcomodacao: [] 
-    },
-    detalhesRodoviario: { 
-      totalReservas: 0, valorTotal: 0, ticketMedio: 0, empresas: [], rotasComuns: [], 
-      trechosMaisUtilizados: [], empresasRodoviarias: [] 
-    }
-  });
+  // Período padrão: últimos 3 meses
+  const [dataInicial] = useState(() => format(subMonths(new Date(), 3), 'yyyy-MM-dd'));
+  const [dataFinal] = useState(() => format(new Date(), 'yyyy-MM-dd'));
   const [selectChartsModalOpen, setSelectChartsModalOpen] = useState(false);
   const [preSelectedCCA, setPreSelectedCCA] = useState<string | undefined>();
+
+  // Buscar dados do dashboard usando o hook
+  const { dashboardData, isLoading } = useDashboardViagens(dataInicial, dataFinal);
 
   const handleExportPDF = () => {
     toast.success("Exportação de PDF iniciada", {
@@ -59,6 +42,19 @@ const GestaoViagensDashboard = () => {
     const fim = new Date(dashboardData.periodo.fim).toLocaleDateString('pt-BR');
     return `${inicio} - ${fim}`;
   };
+
+  if (isLoading) {
+    return (
+      <div className="container mx-auto p-6">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-muted-foreground">Carregando dados do dashboard...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto p-6 space-y-6">
