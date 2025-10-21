@@ -13,11 +13,14 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { MotivoAbertura, TipoContrato, StatusAprovacao } from "@/types/gestao-pessoas/vaga";
 import { mockCargos, mockAreas, mockSetores, mockAprovadores } from "@/data/gestao-pessoas/mockVagas";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 interface FormData {
   // Bloco 1 - Identificação
   cargo: string;
   area: string;
   setor: string;
+  ccaId: number | null;
   localTrabalho: string;
   gestorResponsavel: string;
 
@@ -44,10 +47,27 @@ const hardSkillsOptions = ['AutoCAD', 'MS Project', 'Excel Avançado', 'PowerBI'
 const softSkillsOptions = ['Comunicação', 'Liderança', 'Trabalho em Equipe', 'Proatividade', 'Organização', 'Atenção aos Detalhes', 'Resolução de Problemas', 'Flexibilidade', 'Criatividade', 'Negociação'];
 export default function RhAberturaVaga() {
   const navigate = useNavigate();
+  
+  // Buscar CCAs da tabela
+  const { data: ccas, isLoading: isLoadingCcas } = useQuery({
+    queryKey: ['ccas'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('ccas')
+        .select('id, codigo, nome')
+        .eq('ativo', true)
+        .order('codigo');
+      
+      if (error) throw error;
+      return data;
+    }
+  });
+  
   const [formData, setFormData] = useState<FormData>({
     cargo: '',
     area: '',
     setor: '',
+    ccaId: null,
     localTrabalho: '',
     gestorResponsavel: '',
     motivoAbertura: '',
@@ -75,7 +95,21 @@ export default function RhAberturaVaga() {
     }));
   };
   const validateAllFields = () => {
-    const requiredFields = [formData.cargo, formData.area, formData.setor, formData.localTrabalho, formData.gestorResponsavel, formData.motivoAbertura, formData.prazoMobilizacao, formData.tipoContrato, formData.jornadaTrabalho, formData.faixaSalarial, formData.experienciaDesejada, formData.aprovador];
+    const requiredFields = [
+      formData.cargo, 
+      formData.area, 
+      formData.setor, 
+      formData.ccaId,
+      formData.localTrabalho, 
+      formData.gestorResponsavel, 
+      formData.motivoAbertura, 
+      formData.prazoMobilizacao, 
+      formData.tipoContrato, 
+      formData.jornadaTrabalho, 
+      formData.faixaSalarial, 
+      formData.experienciaDesejada, 
+      formData.aprovador
+    ];
     return requiredFields.every(field => field !== '' && field !== null && field !== undefined);
   };
   const handleSubmit = () => {
@@ -150,8 +184,23 @@ export default function RhAberturaVaga() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="localTrabalho">CCA *</Label>
-                <Input id="localTrabalho" placeholder="Ex: São Paulo - SP" value={formData.localTrabalho} onChange={e => handleInputChange('localTrabalho', e.target.value)} className={!formData.localTrabalho ? "border-red-500" : ""} />
+                <Label htmlFor="ccaId">CCA *</Label>
+                <Select 
+                  value={formData.ccaId?.toString() || ''} 
+                  onValueChange={value => handleInputChange('ccaId', parseInt(value))}
+                  disabled={isLoadingCcas}
+                >
+                  <SelectTrigger className={!formData.ccaId ? "border-red-500" : ""}>
+                    <SelectValue placeholder={isLoadingCcas ? "Carregando..." : "Selecione o CCA"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {ccas?.map(cca => (
+                      <SelectItem key={cca.id} value={cca.id.toString()}>
+                        {cca.codigo} - {cca.nome}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="space-y-2">
