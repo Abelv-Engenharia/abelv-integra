@@ -1,5 +1,5 @@
 import React from "react";
-import { ChevronDown, ChevronRight, ClipboardList } from "lucide-react";
+import { ChevronDown, ClipboardList } from "lucide-react";
 import {
   SidebarMenu,
   SidebarMenuItem,
@@ -46,7 +46,7 @@ export default function SidebarSectionTarefas({ openMenu, toggleMenu, onLinkClic
             <SidebarMenuButton onClick={() => toggleMenu("tarefas")} className="text-white hover:bg-slate-600">
               <ClipboardList className="h-4 w-4" />
               <span className="break-words">Tarefas</span>
-              {isOpen ? <ChevronDown className="h-4 w-4 ml-auto" /> : <ChevronRight className="h-4 w-4 ml-auto" />}
+              <ChevronDown className={`h-4 w-4 ml-auto transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
             </SidebarMenuButton>
           </CollapsibleTrigger>
           <CollapsibleContent>

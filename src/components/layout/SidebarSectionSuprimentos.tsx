@@ -1,4 +1,4 @@
-import { ChevronRight, Package, Home, Settings, FileText, Upload, Download, ArrowLeftRight, Wrench } from "lucide-react";
+import { ChevronDown, Package, Home, Settings, FileText, Upload, Download, ArrowLeftRight, Wrench } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import {
@@ -138,10 +138,10 @@ export const SidebarSectionSuprimentos = ({
                   {item.icon && <item.icon className="h-4 w-4" />}
                   {item.title}
                 </span>
-                <ChevronRight
+                <ChevronDown
                   className={cn(
-                    "h-4 w-4 transition-transform",
-                    "group-data-[state=open]:rotate-90"
+                    "h-4 w-4 transition-transform duration-200",
+                    "group-data-[state=open]:rotate-180"
                   )}
                 />
               </SidebarMenuButton>
@@ -183,10 +183,10 @@ export const SidebarSectionSuprimentos = ({
             <Package className="h-4 w-4" />
             Suprimentos
           </span>
-          <ChevronRight
+          <ChevronDown
             className={cn(
-              "h-4 w-4 transition-transform",
-              isSuprimentosOpen && "rotate-90"
+              "h-4 w-4 transition-transform duration-200",
+              isSuprimentosOpen && "rotate-180"
             )}
           />
         </SidebarMenuButton>
@@ -200,10 +200,10 @@ export const SidebarSectionSuprimentos = ({
                   <Package className="h-4 w-4" />
                   Estoque
                 </span>
-                <ChevronRight
+                <ChevronDown
                   className={cn(
-                    "h-4 w-4 transition-transform",
-                    "group-data-[state=open]:rotate-90"
+                    "h-4 w-4 transition-transform duration-200",
+                    "group-data-[state=open]:rotate-180"
                   )}
                 />
               </SidebarMenuButton>

@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
 import { 
   ChevronDown, 
-  ChevronRight, 
-  ClipboardList, 
+  ClipboardList,
   FileText, 
   CheckSquare, 
   CheckCircle, 
@@ -134,7 +133,7 @@ export default function SidebarSectionGestaoPessoas({
                 <ClipboardList className="h-4 w-4" />
                 <span>Gestão de Pessoas</span>
               </div>
-              {isOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+              <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
             </SidebarMenuButton>
           </CollapsibleTrigger>
 
@@ -149,7 +148,7 @@ export default function SidebarSectionGestaoPessoas({
                         <Briefcase className="h-4 w-4" />
                         <span>Recursos & Benefícios</span>
                       </div>
-                      {openSubmenus.recursos ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                      <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${openSubmenus.recursos ? 'rotate-180' : ''}`} />
                     </SidebarMenuButton>
                   </CollapsibleTrigger>
 
@@ -164,7 +163,7 @@ export default function SidebarSectionGestaoPessoas({
                                 <FileText className="h-4 w-4" />
                                 <span>Solicitações</span>
                               </div>
-                              {openSubmenus.solicitacoes ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                              <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${openSubmenus.solicitacoes ? 'rotate-180' : ''}`} />
                             </SidebarMenuButton>
                           </CollapsibleTrigger>
 
@@ -238,7 +237,7 @@ export default function SidebarSectionGestaoPessoas({
                                 <Plane className="h-4 w-4" />
                                 <span>Viagens</span>
                               </div>
-                              {openSubmenus.viagens ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                              <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${openSubmenus.viagens ? 'rotate-180' : ''}`} />
                             </SidebarMenuButton>
                           </CollapsibleTrigger>
 
@@ -312,7 +311,7 @@ export default function SidebarSectionGestaoPessoas({
                                 <Car className="h-4 w-4" />
                                 <span>Veículos</span>
                               </div>
-                              {openSubmenus.veiculos ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                              <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${openSubmenus.veiculos ? 'rotate-180' : ''}`} />
                             </SidebarMenuButton>
                           </CollapsibleTrigger>
 
@@ -462,7 +461,7 @@ export default function SidebarSectionGestaoPessoas({
                           <UserPlus className="h-4 w-4" />
                           <span>Recrutamento & Seleção</span>
                         </div>
-                        {openSubmenus.recrutamento ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                        <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${openSubmenus.recrutamento ? 'rotate-180' : ''}`} />
                       </SidebarMenuButton>
                     </CollapsibleTrigger>
 
@@ -553,7 +552,7 @@ export default function SidebarSectionGestaoPessoas({
                           <Briefcase className="h-4 w-4" />
                           <span>Prestadores de Serviço</span>
                         </div>
-                        {openSubmenus.prestadores ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                        <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${openSubmenus.prestadores ? 'rotate-180' : ''}`} />
                       </SidebarMenuButton>
                     </CollapsibleTrigger>
 

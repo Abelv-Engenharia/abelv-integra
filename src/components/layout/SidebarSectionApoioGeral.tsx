@@ -1,7 +1,6 @@
 import React from "react";
 import {
   ChevronDown,
-  ChevronRight,
   Building2,
   Layers,
   Ruler,
@@ -51,7 +50,7 @@ export default function SidebarSectionApoioGeral({ openMenu, toggleMenu, onLinkC
             <SidebarMenuButton onClick={() => toggleMenu("apoio-geral")} className="text-white hover:bg-slate-600">
               <Building2 className="h-4 w-4" />
               <span className="break-words">Apoio Geral</span>
-              {isOpen ? <ChevronDown className="h-4 w-4 ml-auto" /> : <ChevronRight className="h-4 w-4 ml-auto" />}
+              <ChevronDown className={`h-4 w-4 ml-auto transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
             </SidebarMenuButton>
           </CollapsibleTrigger>
 
