@@ -111,7 +111,13 @@ export function SolicitacoesProvider({ children }: { children: ReactNode }) {
 
   // Converter dados do banco para o formato esperado pelo frontend
   const solicitacoes = useMemo(() => {
-    return solicitacoesDb.map(converterParaSolicitacao);
+    console.log("=== CONTEXTO: Convertendo solicitações ===", solicitacoesDb.length);
+    const converted = solicitacoesDb.map((row, index) => {
+      console.log(`=== CONTEXTO: Solicitação ${index + 1} ===`, row);
+      return converterParaSolicitacao(row);
+    });
+    console.log("=== CONTEXTO: Total convertidas ===", converted.length);
+    return converted;
   }, [solicitacoesDb]);
 
   const addSolicitacao = (solicitacao: any) => {

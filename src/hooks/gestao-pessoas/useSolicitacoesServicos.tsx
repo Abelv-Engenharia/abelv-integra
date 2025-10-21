@@ -12,8 +12,10 @@ export function useSolicitacoesServicos() {
 
   // Buscar todas as solicitações com dados específicos
   const { data: solicitacoes = [], isLoading, error } = useQuery({
-    queryKey: ["solicitacoes_servicos"],
+    queryKey: ["solicitacoes_servicos", Date.now()], // Força refetch
     queryFn: async () => {
+      console.log("=== HOOK: Iniciando busca de solicitações ===");
+      
       const { data, error } = await supabase
         .from("solicitacoes_servicos")
         .select(`
@@ -22,16 +24,17 @@ export function useSolicitacoesServicos() {
         `)
         .order("created_at", { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error("=== HOOK: Erro ao buscar ===", error);
+        throw error;
+      }
       
-      console.log("=== DEBUG HOOK: Dados brutos do Supabase ===", data);
+      console.log("=== HOOK: Dados brutos ===", JSON.stringify(data, null, 2));
       
       // Processar dados para extrair o JSONB
       const processed = (data || []).map((row: any) => {
-        console.log("=== DEBUG HOOK: Processando row ===", row);
-        console.log("row.dados:", row.dados);
         const dadosExtraidos = row.dados?.[0]?.dados || null;
-        console.log("Dados extraídos:", dadosExtraidos);
+        console.log(`=== HOOK: ID ${row.id} - Dados extraídos ===`, dadosExtraidos);
         
         return {
           ...row,
@@ -39,7 +42,7 @@ export function useSolicitacoesServicos() {
         };
       });
       
-      console.log("=== DEBUG HOOK: Dados processados ===", processed);
+      console.log("=== HOOK: Total processados ===", processed.length);
       return processed;
     },
   });
