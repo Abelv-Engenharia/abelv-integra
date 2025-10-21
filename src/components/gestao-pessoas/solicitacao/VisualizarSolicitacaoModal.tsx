@@ -12,7 +12,7 @@ import { Upload, X, FileText, Download } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { formatarNumeroSolicitacao } from "@/utils/gestao-pessoas/formatters";
-import { useCCAs } from "@/hooks/useCCAs";
+import { useCCAs } from "@/hooks/useCCAs.ts";
 import { 
   SolicitacaoServico, 
   TipoServico, 
@@ -78,27 +78,18 @@ const formattiposervico = (tipo: TipoServico) => {
 };
 
 const getCcaSolicitacao = (solicitacao: SolicitacaoServico, ccas: any[]): string => {
-  console.log("=== DEBUG CCA ===");
-  console.log("CCAs disponíveis:", ccas);
-  console.log("Solicitação:", solicitacao);
-  console.log("ccaId:", (solicitacao as any).ccaId);
-  console.log("centroCusto:", solicitacao.centroCusto);
-  
   // Primeiro tenta pelo ccaId
   if ((solicitacao as any).ccaId) {
     const cca = ccas.find(c => c.id === (solicitacao as any).ccaId);
-    console.log("Busca por ID, resultado:", cca);
     if (cca) return cca.nome;
   }
   
   // Se não encontrar pelo ID, tenta pelo código em centroCusto
   const codigoCca = solicitacao.centroCusto || '';
   const cca = ccas.find(c => c.codigo === codigoCca);
-  console.log("Busca por código", codigoCca, "resultado:", cca);
   if (cca) return cca.nome;
   
   // Se não encontrar, retorna o código mesmo
-  console.log("Não encontrou CCA, retornando código:", codigoCca);
   return codigoCca;
 };
 
@@ -111,7 +102,7 @@ export function VisualizarSolicitacaoModal({
   onConcluir,
   modoVisualizacao = false
 }: VisualizarSolicitacaoModalProps) {
-  const { data: ccas = [] } = useCCAs();
+  const { data: ccas = [], isLoading } = useCCAs();
   const [observacoesgestao, setObservacoesGestao] = useState("");
   const [imagemanexo, setImagemAnexo] = useState<string>("");
   const [estimativavalor, setEstimativaValor] = useState("");
