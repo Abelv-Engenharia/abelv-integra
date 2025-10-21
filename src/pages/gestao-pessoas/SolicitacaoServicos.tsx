@@ -72,7 +72,7 @@ export default function SolicitacaoServicos() {
   };
 
   // Filtrar apenas solicitações do usuário logado
-  const minhasSolicitacoes = solicitacoes.filter(solicitacao => solicitacao.solicitante === usuarioAtivo.nome);
+  const minhasSolicitacoes = solicitacoes.filter(solicitacao => solicitacao.solicitanteId === usuarioAtivo.id);
   const filteredSolicitacoes = minhasSolicitacoes.filter(solicitacao => solicitacao.id.toLowerCase().includes(searchTerm.toLowerCase()) || solicitacao.centroCusto.toLowerCase().includes(searchTerm.toLowerCase()));
   const handleAbrirModal = (solicitacao: SolicitacaoServico) => {
     setSolicitacaoSelecionada(solicitacao);
