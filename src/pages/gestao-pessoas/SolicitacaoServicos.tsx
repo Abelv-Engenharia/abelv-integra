@@ -7,7 +7,7 @@ import { CategoryCard } from "@/components/gestao-pessoas/solicitacao/CategoryCa
 import { SimpleDynamicForm } from "@/components/gestao-pessoas/solicitacao/SimpleDynamicForm";
 import { MultipleServiceForm } from "@/components/gestao-pessoas/solicitacao/MultipleServiceForm";
 import { TipoServico, SolicitacaoServico, StatusSolicitacao, categoriesInfo, responsavelAtendimento } from "@/types/gestao-pessoas/solicitacao";
-import { Search, Plus, Layers, Clock, CheckCircle2, AlertCircle, CheckSquare, XCircle } from "lucide-react";
+import { Search, Plus, Layers, Clock, CheckCircle2, AlertCircle, CheckSquare, XCircle, Trash2, Car, Plane, Hotel, Bus, Briefcase, FileText } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useSolicitacoes } from "@/contexts/gestao-pessoas/SolicitacoesContext";
 import { useUsuarioAtivo } from "@/hooks/useUsuarioAtivo";
@@ -27,9 +27,39 @@ export default function SolicitacaoServicos() {
   const {
     solicitacoes,
     addSolicitacao,
-    verificarEAtualizarStatusAutomatico
+    verificarEAtualizarStatusAutomatico,
+    deleteSolicitacao
   } = useSolicitacoes();
   const usuarioAtivo = useUsuarioAtivo();
+
+  // Função helper para obter ícone do tipo de serviço
+  const getTipoServicoIcon = (tipo: TipoServico) => {
+    const iconMap: Record<TipoServico, any> = {
+      [TipoServico.VOUCHER_UBER]: Car,
+      [TipoServico.LOCACAO_VEICULO]: Car,
+      [TipoServico.CARTAO_ABASTECIMENTO]: Car,
+      [TipoServico.VELOE_GO]: Car,
+      [TipoServico.PASSAGENS]: Plane,
+      [TipoServico.HOSPEDAGEM]: Hotel,
+      [TipoServico.LOGISTICA]: Bus,
+      [TipoServico.CORREIOS_LOGGI]: Briefcase,
+    };
+    return iconMap[tipo] || FileText;
+  };
+
+  // Handler para exclusão de solicitações
+  const handleExcluirSolicitacao = (id: string, numeroSolicitacao: number, e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevenir abrir modal ao clicar em excluir
+    
+    if (window.confirm(`Deseja realmente excluir a solicitação #${formatarNumeroSolicitacao(numeroSolicitacao)}?`)) {
+      deleteSolicitacao(id);
+      toast({
+        title: "Solicitação Excluída",
+        description: "A solicitação foi removida com sucesso.",
+        variant: "destructive"
+      });
+    }
+  };
 
   // Verificar status automaticamente ao carregar a página
   useEffect(() => {
@@ -206,39 +236,63 @@ export default function SolicitacaoServicos() {
               {filteredSolicitacoes.map((solicitacao) => {
                 const statusConfig = columns.find(col => col.status === solicitacao.status);
                 const StatusIcon = statusConfig?.icon || Clock;
+                const TipoServicoIcon = getTipoServicoIcon(solicitacao.tipoServico);
                 
                 return (
                   <div 
                     key={solicitacao.id} 
-                    className="p-4 hover:bg-accent/50 cursor-pointer transition-colors"
-                    onClick={() => handleAbrirModal(solicitacao)}
+                    className="p-4 hover:bg-accent/50 transition-colors flex items-center gap-4"
                   >
-                    <div className="flex items-center justify-between gap-4">
-                      <div className="flex items-center gap-3 flex-1 min-w-0">
-                        <StatusIcon className={`h-5 w-5 flex-shrink-0 ${statusConfig?.color || 'text-muted-foreground'}`} />
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="font-semibold text-sm text-primary">
-                              {formatarNumeroSolicitacao(solicitacao.numeroSolicitacao)}
-                            </span>
-                            <span className="text-xs text-muted-foreground">•</span>
-                            <span className="font-medium text-sm truncate">
-                              {categoriesInfo.find(c => c.id === solicitacao.tipoServico)?.title || solicitacao.tipoServico}
-                            </span>
-                            <span className="text-xs text-muted-foreground">•</span>
-                            <span className="text-xs text-muted-foreground">
-                              {solicitacao.dataSolicitacao.toLocaleDateString('pt-BR')}
-                            </span>
-                          </div>
+                    {/* Área clicável para abrir modal */}
+                    <div 
+                      className="flex items-center gap-3 flex-1 min-w-0 cursor-pointer"
+                      onClick={() => handleAbrirModal(solicitacao)}
+                    >
+                      {/* Ícone do tipo de serviço */}
+                      <div className="flex-shrink-0">
+                        <TipoServicoIcon className="h-5 w-5 text-primary" />
+                      </div>
+                      
+                      {/* Ícone de status */}
+                      <StatusIcon className={`h-5 w-5 flex-shrink-0 ${statusConfig?.color || 'text-muted-foreground'}`} />
+                      
+                      {/* Informações da solicitação */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="font-semibold text-sm text-primary">
+                            {formatarNumeroSolicitacao(solicitacao.numeroSolicitacao)}
+                          </span>
+                          <span className="text-xs text-muted-foreground">•</span>
+                          <span className="font-medium text-sm truncate">
+                            {categoriesInfo.find(c => c.id === solicitacao.tipoServico)?.title || solicitacao.tipoServico}
+                          </span>
+                          <span className="text-xs text-muted-foreground">•</span>
+                          <span className="text-xs text-muted-foreground">
+                            {solicitacao.dataSolicitacao.toLocaleDateString('pt-BR')}
+                          </span>
                         </div>
                       </div>
-                      <Badge 
-                        variant="outline" 
-                        className={`${statusConfig?.bgColor || 'bg-gray-100'} ${statusConfig?.color || 'text-gray-600'} border-none flex-shrink-0`}
-                      >
-                        {statusConfig?.title || solicitacao.status}
-                      </Badge>
                     </div>
+                    
+                    {/* Badge de status */}
+                    <Badge 
+                      variant="outline" 
+                      className={`${statusConfig?.bgColor || 'bg-gray-100'} ${statusConfig?.color || 'text-gray-600'} border-none flex-shrink-0`}
+                    >
+                      {statusConfig?.title || solicitacao.status}
+                    </Badge>
+                    
+                    {/* Botão de excluir (apenas para status EM_ANDAMENTO) */}
+                    {solicitacao.status === StatusSolicitacao.EM_ANDAMENTO && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="flex-shrink-0 h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                        onClick={(e) => handleExcluirSolicitacao(solicitacao.id, solicitacao.numeroSolicitacao!, e)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    )}
                   </div>
                 );
               })}
