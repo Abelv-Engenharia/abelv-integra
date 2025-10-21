@@ -10,31 +10,49 @@ type SolicitacaoServicoUpdate = Database["public"]["Tables"]["solicitacoes_servi
 export function useSolicitacoesServicos() {
   const queryClient = useQueryClient();
 
-  // Buscar todas as solicitações
+  // Buscar todas as solicitações com dados específicos
   const { data: solicitacoes = [], isLoading, error } = useQuery({
     queryKey: ["solicitacoes_servicos"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("solicitacoes_servicos")
+        .from("v_solicitacoes_completas")
         .select("*")
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      return data as SolicitacaoServicoRow[];
+      return data as any[];
     },
   });
 
   // Criar nova solicitação
   const createSolicitacao = useMutation({
-    mutationFn: async (novaSolicitacao: SolicitacaoServicoInsert) => {
-      const { data, error } = await supabase
+    mutationFn: async (novaSolicitacao: any) => {
+      const { dados_especificos, ...solicitacaoBase } = novaSolicitacao;
+      
+      // Inserir solicitação base
+      const { data: solicitacao, error: errorSolicitacao } = await supabase
         .from("solicitacoes_servicos")
-        .insert(novaSolicitacao)
+        .insert(solicitacaoBase)
         .select()
         .single();
 
-      if (error) throw error;
-      return data;
+      if (errorSolicitacao) throw errorSolicitacao;
+
+      // Inserir dados específicos se existirem
+      if (dados_especificos && Object.keys(dados_especificos).length > 0) {
+        const { error: errorEspecificos } = await supabase
+          .from("solicitacoes_dados_especificos")
+          .insert({
+            solicitacao_id: solicitacao.id,
+            dados: dados_especificos,
+          });
+
+        if (errorEspecificos) {
+          console.error("Erro ao salvar dados específicos:", errorEspecificos);
+        }
+      }
+
+      return solicitacao;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["solicitacoes_servicos"] });
@@ -48,15 +66,31 @@ export function useSolicitacoesServicos() {
 
   // Atualizar solicitação
   const updateSolicitacao = useMutation({
-    mutationFn: async ({ id, updates }: { id: string; updates: SolicitacaoServicoUpdate }) => {
+    mutationFn: async ({ id, updates }: { id: string; updates: any }) => {
+      const { dados_especificos, ...updatesBase } = updates;
+      
+      // Atualizar solicitação base
       const { data, error } = await supabase
         .from("solicitacoes_servicos")
-        .update(updates)
+        .update(updatesBase)
         .eq("id", id)
         .select()
         .single();
 
       if (error) throw error;
+
+      // Atualizar dados específicos se existirem
+      if (dados_especificos) {
+        const { error: errorEspecificos } = await supabase
+          .from("solicitacoes_dados_especificos")
+          .update({ dados: dados_especificos })
+          .eq("solicitacao_id", id);
+
+        if (errorEspecificos) {
+          console.error("Erro ao atualizar dados específicos:", errorEspecificos);
+        }
+      }
+
       return data;
     },
     onSuccess: () => {

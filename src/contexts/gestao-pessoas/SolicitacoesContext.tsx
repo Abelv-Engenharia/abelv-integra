@@ -19,8 +19,8 @@ interface SolicitacoesContextType {
 const SolicitacoesContext = createContext<SolicitacoesContextType | undefined>(undefined);
 
 // Função para converter dados do Supabase para o formato do frontend
-const converterParaSolicitacao = (row: SolicitacaoServicoRow): any => {
-  return {
+const converterParaSolicitacao = (row: any): any => {
+  const dadosBase = {
     id: row.id,
     numeroSolicitacao: row.numero_solicitacao,
     dataSolicitacao: new Date(row.data_solicitacao),
@@ -52,6 +52,44 @@ const converterParaSolicitacao = (row: SolicitacaoServicoRow): any => {
     motivomudancaautomatica: row.motivo_mudanca_automatica || undefined,
     ccaId: row.cca_id || undefined,
   };
+
+  // Mesclar dados específicos do JSONB se existirem
+  if (row.dados) {
+    const dadosEspecificos = row.dados;
+    
+    // Converter datas em strings para objetos Date
+    if (dadosEspecificos.dataUso) {
+      dadosEspecificos.dataUso = new Date(dadosEspecificos.dataUso);
+    }
+    if (dadosEspecificos.dataInicio) {
+      dadosEspecificos.dataInicio = new Date(dadosEspecificos.dataInicio);
+    }
+    if (dadosEspecificos.dataFim) {
+      dadosEspecificos.dataFim = new Date(dadosEspecificos.dataFim);
+    }
+    if (dadosEspecificos.dataPartida) {
+      dadosEspecificos.dataPartida = new Date(dadosEspecificos.dataPartida);
+    }
+    if (dadosEspecificos.dataRetorno) {
+      dadosEspecificos.dataRetorno = new Date(dadosEspecificos.dataRetorno);
+    }
+    if (dadosEspecificos.dataCheckin) {
+      dadosEspecificos.dataCheckin = new Date(dadosEspecificos.dataCheckin);
+    }
+    if (dadosEspecificos.dataCheckout) {
+      dadosEspecificos.dataCheckout = new Date(dadosEspecificos.dataCheckout);
+    }
+    if (dadosEspecificos.dataColeta) {
+      dadosEspecificos.dataColeta = new Date(dadosEspecificos.dataColeta);
+    }
+    if (dadosEspecificos.dataEntrega) {
+      dadosEspecificos.dataEntrega = new Date(dadosEspecificos.dataEntrega);
+    }
+    
+    return { ...dadosBase, ...dadosEspecificos };
+  }
+
+  return dadosBase;
 };
 
 export function SolicitacoesProvider({ children }: { children: ReactNode }) {
@@ -76,6 +114,25 @@ export function SolicitacoesProvider({ children }: { children: ReactNode }) {
       throw new Error('ID do solicitante não encontrado. Por favor, faça login novamente.');
     }
 
+    // Separar dados base e específicos
+    const camposBase = [
+      'solicitanteId', 'solicitante', 'tipoServico', 'prioridade', 'observacoes',
+      'observacoesgestao', 'estimativavalor', 'imagemAnexo', 'responsavelaprovacaoId',
+      'ccaId', 'id', 'numeroSolicitacao', 'dataSolicitacao', 'status'
+    ];
+
+    const dadosEspecificos: any = {};
+    Object.keys(solicitacao).forEach(key => {
+      if (!camposBase.includes(key)) {
+        let valor = solicitacao[key];
+        // Converter datas para ISO string
+        if (valor instanceof Date) {
+          valor = valor.toISOString();
+        }
+        dadosEspecificos[key] = valor;
+      }
+    });
+
     const novaSolicitacao = {
       solicitante_id: solicitacao.solicitanteId,
       solicitante_nome: solicitacao.solicitante || 'Usuário',
@@ -87,6 +144,7 @@ export function SolicitacoesProvider({ children }: { children: ReactNode }) {
       imagem_anexo: solicitacao.imagemAnexo,
       responsavel_aprovacao_id: solicitacao.responsavelaprovacaoId,
       cca_id: solicitacao.ccaId,
+      dados_especificos: Object.keys(dadosEspecificos).length > 0 ? dadosEspecificos : undefined,
     };
 
     createDb(novaSolicitacao);
