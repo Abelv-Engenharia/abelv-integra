@@ -12,7 +12,7 @@ import { ArrowLeft, Send, FileText, User, Building, Clock, UserCheck } from "luc
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { MotivoAbertura, TipoContrato, StatusAprovacao } from "@/types/gestao-pessoas/vaga";
-import { mockCargos, mockAreas, mockSetores, mockAprovadores } from "@/data/gestao-pessoas/mockVagas";
+import { mockCargos, mockAreas, mockSetores } from "@/data/gestao-pessoas/mockVagas";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 interface FormData {
@@ -81,6 +81,62 @@ export default function RhAberturaVaga() {
     hardSkills: [],
     softSkills: [],
     aprovador: ''
+  });
+
+  // Buscar aprovadores baseado no CCA selecionado
+  const { data: aprovadores, isLoading: isLoadingAprovadores } = useQuery({
+    queryKey: ['aprovadores-recrutamento', formData.ccaId],
+    queryFn: async () => {
+      if (!formData.ccaId) return [];
+      
+      // Cargos permitidos para aprovação
+      const cargosAprovadores = [
+        'supervisor',
+        'coordenador', 
+        'gerente',
+        'superintendente',
+        'diretor'
+      ];
+      
+      // Buscar usuários vinculados ao CCA com os cargos especificados
+      const { data: usuariosCca, error } = await supabase
+        .from('usuario_ccas')
+        .select(`
+          usuario_id,
+          profiles!inner (
+            id,
+            nome,
+            cargo
+          )
+        `)
+        .eq('cca_id', formData.ccaId)
+        .eq('ativo', true);
+      
+      if (error) throw error;
+      
+      // Filtrar por cargo
+      const aprovadoresFiltrados = usuariosCca
+        ?.filter((uc: any) => {
+          const cargo = uc.profiles?.cargo?.toLowerCase() || '';
+          return cargosAprovadores.some(cargoPermitido => 
+            cargo.includes(cargoPermitido)
+          );
+        })
+        .map((uc: any) => ({
+          id: uc.profiles.id,
+          nome: uc.profiles.nome,
+          cargo: uc.profiles.cargo
+        })) || [];
+      
+      // Remover duplicados
+      const aprovadoresUnicos = aprovadoresFiltrados.filter(
+        (aprovador: any, index: number, self: any[]) => 
+          index === self.findIndex(a => a.id === aprovador.id)
+      );
+      
+      return aprovadoresUnicos;
+    },
+    enabled: !!formData.ccaId
   });
   const handleInputChange = (field: keyof FormData, value: any) => {
     setFormData(prev => ({
@@ -319,16 +375,35 @@ export default function RhAberturaVaga() {
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="aprovador">Selecione o Aprovador *</Label>
-                <Select value={formData.aprovador} onValueChange={value => handleInputChange('aprovador', value)}>
+                <Select 
+                  value={formData.aprovador} 
+                  onValueChange={value => handleInputChange('aprovador', value)}
+                  disabled={!formData.ccaId || isLoadingAprovadores}
+                >
                   <SelectTrigger className={!formData.aprovador ? "border-red-500" : ""}>
-                    <SelectValue placeholder="Selecione o aprovador" />
+                    <SelectValue placeholder={
+                      !formData.ccaId 
+                        ? "Selecione um CCA primeiro" 
+                        : isLoadingAprovadores 
+                          ? "Carregando..." 
+                          : aprovadores && aprovadores.length > 0
+                            ? "Selecione o aprovador"
+                            : "Nenhum aprovador disponível"
+                    } />
                   </SelectTrigger>
                   <SelectContent>
-                    {mockAprovadores.map(aprovador => <SelectItem key={aprovador.id} value={aprovador.nome}>
-                        {aprovador.nome}
-                      </SelectItem>)}
+                    {aprovadores?.map((aprovador: any) => (
+                      <SelectItem key={aprovador.id} value={aprovador.id}>
+                        {aprovador.nome} - {aprovador.cargo}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
+                {formData.ccaId && aprovadores && aprovadores.length === 0 && !isLoadingAprovadores && (
+                  <p className="text-xs text-muted-foreground">
+                    Nenhum aprovador (Supervisor, Coordenador, Gerente, Superintendente ou Diretor) vinculado a este CCA.
+                  </p>
+                )}
               </div>
 
               <div>
