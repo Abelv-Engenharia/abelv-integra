@@ -193,16 +193,55 @@ export default function SolicitacaoServicos() {
           <Input placeholder="Pesquisar por ID ou centro de custo..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-10" />
         </div>
 
-        {/* Board Kanban */}
+        {/* Lista de Solicitações */}
         {minhasSolicitacoes.length === 0 ? <Card className="p-8 text-center">
             <div className="text-muted-foreground">
               <Clock className="h-12 w-12 mx-auto mb-4 opacity-50" />
               <p>Nenhuma solicitação encontrada</p>
               <p className="text-sm">Faça sua primeira solicitação selecionando uma categoria acima</p>
             </div>
-          </Card> : <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6 gap-4">
-            {columns.map(column => <SolicitacaoKanbanColumn key={column.status} status={column.status} titulo={column.title} icon={column.icon} color={column.color} bgColor={column.bgColor} solicitacoes={getSolicitacoesByStatus(column.status)} onViewDetails={handleAbrirModal} />)}
-          </div>}
+          </Card> : <Card>
+            <div className="divide-y">
+              {filteredSolicitacoes.map((solicitacao) => {
+                const statusConfig = columns.find(col => col.status === solicitacao.status);
+                const StatusIcon = statusConfig?.icon || Clock;
+                
+                return (
+                  <div 
+                    key={solicitacao.id} 
+                    className="p-4 hover:bg-accent/50 cursor-pointer transition-colors"
+                    onClick={() => handleAbrirModal(solicitacao)}
+                  >
+                    <div className="flex items-center justify-between gap-4">
+                      <div className="flex items-center gap-3 flex-1 min-w-0">
+                        <StatusIcon className={`h-5 w-5 flex-shrink-0 ${statusConfig?.color || 'text-muted-foreground'}`} />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="font-medium text-sm truncate">
+                              {categoriesInfo.find(c => c.id === solicitacao.tipoServico)?.title || solicitacao.tipoServico}
+                            </span>
+                            <span className="text-xs text-muted-foreground">•</span>
+                            <span className="text-xs text-muted-foreground">
+                              {solicitacao.dataSolicitacao.toLocaleDateString('pt-BR')}
+                            </span>
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            ID: {solicitacao.id.slice(0, 8)}...
+                          </div>
+                        </div>
+                      </div>
+                      <Badge 
+                        variant="outline" 
+                        className={`${statusConfig?.bgColor || 'bg-gray-100'} ${statusConfig?.color || 'text-gray-600'} border-none flex-shrink-0`}
+                      >
+                        {statusConfig?.title || solicitacao.status}
+                      </Badge>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </Card>}
       </div>
 
       {/* Modal de Visualização */}
