@@ -83,6 +83,13 @@ export function useSolicitacoesServicos() {
       toast.success("Solicitação criada com sucesso!");
       
       // Enviar notificação
+      console.log('🔍 Verificando responsável de aprovação:', {
+        id: solicitacao.id,
+        responsavel_aprovacao_id: solicitacao.responsavel_aprovacao_id,
+        numero: solicitacao.numero_solicitacao,
+        tipo_servico: solicitacao.tipo_servico
+      });
+      
       if (!solicitacao.responsavel_aprovacao_id) {
         console.warn('⚠️ Solicitação criada sem responsável de aprovação. Notificação não será enviada.');
         return;
@@ -109,10 +116,15 @@ export function useSolicitacoesServicos() {
         );
         
         if (notifError) {
-          console.error('❌ Erro ao invocar edge function:', notifError);
+          console.error('❌ Erro ao invocar edge function:', {
+            error: notifError,
+            message: notifError.message,
+            details: notifError
+          });
           toast.error('Solicitação criada, mas falha ao enviar notificação');
         } else {
           console.log('✅ Notificação enviada com sucesso:', notifData);
+          toast.success('Notificação enviada ao aprovador!');
         }
       } catch (error) {
         console.error('❌ Erro ao enviar notificação:', error);

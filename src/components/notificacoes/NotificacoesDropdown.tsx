@@ -14,9 +14,12 @@ import { notificacoesService } from "@/services/notificacoesService";
 import { Notificacao } from "@/types/notificacoes";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 const NotificacoesDropdown = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [notificacoes, setNotificacoes] = useState<Notificacao[]>([]);
   const [naoLidas, setNaoLidas] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -38,7 +41,35 @@ const NotificacoesDropdown = () => {
 
   useEffect(() => {
     carregarNotificacoes();
-  }, []);
+    
+    if (!user?.id) return;
+    
+    // Subscription realtime para receber notificações instantaneamente
+    console.log('🔔 Configurando subscription realtime para notificações do usuário:', user.id);
+    
+    const channel = supabase
+      .channel('notificacoes-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'notificacoes',
+          filter: `usuario_id=eq.${user.id}`
+        },
+        (payload) => {
+          console.log('🔔 Nova notificação recebida em tempo real:', payload);
+          carregarNotificacoes();
+          toast.info('Nova notificação recebida!');
+        }
+      )
+      .subscribe();
+    
+    return () => {
+      console.log('🔕 Removendo subscription de notificações');
+      supabase.removeChannel(channel);
+    };
+  }, [user?.id]);
 
   const marcarComoLida = async (id: string) => {
     try {

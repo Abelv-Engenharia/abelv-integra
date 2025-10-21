@@ -126,8 +126,15 @@ Deno.serve(async (req) => {
     );
   } catch (error) {
     console.error('❌ Erro ao processar notificação:', error);
+    console.error('Stack trace:', error.stack);
+    console.error('Tipo de erro:', error.constructor.name);
+    
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        error: error.message,
+        type: error.constructor?.name || 'Unknown',
+        details: error.toString()
+      }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
