@@ -5009,6 +5009,440 @@ export type Database = {
           },
         ]
       }
+      recrutamento_candidatos: {
+        Row: {
+          ativo: boolean | null
+          cargo_vaga_pretendida: string
+          cca_codigo: string | null
+          cca_id: number | null
+          cca_nome: string | null
+          cidade_estado: string
+          cpf: string | null
+          created_at: string
+          created_by: string | null
+          curriculo_nome: string | null
+          curriculo_url: string | null
+          data_cadastro: string
+          data_entrevista: string | null
+          data_ultima_atualizacao: string
+          email: string
+          etapa_processo: string
+          faixa_salarial: string | null
+          feedback_gestor_rh: string | null
+          id: string
+          motivo_nao_contratacao: string | null
+          nome_completo: string
+          observacoes_gerais: string | null
+          origem_candidato: string
+          possibilidade_reaproveitamento: boolean | null
+          responsavel_etapa: string
+          responsavel_etapa_id: string | null
+          status_candidato: string
+          telefone: string
+          updated_at: string
+        }
+        Insert: {
+          ativo?: boolean | null
+          cargo_vaga_pretendida: string
+          cca_codigo?: string | null
+          cca_id?: number | null
+          cca_nome?: string | null
+          cidade_estado: string
+          cpf?: string | null
+          created_at?: string
+          created_by?: string | null
+          curriculo_nome?: string | null
+          curriculo_url?: string | null
+          data_cadastro?: string
+          data_entrevista?: string | null
+          data_ultima_atualizacao?: string
+          email: string
+          etapa_processo?: string
+          faixa_salarial?: string | null
+          feedback_gestor_rh?: string | null
+          id?: string
+          motivo_nao_contratacao?: string | null
+          nome_completo: string
+          observacoes_gerais?: string | null
+          origem_candidato: string
+          possibilidade_reaproveitamento?: boolean | null
+          responsavel_etapa: string
+          responsavel_etapa_id?: string | null
+          status_candidato?: string
+          telefone: string
+          updated_at?: string
+        }
+        Update: {
+          ativo?: boolean | null
+          cargo_vaga_pretendida?: string
+          cca_codigo?: string | null
+          cca_id?: number | null
+          cca_nome?: string | null
+          cidade_estado?: string
+          cpf?: string | null
+          created_at?: string
+          created_by?: string | null
+          curriculo_nome?: string | null
+          curriculo_url?: string | null
+          data_cadastro?: string
+          data_entrevista?: string | null
+          data_ultima_atualizacao?: string
+          email?: string
+          etapa_processo?: string
+          faixa_salarial?: string | null
+          feedback_gestor_rh?: string | null
+          id?: string
+          motivo_nao_contratacao?: string | null
+          nome_completo?: string
+          observacoes_gerais?: string | null
+          origem_candidato?: string
+          possibilidade_reaproveitamento?: boolean | null
+          responsavel_etapa?: string
+          responsavel_etapa_id?: string | null
+          status_candidato?: string
+          telefone?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_recrutamento_candidatos_cca"
+            columns: ["cca_id"]
+            isOneToOne: false
+            referencedRelation: "ccas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      recrutamento_etapas_sla: {
+        Row: {
+          atrasado: boolean | null
+          cargo_vaga: string
+          created_at: string
+          data_conclusao: string | null
+          data_inicio: string | null
+          descricao: string
+          dias_decorridos: number | null
+          etapa: string
+          id: string
+          numero_vaga: string
+          objetivo: string
+          observacoes: string | null
+          ordem: number
+          prazo_limite: string | null
+          responsavel: string
+          sla_dias_uteis: number
+          sla_prazo: string
+          status: string
+          updated_at: string
+          vaga_id: string
+        }
+        Insert: {
+          atrasado?: boolean | null
+          cargo_vaga: string
+          created_at?: string
+          data_conclusao?: string | null
+          data_inicio?: string | null
+          descricao: string
+          dias_decorridos?: number | null
+          etapa: string
+          id?: string
+          numero_vaga: string
+          objetivo: string
+          observacoes?: string | null
+          ordem: number
+          prazo_limite?: string | null
+          responsavel: string
+          sla_dias_uteis: number
+          sla_prazo: string
+          status?: string
+          updated_at?: string
+          vaga_id: string
+        }
+        Update: {
+          atrasado?: boolean | null
+          cargo_vaga?: string
+          created_at?: string
+          data_conclusao?: string | null
+          data_inicio?: string | null
+          descricao?: string
+          dias_decorridos?: number | null
+          etapa?: string
+          id?: string
+          numero_vaga?: string
+          objetivo?: string
+          observacoes?: string | null
+          ordem?: number
+          prazo_limite?: string | null
+          responsavel?: string
+          sla_dias_uteis?: number
+          sla_prazo?: string
+          status?: string
+          updated_at?: string
+          vaga_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_recrutamento_etapas_sla_vaga"
+            columns: ["vaga_id"]
+            isOneToOne: false
+            referencedRelation: "recrutamento_vagas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_recrutamento_etapas_sla_vaga"
+            columns: ["vaga_id"]
+            isOneToOne: false
+            referencedRelation: "view_vagas_resumo"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      recrutamento_historico_sla: {
+        Row: {
+          created_at: string
+          data_alteracao: string
+          etapa_sla_id: string
+          id: string
+          observacao: string | null
+          status_anterior: string
+          status_novo: string
+          usuario: string
+          usuario_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          data_alteracao?: string
+          etapa_sla_id: string
+          id?: string
+          observacao?: string | null
+          status_anterior: string
+          status_novo: string
+          usuario: string
+          usuario_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          data_alteracao?: string
+          etapa_sla_id?: string
+          id?: string
+          observacao?: string | null
+          status_anterior?: string
+          status_novo?: string
+          usuario?: string
+          usuario_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_recrutamento_historico_sla_etapa"
+            columns: ["etapa_sla_id"]
+            isOneToOne: false
+            referencedRelation: "recrutamento_etapas_sla"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      recrutamento_vagas: {
+        Row: {
+          aprovador: string
+          aprovador_id: string | null
+          area: string
+          ativo: boolean | null
+          beneficios: string | null
+          cargo: string
+          cca_codigo: string
+          cca_id: number
+          cca_nome: string
+          created_at: string
+          created_by: string | null
+          data_aprovacao: string | null
+          etapa_atual: string | null
+          experiencia_desejada: string
+          faixa_salarial: string
+          formacao_minima: string
+          gestor_responsavel: string
+          gestor_responsavel_id: string | null
+          hard_skills: string[] | null
+          id: string
+          jornada_trabalho: string
+          justificativa_reprovacao: string | null
+          local_trabalho: string
+          motivo_abertura: string
+          nome_colaborador_substituido: string | null
+          numero_vaga: string
+          observacoes: string | null
+          prazo_mobilizacao: string
+          prioridade: string
+          setor: string
+          soft_skills: string[] | null
+          status: string
+          status_aprovacao: string
+          tipo_contrato: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          aprovador: string
+          aprovador_id?: string | null
+          area: string
+          ativo?: boolean | null
+          beneficios?: string | null
+          cargo: string
+          cca_codigo: string
+          cca_id: number
+          cca_nome: string
+          created_at?: string
+          created_by?: string | null
+          data_aprovacao?: string | null
+          etapa_atual?: string | null
+          experiencia_desejada: string
+          faixa_salarial: string
+          formacao_minima: string
+          gestor_responsavel: string
+          gestor_responsavel_id?: string | null
+          hard_skills?: string[] | null
+          id?: string
+          jornada_trabalho: string
+          justificativa_reprovacao?: string | null
+          local_trabalho: string
+          motivo_abertura: string
+          nome_colaborador_substituido?: string | null
+          numero_vaga: string
+          observacoes?: string | null
+          prazo_mobilizacao: string
+          prioridade?: string
+          setor: string
+          soft_skills?: string[] | null
+          status?: string
+          status_aprovacao?: string
+          tipo_contrato: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          aprovador?: string
+          aprovador_id?: string | null
+          area?: string
+          ativo?: boolean | null
+          beneficios?: string | null
+          cargo?: string
+          cca_codigo?: string
+          cca_id?: number
+          cca_nome?: string
+          created_at?: string
+          created_by?: string | null
+          data_aprovacao?: string | null
+          etapa_atual?: string | null
+          experiencia_desejada?: string
+          faixa_salarial?: string
+          formacao_minima?: string
+          gestor_responsavel?: string
+          gestor_responsavel_id?: string | null
+          hard_skills?: string[] | null
+          id?: string
+          jornada_trabalho?: string
+          justificativa_reprovacao?: string | null
+          local_trabalho?: string
+          motivo_abertura?: string
+          nome_colaborador_substituido?: string | null
+          numero_vaga?: string
+          observacoes?: string | null
+          prazo_mobilizacao?: string
+          prioridade?: string
+          setor?: string
+          soft_skills?: string[] | null
+          status?: string
+          status_aprovacao?: string
+          tipo_contrato?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_recrutamento_vagas_cca"
+            columns: ["cca_id"]
+            isOneToOne: false
+            referencedRelation: "ccas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      recrutamento_vagas_candidatos: {
+        Row: {
+          candidato_id: string
+          created_at: string
+          created_by: string | null
+          data_aplicacao: string
+          data_status_alteracao: string | null
+          feedback_entrevista: string | null
+          id: string
+          motivo_reprovacao: string | null
+          nota_triagem: number | null
+          observacoes: string | null
+          status: string
+          updated_at: string
+          vaga_id: string
+        }
+        Insert: {
+          candidato_id: string
+          created_at?: string
+          created_by?: string | null
+          data_aplicacao?: string
+          data_status_alteracao?: string | null
+          feedback_entrevista?: string | null
+          id?: string
+          motivo_reprovacao?: string | null
+          nota_triagem?: number | null
+          observacoes?: string | null
+          status?: string
+          updated_at?: string
+          vaga_id: string
+        }
+        Update: {
+          candidato_id?: string
+          created_at?: string
+          created_by?: string | null
+          data_aplicacao?: string
+          data_status_alteracao?: string | null
+          feedback_entrevista?: string | null
+          id?: string
+          motivo_reprovacao?: string | null
+          nota_triagem?: number | null
+          observacoes?: string | null
+          status?: string
+          updated_at?: string
+          vaga_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_recrutamento_vagas_candidatos_candidato"
+            columns: ["candidato_id"]
+            isOneToOne: false
+            referencedRelation: "recrutamento_candidatos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_recrutamento_vagas_candidatos_candidato"
+            columns: ["candidato_id"]
+            isOneToOne: false
+            referencedRelation: "view_candidatos_estatisticas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_recrutamento_vagas_candidatos_vaga"
+            columns: ["vaga_id"]
+            isOneToOne: false
+            referencedRelation: "recrutamento_vagas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_recrutamento_vagas_candidatos_vaga"
+            columns: ["vaga_id"]
+            isOneToOne: false
+            referencedRelation: "view_vagas_resumo"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       repositorio_categorias: {
         Row: {
           ativo: boolean | null
@@ -7339,6 +7773,42 @@ export type Database = {
           },
         ]
       }
+      view_candidatos_estatisticas: {
+        Row: {
+          cargo_vaga_pretendida: string | null
+          cca_codigo: string | null
+          data_cadastro: string | null
+          data_ultima_atualizacao: string | null
+          etapa_processo: string | null
+          id: string | null
+          nome_completo: string | null
+          origem_candidato: string | null
+          status_candidato: string | null
+          total_aplicacoes: number | null
+          total_aprovacoes: number | null
+          total_reprovacoes: number | null
+        }
+        Relationships: []
+      }
+      view_vagas_resumo: {
+        Row: {
+          candidatos_aprovados: number | null
+          cargo: string | null
+          cca_codigo: string | null
+          cca_nome: string | null
+          created_at: string | null
+          etapas_atrasadas: number | null
+          id: string | null
+          numero_vaga: string | null
+          prazo_mobilizacao: string | null
+          prioridade: string | null
+          status: string | null
+          status_aprovacao: string | null
+          total_candidatos: number | null
+          updated_at: string | null
+        }
+        Relationships: []
+      }
       vw_heatmap_funcao_agente: {
         Row: {
           agente_nocivo: string | null
@@ -7369,6 +7839,13 @@ export type Database = {
       gerar_numero_os: {
         Args: { p_cca_id: number }
         Returns: string
+      }
+      get_candidatos_por_etapa: {
+        Args: { vaga_id_param: string }
+        Returns: {
+          etapa: string
+          quantidade: number
+        }[]
       }
       get_condutores_cnh_vencendo: {
         Args: { dias?: number }
@@ -7473,6 +7950,17 @@ export type Database = {
       get_user_permissions: {
         Args: { user_id_param: string }
         Returns: string[]
+      }
+      get_vagas_atrasadas: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          cargo: string
+          dias_atraso: number
+          etapa: string
+          numero_vaga: string
+          responsavel: string
+          vaga_id: string
+        }[]
       }
       has_role: {
         Args: {
