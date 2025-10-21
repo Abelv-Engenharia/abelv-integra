@@ -76,11 +76,8 @@ export default function SolicitacaoServicos() {
   const minhasSolicitacoes = solicitacoes.filter(solicitacao => solicitacao.solicitanteId === usuarioAtivo.id);
   const filteredSolicitacoes = minhasSolicitacoes.filter(solicitacao => solicitacao.id.toLowerCase().includes(searchTerm.toLowerCase()) || solicitacao.centroCusto.toLowerCase().includes(searchTerm.toLowerCase()));
   const handleAbrirModal = (solicitacao: SolicitacaoServico) => {
-    console.log('🔍 Abrindo modal para solicitação:', solicitacao);
-    console.log('📊 Número da solicitação:', solicitacao.numeroSolicitacao);
     setSolicitacaoSelecionada(solicitacao);
     setModalAberto(true);
-    console.log('✅ Modal aberto:', true);
   };
   const getSolicitacoesByStatus = (status: StatusSolicitacao) => {
     return filteredSolicitacoes.filter(s => s.status === status);

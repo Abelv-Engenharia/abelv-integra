@@ -76,6 +76,15 @@ const formattiposervico = (tipo: TipoServico) => {
   return labels[tipo] || tipo;
 };
 
+const getCcaSolicitacao = (solicitacao: SolicitacaoServico): string => {
+  // Busca o CCA específico do tipo de serviço
+  if ('cca' in solicitacao && solicitacao.cca) {
+    return solicitacao.cca;
+  }
+  // Fallback para centroCusto se não houver CCA específico
+  return solicitacao.centroCusto || '';
+};
+
 export function VisualizarSolicitacaoModal({
   open,
   onOpenChange,
@@ -85,8 +94,6 @@ export function VisualizarSolicitacaoModal({
   onConcluir,
   modoVisualizacao = false
 }: VisualizarSolicitacaoModalProps) {
-  console.log('🎭 Modal renderizado:', { open, solicitacao: solicitacao?.id, numeroSolicitacao: solicitacao?.numeroSolicitacao });
-  
   const [observacoesgestao, setObservacoesGestao] = useState("");
   const [imagemanexo, setImagemAnexo] = useState<string>("");
   const [estimativavalor, setEstimativaValor] = useState("");
@@ -240,28 +247,24 @@ export function VisualizarSolicitacaoModal({
         return (
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label className="text-muted-foreground">Cca</Label>
-              <p className="font-medium">{voucher.cca}</p>
-            </div>
-            <div>
               <Label className="text-muted-foreground">Valor</Label>
               <p className="font-medium">R$ {voucher.valor?.toFixed(2) || '0.00'}</p>
             </div>
             <div>
               <Label className="text-muted-foreground">Data de uso</Label>
-              <p className="font-medium">{new Date(voucher.dataUso).toLocaleDateString('pt-BR')}</p>
+              <p className="font-medium">{voucher.dataUso ? new Date(voucher.dataUso).toLocaleDateString('pt-BR') : '-'}</p>
             </div>
             <div>
               <Label className="text-muted-foreground">Motivo</Label>
-              <p className="font-medium">{voucher.motivo}</p>
+              <p className="font-medium">{voucher.motivo || '-'}</p>
             </div>
             <div>
               <Label className="text-muted-foreground">Local partida</Label>
-              <p className="font-medium">{voucher.localPartida}</p>
+              <p className="font-medium">{voucher.localPartida || '-'}</p>
             </div>
             <div>
               <Label className="text-muted-foreground">Local destino</Label>
-              <p className="font-medium">{voucher.localDestino}</p>
+              <p className="font-medium">{voucher.localDestino || '-'}</p>
             </div>
           </div>
         );
@@ -271,28 +274,32 @@ export function VisualizarSolicitacaoModal({
         return (
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label className="text-muted-foreground">Cca</Label>
-              <p className="font-medium">{locacao.cca}</p>
+              <Label className="text-muted-foreground">Nome condutor</Label>
+              <p className="font-medium">{locacao.nomeCondutor || '-'}</p>
             </div>
             <div>
-              <Label className="text-muted-foreground">Nome condutor</Label>
-              <p className="font-medium">{locacao.nomeCondutor}</p>
+              <Label className="text-muted-foreground">Motivo</Label>
+              <p className="font-medium">{locacao.motivo || '-'}</p>
             </div>
             <div>
               <Label className="text-muted-foreground">Data retirada</Label>
-              <p className="font-medium">{new Date(locacao.dataRetirada).toLocaleDateString('pt-BR')}</p>
+              <p className="font-medium">{locacao.dataRetirada ? new Date(locacao.dataRetirada).toLocaleDateString('pt-BR') : '-'}</p>
             </div>
             <div>
               <Label className="text-muted-foreground">Período locação</Label>
-              <p className="font-medium">{locacao.periodoLocacao}</p>
+              <p className="font-medium">{locacao.periodoLocacao || '-'}</p>
             </div>
             <div>
               <Label className="text-muted-foreground">Local retirada</Label>
-              <p className="font-medium">{locacao.localRetirada}</p>
+              <p className="font-medium">{locacao.localRetirada || '-'}</p>
             </div>
             <div>
               <Label className="text-muted-foreground">Franquia km</Label>
               <p className="font-medium">{locacao.franquiaKm || "Não informado"}</p>
+            </div>
+            <div>
+              <Label className="text-muted-foreground">Termo responsabilidade</Label>
+              <p className="font-medium">{locacao.termoResponsabilidade ? 'Sim' : 'Não'}</p>
             </div>
           </div>
         );
@@ -307,20 +314,20 @@ export function VisualizarSolicitacaoModal({
                 <p className="font-medium">{passagens.tipoPassagem === 'aerea' ? 'Aérea' : 'Rodoviária'}</p>
               </div>
               <div>
-                <Label className="text-muted-foreground">Cca</Label>
-                <p className="font-medium">{passagens.cca}</p>
+                <Label className="text-muted-foreground">Motivo</Label>
+                <p className="font-medium">{passagens.motivo || '-'}</p>
               </div>
               <div>
                 <Label className="text-muted-foreground">Origem</Label>
-                <p className="font-medium">{passagens.origem}</p>
+                <p className="font-medium">{passagens.origem || '-'}</p>
               </div>
               <div>
                 <Label className="text-muted-foreground">Destino</Label>
-                <p className="font-medium">{passagens.destino}</p>
+                <p className="font-medium">{passagens.destino || '-'}</p>
               </div>
               <div>
                 <Label className="text-muted-foreground">Data viagem</Label>
-                <p className="font-medium">{new Date(passagens.dataViagem).toLocaleDateString('pt-BR')}</p>
+                <p className="font-medium">{passagens.dataViagem ? new Date(passagens.dataViagem).toLocaleDateString('pt-BR') : '-'}</p>
               </div>
               {passagens.dataVolta && (
                 <div>
@@ -328,13 +335,23 @@ export function VisualizarSolicitacaoModal({
                   <p className="font-medium">{new Date(passagens.dataVolta).toLocaleDateString('pt-BR')}</p>
                 </div>
               )}
+              <div>
+                <Label className="text-muted-foreground">Precisa bagagem</Label>
+                <p className="font-medium">{passagens.precisaBagagem ? 'Sim' : 'Não'}</p>
+              </div>
             </div>
             <div>
-              <Label className="text-muted-foreground">Viajantes ({passagens.viajantes.length})</Label>
-              {passagens.viajantes.map((v, idx) => (
+              <Label className="text-muted-foreground">Viajantes ({passagens.viajantes?.length || 0})</Label>
+              {passagens.viajantes?.map((v, idx) => (
                 <p key={idx} className="font-medium text-sm">{v.nome}</p>
-              ))}
+              )) || <p className="text-sm text-muted-foreground">Nenhum viajante cadastrado</p>}
             </div>
+            {passagens.observacoesViagem && (
+              <div>
+                <Label className="text-muted-foreground">Observações viagem</Label>
+                <p className="font-medium">{passagens.observacoesViagem}</p>
+              </div>
+            )}
           </div>
         );
       }
@@ -344,24 +361,30 @@ export function VisualizarSolicitacaoModal({
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label className="text-muted-foreground">Hotel</Label>
-              <p className="font-medium">{hospedagem.hotel}</p>
+              <p className="font-medium">{hospedagem.hotel || '-'}</p>
             </div>
             <div>
               <Label className="text-muted-foreground">Número pessoas</Label>
-              <p className="font-medium">{hospedagem.numeroPessoas}</p>
+              <p className="font-medium">{hospedagem.numeroPessoas || '-'}</p>
             </div>
             <div>
               <Label className="text-muted-foreground">Data início</Label>
-              <p className="font-medium">{new Date(hospedagem.dataInicio).toLocaleDateString('pt-BR')}</p>
+              <p className="font-medium">{hospedagem.dataInicio ? new Date(hospedagem.dataInicio).toLocaleDateString('pt-BR') : '-'}</p>
             </div>
             <div>
               <Label className="text-muted-foreground">Data fim</Label>
-              <p className="font-medium">{new Date(hospedagem.dataFim).toLocaleDateString('pt-BR')}</p>
+              <p className="font-medium">{hospedagem.dataFim ? new Date(hospedagem.dataFim).toLocaleDateString('pt-BR') : '-'}</p>
             </div>
             <div className="col-span-2">
               <Label className="text-muted-foreground">Motivo</Label>
-              <p className="font-medium">{hospedagem.motivo}</p>
+              <p className="font-medium">{hospedagem.motivo || '-'}</p>
             </div>
+            {hospedagem.observacoesHospedagem && (
+              <div className="col-span-2">
+                <Label className="text-muted-foreground">Observações</Label>
+                <p className="font-medium">{hospedagem.observacoesHospedagem}</p>
+              </div>
+            )}
           </div>
         );
       }
@@ -375,27 +398,35 @@ export function VisualizarSolicitacaoModal({
             </div>
             <div>
               <Label className="text-muted-foreground">Peso aproximado</Label>
-              <p className="font-medium">{logistica.pesoAproximado} kg</p>
+              <p className="font-medium">{logistica.pesoAproximado || '-'} kg</p>
             </div>
             <div>
               <Label className="text-muted-foreground">Data serviço</Label>
-              <p className="font-medium">{new Date(logistica.dataServico).toLocaleDateString('pt-BR')}</p>
+              <p className="font-medium">{logistica.dataServico ? new Date(logistica.dataServico).toLocaleDateString('pt-BR') : '-'}</p>
+            </div>
+            <div>
+              <Label className="text-muted-foreground">Motivo</Label>
+              <p className="font-medium">{logistica.motivo || '-'}</p>
             </div>
             <div>
               <Label className="text-muted-foreground">Remetente/destinatário</Label>
-              <p className="font-medium">{logistica.remetenteDestinatario}</p>
+              <p className="font-medium">{logistica.remetenteDestinatario || '-'}</p>
             </div>
             <div className="col-span-2">
               <Label className="text-muted-foreground">Endereço completo</Label>
-              <p className="font-medium">{logistica.enderecoCompleto}</p>
+              <p className="font-medium">{logistica.enderecoCompleto || '-'}</p>
             </div>
             <div>
               <Label className="text-muted-foreground">Cidade</Label>
-              <p className="font-medium">{logistica.cidade}</p>
+              <p className="font-medium">{logistica.cidade || '-'}</p>
+            </div>
+            <div>
+              <Label className="text-muted-foreground">Estado</Label>
+              <p className="font-medium">{logistica.estado || '-'}</p>
             </div>
             <div>
               <Label className="text-muted-foreground">Cep</Label>
-              <p className="font-medium">{logistica.cep}</p>
+              <p className="font-medium">{logistica.cep || '-'}</p>
             </div>
           </div>
         );
@@ -405,8 +436,8 @@ export function VisualizarSolicitacaoModal({
         return (
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label className="text-muted-foreground">Cca</Label>
-              <p className="font-medium">{cartao.cca}</p>
+              <Label className="text-muted-foreground">Nome solicitante</Label>
+              <p className="font-medium">{cartao.nomeSolicitante || '-'}</p>
             </div>
             <div>
               <Label className="text-muted-foreground">Tipo solicitação</Label>
@@ -416,13 +447,23 @@ export function VisualizarSolicitacaoModal({
               </p>
             </div>
             <div>
+              <Label className="text-muted-foreground">Motivo</Label>
+              <p className="font-medium">{cartao.motivo || '-'}</p>
+            </div>
+            <div>
               <Label className="text-muted-foreground">Data</Label>
-              <p className="font-medium">{new Date(cartao.data).toLocaleDateString('pt-BR')}</p>
+              <p className="font-medium">{cartao.data ? new Date(cartao.data).toLocaleDateString('pt-BR') : '-'}</p>
             </div>
             {cartao.valorAdicional && (
               <div>
                 <Label className="text-muted-foreground">Valor adicional</Label>
                 <p className="font-medium">R$ {cartao.valorAdicional?.toFixed(2) || '0.00'}</p>
+              </div>
+            )}
+            {cartao.kmVeiculo && (
+              <div>
+                <Label className="text-muted-foreground">Km veículo</Label>
+                <p className="font-medium">{cartao.kmVeiculo} km</p>
               </div>
             )}
             {cartao.placaAssociada && (
@@ -444,15 +485,15 @@ export function VisualizarSolicitacaoModal({
             </div>
             <div>
               <Label className="text-muted-foreground">Data uso</Label>
-              <p className="font-medium">{new Date(veloe.dataUso).toLocaleDateString('pt-BR')}</p>
+              <p className="font-medium">{veloe.dataUso ? new Date(veloe.dataUso).toLocaleDateString('pt-BR') : '-'}</p>
             </div>
             <div>
               <Label className="text-muted-foreground">Local partida</Label>
-              <p className="font-medium">{veloe.localPartida}</p>
+              <p className="font-medium">{veloe.localPartida || '-'}</p>
             </div>
             <div>
               <Label className="text-muted-foreground">Local destino</Label>
-              <p className="font-medium">{veloe.localDestino}</p>
+              <p className="font-medium">{veloe.localDestino || '-'}</p>
             </div>
           </div>
         );
@@ -502,8 +543,8 @@ export function VisualizarSolicitacaoModal({
                   <p className="font-medium">{new Date(solicitacao.dataSolicitacao).toLocaleDateString('pt-BR')}</p>
                 </div>
                 <div>
-                  <Label className="text-muted-foreground">Centro de custo</Label>
-                  <p className="font-medium">{solicitacao.centroCusto}</p>
+                  <Label className="text-muted-foreground">CCA</Label>
+                  <p className="font-medium">{getCcaSolicitacao(solicitacao)}</p>
                 </div>
                 {solicitacao.observacoes && (
                   <div className="col-span-2">
