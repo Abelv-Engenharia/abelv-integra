@@ -4932,6 +4932,13 @@ export type Database = {
             referencedRelation: "prestadores_pj"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "fk_contratos_prestador"
+            columns: ["prestador_pj_id"]
+            isOneToOne: false
+            referencedRelation: "view_prestadores_resumo"
+            referencedColumns: ["id"]
+          },
         ]
       }
       prestadores_demonstrativos: {
@@ -5050,6 +5057,13 @@ export type Database = {
             referencedRelation: "prestadores_pj"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "fk_demonstrativos_prestador"
+            columns: ["prestador_pj_id"]
+            isOneToOne: false
+            referencedRelation: "view_prestadores_resumo"
+            referencedColumns: ["id"]
+          },
         ]
       }
       prestadores_ferias: {
@@ -5157,6 +5171,13 @@ export type Database = {
             columns: ["prestador_pj_id"]
             isOneToOne: false
             referencedRelation: "prestadores_pj"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_ferias_prestador"
+            columns: ["prestador_pj_id"]
+            isOneToOne: false
+            referencedRelation: "view_prestadores_resumo"
             referencedColumns: ["id"]
           },
         ]
@@ -5337,6 +5358,13 @@ export type Database = {
             referencedRelation: "prestadores_pj"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "fk_nf_prestador"
+            columns: ["prestador_pj_id"]
+            isOneToOne: false
+            referencedRelation: "view_prestadores_resumo"
+            referencedColumns: ["id"]
+          },
         ]
       }
       prestadores_passivos: {
@@ -5435,6 +5463,13 @@ export type Database = {
             columns: ["prestador_pj_id"]
             isOneToOne: false
             referencedRelation: "prestadores_pj"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_passivos_prestador"
+            columns: ["prestador_pj_id"]
+            isOneToOne: false
+            referencedRelation: "view_prestadores_resumo"
             referencedColumns: ["id"]
           },
         ]
@@ -8614,6 +8649,44 @@ export type Database = {
         }
         Relationships: []
       }
+      view_demonstrativos_mensais: {
+        Row: {
+          cca_codigo: string | null
+          cca_nome: string | null
+          mes: string | null
+          total_ajuda_aluguel: number | null
+          total_desconto_convenio: number | null
+          total_liquido: number | null
+          total_multas: number | null
+          total_nf: number | null
+          total_prestadores: number | null
+          total_reembolso_convenio: number | null
+          total_salarios: number | null
+        }
+        Relationships: []
+      }
+      view_prestadores_resumo: {
+        Row: {
+          ativo: boolean | null
+          cca_codigo: string | null
+          cca_nome: string | null
+          cnpj: string | null
+          contratos_ativos: number | null
+          cpf: string | null
+          created_at: string | null
+          ferias_ativas: number | null
+          id: string | null
+          razaosocial: string | null
+          representante: string | null
+          total_contratos: number | null
+          total_ferias: number | null
+          total_nf: number | null
+          total_passivos: number | null
+          updated_at: string | null
+          valor_total_nf: number | null
+        }
+        Relationships: []
+      }
       view_vagas_resumo: {
         Row: {
           candidatos_aprovados: number | null
@@ -8644,6 +8717,15 @@ export type Database = {
       }
     }
     Functions: {
+      calcular_total_passivos_por_cca: {
+        Args: { cca_id_param: number }
+        Returns: {
+          cca_codigo: string
+          cca_nome: string
+          quantidade_prestadores: number
+          total_passivos: number
+        }[]
+      }
       create_encarregado_snapshot: {
         Args: { p_encarregado_id: string }
         Returns: string
@@ -8759,6 +8841,17 @@ export type Database = {
           status_multa: string
         }[]
       }
+      get_nf_pendentes_aprovacao: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          dataemissao: string
+          dias_pendente: number
+          nf_id: string
+          nomeempresa: string
+          numero: string
+          valor: number
+        }[]
+      }
       get_personnel_data: {
         Args: {
           p_person_id: string
@@ -8766,6 +8859,26 @@ export type Database = {
           p_prefer_current?: boolean
         }
         Returns: Json
+      }
+      get_prestadores_contratos_ativos: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          contrato_id: string
+          datafim: string
+          dias_restantes: number
+          numero: string
+          prestador_nome: string
+        }[]
+      }
+      get_prestadores_ferias_proximas: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          datainicio: string
+          dias_restantes: number
+          ferias_id: string
+          prestador_nome: string
+          status: string
+        }[]
       }
       get_user_allowed_ccas: {
         Args: { user_id_param: string }
