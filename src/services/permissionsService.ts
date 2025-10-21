@@ -295,6 +295,84 @@ export const COMPLETE_PERMISSIONS: PermissionCategory[] = [
       { key: 'comercial_controle_cadastros_vendedores', label: 'Alteração - Vendedores' }
     ]
   },
+  {
+    name: 'Gestão de Pessoas - Solicitações de Serviços',
+    permissions: [
+      { key: 'gestao_pessoas_solicitacoes_dashboard', label: 'Dashboard' },
+      { key: 'gestao_pessoas_solicitacoes_criar', label: 'Criar Solicitação' },
+      { key: 'gestao_pessoas_solicitacoes_visualizar', label: 'Visualizar Solicitações' },
+      { key: 'gestao_pessoas_solicitacoes_editar', label: 'Editar Solicitação' },
+      { key: 'gestao_pessoas_solicitacoes_excluir', label: 'Excluir Solicitação' },
+      { key: 'gestao_pessoas_solicitacoes_aprovar', label: 'Aprovar Solicitações' },
+      { key: 'gestao_pessoas_solicitacoes_reprovar', label: 'Reprovar Solicitações' },
+      { key: 'gestao_pessoas_solicitacoes_relatorios', label: 'Relatórios' }
+    ]
+  },
+  {
+    name: 'Gestão de Pessoas - Viagens',
+    permissions: [
+      { key: 'gestao_pessoas_viagens_dashboard', label: 'Dashboard' },
+      { key: 'gestao_pessoas_viagens_cadastrar_fatura', label: 'Cadastrar Fatura' },
+      { key: 'gestao_pessoas_viagens_importar_fatura', label: 'Importar Fatura' },
+      { key: 'gestao_pessoas_viagens_consultar_faturas', label: 'Consultar Faturas' },
+      { key: 'gestao_pessoas_viagens_relatorios', label: 'Relatórios' }
+    ]
+  },
+  {
+    name: 'Gestão de Pessoas - Veículos',
+    permissions: [
+      { key: 'gestao_pessoas_veiculos_dashboard', label: 'Dashboard' },
+      { key: 'gestao_pessoas_veiculos_cadastrar', label: 'Cadastrar Veículo' },
+      { key: 'gestao_pessoas_veiculos_editar', label: 'Editar Veículo' },
+      { key: 'gestao_pessoas_veiculos_visualizar', label: 'Visualizar Veículos' },
+      { key: 'gestao_pessoas_veiculos_excluir', label: 'Excluir Veículo' },
+      { key: 'gestao_pessoas_veiculos_consultas', label: 'Consultas Veículos' },
+      { key: 'gestao_pessoas_veiculos_multas_cadastrar', label: 'Cadastrar Multas' },
+      { key: 'gestao_pessoas_veiculos_multas_visualizar', label: 'Visualizar Multas' },
+      { key: 'gestao_pessoas_veiculos_multas_editar', label: 'Editar Multas' },
+      { key: 'gestao_pessoas_veiculos_condutores_cadastrar', label: 'Cadastrar Condutores' },
+      { key: 'gestao_pessoas_veiculos_condutores_visualizar', label: 'Visualizar Condutores' },
+      { key: 'gestao_pessoas_veiculos_condutores_editar', label: 'Editar Condutores' },
+      { key: 'gestao_pessoas_veiculos_cartoes_cadastrar', label: 'Cadastrar Cartões' },
+      { key: 'gestao_pessoas_veiculos_cartoes_visualizar', label: 'Visualizar Cartões' },
+      { key: 'gestao_pessoas_veiculos_pedagios_cadastrar', label: 'Cadastrar Pedágios' },
+      { key: 'gestao_pessoas_veiculos_pedagios_visualizar', label: 'Visualizar Pedágios' },
+      { key: 'gestao_pessoas_veiculos_checklists_criar', label: 'Criar Checklists' },
+      { key: 'gestao_pessoas_veiculos_checklists_visualizar', label: 'Visualizar Checklists' },
+      { key: 'gestao_pessoas_veiculos_abastecimento_gerenciar', label: 'Gerenciar Abastecimento' },
+      { key: 'gestao_pessoas_veiculos_relatorios', label: 'Relatórios' }
+    ]
+  },
+  {
+    name: 'Gestão de Pessoas - Recrutamento & Seleção',
+    permissions: [
+      { key: 'gestao_pessoas_recrutamento_dashboard', label: 'Dashboard' },
+      { key: 'gestao_pessoas_recrutamento_abertura_vaga', label: 'Abertura de Vaga' },
+      { key: 'gestao_pessoas_recrutamento_gestao_vagas', label: 'Gestão de Vagas' },
+      { key: 'gestao_pessoas_recrutamento_aprovacao_vaga', label: 'Aprovação de Vaga' },
+      { key: 'gestao_pessoas_recrutamento_banco_talentos', label: 'Banco de Talentos' },
+      { key: 'gestao_pessoas_recrutamento_acompanhamento_sla', label: 'Acompanhamento SLA' }
+    ]
+  },
+  {
+    name: 'Gestão de Pessoas - Prestadores de Serviço',
+    permissions: [
+      { key: 'gestao_pessoas_prestadores_dashboard', label: 'Dashboard' },
+      { key: 'gestao_pessoas_prestadores_cadastrar_pj', label: 'Cadastrar Pessoa Jurídica' },
+      { key: 'gestao_pessoas_prestadores_consultar_pj', label: 'Consultar Prestadores' },
+      { key: 'gestao_pessoas_prestadores_editar_pj', label: 'Editar Prestador' },
+      { key: 'gestao_pessoas_prestadores_contratos_visualizar', label: 'Visualizar Contratos' },
+      { key: 'gestao_pessoas_prestadores_contratos_criar', label: 'Criar Contrato' },
+      { key: 'gestao_pessoas_prestadores_contratos_editar', label: 'Editar Contrato' },
+      { key: 'gestao_pessoas_prestadores_demonstrativos', label: 'Demonstrativos' },
+      { key: 'gestao_pessoas_prestadores_nf_emitir', label: 'Emitir Nota Fiscal' },
+      { key: 'gestao_pessoas_prestadores_nf_aprovar', label: 'Aprovar Nota Fiscal' },
+      { key: 'gestao_pessoas_prestadores_ferias_controlar', label: 'Controlar Férias' },
+      { key: 'gestao_pessoas_prestadores_ferias_aprovar', label: 'Aprovar Férias' },
+      { key: 'gestao_pessoas_prestadores_passivos', label: 'Controle de Passivos' },
+      { key: 'gestao_pessoas_prestadores_relatorios', label: 'Relatórios' }
+    ]
+  },
 ];
 
 // Função para converter permissões customizadas em array de slugs para menus_sidebar
