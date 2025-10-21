@@ -8,6 +8,7 @@ import { queryClient } from "@/lib/queryClient";
 import { AuthProvider } from "@/contexts/AuthContext";
 import AuthGuard from "@/components/auth/AuthGuard";
 import Layout from "@/components/layout/Layout";
+import { PermissionGuard } from "@/components/security/PermissionGuard";
 
 // Import pages
 import Dashboard from "./pages/Dashboard";
@@ -593,26 +594,98 @@ function App() {
                 <Route path="gestao-pessoas/relatorios-solicitacoes" element={<SolicitacoesProvider><RelatoriosSolicitacoes /></SolicitacoesProvider>} />
                 
                 {/* Gestão de Pessoas - Recrutamento & Seleção */}
-                <Route path="gestao-pessoas/dashboard-recrutamento" element={<DashboardRecrutamento />} />
-                <Route path="gestao-pessoas/rh-abertura-vaga" element={<RhAberturaVaga />} />
-                <Route path="gestao-pessoas/gestao-vagas" element={<GestaoVagas />} />
-                <Route path="gestao-pessoas/rh-detalhes-vaga/:id" element={<RhDetalhesVaga />} />
-                <Route path="gestao-pessoas/aprovacao-vaga" element={<AprovacaoVaga />} />
-                <Route path="gestao-pessoas/banco-talentos" element={<BancoTalentos />} />
+                <Route path="gestao-pessoas/dashboard-recrutamento" element={
+                  <PermissionGuard requiredPermission="gestao_pessoas_recrutamento_dashboard">
+                    <DashboardRecrutamento />
+                  </PermissionGuard>
+                } />
+                <Route path="gestao-pessoas/rh-abertura-vaga" element={
+                  <PermissionGuard requiredPermission="gestao_pessoas_recrutamento_abertura_vaga">
+                    <RhAberturaVaga />
+                  </PermissionGuard>
+                } />
+                <Route path="gestao-pessoas/gestao-vagas" element={
+                  <PermissionGuard requiredPermission="gestao_pessoas_recrutamento_gestao_vagas">
+                    <GestaoVagas />
+                  </PermissionGuard>
+                } />
+                <Route path="gestao-pessoas/rh-detalhes-vaga/:id" element={
+                  <PermissionGuard requiredPermission="gestao_pessoas_recrutamento_gestao_vagas">
+                    <RhDetalhesVaga />
+                  </PermissionGuard>
+                } />
+                <Route path="gestao-pessoas/aprovacao-vaga" element={
+                  <PermissionGuard requiredPermission="gestao_pessoas_recrutamento_aprovacao_vaga">
+                    <AprovacaoVaga />
+                  </PermissionGuard>
+                } />
+                <Route path="gestao-pessoas/banco-talentos" element={
+                  <PermissionGuard requiredPermission="gestao_pessoas_recrutamento_banco_talentos">
+                    <BancoTalentos />
+                  </PermissionGuard>
+                } />
                 
                 {/* Gestão de Pessoas - Prestadores de Serviço */}
-                <Route path="gestao-pessoas/dashboard-prestadores" element={<DashboardPrestadores />} />
-                <Route path="gestao-pessoas/cadastro-pessoa-juridica" element={<CadastroPessoaJuridica />} />
-                <Route path="gestao-pessoas/consulta-prestadores" element={<ConsultaPrestadores />} />
-                <Route path="gestao-pessoas/emissao-contrato-prestacao-servico" element={<EmissaoContratoPrestacaoServico />} />
-                <Route path="gestao-pessoas/consulta-contratos" element={<ConsultaContratos />} />
-                <Route path="gestao-pessoas/demonstrativo-prestacao-servico" element={<DemonstrativoPrestacaoServico />} />
-                <Route path="gestao-pessoas/cadastro-emissao-nf" element={<CadastroEmissaoNF />} />
-                <Route path="gestao-pessoas/aprovacao-nf" element={<AprovacaoNF />} />
-                <Route path="gestao-pessoas/relatorios-prestadores" element={<RelatoriosPrestadores />} />
-                <Route path="gestao-pessoas/controle-ferias" element={<ControleFerias />} />
-                <Route path="gestao-pessoas/aprovacao-ferias" element={<AprovacaoFerias />} />
-                <Route path="gestao-pessoas/controle-passivos" element={<ControlePassivos />} />
+                <Route path="gestao-pessoas/dashboard-prestadores" element={
+                  <PermissionGuard requiredPermission="gestao_pessoas_prestadores_dashboard">
+                    <DashboardPrestadores />
+                  </PermissionGuard>
+                } />
+                <Route path="gestao-pessoas/cadastro-pessoa-juridica" element={
+                  <PermissionGuard requiredPermission="gestao_pessoas_prestadores_cadastrar_pj">
+                    <CadastroPessoaJuridica />
+                  </PermissionGuard>
+                } />
+                <Route path="gestao-pessoas/consulta-prestadores" element={
+                  <PermissionGuard requiredPermission="gestao_pessoas_prestadores_consultar_pj">
+                    <ConsultaPrestadores />
+                  </PermissionGuard>
+                } />
+                <Route path="gestao-pessoas/emissao-contrato-prestacao-servico" element={
+                  <PermissionGuard requiredPermission="gestao_pessoas_prestadores_contratos_criar">
+                    <EmissaoContratoPrestacaoServico />
+                  </PermissionGuard>
+                } />
+                <Route path="gestao-pessoas/consulta-contratos" element={
+                  <PermissionGuard requiredPermission="gestao_pessoas_prestadores_contratos_visualizar">
+                    <ConsultaContratos />
+                  </PermissionGuard>
+                } />
+                <Route path="gestao-pessoas/demonstrativo-prestacao-servico" element={
+                  <PermissionGuard requiredPermission="gestao_pessoas_prestadores_demonstrativos">
+                    <DemonstrativoPrestacaoServico />
+                  </PermissionGuard>
+                } />
+                <Route path="gestao-pessoas/cadastro-emissao-nf" element={
+                  <PermissionGuard requiredPermission="gestao_pessoas_prestadores_nf_emitir">
+                    <CadastroEmissaoNF />
+                  </PermissionGuard>
+                } />
+                <Route path="gestao-pessoas/aprovacao-nf" element={
+                  <PermissionGuard requiredPermission="gestao_pessoas_prestadores_nf_aprovar">
+                    <AprovacaoNF />
+                  </PermissionGuard>
+                } />
+                <Route path="gestao-pessoas/relatorios-prestadores" element={
+                  <PermissionGuard requiredPermission="gestao_pessoas_prestadores_relatorios">
+                    <RelatoriosPrestadores />
+                  </PermissionGuard>
+                } />
+                <Route path="gestao-pessoas/controle-ferias" element={
+                  <PermissionGuard requiredPermission="gestao_pessoas_prestadores_ferias_controlar">
+                    <ControleFerias />
+                  </PermissionGuard>
+                } />
+                <Route path="gestao-pessoas/aprovacao-ferias" element={
+                  <PermissionGuard requiredPermission="gestao_pessoas_prestadores_ferias_aprovar">
+                    <AprovacaoFerias />
+                  </PermissionGuard>
+                } />
+                <Route path="gestao-pessoas/controle-passivos" element={
+                  <PermissionGuard requiredPermission="gestao_pessoas_prestadores_passivos">
+                    <ControlePassivos />
+                  </PermissionGuard>
+                } />
                 
                 {/* Gestão de Pessoas - Viagens */}
                 <Route path="gestao-pessoas/gestao-viagens-dashboard" element={<GestaoViagensDashboard />} />

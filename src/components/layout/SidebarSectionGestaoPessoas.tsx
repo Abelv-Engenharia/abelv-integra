@@ -446,195 +446,255 @@ export default function SidebarSectionGestaoPessoas({
               </Collapsible>
 
               {/* Recrutamento & Seleção */}
-              <Collapsible open={openSubmenus.recrutamento} onOpenChange={() => toggleSubmenu("recrutamento")}>
-                <SidebarMenuItem>
-                  <CollapsibleTrigger asChild>
-                    <SidebarMenuButton className="w-full justify-between hover:bg-sidebar-accent">
-                      <div className="flex items-center gap-2">
-                        <UserPlus className="h-4 w-4" />
-                        <span>Recrutamento & Seleção</span>
-                      </div>
-                      {openSubmenus.recrutamento ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-                    </SidebarMenuButton>
-                  </CollapsibleTrigger>
+              {[
+                'gestao_pessoas_recrutamento_dashboard',
+                'gestao_pessoas_recrutamento_abertura_vaga',
+                'gestao_pessoas_recrutamento_gestao_vagas',
+                'gestao_pessoas_recrutamento_aprovacao_vaga',
+                'gestao_pessoas_recrutamento_banco_talentos',
+                'gestao_pessoas_recrutamento_acompanhamento_sla'
+              ].some(canSee) && (
+                <Collapsible open={openSubmenus.recrutamento} onOpenChange={() => toggleSubmenu("recrutamento")}>
+                  <SidebarMenuItem>
+                    <CollapsibleTrigger asChild>
+                      <SidebarMenuButton className="w-full justify-between hover:bg-sidebar-accent">
+                        <div className="flex items-center gap-2">
+                          <UserPlus className="h-4 w-4" />
+                          <span>Recrutamento & Seleção</span>
+                        </div>
+                        {openSubmenus.recrutamento ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                      </SidebarMenuButton>
+                    </CollapsibleTrigger>
 
-                  <CollapsibleContent>
-                    <SidebarMenu className="ml-4 border-l border-sidebar-border">
-                      <SidebarMenuItem>
-                        <SidebarMenuButton asChild>
-                          <Link to="/gestao-pessoas/dashboard-recrutamento" onClick={onLinkClick}>
-                            <BarChart3 className="h-4 w-4" />
-                            <span>Dashboard</span>
-                          </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
+                    <CollapsibleContent>
+                      <SidebarMenu className="ml-4 border-l border-sidebar-border">
+                        {canSee('gestao_pessoas_recrutamento_dashboard') && (
+                          <SidebarMenuItem>
+                            <SidebarMenuButton asChild>
+                              <Link to="/gestao-pessoas/dashboard-recrutamento" onClick={onLinkClick}>
+                                <BarChart3 className="h-4 w-4" />
+                                <span>Dashboard</span>
+                              </Link>
+                            </SidebarMenuButton>
+                          </SidebarMenuItem>
+                        )}
 
-                      <SidebarMenuItem>
-                        <SidebarMenuButton asChild>
-                          <Link to="/gestao-pessoas/rh-abertura-vaga" onClick={onLinkClick}>
-                            <FilePlus className="h-4 w-4" />
-                            <span>Abertura de Vaga</span>
-                          </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
+                        {canSee('gestao_pessoas_recrutamento_abertura_vaga') && (
+                          <SidebarMenuItem>
+                            <SidebarMenuButton asChild>
+                              <Link to="/gestao-pessoas/rh-abertura-vaga" onClick={onLinkClick}>
+                                <FilePlus className="h-4 w-4" />
+                                <span>Abertura de Vaga</span>
+                              </Link>
+                            </SidebarMenuButton>
+                          </SidebarMenuItem>
+                        )}
 
-                      <SidebarMenuItem>
-                        <SidebarMenuButton asChild>
-                          <Link to="/gestao-pessoas/gestao-vagas" onClick={onLinkClick}>
-                            <Database className="h-4 w-4" />
-                            <span>Gestão de Vagas</span>
-                          </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
+                        {canSee('gestao_pessoas_recrutamento_gestao_vagas') && (
+                          <SidebarMenuItem>
+                            <SidebarMenuButton asChild>
+                              <Link to="/gestao-pessoas/gestao-vagas" onClick={onLinkClick}>
+                                <Database className="h-4 w-4" />
+                                <span>Gestão de Vagas</span>
+                              </Link>
+                            </SidebarMenuButton>
+                          </SidebarMenuItem>
+                        )}
 
-                      <SidebarMenuItem>
-                        <SidebarMenuButton asChild>
-                          <Link to="/gestao-pessoas/aprovacao-vaga" onClick={onLinkClick}>
-                            <CheckCircle className="h-4 w-4" />
-                            <span>Aprovação de Vaga</span>
-                          </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
+                        {canSee('gestao_pessoas_recrutamento_aprovacao_vaga') && (
+                          <SidebarMenuItem>
+                            <SidebarMenuButton asChild>
+                              <Link to="/gestao-pessoas/aprovacao-vaga" onClick={onLinkClick}>
+                                <CheckCircle className="h-4 w-4" />
+                                <span>Aprovação de Vaga</span>
+                              </Link>
+                            </SidebarMenuButton>
+                          </SidebarMenuItem>
+                        )}
 
-                      <SidebarMenuItem>
-                        <SidebarMenuButton asChild>
-                          <Link to="/gestao-pessoas/banco-talentos" onClick={onLinkClick}>
-                            <Users className="h-4 w-4" />
-                            <span>Banco de Talentos</span>
-                          </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                    </SidebarMenu>
-                  </CollapsibleContent>
-                </SidebarMenuItem>
-              </Collapsible>
+                        {canSee('gestao_pessoas_recrutamento_banco_talentos') && (
+                          <SidebarMenuItem>
+                            <SidebarMenuButton asChild>
+                              <Link to="/gestao-pessoas/banco-talentos" onClick={onLinkClick}>
+                                <Users className="h-4 w-4" />
+                                <span>Banco de Talentos</span>
+                              </Link>
+                            </SidebarMenuButton>
+                          </SidebarMenuItem>
+                        )}
+                      </SidebarMenu>
+                    </CollapsibleContent>
+                  </SidebarMenuItem>
+                </Collapsible>
+              )}
 
               {/* Prestadores de Serviço */}
-              <Collapsible open={openSubmenus.prestadores} onOpenChange={() => toggleSubmenu("prestadores")}>
-                <SidebarMenuItem>
-                  <CollapsibleTrigger asChild>
-                    <SidebarMenuButton className="w-full justify-between hover:bg-sidebar-accent">
-                      <div className="flex items-center gap-2">
-                        <Briefcase className="h-4 w-4" />
-                        <span>Prestadores de Serviço</span>
-                      </div>
-                      {openSubmenus.prestadores ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-                    </SidebarMenuButton>
-                  </CollapsibleTrigger>
+              {[
+                'gestao_pessoas_prestadores_dashboard',
+                'gestao_pessoas_prestadores_cadastrar_pj',
+                'gestao_pessoas_prestadores_consultar_pj',
+                'gestao_pessoas_prestadores_editar_pj',
+                'gestao_pessoas_prestadores_contratos_visualizar',
+                'gestao_pessoas_prestadores_contratos_criar',
+                'gestao_pessoas_prestadores_contratos_editar',
+                'gestao_pessoas_prestadores_demonstrativos',
+                'gestao_pessoas_prestadores_nf_emitir',
+                'gestao_pessoas_prestadores_nf_aprovar',
+                'gestao_pessoas_prestadores_ferias_controlar',
+                'gestao_pessoas_prestadores_ferias_aprovar',
+                'gestao_pessoas_prestadores_passivos',
+                'gestao_pessoas_prestadores_relatorios'
+              ].some(canSee) && (
+                <Collapsible open={openSubmenus.prestadores} onOpenChange={() => toggleSubmenu("prestadores")}>
+                  <SidebarMenuItem>
+                    <CollapsibleTrigger asChild>
+                      <SidebarMenuButton className="w-full justify-between hover:bg-sidebar-accent">
+                        <div className="flex items-center gap-2">
+                          <Briefcase className="h-4 w-4" />
+                          <span>Prestadores de Serviço</span>
+                        </div>
+                        {openSubmenus.prestadores ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                      </SidebarMenuButton>
+                    </CollapsibleTrigger>
 
-                  <CollapsibleContent>
-                    <SidebarMenu className="ml-4 border-l border-sidebar-border">
-                      <SidebarMenuItem>
-                        <SidebarMenuButton asChild>
-                          <Link to="/gestao-pessoas/dashboard-prestadores" onClick={onLinkClick}>
-                            <BarChart3 className="h-4 w-4" />
-                            <span>Dashboard</span>
-                          </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
+                    <CollapsibleContent>
+                      <SidebarMenu className="ml-4 border-l border-sidebar-border">
+                        {canSee('gestao_pessoas_prestadores_dashboard') && (
+                          <SidebarMenuItem>
+                            <SidebarMenuButton asChild>
+                              <Link to="/gestao-pessoas/dashboard-prestadores" onClick={onLinkClick}>
+                                <BarChart3 className="h-4 w-4" />
+                                <span>Dashboard</span>
+                              </Link>
+                            </SidebarMenuButton>
+                          </SidebarMenuItem>
+                        )}
 
-                      <SidebarMenuItem>
-                        <SidebarMenuButton asChild>
-                          <Link to="/gestao-pessoas/cadastro-pessoa-juridica" onClick={onLinkClick}>
-                            <FilePlus className="h-4 w-4" />
-                            <span>Cadastro Pessoa Jurídica</span>
-                          </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
+                        {canSee('gestao_pessoas_prestadores_cadastrar_pj') && (
+                          <SidebarMenuItem>
+                            <SidebarMenuButton asChild>
+                              <Link to="/gestao-pessoas/cadastro-pessoa-juridica" onClick={onLinkClick}>
+                                <FilePlus className="h-4 w-4" />
+                                <span>Cadastro Pessoa Jurídica</span>
+                              </Link>
+                            </SidebarMenuButton>
+                          </SidebarMenuItem>
+                        )}
 
-                      <SidebarMenuItem>
-                        <SidebarMenuButton asChild>
-                          <Link to="/gestao-pessoas/consulta-prestadores" onClick={onLinkClick}>
-                            <Database className="h-4 w-4" />
-                            <span>Consulta Prestadores</span>
-                          </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
+                        {canSee('gestao_pessoas_prestadores_consultar_pj') && (
+                          <SidebarMenuItem>
+                            <SidebarMenuButton asChild>
+                              <Link to="/gestao-pessoas/consulta-prestadores" onClick={onLinkClick}>
+                                <Database className="h-4 w-4" />
+                                <span>Consulta Prestadores</span>
+                              </Link>
+                            </SidebarMenuButton>
+                          </SidebarMenuItem>
+                        )}
 
-                      <SidebarMenuItem>
-                        <SidebarMenuButton asChild>
-                          <Link to="/gestao-pessoas/emissao-contrato-prestacao-servico" onClick={onLinkClick}>
-                            <FileText className="h-4 w-4" />
-                            <span>Emissão Contrato</span>
-                          </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
+                        {canSee('gestao_pessoas_prestadores_contratos_criar') && (
+                          <SidebarMenuItem>
+                            <SidebarMenuButton asChild>
+                              <Link to="/gestao-pessoas/emissao-contrato-prestacao-servico" onClick={onLinkClick}>
+                                <FileText className="h-4 w-4" />
+                                <span>Emissão Contrato</span>
+                              </Link>
+                            </SidebarMenuButton>
+                          </SidebarMenuItem>
+                        )}
 
-                      <SidebarMenuItem>
-                        <SidebarMenuButton asChild>
-                          <Link to="/gestao-pessoas/consulta-contratos" onClick={onLinkClick}>
-                            <Database className="h-4 w-4" />
-                            <span>Consulta Contratos</span>
-                          </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
+                        {canSee('gestao_pessoas_prestadores_contratos_visualizar') && (
+                          <SidebarMenuItem>
+                            <SidebarMenuButton asChild>
+                              <Link to="/gestao-pessoas/consulta-contratos" onClick={onLinkClick}>
+                                <Database className="h-4 w-4" />
+                                <span>Consulta Contratos</span>
+                              </Link>
+                            </SidebarMenuButton>
+                          </SidebarMenuItem>
+                        )}
 
-                      <SidebarMenuItem>
-                        <SidebarMenuButton asChild>
-                          <Link to="/gestao-pessoas/demonstrativo-prestacao-servico" onClick={onLinkClick}>
-                            <FileText className="h-4 w-4" />
-                            <span>Demonstrativo</span>
-                          </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
+                        {canSee('gestao_pessoas_prestadores_demonstrativos') && (
+                          <SidebarMenuItem>
+                            <SidebarMenuButton asChild>
+                              <Link to="/gestao-pessoas/demonstrativo-prestacao-servico" onClick={onLinkClick}>
+                                <FileText className="h-4 w-4" />
+                                <span>Demonstrativo</span>
+                              </Link>
+                            </SidebarMenuButton>
+                          </SidebarMenuItem>
+                        )}
 
-                      <SidebarMenuItem>
-                        <SidebarMenuButton asChild>
-                          <Link to="/gestao-pessoas/cadastro-emissao-nf" onClick={onLinkClick}>
-                            <FilePlus className="h-4 w-4" />
-                            <span>Cadastro Emissão Nf</span>
-                          </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
+                        {canSee('gestao_pessoas_prestadores_nf_emitir') && (
+                          <SidebarMenuItem>
+                            <SidebarMenuButton asChild>
+                              <Link to="/gestao-pessoas/cadastro-emissao-nf" onClick={onLinkClick}>
+                                <FilePlus className="h-4 w-4" />
+                                <span>Cadastro Emissão Nf</span>
+                              </Link>
+                            </SidebarMenuButton>
+                          </SidebarMenuItem>
+                        )}
 
-                      <SidebarMenuItem>
-                        <SidebarMenuButton asChild>
-                          <Link to="/gestao-pessoas/aprovacao-nf" onClick={onLinkClick}>
-                            <CheckCircle className="h-4 w-4" />
-                            <span>Aprovação Nf</span>
-                          </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
+                        {canSee('gestao_pessoas_prestadores_nf_aprovar') && (
+                          <SidebarMenuItem>
+                            <SidebarMenuButton asChild>
+                              <Link to="/gestao-pessoas/aprovacao-nf" onClick={onLinkClick}>
+                                <CheckCircle className="h-4 w-4" />
+                                <span>Aprovação Nf</span>
+                              </Link>
+                            </SidebarMenuButton>
+                          </SidebarMenuItem>
+                        )}
 
-                      <SidebarMenuItem>
-                        <SidebarMenuButton asChild>
-                          <Link to="/gestao-pessoas/controle-ferias" onClick={onLinkClick}>
-                            <CheckSquare className="h-4 w-4" />
-                            <span>Controle Férias</span>
-                          </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
+                        {canSee('gestao_pessoas_prestadores_ferias_controlar') && (
+                          <SidebarMenuItem>
+                            <SidebarMenuButton asChild>
+                              <Link to="/gestao-pessoas/controle-ferias" onClick={onLinkClick}>
+                                <CheckSquare className="h-4 w-4" />
+                                <span>Controle Férias</span>
+                              </Link>
+                            </SidebarMenuButton>
+                          </SidebarMenuItem>
+                        )}
 
-                      <SidebarMenuItem>
-                        <SidebarMenuButton asChild>
-                          <Link to="/gestao-pessoas/aprovacao-ferias" onClick={onLinkClick}>
-                            <CheckCircle className="h-4 w-4" />
-                            <span>Aprovação Férias</span>
-                          </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
+                        {canSee('gestao_pessoas_prestadores_ferias_aprovar') && (
+                          <SidebarMenuItem>
+                            <SidebarMenuButton asChild>
+                              <Link to="/gestao-pessoas/aprovacao-ferias" onClick={onLinkClick}>
+                                <CheckCircle className="h-4 w-4" />
+                                <span>Aprovação Férias</span>
+                              </Link>
+                            </SidebarMenuButton>
+                          </SidebarMenuItem>
+                        )}
 
-                      <SidebarMenuItem>
-                        <SidebarMenuButton asChild>
-                          <Link to="/gestao-pessoas/controle-passivos" onClick={onLinkClick}>
-                            <FileText className="h-4 w-4" />
-                            <span>Controle Passivos</span>
-                          </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
+                        {canSee('gestao_pessoas_prestadores_passivos') && (
+                          <SidebarMenuItem>
+                            <SidebarMenuButton asChild>
+                              <Link to="/gestao-pessoas/controle-passivos" onClick={onLinkClick}>
+                                <FileText className="h-4 w-4" />
+                                <span>Controle Passivos</span>
+                              </Link>
+                            </SidebarMenuButton>
+                          </SidebarMenuItem>
+                        )}
 
-                      <SidebarMenuItem>
-                        <SidebarMenuButton asChild>
-                          <Link to="/gestao-pessoas/relatorios-prestadores" onClick={onLinkClick}>
-                            <BarChart3 className="h-4 w-4" />
-                            <span>Relatórios</span>
-                          </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                    </SidebarMenu>
-                  </CollapsibleContent>
-                </SidebarMenuItem>
-              </Collapsible>
+                        {canSee('gestao_pessoas_prestadores_relatorios') && (
+                          <SidebarMenuItem>
+                            <SidebarMenuButton asChild>
+                              <Link to="/gestao-pessoas/relatorios-prestadores" onClick={onLinkClick}>
+                                <BarChart3 className="h-4 w-4" />
+                                <span>Relatórios</span>
+                              </Link>
+                            </SidebarMenuButton>
+                          </SidebarMenuItem>
+                        )}
+                      </SidebarMenu>
+                    </CollapsibleContent>
+                  </SidebarMenuItem>
+                </Collapsible>
+              )}
             </SidebarMenu>
           </CollapsibleContent>
         </SidebarMenuItem>
