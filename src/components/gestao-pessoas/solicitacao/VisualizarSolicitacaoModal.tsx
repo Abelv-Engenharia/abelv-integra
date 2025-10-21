@@ -78,18 +78,27 @@ const formattiposervico = (tipo: TipoServico) => {
 };
 
 const getCcaSolicitacao = (solicitacao: SolicitacaoServico, ccas: any[]): string => {
+  console.log("=== DEBUG CCA ===");
+  console.log("CCAs disponíveis:", ccas);
+  console.log("Solicitação:", solicitacao);
+  console.log("ccaId:", (solicitacao as any).ccaId);
+  console.log("centroCusto:", solicitacao.centroCusto);
+  
   // Primeiro tenta pelo ccaId
   if ((solicitacao as any).ccaId) {
     const cca = ccas.find(c => c.id === (solicitacao as any).ccaId);
+    console.log("Busca por ID, resultado:", cca);
     if (cca) return cca.nome;
   }
   
   // Se não encontrar pelo ID, tenta pelo código em centroCusto
   const codigoCca = solicitacao.centroCusto || '';
   const cca = ccas.find(c => c.codigo === codigoCca);
+  console.log("Busca por código", codigoCca, "resultado:", cca);
   if (cca) return cca.nome;
   
   // Se não encontrar, retorna o código mesmo
+  console.log("Não encontrou CCA, retornando código:", codigoCca);
   return codigoCca;
 };
 
@@ -561,7 +570,7 @@ export function VisualizarSolicitacaoModal({
                   <p className="font-medium">{new Date(solicitacao.dataSolicitacao).toLocaleDateString('pt-BR')}</p>
                 </div>
                 <div>
-                  <Label className="text-muted-foreground">Cca</Label>
+                  <Label className="text-muted-foreground">CCA</Label>
                   <p className="font-medium">{getCcaSolicitacao(solicitacao, ccas)}</p>
                 </div>
                 {solicitacao.observacoes && (
