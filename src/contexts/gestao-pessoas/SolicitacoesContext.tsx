@@ -171,6 +171,7 @@ export function SolicitacoesProvider({ children }: { children: ReactNode }) {
     if (updates.observacoes) dbUpdates.observacoes = updates.observacoes;
     if (updates.observacoesgestao) dbUpdates.observacoes_gestao = updates.observacoesgestao;
     if (updates.estimativavalor !== undefined) dbUpdates.estimativa_valor = updates.estimativavalor;
+    if (updates.responsavelaprovacaoId !== undefined) dbUpdates.responsavel_aprovacao_id = updates.responsavelaprovacaoId;
     if (updates.justificativaaprovacao) dbUpdates.justificativa_aprovacao = updates.justificativaaprovacao;
     if (updates.justificativareprovacao) dbUpdates.justificativa_reprovacao = updates.justificativareprovacao;
     if (updates.dataaprovacao) dbUpdates.data_aprovacao = updates.dataaprovacao.toISOString();
