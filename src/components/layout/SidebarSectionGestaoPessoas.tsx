@@ -129,11 +129,11 @@ export default function SidebarSectionGestaoPessoas({
         <SidebarMenuItem>
           <CollapsibleTrigger asChild>
             <SidebarMenuButton className="w-full justify-between hover:bg-sidebar-accent">
-              <div className="flex items-center gap-2">
-                <ClipboardList className="h-4 w-4" />
-                <span>Gestão de Pessoas</span>
+              <div className="flex items-center gap-2 min-w-0">
+                <ClipboardList className="h-4 w-4 flex-shrink-0" />
+                <span className="truncate">Gestão de Pessoas</span>
               </div>
-              <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+              <ChevronDown className={`h-4 w-4 flex-shrink-0 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
             </SidebarMenuButton>
           </CollapsibleTrigger>
 
@@ -144,11 +144,11 @@ export default function SidebarSectionGestaoPessoas({
                 <SidebarMenuItem>
                   <CollapsibleTrigger asChild>
                     <SidebarMenuButton className="w-full justify-between hover:bg-sidebar-accent">
-                      <div className="flex items-center gap-2">
-                        <Briefcase className="h-4 w-4" />
-                        <span>Recursos & Benefícios</span>
+                      <div className="flex items-center gap-2 min-w-0">
+                        <Briefcase className="h-4 w-4 flex-shrink-0" />
+                        <span className="truncate">Recursos & Benefícios</span>
                       </div>
-                      <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${openSubmenus.recursos ? 'rotate-180' : ''}`} />
+                      <ChevronDown className={`h-4 w-4 flex-shrink-0 transition-transform duration-200 ${openSubmenus.recursos ? 'rotate-180' : ''}`} />
                     </SidebarMenuButton>
                   </CollapsibleTrigger>
 
@@ -159,11 +159,11 @@ export default function SidebarSectionGestaoPessoas({
                         <SidebarMenuItem>
                           <CollapsibleTrigger asChild>
                             <SidebarMenuButton className="w-full justify-between hover:bg-sidebar-accent">
-                              <div className="flex items-center gap-2">
-                                <FileText className="h-4 w-4" />
-                                <span>Solicitações</span>
+                              <div className="flex items-center gap-2 min-w-0">
+                                <FileText className="h-4 w-4 flex-shrink-0" />
+                                <span className="truncate">Solicitações</span>
                               </div>
-                              <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${openSubmenus.solicitacoes ? 'rotate-180' : ''}`} />
+                              <ChevronDown className={`h-4 w-4 flex-shrink-0 transition-transform duration-200 ${openSubmenus.solicitacoes ? 'rotate-180' : ''}`} />
                             </SidebarMenuButton>
                           </CollapsibleTrigger>
 
@@ -233,11 +233,11 @@ export default function SidebarSectionGestaoPessoas({
                         <SidebarMenuItem>
                           <CollapsibleTrigger asChild>
                             <SidebarMenuButton className="w-full justify-between hover:bg-sidebar-accent">
-                              <div className="flex items-center gap-2">
-                                <Plane className="h-4 w-4" />
-                                <span>Viagens</span>
+                              <div className="flex items-center gap-2 min-w-0">
+                                <Plane className="h-4 w-4 flex-shrink-0" />
+                                <span className="truncate">Viagens</span>
                               </div>
-                              <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${openSubmenus.viagens ? 'rotate-180' : ''}`} />
+                              <ChevronDown className={`h-4 w-4 flex-shrink-0 transition-transform duration-200 ${openSubmenus.viagens ? 'rotate-180' : ''}`} />
                             </SidebarMenuButton>
                           </CollapsibleTrigger>
 
@@ -307,11 +307,11 @@ export default function SidebarSectionGestaoPessoas({
                         <SidebarMenuItem>
                           <CollapsibleTrigger asChild>
                             <SidebarMenuButton className="w-full justify-between hover:bg-sidebar-accent">
-                              <div className="flex items-center gap-2">
-                                <Car className="h-4 w-4" />
-                                <span>Veículos</span>
+                              <div className="flex items-center gap-2 min-w-0">
+                                <Car className="h-4 w-4 flex-shrink-0" />
+                                <span className="truncate">Veículos</span>
                               </div>
-                              <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${openSubmenus.veiculos ? 'rotate-180' : ''}`} />
+                              <ChevronDown className={`h-4 w-4 flex-shrink-0 transition-transform duration-200 ${openSubmenus.veiculos ? 'rotate-180' : ''}`} />
                             </SidebarMenuButton>
                           </CollapsibleTrigger>
 
@@ -457,11 +457,11 @@ export default function SidebarSectionGestaoPessoas({
                   <SidebarMenuItem>
                     <CollapsibleTrigger asChild>
                       <SidebarMenuButton className="w-full justify-between hover:bg-sidebar-accent">
-                        <div className="flex items-center gap-2">
-                          <UserPlus className="h-4 w-4" />
-                          <span>Recrutamento & Seleção</span>
+                        <div className="flex items-center gap-2 min-w-0">
+                          <UserPlus className="h-4 w-4 flex-shrink-0" />
+                          <span className="truncate">Recrutamento & Seleção</span>
                         </div>
-                        <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${openSubmenus.recrutamento ? 'rotate-180' : ''}`} />
+                        <ChevronDown className={`h-4 w-4 flex-shrink-0 transition-transform duration-200 ${openSubmenus.recrutamento ? 'rotate-180' : ''}`} />
                       </SidebarMenuButton>
                     </CollapsibleTrigger>
 
@@ -548,11 +548,11 @@ export default function SidebarSectionGestaoPessoas({
                   <SidebarMenuItem>
                     <CollapsibleTrigger asChild>
                       <SidebarMenuButton className="w-full justify-between hover:bg-sidebar-accent">
-                        <div className="flex items-center gap-2">
-                          <Briefcase className="h-4 w-4" />
-                          <span>Prestadores de Serviço</span>
+                        <div className="flex items-center gap-2 min-w-0">
+                          <Briefcase className="h-4 w-4 flex-shrink-0" />
+                          <span className="truncate">Prestadores de Serviço</span>
                         </div>
-                        <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${openSubmenus.prestadores ? 'rotate-180' : ''}`} />
+                        <ChevronDown className={`h-4 w-4 flex-shrink-0 transition-transform duration-200 ${openSubmenus.prestadores ? 'rotate-180' : ''}`} />
                       </SidebarMenuButton>
                     </CollapsibleTrigger>
 
