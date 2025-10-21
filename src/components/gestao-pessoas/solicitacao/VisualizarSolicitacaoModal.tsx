@@ -245,7 +245,7 @@ export function VisualizarSolicitacaoModal({
             </div>
             <div>
               <Label className="text-muted-foreground">Valor</Label>
-              <p className="font-medium">R$ {voucher.valor.toFixed(2)}</p>
+              <p className="font-medium">R$ {voucher.valor?.toFixed(2) || '0.00'}</p>
             </div>
             <div>
               <Label className="text-muted-foreground">Data de uso</Label>
@@ -422,7 +422,7 @@ export function VisualizarSolicitacaoModal({
             {cartao.valorAdicional && (
               <div>
                 <Label className="text-muted-foreground">Valor adicional</Label>
-                <p className="font-medium">R$ {cartao.valorAdicional.toFixed(2)}</p>
+                <p className="font-medium">R$ {cartao.valorAdicional?.toFixed(2) || '0.00'}</p>
               </div>
             )}
             {cartao.placaAssociada && (
@@ -440,7 +440,7 @@ export function VisualizarSolicitacaoModal({
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label className="text-muted-foreground">Valor</Label>
-              <p className="font-medium">R$ {veloe.valor.toFixed(2)}</p>
+              <p className="font-medium">R$ {veloe.valor?.toFixed(2) || '0.00'}</p>
             </div>
             <div>
               <Label className="text-muted-foreground">Data uso</Label>
@@ -563,7 +563,7 @@ export function VisualizarSolicitacaoModal({
                       <div className="space-y-2">
                         <Label>Estimativa de valor</Label>
                         <p className="text-lg font-semibold text-green-600">
-                          R$ {solicitacao.estimativavalor.toFixed(2)}
+                          R$ {solicitacao.estimativavalor?.toFixed(2) || '0.00'}
                         </p>
                       </div>
                     )}
