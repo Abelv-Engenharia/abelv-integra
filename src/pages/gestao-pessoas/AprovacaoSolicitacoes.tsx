@@ -76,7 +76,7 @@ export default function AprovacaoSolicitacoes() {
     setModalAberto(true);
   };
 
-  const handleAprovar = (justificativa?: string) => {
+  const handleAprovar = async (justificativa?: string) => {
     if (solicitacaoSelecionada) {
       updateSolicitacao(solicitacaoSelecionada.id, {
         status: StatusSolicitacao.APROVADO,
@@ -84,13 +84,35 @@ export default function AprovacaoSolicitacoes() {
         dataaprovacao: new Date(),
         aprovadopor: usuarioAtivo.nome,
       });
+      
+      // Enviar notificação
+      try {
+        const { supabase } = await import("@/integrations/supabase/client");
+        await supabase.functions.invoke('enviar-notificacao-solicitacao', {
+          body: {
+            evento: 'solicitacao_aprovada',
+            solicitacao: {
+              id: solicitacaoSelecionada.id,
+              numeroSolicitacao: solicitacaoSelecionada.numeroSolicitacao,
+              solicitanteId: (solicitacaoSelecionada as any).solicitanteId,
+              solicitanteNome: solicitacaoSelecionada.solicitante,
+              tipoServico: solicitacaoSelecionada.tipoServico,
+              aprovadoPor: usuarioAtivo.nome,
+              justificativaAprovacao: justificativa
+            }
+          }
+        });
+      } catch (error) {
+        console.error("Erro ao enviar notificação:", error);
+      }
+      
       toast.success("Solicitação aprovada com sucesso!");
       setModalAberto(false);
       setSolicitacaoSelecionada(null);
     }
   };
 
-  const handleReprovar = (justificativa: string) => {
+  const handleReprovar = async (justificativa: string) => {
     if (solicitacaoSelecionada) {
       updateSolicitacao(solicitacaoSelecionada.id, {
         status: StatusSolicitacao.REJEITADO,
@@ -98,6 +120,27 @@ export default function AprovacaoSolicitacoes() {
         dataaprovacao: new Date(),
         aprovadopor: usuarioAtivo.nome,
       });
+      
+      // Enviar notificação
+      try {
+        const { supabase } = await import("@/integrations/supabase/client");
+        await supabase.functions.invoke('enviar-notificacao-solicitacao', {
+          body: {
+            evento: 'solicitacao_reprovada',
+            solicitacao: {
+              id: solicitacaoSelecionada.id,
+              numeroSolicitacao: solicitacaoSelecionada.numeroSolicitacao,
+              solicitanteId: (solicitacaoSelecionada as any).solicitanteId,
+              solicitanteNome: solicitacaoSelecionada.solicitante,
+              tipoServico: solicitacaoSelecionada.tipoServico,
+              justificativaReprovacao: justificativa
+            }
+          }
+        });
+      } catch (error) {
+        console.error("Erro ao enviar notificação:", error);
+      }
+      
       toast.success("Solicitação reprovada");
       setModalAberto(false);
       setSolicitacaoSelecionada(null);

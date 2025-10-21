@@ -85,6 +85,7 @@ export const notificacoesService = {
     mensagem: string;
     tipo: string;
     tarefa_id?: string;
+    solicitacao_id?: string;
   }): Promise<boolean> {
     try {
       const { error } = await supabase

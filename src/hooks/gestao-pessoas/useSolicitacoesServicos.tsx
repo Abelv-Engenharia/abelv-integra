@@ -78,9 +78,28 @@ export function useSolicitacoesServicos() {
 
       return solicitacao;
     },
-    onSuccess: () => {
+    onSuccess: async (solicitacao) => {
       queryClient.invalidateQueries({ queryKey: ["solicitacoes_servicos"] });
       toast.success("Solicitação criada com sucesso!");
+      
+      // Enviar notificação
+      try {
+        await supabase.functions.invoke('enviar-notificacao-solicitacao', {
+          body: {
+            evento: 'solicitacao_criada',
+            solicitacao: {
+              id: solicitacao.id,
+              numeroSolicitacao: solicitacao.numero_solicitacao,
+              solicitanteId: solicitacao.solicitante_id,
+              solicitanteNome: solicitacao.solicitante_nome,
+              tipoServico: solicitacao.tipo_servico,
+              responsavelAprovacaoId: solicitacao.responsavel_aprovacao_id
+            }
+          }
+        });
+      } catch (error) {
+        console.error("Erro ao enviar notificação:", error);
+      }
     },
     onError: (error) => {
       console.error("Erro ao criar solicitação:", error);

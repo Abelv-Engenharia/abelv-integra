@@ -2,3 +2,6 @@ project_id = "xexgdtlctyuycohzhmuu"
 
 [functions.serve-treinamento-file]
 verify_jwt = false
+
+[functions.enviar-notificacao-solicitacao]
+verify_jwt = false

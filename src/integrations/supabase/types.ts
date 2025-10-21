@@ -4077,6 +4077,7 @@ export type Database = {
           id: string
           lida: boolean
           mensagem: string
+          solicitacao_id: string | null
           tarefa_id: string | null
           tipo: string
           titulo: string
@@ -4088,6 +4089,7 @@ export type Database = {
           id?: string
           lida?: boolean
           mensagem: string
+          solicitacao_id?: string | null
           tarefa_id?: string | null
           tipo?: string
           titulo: string
@@ -4099,6 +4101,7 @@ export type Database = {
           id?: string
           lida?: boolean
           mensagem?: string
+          solicitacao_id?: string | null
           tarefa_id?: string | null
           tipo?: string
           titulo?: string
@@ -4106,6 +4109,20 @@ export type Database = {
           usuario_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "notificacoes_solicitacao_id_fkey"
+            columns: ["solicitacao_id"]
+            isOneToOne: false
+            referencedRelation: "solicitacoes_servicos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notificacoes_solicitacao_id_fkey"
+            columns: ["solicitacao_id"]
+            isOneToOne: false
+            referencedRelation: "v_solicitacoes_completas"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "notificacoes_tarefa_id_fkey"
             columns: ["tarefa_id"]

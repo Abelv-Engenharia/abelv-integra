@@ -53,15 +53,21 @@ const NotificacoesDropdown = () => {
 
   // Nova função: ao clicar na notificação, redireciona para o destino apropriado
   const handleNotificacaoClick = async (notificacao: Notificacao) => {
-    // Exemplo: existe tarefa vinculada, ir para a rota de detalhe
+    // Existe tarefa vinculada, ir para a rota de detalhe
     if (notificacao.tarefa_id) {
       await marcarComoLida(notificacao.id);
       navigate(`/tarefas/detalhe/${notificacao.tarefa_id}`);
       return;
     }
-    // Adicione outros destinos conforme necessário, exemplo:
-    // if (notificacao.ocorrencia_id) { ... }
-    // se nenhum destino, apenas marca como lida
+    
+    // Existe solicitação vinculada, ir para a tela de solicitações
+    if (notificacao.solicitacao_id) {
+      await marcarComoLida(notificacao.id);
+      navigate(`/gestao-pessoas/solicitacao-servicos?id=${notificacao.solicitacao_id}`);
+      return;
+    }
+    
+    // Se nenhum destino, apenas marca como lida
     await marcarComoLida(notificacao.id);
   };
 

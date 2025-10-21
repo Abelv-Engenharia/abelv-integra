@@ -7,6 +7,7 @@ export type Notificacao = {
   tipo: string;
   lida: boolean;
   tarefa_id?: string;
+  solicitacao_id?: string;
   created_at: string;
   updated_at: string;
 };
