@@ -31,10 +31,27 @@ export function AprovarSolicitacaoModal({
   
   if (!solicitacao) return null;
 
-  const getCodigoNomeCCA = (ccaId?: number) => {
-    if (!ccaId) return "N/A";
-    const cca = ccas.find(c => c.id === ccaId);
-    return cca ? `${cca.codigo} - ${cca.nome}` : ccaId.toString();
+  const getCcaSolicitacao = (solicitacao: SolicitacaoServico, ccas: any[]): string => {
+    // Primeiro tenta pelo ccaId
+    if ((solicitacao as any).ccaId) {
+      const cca = ccas.find(c => c.id === (solicitacao as any).ccaId);
+      if (cca) return `${cca.codigo} - ${cca.nome}`;
+    }
+    
+    // Se não encontrar pelo ccaId, tenta buscar por id usando centroCusto
+    const centroCusto = solicitacao.centroCusto || '';
+    if (centroCusto) {
+      // Tenta buscar por ID (valor numérico)
+      const ccaById = ccas.find(c => c.id === parseInt(centroCusto));
+      if (ccaById) return `${ccaById.codigo} - ${ccaById.nome}`;
+      
+      // Tenta buscar por código (valor string)
+      const ccaByCodigo = ccas.find(c => c.codigo === centroCusto);
+      if (ccaByCodigo) return `${ccaByCodigo.codigo} - ${ccaByCodigo.nome}`;
+    }
+    
+    // Se não encontrar, retorna o valor original de centroCusto
+    return centroCusto || "N/A";
   };
   const handleAprovar = () => {
     onAprovar(justificativa || undefined);
@@ -270,7 +287,7 @@ export function AprovarSolicitacaoModal({
               </div>
               <div>
                 <Label className="text-muted-foreground">CCA</Label>
-                <p className="font-medium">{getCodigoNomeCCA(solicitacao.ccaId)}</p>
+                <p className="font-medium">{getCcaSolicitacao(solicitacao, ccas)}</p>
               </div>
               <div>
                 <Label className="text-muted-foreground">Prioridade</Label>
