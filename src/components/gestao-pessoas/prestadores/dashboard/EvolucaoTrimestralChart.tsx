@@ -1,24 +1,18 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { DemonstrativoPrestador } from "@/types/gestao-pessoas/dashboard-prestadores";
+import { DadosGraficoMensal } from "@/types/gestao-pessoas/dashboard-prestadores";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
-import { useMemo } from "react";
-import { DashboardPrestadoresService } from "@/services/gestao-pessoas/DashboardPrestadoresService";
 
 interface EvolucaoTrimestralChartProps {
-  dados: DemonstrativoPrestador[];
+  dados: DadosGraficoMensal[];
 }
 
 export function EvolucaoTrimestralChart({ dados }: EvolucaoTrimestralChartProps) {
-  const chartData = useMemo(() => {
-    const dadosMensais = DashboardPrestadoresService.obterDadosMensais(dados);
-    
-    return dadosMensais.map(item => ({
-      mes: new Date(item.mes + '-01').toLocaleDateString('pt-BR', { month: 'short', year: '2-digit' }),
-      'Total NF': item.nf,
-      'Total descontos': item.descontos,
-      'Líquido': item.nf - item.descontos,
-    }));
-  }, [dados]);
+  const chartData = dados.map(item => ({
+    mes: new Date(item.mes + '-01').toLocaleDateString('pt-BR', { month: 'short', year: '2-digit' }),
+    'Total NF': item.nf,
+    'Total descontos': item.descontos,
+    'Líquido': item.nf - item.descontos,
+  }));
 
   if (chartData.length === 0) {
     return (

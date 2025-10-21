@@ -6,8 +6,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Eye, Download, Edit, FileSpreadsheet } from "lucide-react";
-import { mockNotasFiscais } from "@/data/gestao-pessoas/mockNotasFiscais";
 import { NotaFiscal } from "@/types/gestao-pessoas/nf";
+import { useNotasFiscais } from "@/hooks/gestao-pessoas/useNotasFiscais";
 import { StatusBadgeNF } from "@/components/gestao-pessoas/nf/StatusBadgeNF";
 import { VisualizarNFModal } from "@/components/gestao-pessoas/nf/VisualizarNFModal";
 import { EditarNFModal } from "@/components/gestao-pessoas/nf/EditarNFModal";
@@ -15,7 +15,7 @@ import { toast } from "sonner";
 import * as XLSX from 'xlsx';
 
 export default function AprovacaoNF() {
-  const [notasFiscais, setNotasFiscais] = useState<NotaFiscal[]>(mockNotasFiscais);
+  const { data: notasFiscais = [] } = useNotasFiscais();
   const [filtroStatus, setFiltroStatus] = useState<string>("Todas");
   const [filtroPeriodo, setFiltroPeriodo] = useState<string>("Todos");
   const [filtroBusca, setFiltroBusca] = useState<string>("");
@@ -56,9 +56,7 @@ export default function AprovacaoNF() {
   };
 
   const handleSalvarEdicao = (nfAtualizada: NotaFiscal) => {
-    setNotasFiscais(prev => 
-      prev.map(nf => nf.id === nfAtualizada.id ? nfAtualizada : nf)
-    );
+    toast.success("NF atualizada com sucesso!");
   };
 
   const handleDownload = (nf: NotaFiscal) => {

@@ -1,25 +1,19 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { DemonstrativoPrestador } from "@/types/gestao-pessoas/dashboard-prestadores";
+import { DadosGraficoMensal } from "@/types/gestao-pessoas/dashboard-prestadores";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
-import { useMemo } from "react";
-import { DashboardPrestadoresService } from "@/services/gestao-pessoas/DashboardPrestadoresService";
 
 interface ComparativoMensalChartProps {
-  dados: DemonstrativoPrestador[];
+  dados: DadosGraficoMensal[];
 }
 
 export function ComparativoMensalChart({ dados }: ComparativoMensalChartProps) {
-  const chartData = useMemo(() => {
-    const dadosMensais = DashboardPrestadoresService.obterDadosMensais(dados);
-    
-    return dadosMensais.map(item => ({
-      mes: new Date(item.mes + '-01').toLocaleDateString('pt-BR', { month: 'short', year: '2-digit' }),
-      'NF': item.nf,
-      'Ajuda aluguel': item.ajudaaluguel,
-      'Reembolso': item.reembolso,
-      'Descontos': item.descontos,
-    }));
-  }, [dados]);
+  const chartData = dados.map(item => ({
+    mes: new Date(item.mes + '-01').toLocaleDateString('pt-BR', { month: 'short', year: '2-digit' }),
+    'NF': item.nf,
+    'Ajuda aluguel': item.ajudaaluguel,
+    'Reembolso': item.reembolso,
+    'Descontos': item.descontos,
+  }));
 
   if (chartData.length === 0) {
     return (

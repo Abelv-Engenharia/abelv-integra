@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
-import { DemonstrativoPrestador, KPIData, FiltrosDashboard } from "@/types/gestao-pessoas/dashboard-prestadores";
-import { DashboardPrestadoresService } from "@/services/gestao-pessoas/DashboardPrestadoresService";
+import { useState } from "react";
+import { FiltrosDashboard } from "@/types/gestao-pessoas/dashboard-prestadores";
+import { useDashboardPrestadores } from "@/hooks/gestao-pessoas/useDashboardPrestadores";
 import { KPICardsPrestadores } from "@/components/gestao-pessoas/prestadores/dashboard/KPICardsPrestadores";
 import { DistribuicaoValoresChart } from "@/components/gestao-pessoas/prestadores/dashboard/DistribuicaoValoresChart";
 import { ComparativoMensalChart } from "@/components/gestao-pessoas/prestadores/dashboard/ComparativoMensalChart";
@@ -9,43 +9,26 @@ import { EvolucaoTrimestralChart } from "@/components/gestao-pessoas/prestadores
 import { TabelaResumoPrestadores } from "@/components/gestao-pessoas/prestadores/dashboard/TabelaResumoPrestadores";
 import { FiltrosDashboardComponent } from "@/components/gestao-pessoas/prestadores/dashboard/FiltrosDashboard";
 import { Button } from "@/components/ui/button";
-import { FileSpreadsheet, FileText, RefreshCw } from "lucide-react";
+import { FileSpreadsheet, FileText } from "lucide-react";
 import { toast } from "sonner";
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
 export default function DashboardPrestadores() {
-  const [dados, setDados] = useState<DemonstrativoPrestador[]>([]);
-  const [dadosFiltrados, setDadosFiltrados] = useState<DemonstrativoPrestador[]>([]);
   const [filtros, setFiltros] = useState<FiltrosDashboard>({});
-  const [kpis, setKPIs] = useState<KPIData | null>(null);
-  const [carregando, setCarregando] = useState(true);
-
-  useEffect(() => {
-    carregarDados();
-  }, []);
-
-  const carregarDados = () => {
-    setCarregando(true);
-    try {
-      const dadosCarregados = DashboardPrestadoresService.carregarDados();
-      setDados(dadosCarregados);
-      setDadosFiltrados(dadosCarregados);
-      setKPIs(DashboardPrestadoresService.calcularKPIs(dadosCarregados));
-    } catch (error) {
-      toast.error("Erro ao carregar dados");
-      console.error(error);
-    } finally {
-      setCarregando(false);
-    }
-  };
+  
+  const {
+    demonstrativos: dados,
+    demonstrativosFiltrados: dadosFiltrados,
+    kpis,
+    dadosMensais,
+    top10Prestadores,
+    isLoading: carregando,
+  } = useDashboardPrestadores(filtros);
 
   const handleAplicarFiltros = (novosFiltros: FiltrosDashboard) => {
     setFiltros(novosFiltros);
-    const filtrados = DashboardPrestadoresService.aplicarFiltros(dados, novosFiltros);
-    setDadosFiltrados(filtrados);
-    setKPIs(DashboardPrestadoresService.calcularKPIs(filtrados));
     toast.success("Filtros aplicados com sucesso");
   };
 
@@ -84,10 +67,9 @@ export default function DashboardPrestadores() {
       XLSX.utils.book_append_sheet(wb, wsDados, 'Dados Completos');
 
       // Aba Top 10
-      const top10 = DashboardPrestadoresService.obterTop10Prestadores(dadosFiltrados);
       const top10Data = [
         ['Nome', 'Empresa', 'Total NF'],
-        ...top10.map(p => [p.nome, p.empresa, p.totalnf])
+        ...top10Prestadores.map(p => [p.nome, p.empresa, p.totalnf])
       ];
       const wsTop10 = XLSX.utils.aoa_to_sheet(top10Data);
       XLSX.utils.book_append_sheet(wb, wsTop10, 'Top 10');
@@ -182,11 +164,7 @@ export default function DashboardPrestadores() {
           <h1 className="text-3xl font-bold">Dashboard de prestadores de serviço</h1>
           <p className="text-muted-foreground">Visão geral financeira e operacional</p>
         </div>
-          <Button onClick={carregarDados} variant="outline" size="sm">
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Atualizar
-          </Button>
-        </div>
+      </div>
 
         <FiltrosDashboardComponent onAplicar={handleAplicarFiltros} />
 

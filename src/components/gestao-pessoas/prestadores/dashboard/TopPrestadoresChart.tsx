@@ -1,22 +1,16 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { DemonstrativoPrestador } from "@/types/gestao-pessoas/dashboard-prestadores";
+import { TopPrestador } from "@/types/gestao-pessoas/dashboard-prestadores";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import { useMemo } from "react";
-import { DashboardPrestadoresService } from "@/services/gestao-pessoas/DashboardPrestadoresService";
 
 interface TopPrestadoresChartProps {
-  dados: DemonstrativoPrestador[];
+  dados: TopPrestador[];
 }
 
 export function TopPrestadoresChart({ dados }: TopPrestadoresChartProps) {
-  const chartData = useMemo(() => {
-    const top10 = DashboardPrestadoresService.obterTop10Prestadores(dados);
-    
-    return top10.map(p => ({
-      nome: p.nome.split(' ')[0],
-      valor: p.totalnf,
-    }));
-  }, [dados]);
+  const chartData = dados.map(p => ({
+    nome: p.nome.split(' ')[0],
+    valor: p.totalnf,
+  }));
 
   if (chartData.length === 0) {
     return (

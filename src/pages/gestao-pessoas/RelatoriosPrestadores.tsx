@@ -7,18 +7,18 @@ import { TabelaDinamica } from "@/components/gestao-pessoas/prestadores/relatori
 import { ResumoCards } from "@/components/gestao-pessoas/prestadores/relatorios/ResumoCards";
 import { ExportButtons } from "@/components/gestao-pessoas/prestadores/relatorios/ExportButtons";
 import { ModuloPrestador, FiltrosRelatorioPrestadores, DadosModulo } from "@/types/gestao-pessoas/relatorio-prestadores";
-import { RelatorioPrestadoresDataService } from "@/services/gestao-pessoas/RelatorioPrestadoresDataService";
-import { BarChart3, FileBarChart } from "lucide-react";
+import { useRelatorioPrestadores } from "@/hooks/gestao-pessoas/useRelatorioPrestadores";
+import { FileBarChart, BarChart3 } from "lucide-react";
 import { toast } from "sonner";
 
 export default function RelatoriosPrestadores() {
   const [modulosSelecionados, setModulosSelecionados] = useState<ModuloPrestador[]>([]);
   const [colunasPorModulo, setColunasPorModulo] = useState<Record<ModuloPrestador, string[]>>({} as any);
-  const [filtros, setFiltros] = useState<FiltrosRelatorioPrestadores>({
-    modulos: [],
-  });
+  const [filtros, setFiltros] = useState<FiltrosRelatorioPrestadores>({ modulos: [] });
   const [dadosModulos, setDadosModulos] = useState<DadosModulo[]>([]);
   const [relatorioGerado, setRelatorioGerado] = useState(false);
+
+  const { carregarDadosCompletos, aplicarFiltros, isLoading } = useRelatorioPrestadores();
 
   const handleGerarRelatorio = () => {
     if (modulosSelecionados.length === 0) {
@@ -39,17 +39,10 @@ export default function RelatoriosPrestadores() {
       return;
     }
 
-    const dadosCompletos = RelatorioPrestadoresDataService.carregarDadosCompletos(
-      modulosSelecionados,
-      colunasPorModulo
-    );
-
+    const dadosCompletos = carregarDadosCompletos(modulosSelecionados, colunasPorModulo);
     const dadosFiltrados = dadosCompletos.map(modulo => ({
       ...modulo,
-      dados: RelatorioPrestadoresDataService.aplicarFiltros(modulo.dados, {
-        ...filtros,
-        modulos: modulosSelecionados
-      })
+      dados: aplicarFiltros(modulo.dados, { ...filtros, modulos: modulosSelecionados })
     }));
 
     setDadosModulos(dadosFiltrados);

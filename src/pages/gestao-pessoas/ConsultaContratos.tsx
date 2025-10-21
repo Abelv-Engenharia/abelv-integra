@@ -7,7 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search, Eye, FileSpreadsheet, FileText } from "lucide-react";
 import { ContratoEmitido } from "@/types/gestao-pessoas/contrato";
-import { mockContratos } from "@/data/gestao-pessoas/mockContratos";
+import { useContratos } from "@/hooks/gestao-pessoas/usePrestadoresContratos";
 import { StatusContratoBadge } from "@/components/gestao-pessoas/prestadores/StatusContratoBadge";
 import { TipoContratoBadge } from "@/components/gestao-pessoas/prestadores/TipoContratoBadge";
 import { VisualizarContratoModal } from "@/components/gestao-pessoas/prestadores/VisualizarContratoModal";
@@ -17,10 +17,7 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
 export default function ConsultaContratos() {
-  const [contratos, setContratos] = useState<ContratoEmitido[]>(() => {
-    const stored = localStorage.getItem('contratos_emitidos');
-    return stored ? JSON.parse(stored) : mockContratos;
-  });
+  const { data: contratos = [] } = useContratos();
 
   const [busca, setBusca] = useState("");
   const [filtroStatus, setFiltroStatus] = useState<string>("todos");
