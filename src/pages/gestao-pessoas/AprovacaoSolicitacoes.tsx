@@ -9,6 +9,7 @@ import { useSolicitacoes } from "@/contexts/gestao-pessoas/SolicitacoesContext";
 import { useUsuarioAtivo } from "@/hooks/useUsuarioAtivo";
 import { AprovarSolicitacaoModal } from "@/components/gestao-pessoas/solicitacao/AprovarSolicitacaoModal";
 import { format } from "date-fns";
+import { formatarNumeroSolicitacao } from "@/utils/gestao-pessoas/formatters";
 import { 
   SolicitacaoServico, 
   StatusSolicitacao, 
@@ -108,17 +109,10 @@ export default function AprovacaoSolicitacoes() {
     return tipos[tipo] || tipo;
   };
 
-  const getBadgePrioridade = (prioridade: PrioridadeSolicitacao) => {
-    const variants = {
-      baixa: "secondary",
-      media: "default",
-      alta: "destructive",
-    };
-    return (
-      <Badge variant={variants[prioridade] as any} className="text-xs">
-        {prioridade.charAt(0).toUpperCase() + prioridade.slice(1)}
-      </Badge>
-    );
+  const priorityConfig = {
+    [PrioridadeSolicitacao.ALTA]: { color: "bg-red-500", label: "Alta" },
+    [PrioridadeSolicitacao.MEDIA]: { color: "bg-yellow-500", label: "Média" },
+    [PrioridadeSolicitacao.BAIXA]: { color: "bg-green-500", label: "Baixa" }
   };
 
   const renderCard = (solicitacao: SolicitacaoServico) => (
@@ -128,37 +122,40 @@ export default function AprovacaoSolicitacoes() {
       onClick={() => handleAbrirModal(solicitacao)}
     >
       <div className="space-y-2">
+        {/* Header do Card */}
         <div className="flex items-start justify-between">
-          <div className="flex-1">
-            <div className="flex items-center gap-2 mb-1">
-              <span className="text-sm font-semibold">{solicitacao.numeroSolicitacao}</span>
-              {getBadgePrioridade(solicitacao.prioridade)}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              {formatarTipoServico(solicitacao.tipoServico)}
-            </p>
-          </div>
-        </div>
-        
-        <div className="space-y-1 text-xs">
-          <div className="flex items-center gap-1">
-            <span className="font-medium">Solicitante:</span>
-            <span className="text-muted-foreground">{solicitacao.solicitante}</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <span className="font-medium">Data:</span>
-            <span className="text-muted-foreground">
-              {format(new Date(solicitacao.dataSolicitacao), "dd/MM/yyyy")}
+          <div className="flex items-center gap-2">
+            <div className={`w-2 h-2 rounded-full ${priorityConfig[solicitacao.prioridade].color}`} />
+            <span className="text-xs font-semibold text-primary">
+              {formatarNumeroSolicitacao(solicitacao.numeroSolicitacao)}
             </span>
           </div>
-          {solicitacao.estimativavalor && (
-            <div className="flex items-center gap-1">
-              <span className="font-medium">Valor:</span>
-              <span className="text-muted-foreground">
-                R$ {solicitacao.estimativavalor.toFixed(2)}
-              </span>
-            </div>
-          )}
+        </div>
+
+        {/* Tipo de Serviço */}
+        <h4 className="font-semibold text-sm">
+          {formatarTipoServico(solicitacao.tipoServico)}
+        </h4>
+
+        {/* Descrição/Observações */}
+        <p className="text-xs text-muted-foreground line-clamp-2">
+          {solicitacao.observacoes || "Sem observações"}
+        </p>
+
+        {/* Footer do Card */}
+        <div className="pt-2 border-t space-y-1">
+          <div className="flex items-center gap-1 text-xs text-muted-foreground">
+            <span className="font-medium">Solicitante:</span>
+            <span className="truncate">{solicitacao.solicitante}</span>
+          </div>
+          <div className="flex items-center justify-between text-xs text-muted-foreground">
+            <span>{solicitacao.dataSolicitacao.toLocaleDateString('pt-BR')}</span>
+            {solicitacao.centroCusto && (
+              <Badge variant="outline" className="text-xs px-1 py-0">
+                {solicitacao.centroCusto}
+              </Badge>
+            )}
+          </div>
         </div>
       </div>
     </Card>
