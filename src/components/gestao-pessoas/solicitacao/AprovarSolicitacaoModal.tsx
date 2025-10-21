@@ -9,6 +9,8 @@ import { toast } from "sonner";
 import { SolicitacaoServico, TipoServico, PrioridadeSolicitacao, VoucherUber, LocacaoVeiculo, CartaoAbastecimento, VeloeGo, Passagens, Hospedagem, Logistica, CorreiosLoggi } from "@/types/gestao-pessoas/solicitacao";
 import { format } from "date-fns";
 import { CheckCircle, XCircle } from "lucide-react";
+import { formatarNumeroSolicitacao } from "@/utils/gestao-pessoas/formatters";
+import { useCCAs } from "@/hooks/useCCAs";
 interface AprovarSolicitacaoModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -25,7 +27,15 @@ export function AprovarSolicitacaoModal({
 }: AprovarSolicitacaoModalProps) {
   const [justificativa, setJustificativa] = useState("");
   const [mostrarJustificativaAprovacao, setMostrarJustificativaAprovacao] = useState(false);
+  const { data: ccas = [] } = useCCAs();
+  
   if (!solicitacao) return null;
+
+  const getCodigoNomeCCA = (ccaId?: number) => {
+    if (!ccaId) return "N/A";
+    const cca = ccas.find(c => c.id === ccaId);
+    return cca ? `${cca.codigo} - ${cca.nome}` : ccaId.toString();
+  };
   const handleAprovar = () => {
     onAprovar(justificativa || undefined);
     setJustificativa("");
@@ -152,7 +162,7 @@ export function AprovarSolicitacaoModal({
   return <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Aprovar Solicitação - {solicitacao.id}</DialogTitle>
+          <DialogTitle>Aprovar Solicitação - {formatarNumeroSolicitacao(solicitacao.numeroSolicitacao)}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
@@ -172,7 +182,7 @@ export function AprovarSolicitacaoModal({
                 {format(new Date(solicitacao.dataSolicitacao), "dd/MM/yyyy")}
               </div>
               <div>
-                <span className="font-medium">Centro de custo:</span> {solicitacao.centroCusto}
+                <span className="font-medium">CCA:</span> {getCodigoNomeCCA(solicitacao.ccaId)}
               </div>
               <div className="flex items-center gap-2">
                 <span className="font-medium">Prioridade:</span>
