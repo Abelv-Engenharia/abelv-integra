@@ -5,6 +5,8 @@ import { z } from "zod";
 import { format } from "date-fns";
 import { CalendarIcon, Building2, Download, FileText } from "lucide-react";
 import * as XLSX from 'xlsx';
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -103,6 +105,22 @@ const mockDemonstrativo = [{
 export default function CadastroPessoaJuridica() {
   const [cadastrosCnpj, setCadastrosCnpj] = useState<Set<string>>(new Set());
   const [cadastrosCpf, setCadastrosCpf] = useState<Set<string>>(new Set());
+  
+  // Buscar usuários ativos do sistema
+  const { data: usuarios, isLoading: isLoadingUsuarios } = useQuery({
+    queryKey: ['usuarios-ativos-sistema'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id, nome, email')
+        .eq('ativo', true)
+        .order('nome');
+      
+      if (error) throw error;
+      return data || [];
+    }
+  });
+  
   const form = useForm<CadastroFormData>({
     resolver: zodResolver(cadastroSchema),
     defaultValues: {
@@ -474,9 +492,30 @@ export default function CadastroPessoaJuridica() {
                 field
               }) => <FormItem>
                       <FormLabel>Usuário do Sistema</FormLabel>
-                      <FormControl>
-                        <Input type="email" placeholder="exemplo@email.com" {...field} />
-                      </FormControl>
+                      <Select 
+                        onValueChange={field.onChange} 
+                        value={field.value}
+                        disabled={isLoadingUsuarios}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder={
+                              isLoadingUsuarios 
+                                ? "Carregando usuários..." 
+                                : usuarios && usuarios.length > 0
+                                  ? "Selecione um usuário"
+                                  : "Nenhum usuário disponível"
+                            } />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {usuarios?.map((usuario) => (
+                            <SelectItem key={usuario.id} value={usuario.email || ''}>
+                              {usuario.nome} {usuario.email ? `(${usuario.email})` : ''}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>} />
               </div>
