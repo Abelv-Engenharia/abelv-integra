@@ -34,7 +34,7 @@ export default function SolicitacaoServicos() {
   // Verificar status automaticamente ao carregar a página
   useEffect(() => {
     verificarEAtualizarStatusAutomatico();
-  }, []);
+  }, [verificarEAtualizarStatusAutomatico]);
 
   // Verificar status periodicamente (a cada 5 minutos)
   useEffect(() => {
@@ -42,7 +42,7 @@ export default function SolicitacaoServicos() {
       verificarEAtualizarStatusAutomatico();
     }, 5 * 60 * 1000);
     return () => clearInterval(interval);
-  }, []);
+  }, [verificarEAtualizarStatusAutomatico]);
   const handleCategorySelect = (category: TipoServico) => {
     setSelectedCategory(category);
     setShowForm(true);
