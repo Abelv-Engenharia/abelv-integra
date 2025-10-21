@@ -172,12 +172,12 @@ export default function DashboardPrestadores() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <DistribuicaoValoresChart dados={dadosFiltrados} />
-          <ComparativoMensalChart dados={dadosFiltrados} />
+          <ComparativoMensalChart dados={dadosMensais} />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <TopPrestadoresChart dados={dadosFiltrados} />
-          <EvolucaoTrimestralChart dados={dadosFiltrados} />
+          <TopPrestadoresChart dados={top10Prestadores} />
+          <EvolucaoTrimestralChart dados={dadosMensais} />
         </div>
 
       <TabelaResumoPrestadores dados={dadosFiltrados} />
