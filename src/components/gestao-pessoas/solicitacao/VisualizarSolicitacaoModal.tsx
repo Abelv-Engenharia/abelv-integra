@@ -77,11 +77,7 @@ const formattiposervico = (tipo: TipoServico) => {
 };
 
 const getCcaSolicitacao = (solicitacao: SolicitacaoServico): string => {
-  // Busca o CCA específico do tipo de serviço
-  if ('cca' in solicitacao && solicitacao.cca) {
-    return solicitacao.cca;
-  }
-  // Fallback para centroCusto se não houver CCA específico
+  // O campo centroCusto contém o CCA após a mesclagem dos dados específicos
   return solicitacao.centroCusto || '';
 };
 
@@ -103,6 +99,15 @@ export function VisualizarSolicitacaoModal({
 
   useEffect(() => {
     if (solicitacao) {
+      console.log("=== DEBUG MODAL: Dados da solicitação ===", solicitacao);
+      console.log("Número:", solicitacao.numeroSolicitacao);
+      console.log("Centro de Custo:", solicitacao.centroCusto);
+      console.log("Valor:", (solicitacao as any).valor);
+      console.log("Data de Uso:", (solicitacao as any).dataUso);
+      console.log("Local Partida:", (solicitacao as any).localPartida);
+      console.log("Local Destino:", (solicitacao as any).localDestino);
+      console.log("Motivo:", (solicitacao as any).motivo);
+      
       setObservacoesGestao(solicitacao.observacoesgestao || "");
       setImagemAnexo(solicitacao.imagemanexo || "");
       setEstimativaValor(solicitacao.estimativavalor?.toString() || "");

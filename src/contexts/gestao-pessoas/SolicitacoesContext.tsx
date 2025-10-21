@@ -20,13 +20,17 @@ const SolicitacoesContext = createContext<SolicitacoesContextType | undefined>(u
 
 // Função para converter dados do Supabase para o formato do frontend
 const converterParaSolicitacao = (row: any): any => {
+  console.log("=== DEBUG CONTEXTO: Convertendo solicitação ===");
+  console.log("Row recebido:", row);
+  console.log("Dados JSONB:", row.dados);
+  
   const dadosBase = {
     id: row.id,
     numeroSolicitacao: row.numero_solicitacao,
     dataSolicitacao: new Date(row.data_solicitacao),
     solicitante: row.solicitante_nome,
     solicitanteId: row.solicitante_id,
-    centroCusto: '', // TODO: buscar do CCA
+    centroCusto: row.dados?.centroCusto || '', // Buscar do JSONB primeiro
     tipoServico: row.tipo_servico as TipoServico,
     prioridade: row.prioridade as PrioridadeSolicitacao,
     status: row.status as StatusSolicitacao,
@@ -55,7 +59,7 @@ const converterParaSolicitacao = (row: any): any => {
 
   // Mesclar dados específicos do JSONB se existirem
   if (row.dados) {
-    const dadosEspecificos = row.dados;
+    const dadosEspecificos = { ...row.dados };
     
     // Converter datas em strings para objetos Date
     if (dadosEspecificos.dataUso) {
@@ -86,9 +90,12 @@ const converterParaSolicitacao = (row: any): any => {
       dadosEspecificos.dataEntrega = new Date(dadosEspecificos.dataEntrega);
     }
     
-    return { ...dadosBase, ...dadosEspecificos };
+    const resultado = { ...dadosBase, ...dadosEspecificos };
+    console.log("Resultado da conversão:", resultado);
+    return resultado;
   }
 
+  console.log("Resultado da conversão (sem dados específicos):", dadosBase);
   return dadosBase;
 };
 
