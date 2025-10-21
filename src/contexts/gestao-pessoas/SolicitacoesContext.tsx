@@ -1,6 +1,10 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { SolicitacaoServico, StatusSolicitacao } from '@/types/gestao-pessoas/solicitacao';
+import { createContext, useContext, ReactNode, useMemo } from 'react';
+import { SolicitacaoServico, StatusSolicitacao, PrioridadeSolicitacao, TipoServico } from '@/types/gestao-pessoas/solicitacao';
 import { verificarEAtualizarStatus } from '@/utils/gestao-pessoas/solicitacaoStatus';
+import { useSolicitacoesServicos } from '@/hooks/gestao-pessoas/useSolicitacoesServicos';
+import { Database } from '@/integrations/supabase/types';
+
+type SolicitacaoServicoRow = Database["public"]["Tables"]["solicitacoes_servicos"]["Row"];
 
 interface SolicitacoesContextType {
   solicitacoes: SolicitacaoServico[];
@@ -9,78 +13,105 @@ interface SolicitacoesContextType {
   deleteSolicitacao: (id: string) => void;
   getSolicitacaoById: (id: string) => SolicitacaoServico | undefined;
   verificarEAtualizarStatusAutomatico: () => void;
+  isLoading: boolean;
 }
 
 const SolicitacoesContext = createContext<SolicitacoesContextType | undefined>(undefined);
 
-const STORAGE_KEY = 'solicitacoes';
-
-const loadSolicitacoes = (): SolicitacaoServico[] => {
-  try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      const parsed = JSON.parse(stored);
-      return parsed.map((sol: any) => ({
-        ...sol,
-        dataSolicitacao: new Date(sol.dataSolicitacao),
-        dataUso: sol.dataUso ? new Date(sol.dataUso) : undefined,
-        dataRetirada: sol.dataRetirada ? new Date(sol.dataRetirada) : undefined,
-        dataViagem: sol.dataViagem ? new Date(sol.dataViagem) : undefined,
-        dataVolta: sol.dataVolta ? new Date(sol.dataVolta) : undefined,
-        dataInicio: sol.dataInicio ? new Date(sol.dataInicio) : undefined,
-        dataFim: sol.dataFim ? new Date(sol.dataFim) : undefined,
-        dataServico: sol.dataServico ? new Date(sol.dataServico) : undefined,
-        data: sol.data ? new Date(sol.data) : undefined,
-      }));
-    }
-  } catch (error) {
-    console.error('Erro ao carregar solicitações:', error);
-  }
-  return [];
+// Função para converter dados do Supabase para o formato do frontend
+const converterParaSolicitacao = (row: SolicitacaoServicoRow): any => {
+  return {
+    id: row.id,
+    dataSolicitacao: new Date(row.data_solicitacao),
+    solicitante: row.solicitante_nome,
+    solicitanteId: row.solicitante_id,
+    centroCusto: '', // TODO: buscar do CCA
+    tipoServico: row.tipo_servico as TipoServico,
+    prioridade: row.prioridade as PrioridadeSolicitacao,
+    status: row.status as StatusSolicitacao,
+    observacoes: row.observacoes || undefined,
+    observacoesgestao: row.observacoes_gestao || undefined,
+    estimativavalor: row.estimativa_valor || undefined,
+    imagemAnexo: row.imagem_anexo || undefined,
+    responsavelaprovacao: '', // TODO: buscar nome do responsável
+    responsavelaprovacaoId: row.responsavel_aprovacao_id || undefined,
+    aprovadopor: '', // TODO: buscar nome do aprovador
+    aprovadoporId: row.aprovado_por_id || undefined,
+    dataaprovacao: row.data_aprovacao ? new Date(row.data_aprovacao) : undefined,
+    justificativaaprovacao: row.justificativa_aprovacao || undefined,
+    justificativareprovacao: row.justificativa_reprovacao || undefined,
+    concluidopor: '', // TODO: buscar nome do concluído por
+    concluidoporId: row.concluido_por_id || undefined,
+    dataconclusao: row.data_conclusao ? new Date(row.data_conclusao) : undefined,
+    observacoesconclusao: row.observacoes_conclusao || undefined,
+    comprovanteconclusao: row.comprovante_conclusao || undefined,
+    statusanterior: row.status_anterior as StatusSolicitacao | undefined,
+    foimovidoautomaticamente: row.foi_movido_automaticamente || undefined,
+    datamudancaautomatica: row.data_mudanca_automatica ? new Date(row.data_mudanca_automatica) : undefined,
+    motivomudancaautomatica: row.motivo_mudanca_automatica || undefined,
+    ccaId: row.cca_id || undefined,
+  };
 };
-
-const saveSolicitacoes = (solicitacoes: SolicitacaoServico[]) => {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(solicitacoes));
-  } catch (error) {
-    console.error('Erro ao salvar solicitações:', error);
-  }
-};
-
-const generateId = () => `SOL-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
 export function SolicitacoesProvider({ children }: { children: ReactNode }) {
-  const [solicitacoes, setSolicitacoes] = useState<SolicitacaoServico[]>([]);
+  const {
+    solicitacoes: solicitacoesDb,
+    isLoading,
+    createSolicitacao: createDb,
+    updateSolicitacao: updateDb,
+    deleteSolicitacao: deleteDb,
+    getSolicitacaoById: getByIdDb,
+  } = useSolicitacoesServicos();
 
-  useEffect(() => {
-    setSolicitacoes(loadSolicitacoes());
-  }, []);
-
-  useEffect(() => {
-    if (solicitacoes.length > 0) {
-      saveSolicitacoes(solicitacoes);
-    }
-  }, [solicitacoes]);
+  // Converter dados do banco para o formato esperado pelo frontend
+  const solicitacoes = useMemo(() => {
+    return solicitacoesDb.map(converterParaSolicitacao);
+  }, [solicitacoesDb]);
 
   const addSolicitacao = (solicitacao: any) => {
+    // TODO: Buscar usuário autenticado
     const novaSolicitacao = {
-      ...solicitacao,
-      id: generateId(),
-      dataSolicitacao: new Date(),
-      status: solicitacao.status || StatusSolicitacao.EM_ANDAMENTO,
-    } as SolicitacaoServico;
+      solicitante_id: solicitacao.solicitanteId || 'temp-user-id',
+      solicitante_nome: solicitacao.solicitante || 'Usuário Temporário',
+      tipo_servico: solicitacao.tipoServico,
+      prioridade: solicitacao.prioridade || 'media',
+      observacoes: solicitacao.observacoes,
+      observacoes_gestao: solicitacao.observacoesgestao,
+      estimativa_valor: solicitacao.estimativavalor,
+      imagem_anexo: solicitacao.imagemAnexo,
+      responsavel_aprovacao_id: solicitacao.responsavelaprovacaoId,
+      cca_id: solicitacao.ccaId,
+    };
 
-    setSolicitacoes(prev => [novaSolicitacao, ...prev]);
+    createDb(novaSolicitacao);
   };
 
   const updateSolicitacao = (id: string, updates: any) => {
-    setSolicitacoes(prev =>
-      prev.map(sol => (sol.id === id ? { ...sol, ...updates } as SolicitacaoServico : sol))
-    );
+    // Converter campos do frontend para o banco
+    const dbUpdates: any = {};
+    
+    if (updates.status) dbUpdates.status = updates.status;
+    if (updates.observacoes) dbUpdates.observacoes = updates.observacoes;
+    if (updates.observacoesgestao) dbUpdates.observacoes_gestao = updates.observacoesgestao;
+    if (updates.estimativavalor !== undefined) dbUpdates.estimativa_valor = updates.estimativavalor;
+    if (updates.justificativaaprovacao) dbUpdates.justificativa_aprovacao = updates.justificativaaprovacao;
+    if (updates.justificativareprovacao) dbUpdates.justificativa_reprovacao = updates.justificativareprovacao;
+    if (updates.dataaprovacao) dbUpdates.data_aprovacao = updates.dataaprovacao.toISOString();
+    if (updates.aprovadoporId) dbUpdates.aprovado_por_id = updates.aprovadoporId;
+    if (updates.dataconclusao) dbUpdates.data_conclusao = updates.dataconclusao.toISOString();
+    if (updates.concluidoporId) dbUpdates.concluido_por_id = updates.concluidoporId;
+    if (updates.observacoesconclusao) dbUpdates.observacoes_conclusao = updates.observacoesconclusao;
+    if (updates.comprovanteconclusao) dbUpdates.comprovante_conclusao = updates.comprovanteconclusao;
+    if (updates.statusanterior) dbUpdates.status_anterior = updates.statusanterior;
+    if (updates.foimovidoautomaticamente !== undefined) dbUpdates.foi_movido_automaticamente = updates.foimovidoautomaticamente;
+    if (updates.datamudancaautomatica) dbUpdates.data_mudanca_automatica = updates.datamudancaautomatica.toISOString();
+    if (updates.motivomudancaautomatica) dbUpdates.motivo_mudanca_automatica = updates.motivomudancaautomatica;
+
+    updateDb({ id, updates: dbUpdates });
   };
 
   const deleteSolicitacao = (id: string) => {
-    setSolicitacoes(prev => prev.filter(sol => sol.id !== id));
+    deleteDb(id);
   };
 
   const getSolicitacaoById = (id: string) => {
@@ -88,27 +119,22 @@ export function SolicitacoesProvider({ children }: { children: ReactNode }) {
   };
 
   const verificarEAtualizarStatusAutomatico = () => {
-    const solicitacoesAtualizadas = solicitacoes.map(solicitacao => {
+    // TODO: Implementar verificação automática com o banco
+    solicitacoes.forEach(solicitacao => {
       const novoStatus = verificarEAtualizarStatus(solicitacao);
       
-      // Se o status mudou automaticamente
       if (novoStatus !== solicitacao.status && novoStatus === StatusSolicitacao.PENDENTE) {
         console.log(`[AUTO-MOVE] Solicitação ${solicitacao.id} movida para PENDENTE`);
         
-        return {
-          ...solicitacao,
+        updateSolicitacao(solicitacao.id, {
           status: novoStatus,
           statusanterior: solicitacao.status,
           datamudancaautomatica: new Date(),
           motivomudancaautomatica: "Movida automaticamente após 3 dias úteis sem atendimento",
           foimovidoautomaticamente: true
-        };
+        });
       }
-      
-      return solicitacao;
     });
-    
-    setSolicitacoes(solicitacoesAtualizadas);
   };
 
   return (
@@ -120,6 +146,7 @@ export function SolicitacoesProvider({ children }: { children: ReactNode }) {
         deleteSolicitacao,
         getSolicitacaoById,
         verificarEAtualizarStatusAutomatico,
+        isLoading,
       }}
     >
       {children}
