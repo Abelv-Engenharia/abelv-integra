@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import {
   ChevronDown,
-  ChevronRight,
   ShieldAlert,
   GraduationCap,
   Clock,
@@ -212,11 +211,7 @@ export default function SidebarSectionGestaoSMS({
             <SidebarMenuButton onClick={() => toggleMenu("gestao-sms")} className="text-white hover:bg-slate-600">
               <ShieldAlert className="h-4 w-4 flex-shrink-0" />
               <span className="break-words">SMS</span>
-              {openSubMenus["gestao-sms"] ? (
-                <ChevronDown className="h-4 w-4 ml-auto" />
-              ) : (
-                <ChevronRight className="h-4 w-4 ml-auto" />
-              )}
+              <ChevronDown className={`h-4 w-4 ml-auto transition-transform duration-200 ${openSubMenus["gestao-sms"] ? 'rotate-180' : ''}`} />
             </SidebarMenuButton>
           </CollapsibleTrigger>
 
@@ -251,7 +246,7 @@ export default function SidebarSectionGestaoSMS({
                         <BarChart3 className="h-3 w-3 flex-shrink-0" />
                         <span>IDSMS</span>
                       </div>
-                      {openSubMenus.idsms ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
+                      <ChevronDown className={`h-3 w-3 transition-transform duration-200 ${openSubMenus.idsms ? 'rotate-180' : ''}`} />
                     </button>
                     {openSubMenus.idsms && (
                       <div className="ml-4 mt-1 space-y-1">
@@ -286,7 +281,7 @@ export default function SidebarSectionGestaoSMS({
                         <AlertTriangle className="h-3 w-3 flex-shrink-0" />
                         <span>Desvios</span>
                       </div>
-                      {openSubMenus.desvios ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
+                      <ChevronDown className={`h-3 w-3 transition-transform duration-200 ${openSubMenus.desvios ? 'rotate-180' : ''}`} />
                     </button>
                     {openSubMenus.desvios && (
                       <div className="ml-4 mt-1 space-y-1">
@@ -319,7 +314,7 @@ export default function SidebarSectionGestaoSMS({
                         <GraduationCap className="h-3 w-3 flex-shrink-0" />
                         <span>Treinamentos</span>
                       </div>
-                      {openSubMenus.treinamentos ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
+                      <ChevronDown className={`h-3 w-3 transition-transform duration-200 ${openSubMenus.treinamentos ? 'rotate-180' : ''}`} />
                     </button>
                     {openSubMenus.treinamentos && (
                       <div className="ml-4 mt-1 space-y-1">
@@ -352,7 +347,7 @@ export default function SidebarSectionGestaoSMS({
                         <Clock className="h-3 w-3 flex-shrink-0" />
                         <span>Hora da Segurança</span>
                       </div>
-                      {openSubMenus["hora-seguranca"] ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
+                      <ChevronDown className={`h-3 w-3 transition-transform duration-200 ${openSubMenus["hora-seguranca"] ? 'rotate-180' : ''}`} />
                     </button>
                     {openSubMenus["hora-seguranca"] && (
                       <div className="ml-4 mt-1 space-y-1">
@@ -387,7 +382,7 @@ export default function SidebarSectionGestaoSMS({
                         <ClipboardCheck className="h-3 w-3 flex-shrink-0" />
                         <span>Inspeção SMS</span>
                       </div>
-                      {openSubMenus["inspecao-sms"] ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
+                      <ChevronDown className={`h-3 w-3 transition-transform duration-200 ${openSubMenus["inspecao-sms"] ? 'rotate-180' : ''}`} />
                     </button>
                     {openSubMenus["inspecao-sms"] && (
                       <div className="ml-4 mt-1 space-y-1">
@@ -420,7 +415,7 @@ export default function SidebarSectionGestaoSMS({
                         <AlertTriangle className="h-3 w-3 flex-shrink-0" />
                         <span>Ocorrências</span>
                       </div>
-                      {openSubMenus.ocorrencias ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
+                      <ChevronDown className={`h-3 w-3 transition-transform duration-200 ${openSubMenus.ocorrencias ? 'rotate-180' : ''}`} />
                     </button>
                     {openSubMenus.ocorrencias && (
                       <div className="ml-4 mt-1 space-y-1">
@@ -453,7 +448,7 @@ export default function SidebarSectionGestaoSMS({
                         <Gavel className="h-3 w-3 flex-shrink-0" />
                         <span>Medidas Disciplinares</span>
                       </div>
-                      {openSubMenus["medidas-disciplinares"] ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
+                      <ChevronDown className={`h-3 w-3 transition-transform duration-200 ${openSubMenus["medidas-disciplinares"] ? 'rotate-180' : ''}`} />
                     </button>
                     {openSubMenus["medidas-disciplinares"] && (
                       <div className="ml-4 mt-1 space-y-1">
@@ -486,7 +481,7 @@ export default function SidebarSectionGestaoSMS({
                         <Shield className="h-3 w-3 flex-shrink-0" />
                         <span>GRO</span>
                       </div>
-                      {openSubMenus.gro ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
+                      <ChevronDown className={`h-3 w-3 transition-transform duration-200 ${openSubMenus.gro ? 'rotate-180' : ''}`} />
                     </button>
                     {openSubMenus.gro && (
                       <div className="ml-4 mt-1 space-y-1">
@@ -519,7 +514,7 @@ export default function SidebarSectionGestaoSMS({
                         <Flame className="h-3 w-3 flex-shrink-0" />
                         <span>Prevenção de Incêndio</span>
                       </div>
-                      {openSubMenus["prevencao-incendio"] ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
+                      <ChevronDown className={`h-3 w-3 transition-transform duration-200 ${openSubMenus["prevencao-incendio"] ? 'rotate-180' : ''}`} />
                     </button>
                     {openSubMenus["prevencao-incendio"] && (
                       <div className="ml-4 mt-1 space-y-1">
@@ -552,7 +547,7 @@ export default function SidebarSectionGestaoSMS({
                         <FileText className="h-3 w-3 flex-shrink-0" />
                         <span>Documentação SMS</span>
                       </div>
-                      {openSubMenus["documentacao-sms"] ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
+                      <ChevronDown className={`h-3 w-3 transition-transform duration-200 ${openSubMenus["documentacao-sms"] ? 'rotate-180' : ''}`} />
                     </button>
                     {openSubMenus["documentacao-sms"] && (
                       <div className="ml-4 mt-1 space-y-1">
@@ -585,7 +580,7 @@ export default function SidebarSectionGestaoSMS({
                         <BarChart3 className="h-3 w-3 flex-shrink-0" />
                         <span>Relatórios</span>
                       </div>
-                      {openSubMenus["relatorios"] ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
+                      <ChevronDown className={`h-3 w-3 transition-transform duration-200 ${openSubMenus["relatorios"] ? 'rotate-180' : ''}`} />
                     </button>
                     {openSubMenus["relatorios"] && (
                       <div className="ml-4 mt-1 space-y-1">

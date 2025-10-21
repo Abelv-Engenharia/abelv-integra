@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { useLocation, Link } from "react-router-dom";
 import {
   ChevronDown,
-  ChevronRight,
   BarChart3,
   FolderOpen,
   LayoutDashboard,
@@ -69,11 +68,7 @@ export default function SidebarSectionComercial({ openMenu, toggleMenu, onLinkCl
               <BarChart3 className="h-4 w-4" />
               <span>Comercial</span>
             </div>
-            {openMenu === "comercial" ? (
-              <ChevronDown className="h-4 w-4 transition-transform" />
-            ) : (
-              <ChevronRight className="h-4 w-4 transition-transform" />
-            )}
+            <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${openMenu === "comercial" ? 'rotate-180' : ''}`} />
           </SidebarMenuButton>
         </CollapsibleTrigger>
 
@@ -88,11 +83,7 @@ export default function SidebarSectionComercial({ openMenu, toggleMenu, onLinkCl
                       <FolderOpen className="h-4 w-4" />
                       <span>Repositório de Documentos</span>
                     </div>
-                    {isRepositorioOpen ? (
-                      <ChevronDown className="h-4 w-4 transition-transform" />
-                    ) : (
-                      <ChevronRight className="h-4 w-4 transition-transform" />
-                    )}
+                    <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isRepositorioOpen ? 'rotate-180' : ''}`} />
                   </SidebarMenuSubButton>
                 </CollapsibleTrigger>
 
@@ -198,11 +189,7 @@ export default function SidebarSectionComercial({ openMenu, toggleMenu, onLinkCl
                       <BarChart3 className="h-4 w-4" />
                       <span>Controle Comercial</span>
                     </div>
-                    {isControleOpen ? (
-                      <ChevronDown className="h-4 w-4 transition-transform" />
-                    ) : (
-                      <ChevronRight className="h-4 w-4 transition-transform" />
-                    )}
+                    <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isControleOpen ? 'rotate-180' : ''}`} />
                   </SidebarMenuSubButton>
                 </CollapsibleTrigger>
 
@@ -286,11 +273,7 @@ export default function SidebarSectionComercial({ openMenu, toggleMenu, onLinkCl
                               <Settings className="h-4 w-4" />
                               <span>Alteração de Cadastros</span>
                             </div>
-                            {isAlteracaoCadastrosOpen ? (
-                              <ChevronDown className="h-3 w-3 transition-transform" />
-                            ) : (
-                              <ChevronRight className="h-3 w-3 transition-transform" />
-                            )}
+                            <ChevronDown className={`h-3 w-3 transition-transform duration-200 ${isAlteracaoCadastrosOpen ? 'rotate-180' : ''}`} />
                           </SidebarMenuSubButton>
                         </CollapsibleTrigger>
 

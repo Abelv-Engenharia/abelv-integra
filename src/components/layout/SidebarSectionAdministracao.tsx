@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import {
   ChevronDown,
-  ChevronRight,
   Settings,
   Users,
   Building2,
@@ -106,7 +105,7 @@ export default function SidebarSectionAdministracao({ openMenu, toggleMenu, onLi
             <SidebarMenuButton onClick={() => toggleMenu("admin")} className="text-white hover:bg-slate-600">
               <Settings className="h-4 w-4" />
               <span className="break-words">Configurações</span>
-              {isOpen ? <ChevronDown className="h-4 w-4 ml-auto" /> : <ChevronRight className="h-4 w-4 ml-auto" />}
+              <ChevronDown className={`h-4 w-4 ml-auto transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
             </SidebarMenuButton>
           </CollapsibleTrigger>
 
@@ -138,11 +137,7 @@ export default function SidebarSectionAdministracao({ openMenu, toggleMenu, onLi
                       >
                         <Database className="h-3 w-3 flex-shrink-0" />
                         <span className="text-xs leading-tight break-words min-w-0">Importação de Dados</span>
-                        {isImportacaoDadosOpen ? (
-                          <ChevronDown className="h-3 w-3 ml-auto" />
-                        ) : (
-                          <ChevronRight className="h-3 w-3 ml-auto" />
-                        )}
+                        <ChevronDown className={`h-3 w-3 ml-auto transition-transform duration-200 ${isImportacaoDadosOpen ? 'rotate-180' : ''}`} />
                       </SidebarMenuSubButton>
                     </CollapsibleTrigger>
                     <CollapsibleContent>
@@ -179,11 +174,7 @@ export default function SidebarSectionAdministracao({ openMenu, toggleMenu, onLi
                       >
                         <MessageSquare className="h-3 w-3 flex-shrink-0" />
                         <span className="text-xs leading-tight break-words min-w-0">Comunicados</span>
-                        {isComunicadosOpen ? (
-                          <ChevronDown className="h-3 w-3 ml-auto" />
-                        ) : (
-                          <ChevronRight className="h-3 w-3 ml-auto" />
-                        )}
+                        <ChevronDown className={`h-3 w-3 ml-auto transition-transform duration-200 ${isComunicadosOpen ? 'rotate-180' : ''}`} />
                       </SidebarMenuSubButton>
                     </CollapsibleTrigger>
                     <CollapsibleContent>

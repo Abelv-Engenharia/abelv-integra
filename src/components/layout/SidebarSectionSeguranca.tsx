@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import {
   ChevronDown,
-  ChevronRight,
   Shield,
   UserPlus,
   UserCog,
@@ -70,7 +69,7 @@ export default function SidebarSectionSeguranca({ openMenu, toggleMenu, onLinkCl
             <SidebarMenuButton onClick={() => toggleMenu("seguranca")} className="text-white hover:bg-slate-600">
               <Shield className="h-4 w-4" />
               <span className="break-words">Segurança</span>
-              {isOpen ? <ChevronDown className="h-4 w-4 ml-auto" /> : <ChevronRight className="h-4 w-4 ml-auto" />}
+              <ChevronDown className={`h-4 w-4 ml-auto transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
             </SidebarMenuButton>
           </CollapsibleTrigger>
 
