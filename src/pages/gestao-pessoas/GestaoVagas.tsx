@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Vaga, StatusVaga, StatusAprovacao, EtapaProcesso } from "@/types/gestao-pessoas/vaga";
-import { mockVagas } from "@/data/gestao-pessoas/mockVagas";
+import { useVagas, useUpdateVaga } from "@/hooks/gestao-pessoas/useVagas";
 import { VagaKanbanCard } from "@/components/gestao-pessoas/recrutamento/VagaKanbanCard";
 import { DndContext, DragEndEvent, closestCorners } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
@@ -49,7 +49,8 @@ function ColunaKanban({
 }
 export default function GestaoVagas() {
   const navigate = useNavigate();
-  const [vagas, setVagas] = useState<Vaga[]>(mockVagas);
+  const { data: vagas = [], isLoading } = useVagas();
+  const updateVaga = useUpdateVaga();
   const getColunaVaga = (vaga: Vaga): ColunaGestao => {
     // Vagas por etapa específica
     if (vaga.etapaAtual === EtapaProcesso.TRIAGEM_CURRICULOS) {
@@ -118,90 +119,99 @@ export default function GestaoVagas() {
     navigate(`/rh-detalhes-vaga/${vaga.id}`);
   };
   const handleDragEnd = (event: DragEndEvent) => {
-    const {
-      active,
-      over
-    } = event;
+    const { active, over } = event;
     if (!over) return;
+
     const vagaId = active.id as string;
     const novaColuna = over.id as ColunaGestao;
-    setVagas(prev => prev.map(vaga => {
-      if (vaga.id !== vagaId) return vaga;
-      const vagaAtualizada = {
-        ...vaga
-      };
+    const vaga = vagas.find(v => v.id === vagaId);
+    if (!vaga) return;
 
-      // Atualiza status/etapa baseado na coluna de destino
-      switch (novaColuna) {
-        case "solicitadas":
-          vagaAtualizada.statusAprovacao = StatusAprovacao.PENDENTE;
-          vagaAtualizada.status = StatusVaga.SOLICITACAO_ABERTA;
-          vagaAtualizada.etapaAtual = undefined;
-          break;
-        case "aprovadas":
-          vagaAtualizada.statusAprovacao = StatusAprovacao.APROVADO;
-          vagaAtualizada.status = StatusVaga.APROVADA;
-          vagaAtualizada.etapaAtual = undefined;
-          break;
-        case "anunciadas":
-          vagaAtualizada.statusAprovacao = StatusAprovacao.APROVADO;
-          vagaAtualizada.status = StatusVaga.DIVULGACAO_FEITA;
-          vagaAtualizada.etapaAtual = undefined;
-          break;
-        case "triagem":
-          vagaAtualizada.statusAprovacao = StatusAprovacao.APROVADO;
-          vagaAtualizada.status = StatusVaga.EM_SELECAO;
-          vagaAtualizada.etapaAtual = EtapaProcesso.TRIAGEM_CURRICULOS;
-          break;
-        case "envio_curriculos":
-          vagaAtualizada.statusAprovacao = StatusAprovacao.APROVADO;
-          vagaAtualizada.status = StatusVaga.EM_SELECAO;
-          vagaAtualizada.etapaAtual = EtapaProcesso.ENVIO_CURRICULOS_GESTOR;
-          break;
-        case "agendamento_entrevistas":
-          vagaAtualizada.statusAprovacao = StatusAprovacao.APROVADO;
-          vagaAtualizada.status = StatusVaga.EM_SELECAO;
-          vagaAtualizada.etapaAtual = EtapaProcesso.AGENDAMENTO_ENTREVISTAS;
-          break;
-        case "entrevistas_agendadas":
-          vagaAtualizada.statusAprovacao = StatusAprovacao.APROVADO;
-          vagaAtualizada.status = StatusVaga.EM_SELECAO;
-          vagaAtualizada.etapaAtual = EtapaProcesso.ENTREVISTAS_AGENDADAS;
-          break;
-        case "envio_profile":
-          vagaAtualizada.statusAprovacao = StatusAprovacao.APROVADO;
-          vagaAtualizada.status = StatusVaga.EM_SELECAO;
-          vagaAtualizada.etapaAtual = EtapaProcesso.ENVIO_PROFILE;
-          break;
-        case "envio_testes":
-          vagaAtualizada.statusAprovacao = StatusAprovacao.APROVADO;
-          vagaAtualizada.status = StatusVaga.EM_SELECAO;
-          vagaAtualizada.etapaAtual = EtapaProcesso.ENVIO_TESTES;
-          break;
-        case "entrevista_final":
-          vagaAtualizada.statusAprovacao = StatusAprovacao.APROVADO;
-          vagaAtualizada.status = StatusVaga.EM_SELECAO;
-          vagaAtualizada.etapaAtual = EtapaProcesso.ENTREVISTA_FINAL;
-          break;
-        case "pesquisa_daco":
-          vagaAtualizada.statusAprovacao = StatusAprovacao.APROVADO;
-          vagaAtualizada.status = StatusVaga.EM_SELECAO;
-          vagaAtualizada.etapaAtual = EtapaProcesso.PESQUISA_DACO;
-          break;
-        case "envio_proposta":
-          vagaAtualizada.statusAprovacao = StatusAprovacao.APROVADO;
-          vagaAtualizada.status = StatusVaga.EM_SELECAO;
-          vagaAtualizada.etapaAtual = EtapaProcesso.ENVIO_PROPOSTA;
-          break;
-        case "concluidas":
-          vagaAtualizada.statusAprovacao = StatusAprovacao.APROVADO;
-          vagaAtualizada.status = StatusVaga.FINALIZADA;
-          vagaAtualizada.etapaAtual = undefined;
-          break;
-      }
-      return vagaAtualizada;
-    }));
+    const vagaAtualizada: Partial<Vaga> = {};
+
+    // Atualiza status/etapa baseado na coluna de destino
+    switch (novaColuna) {
+      case "solicitadas":
+        vagaAtualizada.statusAprovacao = StatusAprovacao.PENDENTE;
+        vagaAtualizada.status = StatusVaga.SOLICITACAO_ABERTA;
+        vagaAtualizada.etapaAtual = undefined;
+        break;
+      case "aprovadas":
+        vagaAtualizada.statusAprovacao = StatusAprovacao.APROVADO;
+        vagaAtualizada.status = StatusVaga.APROVADA;
+        vagaAtualizada.etapaAtual = undefined;
+        break;
+      case "anunciadas":
+        vagaAtualizada.statusAprovacao = StatusAprovacao.APROVADO;
+        vagaAtualizada.status = StatusVaga.DIVULGACAO_FEITA;
+        vagaAtualizada.etapaAtual = undefined;
+        break;
+      case "triagem":
+        vagaAtualizada.statusAprovacao = StatusAprovacao.APROVADO;
+        vagaAtualizada.status = StatusVaga.EM_SELECAO;
+        vagaAtualizada.etapaAtual = EtapaProcesso.TRIAGEM_CURRICULOS;
+        break;
+      case "envio_curriculos":
+        vagaAtualizada.statusAprovacao = StatusAprovacao.APROVADO;
+        vagaAtualizada.status = StatusVaga.EM_SELECAO;
+        vagaAtualizada.etapaAtual = EtapaProcesso.ENVIO_CURRICULOS_GESTOR;
+        break;
+      case "agendamento_entrevistas":
+        vagaAtualizada.statusAprovacao = StatusAprovacao.APROVADO;
+        vagaAtualizada.status = StatusVaga.EM_SELECAO;
+        vagaAtualizada.etapaAtual = EtapaProcesso.AGENDAMENTO_ENTREVISTAS;
+        break;
+      case "entrevistas_agendadas":
+        vagaAtualizada.statusAprovacao = StatusAprovacao.APROVADO;
+        vagaAtualizada.status = StatusVaga.EM_SELECAO;
+        vagaAtualizada.etapaAtual = EtapaProcesso.ENTREVISTAS_AGENDADAS;
+        break;
+      case "envio_profile":
+        vagaAtualizada.statusAprovacao = StatusAprovacao.APROVADO;
+        vagaAtualizada.status = StatusVaga.EM_SELECAO;
+        vagaAtualizada.etapaAtual = EtapaProcesso.ENVIO_PROFILE;
+        break;
+      case "envio_testes":
+        vagaAtualizada.statusAprovacao = StatusAprovacao.APROVADO;
+        vagaAtualizada.status = StatusVaga.EM_SELECAO;
+        vagaAtualizada.etapaAtual = EtapaProcesso.ENVIO_TESTES;
+        break;
+      case "entrevista_final":
+        vagaAtualizada.statusAprovacao = StatusAprovacao.APROVADO;
+        vagaAtualizada.status = StatusVaga.EM_SELECAO;
+        vagaAtualizada.etapaAtual = EtapaProcesso.ENTREVISTA_FINAL;
+        break;
+      case "pesquisa_daco":
+        vagaAtualizada.statusAprovacao = StatusAprovacao.APROVADO;
+        vagaAtualizada.status = StatusVaga.EM_SELECAO;
+        vagaAtualizada.etapaAtual = EtapaProcesso.PESQUISA_DACO;
+        break;
+      case "envio_proposta":
+        vagaAtualizada.statusAprovacao = StatusAprovacao.APROVADO;
+        vagaAtualizada.status = StatusVaga.EM_SELECAO;
+        vagaAtualizada.etapaAtual = EtapaProcesso.ENVIO_PROPOSTA;
+        break;
+      case "concluidas":
+        vagaAtualizada.statusAprovacao = StatusAprovacao.APROVADO;
+        vagaAtualizada.status = StatusVaga.FINALIZADA;
+        vagaAtualizada.etapaAtual = undefined;
+        break;
+    }
+
+    updateVaga.mutate({ id: vagaId, vaga: vagaAtualizada });
   };
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <div className="container mx-auto p-6">
+          <div className="flex items-center justify-center py-12">
+            <div className="text-muted-foreground">Carregando vagas...</div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return <div className="min-h-screen bg-background">
       <div className="container mx-auto p-6 space-y-6">
         <div className="flex items-center gap-4">

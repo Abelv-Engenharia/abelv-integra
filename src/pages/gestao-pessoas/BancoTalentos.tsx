@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { mockCandidatos } from "@/data/gestao-pessoas/mockCandidatos";
+import { useCandidatos, useDeleteCandidato } from "@/hooks/gestao-pessoas/useCandidatos";
 import { Candidato } from "@/types/gestao-pessoas/candidato";
 import { CandidatoStatusBadge } from "@/components/gestao-pessoas/banco-talentos/CandidatoStatusBadge";
 import { EtapaProcessoBadge } from "@/components/gestao-pessoas/banco-talentos/EtapaProcessoBadge";
@@ -16,7 +16,8 @@ import { toast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 
 const BancoTalentos = () => {
-  const [candidatos, setCandidatos] = useState<Candidato[]>(mockCandidatos);
+  const { data: candidatos = [], isLoading } = useCandidatos();
+  const deleteCandidato = useDeleteCandidato();
   const [modalNovo, setModalNovo] = useState(false);
   const [modalDetalhes, setModalDetalhes] = useState(false);
   const [modalEditar, setModalEditar] = useState(false);
@@ -59,20 +60,8 @@ const BancoTalentos = () => {
     };
   }, [candidatos]);
 
-  const handleNovoCandidato = (data: any) => {
-    setCandidatos([...candidatos, data]);
-  };
-
-  const handleEditarCandidato = (data: Candidato) => {
-    setCandidatos(candidatos.map(c => c.id === data.id ? data : c));
-  };
-
   const handleExcluirCandidato = (id: string) => {
-    setCandidatos(candidatos.filter(c => c.id !== id));
-    toast({
-      title: "Candidato excluído",
-      description: "O candidato foi removido do banco de talentos."
-    });
+    deleteCandidato.mutate(id);
   };
 
   const handleVerDetalhes = (candidato: Candidato) => {
@@ -95,6 +84,16 @@ const BancoTalentos = () => {
       possibilidadeReaproveitamento: undefined
     });
   };
+
+  if (isLoading) {
+    return (
+      <div className="container mx-auto p-6">
+        <div className="flex items-center justify-center py-12">
+          <div className="text-muted-foreground">Carregando candidatos...</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto p-6 space-y-6">

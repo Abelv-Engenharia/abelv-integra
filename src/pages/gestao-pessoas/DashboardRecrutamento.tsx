@@ -77,32 +77,179 @@ export default function DashboardRecrutamento() {
           </CardContent>
         </Card>
 
-        {/* KPIs */}
-        <KPIsRecrutamento vagas={mockVagas} candidatos={mockCandidatos} />
+        {isLoading ? (
+          <div className="flex items-center justify-center py-12">
+            <div className="text-muted-foreground">Carregando dados...</div>
+          </div>
+        ) : (
+          <>
+            {/* KPIs */}
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm">Vagas Ativas</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{kpis.totalVagasAtivas}</div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm">No Prazo</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-green-600">{kpis.vagasNoSLA}</div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm">Atrasadas</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-red-600">{kpis.vagasAtrasadas}</div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm">Taxa Conversão</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{kpis.taxaConversao}%</div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm">Candidatos</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{kpis.totalCandidatos}</div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm">Tempo Médio</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{kpis.tempoMedioFechamento} dias</div>
+                </CardContent>
+              </Card>
+            </div>
 
-        {/* Gráficos - Primeira linha */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <FunilConversaoChart vagas={mockVagas} />
-          <DistribuicaoVagasChart vagas={mockVagas} />
-        </div>
+            {/* Gráficos - Primeira linha */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Funil de Conversão</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {funilConversao.length > 0 ? (
+                    <div className="space-y-2">
+                      {funilConversao.map((item, idx) => (
+                        <div key={idx} className="flex justify-between items-center">
+                          <span>{item.etapa}</span>
+                          <span className="font-bold">{item.quantidade}</span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-muted-foreground text-center py-4">Sem dados</div>
+                  )}
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Distribuição de Vagas</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {distribuicaoVagas.length > 0 ? (
+                    <div className="space-y-2">
+                      {distribuicaoVagas.map((item, idx) => (
+                        <div key={idx} className="flex justify-between items-center">
+                          <span>{item.status}</span>
+                          <span className="font-bold">{item.quantidade}</span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-muted-foreground text-center py-4">Sem dados</div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
 
-        {/* Gráficos - Segunda linha */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <VagasPorPrioridadeChart vagas={mockVagas} />
-          <VagasPorContratoChart vagas={mockVagas} />
-        </div>
+            {/* Gráficos - Segunda linha */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <VagasPorPrioridadeChart vagas={vagasEmAberto} />
+              <Card>
+                <CardHeader>
+                  <CardTitle>Vagas por Contrato</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {vagasPorContrato.length > 0 ? (
+                    <div className="space-y-2">
+                      {vagasPorContrato.map((item, idx) => (
+                        <div key={idx} className="flex justify-between items-center">
+                          <span>{item.tipo}</span>
+                          <span className="font-bold">{item.quantidade}</span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-muted-foreground text-center py-4">Sem dados</div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
 
-        {/* Gráficos - Terceira linha */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <OrigemCandidatosChart candidatos={mockCandidatos} />
-          <CandidatosPorStatusChart candidatos={mockCandidatos} />
-        </div>
+            {/* Gráficos - Terceira linha */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Origem dos Candidatos</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {origemCandidatos.length > 0 ? (
+                    <div className="space-y-2">
+                      {origemCandidatos.map((item, idx) => (
+                        <div key={idx} className="flex justify-between items-center">
+                          <span>{item.name}</span>
+                          <span className="font-bold">{item.value}</span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-muted-foreground text-center py-4">Sem dados</div>
+                  )}
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Candidatos por Status</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {candidatosPorStatus.length > 0 ? (
+                    <div className="space-y-2">
+                      {candidatosPorStatus.map((item, idx) => (
+                        <div key={idx} className="flex justify-between items-center">
+                          <span>{item.status}</span>
+                          <span className="font-bold">{item.quantidade}</span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-muted-foreground text-center py-4">Sem dados</div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
 
-        {/* Gráfico - Quarta linha */}
-        <TopCargosChart vagas={mockVagas} />
+            {/* Top Cargos */}
+            {topCargos.length > 0 && <TopCargosChart vagas={vagasEmAberto} />}
 
-      {/* Tabela de Vagas em Aberto */}
-      <VagasAbertoTable vagas={mockVagas} />
+            {/* Tabela de Vagas em Aberto */}
+            {vagasEmAberto.length > 0 && <VagasAbertoTable vagas={vagasEmAberto} />}
+          </>
+        )}
     </div>
   );
 }

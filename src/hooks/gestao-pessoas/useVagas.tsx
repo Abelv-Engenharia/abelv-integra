@@ -29,7 +29,6 @@ function converterVagaDB(vaga: VagaDB): Vaga {
     prioridade: vaga.prioridade as PrioridadeVaga,
     gestor: vaga.gestor_responsavel,
     aprovador: vaga.aprovador || undefined,
-    dataAprovacao: vaga.data_aprovacao ? new Date(vaga.data_aprovacao) : undefined,
     prazoMobilizacao: vaga.prazo_mobilizacao ? new Date(vaga.prazo_mobilizacao) : undefined,
     etapaAtual: vaga.etapa_atual as EtapaProcesso | undefined,
     observacoes: vaga.observacoes || undefined,
