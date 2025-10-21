@@ -6514,6 +6514,621 @@ export type Database = {
         }
         Relationships: []
       }
+      veiculos: {
+        Row: {
+          ativo: boolean
+          condutor_principal_id: string | null
+          condutor_principal_nome: string
+          created_at: string
+          created_by: string | null
+          data_devolucao: string
+          data_retirada: string
+          franquia_km: string | null
+          id: string
+          locadora_id: string | null
+          locadora_nome: string | null
+          modelo: string
+          motivo_devolucao: string | null
+          observacoes: string | null
+          placa: string
+          status: string
+          tipo_locacao: string
+          updated_at: string
+        }
+        Insert: {
+          ativo?: boolean
+          condutor_principal_id?: string | null
+          condutor_principal_nome: string
+          created_at?: string
+          created_by?: string | null
+          data_devolucao: string
+          data_retirada: string
+          franquia_km?: string | null
+          id?: string
+          locadora_id?: string | null
+          locadora_nome?: string | null
+          modelo: string
+          motivo_devolucao?: string | null
+          observacoes?: string | null
+          placa: string
+          status?: string
+          tipo_locacao: string
+          updated_at?: string
+        }
+        Update: {
+          ativo?: boolean
+          condutor_principal_id?: string | null
+          condutor_principal_nome?: string
+          created_at?: string
+          created_by?: string | null
+          data_devolucao?: string
+          data_retirada?: string
+          franquia_km?: string | null
+          id?: string
+          locadora_id?: string | null
+          locadora_nome?: string | null
+          modelo?: string
+          motivo_devolucao?: string | null
+          observacoes?: string | null
+          placa?: string
+          status?: string
+          tipo_locacao?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "veiculos_condutor_principal_id_fkey"
+            columns: ["condutor_principal_id"]
+            isOneToOne: false
+            referencedRelation: "veiculos_condutores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "veiculos_locadora_id_fkey"
+            columns: ["locadora_id"]
+            isOneToOne: false
+            referencedRelation: "veiculos_locadoras"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      veiculos_abastecimentos: {
+        Row: {
+          centro_custo: string | null
+          cidade_estabelecimento: string | null
+          condutor_id: string | null
+          created_at: string
+          created_by: string | null
+          data_hora_transacao: string
+          data_upload: string
+          id: string
+          mercadoria: string | null
+          modelo_veiculo: string | null
+          motorista: string
+          nome_estabelecimento: string | null
+          numero_cartao: string | null
+          placa: string
+          quantidade_litros: number | null
+          tipo_cartao: string | null
+          tipo_mercadoria: string | null
+          uf_estabelecimento: string | null
+          usuario_responsavel: string | null
+          valor: number
+          veiculo_id: string | null
+        }
+        Insert: {
+          centro_custo?: string | null
+          cidade_estabelecimento?: string | null
+          condutor_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          data_hora_transacao: string
+          data_upload?: string
+          id?: string
+          mercadoria?: string | null
+          modelo_veiculo?: string | null
+          motorista: string
+          nome_estabelecimento?: string | null
+          numero_cartao?: string | null
+          placa: string
+          quantidade_litros?: number | null
+          tipo_cartao?: string | null
+          tipo_mercadoria?: string | null
+          uf_estabelecimento?: string | null
+          usuario_responsavel?: string | null
+          valor: number
+          veiculo_id?: string | null
+        }
+        Update: {
+          centro_custo?: string | null
+          cidade_estabelecimento?: string | null
+          condutor_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          data_hora_transacao?: string
+          data_upload?: string
+          id?: string
+          mercadoria?: string | null
+          modelo_veiculo?: string | null
+          motorista?: string
+          nome_estabelecimento?: string | null
+          numero_cartao?: string | null
+          placa?: string
+          quantidade_litros?: number | null
+          tipo_cartao?: string | null
+          tipo_mercadoria?: string | null
+          uf_estabelecimento?: string | null
+          usuario_responsavel?: string | null
+          valor?: number
+          veiculo_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "veiculos_abastecimentos_condutor_id_fkey"
+            columns: ["condutor_id"]
+            isOneToOne: false
+            referencedRelation: "veiculos_condutores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "veiculos_abastecimentos_veiculo_id_fkey"
+            columns: ["veiculo_id"]
+            isOneToOne: false
+            referencedRelation: "veiculos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      veiculos_cartoes_abastecimento: {
+        Row: {
+          ativo: boolean
+          bandeira: string | null
+          condutor_id: string | null
+          condutor_nome: string
+          created_at: string
+          created_by: string | null
+          data_validade: string
+          id: string
+          limite_credito: number | null
+          numero_cartao: string
+          numero_cartao_hash: string
+          observacoes: string | null
+          placa: string
+          status: string
+          tipo_cartao: string
+          updated_at: string
+          veiculo_id: string | null
+          veiculo_modelo: string | null
+        }
+        Insert: {
+          ativo?: boolean
+          bandeira?: string | null
+          condutor_id?: string | null
+          condutor_nome: string
+          created_at?: string
+          created_by?: string | null
+          data_validade: string
+          id?: string
+          limite_credito?: number | null
+          numero_cartao: string
+          numero_cartao_hash: string
+          observacoes?: string | null
+          placa: string
+          status?: string
+          tipo_cartao: string
+          updated_at?: string
+          veiculo_id?: string | null
+          veiculo_modelo?: string | null
+        }
+        Update: {
+          ativo?: boolean
+          bandeira?: string | null
+          condutor_id?: string | null
+          condutor_nome?: string
+          created_at?: string
+          created_by?: string | null
+          data_validade?: string
+          id?: string
+          limite_credito?: number | null
+          numero_cartao?: string
+          numero_cartao_hash?: string
+          observacoes?: string | null
+          placa?: string
+          status?: string
+          tipo_cartao?: string
+          updated_at?: string
+          veiculo_id?: string | null
+          veiculo_modelo?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "veiculos_cartoes_abastecimento_condutor_id_fkey"
+            columns: ["condutor_id"]
+            isOneToOne: false
+            referencedRelation: "veiculos_condutores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "veiculos_cartoes_abastecimento_veiculo_id_fkey"
+            columns: ["veiculo_id"]
+            isOneToOne: false
+            referencedRelation: "veiculos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      veiculos_checklists: {
+        Row: {
+          condutor_id: string | null
+          condutor_nome: string
+          created_at: string
+          created_by: string | null
+          data_checklist: string
+          data_limite: string | null
+          fotos_metadata: Json | null
+          hodometro: number | null
+          id: string
+          marca_modelo: string
+          nivel_combustivel: string | null
+          observacoes: string | null
+          observacoes_detalhadas: string | null
+          placa: string
+          status: string
+          tentativas_cobranca: number
+          tipo_operacao: string
+          updated_at: string
+          veiculo_id: string | null
+        }
+        Insert: {
+          condutor_id?: string | null
+          condutor_nome: string
+          created_at?: string
+          created_by?: string | null
+          data_checklist: string
+          data_limite?: string | null
+          fotos_metadata?: Json | null
+          hodometro?: number | null
+          id?: string
+          marca_modelo: string
+          nivel_combustivel?: string | null
+          observacoes?: string | null
+          observacoes_detalhadas?: string | null
+          placa: string
+          status?: string
+          tentativas_cobranca?: number
+          tipo_operacao: string
+          updated_at?: string
+          veiculo_id?: string | null
+        }
+        Update: {
+          condutor_id?: string | null
+          condutor_nome?: string
+          created_at?: string
+          created_by?: string | null
+          data_checklist?: string
+          data_limite?: string | null
+          fotos_metadata?: Json | null
+          hodometro?: number | null
+          id?: string
+          marca_modelo?: string
+          nivel_combustivel?: string | null
+          observacoes?: string | null
+          observacoes_detalhadas?: string | null
+          placa?: string
+          status?: string
+          tentativas_cobranca?: number
+          tipo_operacao?: string
+          updated_at?: string
+          veiculo_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "veiculos_checklists_condutor_id_fkey"
+            columns: ["condutor_id"]
+            isOneToOne: false
+            referencedRelation: "veiculos_condutores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "veiculos_checklists_veiculo_id_fkey"
+            columns: ["veiculo_id"]
+            isOneToOne: false
+            referencedRelation: "veiculos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      veiculos_condutores: {
+        Row: {
+          ativo: boolean
+          categoria_cnh: string
+          cpf: string
+          created_at: string
+          created_by: string | null
+          id: string
+          nome_condutor: string
+          observacao: string | null
+          pontuacao_atual: number
+          status_cnh: string
+          termo_anexado_nome: string | null
+          termo_anexado_url: string | null
+          termo_responsabilidade_assinado: boolean
+          updated_at: string
+          validade_cnh: string
+        }
+        Insert: {
+          ativo?: boolean
+          categoria_cnh: string
+          cpf: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          nome_condutor: string
+          observacao?: string | null
+          pontuacao_atual?: number
+          status_cnh?: string
+          termo_anexado_nome?: string | null
+          termo_anexado_url?: string | null
+          termo_responsabilidade_assinado?: boolean
+          updated_at?: string
+          validade_cnh: string
+        }
+        Update: {
+          ativo?: boolean
+          categoria_cnh?: string
+          cpf?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          nome_condutor?: string
+          observacao?: string | null
+          pontuacao_atual?: number
+          status_cnh?: string
+          termo_anexado_nome?: string | null
+          termo_anexado_url?: string | null
+          termo_responsabilidade_assinado?: boolean
+          updated_at?: string
+          validade_cnh?: string
+        }
+        Relationships: []
+      }
+      veiculos_locadoras: {
+        Row: {
+          ativo: boolean
+          cnpj: string | null
+          created_at: string
+          email: string | null
+          endereco: string | null
+          id: string
+          nome: string
+          observacoes: string | null
+          telefone: string | null
+          updated_at: string
+        }
+        Insert: {
+          ativo?: boolean
+          cnpj?: string | null
+          created_at?: string
+          email?: string | null
+          endereco?: string | null
+          id?: string
+          nome: string
+          observacoes?: string | null
+          telefone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          ativo?: boolean
+          cnpj?: string | null
+          created_at?: string
+          email?: string | null
+          endereco?: string | null
+          id?: string
+          nome?: string
+          observacoes?: string | null
+          telefone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      veiculos_multas: {
+        Row: {
+          comprovante_indicacao_nome: string | null
+          comprovante_indicacao_url: string | null
+          condutor_infrator_id: string | null
+          condutor_infrator_nome: string
+          created_at: string
+          created_by: string | null
+          data_multa: string
+          data_notificacao: string | null
+          desconto_confirmado: boolean
+          documento_notificacao_nome: string | null
+          documento_notificacao_url: string | null
+          email_condutor: string | null
+          email_condutor_enviado_em: string | null
+          email_rh_financeiro_enviado_em: string | null
+          formulario_preenchido_nome: string | null
+          formulario_preenchido_url: string | null
+          horario: string
+          id: string
+          indicado_orgao: string
+          locadora_nome: string | null
+          local_completo: string | null
+          numero_auto_infracao: string
+          numero_fatura: string | null
+          observacoes_gerais: string | null
+          ocorrencia: string
+          placa: string
+          pontos: number
+          responsavel: string | null
+          status_multa: string
+          titulo_sienge: string | null
+          updated_at: string
+          valor: number | null
+          veiculo_id: string | null
+          veiculo_modelo: string | null
+        }
+        Insert: {
+          comprovante_indicacao_nome?: string | null
+          comprovante_indicacao_url?: string | null
+          condutor_infrator_id?: string | null
+          condutor_infrator_nome: string
+          created_at?: string
+          created_by?: string | null
+          data_multa: string
+          data_notificacao?: string | null
+          desconto_confirmado?: boolean
+          documento_notificacao_nome?: string | null
+          documento_notificacao_url?: string | null
+          email_condutor?: string | null
+          email_condutor_enviado_em?: string | null
+          email_rh_financeiro_enviado_em?: string | null
+          formulario_preenchido_nome?: string | null
+          formulario_preenchido_url?: string | null
+          horario: string
+          id?: string
+          indicado_orgao?: string
+          locadora_nome?: string | null
+          local_completo?: string | null
+          numero_auto_infracao: string
+          numero_fatura?: string | null
+          observacoes_gerais?: string | null
+          ocorrencia: string
+          placa: string
+          pontos: number
+          responsavel?: string | null
+          status_multa?: string
+          titulo_sienge?: string | null
+          updated_at?: string
+          valor?: number | null
+          veiculo_id?: string | null
+          veiculo_modelo?: string | null
+        }
+        Update: {
+          comprovante_indicacao_nome?: string | null
+          comprovante_indicacao_url?: string | null
+          condutor_infrator_id?: string | null
+          condutor_infrator_nome?: string
+          created_at?: string
+          created_by?: string | null
+          data_multa?: string
+          data_notificacao?: string | null
+          desconto_confirmado?: boolean
+          documento_notificacao_nome?: string | null
+          documento_notificacao_url?: string | null
+          email_condutor?: string | null
+          email_condutor_enviado_em?: string | null
+          email_rh_financeiro_enviado_em?: string | null
+          formulario_preenchido_nome?: string | null
+          formulario_preenchido_url?: string | null
+          horario?: string
+          id?: string
+          indicado_orgao?: string
+          locadora_nome?: string | null
+          local_completo?: string | null
+          numero_auto_infracao?: string
+          numero_fatura?: string | null
+          observacoes_gerais?: string | null
+          ocorrencia?: string
+          placa?: string
+          pontos?: number
+          responsavel?: string | null
+          status_multa?: string
+          titulo_sienge?: string | null
+          updated_at?: string
+          valor?: number | null
+          veiculo_id?: string | null
+          veiculo_modelo?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "veiculos_multas_condutor_infrator_id_fkey"
+            columns: ["condutor_infrator_id"]
+            isOneToOne: false
+            referencedRelation: "veiculos_condutores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "veiculos_multas_veiculo_id_fkey"
+            columns: ["veiculo_id"]
+            isOneToOne: false
+            referencedRelation: "veiculos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      veiculos_pedagogios_estacionamentos: {
+        Row: {
+          cca: string | null
+          condutor_id: string | null
+          condutor_nome: string
+          created_at: string
+          created_by: string | null
+          data_utilizacao: string
+          finalidade: string | null
+          horario: string
+          id: string
+          local: string
+          observacoes: string | null
+          placa: string
+          tipo_servico: string
+          updated_at: string
+          valor: number | null
+          veiculo_id: string | null
+        }
+        Insert: {
+          cca?: string | null
+          condutor_id?: string | null
+          condutor_nome: string
+          created_at?: string
+          created_by?: string | null
+          data_utilizacao: string
+          finalidade?: string | null
+          horario: string
+          id?: string
+          local: string
+          observacoes?: string | null
+          placa: string
+          tipo_servico: string
+          updated_at?: string
+          valor?: number | null
+          veiculo_id?: string | null
+        }
+        Update: {
+          cca?: string | null
+          condutor_id?: string | null
+          condutor_nome?: string
+          created_at?: string
+          created_by?: string | null
+          data_utilizacao?: string
+          finalidade?: string | null
+          horario?: string
+          id?: string
+          local?: string
+          observacoes?: string | null
+          placa?: string
+          tipo_servico?: string
+          updated_at?: string
+          valor?: number | null
+          veiculo_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "veiculos_pedagogios_estacionamentos_condutor_id_fkey"
+            columns: ["condutor_id"]
+            isOneToOne: false
+            referencedRelation: "veiculos_condutores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "veiculos_pedagogios_estacionamentos_veiculo_id_fkey"
+            columns: ["veiculo_id"]
+            isOneToOne: false
+            referencedRelation: "veiculos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vendedores_comercial: {
         Row: {
           ativo: boolean
@@ -6755,6 +7370,15 @@ export type Database = {
         Args: { p_cca_id: number }
         Returns: string
       }
+      get_condutores_cnh_vencendo: {
+        Args: { dias?: number }
+        Returns: {
+          dias_restantes: number
+          id: string
+          nome_condutor: string
+          validade_cnh: string
+        }[]
+      }
       get_desvios_by_base_legal: {
         Args: { filtros?: Json }
         Returns: {
@@ -6821,6 +7445,17 @@ export type Database = {
           ano: number
           mes: number
           total_horas: number
+        }[]
+      }
+      get_multas_pendentes_notificacao: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          condutor_infrator_nome: string
+          dias_desde_notificacao: number
+          id: string
+          numero_auto_infracao: string
+          placa: string
+          status_multa: string
         }[]
       }
       get_personnel_data: {
