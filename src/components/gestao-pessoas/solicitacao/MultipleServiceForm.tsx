@@ -17,9 +17,10 @@ interface MultipleServiceFormProps {
   onSubmit: (data: any) => void;
   onCancel: () => void;
   solicitante: string;
+  solicitanteId: string;
 }
 
-export function MultipleServiceForm({ onSubmit, onCancel, solicitante }: MultipleServiceFormProps) {
+export function MultipleServiceForm({ onSubmit, onCancel, solicitante, solicitanteId }: MultipleServiceFormProps) {
   const { data: ccas, isLoading: isLoadingCCAs } = useUserCCAs();
   
   const [selectedServices, setSelectedServices] = useState<TipoServico[]>([]);
@@ -28,6 +29,7 @@ export function MultipleServiceForm({ onSubmit, onCancel, solicitante }: Multipl
   // Dados comuns
   const [commonData, setCommonData] = useState({
     solicitante: solicitante,
+    solicitanteId: solicitanteId,
     prioridade: PrioridadeSolicitacao.MEDIA,
     centroCusto: "",
     observacoes: "",

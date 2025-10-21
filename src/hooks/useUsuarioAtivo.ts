@@ -1,5 +1,4 @@
-// Hook para simular usuário ativo
-// Em produção, substituir por autenticação real (Supabase Auth)
+import { useAuth } from "@/contexts/AuthContext";
 
 export interface UsuarioAtivo {
   id: string;
@@ -8,11 +7,21 @@ export interface UsuarioAtivo {
 }
 
 export const useUsuarioAtivo = (): UsuarioAtivo => {
-  // Simulação de usuário ativo
-  // TODO: Substituir por autenticação real do Supabase
+  const { user } = useAuth();
+  
+  // Se houver usuário autenticado, retornar seus dados
+  if (user) {
+    return {
+      id: user.id,
+      nome: user.user_metadata?.full_name || user.email?.split('@')[0] || "Usuário",
+      email: user.email || ""
+    };
+  }
+  
+  // Fallback caso não haja autenticação (não deveria acontecer)
   return {
-    id: "1",
-    nome: "Carlos Silva - Gestor",
-    email: "carlos.silva@empresa.com"
+    id: "temp-user-id",
+    nome: "Usuário Temporário",
+    email: "temp@email.com"
   };
 };

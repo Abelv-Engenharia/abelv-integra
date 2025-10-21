@@ -47,10 +47,11 @@ export default function SolicitacaoServicos() {
     setShowForm(true);
   };
   const handleFormSubmit = (data: any) => {
-    // Adicionar o nome do usuário logado à solicitação
+    // Garantir que temos o ID e nome do usuário logado
     const solicitacaoComUsuario = {
       ...data,
-      solicitante: usuarioAtivo.nome
+      solicitante: usuarioAtivo.nome,
+      solicitanteId: usuarioAtivo.id
     };
     addSolicitacao(solicitacaoComUsuario);
     toast({
@@ -125,7 +126,7 @@ export default function SolicitacaoServicos() {
           </Button>
         </div>
         
-        <MultipleServiceForm onSubmit={handleFormSubmit} onCancel={handleCancel} solicitante={usuarioAtivo.nome} />
+        <MultipleServiceForm onSubmit={handleFormSubmit} onCancel={handleCancel} solicitante={usuarioAtivo.nome} solicitanteId={usuarioAtivo.id} />
       </div>;
   }
   if (showForm && selectedCategory) {
@@ -136,7 +137,7 @@ export default function SolicitacaoServicos() {
           </Button>
         </div>
         
-        <SimpleDynamicForm tipoServico={selectedCategory} onSubmit={handleFormSubmit} onCancel={handleCancel} solicitante={usuarioAtivo.nome} />
+        <SimpleDynamicForm tipoServico={selectedCategory} onSubmit={handleFormSubmit} onCancel={handleCancel} solicitante={usuarioAtivo.nome} solicitanteId={usuarioAtivo.id} />
       </div>;
   }
   return <div className="container mx-auto px-4 py-6 space-y-8">

@@ -69,10 +69,15 @@ export function SolicitacoesProvider({ children }: { children: ReactNode }) {
   }, [solicitacoesDb]);
 
   const addSolicitacao = (solicitacao: any) => {
-    // TODO: Buscar usuário autenticado
+    // Validar que o solicitanteId está presente
+    if (!solicitacao.solicitanteId) {
+      console.error('solicitanteId é obrigatório');
+      throw new Error('ID do solicitante não encontrado. Por favor, faça login novamente.');
+    }
+
     const novaSolicitacao = {
-      solicitante_id: solicitacao.solicitanteId || 'temp-user-id',
-      solicitante_nome: solicitacao.solicitante || 'Usuário Temporário',
+      solicitante_id: solicitacao.solicitanteId,
+      solicitante_nome: solicitacao.solicitante || 'Usuário',
       tipo_servico: solicitacao.tipoServico,
       prioridade: solicitacao.prioridade || 'media',
       observacoes: solicitacao.observacoes,

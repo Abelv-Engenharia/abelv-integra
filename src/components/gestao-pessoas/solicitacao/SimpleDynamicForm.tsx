@@ -22,6 +22,7 @@ interface SimpleDynamicFormProps {
   onSubmit: (data: any) => void;
   onCancel: () => void;
   solicitante: string;
+  solicitanteId: string;
 }
 
 // Interface para viajantes múltiplos
@@ -44,11 +45,13 @@ export function SimpleDynamicForm({
   tipoServico,
   onSubmit,
   onCancel,
-  solicitante
+  solicitante,
+  solicitanteId
 }: SimpleDynamicFormProps) {
   const { data: ccas, isLoading: isLoadingCCAs } = useUserCCAs();
   const [formData, setFormData] = useState<any>({
     solicitante: solicitante,
+    solicitanteId: solicitanteId,
     dataSolicitacao: new Date(),
     prioridade: PrioridadeSolicitacao.MEDIA,
     centroCusto: "",
