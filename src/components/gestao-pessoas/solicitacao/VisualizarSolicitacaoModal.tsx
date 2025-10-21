@@ -12,6 +12,7 @@ import { Upload, X, FileText, Download } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { formatarNumeroSolicitacao } from "@/utils/gestao-pessoas/formatters";
+import { useCCAs } from "@/hooks/useCCAs";
 import { 
   SolicitacaoServico, 
   TipoServico, 
@@ -76,9 +77,20 @@ const formattiposervico = (tipo: TipoServico) => {
   return labels[tipo] || tipo;
 };
 
-const getCcaSolicitacao = (solicitacao: SolicitacaoServico): string => {
-  // O campo centroCusto contém o CCA após a mesclagem dos dados específicos
-  return solicitacao.centroCusto || '';
+const getCcaSolicitacao = (solicitacao: SolicitacaoServico, ccas: any[]): string => {
+  // Primeiro tenta pelo ccaId
+  if ((solicitacao as any).ccaId) {
+    const cca = ccas.find(c => c.id === (solicitacao as any).ccaId);
+    if (cca) return cca.nome;
+  }
+  
+  // Se não encontrar pelo ID, tenta pelo código em centroCusto
+  const codigoCca = solicitacao.centroCusto || '';
+  const cca = ccas.find(c => c.codigo === codigoCca);
+  if (cca) return cca.nome;
+  
+  // Se não encontrar, retorna o código mesmo
+  return codigoCca;
 };
 
 export function VisualizarSolicitacaoModal({
@@ -90,6 +102,7 @@ export function VisualizarSolicitacaoModal({
   onConcluir,
   modoVisualizacao = false
 }: VisualizarSolicitacaoModalProps) {
+  const { data: ccas = [] } = useCCAs();
   const [observacoesgestao, setObservacoesGestao] = useState("");
   const [imagemanexo, setImagemAnexo] = useState<string>("");
   const [estimativavalor, setEstimativaValor] = useState("");
@@ -548,8 +561,8 @@ export function VisualizarSolicitacaoModal({
                   <p className="font-medium">{new Date(solicitacao.dataSolicitacao).toLocaleDateString('pt-BR')}</p>
                 </div>
                 <div>
-                  <Label className="text-muted-foreground">CCA</Label>
-                  <p className="font-medium">{getCcaSolicitacao(solicitacao)}</p>
+                  <Label className="text-muted-foreground">Cca</Label>
+                  <p className="font-medium">{getCcaSolicitacao(solicitacao, ccas)}</p>
                 </div>
                 {solicitacao.observacoes && (
                   <div className="col-span-2">
