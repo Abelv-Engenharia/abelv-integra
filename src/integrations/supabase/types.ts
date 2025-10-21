@@ -6712,6 +6712,7 @@ export type Database = {
           justificativa_aprovacao: string | null
           justificativa_reprovacao: string | null
           motivo_mudanca_automatica: string | null
+          numero_solicitacao: number | null
           observacoes: string | null
           observacoes_conclusao: string | null
           observacoes_gestao: string | null
@@ -6745,6 +6746,7 @@ export type Database = {
           justificativa_aprovacao?: string | null
           justificativa_reprovacao?: string | null
           motivo_mudanca_automatica?: string | null
+          numero_solicitacao?: number | null
           observacoes?: string | null
           observacoes_conclusao?: string | null
           observacoes_gestao?: string | null
@@ -6778,6 +6780,7 @@ export type Database = {
           justificativa_aprovacao?: string | null
           justificativa_reprovacao?: string | null
           motivo_mudanca_automatica?: string | null
+          numero_solicitacao?: number | null
           observacoes?: string | null
           observacoes_conclusao?: string | null
           observacoes_gestao?: string | null

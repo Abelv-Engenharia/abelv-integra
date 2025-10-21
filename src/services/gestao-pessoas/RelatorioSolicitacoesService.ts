@@ -4,6 +4,7 @@ import * as XLSX from 'xlsx';
 import { SolicitacaoServico, StatusSolicitacao } from '@/types/gestao-pessoas/solicitacao';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { formatarNumeroSolicitacao } from '@/utils/gestao-pessoas/formatters';
 
 interface EstatisticasSolicitacoes {
   total: number;
@@ -138,7 +139,7 @@ export function exportarRelatorioPDF(dados: SolicitacaoServico[], filtros?: any)
   yPosition += 5;
 
   const tabelaResumo = dados.map((s) => [
-    s.id,
+    formatarNumeroSolicitacao(s.numeroSolicitacao),
     s.solicitante,
     format(new Date(s.dataSolicitacao), 'dd/MM/yyyy', { locale: ptBR }),
     s.dataconclusao ? format(new Date(s.dataconclusao), 'dd/MM/yyyy', { locale: ptBR }) : '-',
@@ -151,7 +152,7 @@ export function exportarRelatorioPDF(dados: SolicitacaoServico[], filtros?: any)
   ]);
 
   autoTable(doc, {
-    head: [['ID', 'Solicitante', 'Dt. Abertura', 'Dt. Conclusão', 'CCA', 'Tipo', 'Status', 'Valor']],
+    head: [['Nº', 'Solicitante', 'Dt. Abertura', 'Dt. Conclusão', 'CCA', 'Tipo', 'Status', 'Valor']],
     body: tabelaResumo,
     startY: yPosition,
     styles: { fontSize: 8, cellPadding: 2 },

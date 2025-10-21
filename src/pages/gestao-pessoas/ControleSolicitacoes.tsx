@@ -10,6 +10,7 @@ import { useSolicitacoes } from "@/contexts/gestao-pessoas/SolicitacoesContext";
 import { Search, Download, Clock, BarChart3, FileText, CheckCircle2, AlertCircle, CheckSquare, MoreVertical, Eye, Edit, XCircle, XSquare } from "lucide-react";
 import { VisualizarSolicitacaoModal } from "@/components/gestao-pessoas/solicitacao/VisualizarSolicitacaoModal";
 import { toast } from "sonner";
+import { formatarNumeroSolicitacao } from "@/utils/gestao-pessoas/formatters";
 
 const columns = [
   { 
@@ -344,8 +345,8 @@ export default function ControleSolicitacoes() {
                           <div className="flex items-start justify-between">
                             <div className="flex items-center gap-2">
                               <div className={`w-2 h-2 rounded-full ${priorityConfig[solicitacao.prioridade].color}`} />
-                              <span className="text-xs font-semibold text-muted-foreground">
-                                #{solicitacao.id}
+                              <span className="text-xs font-semibold text-primary">
+                                {formatarNumeroSolicitacao(solicitacao.numeroSolicitacao)}
                               </span>
                             </div>
                             <DropdownMenu>

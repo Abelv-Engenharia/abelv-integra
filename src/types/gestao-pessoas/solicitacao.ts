@@ -31,6 +31,7 @@ export enum TipoPassagem {
 
 export interface SolicitacaoBase {
   id: string;
+  numeroSolicitacao?: number;
   solicitante: string;
   solicitanteId: string;
   dataSolicitacao: Date;

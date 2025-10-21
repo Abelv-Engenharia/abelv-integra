@@ -11,6 +11,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Upload, X, FileText, Download } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { formatarNumeroSolicitacao } from "@/utils/gestao-pessoas/formatters";
 import { 
   SolicitacaoServico, 
   TipoServico, 
@@ -464,7 +465,7 @@ export function VisualizarSolicitacaoModal({
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            Visualizar Solicitação - #{solicitacao.id}
+            Visualizar Solicitação - {formatarNumeroSolicitacao(solicitacao.numeroSolicitacao)}
           </DialogTitle>
         </DialogHeader>
 

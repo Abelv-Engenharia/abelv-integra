@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { SolicitacaoServico, StatusSolicitacao } from "@/types/gestao-pessoas/solicitacao";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { formatarNumeroSolicitacao } from "@/utils/gestao-pessoas/formatters";
 
 interface RelatorioSolicitacoesTableProps {
   dados: SolicitacaoServico[];
@@ -116,7 +117,7 @@ export function RelatorioSolicitacoesTable({ dados }: RelatorioSolicitacoesTable
           <TableRow>
             <TableHead className="w-10"></TableHead>
             <TableHead>
-              <SortButton field="id">ID</SortButton>
+              <SortButton field="numeroSolicitacao">Nº</SortButton>
             </TableHead>
             <TableHead>
               <SortButton field="solicitante">Solicitante</SortButton>
@@ -165,7 +166,9 @@ export function RelatorioSolicitacoesTable({ dados }: RelatorioSolicitacoesTable
                         )}
                       </Button>
                     </TableCell>
-                    <TableCell className="font-medium">{solicitacao.id}</TableCell>
+                    <TableCell className="font-medium text-primary">
+                      {formatarNumeroSolicitacao(solicitacao.numeroSolicitacao)}
+                    </TableCell>
                     <TableCell>{solicitacao.solicitante}</TableCell>
                     <TableCell>
                       {format(new Date(solicitacao.dataSolicitacao), "dd/MM/yyyy HH:mm", {

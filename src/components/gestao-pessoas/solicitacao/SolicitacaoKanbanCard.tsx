@@ -14,6 +14,7 @@ import {
   Clock
 } from "lucide-react";
 import { format } from "date-fns";
+import { formatarNumeroSolicitacao } from "@/utils/gestao-pessoas/formatters";
 
 interface SolicitacaoKanbanCardProps {
   solicitacao: SolicitacaoServico;
@@ -70,7 +71,7 @@ export const SolicitacaoKanbanCard = ({
       <CardContent className="p-3 space-y-2">
         <div className="flex items-start justify-between gap-2">
           <span className="font-semibold text-sm text-primary">
-            {solicitacao.id}
+            {formatarNumeroSolicitacao(solicitacao.numeroSolicitacao)}
           </span>
           <Badge 
             variant="outline" 

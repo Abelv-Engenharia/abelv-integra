@@ -22,6 +22,7 @@ const SolicitacoesContext = createContext<SolicitacoesContextType | undefined>(u
 const converterParaSolicitacao = (row: SolicitacaoServicoRow): any => {
   return {
     id: row.id,
+    numeroSolicitacao: row.numero_solicitacao,
     dataSolicitacao: new Date(row.data_solicitacao),
     solicitante: row.solicitante_nome,
     solicitanteId: row.solicitante_id,

@@ -13,6 +13,7 @@ import { useSolicitacoes } from "@/contexts/gestao-pessoas/SolicitacoesContext";
 import { useUsuarioAtivo } from "@/hooks/useUsuarioAtivo";
 import { SolicitacaoKanbanColumn } from "@/components/gestao-pessoas/solicitacao/SolicitacaoKanbanColumn";
 import { VisualizarSolicitacaoModal } from "@/components/gestao-pessoas/solicitacao/VisualizarSolicitacaoModal";
+import { formatarNumeroSolicitacao } from "@/utils/gestao-pessoas/formatters";
 export default function SolicitacaoServicos() {
   const [selectedCategory, setSelectedCategory] = useState<TipoServico | null>(null);
   const [showForm, setShowForm] = useState(false);
@@ -217,6 +218,10 @@ export default function SolicitacaoServicos() {
                         <StatusIcon className={`h-5 w-5 flex-shrink-0 ${statusConfig?.color || 'text-muted-foreground'}`} />
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-1">
+                            <span className="font-semibold text-sm text-primary">
+                              {formatarNumeroSolicitacao(solicitacao.numeroSolicitacao)}
+                            </span>
+                            <span className="text-xs text-muted-foreground">•</span>
                             <span className="font-medium text-sm truncate">
                               {categoriesInfo.find(c => c.id === solicitacao.tipoServico)?.title || solicitacao.tipoServico}
                             </span>
@@ -224,9 +229,6 @@ export default function SolicitacaoServicos() {
                             <span className="text-xs text-muted-foreground">
                               {solicitacao.dataSolicitacao.toLocaleDateString('pt-BR')}
                             </span>
-                          </div>
-                          <div className="text-xs text-muted-foreground">
-                            ID: {solicitacao.id.slice(0, 8)}...
                           </div>
                         </div>
                       </div>
