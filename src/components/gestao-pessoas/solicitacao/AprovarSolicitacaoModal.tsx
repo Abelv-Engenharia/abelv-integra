@@ -62,96 +62,182 @@ export function AprovarSolicitacaoModal({
     };
     return tipos[tipo] || tipo;
   };
-  const getBadgePrioridade = (prioridade: PrioridadeSolicitacao) => {
-    const variants = {
-      baixa: "secondary",
-      media: "default",
-      alta: "destructive"
-    };
-    const labels = {
-      baixa: "Baixa",
-      media: "Média",
-      alta: "Alta"
-    };
-    return <Badge variant={variants[prioridade] as any}>
-        {labels[prioridade]}
-      </Badge>;
+  const priorityconfig = {
+    [PrioridadeSolicitacao.ALTA]: { color: "bg-red-500", label: "Alta" },
+    [PrioridadeSolicitacao.MEDIA]: { color: "bg-yellow-500", label: "Média" },
+    [PrioridadeSolicitacao.BAIXA]: { color: "bg-green-500", label: "Baixa" }
   };
   const renderDetalhesServico = () => {
     switch (solicitacao.tipoServico) {
       case TipoServico.VOUCHER_UBER:
         {
           const dados = solicitacao as VoucherUber;
-          return <div className="space-y-2">
-            <div className="grid grid-cols-2 gap-3 text-sm">
-              <div><span className="font-medium">Cca:</span> {dados.cca}</div>
-              <div><span className="font-medium">Valor:</span> R$ {dados.valor?.toFixed(2) || "0.00"}</div>
-              <div><span className="font-medium">Data de uso:</span> {format(new Date(dados.dataUso), "dd/MM/yyyy")}</div>
-              <div className="col-span-2"><span className="font-medium">Local de partida:</span> {dados.localPartida}</div>
-              <div className="col-span-2"><span className="font-medium">Local de destino:</span> {dados.localDestino}</div>
-              <div className="col-span-2"><span className="font-medium">Motivo:</span> {dados.motivo}</div>
+          return <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label className="text-muted-foreground">Valor</Label>
+              <p className="font-medium">R$ {dados.valor?.toFixed(2) || "0.00"}</p>
+            </div>
+            <div>
+              <Label className="text-muted-foreground">Data de uso</Label>
+              <p className="font-medium">{format(new Date(dados.dataUso), "dd/MM/yyyy")}</p>
+            </div>
+            <div>
+              <Label className="text-muted-foreground">Local partida</Label>
+              <p className="font-medium">{dados.localPartida}</p>
+            </div>
+            <div>
+              <Label className="text-muted-foreground">Local destino</Label>
+              <p className="font-medium">{dados.localDestino}</p>
+            </div>
+            <div className="col-span-2">
+              <Label className="text-muted-foreground">Motivo</Label>
+              <p className="font-medium">{dados.motivo}</p>
             </div>
           </div>;
         }
       case TipoServico.LOCACAO_VEICULO:
         {
           const dados = solicitacao as LocacaoVeiculo;
-          return <div className="space-y-2">
-            <div className="grid grid-cols-2 gap-3 text-sm">
-              <div><span className="font-medium">Cca:</span> {dados.cca}</div>
-              <div><span className="font-medium">Condutor:</span> {dados.nomeCondutor}</div>
-              <div><span className="font-medium">Data de retirada:</span> {format(new Date(dados.dataRetirada), "dd/MM/yyyy")}</div>
-              <div><span className="font-medium">Período:</span> {dados.periodoLocacao}</div>
-              <div><span className="font-medium">Franquia km:</span> {dados.franquiaKm || "N/A"}</div>
-              <div><span className="font-medium">Local de retirada:</span> {dados.localRetirada}</div>
-              <div className="col-span-2"><span className="font-medium">Motivo:</span> {dados.motivo}</div>
+          return <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label className="text-muted-foreground">Condutor</Label>
+              <p className="font-medium">{dados.nomeCondutor}</p>
+            </div>
+            <div>
+              <Label className="text-muted-foreground">Data retirada</Label>
+              <p className="font-medium">{format(new Date(dados.dataRetirada), "dd/MM/yyyy")}</p>
+            </div>
+            <div>
+              <Label className="text-muted-foreground">Período</Label>
+              <p className="font-medium">{dados.periodoLocacao}</p>
+            </div>
+            <div>
+              <Label className="text-muted-foreground">Franquia km</Label>
+              <p className="font-medium">{dados.franquiaKm || "N/A"}</p>
+            </div>
+            <div>
+              <Label className="text-muted-foreground">Local retirada</Label>
+              <p className="font-medium">{dados.localRetirada}</p>
+            </div>
+            <div>
+              <Label className="text-muted-foreground">Termo responsabilidade</Label>
+              <p className="font-medium">{dados.termoResponsabilidade ? "Sim" : "Não"}</p>
+            </div>
+            <div className="col-span-2">
+              <Label className="text-muted-foreground">Motivo</Label>
+              <p className="font-medium">{dados.motivo}</p>
             </div>
           </div>;
         }
       case TipoServico.PASSAGENS:
         {
           const dados = solicitacao as Passagens;
-          return <div className="space-y-2">
-            <div className="grid grid-cols-2 gap-3 text-sm">
-              <div><span className="font-medium">Tipo:</span> {dados.tipoPassagem === "aerea" ? "Aérea" : "Rodoviária"}</div>
-              
-              <div><span className="font-medium">Origem:</span> {dados.origem}</div>
-              <div><span className="font-medium">Destino:</span> {dados.destino}</div>
-              <div><span className="font-medium">Data de ida:</span> {format(new Date(dados.dataViagem), "dd/MM/yyyy")}</div>
-              <div><span className="font-medium">Data de volta:</span> {dados.dataVolta ? format(new Date(dados.dataVolta), "dd/MM/yyyy") : "N/A"}</div>
-              <div><span className="font-medium">Viajantes:</span> {dados.viajantes?.length || 0}</div>
-              <div><span className="font-medium">Bagagem:</span> {dados.precisaBagagem ? "Sim" : "Não"}</div>
-              <div className="col-span-2"><span className="font-medium">Motivo:</span> {dados.motivo}</div>
+          return <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label className="text-muted-foreground">Tipo passagem</Label>
+                <p className="font-medium">{dados.tipoPassagem === "aerea" ? "Aérea" : "Rodoviária"}</p>
+              </div>
+              <div>
+                <Label className="text-muted-foreground">Motivo</Label>
+                <p className="font-medium">{dados.motivo}</p>
+              </div>
+              <div>
+                <Label className="text-muted-foreground">Origem</Label>
+                <p className="font-medium">{dados.origem}</p>
+              </div>
+              <div>
+                <Label className="text-muted-foreground">Destino</Label>
+                <p className="font-medium">{dados.destino}</p>
+              </div>
+              <div>
+                <Label className="text-muted-foreground">Data viagem</Label>
+                <p className="font-medium">{format(new Date(dados.dataViagem), "dd/MM/yyyy")}</p>
+              </div>
+              {dados.dataVolta && (
+                <div>
+                  <Label className="text-muted-foreground">Data volta</Label>
+                  <p className="font-medium">{format(new Date(dados.dataVolta), "dd/MM/yyyy")}</p>
+                </div>
+              )}
+              <div>
+                <Label className="text-muted-foreground">Precisa bagagem</Label>
+                <p className="font-medium">{dados.precisaBagagem ? "Sim" : "Não"}</p>
+              </div>
+            </div>
+            <div>
+              <Label className="text-muted-foreground">Viajantes ({dados.viajantes?.length || 0})</Label>
+              {dados.viajantes?.map((v, idx) => (
+                <p key={idx} className="font-medium text-sm">{v.nome}</p>
+              )) || <p className="text-sm text-muted-foreground">Nenhum viajante</p>}
             </div>
           </div>;
         }
       case TipoServico.HOSPEDAGEM:
         {
           const dados = solicitacao as Hospedagem;
-          return <div className="space-y-2">
-            <div className="grid grid-cols-2 gap-3 text-sm">
-              <div><span className="font-medium">Hotel:</span> {dados.hotel}</div>
-              <div><span className="font-medium">Nº de pessoas:</span> {dados.numeroPessoas}</div>
-              <div><span className="font-medium">Check-in:</span> {format(new Date(dados.dataInicio), "dd/MM/yyyy")}</div>
-              <div><span className="font-medium">Check-out:</span> {format(new Date(dados.dataFim), "dd/MM/yyyy")}</div>
-              <div className="col-span-2"><span className="font-medium">Motivo:</span> {dados.motivo}</div>
+          return <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label className="text-muted-foreground">Hotel</Label>
+              <p className="font-medium">{dados.hotel}</p>
+            </div>
+            <div>
+              <Label className="text-muted-foreground">Nº pessoas</Label>
+              <p className="font-medium">{dados.numeroPessoas}</p>
+            </div>
+            <div>
+              <Label className="text-muted-foreground">Check-in</Label>
+              <p className="font-medium">{format(new Date(dados.dataInicio), "dd/MM/yyyy")}</p>
+            </div>
+            <div>
+              <Label className="text-muted-foreground">Check-out</Label>
+              <p className="font-medium">{format(new Date(dados.dataFim), "dd/MM/yyyy")}</p>
+            </div>
+            <div className="col-span-2">
+              <Label className="text-muted-foreground">Motivo</Label>
+              <p className="font-medium">{dados.motivo}</p>
             </div>
           </div>;
         }
       case TipoServico.LOGISTICA:
         {
           const dados = solicitacao as Logistica;
-          return <div className="space-y-2">
-            <div className="grid grid-cols-2 gap-3 text-sm">
-              <div><span className="font-medium">Tipo de serviço:</span> {dados.tipoServicoLogistica === "envio" ? "Envio" : "Retirada"}</div>
-              <div><span className="font-medium">Data:</span> {format(new Date(dados.dataServico), "dd/MM/yyyy")}</div>
-              <div><span className="font-medium">Peso aprox.:</span> {dados.pesoAproximado} kg</div>
-              <div><span className="font-medium">Remetente/destinatário:</span> {dados.remetenteDestinatario}</div>
-              <div className="col-span-2"><span className="font-medium">Endereço:</span> {dados.enderecoCompleto}</div>
-              <div><span className="font-medium">Cep:</span> {dados.cep}</div>
-              <div><span className="font-medium">Cidade:</span> {dados.cidade}</div>
-              <div><span className="font-medium">Estado:</span> {dados.estado}</div>
-              <div className="col-span-2"><span className="font-medium">Motivo:</span> {dados.motivo}</div>
+          return <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label className="text-muted-foreground">Tipo serviço</Label>
+              <p className="font-medium">{dados.tipoServicoLogistica === "envio" ? "Envio" : "Retirada"}</p>
+            </div>
+            <div>
+              <Label className="text-muted-foreground">Data</Label>
+              <p className="font-medium">{format(new Date(dados.dataServico), "dd/MM/yyyy")}</p>
+            </div>
+            <div>
+              <Label className="text-muted-foreground">Peso aprox.</Label>
+              <p className="font-medium">{dados.pesoAproximado} kg</p>
+            </div>
+            <div>
+              <Label className="text-muted-foreground">Remetente/destinatário</Label>
+              <p className="font-medium">{dados.remetenteDestinatario}</p>
+            </div>
+            <div className="col-span-2">
+              <Label className="text-muted-foreground">Endereço</Label>
+              <p className="font-medium">{dados.enderecoCompleto}</p>
+            </div>
+            <div>
+              <Label className="text-muted-foreground">Cep</Label>
+              <p className="font-medium">{dados.cep}</p>
+            </div>
+            <div>
+              <Label className="text-muted-foreground">Cidade</Label>
+              <p className="font-medium">{dados.cidade}</p>
+            </div>
+            <div>
+              <Label className="text-muted-foreground">Estado</Label>
+              <p className="font-medium">{dados.estado}</p>
+            </div>
+            <div className="col-span-2">
+              <Label className="text-muted-foreground">Motivo</Label>
+              <p className="font-medium">{dados.motivo}</p>
             </div>
           </div>;
         }
@@ -169,24 +255,29 @@ export function AprovarSolicitacaoModal({
           {/* Dados da Solicitação */}
           <div className="rounded-lg border p-4 space-y-3">
             <h3 className="font-semibold text-sm">Dados da Solicitação</h3>
-            <div className="grid grid-cols-2 gap-3 text-sm">
+            <div className="grid grid-cols-2 gap-4">
               <div>
-                <span className="font-medium">Tipo de serviço:</span>{" "}
-                {formatarTipoServico(solicitacao.tipoServico)}
+                <Label className="text-muted-foreground">Tipo de serviço</Label>
+                <p className="font-medium">{formatarTipoServico(solicitacao.tipoServico)}</p>
               </div>
               <div>
-                <span className="font-medium">Solicitante:</span> {solicitacao.solicitante}
+                <Label className="text-muted-foreground">Solicitante</Label>
+                <p className="font-medium">{solicitacao.solicitante}</p>
               </div>
               <div>
-                <span className="font-medium">Data:</span>{" "}
-                {format(new Date(solicitacao.dataSolicitacao), "dd/MM/yyyy")}
+                <Label className="text-muted-foreground">Data</Label>
+                <p className="font-medium">{format(new Date(solicitacao.dataSolicitacao), "dd/MM/yyyy")}</p>
               </div>
               <div>
-                <span className="font-medium">CCA:</span> {getCodigoNomeCCA(solicitacao.ccaId)}
+                <Label className="text-muted-foreground">CCA</Label>
+                <p className="font-medium">{getCodigoNomeCCA(solicitacao.ccaId)}</p>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="font-medium">Prioridade:</span>
-                {getBadgePrioridade(solicitacao.prioridade)}
+              <div>
+                <Label className="text-muted-foreground">Prioridade</Label>
+                <div className="flex items-center gap-2 mt-1">
+                  <div className={`w-2 h-2 rounded-full ${priorityconfig[solicitacao.prioridade].color}`} />
+                  <span className="font-medium">{priorityconfig[solicitacao.prioridade].label}</span>
+                </div>
               </div>
             </div>
           </div>
