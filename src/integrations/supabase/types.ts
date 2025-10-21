@@ -4835,6 +4835,830 @@ export type Database = {
         }
         Relationships: []
       }
+      prestadores_contratos: {
+        Row: {
+          ativo: boolean | null
+          cca_codigo: string
+          cca_id: number
+          cca_nome: string
+          contrato_nome: string | null
+          contrato_url: string | null
+          created_at: string | null
+          created_by: string | null
+          dataemissao: string
+          datafim: string
+          datainicio: string
+          empresa: string
+          id: string
+          numero: string
+          observacoes: string | null
+          prestador_cnpj: string
+          prestador_cpf: string
+          prestador_nome: string
+          prestador_pj_id: string
+          servico: string
+          status: string
+          tipo: string
+          updated_at: string | null
+          updated_by: string | null
+          valor: number
+        }
+        Insert: {
+          ativo?: boolean | null
+          cca_codigo: string
+          cca_id: number
+          cca_nome: string
+          contrato_nome?: string | null
+          contrato_url?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          dataemissao: string
+          datafim: string
+          datainicio: string
+          empresa: string
+          id?: string
+          numero: string
+          observacoes?: string | null
+          prestador_cnpj: string
+          prestador_cpf: string
+          prestador_nome: string
+          prestador_pj_id: string
+          servico: string
+          status?: string
+          tipo: string
+          updated_at?: string | null
+          updated_by?: string | null
+          valor: number
+        }
+        Update: {
+          ativo?: boolean | null
+          cca_codigo?: string
+          cca_id?: number
+          cca_nome?: string
+          contrato_nome?: string | null
+          contrato_url?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          dataemissao?: string
+          datafim?: string
+          datainicio?: string
+          empresa?: string
+          id?: string
+          numero?: string
+          observacoes?: string | null
+          prestador_cnpj?: string
+          prestador_cpf?: string
+          prestador_nome?: string
+          prestador_pj_id?: string
+          servico?: string
+          status?: string
+          tipo?: string
+          updated_at?: string | null
+          updated_by?: string | null
+          valor?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_contratos_cca"
+            columns: ["cca_id"]
+            isOneToOne: false
+            referencedRelation: "ccas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_contratos_prestador"
+            columns: ["prestador_pj_id"]
+            isOneToOne: false
+            referencedRelation: "prestadores_pj"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      prestadores_demonstrativos: {
+        Row: {
+          admissao: string
+          ajudaaluguel: number | null
+          ajudacustoobra: number | null
+          ativo: boolean | null
+          cca_codigo: string
+          cca_id: number
+          cca_nome: string
+          codigo: string
+          contrato_id: string | null
+          cpf: string
+          created_at: string | null
+          created_by: string | null
+          datanascimento: string | null
+          descontoabelvrun: number | null
+          descontoconvenio: number | null
+          funcao: string
+          id: string
+          mes: string
+          multasdescontos: number | null
+          nome: string
+          nomeempresa: string
+          observacoes: string | null
+          premiacaonexa: number | null
+          prestador_pj_id: string
+          reembolsoconvenio: number | null
+          salario: number
+          updated_at: string | null
+          valorliquido: number
+          valornf: number
+        }
+        Insert: {
+          admissao: string
+          ajudaaluguel?: number | null
+          ajudacustoobra?: number | null
+          ativo?: boolean | null
+          cca_codigo: string
+          cca_id: number
+          cca_nome: string
+          codigo: string
+          contrato_id?: string | null
+          cpf: string
+          created_at?: string | null
+          created_by?: string | null
+          datanascimento?: string | null
+          descontoabelvrun?: number | null
+          descontoconvenio?: number | null
+          funcao: string
+          id?: string
+          mes: string
+          multasdescontos?: number | null
+          nome: string
+          nomeempresa: string
+          observacoes?: string | null
+          premiacaonexa?: number | null
+          prestador_pj_id: string
+          reembolsoconvenio?: number | null
+          salario: number
+          updated_at?: string | null
+          valorliquido: number
+          valornf: number
+        }
+        Update: {
+          admissao?: string
+          ajudaaluguel?: number | null
+          ajudacustoobra?: number | null
+          ativo?: boolean | null
+          cca_codigo?: string
+          cca_id?: number
+          cca_nome?: string
+          codigo?: string
+          contrato_id?: string | null
+          cpf?: string
+          created_at?: string | null
+          created_by?: string | null
+          datanascimento?: string | null
+          descontoabelvrun?: number | null
+          descontoconvenio?: number | null
+          funcao?: string
+          id?: string
+          mes?: string
+          multasdescontos?: number | null
+          nome?: string
+          nomeempresa?: string
+          observacoes?: string | null
+          premiacaonexa?: number | null
+          prestador_pj_id?: string
+          reembolsoconvenio?: number | null
+          salario?: number
+          updated_at?: string | null
+          valorliquido?: number
+          valornf?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_demonstrativos_cca"
+            columns: ["cca_id"]
+            isOneToOne: false
+            referencedRelation: "ccas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_demonstrativos_contrato"
+            columns: ["contrato_id"]
+            isOneToOne: false
+            referencedRelation: "prestadores_contratos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_demonstrativos_prestador"
+            columns: ["prestador_pj_id"]
+            isOneToOne: false
+            referencedRelation: "prestadores_pj"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      prestadores_ferias: {
+        Row: {
+          anexos: string[] | null
+          aprovadopor: string | null
+          ativo: boolean | null
+          cca_codigo: string
+          cca_id: number
+          cca_nome: string
+          contrato_id: string | null
+          created_at: string | null
+          created_by: string | null
+          dataaprovacao: string | null
+          datainicioferias: string
+          diasferias: number
+          empresa: string
+          funcaocargo: string
+          id: string
+          justificativareprovacao: string | null
+          nomeprestador: string
+          observacoes: string | null
+          periodoaquisitivo: string
+          prestador_pj_id: string
+          responsaveldireto: string
+          responsaveldireto_id: string | null
+          responsavelregistro: string
+          responsavelregistro_id: string | null
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          anexos?: string[] | null
+          aprovadopor?: string | null
+          ativo?: boolean | null
+          cca_codigo: string
+          cca_id: number
+          cca_nome: string
+          contrato_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          dataaprovacao?: string | null
+          datainicioferias: string
+          diasferias: number
+          empresa: string
+          funcaocargo: string
+          id?: string
+          justificativareprovacao?: string | null
+          nomeprestador: string
+          observacoes?: string | null
+          periodoaquisitivo: string
+          prestador_pj_id: string
+          responsaveldireto: string
+          responsaveldireto_id?: string | null
+          responsavelregistro: string
+          responsavelregistro_id?: string | null
+          status?: string
+          updated_at?: string | null
+        }
+        Update: {
+          anexos?: string[] | null
+          aprovadopor?: string | null
+          ativo?: boolean | null
+          cca_codigo?: string
+          cca_id?: number
+          cca_nome?: string
+          contrato_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          dataaprovacao?: string | null
+          datainicioferias?: string
+          diasferias?: number
+          empresa?: string
+          funcaocargo?: string
+          id?: string
+          justificativareprovacao?: string | null
+          nomeprestador?: string
+          observacoes?: string | null
+          periodoaquisitivo?: string
+          prestador_pj_id?: string
+          responsaveldireto?: string
+          responsaveldireto_id?: string | null
+          responsavelregistro?: string
+          responsavelregistro_id?: string | null
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_ferias_cca"
+            columns: ["cca_id"]
+            isOneToOne: false
+            referencedRelation: "ccas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_ferias_contrato"
+            columns: ["contrato_id"]
+            isOneToOne: false
+            referencedRelation: "prestadores_contratos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_ferias_prestador"
+            columns: ["prestador_pj_id"]
+            isOneToOne: false
+            referencedRelation: "prestadores_pj"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      prestadores_ferias_historico: {
+        Row: {
+          created_at: string | null
+          data: string
+          ferias_id: string
+          id: string
+          observacao: string | null
+          status: string
+          usuario: string
+          usuario_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          data?: string
+          ferias_id: string
+          id?: string
+          observacao?: string | null
+          status: string
+          usuario: string
+          usuario_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          data?: string
+          ferias_id?: string
+          id?: string
+          observacao?: string | null
+          status?: string
+          usuario?: string
+          usuario_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_ferias_historico_ferias"
+            columns: ["ferias_id"]
+            isOneToOne: false
+            referencedRelation: "prestadores_ferias"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      prestadores_notas_fiscais: {
+        Row: {
+          aprovadopor: string | null
+          arquivo_nome: string | null
+          arquivo_url: string | null
+          ativo: boolean | null
+          cca_codigo: string
+          cca_id: number
+          cca_nome: string
+          contrato_id: string | null
+          created_at: string | null
+          created_by: string | null
+          dataaprovacao: string | null
+          dataemissao: string
+          dataenviosienge: string | null
+          datavencimento: string | null
+          demonstrativo_id: string | null
+          descricaoservico: string
+          empresadestino: string | null
+          id: string
+          mensagemerro: string | null
+          nomeempresa: string
+          nomerepresentante: string
+          numero: string
+          numerocredor: string | null
+          observacoesaprovacao: string | null
+          periodocontabil: string
+          planofinanceiro: string | null
+          prestador_pj_id: string
+          status: string
+          statusaprovacao: string | null
+          tipodocumento: string | null
+          updated_at: string | null
+          updated_by: string | null
+          valor: number
+        }
+        Insert: {
+          aprovadopor?: string | null
+          arquivo_nome?: string | null
+          arquivo_url?: string | null
+          ativo?: boolean | null
+          cca_codigo: string
+          cca_id: number
+          cca_nome: string
+          contrato_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          dataaprovacao?: string | null
+          dataemissao: string
+          dataenviosienge?: string | null
+          datavencimento?: string | null
+          demonstrativo_id?: string | null
+          descricaoservico: string
+          empresadestino?: string | null
+          id?: string
+          mensagemerro?: string | null
+          nomeempresa: string
+          nomerepresentante: string
+          numero: string
+          numerocredor?: string | null
+          observacoesaprovacao?: string | null
+          periodocontabil: string
+          planofinanceiro?: string | null
+          prestador_pj_id: string
+          status?: string
+          statusaprovacao?: string | null
+          tipodocumento?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+          valor: number
+        }
+        Update: {
+          aprovadopor?: string | null
+          arquivo_nome?: string | null
+          arquivo_url?: string | null
+          ativo?: boolean | null
+          cca_codigo?: string
+          cca_id?: number
+          cca_nome?: string
+          contrato_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          dataaprovacao?: string | null
+          dataemissao?: string
+          dataenviosienge?: string | null
+          datavencimento?: string | null
+          demonstrativo_id?: string | null
+          descricaoservico?: string
+          empresadestino?: string | null
+          id?: string
+          mensagemerro?: string | null
+          nomeempresa?: string
+          nomerepresentante?: string
+          numero?: string
+          numerocredor?: string | null
+          observacoesaprovacao?: string | null
+          periodocontabil?: string
+          planofinanceiro?: string | null
+          prestador_pj_id?: string
+          status?: string
+          statusaprovacao?: string | null
+          tipodocumento?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+          valor?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_nf_cca"
+            columns: ["cca_id"]
+            isOneToOne: false
+            referencedRelation: "ccas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_nf_contrato"
+            columns: ["contrato_id"]
+            isOneToOne: false
+            referencedRelation: "prestadores_contratos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_nf_demonstrativo"
+            columns: ["demonstrativo_id"]
+            isOneToOne: false
+            referencedRelation: "prestadores_demonstrativos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_nf_prestador"
+            columns: ["prestador_pj_id"]
+            isOneToOne: false
+            referencedRelation: "prestadores_pj"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      prestadores_passivos: {
+        Row: {
+          ativo: boolean | null
+          avisopravio: number
+          cargo: string
+          cca_codigo: string | null
+          cca_id: number | null
+          cca_nome: string | null
+          contrato_id: string | null
+          created_at: string | null
+          created_by: string | null
+          dataadmissao: string
+          datacorte: string
+          decimoterceiro: number
+          empresa: string
+          id: string
+          nomeprestador: string
+          observacoes: string | null
+          prestador_pj_id: string
+          salariobase: number
+          saldoferias: number
+          status: string
+          total: number
+          updated_at: string | null
+          updated_by: string | null
+        }
+        Insert: {
+          ativo?: boolean | null
+          avisopravio: number
+          cargo: string
+          cca_codigo?: string | null
+          cca_id?: number | null
+          cca_nome?: string | null
+          contrato_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          dataadmissao: string
+          datacorte: string
+          decimoterceiro: number
+          empresa: string
+          id?: string
+          nomeprestador: string
+          observacoes?: string | null
+          prestador_pj_id: string
+          salariobase: number
+          saldoferias: number
+          status?: string
+          total: number
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Update: {
+          ativo?: boolean | null
+          avisopravio?: number
+          cargo?: string
+          cca_codigo?: string | null
+          cca_id?: number | null
+          cca_nome?: string | null
+          contrato_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          dataadmissao?: string
+          datacorte?: string
+          decimoterceiro?: number
+          empresa?: string
+          id?: string
+          nomeprestador?: string
+          observacoes?: string | null
+          prestador_pj_id?: string
+          salariobase?: number
+          saldoferias?: number
+          status?: string
+          total?: number
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_passivos_cca"
+            columns: ["cca_id"]
+            isOneToOne: false
+            referencedRelation: "ccas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_passivos_contrato"
+            columns: ["contrato_id"]
+            isOneToOne: false
+            referencedRelation: "prestadores_contratos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_passivos_prestador"
+            columns: ["prestador_pj_id"]
+            isOneToOne: false
+            referencedRelation: "prestadores_pj"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      prestadores_passivos_historico: {
+        Row: {
+          campo: string
+          created_at: string | null
+          data: string
+          id: string
+          justificativa: string
+          passivo_id: string
+          usuario: string
+          usuario_id: string | null
+          valoranterior: string
+          valornovo: string
+        }
+        Insert: {
+          campo: string
+          created_at?: string | null
+          data?: string
+          id?: string
+          justificativa: string
+          passivo_id: string
+          usuario: string
+          usuario_id?: string | null
+          valoranterior: string
+          valornovo: string
+        }
+        Update: {
+          campo?: string
+          created_at?: string | null
+          data?: string
+          id?: string
+          justificativa?: string
+          passivo_id?: string
+          usuario?: string
+          usuario_id?: string | null
+          valoranterior?: string
+          valornovo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_passivos_historico_passivo"
+            columns: ["passivo_id"]
+            isOneToOne: false
+            referencedRelation: "prestadores_passivos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      prestadores_pj: {
+        Row: {
+          ajudaaluguel: number | null
+          ajudacusto: number | null
+          almoco: boolean | null
+          alojamento: boolean | null
+          ativo: boolean | null
+          auxilioconveniomedico: boolean | null
+          cafemanha: boolean | null
+          cafetarde: boolean | null
+          cca_codigo: string
+          cca_id: number
+          cca_nome: string
+          celular: boolean | null
+          chavepix: string | null
+          cnpj: string
+          contrato_nome: string | null
+          contrato_url: string | null
+          cpf: string
+          created_at: string | null
+          created_by: string | null
+          datainiciocontrato: string | null
+          datanascimento: string | null
+          descricaoatividade: string | null
+          detalhesalojamento: string | null
+          detalhesveiculo: string | null
+          email: string | null
+          emailrepresentante: string | null
+          endereco: string | null
+          enderecorepresentante: string | null
+          folgacampo: string | null
+          grauderisco: number | null
+          id: string
+          nomecompleto: string
+          numerocnae: string | null
+          numerocredorsienge: string | null
+          periodoferias: string | null
+          quantidadediasferias: number | null
+          razaosocial: string
+          registrofuncional: string | null
+          rg: string | null
+          servico: string | null
+          telefone: string | null
+          telefonerepresentante: string | null
+          tempocontrato: string | null
+          updated_at: string | null
+          updated_by: string | null
+          valerefeicao: number | null
+          valoralmoco: number | null
+          valorauxilioconveniomedico: number | null
+          valorcafemanha: number | null
+          valorcafetarde: number | null
+          valorprestacaoservico: number | null
+          veiculo: boolean | null
+        }
+        Insert: {
+          ajudaaluguel?: number | null
+          ajudacusto?: number | null
+          almoco?: boolean | null
+          alojamento?: boolean | null
+          ativo?: boolean | null
+          auxilioconveniomedico?: boolean | null
+          cafemanha?: boolean | null
+          cafetarde?: boolean | null
+          cca_codigo: string
+          cca_id: number
+          cca_nome: string
+          celular?: boolean | null
+          chavepix?: string | null
+          cnpj: string
+          contrato_nome?: string | null
+          contrato_url?: string | null
+          cpf: string
+          created_at?: string | null
+          created_by?: string | null
+          datainiciocontrato?: string | null
+          datanascimento?: string | null
+          descricaoatividade?: string | null
+          detalhesalojamento?: string | null
+          detalhesveiculo?: string | null
+          email?: string | null
+          emailrepresentante?: string | null
+          endereco?: string | null
+          enderecorepresentante?: string | null
+          folgacampo?: string | null
+          grauderisco?: number | null
+          id?: string
+          nomecompleto: string
+          numerocnae?: string | null
+          numerocredorsienge?: string | null
+          periodoferias?: string | null
+          quantidadediasferias?: number | null
+          razaosocial: string
+          registrofuncional?: string | null
+          rg?: string | null
+          servico?: string | null
+          telefone?: string | null
+          telefonerepresentante?: string | null
+          tempocontrato?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+          valerefeicao?: number | null
+          valoralmoco?: number | null
+          valorauxilioconveniomedico?: number | null
+          valorcafemanha?: number | null
+          valorcafetarde?: number | null
+          valorprestacaoservico?: number | null
+          veiculo?: boolean | null
+        }
+        Update: {
+          ajudaaluguel?: number | null
+          ajudacusto?: number | null
+          almoco?: boolean | null
+          alojamento?: boolean | null
+          ativo?: boolean | null
+          auxilioconveniomedico?: boolean | null
+          cafemanha?: boolean | null
+          cafetarde?: boolean | null
+          cca_codigo?: string
+          cca_id?: number
+          cca_nome?: string
+          celular?: boolean | null
+          chavepix?: string | null
+          cnpj?: string
+          contrato_nome?: string | null
+          contrato_url?: string | null
+          cpf?: string
+          created_at?: string | null
+          created_by?: string | null
+          datainiciocontrato?: string | null
+          datanascimento?: string | null
+          descricaoatividade?: string | null
+          detalhesalojamento?: string | null
+          detalhesveiculo?: string | null
+          email?: string | null
+          emailrepresentante?: string | null
+          endereco?: string | null
+          enderecorepresentante?: string | null
+          folgacampo?: string | null
+          grauderisco?: number | null
+          id?: string
+          nomecompleto?: string
+          numerocnae?: string | null
+          numerocredorsienge?: string | null
+          periodoferias?: string | null
+          quantidadediasferias?: number | null
+          razaosocial?: string
+          registrofuncional?: string | null
+          rg?: string | null
+          servico?: string | null
+          telefone?: string | null
+          telefonerepresentante?: string | null
+          tempocontrato?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+          valerefeicao?: number | null
+          valoralmoco?: number | null
+          valorauxilioconveniomedico?: number | null
+          valorcafemanha?: number | null
+          valorcafetarde?: number | null
+          valorprestacaoservico?: number | null
+          veiculo?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_prestadores_pj_cca"
+            columns: ["cca_id"]
+            isOneToOne: false
+            referencedRelation: "ccas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       processo_treinamento: {
         Row: {
           ativo: boolean | null
