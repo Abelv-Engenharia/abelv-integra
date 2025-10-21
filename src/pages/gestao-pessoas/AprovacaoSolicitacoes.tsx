@@ -37,7 +37,7 @@ export default function AprovacaoSolicitacoes() {
   const solicitacoesFiltradas = useMemo(() => {
     return solicitacoesDoUsuario.filter((sol) => {
       const matchPesquisa = 
-        sol.id.toLowerCase().includes(pesquisa.toLowerCase()) ||
+        (sol.numeroSolicitacao?.toString() || '').toLowerCase().includes(pesquisa.toLowerCase()) ||
         sol.solicitante.toLowerCase().includes(pesquisa.toLowerCase());
       
       const matchPrioridade = 
@@ -131,7 +131,7 @@ export default function AprovacaoSolicitacoes() {
         <div className="flex items-start justify-between">
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-1">
-              <span className="text-sm font-semibold">{solicitacao.id}</span>
+              <span className="text-sm font-semibold">{solicitacao.numeroSolicitacao}</span>
               {getBadgePrioridade(solicitacao.prioridade)}
             </div>
             <p className="text-xs text-muted-foreground">
