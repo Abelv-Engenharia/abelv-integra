@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
-import { SolicitacaoServico, TipoServico, PrioridadeSolicitacao, VoucherUber, LocacaoVeiculo, CartaoAbastecimento, VeloeGo, Passagens, Hospedagem, Logistica, CorreiosLoggi } from "@/types/gestao-pessoas/solicitacao";
+import { SolicitacaoServico, TipoServico, PrioridadeSolicitacao, StatusSolicitacao, VoucherUber, LocacaoVeiculo, CartaoAbastecimento, VeloeGo, Passagens, Hospedagem, Logistica, CorreiosLoggi } from "@/types/gestao-pessoas/solicitacao";
 import { format } from "date-fns";
 import { CheckCircle, XCircle } from "lucide-react";
 import { formatarNumeroSolicitacao } from "@/utils/gestao-pessoas/formatters";
@@ -30,6 +30,9 @@ export function AprovarSolicitacaoModal({
   const { data: ccas = [] } = useCCAs();
   
   if (!solicitacao) return null;
+
+  const isReadOnlyMode = solicitacao.status === StatusSolicitacao.APROVADO || 
+                         solicitacao.status === StatusSolicitacao.REJEITADO;
 
   const getCcaSolicitacao = (solicitacao: SolicitacaoServico, ccas: any[]): string => {
     // Primeiro tenta pelo ccaId
@@ -265,7 +268,9 @@ export function AprovarSolicitacaoModal({
   return <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Aprovar Solicitação - {formatarNumeroSolicitacao(solicitacao.numeroSolicitacao)}</DialogTitle>
+          <DialogTitle>
+            {isReadOnlyMode ? "Visualizar Solicitação" : "Aprovar Solicitação"} - {formatarNumeroSolicitacao(solicitacao.numeroSolicitacao)}
+          </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
@@ -332,39 +337,89 @@ export function AprovarSolicitacaoModal({
             </div>
           </div>
 
-          <Separator />
+          {isReadOnlyMode && (
+            <>
+              <Separator />
+              <div className="rounded-lg border p-4 space-y-3">
+                <h3 className="font-semibold text-sm">
+                  Informações de {solicitacao.status === StatusSolicitacao.APROVADO ? "Aprovação" : "Reprovação"}
+                </h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-muted-foreground">
+                      {solicitacao.status === StatusSolicitacao.APROVADO ? "Aprovado por" : "Reprovado por"}
+                    </Label>
+                    <p className="font-medium">{solicitacao.aprovadopor || "N/A"}</p>
+                  </div>
+                  <div>
+                    <Label className="text-muted-foreground">Data</Label>
+                    <p className="font-medium">
+                      {solicitacao.dataaprovacao 
+                        ? format(new Date(solicitacao.dataaprovacao), "dd/MM/yyyy HH:mm")
+                        : "N/A"}
+                    </p>
+                  </div>
+                </div>
+                {(solicitacao.justificativaaprovacao || solicitacao.justificativareprovacao) && (
+                  <div>
+                    <Label className="text-muted-foreground">Justificativa</Label>
+                    <p className="text-sm mt-1 p-2 bg-muted rounded">
+                      {solicitacao.justificativaaprovacao || solicitacao.justificativareprovacao}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </>
+          )}
 
-          {/* Justificativa */}
-          <div className="space-y-2">
-            <Label htmlFor="justificativa">
-              {mostrarJustificativaAprovacao ? "Justificativa (Opcional)" : "Justificativa *"}
-            </Label>
-            <Textarea id="justificativa" placeholder={mostrarJustificativaAprovacao ? "Adicione uma justificativa para aprovação (opcional)..." : "Adicione uma justificativa para reprovação..."} value={justificativa} onChange={e => setJustificativa(e.target.value)} rows={3} />
-          </div>
+          {!isReadOnlyMode && (
+            <>
+              <Separator />
+              {/* Justificativa */}
+              <div className="space-y-2">
+                <Label htmlFor="justificativa">
+                  {mostrarJustificativaAprovacao ? "Justificativa (Opcional)" : "Justificativa *"}
+                </Label>
+                <Textarea id="justificativa" placeholder={mostrarJustificativaAprovacao ? "Adicione uma justificativa para aprovação (opcional)..." : "Adicione uma justificativa para reprovação..."} value={justificativa} onChange={e => setJustificativa(e.target.value)} rows={3} />
+              </div>
+            </>
+          )}
         </div>
 
         <DialogFooter className="gap-2">
-          <Button variant="outline" onClick={() => {
-          onOpenChange(false);
-          setJustificativa("");
-          setMostrarJustificativaAprovacao(false);
-        }}>
-            Cancelar
-          </Button>
-          <Button variant="destructive" onClick={handleReprovar} className="gap-2">
-            <XCircle className="h-4 w-4" />
-            Reprovar
-          </Button>
-          <Button onClick={() => {
-          if (!mostrarJustificativaAprovacao) {
-            setMostrarJustificativaAprovacao(true);
-          } else {
-            handleAprovar();
-          }
-        }} className="gap-2">
-            <CheckCircle className="h-4 w-4" />
-            {mostrarJustificativaAprovacao ? "Confirmar Aprovação" : "Aprovar"}
-          </Button>
+          {isReadOnlyMode ? (
+            <Button onClick={() => {
+              onOpenChange(false);
+              setJustificativa("");
+              setMostrarJustificativaAprovacao(false);
+            }}>
+              Fechar
+            </Button>
+          ) : (
+            <>
+              <Button variant="outline" onClick={() => {
+                onOpenChange(false);
+                setJustificativa("");
+                setMostrarJustificativaAprovacao(false);
+              }}>
+                Cancelar
+              </Button>
+              <Button variant="destructive" onClick={handleReprovar} className="gap-2">
+                <XCircle className="h-4 w-4" />
+                Reprovar
+              </Button>
+              <Button onClick={() => {
+                if (!mostrarJustificativaAprovacao) {
+                  setMostrarJustificativaAprovacao(true);
+                } else {
+                  handleAprovar();
+                }
+              }} className="gap-2">
+                <CheckCircle className="h-4 w-4" />
+                {mostrarJustificativaAprovacao ? "Confirmar Aprovação" : "Aprovar"}
+              </Button>
+            </>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>;
