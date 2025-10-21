@@ -10,6 +10,7 @@ import { useUsuarioAtivo } from "@/hooks/useUsuarioAtivo";
 import { AprovarSolicitacaoModal } from "@/components/gestao-pessoas/solicitacao/AprovarSolicitacaoModal";
 import { format } from "date-fns";
 import { formatarNumeroSolicitacao } from "@/utils/gestao-pessoas/formatters";
+import { useCCAs } from "@/hooks/useCCAs";
 import { 
   SolicitacaoServico, 
   StatusSolicitacao, 
@@ -20,12 +21,20 @@ import {
 export default function AprovacaoSolicitacoes() {
   const { solicitacoes, updateSolicitacao } = useSolicitacoes();
   const usuarioAtivo = useUsuarioAtivo();
+  const { data: ccas = [] } = useCCAs();
   
   const [pesquisa, setPesquisa] = useState("");
   const [filtroPrioridade, setFiltroPrioridade] = useState<string>("todas");
   const [filtroTipo, setFiltroTipo] = useState<string>("todos");
   const [modalAberto, setModalAberto] = useState(false);
   const [solicitacaoSelecionada, setSolicitacaoSelecionada] = useState<SolicitacaoServico | null>(null);
+
+  // Função para obter o código do CCA pelo ID
+  const getCodigoCCA = (ccaId?: number) => {
+    if (!ccaId) return null;
+    const cca = ccas.find(c => c.id === ccaId);
+    return cca?.codigo || null;
+  };
 
   // Filtrar apenas solicitações do usuário ativo
   const solicitacoesDoUsuario = useMemo(() => {
@@ -150,9 +159,9 @@ export default function AprovacaoSolicitacoes() {
           </div>
           <div className="flex items-center justify-between text-xs text-muted-foreground">
             <span>{solicitacao.dataSolicitacao.toLocaleDateString('pt-BR')}</span>
-            {solicitacao.centroCusto && (
+            {getCodigoCCA(solicitacao.ccaId) && (
               <Badge variant="outline" className="text-xs px-1 py-0">
-                {solicitacao.centroCusto}
+                {getCodigoCCA(solicitacao.ccaId)}
               </Badge>
             )}
           </div>
