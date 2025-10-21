@@ -29,9 +29,9 @@ export default function AprovacaoSolicitacoes() {
   // Filtrar apenas solicitações do usuário ativo
   const solicitacoesDoUsuario = useMemo(() => {
     return solicitacoes.filter(
-      (sol) => sol.responsavelaprovacao === usuarioAtivo.nome
+      (sol) => (sol as any).responsavelaprovacaoId === usuarioAtivo.id
     );
-  }, [solicitacoes, usuarioAtivo.nome]);
+  }, [solicitacoes, usuarioAtivo.id]);
 
   // Aplicar filtros
   const solicitacoesFiltradas = useMemo(() => {

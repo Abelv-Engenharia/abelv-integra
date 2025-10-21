@@ -46,6 +46,8 @@ export interface SolicitacaoBase {
   imagemanexo?: string;
   estimativavalor?: number;
   responsavelaprovacao?: string;
+  responsavelaprovacaoId?: string;
+  ccaId?: number;
   
   // Campos para aprovação
   justificativaaprovacao?: string;

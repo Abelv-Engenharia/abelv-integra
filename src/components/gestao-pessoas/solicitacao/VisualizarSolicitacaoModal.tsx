@@ -13,7 +13,8 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { formatarNumeroSolicitacao } from "@/utils/gestao-pessoas/formatters";
 import { useCCAs } from "@/hooks/useCCAs.ts";
-import { 
+import { useUsuariosAprovadores } from "@/hooks/useUsuariosAprovadores";
+import {
   SolicitacaoServico, 
   TipoServico, 
   VoucherUber, 
@@ -40,13 +41,6 @@ interface VisualizarSolicitacaoModalProps {
   }) => void;
   modoVisualizacao?: boolean;
 }
-
-const usuariosistema = [
-  { id: "1", nome: "Carlos Silva - Gestor" },
-  { id: "2", nome: "Ana Santos - Supervisora" },
-  { id: "3", nome: "Pedro Costa - Coordenador" },
-  { id: "4", nome: "Maria Oliveira - Diretora" },
-];
 
 const priorityconfig = {
   [PrioridadeSolicitacao.ALTA]: { color: "bg-red-500", label: "Alta" },
@@ -110,10 +104,15 @@ export function VisualizarSolicitacaoModal({
   modoVisualizacao = false
 }: VisualizarSolicitacaoModalProps) {
   const { data: ccas = [], isLoading } = useCCAs();
+  
+  // Obter ccaId da solicitação
+  const ccaId = (solicitacao as any)?.ccaId || (solicitacao?.centroCusto ? parseInt(solicitacao.centroCusto) : undefined);
+  const { data: usuariosAprovadores = [] } = useUsuariosAprovadores(ccaId);
+  
   const [observacoesgestao, setObservacoesGestao] = useState("");
   const [imagemanexo, setImagemAnexo] = useState<string>("");
   const [estimativavalor, setEstimativaValor] = useState("");
-  const [responsavelaprovacao, setResponsavelAprovacao] = useState("");
+  const [responsavelaprovacaoId, setResponsavelAprovacaoId] = useState("");
   const [observacoesconclusao, setObservacoesConclusao] = useState("");
   const [comprovanteconclusao, setComprovanteConclusao] = useState<string | undefined>();
 
@@ -131,7 +130,7 @@ export function VisualizarSolicitacaoModal({
       setObservacoesGestao(solicitacao.observacoesgestao || "");
       setImagemAnexo(solicitacao.imagemanexo || "");
       setEstimativaValor(solicitacao.estimativavalor?.toString() || "");
-      setResponsavelAprovacao(solicitacao.responsavelaprovacao || "");
+      setResponsavelAprovacaoId((solicitacao as any).responsavelaprovacaoId || "");
       setObservacoesConclusao("");
       setComprovanteConclusao(undefined);
     }
@@ -193,7 +192,8 @@ export function VisualizarSolicitacaoModal({
       observacoesgestao,
       imagemanexo: imagemanexo || undefined,
       estimativavalor: estimativavalor ? parseFloat(estimativavalor) : undefined,
-      responsavelaprovacao: responsavelaprovacao || undefined
+      responsavelaprovacaoId: responsavelaprovacaoId || undefined,
+      responsavelaprovacao: usuariosAprovadores.find(u => u.id === responsavelaprovacaoId)?.nome || undefined
     };
     onSave(updates);
   };
@@ -203,7 +203,7 @@ export function VisualizarSolicitacaoModal({
       toast.error("Estimativa de valor é obrigatória");
       return;
     }
-    if (!responsavelaprovacao) {
+    if (!responsavelaprovacaoId) {
       toast.error("Selecione um responsável pela aprovação");
       return;
     }
@@ -212,7 +212,8 @@ export function VisualizarSolicitacaoModal({
       observacoesgestao,
       imagemanexo: imagemanexo || undefined,
       estimativavalor: parseFloat(estimativavalor),
-      responsavelaprovacao
+      responsavelaprovacaoId,
+      responsavelaprovacao: usuariosAprovadores.find(u => u.id === responsavelaprovacaoId)?.nome || undefined
     };
     onSaveAndApprove(updates);
   };
@@ -742,16 +743,22 @@ export function VisualizarSolicitacaoModal({
                       <Label htmlFor="responsavelaprovacao" className="text-destructive">
                         Responsável pela aprovação *
                       </Label>
-                      <Select value={responsavelaprovacao} onValueChange={setResponsavelAprovacao}>
+                      <Select value={responsavelaprovacaoId} onValueChange={setResponsavelAprovacaoId}>
                         <SelectTrigger>
                           <SelectValue placeholder="Selecione um responsável..." />
                         </SelectTrigger>
                         <SelectContent>
-                          {usuariosistema.map((usuario) => (
-                            <SelectItem key={usuario.id} value={usuario.nome}>
-                              {usuario.nome}
+                          {usuariosAprovadores.length > 0 ? (
+                            usuariosAprovadores.map((usuario) => (
+                              <SelectItem key={usuario.id} value={usuario.id}>
+                                {usuario.nome} - {usuario.cargo}
+                              </SelectItem>
+                            ))
+                          ) : (
+                            <SelectItem value="none" disabled>
+                              Nenhum aprovador disponível para este CCA
                             </SelectItem>
-                          ))}
+                          )}
                         </SelectContent>
                       </Select>
                     </div>
