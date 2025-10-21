@@ -120,6 +120,21 @@ export default function CadastroPessoaJuridica() {
       return data || [];
     }
   });
+
+  // Buscar CCAs ativos
+  const { data: ccas, isLoading: isLoadingCcas } = useQuery({
+    queryKey: ['ccas-ativos'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('ccas')
+        .select('id, codigo, nome')
+        .eq('ativo', true)
+        .order('codigo');
+      
+      if (error) throw error;
+      return data || [];
+    }
+  });
   
   const form = useForm<CadastroFormData>({
     resolver: zodResolver(cadastroSchema),
@@ -737,18 +752,36 @@ export default function CadastroPessoaJuridica() {
 
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-
-                <FormField control={form.control} name="ccaobra" render={({
+              <FormField control={form.control} name="ccaobra" render={({
                 field
               }) => <FormItem>
-                      <FormLabel>CCA da Obra</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Código CCA" {...field} />
-                      </FormControl>
+                      <FormLabel>Cca</FormLabel>
+                      <Select 
+                        onValueChange={field.onChange} 
+                        value={field.value}
+                        disabled={isLoadingCcas}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder={
+                              isLoadingCcas 
+                                ? "Carregando CCAs..." 
+                                : ccas && ccas.length > 0
+                                  ? "Selecione um CCA"
+                                  : "Nenhum CCA disponível"
+                            } />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {ccas?.map((cca) => (
+                            <SelectItem key={cca.id} value={cca.id.toString()}>
+                              {cca.codigo} - {cca.nome}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>} />
-              </div>
             </CardContent>
           </Card>
 
