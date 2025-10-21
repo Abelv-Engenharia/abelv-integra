@@ -296,81 +296,70 @@ export const COMPLETE_PERMISSIONS: PermissionCategory[] = [
     ]
   },
   {
-    name: 'Gestão de Pessoas - Solicitações de Serviços',
+    name: 'Gestão de Pessoas',
     permissions: [
-      { key: 'gestao_pessoas_solicitacoes_dashboard', label: 'Dashboard' },
-      { key: 'gestao_pessoas_solicitacoes_criar', label: 'Criar Solicitação' },
-      { key: 'gestao_pessoas_solicitacoes_visualizar', label: 'Visualizar Solicitações' },
-      { key: 'gestao_pessoas_solicitacoes_editar', label: 'Editar Solicitação' },
-      { key: 'gestao_pessoas_solicitacoes_excluir', label: 'Excluir Solicitação' },
-      { key: 'gestao_pessoas_solicitacoes_aprovar', label: 'Aprovar Solicitações' },
-      { key: 'gestao_pessoas_solicitacoes_reprovar', label: 'Reprovar Solicitações' },
-      { key: 'gestao_pessoas_solicitacoes_relatorios', label: 'Relatórios' }
-    ]
-  },
-  {
-    name: 'Gestão de Pessoas - Viagens',
-    permissions: [
-      { key: 'gestao_pessoas_viagens_dashboard', label: 'Dashboard' },
-      { key: 'gestao_pessoas_viagens_cadastrar_fatura', label: 'Cadastrar Fatura' },
-      { key: 'gestao_pessoas_viagens_importar_fatura', label: 'Importar Fatura' },
-      { key: 'gestao_pessoas_viagens_consultar_faturas', label: 'Consultar Faturas' },
-      { key: 'gestao_pessoas_viagens_relatorios', label: 'Relatórios' }
-    ]
-  },
-  {
-    name: 'Gestão de Pessoas - Veículos',
-    permissions: [
-      { key: 'gestao_pessoas_veiculos_dashboard', label: 'Dashboard' },
-      { key: 'gestao_pessoas_veiculos_cadastrar', label: 'Cadastrar Veículo' },
-      { key: 'gestao_pessoas_veiculos_editar', label: 'Editar Veículo' },
-      { key: 'gestao_pessoas_veiculos_visualizar', label: 'Visualizar Veículos' },
-      { key: 'gestao_pessoas_veiculos_excluir', label: 'Excluir Veículo' },
-      { key: 'gestao_pessoas_veiculos_consultas', label: 'Consultas Veículos' },
-      { key: 'gestao_pessoas_veiculos_multas_cadastrar', label: 'Cadastrar Multas' },
-      { key: 'gestao_pessoas_veiculos_multas_visualizar', label: 'Visualizar Multas' },
-      { key: 'gestao_pessoas_veiculos_multas_editar', label: 'Editar Multas' },
-      { key: 'gestao_pessoas_veiculos_condutores_cadastrar', label: 'Cadastrar Condutores' },
-      { key: 'gestao_pessoas_veiculos_condutores_visualizar', label: 'Visualizar Condutores' },
-      { key: 'gestao_pessoas_veiculos_condutores_editar', label: 'Editar Condutores' },
-      { key: 'gestao_pessoas_veiculos_cartoes_cadastrar', label: 'Cadastrar Cartões' },
-      { key: 'gestao_pessoas_veiculos_cartoes_visualizar', label: 'Visualizar Cartões' },
-      { key: 'gestao_pessoas_veiculos_pedagios_cadastrar', label: 'Cadastrar Pedágios' },
-      { key: 'gestao_pessoas_veiculos_pedagios_visualizar', label: 'Visualizar Pedágios' },
-      { key: 'gestao_pessoas_veiculos_checklists_criar', label: 'Criar Checklists' },
-      { key: 'gestao_pessoas_veiculos_checklists_visualizar', label: 'Visualizar Checklists' },
-      { key: 'gestao_pessoas_veiculos_abastecimento_gerenciar', label: 'Gerenciar Abastecimento' },
-      { key: 'gestao_pessoas_veiculos_relatorios', label: 'Relatórios' }
-    ]
-  },
-  {
-    name: 'Gestão de Pessoas - Recrutamento & Seleção',
-    permissions: [
-      { key: 'gestao_pessoas_recrutamento_dashboard', label: 'Dashboard' },
-      { key: 'gestao_pessoas_recrutamento_abertura_vaga', label: 'Abertura de Vaga' },
-      { key: 'gestao_pessoas_recrutamento_gestao_vagas', label: 'Gestão de Vagas' },
-      { key: 'gestao_pessoas_recrutamento_aprovacao_vaga', label: 'Aprovação de Vaga' },
-      { key: 'gestao_pessoas_recrutamento_banco_talentos', label: 'Banco de Talentos' },
-      { key: 'gestao_pessoas_recrutamento_acompanhamento_sla', label: 'Acompanhamento SLA' }
-    ]
-  },
-  {
-    name: 'Gestão de Pessoas - Prestadores de Serviço',
-    permissions: [
-      { key: 'gestao_pessoas_prestadores_dashboard', label: 'Dashboard' },
-      { key: 'gestao_pessoas_prestadores_cadastrar_pj', label: 'Cadastrar Pessoa Jurídica' },
-      { key: 'gestao_pessoas_prestadores_consultar_pj', label: 'Consultar Prestadores' },
-      { key: 'gestao_pessoas_prestadores_editar_pj', label: 'Editar Prestador' },
-      { key: 'gestao_pessoas_prestadores_contratos_visualizar', label: 'Visualizar Contratos' },
-      { key: 'gestao_pessoas_prestadores_contratos_criar', label: 'Criar Contrato' },
-      { key: 'gestao_pessoas_prestadores_contratos_editar', label: 'Editar Contrato' },
-      { key: 'gestao_pessoas_prestadores_demonstrativos', label: 'Demonstrativos' },
-      { key: 'gestao_pessoas_prestadores_nf_emitir', label: 'Emitir Nota Fiscal' },
-      { key: 'gestao_pessoas_prestadores_nf_aprovar', label: 'Aprovar Nota Fiscal' },
-      { key: 'gestao_pessoas_prestadores_ferias_controlar', label: 'Controlar Férias' },
-      { key: 'gestao_pessoas_prestadores_ferias_aprovar', label: 'Aprovar Férias' },
-      { key: 'gestao_pessoas_prestadores_passivos', label: 'Controle de Passivos' },
-      { key: 'gestao_pessoas_prestadores_relatorios', label: 'Relatórios' }
+      // Solicitações de Serviços (8)
+      { key: 'gestao_pessoas_solicitacoes_dashboard', label: 'Solicitações - Dashboard' },
+      { key: 'gestao_pessoas_solicitacoes_criar', label: 'Solicitações - Criar' },
+      { key: 'gestao_pessoas_solicitacoes_visualizar', label: 'Solicitações - Visualizar' },
+      { key: 'gestao_pessoas_solicitacoes_editar', label: 'Solicitações - Editar' },
+      { key: 'gestao_pessoas_solicitacoes_excluir', label: 'Solicitações - Excluir' },
+      { key: 'gestao_pessoas_solicitacoes_aprovar', label: 'Solicitações - Aprovar' },
+      { key: 'gestao_pessoas_solicitacoes_reprovar', label: 'Solicitações - Reprovar' },
+      { key: 'gestao_pessoas_solicitacoes_relatorios', label: 'Solicitações - Relatórios' },
+      
+      // Viagens (5)
+      { key: 'gestao_pessoas_viagens_dashboard', label: 'Viagens - Dashboard' },
+      { key: 'gestao_pessoas_viagens_cadastrar_fatura', label: 'Viagens - Cadastrar Fatura' },
+      { key: 'gestao_pessoas_viagens_importar_fatura', label: 'Viagens - Importar Fatura' },
+      { key: 'gestao_pessoas_viagens_consultar_faturas', label: 'Viagens - Consultar Faturas' },
+      { key: 'gestao_pessoas_viagens_relatorios', label: 'Viagens - Relatórios' },
+      
+      // Veículos (20)
+      { key: 'gestao_pessoas_veiculos_dashboard', label: 'Veículos - Dashboard' },
+      { key: 'gestao_pessoas_veiculos_cadastrar', label: 'Veículos - Cadastrar' },
+      { key: 'gestao_pessoas_veiculos_editar', label: 'Veículos - Editar' },
+      { key: 'gestao_pessoas_veiculos_visualizar', label: 'Veículos - Visualizar' },
+      { key: 'gestao_pessoas_veiculos_excluir', label: 'Veículos - Excluir' },
+      { key: 'gestao_pessoas_veiculos_consultas', label: 'Veículos - Consultas' },
+      { key: 'gestao_pessoas_veiculos_multas_cadastrar', label: 'Veículos - Multas - Cadastrar' },
+      { key: 'gestao_pessoas_veiculos_multas_visualizar', label: 'Veículos - Multas - Visualizar' },
+      { key: 'gestao_pessoas_veiculos_multas_editar', label: 'Veículos - Multas - Editar' },
+      { key: 'gestao_pessoas_veiculos_condutores_cadastrar', label: 'Veículos - Condutores - Cadastrar' },
+      { key: 'gestao_pessoas_veiculos_condutores_visualizar', label: 'Veículos - Condutores - Visualizar' },
+      { key: 'gestao_pessoas_veiculos_condutores_editar', label: 'Veículos - Condutores - Editar' },
+      { key: 'gestao_pessoas_veiculos_cartoes_cadastrar', label: 'Veículos - Cartões - Cadastrar' },
+      { key: 'gestao_pessoas_veiculos_cartoes_visualizar', label: 'Veículos - Cartões - Visualizar' },
+      { key: 'gestao_pessoas_veiculos_pedagios_cadastrar', label: 'Veículos - Pedágios - Cadastrar' },
+      { key: 'gestao_pessoas_veiculos_pedagios_visualizar', label: 'Veículos - Pedágios - Visualizar' },
+      { key: 'gestao_pessoas_veiculos_checklists_criar', label: 'Veículos - Checklists - Criar' },
+      { key: 'gestao_pessoas_veiculos_checklists_visualizar', label: 'Veículos - Checklists - Visualizar' },
+      { key: 'gestao_pessoas_veiculos_abastecimento_gerenciar', label: 'Veículos - Abastecimento - Gerenciar' },
+      { key: 'gestao_pessoas_veiculos_relatorios', label: 'Veículos - Relatórios' },
+      
+      // Recrutamento & Seleção (6)
+      { key: 'gestao_pessoas_recrutamento_dashboard', label: 'Recrutamento - Dashboard' },
+      { key: 'gestao_pessoas_recrutamento_abertura_vaga', label: 'Recrutamento - Abertura de Vaga' },
+      { key: 'gestao_pessoas_recrutamento_gestao_vagas', label: 'Recrutamento - Gestão de Vagas' },
+      { key: 'gestao_pessoas_recrutamento_aprovacao_vaga', label: 'Recrutamento - Aprovação de Vaga' },
+      { key: 'gestao_pessoas_recrutamento_banco_talentos', label: 'Recrutamento - Banco de Talentos' },
+      { key: 'gestao_pessoas_recrutamento_acompanhamento_sla', label: 'Recrutamento - Acompanhamento SLA' },
+      
+      // Prestadores de Serviço (14)
+      { key: 'gestao_pessoas_prestadores_dashboard', label: 'Prestadores - Dashboard' },
+      { key: 'gestao_pessoas_prestadores_cadastrar_pj', label: 'Prestadores - Cadastrar PJ' },
+      { key: 'gestao_pessoas_prestadores_consultar_pj', label: 'Prestadores - Consultar' },
+      { key: 'gestao_pessoas_prestadores_editar_pj', label: 'Prestadores - Editar PJ' },
+      { key: 'gestao_pessoas_prestadores_contratos_visualizar', label: 'Prestadores - Contratos - Visualizar' },
+      { key: 'gestao_pessoas_prestadores_contratos_criar', label: 'Prestadores - Contratos - Criar' },
+      { key: 'gestao_pessoas_prestadores_contratos_editar', label: 'Prestadores - Contratos - Editar' },
+      { key: 'gestao_pessoas_prestadores_demonstrativos', label: 'Prestadores - Demonstrativos' },
+      { key: 'gestao_pessoas_prestadores_nf_emitir', label: 'Prestadores - NF - Emitir' },
+      { key: 'gestao_pessoas_prestadores_nf_aprovar', label: 'Prestadores - NF - Aprovar' },
+      { key: 'gestao_pessoas_prestadores_ferias_controlar', label: 'Prestadores - Férias - Controlar' },
+      { key: 'gestao_pessoas_prestadores_ferias_aprovar', label: 'Prestadores - Férias - Aprovar' },
+      { key: 'gestao_pessoas_prestadores_passivos', label: 'Prestadores - Passivos' },
+      { key: 'gestao_pessoas_prestadores_relatorios', label: 'Prestadores - Relatórios' }
     ]
   },
 ];
