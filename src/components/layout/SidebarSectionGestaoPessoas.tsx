@@ -170,50 +170,60 @@ export default function SidebarSectionGestaoPessoas({
 
                           <CollapsibleContent>
                             <SidebarMenu className="ml-4 border-l border-sidebar-border">
-                              <SidebarMenuItem>
-                                <SidebarMenuButton asChild>
-                                  <Link to="/gestao-pessoas/kpi-solicitacoes" onClick={onLinkClick}>
-                                    <BarChart3 className="h-4 w-4" />
-                                    <span>Kpi Solicitações</span>
-                                  </Link>
-                                </SidebarMenuButton>
-                              </SidebarMenuItem>
+                              {canSee('gestao_pessoas_solicitacoes_dashboard') && (
+                                <SidebarMenuItem>
+                                  <SidebarMenuButton asChild>
+                                    <Link to="/gestao-pessoas/kpi-solicitacoes" onClick={onLinkClick}>
+                                      <BarChart3 className="h-4 w-4" />
+                                      <span>Kpi Solicitações</span>
+                                    </Link>
+                                  </SidebarMenuButton>
+                                </SidebarMenuItem>
+                              )}
 
-                              <SidebarMenuItem>
-                                <SidebarMenuButton asChild>
-                                  <Link to="/gestao-pessoas/solicitacao-servicos" onClick={onLinkClick}>
-                                    <FileText className="h-4 w-4" />
-                                    <span>Solicitação de Serviços</span>
-                                  </Link>
-                                </SidebarMenuButton>
-                              </SidebarMenuItem>
+                              {canSee('gestao_pessoas_solicitacoes_criar') && (
+                                <SidebarMenuItem>
+                                  <SidebarMenuButton asChild>
+                                    <Link to="/gestao-pessoas/solicitacao-servicos" onClick={onLinkClick}>
+                                      <FileText className="h-4 w-4" />
+                                      <span>Solicitação de Serviços</span>
+                                    </Link>
+                                  </SidebarMenuButton>
+                                </SidebarMenuItem>
+                              )}
 
-                              <SidebarMenuItem>
-                                <SidebarMenuButton asChild>
-                                  <Link to="/gestao-pessoas/controle-solicitacoes" onClick={onLinkClick}>
-                                    <CheckSquare className="h-4 w-4" />
-                                    <span>Controle Solicitações</span>
-                                  </Link>
-                                </SidebarMenuButton>
-                              </SidebarMenuItem>
+                              {canSee('gestao_pessoas_solicitacoes_visualizar') && (
+                                <SidebarMenuItem>
+                                  <SidebarMenuButton asChild>
+                                    <Link to="/gestao-pessoas/controle-solicitacoes" onClick={onLinkClick}>
+                                      <CheckSquare className="h-4 w-4" />
+                                      <span>Controle Solicitações</span>
+                                    </Link>
+                                  </SidebarMenuButton>
+                                </SidebarMenuItem>
+                              )}
 
-                              <SidebarMenuItem>
-                                <SidebarMenuButton asChild>
-                                  <Link to="/gestao-pessoas/aprovacao-solicitacoes" onClick={onLinkClick}>
-                                    <CheckCircle className="h-4 w-4" />
-                                    <span>Aprovação Solicitações</span>
-                                  </Link>
-                                </SidebarMenuButton>
-                              </SidebarMenuItem>
+                              {canSee('gestao_pessoas_solicitacoes_aprovar') && (
+                                <SidebarMenuItem>
+                                  <SidebarMenuButton asChild>
+                                    <Link to="/gestao-pessoas/aprovacao-solicitacoes" onClick={onLinkClick}>
+                                      <CheckCircle className="h-4 w-4" />
+                                      <span>Aprovação Solicitações</span>
+                                    </Link>
+                                  </SidebarMenuButton>
+                                </SidebarMenuItem>
+                              )}
 
-                              <SidebarMenuItem>
-                                <SidebarMenuButton asChild>
-                                  <Link to="/gestao-pessoas/relatorios-solicitacoes" onClick={onLinkClick}>
-                                    <FileText className="h-4 w-4" />
-                                    <span>Relatórios Solicitações</span>
-                                  </Link>
-                                </SidebarMenuButton>
-                              </SidebarMenuItem>
+                              {canSee('gestao_pessoas_solicitacoes_relatorios') && (
+                                <SidebarMenuItem>
+                                  <SidebarMenuButton asChild>
+                                    <Link to="/gestao-pessoas/relatorios-solicitacoes" onClick={onLinkClick}>
+                                      <FileText className="h-4 w-4" />
+                                      <span>Relatórios Solicitações</span>
+                                    </Link>
+                                  </SidebarMenuButton>
+                                </SidebarMenuItem>
+                              )}
                             </SidebarMenu>
                           </CollapsibleContent>
                         </SidebarMenuItem>
@@ -234,50 +244,60 @@ export default function SidebarSectionGestaoPessoas({
 
                           <CollapsibleContent>
                             <SidebarMenu className="ml-4 border-l border-sidebar-border">
-                              <SidebarMenuItem>
-                                <SidebarMenuButton asChild>
-                                  <Link to="/gestao-pessoas/gestao-viagens-dashboard" onClick={onLinkClick}>
-                                    <Plane className="h-4 w-4" />
-                                    <span>Dashboard Viagens</span>
-                                  </Link>
-                                </SidebarMenuButton>
-                              </SidebarMenuItem>
+                              {canSee('gestao_pessoas_viagens_dashboard') && (
+                                <SidebarMenuItem>
+                                  <SidebarMenuButton asChild>
+                                    <Link to="/gestao-pessoas/gestao-viagens-dashboard" onClick={onLinkClick}>
+                                      <Plane className="h-4 w-4" />
+                                      <span>Dashboard Viagens</span>
+                                    </Link>
+                                  </SidebarMenuButton>
+                                </SidebarMenuItem>
+                              )}
 
-                              <SidebarMenuItem>
-                                <SidebarMenuButton asChild>
-                                  <Link to="/gestao-pessoas/cadastro-fatura" onClick={onLinkClick}>
-                                    <FilePlus className="h-4 w-4" />
-                                    <span>Cadastro Fatura</span>
-                                  </Link>
-                                </SidebarMenuButton>
-                              </SidebarMenuItem>
+                              {canSee('gestao_pessoas_viagens_cadastrar_fatura') && (
+                                <SidebarMenuItem>
+                                  <SidebarMenuButton asChild>
+                                    <Link to="/gestao-pessoas/cadastro-fatura" onClick={onLinkClick}>
+                                      <FilePlus className="h-4 w-4" />
+                                      <span>Cadastro Fatura</span>
+                                    </Link>
+                                  </SidebarMenuButton>
+                                </SidebarMenuItem>
+                              )}
 
-                              <SidebarMenuItem>
-                                <SidebarMenuButton asChild>
-                                  <Link to="/gestao-pessoas/importar-fatura" onClick={onLinkClick}>
-                                    <FileUp className="h-4 w-4" />
-                                    <span>Importar Fatura</span>
-                                  </Link>
-                                </SidebarMenuButton>
-                              </SidebarMenuItem>
+                              {canSee('gestao_pessoas_viagens_importar_fatura') && (
+                                <SidebarMenuItem>
+                                  <SidebarMenuButton asChild>
+                                    <Link to="/gestao-pessoas/importar-fatura" onClick={onLinkClick}>
+                                      <FileUp className="h-4 w-4" />
+                                      <span>Importar Fatura</span>
+                                    </Link>
+                                  </SidebarMenuButton>
+                                </SidebarMenuItem>
+                              )}
 
-                              <SidebarMenuItem>
-                                <SidebarMenuButton asChild>
-                                  <Link to="/gestao-pessoas/consulta-faturas" onClick={onLinkClick}>
-                                    <Database className="h-4 w-4" />
-                                    <span>Consulta Faturas</span>
-                                  </Link>
-                                </SidebarMenuButton>
-                              </SidebarMenuItem>
+                              {canSee('gestao_pessoas_viagens_consultar_faturas') && (
+                                <SidebarMenuItem>
+                                  <SidebarMenuButton asChild>
+                                    <Link to="/gestao-pessoas/consulta-faturas" onClick={onLinkClick}>
+                                      <Database className="h-4 w-4" />
+                                      <span>Consulta Faturas</span>
+                                    </Link>
+                                  </SidebarMenuButton>
+                                </SidebarMenuItem>
+                              )}
 
-                              <SidebarMenuItem>
-                                <SidebarMenuButton asChild>
-                                  <Link to="/gestao-pessoas/relatorio-viagens" onClick={onLinkClick}>
-                                    <FileText className="h-4 w-4" />
-                                    <span>Relatório Viagens</span>
-                                  </Link>
-                                </SidebarMenuButton>
-                              </SidebarMenuItem>
+                              {canSee('gestao_pessoas_viagens_relatorios') && (
+                                <SidebarMenuItem>
+                                  <SidebarMenuButton asChild>
+                                    <Link to="/gestao-pessoas/relatorio-viagens" onClick={onLinkClick}>
+                                      <FileText className="h-4 w-4" />
+                                      <span>Relatório Viagens</span>
+                                    </Link>
+                                  </SidebarMenuButton>
+                                </SidebarMenuItem>
+                              )}
                             </SidebarMenu>
                           </CollapsibleContent>
                         </SidebarMenuItem>
@@ -298,77 +318,93 @@ export default function SidebarSectionGestaoPessoas({
 
                           <CollapsibleContent>
                             <SidebarMenu className="ml-4 border-l border-sidebar-border">
-                              <SidebarMenuItem>
-                                <SidebarMenuButton asChild>
-                                  <Link to="/gestao-pessoas/dashboard-veiculos" onClick={onLinkClick}>
-                                    <Car className="h-4 w-4" />
-                                    <span>Dashboard Veículos</span>
-                                  </Link>
-                                </SidebarMenuButton>
-                              </SidebarMenuItem>
+                              {canSee('gestao_pessoas_veiculos_dashboard') && (
+                                <SidebarMenuItem>
+                                  <SidebarMenuButton asChild>
+                                    <Link to="/gestao-pessoas/dashboard-veiculos" onClick={onLinkClick}>
+                                      <Car className="h-4 w-4" />
+                                      <span>Dashboard Veículos</span>
+                                    </Link>
+                                  </SidebarMenuButton>
+                                </SidebarMenuItem>
+                              )}
 
-                              <SidebarMenuItem>
-                                <SidebarMenuButton asChild>
-                                  <Link to="/gestao-pessoas/consultas-veiculos" onClick={onLinkClick}>
-                                    <Database className="h-4 w-4" />
-                                    <span>Consultas Veículos</span>
-                                  </Link>
-                                </SidebarMenuButton>
-                              </SidebarMenuItem>
+                              {canSee('gestao_pessoas_veiculos_consultas') && (
+                                <SidebarMenuItem>
+                                  <SidebarMenuButton asChild>
+                                    <Link to="/gestao-pessoas/consultas-veiculos" onClick={onLinkClick}>
+                                      <Database className="h-4 w-4" />
+                                      <span>Consultas Veículos</span>
+                                    </Link>
+                                  </SidebarMenuButton>
+                                </SidebarMenuItem>
+                              )}
 
-                              <SidebarMenuItem>
-                                <SidebarMenuButton asChild>
-                                  <Link to="/gestao-pessoas/cadastro-veiculo" onClick={onLinkClick}>
-                                    <FilePlus className="h-4 w-4" />
-                                    <span>Cadastro Veículo</span>
-                                  </Link>
-                                </SidebarMenuButton>
-                              </SidebarMenuItem>
+                              {canSee('gestao_pessoas_veiculos_cadastrar') && (
+                                <SidebarMenuItem>
+                                  <SidebarMenuButton asChild>
+                                    <Link to="/gestao-pessoas/cadastro-veiculo" onClick={onLinkClick}>
+                                      <FilePlus className="h-4 w-4" />
+                                      <span>Cadastro Veículo</span>
+                                    </Link>
+                                  </SidebarMenuButton>
+                                </SidebarMenuItem>
+                              )}
 
-                              <SidebarMenuItem>
-                                <SidebarMenuButton asChild>
-                                  <Link to="/gestao-pessoas/cadastro-multa" onClick={onLinkClick}>
-                                    <Receipt className="h-4 w-4" />
-                                    <span>Cadastro Multa</span>
-                                  </Link>
-                                </SidebarMenuButton>
-                              </SidebarMenuItem>
+                              {canSee('gestao_pessoas_veiculos_multas_cadastrar') && (
+                                <SidebarMenuItem>
+                                  <SidebarMenuButton asChild>
+                                    <Link to="/gestao-pessoas/cadastro-multa" onClick={onLinkClick}>
+                                      <Receipt className="h-4 w-4" />
+                                      <span>Cadastro Multa</span>
+                                    </Link>
+                                  </SidebarMenuButton>
+                                </SidebarMenuItem>
+                              )}
 
-                              <SidebarMenuItem>
-                                <SidebarMenuButton asChild>
-                                  <Link to="/gestao-pessoas/cadastro-condutor" onClick={onLinkClick}>
-                                    <User className="h-4 w-4" />
-                                    <span>Cadastro Condutor</span>
-                                  </Link>
-                                </SidebarMenuButton>
-                              </SidebarMenuItem>
+                              {canSee('gestao_pessoas_veiculos_condutores_cadastrar') && (
+                                <SidebarMenuItem>
+                                  <SidebarMenuButton asChild>
+                                    <Link to="/gestao-pessoas/cadastro-condutor" onClick={onLinkClick}>
+                                      <User className="h-4 w-4" />
+                                      <span>Cadastro Condutor</span>
+                                    </Link>
+                                  </SidebarMenuButton>
+                                </SidebarMenuItem>
+                              )}
 
-                              <SidebarMenuItem>
-                                <SidebarMenuButton asChild>
-                                  <Link to="/gestao-pessoas/cadastro-cartao" onClick={onLinkClick}>
-                                    <CreditCard className="h-4 w-4" />
-                                    <span>Cadastro Cartão</span>
-                                  </Link>
-                                </SidebarMenuButton>
-                              </SidebarMenuItem>
+                              {canSee('gestao_pessoas_veiculos_cartoes_cadastrar') && (
+                                <SidebarMenuItem>
+                                  <SidebarMenuButton asChild>
+                                    <Link to="/gestao-pessoas/cadastro-cartao" onClick={onLinkClick}>
+                                      <CreditCard className="h-4 w-4" />
+                                      <span>Cadastro Cartão</span>
+                                    </Link>
+                                  </SidebarMenuButton>
+                                </SidebarMenuItem>
+                              )}
 
-                              <SidebarMenuItem>
-                                <SidebarMenuButton asChild>
-                                  <Link to="/gestao-pessoas/cadastro-pedagio" onClick={onLinkClick}>
-                                    <Ticket className="h-4 w-4" />
-                                    <span>Cadastro Pedágio</span>
-                                  </Link>
-                                </SidebarMenuButton>
-                              </SidebarMenuItem>
+                              {canSee('gestao_pessoas_veiculos_pedagios_cadastrar') && (
+                                <SidebarMenuItem>
+                                  <SidebarMenuButton asChild>
+                                    <Link to="/gestao-pessoas/cadastro-pedagio" onClick={onLinkClick}>
+                                      <Ticket className="h-4 w-4" />
+                                      <span>Cadastro Pedágio</span>
+                                    </Link>
+                                  </SidebarMenuButton>
+                                </SidebarMenuItem>
+                              )}
 
-                              <SidebarMenuItem>
-                                <SidebarMenuButton asChild>
-                                  <Link to="/gestao-pessoas/checklist-veiculos" onClick={onLinkClick}>
-                                    <CheckSquare className="h-4 w-4" />
-                                    <span>Checklist Veículos</span>
-                                  </Link>
-                                </SidebarMenuButton>
-                              </SidebarMenuItem>
+                              {canSee('gestao_pessoas_veiculos_checklists_criar') && (
+                                <SidebarMenuItem>
+                                  <SidebarMenuButton asChild>
+                                    <Link to="/gestao-pessoas/checklist-veiculos" onClick={onLinkClick}>
+                                      <CheckSquare className="h-4 w-4" />
+                                      <span>Checklist Veículos</span>
+                                    </Link>
+                                  </SidebarMenuButton>
+                                </SidebarMenuItem>
+                              )}
 
                               <SidebarMenuItem>
                                 <SidebarMenuButton asChild>
@@ -379,23 +415,27 @@ export default function SidebarSectionGestaoPessoas({
                                 </SidebarMenuButton>
                               </SidebarMenuItem>
 
-                              <SidebarMenuItem>
-                                <SidebarMenuButton asChild>
-                                  <Link to="/gestao-pessoas/controle-abastecimento" onClick={onLinkClick}>
-                                    <BarChart3 className="h-4 w-4" />
-                                    <span>Controle Abastecimento</span>
-                                  </Link>
-                                </SidebarMenuButton>
-                              </SidebarMenuItem>
+                              {canSee('gestao_pessoas_veiculos_abastecimento_gerenciar') && (
+                                <SidebarMenuItem>
+                                  <SidebarMenuButton asChild>
+                                    <Link to="/gestao-pessoas/controle-abastecimento" onClick={onLinkClick}>
+                                      <BarChart3 className="h-4 w-4" />
+                                      <span>Controle Abastecimento</span>
+                                    </Link>
+                                  </SidebarMenuButton>
+                                </SidebarMenuItem>
+                              )}
 
-                              <SidebarMenuItem>
-                                <SidebarMenuButton asChild>
-                                  <Link to="/gestao-pessoas/relatorios-veiculos" onClick={onLinkClick}>
-                                    <FileText className="h-4 w-4" />
-                                    <span>Relatórios Veículos</span>
-                                  </Link>
-                                </SidebarMenuButton>
-                              </SidebarMenuItem>
+                              {canSee('gestao_pessoas_veiculos_relatorios') && (
+                                <SidebarMenuItem>
+                                  <SidebarMenuButton asChild>
+                                    <Link to="/gestao-pessoas/relatorios-veiculos" onClick={onLinkClick}>
+                                      <FileText className="h-4 w-4" />
+                                      <span>Relatórios Veículos</span>
+                                    </Link>
+                                  </SidebarMenuButton>
+                                </SidebarMenuItem>
+                              )}
                             </SidebarMenu>
                           </CollapsibleContent>
                         </SidebarMenuItem>

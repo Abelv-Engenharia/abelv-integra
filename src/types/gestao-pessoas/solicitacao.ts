@@ -185,3 +185,39 @@ export interface CategoryInfo {
   icon: any;
   subcategories?: string[];
 }
+
+// Constantes exportadas (movidas do mock)
+import { Car, Plane, Building, Package } from "lucide-react";
+
+export const categoriesInfo: CategoryInfo[] = [
+  {
+    id: TipoServico.VOUCHER_UBER,
+    title: "Transporte",
+    description: "Vouchers, locação de veículos, cartão de abastecimento",
+    icon: Car,
+    subcategories: ["Voucher Uber", "Locação Veículo", "Cartão Abastecimento"]
+  },
+  {
+    id: TipoServico.PASSAGENS,
+    title: "Passagens",
+    description: "Passagens aéreas e rodoviárias para viagens",
+    icon: Plane,
+    subcategories: ["Aérea", "Rodoviária"]
+  },
+  {
+    id: TipoServico.HOSPEDAGEM,
+    title: "Hospedagem",
+    description: "Reservas de hotéis e estadias para funcionários",
+    icon: Building,
+    subcategories: ["Hotéis", "Pousadas", "Apart-hotéis"]
+  },
+  {
+    id: TipoServico.LOGISTICA,
+    title: "Logística",
+    description: "Envio/recebimento de objetos e serviços de correio",
+    icon: Package,
+    subcategories: ["Envio/Recebimento", "Correios", "Loggi"]
+  }
+];
+
+export const responsavelAtendimento = "Aline Cerqueira de Oliveira";

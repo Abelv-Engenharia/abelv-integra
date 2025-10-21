@@ -1,17 +1,18 @@
 import { useState } from "react";
 import { RelatoriosTab } from "@/components/gestao-pessoas/veiculos/relatorios/RelatoriosTab";
-import { 
-  veiculosData, 
-  multasDataInitial, 
-  condutoresData, 
-  cartoesData, 
-  semPararData 
-} from "@/data/gestao-pessoas/mockVeiculosData";
 import ChecklistDataService from "@/services/gestao-pessoas/ChecklistDataService";
 
 export default function RelatoriosVeiculos() {
+  // TODO: Implementar queries reais do banco de dados
   const [historicoCalculos] = useState([]);
   const checklistsData = ChecklistDataService.obterTodos();
+  
+  // Dados temporários vazios até implementação das queries reais
+  const veiculosData: any[] = [];
+  const multasDataInitial: any[] = [];
+  const condutoresData: any[] = [];
+  const cartoesData: any[] = [];
+  const semPararData: any[] = [];
 
   return (
     <div className="container mx-auto p-6">

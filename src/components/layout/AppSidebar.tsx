@@ -312,11 +312,38 @@ export function AppSidebar() {
         )}
 
         {/* Seção: Gestão de Pessoas */}
-        <SidebarSectionGestaoPessoas
-          openMenu={openMenu}
-          toggleMenu={toggleMenu}
-          onLinkClick={handleLinkClick}
-        />
+        {[
+          // Solicitações
+          "gestao_pessoas_solicitacoes_dashboard",
+          "gestao_pessoas_solicitacoes_criar",
+          "gestao_pessoas_solicitacoes_visualizar",
+          "gestao_pessoas_solicitacoes_aprovar",
+          "gestao_pessoas_solicitacoes_relatorios",
+          // Viagens
+          "gestao_pessoas_viagens_dashboard",
+          "gestao_pessoas_viagens_cadastrar_fatura",
+          "gestao_pessoas_viagens_importar_fatura",
+          "gestao_pessoas_viagens_consultar_faturas",
+          "gestao_pessoas_viagens_relatorios",
+          // Veículos
+          "gestao_pessoas_veiculos_dashboard",
+          "gestao_pessoas_veiculos_cadastrar",
+          "gestao_pessoas_veiculos_consultas",
+          "gestao_pessoas_veiculos_multas_cadastrar",
+          "gestao_pessoas_veiculos_condutores_cadastrar",
+          "gestao_pessoas_veiculos_cartoes_cadastrar",
+          "gestao_pessoas_veiculos_pedagios_cadastrar",
+          "gestao_pessoas_veiculos_checklists_criar",
+          "gestao_pessoas_veiculos_abastecimento_gerenciar",
+          "gestao_pessoas_veiculos_relatorios"
+        ].some(canSee) && (
+          <SidebarSectionGestaoPessoas
+            openMenu={openMenu}
+            toggleMenu={toggleMenu}
+            onLinkClick={handleLinkClick}
+            canSee={canSee}
+          />
+        )}
       </SidebarContent>
     </Sidebar>
   );

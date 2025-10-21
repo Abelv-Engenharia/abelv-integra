@@ -9,8 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ServiceSpecificFields } from "./ServiceSpecificFields";
 import { TransportSubcategorySelector, TransportSubcategory } from "./TransportSubcategorySelector";
-import { TipoServico, PrioridadeSolicitacao, StatusSolicitacao } from "@/types/gestao-pessoas/solicitacao";
-import { categoriesInfo } from "@/data/gestao-pessoas/mockSolicitacoes";
+import { TipoServico, PrioridadeSolicitacao, StatusSolicitacao, categoriesInfo } from "@/types/gestao-pessoas/solicitacao";
 import { Plane, Car, Building, Package } from "lucide-react";
 import { useUserCCAs } from "@/hooks/useUserCCAs";
 

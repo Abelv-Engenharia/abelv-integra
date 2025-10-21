@@ -41,16 +41,17 @@ export default function DashboardVeiculos() {
   const [periodo, setPeriodo] = useState<"mensal" | "trimestral" | "anual">("mensal");
 
   useEffect(() => {
-    // Carregar dados do localStorage
-    const veiculosData = JSON.parse(localStorage.getItem("veiculos") || "[]");
-    const multasData = JSON.parse(localStorage.getItem("multas") || "[]");
-    const condutoresData = JSON.parse(localStorage.getItem("condutores") || "[]");
-    const fuelDataStorage = JSON.parse(localStorage.getItem("fuelData") || "[]");
-
-    setVeiculos(veiculosData);
-    setMultas(multasData);
-    setCondutores(condutoresData);
-    setFuelData(fuelDataStorage);
+    // TODO: Implementar queries reais do banco de dados
+    // const { data: veiculosData } = useQuery(['veiculos'], fetchVeiculos);
+    // const { data: multasData } = useQuery(['multas'], fetchMultas);
+    // const { data: condutoresData } = useQuery(['condutores'], fetchCondutores);
+    // const { data: fuelDataStorage } = useQuery(['abastecimentos'], fetchAbastecimentos);
+    
+    // Dados vazios temporários
+    setVeiculos([]);
+    setMultas([]);
+    setCondutores([]);
+    setFuelData([]);
   }, []);
 
   // Calcular KPIs
