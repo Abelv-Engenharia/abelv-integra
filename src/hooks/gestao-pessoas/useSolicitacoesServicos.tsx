@@ -15,12 +15,20 @@ export function useSolicitacoesServicos() {
     queryKey: ["solicitacoes_servicos"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("v_solicitacoes_completas")
-        .select("*")
+        .from("solicitacoes_servicos")
+        .select(`
+          *,
+          dados:solicitacoes_dados_especificos(dados)
+        `)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      return data as any[];
+      
+      // Processar dados para extrair o JSONB
+      return (data || []).map((row: any) => ({
+        ...row,
+        dados: row.dados?.[0]?.dados || null
+      }));
     },
   });
 
