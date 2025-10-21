@@ -4,8 +4,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { StatusVaga, PrioridadeVaga } from "@/types/gestao-pessoas/vaga";
-import { mockAreas, mockSetores, mockGestores } from "@/data/gestao-pessoas/mockVagas";
 import { Filter, X } from "lucide-react";
+
+// Dados temporários até integração completa
+const mockAreas = ["Engenharia", "Segurança", "Administrativo", "RH"];
+const mockSetores = ["Obras", "Escritório", "Manutenção"];
+const mockGestores = [{ id: "1", nome: "Gestor 1" }, { id: "2", nome: "Gestor 2" }];
 
 export interface FiltrosState {
   busca: string;

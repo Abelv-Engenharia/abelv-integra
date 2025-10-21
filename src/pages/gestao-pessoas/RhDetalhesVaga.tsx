@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 import { StatusBadge } from "@/components/gestao-pessoas/recrutamento/StatusBadge";
 import { TimelineComponent } from "@/components/gestao-pessoas/recrutamento/TimelineComponent";
-import { mockVagas } from "@/data/gestao-pessoas/mockVagas";
+import { useVagaById } from "@/hooks/gestao-pessoas/useVagas";
 import { MotivoAbertura, TipoContrato } from "@/types/gestao-pessoas/vaga";
 import { toast } from "sonner";
 
@@ -27,9 +27,17 @@ export default function RhDetalhesVaga() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'detalhes' | 'candidatos'>('detalhes');
-  
-  // Buscar vaga pelos dados mock
-  const vaga = mockVagas.find(v => v.id === id);
+  const { data: vaga, isLoading } = useVagaById(id || "");
+
+  if (isLoading) {
+    return (
+      <div className="container mx-auto p-6">
+        <div className="text-center py-12">
+          <p className="text-muted-foreground">Carregando...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!vaga) {
     return (

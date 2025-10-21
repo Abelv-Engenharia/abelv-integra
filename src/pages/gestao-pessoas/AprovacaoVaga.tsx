@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, CheckCircle, XCircle, Clock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { mockVagas } from "@/data/gestao-pessoas/mockVagas";
+import { useVagas, useUpdateVaga } from "@/hooks/gestao-pessoas/useVagas";
 import { Vaga, StatusAprovacao } from "@/types/gestao-pessoas/vaga";
 import { VagaAprovacaoKanbanColumn } from "@/components/gestao-pessoas/recrutamento/VagaAprovacaoKanbanColumn";
 import { toast } from "sonner";
@@ -15,7 +15,8 @@ import { format } from "date-fns";
 
 export default function AprovacaoVaga() {
   const navigate = useNavigate();
-  const [vagas, setVagas] = useState<Vaga[]>(mockVagas);
+  const { data: vagas = [], isLoading } = useVagas();
+  const updateVaga = useUpdateVaga();
   const [vagaSelecionada, setVagaSelecionada] = useState<Vaga | null>(null);
   const [modalAcao, setModalAcao] = useState<"aprovar" | "reprovar" | "detalhes" | null>(null);
   const [justificativa, setJustificativa] = useState("");
@@ -45,11 +46,10 @@ export default function AprovacaoVaga() {
   const handleConfirmarAprovacao = () => {
     if (!vagaSelecionada) return;
 
-    setVagas(vagas.map(v => 
-      v.id === vagaSelecionada.id 
-        ? { ...v, statusAprovacao: StatusAprovacao.APROVADO } 
-        : v
-    ));
+    updateVaga.mutate({ 
+      id: vagaSelecionada.id, 
+      vaga: { statusAprovacao: StatusAprovacao.APROVADO } 
+    });
 
     toast.success("Vaga aprovada com sucesso!");
     setModalAcao(null);
@@ -65,11 +65,13 @@ export default function AprovacaoVaga() {
       return;
     }
 
-    setVagas(vagas.map(v => 
-      v.id === vagaSelecionada.id 
-        ? { ...v, statusAprovacao: StatusAprovacao.REPROVADO } 
-        : v
-    ));
+    updateVaga.mutate({ 
+      id: vagaSelecionada.id, 
+      vaga: { 
+        statusAprovacao: StatusAprovacao.REPROVADO,
+        observacoes: justificativa
+      } 
+    });
 
     toast.success("Vaga reprovada");
     setModalAcao(null);

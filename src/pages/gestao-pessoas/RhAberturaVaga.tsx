@@ -12,9 +12,13 @@ import { ArrowLeft, Send, FileText, User, Building, Clock, UserCheck } from "luc
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { MotivoAbertura, TipoContrato, StatusAprovacao } from "@/types/gestao-pessoas/vaga";
-import { mockCargos, mockAreas, mockSetores } from "@/data/gestao-pessoas/mockVagas";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+
+// Dados temporários
+const mockCargos = ["Engenheiro", "Técnico", "Auxiliar"];
+const mockAreas = ["Engenharia", "Segurança", "Administrativo"];
+const mockSetores = ["Obras", "Escritório", "Manutenção"];
 interface FormData {
   // Bloco 1 - Identificação
   cargo: string;

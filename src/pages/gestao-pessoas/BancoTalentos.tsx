@@ -227,7 +227,7 @@ const BancoTalentos = () => {
       <NovoCandidatoModal
         open={modalNovo}
         onOpenChange={setModalNovo}
-        onSubmit={handleNovoCandidato}
+        onSubmit={() => setModalNovo(false)}
       />
 
       <DetalhesCandidatoModal
@@ -241,7 +241,7 @@ const BancoTalentos = () => {
         open={modalEditar}
         onOpenChange={setModalEditar}
         candidato={candidatoSelecionado}
-        onSubmit={handleEditarCandidato}
+        onSubmit={() => setModalEditar(false)}
       />
     </div>
   );
