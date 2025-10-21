@@ -211,7 +211,7 @@ export default function SidebarSectionGestaoSMS({
             <SidebarMenuButton onClick={() => toggleMenu("gestao-sms")} className="text-white hover:bg-slate-600">
               <ShieldAlert className="h-4 w-4 flex-shrink-0" />
               <span className="break-words">SMS</span>
-              <ChevronDown className={`h-4 w-4 ml-auto transition-transform duration-200 ${openSubMenus["gestao-sms"] ? 'rotate-180' : ''}`} />
+              <ChevronDown className={`h-4 w-4 ml-auto transition-transform duration-200 ${isGestaoSMSOpen ? 'rotate-180' : ''}`} />
             </SidebarMenuButton>
           </CollapsibleTrigger>
 
