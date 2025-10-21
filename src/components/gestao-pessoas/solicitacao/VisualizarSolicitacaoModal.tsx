@@ -81,16 +81,23 @@ const getCcaSolicitacao = (solicitacao: SolicitacaoServico, ccas: any[]): string
   // Primeiro tenta pelo ccaId
   if ((solicitacao as any).ccaId) {
     const cca = ccas.find(c => c.id === (solicitacao as any).ccaId);
-    if (cca) return cca.nome;
+    if (cca) return `${cca.codigo} - ${cca.nome}`;
   }
   
-  // Se não encontrar pelo ID, tenta pelo código em centroCusto
-  const codigoCca = solicitacao.centroCusto || '';
-  const cca = ccas.find(c => c.codigo === codigoCca);
-  if (cca) return cca.nome;
+  // Se não encontrar pelo ccaId, tenta buscar por id usando centroCusto
+  const centroCusto = solicitacao.centroCusto || '';
+  if (centroCusto) {
+    // Tenta buscar por ID (valor numérico)
+    const ccaById = ccas.find(c => c.id === parseInt(centroCusto));
+    if (ccaById) return `${ccaById.codigo} - ${ccaById.nome}`;
+    
+    // Tenta buscar por código (valor string)
+    const ccaByCodigo = ccas.find(c => c.codigo === centroCusto);
+    if (ccaByCodigo) return `${ccaByCodigo.codigo} - ${ccaByCodigo.nome}`;
+  }
   
-  // Se não encontrar, retorna o código mesmo
-  return codigoCca;
+  // Se não encontrar, retorna o valor original de centroCusto
+  return centroCusto;
 };
 
 export function VisualizarSolicitacaoModal({
