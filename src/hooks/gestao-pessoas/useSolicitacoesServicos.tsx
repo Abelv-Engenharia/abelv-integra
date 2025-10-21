@@ -83,22 +83,40 @@ export function useSolicitacoesServicos() {
       toast.success("Solicitação criada com sucesso!");
       
       // Enviar notificação
+      if (!solicitacao.responsavel_aprovacao_id) {
+        console.warn('⚠️ Solicitação criada sem responsável de aprovação. Notificação não será enviada.');
+        return;
+      }
+      
       try {
-        await supabase.functions.invoke('enviar-notificacao-solicitacao', {
-          body: {
-            evento: 'solicitacao_criada',
-            solicitacao: {
-              id: solicitacao.id,
-              numeroSolicitacao: solicitacao.numero_solicitacao,
-              solicitanteId: solicitacao.solicitante_id,
-              solicitanteNome: solicitacao.solicitante_nome,
-              tipoServico: solicitacao.tipo_servico,
-              responsavelAprovacaoId: solicitacao.responsavel_aprovacao_id
+        console.log('📤 Enviando notificação para solicitação:', solicitacao.id);
+        
+        const { data: notifData, error: notifError } = await supabase.functions.invoke(
+          'enviar-notificacao-solicitacao',
+          {
+            body: {
+              evento: 'solicitacao_criada',
+              solicitacao: {
+                id: solicitacao.id,
+                numeroSolicitacao: solicitacao.numero_solicitacao,
+                solicitanteId: solicitacao.solicitante_id,
+                solicitanteNome: solicitacao.solicitante_nome,
+                tipoServico: solicitacao.tipo_servico,
+                responsavelAprovacaoId: solicitacao.responsavel_aprovacao_id
+              }
             }
           }
-        });
+        );
+        
+        if (notifError) {
+          console.error('❌ Erro ao invocar edge function:', notifError);
+          toast.error('Solicitação criada, mas falha ao enviar notificação');
+        } else {
+          console.log('✅ Notificação enviada com sucesso:', notifData);
+        }
       } catch (error) {
-        console.error("Erro ao enviar notificação:", error);
+        console.error('❌ Erro ao enviar notificação:', error);
+        toast.error('Solicitação criada, mas falha ao enviar notificação');
       }
     },
     onError: (error) => {

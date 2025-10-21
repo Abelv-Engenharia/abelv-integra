@@ -34,6 +34,8 @@ Deno.serve(async (req) => {
 
     const payload: NotificationPayload = await req.json();
     console.log('📩 Evento recebido:', payload.evento, 'para solicitação:', payload.solicitacao.numeroSolicitacao);
+    console.log('📋 Payload completo:', JSON.stringify(payload, null, 2));
+    console.log('👤 Responsável aprovação ID:', payload.solicitacao.responsavelAprovacaoId);
 
     const { evento, solicitacao } = payload;
     const notificacoes: Array<{
@@ -47,15 +49,25 @@ Deno.serve(async (req) => {
     // Determinar destinatários e mensagens
     switch (evento) {
       case 'solicitacao_criada':
-        if (solicitacao.responsavelAprovacaoId) {
-          notificacoes.push({
-            usuario_id: solicitacao.responsavelAprovacaoId,
-            titulo: 'Nova solicitação aguardando aprovação',
-            mensagem: `${solicitacao.solicitanteNome} criou a solicitação #${solicitacao.numeroSolicitacao} (${solicitacao.tipoServico})`,
-            tipo: 'solicitacao',
-            solicitacao_id: solicitacao.id,
-          });
+        if (!solicitacao.responsavelAprovacaoId) {
+          console.warn('⚠️ Solicitação sem responsável de aprovação definido');
+          return new Response(
+            JSON.stringify({ 
+              success: true, 
+              count: 0, 
+              message: 'Nenhuma notificação criada - sem responsável de aprovação' 
+            }),
+            { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
         }
+        
+        notificacoes.push({
+          usuario_id: solicitacao.responsavelAprovacaoId,
+          titulo: 'Nova solicitação aguardando aprovação',
+          mensagem: `${solicitacao.solicitanteNome} criou a solicitação #${solicitacao.numeroSolicitacao} (${solicitacao.tipoServico})`,
+          tipo: 'solicitacao',
+          solicitacao_id: solicitacao.id,
+        });
         break;
 
       case 'solicitacao_aprovada':
@@ -97,6 +109,7 @@ Deno.serve(async (req) => {
 
     // Inserir notificações no banco
     if (notificacoes.length > 0) {
+      console.log('📝 Notificações a serem inseridas:', JSON.stringify(notificacoes, null, 2));
       const { error } = await supabase.from('notificacoes').insert(notificacoes);
 
       if (error) {
