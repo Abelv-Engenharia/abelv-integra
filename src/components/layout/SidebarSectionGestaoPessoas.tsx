@@ -123,6 +123,30 @@ export default function SidebarSectionGestaoPessoas({
     }));
   };
 
+  // Verificar se usuário tem pelo menos uma permissão de Viagens
+  const hasAnyViagensPermission = () => {
+    return canSee('gestao_pessoas_viagens_dashboard') ||
+           canSee('gestao_pessoas_viagens_cadastrar_fatura') ||
+           canSee('gestao_pessoas_viagens_importar_fatura') ||
+           canSee('gestao_pessoas_viagens_consultar_faturas') ||
+           canSee('gestao_pessoas_viagens_relatorios');
+  };
+
+  // Verificar se usuário tem pelo menos uma permissão de Veículos
+  const hasAnyVeiculosPermission = () => {
+    return canSee('gestao_pessoas_veiculos_dashboard') ||
+           canSee('gestao_pessoas_veiculos_consultas') ||
+           canSee('gestao_pessoas_veiculos_cadastrar') ||
+           canSee('gestao_pessoas_veiculos_multas_cadastrar') ||
+           canSee('gestao_pessoas_veiculos_condutores_cadastrar') ||
+           canSee('gestao_pessoas_veiculos_cartoes_cadastrar') ||
+           canSee('gestao_pessoas_veiculos_pedagios_cadastrar') ||
+           canSee('gestao_pessoas_veiculos_checklists_criar') ||
+           canSee('gestao_pessoas_veiculos_calculo_rotas') ||
+           canSee('gestao_pessoas_veiculos_abastecimento_gerenciar') ||
+           canSee('gestao_pessoas_veiculos_relatorios');
+  };
+
   return (
     <Collapsible open={isOpen} onOpenChange={() => toggleMenu("gestao-pessoas")}>
       <SidebarMenu>
@@ -228,217 +252,223 @@ export default function SidebarSectionGestaoPessoas({
                         </SidebarMenuItem>
                       </Collapsible>
 
-                      {/* Gestão de Viagens */}
-                      <Collapsible open={openSubmenus.viagens} onOpenChange={() => toggleSubmenu("viagens")}>
-                        <SidebarMenuItem>
-                          <CollapsibleTrigger asChild>
-                            <SidebarMenuButton className="w-full justify-between hover:bg-sidebar-accent">
-                              <div className="flex items-center gap-2 min-w-0">
-                                <Plane className="h-4 w-4 flex-shrink-0" />
-                                <span className="truncate">Viagens</span>
-                              </div>
-                              <ChevronDown className={`h-4 w-4 flex-shrink-0 transition-transform duration-200 ${openSubmenus.viagens ? 'rotate-180' : ''}`} />
-                            </SidebarMenuButton>
-                          </CollapsibleTrigger>
+                      {/* Gestão de Viagens - só mostra se tiver pelo menos uma permissão */}
+                      {hasAnyViagensPermission() && (
+                        <Collapsible open={openSubmenus.viagens} onOpenChange={() => toggleSubmenu("viagens")}>
+                          <SidebarMenuItem>
+                            <CollapsibleTrigger asChild>
+                              <SidebarMenuButton className="w-full justify-between hover:bg-sidebar-accent">
+                                <div className="flex items-center gap-2 min-w-0">
+                                  <Plane className="h-4 w-4 flex-shrink-0" />
+                                  <span className="truncate">Viagens</span>
+                                </div>
+                                <ChevronDown className={`h-4 w-4 flex-shrink-0 transition-transform duration-200 ${openSubmenus.viagens ? 'rotate-180' : ''}`} />
+                              </SidebarMenuButton>
+                            </CollapsibleTrigger>
 
-                          <CollapsibleContent>
-                            <SidebarMenu className="ml-4 border-l border-sidebar-border">
-                              {canSee('gestao_pessoas_viagens_dashboard') && (
-                                <SidebarMenuItem>
-                                  <SidebarMenuButton asChild>
-                                    <Link to="/gestao-pessoas/gestao-viagens-dashboard" onClick={onLinkClick}>
-                                      <Plane className="h-4 w-4" />
-                                      <span>Dashboard Viagens</span>
-                                    </Link>
-                                  </SidebarMenuButton>
-                                </SidebarMenuItem>
-                              )}
+                            <CollapsibleContent>
+                              <SidebarMenu className="ml-4 border-l border-sidebar-border">
+                                {canSee('gestao_pessoas_viagens_dashboard') && (
+                                  <SidebarMenuItem>
+                                    <SidebarMenuButton asChild>
+                                      <Link to="/gestao-pessoas/gestao-viagens-dashboard" onClick={onLinkClick}>
+                                        <Plane className="h-4 w-4" />
+                                        <span>Dashboard Viagens</span>
+                                      </Link>
+                                    </SidebarMenuButton>
+                                  </SidebarMenuItem>
+                                )}
 
-                              {canSee('gestao_pessoas_viagens_cadastrar_fatura') && (
-                                <SidebarMenuItem>
-                                  <SidebarMenuButton asChild>
-                                    <Link to="/gestao-pessoas/cadastro-fatura" onClick={onLinkClick}>
-                                      <FilePlus className="h-4 w-4" />
-                                      <span>Cadastro Fatura</span>
-                                    </Link>
-                                  </SidebarMenuButton>
-                                </SidebarMenuItem>
-                              )}
+                                {canSee('gestao_pessoas_viagens_cadastrar_fatura') && (
+                                  <SidebarMenuItem>
+                                    <SidebarMenuButton asChild>
+                                      <Link to="/gestao-pessoas/cadastro-fatura" onClick={onLinkClick}>
+                                        <FilePlus className="h-4 w-4" />
+                                        <span>Cadastro Fatura</span>
+                                      </Link>
+                                    </SidebarMenuButton>
+                                  </SidebarMenuItem>
+                                )}
 
-                              {canSee('gestao_pessoas_viagens_importar_fatura') && (
-                                <SidebarMenuItem>
-                                  <SidebarMenuButton asChild>
-                                    <Link to="/gestao-pessoas/importar-fatura" onClick={onLinkClick}>
-                                      <FileUp className="h-4 w-4" />
-                                      <span>Importar Fatura</span>
-                                    </Link>
-                                  </SidebarMenuButton>
-                                </SidebarMenuItem>
-                              )}
+                                {canSee('gestao_pessoas_viagens_importar_fatura') && (
+                                  <SidebarMenuItem>
+                                    <SidebarMenuButton asChild>
+                                      <Link to="/gestao-pessoas/importar-fatura" onClick={onLinkClick}>
+                                        <FileUp className="h-4 w-4" />
+                                        <span>Importar Fatura</span>
+                                      </Link>
+                                    </SidebarMenuButton>
+                                  </SidebarMenuItem>
+                                )}
 
-                              {canSee('gestao_pessoas_viagens_consultar_faturas') && (
-                                <SidebarMenuItem>
-                                  <SidebarMenuButton asChild>
-                                    <Link to="/gestao-pessoas/consulta-faturas" onClick={onLinkClick}>
-                                      <Database className="h-4 w-4" />
-                                      <span>Consulta Faturas</span>
-                                    </Link>
-                                  </SidebarMenuButton>
-                                </SidebarMenuItem>
-                              )}
+                                {canSee('gestao_pessoas_viagens_consultar_faturas') && (
+                                  <SidebarMenuItem>
+                                    <SidebarMenuButton asChild>
+                                      <Link to="/gestao-pessoas/consulta-faturas" onClick={onLinkClick}>
+                                        <Database className="h-4 w-4" />
+                                        <span>Consulta Faturas</span>
+                                      </Link>
+                                    </SidebarMenuButton>
+                                  </SidebarMenuItem>
+                                )}
 
-                              {canSee('gestao_pessoas_viagens_relatorios') && (
-                                <SidebarMenuItem>
-                                  <SidebarMenuButton asChild>
-                                    <Link to="/gestao-pessoas/relatorio-viagens" onClick={onLinkClick}>
-                                      <FileText className="h-4 w-4" />
-                                      <span>Relatório Viagens</span>
-                                    </Link>
-                                  </SidebarMenuButton>
-                                </SidebarMenuItem>
-                              )}
-                            </SidebarMenu>
-                          </CollapsibleContent>
-                        </SidebarMenuItem>
-                      </Collapsible>
+                                {canSee('gestao_pessoas_viagens_relatorios') && (
+                                  <SidebarMenuItem>
+                                    <SidebarMenuButton asChild>
+                                      <Link to="/gestao-pessoas/relatorio-viagens" onClick={onLinkClick}>
+                                        <FileText className="h-4 w-4" />
+                                        <span>Relatório Viagens</span>
+                                      </Link>
+                                    </SidebarMenuButton>
+                                  </SidebarMenuItem>
+                                )}
+                              </SidebarMenu>
+                            </CollapsibleContent>
+                          </SidebarMenuItem>
+                        </Collapsible>
+                      )}
 
-                      {/* Gestão de Veículos */}
-                      <Collapsible open={openSubmenus.veiculos} onOpenChange={() => toggleSubmenu("veiculos")}>
-                        <SidebarMenuItem>
-                          <CollapsibleTrigger asChild>
-                            <SidebarMenuButton className="w-full justify-between hover:bg-sidebar-accent">
-                              <div className="flex items-center gap-2 min-w-0">
-                                <Car className="h-4 w-4 flex-shrink-0" />
-                                <span className="truncate">Veículos</span>
-                              </div>
-                              <ChevronDown className={`h-4 w-4 flex-shrink-0 transition-transform duration-200 ${openSubmenus.veiculos ? 'rotate-180' : ''}`} />
-                            </SidebarMenuButton>
-                          </CollapsibleTrigger>
+                      {/* Gestão de Veículos - só mostra se tiver pelo menos uma permissão */}
+                      {hasAnyVeiculosPermission() && (
+                        <Collapsible open={openSubmenus.veiculos} onOpenChange={() => toggleSubmenu("veiculos")}>
+                          <SidebarMenuItem>
+                            <CollapsibleTrigger asChild>
+                              <SidebarMenuButton className="w-full justify-between hover:bg-sidebar-accent">
+                                <div className="flex items-center gap-2 min-w-0">
+                                  <Car className="h-4 w-4 flex-shrink-0" />
+                                  <span className="truncate">Veículos</span>
+                                </div>
+                                <ChevronDown className={`h-4 w-4 flex-shrink-0 transition-transform duration-200 ${openSubmenus.veiculos ? 'rotate-180' : ''}`} />
+                              </SidebarMenuButton>
+                            </CollapsibleTrigger>
 
-                          <CollapsibleContent>
-                            <SidebarMenu className="ml-4 border-l border-sidebar-border">
-                              {canSee('gestao_pessoas_veiculos_dashboard') && (
-                                <SidebarMenuItem>
-                                  <SidebarMenuButton asChild>
-                                    <Link to="/gestao-pessoas/dashboard-veiculos" onClick={onLinkClick}>
-                                      <Car className="h-4 w-4" />
-                                      <span>Dashboard Veículos</span>
-                                    </Link>
-                                  </SidebarMenuButton>
-                                </SidebarMenuItem>
-                              )}
+                            <CollapsibleContent>
+                              <SidebarMenu className="ml-4 border-l border-sidebar-border">
+                                {canSee('gestao_pessoas_veiculos_dashboard') && (
+                                  <SidebarMenuItem>
+                                    <SidebarMenuButton asChild>
+                                      <Link to="/gestao-pessoas/dashboard-veiculos" onClick={onLinkClick}>
+                                        <Car className="h-4 w-4" />
+                                        <span>Dashboard Veículos</span>
+                                      </Link>
+                                    </SidebarMenuButton>
+                                  </SidebarMenuItem>
+                                )}
 
-                              {canSee('gestao_pessoas_veiculos_consultas') && (
-                                <SidebarMenuItem>
-                                  <SidebarMenuButton asChild>
-                                    <Link to="/gestao-pessoas/consultas-veiculos" onClick={onLinkClick}>
-                                      <Database className="h-4 w-4" />
-                                      <span>Consultas Veículos</span>
-                                    </Link>
-                                  </SidebarMenuButton>
-                                </SidebarMenuItem>
-                              )}
+                                {canSee('gestao_pessoas_veiculos_consultas') && (
+                                  <SidebarMenuItem>
+                                    <SidebarMenuButton asChild>
+                                      <Link to="/gestao-pessoas/consultas-veiculos" onClick={onLinkClick}>
+                                        <Database className="h-4 w-4" />
+                                        <span>Consultas Veículos</span>
+                                      </Link>
+                                    </SidebarMenuButton>
+                                  </SidebarMenuItem>
+                                )}
 
-                              {canSee('gestao_pessoas_veiculos_cadastrar') && (
-                                <SidebarMenuItem>
-                                  <SidebarMenuButton asChild>
-                                    <Link to="/gestao-pessoas/cadastro-veiculo" onClick={onLinkClick}>
-                                      <FilePlus className="h-4 w-4" />
-                                      <span>Cadastro Veículo</span>
-                                    </Link>
-                                  </SidebarMenuButton>
-                                </SidebarMenuItem>
-                              )}
+                                {canSee('gestao_pessoas_veiculos_cadastrar') && (
+                                  <SidebarMenuItem>
+                                    <SidebarMenuButton asChild>
+                                      <Link to="/gestao-pessoas/cadastro-veiculo" onClick={onLinkClick}>
+                                        <FilePlus className="h-4 w-4" />
+                                        <span>Cadastro Veículo</span>
+                                      </Link>
+                                    </SidebarMenuButton>
+                                  </SidebarMenuItem>
+                                )}
 
-                              {canSee('gestao_pessoas_veiculos_multas_cadastrar') && (
-                                <SidebarMenuItem>
-                                  <SidebarMenuButton asChild>
-                                    <Link to="/gestao-pessoas/cadastro-multa" onClick={onLinkClick}>
-                                      <Receipt className="h-4 w-4" />
-                                      <span>Cadastro Multa</span>
-                                    </Link>
-                                  </SidebarMenuButton>
-                                </SidebarMenuItem>
-                              )}
+                                {canSee('gestao_pessoas_veiculos_multas_cadastrar') && (
+                                  <SidebarMenuItem>
+                                    <SidebarMenuButton asChild>
+                                      <Link to="/gestao-pessoas/cadastro-multa" onClick={onLinkClick}>
+                                        <Receipt className="h-4 w-4" />
+                                        <span>Cadastro Multa</span>
+                                      </Link>
+                                    </SidebarMenuButton>
+                                  </SidebarMenuItem>
+                                )}
 
-                              {canSee('gestao_pessoas_veiculos_condutores_cadastrar') && (
-                                <SidebarMenuItem>
-                                  <SidebarMenuButton asChild>
-                                    <Link to="/gestao-pessoas/cadastro-condutor" onClick={onLinkClick}>
-                                      <User className="h-4 w-4" />
-                                      <span>Cadastro Condutor</span>
-                                    </Link>
-                                  </SidebarMenuButton>
-                                </SidebarMenuItem>
-                              )}
+                                {canSee('gestao_pessoas_veiculos_condutores_cadastrar') && (
+                                  <SidebarMenuItem>
+                                    <SidebarMenuButton asChild>
+                                      <Link to="/gestao-pessoas/cadastro-condutor" onClick={onLinkClick}>
+                                        <User className="h-4 w-4" />
+                                        <span>Cadastro Condutor</span>
+                                      </Link>
+                                    </SidebarMenuButton>
+                                  </SidebarMenuItem>
+                                )}
 
-                              {canSee('gestao_pessoas_veiculos_cartoes_cadastrar') && (
-                                <SidebarMenuItem>
-                                  <SidebarMenuButton asChild>
-                                    <Link to="/gestao-pessoas/cadastro-cartao" onClick={onLinkClick}>
-                                      <CreditCard className="h-4 w-4" />
-                                      <span>Cadastro Cartão</span>
-                                    </Link>
-                                  </SidebarMenuButton>
-                                </SidebarMenuItem>
-                              )}
+                                {canSee('gestao_pessoas_veiculos_cartoes_cadastrar') && (
+                                  <SidebarMenuItem>
+                                    <SidebarMenuButton asChild>
+                                      <Link to="/gestao-pessoas/cadastro-cartao" onClick={onLinkClick}>
+                                        <CreditCard className="h-4 w-4" />
+                                        <span>Cadastro Cartão</span>
+                                      </Link>
+                                    </SidebarMenuButton>
+                                  </SidebarMenuItem>
+                                )}
 
-                              {canSee('gestao_pessoas_veiculos_pedagios_cadastrar') && (
-                                <SidebarMenuItem>
-                                  <SidebarMenuButton asChild>
-                                    <Link to="/gestao-pessoas/cadastro-pedagio" onClick={onLinkClick}>
-                                      <Ticket className="h-4 w-4" />
-                                      <span>Cadastro Pedágio</span>
-                                    </Link>
-                                  </SidebarMenuButton>
-                                </SidebarMenuItem>
-                              )}
+                                {canSee('gestao_pessoas_veiculos_pedagios_cadastrar') && (
+                                  <SidebarMenuItem>
+                                    <SidebarMenuButton asChild>
+                                      <Link to="/gestao-pessoas/cadastro-pedagio" onClick={onLinkClick}>
+                                        <Ticket className="h-4 w-4" />
+                                        <span>Cadastro Pedágio</span>
+                                      </Link>
+                                    </SidebarMenuButton>
+                                  </SidebarMenuItem>
+                                )}
 
-                              {canSee('gestao_pessoas_veiculos_checklists_criar') && (
-                                <SidebarMenuItem>
-                                  <SidebarMenuButton asChild>
-                                    <Link to="/gestao-pessoas/checklist-veiculos" onClick={onLinkClick}>
-                                      <CheckSquare className="h-4 w-4" />
-                                      <span>Checklist Veículos</span>
-                                    </Link>
-                                  </SidebarMenuButton>
-                                </SidebarMenuItem>
-                              )}
+                                {canSee('gestao_pessoas_veiculos_checklists_criar') && (
+                                  <SidebarMenuItem>
+                                    <SidebarMenuButton asChild>
+                                      <Link to="/gestao-pessoas/checklist-veiculos" onClick={onLinkClick}>
+                                        <CheckSquare className="h-4 w-4" />
+                                        <span>Checklist Veículos</span>
+                                      </Link>
+                                    </SidebarMenuButton>
+                                  </SidebarMenuItem>
+                                )}
 
-                              <SidebarMenuItem>
-                                <SidebarMenuButton asChild>
-                                  <Link to="/gestao-pessoas/calculo-rotas" onClick={onLinkClick}>
-                                    <FileText className="h-4 w-4" />
-                                    <span>Cálculo Rotas</span>
-                                  </Link>
-                                </SidebarMenuButton>
-                              </SidebarMenuItem>
+                                {canSee('gestao_pessoas_veiculos_calculo_rotas') && (
+                                  <SidebarMenuItem>
+                                    <SidebarMenuButton asChild>
+                                      <Link to="/gestao-pessoas/calculo-rotas" onClick={onLinkClick}>
+                                        <FileText className="h-4 w-4" />
+                                        <span>Cálculo Rotas</span>
+                                      </Link>
+                                    </SidebarMenuButton>
+                                  </SidebarMenuItem>
+                                )}
 
-                              {canSee('gestao_pessoas_veiculos_abastecimento_gerenciar') && (
-                                <SidebarMenuItem>
-                                  <SidebarMenuButton asChild>
-                                    <Link to="/gestao-pessoas/controle-abastecimento" onClick={onLinkClick}>
-                                      <BarChart3 className="h-4 w-4" />
-                                      <span>Controle Abastecimento</span>
-                                    </Link>
-                                  </SidebarMenuButton>
-                                </SidebarMenuItem>
-                              )}
+                                {canSee('gestao_pessoas_veiculos_abastecimento_gerenciar') && (
+                                  <SidebarMenuItem>
+                                    <SidebarMenuButton asChild>
+                                      <Link to="/gestao-pessoas/controle-abastecimento" onClick={onLinkClick}>
+                                        <BarChart3 className="h-4 w-4" />
+                                        <span>Controle Abastecimento</span>
+                                      </Link>
+                                    </SidebarMenuButton>
+                                  </SidebarMenuItem>
+                                )}
 
-                              {canSee('gestao_pessoas_veiculos_relatorios') && (
-                                <SidebarMenuItem>
-                                  <SidebarMenuButton asChild>
-                                    <Link to="/gestao-pessoas/relatorios-veiculos" onClick={onLinkClick}>
-                                      <FileText className="h-4 w-4" />
-                                      <span>Relatórios Veículos</span>
-                                    </Link>
-                                  </SidebarMenuButton>
-                                </SidebarMenuItem>
-                              )}
-                            </SidebarMenu>
-                          </CollapsibleContent>
-                        </SidebarMenuItem>
-                      </Collapsible>
+                                {canSee('gestao_pessoas_veiculos_relatorios') && (
+                                  <SidebarMenuItem>
+                                    <SidebarMenuButton asChild>
+                                      <Link to="/gestao-pessoas/relatorios-veiculos" onClick={onLinkClick}>
+                                        <FileText className="h-4 w-4" />
+                                        <span>Relatórios Veículos</span>
+                                      </Link>
+                                    </SidebarMenuButton>
+                                  </SidebarMenuItem>
+                                )}
+                              </SidebarMenu>
+                            </CollapsibleContent>
+                          </SidebarMenuItem>
+                        </Collapsible>
+                      )}
                     </SidebarMenu>
                   </CollapsibleContent>
                 </SidebarMenuItem>
