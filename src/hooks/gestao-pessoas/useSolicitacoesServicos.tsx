@@ -12,7 +12,7 @@ export function useSolicitacoesServicos() {
 
   // Buscar todas as solicitações com dados específicos
   const { data: solicitacoes = [], isLoading, error } = useQuery({
-    queryKey: ["solicitacoes_servicos", Date.now()], // Força refetch
+    queryKey: ["solicitacoes_servicos"],
     queryFn: async () => {
       console.log("=== HOOK: Iniciando busca de solicitações ===");
       
@@ -33,7 +33,8 @@ export function useSolicitacoesServicos() {
       
       // Processar dados para extrair o JSONB
       const processed = (data || []).map((row: any) => {
-        const dadosExtraidos = row.dados?.[0]?.dados || null;
+        // O Supabase retorna dados como objeto, não array
+        const dadosExtraidos = row.dados?.dados || null;
         console.log(`=== HOOK: ID ${row.id} - Dados extraídos ===`, dadosExtraidos);
         
         return {
