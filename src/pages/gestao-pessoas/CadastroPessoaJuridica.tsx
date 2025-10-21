@@ -755,8 +755,8 @@ export default function CadastroPessoaJuridica() {
               <FormField control={form.control} name="ccaobra" render={({
                 field
               }) => <FormItem>
-                      <FormLabel>Cca</FormLabel>
-                      <Select 
+                      <FormLabel>CCA</FormLabel>
+                      <Select
                         onValueChange={field.onChange} 
                         value={field.value}
                         disabled={isLoadingCcas}
