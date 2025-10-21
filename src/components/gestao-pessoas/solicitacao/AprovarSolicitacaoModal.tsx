@@ -6,22 +6,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
-import { 
-  SolicitacaoServico, 
-  TipoServico, 
-  PrioridadeSolicitacao,
-  VoucherUber,
-  LocacaoVeiculo,
-  CartaoAbastecimento,
-  VeloeGo,
-  Passagens,
-  Hospedagem,
-  Logistica,
-  CorreiosLoggi
-} from "@/types/gestao-pessoas/solicitacao";
+import { SolicitacaoServico, TipoServico, PrioridadeSolicitacao, VoucherUber, LocacaoVeiculo, CartaoAbastecimento, VeloeGo, Passagens, Hospedagem, Logistica, CorreiosLoggi } from "@/types/gestao-pessoas/solicitacao";
 import { format } from "date-fns";
 import { CheckCircle, XCircle } from "lucide-react";
-
 interface AprovarSolicitacaoModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -29,25 +16,21 @@ interface AprovarSolicitacaoModalProps {
   onAprovar: (justificativa?: string) => void;
   onReprovar: (justificativa: string) => void;
 }
-
 export function AprovarSolicitacaoModal({
   open,
   onOpenChange,
   solicitacao,
   onAprovar,
-  onReprovar,
+  onReprovar
 }: AprovarSolicitacaoModalProps) {
   const [justificativa, setJustificativa] = useState("");
   const [mostrarJustificativaAprovacao, setMostrarJustificativaAprovacao] = useState(false);
-
   if (!solicitacao) return null;
-
   const handleAprovar = () => {
     onAprovar(justificativa || undefined);
     setJustificativa("");
     setMostrarJustificativaAprovacao(false);
   };
-
   const handleReprovar = () => {
     if (!justificativa.trim()) {
       toast.error("Justificativa é obrigatória para reprovar");
@@ -56,7 +39,6 @@ export function AprovarSolicitacaoModal({
     onReprovar(justificativa);
     setJustificativa("");
   };
-
   const formatarTipoServico = (tipo: TipoServico): string => {
     const tipos = {
       [TipoServico.VOUCHER_UBER]: "Voucher Uber",
@@ -66,35 +48,31 @@ export function AprovarSolicitacaoModal({
       [TipoServico.PASSAGENS]: "Passagens",
       [TipoServico.HOSPEDAGEM]: "Hospedagem",
       [TipoServico.LOGISTICA]: "Logística",
-      [TipoServico.CORREIOS_LOGGI]: "Correios/Loggi",
+      [TipoServico.CORREIOS_LOGGI]: "Correios/Loggi"
     };
     return tipos[tipo] || tipo;
   };
-
   const getBadgePrioridade = (prioridade: PrioridadeSolicitacao) => {
     const variants = {
       baixa: "secondary",
       media: "default",
-      alta: "destructive",
+      alta: "destructive"
     };
     const labels = {
       baixa: "Baixa",
       media: "Média",
-      alta: "Alta",
+      alta: "Alta"
     };
-    return (
-      <Badge variant={variants[prioridade] as any}>
+    return <Badge variant={variants[prioridade] as any}>
         {labels[prioridade]}
-      </Badge>
-    );
+      </Badge>;
   };
-
   const renderDetalhesServico = () => {
     switch (solicitacao.tipoServico) {
-      case TipoServico.VOUCHER_UBER: {
-        const dados = solicitacao as VoucherUber;
-        return (
-          <div className="space-y-2">
+      case TipoServico.VOUCHER_UBER:
+        {
+          const dados = solicitacao as VoucherUber;
+          return <div className="space-y-2">
             <div className="grid grid-cols-2 gap-3 text-sm">
               <div><span className="font-medium">Cca:</span> {dados.cca}</div>
               <div><span className="font-medium">Valor:</span> R$ {dados.valor?.toFixed(2) || "0.00"}</div>
@@ -103,13 +81,12 @@ export function AprovarSolicitacaoModal({
               <div className="col-span-2"><span className="font-medium">Local de destino:</span> {dados.localDestino}</div>
               <div className="col-span-2"><span className="font-medium">Motivo:</span> {dados.motivo}</div>
             </div>
-          </div>
-        );
-      }
-      case TipoServico.LOCACAO_VEICULO: {
-        const dados = solicitacao as LocacaoVeiculo;
-        return (
-          <div className="space-y-2">
+          </div>;
+        }
+      case TipoServico.LOCACAO_VEICULO:
+        {
+          const dados = solicitacao as LocacaoVeiculo;
+          return <div className="space-y-2">
             <div className="grid grid-cols-2 gap-3 text-sm">
               <div><span className="font-medium">Cca:</span> {dados.cca}</div>
               <div><span className="font-medium">Condutor:</span> {dados.nomeCondutor}</div>
@@ -119,16 +96,15 @@ export function AprovarSolicitacaoModal({
               <div><span className="font-medium">Local de retirada:</span> {dados.localRetirada}</div>
               <div className="col-span-2"><span className="font-medium">Motivo:</span> {dados.motivo}</div>
             </div>
-          </div>
-        );
-      }
-      case TipoServico.PASSAGENS: {
-        const dados = solicitacao as Passagens;
-        return (
-          <div className="space-y-2">
+          </div>;
+        }
+      case TipoServico.PASSAGENS:
+        {
+          const dados = solicitacao as Passagens;
+          return <div className="space-y-2">
             <div className="grid grid-cols-2 gap-3 text-sm">
               <div><span className="font-medium">Tipo:</span> {dados.tipoPassagem === "aerea" ? "Aérea" : "Rodoviária"}</div>
-              <div><span className="font-medium">Cca:</span> {dados.cca}</div>
+              
               <div><span className="font-medium">Origem:</span> {dados.origem}</div>
               <div><span className="font-medium">Destino:</span> {dados.destino}</div>
               <div><span className="font-medium">Data de ida:</span> {format(new Date(dados.dataViagem), "dd/MM/yyyy")}</div>
@@ -137,13 +113,12 @@ export function AprovarSolicitacaoModal({
               <div><span className="font-medium">Bagagem:</span> {dados.precisaBagagem ? "Sim" : "Não"}</div>
               <div className="col-span-2"><span className="font-medium">Motivo:</span> {dados.motivo}</div>
             </div>
-          </div>
-        );
-      }
-      case TipoServico.HOSPEDAGEM: {
-        const dados = solicitacao as Hospedagem;
-        return (
-          <div className="space-y-2">
+          </div>;
+        }
+      case TipoServico.HOSPEDAGEM:
+        {
+          const dados = solicitacao as Hospedagem;
+          return <div className="space-y-2">
             <div className="grid grid-cols-2 gap-3 text-sm">
               <div><span className="font-medium">Hotel:</span> {dados.hotel}</div>
               <div><span className="font-medium">Nº de pessoas:</span> {dados.numeroPessoas}</div>
@@ -151,13 +126,12 @@ export function AprovarSolicitacaoModal({
               <div><span className="font-medium">Check-out:</span> {format(new Date(dados.dataFim), "dd/MM/yyyy")}</div>
               <div className="col-span-2"><span className="font-medium">Motivo:</span> {dados.motivo}</div>
             </div>
-          </div>
-        );
-      }
-      case TipoServico.LOGISTICA: {
-        const dados = solicitacao as Logistica;
-        return (
-          <div className="space-y-2">
+          </div>;
+        }
+      case TipoServico.LOGISTICA:
+        {
+          const dados = solicitacao as Logistica;
+          return <div className="space-y-2">
             <div className="grid grid-cols-2 gap-3 text-sm">
               <div><span className="font-medium">Tipo de serviço:</span> {dados.tipoServicoLogistica === "envio" ? "Envio" : "Retirada"}</div>
               <div><span className="font-medium">Data:</span> {format(new Date(dados.dataServico), "dd/MM/yyyy")}</div>
@@ -169,16 +143,13 @@ export function AprovarSolicitacaoModal({
               <div><span className="font-medium">Estado:</span> {dados.estado}</div>
               <div className="col-span-2"><span className="font-medium">Motivo:</span> {dados.motivo}</div>
             </div>
-          </div>
-        );
-      }
+          </div>;
+        }
       default:
         return <p className="text-sm text-muted-foreground">Detalhes não disponíveis</p>;
     }
   };
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+  return <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Aprovar Solicitação - {solicitacao.id}</DialogTitle>
@@ -224,32 +195,22 @@ export function AprovarSolicitacaoModal({
           <div className="rounded-lg border p-4 space-y-3">
             <h3 className="font-semibold text-sm">Informações de Gestão</h3>
             <div className="space-y-3">
-              {solicitacao.observacoesgestao && (
-                <div>
+              {solicitacao.observacoesgestao && <div>
                   <Label className="text-xs text-muted-foreground">Observações de gestão</Label>
                   <p className="text-sm mt-1 p-2 bg-muted rounded">{solicitacao.observacoesgestao}</p>
-                </div>
-              )}
+                </div>}
               
-              {solicitacao.imagemanexo && (
-                <div>
+              {solicitacao.imagemanexo && <div>
                   <Label className="text-xs text-muted-foreground">Anexo</Label>
-                  <img 
-                    src={solicitacao.imagemanexo} 
-                    alt="Anexo" 
-                    className="mt-1 max-w-xs rounded border"
-                  />
-                </div>
-              )}
+                  <img src={solicitacao.imagemanexo} alt="Anexo" className="mt-1 max-w-xs rounded border" />
+                </div>}
               
-              {solicitacao.estimativavalor && (
-                <div>
+              {solicitacao.estimativavalor && <div>
                   <Label className="text-xs text-muted-foreground">Estimativa de valor</Label>
                   <p className="text-sm mt-1 font-medium">
                     R$ {solicitacao.estimativavalor.toFixed(2)}
                   </p>
-                </div>
-              )}
+                </div>}
             </div>
           </div>
 
@@ -260,52 +221,33 @@ export function AprovarSolicitacaoModal({
             <Label htmlFor="justificativa">
               {mostrarJustificativaAprovacao ? "Justificativa (Opcional)" : "Justificativa *"}
             </Label>
-            <Textarea
-              id="justificativa"
-              placeholder={mostrarJustificativaAprovacao 
-                ? "Adicione uma justificativa para aprovação (opcional)..." 
-                : "Adicione uma justificativa para reprovação..."}
-              value={justificativa}
-              onChange={(e) => setJustificativa(e.target.value)}
-              rows={3}
-            />
+            <Textarea id="justificativa" placeholder={mostrarJustificativaAprovacao ? "Adicione uma justificativa para aprovação (opcional)..." : "Adicione uma justificativa para reprovação..."} value={justificativa} onChange={e => setJustificativa(e.target.value)} rows={3} />
           </div>
         </div>
 
         <DialogFooter className="gap-2">
-          <Button
-            variant="outline"
-            onClick={() => {
-              onOpenChange(false);
-              setJustificativa("");
-              setMostrarJustificativaAprovacao(false);
-            }}
-          >
+          <Button variant="outline" onClick={() => {
+          onOpenChange(false);
+          setJustificativa("");
+          setMostrarJustificativaAprovacao(false);
+        }}>
             Cancelar
           </Button>
-          <Button
-            variant="destructive"
-            onClick={handleReprovar}
-            className="gap-2"
-          >
+          <Button variant="destructive" onClick={handleReprovar} className="gap-2">
             <XCircle className="h-4 w-4" />
             Reprovar
           </Button>
-          <Button
-            onClick={() => {
-              if (!mostrarJustificativaAprovacao) {
-                setMostrarJustificativaAprovacao(true);
-              } else {
-                handleAprovar();
-              }
-            }}
-            className="gap-2"
-          >
+          <Button onClick={() => {
+          if (!mostrarJustificativaAprovacao) {
+            setMostrarJustificativaAprovacao(true);
+          } else {
+            handleAprovar();
+          }
+        }} className="gap-2">
             <CheckCircle className="h-4 w-4" />
             {mostrarJustificativaAprovacao ? "Confirmar Aprovação" : "Aprovar"}
           </Button>
         </DialogFooter>
       </DialogContent>
-    </Dialog>
-  );
+    </Dialog>;
 }
