@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Car, AlertTriangle, Users, Fuel, DollarSign, Receipt } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
@@ -7,77 +7,33 @@ import { VeiculosCharts } from "@/components/gestao-pessoas/veiculos/dashboard/V
 import { MultasCharts } from "@/components/gestao-pessoas/veiculos/dashboard/MultasCharts";
 import { CondutoresCharts } from "@/components/gestao-pessoas/veiculos/dashboard/CondutoresCharts";
 import { AbastecimentoCharts } from "@/components/gestao-pessoas/veiculos/dashboard/AbastecimentoCharts";
-import { MultaCompleta } from "@/types/gestao-pessoas/multa";
-import { FuelTransaction } from "@/types/gestao-pessoas/fuel";
-import { differenceInDays, isSameMonth } from "date-fns";
-
-interface Veiculo {
-  id: string;
-  status: string;
-  locadora: string;
-  tipoLocacao: string;
-  placa: string;
-  modelo: string;
-  condutorAtual?: string;
-  dataInicioLocacao?: Date;
-  dataFimLocacao?: Date;
-}
-
-interface Condutor {
-  id: string;
-  nome: string;
-  cpf: string;
-  categoriaCnh: string;
-  validadeCnh: Date;
-  statusCnh: string;
-  termoResponsabilidade?: boolean;
-}
+import { useDashboardVeiculos } from "@/hooks/gestao-pessoas/useDashboardVeiculos";
 
 export default function DashboardVeiculos() {
-  const [veiculos, setVeiculos] = useState<Veiculo[]>([]);
-  const [multas, setMultas] = useState<MultaCompleta[]>([]);
-  const [condutores, setCondutores] = useState<Condutor[]>([]);
-  const [fuelData, setFuelData] = useState<FuelTransaction[]>([]);
   const [periodo, setPeriodo] = useState<"mensal" | "trimestral" | "anual">("mensal");
+  const { dashboardData, isLoading } = useDashboardVeiculos(periodo);
 
-  useEffect(() => {
-    // TODO: Implementar queries reais do banco de dados
-    // const { data: veiculosData } = useQuery(['veiculos'], fetchVeiculos);
-    // const { data: multasData } = useQuery(['multas'], fetchMultas);
-    // const { data: condutoresData } = useQuery(['condutores'], fetchCondutores);
-    // const { data: fuelDataStorage } = useQuery(['abastecimentos'], fetchAbastecimentos);
-    
-    // Dados vazios temporários
-    setVeiculos([]);
-    setMultas([]);
-    setCondutores([]);
-    setFuelData([]);
-  }, []);
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background p-6">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-muted-foreground">Carregando dados do dashboard...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
-  // Calcular KPIs
-  const veiculosAtivos = veiculos.filter(v => v.status === "ativo").length;
-
-  const cnhVencendo = condutores.filter(c => {
-    const diasRestantes = differenceInDays(new Date(c.validadeCnh), new Date());
-    return diasRestantes > 0 && diasRestantes <= 30;
-  }).length;
-
-  const multasPendentes = multas.filter(m => m.statusMulta !== "Processo Concluído").length;
-
-  const condutoresCriticos = condutores.filter(c => {
-    const pontos = multas
-      .filter(m => m.condutorInfrator === c.nome)
-      .reduce((sum, m) => sum + m.pontos, 0);
-    return pontos >= 20;
-  }).length;
-
-  const gastosCombustivelMes = fuelData
-    .filter(f => isSameMonth(new Date(f.data_hora_transacao), new Date()))
-    .reduce((sum, f) => sum + f.valor, 0);
-
-  const totalMultasMes = multas
-    .filter(m => isSameMonth(new Date(m.dataMulta), new Date()))
-    .reduce((sum, m) => sum + (m.valor || 0), 0);
+  const {
+    veiculosAtivos,
+    cnhVencendo,
+    multasPendentes,
+    condutoresCriticos,
+    gastosCombustivelMes,
+    totalMultasMes
+  } = dashboardData.kpis;
 
   return (
     <div className="min-h-screen bg-background p-6 space-y-6">
@@ -161,7 +117,7 @@ export default function DashboardVeiculos() {
                 Status, locadoras e próximas devoluções
               </p>
             </div>
-            <VeiculosCharts veiculos={veiculos} />
+            <VeiculosCharts veiculos={dashboardData.rawData.veiculos} />
           </div>
 
           <Separator />
@@ -177,7 +133,7 @@ export default function DashboardVeiculos() {
                 Evolução, status e principais ocorrências
               </p>
             </div>
-            <MultasCharts multas={multas} />
+            <MultasCharts multas={dashboardData.rawData.multas} />
           </div>
 
           <Separator />
@@ -193,7 +149,7 @@ export default function DashboardVeiculos() {
                 Pontuação, status de CNH e alertas
               </p>
             </div>
-            <CondutoresCharts condutores={condutores} multas={multas} />
+            <CondutoresCharts condutores={dashboardData.rawData.condutores} multas={dashboardData.rawData.multas} />
           </div>
 
           <Separator />
@@ -209,7 +165,7 @@ export default function DashboardVeiculos() {
                 Consumo, gastos e distribuição por tipo
               </p>
             </div>
-            <AbastecimentoCharts transacoes={fuelData} />
+            <AbastecimentoCharts transacoes={dashboardData.rawData.abastecimentos} />
           </div>
         </TabsContent>
 
