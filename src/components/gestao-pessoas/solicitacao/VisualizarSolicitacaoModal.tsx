@@ -85,6 +85,8 @@ export function VisualizarSolicitacaoModal({
   onConcluir,
   modoVisualizacao = false
 }: VisualizarSolicitacaoModalProps) {
+  console.log('🎭 Modal renderizado:', { open, solicitacao: solicitacao?.id, numeroSolicitacao: solicitacao?.numeroSolicitacao });
+  
   const [observacoesgestao, setObservacoesGestao] = useState("");
   const [imagemanexo, setImagemAnexo] = useState<string>("");
   const [estimativavalor, setEstimativaValor] = useState("");
