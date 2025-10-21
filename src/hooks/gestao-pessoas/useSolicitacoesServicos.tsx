@@ -24,11 +24,23 @@ export function useSolicitacoesServicos() {
 
       if (error) throw error;
       
+      console.log("=== DEBUG HOOK: Dados brutos do Supabase ===", data);
+      
       // Processar dados para extrair o JSONB
-      return (data || []).map((row: any) => ({
-        ...row,
-        dados: row.dados?.[0]?.dados || null
-      }));
+      const processed = (data || []).map((row: any) => {
+        console.log("=== DEBUG HOOK: Processando row ===", row);
+        console.log("row.dados:", row.dados);
+        const dadosExtraidos = row.dados?.[0]?.dados || null;
+        console.log("Dados extraídos:", dadosExtraidos);
+        
+        return {
+          ...row,
+          dados: dadosExtraidos
+        };
+      });
+      
+      console.log("=== DEBUG HOOK: Dados processados ===", processed);
+      return processed;
     },
   });
 
