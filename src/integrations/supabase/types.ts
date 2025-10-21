@@ -2579,6 +2579,156 @@ export type Database = {
           },
         ]
       }
+      faturas_viagens_consolidadas: {
+        Row: {
+          agencia: string
+          cca: string
+          created_at: string
+          created_by: string | null
+          dataemissao: string
+          id: string
+          numerofatura: string
+          pdf_nome: string | null
+          pdf_url: string | null
+          periodoapuracao: string
+          status: string
+          updated_at: string
+          valortotal: number
+        }
+        Insert: {
+          agencia: string
+          cca: string
+          created_at?: string
+          created_by?: string | null
+          dataemissao: string
+          id?: string
+          numerofatura: string
+          pdf_nome?: string | null
+          pdf_url?: string | null
+          periodoapuracao: string
+          status: string
+          updated_at?: string
+          valortotal?: number
+        }
+        Update: {
+          agencia?: string
+          cca?: string
+          created_at?: string
+          created_by?: string | null
+          dataemissao?: string
+          id?: string
+          numerofatura?: string
+          pdf_nome?: string | null
+          pdf_url?: string | null
+          periodoapuracao?: string
+          status?: string
+          updated_at?: string
+          valortotal?: number
+        }
+        Relationships: []
+      }
+      faturas_viagens_integra: {
+        Row: {
+          agencia: string
+          antecedencia: number | null
+          cca: string
+          centrodecusto: string
+          checkin: string | null
+          checkout: string | null
+          ciaida: string | null
+          ciavolta: string | null
+          codconta: string | null
+          comprador: string
+          contafinanceira: string | null
+          created_at: string
+          created_by: string | null
+          datadacompra: string
+          dataemissaofat: string
+          dentrodapolitica: string
+          destino: string
+          hospedagem: string | null
+          id: string
+          motivoevento: string
+          numerodefat: string
+          observacao: string | null
+          origem: string
+          possuibagagem: string
+          protocolo: string
+          quemsolicitouforapolitica: string | null
+          tipo: string
+          updated_at: string
+          valorpago: number
+          valorpagodebagagem: number | null
+          viajante: string
+        }
+        Insert: {
+          agencia: string
+          antecedencia?: number | null
+          cca: string
+          centrodecusto: string
+          checkin?: string | null
+          checkout?: string | null
+          ciaida?: string | null
+          ciavolta?: string | null
+          codconta?: string | null
+          comprador: string
+          contafinanceira?: string | null
+          created_at?: string
+          created_by?: string | null
+          datadacompra: string
+          dataemissaofat: string
+          dentrodapolitica: string
+          destino: string
+          hospedagem?: string | null
+          id?: string
+          motivoevento: string
+          numerodefat: string
+          observacao?: string | null
+          origem: string
+          possuibagagem: string
+          protocolo: string
+          quemsolicitouforapolitica?: string | null
+          tipo: string
+          updated_at?: string
+          valorpago?: number
+          valorpagodebagagem?: number | null
+          viajante: string
+        }
+        Update: {
+          agencia?: string
+          antecedencia?: number | null
+          cca?: string
+          centrodecusto?: string
+          checkin?: string | null
+          checkout?: string | null
+          ciaida?: string | null
+          ciavolta?: string | null
+          codconta?: string | null
+          comprador?: string
+          contafinanceira?: string | null
+          created_at?: string
+          created_by?: string | null
+          datadacompra?: string
+          dataemissaofat?: string
+          dentrodapolitica?: string
+          destino?: string
+          hospedagem?: string | null
+          id?: string
+          motivoevento?: string
+          numerodefat?: string
+          observacao?: string | null
+          origem?: string
+          possuibagagem?: string
+          protocolo?: string
+          quemsolicitouforapolitica?: string | null
+          tipo?: string
+          updated_at?: string
+          valorpago?: number
+          valorpagodebagagem?: number | null
+          viajante?: string
+        }
+        Relationships: []
+      }
       funcionario_supervisores: {
         Row: {
           created_at: string
@@ -6325,7 +6475,7 @@ export type Database = {
           {
             foreignKeyName: "usuario_perfis_usuario_id_fkey"
             columns: ["usuario_id"]
-            isOneToOne: true
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -6395,6 +6545,130 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      viagens_destinatarios_alertas: {
+        Row: {
+          ativo: boolean
+          cca_id: number | null
+          created_at: string
+          email: string
+          id: string
+          nome: string
+          tipo: string
+          updated_at: string
+        }
+        Insert: {
+          ativo?: boolean
+          cca_id?: number | null
+          created_at?: string
+          email: string
+          id?: string
+          nome: string
+          tipo: string
+          updated_at?: string
+        }
+        Update: {
+          ativo?: boolean
+          cca_id?: number | null
+          created_at?: string
+          email?: string
+          id?: string
+          nome?: string
+          tipo?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "viagens_destinatarios_alertas_cca_id_fkey"
+            columns: ["cca_id"]
+            isOneToOne: false
+            referencedRelation: "ccas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      viagens_orcamentos_cca: {
+        Row: {
+          ano: number
+          cca_id: number
+          created_at: string
+          created_by: string | null
+          gasto_aereo: number
+          gasto_hotel: number
+          gasto_outros: number
+          gasto_rodoviario: number
+          id: string
+          observacoes: string | null
+          orcamento_total: number
+          updated_at: string
+        }
+        Insert: {
+          ano: number
+          cca_id: number
+          created_at?: string
+          created_by?: string | null
+          gasto_aereo?: number
+          gasto_hotel?: number
+          gasto_outros?: number
+          gasto_rodoviario?: number
+          id?: string
+          observacoes?: string | null
+          orcamento_total?: number
+          updated_at?: string
+        }
+        Update: {
+          ano?: number
+          cca_id?: number
+          created_at?: string
+          created_by?: string | null
+          gasto_aereo?: number
+          gasto_hotel?: number
+          gasto_outros?: number
+          gasto_rodoviario?: number
+          id?: string
+          observacoes?: string | null
+          orcamento_total?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "viagens_orcamentos_cca_cca_id_fkey"
+            columns: ["cca_id"]
+            isOneToOne: false
+            referencedRelation: "ccas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      viagens_relatorios_salvos: {
+        Row: {
+          colunas_selecionadas: string[]
+          created_at: string
+          filtros: Json
+          id: string
+          nome: string
+          updated_at: string
+          usuario_id: string
+        }
+        Insert: {
+          colunas_selecionadas?: string[]
+          created_at?: string
+          filtros?: Json
+          id?: string
+          nome: string
+          updated_at?: string
+          usuario_id: string
+        }
+        Update: {
+          colunas_selecionadas?: string[]
+          created_at?: string
+          filtros?: Json
+          id?: string
+          nome?: string
+          updated_at?: string
+          usuario_id?: string
+        }
+        Relationships: []
       }
     }
     Views: {
