@@ -1,18 +1,37 @@
 import { useState } from "react";
 import { RelatoriosTab } from "@/components/gestao-pessoas/veiculos/relatorios/RelatoriosTab";
 import ChecklistDataService from "@/services/gestao-pessoas/ChecklistDataService";
+import { useVeiculos } from "@/hooks/gestao-pessoas/useVeiculos";
+import { useCondutores } from "@/hooks/gestao-pessoas/useCondutores";
+import { useMultas } from "@/hooks/gestao-pessoas/useMultas";
+import { useCartoesAbastecimento } from "@/hooks/gestao-pessoas/useCartoesAbastecimento";
+import { usePedagiosEstacionamentos } from "@/hooks/gestao-pessoas/usePedagiosEstacionamentos";
 
 export default function RelatoriosVeiculos() {
-  // TODO: Implementar queries reais do banco de dados
   const [historicoCalculos] = useState([]);
   const checklistsData = ChecklistDataService.obterTodos();
   
-  // Dados temporários vazios até implementação das queries reais
-  const veiculosData: any[] = [];
-  const multasDataInitial: any[] = [];
-  const condutoresData: any[] = [];
-  const cartoesData: any[] = [];
-  const semPararData: any[] = [];
+  // Buscar dados reais do banco de dados
+  const { data: veiculosData = [], isLoading: isLoadingVeiculos } = useVeiculos();
+  const { data: multasData = [], isLoading: isLoadingMultas } = useMultas();
+  const { data: condutoresData = [], isLoading: isLoadingCondutores } = useCondutores();
+  const { data: cartoesData = [], isLoading: isLoadingCartoes } = useCartoesAbastecimento();
+  const { data: pedagogiosData = [], isLoading: isLoadingPedagios } = usePedagiosEstacionamentos();
+
+  const isLoading = isLoadingVeiculos || isLoadingMultas || isLoadingCondutores || isLoadingCartoes || isLoadingPedagios;
+
+  if (isLoading) {
+    return (
+      <div className="container mx-auto p-6">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-muted-foreground">Carregando dados dos relatórios...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto p-6">
@@ -33,10 +52,10 @@ export default function RelatoriosVeiculos() {
       <RelatoriosTab 
         veiculos={veiculosData}
         checklists={checklistsData}
-        multas={multasDataInitial}
+        multas={multasData}
         condutores={condutoresData}
         cartoes={cartoesData}
-        pedagogios={semPararData}
+        pedagogios={pedagogiosData}
         calculos={historicoCalculos}
       />
     </div>
