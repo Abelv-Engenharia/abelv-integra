@@ -50,10 +50,8 @@ export interface PrestadorPJ {
   valorAuxilioConvenioMedico: number;
   valeRefeicao: number;
   veiculo: boolean;
-  detalhesVeiculo: string | null;
   celular: boolean;
   alojamento: boolean;
-  detalhesAlojamento: string | null;
   folgaCampo: string | null;
   periodoFerias: string | null;
   quantidadeDiasFerias: number | null;
@@ -255,10 +253,8 @@ function mapPrestadorFromDB(data: any): PrestadorPJ {
     valorAuxilioConvenioMedico: data.valorauxilioconveniomedico || 0,
     valeRefeicao: data.valerefeicao || 0,
     veiculo: data.veiculo || false,
-    detalhesVeiculo: data.detalhesveiculo,
     celular: data.celular || false,
     alojamento: data.alojamento || false,
-    detalhesAlojamento: data.detalhesalojamento,
     folgaCampo: data.folgacampo,
     periodoFerias: data.periodoferias,
     quantidadeDiasFerias: data.quantidadediasferias,
@@ -311,10 +307,8 @@ function mapPrestadorToDB(data: any): any {
     valorauxilioconveniomedico: typeof data.valorAuxilioConvenioMedico === 'number' ? data.valorAuxilioConvenioMedico : 0,
     valerefeicao: typeof data.valeRefeicao === 'number' ? data.valeRefeicao : 0,
     veiculo: Boolean(data.veiculo),
-    detalhesveiculo: data.detalhesVeiculo || null,
     celular: Boolean(data.celular),
     alojamento: Boolean(data.alojamento),
-    detalhesalojamento: data.detalhesAlojamento || null,
     folgacampo: data.folgaCampo || null,
     periodoferias: data.periodoFerias || null,
     quantidadediasferias: data.quantidadeDiasFerias ? parseInt(String(data.quantidadeDiasFerias)) : null,

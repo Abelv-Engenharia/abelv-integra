@@ -231,13 +231,9 @@ export function VisualizarPrestadorModal({ open, onOpenChange, prestador }: Visu
                       Almoço: {prestador.valorAlmoco.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                     </Badge>
                   )}
-                  {prestador.veiculo && (
-                    <Badge>Veículo: {prestador.detalhesVeiculo || "Sim"}</Badge>
-                  )}
+                  {prestador.veiculo && <Badge>Veículo</Badge>}
                   {prestador.celular && <Badge>Celular</Badge>}
-                  {prestador.alojamento && (
-                    <Badge>Alojamento: {prestador.detalhesAlojamento || "Sim"}</Badge>
-                  )}
+                  {prestador.alojamento && <Badge>Alojamento</Badge>}
                 </div>
               </div>
 

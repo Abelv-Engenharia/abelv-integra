@@ -58,10 +58,8 @@ const cadastroSchema = z.object({
   almoco: z.boolean().default(false),
   valoralmoco: z.string().optional(),
   veiculo: z.boolean().default(false),
-  detalhesveiculo: z.string().optional(),
   celular: z.boolean().default(false),
   alojamento: z.boolean().default(false),
-  detalhesalojamento: z.string().optional(),
   folgacampo: z.string().optional(),
   periodoferias: z.string().optional(),
   quantidadediasferias: z.string().optional(),
@@ -182,10 +180,8 @@ export default function CadastroPessoaJuridica() {
       almoco: false,
       valoralmoco: "",
       veiculo: false,
-      detalhesveiculo: "",
       celular: false,
       alojamento: false,
-      detalhesalojamento: "",
       folgacampo: "",
       periodoferias: "",
       quantidadediasferias: "",
@@ -916,34 +912,6 @@ export default function CadastroPessoaJuridica() {
                       <FormMessage />
                     </FormItem>} />
               </div>
-
-              {form.watch("veiculo") && <FormField control={form.control} name="detalhesveiculo" render={({
-              field
-            }) => <FormItem>
-                      <FormLabel>Detalhes do Veículo</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Modelo, ano, observações" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>} />}
-
-              {form.watch("alojamento") && <FormField control={form.control} name="detalhesalojamento" render={({
-              field
-            }) => <FormItem>
-                        <FormLabel>Endereço/Detalhes do Alojamento</FormLabel>
-                        <FormControl>
-                          <Textarea placeholder="Endereço completo e detalhes" className="min-h-[60px]" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>} />}
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField control={form.control} name="folgacampo" render={({
-                field
-              }) => {}} />
-
-              </div>
-
               <FormField control={form.control} name="ccaobra" render={({
               field
             }) => <FormItem>
