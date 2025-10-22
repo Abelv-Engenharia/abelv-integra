@@ -69,7 +69,11 @@ export function VisualizarPedagioModal({ pedagio, open, onOpenChange, onEditar }
                 <label className="text-sm font-medium text-muted-foreground">Tipo</label>
                 <div className="mt-1">
                   <Badge variant="outline">
-                    {pedagio.tipo_servico === "pedágio" ? "Pedágio" : "Estacionamento"}
+                    {pedagio.tipo_servico === "pedagio" && "Pedágio"}
+                    {pedagio.tipo_servico === "estacionamento" && "Estacionamento"}
+                    {pedagio.tipo_servico === "lavagem" && "Lavagem"}
+                    {pedagio.tipo_servico === "posto" && "Posto de Combustível"}
+                    {pedagio.tipo_servico === "outros" && "Outros"}
                   </Badge>
                 </div>
               </div>
@@ -123,9 +127,15 @@ export function VisualizarPedagioModal({ pedagio, open, onOpenChange, onEditar }
                   </div>
                 )}
                 {pedagio.finalidade && (
-                  <div className="col-span-2">
+                  <div>
                     <label className="text-sm font-medium text-muted-foreground">Finalidade</label>
-                    <p className="text-sm mt-1">{pedagio.finalidade}</p>
+                    <p className="text-sm mt-1">
+                      {pedagio.finalidade === 'trabalho' && 'Trabalho'}
+                      {pedagio.finalidade === 'pessoal' && 'Pessoal'}
+                      {pedagio.finalidade === 'emergencia' && 'Emergência'}
+                      {pedagio.finalidade === 'manutencao' && 'Manutenção'}
+                      {pedagio.finalidade === 'outros' && 'Outros'}
+                    </p>
                   </div>
                 )}
               </CardContent>

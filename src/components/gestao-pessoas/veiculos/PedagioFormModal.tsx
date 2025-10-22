@@ -2,7 +2,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -193,8 +192,11 @@ export function PedagioFormModal({ open, onOpenChange, itemParaEdicao, onSuccess
                   <SelectValue placeholder="Selecione" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="pedágio">Pedágio</SelectItem>
+                  <SelectItem value="pedagio">Pedágio</SelectItem>
                   <SelectItem value="estacionamento">Estacionamento</SelectItem>
+                  <SelectItem value="lavagem">Lavagem</SelectItem>
+                  <SelectItem value="posto">Posto de Combustível</SelectItem>
+                  <SelectItem value="outros">Outros</SelectItem>
                 </SelectContent>
               </Select>
               {errors.tipo_servico && <p className="text-sm text-destructive mt-1">{errors.tipo_servico.message}</p>}
@@ -233,9 +235,20 @@ export function PedagioFormModal({ open, onOpenChange, itemParaEdicao, onSuccess
               </Select>
             </div>
 
-            <div className="col-span-2">
+            <div>
               <Label>Finalidade</Label>
-              <Textarea {...register("finalidade")} rows={3} />
+              <Select onValueChange={(value) => setValue("finalidade", value)} value={watch("finalidade") || undefined}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione a finalidade" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="trabalho">Trabalho</SelectItem>
+                  <SelectItem value="pessoal">Pessoal</SelectItem>
+                  <SelectItem value="emergencia">Emergência</SelectItem>
+                  <SelectItem value="manutencao">Manutenção</SelectItem>
+                  <SelectItem value="outros">Outros</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
