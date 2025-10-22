@@ -1,9 +1,20 @@
 import { useState } from "react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { CalendarIcon, Car, Camera, FileCheck, Upload, Maximize2 } from "lucide-react";
+import { 
+  CalendarIcon, 
+  Car, 
+  Camera, 
+  FileCheck, 
+  Upload, 
+  CircleHelp,
+  Gauge,
+  Battery,
+  FileText,
+  Zap
+} from "lucide-react";
 
-import ChecklistDataService from "@/services/gestao-pessoas/ChecklistDataService";
+import { useVeiculosChecklists } from "@/hooks/gestao-pessoas/useVeiculosChecklists";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,20 +29,20 @@ import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
 
 const vehiclePositions = [
-  { name: "Frente", image: "/vehicle-examples/frente.jpg" },
-  { name: "Lateral dianteira direita", image: "/vehicle-examples/lateral-dianteira-direita.jpg" },
-  { name: "Pneu dianteiro direito", image: "/vehicle-examples/pneu-dianteiro-direito.jpg" },
-  { name: "Lateral traseira direita", image: "/vehicle-examples/lateral-traseira-direita.jpg" },
-  { name: "Pneu traseiro direito", image: "/vehicle-examples/pneu-traseiro-direito.jpg" },
-  { name: "Traseira", image: "/vehicle-examples/traseira.jpg" },
-  { name: "Estepe", image: "/vehicle-examples/estepe.jpg" },
-  { name: "Lateral traseira esquerda", image: "/vehicle-examples/lateral-traseira-esquerda.jpg" },
-  { name: "Pneu traseiro esquerdo", image: "/vehicle-examples/pneu-traseiro-esquerdo.jpg" },
-  { name: "Lateral dianteira esquerda", image: "/vehicle-examples/lateral-dianteira-esquerda.jpg" },
-  { name: "Pneu dianteiro esquerdo", image: "/vehicle-examples/pneu-dianteiro-esquerdo.jpg" },
-  { name: "Painel de instrumentos (com ignição ligada)", image: "/vehicle-examples/painel-instrumentos.jpg" },
-  { name: "Bateria", image: "/vehicle-examples/bateria.jpg" },
-  { name: "CNH do condutor (upload de documento)", image: "/vehicle-examples/cnh-condutor.jpg" }
+  { name: "Frente", icon: Car, description: "Vista frontal completa do veículo" },
+  { name: "Lateral dianteira direita", icon: Car, description: "Lateral direita - parte frontal" },
+  { name: "Pneu dianteiro direito", icon: CircleHelp, description: "Foto detalhada do pneu" },
+  { name: "Lateral traseira direita", icon: Car, description: "Lateral direita - parte traseira" },
+  { name: "Pneu traseiro direito", icon: CircleHelp, description: "Foto detalhada do pneu" },
+  { name: "Traseira", icon: Car, description: "Vista traseira completa do veículo" },
+  { name: "Estepe", icon: CircleHelp, description: "Foto do pneu estepe no compartimento" },
+  { name: "Lateral traseira esquerda", icon: Car, description: "Lateral esquerda - parte traseira" },
+  { name: "Pneu traseiro esquerdo", icon: CircleHelp, description: "Foto detalhada do pneu" },
+  { name: "Lateral dianteira esquerda", icon: Car, description: "Lateral esquerda - parte frontal" },
+  { name: "Pneu dianteiro esquerdo", icon: CircleHelp, description: "Foto detalhada do pneu" },
+  { name: "Painel de instrumentos (com ignição ligada)", icon: Gauge, description: "Painel ligado mostrando hodômetro e indicadores" },
+  { name: "Bateria", icon: Battery, description: "Foto da bateria no compartimento do motor" },
+  { name: "CNH do condutor (upload de documento)", icon: FileText, description: "Upload do documento CNH do condutor" }
 ];
 
 const fuelLevels = [
@@ -43,6 +54,8 @@ const fuelLevels = [
 ];
 
 export function VehicleChecklist() {
+  const { criarChecklist, isCreating } = useVeiculosChecklists();
+  
   const [date, setDate] = useState<Date>(new Date());
   const [operationType, setOperationType] = useState<string>("");
   const [plate, setPlate] = useState<string>("");
@@ -53,41 +66,35 @@ export function VehicleChecklist() {
   const [odometer, setOdometer] = useState<string>("");
   const [observations, setObservations] = useState<string>("");
   const [uploads, setUploads] = useState<{[key: number]: File[]}>({});
+  const [uploadProgress, setUploadProgress] = useState<number>(0);
 
   const handleFileUpload = (positionIndex: number, files: FileList | null) => {
     if (!files) return;
 
     const validFiles: File[] = [];
     const allowedTypes = [
-      'application/msword',
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      'application/vnd.ms-excel',
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      'application/vnd.ms-powerpoint',
-      'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-      'application/pdf',
       'image/jpeg',
       'image/jpg', 
       'image/png',
-      'video/mp4',
-      'audio/mpeg',
-      'audio/mp3'
+      'image/webp',
+      'application/pdf',
+      'video/mp4'
     ];
 
     Array.from(files).forEach(file => {
-      if (file.size > 2 * 1024 * 1024) { // 2MB
+      if (file.size > 5 * 1024 * 1024) { // 5MB
         toast({
           title: "Arquivo muito grande",
-          description: `${file.name} excede o limite de 2MB`,
+          description: `${file.name} excede o limite de 5MB`,
           variant: "destructive"
         });
         return;
       }
 
-      if (!allowedTypes.includes(file.type) && !file.name.match(/\.(doc|docx|xls|xlsx|ppt|pptx|pdf|jpg|jpeg|png|mp4|mp3)$/i)) {
+      if (!allowedTypes.includes(file.type) && !file.name.match(/\.(jpg|jpeg|png|webp|pdf|mp4)$/i)) {
         toast({
           title: "Tipo de arquivo não permitido", 
-          description: `${file.name} não é um tipo de arquivo válido`,
+          description: `${file.name} não é um tipo de arquivo válido. Use: JPG, PNG, WEBP, PDF ou MP4`,
           variant: "destructive"
         });
         return;
@@ -133,59 +140,61 @@ export function VehicleChecklist() {
     }
 
     try {
-      // Processar fotos para armazenamento
-      const fotosProcessadas: {[posicao: number]: {arquivos: string[], files: File[]}} = {};
-      
-      for (const [posicao, arquivos] of Object.entries(uploads)) {
-        if (arquivos.length > 0) {
-          fotosProcessadas[parseInt(posicao)] = {
-            arquivos: arquivos.map(file => file.name),
-            files: arquivos
-          };
-        }
-      }
+      setUploadProgress(10);
 
-      // Calcular data limite (1 dia após a data atual)
-      const dataLimite = new Date();
-      dataLimite.setDate(dataLimite.getDate() + 1);
-
-      // Salvar no controle de checklists
-      const checklistId = ChecklistDataService.salvarChecklist({
-        data: format(date, "dd/MM/yyyy"),
+      // Preparar dados do checklist
+      const checklistData = {
+        data_checklist: format(date, "yyyy-MM-dd"),
         placa: plate.toUpperCase(),
-        condutor,
-        tipo: operationType === 'retirada' ? 'Retirada' : 'Devolução',
-        status: 'Concluído',
-        datalimite: format(dataLimite, "dd/MM/yyyy"),
-        observacoes: observations || 'Nenhuma observação',
-        tentativascobranca: 0,
-        fotos: fotosProcessadas,
-        dadosoriginais: {
-          nivelcombustivel: fuelLevel,
-          hodometro: odometer,
-          observacoesdetalhadas: observations,
-          marcamodelo: brandModel
+        veiculo_id: null,
+        marca_modelo: brandModel,
+        condutor_nome: condutor,
+        condutor_id: null,
+        tipo_operacao: (operationType === 'retirada' ? 'Retirada' : 'Devolução') as "Retirada" | "Devolução",
+        nivel_combustivel: fuelLevel || null,
+        hodometro: odometer ? parseInt(odometer) : null,
+        observacoes: observations || null,
+        observacoes_detalhadas: observations || null,
+        status: 'Concluído' as const,
+        data_limite: null,
+        tentativas_cobranca: 0,
+      };
+
+      setUploadProgress(30);
+
+      // Criar checklist com upload de fotos
+      criarChecklist(
+        {
+          checklist: checklistData,
+          fotos: uploads,
+        },
+        {
+          onSuccess: () => {
+            setUploadProgress(100);
+            // Limpar formulário
+            setTimeout(() => {
+              setDate(new Date());
+              setOperationType("");
+              setPlate("");
+              setBrandModel("");
+              setCondutor("");
+              setEmailCondutor("");
+              setFuelLevel("");
+              setOdometer("");
+              setObservations("");
+              setUploads({});
+              setUploadProgress(0);
+            }, 1000);
+          },
+          onError: () => {
+            setUploadProgress(0);
+          },
         }
-      });
+      );
 
-      toast({
-        title: "Checklist salvo!",
-        description: "O checklist foi salvo e adicionado ao controle automaticamente",
-      });
-
-      // Limpar formulário
-      setDate(new Date());
-      setOperationType("");
-      setPlate("");
-      setBrandModel("");
-      setCondutor("");
-      setEmailCondutor("");
-      setFuelLevel("");
-      setOdometer("");
-      setObservations("");
-      setUploads({});
-
+      setUploadProgress(60);
     } catch (error) {
+      setUploadProgress(0);
       toast({
         title: "Erro ao salvar",
         description: "Ocorreu um erro ao salvar o checklist",
@@ -357,42 +366,14 @@ export function VehicleChecklist() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    {/* Reference Image */}
+                    {/* Reference Icon */}
                     <div className="mb-3">
-                      <div className="relative group">
-                        <img 
-                          src={position.image} 
-                          alt={`Exemplo de ${position.name.toLowerCase()}`}
-                          className="w-full h-32 object-cover rounded-md border border-muted cursor-pointer transition-all hover:scale-105 hover:shadow-md"
-                        />
-                        <Dialog>
-                          <DialogTrigger asChild>
-                            <Button
-                              size="sm"
-                              variant="secondary"
-                              className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8 p-0"
-                            >
-                              <Maximize2 className="h-4 w-4" />
-                            </Button>
-                          </DialogTrigger>
-                          <DialogContent className="max-w-2xl">
-                            <div className="space-y-4">
-                              <h3 className="text-lg font-semibold">{position.name}</h3>
-                              <img 
-                                src={position.image} 
-                                alt={`Exemplo ampliado de ${position.name.toLowerCase()}`}
-                                className="w-full max-h-96 object-contain rounded-md"
-                              />
-                              <p className="text-sm text-muted-foreground text-center">
-                                Esta é a área que deve ser fotografada no veículo
-                              </p>
-                            </div>
-                          </DialogContent>
-                        </Dialog>
+                      <div className="bg-primary/10 rounded-lg p-4 text-center">
+                        <position.icon className="h-12 w-12 mx-auto mb-2 text-primary" />
+                        <p className="text-xs text-muted-foreground font-medium">
+                          {position.description}
+                        </p>
                       </div>
-                      <p className="text-xs text-muted-foreground mt-2 text-center font-medium">
-                        Exemplo da área a ser fotografada
-                      </p>
                     </div>
 
                     <div className="border-2 border-dashed border-muted rounded-lg p-4 text-center bg-muted/20 hover:bg-muted/30 transition-colors">
@@ -407,12 +388,12 @@ export function VehicleChecklist() {
                           type="file"
                           className="sr-only"
                           multiple
-                          accept=".doc,.docx,.xls,.xlsx,.ppt,.pptx,.pdf,.jpg,.jpeg,.png,.mp4,.mp3"
+                          accept="image/jpeg,image/jpg,image/png,image/webp,application/pdf,video/mp4"
                           onChange={(e) => handleFileUpload(index, e.target.files)}
                         />
                       </Label>
                       <p className="text-xs text-muted-foreground mt-1">
-                        Máx: 2MB | Formatos: Word, Excel, PPT, PDF, Imagem, Vídeo, Áudio
+                        Máx: 5MB | Formatos: JPG, PNG, WEBP, PDF, MP4
                       </p>
                     </div>
 
@@ -476,16 +457,39 @@ export function VehicleChecklist() {
           </CardContent>
         </Card>
 
-        {/* Botão de Submissão */}
-        <div className="text-center pb-6">
-          <Button
-            onClick={handleSubmit}
-            className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 shadow-lg px-8 py-6 text-lg font-semibold"
-            size="lg"
-          >
-            Salvar Checklist
-          </Button>
-        </div>
+        {/* Botões de ação */}
+        <Card className="shadow-lg">
+          <CardContent className="pt-6 space-y-4">
+            {uploadProgress > 0 && uploadProgress < 100 && (
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">
+                    <Zap className="h-4 w-4 inline mr-1" />
+                    Salvando checklist...
+                  </span>
+                  <span className="font-medium">{uploadProgress}%</span>
+                </div>
+                <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
+                  <div 
+                    className="bg-primary h-full transition-all duration-300"
+                    style={{ width: `${uploadProgress}%` }}
+                  />
+                </div>
+              </div>
+            )}
+            <div className="flex gap-4">
+              <Button 
+                onClick={handleSubmit}
+                className="flex-1 bg-primary hover:bg-primary/90"
+                size="lg"
+                disabled={isCreating || uploadProgress > 0}
+              >
+                <FileCheck className="mr-2 h-5 w-5" />
+                {isCreating ? "Salvando..." : "Salvar Checklist"}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
