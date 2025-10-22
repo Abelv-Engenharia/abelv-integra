@@ -201,6 +201,27 @@ export default function CadastroPessoaJuridica() {
     return numbers.replace(/(\d{2})(\d{5})(\d{4})/, "($1) $2-$3");
   };
 
+  const formatarData = (value: string) => {
+    const numbers = value.replace(/\D/g, "");
+    if (numbers.length <= 2) {
+      return numbers;
+    } else if (numbers.length <= 4) {
+      return numbers.replace(/(\d{2})(\d{0,2})/, "$1/$2");
+    } else {
+      return numbers.replace(/(\d{2})(\d{2})(\d{0,4})/, "$1/$2/$3").slice(0, 10);
+    }
+  };
+
+  const parseDataString = (dataStr: string): Date | undefined => {
+    if (!dataStr || dataStr.length !== 10) return undefined;
+    const [dia, mes, ano] = dataStr.split('/').map(Number);
+    if (!dia || !mes || !ano) return undefined;
+    if (dia < 1 || dia > 31 || mes < 1 || mes > 12 || ano < 1900) return undefined;
+    const data = new Date(ano, mes - 1, dia);
+    if (data.getDate() !== dia || data.getMonth() !== mes - 1) return undefined;
+    return data;
+  };
+
   const handleBuscarCNPJ = async () => {
     const cnpj = form.getValues("cnpj");
     const cnpjNumbers = cnpj.replace(/\D/g, "");
@@ -534,19 +555,48 @@ export default function CadastroPessoaJuridica() {
                 field
               }) => <FormItem>
                       <FormLabel>Data de Nascimento</FormLabel>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <FormControl>
-                            <Button variant="outline" className={cn("w-full pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>
-                              {field.value ? format(field.value, "dd/MM/yyyy") : <span>Selecione a data</span>}
-                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                      <div className="relative">
+                        <FormControl>
+                          <Input
+                            placeholder="DD/MM/AAAA"
+                            value={field.value ? format(field.value, "dd/MM/yyyy") : ""}
+                            onChange={(e) => {
+                              const formatted = formatarData(e.target.value);
+                              const parsedDate = parseDataString(formatted);
+                              if (parsedDate) {
+                                field.onChange(parsedDate);
+                              } else if (formatted.length < 10) {
+                                // Permite continuar digitando
+                                field.onChange(undefined);
+                              }
+                            }}
+                            maxLength={10}
+                            className="pr-10"
+                          />
+                        </FormControl>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
+                              type="button"
+                            >
+                              <CalendarIcon className="h-4 w-4 opacity-50" />
                             </Button>
-                          </FormControl>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                          <Calendar mode="single" selected={field.value} onSelect={field.onChange} disabled={date => date > new Date() || date < new Date("1900-01-01")} initialFocus className={cn("p-3 pointer-events-auto")} />
-                        </PopoverContent>
-                      </Popover>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar 
+                              mode="single" 
+                              selected={field.value} 
+                              onSelect={field.onChange} 
+                              disabled={date => date > new Date() || date < new Date("1900-01-01")} 
+                              initialFocus 
+                              className={cn("p-3 pointer-events-auto")} 
+                            />
+                          </PopoverContent>
+                        </Popover>
+                      </div>
                       <FormMessage />
                     </FormItem>} />
 
