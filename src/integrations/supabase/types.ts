@@ -7992,6 +7992,117 @@ export type Database = {
           },
         ]
       }
+      veiculos_calculos_rotas: {
+        Row: {
+          cartao_id: string | null
+          consumo_km_l: number
+          created_at: string | null
+          created_by: string | null
+          custo_estimado_base: number
+          custo_estimado_com_margem: number
+          dias_uteis: number
+          diferenca_limite: number | null
+          distancia_total_mensal_km: number
+          endereco_base: string
+          endereco_base_nome: string
+          endereco_obra: string
+          endereco_obra_nome: string
+          frequencia_diaria: number
+          id: string
+          limite_atual_cartao: number | null
+          litros_necessarios: number
+          margem_seguranca_pct: number
+          modelo: string
+          observacoes: string | null
+          percentual_diferenca: number | null
+          placa: string
+          preco_combustivel_litro: number
+          rota_principal: Json
+          tipo_combustivel: string
+          trajetos_adicionais: Json | null
+          updated_at: string | null
+          valor_margem_seguranca: number
+          veiculo_id: string | null
+        }
+        Insert: {
+          cartao_id?: string | null
+          consumo_km_l: number
+          created_at?: string | null
+          created_by?: string | null
+          custo_estimado_base: number
+          custo_estimado_com_margem: number
+          dias_uteis: number
+          diferenca_limite?: number | null
+          distancia_total_mensal_km: number
+          endereco_base: string
+          endereco_base_nome: string
+          endereco_obra: string
+          endereco_obra_nome: string
+          frequencia_diaria: number
+          id?: string
+          limite_atual_cartao?: number | null
+          litros_necessarios: number
+          margem_seguranca_pct: number
+          modelo: string
+          observacoes?: string | null
+          percentual_diferenca?: number | null
+          placa: string
+          preco_combustivel_litro: number
+          rota_principal: Json
+          tipo_combustivel: string
+          trajetos_adicionais?: Json | null
+          updated_at?: string | null
+          valor_margem_seguranca: number
+          veiculo_id?: string | null
+        }
+        Update: {
+          cartao_id?: string | null
+          consumo_km_l?: number
+          created_at?: string | null
+          created_by?: string | null
+          custo_estimado_base?: number
+          custo_estimado_com_margem?: number
+          dias_uteis?: number
+          diferenca_limite?: number | null
+          distancia_total_mensal_km?: number
+          endereco_base?: string
+          endereco_base_nome?: string
+          endereco_obra?: string
+          endereco_obra_nome?: string
+          frequencia_diaria?: number
+          id?: string
+          limite_atual_cartao?: number | null
+          litros_necessarios?: number
+          margem_seguranca_pct?: number
+          modelo?: string
+          observacoes?: string | null
+          percentual_diferenca?: number | null
+          placa?: string
+          preco_combustivel_litro?: number
+          rota_principal?: Json
+          tipo_combustivel?: string
+          trajetos_adicionais?: Json | null
+          updated_at?: string | null
+          valor_margem_seguranca?: number
+          veiculo_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "veiculos_calculos_rotas_cartao_id_fkey"
+            columns: ["cartao_id"]
+            isOneToOne: false
+            referencedRelation: "veiculos_cartoes_abastecimento"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "veiculos_calculos_rotas_veiculo_id_fkey"
+            columns: ["veiculo_id"]
+            isOneToOne: false
+            referencedRelation: "veiculos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       veiculos_cartoes_abastecimento: {
         Row: {
           ativo: boolean

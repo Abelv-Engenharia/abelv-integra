@@ -54,4 +54,9 @@ export interface CalculoEstimativaCartao {
   percentualDiferenca?: number;
   dataCalculo: Date;
   observacoes?: string;
+  // Campos opcionais para endereços completos
+  enderecoBaseNome?: string;
+  enderecoBase?: string;
+  enderecoObraNome?: string;
+  enderecoObra?: string;
 }

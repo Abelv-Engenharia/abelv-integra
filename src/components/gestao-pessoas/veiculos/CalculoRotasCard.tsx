@@ -14,20 +14,26 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { toast } from "@/hooks/use-toast";
 import type { EnderecoRota, CalculoEstimativaCartao } from "@/types/gestao-pessoas/route";
 import { calcularEstimativaCompleta } from "@/services/gestao-pessoas/RouteCalculationService";
+import { generateRouteReportPDF } from "./GenerateRouteReportPDF";
 
 interface CalculoRotasCardProps {
   veiculos: Array<{
-    id: number;
+    id: string;
     placa: string;
-    modelo: string;
-    status: string;
+    marca_modelo?: string;
+    modelo?: string;
+    status?: string;
+    ativo?: boolean;
   }>;
   cartoes: Array<{
-    id: number;
-    placa: string;
-    numeroCartao: string;
-    limiteCredito: number;
-    status: string;
+    id: string;
+    placa?: string;
+    numero_cartao?: string;
+    numeroCartao?: string;
+    limite_credito?: number;
+    limiteCredito?: number;
+    status?: string;
+    ativo?: boolean;
   }>;
   onCalculoSalvo?: (calculo: CalculoEstimativaCartao) => void;
 }
@@ -62,7 +68,7 @@ export function CalculoRotasCard({ veiculos, cartoes, onCalculoSalvo }: CalculoR
   const [calculando, setCalculando] = useState(false);
   const [resultado, setResultado] = useState<CalculoEstimativaCartao | null>(null);
 
-  const veiculoAtual = veiculos.find(v => v.id.toString() === veiculoSelecionado);
+  const veiculoAtual = veiculos.find(v => v.id === veiculoSelecionado);
   const cartaoVeiculo = cartoes.find(c => c.placa === veiculoAtual?.placa);
 
   const adicionarTrajeto = () => {
@@ -117,11 +123,11 @@ export function CalculoRotasCard({ veiculos, cartoes, onCalculoSalvo }: CalculoR
       const config = {
         veiculoId: veiculoSelecionado,
         placa: veiculoAtual!.placa,
-        modelo: veiculoAtual!.modelo,
+        modelo: veiculoAtual!.marca_modelo || veiculoAtual!.modelo || '',
         consumoMedioKmL: parseFloat(consumoKmL),
         tipoCombustivel: tipoCombustivel as 'gasolina' | 'diesel' | 'etanol' | 'flex',
-        cartaoId: cartaoVeiculo?.id.toString(),
-        limiteAtualCartao: cartaoVeiculo?.limiteCredito
+        cartaoId: cartaoVeiculo?.id,
+        limiteAtualCartao: cartaoVeiculo?.limite_credito || cartaoVeiculo?.limiteCredito
       };
 
       const enderecoBaseObj: EnderecoRota = {
@@ -197,10 +203,28 @@ export function CalculoRotasCard({ veiculos, cartoes, onCalculoSalvo }: CalculoR
 
   const salvarCalculo = () => {
     if (resultado && onCalculoSalvo) {
-      onCalculoSalvo(resultado);
+      onCalculoSalvo({
+        ...resultado,
+        enderecoBaseNome: enderecoBase.nome,
+        enderecoBase: enderecoBase.endereco,
+        enderecoObraNome: enderecoObra.nome,
+        enderecoObra: enderecoObra.endereco,
+      });
+    }
+  };
+
+  const exportarPDF = () => {
+    if (resultado) {
+      generateRouteReportPDF({
+        ...resultado,
+        enderecoBaseNome: enderecoBase.nome,
+        enderecoBase: enderecoBase.endereco,
+        enderecoObraNome: enderecoObra.nome,
+        enderecoObra: enderecoObra.endereco,
+      });
       toast({
-        title: "Cálculo salvo",
-        description: "Estimativa adicionada ao histórico"
+        title: "PDF exportado",
+        description: "O relatório foi baixado com sucesso"
       });
     }
   };
@@ -222,9 +246,9 @@ export function CalculoRotasCard({ veiculos, cartoes, onCalculoSalvo }: CalculoR
                   <SelectValue placeholder="Selecione um veículo" />
                 </SelectTrigger>
                 <SelectContent>
-                  {veiculos.filter(v => v.status === "Ativo").map(veiculo => (
-                    <SelectItem key={veiculo.id} value={veiculo.id.toString()}>
-                      {veiculo.placa} - {veiculo.modelo}
+                  {veiculos.filter(v => v.ativo !== false).map(veiculo => (
+                    <SelectItem key={veiculo.id} value={veiculo.id}>
+                      {veiculo.placa} - {veiculo.marca_modelo || veiculo.modelo}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -235,13 +259,15 @@ export function CalculoRotasCard({ veiculos, cartoes, onCalculoSalvo }: CalculoR
               <div className="space-y-2">
                 <Label>Cartão Vinculado</Label>
                 <div className="p-3 border rounded-md bg-muted">
-                  <p className="text-sm font-medium">{cartaoVeiculo.numeroCartao}</p>
+                  <p className="text-sm font-medium">{cartaoVeiculo.numero_cartao || cartaoVeiculo.numeroCartao}</p>
                   <p className="text-sm text-muted-foreground">
-                    Limite: R$ {cartaoVeiculo.limiteCredito.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                    Limite: R$ {(cartaoVeiculo.limite_credito || cartaoVeiculo.limiteCredito || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                   </p>
-                  <Badge variant={cartaoVeiculo.status === "Ativo" ? "default" : "secondary"} className="mt-1">
-                    {cartaoVeiculo.status}
-                  </Badge>
+                  {cartaoVeiculo.status && (
+                    <Badge variant={cartaoVeiculo.status === "Ativo" || cartaoVeiculo.ativo ? "default" : "secondary"} className="mt-1">
+                      {cartaoVeiculo.status || (cartaoVeiculo.ativo ? "Ativo" : "Inativo")}
+                    </Badge>
+                  )}
                 </div>
               </div>
             )}
@@ -688,7 +714,7 @@ export function CalculoRotasCard({ veiculos, cartoes, onCalculoSalvo }: CalculoR
               <Save className="h-4 w-4 mr-2" />
               Salvar no Histórico
             </Button>
-            <Button variant="outline">
+            <Button variant="outline" onClick={exportarPDF}>
               <FileText className="h-4 w-4 mr-2" />
               Exportar PDF
             </Button>

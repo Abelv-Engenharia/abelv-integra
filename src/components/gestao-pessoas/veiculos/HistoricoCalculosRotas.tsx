@@ -2,17 +2,34 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Eye, FileText, Trash2 } from "lucide-react";
+import { Eye, FileText, Trash2, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import type { CalculoEstimativaCartao } from "@/types/gestao-pessoas/route";
+import { generateRouteReportPDF } from "./GenerateRouteReportPDF";
+import { toast } from "@/hooks/use-toast";
 
 interface HistoricoCalculosRotasProps {
   calculos: CalculoEstimativaCartao[];
   onExcluir: (id: string) => void;
+  isLoading?: boolean;
 }
 
-export function HistoricoCalculosRotas({ calculos, onExcluir }: HistoricoCalculosRotasProps) {
+export function HistoricoCalculosRotas({ calculos, onExcluir, isLoading }: HistoricoCalculosRotasProps) {
+  if (isLoading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Histórico de Cálculos</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-center py-8">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
   if (calculos.length === 0) {
     return (
       <Card>
@@ -95,16 +112,25 @@ export function HistoricoCalculosRotas({ calculos, onExcluir }: HistoricoCalculo
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
-                        <Button variant="ghost" size="sm">
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="sm">
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => {
+                            generateRouteReportPDF(calculo);
+                            toast({
+                              title: "PDF exportado",
+                              description: "O relatório foi baixado com sucesso"
+                            });
+                          }}
+                          title="Exportar PDF"
+                        >
                           <FileText className="h-4 w-4" />
                         </Button>
                         <Button 
                           variant="ghost" 
                           size="sm"
                           onClick={() => onExcluir(calculo.id)}
+                          title="Excluir"
                         >
                           <Trash2 className="h-4 w-4 text-destructive" />
                         </Button>
