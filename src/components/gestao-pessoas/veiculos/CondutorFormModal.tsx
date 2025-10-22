@@ -12,7 +12,20 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { useState, useEffect } from "react";
-import { Upload } from "lucide-react";
+import { FileCheck } from "lucide-react";
+
+// Funções auxiliares para formatação de CPF
+const formatCPF = (cpf: string): string => {
+  const cleaned = cpf.replace(/\D/g, '');
+  if (cleaned.length === 11) {
+    return cleaned.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+  }
+  return cpf;
+};
+
+const removeCPFMask = (cpf: string): string => {
+  return cpf.replace(/\D/g, '');
+};
 
 const formSchema = z.object({
   nome_condutor: z.string().min(1, "Nome é obrigatório"),
@@ -44,14 +57,14 @@ export function CondutorFormModal({ open, onOpenChange, itemParaEdicao, onSucces
     resolver: zodResolver(formSchema),
     defaultValues: itemParaEdicao ? {
       nome_condutor: itemParaEdicao.nome_condutor,
-      cpf: itemParaEdicao.cpf,
+      cpf: formatCPF(itemParaEdicao.cpf),
       categoria_cnh: itemParaEdicao.categoria_cnh,
       validade_cnh: itemParaEdicao.validade_cnh ? format(new Date(itemParaEdicao.validade_cnh), "yyyy-MM-dd") : "",
       status_cnh: itemParaEdicao.status_cnh,
       numero_cnh: itemParaEdicao.numero_cnh || "",
       observacao: itemParaEdicao.observacao || "",
     } : {
-      status_cnh: "válida"
+      status_cnh: "ativa"
     }
   });
 
@@ -59,7 +72,7 @@ export function CondutorFormModal({ open, onOpenChange, itemParaEdicao, onSucces
     if (open && itemParaEdicao) {
       reset({
         nome_condutor: itemParaEdicao.nome_condutor,
-        cpf: itemParaEdicao.cpf,
+        cpf: formatCPF(itemParaEdicao.cpf),
         categoria_cnh: itemParaEdicao.categoria_cnh,
         validade_cnh: itemParaEdicao.validade_cnh ? format(new Date(itemParaEdicao.validade_cnh), "yyyy-MM-dd") : "",
         status_cnh: itemParaEdicao.status_cnh,
@@ -72,7 +85,7 @@ export function CondutorFormModal({ open, onOpenChange, itemParaEdicao, onSucces
         cpf: "",
         categoria_cnh: "",
         validade_cnh: "",
-        status_cnh: "válida",
+        status_cnh: "ativa",
         numero_cnh: "",
         observacao: "",
       });
@@ -124,7 +137,7 @@ export function CondutorFormModal({ open, onOpenChange, itemParaEdicao, onSucces
         .from('veiculos_condutores')
         .insert([{ 
           nome_condutor: values.nome_condutor,
-          cpf: values.cpf,
+          cpf: removeCPFMask(values.cpf),
           categoria_cnh: values.categoria_cnh,
           validade_cnh: values.validade_cnh,
           status_cnh: values.status_cnh,
@@ -158,7 +171,10 @@ export function CondutorFormModal({ open, onOpenChange, itemParaEdicao, onSucces
         termoData = await uploadTermo();
       }
 
-      const updateData: any = { ...values };
+      const updateData: any = { 
+        ...values,
+        cpf: removeCPFMask(values.cpf)
+      };
       if (termoData) {
         updateData.termo_anexado_url = termoData.url;
         updateData.termo_anexado_nome = termoData.nome;
@@ -247,7 +263,7 @@ export function CondutorFormModal({ open, onOpenChange, itemParaEdicao, onSucces
                   <SelectValue placeholder="Selecione" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="válida">Válida</SelectItem>
+                  <SelectItem value="ativa">Ativa</SelectItem>
                   <SelectItem value="vencida">Vencida</SelectItem>
                   <SelectItem value="suspensa">Suspensa</SelectItem>
                 </SelectContent>
@@ -257,6 +273,24 @@ export function CondutorFormModal({ open, onOpenChange, itemParaEdicao, onSucces
 
             <div className="col-span-2">
               <Label>Termo de Responsabilidade</Label>
+              
+              {isEditMode && itemParaEdicao.termo_anexado_url && (
+                <div className="mb-2 p-3 bg-muted rounded-md">
+                  <div className="flex items-center gap-2">
+                    <FileCheck className="h-4 w-4 text-primary" />
+                    <span className="text-sm font-medium">Documento atual:</span>
+                    <a 
+                      href={itemParaEdicao.termo_anexado_url} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-sm text-primary hover:underline"
+                    >
+                      {itemParaEdicao.termo_anexado_nome || "Visualizar documento"}
+                    </a>
+                  </div>
+                </div>
+              )}
+              
               <div className="flex items-center gap-2 mt-1">
                 <Input
                   type="file"
@@ -264,8 +298,12 @@ export function CondutorFormModal({ open, onOpenChange, itemParaEdicao, onSucces
                   onChange={handleFileChange}
                   className="flex-1"
                 />
-                {termoFile && (
+                {termoFile ? (
                   <span className="text-sm text-muted-foreground">{termoFile.name}</span>
+                ) : (
+                  <span className="text-sm text-muted-foreground">
+                    {isEditMode ? "Selecione para substituir" : "Nenhum arquivo escolhido"}
+                  </span>
                 )}
               </div>
             </div>
