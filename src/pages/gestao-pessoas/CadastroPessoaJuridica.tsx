@@ -438,28 +438,6 @@ export default function CadastroPessoaJuridica() {
                   </FormItem>} />
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField control={form.control} name="numerocredorsienge" render={({
-                field
-              }) => <FormItem>
-                      <FormLabel>Nº de Credor Sienge</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Digite o número de credor Sienge" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>} />
-
-                <FormField control={form.control} name="contabancaria" render={({
-                field
-              }) => <FormItem>
-                      <FormLabel>Chave Pix</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Digite a chave pix" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>} />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField control={form.control} name="telefone" render={({
                 field
               }) => <FormItem>
@@ -479,6 +457,28 @@ export default function CadastroPessoaJuridica() {
                     </FormControl>
                     <FormMessage />
                   </FormItem>} />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField control={form.control} name="numerocredorsienge" render={({
+                field
+              }) => <FormItem>
+                      <FormLabel>Nº de Credor Sienge</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Digite o número de credor Sienge" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>} />
+
+                <FormField control={form.control} name="contabancaria" render={({
+                field
+              }) => <FormItem>
+                      <FormLabel>Chave Pix</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Digite a chave pix" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>} />
               </div>
             </CardContent>
           </Card>
