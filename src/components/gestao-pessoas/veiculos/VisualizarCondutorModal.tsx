@@ -116,14 +116,14 @@ export function VisualizarCondutorModal({ condutor, open, onOpenChange, onEditar
             </CardContent>
           </Card>
 
-          {/* Documentos */}
+          {/* CNH */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Documentos</CardTitle>
+              <CardTitle className="text-base">CNH</CardTitle>
             </CardHeader>
             <CardContent>
               <div>
-                <label className="text-sm font-medium text-muted-foreground">Termo de Responsabilidade</label>
+                <label className="text-sm font-medium text-muted-foreground">CNH Anexada</label>
                 <div className="mt-2">
                   {condutor.termo_anexado_url ? (
                     <a 
@@ -133,10 +133,10 @@ export function VisualizarCondutorModal({ condutor, open, onOpenChange, onEditar
                       className="flex items-center gap-2 text-sm text-primary hover:underline"
                     >
                       <FileCheck className="h-4 w-4" />
-                      {condutor.termo_anexado_nome || "Termo anexado"}
+                      {condutor.termo_anexado_nome || "Visualizar CNH"}
                     </a>
                   ) : (
-                    <Badge variant="secondary">Não anexado</Badge>
+                    <Badge variant="secondary">Não anexada</Badge>
                   )}
                 </div>
               </div>
