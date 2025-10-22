@@ -4,7 +4,9 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { MapPin, Navigation } from "lucide-react";
+import { MapPin, Navigation, Search, Loader2 } from "lucide-react";
+import { useViaCep } from "@/hooks/gestao-pessoas/useViaCep";
+import { toast } from "@/hooks/use-toast";
 
 interface AddressInputProps {
   label: string;
@@ -26,6 +28,11 @@ export function AddressInput({
   const [modoManual, setModoManual] = useState(false);
   const [latitude, setLatitude] = useState("");
   const [longitude, setLongitude] = useState("");
+  const [cep, setCep] = useState("");
+  const [numero, setNumero] = useState("");
+  const [complemento, setComplemento] = useState("");
+  
+  const { buscarEndereco, loading: loadingCep, error: errorCep } = useViaCep();
 
   const aplicarCoordenadas = () => {
     if (latitude && longitude) {
@@ -35,7 +42,11 @@ export function AddressInput({
 
   const obterLocalizacaoAtual = () => {
     if (!navigator.geolocation) {
-      alert("Geolocalização não é suportada pelo seu navegador");
+      toast({
+        title: "Erro",
+        description: "Geolocalização não é suportada pelo seu navegador",
+        variant: "destructive"
+      });
       return;
     }
 
@@ -46,11 +57,49 @@ export function AddressInput({
         setLatitude(lat);
         setLongitude(lng);
         onEnderecoChange(`${lat},${lng}`);
+        toast({
+          title: "Localização Obtida",
+          description: "Coordenadas atualizadas com sucesso"
+        });
       },
       (error) => {
-        alert("Não foi possível obter sua localização: " + error.message);
+        toast({
+          title: "Erro",
+          description: "Não foi possível obter sua localização: " + error.message,
+          variant: "destructive"
+        });
       }
     );
+  };
+
+  const buscarCep = async () => {
+    if (!cep) {
+      toast({
+        title: "CEP vazio",
+        description: "Digite um CEP para buscar",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const resultado = await buscarEndereco(cep);
+    
+    if (resultado) {
+      // Montar endereço completo
+      const enderecoCompleto = `${resultado.logradouro}${numero ? ', ' + numero : ''}${complemento ? ' - ' + complemento : ''} - ${resultado.bairro}, ${resultado.cidade} - ${resultado.uf}, Brasil`;
+      onEnderecoChange(enderecoCompleto);
+      
+      toast({
+        title: "CEP Encontrado",
+        description: "Endereço preenchido automaticamente"
+      });
+    } else {
+      toast({
+        title: "CEP não encontrado",
+        description: errorCep || "Verifique o CEP digitado",
+        variant: "destructive"
+      });
+    }
   };
 
   return (
@@ -68,17 +117,67 @@ export function AddressInput({
 
       {!modoManual ? (
         <>
-          <Textarea
-            id={name}
-            value={endereco}
-            onChange={(e) => onEnderecoChange(e.target.value)}
-            placeholder={placeholder}
-            rows={3}
-            className={required && !endereco ? "border-destructive" : ""}
-          />
-          <p className="text-xs text-muted-foreground">
-            Exemplo: Rua XV de Novembro, 500 - Centro, Curitiba - PR, Brasil
-          </p>
+          {/* Busca por CEP */}
+          <div className="space-y-2 p-3 bg-muted/50 rounded-md">
+            <Label className="text-xs font-medium">Buscar por CEP</Label>
+            <div className="grid grid-cols-12 gap-2">
+              <Input
+                placeholder="00000-000"
+                value={cep}
+                onChange={(e) => setCep(e.target.value)}
+                maxLength={9}
+                className="col-span-3"
+              />
+              <Input
+                placeholder="Número"
+                value={numero}
+                onChange={(e) => setNumero(e.target.value)}
+                className="col-span-2"
+              />
+              <Input
+                placeholder="Complemento"
+                value={complemento}
+                onChange={(e) => setComplemento(e.target.value)}
+                className="col-span-4"
+              />
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                onClick={buscarCep}
+                disabled={loadingCep || !cep}
+                className="col-span-3"
+              >
+                {loadingCep ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Buscando...
+                  </>
+                ) : (
+                  <>
+                    <Search className="h-4 w-4 mr-2" />
+                    Buscar
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+          
+          {/* Campo de endereço manual */}
+          <div className="space-y-2">
+            <Label htmlFor={name}>Ou digite o endereço completo</Label>
+            <Textarea
+              id={name}
+              value={endereco}
+              onChange={(e) => onEnderecoChange(e.target.value)}
+              placeholder={placeholder}
+              rows={3}
+              className={required && !endereco ? "border-destructive" : ""}
+            />
+            <p className="text-xs text-muted-foreground">
+              Exemplo: Rua XV de Novembro, 500 - Centro, Curitiba - PR, Brasil
+            </p>
+          </div>
         </>
       ) : (
         <div className="space-y-3">
