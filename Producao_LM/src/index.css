@@ -1,0 +1,174 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* LMD Design System - Professional Document Management Interface */
+
+@layer base {
+  :root {
+    /* Base colors */
+    --background: 240 10% 98%;
+    --foreground: 222 47% 11%;
+
+    /* Card system */
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+
+    /* Popovers */
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+
+    /* Primary brand - Corporate blue */
+    --primary: 214 84% 45%;
+    --primary-foreground: 0 0% 100%;
+    --primary-hover: 214 84% 40%;
+
+    /* Secondary - Professional gray */
+    --secondary: 210 20% 96%;
+    --secondary-foreground: 222 47% 11%;
+    --secondary-hover: 210 20% 92%;
+
+    /* Muted elements */
+    --muted: 210 20% 96%;
+    --muted-foreground: 215 15% 47%;
+
+    /* Accent - Success green */
+    --accent: 142 76% 36%;
+    --accent-foreground: 0 0% 100%;
+    --accent-hover: 142 76% 32%;
+
+    /* Status colors */
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 100%;
+    
+    --warning: 43 96% 56%;
+    --warning-foreground: 0 0% 100%;
+    
+    --danger: 0 84% 60%;
+    --danger-foreground: 0 0% 100%;
+
+    --info: 214 84% 45%;
+    --info-foreground: 0 0% 100%;
+
+    /* Form elements */
+    --border: 214 20% 89%;
+    --input: 214 20% 89%;
+    --input-focus: 214 84% 45%;
+    --ring: 214 84% 45%;
+
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(214 84% 52%));
+    --gradient-success: linear-gradient(135deg, hsl(var(--success)), hsl(142 76% 42%));
+    --gradient-subtle: linear-gradient(180deg, hsl(var(--background)), hsl(240 10% 96%));
+
+    /* Shadows */
+    --shadow-sm: 0 1px 2px 0 hsl(0 0% 0% / 0.05);
+    --shadow-md: 0 4px 6px -1px hsl(0 0% 0% / 0.1), 0 2px 4px -2px hsl(0 0% 0% / 0.1);
+    --shadow-lg: 0 10px 15px -3px hsl(0 0% 0% / 0.1), 0 4px 6px -4px hsl(0 0% 0% / 0.1);
+    --shadow-primary: 0 4px 15px hsl(var(--primary) / 0.25);
+
+    /* Spacing and sizing */
+    --radius: 0.75rem;
+    --radius-sm: 0.5rem;
+    --radius-lg: 1rem;
+
+    /* Animations */
+    --transition-base: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-fast: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .dark {
+    --background: 222 47% 7%;
+    --foreground: 210 40% 98%;
+
+    --card: 222 47% 9%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222 47% 9%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 214 84% 55%;
+    --primary-foreground: 0 0% 100%;
+    --primary-hover: 214 84% 50%;
+
+    --secondary: 217 33% 17%;
+    --secondary-foreground: 210 40% 98%;
+    --secondary-hover: 217 33% 22%;
+
+    --muted: 217 33% 17%;
+    --muted-foreground: 215 20% 65%;
+
+    --accent: 142 76% 40%;
+    --accent-foreground: 0 0% 100%;
+    --accent-hover: 142 76% 35%;
+
+    --success: 142 76% 40%;
+    --warning: 43 96% 60%;
+    --danger: 0 84% 65%;
+    --info: 214 84% 55%;
+
+    --border: 217 33% 17%;
+    --input: 217 33% 17%;
+    --input-focus: 214 84% 55%;
+    --ring: 214 84% 55%;
+
+    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(214 84% 62%));
+    --gradient-success: linear-gradient(135deg, hsl(var(--success)), hsl(142 76% 47%));
+    --gradient-subtle: linear-gradient(180deg, hsl(var(--background)), hsl(222 47% 9%));
+
+    --shadow-primary: 0 4px 15px hsl(var(--primary) / 0.3);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  /* Custom animations */
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-out;
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.3s ease-out;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes slideUp {
+    from { 
+      opacity: 0;
+      transform: translateY(10px); 
+    }
+    to { 
+      opacity: 1;
+      transform: translateY(0); 
+    }
+  }
+
+  /* Status badge styles */
+  .status-badge-elaboracao {
+    @apply bg-blue-100 text-blue-800 border-blue-200;
+  }
+
+  .status-badge-revisao {
+    @apply bg-yellow-100 text-yellow-800 border-yellow-200;
+  }
+
+  .status-badge-aprovado {
+    @apply bg-green-100 text-green-800 border-green-200;
+  }
+
+  .status-badge-obsoleto {
+    @apply bg-gray-100 text-gray-800 border-gray-200;
+  }
+}
