@@ -29,7 +29,7 @@ export function ConsultaPedagiosTab() {
       valor: pedagio.valor,
       local: pedagio.local,
       horario: pedagio.horario,
-      cca: pedagio.cca,
+      cca_id: pedagio.cca_id || null,
       finalidade: pedagio.finalidade || pedagio.observacao,
       ativo: true,
     }),
@@ -149,7 +149,7 @@ export function ConsultaPedagiosTab() {
                     minimumFractionDigits: 2
                   })}
                       </TableCell>
-                      <TableCell>{pedagio.cca}</TableCell>
+                      <TableCell>{pedagio.cca_id || '-'}</TableCell>
                       <TableCell className="max-w-[150px] truncate">{pedagio.finalidade}</TableCell>
                       <TableCell>
                         <div className="flex gap-1">

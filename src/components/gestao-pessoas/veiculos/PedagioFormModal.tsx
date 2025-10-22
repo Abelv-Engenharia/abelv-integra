@@ -21,7 +21,7 @@ const formSchema = z.object({
   tipo_servico: z.string().min(1, "Tipo é obrigatório"),
   local: z.string().min(1, "Local é obrigatório"),
   valor: z.string().min(1, "Valor é obrigatório"),
-  cca: z.string().optional(),
+  cca_id: z.string().optional(),
   finalidade: z.string().optional(),
 });
 
@@ -49,7 +49,7 @@ export function PedagioFormModal({ open, onOpenChange, itemParaEdicao, onSuccess
       tipo_servico: itemParaEdicao.tipo_servico,
       local: itemParaEdicao.local,
       valor: itemParaEdicao.valor?.toString() || "",
-      cca: itemParaEdicao.cca || "",
+      cca_id: itemParaEdicao.cca_id?.toString() || "",
       finalidade: itemParaEdicao.finalidade || "",
     } : undefined
   });
@@ -64,7 +64,7 @@ export function PedagioFormModal({ open, onOpenChange, itemParaEdicao, onSuccess
         tipo_servico: itemParaEdicao.tipo_servico,
         local: itemParaEdicao.local,
         valor: itemParaEdicao.valor?.toString() || "",
-        cca: itemParaEdicao.cca || "",
+        cca_id: itemParaEdicao.cca_id?.toString() || "",
         finalidade: itemParaEdicao.finalidade || "",
       });
     } else if (open && !itemParaEdicao) {
@@ -76,7 +76,7 @@ export function PedagioFormModal({ open, onOpenChange, itemParaEdicao, onSuccess
         tipo_servico: "",
         local: "",
         valor: "",
-        cca: "",
+        cca_id: "",
         finalidade: "",
       });
     }
@@ -94,7 +94,7 @@ export function PedagioFormModal({ open, onOpenChange, itemParaEdicao, onSuccess
           tipo_servico: values.tipo_servico,
           local: values.local,
           valor: parseFloat(values.valor),
-          cca: values.cca,
+          cca_id: values.cca_id ? parseInt(values.cca_id) : null,
           finalidade: values.finalidade
         }])
         .select()
@@ -119,9 +119,15 @@ export function PedagioFormModal({ open, onOpenChange, itemParaEdicao, onSuccess
       const { error } = await supabase
         .from('veiculos_pedagogios_estacionamentos')
         .update({ 
-          ...values, 
           placa: values.placa.toUpperCase(),
-          valor: parseFloat(values.valor)
+          condutor_nome: values.condutor_nome,
+          data_utilizacao: values.data_utilizacao,
+          horario: values.horario,
+          tipo_servico: values.tipo_servico,
+          local: values.local,
+          valor: parseFloat(values.valor),
+          cca_id: values.cca_id ? parseInt(values.cca_id) : null,
+          finalidade: values.finalidade
         })
         .eq('id', itemParaEdicao.id);
       if (error) throw error;
@@ -210,8 +216,8 @@ export function PedagioFormModal({ open, onOpenChange, itemParaEdicao, onSuccess
             </div>
 
             <div>
-              <Label>CCA</Label>
-              <Input {...register("cca")} />
+              <Label>CCA (ID)</Label>
+              <Input {...register("cca_id")} placeholder="ID do CCA" />
             </div>
 
             <div className="col-span-2">

@@ -8378,7 +8378,7 @@ export type Database = {
       }
       veiculos_pedagogios_estacionamentos: {
         Row: {
-          cca: string | null
+          cca_id: number | null
           condutor_id: string | null
           condutor_nome: string
           created_at: string
@@ -8396,7 +8396,7 @@ export type Database = {
           veiculo_id: string | null
         }
         Insert: {
-          cca?: string | null
+          cca_id?: number | null
           condutor_id?: string | null
           condutor_nome: string
           created_at?: string
@@ -8414,7 +8414,7 @@ export type Database = {
           veiculo_id?: string | null
         }
         Update: {
-          cca?: string | null
+          cca_id?: number | null
           condutor_id?: string | null
           condutor_nome?: string
           created_at?: string
@@ -8432,6 +8432,13 @@ export type Database = {
           veiculo_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "veiculos_pedagogios_estacionamentos_cca_id_fkey"
+            columns: ["cca_id"]
+            isOneToOne: false
+            referencedRelation: "ccas"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "veiculos_pedagogios_estacionamentos_condutor_id_fkey"
             columns: ["condutor_id"]
