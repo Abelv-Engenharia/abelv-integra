@@ -217,13 +217,41 @@ export default function CadastroPessoaJuridica() {
     const dados = await buscarCNPJ(cnpjNumbers);
     
     if (dados) {
+      console.log('🔍 Dados recebidos da API:', {
+        grauderisco: dados.grauderisco,
+        email: dados.email,
+        numerocnae: dados.numerocnae
+      });
+
       form.setValue("razaosocial", dados.razaosocial);
       form.setValue("descricaoatividade", dados.descricaoatividade);
       form.setValue("numerocnae", dados.numerocnae);
-      form.setValue("grauderisco", dados.grauderisco);
       form.setValue("endereco", dados.endereco);
       form.setValue("telefone", dados.telefone);
-      form.setValue("email", dados.email);
+      
+      // Forçar atualização do Select de Grau de Risco
+      if (dados.grauderisco) {
+        form.setValue("grauderisco", dados.grauderisco, {
+          shouldValidate: true,
+          shouldDirty: true,
+          shouldTouch: true
+        });
+        console.log('✅ Grau de risco setado:', dados.grauderisco);
+      } else {
+        console.log('⚠️ Grau de risco não encontrado para este CNAE');
+        toast({
+          title: "Atenção",
+          description: "Grau de risco não encontrado para este CNAE. Selecione manualmente.",
+          variant: "default"
+        });
+      }
+
+      // Tratar e-mail
+      if (dados.email) {
+        form.setValue("email", dados.email);
+      } else {
+        console.log('⚠️ E-mail não disponível na Receita Federal');
+      }
       
       toast({
         title: "Sucesso",
@@ -379,7 +407,11 @@ export default function CadastroPessoaJuridica() {
                 field
               }) => <FormItem>
                       <FormLabel>Grau de Risco</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
+                      <Select 
+                        onValueChange={field.onChange} 
+                        value={field.value || undefined}
+                        defaultValue={field.value}
+                      >
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Selecione o grau de risco" />
