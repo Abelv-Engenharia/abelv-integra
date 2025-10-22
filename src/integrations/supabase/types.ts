@@ -5595,8 +5595,6 @@ export type Database = {
           datainiciocontratodeterminado: string | null
           datanascimento: string | null
           descricaoatividade: string | null
-          detalhesalojamento: string | null
-          detalhesveiculo: string | null
           email: string | null
           emailrepresentante: string | null
           endereco: string | null
@@ -5652,8 +5650,6 @@ export type Database = {
           datainiciocontratodeterminado?: string | null
           datanascimento?: string | null
           descricaoatividade?: string | null
-          detalhesalojamento?: string | null
-          detalhesveiculo?: string | null
           email?: string | null
           emailrepresentante?: string | null
           endereco?: string | null
@@ -5709,8 +5705,6 @@ export type Database = {
           datainiciocontratodeterminado?: string | null
           datanascimento?: string | null
           descricaoatividade?: string | null
-          detalhesalojamento?: string | null
-          detalhesveiculo?: string | null
           email?: string | null
           emailrepresentante?: string | null
           endereco?: string | null
