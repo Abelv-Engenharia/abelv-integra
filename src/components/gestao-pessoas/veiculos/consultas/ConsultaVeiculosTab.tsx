@@ -9,8 +9,28 @@ import { Search, Eye, Edit, FileSpreadsheet, FileText } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "@/hooks/use-toast";
 import { useVeiculos } from "@/hooks/gestao-pessoas/useVeiculos";
+import { useMigracaoLocalStorage } from "@/hooks/gestao-pessoas/useMigracaoLocalStorage";
 
 export function ConsultaVeiculosTab() {
+  // Migração automática ao carregar o componente
+  useMigracaoLocalStorage({
+    localStorageKey: "veiculos",
+    supabaseTable: "veiculos",
+    migrationFlagKey: "migration_completed_veiculos",
+    mapFunction: (veiculo) => ({
+      status: veiculo.status,
+      locadora_nome: veiculo.locadora || veiculo.locadora_nome,
+      tipo_locacao: veiculo.tipo || veiculo.tipo_locacao,
+      placa: veiculo.placa?.toUpperCase(),
+      modelo: veiculo.modelo,
+      franquia_km: veiculo.franquiaKm || veiculo.franquia_km,
+      condutor_principal_nome: veiculo.condutorPrincipal || veiculo.condutor_principal_nome,
+      data_retirada: veiculo.dataRetirada || veiculo.data_retirada,
+      data_devolucao: veiculo.dataDevolucao || veiculo.data_devolucao,
+      ativo: true,
+    }),
+    enabled: true,
+  });
   const [busca, setBusca] = useState("");
   const [filtroStatus, setFiltroStatus] = useState("todos");
   const [filtroTipo, setFiltroTipo] = useState("todos");

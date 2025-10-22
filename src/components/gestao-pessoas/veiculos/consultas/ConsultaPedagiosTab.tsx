@@ -8,8 +8,28 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Search, Eye, Edit, FileSpreadsheet, FileText } from "lucide-react";
 import { format } from "date-fns";
 import { usePedagiosEstacionamentos } from "@/hooks/gestao-pessoas/usePedagiosEstacionamentos";
+import { useMigracaoLocalStorage } from "@/hooks/gestao-pessoas/useMigracaoLocalStorage";
 
 export function ConsultaPedagiosTab() {
+  // Migração automática
+  useMigracaoLocalStorage({
+    localStorageKey: "semparar",
+    supabaseTable: "veiculos_pedagogios_estacionamentos",
+    migrationFlagKey: "migration_completed_pedagogios",
+    mapFunction: (pedagio) => ({
+      data_utilizacao: pedagio.data || pedagio.dataUtilizacao || pedagio.data_utilizacao,
+      tipo_servico: pedagio.tipoServico || pedagio.tipo_servico,
+      placa: pedagio.placa?.toUpperCase(),
+      condutor_nome: pedagio.condutor || pedagio.condutor_nome,
+      valor: pedagio.valor,
+      local: pedagio.local,
+      horario: pedagio.horario,
+      cca: pedagio.cca,
+      finalidade: pedagio.finalidade || pedagio.observacao,
+      ativo: true,
+    }),
+    enabled: true,
+  });
   const [busca, setBusca] = useState("");
   const [filtroTipo, setFiltroTipo] = useState("todos");
   

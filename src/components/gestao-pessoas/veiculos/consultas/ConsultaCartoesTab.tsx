@@ -8,8 +8,27 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Search, Eye, Edit, FileSpreadsheet, FileText } from "lucide-react";
 import { format } from "date-fns";
 import { useCartoesAbastecimento } from "@/hooks/gestao-pessoas/useCartoesAbastecimento";
+import { useMigracaoLocalStorage } from "@/hooks/gestao-pessoas/useMigracaoLocalStorage";
 
 export function ConsultaCartoesTab() {
+  // Migração automática
+  useMigracaoLocalStorage({
+    localStorageKey: "cartoes",
+    supabaseTable: "veiculos_cartoes_abastecimento",
+    migrationFlagKey: "migration_completed_cartoes",
+    mapFunction: (cartao) => ({
+      numero_cartao: cartao.numeroCartao || cartao.numero_cartao,
+      bandeira: cartao.tipo || cartao.bandeira,
+      status: cartao.status,
+      condutor_nome: cartao.condutorPrincipal || cartao.condutor_nome,
+      data_validade: cartao.dataValidade || cartao.data_validade,
+      limite_credito: cartao.limiteCredito || cartao.limite_credito,
+      placa: cartao.placa?.toUpperCase(),
+      veiculo_modelo: cartao.modelo || cartao.veiculo_modelo,
+      ativo: true,
+    }),
+    enabled: true,
+  });
   const [busca, setBusca] = useState("");
   const [filtroStatus, setFiltroStatus] = useState("todos");
   const [filtroTipo, setFiltroTipo] = useState("todos");

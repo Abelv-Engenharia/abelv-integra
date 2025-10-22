@@ -11,8 +11,37 @@ import { VisualizarMultaModal } from "@/components/gestao-pessoas/veiculos/Visua
 import { NovaMultaModal } from "@/components/gestao-pessoas/veiculos/NovaMultaModal";
 import { useMultas } from "@/hooks/gestao-pessoas/useMultas";
 import { useQueryClient } from "@tanstack/react-query";
+import { useMigracaoLocalStorage } from "@/hooks/gestao-pessoas/useMigracaoLocalStorage";
 
 export function ConsultaMultasTab() {
+  // Migração automática
+  useMigracaoLocalStorage({
+    localStorageKey: "multas",
+    supabaseTable: "veiculos_multas",
+    migrationFlagKey: "migration_completed_multas",
+    mapFunction: (multa) => ({
+      numero_auto_infracao: multa.numeroAutoInfracao || multa.numero_auto_infracao,
+      data_multa: multa.dataMulta || multa.data_multa,
+      horario: multa.horario,
+      ocorrencia: multa.ocorrencia,
+      pontos: multa.pontos,
+      condutor_infrator_nome: multa.condutorInfrator || multa.condutor_infrator_nome,
+      placa: multa.placa?.toUpperCase(),
+      data_notificacao: multa.dataNotificacao || multa.data_notificacao,
+      responsavel: multa.responsavel,
+      veiculo_modelo: multa.veiculo || multa.veiculo_modelo,
+      locadora_nome: multa.locadora || multa.locadora_nome,
+      valor: multa.valor,
+      local_completo: multa.localCompleto || multa.local_completo,
+      email_condutor: multa.emailCondutor || multa.email_condutor,
+      numero_fatura: multa.numeroFatura || multa.numero_fatura,
+      titulo_sienge: multa.tituloSienge || multa.titulo_sienge,
+      indicado_orgao: multa.indicadoOrgao || multa.indicado_orgao || 'Pendente',
+      status_multa: multa.statusMulta || multa.status_multa || 'Registrada',
+      ativo: true,
+    }),
+    enabled: true,
+  });
   const [busca, setBusca] = useState("");
   const [filtroStatus, setFiltroStatus] = useState("todos");
   const [multaVisualizarOpen, setMultaVisualizarOpen] = useState(false);
