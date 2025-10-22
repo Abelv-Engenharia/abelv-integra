@@ -95,13 +95,41 @@ export function CalculoRotasCard({ veiculos, cartoes, onCalculoSalvo }: CalculoR
     );
   };
 
+  const validarFormatoEndereco = (endereco: string): boolean => {
+    const enderecoLower = endereco.toLowerCase();
+    
+    // Verificar se contém elementos básicos de um endereço
+    const contemCidade = /\b[a-záàâãéèêíïóôõöúçñ\s]+\s*-\s*[a-z]{2}\b/i.test(endereco);
+    const contemNumero = /\d+/.test(endereco);
+    const contemVirgula = endereco.includes(',');
+    const contemHifen = endereco.includes('-');
+    
+    return contemCidade && (contemNumero || contemVirgula) && contemHifen;
+  };
+
   const validarFormulario = (): string | null => {
     if (!veiculoSelecionado) return "Selecione um veículo";
     if (!consumoKmL || parseFloat(consumoKmL) <= 0) return "Informe o consumo do veículo";
     if (!precoCombustivel || parseFloat(precoCombustivel) <= 0) return "Informe o preço do combustível";
-    if (!enderecoBase.nome || !enderecoBase.endereco) return "Preencha o endereço base";
-    if (!enderecoObra.nome || !enderecoObra.endereco) return "Preencha o endereço da obra";
+    
+    if (!enderecoBase.nome || !enderecoBase.endereco) {
+      return "Preencha o endereço base completo";
+    }
+    
+    if (!validarFormatoEndereco(enderecoBase.endereco)) {
+      return "Endereço Base está incompleto. Inclua: Rua, Número, Bairro, Cidade e Estado (Ex: Av. Paulista, 1000 - Centro, São Paulo - SP, Brasil)";
+    }
+    
+    if (!enderecoObra.nome || !enderecoObra.endereco) {
+      return "Preencha o endereço da obra completo";
+    }
+    
+    if (!validarFormatoEndereco(enderecoObra.endereco)) {
+      return "Endereço da Obra está incompleto. Inclua: Rua, Número, Bairro, Cidade e Estado (Ex: Rua XV, 500 - Jardim, Curitiba - PR, Brasil)";
+    }
+    
     if (!diasUteis || parseInt(diasUteis) <= 0) return "Informe os dias úteis";
+    
     return null;
   };
 
@@ -176,10 +204,14 @@ export function CalculoRotasCard({ veiculos, cartoes, onCalculoSalvo }: CalculoR
           variant: "destructive"
         });
       }
-    } catch (error) {
+    } catch (error: any) {
+      console.error('Erro no cálculo:', error);
+      
+      const mensagemErro = error?.message || "Erro ao calcular estimativa. Verifique os endereços e tente novamente.";
+      
       toast({
-        title: "Erro",
-        description: "Erro ao calcular estimativa",
+        title: "Erro no Cálculo",
+        description: mensagemErro,
         variant: "destructive"
       });
     } finally {
@@ -231,6 +263,23 @@ export function CalculoRotasCard({ veiculos, cartoes, onCalculoSalvo }: CalculoR
 
   return (
     <div className="space-y-6">
+      {/* Alert de Ajuda */}
+      <Alert>
+        <AlertCircle className="h-4 w-4" />
+        <AlertTitle>Como preencher os endereços</AlertTitle>
+        <AlertDescription className="space-y-2 mt-2">
+          <p>Para garantir o cálculo correto da rota, preencha os endereços no formato completo:</p>
+          <div className="bg-muted/50 p-3 rounded-md space-y-1 text-sm">
+            <p className="font-medium">✅ Formato correto:</p>
+            <p className="font-mono">Avenida Paulista, 1578 - Bela Vista, São Paulo - SP, Brasil</p>
+            <p className="font-mono">Rua da Consolação, 3701 - Consolação, São Paulo - SP, Brasil</p>
+          </div>
+          <p className="text-xs text-muted-foreground mt-2">
+            Inclua: <strong>Logradouro, Número - Bairro, Cidade - UF, Brasil</strong>
+          </p>
+        </AlertDescription>
+      </Alert>
+
       {/* Seleção de Veículo */}
       <Card>
         <CardHeader>
@@ -349,9 +398,13 @@ export function CalculoRotasCard({ veiculos, cartoes, onCalculoSalvo }: CalculoR
                 id="endereco-base"
                 value={enderecoBase.endereco}
                 onChange={(e) => setEnderecoBase({ ...enderecoBase, endereco: e.target.value })}
-                placeholder="Rua, Número - Bairro, Cidade - UF"
+                placeholder="Ex: Avenida Paulista, 1578 - Bela Vista, São Paulo - SP, Brasil"
                 rows={3}
+                className={!enderecoBase.endereco && "border-destructive"}
               />
+              <p className="text-xs text-muted-foreground">
+                Exemplo: Rua [Nome], [Nº] - [Bairro], [Cidade] - [UF], Brasil
+              </p>
             </div>
           </CardContent>
         </Card>
@@ -379,9 +432,13 @@ export function CalculoRotasCard({ veiculos, cartoes, onCalculoSalvo }: CalculoR
                 id="endereco-obra"
                 value={enderecoObra.endereco}
                 onChange={(e) => setEnderecoObra({ ...enderecoObra, endereco: e.target.value })}
-                placeholder="Rua, Número - Bairro, Cidade - UF"
+                placeholder="Ex: Rua da Consolação, 3701 - Consolação, São Paulo - SP, Brasil"
                 rows={3}
+                className={!enderecoObra.endereco && "border-destructive"}
               />
+              <p className="text-xs text-muted-foreground">
+                Exemplo: Rua [Nome], [Nº] - [Bairro], [Cidade] - [UF], Brasil
+              </p>
             </div>
           </CardContent>
         </Card>

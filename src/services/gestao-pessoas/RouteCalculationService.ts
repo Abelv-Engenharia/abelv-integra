@@ -16,6 +16,8 @@ interface GeocodingResult {
 // Geocoding usando Nominatim (OpenStreetMap)
 const geocodificarEndereco = async (endereco: string): Promise<{ lat: number; lng: number } | null> => {
   try {
+    console.log('🔍 Geocodificando:', endereco);
+    
     const response = await fetch(
       `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(endereco)}&limit=1`,
       {
@@ -25,17 +27,28 @@ const geocodificarEndereco = async (endereco: string): Promise<{ lat: number; ln
       }
     );
     
-    if (!response.ok) return null;
+    if (!response.ok) {
+      console.error('❌ Erro na API Nominatim:', response.status);
+      return null;
+    }
     
     const data: GeocodingResult[] = await response.json();
-    if (data.length === 0) return null;
     
-    return {
+    if (data.length === 0) {
+      console.error('❌ Endereço não encontrado:', endereco);
+      return null;
+    }
+    
+    const coords = {
       lat: typeof data[0].lat === 'string' ? parseFloat(data[0].lat) : data[0].lat,
       lng: typeof data[0].lon === 'string' ? parseFloat(data[0].lon) : data[0].lon
     };
+    
+    console.log('✅ Coordenadas obtidas:', coords, '|', data[0].display_name);
+    
+    return coords;
   } catch (error) {
-    console.error('Erro ao geocodificar endereço:', error);
+    console.error('❌ Erro ao geocodificar endereço:', endereco, error);
     return null;
   }
 };
@@ -96,33 +109,57 @@ export const calcularRota = async (
   destinoEndereco: string
 ): Promise<RouteResponse> => {
   try {
+    console.log('🚗 Calculando rota entre:', { origem: origemEndereco, destino: destinoEndereco });
+    
+    // Delay para respeitar rate limit da API (1 req/segundo)
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
     // Geocodificar origem e destino
     const origemCoords = await geocodificarEndereco(origemEndereco);
-    const destinoCoords = await geocodificarEndereco(destinoEndereco);
     
-    if (!origemCoords || !destinoCoords) {
+    if (!origemCoords) {
       return {
         distanciaKm: 0,
         duracaoMin: 0,
         sucesso: false,
-        erro: 'Não foi possível geocodificar os endereços'
+        erro: `Endereço Base não encontrado. Verifique se está completo com rua, número, cidade e estado.`
+      };
+    }
+    
+    // Delay entre geocodificações
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    const destinoCoords = await geocodificarEndereco(destinoEndereco);
+    
+    if (!destinoCoords) {
+      return {
+        distanciaKm: 0,
+        duracaoMin: 0,
+        sucesso: false,
+        erro: `Endereço da Obra não encontrado. Verifique se está completo com rua, número, cidade e estado.`
       };
     }
     
     // Calcular rota usando OSRM
-    return await calcularRotaOSRM(
+    const resultado = await calcularRotaOSRM(
       origemCoords.lat,
       origemCoords.lng,
       destinoCoords.lat,
       destinoCoords.lng
     );
+    
+    if (resultado.sucesso) {
+      console.log('✅ Rota calculada:', resultado.distanciaKm, 'km');
+    }
+    
+    return resultado;
   } catch (error) {
-    console.error('Erro ao calcular rota:', error);
+    console.error('❌ Erro ao calcular rota:', error);
     return {
       distanciaKm: 0,
       duracaoMin: 0,
       sucesso: false,
-      erro: 'Erro ao calcular rota'
+      erro: 'Erro ao calcular rota. Tente novamente.'
     };
   }
 };
