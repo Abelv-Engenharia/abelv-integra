@@ -15,6 +15,10 @@ interface Pedagio {
   local: string;
   horario?: string;
   cca_id?: number;
+  ccas?: {
+    codigo: string;
+    nome: string;
+  };
   finalidade?: string;
   created_at?: string;
 }
@@ -106,16 +110,16 @@ export function VisualizarPedagioModal({ pedagio, open, onOpenChange, onEditar }
           </Card>
 
           {/* Dados Adicionais */}
-          {(pedagio.cca_id || pedagio.finalidade) && (
+          {(pedagio.ccas || pedagio.finalidade) && (
             <Card>
               <CardHeader>
                 <CardTitle className="text-base">Dados Adicionais</CardTitle>
               </CardHeader>
               <CardContent className="grid grid-cols-2 gap-4">
-                {pedagio.cca_id && (
+                {pedagio.ccas && (
                   <div>
-                    <label className="text-sm font-medium text-muted-foreground">CCA (ID)</label>
-                    <p className="text-sm mt-1">{pedagio.cca_id}</p>
+                    <label className="text-sm font-medium text-muted-foreground">CCA</label>
+                    <p className="text-sm mt-1">{pedagio.ccas.codigo} - {pedagio.ccas.nome}</p>
                   </div>
                 )}
                 {pedagio.finalidade && (

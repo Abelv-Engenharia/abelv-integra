@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { useEffect } from "react";
+import { useCCAs } from "@/hooks/useCCAs";
 
 const formSchema = z.object({
   placa: z.string().min(7, "Placa é obrigatória"),
@@ -38,6 +39,7 @@ export function PedagioFormModal({ open, onOpenChange, itemParaEdicao, onSuccess
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const isEditMode = !!itemParaEdicao;
+  const { data: ccas = [] } = useCCAs();
 
   const { register, handleSubmit, formState: { errors }, setValue, watch, reset } = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -216,8 +218,20 @@ export function PedagioFormModal({ open, onOpenChange, itemParaEdicao, onSuccess
             </div>
 
             <div>
-              <Label>CCA (ID)</Label>
-              <Input {...register("cca_id")} placeholder="ID do CCA" />
+              <Label>CCA</Label>
+              <Select onValueChange={(value) => setValue("cca_id", value)} value={watch("cca_id")}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o CCA" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Nenhum</SelectItem>
+                  {ccas.map((cca) => (
+                    <SelectItem key={cca.id} value={cca.id.toString()}>
+                      {cca.codigo} - {cca.nome}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="col-span-2">
