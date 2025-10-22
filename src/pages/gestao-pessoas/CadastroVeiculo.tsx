@@ -106,7 +106,17 @@ export default function CadastroVeiculo() {
         title: "Sucesso",
         description: "Veículo cadastrado com sucesso!",
       })
-      form.reset()
+      form.reset({
+        status: "",
+        locadora: "",
+        tipo: "",
+        placa: "",
+        modelo: "",
+        franquiaKm: "",
+        condutorPrincipal: "",
+        dataRetirada: undefined,
+        dataDevolucao: undefined,
+      })
       queryClient.invalidateQueries({ queryKey: ['veiculos'] })
     },
     onError: (error: any) => {
@@ -155,7 +165,7 @@ export default function CadastroVeiculo() {
                       <FormLabel className={cn(!field.value && "text-destructive")}>
                         Status *
                       </FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger className={cn(!field.value && "border-destructive")}>
                             <SelectValue placeholder="Selecione o status" />
@@ -179,7 +189,7 @@ export default function CadastroVeiculo() {
                       <FormLabel className={cn(!field.value && "text-destructive")}>
                         Locadora *
                       </FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger className={cn(!field.value && "border-destructive")}>
                             <SelectValue placeholder="Selecione a locadora" />
@@ -212,7 +222,7 @@ export default function CadastroVeiculo() {
                       <FormLabel className={cn(!field.value && "text-destructive")}>
                         Tipo *
                       </FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger className={cn(!field.value && "border-destructive")}>
                             <SelectValue placeholder="Selecione o tipo" />
@@ -302,7 +312,7 @@ export default function CadastroVeiculo() {
                       <FormLabel className={cn(!field.value && "text-destructive")}>
                         Condutor Principal *
                       </FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger className={cn(!field.value && "border-destructive")}>
                             <SelectValue placeholder="Selecione condutor" />
