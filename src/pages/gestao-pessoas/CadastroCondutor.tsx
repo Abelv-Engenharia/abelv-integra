@@ -27,7 +27,9 @@ const formSchema = z.object({
     required_error: "Validade da CNH é obrigatória",
   }),
   statusCnh: z.string().min(1, "Status da CNH é obrigatório"),
-  termoResponsabilidade: z.string().min(1, "Status do termo de responsabilidade é obrigatório"),
+  numeroCnh: z.string()
+    .min(1, "Número da CNH é obrigatório")
+    .regex(/^\d{11}$/, "CNH deve conter 11 dígitos"),
   observacao: z.string().optional(),
 })
 
@@ -37,7 +39,7 @@ export default function CadastroCondutor() {
   const { toast } = useToast()
   const navigate = useNavigate()
   const [loading, setLoading] = useState(false)
-  const [termoAnexado, setTermoAnexado] = useState<File | null>(null)
+  const [cnhAnexada, setCnhAnexada] = useState<File | null>(null)
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -46,7 +48,7 @@ export default function CadastroCondutor() {
       cpf: "",
       categoriaCnh: "",
       statusCnh: "",
-      termoResponsabilidade: "",
+      numeroCnh: "",
       observacao: "",
     },
   })
@@ -58,6 +60,12 @@ export default function CadastroCondutor() {
       .replace(/(\d{3})(\d)/, "$1.$2")
       .replace(/(\d{3})(\d{1,2})/, "$1-$2")
       .replace(/(-\d{2})\d+?$/, "$1")
+  }
+
+  const formatCNH = (value: string) => {
+    return value
+      .replace(/\D/g, "")
+      .slice(0, 11)
   }
 
   const onSubmit = async (values: FormValues) => {
@@ -85,10 +93,10 @@ export default function CadastroCondutor() {
         categoriaCnh: values.categoriaCnh,
         validadeCnh: values.validadeCnh,
         statusCnh: values.statusCnh,
-        termoResponsabilidade: values.termoResponsabilidade,
+        numeroCnh: values.numeroCnh,
         observacao: values.observacao,
         pontuacaoAtual: 0,
-        termoAnexado: termoAnexado ? termoAnexado.name : null,
+        cnhAnexada: cnhAnexada ? cnhAnexada.name : null,
         createdAt: new Date().toISOString(),
       }
 
@@ -101,7 +109,7 @@ export default function CadastroCondutor() {
       })
 
       form.reset()
-      setTermoAnexado(null)
+      setCnhAnexada(null)
     } catch (error) {
       toast({
         title: "Erro",
@@ -162,7 +170,7 @@ export default function CadastroCondutor() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className={cn(!field.value && "text-destructive")}>
-                        Cpf *
+                        CPF *
                       </FormLabel>
                       <FormControl>
                         <Input 
@@ -184,7 +192,7 @@ export default function CadastroCondutor() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className={cn(!field.value && "text-destructive")}>
-                        Categoria Cnh *
+                        Categoria CNH *
                       </FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
@@ -215,7 +223,7 @@ export default function CadastroCondutor() {
                   render={({ field }) => (
                     <FormItem className="flex flex-col">
                       <FormLabel className={cn(!field.value && "text-destructive")}>
-                        Validade Cnh *
+                        Validade CNH *
                       </FormLabel>
                       <Popover>
                         <PopoverTrigger asChild>
@@ -256,7 +264,7 @@ export default function CadastroCondutor() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className={cn(!field.value && "text-destructive")}>
-                        Status Cnh *
+                        Status CNH *
                       </FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
@@ -278,23 +286,21 @@ export default function CadastroCondutor() {
 
                 <FormField
                   control={form.control}
-                  name="termoResponsabilidade"
+                  name="numeroCnh"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className={cn(!field.value && "text-destructive")}>
-                        Termo Responsabilidade *
+                        Número da CNH *
                       </FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger className={cn(!field.value && "border-destructive")}>
-                            <SelectValue placeholder="Selecione o status" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="sim">Assinado</SelectItem>
-                          <SelectItem value="nao">Não Assinado</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <FormControl>
+                        <Input 
+                          placeholder="00000000000" 
+                          className={cn(!field.value && "border-destructive")}
+                          {...field}
+                          onChange={(e) => field.onChange(formatCNH(e.target.value))}
+                          maxLength={11}
+                        />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -302,11 +308,11 @@ export default function CadastroCondutor() {
               </div>
 
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold">Documentação</h3>
+                <h3 className="text-lg font-semibold">CNH do Condutor</h3>
                 <DocumentUploadField
-                  label="Termo de Responsabilidade"
-                  value={termoAnexado?.name || null}
-                  onChange={setTermoAnexado}
+                  label="CNH do Condutor"
+                  value={cnhAnexada?.name || null}
+                  onChange={setCnhAnexada}
                   accept=".pdf,.jpg,.jpeg,.png"
                 />
               </div>
