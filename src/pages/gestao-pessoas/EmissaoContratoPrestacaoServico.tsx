@@ -25,6 +25,7 @@ import {
   BreadcrumbPage, 
   BreadcrumbSeparator 
 } from "@/components/ui/breadcrumb";
+import { usePrestadoresPJ, PrestadorPJ } from "@/hooks/gestao-pessoas/usePrestadoresPJ";
 
 // Enum para tipos de contrato
 enum TipoContrato {
@@ -33,21 +34,6 @@ enum TipoContrato {
   ADITIVO = 'aditivo'
 }
 
-// Interface para Prestador Completo
-interface PrestadorCompleto {
-  id: string;
-  razaosocial: string;
-  cnpj: string;
-  descricaoatividade: string;
-  endereco: string;
-  nomecompleto: string; // representante legal
-  valorprestacaoservico: string;
-  ajudacusto: string;
-  datainiciocontrato: string;
-  telefone?: string;
-  email?: string;
-  ccaobra?: string;
-}
 
 // Schemas de validação
 const contratoSchema = z.object({
@@ -86,58 +72,14 @@ type ContratoFormData = z.infer<typeof contratoSchema>;
 type DistratoFormData = z.infer<typeof distratoSchema>;
 type AditivoFormData = z.infer<typeof aditivoSchema>;
 
-// Mock de Prestadores Completos (substituir por dados reais do Cadastro PJ)
-const prestadoresCompletosMock: PrestadorCompleto[] = [
-  {
-    id: "1",
-    razaosocial: "Tech Solutions Ltda",
-    cnpj: "12.345.678/0001-90",
-    descricaoatividade: "Prestação de serviços de desenvolvimento de software e consultoria em TI",
-    endereco: "Av. Paulista, 1000 - São Paulo/SP - CEP: 01310-100",
-    nomecompleto: "João da Silva Santos",
-    valorprestacaoservico: "12000.00",
-    ajudacusto: "1500.00",
-    datainiciocontrato: "2024-01-15",
-    telefone: "(11) 98765-4321",
-    email: "contato@techsolutions.com.br",
-    ccaobra: "1234.56.789"
-  },
-  {
-    id: "2",
-    razaosocial: "Consultoria Premium ME",
-    cnpj: "98.765.432/0001-10",
-    descricaoatividade: "Consultoria empresarial e gestão de projetos",
-    endereco: "Rua das Flores, 500 - Rio de Janeiro/RJ - CEP: 22041-001",
-    nomecompleto: "Maria Oliveira Costa",
-    valorprestacaoservico: "8500.00",
-    ajudacusto: "1000.00",
-    datainiciocontrato: "2024-02-20",
-    telefone: "(21) 97654-3210",
-    email: "contato@consulpremium.com.br",
-    ccaobra: "9876.54.321"
-  },
-  {
-    id: "3",
-    razaosocial: "Serviços Especializados S.A.",
-    cnpj: "11.222.333/0001-44",
-    descricaoatividade: "Serviços de engenharia civil e consultoria técnica",
-    endereco: "Rua da Construção, 200 - Belo Horizonte/MG - CEP: 30130-100",
-    nomecompleto: "Carlos Alberto Mendes",
-    valorprestacaoservico: "15000.00",
-    ajudacusto: "2000.00",
-    datainiciocontrato: "2023-05-10",
-    telefone: "(31) 96543-2109",
-    email: "contato@servesp.com.br",
-    ccaobra: "1111.22.333"
-  }
-];
 
 export default function EmissaoContratoPrestacaoServico() {
   const { toast } = useToast();
+  const { data: prestadores, isLoading: loadingPrestadores } = usePrestadoresPJ();
   
   // Estados para controle de fluxo
   const [tipoContratoSelecionado, setTipoContratoSelecionado] = useState<TipoContrato | null>(null);
-  const [prestadorSelecionado, setPrestadorSelecionado] = useState<PrestadorCompleto | null>(null);
+  const [prestadorSelecionado, setPrestadorSelecionado] = useState<PrestadorPJ | null>(null);
   const [etapaAtual, setEtapaAtual] = useState<1 | 2 | 3>(1);
 
   // Forms para cada tipo de contrato
@@ -182,7 +124,7 @@ export default function EmissaoContratoPrestacaoServico() {
     console.log("Contrato de Prestação de Serviço:", { prestador: prestadorSelecionado, ...data });
     toast({
       title: "Contrato emitido com sucesso!",
-      description: `Contrato de ${prestadorSelecionado?.razaosocial} criado.`,
+      description: `Contrato de ${prestadorSelecionado?.razaoSocial} criado.`,
     });
     resetarFluxo();
   };
@@ -191,7 +133,7 @@ export default function EmissaoContratoPrestacaoServico() {
     console.log("Distrato:", { prestador: prestadorSelecionado, ...data });
     toast({
       title: "Distrato emitido com sucesso!",
-      description: `Distrato de ${prestadorSelecionado?.razaosocial} criado.`,
+      description: `Distrato de ${prestadorSelecionado?.razaoSocial} criado.`,
     });
     resetarFluxo();
   };
@@ -200,7 +142,7 @@ export default function EmissaoContratoPrestacaoServico() {
     console.log("Aditivo:", { prestador: prestadorSelecionado, ...data });
     toast({
       title: "Aditivo emitido com sucesso!",
-      description: `Aditivo de ${prestadorSelecionado?.razaosocial} criado.`,
+      description: `Aditivo de ${prestadorSelecionado?.razaoSocial} criado.`,
     });
     resetarFluxo();
   };
@@ -237,15 +179,15 @@ export default function EmissaoContratoPrestacaoServico() {
     doc.text("DADOS DO PRESTADOR:", 20, 35);
     doc.setFont("helvetica", "normal");
     doc.setFontSize(10);
-    doc.text(`Razão Social: ${prestadorSelecionado.razaosocial}`, 20, 42);
+    doc.text(`Razão Social: ${prestadorSelecionado.razaoSocial}`, 20, 42);
     doc.text(`CNPJ: ${prestadorSelecionado.cnpj}`, 20, 48);
-    doc.text(`Representante Legal: ${prestadorSelecionado.nomecompleto}`, 20, 54);
+    doc.text(`Representante Legal: ${prestadorSelecionado.nomeCompleto}`, 20, 54);
     doc.text(`Endereço: ${prestadorSelecionado.endereco}`, 20, 60);
-    doc.text(`Atividade: ${prestadorSelecionado.descricaoatividade}`, 20, 66);
-    doc.text(`Valor: R$ ${parseFloat(prestadorSelecionado.valorprestacaoservico).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`, 20, 72);
-    doc.text(`Ajuda de Custo: R$ ${parseFloat(prestadorSelecionado.ajudacusto).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`, 20, 78);
+    doc.text(`Atividade: ${prestadorSelecionado.descricaoAtividade || 'N/A'}`, 20, 66);
+    doc.text(`Valor: R$ ${prestadorSelecionado.valorPrestacaoServico.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`, 20, 72);
+    doc.text(`Ajuda de Custo: R$ ${prestadorSelecionado.ajudaCusto.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`, 20, 78);
 
-    doc.save(`${tipoContratoSelecionado}_${prestadorSelecionado.razaosocial}.pdf`);
+    doc.save(`${tipoContratoSelecionado}_${prestadorSelecionado.razaoSocial}.pdf`);
     
     toast({
       title: "PDF gerado com sucesso!",
@@ -379,20 +321,21 @@ export default function EmissaoContratoPrestacaoServico() {
                 <Label htmlFor="prestador">Prestador *</Label>
                 <Select
                   onValueChange={(value) => {
-                    const prestador = prestadoresCompletosMock.find(p => p.id === value);
+                    const prestador = prestadores?.find(p => p.id === value);
                     if (prestador) {
                       setPrestadorSelecionado(prestador);
                       setEtapaAtual(3);
                     }
                   }}
+                  disabled={loadingPrestadores}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Selecione um prestador cadastrado" />
+                    <SelectValue placeholder={loadingPrestadores ? "Carregando prestadores..." : "Selecione um prestador cadastrado"} />
                   </SelectTrigger>
                   <SelectContent>
-                    {prestadoresCompletosMock.map(prestador => (
+                    {prestadores?.map(prestador => (
                       <SelectItem key={prestador.id} value={prestador.id}>
-                        {prestador.razaosocial} - {prestador.cnpj}
+                        {prestador.razaoSocial} - {prestador.cnpj}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -429,7 +372,7 @@ export default function EmissaoContratoPrestacaoServico() {
                 <div className="grid gap-4 md:grid-cols-2">
                   <div>
                     <Label>Razão Social</Label>
-                    <Input value={prestadorSelecionado.razaosocial} disabled className="bg-muted" />
+                    <Input value={prestadorSelecionado.razaoSocial} disabled className="bg-muted" />
                   </div>
                   <div>
                     <Label>Cnpj</Label>
@@ -437,7 +380,7 @@ export default function EmissaoContratoPrestacaoServico() {
                   </div>
                   <div>
                     <Label>Representante Legal</Label>
-                    <Input value={prestadorSelecionado.nomecompleto} disabled className="bg-muted" />
+                    <Input value={prestadorSelecionado.nomeCompleto} disabled className="bg-muted" />
                   </div>
                   <div>
                     <Label>Endereço</Label>
@@ -445,12 +388,12 @@ export default function EmissaoContratoPrestacaoServico() {
                   </div>
                   <div className="md:col-span-2">
                     <Label>Descrição de Atividade</Label>
-                    <Textarea value={prestadorSelecionado.descricaoatividade} disabled className="bg-muted" />
+                    <Textarea value={prestadorSelecionado.descricaoAtividade || 'N/A'} disabled className="bg-muted" />
                   </div>
                   <div>
                     <Label>Valor de Prestação de Serviço</Label>
                     <Input 
-                      value={`R$ ${parseFloat(prestadorSelecionado.valorprestacaoservico).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`} 
+                      value={`R$ ${prestadorSelecionado.valorPrestacaoServico.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`} 
                       disabled 
                       className="bg-muted"
                     />
@@ -458,7 +401,7 @@ export default function EmissaoContratoPrestacaoServico() {
                   <div>
                     <Label>Ajuda de Custo</Label>
                     <Input 
-                      value={`R$ ${parseFloat(prestadorSelecionado.ajudacusto).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`} 
+                      value={`R$ ${prestadorSelecionado.ajudaCusto.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`} 
                       disabled 
                       className="bg-muted"
                     />
@@ -466,7 +409,7 @@ export default function EmissaoContratoPrestacaoServico() {
                   <div>
                     <Label>Data de Início do Contrato</Label>
                     <Input 
-                      value={new Date(prestadorSelecionado.datainiciocontrato).toLocaleDateString('pt-BR')} 
+                      value={new Date(prestadorSelecionado.dataInicioContrato).toLocaleDateString('pt-BR')} 
                       disabled 
                       className="bg-muted"
                     />
