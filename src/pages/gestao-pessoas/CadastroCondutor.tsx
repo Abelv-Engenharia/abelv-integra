@@ -118,6 +118,32 @@ export default function CadastroCondutor() {
       .slice(0, 11)
   }
 
+  const uploadCNH = async (file: File): Promise<string | null> => {
+    try {
+      const fileExt = file.name.split('.').pop()
+      const fileName = `${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`
+      const filePath = `cnhs/${fileName}`
+
+      const { error: uploadError } = await supabase.storage
+        .from('veiculos-documentos')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false
+        })
+
+      if (uploadError) throw uploadError
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('veiculos-documentos')
+        .getPublicUrl(filePath)
+
+      return publicUrl
+    } catch (error) {
+      console.error('Erro ao fazer upload da CNH:', error)
+      return null
+    }
+  }
+
   const onSubmit = async (values: FormValues) => {
     setLoading(true)
     try {
@@ -138,6 +164,19 @@ export default function CadastroCondutor() {
         return
       }
 
+      // Fazer upload da CNH se anexada
+      let cnhUrl: string | null = null
+      if (cnhAnexada) {
+        cnhUrl = await uploadCNH(cnhAnexada)
+        if (!cnhUrl) {
+          toast({
+            title: "Aviso",
+            description: "Erro ao fazer upload da CNH. O condutor será cadastrado sem o documento anexado.",
+            variant: "destructive",
+          })
+        }
+      }
+
       // Inserir novo condutor no Supabase
       const { error: insertError } = await supabase
         .from('veiculos_condutores')
@@ -151,6 +190,7 @@ export default function CadastroCondutor() {
           observacao: values.observacao || null,
           pontuacao_atual: 0,
           termo_responsabilidade_assinado: false,
+          termo_anexado_url: cnhUrl,
           termo_anexado_nome: cnhAnexada ? cnhAnexada.name : null,
           ativo: true,
         })
