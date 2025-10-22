@@ -5584,12 +5584,15 @@ export type Database = {
           celular: boolean | null
           chavepix: string | null
           cnpj: string
+          contabancaria: string | null
           contrato_nome: string | null
           contrato_url: string | null
           cpf: string
           created_at: string | null
           created_by: string | null
+          datafimcontratodeterminado: string | null
           datainiciocontrato: string | null
+          datainiciocontratodeterminado: string | null
           datanascimento: string | null
           descricaoatividade: string | null
           detalhesalojamento: string | null
@@ -5613,9 +5616,12 @@ export type Database = {
           telefone: string | null
           telefonerepresentante: string | null
           tempocontrato: string | null
+          tipocontrato: string | null
           updated_at: string | null
           updated_by: string | null
           valerefeicao: number | null
+          valorajudaaluguel: number | null
+          valorajudacusto: number | null
           valoralmoco: number | null
           valorauxilioconveniomedico: number | null
           valorcafemanha: number | null
@@ -5638,12 +5644,15 @@ export type Database = {
           celular?: boolean | null
           chavepix?: string | null
           cnpj: string
+          contabancaria?: string | null
           contrato_nome?: string | null
           contrato_url?: string | null
           cpf: string
           created_at?: string | null
           created_by?: string | null
+          datafimcontratodeterminado?: string | null
           datainiciocontrato?: string | null
+          datainiciocontratodeterminado?: string | null
           datanascimento?: string | null
           descricaoatividade?: string | null
           detalhesalojamento?: string | null
@@ -5667,9 +5676,12 @@ export type Database = {
           telefone?: string | null
           telefonerepresentante?: string | null
           tempocontrato?: string | null
+          tipocontrato?: string | null
           updated_at?: string | null
           updated_by?: string | null
           valerefeicao?: number | null
+          valorajudaaluguel?: number | null
+          valorajudacusto?: number | null
           valoralmoco?: number | null
           valorauxilioconveniomedico?: number | null
           valorcafemanha?: number | null
@@ -5692,12 +5704,15 @@ export type Database = {
           celular?: boolean | null
           chavepix?: string | null
           cnpj?: string
+          contabancaria?: string | null
           contrato_nome?: string | null
           contrato_url?: string | null
           cpf?: string
           created_at?: string | null
           created_by?: string | null
+          datafimcontratodeterminado?: string | null
           datainiciocontrato?: string | null
+          datainiciocontratodeterminado?: string | null
           datanascimento?: string | null
           descricaoatividade?: string | null
           detalhesalojamento?: string | null
@@ -5721,9 +5736,12 @@ export type Database = {
           telefone?: string | null
           telefonerepresentante?: string | null
           tempocontrato?: string | null
+          tipocontrato?: string | null
           updated_at?: string | null
           updated_by?: string | null
           valerefeicao?: number | null
+          valorajudaaluguel?: number | null
+          valorajudacusto?: number | null
           valoralmoco?: number | null
           valorauxilioconveniomedico?: number | null
           valorcafemanha?: number | null

@@ -31,6 +31,34 @@ export interface PrestadorPJ {
   ativo: boolean;
   createdAt: string;
   updatedAt: string;
+  // Novos campos
+  descricaoAtividade: string | null;
+  numeroCnae: string | null;
+  grauDeRisco: string | null;
+  contaBancaria: string | null;
+  numeroCredorSienge: string | null;
+  dataNascimento: string | null;
+  rg: string | null;
+  registroFuncional: string | null;
+  telefoneRepresentante: string | null;
+  emailRepresentante: string | null;
+  enderecoRepresentante: string | null;
+  tipoContrato: string;
+  dataInicioContratoDeterminado: string | null;
+  dataFimContratoDeterminado: string | null;
+  auxilioConvenioMedico: boolean;
+  valorAuxilioConvenioMedico: number;
+  valeRefeicao: number;
+  veiculo: boolean;
+  detalhesVeiculo: string | null;
+  celular: boolean;
+  alojamento: boolean;
+  detalhesAlojamento: string | null;
+  folgaCampo: string | null;
+  periodoFerias: string | null;
+  quantidadeDiasFerias: number | null;
+  valorAjudaAluguel: number;
+  valorAjudaCusto: number;
 }
 
 interface FiltrosPrestadoresPJ {
@@ -193,7 +221,7 @@ function mapPrestadorFromDB(data: any): PrestadorPJ {
     ccaId: data.cca_id,
     ccaCodigo: data.cca_codigo,
     ccaNome: data.cca_nome,
-    valorPrestacaoServico: data.valorprestacaoservico,
+    valorPrestacaoServico: data.valorprestacaoservico || 0,
     dataInicioContrato: data.datainiciocontrato,
     servico: data.servico,
     chavePix: data.chavepix,
@@ -202,14 +230,42 @@ function mapPrestadorFromDB(data: any): PrestadorPJ {
     almoco: data.almoco,
     cafeManha: data.cafemanha,
     cafeTarde: data.cafetarde,
-    valorAlmoco: data.valoralmoco,
-    valorCafeManha: data.valorcafemanha,
-    valorCafeTarde: data.valorcafetarde,
+    valorAlmoco: data.valoralmoco || 0,
+    valorCafeManha: data.valorcafemanha || 0,
+    valorCafeTarde: data.valorcafetarde || 0,
     contratoUrl: data.contrato_url,
     contratoNome: data.contrato_nome,
     ativo: data.ativo,
     createdAt: data.created_at,
     updatedAt: data.updated_at,
+    // Novos campos
+    descricaoAtividade: data.descricaoatividade,
+    numeroCnae: data.numerocnae,
+    grauDeRisco: data.grauderisco,
+    contaBancaria: data.contabancaria,
+    numeroCredorSienge: data.numerocredorsienge,
+    dataNascimento: data.datanascimento,
+    rg: data.rg,
+    registroFuncional: data.registrofuncional,
+    telefoneRepresentante: data.telefonerepresentante,
+    emailRepresentante: data.emailrepresentante,
+    enderecoRepresentante: data.enderecorepresentante,
+    tipoContrato: data.tipocontrato || 'padrao',
+    dataInicioContratoDeterminado: data.datainiciocontratodeterminado,
+    dataFimContratoDeterminado: data.datafimcontratodeterminado,
+    auxilioConvenioMedico: data.auxilioconveniomedico || false,
+    valorAuxilioConvenioMedico: data.valorauxilioconveniomedico || 0,
+    valeRefeicao: data.valerefeicao || 0,
+    veiculo: data.veiculo || false,
+    detalhesVeiculo: data.detalhesveiculo,
+    celular: data.celular || false,
+    alojamento: data.alojamento || false,
+    detalhesAlojamento: data.detalhesalojamento,
+    folgaCampo: data.folgacampo,
+    periodoFerias: data.periodoferias,
+    quantidadeDiasFerias: data.quantidadediasferias,
+    valorAjudaAluguel: data.valorajudaaluguel || 0,
+    valorAjudaCusto: data.valorajudacusto || 0,
   };
 }
 
@@ -240,5 +296,33 @@ function mapPrestadorToDB(data: any): any {
     contrato_url: data.contratoUrl,
     contrato_nome: data.contratoNome,
     ativo: data.ativo ?? true,
+    // Novos campos
+    descricaoatividade: data.descricaoAtividade,
+    numerocnae: data.numeroCnae,
+    grauderisco: data.grauDeRisco,
+    contabancaria: data.contaBancaria,
+    numerocredorsienge: data.numeroCredorSienge,
+    datanascimento: data.dataNascimento,
+    rg: data.rg,
+    registrofuncional: data.registroFuncional,
+    telefonerepresentante: data.telefoneRepresentante,
+    emailrepresentante: data.emailRepresentante,
+    enderecorepresentante: data.enderecoRepresentante,
+    tipocontrato: data.tipoContrato,
+    datainiciocontratodeterminado: data.dataInicioContratoDeterminado,
+    datafimcontratodeterminado: data.dataFimContratoDeterminado,
+    auxilioconveniomedico: data.auxilioConvenioMedico,
+    valorauxilioconveniomedico: data.valorAuxilioConvenioMedico,
+    valerefeicao: data.valeRefeicao,
+    veiculo: data.veiculo,
+    detalhesveiculo: data.detalhesVeiculo,
+    celular: data.celular,
+    alojamento: data.alojamento,
+    detalhesalojamento: data.detalhesAlojamento,
+    folgacampo: data.folgaCampo,
+    periodoferias: data.periodoFerias,
+    quantidadediasferias: data.quantidadeDiasFerias,
+    valorajudaaluguel: data.valorAjudaAluguel,
+    valorajudacusto: data.valorAjudaCusto,
   };
 }

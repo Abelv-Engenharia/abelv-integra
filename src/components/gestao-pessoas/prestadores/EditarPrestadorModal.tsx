@@ -13,15 +13,16 @@ import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
 import { toast } from "@/hooks/use-toast";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useUpdatePrestadorPJ, PrestadorPJ } from "@/hooks/gestao-pessoas/usePrestadoresPJ";
 
 interface EditarPrestadorModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  prestador: any;
-  onSave: (prestador: any) => void;
+  prestador: PrestadorPJ;
 }
 
-export function EditarPrestadorModal({ open, onOpenChange, prestador, onSave }: EditarPrestadorModalProps) {
+export function EditarPrestadorModal({ open, onOpenChange, prestador }: EditarPrestadorModalProps) {
+  const updatePrestadorMutation = useUpdatePrestadorPJ();
   const [formData, setFormData] = useState<any>({});
   const [dataNascimento, setDataNascimento] = useState<Date>();
   const [dataInicioContrato, setDataInicioContrato] = useState<Date>();
@@ -30,12 +31,12 @@ export function EditarPrestadorModal({ open, onOpenChange, prestador, onSave }: 
     if (prestador) {
       setFormData(prestador);
       
-      if (prestador.datanascimento) {
-        setDataNascimento(new Date(prestador.datanascimento));
+      if (prestador.dataNascimento) {
+        setDataNascimento(new Date(prestador.dataNascimento));
       }
       
-      if (prestador.datainiciocontrato) {
-        setDataInicioContrato(new Date(prestador.datainiciocontrato));
+      if (prestador.dataInicioContrato) {
+        setDataInicioContrato(new Date(prestador.dataInicioContrato));
       }
     }
   }, [prestador]);
@@ -54,15 +55,27 @@ export function EditarPrestadorModal({ open, onOpenChange, prestador, onSave }: 
     return numbers.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
   };
 
-  const handleSave = () => {
-    const updatedPrestador = {
-      ...formData,
-      datanascimento: dataNascimento?.toISOString(),
-      datainiciocontrato: dataInicioContrato?.toISOString(),
-    };
+  const handleSave = async () => {
+    try {
+      const updatedPrestador = {
+        ...formData,
+        dataNascimento: dataNascimento ? format(dataNascimento, "yyyy-MM-dd") : null,
+        dataInicioContrato: dataInicioContrato ? format(dataInicioContrato, "yyyy-MM-dd") : null,
+      };
 
-    onSave(updatedPrestador);
-    onOpenChange(false);
+      await updatePrestadorMutation.mutateAsync({
+        id: prestador.id,
+        ...updatedPrestador
+      });
+      
+      onOpenChange(false);
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Falha ao atualizar prestador.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (

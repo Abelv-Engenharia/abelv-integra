@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Building2, Search, Eye, Pencil, Trash2 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -17,47 +17,33 @@ import {
 } from "@/components/ui/alert-dialog";
 import { VisualizarPrestadorModal } from "@/components/gestao-pessoas/prestadores/VisualizarPrestadorModal";
 import { EditarPrestadorModal } from "@/components/gestao-pessoas/prestadores/EditarPrestadorModal";
+import { usePrestadoresPJ, useDeletePrestadorPJ, PrestadorPJ } from "@/hooks/gestao-pessoas/usePrestadoresPJ";
 
 export default function ConsultaPrestadores() {
-  const [prestadores, setPrestadores] = useState<any[]>([]);
-  const [filteredPrestadores, setFilteredPrestadores] = useState<any[]>([]);
+  const { data: prestadores = [], isLoading } = usePrestadoresPJ();
+  const deletePrestadorMutation = useDeletePrestadorPJ();
+  
   const [searchTerm, setSearchTerm] = useState("");
-  const [prestadorToDelete, setPrestadorToDelete] = useState<any>(null);
+  const [prestadorToDelete, setPrestadorToDelete] = useState<PrestadorPJ | null>(null);
   const [visualizarModal, setVisualizarModal] = useState(false);
   const [editarModal, setEditarModal] = useState(false);
-  const [prestadorSelecionado, setPrestadorSelecionado] = useState<any>(null);
-
-  // Carregar prestadores do localStorage
-  useEffect(() => {
-    loadPrestadores();
-  }, []);
-
-  const loadPrestadores = () => {
-    const prestadoresStorage = localStorage.getItem('cadastros_pessoa_juridica');
-    if (prestadoresStorage) {
-      const data = JSON.parse(prestadoresStorage);
-      setPrestadores(data);
-      setFilteredPrestadores(data);
-    }
-  };
+  const [prestadorSelecionado, setPrestadorSelecionado] = useState<PrestadorPJ | null>(null);
 
   // Filtrar prestadores
-  useEffect(() => {
+  const filteredPrestadores = useMemo(() => {
     if (searchTerm.trim() === "") {
-      setFilteredPrestadores(prestadores);
-    } else {
-      const filtered = prestadores.filter((prestador) => {
-        const searchLower = searchTerm.toLowerCase();
-        return (
-          prestador.nomecompleto?.toLowerCase().includes(searchLower) ||
-          prestador.razaosocial?.toLowerCase().includes(searchLower) ||
-          prestador.cpf?.includes(searchTerm) ||
-          prestador.cnpj?.includes(searchTerm) ||
-          prestador.email?.toLowerCase().includes(searchLower)
-        );
-      });
-      setFilteredPrestadores(filtered);
+      return prestadores;
     }
+    
+    const searchLower = searchTerm.toLowerCase();
+    return prestadores.filter((prestador) => 
+      prestador.nomeCompleto?.toLowerCase().includes(searchLower) ||
+      prestador.razaoSocial?.toLowerCase().includes(searchLower) ||
+      prestador.cpf?.includes(searchTerm) ||
+      prestador.cnpj?.includes(searchTerm) ||
+      prestador.email?.toLowerCase().includes(searchLower) ||
+      prestador.emailRepresentante?.toLowerCase().includes(searchLower)
+    );
   }, [searchTerm, prestadores]);
 
   const handleVisualizar = (prestador: any) => {
@@ -70,39 +56,22 @@ export default function ConsultaPrestadores() {
     setEditarModal(true);
   };
 
-  const handleSalvarEdicao = (prestadorEditado: any) => {
-    const updatedPrestadores = prestadores.map((p) =>
-      p.cpf === prestadorSelecionado.cpf ? prestadorEditado : p
-    );
-    
-    localStorage.setItem('cadastros_pessoa_juridica', JSON.stringify(updatedPrestadores));
-    setPrestadores(updatedPrestadores);
-    
-    toast({
-      title: "Sucesso",
-      description: "Prestador atualizado com sucesso!",
-    });
-  };
-
-  const handleDeleteClick = (prestador: any) => {
+  const handleDeleteClick = (prestador: PrestadorPJ) => {
     setPrestadorToDelete(prestador);
   };
 
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     if (prestadorToDelete) {
-      const updatedPrestadores = prestadores.filter(
-        (p) => p.cpf !== prestadorToDelete.cpf
-      );
-      
-      localStorage.setItem('cadastros_pessoa_juridica', JSON.stringify(updatedPrestadores));
-      setPrestadores(updatedPrestadores);
-      
-      toast({
-        title: "Sucesso",
-        description: "Prestador excluído com sucesso!",
-      });
-      
-      setPrestadorToDelete(null);
+      try {
+        await deletePrestadorMutation.mutateAsync(prestadorToDelete.id);
+        setPrestadorToDelete(null);
+      } catch (error) {
+        toast({
+          title: "Erro",
+          description: "Falha ao excluir prestador.",
+          variant: "destructive",
+        });
+      }
     }
   };
 
@@ -151,20 +120,26 @@ export default function ConsultaPrestadores() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredPrestadores.length === 0 ? (
+                {isLoading ? (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center py-8">
+                      Carregando prestadores...
+                    </TableCell>
+                  </TableRow>
+                ) : filteredPrestadores.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
                       {searchTerm ? "Nenhum prestador encontrado com os critérios de busca." : "Nenhum prestador cadastrado."}
                     </TableCell>
                   </TableRow>
                 ) : (
-                  filteredPrestadores.map((prestador, index) => (
-                    <TableRow key={index}>
-                      <TableCell className="font-medium">{prestador.nomecompleto}</TableCell>
-                      <TableCell>{prestador.razaosocial}</TableCell>
+                  filteredPrestadores.map((prestador) => (
+                    <TableRow key={prestador.id}>
+                      <TableCell className="font-medium">{prestador.nomeCompleto}</TableCell>
+                      <TableCell>{prestador.razaoSocial}</TableCell>
                       <TableCell>{prestador.cpf}</TableCell>
                       <TableCell>{prestador.cnpj}</TableCell>
-                      <TableCell>{prestador.emailrepresentante || prestador.email}</TableCell>
+                      <TableCell>{prestador.emailRepresentante || prestador.email}</TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
                           <Button
@@ -218,7 +193,6 @@ export default function ConsultaPrestadores() {
           open={editarModal}
           onOpenChange={setEditarModal}
           prestador={prestadorSelecionado}
-          onSave={handleSalvarEdicao}
         />
       )}
 
@@ -228,7 +202,7 @@ export default function ConsultaPrestadores() {
           <AlertDialogHeader>
             <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
             <AlertDialogDescription>
-              Tem certeza que deseja excluir o prestador <strong>{prestadorToDelete?.nomecompleto}</strong>?
+              Tem certeza que deseja excluir o prestador <strong>{prestadorToDelete?.nomeCompleto}</strong>?
               Esta ação não pode ser desfeita.
             </AlertDialogDescription>
           </AlertDialogHeader>

@@ -3,11 +3,12 @@ import { Label } from "@/components/ui/label";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { PrestadorPJ } from "@/hooks/gestao-pessoas/usePrestadoresPJ";
 
 interface VisualizarPrestadorModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  prestador: any;
+  prestador: PrestadorPJ;
 }
 
 export function VisualizarPrestadorModal({ open, onOpenChange, prestador }: VisualizarPrestadorModalProps) {
@@ -20,9 +21,9 @@ export function VisualizarPrestadorModal({ open, onOpenChange, prestador }: Visu
     }
   };
 
-  const formatCurrency = (value: string) => {
+  const formatCurrency = (value: number) => {
     if (!value) return "R$ 0,00";
-    return value;
+    return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
   };
 
   return (
@@ -40,7 +41,7 @@ export function VisualizarPrestadorModal({ open, onOpenChange, prestador }: Visu
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label className="text-muted-foreground">Razão Social</Label>
-                  <p className="font-medium">{prestador.razaosocial || "-"}</p>
+                  <p className="font-medium">{prestador.razaoSocial || "-"}</p>
                 </div>
                 <div>
                   <Label className="text-muted-foreground">CNPJ</Label>
@@ -50,21 +51,21 @@ export function VisualizarPrestadorModal({ open, onOpenChange, prestador }: Visu
 
               <div>
                 <Label className="text-muted-foreground">Descrição da Atividade</Label>
-                <p className="font-medium">{prestador.descricaoatividade || "-"}</p>
+                <p className="font-medium">{prestador.descricaoAtividade || "-"}</p>
               </div>
 
               <div className="grid grid-cols-3 gap-4">
                 <div>
                   <Label className="text-muted-foreground">Número de CNAE</Label>
-                  <p className="font-medium">{prestador.numerocnae || "-"}</p>
+                  <p className="font-medium">{prestador.numeroCnae || "-"}</p>
                 </div>
                 <div>
                   <Label className="text-muted-foreground">Grau de Risco</Label>
-                  <p className="font-medium">{prestador.grauderisco || "-"}</p>
+                  <p className="font-medium">{prestador.grauDeRisco || "-"}</p>
                 </div>
                 <div>
                   <Label className="text-muted-foreground">Nº Credor Sienge</Label>
-                  <p className="font-medium">{prestador.numerocredorsienge || "-"}</p>
+                  <p className="font-medium">{prestador.numeroCredorSienge || "-"}</p>
                 </div>
               </div>
 
@@ -84,7 +85,7 @@ export function VisualizarPrestadorModal({ open, onOpenChange, prestador }: Visu
                 </div>
                 <div>
                   <Label className="text-muted-foreground">Chave PIX</Label>
-                  <p className="font-medium">{prestador.contabancaria || "-"}</p>
+                  <p className="font-medium">{prestador.contaBancaria || "-"}</p>
                 </div>
               </div>
             </div>
@@ -95,7 +96,7 @@ export function VisualizarPrestadorModal({ open, onOpenChange, prestador }: Visu
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label className="text-muted-foreground">Nome Completo</Label>
-                  <p className="font-medium">{prestador.nomecompleto || "-"}</p>
+                  <p className="font-medium">{prestador.nomeCompleto || "-"}</p>
                 </div>
                 <div>
                   <Label className="text-muted-foreground">CPF</Label>
@@ -106,7 +107,7 @@ export function VisualizarPrestadorModal({ open, onOpenChange, prestador }: Visu
               <div className="grid grid-cols-3 gap-4">
                 <div>
                   <Label className="text-muted-foreground">Data de Nascimento</Label>
-                  <p className="font-medium">{formatDate(prestador.datanascimento)}</p>
+                  <p className="font-medium">{formatDate(prestador.dataNascimento)}</p>
                 </div>
                 <div>
                   <Label className="text-muted-foreground">RG</Label>
@@ -114,24 +115,24 @@ export function VisualizarPrestadorModal({ open, onOpenChange, prestador }: Visu
                 </div>
                 <div>
                   <Label className="text-muted-foreground">Registro Funcional</Label>
-                  <p className="font-medium">{prestador.registrofuncional || "-"}</p>
+                  <p className="font-medium">{prestador.registroFuncional || "-"}</p>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label className="text-muted-foreground">Telefone</Label>
-                  <p className="font-medium">{prestador.telefonerepresentante || "-"}</p>
+                  <p className="font-medium">{prestador.telefoneRepresentante || "-"}</p>
                 </div>
                 <div>
                   <Label className="text-muted-foreground">Email</Label>
-                  <p className="font-medium">{prestador.emailrepresentante || "-"}</p>
+                  <p className="font-medium">{prestador.emailRepresentante || "-"}</p>
                 </div>
               </div>
 
               <div>
                 <Label className="text-muted-foreground">Endereço</Label>
-                <p className="font-medium">{prestador.enderecorepresentante || "-"}</p>
+                <p className="font-medium">{prestador.enderecoRepresentante || "-"}</p>
               </div>
             </div>
 
@@ -145,33 +146,45 @@ export function VisualizarPrestadorModal({ open, onOpenChange, prestador }: Visu
                 </div>
                 <div>
                   <Label className="text-muted-foreground">Valor Prestação de Serviço</Label>
-                  <p className="font-medium">{formatCurrency(prestador.valorprestacaoservico)}</p>
+                  <p className="font-medium">
+                    {prestador.valorPrestacaoServico 
+                      ? prestador.valorPrestacaoServico.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) 
+                      : "R$ 0,00"}
+                  </p>
                 </div>
               </div>
 
               <div className="grid grid-cols-3 gap-4">
                 <div>
                   <Label className="text-muted-foreground">Data Início Contrato</Label>
-                  <p className="font-medium">{formatDate(prestador.datainiciocontrato)}</p>
+                  <p className="font-medium">{formatDate(prestador.dataInicioContrato)}</p>
                 </div>
                 <div>
-                  <Label className="text-muted-foreground">Tempo de Contrato</Label>
-                  <p className="font-medium">{prestador.tempocontrato || "-"}</p>
+                  <Label className="text-muted-foreground">Tipo de Contrato</Label>
+                  <p className="font-medium">{prestador.tipoContrato === 'determinado' ? 'Determinado' : 'Padrão'}</p>
                 </div>
                 <div>
-                  <Label className="text-muted-foreground">CCA Obra</Label>
-                  <p className="font-medium">{prestador.ccaobra || "-"}</p>
+                  <Label className="text-muted-foreground">CCA</Label>
+                  <p className="font-medium">{prestador.ccaNome || "-"}</p>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label className="text-muted-foreground">Ajuda de Custo</Label>
-                  <p className="font-medium">{formatCurrency(prestador.ajudacusto)}</p>
+                  <p className="font-medium">
+                    {prestador.valorAjudaCusto 
+                      ? prestador.valorAjudaCusto.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) 
+                      : "R$ 0,00"}
+                  </p>
                 </div>
                 <div>
                   <Label className="text-muted-foreground">Ajuda de Aluguel</Label>
-                  <p className="font-medium">{formatCurrency(prestador.ajudaaluguel)}</p>
+                  <p className="font-medium">
+                    {prestador.valorAjudaAluguel 
+                      ? prestador.valorAjudaAluguel.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) 
+                      : "R$ 0,00"}
+                  </p>
                 </div>
               </div>
 
@@ -179,17 +192,23 @@ export function VisualizarPrestadorModal({ open, onOpenChange, prestador }: Visu
                 <div>
                   <Label className="text-muted-foreground">Auxílio Convênio Médico</Label>
                   <div className="flex items-center gap-2">
-                    <Badge variant={prestador.auxilioconveniomedico ? "default" : "secondary"}>
-                      {prestador.auxilioconveniomedico ? "Sim" : "Não"}
+                    <Badge variant={prestador.auxilioConvenioMedico ? "default" : "secondary"}>
+                      {prestador.auxilioConvenioMedico ? "Sim" : "Não"}
                     </Badge>
-                    {prestador.auxilioconveniomedico && (
-                      <span className="text-sm">{formatCurrency(prestador.valorauxilioconveniomedico)}</span>
+                    {prestador.auxilioConvenioMedico && (
+                      <span className="text-sm">
+                        {prestador.valorAuxilioConvenioMedico.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                      </span>
                     )}
                   </div>
                 </div>
                 <div>
                   <Label className="text-muted-foreground">Vale Refeição</Label>
-                  <p className="font-medium">{formatCurrency(prestador.valerefeicao)}</p>
+                  <p className="font-medium">
+                    {prestador.valeRefeicao 
+                      ? prestador.valeRefeicao.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) 
+                      : "R$ 0,00"}
+                  </p>
                 </div>
               </div>
 
@@ -197,21 +216,27 @@ export function VisualizarPrestadorModal({ open, onOpenChange, prestador }: Visu
               <div className="space-y-2">
                 <Label className="text-muted-foreground">Benefícios Adicionais</Label>
                 <div className="flex flex-wrap gap-2">
-                  {prestador.cafemanha && (
-                    <Badge>Café da Manhã: {formatCurrency(prestador.valorcafemanha)}</Badge>
+                  {prestador.cafeManha && (
+                    <Badge>
+                      Café da Manhã: {prestador.valorCafeManha.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                    </Badge>
                   )}
-                  {prestador.cafetarde && (
-                    <Badge>Café da Tarde: {formatCurrency(prestador.valorcafetarde)}</Badge>
+                  {prestador.cafeTarde && (
+                    <Badge>
+                      Café da Tarde: {prestador.valorCafeTarde.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                    </Badge>
                   )}
                   {prestador.almoco && (
-                    <Badge>Almoço: {formatCurrency(prestador.valoralmoco)}</Badge>
+                    <Badge>
+                      Almoço: {prestador.valorAlmoco.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                    </Badge>
                   )}
                   {prestador.veiculo && (
-                    <Badge>Veículo: {prestador.detalhesveiculo || "Sim"}</Badge>
+                    <Badge>Veículo: {prestador.detalhesVeiculo || "Sim"}</Badge>
                   )}
                   {prestador.celular && <Badge>Celular</Badge>}
                   {prestador.alojamento && (
-                    <Badge>Alojamento: {prestador.detalhesalojamento || "Sim"}</Badge>
+                    <Badge>Alojamento: {prestador.detalhesAlojamento || "Sim"}</Badge>
                   )}
                 </div>
               </div>
@@ -219,17 +244,17 @@ export function VisualizarPrestadorModal({ open, onOpenChange, prestador }: Visu
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label className="text-muted-foreground">Folga em Campo</Label>
-                  <p className="font-medium">{prestador.folgacampo || "-"}</p>
+                  <p className="font-medium">{prestador.folgaCampo || "-"}</p>
                 </div>
                 <div>
                   <Label className="text-muted-foreground">Período de Férias</Label>
-                  <p className="font-medium">{prestador.periodoferias || "-"}</p>
+                  <p className="font-medium">{prestador.periodoFerias || "-"}</p>
                 </div>
               </div>
 
               <div>
                 <Label className="text-muted-foreground">Quantidade de Dias de Férias</Label>
-                <p className="font-medium">{prestador.quantidadediasferias || "-"}</p>
+                <p className="font-medium">{prestador.quantidadeDiasFerias || "-"}</p>
               </div>
             </div>
           </div>
