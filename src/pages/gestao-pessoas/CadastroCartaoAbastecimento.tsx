@@ -190,9 +190,9 @@ export default function CadastroCartaoAbastecimento() {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="Ativo">Ativo</SelectItem>
-                          <SelectItem value="Bloqueado">Bloqueado</SelectItem>
-                          <SelectItem value="Cancelado">Cancelado</SelectItem>
+                          <SelectItem value="ativo">Ativo</SelectItem>
+                          <SelectItem value="bloqueado">Bloqueado</SelectItem>
+                          <SelectItem value="cancelado">Cancelado</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -215,9 +215,9 @@ export default function CadastroCartaoAbastecimento() {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="Combustível">Combustível</SelectItem>
-                          <SelectItem value="Pedágio">Pedágio</SelectItem>
-                          <SelectItem value="Múltiplo">Múltiplo</SelectItem>
+                          <SelectItem value="combustivel">Combustível</SelectItem>
+                          <SelectItem value="pedagio">Pedágio</SelectItem>
+                          <SelectItem value="multiplo">Múltiplo</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
