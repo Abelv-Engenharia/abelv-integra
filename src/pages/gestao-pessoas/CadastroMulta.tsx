@@ -21,6 +21,7 @@ import { DocumentUploadField } from "@/components/gestao-pessoas/veiculos/Docume
 import { MultaCompleta } from "@/types/gestao-pessoas/multa"
 import { useVeiculos } from "@/hooks/gestao-pessoas/useVeiculos"
 import { useCondutores } from "@/hooks/gestao-pessoas/useCondutores"
+import { supabase } from "@/integrations/supabase/client"
 import { cn } from "@/lib/utils"
 
 const formSchema = z.object({
@@ -140,35 +141,40 @@ export default function CadastroMulta() {
       const condutorFinalId = values.indicar_outro_condutor ? values.outro_condutor_id : values.condutor_infrator_id
       const condutor = condutores?.find(c => c.id === condutorFinalId)
       
-      const novaMulta: MultaCompleta = {
-        id: crypto.randomUUID(),
-        numeroAutoInfracao: values.numeroAutoInfracao,
-        dataMulta: values.dataMulta,
-        horario: values.horario,
+      // Construir o objeto conforme o schema do banco
+      const multaParaSalvar = {
+        numero_auto_infracao: values.numeroAutoInfracao,
+        data_multa: format(values.dataMulta, "yyyy-MM-dd"),
+        horario: values.horario.length === 5 ? `${values.horario}:00` : values.horario,
         ocorrencia: values.ocorrencia,
         pontos: values.pontos,
-        condutorInfrator: condutor?.nome_condutor || values.condutor_infrator_nome || "",
+        condutor_infrator_id: condutorFinalId,
+        condutor_infrator_nome: condutor?.nome_condutor || values.condutor_infrator_nome || "",
         placa: values.placa,
-        veiculo: values.veiculo_modelo,
-        locadora: values.locadora_nome,
-        valor: values.valor,
-        dataNotificacao: values.dataNotificacao,
-        responsavel: values.responsavel,
-        numeroFatura: values.numeroFatura,
-        tituloSienge: values.tituloSienge,
-        indicadoOrgao: values.indicadoOrgao,
-        statusMulta: 'Registrada',
-        documentoNotificacao: documentoNotificacao?.name,
-        formularioPreenchido: formularioPreenchido?.name,
-        comprovanteIndicacao: comprovanteIndicacao?.name,
-        descontoConfirmado: false,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        createdBy: 'user',
+        veiculo_id: values.veiculo_id,
+        veiculo_modelo: values.veiculo_modelo,
+        locadora_nome: values.locadora_nome,
+        valor: values.valor || null,
+        gravidade: values.gravidade || null,
+        data_notificacao: values.dataNotificacao ? format(values.dataNotificacao, "yyyy-MM-dd") : null,
+        responsavel: values.responsavel || null,
+        numero_fatura: values.numeroFatura || null,
+        titulo_sienge: values.tituloSienge || null,
+        indicado_orgao: values.indicadoOrgao,
+        status_multa: 'Registrada',
+        desconto_confirmado: false,
+        observacoes_gerais: values.observacoesGerais || null,
+        documento_notificacao_nome: documentoNotificacao?.name || null,
+        formulario_preenchido_nome: formularioPreenchido?.name || null,
+        comprovante_indicacao_nome: comprovanteIndicacao?.name || null,
       }
 
-      const existingMultas = JSON.parse(localStorage.getItem("multas") || "[]")
-      localStorage.setItem("multas", JSON.stringify([...existingMultas, novaMulta]))
+      // Inserir no Supabase
+      const { error } = await supabase
+        .from('veiculos_multas')
+        .insert(multaParaSalvar)
+
+      if (error) throw error
 
       toast({
         title: "Sucesso",
@@ -180,9 +186,10 @@ export default function CadastroMulta() {
       setFormularioPreenchido(null)
       setComprovanteIndicacao(null)
     } catch (error) {
+      console.error('Erro ao cadastrar multa:', error)
       toast({
         title: "Erro",
-        description: "Erro ao cadastrar multa. Tente novamente.",
+        description: error instanceof Error ? error.message : "Erro ao cadastrar multa. Tente novamente.",
         variant: "destructive",
       })
     } finally {
