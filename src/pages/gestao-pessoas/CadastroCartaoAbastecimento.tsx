@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
@@ -14,18 +14,22 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar"
 import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
+import { supabase } from "@/integrations/supabase/client"
+import { useVeiculos } from "@/hooks/gestao-pessoas/useVeiculos"
 
 const formSchema = z.object({
   status: z.string().min(1, "Status é obrigatório"),
-  condutor: z.string().min(1, "Condutor é obrigatório"),
+  tipo_cartao: z.string().min(1, "Tipo de cartão é obrigatório"),
+  limite_credito: z.number().optional(),
+  veiculo_id: z.string().min(1, "Veículo é obrigatório"),
+  condutor_id: z.string().optional(),
+  condutor_nome: z.string().min(1, "Condutor é obrigatório"),
   placa: z.string().min(1, "Placa é obrigatória"),
-  modelo: z.string().min(1, "Modelo é obrigatório"),
-  numeroCartao: z.string().min(1, "Número do cartão é obrigatório"),
-  dataValidade: z.date({
+  veiculo_modelo: z.string().optional(),
+  numero_cartao: z.string().min(1, "Número do cartão é obrigatório"),
+  data_validade: z.date({
     required_error: "Data de validade é obrigatória",
   }),
-  tipoCartao: z.string().min(1, "Tipo de cartão é obrigatório"),
-  limiteCredito: z.string().optional(),
 })
 
 type FormValues = z.infer<typeof formSchema>
@@ -34,29 +38,61 @@ export default function CadastroCartaoAbastecimento() {
   const { toast } = useToast()
   const navigate = useNavigate()
   const [loading, setLoading] = useState(false)
+  const { data: veiculos, isLoading: loadingVeiculos } = useVeiculos()
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       status: "",
-      condutor: "",
+      tipo_cartao: "",
+      limite_credito: undefined,
+      veiculo_id: "",
+      condutor_id: "",
+      condutor_nome: "",
       placa: "",
-      modelo: "",
-      numeroCartao: "",
-      tipoCartao: "",
-      limiteCredito: "",
+      veiculo_modelo: "",
+      numero_cartao: "",
+      data_validade: undefined,
     },
   })
+
+  // Auto-preencher condutor e placa ao selecionar veículo
+  useEffect(() => {
+    const subscription = form.watch((value, { name }) => {
+      if (name === 'veiculo_id' && value.veiculo_id && veiculos) {
+        const veiculoSelecionado = veiculos.find(v => v.id === value.veiculo_id)
+        if (veiculoSelecionado) {
+          form.setValue('placa', veiculoSelecionado.placa)
+          form.setValue('veiculo_modelo', veiculoSelecionado.modelo)
+          
+          if (veiculoSelecionado.condutor) {
+            form.setValue('condutor_id', veiculoSelecionado.condutor.id)
+            form.setValue('condutor_nome', veiculoSelecionado.condutor.nome_condutor)
+          } else {
+            form.setValue('condutor_id', '')
+            form.setValue('condutor_nome', '')
+          }
+        }
+      }
+    })
+    return () => subscription.unsubscribe()
+  }, [form, veiculos])
 
   const onSubmit = async (values: FormValues) => {
     setLoading(true)
     try {
-      const existingCartoes = JSON.parse(localStorage.getItem("cartoes") || "[]")
-      const cartaoExiste = existingCartoes.some((cartao: any) => 
-        cartao.numeroCartao.replace(/\s/g, "") === values.numeroCartao.replace(/\s/g, "")
-      )
+      // Verificar se o número do cartão já existe
+      const numeroCartaoLimpo = values.numero_cartao.replace(/\s/g, "")
+      
+      const { data: cartaoExistente, error: errorCheck } = await supabase
+        .from('veiculos_cartoes_abastecimento')
+        .select('id')
+        .eq('numero_cartao_hash', numeroCartaoLimpo)
+        .maybeSingle()
 
-      if (cartaoExiste) {
+      if (errorCheck) throw errorCheck
+
+      if (cartaoExistente) {
         toast({
           title: "Erro",
           description: "Este número de cartão já está cadastrado.",
@@ -66,14 +102,36 @@ export default function CadastroCartaoAbastecimento() {
         return
       }
 
-      const novoCartao = {
+      // Construir objeto para inserir no Supabase
+      const cartaoParaSalvar = {
         id: crypto.randomUUID(),
-        ...values,
-        createdAt: new Date().toISOString(),
+        status: values.status,
+        condutor_id: values.condutor_id || null,
+        condutor_nome: values.condutor_nome,
+        placa: values.placa,
+        veiculo_id: values.veiculo_id,
+        veiculo_modelo: values.veiculo_modelo || null,
+        numero_cartao: numeroCartaoLimpo,
+        numero_cartao_hash: numeroCartaoLimpo,
+        data_validade: format(values.data_validade, 'yyyy-MM-dd'),
+        tipo_cartao: values.tipo_cartao,
+        limite_credito: values.limite_credito || null,
+        bandeira: null,
+        observacoes: null,
+        ativo: true,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        created_by: null,
       }
 
-      const cartoes = [...existingCartoes, novoCartao]
-      localStorage.setItem("cartoes", JSON.stringify(cartoes))
+      // Inserir no Supabase
+      const { data, error } = await supabase
+        .from('veiculos_cartoes_abastecimento')
+        .insert(cartaoParaSalvar)
+        .select()
+        .single()
+
+      if (error) throw error
 
       toast({
         title: "Sucesso",
@@ -82,9 +140,10 @@ export default function CadastroCartaoAbastecimento() {
 
       form.reset()
     } catch (error) {
+      console.error('Erro ao cadastrar cartão:', error)
       toast({
         title: "Erro",
-        description: "Erro ao cadastrar cartão. Tente novamente.",
+        description: error instanceof Error ? error.message : "Erro ao cadastrar cartão. Tente novamente.",
         variant: "destructive",
       })
     } finally {
@@ -114,7 +173,8 @@ export default function CadastroCartaoAbastecimento() {
         <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* LINHA 1: Status | Tipo de Cartão | Limite de Crédito */}
                 <FormField
                   control={form.control}
                   name="status"
@@ -130,9 +190,9 @@ export default function CadastroCartaoAbastecimento() {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="ativo">Ativo</SelectItem>
-                          <SelectItem value="bloqueado">Bloqueado</SelectItem>
-                          <SelectItem value="cancelado">Cancelado</SelectItem>
+                          <SelectItem value="Ativo">Ativo</SelectItem>
+                          <SelectItem value="Bloqueado">Bloqueado</SelectItem>
+                          <SelectItem value="Cancelado">Cancelado</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -142,7 +202,89 @@ export default function CadastroCartaoAbastecimento() {
 
                 <FormField
                   control={form.control}
-                  name="condutor"
+                  name="tipo_cartao"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className={cn(!field.value && "text-destructive")}>
+                        Tipo de Cartão *
+                      </FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger className={cn(!field.value && "border-destructive")}>
+                            <SelectValue placeholder="Selecione o tipo" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="Combustível">Combustível</SelectItem>
+                          <SelectItem value="Pedágio">Pedágio</SelectItem>
+                          <SelectItem value="Múltiplo">Múltiplo</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="limite_credito"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Limite de Crédito</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="R$ 0,00" 
+                          value={field.value ? field.value.toLocaleString("pt-BR", {
+                            style: "currency",
+                            currency: "BRL",
+                          }) : ""}
+                          onChange={(e) => {
+                            let value = e.target.value.replace(/\D/g, "")
+                            const numValue = Number(value) / 100
+                            field.onChange(numValue)
+                          }}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* LINHA 2: Veículo | Condutor | Placa */}
+                <FormField
+                  control={form.control}
+                  name="veiculo_id"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className={cn(!field.value && "text-destructive")}>
+                        Veículo *
+                      </FormLabel>
+                      <Select 
+                        onValueChange={field.onChange} 
+                        defaultValue={field.value}
+                        disabled={loadingVeiculos}
+                      >
+                        <FormControl>
+                          <SelectTrigger className={cn(!field.value && "border-destructive")}>
+                            <SelectValue placeholder="Selecione o veículo" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {veiculos?.map((veiculo) => (
+                            <SelectItem key={veiculo.id} value={veiculo.id}>
+                              {veiculo.modelo} - {veiculo.placa}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="condutor_nome"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className={cn(!field.value && "text-destructive")}>
@@ -150,8 +292,9 @@ export default function CadastroCartaoAbastecimento() {
                       </FormLabel>
                       <FormControl>
                         <Input 
-                          placeholder="Nome do condutor" 
-                          className={cn(!field.value && "border-destructive")}
+                          placeholder="Condutor" 
+                          className={cn(!field.value && "border-destructive", "bg-muted")}
+                          readOnly
                           {...field} 
                         />
                       </FormControl>
@@ -171,14 +314,9 @@ export default function CadastroCartaoAbastecimento() {
                       <FormControl>
                         <Input 
                           placeholder="AAA-0000" 
-                          className={cn(!field.value && "border-destructive")}
+                          className={cn(!field.value && "border-destructive", "bg-muted")}
+                          readOnly
                           {...field}
-                          onChange={(e) => {
-                            let value = e.target.value.toUpperCase()
-                            if (value.length === 3) value += "-"
-                            field.onChange(value)
-                          }}
-                          maxLength={8}
                         />
                       </FormControl>
                       <FormMessage />
@@ -186,29 +324,10 @@ export default function CadastroCartaoAbastecimento() {
                   )}
                 />
 
+                {/* LINHA 3: Número do Cartão | Data de Validade */}
                 <FormField
                   control={form.control}
-                  name="modelo"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className={cn(!field.value && "text-destructive")}>
-                        Modelo *
-                      </FormLabel>
-                      <FormControl>
-                        <Input 
-                          placeholder="Modelo do veículo" 
-                          className={cn(!field.value && "border-destructive")}
-                          {...field} 
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="numeroCartao"
+                  name="numero_cartao"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className={cn(!field.value && "text-destructive")}>
@@ -234,7 +353,7 @@ export default function CadastroCartaoAbastecimento() {
 
                 <FormField
                   control={form.control}
-                  name="dataValidade"
+                  name="data_validade"
                   render={({ field }) => (
                     <FormItem className="flex flex-col">
                       <FormLabel className={cn(!field.value && "text-destructive")}>
@@ -268,56 +387,6 @@ export default function CadastroCartaoAbastecimento() {
                           />
                         </PopoverContent>
                       </Popover>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="tipoCartao"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className={cn(!field.value && "text-destructive")}>
-                        Tipo de Cartão *
-                      </FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger className={cn(!field.value && "border-destructive")}>
-                            <SelectValue placeholder="Selecione o tipo" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="combustivel">Combustível</SelectItem>
-                          <SelectItem value="pedagio">Pedágio</SelectItem>
-                          <SelectItem value="multiplo">Múltiplo</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="limiteCredito"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Limite de Crédito</FormLabel>
-                      <FormControl>
-                        <Input 
-                          placeholder="R$ 0,00" 
-                          {...field}
-                          onChange={(e) => {
-                            let value = e.target.value.replace(/\D/g, "")
-                            value = (Number(value) / 100).toLocaleString("pt-BR", {
-                              style: "currency",
-                              currency: "BRL",
-                            })
-                            field.onChange(value)
-                          }}
-                        />
-                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
