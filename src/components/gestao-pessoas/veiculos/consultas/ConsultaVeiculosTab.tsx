@@ -10,6 +10,11 @@ import { format } from "date-fns";
 import { toast } from "@/hooks/use-toast";
 import { useVeiculos } from "@/hooks/gestao-pessoas/useVeiculos";
 import { useMigracaoLocalStorage } from "@/hooks/gestao-pessoas/useMigracaoLocalStorage";
+import { VisualizarVeiculoModal } from "@/components/gestao-pessoas/veiculos/VisualizarVeiculoModal";
+import { VeiculoFormModal } from "@/components/gestao-pessoas/veiculos/VeiculoFormModal";
+import { ExcluirDialog } from "@/components/gestao-pessoas/veiculos/ExcluirDialog";
+import { useExcluirEntidade } from "@/hooks/gestao-pessoas/useExcluirEntidade";
+import { Trash2 } from "lucide-react";
 
 export function ConsultaVeiculosTab() {
   // Migração automática ao carregar o componente
@@ -34,6 +39,16 @@ export function ConsultaVeiculosTab() {
   const [busca, setBusca] = useState("");
   const [filtroStatus, setFiltroStatus] = useState("todos");
   const [filtroTipo, setFiltroTipo] = useState("todos");
+  const [veiculoSelecionado, setVeiculoSelecionado] = useState<any>(null);
+  const [visualizarOpen, setVisualizarOpen] = useState(false);
+  const [editarOpen, setEditarOpen] = useState(false);
+  const [excluirOpen, setExcluirOpen] = useState(false);
+
+  const excluirMutation = useExcluirEntidade({
+    tabela: 'veiculos',
+    queryKey: ['veiculos'],
+    onSuccess: () => setExcluirOpen(false)
+  });
   
   const { data: veiculos = [], isLoading } = useVeiculos();
   const veiculosFiltrados = veiculos.filter(veiculo => {
@@ -168,11 +183,14 @@ export function ConsultaVeiculosTab() {
                       <TableCell>{format(new Date(veiculo.data_devolucao), "dd/MM/yyyy")}</TableCell>
                       <TableCell>
                         <div className="flex gap-1">
-                          <Button variant="ghost" size="sm" title="Visualizar">
+                          <Button variant="ghost" size="sm" title="Visualizar" onClick={() => { setVeiculoSelecionado(veiculo); setVisualizarOpen(true); }}>
                             <Eye className="h-4 w-4" />
                           </Button>
-                          <Button variant="ghost" size="sm" title="Editar">
+                          <Button variant="ghost" size="sm" title="Editar" onClick={() => { setVeiculoSelecionado(veiculo); setEditarOpen(true); }}>
                             <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button variant="ghost" size="sm" title="Excluir" onClick={() => { setVeiculoSelecionado(veiculo); setExcluirOpen(true); }}>
+                            <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>
                       </TableCell>
@@ -183,5 +201,9 @@ export function ConsultaVeiculosTab() {
           )}
         </CardContent>
       </Card>
+
+      <VisualizarVeiculoModal veiculo={veiculoSelecionado} open={visualizarOpen} onOpenChange={setVisualizarOpen} onEditar={() => { setVisualizarOpen(false); setEditarOpen(true); }} />
+      <VeiculoFormModal open={editarOpen} onOpenChange={setEditarOpen} itemParaEdicao={veiculoSelecionado} />
+      <ExcluirDialog open={excluirOpen} onOpenChange={setExcluirOpen} titulo="Excluir Veículo" descricao={`Tem certeza que deseja excluir o veículo ${veiculoSelecionado?.placa}?`} onConfirmar={() => excluirMutation.mutate(veiculoSelecionado?.id)} isLoading={excluirMutation.isPending} />
     </div>;
 }

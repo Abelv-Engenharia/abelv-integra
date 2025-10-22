@@ -9,6 +9,11 @@ import { Search, Eye, Edit, FileSpreadsheet, FileText } from "lucide-react";
 import { format } from "date-fns";
 import { usePedagiosEstacionamentos } from "@/hooks/gestao-pessoas/usePedagiosEstacionamentos";
 import { useMigracaoLocalStorage } from "@/hooks/gestao-pessoas/useMigracaoLocalStorage";
+import { VisualizarPedagioModal } from "@/components/gestao-pessoas/veiculos/VisualizarPedagioModal";
+import { PedagioFormModal } from "@/components/gestao-pessoas/veiculos/PedagioFormModal";
+import { ExcluirDialog } from "@/components/gestao-pessoas/veiculos/ExcluirDialog";
+import { useExcluirEntidade } from "@/hooks/gestao-pessoas/useExcluirEntidade";
+import { Trash2 } from "lucide-react";
 
 export function ConsultaPedagiosTab() {
   // Migração automática
@@ -32,6 +37,12 @@ export function ConsultaPedagiosTab() {
   });
   const [busca, setBusca] = useState("");
   const [filtroTipo, setFiltroTipo] = useState("todos");
+  const [pedagioSelecionado, setPedagioSelecionado] = useState<any>(null);
+  const [visualizarOpen, setVisualizarOpen] = useState(false);
+  const [editarOpen, setEditarOpen] = useState(false);
+  const [excluirOpen, setExcluirOpen] = useState(false);
+
+  const excluirMutation = useExcluirEntidade({ tabela: 'veiculos_pedagogios_estacionamentos', queryKey: ['pedagogios-estacionamentos'], onSuccess: () => setExcluirOpen(false) });
   
   const { data: pedagogios = [], isLoading } = usePedagiosEstacionamentos();
   const pedagogiosFiltrados = pedagogios.filter(pedagio => {
@@ -142,11 +153,14 @@ export function ConsultaPedagiosTab() {
                       <TableCell className="max-w-[150px] truncate">{pedagio.finalidade}</TableCell>
                       <TableCell>
                         <div className="flex gap-1">
-                          <Button variant="ghost" size="sm" title="Visualizar">
+                          <Button variant="ghost" size="sm" title="Visualizar" onClick={() => { setPedagioSelecionado(pedagio); setVisualizarOpen(true); }}>
                             <Eye className="h-4 w-4" />
                           </Button>
-                          <Button variant="ghost" size="sm" title="Editar">
+                          <Button variant="ghost" size="sm" title="Editar" onClick={() => { setPedagioSelecionado(pedagio); setEditarOpen(true); }}>
                             <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button variant="ghost" size="sm" title="Excluir" onClick={() => { setPedagioSelecionado(pedagio); setExcluirOpen(true); }}>
+                            <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>
                       </TableCell>
@@ -157,5 +171,9 @@ export function ConsultaPedagiosTab() {
           )}
         </CardContent>
       </Card>
+
+      <VisualizarPedagioModal pedagio={pedagioSelecionado} open={visualizarOpen} onOpenChange={setVisualizarOpen} onEditar={() => { setVisualizarOpen(false); setEditarOpen(true); }} />
+      <PedagioFormModal open={editarOpen} onOpenChange={setEditarOpen} itemParaEdicao={pedagioSelecionado} />
+      <ExcluirDialog open={excluirOpen} onOpenChange={setExcluirOpen} titulo="Excluir Transação" descricao={`Tem certeza que deseja excluir esta transação?`} onConfirmar={() => excluirMutation.mutate(pedagioSelecionado?.id)} isLoading={excluirMutation.isPending} />
     </div>;
 }

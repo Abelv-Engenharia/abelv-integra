@@ -9,6 +9,11 @@ import { Search, Eye, Edit, FileSpreadsheet, FileText } from "lucide-react";
 import { format } from "date-fns";
 import { useCartoesAbastecimento } from "@/hooks/gestao-pessoas/useCartoesAbastecimento";
 import { useMigracaoLocalStorage } from "@/hooks/gestao-pessoas/useMigracaoLocalStorage";
+import { VisualizarCartaoModal } from "@/components/gestao-pessoas/veiculos/VisualizarCartaoModal";
+import { CartaoFormModal } from "@/components/gestao-pessoas/veiculos/CartaoFormModal";
+import { ExcluirDialog } from "@/components/gestao-pessoas/veiculos/ExcluirDialog";
+import { useExcluirEntidade } from "@/hooks/gestao-pessoas/useExcluirEntidade";
+import { Trash2 } from "lucide-react";
 
 export function ConsultaCartoesTab() {
   // Migração automática
@@ -32,6 +37,12 @@ export function ConsultaCartoesTab() {
   const [busca, setBusca] = useState("");
   const [filtroStatus, setFiltroStatus] = useState("todos");
   const [filtroTipo, setFiltroTipo] = useState("todos");
+  const [cartaoSelecionado, setCartaoSelecionado] = useState<any>(null);
+  const [visualizarOpen, setVisualizarOpen] = useState(false);
+  const [editarOpen, setEditarOpen] = useState(false);
+  const [excluirOpen, setExcluirOpen] = useState(false);
+
+  const excluirMutation = useExcluirEntidade({ tabela: 'veiculos_cartoes_abastecimento', queryKey: ['cartoes-abastecimento'], onSuccess: () => setExcluirOpen(false) });
   
   const { data: cartoes = [], isLoading } = useCartoesAbastecimento();
   const cartoesFiltrados = cartoes.filter(cartao => {
@@ -163,11 +174,14 @@ export function ConsultaCartoesTab() {
                       </TableCell>
                       <TableCell>
                         <div className="flex gap-1">
-                          <Button variant="ghost" size="sm" title="Visualizar">
+                          <Button variant="ghost" size="sm" title="Visualizar" onClick={() => { setCartaoSelecionado(cartao); setVisualizarOpen(true); }}>
                             <Eye className="h-4 w-4" />
                           </Button>
-                          <Button variant="ghost" size="sm" title="Editar">
+                          <Button variant="ghost" size="sm" title="Editar" onClick={() => { setCartaoSelecionado(cartao); setEditarOpen(true); }}>
                             <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button variant="ghost" size="sm" title="Excluir" onClick={() => { setCartaoSelecionado(cartao); setExcluirOpen(true); }}>
+                            <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>
                       </TableCell>
@@ -178,5 +192,9 @@ export function ConsultaCartoesTab() {
           )}
         </CardContent>
       </Card>
+
+      <VisualizarCartaoModal cartao={cartaoSelecionado} open={visualizarOpen} onOpenChange={setVisualizarOpen} onEditar={() => { setVisualizarOpen(false); setEditarOpen(true); }} />
+      <CartaoFormModal open={editarOpen} onOpenChange={setEditarOpen} itemParaEdicao={cartaoSelecionado} />
+      <ExcluirDialog open={excluirOpen} onOpenChange={setExcluirOpen} titulo="Excluir Cartão" descricao={`Tem certeza que deseja excluir o cartão ${cartaoSelecionado?.numero_cartao}?`} onConfirmar={() => excluirMutation.mutate(cartaoSelecionado?.id)} isLoading={excluirMutation.isPending} />
     </div>;
 }

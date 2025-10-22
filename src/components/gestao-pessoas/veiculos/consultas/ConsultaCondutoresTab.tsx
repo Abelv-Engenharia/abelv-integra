@@ -9,11 +9,22 @@ import { FileSpreadsheet, FileText, FileCheck, Eye, Edit, Search } from "lucide-
 import { format, differenceInDays } from "date-fns";
 import { useCondutores } from "@/hooks/gestao-pessoas/useCondutores";
 import { useMultas } from "@/hooks/gestao-pessoas/useMultas";
+import { VisualizarCondutorModal } from "@/components/gestao-pessoas/veiculos/VisualizarCondutorModal";
+import { CondutorFormModal } from "@/components/gestao-pessoas/veiculos/CondutorFormModal";
+import { ExcluirDialog } from "@/components/gestao-pessoas/veiculos/ExcluirDialog";
+import { useExcluirEntidade } from "@/hooks/gestao-pessoas/useExcluirEntidade";
+import { Trash2 } from "lucide-react";
 
 export function ConsultaCondutoresTab() {
   const [busca, setBusca] = useState("");
   const [filtroCategoria, setFiltroCategoria] = useState("todos");
   const [filtroStatus, setFiltroStatus] = useState("todos");
+  const [condutorSelecionado, setCondutorSelecionado] = useState<any>(null);
+  const [visualizarOpen, setVisualizarOpen] = useState(false);
+  const [editarOpen, setEditarOpen] = useState(false);
+  const [excluirOpen, setExcluirOpen] = useState(false);
+
+  const excluirMutation = useExcluirEntidade({ tabela: 'veiculos_condutores', queryKey: ['condutores'], onSuccess: () => setExcluirOpen(false) });
   
   const { data: condutores = [], isLoading: loadingCondutores } = useCondutores();
   const { data: multasData = [], isLoading: loadingMultas } = useMultas();
@@ -160,11 +171,14 @@ export function ConsultaCondutoresTab() {
                       </TableCell>
                       <TableCell>
                         <div className="flex gap-1">
-                          <Button variant="ghost" size="sm" title="Visualizar">
+                          <Button variant="ghost" size="sm" title="Visualizar" onClick={() => { setCondutorSelecionado(condutor); setVisualizarOpen(true); }}>
                             <Eye className="h-4 w-4" />
                           </Button>
-                          <Button variant="ghost" size="sm" title="Editar">
+                          <Button variant="ghost" size="sm" title="Editar" onClick={() => { setCondutorSelecionado(condutor); setEditarOpen(true); }}>
                             <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button variant="ghost" size="sm" title="Excluir" onClick={() => { setCondutorSelecionado(condutor); setExcluirOpen(true); }}>
+                            <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>
                       </TableCell>
@@ -175,5 +189,9 @@ export function ConsultaCondutoresTab() {
           )}
         </CardContent>
       </Card>
+
+      <VisualizarCondutorModal condutor={condutorSelecionado} open={visualizarOpen} onOpenChange={setVisualizarOpen} onEditar={() => { setVisualizarOpen(false); setEditarOpen(true); }} />
+      <CondutorFormModal open={editarOpen} onOpenChange={setEditarOpen} itemParaEdicao={condutorSelecionado} />
+      <ExcluirDialog open={excluirOpen} onOpenChange={setExcluirOpen} titulo="Excluir Condutor" descricao={`Tem certeza que deseja excluir o condutor ${condutorSelecionado?.nome_condutor}?`} onConfirmar={() => excluirMutation.mutate(condutorSelecionado?.id)} isLoading={excluirMutation.isPending} />
     </div>;
 }
