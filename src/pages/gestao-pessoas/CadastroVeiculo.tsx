@@ -80,17 +80,23 @@ export default function CadastroVeiculo() {
         throw new Error('Placa já cadastrada')
       }
 
+      // Buscar dados relacionados
+      const locadoraSelecionada = locadoras?.find(l => l.id.toString() === values.locadora)
+      const condutorSelecionado = condutores?.find(c => c.id.toString() === values.condutorPrincipal)
+
       // Inserir novo veículo
       const { data, error } = await supabase
         .from('veiculos')
         .insert([{
           status: values.status,
           locadora_id: values.locadora,
+          locadora_nome: locadoraSelecionada?.nome || null,
           tipo_locacao: values.tipo,
           placa: values.placa.toUpperCase(),
           modelo: values.modelo,
           franquia_km: values.franquiaKm,
-          condutor_principal_nome: values.condutorPrincipal,
+          condutor_principal_id: values.condutorPrincipal,
+          condutor_principal_nome: condutorSelecionado?.nome_condutor || null,
           data_retirada: values.dataRetirada.toISOString(),
           data_devolucao: values.dataDevolucao.toISOString(),
           ativo: true

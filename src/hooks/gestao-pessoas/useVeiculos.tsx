@@ -7,7 +7,11 @@ export const useVeiculos = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('veiculos')
-        .select('*')
+        .select(`
+          *,
+          locadora:veiculos_locadoras(id, nome),
+          condutor:veiculos_condutores(id, nome_condutor)
+        `)
         .eq('ativo', true)
         .order('created_at', { ascending: false });
 
@@ -23,7 +27,11 @@ export const useVeiculosAtivos = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('veiculos')
-        .select('*')
+        .select(`
+          *,
+          locadora:veiculos_locadoras(id, nome),
+          condutor:veiculos_condutores(id, nome_condutor)
+        `)
         .eq('ativo', true)
         .eq('status', 'Ativo')
         .order('created_at', { ascending: false });

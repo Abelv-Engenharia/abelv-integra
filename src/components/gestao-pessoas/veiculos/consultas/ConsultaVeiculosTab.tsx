@@ -169,7 +169,7 @@ export function ConsultaVeiculosTab() {
                           {veiculo.status}
                         </Badge>
                       </TableCell>
-                      <TableCell>{veiculo.locadora_nome}</TableCell>
+                      <TableCell>{veiculo.locadora?.nome || veiculo.locadora_nome || '-'}</TableCell>
                       <TableCell>
                         <Badge variant="outline">
                           {veiculo.tipo_locacao === "mensal" ? "Mensal" : "Esporádico"}
@@ -178,7 +178,7 @@ export function ConsultaVeiculosTab() {
                       <TableCell className="font-mono">{veiculo.placa}</TableCell>
                       <TableCell>{veiculo.modelo}</TableCell>
                       <TableCell>{veiculo.franquia_km}</TableCell>
-                      <TableCell>{veiculo.condutor_principal_nome}</TableCell>
+                      <TableCell>{veiculo.condutor?.nome_condutor || veiculo.condutor_principal_nome || '-'}</TableCell>
                       <TableCell>{format(new Date(veiculo.data_retirada), "dd/MM/yyyy")}</TableCell>
                       <TableCell>{format(new Date(veiculo.data_devolucao), "dd/MM/yyyy")}</TableCell>
                       <TableCell>

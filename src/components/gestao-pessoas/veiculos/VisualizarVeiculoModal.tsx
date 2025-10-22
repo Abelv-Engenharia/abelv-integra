@@ -8,12 +8,14 @@ import { format } from "date-fns";
 interface Veiculo {
   id: string;
   status: string;
-  locadora_nome: string;
+  locadora_nome?: string;
+  locadora?: { id: string; nome: string };
   tipo_locacao: string;
   placa: string;
   modelo: string;
   franquia_km: string;
-  condutor_principal_nome: string;
+  condutor_principal_nome?: string;
+  condutor?: { id: string; nome_condutor: string };
   data_retirada: string;
   data_devolucao: string;
   created_at?: string;
@@ -61,7 +63,7 @@ export function VisualizarVeiculoModal({ veiculo, open, onOpenChange, onEditar }
               </div>
               <div>
                 <label className="text-sm font-medium text-muted-foreground">Locadora</label>
-                <p className="text-sm mt-1">{veiculo.locadora_nome}</p>
+                <p className="text-sm mt-1">{veiculo.locadora?.nome || veiculo.locadora_nome || '-'}</p>
               </div>
               <div>
                 <label className="text-sm font-medium text-muted-foreground">Tipo de Locação</label>
@@ -90,7 +92,7 @@ export function VisualizarVeiculoModal({ veiculo, open, onOpenChange, onEditar }
             <CardContent className="grid grid-cols-2 gap-4">
               <div>
                 <label className="text-sm font-medium text-muted-foreground">Condutor Principal</label>
-                <p className="text-sm mt-1">{veiculo.condutor_principal_nome}</p>
+                <p className="text-sm mt-1">{veiculo.condutor?.nome_condutor || veiculo.condutor_principal_nome || '-'}</p>
               </div>
               <div>
                 <label className="text-sm font-medium text-muted-foreground">Data de Retirada</label>

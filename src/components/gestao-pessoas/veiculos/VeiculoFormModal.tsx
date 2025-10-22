@@ -11,15 +11,17 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { useEffect } from "react";
+import { useLocadoras } from "@/hooks/gestao-pessoas/useLocadoras";
+import { useCondutores } from "@/hooks/gestao-pessoas/useCondutores";
 
 const formSchema = z.object({
   status: z.string().min(1, "Status é obrigatório"),
-  locadora_nome: z.string().min(1, "Locadora é obrigatória"),
+  locadora_id: z.string().min(1, "Locadora é obrigatória"),
   tipo_locacao: z.string().min(1, "Tipo é obrigatório"),
   placa: z.string().min(7, "Placa inválida"),
   modelo: z.string().min(1, "Modelo é obrigatório"),
   franquia_km: z.string().min(1, "Franquia Km é obrigatória"),
-  condutor_principal_nome: z.string().min(1, "Condutor principal é obrigatório"),
+  condutor_principal_id: z.string().min(1, "Condutor principal é obrigatório"),
   data_retirada: z.string().min(1, "Data de retirada é obrigatória"),
   data_devolucao: z.string().min(1, "Data de devolução é obrigatória"),
 });
@@ -37,17 +39,19 @@ export function VeiculoFormModal({ open, onOpenChange, itemParaEdicao, onSuccess
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const isEditMode = !!itemParaEdicao;
+  const { data: locadoras, isLoading: loadingLocadoras } = useLocadoras();
+  const { data: condutores, isLoading: loadingCondutores } = useCondutores();
 
   const { register, handleSubmit, formState: { errors }, setValue, watch, reset } = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: itemParaEdicao ? {
       status: itemParaEdicao.status,
-      locadora_nome: itemParaEdicao.locadora_nome,
+      locadora_id: itemParaEdicao.locadora_id || "",
       tipo_locacao: itemParaEdicao.tipo_locacao,
       placa: itemParaEdicao.placa,
       modelo: itemParaEdicao.modelo,
       franquia_km: itemParaEdicao.franquia_km,
-      condutor_principal_nome: itemParaEdicao.condutor_principal_nome,
+      condutor_principal_id: itemParaEdicao.condutor_principal_id || "",
       data_retirada: itemParaEdicao.data_retirada ? format(new Date(itemParaEdicao.data_retirada), "yyyy-MM-dd") : "",
       data_devolucao: itemParaEdicao.data_devolucao ? format(new Date(itemParaEdicao.data_devolucao), "yyyy-MM-dd") : "",
     } : undefined
@@ -57,24 +61,24 @@ export function VeiculoFormModal({ open, onOpenChange, itemParaEdicao, onSuccess
     if (open && itemParaEdicao) {
       reset({
         status: itemParaEdicao.status,
-        locadora_nome: itemParaEdicao.locadora_nome,
+        locadora_id: itemParaEdicao.locadora_id || "",
         tipo_locacao: itemParaEdicao.tipo_locacao,
         placa: itemParaEdicao.placa,
         modelo: itemParaEdicao.modelo,
         franquia_km: itemParaEdicao.franquia_km,
-        condutor_principal_nome: itemParaEdicao.condutor_principal_nome,
+        condutor_principal_id: itemParaEdicao.condutor_principal_id || "",
         data_retirada: itemParaEdicao.data_retirada ? format(new Date(itemParaEdicao.data_retirada), "yyyy-MM-dd") : "",
         data_devolucao: itemParaEdicao.data_devolucao ? format(new Date(itemParaEdicao.data_devolucao), "yyyy-MM-dd") : "",
       });
     } else if (open && !itemParaEdicao) {
       reset({
         status: "",
-        locadora_nome: "",
+        locadora_id: "",
         tipo_locacao: "",
         placa: "",
         modelo: "",
         franquia_km: "",
-        condutor_principal_nome: "",
+        condutor_principal_id: "",
         data_retirada: "",
         data_devolucao: "",
       });
@@ -83,18 +87,25 @@ export function VeiculoFormModal({ open, onOpenChange, itemParaEdicao, onSuccess
 
   const createMutation = useMutation({
     mutationFn: async (values: FormData) => {
+      // Buscar dados relacionados
+      const locadoraSelecionada = locadoras?.find(l => l.id.toString() === values.locadora_id);
+      const condutorSelecionado = condutores?.find(c => c.id.toString() === values.condutor_principal_id);
+
       const { data, error } = await supabase
         .from('veiculos')
         .insert([{ 
           status: values.status,
-          locadora_nome: values.locadora_nome,
+          locadora_id: values.locadora_id,
+          locadora_nome: locadoraSelecionada?.nome || null,
           tipo_locacao: values.tipo_locacao,
           placa: values.placa.toUpperCase(),
           modelo: values.modelo,
           franquia_km: values.franquia_km,
-          condutor_principal_nome: values.condutor_principal_nome,
+          condutor_principal_id: values.condutor_principal_id,
+          condutor_principal_nome: condutorSelecionado?.nome_condutor || null,
           data_retirada: values.data_retirada,
-          data_devolucao: values.data_devolucao
+          data_devolucao: values.data_devolucao,
+          ativo: true
         }])
         .select()
         .single();
@@ -115,9 +126,25 @@ export function VeiculoFormModal({ open, onOpenChange, itemParaEdicao, onSuccess
 
   const updateMutation = useMutation({
     mutationFn: async (values: FormData) => {
+      // Buscar dados relacionados
+      const locadoraSelecionada = locadoras?.find(l => l.id.toString() === values.locadora_id);
+      const condutorSelecionado = condutores?.find(c => c.id.toString() === values.condutor_principal_id);
+
       const { error } = await supabase
         .from('veiculos')
-        .update({ ...values, placa: values.placa.toUpperCase() })
+        .update({ 
+          status: values.status,
+          locadora_id: values.locadora_id,
+          locadora_nome: locadoraSelecionada?.nome || null,
+          tipo_locacao: values.tipo_locacao,
+          placa: values.placa.toUpperCase(),
+          modelo: values.modelo,
+          franquia_km: values.franquia_km,
+          condutor_principal_id: values.condutor_principal_id,
+          condutor_principal_nome: condutorSelecionado?.nome_condutor || null,
+          data_retirada: values.data_retirada,
+          data_devolucao: values.data_devolucao
+        })
         .eq('id', itemParaEdicao.id);
       if (error) throw error;
     },
@@ -164,9 +191,26 @@ export function VeiculoFormModal({ open, onOpenChange, itemParaEdicao, onSuccess
             </div>
 
             <div>
-              <Label className={errors.locadora_nome ? "text-destructive" : ""}>Locadora *</Label>
-              <Input {...register("locadora_nome")} className={errors.locadora_nome ? "border-destructive" : ""} />
-              {errors.locadora_nome && <p className="text-sm text-destructive mt-1">{errors.locadora_nome.message}</p>}
+              <Label className={errors.locadora_id ? "text-destructive" : ""}>Locadora *</Label>
+              <Select onValueChange={(value) => setValue("locadora_id", value)} value={watch("locadora_id")}>
+                <SelectTrigger className={errors.locadora_id ? "border-destructive" : ""}>
+                  <SelectValue placeholder="Selecione a locadora" />
+                </SelectTrigger>
+                <SelectContent>
+                  {loadingLocadoras ? (
+                    <SelectItem value="loading" disabled>Carregando...</SelectItem>
+                  ) : locadoras && locadoras.length > 0 ? (
+                    locadoras.map((locadora) => (
+                      <SelectItem key={locadora.id} value={locadora.id.toString()}>
+                        {locadora.nome}
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <SelectItem value="empty" disabled>Nenhuma locadora cadastrada</SelectItem>
+                  )}
+                </SelectContent>
+              </Select>
+              {errors.locadora_id && <p className="text-sm text-destructive mt-1">{errors.locadora_id.message}</p>}
             </div>
 
             <div>
@@ -202,9 +246,26 @@ export function VeiculoFormModal({ open, onOpenChange, itemParaEdicao, onSuccess
             </div>
 
             <div>
-              <Label className={errors.condutor_principal_nome ? "text-destructive" : ""}>Condutor Principal *</Label>
-              <Input {...register("condutor_principal_nome")} className={errors.condutor_principal_nome ? "border-destructive" : ""} />
-              {errors.condutor_principal_nome && <p className="text-sm text-destructive mt-1">{errors.condutor_principal_nome.message}</p>}
+              <Label className={errors.condutor_principal_id ? "text-destructive" : ""}>Condutor Principal *</Label>
+              <Select onValueChange={(value) => setValue("condutor_principal_id", value)} value={watch("condutor_principal_id")}>
+                <SelectTrigger className={errors.condutor_principal_id ? "border-destructive" : ""}>
+                  <SelectValue placeholder="Selecione o condutor" />
+                </SelectTrigger>
+                <SelectContent>
+                  {loadingCondutores ? (
+                    <SelectItem value="loading" disabled>Carregando...</SelectItem>
+                  ) : condutores && condutores.length > 0 ? (
+                    condutores.map((condutor) => (
+                      <SelectItem key={condutor.id} value={condutor.id.toString()}>
+                        {condutor.nome_condutor}
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <SelectItem value="empty" disabled>Nenhum condutor cadastrado</SelectItem>
+                  )}
+                </SelectContent>
+              </Select>
+              {errors.condutor_principal_id && <p className="text-sm text-destructive mt-1">{errors.condutor_principal_id.message}</p>}
             </div>
 
             <div>
