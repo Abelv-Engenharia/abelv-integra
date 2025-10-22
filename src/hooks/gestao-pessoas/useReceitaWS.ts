@@ -1,28 +1,23 @@
 import { useState } from 'react';
 
-interface ReceitaWSResponse {
-  status: "OK" | "ERROR";
-  message?: string;
-  nome: string; // Razão Social
-  fantasia: string; // Nome Fantasia
-  cnpj: string; // CNPJ formatado
+interface BrasilAPIResponse {
+  cnpj: string;
+  razao_social: string;
+  nome_fantasia: string;
+  cnae_fiscal: number;
+  cnae_fiscal_descricao: string;
+  descricao_situacao_cadastral: string;
+  data_situacao_cadastral: string;
+  data_inicio_atividade: string;
   logradouro: string;
   numero: string;
   complemento: string;
   bairro: string;
-  municipio: string; // Cidade
+  municipio: string;
   uf: string;
-  cep: string; // CEP formatado
-  telefone: string; // Telefone formatado
+  cep: string;
+  ddd_telefone_1: string;
   email: string;
-  atividade_principal: Array<{
-    code: string; // Código CNAE
-    text: string; // Descrição da atividade
-  }>;
-  situacao: string; // "ATIVA", "BAIXADA", etc
-  data_situacao: string;
-  abertura: string; // Data de abertura
-  capital_social: string;
 }
 
 interface EmpresaData {
@@ -54,27 +49,41 @@ export function useReceitaWS() {
     setError(null);
 
     try {
-      const response = await fetch(`https://receitaws.com.br/v1/cnpj/${cnpjLimpo}`);
-      const data: ReceitaWSResponse = await response.json();
-
-      console.log('📋 Resposta ReceitaWS:', data);
-
-      if (data.status === "ERROR") {
-        if (data.message?.includes("limite")) {
+      const response = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${cnpjLimpo}`);
+      
+      if (!response.ok) {
+        if (response.status === 404) {
+          setError('CNPJ não encontrado na Receita Federal.');
+        } else if (response.status === 429) {
           setError('Limite de consultas atingido. Tente novamente em alguns minutos.');
-        } else if (data.message?.includes("CNPJ inválido")) {
-          setError('CNPJ inválido. Verifique o número digitado.');
         } else {
-          setError('Empresa não encontrada na Receita Federal.');
+          setError('Erro ao consultar CNPJ. Tente novamente.');
         }
         return null;
       }
 
+      const data: BrasilAPIResponse = await response.json();
+
+      console.log('📋 Resposta BrasilAPI:', data);
+
       // Verificar se a empresa está ativa
-      if (data.situacao !== "ATIVA") {
-        setError(`Esta empresa está com situação cadastral: ${data.situacao}`);
+      if (data.descricao_situacao_cadastral !== "ATIVA") {
+        setError(`Esta empresa está com situação cadastral: ${data.descricao_situacao_cadastral}`);
         return null;
       }
+
+      // Formatar CEP (adicionar hífen)
+      const cepFormatado = data.cep ? `${data.cep.substring(0, 5)}-${data.cep.substring(5)}` : '';
+      
+      // Formatar telefone (adicionar parênteses e hífen)
+      const telefoneFormatado = data.ddd_telefone_1 
+        ? `(${data.ddd_telefone_1.substring(0, 2)}) ${data.ddd_telefone_1.substring(2, 7)}-${data.ddd_telefone_1.substring(7)}`
+        : '';
+
+      // Formatar CNPJ (adicionar pontos, barra e hífen)
+      const cnpjFormatado = data.cnpj
+        ? `${data.cnpj.substring(0, 2)}.${data.cnpj.substring(2, 5)}.${data.cnpj.substring(5, 8)}/${data.cnpj.substring(8, 12)}-${data.cnpj.substring(12)}`
+        : '';
 
       // Montar endereço completo
       const enderecoCompleto = [
@@ -83,24 +92,24 @@ export function useReceitaWS() {
         data.complemento ? `- ${data.complemento}` : '',
         data.bairro ? `- ${data.bairro}` : '',
         `${data.municipio}/${data.uf}`,
-        data.cep ? `- CEP: ${data.cep}` : ''
+        cepFormatado ? `- CEP: ${cepFormatado}` : ''
       ].filter(Boolean).join(' ');
 
       return {
-        razaosocial: data.nome || '',
-        fantasia: data.fantasia || '',
-        cnpj: data.cnpj || '',
+        razaosocial: data.razao_social || '',
+        fantasia: data.nome_fantasia || '',
+        cnpj: cnpjFormatado || '',
         endereco: enderecoCompleto,
-        telefone: data.telefone || '',
+        telefone: telefoneFormatado,
         email: data.email || '',
-        descricaoatividade: data.atividade_principal?.[0]?.text || '',
-        numerocnae: data.atividade_principal?.[0]?.code || '',
-        situacao: data.situacao || '',
-        abertura: data.abertura || '',
+        descricaoatividade: data.cnae_fiscal_descricao || '',
+        numerocnae: data.cnae_fiscal?.toString() || '',
+        situacao: data.descricao_situacao_cadastral || '',
+        abertura: data.data_inicio_atividade || '',
       };
     } catch (err) {
       console.error('❌ Erro ao buscar CNPJ:', err);
-      setError('Erro ao buscar CNPJ. Tente novamente.');
+      setError('Erro ao buscar CNPJ. Verifique sua conexão e tente novamente.');
       return null;
     } finally {
       setLoading(false);
