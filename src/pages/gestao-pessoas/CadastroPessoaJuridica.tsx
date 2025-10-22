@@ -227,7 +227,6 @@ export default function CadastroPessoaJuridica() {
       form.setValue("descricaoatividade", dados.descricaoatividade);
       form.setValue("numerocnae", dados.numerocnae);
       form.setValue("endereco", dados.endereco);
-      form.setValue("telefone", dados.telefone);
       
       // Forçar atualização do Select de Grau de Risco
       if (dados.grauderisco) {
@@ -438,7 +437,29 @@ export default function CadastroPessoaJuridica() {
                     <FormMessage />
                   </FormItem>} />
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField control={form.control} name="numerocredorsienge" render={({
+                field
+              }) => <FormItem>
+                      <FormLabel>Nº de Credor Sienge</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Digite o número de credor Sienge" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>} />
+
+                <FormField control={form.control} name="contabancaria" render={({
+                field
+              }) => <FormItem>
+                      <FormLabel>Chave Pix</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Digite a chave pix" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>} />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField control={form.control} name="telefone" render={({
                 field
               }) => <FormItem>
@@ -458,27 +479,7 @@ export default function CadastroPessoaJuridica() {
                     </FormControl>
                     <FormMessage />
                   </FormItem>} />
-
-                <FormField control={form.control} name="contabancaria" render={({
-                field
-              }) => <FormItem>
-                    <FormLabel>Chave PIx</FormLabel>
-                    <FormControl>
-                      <Input placeholder="123456789-0" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>} />
               </div>
-
-              <FormField control={form.control} name="numerocredorsienge" render={({
-              field
-            }) => <FormItem>
-                    <FormLabel>Nº de Credor Sienge</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Digite o número de credor Sienge" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>} />
             </CardContent>
           </Card>
 
