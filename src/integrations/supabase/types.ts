@@ -301,6 +301,36 @@ export type Database = {
         }
         Relationships: []
       }
+      cnae_grau_risco: {
+        Row: {
+          codigo_cnae: string
+          created_at: string | null
+          descricao: string
+          divisao: string | null
+          grau_risco: number
+          secao: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          codigo_cnae: string
+          created_at?: string | null
+          descricao: string
+          divisao?: string | null
+          grau_risco: number
+          secao?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          codigo_cnae?: string
+          created_at?: string | null
+          descricao?: string
+          divisao?: string | null
+          grau_risco?: number
+          secao?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       comunicados: {
         Row: {
           arquivo_nome: string | null

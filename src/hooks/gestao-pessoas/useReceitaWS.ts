@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 
 interface BrasilAPIResponse {
   cnpj: string;
@@ -31,6 +32,7 @@ interface EmpresaData {
   numerocnae: string;
   situacao: string;
   abertura: string;
+  grauderisco: string;
 }
 
 export function useReceitaWS() {
@@ -95,6 +97,29 @@ export function useReceitaWS() {
         cepFormatado ? `- CEP: ${cepFormatado}` : ''
       ].filter(Boolean).join(' ');
 
+      // Buscar grau de risco na tabela cnae_grau_risco
+      const cnaeNumero = data.cnae_fiscal?.toString() || '';
+      let grauRisco = '';
+
+      if (cnaeNumero) {
+        try {
+          const { data: grauRiscoData, error: grauRiscoError } = await supabase
+            .from('cnae_grau_risco')
+            .select('grau_risco')
+            .eq('codigo_cnae', cnaeNumero)
+            .single();
+
+          if (grauRiscoData && !grauRiscoError) {
+            grauRisco = grauRiscoData.grau_risco.toString();
+            console.log(`✅ Grau de risco encontrado para CNAE ${cnaeNumero}: ${grauRisco}`);
+          } else {
+            console.log(`⚠️ Grau de risco não encontrado para CNAE ${cnaeNumero}`);
+          }
+        } catch (err) {
+          console.error('❌ Erro ao buscar grau de risco:', err);
+        }
+      }
+
       return {
         razaosocial: data.razao_social || '',
         fantasia: data.nome_fantasia || '',
@@ -103,9 +128,10 @@ export function useReceitaWS() {
         telefone: telefoneFormatado,
         email: data.email || '',
         descricaoatividade: data.cnae_fiscal_descricao || '',
-        numerocnae: data.cnae_fiscal?.toString() || '',
+        numerocnae: cnaeNumero,
         situacao: data.descricao_situacao_cadastral || '',
         abertura: data.data_inicio_atividade || '',
+        grauderisco: grauRisco,
       };
     } catch (err) {
       console.error('❌ Erro ao buscar CNPJ:', err);
