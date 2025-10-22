@@ -104,15 +104,25 @@ export function CalculoRotasCard({ veiculos, cartoes, onCalculoSalvo }: CalculoR
   const validarFormatoEndereco = (endereco: string): boolean => {
     if (!endereco || endereco.trim().length < 10) return false;
     
-    // Verificar elementos essenciais de forma flexível
+    console.log('🔍 Validando endereço:', endereco);
+    
+    // Verificar elementos essenciais
     const contemNumero = /\d+/.test(endereco);
     
-    // Aceitar tanto formato com vírgulas quanto formato simplificado
-    const contemCidadeEstadoCompleto = /[a-záàâãéèêíïóôõöúçñ\s]+-\s*[A-Z]{2}\b/.test(endereco);
-    const contemCidadeEstadoSimples = /[a-záàâãéèêíïóôõöúçñ\s]+\s+[A-Z]{2}\s+(Brazil|Brasil)/i.test(endereco);
+    // Aceitar diversos formatos de Cidade/Estado:
+    // - "São Paulo - SP" (com hífen)
+    // - "São Paulo SP" (sem hífen)
+    // - Seguido de "Brazil" ou "Brasil" (opcional)
+    const contemCidadeEstado = /[A-ZÀ-Ú][a-záàâãéèêíïóôõöúçñ\s]+([-\s]+[A-Z]{2})\b/i.test(endereco);
+    
+    console.log('✅ Validação:', {
+      contemNumero,
+      contemCidadeEstado,
+      resultado: contemNumero && contemCidadeEstado
+    });
     
     // Endereço válido deve ter: número e padrão de cidade/estado
-    return contemNumero && (contemCidadeEstadoCompleto || contemCidadeEstadoSimples);
+    return contemNumero && contemCidadeEstado;
   };
 
   const validarEnderecosAntesCalculo = async () => {
