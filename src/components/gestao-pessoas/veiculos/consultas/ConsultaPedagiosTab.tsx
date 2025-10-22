@@ -1,39 +1,25 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Search, Eye, Edit, FileSpreadsheet, FileText } from "lucide-react";
+import { Search, Eye, Edit, FileSpreadsheet, FileText } from "lucide-react";
 import { format } from "date-fns";
-interface Pedagio {
-  id: string;
-  placa: string;
-  condutor: string;
-  data: Date;
-  local: string;
-  horario: string;
-  valor: number;
-  tipoServico: string;
-  cca: string;
-  finalidade: string;
-}
+import { usePedagiosEstacionamentos } from "@/hooks/gestao-pessoas/usePedagiosEstacionamentos";
+
 export function ConsultaPedagiosTab() {
-  const navigate = useNavigate();
   const [busca, setBusca] = useState("");
   const [filtroTipo, setFiltroTipo] = useState("todos");
-  const [pedagogios, setPedagogios] = useState<Pedagio[]>([]);
-  useEffect(() => {
-    const dadosLocalStorage = localStorage.getItem("semparar");
-    if (dadosLocalStorage) {
-      setPedagogios(JSON.parse(dadosLocalStorage));
-    }
-  }, []);
+  
+  const { data: pedagogios = [], isLoading } = usePedagiosEstacionamentos();
   const pedagogiosFiltrados = pedagogios.filter(pedagio => {
-    const matchBusca = busca === "" || pedagio.placa?.toLowerCase().includes(busca.toLowerCase()) || pedagio.condutor?.toLowerCase().includes(busca.toLowerCase()) || pedagio.local?.toLowerCase().includes(busca.toLowerCase());
-    const matchTipo = filtroTipo === "todos" || pedagio.tipoServico?.toLowerCase() === filtroTipo;
+    const matchBusca = busca === "" || 
+      pedagio.veiculo_placa?.toLowerCase().includes(busca.toLowerCase()) || 
+      pedagio.condutor_nome?.toLowerCase().includes(busca.toLowerCase()) || 
+      pedagio.local?.toLowerCase().includes(busca.toLowerCase());
+    const matchTipo = filtroTipo === "todos" || pedagio.tipo_servico?.toLowerCase() === filtroTipo;
     return matchBusca && matchTipo;
   });
   return <div className="space-y-6">
@@ -86,12 +72,20 @@ export function ConsultaPedagiosTab() {
           </div>
         </CardHeader>
         <CardContent>
-          {pedagogiosFiltrados.length === 0 ? <div className="text-center py-12">
+          {isLoading ? (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">Carregando transações...</p>
+            </div>
+          ) : pedagogiosFiltrados.length === 0 ? (
+            <div className="text-center py-12">
               <p className="text-muted-foreground">
-                {busca || filtroTipo !== "todos" ? "Nenhuma transação encontrada com os filtros aplicados." : "Nenhuma transação cadastrada ainda."}
+                {busca || filtroTipo !== "todos" 
+                  ? "Nenhuma transação encontrada com os filtros aplicados." 
+                  : "Nenhuma transação cadastrada ainda."}
               </p>
-              
-            </div> : <div className="overflow-x-auto">
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -109,14 +103,14 @@ export function ConsultaPedagiosTab() {
                 </TableHeader>
                 <TableBody>
                   {pedagogiosFiltrados.map(pedagio => <TableRow key={pedagio.id}>
-                      <TableCell className="font-mono">{pedagio.placa}</TableCell>
-                      <TableCell>{pedagio.condutor}</TableCell>
-                      <TableCell>{format(new Date(pedagio.data), "dd/MM/yyyy")}</TableCell>
+                      <TableCell className="font-mono">{pedagio.veiculo_placa}</TableCell>
+                      <TableCell>{pedagio.condutor_nome}</TableCell>
+                      <TableCell>{format(new Date(pedagio.data_utilizacao), "dd/MM/yyyy")}</TableCell>
                       <TableCell>{pedagio.horario}</TableCell>
                       <TableCell className="max-w-[200px] truncate">{pedagio.local}</TableCell>
                       <TableCell>
                         <Badge variant="outline">
-                          {pedagio.tipoServico === "pedágio" ? "Pedágio" : "Estacionamento"}
+                          {pedagio.tipo_servico === "pedágio" ? "Pedágio" : "Estacionamento"}
                         </Badge>
                       </TableCell>
                       <TableCell>
@@ -139,7 +133,8 @@ export function ConsultaPedagiosTab() {
                     </TableRow>)}
                 </TableBody>
               </Table>
-            </div>}
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>;

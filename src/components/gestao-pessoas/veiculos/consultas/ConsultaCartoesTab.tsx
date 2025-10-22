@@ -1,40 +1,27 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Search, Eye, Edit, FileSpreadsheet, FileText } from "lucide-react";
+import { Search, Eye, Edit, FileSpreadsheet, FileText } from "lucide-react";
 import { format } from "date-fns";
-interface Cartao {
-  id: string;
-  status: string;
-  condutor: string;
-  placa: string;
-  modelo: string;
-  numeroCartao: string;
-  dataValidade: Date;
-  tipo: string;
-  limiteCredito: number;
-}
+import { useCartoesAbastecimento } from "@/hooks/gestao-pessoas/useCartoesAbastecimento";
+
 export function ConsultaCartoesTab() {
-  const navigate = useNavigate();
   const [busca, setBusca] = useState("");
   const [filtroStatus, setFiltroStatus] = useState("todos");
   const [filtroTipo, setFiltroTipo] = useState("todos");
-  const [cartoes, setCartoes] = useState<Cartao[]>([]);
-  useEffect(() => {
-    const dadosLocalStorage = localStorage.getItem("cartoes");
-    if (dadosLocalStorage) {
-      setCartoes(JSON.parse(dadosLocalStorage));
-    }
-  }, []);
+  
+  const { data: cartoes = [], isLoading } = useCartoesAbastecimento();
   const cartoesFiltrados = cartoes.filter(cartao => {
-    const matchBusca = busca === "" || cartao.placa?.toLowerCase().includes(busca.toLowerCase()) || cartao.condutor?.toLowerCase().includes(busca.toLowerCase()) || cartao.numeroCartao?.includes(busca);
-    const matchStatus = filtroStatus === "todos" || cartao.status.toLowerCase() === filtroStatus;
-    const matchTipo = filtroTipo === "todos" || cartao.tipo.toLowerCase() === filtroTipo;
+    const matchBusca = busca === "" || 
+      cartao.veiculo_placa?.toLowerCase().includes(busca.toLowerCase()) || 
+      cartao.condutor_nome?.toLowerCase().includes(busca.toLowerCase()) || 
+      cartao.numero_cartao?.includes(busca);
+    const matchStatus = filtroStatus === "todos" || cartao.status?.toLowerCase() === filtroStatus;
+    const matchTipo = filtroTipo === "todos" || cartao.bandeira?.toLowerCase() === filtroTipo;
     return matchBusca && matchStatus && matchTipo;
   });
   const mascaraCartao = (numero: string) => {
@@ -103,12 +90,20 @@ export function ConsultaCartoesTab() {
           </div>
         </CardHeader>
         <CardContent>
-          {cartoesFiltrados.length === 0 ? <div className="text-center py-12">
+          {isLoading ? (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">Carregando cartões...</p>
+            </div>
+          ) : cartoesFiltrados.length === 0 ? (
+            <div className="text-center py-12">
               <p className="text-muted-foreground">
-                {busca || filtroStatus !== "todos" || filtroTipo !== "todos" ? "Nenhum cartão encontrado com os filtros aplicados." : "Nenhum cartão cadastrado ainda."}
+                {busca || filtroStatus !== "todos" || filtroTipo !== "todos" 
+                  ? "Nenhum cartão encontrado com os filtros aplicados." 
+                  : "Nenhum cartão cadastrado ainda."}
               </p>
-              
-            </div> : <div className="overflow-x-auto">
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -130,20 +125,20 @@ export function ConsultaCartoesTab() {
                           {cartao.status}
                         </Badge>
                       </TableCell>
-                      <TableCell>{cartao.condutor}</TableCell>
-                      <TableCell className="font-mono">{cartao.placa}</TableCell>
-                      <TableCell>{cartao.modelo}</TableCell>
+                      <TableCell>{cartao.condutor_nome}</TableCell>
+                      <TableCell className="font-mono">{cartao.veiculo_placa}</TableCell>
+                      <TableCell>{cartao.veiculo_modelo}</TableCell>
                       <TableCell className="font-mono">
-                        {mascaraCartao(cartao.numeroCartao)}
+                        {mascaraCartao(cartao.numero_cartao)}
                       </TableCell>
-                      <TableCell>{format(new Date(cartao.dataValidade), "dd/MM/yyyy")}</TableCell>
+                      <TableCell>{format(new Date(cartao.data_validade), "dd/MM/yyyy")}</TableCell>
                       <TableCell>
                         <Badge variant="outline">
-                          {cartao.tipo === "crédito" ? "Crédito" : "Débito"}
+                          {cartao.bandeira}
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        R$ {cartao.limiteCredito?.toLocaleString("pt-BR", {
+                        R$ {cartao.limite_credito?.toLocaleString("pt-BR", {
                     minimumFractionDigits: 2
                   })}
                       </TableCell>
@@ -160,7 +155,8 @@ export function ConsultaCartoesTab() {
                     </TableRow>)}
                 </TableBody>
               </Table>
-            </div>}
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>;

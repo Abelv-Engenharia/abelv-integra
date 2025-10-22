@@ -1,49 +1,35 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Search, Eye, Edit, FileSpreadsheet, FileText, FileCheck } from "lucide-react";
+import { FileSpreadsheet, FileText, FileCheck, Eye, Edit, Search } from "lucide-react";
 import { format, differenceInDays } from "date-fns";
-import type { MultaCompleta } from "@/types/gestao-pessoas/multa";
-interface Condutor {
-  id: string;
-  nome?: string;
-  nomeCondutor?: string;
-  cpf: string;
-  categoriaCnh: string;
-  validadeCnh: Date;
-  statusCnh: string;
-  termoResponsabilidade?: string;
-}
+import { useCondutores } from "@/hooks/gestao-pessoas/useCondutores";
+import { useMultas } from "@/hooks/gestao-pessoas/useMultas";
+
 export function ConsultaCondutoresTab() {
-  const navigate = useNavigate();
   const [busca, setBusca] = useState("");
   const [filtroCategoria, setFiltroCategoria] = useState("todos");
   const [filtroStatus, setFiltroStatus] = useState("todos");
-  const [condutores, setCondutores] = useState<Condutor[]>([]);
-  const [multas, setMultas] = useState<MultaCompleta[]>([]);
-  useEffect(() => {
-    const dadosLocalStorage = localStorage.getItem("condutores");
-    if (dadosLocalStorage) {
-      setCondutores(JSON.parse(dadosLocalStorage));
-    }
-    const multasLocalStorage = localStorage.getItem("multas");
-    if (multasLocalStorage) {
-      setMultas(JSON.parse(multasLocalStorage));
-    }
-  }, []);
+  
+  const { data: condutores = [], isLoading: loadingCondutores } = useCondutores();
+  const { data: multasData = [], isLoading: loadingMultas } = useMultas();
   const condutoresFiltrados = condutores.filter(condutor => {
-    const matchBusca = busca === "" || condutor.nome.toLowerCase().includes(busca.toLowerCase()) || condutor.cpf.replace(/\D/g, "").includes(busca.replace(/\D/g, ""));
-    const matchCategoria = filtroCategoria === "todos" || condutor.categoriaCnh === filtroCategoria;
-    const matchStatus = filtroStatus === "todos" || condutor.statusCnh.toLowerCase() === filtroStatus;
+    const nomeCondutor = condutor.nome_condutor || "";
+    const matchBusca = busca === "" || 
+      nomeCondutor.toLowerCase().includes(busca.toLowerCase()) || 
+      condutor.cpf?.replace(/\D/g, "").includes(busca.replace(/\D/g, ""));
+    const matchCategoria = filtroCategoria === "todos" || condutor.categoria_cnh === filtroCategoria;
+    const matchStatus = filtroStatus === "todos" || condutor.status_cnh?.toLowerCase() === filtroStatus;
     return matchBusca && matchCategoria && matchStatus;
   });
+  
   const calcularPontuacaoCondutor = (nomeCondutor: string): number => {
-    return multas.filter(multa => multa.condutorInfrator === nomeCondutor).reduce((total, multa) => total + (multa.pontos || 0), 0);
+    return multasData.filter(multa => multa.condutor_infrator_nome === nomeCondutor)
+      .reduce((total, multa) => total + (multa.pontos || 0), 0);
   };
   const getStatusCnhBadge = (validadeCnh: Date) => {
     const diasRestantes = differenceInDays(new Date(validadeCnh), new Date());
@@ -120,12 +106,20 @@ export function ConsultaCondutoresTab() {
           </div>
         </CardHeader>
         <CardContent>
-          {condutoresFiltrados.length === 0 ? <div className="text-center py-12">
+          {loadingCondutores || loadingMultas ? (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">Carregando condutores...</p>
+            </div>
+          ) : condutoresFiltrados.length === 0 ? (
+            <div className="text-center py-12">
               <p className="text-muted-foreground">
-                {busca || filtroCategoria !== "todos" || filtroStatus !== "todos" ? "Nenhum condutor encontrado com os filtros aplicados." : "Nenhum condutor cadastrado ainda."}
+                {busca || filtroCategoria !== "todos" || filtroStatus !== "todos" 
+                  ? "Nenhum condutor encontrado com os filtros aplicados." 
+                  : "Nenhum condutor cadastrado ainda."}
               </p>
-              
-            </div> : <div className="overflow-x-auto">
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -141,25 +135,25 @@ export function ConsultaCondutoresTab() {
                 </TableHeader>
                 <TableBody>
                   {condutoresFiltrados.map(condutor => <TableRow key={condutor.id}>
-                      <TableCell className="font-medium">{condutor.nome || condutor.nomeCondutor || "-"}</TableCell>
+                      <TableCell className="font-medium">{condutor.nome_condutor || "-"}</TableCell>
                       <TableCell className="font-mono">{condutor.cpf}</TableCell>
                       <TableCell>
-                        <Badge variant="outline">{condutor.categoriaCnh}</Badge>
+                        <Badge variant="outline">{condutor.categoria_cnh}</Badge>
                       </TableCell>
-                      <TableCell>{format(new Date(condutor.validadeCnh), "dd/MM/yyyy")}</TableCell>
+                      <TableCell>{format(new Date(condutor.validade_cnh), "dd/MM/yyyy")}</TableCell>
                       <TableCell>
                         {(() => {
-                    const pontuacaoTotal = calcularPontuacaoCondutor(condutor.nome || condutor.nomeCondutor || "");
+                    const pontuacaoTotal = calcularPontuacaoCondutor(condutor.nome_condutor || "");
                     return <Badge variant={pontuacaoTotal >= 20 ? "destructive" : pontuacaoTotal >= 10 ? "default" : "secondary"}>
                               {pontuacaoTotal} pts
                             </Badge>;
                   })()}
                       </TableCell>
                       <TableCell>
-                        {getStatusCnhBadge(new Date(condutor.validadeCnh))}
+                        {getStatusCnhBadge(new Date(condutor.validade_cnh))}
                       </TableCell>
                       <TableCell>
-                        {condutor.termoResponsabilidade ? <Badge variant="default" className="gap-1">
+                        {condutor.termo_anexado_nome ? <Badge variant="default" className="gap-1">
                             <FileCheck className="h-3 w-3" />
                             Sim
                           </Badge> : <Badge variant="secondary">Não</Badge>}
@@ -177,7 +171,8 @@ export function ConsultaCondutoresTab() {
                     </TableRow>)}
                 </TableBody>
               </Table>
-            </div>}
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>;

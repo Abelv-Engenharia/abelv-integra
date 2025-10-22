@@ -1,51 +1,47 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Search, Eye, Edit, FileSpreadsheet, FileText } from "lucide-react";
+import { Search, Eye, Edit, FileSpreadsheet, FileText } from "lucide-react";
 import { format } from "date-fns";
-import type { MultaCompleta } from "@/types/gestao-pessoas/multa";
 import { VisualizarMultaModal } from "@/components/gestao-pessoas/veiculos/VisualizarMultaModal";
 import { NovaMultaModal } from "@/components/gestao-pessoas/veiculos/NovaMultaModal";
+import { useMultas } from "@/hooks/gestao-pessoas/useMultas";
+import { useQueryClient } from "@tanstack/react-query";
+
 export function ConsultaMultasTab() {
-  const navigate = useNavigate();
   const [busca, setBusca] = useState("");
   const [filtroStatus, setFiltroStatus] = useState("todos");
-  const [multasData, setMultasData] = useState<MultaCompleta[]>([]);
   const [multaVisualizarOpen, setMultaVisualizarOpen] = useState(false);
   const [multaEditarOpen, setMultaEditarOpen] = useState(false);
-  const [multaSelecionada, setMultaSelecionada] = useState<MultaCompleta | null>(null);
-  useEffect(() => {
-    carregarMultas();
-  }, []);
-  const carregarMultas = () => {
-    const dadosLocalStorage = localStorage.getItem("multas");
-    if (dadosLocalStorage) {
-      setMultasData(JSON.parse(dadosLocalStorage));
-    }
-  };
+  const [multaSelecionada, setMultaSelecionada] = useState<any | null>(null);
+  
+  const { data: multasData = [], isLoading } = useMultas();
+  const queryClient = useQueryClient();
   const multasFiltradas = multasData.filter(multa => {
-    const matchBusca = busca === "" || multa.placa?.toLowerCase().includes(busca.toLowerCase()) || multa.numeroAutoInfracao?.toLowerCase().includes(busca.toLowerCase()) || multa.condutorInfrator?.toLowerCase().includes(busca.toLowerCase());
-    const matchStatus = filtroStatus === "todos" || multa.statusMulta === filtroStatus;
+    const matchBusca = busca === "" || 
+      multa.placa?.toLowerCase().includes(busca.toLowerCase()) || 
+      multa.numero_auto_infracao?.toLowerCase().includes(busca.toLowerCase()) || 
+      multa.condutor_infrator_nome?.toLowerCase().includes(busca.toLowerCase());
+    const matchStatus = filtroStatus === "todos" || multa.status_multa === filtroStatus;
     return matchBusca && matchStatus;
   });
-  const visualizarMulta = (multa: MultaCompleta) => {
+  
+  const visualizarMulta = (multa: any) => {
     setMultaSelecionada(multa);
     setMultaVisualizarOpen(true);
   };
-  const editarMulta = (multa: MultaCompleta) => {
+  
+  const editarMulta = (multa: any) => {
     setMultaSelecionada(multa);
     setMultaEditarOpen(true);
   };
-  const atualizarMulta = (multaId: string, dadosAtualizados: Partial<MultaCompleta>) => {
-    setMultasData(prev => prev.map(multa => multa.id === multaId ? {
-      ...multa,
-      ...dadosAtualizados
-    } : multa));
+  
+  const atualizarMulta = () => {
+    queryClient.invalidateQueries({ queryKey: ['multas'] });
   };
   return <div className="space-y-6">
       {/* Filtros */}
@@ -99,12 +95,20 @@ export function ConsultaMultasTab() {
           </div>
         </CardHeader>
         <CardContent>
-          {multasFiltradas.length === 0 ? <div className="text-center py-12">
+          {isLoading ? (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">Carregando multas...</p>
+            </div>
+          ) : multasFiltradas.length === 0 ? (
+            <div className="text-center py-12">
               <p className="text-muted-foreground">
-                {busca || filtroStatus !== "todos" ? "Nenhuma multa encontrada com os filtros aplicados." : "Nenhuma multa cadastrada ainda."}
+                {busca || filtroStatus !== "todos" 
+                  ? "Nenhuma multa encontrada com os filtros aplicados." 
+                  : "Nenhuma multa cadastrada ainda."}
               </p>
-              
-            </div> : <div className="overflow-x-auto">
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -123,8 +127,8 @@ export function ConsultaMultasTab() {
                 <TableBody>
                   {multasFiltradas.map(multa => <TableRow key={multa.id}>
                       <TableCell className="font-mono">{multa.placa}</TableCell>
-                      <TableCell>{multa.numeroAutoInfracao}</TableCell>
-                      <TableCell>{format(new Date(multa.dataMulta), "dd/MM/yyyy")}</TableCell>
+                      <TableCell>{multa.numero_auto_infracao}</TableCell>
+                      <TableCell>{format(new Date(multa.data_multa), "dd/MM/yyyy")}</TableCell>
                       <TableCell className="max-w-[200px] truncate">{multa.ocorrencia}</TableCell>
                       <TableCell>
                         <Badge variant="destructive">{multa.pontos} pts</Badge>
@@ -132,15 +136,15 @@ export function ConsultaMultasTab() {
                       <TableCell>
                         {multa.valor ? `R$ ${multa.valor.toFixed(2)}` : "-"}
                       </TableCell>
-                      <TableCell>{multa.condutorInfrator}</TableCell>
+                      <TableCell>{multa.condutor_infrator_nome}</TableCell>
                       <TableCell>
-                        <Badge variant={multa.indicadoOrgao === "Sim" ? "default" : multa.indicadoOrgao === "Não" ? "destructive" : "secondary"}>
-                          {multa.indicadoOrgao}
+                        <Badge variant={multa.indicado_orgao === "Sim" ? "default" : multa.indicado_orgao === "Não" ? "destructive" : "secondary"}>
+                          {multa.indicado_orgao}
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        <Badge variant={multa.statusMulta === "Registrada" ? "secondary" : "default"}>
-                          {multa.statusMulta}
+                        <Badge variant={multa.status_multa === "Registrada" ? "secondary" : "default"}>
+                          {multa.status_multa}
                         </Badge>
                       </TableCell>
                       <TableCell>
@@ -156,7 +160,8 @@ export function ConsultaMultasTab() {
                     </TableRow>)}
                 </TableBody>
               </Table>
-            </div>}
+            </div>
+          )}
         </CardContent>
       </Card>
 

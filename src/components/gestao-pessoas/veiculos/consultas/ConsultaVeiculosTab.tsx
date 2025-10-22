@@ -1,42 +1,28 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Search, Eye, Edit, FileSpreadsheet, FileText } from "lucide-react";
+import { Search, Eye, Edit, FileSpreadsheet, FileText } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "@/hooks/use-toast";
-interface Veiculo {
-  id: string;
-  status: string;
-  locadora: string;
-  tipo: string;
-  placa: string;
-  modelo: string;
-  franquiaKm: string;
-  condutorPrincipal: string;
-  dataRetirada: Date;
-  dataDevolucao: Date;
-}
+import { useVeiculos } from "@/hooks/gestao-pessoas/useVeiculos";
+
 export function ConsultaVeiculosTab() {
-  const navigate = useNavigate();
   const [busca, setBusca] = useState("");
   const [filtroStatus, setFiltroStatus] = useState("todos");
   const [filtroTipo, setFiltroTipo] = useState("todos");
-  const [veiculos, setVeiculos] = useState<Veiculo[]>([]);
-  useEffect(() => {
-    const dadosLocalStorage = localStorage.getItem("veiculos");
-    if (dadosLocalStorage) {
-      setVeiculos(JSON.parse(dadosLocalStorage));
-    }
-  }, []);
+  
+  const { data: veiculos = [], isLoading } = useVeiculos();
   const veiculosFiltrados = veiculos.filter(veiculo => {
-    const matchBusca = busca === "" || veiculo.placa.toLowerCase().includes(busca.toLowerCase()) || veiculo.modelo.toLowerCase().includes(busca.toLowerCase()) || veiculo.condutorPrincipal.toLowerCase().includes(busca.toLowerCase());
-    const matchStatus = filtroStatus === "todos" || veiculo.status.toLowerCase() === filtroStatus;
-    const matchTipo = filtroTipo === "todos" || veiculo.tipo.toLowerCase() === filtroTipo;
+    const matchBusca = busca === "" || 
+      veiculo.placa?.toLowerCase().includes(busca.toLowerCase()) || 
+      veiculo.veiculo_modelo?.toLowerCase().includes(busca.toLowerCase()) || 
+      veiculo.condutor_principal_nome?.toLowerCase().includes(busca.toLowerCase());
+    const matchStatus = filtroStatus === "todos" || veiculo.status?.toLowerCase() === filtroStatus;
+    const matchTipo = filtroTipo === "todos" || veiculo.tipo_locacao?.toLowerCase() === filtroTipo;
     return matchBusca && matchStatus && matchTipo;
   });
   const exportarExcel = () => {
@@ -112,12 +98,20 @@ export function ConsultaVeiculosTab() {
           </div>
         </CardHeader>
         <CardContent>
-          {veiculosFiltrados.length === 0 ? <div className="text-center py-12">
+          {isLoading ? (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">Carregando veículos...</p>
+            </div>
+          ) : veiculosFiltrados.length === 0 ? (
+            <div className="text-center py-12">
               <p className="text-muted-foreground">
-                {busca || filtroStatus !== "todos" || filtroTipo !== "todos" ? "Nenhum veículo encontrado com os filtros aplicados." : "Nenhum veículo cadastrado ainda."}
+                {busca || filtroStatus !== "todos" || filtroTipo !== "todos" 
+                  ? "Nenhum veículo encontrado com os filtros aplicados." 
+                  : "Nenhum veículo cadastrado ainda."}
               </p>
-              
-            </div> : <div className="overflow-x-auto">
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -140,18 +134,18 @@ export function ConsultaVeiculosTab() {
                           {veiculo.status}
                         </Badge>
                       </TableCell>
-                      <TableCell>{veiculo.locadora}</TableCell>
+                      <TableCell>{veiculo.locadora_nome}</TableCell>
                       <TableCell>
                         <Badge variant="outline">
-                          {veiculo.tipo === "mensal" ? "Mensal" : "Esporádico"}
+                          {veiculo.tipo_locacao === "mensal" ? "Mensal" : "Esporádico"}
                         </Badge>
                       </TableCell>
                       <TableCell className="font-mono">{veiculo.placa}</TableCell>
-                      <TableCell>{veiculo.modelo}</TableCell>
-                      <TableCell>{veiculo.franquiaKm}</TableCell>
-                      <TableCell>{veiculo.condutorPrincipal}</TableCell>
-                      <TableCell>{format(new Date(veiculo.dataRetirada), "dd/MM/yyyy")}</TableCell>
-                      <TableCell>{format(new Date(veiculo.dataDevolucao), "dd/MM/yyyy")}</TableCell>
+                      <TableCell>{veiculo.veiculo_modelo}</TableCell>
+                      <TableCell>{veiculo.franquia_km}</TableCell>
+                      <TableCell>{veiculo.condutor_principal_nome}</TableCell>
+                      <TableCell>{format(new Date(veiculo.data_retirada), "dd/MM/yyyy")}</TableCell>
+                      <TableCell>{format(new Date(veiculo.data_devolucao), "dd/MM/yyyy")}</TableCell>
                       <TableCell>
                         <div className="flex gap-1">
                           <Button variant="ghost" size="sm" title="Visualizar">
@@ -165,7 +159,8 @@ export function ConsultaVeiculosTab() {
                     </TableRow>)}
                 </TableBody>
               </Table>
-            </div>}
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>;

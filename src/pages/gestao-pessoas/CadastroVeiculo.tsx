@@ -15,6 +15,8 @@ import { Calendar } from "@/components/ui/calendar"
 import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
 import { useCondutores } from "@/hooks/gestao-pessoas/useCondutores"
+import { supabase } from "@/integrations/supabase/client"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 
 const formSchema = z.object({
   status: z.string().min(1, "Status é obrigatório"),
@@ -47,8 +49,8 @@ type FormValues = z.infer<typeof formSchema>
 export default function CadastroVeiculo() {
   const { toast } = useToast()
   const navigate = useNavigate()
-  const [loading, setLoading] = useState(false)
   const { data: condutores, isLoading: loadingCondutores } = useCondutores()
+  const queryClient = useQueryClient()
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -63,48 +65,61 @@ export default function CadastroVeiculo() {
     },
   })
 
-  const onSubmit = async (values: FormValues) => {
-    setLoading(true)
-    try {
-      const existingVeiculos = JSON.parse(localStorage.getItem("veiculos") || "[]")
-      const placaExiste = existingVeiculos.some((veiculo: any) => 
-        veiculo.placa.toLowerCase().replace("-", "") === values.placa.toLowerCase().replace("-", "")
-      )
+  const createVeiculoMutation = useMutation({
+    mutationFn: async (values: FormValues) => {
+      // Verificar duplicação de placa
+      const { data: existing } = await supabase
+        .from('veiculos')
+        .select('placa')
+        .eq('placa', values.placa.toUpperCase().replace("-", ""))
+        .maybeSingle()
 
-      if (placaExiste) {
-        toast({
-          title: "Erro",
-          description: "Esta placa já está cadastrada.",
-          variant: "destructive",
-        })
-        setLoading(false)
-        return
+      if (existing) {
+        throw new Error('Placa já cadastrada')
       }
 
-      const novoVeiculo = {
-        id: crypto.randomUUID(),
-        ...values,
-        createdAt: new Date().toISOString(),
-      }
+      // Inserir novo veículo
+      const { data, error } = await supabase
+        .from('veiculos')
+        .insert([{
+          status: values.status,
+          locadora: values.locadora,
+          tipo: values.tipo,
+          placa: values.placa.toUpperCase(),
+          modelo: values.modelo,
+          franquia_km: values.franquiaKm,
+          condutor_principal: values.condutorPrincipal,
+          data_retirada: values.dataRetirada.toISOString(),
+          data_devolucao: values.dataDevolucao.toISOString(),
+          ativo: true
+        }])
+        .select()
+        .single()
 
-      const veiculos = [...existingVeiculos, novoVeiculo]
-      localStorage.setItem("veiculos", JSON.stringify(veiculos))
-
+      if (error) throw error
+      return data
+    },
+    onSuccess: () => {
       toast({
         title: "Sucesso",
         description: "Veículo cadastrado com sucesso!",
       })
-
       form.reset()
-    } catch (error) {
+      queryClient.invalidateQueries(['veiculos'])
+    },
+    onError: (error: any) => {
       toast({
         title: "Erro",
-        description: "Erro ao cadastrar veículo. Tente novamente.",
+        description: error.message === 'Placa já cadastrada' 
+          ? "Esta placa já está cadastrada." 
+          : "Erro ao cadastrar veículo. Tente novamente.",
         variant: "destructive",
       })
-    } finally {
-      setLoading(false)
     }
+  })
+
+  const onSubmit = (values: FormValues) => {
+    createVeiculoMutation.mutate(values)
   }
 
   return (
@@ -386,12 +401,12 @@ export default function CadastroVeiculo() {
                   type="button"
                   variant="outline"
                   onClick={() => navigate("/gestao-pessoas/dashboard-veiculos")}
-                  disabled={loading}
+                  disabled={createVeiculoMutation.isPending}
                 >
                   Cancelar
                 </Button>
-                <Button type="submit" disabled={loading}>
-                  {loading ? "Salvando..." : "Salvar"}
+                <Button type="submit" disabled={createVeiculoMutation.isPending}>
+                  {createVeiculoMutation.isPending ? "Salvando..." : "Salvar"}
                 </Button>
               </div>
             </form>

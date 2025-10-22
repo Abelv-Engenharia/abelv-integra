@@ -14,9 +14,10 @@ import { Calendar } from "@/components/ui/calendar"
 import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/hooks/use-toast"
 import { DocumentUploadField } from "./DocumentUploadField"
-import { MultaCompleta } from "@/types/gestao-pessoas/multa"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
+import { supabase } from "@/integrations/supabase/client"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 
 const formSchema = z.object({
   numeroAutoInfracao: z.string().min(1, "Número do auto de infração é obrigatório"),
@@ -44,8 +45,8 @@ type FormValues = z.infer<typeof formSchema>
 interface NovaMultaModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  multaParaEdicao?: MultaCompleta | null
-  onUpdate?: (multaId: string, dadosAtualizados: Partial<MultaCompleta>) => void
+  multaParaEdicao?: any | null
+  onUpdate?: () => void
 }
 
 export function NovaMultaModal({ 
@@ -55,10 +56,10 @@ export function NovaMultaModal({
   onUpdate 
 }: NovaMultaModalProps) {
   const { toast } = useToast()
-  const [loading, setLoading] = useState(false)
   const [documentoNotificacao, setDocumentoNotificacao] = useState<File | null>(null)
   const [formularioPreenchido, setFormularioPreenchido] = useState<File | null>(null)
   const [comprovanteIndicacao, setComprovanteIndicacao] = useState<File | null>(null)
+  const queryClient = useQueryClient()
   
   const isEdicao = !!multaParaEdicao
   const modalTitle = isEdicao ? "Editar Multa" : "Nova Multa"
@@ -88,108 +89,138 @@ export function NovaMultaModal({
   useEffect(() => {
     if (isEdicao && multaParaEdicao) {
       form.reset({
-        numeroAutoInfracao: multaParaEdicao.numeroAutoInfracao || "",
-        dataMulta: new Date(multaParaEdicao.dataMulta),
+        numeroAutoInfracao: multaParaEdicao.numero_auto_infracao || "",
+        dataMulta: new Date(multaParaEdicao.data_multa),
         horario: multaParaEdicao.horario || "",
         ocorrencia: multaParaEdicao.ocorrencia || "",
         pontos: multaParaEdicao.pontos || 0,
-        dataNotificacao: multaParaEdicao.dataNotificacao ? new Date(multaParaEdicao.dataNotificacao) : undefined,
+        dataNotificacao: multaParaEdicao.data_notificacao ? new Date(multaParaEdicao.data_notificacao) : undefined,
         responsavel: multaParaEdicao.responsavel || "",
-        condutorInfrator: multaParaEdicao.condutorInfrator || "",
+        condutorInfrator: multaParaEdicao.condutor_infrator || "",
         placa: multaParaEdicao.placa || "",
         veiculo: multaParaEdicao.veiculo || "",
         locadora: multaParaEdicao.locadora || "",
-        numeroFatura: multaParaEdicao.numeroFatura || "",
-        tituloSienge: multaParaEdicao.tituloSienge || "",
+        numeroFatura: multaParaEdicao.numero_fatura || "",
+        tituloSienge: multaParaEdicao.titulo_sienge || "",
         valor: multaParaEdicao.valor || 0,
-        indicadoOrgao: multaParaEdicao.indicadoOrgao || "Pendente",
-        localCompleto: multaParaEdicao.localCompleto || "",
-        emailCondutor: multaParaEdicao.emailCondutor || "",
+        indicadoOrgao: multaParaEdicao.indicado_orgao || "Pendente",
+        localCompleto: multaParaEdicao.local_completo || "",
+        emailCondutor: multaParaEdicao.email_condutor || "",
         observacoesGerais: "",
       })
     }
   }, [isEdicao, multaParaEdicao, form])
 
-  const onSubmit = async (values: FormValues) => {
-    setLoading(true)
-    try {
-      if (isEdicao && multaParaEdicao) {
-        const multaAtualizada: Partial<MultaCompleta> = {
-          ...values,
-          documentoNotificacao: documentoNotificacao?.name || multaParaEdicao.documentoNotificacao,
-          formularioPreenchido: formularioPreenchido?.name || multaParaEdicao.formularioPreenchido,
-          comprovanteIndicacao: comprovanteIndicacao?.name || multaParaEdicao.comprovanteIndicacao,
-          updatedAt: new Date(),
-        }
-
-        const existingMultas = JSON.parse(localStorage.getItem("multas") || "[]")
-        const multasAtualizadas = existingMultas.map((multa: MultaCompleta) => 
-          multa.id === multaParaEdicao.id ? { ...multa, ...multaAtualizada } : multa
-        )
-        localStorage.setItem("multas", JSON.stringify(multasAtualizadas))
-
-        if (onUpdate) {
-          onUpdate(multaParaEdicao.id, multaAtualizada)
-        }
-
-        toast({
-          title: "Sucesso",
-          description: "Multa atualizada com sucesso!",
-        })
-      } else {
-        const novaMulta: MultaCompleta = {
-          id: crypto.randomUUID(),
-          numeroAutoInfracao: values.numeroAutoInfracao,
-          dataMulta: values.dataMulta,
+  const createMultaMutation = useMutation({
+    mutationFn: async (values: FormValues) => {
+      const { data, error } = await supabase
+        .from('veiculos_multas')
+        .insert([{
+          numero_auto_infracao: values.numeroAutoInfracao,
+          data_multa: values.dataMulta.toISOString(),
           horario: values.horario,
           ocorrencia: values.ocorrencia,
           pontos: values.pontos,
-          condutorInfrator: values.condutorInfrator,
-          placa: values.placa,
-          dataNotificacao: values.dataNotificacao,
+          condutor_infrator: values.condutorInfrator,
+          placa: values.placa.toUpperCase(),
+          data_notificacao: values.dataNotificacao?.toISOString(),
           responsavel: values.responsavel,
           veiculo: values.veiculo,
           locadora: values.locadora,
           valor: values.valor,
-          localCompleto: values.localCompleto,
-          emailCondutor: values.emailCondutor,
-          numeroFatura: values.numeroFatura,
-          tituloSienge: values.tituloSienge,
-          indicadoOrgao: values.indicadoOrgao,
-          statusMulta: 'Registrada',
-          documentoNotificacao: documentoNotificacao?.name,
-          formularioPreenchido: formularioPreenchido?.name,
-          comprovanteIndicacao: comprovanteIndicacao?.name,
-          descontoConfirmado: false,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          createdBy: 'user',
-        }
+          local_completo: values.localCompleto,
+          email_condutor: values.emailCondutor,
+          numero_fatura: values.numeroFatura,
+          titulo_sienge: values.tituloSienge,
+          indicado_orgao: values.indicadoOrgao,
+          status_multa: 'Registrada',
+          ativo: true
+        }])
+        .select()
+        .single()
 
-        const existingMultas = JSON.parse(localStorage.getItem("multas") || "[]")
-        localStorage.setItem("multas", JSON.stringify([...existingMultas, novaMulta]))
-
-        toast({
-          title: "Sucesso",
-          description: "Multa cadastrada com sucesso!",
-        })
-      }
-
+      if (error) throw error
+      return data
+    },
+    onSuccess: () => {
+      toast({
+        title: "Sucesso",
+        description: "Multa cadastrada com sucesso!",
+      })
       form.reset()
       setDocumentoNotificacao(null)
       setFormularioPreenchido(null)
       setComprovanteIndicacao(null)
+      queryClient.invalidateQueries(['multas'])
       onOpenChange(false)
-    } catch (error) {
+    },
+    onError: () => {
       toast({
         title: "Erro",
-        description: `Erro ao ${isEdicao ? 'atualizar' : 'cadastrar'} multa. Tente novamente.`,
+        description: "Erro ao cadastrar multa. Tente novamente.",
         variant: "destructive",
       })
-    } finally {
-      setLoading(false)
+    }
+  })
+
+  const updateMultaMutation = useMutation({
+    mutationFn: async (values: FormValues) => {
+      const { error } = await supabase
+        .from('veiculos_multas')
+        .update({
+          numero_auto_infracao: values.numeroAutoInfracao,
+          data_multa: values.dataMulta.toISOString(),
+          horario: values.horario,
+          ocorrencia: values.ocorrencia,
+          pontos: values.pontos,
+          condutor_infrator: values.condutorInfrator,
+          placa: values.placa.toUpperCase(),
+          data_notificacao: values.dataNotificacao?.toISOString(),
+          responsavel: values.responsavel,
+          veiculo: values.veiculo,
+          locadora: values.locadora,
+          valor: values.valor,
+          local_completo: values.localCompleto,
+          email_condutor: values.emailCondutor,
+          numero_fatura: values.numeroFatura,
+          titulo_sienge: values.tituloSienge,
+          indicado_orgao: values.indicadoOrgao,
+        })
+        .eq('id', multaParaEdicao.id)
+
+      if (error) throw error
+    },
+    onSuccess: () => {
+      toast({
+        title: "Sucesso",
+        description: "Multa atualizada com sucesso!",
+      })
+      form.reset()
+      setDocumentoNotificacao(null)
+      setFormularioPreenchido(null)
+      setComprovanteIndicacao(null)
+      queryClient.invalidateQueries(['multas'])
+      if (onUpdate) onUpdate()
+      onOpenChange(false)
+    },
+    onError: () => {
+      toast({
+        title: "Erro",
+        description: "Erro ao atualizar multa. Tente novamente.",
+        variant: "destructive",
+      })
+    }
+  })
+
+  const onSubmit = (values: FormValues) => {
+    if (isEdicao) {
+      updateMultaMutation.mutate(values)
+    } else {
+      createMultaMutation.mutate(values)
     }
   }
+
+  const isLoading = createMultaMutation.isPending || updateMultaMutation.isPending
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
