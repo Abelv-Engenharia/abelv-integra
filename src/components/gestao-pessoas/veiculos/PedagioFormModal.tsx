@@ -218,13 +218,12 @@ export function PedagioFormModal({ open, onOpenChange, itemParaEdicao, onSuccess
             </div>
 
             <div>
-              <Label>CCA</Label>
-              <Select onValueChange={(value) => setValue("cca_id", value)} value={watch("cca_id")}>
+              <Label>CCA (Opcional)</Label>
+              <Select onValueChange={(value) => setValue("cca_id", value)} value={watch("cca_id") || undefined}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Selecione o CCA" />
+                  <SelectValue placeholder="Selecione o CCA (opcional)" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Nenhum</SelectItem>
                   {ccas.map((cca) => (
                     <SelectItem key={cca.id} value={cca.id.toString()}>
                       {cca.codigo} - {cca.nome}
