@@ -10,6 +10,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
+import { useEffect } from "react";
 
 const formSchema = z.object({
   numero_cartao: z.string().min(4, "Número inválido"),
@@ -51,6 +52,32 @@ export function CartaoFormModal({ open, onOpenChange, itemParaEdicao, onSuccess 
       status: "ativo"
     }
   });
+
+  useEffect(() => {
+    if (open && itemParaEdicao) {
+      reset({
+        numero_cartao: itemParaEdicao.numero_cartao,
+        bandeira: itemParaEdicao.bandeira,
+        status: itemParaEdicao.status,
+        condutor_nome: itemParaEdicao.condutor_nome,
+        placa: itemParaEdicao.placa,
+        data_validade: itemParaEdicao.data_validade ? format(new Date(itemParaEdicao.data_validade), "yyyy-MM-dd") : "",
+        limite_credito: itemParaEdicao.limite_credito?.toString() || "",
+        veiculo_modelo: itemParaEdicao.veiculo_modelo || "",
+      });
+    } else if (open && !itemParaEdicao) {
+      reset({
+        numero_cartao: "",
+        bandeira: "",
+        status: "ativo",
+        condutor_nome: "",
+        placa: "",
+        data_validade: "",
+        limite_credito: "",
+        veiculo_modelo: "",
+      });
+    }
+  }, [open, itemParaEdicao, reset]);
 
   const createMutation = useMutation({
     mutationFn: async (values: FormData) => {

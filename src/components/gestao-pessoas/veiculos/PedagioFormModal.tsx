@@ -11,6 +11,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
+import { useEffect } from "react";
 
 const formSchema = z.object({
   placa: z.string().min(7, "Placa é obrigatória"),
@@ -52,6 +53,34 @@ export function PedagioFormModal({ open, onOpenChange, itemParaEdicao, onSuccess
       finalidade: itemParaEdicao.finalidade || "",
     } : undefined
   });
+
+  useEffect(() => {
+    if (open && itemParaEdicao) {
+      reset({
+        placa: itemParaEdicao.placa,
+        condutor_nome: itemParaEdicao.condutor_nome,
+        data_utilizacao: itemParaEdicao.data_utilizacao ? format(new Date(itemParaEdicao.data_utilizacao), "yyyy-MM-dd") : "",
+        horario: itemParaEdicao.horario || "",
+        tipo_servico: itemParaEdicao.tipo_servico,
+        local: itemParaEdicao.local,
+        valor: itemParaEdicao.valor?.toString() || "",
+        cca: itemParaEdicao.cca || "",
+        finalidade: itemParaEdicao.finalidade || "",
+      });
+    } else if (open && !itemParaEdicao) {
+      reset({
+        placa: "",
+        condutor_nome: "",
+        data_utilizacao: "",
+        horario: "",
+        tipo_servico: "",
+        local: "",
+        valor: "",
+        cca: "",
+        finalidade: "",
+      });
+    }
+  }, [open, itemParaEdicao, reset]);
 
   const createMutation = useMutation({
     mutationFn: async (values: FormData) => {

@@ -11,7 +11,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Upload } from "lucide-react";
 
 const formSchema = z.object({
@@ -54,6 +54,30 @@ export function CondutorFormModal({ open, onOpenChange, itemParaEdicao, onSucces
       status_cnh: "válida"
     }
   });
+
+  useEffect(() => {
+    if (open && itemParaEdicao) {
+      reset({
+        nome_condutor: itemParaEdicao.nome_condutor,
+        cpf: itemParaEdicao.cpf,
+        categoria_cnh: itemParaEdicao.categoria_cnh,
+        validade_cnh: itemParaEdicao.validade_cnh ? format(new Date(itemParaEdicao.validade_cnh), "yyyy-MM-dd") : "",
+        status_cnh: itemParaEdicao.status_cnh,
+        numero_cnh: itemParaEdicao.numero_cnh || "",
+        observacao: itemParaEdicao.observacao || "",
+      });
+    } else if (open && !itemParaEdicao) {
+      reset({
+        nome_condutor: "",
+        cpf: "",
+        categoria_cnh: "",
+        validade_cnh: "",
+        status_cnh: "válida",
+        numero_cnh: "",
+        observacao: "",
+      });
+    }
+  }, [open, itemParaEdicao, reset]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {

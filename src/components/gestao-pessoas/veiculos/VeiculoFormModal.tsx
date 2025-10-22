@@ -10,6 +10,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
+import { useEffect } from "react";
 
 const formSchema = z.object({
   status: z.string().min(1, "Status é obrigatório"),
@@ -51,6 +52,34 @@ export function VeiculoFormModal({ open, onOpenChange, itemParaEdicao, onSuccess
       data_devolucao: itemParaEdicao.data_devolucao ? format(new Date(itemParaEdicao.data_devolucao), "yyyy-MM-dd") : "",
     } : undefined
   });
+
+  useEffect(() => {
+    if (open && itemParaEdicao) {
+      reset({
+        status: itemParaEdicao.status,
+        locadora_nome: itemParaEdicao.locadora_nome,
+        tipo_locacao: itemParaEdicao.tipo_locacao,
+        placa: itemParaEdicao.placa,
+        modelo: itemParaEdicao.modelo,
+        franquia_km: itemParaEdicao.franquia_km,
+        condutor_principal_nome: itemParaEdicao.condutor_principal_nome,
+        data_retirada: itemParaEdicao.data_retirada ? format(new Date(itemParaEdicao.data_retirada), "yyyy-MM-dd") : "",
+        data_devolucao: itemParaEdicao.data_devolucao ? format(new Date(itemParaEdicao.data_devolucao), "yyyy-MM-dd") : "",
+      });
+    } else if (open && !itemParaEdicao) {
+      reset({
+        status: "",
+        locadora_nome: "",
+        tipo_locacao: "",
+        placa: "",
+        modelo: "",
+        franquia_km: "",
+        condutor_principal_nome: "",
+        data_retirada: "",
+        data_devolucao: "",
+      });
+    }
+  }, [open, itemParaEdicao, reset]);
 
   const createMutation = useMutation({
     mutationFn: async (values: FormData) => {
