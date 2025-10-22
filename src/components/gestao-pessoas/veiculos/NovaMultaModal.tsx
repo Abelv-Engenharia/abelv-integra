@@ -121,12 +121,12 @@ export function NovaMultaModal({
           horario: values.horario,
           ocorrencia: values.ocorrencia,
           pontos: values.pontos,
-          condutor_infrator: values.condutorInfrator,
+          condutor_infrator_nome: values.condutorInfrator,
           placa: values.placa.toUpperCase(),
           data_notificacao: values.dataNotificacao?.toISOString(),
           responsavel: values.responsavel,
-          veiculo: values.veiculo,
-          locadora: values.locadora,
+          veiculo_modelo: values.veiculo,
+          locadora_nome: values.locadora,
           valor: values.valor,
           local_completo: values.localCompleto,
           email_condutor: values.emailCondutor,
@@ -151,7 +151,7 @@ export function NovaMultaModal({
       setDocumentoNotificacao(null)
       setFormularioPreenchido(null)
       setComprovanteIndicacao(null)
-      queryClient.invalidateQueries(['multas'])
+      queryClient.invalidateQueries({ queryKey: ['multas'] })
       onOpenChange(false)
     },
     onError: () => {
@@ -173,12 +173,12 @@ export function NovaMultaModal({
           horario: values.horario,
           ocorrencia: values.ocorrencia,
           pontos: values.pontos,
-          condutor_infrator: values.condutorInfrator,
+          condutor_infrator_nome: values.condutorInfrator,
           placa: values.placa.toUpperCase(),
           data_notificacao: values.dataNotificacao?.toISOString(),
           responsavel: values.responsavel,
-          veiculo: values.veiculo,
-          locadora: values.locadora,
+          veiculo_modelo: values.veiculo,
+          locadora_nome: values.locadora,
           valor: values.valor,
           local_completo: values.localCompleto,
           email_condutor: values.emailCondutor,
@@ -199,7 +199,7 @@ export function NovaMultaModal({
       setDocumentoNotificacao(null)
       setFormularioPreenchido(null)
       setComprovanteIndicacao(null)
-      queryClient.invalidateQueries(['multas'])
+      queryClient.invalidateQueries({ queryKey: ['multas'] })
       if (onUpdate) onUpdate()
       onOpenChange(false)
     },
@@ -554,12 +554,12 @@ export function NovaMultaModal({
                 type="button" 
                 variant="outline" 
                 onClick={() => onOpenChange(false)}
-                disabled={loading}
+                disabled={isLoading}
               >
                 Cancelar
               </Button>
-              <Button type="submit" disabled={loading} className="min-w-[120px]">
-                {loading ? "Salvando..." : isEdicao ? "Atualizar" : "Cadastrar"}
+              <Button type="submit" disabled={isLoading} className="min-w-[120px]">
+                {isLoading ? "Salvando..." : isEdicao ? "Atualizar" : "Cadastrar"}
               </Button>
             </div>
           </form>

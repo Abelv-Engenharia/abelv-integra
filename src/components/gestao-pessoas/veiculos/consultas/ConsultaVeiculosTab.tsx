@@ -19,7 +19,7 @@ export function ConsultaVeiculosTab() {
   const veiculosFiltrados = veiculos.filter(veiculo => {
     const matchBusca = busca === "" || 
       veiculo.placa?.toLowerCase().includes(busca.toLowerCase()) || 
-      veiculo.veiculo_modelo?.toLowerCase().includes(busca.toLowerCase()) || 
+      veiculo.modelo?.toLowerCase().includes(busca.toLowerCase()) || 
       veiculo.condutor_principal_nome?.toLowerCase().includes(busca.toLowerCase());
     const matchStatus = filtroStatus === "todos" || veiculo.status?.toLowerCase() === filtroStatus;
     const matchTipo = filtroTipo === "todos" || veiculo.tipo_locacao?.toLowerCase() === filtroTipo;
@@ -141,7 +141,7 @@ export function ConsultaVeiculosTab() {
                         </Badge>
                       </TableCell>
                       <TableCell className="font-mono">{veiculo.placa}</TableCell>
-                      <TableCell>{veiculo.veiculo_modelo}</TableCell>
+                      <TableCell>{veiculo.modelo}</TableCell>
                       <TableCell>{veiculo.franquia_km}</TableCell>
                       <TableCell>{veiculo.condutor_principal_nome}</TableCell>
                       <TableCell>{format(new Date(veiculo.data_retirada), "dd/MM/yyyy")}</TableCell>

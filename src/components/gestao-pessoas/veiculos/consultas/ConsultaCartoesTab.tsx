@@ -17,7 +17,7 @@ export function ConsultaCartoesTab() {
   const { data: cartoes = [], isLoading } = useCartoesAbastecimento();
   const cartoesFiltrados = cartoes.filter(cartao => {
     const matchBusca = busca === "" || 
-      cartao.veiculo_placa?.toLowerCase().includes(busca.toLowerCase()) || 
+      cartao.placa?.toLowerCase().includes(busca.toLowerCase()) || 
       cartao.condutor_nome?.toLowerCase().includes(busca.toLowerCase()) || 
       cartao.numero_cartao?.includes(busca);
     const matchStatus = filtroStatus === "todos" || cartao.status?.toLowerCase() === filtroStatus;
@@ -126,7 +126,7 @@ export function ConsultaCartoesTab() {
                         </Badge>
                       </TableCell>
                       <TableCell>{cartao.condutor_nome}</TableCell>
-                      <TableCell className="font-mono">{cartao.veiculo_placa}</TableCell>
+                      <TableCell className="font-mono">{cartao.placa}</TableCell>
                       <TableCell>{cartao.veiculo_modelo}</TableCell>
                       <TableCell className="font-mono">
                         {mascaraCartao(cartao.numero_cartao)}

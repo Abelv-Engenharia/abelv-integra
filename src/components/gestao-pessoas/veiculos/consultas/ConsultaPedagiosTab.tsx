@@ -16,7 +16,7 @@ export function ConsultaPedagiosTab() {
   const { data: pedagogios = [], isLoading } = usePedagiosEstacionamentos();
   const pedagogiosFiltrados = pedagogios.filter(pedagio => {
     const matchBusca = busca === "" || 
-      pedagio.veiculo_placa?.toLowerCase().includes(busca.toLowerCase()) || 
+      pedagio.placa?.toLowerCase().includes(busca.toLowerCase()) || 
       pedagio.condutor_nome?.toLowerCase().includes(busca.toLowerCase()) || 
       pedagio.local?.toLowerCase().includes(busca.toLowerCase());
     const matchTipo = filtroTipo === "todos" || pedagio.tipo_servico?.toLowerCase() === filtroTipo;
@@ -103,7 +103,7 @@ export function ConsultaPedagiosTab() {
                 </TableHeader>
                 <TableBody>
                   {pedagogiosFiltrados.map(pedagio => <TableRow key={pedagio.id}>
-                      <TableCell className="font-mono">{pedagio.veiculo_placa}</TableCell>
+                      <TableCell className="font-mono">{pedagio.placa}</TableCell>
                       <TableCell>{pedagio.condutor_nome}</TableCell>
                       <TableCell>{format(new Date(pedagio.data_utilizacao), "dd/MM/yyyy")}</TableCell>
                       <TableCell>{pedagio.horario}</TableCell>

@@ -83,12 +83,12 @@ export default function CadastroVeiculo() {
         .from('veiculos')
         .insert([{
           status: values.status,
-          locadora: values.locadora,
-          tipo: values.tipo,
+          locadora_nome: values.locadora,
+          tipo_locacao: values.tipo,
           placa: values.placa.toUpperCase(),
           modelo: values.modelo,
           franquia_km: values.franquiaKm,
-          condutor_principal: values.condutorPrincipal,
+          condutor_principal_nome: values.condutorPrincipal,
           data_retirada: values.dataRetirada.toISOString(),
           data_devolucao: values.dataDevolucao.toISOString(),
           ativo: true
@@ -105,7 +105,7 @@ export default function CadastroVeiculo() {
         description: "Veículo cadastrado com sucesso!",
       })
       form.reset()
-      queryClient.invalidateQueries(['veiculos'])
+      queryClient.invalidateQueries({ queryKey: ['veiculos'] })
     },
     onError: (error: any) => {
       toast({
