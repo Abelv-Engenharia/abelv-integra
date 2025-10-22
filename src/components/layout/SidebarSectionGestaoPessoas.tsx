@@ -342,7 +342,7 @@ export default function SidebarSectionGestaoPessoas({
                                     <SidebarMenuButton asChild>
                                       <Link to="/gestao-pessoas/relatorios-veiculos" onClick={onLinkClick}>
                                         <FileText className="h-4 w-4" />
-                                        <span>Relatórios Veículos</span>
+                                        <span>Relatórios</span>
                                       </Link>
                                     </SidebarMenuButton>
                                   </SidebarMenuItem>}
