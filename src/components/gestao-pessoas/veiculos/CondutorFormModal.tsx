@@ -4,6 +4,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -11,8 +13,10 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 import { useState, useEffect } from "react";
-import { FileCheck } from "lucide-react";
+import { FileCheck, CalendarIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 // Funções auxiliares para formatação de CPF
 const formatCPF = (cpf: string): string => {
@@ -252,7 +256,39 @@ export function CondutorFormModal({ open, onOpenChange, itemParaEdicao, onSucces
 
             <div>
               <Label className={errors.validade_cnh ? "text-destructive" : ""}>Validade CNH *</Label>
-              <Input type="date" {...register("validade_cnh")} className={errors.validade_cnh ? "border-destructive" : ""} />
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !watch("validade_cnh") && "text-muted-foreground",
+                      errors.validade_cnh && "border-destructive"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {watch("validade_cnh") ? (
+                      format(new Date(watch("validade_cnh")), "dd/MM/yyyy", { locale: ptBR })
+                    ) : (
+                      <span>Selecione a data</span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={watch("validade_cnh") ? new Date(watch("validade_cnh")) : undefined}
+                    onSelect={(date) => {
+                      if (date) {
+                        setValue("validade_cnh", format(date, "yyyy-MM-dd"));
+                      }
+                    }}
+                    locale={ptBR}
+                    initialFocus
+                    className="pointer-events-auto"
+                  />
+                </PopoverContent>
+              </Popover>
               {errors.validade_cnh && <p className="text-sm text-destructive mt-1">{errors.validade_cnh.message}</p>}
             </div>
 
