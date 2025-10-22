@@ -292,6 +292,7 @@ import CadastroCartaoAbastecimento from "./pages/gestao-pessoas/CadastroCartaoAb
 import CadastroPedagioEstacionamento from "./pages/gestao-pessoas/CadastroPedagioEstacionamento";
 import CadastroCondutor from "./pages/gestao-pessoas/CadastroCondutor";
 import ChecklistVeiculos from "./pages/gestao-pessoas/ChecklistVeiculos";
+import ChecklistVeiculosPublico from "./pages/gestao-pessoas/ChecklistVeiculosPublico";
 import ConsultasVeiculos from "./pages/gestao-pessoas/ConsultasVeiculos";
 import RelatoriosVeiculos from "./pages/gestao-pessoas/RelatoriosVeiculos";
 import CalculoRotas from "./pages/gestao-pessoas/CalculoRotas";
@@ -708,6 +709,9 @@ function App() {
                 <Route path="gestao-pessoas/controle-abastecimento" element={<ControleAbastecimento />} />
               </Route>
 
+
+              {/* Checklist Público - Sem autenticação */}
+              <Route path="/checklist-publico/:token" element={<ChecklistVeiculosPublico />} />
 
               {/* 404 route */}
               <Route path="*" element={<NotFound />} />

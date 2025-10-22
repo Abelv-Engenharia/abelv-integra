@@ -1,30 +1,29 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { 
-  CalendarIcon, 
   Car, 
   Camera, 
-  FileCheck, 
   Upload, 
   CircleHelp,
   Gauge,
   Battery,
   FileText,
-  Zap
+  CheckCircle,
+  XCircle,
+  Clock
 } from "lucide-react";
 
+import { useChecklistTokens } from "@/hooks/gestao-pessoas/useChecklistTokens";
 import { useVeiculosChecklists } from "@/hooks/gestao-pessoas/useVeiculosChecklists";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
 
@@ -53,34 +52,71 @@ const fuelLevels = [
   { value: "F", label: "F" }
 ];
 
-export function VehicleChecklist() {
+export default function ChecklistVeiculosPublico() {
+  const { token } = useParams<{ token: string }>();
+  const navigate = useNavigate();
+  const { validarToken, marcarTokenUsado } = useChecklistTokens();
   const { criarChecklist, isCreating } = useVeiculosChecklists();
-  
-  const [date, setDate] = useState<Date>(new Date());
-  const [operationType, setOperationType] = useState<string>("");
-  const [plate, setPlate] = useState<string>("");
-  const [brandModel, setBrandModel] = useState<string>("");
-  const [condutor, setCondutor] = useState<string>("");
-  const [emailCondutor, setEmailCondutor] = useState<string>("");
+
+  const [tokenData, setTokenData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [submitted, setSubmitted] = useState(false);
+  const [timeRemaining, setTimeRemaining] = useState<number>(0);
+
   const [fuelLevel, setFuelLevel] = useState<string>("");
   const [odometer, setOdometer] = useState<string>("");
   const [observations, setObservations] = useState<string>("");
   const [uploads, setUploads] = useState<{[key: number]: File[]}>({});
   const [uploadProgress, setUploadProgress] = useState<number>(0);
 
+  useEffect(() => {
+    const checkToken = async () => {
+      if (!token) {
+        setLoading(false);
+        return;
+      }
+
+      const data = await validarToken(token);
+      if (data) {
+        setTokenData(data);
+        
+        // Calcular tempo restante
+        const validadeDate = new Date(data.validade);
+        const agora = new Date();
+        const diff = validadeDate.getTime() - agora.getTime();
+        setTimeRemaining(Math.max(0, Math.floor(diff / 1000))); // em segundos
+      }
+      setLoading(false);
+    };
+
+    checkToken();
+  }, [token]);
+
+  // Countdown timer
+  useEffect(() => {
+    if (timeRemaining <= 0) return;
+
+    const interval = setInterval(() => {
+      setTimeRemaining((prev) => Math.max(0, prev - 1));
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [timeRemaining]);
+
+  const formatTime = (seconds: number) => {
+    const minutes = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${minutes}:${secs.toString().padStart(2, '0')}`;
+  };
+
   const handleFileUpload = (positionIndex: number, files: FileList | null) => {
     if (!files) return;
 
     const validFiles: File[] = [];
-    const allowedTypes = [
-      'image/jpeg',
-      'image/jpg', 
-      'image/png',
-      'image/webp'
-    ];
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
 
     Array.from(files).forEach(file => {
-      if (file.size > 5 * 1024 * 1024) { // 5MB
+      if (file.size > 5 * 1024 * 1024) {
         toast({
           title: "Arquivo muito grande",
           description: `${file.name} excede o limite de 5MB`,
@@ -91,7 +127,7 @@ export function VehicleChecklist() {
 
       if (!allowedTypes.includes(file.type) && !file.name.match(/\.(jpg|jpeg|png|webp)$/i)) {
         toast({
-          title: "Tipo de arquivo não permitido", 
+          title: "Tipo de arquivo não permitido",
           description: `${file.name} não é uma imagem válida. Use: JPG, PNG ou WEBP`,
           variant: "destructive"
         });
@@ -117,17 +153,17 @@ export function VehicleChecklist() {
   };
 
   const handleSubmit = async () => {
-    // Validação dos campos obrigatórios
-    if (!date || !operationType || !plate.trim() || !brandModel.trim() || !condutor.trim() || !emailCondutor.trim() || !odometer.trim()) {
+    if (!tokenData || !token) return;
+
+    if (!odometer.trim()) {
       toast({
-        title: "Campos obrigatórios",
-        description: "Preencha todos os campos obrigatórios",
+        title: "Campo obrigatório",
+        description: "Preencha o hodômetro",
         variant: "destructive"
       });
       return;
     }
 
-    // Verificar se CNH foi enviada (posição 13)
     if (!uploads[13] || uploads[13].length === 0) {
       toast({
         title: "CNH obrigatória",
@@ -140,15 +176,14 @@ export function VehicleChecklist() {
     try {
       setUploadProgress(10);
 
-      // Preparar dados do checklist
       const checklistData = {
-        data_checklist: format(date, "yyyy-MM-dd"),
-        placa: plate.toUpperCase(),
+        data_checklist: format(new Date(), "yyyy-MM-dd"),
+        placa: tokenData.placa,
         veiculo_id: null,
-        marca_modelo: brandModel,
-        condutor_nome: condutor,
+        marca_modelo: tokenData.marca_modelo,
+        condutor_nome: tokenData.condutor_nome,
         condutor_id: null,
-        tipo_operacao: (operationType === 'retirada' ? 'Retirada' : 'Devolução') as "Retirada" | "Devolução",
+        tipo_operacao: tokenData.tipo_operacao,
         nivel_combustivel: fuelLevel || null,
         hodometro: odometer ? parseInt(odometer) : null,
         observacoes: observations || null,
@@ -160,29 +195,16 @@ export function VehicleChecklist() {
 
       setUploadProgress(30);
 
-      // Criar checklist com upload de fotos
       criarChecklist(
         {
           checklist: checklistData,
           fotos: uploads,
         },
         {
-          onSuccess: () => {
+          onSuccess: (data) => {
             setUploadProgress(100);
-            // Limpar formulário
-            setTimeout(() => {
-              setDate(new Date());
-              setOperationType("");
-              setPlate("");
-              setBrandModel("");
-              setCondutor("");
-              setEmailCondutor("");
-              setFuelLevel("");
-              setOdometer("");
-              setObservations("");
-              setUploads({});
-              setUploadProgress(0);
-            }, 1000);
+            marcarTokenUsado({ token, checklistId: data.id });
+            setSubmitted(true);
           },
           onError: () => {
             setUploadProgress(0);
@@ -201,6 +223,49 @@ export function VehicleChecklist() {
     }
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <Clock className="h-12 w-12 animate-spin mx-auto text-primary" />
+          <p className="text-muted-foreground">Validando acesso...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!tokenData || timeRemaining <= 0) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <Card className="max-w-md w-full">
+          <CardContent className="pt-6 text-center space-y-4">
+            <XCircle className="h-16 w-16 text-destructive mx-auto" />
+            <h2 className="text-2xl font-bold">Link Inválido ou Expirado</h2>
+            <p className="text-muted-foreground">
+              Este link não é válido ou já expirou. Entre em contato com o responsável para obter um novo link.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (submitted) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <Card className="max-w-md w-full">
+          <CardContent className="pt-6 text-center space-y-4">
+            <CheckCircle className="h-16 w-16 text-green-600 mx-auto" />
+            <h2 className="text-2xl font-bold">Checklist Enviado!</h2>
+            <p className="text-muted-foreground">
+              Seu checklist foi enviado com sucesso. Obrigado!
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background p-4">
       <div className="mx-auto max-w-4xl space-y-6">
@@ -211,122 +276,32 @@ export function VehicleChecklist() {
               <Car className="h-6 w-6" />
               Checklist de Veículo
             </CardTitle>
+            <div className="flex items-center justify-center gap-2 text-sm mt-2">
+              <Clock className="h-4 w-4" />
+              <span>Tempo restante: {formatTime(timeRemaining)}</span>
+            </div>
           </CardHeader>
         </Card>
 
-        {/* Bloco 1 - Dados Gerais */}
+        {/* Dados Pré-preenchidos */}
         <Card className="shadow-lg">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-primary">
-              <FileCheck className="h-5 w-5" />
-              Dados Gerais do Checklist
-            </CardTitle>
+            <CardTitle>Dados do Veículo</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            <p><strong>Placa:</strong> {tokenData.placa}</p>
+            <p><strong>Marca/Modelo:</strong> {tokenData.marca_modelo}</p>
+            <p><strong>Condutor:</strong> {tokenData.condutor_nome}</p>
+            <p><strong>Tipo de Operação:</strong> {tokenData.tipo_operacao}</p>
+          </CardContent>
+        </Card>
+
+        {/* Informações Básicas */}
+        <Card className="shadow-lg">
+          <CardHeader>
+            <CardTitle>Informações do Veículo</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="date" className={!date ? "text-destructive" : ""}>
-                  Data *
-                </Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        "w-full justify-start text-left font-normal",
-                        !date && "text-muted-foreground border-destructive"
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {date ? format(date, "dd/MM/yyyy", { locale: ptBR }) : "Selecione uma data"}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={date}
-                      onSelect={setDate}
-                      initialFocus
-                      className="pointer-events-auto"
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
-
-              <div className="space-y-2">
-                <Label className={!operationType ? "text-destructive" : ""}>
-                  Tipo de Operação *
-                </Label>
-                <RadioGroup value={operationType} onValueChange={setOperationType}>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="retirada" id="retirada" />
-                    <Label htmlFor="retirada">Retirada do Veículo</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="devolucao" id="devolucao" />
-                    <Label htmlFor="devolucao">Devolução do Veículo</Label>
-                  </div>
-                </RadioGroup>
-              </div>
-            </div>
-
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="plate" className={!plate.trim() ? "text-destructive" : ""}>
-                  Placa *
-                </Label>
-                <Input 
-                  id="plate"
-                  placeholder="ABC-1234"
-                  value={plate}
-                  onChange={(e) => setPlate(e.target.value.toUpperCase())}
-                  className={!plate.trim() ? "border-destructive" : ""}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="brand-model" className={!brandModel.trim() ? "text-destructive" : ""}>
-                  Marca/Modelo *
-                </Label>
-                <Input 
-                  id="brand-model"
-                  placeholder="Ex: Toyota Corolla"
-                  value={brandModel}
-                  onChange={(e) => setBrandModel(e.target.value)}
-                  className={!brandModel.trim() ? "border-destructive" : ""}
-                />
-              </div>
-            </div>
-
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="condutor" className={!condutor.trim() ? "text-destructive" : ""}>
-                  Nome do Condutor *
-                </Label>
-                <Input 
-                  id="condutor"
-                  placeholder="Nome completo do condutor"
-                  value={condutor}
-                  onChange={(e) => setCondutor(e.target.value)}
-                  className={!condutor.trim() ? "border-destructive" : ""}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="email-condutor" className={!emailCondutor.trim() ? "text-destructive" : ""}>
-                  E-mail do Condutor *
-                </Label>
-                <Input 
-                  id="email-condutor"
-                  type="email"
-                  placeholder="email@exemplo.com"
-                  value={emailCondutor}
-                  onChange={(e) => setEmailCondutor(e.target.value)}
-                  className={!emailCondutor.trim() ? "border-destructive" : ""}
-                />
-              </div>
-            </div>
-
             <div className="space-y-2">
               <Label>Nível de Combustível</Label>
               <div className="flex gap-2">
@@ -343,15 +318,29 @@ export function VehicleChecklist() {
                 ))}
               </div>
             </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="odometer" className={!odometer.trim() ? "text-destructive" : ""}>
+                KM / Hodômetro *
+              </Label>
+              <Input
+                id="odometer"
+                type="number"
+                placeholder="Ex: 45000"
+                value={odometer}
+                onChange={(e) => setOdometer(e.target.value)}
+                className={!odometer.trim() ? "border-destructive" : ""}
+              />
+            </div>
           </CardContent>
         </Card>
 
-        {/* Bloco 2 - Fotos por Posição */}
+        {/* Fotos */}
         <Card className="shadow-lg">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-primary">
               <Camera className="h-5 w-5" />
-              Fotos do Veículo por Posição
+              Fotos do Veículo
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -364,7 +353,6 @@ export function VehicleChecklist() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    {/* Reference Icon */}
                     <div className="mb-3">
                       <div className="bg-primary/10 rounded-lg p-4 text-center">
                         <position.icon className="h-12 w-12 mx-auto mb-2 text-primary" />
@@ -380,7 +368,7 @@ export function VehicleChecklist() {
                         htmlFor={`upload-${index}`}
                         className="cursor-pointer text-sm text-muted-foreground hover:text-primary"
                       >
-                        Clique para adicionar arquivo
+                        Tirar foto ou selecionar
                         <Input
                           id={`upload-${index}`}
                           type="file"
@@ -392,7 +380,7 @@ export function VehicleChecklist() {
                         />
                       </Label>
                       <p className="text-xs text-muted-foreground mt-1">
-                        Máx: 5MB | Formato: Imagens (JPG, PNG, WEBP)
+                        Máx: 5MB | Formato: Imagens
                       </p>
                     </div>
 
@@ -420,75 +408,41 @@ export function VehicleChecklist() {
           </CardContent>
         </Card>
 
-        {/* Bloco 3 - Informações Complementares */}
+        {/* Observações */}
         <Card className="shadow-lg">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-primary">
-              <FileCheck className="h-5 w-5" />
-              Informações Complementares
-            </CardTitle>
+            <CardTitle>Observações Adicionais</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="odometer" className={!odometer.trim() ? "text-destructive" : ""}>
-                KM / Hodômetro *
-              </Label>
-              <Input 
-                id="odometer"
-                type="number"
-                placeholder="Ex: 45000"
-                value={odometer}
-                onChange={(e) => setOdometer(e.target.value)}
-                className={!odometer.trim() ? "border-destructive" : ""}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="observations">Observações Adicionais</Label>
-              <Textarea 
-                id="observations"
-                placeholder="Digite observações adicionais..."
-                rows={4}
-                value={observations}
-                onChange={(e) => setObservations(e.target.value)}
-              />
-            </div>
+          <CardContent>
+            <Textarea
+              placeholder="Digite observações adicionais..."
+              rows={4}
+              value={observations}
+              onChange={(e) => setObservations(e.target.value)}
+            />
           </CardContent>
         </Card>
 
-        {/* Botões de ação */}
-        <Card className="shadow-lg">
-          <CardContent className="pt-6 space-y-4">
-            {uploadProgress > 0 && uploadProgress < 100 && (
-              <div className="space-y-2">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">
-                    <Zap className="h-4 w-4 inline mr-1" />
-                    Salvando checklist...
-                  </span>
-                  <span className="font-medium">{uploadProgress}%</span>
-                </div>
-                <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
-                  <div 
-                    className="bg-primary h-full transition-all duration-300"
-                    style={{ width: `${uploadProgress}%` }}
-                  />
-                </div>
-              </div>
-            )}
-            <div className="flex gap-4">
-              <Button 
-                onClick={handleSubmit}
-                className="flex-1 bg-primary hover:bg-primary/90"
-                size="lg"
-                disabled={isCreating || uploadProgress > 0}
-              >
-                <FileCheck className="mr-2 h-5 w-5" />
-                {isCreating ? "Salvando..." : "Salvar Checklist"}
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+        {/* Progress e Botão Submit */}
+        {uploadProgress > 0 && uploadProgress < 100 && (
+          <Card>
+            <CardContent className="pt-6">
+              <Progress value={uploadProgress} className="w-full" />
+              <p className="text-sm text-muted-foreground text-center mt-2">
+                Enviando checklist... {uploadProgress}%
+              </p>
+            </CardContent>
+          </Card>
+        )}
+
+        <Button
+          onClick={handleSubmit}
+          disabled={isCreating || uploadProgress > 0}
+          className="w-full"
+          size="lg"
+        >
+          {isCreating ? "Enviando..." : "Enviar Checklist"}
+        </Button>
       </div>
     </div>
   );

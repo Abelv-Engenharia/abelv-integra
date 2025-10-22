@@ -8151,6 +8151,56 @@ export type Database = {
           },
         ]
       }
+      veiculos_checklists_tokens: {
+        Row: {
+          checklist_id: string | null
+          condutor_nome: string
+          created_at: string | null
+          created_by: string | null
+          id: string
+          marca_modelo: string
+          placa: string
+          tipo_operacao: string
+          token: string
+          usado: boolean | null
+          validade: string
+        }
+        Insert: {
+          checklist_id?: string | null
+          condutor_nome: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          marca_modelo: string
+          placa: string
+          tipo_operacao: string
+          token: string
+          usado?: boolean | null
+          validade: string
+        }
+        Update: {
+          checklist_id?: string | null
+          condutor_nome?: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          marca_modelo?: string
+          placa?: string
+          tipo_operacao?: string
+          token?: string
+          usado?: boolean | null
+          validade?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "veiculos_checklists_tokens_checklist_id_fkey"
+            columns: ["checklist_id"]
+            isOneToOne: false
+            referencedRelation: "veiculos_checklists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       veiculos_condutores: {
         Row: {
           ativo: boolean
