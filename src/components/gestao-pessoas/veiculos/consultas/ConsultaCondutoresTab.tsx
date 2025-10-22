@@ -9,7 +9,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Plus, Search, Eye, Edit, FileSpreadsheet, FileText, FileCheck } from "lucide-react";
 import { format, differenceInDays } from "date-fns";
 import type { MultaCompleta } from "@/types/gestao-pessoas/multa";
-
 interface Condutor {
   id: string;
   nome?: string;
@@ -20,7 +19,6 @@ interface Condutor {
   statusCnh: string;
   termoResponsabilidade?: string;
 }
-
 export function ConsultaCondutoresTab() {
   const navigate = useNavigate();
   const [busca, setBusca] = useState("");
@@ -28,39 +26,27 @@ export function ConsultaCondutoresTab() {
   const [filtroStatus, setFiltroStatus] = useState("todos");
   const [condutores, setCondutores] = useState<Condutor[]>([]);
   const [multas, setMultas] = useState<MultaCompleta[]>([]);
-
   useEffect(() => {
     const dadosLocalStorage = localStorage.getItem("condutores");
     if (dadosLocalStorage) {
       setCondutores(JSON.parse(dadosLocalStorage));
     }
-    
     const multasLocalStorage = localStorage.getItem("multas");
     if (multasLocalStorage) {
       setMultas(JSON.parse(multasLocalStorage));
     }
   }, []);
-
   const condutoresFiltrados = condutores.filter(condutor => {
-    const matchBusca = busca === "" || 
-      condutor.nome.toLowerCase().includes(busca.toLowerCase()) ||
-      condutor.cpf.replace(/\D/g, "").includes(busca.replace(/\D/g, ""));
-    
+    const matchBusca = busca === "" || condutor.nome.toLowerCase().includes(busca.toLowerCase()) || condutor.cpf.replace(/\D/g, "").includes(busca.replace(/\D/g, ""));
     const matchCategoria = filtroCategoria === "todos" || condutor.categoriaCnh === filtroCategoria;
     const matchStatus = filtroStatus === "todos" || condutor.statusCnh.toLowerCase() === filtroStatus;
-
     return matchBusca && matchCategoria && matchStatus;
   });
-
   const calcularPontuacaoCondutor = (nomeCondutor: string): number => {
-    return multas
-      .filter(multa => multa.condutorInfrator === nomeCondutor)
-      .reduce((total, multa) => total + (multa.pontos || 0), 0);
+    return multas.filter(multa => multa.condutorInfrator === nomeCondutor).reduce((total, multa) => total + (multa.pontos || 0), 0);
   };
-
   const getStatusCnhBadge = (validadeCnh: Date) => {
     const diasRestantes = differenceInDays(new Date(validadeCnh), new Date());
-    
     if (diasRestantes < 0) {
       return <Badge variant="destructive">Vencida</Badge>;
     } else if (diasRestantes <= 30) {
@@ -69,30 +55,20 @@ export function ConsultaCondutoresTab() {
       return <Badge variant="default">Válida</Badge>;
     }
   };
-
-  return (
-    <div className="space-y-6">
+  return <div className="space-y-6">
       {/* Filtros */}
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle>Filtros de Busca</CardTitle>
-            <Button onClick={() => navigate("/cadastro-condutor")}>
-              <Plus className="h-4 w-4 mr-2" />
-              Novo Condutor
-            </Button>
+            
           </div>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="relative col-span-2">
               <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Buscar por nome ou CPF..."
-                value={busca}
-                onChange={(e) => setBusca(e.target.value)}
-                className="pl-10"
-              />
+              <Input placeholder="Buscar por nome ou CPF..." value={busca} onChange={e => setBusca(e.target.value)} className="pl-10" />
             </div>
             
             <Select value={filtroCategoria} onValueChange={setFiltroCategoria}>
@@ -144,24 +120,12 @@ export function ConsultaCondutoresTab() {
           </div>
         </CardHeader>
         <CardContent>
-          {condutoresFiltrados.length === 0 ? (
-            <div className="text-center py-12">
+          {condutoresFiltrados.length === 0 ? <div className="text-center py-12">
               <p className="text-muted-foreground">
-                {busca || filtroCategoria !== "todos" || filtroStatus !== "todos"
-                  ? "Nenhum condutor encontrado com os filtros aplicados."
-                  : "Nenhum condutor cadastrado ainda."}
+                {busca || filtroCategoria !== "todos" || filtroStatus !== "todos" ? "Nenhum condutor encontrado com os filtros aplicados." : "Nenhum condutor cadastrado ainda."}
               </p>
-              <Button
-                variant="outline"
-                className="mt-4"
-                onClick={() => navigate("/cadastro-condutor")}
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Cadastrar Primeiro Condutor
-              </Button>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
+              
+            </div> : <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -176,8 +140,7 @@ export function ConsultaCondutoresTab() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {condutoresFiltrados.map((condutor) => (
-                    <TableRow key={condutor.id}>
+                  {condutoresFiltrados.map(condutor => <TableRow key={condutor.id}>
                       <TableCell className="font-medium">{condutor.nome || condutor.nomeCondutor || "-"}</TableCell>
                       <TableCell className="font-mono">{condutor.cpf}</TableCell>
                       <TableCell>
@@ -186,34 +149,20 @@ export function ConsultaCondutoresTab() {
                       <TableCell>{format(new Date(condutor.validadeCnh), "dd/MM/yyyy")}</TableCell>
                       <TableCell>
                         {(() => {
-                          const pontuacaoTotal = calcularPontuacaoCondutor(
-                            condutor.nome || condutor.nomeCondutor || ""
-                          );
-                          return (
-                            <Badge 
-                              variant={
-                                pontuacaoTotal >= 20 ? "destructive" : 
-                                pontuacaoTotal >= 10 ? "default" : 
-                                "secondary"
-                              }
-                            >
+                    const pontuacaoTotal = calcularPontuacaoCondutor(condutor.nome || condutor.nomeCondutor || "");
+                    return <Badge variant={pontuacaoTotal >= 20 ? "destructive" : pontuacaoTotal >= 10 ? "default" : "secondary"}>
                               {pontuacaoTotal} pts
-                            </Badge>
-                          );
-                        })()}
+                            </Badge>;
+                  })()}
                       </TableCell>
                       <TableCell>
                         {getStatusCnhBadge(new Date(condutor.validadeCnh))}
                       </TableCell>
                       <TableCell>
-                        {condutor.termoResponsabilidade ? (
-                          <Badge variant="default" className="gap-1">
+                        {condutor.termoResponsabilidade ? <Badge variant="default" className="gap-1">
                             <FileCheck className="h-3 w-3" />
                             Sim
-                          </Badge>
-                        ) : (
-                          <Badge variant="secondary">Não</Badge>
-                        )}
+                          </Badge> : <Badge variant="secondary">Não</Badge>}
                       </TableCell>
                       <TableCell>
                         <div className="flex gap-1">
@@ -225,14 +174,11 @@ export function ConsultaCondutoresTab() {
                           </Button>
                         </div>
                       </TableCell>
-                    </TableRow>
-                  ))}
+                    </TableRow>)}
                 </TableBody>
               </Table>
-            </div>
-          )}
+            </div>}
         </CardContent>
       </Card>
-    </div>
-  );
+    </div>;
 }
