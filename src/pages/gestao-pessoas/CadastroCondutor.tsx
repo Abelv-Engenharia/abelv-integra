@@ -253,7 +253,7 @@ export default function CadastroCondutor() {
                       <FormLabel className={cn(!field.value && "text-destructive")}>
                         Categoria CNH *
                       </FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger className={cn(!field.value && "border-destructive")}>
                             <SelectValue placeholder="Selecione a categoria" />
@@ -325,7 +325,7 @@ export default function CadastroCondutor() {
                       <FormLabel className={cn(!field.value && "text-destructive")}>
                         Status CNH *
                       </FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger className={cn(!field.value && "border-destructive")}>
                             <SelectValue placeholder="Selecione o status" />
