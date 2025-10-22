@@ -12,7 +12,6 @@ import { toast } from "@/hooks/use-toast";
 import ChecklistDataService, { ChecklistRecord } from "@/services/gestao-pessoas/ChecklistDataService";
 import { PhotoViewerModal } from "@/components/gestao-pessoas/veiculos/PhotoViewerModal";
 import { EmailConfigModal } from "@/components/gestao-pessoas/veiculos/EmailConfigModal";
-
 export function ConsultaChecklistTab() {
   const navigate = useNavigate();
   const [busca, setBusca] = useState("");
@@ -22,43 +21,32 @@ export function ConsultaChecklistTab() {
   const [photoViewerOpen, setPhotoViewerOpen] = useState(false);
   const [emailModalOpen, setEmailModalOpen] = useState(false);
   const [checklistSelecionado, setChecklistSelecionado] = useState<ChecklistRecord | null>(null);
-
   useEffect(() => {
     carregarChecklists();
   }, []);
-
   const carregarChecklists = () => {
     const dados = ChecklistDataService.obterTodos();
     setChecklists(dados);
   };
-
   const checklistsFiltrados = checklists.filter(checklist => {
-    const matchBusca = busca === "" || 
-      checklist.placa.toLowerCase().includes(busca.toLowerCase()) ||
-      checklist.condutor.toLowerCase().includes(busca.toLowerCase());
-    
+    const matchBusca = busca === "" || checklist.placa.toLowerCase().includes(busca.toLowerCase()) || checklist.condutor.toLowerCase().includes(busca.toLowerCase());
     const matchStatus = filtroStatus === "todos" || checklist.status.toLowerCase() === filtroStatus.toLowerCase();
     const matchTipo = filtroTipo === "todos" || checklist.tipo.toLowerCase() === filtroTipo.toLowerCase();
-
     return matchBusca && matchStatus && matchTipo;
   });
-
   const enviarCobranca = (id: string) => {
     ChecklistDataService.incrementarTentativaCobranca(id);
     carregarChecklists();
     toast({
       title: "Cobrança enviada",
-      description: "E-mail de cobrança enviado para o condutor",
+      description: "E-mail de cobrança enviado para o condutor"
     });
   };
-
   const visualizarFotos = (checklist: ChecklistRecord) => {
     setChecklistSelecionado(checklist);
     setPhotoViewerOpen(true);
   };
-
-  return (
-    <div className="space-y-6">
+  return <div className="space-y-6">
       {/* Filtros */}
       <Card>
         <CardHeader>
@@ -69,10 +57,7 @@ export function ConsultaChecklistTab() {
                 <Settings className="h-4 w-4 mr-2" />
                 Configurar E-mails
               </Button>
-              <Button onClick={() => navigate("/checklist-veiculos")}>
-                <Plus className="h-4 w-4 mr-2" />
-                Novo Checklist
-              </Button>
+              
             </div>
           </div>
         </CardHeader>
@@ -80,12 +65,7 @@ export function ConsultaChecklistTab() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="relative col-span-2">
               <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Buscar por placa ou condutor..."
-                value={busca}
-                onChange={(e) => setBusca(e.target.value)}
-                className="pl-10"
-              />
+              <Input placeholder="Buscar por placa ou condutor..." value={busca} onChange={e => setBusca(e.target.value)} className="pl-10" />
             </div>
             
             <Select value={filtroStatus} onValueChange={setFiltroStatus}>
@@ -133,16 +113,11 @@ export function ConsultaChecklistTab() {
           </div>
         </CardHeader>
         <CardContent>
-          {checklistsFiltrados.length === 0 ? (
-            <div className="text-center py-12">
+          {checklistsFiltrados.length === 0 ? <div className="text-center py-12">
               <p className="text-muted-foreground">
-                {busca || filtroStatus !== "todos" || filtroTipo !== "todos"
-                  ? "Nenhum checklist encontrado com os filtros aplicados."
-                  : "Nenhum checklist cadastrado ainda."}
+                {busca || filtroStatus !== "todos" || filtroTipo !== "todos" ? "Nenhum checklist encontrado com os filtros aplicados." : "Nenhum checklist cadastrado ainda."}
               </p>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
+            </div> : <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -158,14 +133,12 @@ export function ConsultaChecklistTab() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {checklistsFiltrados.map((checklist) => {
-                    const dataChecklist = checklist.data ? new Date(checklist.data) : null;
-                    const dataLimite = checklist.datalimite ? new Date(checklist.datalimite) : null;
-                    const isDataChecklistValid = dataChecklist && !isNaN(dataChecklist.getTime());
-                    const isDataLimiteValid = dataLimite && !isNaN(dataLimite.getTime());
-
-                    return (
-                      <TableRow key={checklist.id}>
+                  {checklistsFiltrados.map(checklist => {
+                const dataChecklist = checklist.data ? new Date(checklist.data) : null;
+                const dataLimite = checklist.datalimite ? new Date(checklist.datalimite) : null;
+                const isDataChecklistValid = dataChecklist && !isNaN(dataChecklist.getTime());
+                const isDataLimiteValid = dataLimite && !isNaN(dataLimite.getTime());
+                return <TableRow key={checklist.id}>
                         <TableCell>
                           {isDataChecklistValid ? format(dataChecklist, "dd/MM/yyyy") : "-"}
                         </TableCell>
@@ -194,47 +167,24 @@ export function ConsultaChecklistTab() {
                       </TableCell>
                       <TableCell>
                         <div className="flex gap-1">
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            onClick={() => visualizarFotos(checklist)}
-                            title="Visualizar Fotos"
-                          >
+                          <Button variant="ghost" size="sm" onClick={() => visualizarFotos(checklist)} title="Visualizar Fotos">
                             <Camera className="h-4 w-4" />
                           </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            onClick={() => enviarCobranca(checklist.id)}
-                            title="Enviar Cobrança"
-                          >
+                          <Button variant="ghost" size="sm" onClick={() => enviarCobranca(checklist.id)} title="Enviar Cobrança">
                             <Send className="h-4 w-4" />
                           </Button>
                         </div>
                       </TableCell>
-                    </TableRow>
-                    );
-                  })}
+                    </TableRow>;
+              })}
                 </TableBody>
               </Table>
-            </div>
-          )}
+            </div>}
         </CardContent>
       </Card>
 
-      {checklistSelecionado && (
-        <PhotoViewerModal
-          isOpen={photoViewerOpen}
-          onClose={() => setPhotoViewerOpen(false)}
-          fotos={checklistSelecionado.fotos || {}}
-          nomeVeiculo={checklistSelecionado.placa}
-        />
-      )}
+      {checklistSelecionado && <PhotoViewerModal isOpen={photoViewerOpen} onClose={() => setPhotoViewerOpen(false)} fotos={checklistSelecionado.fotos || {}} nomeVeiculo={checklistSelecionado.placa} />}
 
-      <EmailConfigModal
-        open={emailModalOpen}
-        onOpenChange={setEmailModalOpen}
-      />
-    </div>
-  );
+      <EmailConfigModal open={emailModalOpen} onOpenChange={setEmailModalOpen} />
+    </div>;
 }
