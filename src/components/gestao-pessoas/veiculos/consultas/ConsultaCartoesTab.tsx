@@ -8,7 +8,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Search, Eye, Edit, FileSpreadsheet, FileText } from "lucide-react";
 import { format } from "date-fns";
-
 interface Cartao {
   id: string;
   status: string;
@@ -20,61 +19,42 @@ interface Cartao {
   tipo: string;
   limiteCredito: number;
 }
-
 export function ConsultaCartoesTab() {
   const navigate = useNavigate();
   const [busca, setBusca] = useState("");
   const [filtroStatus, setFiltroStatus] = useState("todos");
   const [filtroTipo, setFiltroTipo] = useState("todos");
   const [cartoes, setCartoes] = useState<Cartao[]>([]);
-
   useEffect(() => {
     const dadosLocalStorage = localStorage.getItem("cartoes");
     if (dadosLocalStorage) {
       setCartoes(JSON.parse(dadosLocalStorage));
     }
   }, []);
-
   const cartoesFiltrados = cartoes.filter(cartao => {
-    const matchBusca = busca === "" || 
-      cartao.placa?.toLowerCase().includes(busca.toLowerCase()) ||
-      cartao.condutor?.toLowerCase().includes(busca.toLowerCase()) ||
-      cartao.numeroCartao?.includes(busca);
-    
+    const matchBusca = busca === "" || cartao.placa?.toLowerCase().includes(busca.toLowerCase()) || cartao.condutor?.toLowerCase().includes(busca.toLowerCase()) || cartao.numeroCartao?.includes(busca);
     const matchStatus = filtroStatus === "todos" || cartao.status.toLowerCase() === filtroStatus;
     const matchTipo = filtroTipo === "todos" || cartao.tipo.toLowerCase() === filtroTipo;
-
     return matchBusca && matchStatus && matchTipo;
   });
-
   const mascaraCartao = (numero: string) => {
     if (!numero || numero.length < 4) return numero;
     return `**** **** **** ${numero.slice(-4)}`;
   };
-
-  return (
-    <div className="space-y-6">
+  return <div className="space-y-6">
       {/* Filtros */}
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle>Filtros de Busca</CardTitle>
-            <Button onClick={() => navigate("/cadastro-cartao-abastecimento")}>
-              <Plus className="h-4 w-4 mr-2" />
-              Novo Cartão
-            </Button>
+            
           </div>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="relative col-span-2">
               <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Buscar por placa, condutor ou nº cartão..."
-                value={busca}
-                onChange={(e) => setBusca(e.target.value)}
-                className="pl-10"
-              />
+              <Input placeholder="Buscar por placa, condutor ou nº cartão..." value={busca} onChange={e => setBusca(e.target.value)} className="pl-10" />
             </div>
             
             <Select value={filtroStatus} onValueChange={setFiltroStatus}>
@@ -123,24 +103,12 @@ export function ConsultaCartoesTab() {
           </div>
         </CardHeader>
         <CardContent>
-          {cartoesFiltrados.length === 0 ? (
-            <div className="text-center py-12">
+          {cartoesFiltrados.length === 0 ? <div className="text-center py-12">
               <p className="text-muted-foreground">
-                {busca || filtroStatus !== "todos" || filtroTipo !== "todos"
-                  ? "Nenhum cartão encontrado com os filtros aplicados."
-                  : "Nenhum cartão cadastrado ainda."}
+                {busca || filtroStatus !== "todos" || filtroTipo !== "todos" ? "Nenhum cartão encontrado com os filtros aplicados." : "Nenhum cartão cadastrado ainda."}
               </p>
-              <Button
-                variant="outline"
-                className="mt-4"
-                onClick={() => navigate("/cadastro-cartao-abastecimento")}
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Cadastrar Primeiro Cartão
-              </Button>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
+              
+            </div> : <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -156,8 +124,7 @@ export function ConsultaCartoesTab() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {cartoesFiltrados.map((cartao) => (
-                    <TableRow key={cartao.id}>
+                  {cartoesFiltrados.map(cartao => <TableRow key={cartao.id}>
                       <TableCell>
                         <Badge variant={cartao.status === "ativo" ? "default" : "secondary"}>
                           {cartao.status}
@@ -176,7 +143,9 @@ export function ConsultaCartoesTab() {
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        R$ {cartao.limiteCredito?.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                        R$ {cartao.limiteCredito?.toLocaleString("pt-BR", {
+                    minimumFractionDigits: 2
+                  })}
                       </TableCell>
                       <TableCell>
                         <div className="flex gap-1">
@@ -188,14 +157,11 @@ export function ConsultaCartoesTab() {
                           </Button>
                         </div>
                       </TableCell>
-                    </TableRow>
-                  ))}
+                    </TableRow>)}
                 </TableBody>
               </Table>
-            </div>
-          )}
+            </div>}
         </CardContent>
       </Card>
-    </div>
-  );
+    </div>;
 }
