@@ -339,7 +339,7 @@ export default function CadastroCondutor() {
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => navigate("/gestao-veiculos")}
+                  onClick={() => navigate("/gestao-pessoas/dashboard-veiculos")}
                   disabled={loading}
                 >
                   Cancelar
