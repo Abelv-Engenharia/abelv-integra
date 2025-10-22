@@ -8160,6 +8160,7 @@ export type Database = {
           created_by: string | null
           id: string
           nome_condutor: string
+          numero_cnh: string | null
           observacao: string | null
           pontuacao_atual: number
           status_cnh: string
@@ -8177,6 +8178,7 @@ export type Database = {
           created_by?: string | null
           id?: string
           nome_condutor: string
+          numero_cnh?: string | null
           observacao?: string | null
           pontuacao_atual?: number
           status_cnh?: string
@@ -8194,6 +8196,7 @@ export type Database = {
           created_by?: string | null
           id?: string
           nome_condutor?: string
+          numero_cnh?: string | null
           observacao?: string | null
           pontuacao_atual?: number
           status_cnh?: string
@@ -8762,10 +8765,7 @@ export type Database = {
         Args: { p_supervisor_id: string }
         Returns: string
       }
-      gerar_numero_os: {
-        Args: { p_cca_id: number }
-        Returns: string
-      }
+      gerar_numero_os: { Args: { p_cca_id: number }; Returns: string }
       get_candidatos_por_etapa: {
         Args: { vaga_id_param: string }
         Returns: {
@@ -8834,7 +8834,7 @@ export type Database = {
         }[]
       }
       get_hht_by_cca: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           cca_id: number
           codigo: string
@@ -8843,7 +8843,7 @@ export type Database = {
         }[]
       }
       get_hht_by_month: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           ano: number
           mes: number
@@ -8851,7 +8851,7 @@ export type Database = {
         }[]
       }
       get_multas_pendentes_notificacao: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           condutor_infrator_nome: string
           dias_desde_notificacao: number
@@ -8862,7 +8862,7 @@ export type Database = {
         }[]
       }
       get_nf_pendentes_aprovacao: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           dataemissao: string
           dias_pendente: number
@@ -8881,7 +8881,7 @@ export type Database = {
         Returns: Json
       }
       get_prestadores_contratos_ativos: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           contrato_id: string
           datafim: string
@@ -8891,7 +8891,7 @@ export type Database = {
         }[]
       }
       get_prestadores_ferias_proximas: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           datainicio: string
           dias_restantes: number
@@ -8909,7 +8909,7 @@ export type Database = {
         Returns: string[]
       }
       get_vagas_atrasadas: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           cargo: string
           dias_atraso: number
@@ -8940,14 +8940,8 @@ export type Database = {
         Args: { p_funcionario_id?: string; p_gse_id?: string }
         Returns: Json
       }
-      populate_missing_profiles: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
-      processar_configuracoes_emails: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
+      populate_missing_profiles: { Args: never; Returns: undefined }
+      processar_configuracoes_emails: { Args: never; Returns: undefined }
       replace_in_jsonb_array: {
         Args: { arr: Json; new_val: string; old_val: string }
         Returns: Json
@@ -8964,10 +8958,7 @@ export type Database = {
         Args: { _funcionario_id: string; _user_id: string }
         Returns: boolean
       }
-      verificar_alertas_diarios: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
+      verificar_alertas_diarios: { Args: never; Returns: undefined }
     }
     Enums: {
       app_role: "admin_sistema" | "usuario"

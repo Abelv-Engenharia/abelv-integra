@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
@@ -16,6 +16,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/hooks/use-toast"
 import { DocumentUploadField } from "@/components/gestao-pessoas/veiculos/DocumentUploadField"
 import { cn } from "@/lib/utils"
+import { supabase } from "@/integrations/supabase/client"
 
 const formSchema = z.object({
   nomeCondutor: z.string().min(1, "Nome do condutor é obrigatório"),
@@ -53,6 +54,55 @@ export default function CadastroCondutor() {
     },
   })
 
+  // Migrar dados do localStorage para Supabase (uma única vez)
+  useEffect(() => {
+    const migrateFromLocalStorage = async () => {
+      try {
+        const localCondutores = localStorage.getItem("condutores")
+        if (!localCondutores) return
+
+        const condutores = JSON.parse(localCondutores)
+        if (!Array.isArray(condutores) || condutores.length === 0) return
+
+        for (const condutor of condutores) {
+          // Verificar se já existe no Supabase
+          const { data: existing } = await supabase
+            .from('veiculos_condutores')
+            .select('cpf')
+            .eq('cpf', condutor.cpf.replace(/\D/g, ""))
+            .single()
+
+          if (!existing) {
+            // Inserir no Supabase
+            await supabase.from('veiculos_condutores').insert({
+              nome_condutor: condutor.nome || condutor.nomeCondutor,
+              cpf: condutor.cpf.replace(/\D/g, ""),
+              categoria_cnh: condutor.categoriaCnh,
+              validade_cnh: typeof condutor.validadeCnh === 'string' 
+                ? condutor.validadeCnh 
+                : new Date(condutor.validadeCnh).toISOString().split('T')[0],
+              status_cnh: condutor.statusCnh,
+              numero_cnh: condutor.numeroCnh,
+              observacao: condutor.observacao || null,
+              pontuacao_atual: condutor.pontuacaoAtual || 0,
+              termo_responsabilidade_assinado: false,
+              termo_anexado_nome: condutor.cnhAnexada || null,
+              ativo: true,
+            })
+          }
+        }
+
+        // Remover do localStorage após migração
+        localStorage.removeItem("condutores")
+        console.log("Migração de condutores concluída")
+      } catch (error) {
+        console.error("Erro ao migrar condutores:", error)
+      }
+    }
+
+    migrateFromLocalStorage()
+  }, [])
+
   const formatCPF = (value: string) => {
     return value
       .replace(/\D/g, "")
@@ -71,12 +121,14 @@ export default function CadastroCondutor() {
   const onSubmit = async (values: FormValues) => {
     setLoading(true)
     try {
-      const existingCondutores = JSON.parse(localStorage.getItem("condutores") || "[]")
-      const cpfExiste = existingCondutores.some((condutor: any) => 
-        condutor.cpf.replace(/\D/g, "") === values.cpf.replace(/\D/g, "")
-      )
+      // Verificar se CPF já existe no Supabase
+      const { data: existingCondutor, error: checkError } = await supabase
+        .from('veiculos_condutores')
+        .select('cpf')
+        .eq('cpf', values.cpf.replace(/\D/g, ""))
+        .single()
 
-      if (cpfExiste) {
+      if (existingCondutor) {
         toast({
           title: "Erro",
           description: "Este CPF já está cadastrado.",
@@ -86,22 +138,24 @@ export default function CadastroCondutor() {
         return
       }
 
-      const novoCondutor = {
-        id: crypto.randomUUID(),
-        nome: values.nomeCondutor,
-        cpf: values.cpf,
-        categoriaCnh: values.categoriaCnh,
-        validadeCnh: values.validadeCnh,
-        statusCnh: values.statusCnh,
-        numeroCnh: values.numeroCnh,
-        observacao: values.observacao,
-        pontuacaoAtual: 0,
-        cnhAnexada: cnhAnexada ? cnhAnexada.name : null,
-        createdAt: new Date().toISOString(),
-      }
+      // Inserir novo condutor no Supabase
+      const { error: insertError } = await supabase
+        .from('veiculos_condutores')
+        .insert({
+          nome_condutor: values.nomeCondutor,
+          cpf: values.cpf.replace(/\D/g, ""),
+          categoria_cnh: values.categoriaCnh,
+          validade_cnh: values.validadeCnh.toISOString().split('T')[0],
+          status_cnh: values.statusCnh,
+          numero_cnh: values.numeroCnh,
+          observacao: values.observacao || null,
+          pontuacao_atual: 0,
+          termo_responsabilidade_assinado: false,
+          termo_anexado_nome: cnhAnexada ? cnhAnexada.name : null,
+          ativo: true,
+        })
 
-      const condutores = [...existingCondutores, novoCondutor]
-      localStorage.setItem("condutores", JSON.stringify(condutores))
+      if (insertError) throw insertError
 
       toast({
         title: "Sucesso",
@@ -110,7 +164,12 @@ export default function CadastroCondutor() {
 
       form.reset()
       setCnhAnexada(null)
+      
+      // Limpar localStorage antigo (migração)
+      localStorage.removeItem("condutores")
+      
     } catch (error) {
+      console.error("Erro ao cadastrar condutor:", error)
       toast({
         title: "Erro",
         description: "Erro ao cadastrar condutor. Tente novamente.",
