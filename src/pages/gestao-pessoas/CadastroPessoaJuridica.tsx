@@ -106,6 +106,7 @@ const mockDemonstrativo = [{
 export default function CadastroPessoaJuridica() {
   const [cadastrosCnpj, setCadastrosCnpj] = useState<Set<string>>(new Set());
   const [cadastrosCpf, setCadastrosCpf] = useState<Set<string>>(new Set());
+  const [inputDataNascimento, setInputDataNascimento] = useState<string>("");
   const { buscarCNPJ, loading: loadingCNPJ } = useReceitaWS();
   
   // Buscar usuários ativos do sistema
@@ -559,15 +560,19 @@ export default function CadastroPessoaJuridica() {
                         <FormControl>
                           <Input
                             placeholder="DD/MM/AAAA"
-                            value={field.value ? format(field.value, "dd/MM/yyyy") : ""}
+                            value={inputDataNascimento || (field.value ? format(field.value, "dd/MM/yyyy") : "")}
                             onChange={(e) => {
                               const formatted = formatarData(e.target.value);
+                              setInputDataNascimento(formatted);
+                              
                               const parsedDate = parseDataString(formatted);
                               if (parsedDate) {
                                 field.onChange(parsedDate);
-                              } else if (formatted.length < 10) {
-                                // Permite continuar digitando
-                                field.onChange(undefined);
+                              }
+                            }}
+                            onBlur={() => {
+                              if (!parseDataString(inputDataNascimento)) {
+                                setInputDataNascimento("");
                               }
                             }}
                             maxLength={10}
@@ -589,7 +594,10 @@ export default function CadastroPessoaJuridica() {
                             <Calendar 
                               mode="single" 
                               selected={field.value} 
-                              onSelect={field.onChange} 
+                              onSelect={(date) => {
+                                field.onChange(date);
+                                setInputDataNascimento(date ? format(date, "dd/MM/yyyy") : "");
+                              }} 
                               disabled={date => date > new Date() || date < new Date("1900-01-01")} 
                               initialFocus 
                               className={cn("p-3 pointer-events-auto")} 
