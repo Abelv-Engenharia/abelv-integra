@@ -15,6 +15,7 @@ import { Calendar } from "@/components/ui/calendar"
 import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
 import { useCondutores } from "@/hooks/gestao-pessoas/useCondutores"
+import { useLocadoras } from "@/hooks/gestao-pessoas/useLocadoras"
 import { supabase } from "@/integrations/supabase/client"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 
@@ -50,6 +51,7 @@ export default function CadastroVeiculo() {
   const { toast } = useToast()
   const navigate = useNavigate()
   const { data: condutores, isLoading: loadingCondutores } = useCondutores()
+  const { data: locadoras, isLoading: loadingLocadoras } = useLocadoras()
   const queryClient = useQueryClient()
 
   const form = useForm<FormValues>({
@@ -83,7 +85,7 @@ export default function CadastroVeiculo() {
         .from('veiculos')
         .insert([{
           status: values.status,
-          locadora_nome: values.locadora,
+          locadora_id: values.locadora,
           tipo_locacao: values.tipo,
           placa: values.placa.toUpperCase(),
           modelo: values.modelo,
@@ -177,13 +179,26 @@ export default function CadastroVeiculo() {
                       <FormLabel className={cn(!field.value && "text-destructive")}>
                         Locadora *
                       </FormLabel>
-                      <FormControl>
-                        <Input 
-                          placeholder="Nome da locadora" 
-                          className={cn(!field.value && "border-destructive")}
-                          {...field} 
-                        />
-                      </FormControl>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger className={cn(!field.value && "border-destructive")}>
+                            <SelectValue placeholder="Selecione a locadora" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {loadingLocadoras ? (
+                            <SelectItem value="loading" disabled>Carregando locadoras...</SelectItem>
+                          ) : locadoras && locadoras.length > 0 ? (
+                            locadoras.map((locadora) => (
+                              <SelectItem key={locadora.id} value={locadora.id.toString()}>
+                                {locadora.nome}
+                              </SelectItem>
+                            ))
+                          ) : (
+                            <SelectItem value="empty" disabled>Nenhuma locadora cadastrada</SelectItem>
+                          )}
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}
