@@ -443,7 +443,15 @@ export default function CadastroPessoaJuridica() {
               }) => <FormItem>
                     <FormLabel>Telefone</FormLabel>
                     <FormControl>
-                      <Input placeholder="(11) 99999-9999" {...field} />
+                      <Input 
+                        placeholder="(11) 99999-9999" 
+                        {...field}
+                        onChange={(e) => {
+                          const formatted = formatPhone(e.target.value);
+                          field.onChange(formatted);
+                        }}
+                        maxLength={15}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>} />
