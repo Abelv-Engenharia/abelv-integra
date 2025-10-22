@@ -53,7 +53,7 @@ export function EditarPrestadorModal({ open, onOpenChange, prestador }: EditarPr
         cnpj: prestador.cnpj || "",
         descricaoatividade: prestador.descricaoAtividade || "",
         numerocnae: prestador.numeroCnae || "",
-        grauderisco: prestador.grauDeRisco || "",
+        grauderisco: prestador.grauDeRisco?.toString() || "",
         endereco: prestador.endereco || "",
         telefone: prestador.telefone || "",
         email: prestador.email || "",
@@ -70,15 +70,11 @@ export function EditarPrestadorModal({ open, onOpenChange, prestador }: EditarPr
         valorprestacaoservico: prestador.valorPrestacaoServico ? formatarMoeda(prestador.valorPrestacaoServico.toString()) : "",
         tipocontrato: prestador.tempoContrato || "padrao",
         ajudacusto: prestador.ajudaCusto ? formatarMoeda(prestador.ajudaCusto.toString()) : "",
-        auxilioconveniomedico: prestador.auxilioConvenioMedico || false,
-        valorauxilioconveniomedico: prestador.valorAuxilioConvenioMedico ? formatarMoeda(prestador.valorAuxilioConvenioMedico.toString()) : "",
         ajudaaluguel: prestador.ajudaAluguel ? formatarMoeda(prestador.ajudaAluguel.toString()) : "",
         valerefeicao: prestador.valeRefeicao ? formatarMoeda(prestador.valeRefeicao.toString()) : "",
-        cafemanha: prestador.cafeManha || false,
+        valorauxilioconveniomedico: prestador.valorAuxilioConvenioMedico ? formatarMoeda(prestador.valorAuxilioConvenioMedico.toString()) : "",
         valorcafemanha: prestador.valorCafeManha ? formatarMoeda(prestador.valorCafeManha.toString()) : "",
-        cafetarde: prestador.cafeTarde || false,
         valorcafetarde: prestador.valorCafeTarde ? formatarMoeda(prestador.valorCafeTarde.toString()) : "",
-        almoco: prestador.almoco || false,
         valoralmoco: prestador.valorAlmoco ? formatarMoeda(prestador.valorAlmoco.toString()) : "",
         veiculo: prestador.veiculo || false,
         celular: prestador.celular || false,
@@ -171,16 +167,16 @@ export function EditarPrestadorModal({ open, onOpenChange, prestador }: EditarPr
         dataInicioContratoDeterminado: dataInicioContratoDeterminado ? dataInicioContratoDeterminado.toISOString() : null,
         dataFimContratoDeterminado: dataFimContratoDeterminado ? dataFimContratoDeterminado.toISOString() : null,
         ajudaCusto: formData.ajudacusto ? parseFloat(extrairValorNumerico(formData.ajudacusto)) : 0,
-        auxilioConvenioMedico: formData.auxilioconveniomedico,
-        valorAuxilioConvenioMedico: formData.valorauxilioconveniomedico ? parseFloat(extrairValorNumerico(formData.valorauxilioconveniomedico)) : 0,
         ajudaAluguel: formData.ajudaaluguel ? parseFloat(extrairValorNumerico(formData.ajudaaluguel)) : 0,
         valeRefeicao: formData.valerefeicao ? parseFloat(extrairValorNumerico(formData.valerefeicao)) : 0,
-        cafeManha: formData.cafemanha,
+        valorAuxilioConvenioMedico: formData.valorauxilioconveniomedico ? parseFloat(extrairValorNumerico(formData.valorauxilioconveniomedico)) : 0,
         valorCafeManha: formData.valorcafemanha ? parseFloat(extrairValorNumerico(formData.valorcafemanha)) : 0,
-        cafeTarde: formData.cafetarde,
         valorCafeTarde: formData.valorcafetarde ? parseFloat(extrairValorNumerico(formData.valorcafetarde)) : 0,
-        almoco: formData.almoco,
         valorAlmoco: formData.valoralmoco ? parseFloat(extrairValorNumerico(formData.valoralmoco)) : 0,
+        auxilioConvenioMedico: formData.valorauxilioconveniomedico && parseFloat(extrairValorNumerico(formData.valorauxilioconveniomedico)) > 0,
+        cafeManha: formData.valorcafemanha && parseFloat(extrairValorNumerico(formData.valorcafemanha)) > 0,
+        cafeTarde: formData.valorcafetarde && parseFloat(extrairValorNumerico(formData.valorcafetarde)) > 0,
+        almoco: formData.valoralmoco && parseFloat(extrairValorNumerico(formData.valoralmoco)) > 0,
         veiculo: formData.veiculo,
         celular: formData.celular,
         alojamento: formData.alojamento,
@@ -580,11 +576,12 @@ export function EditarPrestadorModal({ open, onOpenChange, prestador }: EditarPr
                 </div>
               )}
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <Label htmlFor="ajudacusto">Ajuda de Custo</Label>
                   <Input
                     id="ajudacusto"
+                    placeholder="R$ 0,00"
                     value={formData.ajudacusto || ""}
                     onChange={(e) => {
                       const formatted = formatarMoeda(e.target.value);
@@ -594,9 +591,10 @@ export function EditarPrestadorModal({ open, onOpenChange, prestador }: EditarPr
                 </div>
 
                 <div>
-                  <Label htmlFor="ajudaaluguel">Ajuda de Aluguel</Label>
+                  <Label htmlFor="ajudaaluguel">Ajuda Aluguel</Label>
                   <Input
                     id="ajudaaluguel"
+                    placeholder="R$ 0,00"
                     value={formData.ajudaaluguel || ""}
                     onChange={(e) => {
                       const formatted = formatarMoeda(e.target.value);
@@ -604,34 +602,12 @@ export function EditarPrestadorModal({ open, onOpenChange, prestador }: EditarPr
                     }}
                   />
                 </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="auxilioconveniomedico"
-                      checked={formData.auxilioconveniomedico || false}
-                      onCheckedChange={(checked) => handleChange("auxilioconveniomedico", checked)}
-                    />
-                    <Label htmlFor="auxilioconveniomedico">Auxílio Convênio Médico</Label>
-                  </div>
-                  {formData.auxilioconveniomedico && (
-                    <Input
-                      placeholder="Valor"
-                      value={formData.valorauxilioconveniomedico || ""}
-                      onChange={(e) => {
-                        const formatted = formatarMoeda(e.target.value);
-                        handleChange("valorauxilioconveniomedico", formatted);
-                      }}
-                    />
-                  )}
-                </div>
 
                 <div>
                   <Label htmlFor="valerefeicao">Vale Refeição</Label>
                   <Input
                     id="valerefeicao"
+                    placeholder="R$ 0,00"
                     value={formData.valerefeicao || ""}
                     onChange={(e) => {
                       const formatted = formatarMoeda(e.target.value);
@@ -641,70 +617,58 @@ export function EditarPrestadorModal({ open, onOpenChange, prestador }: EditarPr
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="cafemanha"
-                      checked={formData.cafemanha || false}
-                      onCheckedChange={(checked) => handleChange("cafemanha", checked)}
-                    />
-                    <Label htmlFor="cafemanha">Café da Manhã</Label>
-                  </div>
-                  {formData.cafemanha && (
-                    <Input
-                      placeholder="Valor"
-                      value={formData.valorcafemanha || ""}
-                      onChange={(e) => {
-                        const formatted = formatarMoeda(e.target.value);
-                        handleChange("valorcafemanha", formatted);
-                      }}
-                    />
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="cafetarde"
-                      checked={formData.cafetarde || false}
-                      onCheckedChange={(checked) => handleChange("cafetarde", checked)}
-                    />
-                    <Label htmlFor="cafetarde">Café da Tarde</Label>
-                  </div>
-                  {formData.cafetarde && (
-                    <Input
-                      placeholder="Valor"
-                      value={formData.valorcafetarde || ""}
-                      onChange={(e) => {
-                        const formatted = formatarMoeda(e.target.value);
-                        handleChange("valorcafetarde", formatted);
-                      }}
-                    />
-                  )}
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="almoco"
-                    checked={formData.almoco || false}
-                    onCheckedChange={(checked) => handleChange("almoco", checked)}
-                  />
-                  <Label htmlFor="almoco">Almoço</Label>
-                </div>
-                {formData.almoco && (
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div>
+                  <Label htmlFor="valorauxilioconveniomedico">Auxílio Convênio Médico</Label>
                   <Input
-                    placeholder="Valor"
+                    id="valorauxilioconveniomedico"
+                    placeholder="R$ 0,00"
+                    value={formData.valorauxilioconveniomedico || ""}
+                    onChange={(e) => {
+                      const formatted = formatarMoeda(e.target.value);
+                      handleChange("valorauxilioconveniomedico", formatted);
+                    }}
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="valorcafemanha">Café da Manhã</Label>
+                  <Input
+                    id="valorcafemanha"
+                    placeholder="R$ 0,00"
+                    value={formData.valorcafemanha || ""}
+                    onChange={(e) => {
+                      const formatted = formatarMoeda(e.target.value);
+                      handleChange("valorcafemanha", formatted);
+                    }}
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="valorcafetarde">Café da Tarde</Label>
+                  <Input
+                    id="valorcafetarde"
+                    placeholder="R$ 0,00"
+                    value={formData.valorcafetarde || ""}
+                    onChange={(e) => {
+                      const formatted = formatarMoeda(e.target.value);
+                      handleChange("valorcafetarde", formatted);
+                    }}
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="valoralmoco">Almoço</Label>
+                  <Input
+                    id="valoralmoco"
+                    placeholder="R$ 0,00"
                     value={formData.valoralmoco || ""}
                     onChange={(e) => {
                       const formatted = formatarMoeda(e.target.value);
                       handleChange("valoralmoco", formatted);
                     }}
-                    className="w-full md:w-1/2"
                   />
-                )}
+                </div>
               </div>
 
               <div className="space-y-3">
