@@ -272,20 +272,20 @@ export function CondutorFormModal({ open, onOpenChange, itemParaEdicao, onSucces
             </div>
 
             <div className="col-span-2">
-              <Label>Termo de Responsabilidade</Label>
+              <Label>CNH</Label>
               
               {isEditMode && itemParaEdicao.termo_anexado_url && (
                 <div className="mb-2 p-3 bg-muted rounded-md">
                   <div className="flex items-center gap-2">
                     <FileCheck className="h-4 w-4 text-primary" />
-                    <span className="text-sm font-medium">Documento atual:</span>
+                    <span className="text-sm font-medium">CNH anexada:</span>
                     <a 
                       href={itemParaEdicao.termo_anexado_url} 
                       target="_blank" 
                       rel="noopener noreferrer"
                       className="text-sm text-primary hover:underline"
                     >
-                      {itemParaEdicao.termo_anexado_nome || "Visualizar documento"}
+                      {itemParaEdicao.termo_anexado_nome || "Visualizar CNH"}
                     </a>
                   </div>
                 </div>
