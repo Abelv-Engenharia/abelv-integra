@@ -9,12 +9,13 @@ import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Progress } from "@/components/ui/progress";
-import { AlertCircle, Plus, Trash2, Loader2, MapPin, Route, FileText, Save } from "lucide-react";
+import { AlertCircle, Plus, Trash2, Loader2, MapPin, Route, FileText, Save, CheckCircle2, XCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { toast } from "@/hooks/use-toast";
 import type { EnderecoRota, CalculoEstimativaCartao } from "@/types/gestao-pessoas/route";
 import { calcularEstimativaCompleta } from "@/services/gestao-pessoas/RouteCalculationService";
 import { generateRouteReportPDF } from "./GenerateRouteReportPDF";
+import { AddressInput } from "./AddressInput";
 
 interface CalculoRotasCardProps {
   veiculos: Array<{
@@ -67,6 +68,11 @@ export function CalculoRotasCard({ veiculos, cartoes, onCalculoSalvo }: CalculoR
   
   const [calculando, setCalculando] = useState(false);
   const [resultado, setResultado] = useState<CalculoEstimativaCartao | null>(null);
+  
+  const [validandoEnderecos, setValidandoEnderecos] = useState(false);
+  const [validacaoBase, setValidacaoBase] = useState<{ status: 'idle' | 'valid' | 'invalid'; message?: string }>({ status: 'idle' });
+  const [validacaoObra, setValidacaoObra] = useState<{ status: 'idle' | 'valid' | 'invalid'; message?: string }>({ status: 'idle' });
+  const [progressoCalculo, setProgressoCalculo] = useState(0);
 
   const veiculoAtual = veiculos.find(v => v.id === veiculoSelecionado);
   const cartaoVeiculo = cartoes.find(c => c.placa === veiculoAtual?.placa);
@@ -105,6 +111,75 @@ export function CalculoRotasCard({ veiculos, cartoes, onCalculoSalvo }: CalculoR
     const contemHifen = endereco.includes('-');
     
     return contemCidade && (contemNumero || contemVirgula) && contemHifen;
+  };
+
+  const validarEnderecosAntesCalculo = async () => {
+    setValidandoEnderecos(true);
+    setValidacaoBase({ status: 'idle' });
+    setValidacaoObra({ status: 'idle' });
+    
+    let todosValidos = true;
+
+    try {
+      // Validar endereço base
+      const responseBase = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(enderecoBase.endereco)}&limit=1`,
+        {
+          headers: {
+            'User-Agent': 'GestaoVeiculos/1.0'
+          }
+        }
+      );
+      
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      const dataBase = await responseBase.json();
+      if (dataBase.length === 0) {
+        setValidacaoBase({ status: 'invalid', message: 'Endereço não encontrado' });
+        todosValidos = false;
+      } else {
+        setValidacaoBase({ status: 'valid', message: 'Endereço válido' });
+      }
+
+      // Validar endereço obra
+      const responseObra = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(enderecoObra.endereco)}&limit=1`,
+        {
+          headers: {
+            'User-Agent': 'GestaoVeiculos/1.0'
+          }
+        }
+      );
+      
+      const dataObra = await responseObra.json();
+      if (dataObra.length === 0) {
+        setValidacaoObra({ status: 'invalid', message: 'Endereço não encontrado' });
+        todosValidos = false;
+      } else {
+        setValidacaoObra({ status: 'valid', message: 'Endereço válido' });
+      }
+
+      if (todosValidos) {
+        toast({
+          title: "Endereços Válidos",
+          description: "Todos os endereços foram validados com sucesso"
+        });
+      } else {
+        toast({
+          title: "Erro na Validação",
+          description: "Um ou mais endereços não foram encontrados",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Erro ao validar endereços",
+        variant: "destructive"
+      });
+    } finally {
+      setValidandoEnderecos(false);
+    }
   };
 
   const validarFormulario = (): string | null => {
@@ -146,8 +221,11 @@ export function CalculoRotasCard({ veiculos, cartoes, onCalculoSalvo }: CalculoR
 
     setCalculando(true);
     setResultado(null);
+    setProgressoCalculo(0);
 
     try {
+      setProgressoCalculo(10);
+      
       const config = {
         veiculoId: veiculoSelecionado,
         placa: veiculoAtual!.placa,
@@ -157,6 +235,8 @@ export function CalculoRotasCard({ veiculos, cartoes, onCalculoSalvo }: CalculoR
         cartaoId: cartaoVeiculo?.id,
         limiteAtualCartao: cartaoVeiculo?.limite_credito || cartaoVeiculo?.limiteCredito
       };
+
+      setProgressoCalculo(30);
 
       const enderecoBaseObj: EnderecoRota = {
         id: "base",
@@ -180,6 +260,8 @@ export function CalculoRotasCard({ veiculos, cartoes, onCalculoSalvo }: CalculoR
         frequenciaSemanal: t.frequenciaSemanal
       }));
 
+      setProgressoCalculo(50);
+
       const estimativa = await calcularEstimativaCompleta(
         config,
         enderecoBaseObj,
@@ -191,13 +273,17 @@ export function CalculoRotasCard({ veiculos, cartoes, onCalculoSalvo }: CalculoR
         frequenciaDiaria
       );
 
+      setProgressoCalculo(90);
+
       if (estimativa) {
         setResultado(estimativa);
+        setProgressoCalculo(100);
         toast({
           title: "Cálculo concluído",
           description: "Estimativa calculada com sucesso"
         });
       } else {
+        setProgressoCalculo(0);
         toast({
           title: "Erro no cálculo",
           description: "Não foi possível calcular a estimativa",
@@ -206,6 +292,7 @@ export function CalculoRotasCard({ veiculos, cartoes, onCalculoSalvo }: CalculoR
       }
     } catch (error: any) {
       console.error('Erro no cálculo:', error);
+      setProgressoCalculo(0);
       
       const mensagemErro = error?.message || "Erro ao calcular estimativa. Verifique os endereços e tente novamente.";
       
@@ -392,20 +479,29 @@ export function CalculoRotasCard({ veiculos, cartoes, onCalculoSalvo }: CalculoR
                 placeholder="Ex: Escritório Central"
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="endereco-base">Endereço Completo</Label>
-              <Textarea
-                id="endereco-base"
-                value={enderecoBase.endereco}
-                onChange={(e) => setEnderecoBase({ ...enderecoBase, endereco: e.target.value })}
-                placeholder="Ex: Avenida Paulista, 1578 - Bela Vista, São Paulo - SP, Brasil"
-                rows={3}
-                className={!enderecoBase.endereco && "border-destructive"}
-              />
-              <p className="text-xs text-muted-foreground">
-                Exemplo: Rua [Nome], [Nº] - [Bairro], [Cidade] - [UF], Brasil
-              </p>
-            </div>
+            
+            <AddressInput
+              label="Endereço Completo"
+              name="endereco-base"
+              endereco={enderecoBase.endereco}
+              onEnderecoChange={(endereco) => {
+                setEnderecoBase({ ...enderecoBase, endereco });
+                setValidacaoBase({ status: 'idle' });
+              }}
+              placeholder="Ex: Avenida Paulista, 1578 - Bela Vista, São Paulo - SP, Brasil"
+              required
+            />
+            
+            {validacaoBase.status !== 'idle' && (
+              <div className={`flex items-center gap-2 text-sm ${validacaoBase.status === 'valid' ? 'text-green-600' : 'text-destructive'}`}>
+                {validacaoBase.status === 'valid' ? (
+                  <CheckCircle2 className="h-4 w-4" />
+                ) : (
+                  <XCircle className="h-4 w-4" />
+                )}
+                <span>{validacaoBase.message}</span>
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -426,20 +522,29 @@ export function CalculoRotasCard({ veiculos, cartoes, onCalculoSalvo }: CalculoR
                 placeholder="Ex: Obra XYZ"
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="endereco-obra">Endereço Completo</Label>
-              <Textarea
-                id="endereco-obra"
-                value={enderecoObra.endereco}
-                onChange={(e) => setEnderecoObra({ ...enderecoObra, endereco: e.target.value })}
-                placeholder="Ex: Rua da Consolação, 3701 - Consolação, São Paulo - SP, Brasil"
-                rows={3}
-                className={!enderecoObra.endereco && "border-destructive"}
-              />
-              <p className="text-xs text-muted-foreground">
-                Exemplo: Rua [Nome], [Nº] - [Bairro], [Cidade] - [UF], Brasil
-              </p>
-            </div>
+            
+            <AddressInput
+              label="Endereço Completo"
+              name="endereco-obra"
+              endereco={enderecoObra.endereco}
+              onEnderecoChange={(endereco) => {
+                setEnderecoObra({ ...enderecoObra, endereco });
+                setValidacaoObra({ status: 'idle' });
+              }}
+              placeholder="Ex: Rua da Consolação, 3701 - Consolação, São Paulo - SP, Brasil"
+              required
+            />
+            
+            {validacaoObra.status !== 'idle' && (
+              <div className={`flex items-center gap-2 text-sm ${validacaoObra.status === 'valid' ? 'text-green-600' : 'text-destructive'}`}>
+                {validacaoObra.status === 'valid' ? (
+                  <CheckCircle2 className="h-4 w-4" />
+                ) : (
+                  <XCircle className="h-4 w-4" />
+                )}
+                <span>{validacaoObra.message}</span>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -570,31 +675,66 @@ export function CalculoRotasCard({ veiculos, cartoes, onCalculoSalvo }: CalculoR
       </Card>
 
       {/* Botões de Ação */}
-      <div className="flex gap-2 flex-wrap">
-        <Button 
-          onClick={calcularEstimativa} 
-          disabled={calculando}
-          className="flex-1 min-w-[200px]"
-        >
-          {calculando ? (
-            <>
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              Calculando...
-            </>
-          ) : (
-            <>
-              <Route className="h-4 w-4 mr-2" />
-              Calcular Estimativa
-            </>
-          )}
-        </Button>
-        <Button 
-          variant="outline" 
-          onClick={limparFormulario}
-          disabled={calculando}
-        >
-          Limpar
-        </Button>
+      <div className="space-y-4">
+        <div className="flex gap-2 flex-wrap">
+          <Button 
+            onClick={validarEnderecosAntesCalculo}
+            disabled={validandoEnderecos || calculando || !enderecoBase.endereco || !enderecoObra.endereco}
+            variant="outline"
+            className="flex-1 min-w-[200px]"
+          >
+            {validandoEnderecos ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Validando...
+              </>
+            ) : (
+              <>
+                <CheckCircle2 className="h-4 w-4 mr-2" />
+                Validar Endereços
+              </>
+            )}
+          </Button>
+          
+          <Button 
+            onClick={calcularEstimativa} 
+            disabled={calculando || validandoEnderecos}
+            className="flex-1 min-w-[200px]"
+          >
+            {calculando ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Calculando...
+              </>
+            ) : (
+              <>
+                <Route className="h-4 w-4 mr-2" />
+                Calcular Estimativa
+              </>
+            )}
+          </Button>
+          
+          <Button 
+            variant="outline" 
+            onClick={limparFormulario}
+            disabled={calculando || validandoEnderecos}
+          >
+            Limpar
+          </Button>
+        </div>
+        
+        {/* Progress Bar */}
+        {calculando && progressoCalculo > 0 && (
+          <div className="space-y-2">
+            <Progress value={progressoCalculo} className="h-2" />
+            <p className="text-xs text-center text-muted-foreground">
+              {progressoCalculo < 30 && "Preparando cálculo..."}
+              {progressoCalculo >= 30 && progressoCalculo < 50 && "Geocodificando endereços..."}
+              {progressoCalculo >= 50 && progressoCalculo < 90 && "Calculando rotas..."}
+              {progressoCalculo >= 90 && "Finalizando..."}
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Resultados */}

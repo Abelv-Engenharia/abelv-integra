@@ -1,4 +1,5 @@
 import type { EnderecoRota, ConfiguracaoVeiculoRota, ResultadoRotaCalculo, CalculoEstimativaCartao } from "@/types/gestao-pessoas/route";
+import { GeocodingCacheService } from "./GeocodingCacheService";
 
 interface RouteResponse {
   distanciaKm: number;
@@ -13,10 +14,26 @@ interface GeocodingResult {
   display_name: string;
 }
 
-// Geocoding usando Nominatim (OpenStreetMap)
+// Geocoding usando Nominatim (OpenStreetMap) com cache
 const geocodificarEndereco = async (endereco: string): Promise<{ lat: number; lng: number } | null> => {
   try {
     console.log('🔍 Geocodificando:', endereco);
+    
+    // Verificar se é coordenada direta (modo manual)
+    if (/^-?\d+\.?\d*,-?\d+\.?\d*$/.test(endereco.trim())) {
+      const [lat, lng] = endereco.split(',').map(c => parseFloat(c.trim()));
+      console.log('📍 Coordenadas diretas:', { lat, lng });
+      return { lat, lng };
+    }
+    
+    // Verificar cache primeiro
+    const cached = GeocodingCacheService.get(endereco);
+    if (cached) {
+      return { lat: cached.lat, lng: cached.lng };
+    }
+    
+    // Limpar cache antigo automaticamente
+    GeocodingCacheService.cleanOldEntries();
     
     const response = await fetch(
       `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(endereco)}&limit=1`,
@@ -43,6 +60,9 @@ const geocodificarEndereco = async (endereco: string): Promise<{ lat: number; ln
       lat: typeof data[0].lat === 'string' ? parseFloat(data[0].lat) : data[0].lat,
       lng: typeof data[0].lon === 'string' ? parseFloat(data[0].lon) : data[0].lon
     };
+    
+    // Salvar no cache
+    GeocodingCacheService.set(endereco, coords.lat, coords.lng, data[0].display_name);
     
     console.log('✅ Coordenadas obtidas:', coords, '|', data[0].display_name);
     

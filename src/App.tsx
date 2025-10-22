@@ -296,6 +296,7 @@ import ChecklistVeiculosPublico from "./pages/gestao-pessoas/ChecklistVeiculosPu
 import ConsultasVeiculos from "./pages/gestao-pessoas/ConsultasVeiculos";
 import RelatoriosVeiculos from "./pages/gestao-pessoas/RelatoriosVeiculos";
 import CalculoRotas from "./pages/gestao-pessoas/CalculoRotas";
+import TestEnderecos from "./pages/gestao-pessoas/TestEnderecos";
 import ControleAbastecimento from "./pages/gestao-pessoas/ControleAbastecimento";
 
 // Gestão de Pessoas - Recrutamento & Seleção
@@ -706,6 +707,7 @@ function App() {
                 <Route path="gestao-pessoas/consultas-veiculos" element={<ConsultasVeiculos />} />
                 <Route path="gestao-pessoas/relatorios-veiculos" element={<RelatoriosVeiculos />} />
                 <Route path="gestao-pessoas/calculo-rotas" element={<CalculoRotas />} />
+                <Route path="gestao-pessoas/test-enderecos" element={<TestEnderecos />} />
                 <Route path="gestao-pessoas/controle-abastecimento" element={<ControleAbastecimento />} />
               </Route>
 
