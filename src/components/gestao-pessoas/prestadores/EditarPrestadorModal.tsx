@@ -29,7 +29,13 @@ export function EditarPrestadorModal({ open, onOpenChange, prestador }: EditarPr
 
   useEffect(() => {
     if (prestador) {
-      setFormData(prestador);
+      // Map PrestadorPJ properties to form data with lowercase field names
+      setFormData({
+        ...prestador,
+        ajudacusto: prestador.ajudaCusto,
+        ajudaaluguel: prestador.ajudaAluguel,
+        tempocontrato: prestador.tempoContrato,
+      });
       
       if (prestador.dataNascimento) {
         setDataNascimento(new Date(prestador.dataNascimento));
@@ -59,6 +65,10 @@ export function EditarPrestadorModal({ open, onOpenChange, prestador }: EditarPr
     try {
       const updatedPrestador = {
         ...formData,
+        // Map back to camelCase for PrestadorPJ interface
+        ajudaCusto: formData.ajudacusto || 0,
+        ajudaAluguel: formData.ajudaaluguel || 0,
+        tempoContrato: formData.tempocontrato || 'padrao',
         dataNascimento: dataNascimento ? format(dataNascimento, "yyyy-MM-dd") : null,
         dataInicioContrato: dataInicioContrato ? format(dataInicioContrato, "yyyy-MM-dd") : null,
       };

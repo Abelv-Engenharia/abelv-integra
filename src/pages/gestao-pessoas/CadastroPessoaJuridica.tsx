@@ -324,8 +324,8 @@ export default function CadastroPessoaJuridica() {
         dataInicioContrato: data.datainiciocontrato ? format(data.datainiciocontrato, "yyyy-MM-dd") : "",
         servico: data.servico || "",
         chavePix: data.contabancaria || null,
-        ajudaAluguel: Boolean(valorAjudaAluguel > 0),
-        ajudaCusto: Boolean(valorAjudaCusto > 0),
+        ajudaAluguel: isNaN(valorAjudaAluguel) ? 0 : valorAjudaAluguel,
+        ajudaCusto: isNaN(valorAjudaCusto) ? 0 : valorAjudaCusto,
         almoco: Boolean(data.almoco),
         cafeManha: Boolean(data.cafemanha),
         cafeTarde: Boolean(data.cafetarde),
@@ -347,7 +347,7 @@ export default function CadastroPessoaJuridica() {
         telefoneRepresentante: data.telefonerepresentante || null,
         emailRepresentante: data.emailrepresentante || null,
         enderecoRepresentante: data.enderecorepresentante || null,
-        tipoContrato: data.tipocontrato || 'padrao',
+        tempoContrato: data.tipocontrato || 'padrao',
         dataInicioContratoDeterminado: data.datainiciocontratodeterminado ? format(data.datainiciocontratodeterminado, "yyyy-MM-dd") : null,
         dataFimContratoDeterminado: data.datafimcontratodeterminado ? format(data.datafimcontratodeterminado, "yyyy-MM-dd") : null,
         auxilioConvenioMedico: Boolean(data.auxilioconveniomedico),
@@ -361,8 +361,6 @@ export default function CadastroPessoaJuridica() {
         folgaCampo: data.folgacampo || null,
         periodoFerias: data.periodoferias || null,
         quantidadeDiasFerias: data.quantidadediasferias ? parseInt(data.quantidadediasferias) : null,
-        valorAjudaAluguel: isNaN(valorAjudaAluguel) ? 0 : valorAjudaAluguel,
-        valorAjudaCusto: isNaN(valorAjudaCusto) ? 0 : valorAjudaCusto,
       };
 
       await createPrestadorMutation.mutateAsync(prestadorData);

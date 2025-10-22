@@ -5616,12 +5616,9 @@ export type Database = {
           telefone: string | null
           telefonerepresentante: string | null
           tempocontrato: string | null
-          tipocontrato: string | null
           updated_at: string | null
           updated_by: string | null
           valerefeicao: number | null
-          valorajudaaluguel: number | null
-          valorajudacusto: number | null
           valoralmoco: number | null
           valorauxilioconveniomedico: number | null
           valorcafemanha: number | null
@@ -5676,12 +5673,9 @@ export type Database = {
           telefone?: string | null
           telefonerepresentante?: string | null
           tempocontrato?: string | null
-          tipocontrato?: string | null
           updated_at?: string | null
           updated_by?: string | null
           valerefeicao?: number | null
-          valorajudaaluguel?: number | null
-          valorajudacusto?: number | null
           valoralmoco?: number | null
           valorauxilioconveniomedico?: number | null
           valorcafemanha?: number | null
@@ -5736,12 +5730,9 @@ export type Database = {
           telefone?: string | null
           telefonerepresentante?: string | null
           tempocontrato?: string | null
-          tipocontrato?: string | null
           updated_at?: string | null
           updated_by?: string | null
           valerefeicao?: number | null
-          valorajudaaluguel?: number | null
-          valorajudacusto?: number | null
           valoralmoco?: number | null
           valorauxilioconveniomedico?: number | null
           valorcafemanha?: number | null

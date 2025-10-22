@@ -161,7 +161,7 @@ export function VisualizarPrestadorModal({ open, onOpenChange, prestador }: Visu
                 </div>
                 <div>
                   <Label className="text-muted-foreground">Tipo de Contrato</Label>
-                  <p className="font-medium">{prestador.tipoContrato === 'determinado' ? 'Determinado' : 'Padrão'}</p>
+                  <p className="font-medium">{prestador.tempoContrato === 'determinado' ? 'Determinado' : 'Padrão'}</p>
                 </div>
                 <div>
                   <Label className="text-muted-foreground">CCA</Label>
@@ -173,16 +173,16 @@ export function VisualizarPrestadorModal({ open, onOpenChange, prestador }: Visu
                 <div>
                   <Label className="text-muted-foreground">Ajuda de Custo</Label>
                   <p className="font-medium">
-                    {prestador.valorAjudaCusto 
-                      ? prestador.valorAjudaCusto.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) 
+                    {prestador.ajudaCusto 
+                      ? prestador.ajudaCusto.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) 
                       : "R$ 0,00"}
                   </p>
                 </div>
                 <div>
                   <Label className="text-muted-foreground">Ajuda de Aluguel</Label>
                   <p className="font-medium">
-                    {prestador.valorAjudaAluguel 
-                      ? prestador.valorAjudaAluguel.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) 
+                    {prestador.ajudaAluguel 
+                      ? prestador.ajudaAluguel.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) 
                       : "R$ 0,00"}
                   </p>
                 </div>

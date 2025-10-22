@@ -18,8 +18,8 @@ export interface PrestadorPJ {
   dataInicioContrato: string;
   servico: string;
   chavePix: string | null;
-  ajudaAluguel: boolean;
-  ajudaCusto: boolean;
+  ajudaAluguel: number;
+  ajudaCusto: number;
   almoco: boolean;
   cafeManha: boolean;
   cafeTarde: boolean;
@@ -43,7 +43,7 @@ export interface PrestadorPJ {
   telefoneRepresentante: string | null;
   emailRepresentante: string | null;
   enderecoRepresentante: string | null;
-  tipoContrato: string;
+  tempoContrato: string;
   dataInicioContratoDeterminado: string | null;
   dataFimContratoDeterminado: string | null;
   auxilioConvenioMedico: boolean;
@@ -57,8 +57,6 @@ export interface PrestadorPJ {
   folgaCampo: string | null;
   periodoFerias: string | null;
   quantidadeDiasFerias: number | null;
-  valorAjudaAluguel: number;
-  valorAjudaCusto: number;
 }
 
 interface FiltrosPrestadoresPJ {
@@ -225,8 +223,8 @@ function mapPrestadorFromDB(data: any): PrestadorPJ {
     dataInicioContrato: data.datainiciocontrato,
     servico: data.servico,
     chavePix: data.chavepix,
-    ajudaAluguel: data.ajudaaluguel,
-    ajudaCusto: data.ajudacusto,
+    ajudaAluguel: data.ajudaaluguel || 0,
+    ajudaCusto: data.ajudacusto || 0,
     almoco: data.almoco,
     cafeManha: data.cafemanha,
     cafeTarde: data.cafetarde,
@@ -250,7 +248,7 @@ function mapPrestadorFromDB(data: any): PrestadorPJ {
     telefoneRepresentante: data.telefonerepresentante,
     emailRepresentante: data.emailrepresentante,
     enderecoRepresentante: data.enderecorepresentante,
-    tipoContrato: data.tipocontrato || 'padrao',
+    tempoContrato: data.tempocontrato || 'padrao',
     dataInicioContratoDeterminado: data.datainiciocontratodeterminado,
     dataFimContratoDeterminado: data.datafimcontratodeterminado,
     auxilioConvenioMedico: data.auxilioconveniomedico || false,
@@ -264,8 +262,6 @@ function mapPrestadorFromDB(data: any): PrestadorPJ {
     folgaCampo: data.folgacampo,
     periodoFerias: data.periodoferias,
     quantidadeDiasFerias: data.quantidadediasferias,
-    valorAjudaAluguel: data.valorajudaaluguel || 0,
-    valorAjudaCusto: data.valorajudacusto || 0,
   };
 }
 
@@ -285,8 +281,8 @@ function mapPrestadorToDB(data: any): any {
     datainiciocontrato: data.dataInicioContrato || null,
     servico: data.servico || null,
     chavepix: data.chavePix || null,
-    ajudaaluguel: Boolean(data.ajudaAluguel),
-    ajudacusto: Boolean(data.ajudaCusto),
+    ajudaaluguel: typeof data.ajudaAluguel === 'number' ? data.ajudaAluguel : 0,
+    ajudacusto: typeof data.ajudaCusto === 'number' ? data.ajudaCusto : 0,
     almoco: Boolean(data.almoco),
     cafemanha: Boolean(data.cafeManha),
     cafetarde: Boolean(data.cafeTarde),
@@ -308,7 +304,7 @@ function mapPrestadorToDB(data: any): any {
     telefonerepresentante: data.telefoneRepresentante || null,
     emailrepresentante: data.emailRepresentante || null,
     enderecorepresentante: data.enderecoRepresentante || null,
-    tipocontrato: data.tipoContrato || 'padrao',
+    tempocontrato: data.tempoContrato || 'padrao',
     datainiciocontratodeterminado: data.dataInicioContratoDeterminado || null,
     datafimcontratodeterminado: data.dataFimContratoDeterminado || null,
     auxilioconveniomedico: Boolean(data.auxilioConvenioMedico),
@@ -322,8 +318,6 @@ function mapPrestadorToDB(data: any): any {
     folgacampo: data.folgaCampo || null,
     periodoferias: data.periodoFerias || null,
     quantidadediasferias: data.quantidadeDiasFerias ? parseInt(String(data.quantidadeDiasFerias)) : null,
-    valorajudaaluguel: typeof data.valorAjudaAluguel === 'number' ? data.valorAjudaAluguel : 0,
-    valorajudacusto: typeof data.valorAjudaCusto === 'number' ? data.valorAjudaCusto : 0,
   };
 
   // Remove campos undefined para evitar sobrescrever valores no update
