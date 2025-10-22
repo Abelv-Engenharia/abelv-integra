@@ -280,7 +280,7 @@ export default function CadastroVeiculo() {
                         </FormControl>
                         <SelectContent>
                           {loadingCondutores ? (
-                            <SelectItem value="" disabled>Carregando condutores...</SelectItem>
+                            <SelectItem value="loading" disabled>Carregando condutores...</SelectItem>
                           ) : condutores && condutores.length > 0 ? (
                             condutores.map((condutor) => (
                               <SelectItem key={condutor.id} value={condutor.id.toString()}>
@@ -288,7 +288,7 @@ export default function CadastroVeiculo() {
                               </SelectItem>
                             ))
                           ) : (
-                            <SelectItem value="" disabled>Nenhum condutor cadastrado</SelectItem>
+                            <SelectItem value="empty" disabled>Nenhum condutor cadastrado</SelectItem>
                           )}
                         </SelectContent>
                       </Select>
