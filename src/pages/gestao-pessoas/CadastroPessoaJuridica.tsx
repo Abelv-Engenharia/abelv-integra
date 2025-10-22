@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { format } from "date-fns";
-import { CalendarIcon, Building2, Download, FileText } from "lucide-react";
+import { CalendarIcon, Building2, Download, FileText, Search } from "lucide-react";
 import * as XLSX from 'xlsx';
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -19,6 +19,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { useReceitaWS } from "@/hooks/gestao-pessoas/useReceitaWS";
 const cadastroSchema = z.object({
   razaosocial: z.string().min(1, "Razão social é obrigatória"),
   cnpj: z.string().min(14, "CNPJ é obrigatório"),
@@ -105,6 +106,7 @@ const mockDemonstrativo = [{
 export default function CadastroPessoaJuridica() {
   const [cadastrosCnpj, setCadastrosCnpj] = useState<Set<string>>(new Set());
   const [cadastrosCpf, setCadastrosCpf] = useState<Set<string>>(new Set());
+  const { buscarCNPJ, loading: loadingCNPJ } = useReceitaWS();
   
   // Buscar usuários ativos do sistema
   const { data: usuarios, isLoading: isLoadingUsuarios } = useQuery({
@@ -197,6 +199,36 @@ export default function CadastroPessoaJuridica() {
       return numbers.replace(/(\d{2})(\d{4})(\d{4})/, "($1) $2-$3");
     }
     return numbers.replace(/(\d{2})(\d{5})(\d{4})/, "($1) $2-$3");
+  };
+
+  const handleBuscarCNPJ = async () => {
+    const cnpj = form.getValues("cnpj");
+    const cnpjNumbers = cnpj.replace(/\D/g, "");
+
+    if (cnpjNumbers.length !== 14) {
+      toast({
+        title: "Erro",
+        description: "Digite um CNPJ válido com 14 dígitos",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const dados = await buscarCNPJ(cnpjNumbers);
+    
+    if (dados) {
+      form.setValue("razaosocial", dados.razaosocial);
+      form.setValue("descricaoatividade", dados.descricaoatividade);
+      form.setValue("numerocnae", dados.numerocnae);
+      form.setValue("endereco", dados.endereco);
+      form.setValue("telefone", dados.telefone);
+      form.setValue("email", dados.email);
+      
+      toast({
+        title: "Sucesso",
+        description: "Dados da empresa encontrados e preenchidos!"
+      });
+    }
   };
   const onSubmit = (data: CadastroFormData) => {
     const cnpjNumbers = data.cnpj.replace(/\D/g, "");
@@ -299,14 +331,26 @@ export default function CadastroPessoaJuridica() {
                       <FormLabel className={cn(errors.cnpj && "text-destructive")}>
                         CNPJ *
                       </FormLabel>
-                      <FormControl>
-                        <Input placeholder="00.000.000/0000-00" className={cn(errors.cnpj && "border-destructive")} {...field} onChange={e => {
-                    const formatted = formatCNPJ(e.target.value);
-                    if (formatted.length <= 18) {
-                      field.onChange(formatted);
-                    }
-                  }} maxLength={18} />
-                      </FormControl>
+                      <div className="flex gap-2">
+                        <FormControl>
+                          <Input placeholder="00.000.000/0000-00" className={cn(errors.cnpj && "border-destructive")} {...field} onChange={e => {
+                      const formatted = formatCNPJ(e.target.value);
+                      if (formatted.length <= 18) {
+                        field.onChange(formatted);
+                      }
+                    }} maxLength={18} />
+                        </FormControl>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="icon"
+                          onClick={handleBuscarCNPJ}
+                          disabled={loadingCNPJ}
+                          title="Buscar dados da Receita Federal"
+                        >
+                          <Search className="h-4 w-4" />
+                        </Button>
+                      </div>
                       <FormMessage />
                     </FormItem>} />
               </div>
