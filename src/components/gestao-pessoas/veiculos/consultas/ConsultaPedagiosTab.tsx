@@ -149,7 +149,9 @@ export function ConsultaPedagiosTab() {
                     minimumFractionDigits: 2
                   })}
                       </TableCell>
-                      <TableCell>{pedagio.cca_id || '-'}</TableCell>
+                      <TableCell>
+                        {pedagio.ccas ? `${pedagio.ccas.codigo} - ${pedagio.ccas.nome}` : '-'}
+                      </TableCell>
                       <TableCell className="max-w-[150px] truncate">{pedagio.finalidade}</TableCell>
                       <TableCell>
                         <div className="flex gap-1">

@@ -11,7 +11,7 @@ export const usePedagiosEstacionamentos = (filters?: {
     queryFn: async () => {
       let query = supabase
         .from('veiculos_pedagogios_estacionamentos')
-        .select('*')
+        .select('*, ccas(codigo, nome)')
         .order('data_utilizacao', { ascending: false });
 
       if (filters?.dataInicial) {
