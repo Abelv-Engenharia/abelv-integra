@@ -20,7 +20,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { useReceitaWS } from "@/hooks/gestao-pessoas/useReceitaWS";
-import { useCreatePrestadorPJ } from "@/hooks/gestao-pessoas/usePrestadoresPJ";
 const cadastroSchema = z.object({
   razaosocial: z.string().min(1, "Razão social é obrigatória"),
   cnpj: z.string().min(14, "CNPJ é obrigatório"),
@@ -115,8 +114,6 @@ export default function CadastroPessoaJuridica() {
     buscarCNPJ,
     loading: loadingCNPJ
   } = useReceitaWS();
-  
-  const createPrestadorMutation = useCreatePrestadorPJ();
 
   // Buscar usuários ativos do sistema
   const {
@@ -294,88 +291,32 @@ export default function CadastroPessoaJuridica() {
       });
     }
   };
-  const onSubmit = async (data: CadastroFormData) => {
-    try {
-      // Extrair valores numéricos dos campos monetários
-      const valorPrestacao = data.valorprestacaoservico ? parseFloat(extrairValorNumerico(data.valorprestacaoservico)) : 0;
-      const valorAjudaCusto = data.ajudacusto ? parseFloat(extrairValorNumerico(data.ajudacusto)) : 0;
-      const valorAjudaAluguel = data.ajudaaluguel ? parseFloat(extrairValorNumerico(data.ajudaaluguel)) : 0;
-      const valorAlmoco = data.valoralmoco ? parseFloat(extrairValorNumerico(data.valoralmoco)) : 0;
-      const valorCafeManha = data.valorcafemanha ? parseFloat(extrairValorNumerico(data.valorcafemanha)) : 0;
-      const valorCafeTarde = data.valorcafetarde ? parseFloat(extrairValorNumerico(data.valorcafetarde)) : 0;
-      const valorAuxilioConvenio = data.valorauxilioconveniomedico ? parseFloat(extrairValorNumerico(data.valorauxilioconveniomedico)) : 0;
-      const valorValeRefeicao = data.valerefeicao ? parseFloat(extrairValorNumerico(data.valerefeicao)) : 0;
-
-      // Buscar dados do CCA selecionado
-      const ccaSelecionado = ccas?.find(c => c.id.toString() === data.ccaobra);
-
-      const prestadorData = {
-        nomeCompleto: data.nomecompleto,
-        razaoSocial: data.razaosocial,
-        cpf: data.cpf,
-        cnpj: data.cnpj,
-        email: data.email || "",
-        telefone: data.telefone || "",
-        endereco: data.endereco || "",
-        ccaId: ccaSelecionado ? ccaSelecionado.id : null,
-        ccaCodigo: ccaSelecionado ? ccaSelecionado.codigo : null,
-        ccaNome: ccaSelecionado ? ccaSelecionado.nome : null,
-        valorPrestacaoServico: isNaN(valorPrestacao) ? 0 : valorPrestacao,
-        dataInicioContrato: data.datainiciocontrato ? format(data.datainiciocontrato, "yyyy-MM-dd") : "",
-        servico: data.servico || "",
-        chavePix: data.contabancaria || null,
-        ajudaAluguel: isNaN(valorAjudaAluguel) ? 0 : valorAjudaAluguel,
-        ajudaCusto: isNaN(valorAjudaCusto) ? 0 : valorAjudaCusto,
-        almoco: Boolean(data.almoco),
-        cafeManha: Boolean(data.cafemanha),
-        cafeTarde: Boolean(data.cafetarde),
-        valorAlmoco: isNaN(valorAlmoco) ? 0 : valorAlmoco,
-        valorCafeManha: isNaN(valorCafeManha) ? 0 : valorCafeManha,
-        valorCafeTarde: isNaN(valorCafeTarde) ? 0 : valorCafeTarde,
-        contratoUrl: null,
-        contratoNome: null,
-        ativo: true,
-        // Novos campos
-        descricaoAtividade: data.descricaoatividade || null,
-        numeroCnae: data.numerocnae || null,
-        grauDeRisco: data.grauderisco || null,
-        contaBancaria: data.contabancaria || null,
-        numeroCredorSienge: data.numerocredorsienge || null,
-        dataNascimento: data.datanascimento ? format(data.datanascimento, "yyyy-MM-dd") : null,
-        rg: data.rg || null,
-        registroFuncional: data.registrofuncional || null,
-        telefoneRepresentante: data.telefonerepresentante || null,
-        emailRepresentante: data.emailrepresentante || null,
-        enderecoRepresentante: data.enderecorepresentante || null,
-        tempoContrato: data.tipocontrato || 'padrao',
-        dataInicioContratoDeterminado: data.datainiciocontratodeterminado ? format(data.datainiciocontratodeterminado, "yyyy-MM-dd") : null,
-        dataFimContratoDeterminado: data.datafimcontratodeterminado ? format(data.datafimcontratodeterminado, "yyyy-MM-dd") : null,
-        auxilioConvenioMedico: Boolean(data.auxilioconveniomedico),
-        valorAuxilioConvenioMedico: isNaN(valorAuxilioConvenio) ? 0 : valorAuxilioConvenio,
-        valeRefeicao: isNaN(valorValeRefeicao) ? 0 : valorValeRefeicao,
-        veiculo: Boolean(data.veiculo),
-        detalhesVeiculo: data.detalhesveiculo || null,
-        celular: Boolean(data.celular),
-        alojamento: Boolean(data.alojamento),
-        detalhesAlojamento: data.detalhesalojamento || null,
-        folgaCampo: data.folgacampo || null,
-        periodoFerias: data.periodoferias || null,
-        quantidadeDiasFerias: data.quantidadediasferias ? parseInt(data.quantidadediasferias) : null,
-      };
-
-      await createPrestadorMutation.mutateAsync(prestadorData);
-      
-      form.reset();
-      setInputDataNascimento("");
-      setInputDataInicioContrato("");
-    } catch (error) {
-      console.error("Erro ao cadastrar:", error);
+  const onSubmit = (data: CadastroFormData) => {
+    const cnpjNumbers = data.cnpj.replace(/\D/g, "");
+    const cpfNumbers = data.cpf.replace(/\D/g, "");
+    if (cadastrosCnpj.has(cnpjNumbers)) {
       toast({
         title: "Erro",
-        description: "Falha ao cadastrar prestador. Tente novamente.",
-        variant: "destructive",
+        description: "CNPJ já cadastrado no sistema",
+        variant: "destructive"
       });
+      return;
     }
+    if (cadastrosCpf.has(cpfNumbers)) {
+      toast({
+        title: "Erro",
+        description: "CPF já cadastrado no sistema",
+        variant: "destructive"
+      });
+      return;
+    }
+    setCadastrosCnpj(prev => new Set(prev).add(cnpjNumbers));
+    setCadastrosCpf(prev => new Set(prev).add(cpfNumbers));
+    toast({
+      title: "Sucesso",
+      description: "Pessoa jurídica cadastrada com sucesso!"
+    });
+    form.reset();
   };
   const onCancel = () => {
     form.reset();
@@ -996,6 +937,13 @@ export default function CadastroPessoaJuridica() {
                         <FormMessage />
                       </FormItem>} />}
 
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField control={form.control} name="folgacampo" render={({
+                field
+              }) => {}} />
+
+              </div>
+
               <FormField control={form.control} name="ccaobra" render={({
               field
             }) => <FormItem>
@@ -1030,9 +978,6 @@ export default function CadastroPessoaJuridica() {
       </Form>
 
       {/* Demonstrativo de Prestação de Serviço */}
-      <Card>
-        
-        
-      </Card>
+      
     </div>;
 }
