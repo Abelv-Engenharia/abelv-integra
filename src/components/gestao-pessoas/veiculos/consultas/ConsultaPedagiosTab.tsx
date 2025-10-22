@@ -75,7 +75,7 @@ export function ConsultaPedagiosTab() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="todos">Todos os Tipos</SelectItem>
-                <SelectItem value="pedágio">Pedágio</SelectItem>
+                <SelectItem value="pedagio">Pedágio</SelectItem>
                 <SelectItem value="estacionamento">Estacionamento</SelectItem>
               </SelectContent>
             </Select>
@@ -141,7 +141,7 @@ export function ConsultaPedagiosTab() {
                       <TableCell className="max-w-[200px] truncate">{pedagio.local}</TableCell>
                       <TableCell>
                         <Badge variant="outline">
-                          {pedagio.tipo_servico === "pedágio" ? "Pedágio" : "Estacionamento"}
+                          {pedagio.tipo_servico === "pedagio" ? "Pedágio" : "Estacionamento"}
                         </Badge>
                       </TableCell>
                       <TableCell>
