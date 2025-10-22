@@ -43,7 +43,9 @@ const cadastroSchema = z.object({
   servico: z.string().optional(),
   valorprestacaoservico: z.string().optional(),
   datainiciocontrato: z.date().optional(),
-  tempocontrato: z.string().optional(),
+  tipocontrato: z.enum(["padrao", "determinado"]).default("padrao"),
+  datainiciocontratodeterminado: z.date().optional(),
+  datafimcontratodeterminado: z.date().optional(),
   ajudacusto: z.string().optional(),
   auxilioconveniomedico: z.boolean().default(false),
   valorauxilioconveniomedico: z.string().optional(),
@@ -107,6 +109,7 @@ export default function CadastroPessoaJuridica() {
   const [cadastrosCnpj, setCadastrosCnpj] = useState<Set<string>>(new Set());
   const [cadastrosCpf, setCadastrosCpf] = useState<Set<string>>(new Set());
   const [inputDataNascimento, setInputDataNascimento] = useState<string>("");
+  const [inputDataInicioContrato, setInputDataInicioContrato] = useState<string>("");
   const { buscarCNPJ, loading: loadingCNPJ } = useReceitaWS();
   
   // Buscar usuários ativos do sistema
@@ -162,7 +165,7 @@ export default function CadastroPessoaJuridica() {
       // Condições Financeiras
       servico: "",
       valorprestacaoservico: "",
-      tempocontrato: "",
+      tipocontrato: "padrao",
       ajudacusto: "",
       auxilioconveniomedico: false,
       valorauxilioconveniomedico: "",
@@ -221,6 +224,20 @@ export default function CadastroPessoaJuridica() {
     const data = new Date(ano, mes - 1, dia);
     if (data.getDate() !== dia || data.getMonth() !== mes - 1) return undefined;
     return data;
+  };
+
+  const formatarMoeda = (valor: string): string => {
+    const numeros = valor.replace(/\D/g, '');
+    if (!numeros) return '';
+    const numero = Number(numeros) / 100;
+    return numero.toLocaleString('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    });
+  };
+
+  const extrairValorNumerico = (valorFormatado: string): string => {
+    return valorFormatado.replace(/[R$\s.]/g, '').replace(',', '.');
   };
 
   const handleBuscarCNPJ = async () => {
@@ -706,13 +723,20 @@ export default function CadastroPessoaJuridica() {
                     <FormMessage />
                   </FormItem>} />
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField control={form.control} name="valorprestacaoservico" render={({
                 field
               }) => <FormItem>
                       <FormLabel>Valor da Prestação de Serviço</FormLabel>
                       <FormControl>
-                        <Input type="number" placeholder="R$ 0,00" {...field} />
+                        <Input 
+                          placeholder="R$ 0,00" 
+                          value={field.value} 
+                          onChange={(e) => {
+                            const formatted = formatarMoeda(e.target.value);
+                            field.onChange(formatted);
+                          }}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>} />
@@ -721,32 +745,119 @@ export default function CadastroPessoaJuridica() {
                 field
               }) => <FormItem>
                       <FormLabel>Data de Início do Contrato</FormLabel>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <FormControl>
-                            <Button variant="outline" className={cn("w-full pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>
-                              {field.value ? format(field.value, "dd/MM/yyyy") : <span>Selecione a data</span>}
-                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                      <div className="relative">
+                        <FormControl>
+                          <Input
+                            placeholder="DD/MM/AAAA"
+                            value={inputDataInicioContrato || (field.value ? format(field.value, "dd/MM/yyyy") : "")}
+                            onChange={(e) => {
+                              const formatted = formatarData(e.target.value);
+                              setInputDataInicioContrato(formatted);
+                              
+                              const parsedDate = parseDataString(formatted);
+                              if (parsedDate) {
+                                field.onChange(parsedDate);
+                              }
+                            }}
+                            onBlur={() => {
+                              if (!parseDataString(inputDataInicioContrato)) {
+                                setInputDataInicioContrato("");
+                              }
+                            }}
+                            maxLength={10}
+                            className="pr-10"
+                          />
+                        </FormControl>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
+                              type="button"
+                            >
+                              <CalendarIcon className="h-4 w-4 opacity-50" />
                             </Button>
-                          </FormControl>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                          <Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus className={cn("p-3 pointer-events-auto")} />
-                        </PopoverContent>
-                      </Popover>
-                      <FormMessage />
-                    </FormItem>} />
-
-                <FormField control={form.control} name="tempocontrato" render={({
-                field
-              }) => <FormItem>
-                      <FormLabel>Tempo de Contrato em meses/anos</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Ex: 12 meses" {...field} />
-                      </FormControl>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar 
+                              mode="single" 
+                              selected={field.value} 
+                              onSelect={(date) => {
+                                field.onChange(date);
+                                setInputDataInicioContrato(date ? format(date, "dd/MM/yyyy") : "");
+                              }} 
+                              initialFocus 
+                              className={cn("p-3 pointer-events-auto")} 
+                            />
+                          </PopoverContent>
+                        </Popover>
+                      </div>
                       <FormMessage />
                     </FormItem>} />
               </div>
+
+              <FormField control={form.control} name="tipocontrato" render={({
+                field
+              }) => <FormItem>
+                      <FormLabel>Tipo de Contrato</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione o tipo" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="padrao">Padrão</SelectItem>
+                          <SelectItem value="determinado">Determinado</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>} />
+
+              {form.watch("tipocontrato") === "determinado" && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField control={form.control} name="datainiciocontratodeterminado" render={({
+                    field
+                  }) => <FormItem>
+                        <FormLabel>Data de Início</FormLabel>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <FormControl>
+                              <Button variant="outline" className={cn("w-full pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>
+                                {field.value ? format(field.value, "dd/MM/yyyy") : <span>Selecione a data</span>}
+                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                              </Button>
+                            </FormControl>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus className={cn("p-3 pointer-events-auto")} />
+                          </PopoverContent>
+                        </Popover>
+                        <FormMessage />
+                      </FormItem>} />
+
+                  <FormField control={form.control} name="datafimcontratodeterminado" render={({
+                    field
+                  }) => <FormItem>
+                        <FormLabel>Data de Término</FormLabel>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <FormControl>
+                              <Button variant="outline" className={cn("w-full pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>
+                                {field.value ? format(field.value, "dd/MM/yyyy") : <span>Selecione a data</span>}
+                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                              </Button>
+                            </FormControl>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus className={cn("p-3 pointer-events-auto")} />
+                          </PopoverContent>
+                        </Popover>
+                        <FormMessage />
+                      </FormItem>} />
+                </div>
+              )}
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <FormField control={form.control} name="ajudacusto" render={({
@@ -754,7 +865,14 @@ export default function CadastroPessoaJuridica() {
               }) => <FormItem>
                       <FormLabel>Ajuda de Custo</FormLabel>
                       <FormControl>
-                        <Input type="number" placeholder="R$ 0,00" {...field} />
+                        <Input 
+                          placeholder="R$ 0,00" 
+                          value={field.value}
+                          onChange={(e) => {
+                            const formatted = formatarMoeda(e.target.value);
+                            field.onChange(formatted);
+                          }}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>} />
@@ -764,7 +882,14 @@ export default function CadastroPessoaJuridica() {
               }) => <FormItem>
                       <FormLabel>Ajuda Aluguel</FormLabel>
                       <FormControl>
-                        <Input type="number" placeholder="R$ 0,00" {...field} />
+                        <Input 
+                          placeholder="R$ 0,00" 
+                          value={field.value}
+                          onChange={(e) => {
+                            const formatted = formatarMoeda(e.target.value);
+                            field.onChange(formatted);
+                          }}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>} />
@@ -774,7 +899,14 @@ export default function CadastroPessoaJuridica() {
               }) => <FormItem>
                       <FormLabel>Vale Refeição</FormLabel>
                       <FormControl>
-                        <Input placeholder="R$ 0,00 ou quantidade" {...field} />
+                        <Input 
+                          placeholder="R$ 0,00" 
+                          value={field.value}
+                          onChange={(e) => {
+                            const formatted = formatarMoeda(e.target.value);
+                            field.onChange(formatted);
+                          }}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>} />
@@ -786,7 +918,14 @@ export default function CadastroPessoaJuridica() {
               }) => <FormItem>
                       <FormLabel>Auxílio Convênio Médico</FormLabel>
                       <FormControl>
-                        <Input type="number" placeholder="R$ 0,00" {...field} />
+                        <Input 
+                          placeholder="R$ 0,00" 
+                          value={field.value}
+                          onChange={(e) => {
+                            const formatted = formatarMoeda(e.target.value);
+                            field.onChange(formatted);
+                          }}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>} />
@@ -796,7 +935,14 @@ export default function CadastroPessoaJuridica() {
               }) => <FormItem>
                       <FormLabel>Café da Manhã</FormLabel>
                       <FormControl>
-                        <Input type="number" placeholder="R$ 0,00" {...field} />
+                        <Input 
+                          placeholder="R$ 0,00" 
+                          value={field.value}
+                          onChange={(e) => {
+                            const formatted = formatarMoeda(e.target.value);
+                            field.onChange(formatted);
+                          }}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>} />
@@ -806,7 +952,14 @@ export default function CadastroPessoaJuridica() {
               }) => <FormItem>
                       <FormLabel>Café da Tarde</FormLabel>
                       <FormControl>
-                        <Input type="number" placeholder="R$ 0,00" {...field} />
+                        <Input 
+                          placeholder="R$ 0,00" 
+                          value={field.value}
+                          onChange={(e) => {
+                            const formatted = formatarMoeda(e.target.value);
+                            field.onChange(formatted);
+                          }}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>} />
@@ -816,14 +969,20 @@ export default function CadastroPessoaJuridica() {
               }) => <FormItem>
                       <FormLabel>Almoço</FormLabel>
                       <FormControl>
-                        <Input type="number" placeholder="R$ 0,00" {...field} />
+                        <Input 
+                          placeholder="R$ 0,00" 
+                          value={field.value}
+                          onChange={(e) => {
+                            const formatted = formatarMoeda(e.target.value);
+                            field.onChange(formatted);
+                          }}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>} />
               </div>
 
-              {/* Veículo */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <FormField control={form.control} name="veiculo" render={({
                 field
               }) => <FormItem className="flex flex-row items-center space-x-3 space-y-0">
@@ -834,19 +993,6 @@ export default function CadastroPessoaJuridica() {
                       <FormMessage />
                     </FormItem>} />
 
-                {form.watch("veiculo") && <FormField control={form.control} name="detalhesveiculo" render={({
-                field
-              }) => <FormItem>
-                        <FormLabel>Detalhes do Veículo</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Modelo, ano, observações" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>} />}
-              </div>
-
-              {/* Celular */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField control={form.control} name="celular" render={({
                 field
               }) => <FormItem className="flex flex-row items-center space-x-3 space-y-0">
@@ -856,10 +1002,7 @@ export default function CadastroPessoaJuridica() {
                       <FormLabel>Celular</FormLabel>
                       <FormMessage />
                     </FormItem>} />
-              </div>
 
-              {/* Alojamento */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField control={form.control} name="alojamento" render={({
                 field
               }) => <FormItem className="flex flex-row items-center space-x-3 space-y-0">
@@ -870,7 +1013,31 @@ export default function CadastroPessoaJuridica() {
                       <FormMessage />
                     </FormItem>} />
 
-                {form.watch("alojamento") && <FormField control={form.control} name="detalhesalojamento" render={({
+                <FormField control={form.control} name="folgacampo" render={({
+                field
+              }) => <FormItem>
+                      <FormLabel>Folga de Campo</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Ex: 15x15, 20x10" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>} />
+              </div>
+
+              {form.watch("veiculo") && (
+                <FormField control={form.control} name="detalhesveiculo" render={({
+                  field
+                }) => <FormItem>
+                      <FormLabel>Detalhes do Veículo</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Modelo, ano, observações" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>} />
+              )}
+
+              {form.watch("alojamento") && (
+                <FormField control={form.control} name="detalhesalojamento" render={({
                 field
               }) => <FormItem>
                         <FormLabel>Endereço/Detalhes do Alojamento</FormLabel>
@@ -878,8 +1045,8 @@ export default function CadastroPessoaJuridica() {
                           <Textarea placeholder="Endereço completo e detalhes" className="min-h-[60px]" {...field} />
                         </FormControl>
                         <FormMessage />
-                      </FormItem>} />}
-              </div>
+                      </FormItem>} />
+              )}
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField control={form.control} name="folgacampo" render={({
