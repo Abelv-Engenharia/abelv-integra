@@ -16,7 +16,7 @@ export function useExcluirEntidade({ tabela, queryKey, onSuccess }: UseExcluirEn
     mutationFn: async (id: string) => {
       const { error } = await supabase
         .from(tabela)
-        .update({ ativo: false })
+        .delete()
         .eq('id', id);
 
       if (error) throw error;

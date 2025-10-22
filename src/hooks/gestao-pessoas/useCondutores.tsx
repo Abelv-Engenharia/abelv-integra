@@ -8,7 +8,6 @@ export const useCondutores = () => {
       const { data, error } = await supabase
         .from('veiculos_condutores')
         .select('*')
-        .eq('ativo', true)
         .order('nome_condutor', { ascending: true });
 
       if (error) throw error;
