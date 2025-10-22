@@ -220,6 +220,7 @@ export default function CadastroPessoaJuridica() {
       form.setValue("razaosocial", dados.razaosocial);
       form.setValue("descricaoatividade", dados.descricaoatividade);
       form.setValue("numerocnae", dados.numerocnae);
+      form.setValue("grauderisco", dados.grauderisco);
       form.setValue("endereco", dados.endereco);
       form.setValue("telefone", dados.telefone);
       form.setValue("email", dados.email);
