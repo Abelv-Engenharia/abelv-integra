@@ -14,6 +14,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar"
 import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
+import { useCondutores } from "@/hooks/gestao-pessoas/useCondutores"
 
 const formSchema = z.object({
   status: z.string().min(1, "Status é obrigatório"),
@@ -31,7 +32,6 @@ const formSchema = z.object({
   dataDevolucao: z.date({
     required_error: "Data de devolução é obrigatória",
   }),
-  motivoDevolucao: z.string().optional(),
 }).refine((data) => {
   if (data.dataRetirada && data.dataDevolucao) {
     return data.dataDevolucao >= data.dataRetirada
@@ -48,6 +48,7 @@ export default function CadastroVeiculo() {
   const { toast } = useToast()
   const navigate = useNavigate()
   const [loading, setLoading] = useState(false)
+  const { data: condutores, isLoading: loadingCondutores } = useCondutores()
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -59,7 +60,6 @@ export default function CadastroVeiculo() {
       modelo: "",
       franquiaKm: "",
       condutorPrincipal: "",
-      motivoDevolucao: "",
     },
   })
 
@@ -279,9 +279,17 @@ export default function CadastroVeiculo() {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="condutor2">Condutor 2</SelectItem>
-                          <SelectItem value="condutor3">Condutor 3</SelectItem>
-                          <SelectItem value="condutor4">Condutor 4</SelectItem>
+                          {loadingCondutores ? (
+                            <SelectItem value="" disabled>Carregando condutores...</SelectItem>
+                          ) : condutores && condutores.length > 0 ? (
+                            condutores.map((condutor) => (
+                              <SelectItem key={condutor.id} value={condutor.id.toString()}>
+                                {condutor.nome_condutor}
+                              </SelectItem>
+                            ))
+                          ) : (
+                            <SelectItem value="" disabled>Nenhum condutor cadastrado</SelectItem>
+                          )}
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -371,26 +379,13 @@ export default function CadastroVeiculo() {
                   )}
                 />
 
-                <FormField
-                  control={form.control}
-                  name="motivoDevolucao"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Motivo Devolução</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Motivo da devolução (opcional)" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
               </div>
 
               <div className="flex justify-end space-x-2 pt-4">
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => navigate("/gestao-veiculos")}
+                  onClick={() => navigate("/gestao-pessoas/dashboard-veiculos")}
                   disabled={loading}
                 >
                   Cancelar
