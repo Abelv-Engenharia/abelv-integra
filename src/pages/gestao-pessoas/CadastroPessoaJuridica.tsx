@@ -312,48 +312,46 @@ export default function CadastroPessoaJuridica() {
               <CardDescription>Informações básicas da empresa prestadora de serviço</CardDescription>
             </CardHeader>
             <CardContent className="grid gap-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField control={form.control} name="razaosocial" render={({
-                field
-              }) => <FormItem>
-                      <FormLabel className={cn(errors.razaosocial && "text-destructive")}>
-                        Razão Social *
-                      </FormLabel>
+              <FormField control={form.control} name="cnpj" render={({
+              field
+            }) => <FormItem>
+                    <FormLabel className={cn(errors.cnpj && "text-destructive")}>
+                      CNPJ *
+                    </FormLabel>
+                    <div className="flex gap-2">
                       <FormControl>
-                        <Input placeholder="Digite a razão social" className={cn(errors.razaosocial && "border-destructive")} {...field} />
+                        <Input placeholder="00.000.000/0000-00" className={cn(errors.cnpj && "border-destructive")} {...field} onChange={e => {
+                    const formatted = formatCNPJ(e.target.value);
+                    if (formatted.length <= 18) {
+                      field.onChange(formatted);
+                    }
+                  }} maxLength={18} />
                       </FormControl>
-                      <FormMessage />
-                    </FormItem>} />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        onClick={handleBuscarCNPJ}
+                        disabled={loadingCNPJ}
+                        title="Buscar dados da Receita Federal"
+                      >
+                        <Search className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <FormMessage />
+                  </FormItem>} />
 
-                <FormField control={form.control} name="cnpj" render={({
-                field
-              }) => <FormItem>
-                      <FormLabel className={cn(errors.cnpj && "text-destructive")}>
-                        CNPJ *
-                      </FormLabel>
-                      <div className="flex gap-2">
-                        <FormControl>
-                          <Input placeholder="00.000.000/0000-00" className={cn(errors.cnpj && "border-destructive")} {...field} onChange={e => {
-                      const formatted = formatCNPJ(e.target.value);
-                      if (formatted.length <= 18) {
-                        field.onChange(formatted);
-                      }
-                    }} maxLength={18} />
-                        </FormControl>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="icon"
-                          onClick={handleBuscarCNPJ}
-                          disabled={loadingCNPJ}
-                          title="Buscar dados da Receita Federal"
-                        >
-                          <Search className="h-4 w-4" />
-                        </Button>
-                      </div>
-                      <FormMessage />
-                    </FormItem>} />
-              </div>
+              <FormField control={form.control} name="razaosocial" render={({
+              field
+            }) => <FormItem>
+                    <FormLabel className={cn(errors.razaosocial && "text-destructive")}>
+                      Razão Social *
+                    </FormLabel>
+                    <FormControl>
+                      <Input placeholder="Digite a razão social" className={cn(errors.razaosocial && "border-destructive")} {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>} />
 
               <FormField control={form.control} name="descricaoatividade" render={({
               field
