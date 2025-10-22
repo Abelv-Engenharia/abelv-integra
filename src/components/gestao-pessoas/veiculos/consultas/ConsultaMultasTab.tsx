@@ -11,7 +11,6 @@ import { format } from "date-fns";
 import type { MultaCompleta } from "@/types/gestao-pessoas/multa";
 import { VisualizarMultaModal } from "@/components/gestao-pessoas/veiculos/VisualizarMultaModal";
 import { NovaMultaModal } from "@/components/gestao-pessoas/veiculos/NovaMultaModal";
-
 export function ConsultaMultasTab() {
   const navigate = useNavigate();
   const [busca, setBusca] = useState("");
@@ -20,72 +19,48 @@ export function ConsultaMultasTab() {
   const [multaVisualizarOpen, setMultaVisualizarOpen] = useState(false);
   const [multaEditarOpen, setMultaEditarOpen] = useState(false);
   const [multaSelecionada, setMultaSelecionada] = useState<MultaCompleta | null>(null);
-
   useEffect(() => {
     carregarMultas();
   }, []);
-
   const carregarMultas = () => {
     const dadosLocalStorage = localStorage.getItem("multas");
     if (dadosLocalStorage) {
       setMultasData(JSON.parse(dadosLocalStorage));
     }
   };
-
   const multasFiltradas = multasData.filter(multa => {
-    const matchBusca = busca === "" || 
-      multa.placa?.toLowerCase().includes(busca.toLowerCase()) ||
-      multa.numeroAutoInfracao?.toLowerCase().includes(busca.toLowerCase()) ||
-      multa.condutorInfrator?.toLowerCase().includes(busca.toLowerCase());
-    
+    const matchBusca = busca === "" || multa.placa?.toLowerCase().includes(busca.toLowerCase()) || multa.numeroAutoInfracao?.toLowerCase().includes(busca.toLowerCase()) || multa.condutorInfrator?.toLowerCase().includes(busca.toLowerCase());
     const matchStatus = filtroStatus === "todos" || multa.statusMulta === filtroStatus;
-
     return matchBusca && matchStatus;
   });
-
   const visualizarMulta = (multa: MultaCompleta) => {
     setMultaSelecionada(multa);
     setMultaVisualizarOpen(true);
   };
-
   const editarMulta = (multa: MultaCompleta) => {
     setMultaSelecionada(multa);
     setMultaEditarOpen(true);
   };
-
   const atualizarMulta = (multaId: string, dadosAtualizados: Partial<MultaCompleta>) => {
-    setMultasData(prev => 
-      prev.map(multa => 
-        multa.id === multaId 
-          ? { ...multa, ...dadosAtualizados }
-          : multa
-      )
-    );
+    setMultasData(prev => prev.map(multa => multa.id === multaId ? {
+      ...multa,
+      ...dadosAtualizados
+    } : multa));
   };
-
-  return (
-    <div className="space-y-6">
+  return <div className="space-y-6">
       {/* Filtros */}
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle>Filtros de Busca</CardTitle>
-            <Button onClick={() => navigate("/cadastro-multa")}>
-              <Plus className="h-4 w-4 mr-2" />
-              Nova Multa
-            </Button>
+            
           </div>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="relative col-span-2">
               <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Buscar por placa, auto de infração ou condutor..."
-                value={busca}
-                onChange={(e) => setBusca(e.target.value)}
-                className="pl-10"
-              />
+              <Input placeholder="Buscar por placa, auto de infração ou condutor..." value={busca} onChange={e => setBusca(e.target.value)} className="pl-10" />
             </div>
             
             <Select value={filtroStatus} onValueChange={setFiltroStatus}>
@@ -124,24 +99,12 @@ export function ConsultaMultasTab() {
           </div>
         </CardHeader>
         <CardContent>
-          {multasFiltradas.length === 0 ? (
-            <div className="text-center py-12">
+          {multasFiltradas.length === 0 ? <div className="text-center py-12">
               <p className="text-muted-foreground">
-                {busca || filtroStatus !== "todos"
-                  ? "Nenhuma multa encontrada com os filtros aplicados."
-                  : "Nenhuma multa cadastrada ainda."}
+                {busca || filtroStatus !== "todos" ? "Nenhuma multa encontrada com os filtros aplicados." : "Nenhuma multa cadastrada ainda."}
               </p>
-              <Button
-                variant="outline"
-                className="mt-4"
-                onClick={() => navigate("/cadastro-multa")}
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Cadastrar Primeira Multa
-              </Button>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
+              
+            </div> : <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -158,8 +121,7 @@ export function ConsultaMultasTab() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {multasFiltradas.map((multa) => (
-                    <TableRow key={multa.id}>
+                  {multasFiltradas.map(multa => <TableRow key={multa.id}>
                       <TableCell className="font-mono">{multa.placa}</TableCell>
                       <TableCell>{multa.numeroAutoInfracao}</TableCell>
                       <TableCell>{format(new Date(multa.dataMulta), "dd/MM/yyyy")}</TableCell>
@@ -172,15 +134,7 @@ export function ConsultaMultasTab() {
                       </TableCell>
                       <TableCell>{multa.condutorInfrator}</TableCell>
                       <TableCell>
-                        <Badge 
-                          variant={
-                            multa.indicadoOrgao === "Sim" 
-                              ? "default" 
-                              : multa.indicadoOrgao === "Não" 
-                              ? "destructive" 
-                              : "secondary"
-                          }
-                        >
+                        <Badge variant={multa.indicadoOrgao === "Sim" ? "default" : multa.indicadoOrgao === "Não" ? "destructive" : "secondary"}>
                           {multa.indicadoOrgao}
                         </Badge>
                       </TableCell>
@@ -191,45 +145,23 @@ export function ConsultaMultasTab() {
                       </TableCell>
                       <TableCell>
                         <div className="flex gap-1">
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            onClick={() => visualizarMulta(multa)}
-                            title="Visualizar"
-                          >
+                          <Button variant="ghost" size="sm" onClick={() => visualizarMulta(multa)} title="Visualizar">
                             <Eye className="h-4 w-4" />
                           </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            onClick={() => editarMulta(multa)}
-                            title="Editar"
-                          >
+                          <Button variant="ghost" size="sm" onClick={() => editarMulta(multa)} title="Editar">
                             <Edit className="h-4 w-4" />
                           </Button>
                         </div>
                       </TableCell>
-                    </TableRow>
-                  ))}
+                    </TableRow>)}
                 </TableBody>
               </Table>
-            </div>
-          )}
+            </div>}
         </CardContent>
       </Card>
 
-      <VisualizarMultaModal
-        open={multaVisualizarOpen}
-        onOpenChange={setMultaVisualizarOpen}
-        multa={multaSelecionada}
-      />
+      <VisualizarMultaModal open={multaVisualizarOpen} onOpenChange={setMultaVisualizarOpen} multa={multaSelecionada} />
 
-      <NovaMultaModal
-        open={multaEditarOpen}
-        onOpenChange={setMultaEditarOpen}
-        multaParaEdicao={multaSelecionada}
-        onUpdate={atualizarMulta}
-      />
-    </div>
-  );
+      <NovaMultaModal open={multaEditarOpen} onOpenChange={setMultaEditarOpen} multaParaEdicao={multaSelecionada} onUpdate={atualizarMulta} />
+    </div>;
 }
