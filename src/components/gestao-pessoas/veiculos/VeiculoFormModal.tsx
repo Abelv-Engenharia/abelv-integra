@@ -178,13 +178,13 @@ export function VeiculoFormModal({ open, onOpenChange, itemParaEdicao, onSuccess
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label className={errors.status ? "text-destructive" : ""}>Status *</Label>
-              <Select onValueChange={(value) => setValue("status", value)} defaultValue={watch("status")}>
+              <Select onValueChange={(value) => setValue("status", value)} value={watch("status")}>
                 <SelectTrigger className={errors.status ? "border-destructive" : ""}>
                   <SelectValue placeholder="Selecione" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Ativo">Ativo</SelectItem>
-                  <SelectItem value="Inativo">Inativo</SelectItem>
+                  <SelectItem value="ativo">Ativo</SelectItem>
+                  <SelectItem value="encerrado">Encerrado</SelectItem>
                 </SelectContent>
               </Select>
               {errors.status && <p className="text-sm text-destructive mt-1">{errors.status.message}</p>}
@@ -215,13 +215,13 @@ export function VeiculoFormModal({ open, onOpenChange, itemParaEdicao, onSuccess
 
             <div>
               <Label className={errors.tipo_locacao ? "text-destructive" : ""}>Tipo de Locação *</Label>
-              <Select onValueChange={(value) => setValue("tipo_locacao", value)} defaultValue={watch("tipo_locacao")}>
+              <Select onValueChange={(value) => setValue("tipo_locacao", value)} value={watch("tipo_locacao")}>
                 <SelectTrigger className={errors.tipo_locacao ? "border-destructive" : ""}>
                   <SelectValue placeholder="Selecione" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Diária">Diária</SelectItem>
-                  <SelectItem value="Mensal">Mensal</SelectItem>
+                  <SelectItem value="mensal">Mensal</SelectItem>
+                  <SelectItem value="esporadico">Esporádico</SelectItem>
                 </SelectContent>
               </Select>
               {errors.tipo_locacao && <p className="text-sm text-destructive mt-1">{errors.tipo_locacao.message}</p>}
