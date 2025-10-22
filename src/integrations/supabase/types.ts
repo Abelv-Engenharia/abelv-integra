@@ -8265,6 +8265,7 @@ export type Database = {
           email_rh_financeiro_enviado_em: string | null
           formulario_preenchido_nome: string | null
           formulario_preenchido_url: string | null
+          gravidade: string | null
           horario: string
           id: string
           indicado_orgao: string
@@ -8301,6 +8302,7 @@ export type Database = {
           email_rh_financeiro_enviado_em?: string | null
           formulario_preenchido_nome?: string | null
           formulario_preenchido_url?: string | null
+          gravidade?: string | null
           horario: string
           id?: string
           indicado_orgao?: string
@@ -8337,6 +8339,7 @@ export type Database = {
           email_rh_financeiro_enviado_em?: string | null
           formulario_preenchido_nome?: string | null
           formulario_preenchido_url?: string | null
+          gravidade?: string | null
           horario?: string
           id?: string
           indicado_orgao?: string

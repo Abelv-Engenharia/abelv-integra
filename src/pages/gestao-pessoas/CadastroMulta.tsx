@@ -1,9 +1,9 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import { format } from "date-fns"
-import { CalendarIcon } from "lucide-react"
+import { CalendarIcon, AlertCircle } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -13,30 +13,53 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
 import { Textarea } from "@/components/ui/textarea"
+import { Switch } from "@/components/ui/switch"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Label } from "@/components/ui/label"
 import { useToast } from "@/hooks/use-toast"
 import { DocumentUploadField } from "@/components/gestao-pessoas/veiculos/DocumentUploadField"
 import { MultaCompleta } from "@/types/gestao-pessoas/multa"
+import { useVeiculos } from "@/hooks/gestao-pessoas/useVeiculos"
+import { useCondutores } from "@/hooks/gestao-pessoas/useCondutores"
 import { cn } from "@/lib/utils"
 
 const formSchema = z.object({
+  // Campos obrigatórios
+  veiculo_id: z.string().min(1, "Veículo é obrigatório"),
+  condutor_infrator_id: z.string().min(1, "Condutor infrator é obrigatório"),
   numeroAutoInfracao: z.string().min(1, "Número do auto de infração é obrigatório"),
   dataMulta: z.date({ required_error: "Data da multa é obrigatória" }),
   horario: z.string().min(1, "Horário é obrigatório"),
   ocorrencia: z.string().min(1, "Ocorrência é obrigatória"),
   pontos: z.number().min(1, "Pontos são obrigatórios"),
-  condutorInfrator: z.string().min(1, "Condutor infrator é obrigatório"),
   placa: z.string().min(1, "Placa é obrigatória"),
+  
+  // Campos opcionais
+  valor: z.number().optional(),
+  gravidade: z.enum(["Leve", "Média", "Grave", "Gravíssima"]).optional(),
   dataNotificacao: z.date().optional(),
   responsavel: z.string().optional(),
-  veiculo: z.string().optional(),
-  locadora: z.string().optional(),
-  valor: z.number().optional(),
-  localCompleto: z.string().optional(),
-  emailCondutor: z.string().email("E-mail inválido").optional().or(z.literal("")),
   numeroFatura: z.string().optional(),
   tituloSienge: z.string().optional(),
   indicadoOrgao: z.enum(["Sim", "Não", "Pendente"]).default("Pendente"),
   observacoesGerais: z.string().optional(),
+  
+  // Campos para outro condutor
+  indicar_outro_condutor: z.boolean().default(false),
+  outro_condutor_id: z.string().optional(),
+  
+  // Campos preenchidos automaticamente (não estão no form visível)
+  condutor_infrator_nome: z.string().optional(),
+  veiculo_modelo: z.string().optional(),
+  locadora_nome: z.string().optional(),
+}).refine((data) => {
+  if (data.indicar_outro_condutor) {
+    return !!data.outro_condutor_id
+  }
+  return true
+}, {
+  message: "Selecione o outro condutor",
+  path: ["outro_condutor_id"]
 })
 
 type FormValues = z.infer<typeof formSchema>
@@ -48,32 +71,75 @@ export default function CadastroMulta() {
   const [documentoNotificacao, setDocumentoNotificacao] = useState<File | null>(null)
   const [formularioPreenchido, setFormularioPreenchido] = useState<File | null>(null)
   const [comprovanteIndicacao, setComprovanteIndicacao] = useState<File | null>(null)
+  
+  const { data: veiculos } = useVeiculos()
+  const { data: condutores } = useCondutores()
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      veiculo_id: "",
+      condutor_infrator_id: "",
       numeroAutoInfracao: "",
       horario: "",
       ocorrencia: "",
       pontos: 0,
-      responsavel: "",
-      condutorInfrator: "",
       placa: "",
-      veiculo: "",
-      locadora: "",
+      responsavel: "",
       numeroFatura: "",
       tituloSienge: "",
-      valor: 0,
+      valor: undefined,
+      gravidade: undefined,
       indicadoOrgao: "Pendente" as const,
-      localCompleto: "",
-      emailCondutor: "",
       observacoesGerais: "",
+      indicar_outro_condutor: false,
+      outro_condutor_id: "",
+      condutor_infrator_nome: "",
+      veiculo_modelo: "",
+      locadora_nome: "",
     },
   })
+  
+  const veiculoSelecionado = form.watch("veiculo_id")
+  const indicarOutroCondutor = form.watch("indicar_outro_condutor")
+  const outroCondutorId = form.watch("outro_condutor_id")
+  
+  // Auto-preencher placa, locadora e condutor ao selecionar veículo
+  useEffect(() => {
+    if (veiculoSelecionado && veiculos) {
+      const veiculo = veiculos.find(v => v.id === veiculoSelecionado)
+      if (veiculo) {
+        form.setValue("placa", veiculo.placa || "")
+        form.setValue("veiculo_modelo", veiculo.modelo || "")
+        form.setValue("locadora_nome", veiculo.locadora?.nome || "")
+        
+        // Se há condutor principal, preencher automaticamente
+        if (veiculo.condutor_principal_id && !indicarOutroCondutor) {
+          form.setValue("condutor_infrator_id", veiculo.condutor_principal_id)
+          form.setValue("condutor_infrator_nome", veiculo.condutor_principal_nome || "")
+        }
+      }
+    }
+  }, [veiculoSelecionado, veiculos, indicarOutroCondutor])
+  
+  // Preencher nome do condutor ao selecionar
+  useEffect(() => {
+    const condutorId = indicarOutroCondutor ? outroCondutorId : form.watch("condutor_infrator_id")
+    if (condutorId && condutores) {
+      const condutor = condutores.find(c => c.id === condutorId)
+      if (condutor) {
+        form.setValue("condutor_infrator_nome", condutor.nome_condutor || "")
+      }
+    }
+  }, [form.watch("condutor_infrator_id"), outroCondutorId, condutores, indicarOutroCondutor])
 
   const onSubmit = async (values: FormValues) => {
     setLoading(true)
     try {
+      // Se indicar outro condutor, usar o outro_condutor_id
+      const condutorFinalId = values.indicar_outro_condutor ? values.outro_condutor_id : values.condutor_infrator_id
+      const condutor = condutores?.find(c => c.id === condutorFinalId)
+      
       const novaMulta: MultaCompleta = {
         id: crypto.randomUUID(),
         numeroAutoInfracao: values.numeroAutoInfracao,
@@ -81,15 +147,13 @@ export default function CadastroMulta() {
         horario: values.horario,
         ocorrencia: values.ocorrencia,
         pontos: values.pontos,
-        condutorInfrator: values.condutorInfrator,
+        condutorInfrator: condutor?.nome_condutor || values.condutor_infrator_nome || "",
         placa: values.placa,
+        veiculo: values.veiculo_modelo,
+        locadora: values.locadora_nome,
+        valor: values.valor,
         dataNotificacao: values.dataNotificacao,
         responsavel: values.responsavel,
-        veiculo: values.veiculo,
-        locadora: values.locadora,
-        valor: values.valor,
-        localCompleto: values.localCompleto,
-        emailCondutor: values.emailCondutor,
         numeroFatura: values.numeroFatura,
         tituloSienge: values.tituloSienge,
         indicadoOrgao: values.indicadoOrgao,
@@ -125,6 +189,8 @@ export default function CadastroMulta() {
       setLoading(false)
     }
   }
+  
+  const outroCondutor = condutores?.find(c => c.id === outroCondutorId)
 
   return (
     <div className="container mx-auto p-6">
@@ -149,6 +215,87 @@ export default function CadastroMulta() {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {/* Linha 1: Veículo, Condutor Infrator, Placa */}
+                <FormField
+                  control={form.control}
+                  name="veiculo_id"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className={cn(!field.value && "text-destructive")}>
+                        Veículo *
+                      </FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger className={cn(!field.value && "border-destructive")}>
+                            <SelectValue placeholder="Selecione o veículo" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {veiculos?.map((veiculo) => (
+                            <SelectItem key={veiculo.id} value={veiculo.id}>
+                              {veiculo.modelo} - {veiculo.placa}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="condutor_infrator_id"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className={cn(!field.value && "text-destructive")}>
+                        Condutor Infrator *
+                      </FormLabel>
+                      <Select 
+                        onValueChange={field.onChange} 
+                        value={field.value}
+                        disabled={indicarOutroCondutor}
+                      >
+                        <FormControl>
+                          <SelectTrigger className={cn(!field.value && "border-destructive")}>
+                            <SelectValue placeholder="Selecione o condutor" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {condutores?.map((condutor) => (
+                            <SelectItem key={condutor.id} value={condutor.id}>
+                              {condutor.nome_condutor}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="placa"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className={cn(!field.value && "text-destructive")}>
+                        Placa *
+                      </FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="AAA-0000" 
+                          className={cn(!field.value && "border-destructive", "bg-muted")}
+                          readOnly
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* Linha 2: Nº Auto Infração, Data da Multa, Horário */}
                 <FormField
                   control={form.control}
                   name="numeroAutoInfracao"
@@ -173,9 +320,9 @@ export default function CadastroMulta() {
                   control={form.control}
                   name="dataMulta"
                   render={({ field }) => (
-                    <FormItem className="flex flex-col">
+                    <FormItem className="flex flex-col justify-end">
                       <FormLabel className={cn(!field.value && "text-destructive")}>
-                        Dt Multa *
+                        Data da Multa *
                       </FormLabel>
                       <Popover>
                         <PopoverTrigger asChild>
@@ -229,7 +376,10 @@ export default function CadastroMulta() {
                     </FormItem>
                   )}
                 />
+              </div>
 
+              {/* Linha 3: Ocorrência (largura completa) */}
+              <div className="mt-4">
                 <FormField
                   control={form.control}
                   name="ocorrencia"
@@ -239,9 +389,10 @@ export default function CadastroMulta() {
                         Ocorrência *
                       </FormLabel>
                       <FormControl>
-                        <Input 
+                        <Textarea 
                           placeholder="Descrição da ocorrência" 
                           className={cn(!field.value && "border-destructive")}
+                          rows={1}
                           {...field} 
                         />
                       </FormControl>
@@ -249,7 +400,10 @@ export default function CadastroMulta() {
                     </FormItem>
                   )}
                 />
+              </div>
 
+              {/* Linha 4: Pontos, Valor, Gravidade */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
                 <FormField
                   control={form.control}
                   name="pontos"
@@ -274,17 +428,18 @@ export default function CadastroMulta() {
 
                 <FormField
                   control={form.control}
-                  name="condutorInfrator"
+                  name="valor"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className={cn(!field.value && "text-destructive")}>
-                        Condutor Infrator *
-                      </FormLabel>
+                      <FormLabel>Valor</FormLabel>
                       <FormControl>
                         <Input 
-                          placeholder="Nome do condutor infrator" 
-                          className={cn(!field.value && "border-destructive")}
-                          {...field} 
+                          type="number"
+                          step="0.01"
+                          placeholder="R$ 0,00"
+                          {...field}
+                          value={field.value || ""}
+                          onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : undefined)}
                         />
                       </FormControl>
                       <FormMessage />
@@ -294,30 +449,31 @@ export default function CadastroMulta() {
 
                 <FormField
                   control={form.control}
-                  name="placa"
+                  name="gravidade"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className={cn(!field.value && "text-destructive")}>
-                        Placa *
-                      </FormLabel>
-                      <FormControl>
-                        <Input 
-                          placeholder="AAA-0000" 
-                          className={cn(!field.value && "border-destructive")}
-                          {...field}
-                          onChange={(e) => {
-                            let value = e.target.value.toUpperCase()
-                            if (value.length === 3) value += "-"
-                            field.onChange(value)
-                          }}
-                          maxLength={8}
-                        />
-                      </FormControl>
+                      <FormLabel>Gravidade</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="Leve">Leve</SelectItem>
+                          <SelectItem value="Média">Média</SelectItem>
+                          <SelectItem value="Grave">Grave</SelectItem>
+                          <SelectItem value="Gravíssima">Gravíssima</SelectItem>
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
+              </div>
 
+              {/* Linha 5: Indicado ao Órgão */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
                 <FormField
                   control={form.control}
                   name="indicadoOrgao"
@@ -349,82 +505,115 @@ export default function CadastroMulta() {
               <CardTitle>Informações Adicionais</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {/* Toggle para indicar outro condutor */}
+              <div className="space-y-4">
                 <FormField
                   control={form.control}
-                  name="veiculo"
+                  name="indicar_outro_condutor"
                   render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Veículo</FormLabel>
+                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                      <div className="space-y-0.5">
+                        <FormLabel className="text-base">
+                          Indicar outro condutor infrator
+                        </FormLabel>
+                        <p className="text-sm text-muted-foreground">
+                          Diferente do condutor principal vinculado ao veículo
+                        </p>
+                      </div>
                       <FormControl>
-                        <Input placeholder="Modelo do veículo" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="locadora"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Locadora</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Nome da locadora" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="valor"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Valor</FormLabel>
-                      <FormControl>
-                        <Input 
-                          type="number"
-                          step="0.01"
-                          placeholder="0.00"
-                          {...field}
-                          onChange={(e) => field.onChange(Number(e.target.value))}
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
                         />
                       </FormControl>
-                      <FormMessage />
                     </FormItem>
                   )}
                 />
 
-                <FormField
-                  control={form.control}
-                  name="localCompleto"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Local</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Local da infração" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                {/* Campos condicionais quando toggle está ativo */}
+                {indicarOutroCondutor && (
+                  <div className="space-y-4">
+                    <FormField
+                      control={form.control}
+                      name="outro_condutor_id"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className={cn(!field.value && "text-destructive")}>
+                            Outro Condutor Infrator *
+                          </FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger className={cn(!field.value && "border-destructive")}>
+                                <SelectValue placeholder="Selecione o outro condutor" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {condutores?.map((condutor) => (
+                                <SelectItem key={condutor.id} value={condutor.id}>
+                                  {condutor.nome_condutor}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                <FormField
-                  control={form.control}
-                  name="emailCondutor"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Email Condutor</FormLabel>
-                      <FormControl>
-                        <Input type="email" placeholder="email@example.com" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                    {/* Alerta sobre direcionamento de pontos */}
+                    <Alert>
+                      <AlertCircle className="h-4 w-4" />
+                      <AlertDescription>
+                        ⚠️ Os pontos desta multa serão direcionados para o condutor indicado acima e não para o condutor principal do veículo.
+                      </AlertDescription>
+                    </Alert>
+
+                    {/* Exibir dados do outro condutor selecionado */}
+                    {outroCondutor && (
+                      <Card className="bg-muted/50">
+                        <CardHeader>
+                          <CardTitle className="text-base">Dados do Condutor Indicado</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                            <div>
+                              <Label className="text-muted-foreground">Nome Completo</Label>
+                              <p className="font-medium">{outroCondutor.nome_condutor}</p>
+                            </div>
+                            <div>
+                              <Label className="text-muted-foreground">CPF</Label>
+                              <p className="font-medium">{outroCondutor.cpf || "-"}</p>
+                            </div>
+                            <div>
+                              <Label className="text-muted-foreground">CNH</Label>
+                              <p className="font-medium">{outroCondutor.numero_cnh || "-"}</p>
+                            </div>
+                            <div>
+                              <Label className="text-muted-foreground">Categoria CNH</Label>
+                              <p className="font-medium">{outroCondutor.categoria_cnh || "-"}</p>
+                            </div>
+                            <div>
+                              <Label className="text-muted-foreground">Validade CNH</Label>
+                              <p className="font-medium">
+                                {outroCondutor.validade_cnh 
+                                  ? format(new Date(outroCondutor.validade_cnh), "dd/MM/yyyy")
+                                  : "-"}
+                              </p>
+                            </div>
+                            <div>
+                              <Label className="text-muted-foreground">Status CNH</Label>
+                              <p className="font-medium">{outroCondutor.status_cnh || "-"}</p>
+                            </div>
+                            <div>
+                              <Label className="text-muted-foreground">Pontuação Atual</Label>
+                              <p className="font-medium">{outroCondutor.pontuacao_atual || 0} pontos</p>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )}
+                  </div>
+                )}
               </div>
 
               <div className="mt-4 space-y-4">
