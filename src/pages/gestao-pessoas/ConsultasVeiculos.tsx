@@ -41,17 +41,13 @@ export default function ConsultasVeiculos() {
             <Car className="h-4 w-4" />
             Veículos
           </TabsTrigger>
-          <TabsTrigger value="multas" className="gap-2">
-            <AlertTriangle className="h-4 w-4" />
-            Multas
-          </TabsTrigger>
-          <TabsTrigger value="checklist" className="gap-2">
-            <ClipboardList className="h-4 w-4" />
-            Checklist
-          </TabsTrigger>
           <TabsTrigger value="condutores" className="gap-2">
             <User className="h-4 w-4" />
             Condutores
+          </TabsTrigger>
+          <TabsTrigger value="multas" className="gap-2">
+            <AlertTriangle className="h-4 w-4" />
+            Multas
           </TabsTrigger>
           <TabsTrigger value="cartoes" className="gap-2">
             <CreditCard className="h-4 w-4" />
@@ -61,22 +57,22 @@ export default function ConsultasVeiculos() {
             <MapPin className="h-4 w-4" />
             Pedágios
           </TabsTrigger>
+          <TabsTrigger value="checklist" className="gap-2">
+            <ClipboardList className="h-4 w-4" />
+            Checklist
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="veiculos">
           <ConsultaVeiculosTab />
         </TabsContent>
 
-        <TabsContent value="multas">
-          <ConsultaMultasTab />
-        </TabsContent>
-
-        <TabsContent value="checklist">
-          <ConsultaChecklistTab />
-        </TabsContent>
-
         <TabsContent value="condutores">
           <ConsultaCondutoresTab />
+        </TabsContent>
+
+        <TabsContent value="multas">
+          <ConsultaMultasTab />
         </TabsContent>
 
         <TabsContent value="cartoes">
@@ -85,6 +81,10 @@ export default function ConsultasVeiculos() {
 
         <TabsContent value="pedagogios">
           <ConsultaPedagiosTab />
+        </TabsContent>
+
+        <TabsContent value="checklist">
+          <ConsultaChecklistTab />
         </TabsContent>
       </Tabs>
     </div>
