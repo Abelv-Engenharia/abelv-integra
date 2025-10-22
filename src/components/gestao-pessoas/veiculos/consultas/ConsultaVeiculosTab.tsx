@@ -118,7 +118,7 @@ export function ConsultaVeiculosTab() {
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle>
-              Veículos Cadastrados ({veiculosFiltrados.length})
+              Veículos Cadastrados
             </CardTitle>
             <div className="flex gap-2">
               <Button variant="outline" size="sm" onClick={exportarExcel}>

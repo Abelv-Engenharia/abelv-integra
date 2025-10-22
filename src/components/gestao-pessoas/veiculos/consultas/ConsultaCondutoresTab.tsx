@@ -102,7 +102,7 @@ export function ConsultaCondutoresTab() {
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle>
-              Condutores Cadastrados ({condutoresFiltrados.length})
+              Condutores Cadastrados
             </CardTitle>
             <div className="flex gap-2">
               <Button variant="outline" size="sm">

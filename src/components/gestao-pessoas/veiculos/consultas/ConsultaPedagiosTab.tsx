@@ -88,7 +88,7 @@ export function ConsultaPedagiosTab() {
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle>
-              Transações Cadastradas ({pedagogiosFiltrados.length})
+              Transações Cadastradas
             </CardTitle>
             <div className="flex gap-2">
               <Button variant="outline" size="sm">

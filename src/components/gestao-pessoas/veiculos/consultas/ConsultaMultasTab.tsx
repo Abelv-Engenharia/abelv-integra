@@ -109,7 +109,7 @@ export function ConsultaMultasTab() {
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle>
-              Multas Cadastradas ({multasFiltradas.length})
+              Multas Cadastradas
             </CardTitle>
             <div className="flex gap-2">
               <Button variant="outline" size="sm">

@@ -105,7 +105,7 @@ export function ConsultaCartoesTab() {
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle>
-              Cartões Cadastrados ({cartoesFiltrados.length})
+              Cartões Cadastrados
             </CardTitle>
             <div className="flex gap-2">
               <Button variant="outline" size="sm">
