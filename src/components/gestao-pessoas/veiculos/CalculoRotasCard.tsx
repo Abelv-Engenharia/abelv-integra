@@ -102,15 +102,18 @@ export function CalculoRotasCard({ veiculos, cartoes, onCalculoSalvo }: CalculoR
   };
 
   const validarFormatoEndereco = (endereco: string): boolean => {
-    const enderecoLower = endereco.toLowerCase();
+    if (!endereco || endereco.trim().length < 10) return false;
     
-    // Verificar se contém elementos básicos de um endereço
-    const contemCidade = /\b[a-záàâãéèêíïóôõöúçñ\s]+\s*-\s*[a-z]{2}\b/i.test(endereco);
+    // Verificar elementos essenciais de forma flexível para aceitar formato ViaCEP
     const contemNumero = /\d+/.test(endereco);
     const contemVirgula = endereco.includes(',');
     const contemHifen = endereco.includes('-');
     
-    return contemCidade && (contemNumero || contemVirgula) && contemHifen;
+    // Verificar padrão: Cidade - UF (aceita estados em maiúscula como SP, RJ, etc)
+    const contemCidadeEstado = /[a-záàâãéèêíïóôõöúçñ\s]+-\s*[A-Z]{2}\b/.test(endereco);
+    
+    // Endereço válido deve ter: número, vírgula, hífen e padrão Cidade-UF
+    return contemNumero && contemVirgula && contemHifen && contemCidadeEstado;
   };
 
   const validarEnderecosAntesCalculo = async () => {
