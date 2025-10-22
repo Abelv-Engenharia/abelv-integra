@@ -20,6 +20,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { useReceitaWS } from "@/hooks/gestao-pessoas/useReceitaWS";
+import { useCreatePrestadorPJ } from "@/hooks/gestao-pessoas/usePrestadoresPJ";
 const cadastroSchema = z.object({
   razaosocial: z.string().min(1, "Razão social é obrigatória"),
   cnpj: z.string().min(14, "CNPJ é obrigatório"),
@@ -112,6 +113,8 @@ export default function CadastroPessoaJuridica() {
     buscarCNPJ,
     loading: loadingCNPJ
   } = useReceitaWS();
+  
+  const createPrestador = useCreatePrestadorPJ();
 
   // Buscar usuários ativos do sistema
   const {
@@ -287,9 +290,11 @@ export default function CadastroPessoaJuridica() {
       });
     }
   };
-  const onSubmit = (data: CadastroFormData) => {
+  const onSubmit = async (data: CadastroFormData) => {
     const cnpjNumbers = data.cnpj.replace(/\D/g, "");
     const cpfNumbers = data.cpf.replace(/\D/g, "");
+    
+    // Validações de duplicidade
     if (cadastrosCnpj.has(cnpjNumbers)) {
       toast({
         title: "Erro",
@@ -306,13 +311,67 @@ export default function CadastroPessoaJuridica() {
       });
       return;
     }
-    setCadastrosCnpj(prev => new Set(prev).add(cnpjNumbers));
-    setCadastrosCpf(prev => new Set(prev).add(cpfNumbers));
-    toast({
-      title: "Sucesso",
-      description: "Pessoa jurídica cadastrada com sucesso!"
+
+    // Mapear dados do formulário para o formato do banco (camelCase)
+    const prestadorData = {
+      razaoSocial: data.razaosocial,
+      cnpj: cnpjNumbers,
+      descricaoAtividade: data.descricaoatividade || null,
+      numeroCnae: data.numerocnae || null,
+      grauDeRisco: data.grauderisco || null,
+      endereco: data.endereco || null,
+      telefone: data.telefone?.replace(/\D/g, "") || null,
+      email: data.email || null,
+      contaBancaria: data.contabancaria || null,
+      numeroCredorSienge: data.numerocredorsienge || null,
+      nomeCompleto: data.nomecompleto,
+      cpf: cpfNumbers,
+      dataNascimento: data.datanascimento ? data.datanascimento.toISOString() : null,
+      rg: data.rg || null,
+      registroFuncional: data.registrofuncional || null,
+      telefoneRepresentante: data.telefonerepresentante?.replace(/\D/g, "") || null,
+      emailRepresentante: data.emailrepresentante || null,
+      enderecoRepresentante: data.enderecorepresentante || null,
+      servico: data.servico || null,
+      valorPrestacaoServico: data.valorprestacaoservico ? parseFloat(extrairValorNumerico(data.valorprestacaoservico)) : 0,
+      dataInicioContrato: data.datainiciocontrato ? data.datainiciocontrato.toISOString() : null,
+      tempoContrato: data.tipocontrato,
+      dataInicioContratoDeterminado: data.datainiciocontratodeterminado ? data.datainiciocontratodeterminado.toISOString() : null,
+      dataFimContratoDeterminado: data.datafimcontratodeterminado ? data.datafimcontratodeterminado.toISOString() : null,
+      ajudaCusto: data.ajudacusto ? parseFloat(extrairValorNumerico(data.ajudacusto)) : 0,
+      auxilioConvenioMedico: data.auxilioconveniomedico,
+      valorAuxilioConvenioMedico: data.valorauxilioconveniomedico ? parseFloat(extrairValorNumerico(data.valorauxilioconveniomedico)) : 0,
+      ajudaAluguel: data.ajudaaluguel ? parseFloat(extrairValorNumerico(data.ajudaaluguel)) : 0,
+      valeRefeicao: data.valerefeicao ? parseFloat(extrairValorNumerico(data.valerefeicao)) : 0,
+      cafeManha: data.cafemanha,
+      valorCafeManha: data.valorcafemanha ? parseFloat(extrairValorNumerico(data.valorcafemanha)) : 0,
+      cafeTarde: data.cafetarde,
+      valorCafeTarde: data.valorcafetarde ? parseFloat(extrairValorNumerico(data.valorcafetarde)) : 0,
+      almoco: data.almoco,
+      valorAlmoco: data.valoralmoco ? parseFloat(extrairValorNumerico(data.valoralmoco)) : 0,
+      veiculo: data.veiculo,
+      celular: data.celular,
+      alojamento: data.alojamento,
+      folgaCampo: data.folgacampo || null,
+      periodoFerias: data.periodoferias || null,
+      quantidadeDiasFerias: data.quantidadediasferias ? parseInt(data.quantidadediasferias) : null,
+      ccaId: data.ccaobra ? parseInt(data.ccaobra) : null,
+      ccaCodigo: null,
+      ccaNome: null,
+      chavePix: null,
+      contratoUrl: null,
+      contratoNome: null,
+      ativo: true
+    };
+
+    // Salvar no banco
+    createPrestador.mutate(prestadorData, {
+      onSuccess: () => {
+        setCadastrosCnpj(prev => new Set(prev).add(cnpjNumbers));
+        setCadastrosCpf(prev => new Set(prev).add(cpfNumbers));
+        form.reset();
+      }
     });
-    form.reset();
   };
   const onCancel = () => {
     form.reset();
