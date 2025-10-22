@@ -138,7 +138,19 @@ export default function CadastroCartaoAbastecimento() {
         description: "Cartão cadastrado com sucesso!",
       })
 
-      form.reset()
+      // Resetar todos os campos do formulário
+      form.reset({
+        status: "",
+        tipo_cartao: "",
+        limite_credito: undefined,
+        veiculo_id: "",
+        condutor_id: "",
+        condutor_nome: "",
+        placa: "",
+        veiculo_modelo: "",
+        numero_cartao: "",
+        data_validade: undefined,
+      })
     } catch (error) {
       console.error('Erro ao cadastrar cartão:', error)
       toast({
@@ -355,7 +367,7 @@ export default function CadastroCartaoAbastecimento() {
                   control={form.control}
                   name="data_validade"
                   render={({ field }) => (
-                    <FormItem className="flex flex-col">
+                    <FormItem>
                       <FormLabel className={cn(!field.value && "text-destructive")}>
                         Data de Validade *
                       </FormLabel>
