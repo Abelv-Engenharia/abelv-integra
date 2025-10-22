@@ -252,7 +252,7 @@ export default function SidebarSectionGestaoPessoas({
                                     <SidebarMenuButton asChild>
                                       <Link to="/gestao-pessoas/dashboard-veiculos" onClick={onLinkClick}>
                                         <Car className="h-4 w-4" />
-                                        <span>Dashboard Veículos</span>
+                                        <span>Dashboard</span>
                                       </Link>
                                     </SidebarMenuButton>
                                   </SidebarMenuItem>}
