@@ -104,16 +104,15 @@ export function CalculoRotasCard({ veiculos, cartoes, onCalculoSalvo }: CalculoR
   const validarFormatoEndereco = (endereco: string): boolean => {
     if (!endereco || endereco.trim().length < 10) return false;
     
-    // Verificar elementos essenciais de forma flexível para aceitar formato ViaCEP
+    // Verificar elementos essenciais de forma flexível
     const contemNumero = /\d+/.test(endereco);
-    const contemVirgula = endereco.includes(',');
-    const contemHifen = endereco.includes('-');
     
-    // Verificar padrão: Cidade - UF (aceita estados em maiúscula como SP, RJ, etc)
-    const contemCidadeEstado = /[a-záàâãéèêíïóôõöúçñ\s]+-\s*[A-Z]{2}\b/.test(endereco);
+    // Aceitar tanto formato com vírgulas quanto formato simplificado
+    const contemCidadeEstadoCompleto = /[a-záàâãéèêíïóôõöúçñ\s]+-\s*[A-Z]{2}\b/.test(endereco);
+    const contemCidadeEstadoSimples = /[a-záàâãéèêíïóôõöúçñ\s]+\s+[A-Z]{2}\s+(Brazil|Brasil)/i.test(endereco);
     
-    // Endereço válido deve ter: número, vírgula, hífen e padrão Cidade-UF
-    return contemNumero && contemVirgula && contemHifen && contemCidadeEstado;
+    // Endereço válido deve ter: número e padrão de cidade/estado
+    return contemNumero && (contemCidadeEstadoCompleto || contemCidadeEstadoSimples);
   };
 
   const validarEnderecosAntesCalculo = async () => {
@@ -195,7 +194,7 @@ export function CalculoRotasCard({ veiculos, cartoes, onCalculoSalvo }: CalculoR
     }
     
     if (!validarFormatoEndereco(enderecoBase.endereco)) {
-      return "Endereço Base está incompleto. Inclua: Rua, Número, Bairro, Cidade e Estado (Ex: Av. Paulista, 1000 - Centro, São Paulo - SP, Brasil)";
+      return "Endereço Base está incompleto. Use o CEP ou digite no formato: Rua Nome Numero Bairro Cidade UF Brazil";
     }
     
     if (!enderecoObra.nome || !enderecoObra.endereco) {
@@ -203,7 +202,7 @@ export function CalculoRotasCard({ veiculos, cartoes, onCalculoSalvo }: CalculoR
     }
     
     if (!validarFormatoEndereco(enderecoObra.endereco)) {
-      return "Endereço da Obra está incompleto. Inclua: Rua, Número, Bairro, Cidade e Estado (Ex: Rua XV, 500 - Jardim, Curitiba - PR, Brasil)";
+      return "Endereço da Obra está incompleto. Use o CEP ou digite no formato: Rua Nome Numero Bairro Cidade UF Brazil";
     }
     
     if (!diasUteis || parseInt(diasUteis) <= 0) return "Informe os dias úteis";
@@ -358,14 +357,14 @@ export function CalculoRotasCard({ veiculos, cartoes, onCalculoSalvo }: CalculoR
         <AlertCircle className="h-4 w-4" />
         <AlertTitle>Como preencher os endereços</AlertTitle>
         <AlertDescription className="space-y-2 mt-2">
-          <p>Para garantir o cálculo correto da rota, preencha os endereços no formato completo:</p>
+          <p>Use a busca por CEP (recomendado) ou digite o endereço completo:</p>
           <div className="bg-muted/50 p-3 rounded-md space-y-1 text-sm">
-            <p className="font-medium">✅ Formato correto:</p>
-            <p className="font-mono">Avenida Paulista, 1578 - Bela Vista, São Paulo - SP, Brasil</p>
-            <p className="font-mono">Rua da Consolação, 3701 - Consolação, São Paulo - SP, Brasil</p>
+            <p className="font-medium">✅ Exemplos válidos:</p>
+            <p className="font-mono text-xs">Avenida Paulista 1578 Bela Vista São Paulo SP Brazil</p>
+            <p className="font-mono text-xs">Rua da Consolação, 3701 - Consolação, São Paulo - SP, Brasil</p>
           </div>
           <p className="text-xs text-muted-foreground mt-2">
-            Inclua: <strong>Logradouro, Número - Bairro, Cidade - UF, Brasil</strong>
+            <strong>Dica:</strong> Use o CEP para preenchimento automático otimizado
           </p>
         </AlertDescription>
       </Alert>
@@ -491,7 +490,7 @@ export function CalculoRotasCard({ veiculos, cartoes, onCalculoSalvo }: CalculoR
                 setEnderecoBase({ ...enderecoBase, endereco });
                 setValidacaoBase({ status: 'idle' });
               }}
-              placeholder="Ex: Avenida Paulista, 1578 - Bela Vista, São Paulo - SP, Brasil"
+              placeholder="Ex: Avenida Paulista 1578 Bela Vista São Paulo SP Brazil"
               required
             />
             
@@ -534,7 +533,7 @@ export function CalculoRotasCard({ veiculos, cartoes, onCalculoSalvo }: CalculoR
                 setEnderecoObra({ ...enderecoObra, endereco });
                 setValidacaoObra({ status: 'idle' });
               }}
-              placeholder="Ex: Rua da Consolação, 3701 - Consolação, São Paulo - SP, Brasil"
+              placeholder="Ex: Rua da Consolação 3701 Consolação São Paulo SP Brazil"
               required
             />
             

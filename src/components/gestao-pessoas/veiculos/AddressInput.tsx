@@ -85,8 +85,9 @@ export function AddressInput({
     const resultado = await buscarEndereco(cep);
     
     if (resultado) {
-      // Montar endereço completo
-      const enderecoCompleto = `${resultado.logradouro}${numero ? ', ' + numero : ''}${complemento ? ' - ' + complemento : ''} - ${resultado.bairro}, ${resultado.cidade} - ${resultado.uf}, Brasil`;
+      // Formato otimizado para Nominatim (sem vírgulas extras)
+      // Formato: Rua Nome Numero Bairro Cidade UF Brazil
+      const enderecoCompleto = `${resultado.logradouro} ${numero || 'S/N'} ${resultado.bairro} ${resultado.cidade} ${resultado.uf} Brazil`;
       onEnderecoChange(enderecoCompleto);
       
       toast({
@@ -175,7 +176,7 @@ export function AddressInput({
               className={required && !endereco ? "border-destructive" : ""}
             />
             <p className="text-xs text-muted-foreground">
-              Exemplo: Rua XV de Novembro, 500 - Centro, Curitiba - PR, Brasil
+              Exemplo: Rua XV de Novembro 500 Centro Curitiba PR Brazil
             </p>
           </div>
         </>
