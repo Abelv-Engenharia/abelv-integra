@@ -137,6 +137,39 @@ serve(async (req: Request) => {
         }
       }
 
+      // Gerar relatório automaticamente se configurado
+      let anexoUrl = config.anexo_url;
+      let anexoGerado = false;
+      let tempoGeracaoMs = 0;
+
+      if (config.tipo_relatorio === 'hsa') {
+        console.log(`📊 Gerando relatório HSA para configuração ${config.id}...`);
+        
+        try {
+          const { data: reportData, error: reportError } = await supabase.functions.invoke(
+            'generate-hsa-report',
+            {
+              body: {
+                cca_id: config.cca_id,
+                data_inicial: config.data_inicial,
+                data_final: config.data_final,
+              }
+            }
+          );
+
+          if (!reportError && reportData?.anexo_url) {
+            anexoUrl = reportData.anexo_url;
+            anexoGerado = true;
+            tempoGeracaoMs = reportData.tempo_geracao_ms;
+            console.log(`✅ Relatório gerado: ${anexoUrl} (${tempoGeracaoMs}ms)`);
+          } else {
+            console.error('❌ Erro ao gerar relatório:', reportError);
+          }
+        } catch (error: any) {
+          console.error('❌ Exceção ao gerar relatório:', error);
+        }
+      }
+
       // Montar payload para o webhook
       const payload = {
         configuracao_id: config.id,
@@ -148,7 +181,8 @@ serve(async (req: Request) => {
         hora_envio: config.hora_envio,
         tipo_relatorio: config.tipo_relatorio,
         periodo_dias: config.periodo_dias,
-        anexo_url: config.anexo_url,
+        anexo_url: anexoUrl,
+        anexo_gerado: anexoGerado,
         cca_id: config.cca_id,
         timestamp: now.toISOString()
       };
@@ -177,7 +211,10 @@ serve(async (req: Request) => {
             status_code: webhookResponse.status,
             response_body: responseBody,
             sucesso: webhookResponse.ok,
-            erro_mensagem: webhookResponse.ok ? null : `Status ${webhookResponse.status}: ${responseBody}`
+            erro_mensagem: webhookResponse.ok ? null : `Status ${webhookResponse.status}: ${responseBody}`,
+            anexo_gerado: anexoGerado,
+            anexo_url: anexoUrl,
+            tempo_geracao_ms: tempoGeracaoMs
           });
 
         results.push({
@@ -201,7 +238,10 @@ serve(async (req: Request) => {
             status_code: null,
             response_body: null,
             sucesso: false,
-            erro_mensagem: webhookError.message
+            erro_mensagem: webhookError.message,
+            anexo_gerado: anexoGerado,
+            anexo_url: anexoUrl,
+            tempo_geracao_ms: tempoGeracaoMs
           });
 
         results.push({

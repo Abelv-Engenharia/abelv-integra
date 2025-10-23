@@ -9177,6 +9177,8 @@ export type Database = {
       }
       webhook_logs: {
         Row: {
+          anexo_gerado: boolean | null
+          anexo_url: string | null
           configuracao_id: string | null
           enviado_em: string | null
           erro_mensagem: string | null
@@ -9185,9 +9187,12 @@ export type Database = {
           response_body: string | null
           status_code: number | null
           sucesso: boolean | null
+          tempo_geracao_ms: number | null
           webhook_url: string
         }
         Insert: {
+          anexo_gerado?: boolean | null
+          anexo_url?: string | null
           configuracao_id?: string | null
           enviado_em?: string | null
           erro_mensagem?: string | null
@@ -9196,9 +9201,12 @@ export type Database = {
           response_body?: string | null
           status_code?: number | null
           sucesso?: boolean | null
+          tempo_geracao_ms?: number | null
           webhook_url: string
         }
         Update: {
+          anexo_gerado?: boolean | null
+          anexo_url?: string | null
           configuracao_id?: string | null
           enviado_em?: string | null
           erro_mensagem?: string | null
@@ -9207,6 +9215,7 @@ export type Database = {
           response_body?: string | null
           status_code?: number | null
           sucesso?: boolean | null
+          tempo_geracao_ms?: number | null
           webhook_url?: string
         }
         Relationships: [
