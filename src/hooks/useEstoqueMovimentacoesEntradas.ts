@@ -41,7 +41,14 @@ export function useEstoqueMovimentacoesEntradas(ccaId?: number) {
     queryFn: async () => {
       let query = supabase
         .from("estoque_movimentacoes_entradas")
-        .select("*")
+        .select(`
+          *,
+          ccas (codigo, nome),
+          almoxarifados (nome),
+          credores!estoque_movimentacoes_entradas_id_credor_fkey (razao, cnpj_cpf),
+          empresas_sienge (name),
+          tipo_documentos (codigo, descricao)
+        `)
         .order("created_at", { ascending: false });
 
       if (ccaId) {
