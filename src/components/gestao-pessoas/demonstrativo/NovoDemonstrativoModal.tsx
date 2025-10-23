@@ -93,13 +93,22 @@ export function NovoDemonstrativoModal({ open, onOpenChange, onSave }: NovoDemon
       setValue("funcao", prestador.servico || "");
       
       if (prestador.dataNascimento) {
-        const dataNasc = new Date(prestador.dataNascimento);
+        // Corrigir timezone para não perder um dia
+        const [ano, mes, dia] = prestador.dataNascimento.split('-');
+        const dataNasc = new Date(parseInt(ano), parseInt(mes) - 1, parseInt(dia));
         setDataNascimento(dataNasc);
         setValue("datanascimento", dataNasc);
       }
       
+      // Preencher campo CCA
+      if (prestador.ccaCodigo && prestador.ccaNome) {
+        setValue("obra", `${prestador.ccaCodigo} - ${prestador.ccaNome}`);
+      }
+      
       if (prestador.dataInicioContrato) {
-        const dataAdm = new Date(prestador.dataInicioContrato);
+        // Corrigir timezone para não perder um dia
+        const [ano, mes, dia] = prestador.dataInicioContrato.split('-');
+        const dataAdm = new Date(parseInt(ano), parseInt(mes) - 1, parseInt(dia));
         setDataAdmissao(dataAdm);
         setValue("admissao", dataAdm);
       }
@@ -378,12 +387,14 @@ export function NovoDemonstrativoModal({ open, onOpenChange, onSave }: NovoDemon
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="obra" className={errors.obra ? "text-destructive" : ""}>
-                  Obra*
+                  Cca*
                 </Label>
                 <Input 
                   id="obra" 
                   {...register("obra")}
                   className={errors.obra ? "border-destructive" : ""}
+                  placeholder="Auto-preenchido ao selecionar prestador"
+                  readOnly
                 />
                 {errors.obra && <p className="text-xs text-destructive mt-1">{errors.obra.message}</p>}
               </div>
@@ -454,53 +465,88 @@ export function NovoDemonstrativoModal({ open, onOpenChange, onSave }: NovoDemon
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="salario">Salário</Label>
-                <Input 
-                  id="salario" 
-                  type="number"
-                  step="0.01"
-                  {...register("salario", { valueAsNumber: true })}
-                />
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">R$</span>
+                  <Input 
+                    id="salario" 
+                    type="text"
+                    className="pl-10"
+                    value={salario.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/\D/g, '');
+                      setValue("salario", parseFloat(value) / 100 || 0);
+                    }}
+                  />
+                </div>
               </div>
               <div>
                 <Label htmlFor="premiacaonexa">Bonificação</Label>
-                <Input 
-                  id="premiacaonexa" 
-                  type="number"
-                  step="0.01"
-                  {...register("premiacaonexa", { valueAsNumber: true })}
-                />
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">R$</span>
+                  <Input 
+                    id="premiacaonexa" 
+                    type="text"
+                    className="pl-10"
+                    value={premiacaonexa.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/\D/g, '');
+                      setValue("premiacaonexa", parseFloat(value) / 100 || 0);
+                    }}
+                  />
+                </div>
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="ajudacustoobra">Ajuda de Custo Obra</Label>
-                <Input 
-                  id="ajudacustoobra" 
-                  type="number"
-                  step="0.01"
-                  {...register("ajudacustoobra", { valueAsNumber: true })}
-                />
+                <Label htmlFor="ajudacustoobra">Ajuda de Custo</Label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">R$</span>
+                  <Input 
+                    id="ajudacustoobra" 
+                    type="text"
+                    className="pl-10"
+                    value={ajudacustoobra.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/\D/g, '');
+                      setValue("ajudacustoobra", parseFloat(value) / 100 || 0);
+                    }}
+                  />
+                </div>
               </div>
               <div>
-                <Label htmlFor="ajudaaluguel">Ajuda de Aluguel</Label>
-                <Input 
-                  id="ajudaaluguel" 
-                  type="number"
-                  step="0.01"
-                  {...register("ajudaaluguel", { valueAsNumber: true })}
-                />
+                <Label htmlFor="ajudaaluguel">Ajuda Aluguel</Label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">R$</span>
+                  <Input 
+                    id="ajudaaluguel" 
+                    type="text"
+                    className="pl-10"
+                    value={ajudaaluguel.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/\D/g, '');
+                      setValue("ajudaaluguel", parseFloat(value) / 100 || 0);
+                    }}
+                  />
+                </div>
               </div>
             </div>
 
             <div>
-              <Label htmlFor="reembolsoconvenio">Reembolso Convênio</Label>
-              <Input 
-                id="reembolsoconvenio" 
-                type="number"
-                step="0.01"
-                {...register("reembolsoconvenio", { valueAsNumber: true })}
-              />
+              <Label htmlFor="reembolsoconvenio">Reembolso Convenio</Label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">R$</span>
+                <Input 
+                  id="reembolsoconvenio" 
+                  type="text"
+                  className="pl-10"
+                  value={reembolsoconvenio.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/\D/g, '');
+                    setValue("reembolsoconvenio", parseFloat(value) / 100 || 0);
+                  }}
+                />
+              </div>
             </div>
           </div>
 
@@ -509,43 +555,71 @@ export function NovoDemonstrativoModal({ open, onOpenChange, onSave }: NovoDemon
             <h3 className="text-sm font-semibold border-b pb-2 border-red-500/30">Descontos</h3>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="multasdescontos">Multas de Trânsito</Label>
-                <Input 
-                  id="multasdescontos" 
-                  type="number"
-                  step="0.01"
-                  {...register("multasdescontos", { valueAsNumber: true })}
-                />
+                <Label htmlFor="multasdescontos">Multas de Transito</Label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">R$</span>
+                  <Input 
+                    id="multasdescontos" 
+                    type="text"
+                    className="pl-10"
+                    value={multasdescontos.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/\D/g, '');
+                      setValue("multasdescontos", parseFloat(value) / 100 || 0);
+                    }}
+                  />
+                </div>
               </div>
               <div>
-                <Label htmlFor="descontoconvenio">Desconto de Convênio</Label>
-                <Input 
-                  id="descontoconvenio" 
-                  type="number"
-                  step="0.01"
-                  {...register("descontoconvenio", { valueAsNumber: true })}
-                />
+                <Label htmlFor="descontoconvenio">Desconto Convenio</Label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">R$</span>
+                  <Input 
+                    id="descontoconvenio" 
+                    type="text"
+                    className="pl-10"
+                    value={descontoconvenio.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/\D/g, '');
+                      setValue("descontoconvenio", parseFloat(value) / 100 || 0);
+                    }}
+                  />
+                </div>
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="descontoabelvrun">Desconto Abelv Run</Label>
-                <Input 
-                  id="descontoabelvrun" 
-                  type="number"
-                  step="0.01"
-                  {...register("descontoabelvrun", { valueAsNumber: true })}
-                />
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">R$</span>
+                  <Input 
+                    id="descontoabelvrun" 
+                    type="text"
+                    className="pl-10"
+                    value={descontoabelvrun.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/\D/g, '');
+                      setValue("descontoabelvrun", parseFloat(value) / 100 || 0);
+                    }}
+                  />
+                </div>
               </div>
               <div>
                 <Label htmlFor="estacionamento">Estacionamento</Label>
-                <Input 
-                  id="estacionamento" 
-                  type="number"
-                  step="0.01"
-                  {...register("estacionamento", { valueAsNumber: true })}
-                />
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">R$</span>
+                  <Input 
+                    id="estacionamento" 
+                    type="text"
+                    className="pl-10"
+                    value={estacionamento.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/\D/g, '');
+                      setValue("estacionamento", parseFloat(value) / 100 || 0);
+                    }}
+                  />
+                </div>
               </div>
             </div>
           </div>
