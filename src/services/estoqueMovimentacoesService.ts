@@ -35,7 +35,6 @@ export interface CreateMovimentacaoInput {
   numero?: string;
   id_empresa?: number;
   id_documento?: string;
-  tipo_documento?: string;
   emissao?: string;
   movimento?: string;
   pdf_url?: string;
@@ -64,7 +63,6 @@ export const estoqueMovimentacoesService = {
         numero: input.numero,
         id_empresa: input.id_empresa,
         id_documento: input.id_documento,
-        tipo_documento: input.tipo_documento,
         emissao: input.emissao,
         movimento: input.movimento,
         pdf_url: input.pdf_url,
