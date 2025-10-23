@@ -112,10 +112,20 @@ export const useDeleteModelo = () => {
   });
 };
 
+// Função para sanitizar nome do arquivo
+const sanitizeFileName = (fileName: string): string => {
+  return fileName
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '') // Remove acentos
+    .replace(/\s+/g, '_') // Substitui espaços por underscores
+    .replace(/[^a-zA-Z0-9_.-]/g, ''); // Remove caracteres especiais
+};
+
 export const useUploadModelo = () => {
   return useMutation({
     mutationFn: async ({ file, modeloId }: { file: File; modeloId?: string }) => {
-      const fileName = `${modeloId || Date.now()}-${file.name}`;
+      const sanitizedName = sanitizeFileName(file.name);
+      const fileName = `${modeloId || Date.now()}-${sanitizedName}`;
       const { data, error } = await supabase.storage
         .from('contratos-modelos')
         .upload(fileName, file);
