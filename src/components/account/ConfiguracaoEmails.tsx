@@ -71,6 +71,17 @@ const ConfiguracaoEmailsForm = ({
       .map((email) => email.trim())
       .filter(Boolean);
 
+    // Validar webhook_url
+    if (!webhookUrl || webhookUrl.trim() === "") {
+      toast({
+        title: "Erro",
+        description: "URL do Webhook N8N é obrigatória",
+        variant: "destructive",
+      });
+      setLoading(false);
+      return;
+    }
+
     const dataToSubmit = {
       assunto,
       destinatarios: destinatariosArray,
@@ -83,8 +94,10 @@ const ConfiguracaoEmailsForm = ({
       periodo_dias: tipoRelatorio ? periodoDias : null,
       anexo_url: anexoUrl,
       cca_id: ccaId,
-      webhook_url: webhookUrl || null,
+      webhook_url: webhookUrl.trim(),
     };
+
+    console.log("Dados sendo enviados:", dataToSubmit);
 
     try {
       if (configuracao) {
@@ -266,20 +279,21 @@ const ConfiguracaoEmailsForm = ({
       </div>
 
       <div>
-        <Label htmlFor="webhookUrl" className="text-red-600">
-          URL do Webhook N8N *
+        <Label htmlFor="webhookUrl">
+          <span className="text-red-600">* </span>
+          URL do Webhook N8N
         </Label>
         <Input
-          type="url"
+          type="text"
           id="webhookUrl"
-          value={webhookUrl}
+          value={webhookUrl || ""}
           onChange={(e) => setWebhookUrl(e.target.value)}
           placeholder="https://seu-n8n.com/webhook/..."
-          required={!webhookUrl}
+          required
           className={!webhookUrl ? "border-red-600" : ""}
         />
         <p className="text-xs text-muted-foreground mt-1">
-          Digite a URL do webhook do N8N que receberá os dados do email
+          Digite a URL completa do webhook do N8N que receberá os dados do email
         </p>
       </div>
 
