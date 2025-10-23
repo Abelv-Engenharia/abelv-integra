@@ -50,7 +50,7 @@ export function EditarPrestadorModal({ open, onOpenChange, prestador }: EditarPr
     if (prestador) {
       setFormData({
         razaosocial: prestador.razaoSocial || "",
-        cnpj: prestador.cnpj || "",
+        cnpj: prestador.cnpj ? formatCNPJ(prestador.cnpj) : "",
         descricaoatividade: prestador.descricaoAtividade || "",
         numerocnae: prestador.numeroCnae || "",
         grauderisco: prestador.grauDeRisco?.toString() || "",
@@ -67,15 +67,15 @@ export function EditarPrestadorModal({ open, onOpenChange, prestador }: EditarPr
         emailrepresentante: prestador.emailRepresentante || "",
         enderecorepresentante: prestador.enderecoRepresentante || "",
         servico: prestador.servico || "",
-        valorprestacaoservico: prestador.valorPrestacaoServico ? formatarMoeda(prestador.valorPrestacaoServico.toString()) : "",
+        valorprestacaoservico: prestador.valorPrestacaoServico ? formatarMoedaDoBanco(prestador.valorPrestacaoServico) : "",
         tipocontrato: prestador.tempoContrato || "padrao",
-        ajudacusto: prestador.ajudaCusto ? formatarMoeda(prestador.ajudaCusto.toString()) : "",
-        ajudaaluguel: prestador.ajudaAluguel ? formatarMoeda(prestador.ajudaAluguel.toString()) : "",
-        valerefeicao: prestador.valeRefeicao ? formatarMoeda(prestador.valeRefeicao.toString()) : "",
-        valorauxilioconveniomedico: prestador.valorAuxilioConvenioMedico ? formatarMoeda(prestador.valorAuxilioConvenioMedico.toString()) : "",
-        valorcafemanha: prestador.valorCafeManha ? formatarMoeda(prestador.valorCafeManha.toString()) : "",
-        valorcafetarde: prestador.valorCafeTarde ? formatarMoeda(prestador.valorCafeTarde.toString()) : "",
-        valoralmoco: prestador.valorAlmoco ? formatarMoeda(prestador.valorAlmoco.toString()) : "",
+        ajudacusto: prestador.ajudaCusto ? formatarMoedaDoBanco(prestador.ajudaCusto) : "",
+        ajudaaluguel: prestador.ajudaAluguel ? formatarMoedaDoBanco(prestador.ajudaAluguel) : "",
+        valerefeicao: prestador.valeRefeicao ? formatarMoedaDoBanco(prestador.valeRefeicao) : "",
+        valorauxilioconveniomedico: prestador.valorAuxilioConvenioMedico ? formatarMoedaDoBanco(prestador.valorAuxilioConvenioMedico) : "",
+        valorcafemanha: prestador.valorCafeManha ? formatarMoedaDoBanco(prestador.valorCafeManha) : "",
+        valorcafetarde: prestador.valorCafeTarde ? formatarMoedaDoBanco(prestador.valorCafeTarde) : "",
+        valoralmoco: prestador.valorAlmoco ? formatarMoedaDoBanco(prestador.valorAlmoco) : "",
         veiculo: prestador.veiculo || false,
         celular: prestador.celular || false,
         alojamento: prestador.alojamento || false,
@@ -86,19 +86,27 @@ export function EditarPrestadorModal({ open, onOpenChange, prestador }: EditarPr
       });
       
       if (prestador.dataNascimento) {
-        setDataNascimento(new Date(prestador.dataNascimento));
+        const dateStr = prestador.dataNascimento.split('T')[0];
+        const [year, month, day] = dateStr.split('-');
+        setDataNascimento(new Date(parseInt(year), parseInt(month) - 1, parseInt(day)));
       }
       
       if (prestador.dataInicioContrato) {
-        setDataInicioContrato(new Date(prestador.dataInicioContrato));
+        const dateStr = prestador.dataInicioContrato.split('T')[0];
+        const [year, month, day] = dateStr.split('-');
+        setDataInicioContrato(new Date(parseInt(year), parseInt(month) - 1, parseInt(day)));
       }
 
       if (prestador.dataInicioContratoDeterminado) {
-        setDataInicioContratoDeterminado(new Date(prestador.dataInicioContratoDeterminado));
+        const dateStr = prestador.dataInicioContratoDeterminado.split('T')[0];
+        const [year, month, day] = dateStr.split('-');
+        setDataInicioContratoDeterminado(new Date(parseInt(year), parseInt(month) - 1, parseInt(day)));
       }
 
       if (prestador.dataFimContratoDeterminado) {
-        setDataFimContratoDeterminado(new Date(prestador.dataFimContratoDeterminado));
+        const dateStr = prestador.dataFimContratoDeterminado.split('T')[0];
+        const [year, month, day] = dateStr.split('-');
+        setDataFimContratoDeterminado(new Date(parseInt(year), parseInt(month) - 1, parseInt(day)));
       }
     }
   }, [prestador]);
@@ -123,6 +131,14 @@ export function EditarPrestadorModal({ open, onOpenChange, prestador }: EditarPr
       return numbers.replace(/(\d{2})(\d{4})(\d{4})/, "($1) $2-$3");
     }
     return numbers.replace(/(\d{2})(\d{5})(\d{4})/, "($1) $2-$3");
+  };
+
+  const formatarMoedaDoBanco = (valor: number): string => {
+    if (!valor) return '';
+    return valor.toLocaleString('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    });
   };
 
   const formatarMoeda = (valor: string | number): string => {
