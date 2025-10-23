@@ -565,6 +565,130 @@ export type Database = {
           },
         ]
       }
+      contratos_emitidos: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          dados_preenchidos: Json
+          data_fim: string | null
+          data_inicio: string | null
+          email_enviado: boolean
+          email_enviado_em: string | null
+          id: string
+          modelo_id: string | null
+          numero_contrato: string
+          observacoes: string | null
+          pdf_nome: string | null
+          pdf_url: string | null
+          prestador_id: string
+          status: string
+          tipo_contrato: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          dados_preenchidos?: Json
+          data_fim?: string | null
+          data_inicio?: string | null
+          email_enviado?: boolean
+          email_enviado_em?: string | null
+          id?: string
+          modelo_id?: string | null
+          numero_contrato: string
+          observacoes?: string | null
+          pdf_nome?: string | null
+          pdf_url?: string | null
+          prestador_id: string
+          status?: string
+          tipo_contrato: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          dados_preenchidos?: Json
+          data_fim?: string | null
+          data_inicio?: string | null
+          email_enviado?: boolean
+          email_enviado_em?: string | null
+          id?: string
+          modelo_id?: string | null
+          numero_contrato?: string
+          observacoes?: string | null
+          pdf_nome?: string | null
+          pdf_url?: string | null
+          prestador_id?: string
+          status?: string
+          tipo_contrato?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contratos_emitidos_modelo_id_fkey"
+            columns: ["modelo_id"]
+            isOneToOne: false
+            referencedRelation: "contratos_modelos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contratos_emitidos_prestador_id_fkey"
+            columns: ["prestador_id"]
+            isOneToOne: false
+            referencedRelation: "prestadores_pj"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contratos_emitidos_prestador_id_fkey"
+            columns: ["prestador_id"]
+            isOneToOne: false
+            referencedRelation: "view_prestadores_resumo"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      contratos_modelos: {
+        Row: {
+          arquivo_nome: string
+          arquivo_url: string
+          ativo: boolean
+          codigos_disponiveis: Json
+          created_at: string
+          created_by: string | null
+          descricao: string | null
+          id: string
+          nome: string
+          tipo_contrato: string
+          updated_at: string
+        }
+        Insert: {
+          arquivo_nome: string
+          arquivo_url: string
+          ativo?: boolean
+          codigos_disponiveis?: Json
+          created_at?: string
+          created_by?: string | null
+          descricao?: string | null
+          id?: string
+          nome: string
+          tipo_contrato: string
+          updated_at?: string
+        }
+        Update: {
+          arquivo_nome?: string
+          arquivo_url?: string
+          ativo?: boolean
+          codigos_disponiveis?: Json
+          created_at?: string
+          created_by?: string | null
+          descricao?: string | null
+          id?: string
+          nome?: string
+          tipo_contrato?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       controle_opcoes: {
         Row: {
           ativo: boolean | null

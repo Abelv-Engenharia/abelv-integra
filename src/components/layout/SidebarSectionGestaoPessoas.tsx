@@ -464,8 +464,17 @@ export default function SidebarSectionGestaoPessoas({
                         {canSee('gestao_pessoas_prestadores_contratos_criar') && <SidebarMenuItem>
                             <SidebarMenuButton asChild>
                               <Link to="/gestao-pessoas/emissao-contrato-prestacao-servico" onClick={onLinkClick}>
-                                <FileText className="h-4 w-4" />
+                                <FilePlus className="h-4 w-4" />
                                 <span>Emissão Contrato</span>
+                              </Link>
+                            </SidebarMenuButton>
+                          </SidebarMenuItem>}
+                          
+                        {canSee('gestao_pessoas_prestadores_modelos_contratos') && <SidebarMenuItem>
+                            <SidebarMenuButton asChild>
+                              <Link to="/gestao-pessoas/modelos-contratos" onClick={onLinkClick}>
+                                <FileText className="h-4 w-4" />
+                                <span>Modelos de Contratos</span>
                               </Link>
                             </SidebarMenuButton>
                           </SidebarMenuItem>}

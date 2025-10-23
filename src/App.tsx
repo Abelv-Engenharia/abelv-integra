@@ -193,6 +193,7 @@ import DashboardPrestadores from "./pages/gestao-pessoas/DashboardPrestadores";
 import CadastroPessoaJuridica from "./pages/gestao-pessoas/CadastroPessoaJuridica";
 import ConsultaPrestadores from "./pages/gestao-pessoas/ConsultaPrestadores";
 import EmissaoContratoPrestacaoServico from "./pages/gestao-pessoas/EmissaoContratoPrestacaoServico";
+import ModelosContratos from "./pages/gestao-pessoas/ModelosContratos";
 import ConsultaContratos from "./pages/gestao-pessoas/ConsultaContratos";
 import DemonstrativoPrestacaoServico from "./pages/gestao-pessoas/DemonstrativoPrestacaoServico";
 import RelatoriosPrestadores from "./pages/gestao-pessoas/RelatoriosPrestadores";
@@ -646,6 +647,11 @@ function App() {
                 <Route path="gestao-pessoas/emissao-contrato-prestacao-servico" element={
                   <PermissionGuard requiredPermission="gestao_pessoas_prestadores_contratos_criar">
                     <EmissaoContratoPrestacaoServico />
+                  </PermissionGuard>
+                } />
+                <Route path="gestao-pessoas/modelos-contratos" element={
+                  <PermissionGuard requiredPermission="gestao_pessoas_prestadores_modelos_contratos">
+                    <ModelosContratos />
                   </PermissionGuard>
                 } />
                 <Route path="gestao-pessoas/consulta-contratos" element={
