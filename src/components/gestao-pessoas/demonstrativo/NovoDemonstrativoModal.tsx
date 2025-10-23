@@ -46,6 +46,7 @@ interface NovoDemonstrativoModalProps {
   onOpenChange: (open: boolean) => void;
   onSave: (data: DemonstrativoFormData & { 
     valornf: number;
+    valorliquido: number;
     prestadorId: string;
     ccaId?: number;
     ccaCodigo?: string;
@@ -217,6 +218,7 @@ export function NovoDemonstrativoModal({ open, onOpenChange, onSave }: NovoDemon
       ...data,
       codigo,
       valornf: valorNF,
+      valorliquido: valorNF,
       prestadorId: prestadorSelecionado,
       ccaId: prestador?.ccaId,
       ccaCodigo: prestador?.ccaCodigo,
