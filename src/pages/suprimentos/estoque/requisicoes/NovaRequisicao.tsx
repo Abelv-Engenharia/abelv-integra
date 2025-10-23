@@ -16,6 +16,7 @@ import { useCCAs } from "@/hooks/useCCAs";
 import { useAlmoxarifados } from "@/hooks/useAlmoxarifados";
 import { useEstoqueItensDisponiveis } from "@/hooks/useEstoqueItensDisponiveis";
 import { eapService, EAPItem } from "@/services/eapService";
+import { estoqueMovimentacoesSaidasService } from "@/services/estoqueMovimentacoesSaidasService";
 
 interface ItemRequisicao {
   id: string;
@@ -52,6 +53,7 @@ export default function NovaRequisicao() {
     unitario: 0
   });
   const [itemEditando, setItemEditando] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
   
   // Hooks
   const { data: almoxarifados = [] } = useAlmoxarifados(cca ? Number(cca) : undefined);
@@ -184,7 +186,7 @@ export default function NovaRequisicao() {
     setItens(itens.filter(item => item.id !== id));
   };
 
-  const salvarRequisicao = () => {
+  const salvarRequisicao = async () => {
     // Validações básicas
     if (!cca || !requisitante || !dataMovimento || !almoxarifado || !apropriacao) {
       toast({
@@ -204,13 +206,43 @@ export default function NovaRequisicao() {
       return;
     }
 
-    // Simular salvamento
-    toast({
-      title: "Sucesso",
-      description: "Requisição salva com sucesso!"
-    });
+    setIsSaving(true);
     
-    navigate("/suprimentos/estoque/requisicoes/requisicao-materiais");
+    try {
+      // Salvar a requisição e seus itens
+      await estoqueMovimentacoesSaidasService.create(
+        {
+          cca_id: Number(cca),
+          requisitante,
+          data_movimento: format(dataMovimento, "yyyy-MM-dd"),
+          almoxarifado_id: almoxarifado,
+          apropriacao_id: apropriacao,
+          observacao: observacao || undefined,
+        },
+        itens.map(item => ({
+          descricao: item.descricao,
+          unidade: item.unidade,
+          quantidade: item.quantidade,
+          unitario: item.unitario,
+        }))
+      );
+
+      toast({
+        title: "Sucesso",
+        description: "Requisição salva com sucesso!"
+      });
+      
+      navigate("/suprimentos/estoque/requisicoes/requisicao-materiais");
+    } catch (error) {
+      console.error("Erro ao salvar requisição:", error);
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Erro ao salvar requisição. Tente novamente."
+      });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -498,8 +530,8 @@ export default function NovaRequisicao() {
         >
           Cancelar
         </Button>
-        <Button onClick={salvarRequisicao}>
-          Salvar Requisição
+        <Button onClick={salvarRequisicao} disabled={isSaving}>
+          {isSaving ? "Salvando..." : "Salvar Requisição"}
         </Button>
       </div>
     </div>
