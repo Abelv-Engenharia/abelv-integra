@@ -58,10 +58,7 @@ export default function NovaEntrada() {
     data: credores = [],
     isLoading: credoresLoading
   } = useCredores();
-  const {
-    data: empresas = [],
-    isLoading: empresasLoading
-  } = useEmpresas();
+  
   const form = useForm<EntradaFormData>({
     resolver: zodResolver(entradaSchema),
     defaultValues: {
@@ -81,6 +78,13 @@ export default function NovaEntrada() {
       }]
     }
   });
+  
+  const ccaSelecionado = form.watch("cca");
+  
+  const {
+    data: empresas = [],
+    isLoading: empresasLoading
+  } = useEmpresas(ccaSelecionado);
   const {
     fields,
     append,
@@ -180,7 +184,10 @@ export default function NovaEntrada() {
                       <FormLabel className={cn(!field.value && "text-destructive")}>
                         CCA *
                       </FormLabel>
-                      <Select onValueChange={value => field.onChange(parseInt(value))} value={field.value?.toString()} disabled={ccasLoading}>
+                      <Select onValueChange={value => {
+                        field.onChange(parseInt(value));
+                        form.setValue("empresa", undefined);
+                      }} value={field.value?.toString()} disabled={ccasLoading}>
                         <FormControl>
                           <SelectTrigger className={cn(!field.value && "border-destructive")}>
                             <SelectValue placeholder={ccasLoading ? "Carregando..." : "Selecione o CCA"} />
