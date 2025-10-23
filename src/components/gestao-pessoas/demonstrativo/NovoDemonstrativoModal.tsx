@@ -19,7 +19,7 @@ import { usePrestadoresPJ } from "@/hooks/gestao-pessoas/usePrestadoresPJ";
 const demonstrativoSchema = z.object({
   codigo: z.string().optional(),
   periodocontabil: z.string().min(1, "Período Contábil é obrigatório"),
-  codigosienge: z.string().min(1, "Código Sienge é obrigatório"),
+  codigosienge: z.string().min(1, "N° Credor Sienge é obrigatório"),
   nome: z.string().min(1, "Nome é obrigatório"),
   email: z.string().email("Email inválido").min(1, "Email é obrigatório"),
   cpf: z.string().min(1, "CPF é obrigatório"),
@@ -95,6 +95,7 @@ export function NovoDemonstrativoModal({ open, onOpenChange, onSave }: NovoDemon
       setValue("cpf", prestador.cpf || "");
       setValue("nomeempresa", prestador.razaoSocial || "");
       setValue("funcao", prestador.servico || "");
+      setValue("codigosienge", prestador.numeroCredorSienge || "");
       
       // Preencher campo CCA - tentar todas as possibilidades
       if (prestador.ccaCodigo && prestador.ccaNome) {
@@ -301,7 +302,7 @@ export function NovoDemonstrativoModal({ open, onOpenChange, onSave }: NovoDemon
               </div>
               <div>
                 <Label htmlFor="codigosienge" className={errors.codigosienge ? "text-destructive" : ""}>
-                  Código Sienge*
+                  N° Credor Sienge*
                 </Label>
                 <Input 
                   id="codigosienge" 
@@ -643,11 +644,29 @@ export function NovoDemonstrativoModal({ open, onOpenChange, onSave }: NovoDemon
           {/* Valor Total */}
           <div className="space-y-4">
             <h3 className="text-sm font-semibold border-b pb-2">Valor Total</h3>
-            <div className="bg-muted p-4 rounded-lg">
-              <Label>Valor NF (Calculado)</Label>
-              <p className="text-2xl font-bold text-primary mt-2">
-                {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valorNF)}
-              </p>
+            <div className="bg-muted p-4 rounded-lg space-y-3">
+              <div>
+                <Label className="text-sm text-muted-foreground">Total Proventos</Label>
+                <p className="text-lg font-semibold text-green-600">
+                  {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(
+                    salario + premiacaonexa + ajudacustoobra + ajudaaluguel + reembolsoconvenio
+                  )}
+                </p>
+              </div>
+              <div>
+                <Label className="text-sm text-muted-foreground">Total Descontos</Label>
+                <p className="text-lg font-semibold text-red-600">
+                  - {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(
+                    multasdescontos + descontoconvenio + descontoabelvrun + estacionamento
+                  )}
+                </p>
+              </div>
+              <div className="pt-2 border-t">
+                <Label>Valor NF (Calculado)</Label>
+                <p className="text-2xl font-bold text-primary mt-2">
+                  {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valorNF)}
+                </p>
+              </div>
             </div>
           </div>
 
