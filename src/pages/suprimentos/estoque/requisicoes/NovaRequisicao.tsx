@@ -55,7 +55,7 @@ export default function NovaRequisicao() {
   
   // Hooks
   const { data: almoxarifados = [] } = useAlmoxarifados(cca ? Number(cca) : undefined);
-  const { data: itensDisponiveis = [] } = useEstoqueItensDisponiveis(searchDescricao);
+  const { data: itensDisponiveis = [] } = useEstoqueItensDisponiveis(searchDescricao, almoxarifado);
   
   // Carregar EAP quando CCA for selecionado
   useEffect(() => {
@@ -67,6 +67,16 @@ export default function NovaRequisicao() {
       setApropriacao("");
     }
   }, [cca]);
+
+  // Limpar itens quando almoxarifado for alterado
+  useEffect(() => {
+    if (almoxarifado) {
+      setItens([]);
+      setNovoItem({ descricao: "", unidade: "", quantidade: 0, unitario: 0 });
+      setSearchDescricao("");
+      setItemEditando(null);
+    }
+  }, [almoxarifado]);
   
   const carregarEAPNivel1 = async () => {
     try {
@@ -372,15 +382,15 @@ export default function NovaRequisicao() {
                 />
                 {searchDescricao.length >= 2 && itensDisponiveis.length > 0 && (
                   <div className="absolute z-10 w-full mt-1 bg-background border rounded-md shadow-lg max-h-60 overflow-auto">
-                    {itensDisponiveis.map((item) => (
+                    {itensDisponiveis.map((item, index) => (
                       <div
-                        key={item.id}
+                        key={index}
                         className="p-2 hover:bg-muted cursor-pointer"
                         onClick={() => selecionarItemEstoque(item)}
                       >
                         <div className="font-medium">{item.descricao}</div>
                         <div className="text-sm text-muted-foreground">
-                          {item.unidade} {item.unitario && `- R$ ${item.unitario.toFixed(2)}`}
+                          {item.unidade} - Qtd Total: {item.quantidade_total.toFixed(2)}
                         </div>
                       </div>
                     ))}
