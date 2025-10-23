@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,12 +13,16 @@ import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { useCCAs } from "@/hooks/useCCAs";
+import { useAlmoxarifados } from "@/hooks/useAlmoxarifados";
+import { useEstoqueItensDisponiveis } from "@/hooks/useEstoqueItensDisponiveis";
+import { eapService, EAPItem } from "@/services/eapService";
 
 interface ItemRequisicao {
   id: string;
   descricao: string;
   unidade: string;
   quantidade: number;
+  unitario?: number;
 }
 
 export default function NovaRequisicao() {
@@ -33,13 +37,84 @@ export default function NovaRequisicao() {
   const [apropriacao, setApropriacao] = useState("");
   const [observacao, setObservacao] = useState("");
   
+  // Estados para EAP em cascata
+  const [eapNiveis, setEapNiveis] = useState<EAPItem[][]>([]);
+  const [eapSelecionados, setEapSelecionados] = useState<string[]>([]);
+  const [eapItemFinal, setEapItemFinal] = useState<string>("");
+  
+  // Estados para itens
   const [itens, setItens] = useState<ItemRequisicao[]>([]);
+  const [searchDescricao, setSearchDescricao] = useState("");
   const [novoItem, setNovoItem] = useState<Partial<ItemRequisicao>>({
     descricao: "",
     unidade: "",
-    quantidade: 0
+    quantidade: 0,
+    unitario: 0
   });
   const [itemEditando, setItemEditando] = useState<string | null>(null);
+  
+  // Hooks
+  const { data: almoxarifados = [] } = useAlmoxarifados(cca ? Number(cca) : undefined);
+  const { data: itensDisponiveis = [] } = useEstoqueItensDisponiveis(searchDescricao);
+  
+  // Carregar EAP quando CCA for selecionado
+  useEffect(() => {
+    if (cca) {
+      carregarEAPNivel1();
+      setEapSelecionados([]);
+      setEapNiveis([]);
+      setEapItemFinal("");
+      setApropriacao("");
+    }
+  }, [cca]);
+  
+  const carregarEAPNivel1 = async () => {
+    try {
+      const itens = await eapService.getItemsByLevel(Number(cca), 1);
+      setEapNiveis([itens]);
+    } catch (error) {
+      console.error("Erro ao carregar EAP:", error);
+    }
+  };
+  
+  const selecionarEAPNivel = async (codigo: string, nivel: number) => {
+    const novosEapSelecionados = [...eapSelecionados];
+    novosEapSelecionados[nivel - 1] = codigo;
+    
+    // Remover seleções de níveis posteriores
+    novosEapSelecionados.splice(nivel);
+    setEapSelecionados(novosEapSelecionados);
+    
+    // Buscar filhos
+    const filhos = await eapService.getChildItems(Number(cca), codigo);
+    
+    if (filhos.length > 0) {
+      // Tem filhos, adicionar próximo nível
+      const novosNiveis = [...eapNiveis];
+      novosNiveis.splice(nivel);
+      novosNiveis.push(filhos);
+      setEapNiveis(novosNiveis);
+      setEapItemFinal(""); // Ainda não é o último nível
+      setApropriacao("");
+    } else {
+      // Não tem filhos, é o último nível
+      const novosNiveis = [...eapNiveis];
+      novosNiveis.splice(nivel);
+      setEapNiveis(novosNiveis);
+      setEapItemFinal(codigo);
+      setApropriacao(codigo);
+    }
+  };
+
+  const selecionarItemEstoque = (itemEstoque: typeof itensDisponiveis[0]) => {
+    setNovoItem({
+      ...novoItem,
+      descricao: itemEstoque.descricao,
+      unidade: itemEstoque.unidade || "",
+      unitario: itemEstoque.unitario || 0
+    });
+    setSearchDescricao(itemEstoque.descricao);
+  };
 
   const adicionarItem = () => {
     if (!novoItem.descricao || !novoItem.unidade || !novoItem.quantidade) {
@@ -59,7 +134,8 @@ export default function NovaRequisicao() {
               ...item, 
               descricao: novoItem.descricao!, 
               unidade: novoItem.unidade!, 
-              quantidade: novoItem.quantidade! 
+              quantidade: novoItem.quantidade!,
+              unitario: novoItem.unitario
             }
           : item
       ));
@@ -70,12 +146,14 @@ export default function NovaRequisicao() {
         id: Date.now().toString(),
         descricao: novoItem.descricao!,
         unidade: novoItem.unidade!,
-        quantidade: novoItem.quantidade!
+        quantidade: novoItem.quantidade!,
+        unitario: novoItem.unitario
       };
       setItens([...itens, item]);
     }
 
-    setNovoItem({ descricao: "", unidade: "", quantidade: 0 });
+    setNovoItem({ descricao: "", unidade: "", quantidade: 0, unitario: 0 });
+    setSearchDescricao("");
   };
 
   const editarItem = (id: string) => {
@@ -84,8 +162,10 @@ export default function NovaRequisicao() {
       setNovoItem({
         descricao: item.descricao,
         unidade: item.unidade,
-        quantidade: item.quantidade
+        quantidade: item.quantidade,
+        unitario: item.unitario
       });
+      setSearchDescricao(item.descricao);
       setItemEditando(id);
     }
   };
@@ -171,16 +251,13 @@ export default function NovaRequisicao() {
               <Label htmlFor="requisitante">
                 Requisitante <span className="text-destructive">*</span>
               </Label>
-              <Select value={requisitante} onValueChange={setRequisitante}>
-                <SelectTrigger className={cn(!requisitante && "border-destructive")}>
-                  <SelectValue placeholder="Selecione o requisitante" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="joao">João</SelectItem>
-                  <SelectItem value="carlos">Carlos</SelectItem>
-                  <SelectItem value="marcos">Marcos</SelectItem>
-                </SelectContent>
-              </Select>
+              <Input
+                id="requisitante"
+                placeholder="Nome do requisitante"
+                value={requisitante}
+                onChange={(e) => setRequisitante(e.target.value)}
+                className={cn(!requisitante && "border-destructive")}
+              />
             </div>
 
             <div className="space-y-2">
@@ -216,31 +293,50 @@ export default function NovaRequisicao() {
               <Label htmlFor="almoxarifado">
                 Almoxarifado <span className="text-destructive">*</span>
               </Label>
-              <Select value={almoxarifado} onValueChange={setAlmoxarifado}>
+              <Select value={almoxarifado} onValueChange={setAlmoxarifado} disabled={!cca}>
                 <SelectTrigger className={cn(!almoxarifado && "border-destructive")}>
-                  <SelectValue placeholder="Selecione o almoxarifado" />
+                  <SelectValue placeholder={cca ? "Selecione o almoxarifado" : "Selecione um CCA primeiro"} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="interno">Interno</SelectItem>
-                  <SelectItem value="externo">Externo</SelectItem>
+                  {almoxarifados.map((alm) => (
+                    <SelectItem key={alm.id} value={alm.id}>
+                      {alm.nome}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2 md:col-span-2">
               <Label htmlFor="apropriacao">
                 Apropriação <span className="text-destructive">*</span>
               </Label>
-              <Select value={apropriacao} onValueChange={setApropriacao}>
-                <SelectTrigger className={cn(!apropriacao && "border-destructive")}>
-                  <SelectValue placeholder="Selecione a apropriação" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="projeto-a">Projeto A</SelectItem>
-                  <SelectItem value="projeto-b">Projeto B</SelectItem>
-                  <SelectItem value="projeto-c">Projeto C</SelectItem>
-                </SelectContent>
-              </Select>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
+                {eapNiveis.map((nivel, index) => (
+                  <Select
+                    key={index}
+                    value={eapSelecionados[index] || ""}
+                    onValueChange={(value) => selecionarEAPNivel(value, index + 1)}
+                    disabled={!cca}
+                  >
+                    <SelectTrigger className={cn(!eapSelecionados[index] && index === 0 && "border-destructive")}>
+                      <SelectValue placeholder={`Nível ${index + 1}`} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {nivel.map((item) => (
+                        <SelectItem key={item.codigo} value={item.codigo}>
+                          {item.codigo} - {item.nome}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                ))}
+              </div>
+              {eapItemFinal && (
+                <p className="text-sm text-muted-foreground mt-1">
+                  EAP selecionado: {eapItemFinal}
+                </p>
+              )}
             </div>
           </div>
 
@@ -267,12 +363,30 @@ export default function NovaRequisicao() {
               <Label htmlFor="item-descricao">
                 Descrição <span className="text-destructive">*</span>
               </Label>
-              <Input
-                id="item-descricao"
-                placeholder="Descrição do item"
-                value={novoItem.descricao || ""}
-                onChange={(e) => setNovoItem({ ...novoItem, descricao: e.target.value })}
-              />
+              <div className="relative">
+                <Input
+                  id="item-descricao"
+                  placeholder="Digite para buscar..."
+                  value={searchDescricao}
+                  onChange={(e) => setSearchDescricao(e.target.value)}
+                />
+                {searchDescricao.length >= 2 && itensDisponiveis.length > 0 && (
+                  <div className="absolute z-10 w-full mt-1 bg-background border rounded-md shadow-lg max-h-60 overflow-auto">
+                    {itensDisponiveis.map((item) => (
+                      <div
+                        key={item.id}
+                        className="p-2 hover:bg-muted cursor-pointer"
+                        onClick={() => selecionarItemEstoque(item)}
+                      >
+                        <div className="font-medium">{item.descricao}</div>
+                        <div className="text-sm text-muted-foreground">
+                          {item.unidade} {item.unitario && `- R$ ${item.unitario.toFixed(2)}`}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
 
             <div className="space-y-2">
@@ -281,9 +395,10 @@ export default function NovaRequisicao() {
               </Label>
               <Input
                 id="item-unidade"
-                placeholder="Ex: UN, KG, M"
+                placeholder="Unidade"
                 value={novoItem.unidade || ""}
-                onChange={(e) => setNovoItem({ ...novoItem, unidade: e.target.value })}
+                readOnly
+                className="bg-muted"
               />
             </div>
 
@@ -300,6 +415,9 @@ export default function NovaRequisicao() {
                 onChange={(e) => setNovoItem({ ...novoItem, quantidade: Number(e.target.value) })}
               />
             </div>
+            
+            {/* Campo oculto unitário */}
+            <input type="hidden" value={novoItem.unitario || 0} />
 
             <div className="flex items-end gap-2">
               {itemEditando && (
@@ -307,7 +425,8 @@ export default function NovaRequisicao() {
                   variant="outline" 
                   onClick={() => {
                     setItemEditando(null);
-                    setNovoItem({ descricao: "", unidade: "", quantidade: 0 });
+                    setNovoItem({ descricao: "", unidade: "", quantidade: 0, unitario: 0 });
+                    setSearchDescricao("");
                   }}
                   className="w-full"
                 >
