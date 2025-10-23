@@ -12,8 +12,9 @@ import { cn } from "@/lib/utils";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState } from "react";
 import { toast } from "@/hooks/use-toast";
+import { usePrestadoresPJ } from "@/hooks/gestao-pessoas/usePrestadoresPJ";
 
 const demonstrativoSchema = z.object({
   codigo: z.string().optional(),
@@ -47,20 +48,12 @@ interface NovoDemonstrativoModalProps {
 }
 
 export function NovoDemonstrativoModal({ open, onOpenChange, onSave }: NovoDemonstrativoModalProps) {
+  const { data: prestadores = [], isLoading: loadingPrestadores } = usePrestadoresPJ();
   const [dataNascimento, setDataNascimento] = useState<Date>();
   const [dataAdmissao, setDataAdmissao] = useState<Date>();
-  const [prestadores, setPrestadores] = useState<any[]>([]);
   const [prestadorSelecionado, setPrestadorSelecionado] = useState<string>("");
   const [periodoContabil, setPeriodoContabil] = useState<string>("");
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
-
-  // Carregar prestadores do localStorage
-  useEffect(() => {
-    const prestadoresStorage = localStorage.getItem('cadastros_pessoa_juridica');
-    if (prestadoresStorage) {
-      setPrestadores(JSON.parse(prestadoresStorage));
-    }
-  }, [open]);
 
   const { register, handleSubmit, watch, setValue, formState: { errors }, reset } = useForm<DemonstrativoFormData>({
     resolver: zodResolver(demonstrativoSchema),
@@ -87,46 +80,42 @@ export function NovoDemonstrativoModal({ open, onOpenChange, onSave }: NovoDemon
   };
 
   // Auto-preencher campos ao selecionar prestador
-  const handlePrestadorChange = (cpf: string) => {
-    setPrestadorSelecionado(cpf);
+  const handlePrestadorChange = (id: string) => {
+    setPrestadorSelecionado(id);
     verificarExibicaoFormulario();
     
-    const prestador = prestadores.find(p => p.cpf === cpf);
+    const prestador = prestadores.find(p => p.id === id);
     if (prestador) {
-      setValue("nome", prestador.nomecompleto || "");
-      setValue("email", prestador.emailrepresentante || prestador.email || "");
+      setValue("nome", prestador.nomeCompleto || "");
+      setValue("email", prestador.emailRepresentante || "");
       setValue("cpf", prestador.cpf || "");
-      setValue("nomeempresa", prestador.razaosocial || "");
+      setValue("nomeempresa", prestador.razaoSocial || "");
       setValue("funcao", prestador.servico || "");
       
-      if (prestador.datanascimento) {
-        const dataNasc = new Date(prestador.datanascimento);
+      if (prestador.dataNascimento) {
+        const dataNasc = new Date(prestador.dataNascimento);
         setDataNascimento(dataNasc);
         setValue("datanascimento", dataNasc);
       }
       
-      if (prestador.datainiciocontrato) {
-        const dataAdm = new Date(prestador.datainiciocontrato);
+      if (prestador.dataInicioContrato) {
+        const dataAdm = new Date(prestador.dataInicioContrato);
         setDataAdmissao(dataAdm);
         setValue("admissao", dataAdm);
       }
 
       // Preencher valores financeiros se existirem
-      if (prestador.valorprestacaoservico) {
-        const valor = parseFloat(prestador.valorprestacaoservico.replace(/\D/g, '')) / 100;
-        setValue("salario", valor || 0);
+      if (prestador.valorPrestacaoServico) {
+        setValue("salario", prestador.valorPrestacaoServico || 0);
       }
-      if (prestador.ajudacusto) {
-        const valor = parseFloat(prestador.ajudacusto.replace(/\D/g, '')) / 100;
-        setValue("ajudacustoobra", valor || 0);
+      if (prestador.ajudaCusto) {
+        setValue("ajudacustoobra", prestador.ajudaCusto || 0);
       }
-      if (prestador.ajudaaluguel) {
-        const valor = parseFloat(prestador.ajudaaluguel.replace(/\D/g, '')) / 100;
-        setValue("ajudaaluguel", valor || 0);
+      if (prestador.ajudaAluguel) {
+        setValue("ajudaaluguel", prestador.ajudaAluguel || 0);
       }
-      if (prestador.valorauxilioconveniomedico) {
-        const valor = parseFloat(prestador.valorauxilioconveniomedico.replace(/\D/g, '')) / 100;
-        setValue("reembolsoconvenio", valor || 0);
+      if (prestador.valorAuxilioConvenioMedico) {
+        setValue("reembolsoconvenio", prestador.valorAuxilioConvenioMedico || 0);
       }
     }
     verificarExibicaoFormulario();
@@ -229,17 +218,21 @@ export function NovoDemonstrativoModal({ open, onOpenChange, onSave }: NovoDemon
             <h3 className="text-sm font-semibold border-b pb-2 text-primary">Selecionar Prestador e Período</h3>
             <div>
               <Label htmlFor="prestador">Prestador Cadastrado</Label>
-              <Select value={prestadorSelecionado} onValueChange={handlePrestadorChange}>
+              <Select 
+                value={prestadorSelecionado} 
+                onValueChange={handlePrestadorChange}
+                disabled={loadingPrestadores}
+              >
                 <SelectTrigger id="prestador">
-                  <SelectValue placeholder="Selecione um prestador para auto-preencher os dados" />
+                  <SelectValue placeholder={loadingPrestadores ? "Carregando..." : "Selecione um prestador para auto-preencher os dados"} />
                 </SelectTrigger>
                 <SelectContent>
                   {prestadores.length === 0 ? (
                     <SelectItem value="none" disabled>Nenhum prestador cadastrado</SelectItem>
                   ) : (
                     prestadores.map((prestador) => (
-                      <SelectItem key={prestador.cpf} value={prestador.cpf}>
-                        {prestador.nomecompleto} - {prestador.cpf}
+                      <SelectItem key={prestador.id} value={prestador.id}>
+                        {prestador.nomeCompleto} - CPF: {prestador.cpf}
                       </SelectItem>
                     ))
                   )}
