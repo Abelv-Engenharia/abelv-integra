@@ -9521,6 +9521,10 @@ export type Database = {
         Args: { user_id_param: string }
         Returns: boolean
       }
+      user_can_manage_medidas_disciplinares: {
+        Args: { user_id_param: string }
+        Returns: boolean
+      }
       user_can_manage_solicitacoes: {
         Args: { user_id_param: string }
         Returns: boolean
