@@ -2469,7 +2469,11 @@ export type Database = {
           cca_id: number
           created_at: string
           id: string
+          id_credor: string | null
+          id_documento: string | null
+          id_empresa: number | null
           item_nfe_id: string | null
+          numero: string | null
           quantidade: number
           updated_at: string
         }
@@ -2478,7 +2482,11 @@ export type Database = {
           cca_id: number
           created_at?: string
           id?: string
+          id_credor?: string | null
+          id_documento?: string | null
+          id_empresa?: number | null
           item_nfe_id?: string | null
+          numero?: string | null
           quantidade: number
           updated_at?: string
         }
@@ -2487,7 +2495,11 @@ export type Database = {
           cca_id?: number
           created_at?: string
           id?: string
+          id_credor?: string | null
+          id_documento?: string | null
+          id_empresa?: number | null
           item_nfe_id?: string | null
+          numero?: string | null
           quantidade?: number
           updated_at?: string
         }

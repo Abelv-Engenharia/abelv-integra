@@ -23,6 +23,16 @@ export const estoqueMovimentacoesService = {
     almoxarifadoId: string,
     nfeId: string
   ): Promise<EstoqueMovimentacaoEntrada[]> {
+    // Buscar a NFE para obter os dados adicionais
+    const { data: nfe, error: nfeError } = await supabase
+      .from('nfe_compra')
+      .select('id_credor, numero, id_empresa, id_documento')
+      .eq('id', nfeId)
+      .single();
+
+    if (nfeError) throw nfeError;
+    if (!nfe) throw new Error('NFE não encontrada');
+
     // Buscar os itens da NFE
     const { data: itens, error: itensError } = await supabase
       .from('nfe_compra_itens')
@@ -40,6 +50,10 @@ export const estoqueMovimentacoesService = {
       almoxarifado_id: almoxarifadoId,
       item_nfe_id: item.id,
       quantidade: item.quantidade,
+      id_credor: nfe.id_credor,
+      numero: nfe.numero,
+      id_empresa: nfe.id_empresa,
+      id_documento: nfe.id_documento,
     }));
 
     const { data, error } = await supabase

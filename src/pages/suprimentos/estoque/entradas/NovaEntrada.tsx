@@ -286,11 +286,11 @@ export default function NovaEntrada() {
 
                 <FormField control={form.control} name="pcabelv" render={({
                 field
-              }) => {}} />
+              }) => <></>} />
 
                 <FormField control={form.control} name="pccliente" render={({
                 field
-              }) => {}} />
+              }) => <></>} />
               </div>
 
               {/* Upload de arquivo */}
