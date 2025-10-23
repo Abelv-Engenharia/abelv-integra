@@ -33,12 +33,23 @@ serve(async (req: Request) => {
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhleGdkdGxjdHl1eWNvaHpobXV1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDU4NzY0NTMsImV4cCI6MjA2MTQ1MjQ1M30.hbqL05Y8UMfVaOa4nbDQNClCfjk_yRg_dtoL09_yGyo"
     );
 
-    // Buscar configurações ativas com webhook configurado
-    const { data: configuracoes, error: configError } = await supabase
+    // Verificar se é um teste de configuração específica
+    const body = req.method === 'POST' ? await req.json().catch(() => ({})) : {};
+    const testConfigId = body.configuracao_id;
+
+    let query = supabase
       .from('configuracoes_emails')
       .select('*')
       .eq('ativo', true)
       .not('webhook_url', 'is', null);
+
+    // Se for teste de configuração específica, buscar apenas ela
+    if (testConfigId) {
+      query = query.eq('id', testConfigId);
+    }
+
+    // Buscar configurações ativas com webhook configurado
+    const { data: configuracoes, error: configError } = await query;
 
     if (configError) throw configError;
 

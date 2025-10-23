@@ -9,7 +9,7 @@ import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus, Trash2, Settings } from "lucide-react";
+import { Plus, Trash2, Settings, Send } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useRelatoriosDisponiveis } from "@/hooks/useRelatoriosDisponiveis";
 import EmailTestPanel from "./EmailTestPanel";
@@ -374,6 +374,36 @@ const ConfiguracaoEmails = () => {
     }
   };
 
+  const handleTestWebhook = async (configuracao: ConfiguracaoEmail) => {
+    toast({
+      title: "Enviando...",
+      description: "Testando envio do webhook para N8N",
+    });
+
+    try {
+      const { data, error } = await supabase.functions.invoke('send-email-webhook', {
+        body: { configuracao_id: configuracao.id }
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Sucesso",
+        description: `Webhook enviado! ${data?.results?.[0]?.sucesso ? 'Entregue com sucesso' : 'Verifique os logs para detalhes'}`,
+      });
+
+      // Atualizar logs
+      await queryClient.invalidateQueries({ queryKey: ["webhook-logs"] });
+    } catch (error: any) {
+      console.error("Erro ao testar webhook:", error);
+      toast({
+        title: "Erro",
+        description: error.message || "Não foi possível enviar o webhook de teste.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -454,6 +484,16 @@ const ConfiguracaoEmails = () => {
                       )}
                     </div>
                     <div className="flex justify-end space-x-2 mt-4">
+                      {configuracao.webhook_url && configuracao.ativo && (
+                        <Button
+                          size="sm"
+                          variant="default"
+                          onClick={() => handleTestWebhook(configuracao)}
+                        >
+                          <Send className="w-4 h-4 mr-2" />
+                          Testar Agora
+                        </Button>
+                      )}
                       <Button
                         size="sm"
                         variant="outline"
