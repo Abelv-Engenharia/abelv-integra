@@ -14,6 +14,9 @@ import { cn } from "@/lib/utils";
 import { useCCAs } from "@/hooks/useCCAs";
 import { useNfeCompras } from "@/hooks/useNfeCompras";
 import { useCredores } from "@/hooks/useCredores";
+import { useEmpresas } from "@/hooks/useEmpresas";
+import { useAlmoxarifados } from "@/hooks/useAlmoxarifados";
+import { useTiposDocumentos } from "@/hooks/useTiposDocumentos";
 export default function EntradaMateriais() {
   const navigate = useNavigate();
   const {
@@ -29,11 +32,25 @@ export default function EntradaMateriais() {
     data: credores = [],
     isLoading: credoresLoading
   } = useCredores();
+  const {
+    data: empresas = [],
+    isLoading: empresasLoading
+  } = useEmpresas(ccaIdFiltro);
+  const {
+    data: almoxarifados = [],
+    isLoading: almoxarifadosLoading
+  } = useAlmoxarifados(ccaIdFiltro);
+  const {
+    data: tiposDocumentos = [],
+    isLoading: tiposDocumentosLoading
+  } = useTiposDocumentos();
 
   // Estados para filtros
   const [filtros, setFiltros] = useState({
     cca: "all",
     credor: "all",
+    empresa: "all",
+    almoxarifado: "all",
     documento: "",
     numeroDocumento: "",
     dataEmissaoInicio: undefined as Date | undefined,
@@ -156,15 +173,46 @@ export default function EntradaMateriais() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="documento">Documento</Label>
-              <Select value={filtros.documento} onValueChange={value => handleFiltroChange("documento", value)}>
+              <Label htmlFor="empresa">Empresa</Label>
+              <Select value={filtros.empresa} onValueChange={value => handleFiltroChange("empresa", value)} disabled={empresasLoading}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Selecione o documento" />
+                  <SelectValue placeholder={empresasLoading ? "Carregando..." : "Selecione a empresa"} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="NFe">NFe</SelectItem>
-                  <SelectItem value="NFSe">NFSe</SelectItem>
-                  <SelectItem value="ROM">ROM</SelectItem>
+                  <SelectItem value="all">Todas</SelectItem>
+                  {empresas.map(empresa => <SelectItem key={empresa.id} value={empresa.id.toString()}>
+                      {empresa.name}
+                    </SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="almoxarifado">Almoxarifado</Label>
+              <Select value={filtros.almoxarifado} onValueChange={value => handleFiltroChange("almoxarifado", value)} disabled={almoxarifadosLoading || !ccaIdFiltro}>
+                <SelectTrigger>
+                  <SelectValue placeholder={almoxarifadosLoading ? "Carregando..." : !ccaIdFiltro ? "Selecione um CCA primeiro" : "Selecione o almoxarifado"} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos</SelectItem>
+                  {almoxarifados.map(almoxarifado => <SelectItem key={almoxarifado.id} value={almoxarifado.id}>
+                      {almoxarifado.nome}
+                    </SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="documento">Documento</Label>
+              <Select value={filtros.documento} onValueChange={value => handleFiltroChange("documento", value)} disabled={tiposDocumentosLoading}>
+                <SelectTrigger>
+                  <SelectValue placeholder={tiposDocumentosLoading ? "Carregando..." : "Selecione o documento"} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos</SelectItem>
+                  {tiposDocumentos.map(tipo => <SelectItem key={tipo.id} value={tipo.codigo}>
+                      {tipo.codigo} - {tipo.descricao}
+                    </SelectItem>)}
                 </SelectContent>
               </Select>
             </div>

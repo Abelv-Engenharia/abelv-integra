@@ -12,9 +12,27 @@ export const useEmpresas = (ccaId?: number) => {
     queryKey: ["empresas_sienge", ccaId],
     queryFn: async () => {
       console.log('useEmpresas - ccaId:', ccaId);
+      
+      // Se não tiver ccaId, buscar todas as empresas
       if (!ccaId) {
-        console.log('useEmpresas - sem ccaId, retornando vazio');
-        return [];
+        console.log('useEmpresas - sem ccaId, buscando todas as empresas');
+        const { data: todasEmpresas, error: todasError } = await supabase
+          .from("empresas_sienge" as any)
+          .select("id, id_sienge, name")
+          .order("name", { ascending: true });
+        
+        console.log('useEmpresas - resultado todas empresas:', { todasEmpresas, todasError });
+        
+        if (todasError) throw todasError;
+        
+        const resultado = ((todasEmpresas || []) as any[]).map((empresa: any) => ({
+          id: empresa.id_sienge,
+          name: empresa.name,
+          ativo: true
+        })) as Empresa[];
+        
+        console.log('useEmpresas - resultado final (todas):', resultado);
+        return resultado;
       }
 
       console.log('useEmpresas - buscando subcentros_custos para cca_id:', ccaId);
@@ -55,6 +73,6 @@ export const useEmpresas = (ccaId?: number) => {
       console.log('useEmpresas - resultado final:', resultado);
       return resultado;
     },
-    enabled: !!ccaId,
+    enabled: true,
   });
 };
