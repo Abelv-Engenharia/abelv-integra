@@ -15,7 +15,7 @@ export default function VisualizarEntrada() {
   const { data: itens = [], isLoading: itensLoading } = useNfeCompraItens(id);
   const { data: credores = [] } = useCredores();
 
-  const credor = credores.find(c => c.id === nfe?.id_credor);
+  const credor = credores.find(c => c.id_sienge === nfe?.id_credor);
 
   if (nfeLoading) {
     return (

@@ -165,7 +165,7 @@ export default function EntradaMateriais() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Todos</SelectItem>
-                  {credores.map(credor => <SelectItem key={credor.id} value={credor.id}>
+                  {credores.map(credor => <SelectItem key={credor.id} value={credor.id_sienge}>
                       {credor.razao}
                     </SelectItem>)}
                 </SelectContent>

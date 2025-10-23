@@ -339,7 +339,7 @@ export default function NovaEntrada() {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {credores.map(credor => <SelectItem key={credor.id} value={credor.id}>
+                          {credores.map(credor => <SelectItem key={credor.id} value={credor.id_sienge}>
                               {credor.razao}
                             </SelectItem>)}
                         </SelectContent>

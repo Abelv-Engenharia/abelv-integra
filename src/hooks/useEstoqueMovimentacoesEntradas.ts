@@ -45,9 +45,9 @@ export function useEstoqueMovimentacoesEntradas(ccaId?: number) {
           *,
           ccas (codigo, nome),
           almoxarifados (nome),
-          credores!estoque_movimentacoes_entradas_id_credor_fkey (razao, cnpj_cpf),
-          empresas_sienge (name),
-          tipo_documentos (codigo, descricao)
+          credores!fk_estoque_movimentacoes_entradas_credor (razao, cnpj_cpf),
+          empresas_sienge!fk_estoque_movimentacoes_entradas_empresa (name),
+          tipos_documentos (codigo, descricao)
         `)
         .order("created_at", { ascending: false });
 

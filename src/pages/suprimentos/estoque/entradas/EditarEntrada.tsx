@@ -297,7 +297,7 @@ export default function EditarEntrada() {
                 </SelectTrigger>
                 <SelectContent>
                   {credores.map((credor) => (
-                    <SelectItem key={credor.id} value={credor.id}>
+                    <SelectItem key={credor.id} value={credor.id_sienge}>
                       {credor.razao}
                     </SelectItem>
                   ))}
