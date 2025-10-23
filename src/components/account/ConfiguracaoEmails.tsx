@@ -404,7 +404,7 @@ const ConfiguracaoEmails = () => {
     }
   };
 
-  const handleTestReportGeneration = async (configuracao: ConfiguracaoEmail) => {
+  const handleTestReportGeneration = (configuracao: ConfiguracaoEmail) => {
     if (configuracao.tipo_relatorio !== 'hsa') {
       toast({
         title: "Erro",
@@ -414,63 +414,29 @@ const ConfiguracaoEmails = () => {
       return;
     }
 
-    toast({
-      title: "Gerando...",
-      description: "Criando relatório HSA em formato JPEG",
+    const now = new Date();
+    const dataFinal = now.toISOString().split('T')[0];
+    const periodoDias = configuracao.periodo_dias || 30;
+    const dataInicial = new Date(now.getTime() - periodoDias * 24 * 60 * 60 * 1000)
+      .toISOString()
+      .split('T')[0];
+
+    const params = new URLSearchParams({
+      dataInicial,
+      dataFinal,
+      autoGenerate: 'jpeg',
     });
 
-    try {
-      const now = new Date();
-      const dataFinal = now.toISOString().split('T')[0];
-      const periodoDias = configuracao.periodo_dias || 30;
-      const dataInicial = new Date(now.getTime() - periodoDias * 24 * 60 * 60 * 1000)
-        .toISOString()
-        .split('T')[0];
-
-      console.log('🧪 Teste de geração:', {
-        cca_id: configuracao.cca_id,
-        data_inicial: dataInicial,
-        data_final: dataFinal,
-        periodo_dias: periodoDias,
-      });
-
-      const { data, error } = await supabase.functions.invoke('generate-hsa-report', {
-        body: {
-          cca_id: configuracao.cca_id,
-          data_inicial: dataInicial,
-          data_final: dataFinal,
-        }
-      });
-
-      if (error) throw error;
-
-      if (data?.anexo_url) {
-        toast({
-          title: "✅ Relatório Gerado!",
-          description: `Tempo: ${data.tempo_geracao_ms}ms - Clique para abrir`,
-          action: (
-            <a 
-              href={data.anexo_url} 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="text-primary underline hover:text-primary/80"
-            >
-              Abrir relatório
-            </a>
-          ),
-        });
-        
-        console.log('✅ Relatório gerado:', data.anexo_url);
-      }
-
-    } catch (error: any) {
-      console.error('❌ Erro ao gerar relatório:', error);
-      toast({
-        title: "Erro",
-        description: error.message || "Não foi possível gerar o relatório de teste.",
-        variant: "destructive",
-      });
+    if (configuracao.cca_id) {
+      params.append('cca', configuracao.cca_id.toString());
     }
+
+    toast({
+      title: "Redirecionando...",
+      description: "Preparando relatório HSA para geração automática",
+    });
+
+    window.location.href = `/relatorios/hsa?${params.toString()}`;
   };
 
   return (

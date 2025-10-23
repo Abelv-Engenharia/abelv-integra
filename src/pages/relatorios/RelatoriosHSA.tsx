@@ -1,6 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useState, useEffect, useRef } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useSearchParams } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -18,6 +19,7 @@ import { fetchInspecoesByResponsavel } from "@/services/hora-seguranca/inspecoes
 import { useToast } from "@/hooks/use-toast";
 
 const RelatoriosHSA = () => {
+  const [searchParams] = useSearchParams();
   const [filterCCA, setFilterCCA] = useState("");
   const [filterResponsavel, setFilterResponsavel] = useState("");
   const [dataInicial, setDataInicial] = useState<Date>();
@@ -38,6 +40,36 @@ const RelatoriosHSA = () => {
       dataFinal: dataFinal ? format(dataFinal, "yyyy-MM-dd") : undefined,
     };
   };
+
+  // Aplicar filtros da URL e auto-gerar JPEG se solicitado
+  useEffect(() => {
+    const autoGenerate = searchParams.get('autoGenerate');
+    const dataInicialParam = searchParams.get('dataInicial');
+    const dataFinalParam = searchParams.get('dataFinal');
+    const ccaParam = searchParams.get('cca');
+
+    if (autoGenerate === 'jpeg') {
+      // Aplicar filtros dos query params
+      if (dataInicialParam) {
+        setDataInicial(new Date(dataInicialParam));
+      }
+      if (dataFinalParam) {
+        setDataFinal(new Date(dataFinalParam));
+      }
+      if (ccaParam) {
+        setFilterCCA(ccaParam);
+      }
+
+      // Aguardar um pouco para garantir que os filtros foram aplicados e dados carregados
+      setTimeout(() => {
+        generateJPEG();
+        
+        // Limpar query params após geração
+        const newUrl = window.location.pathname;
+        window.history.replaceState({}, '', newUrl);
+      }, 2000);
+    }
+  }, [searchParams]);
 
   // Buscar responsáveis reais da tabela execucao_hsa
   useEffect(() => {
