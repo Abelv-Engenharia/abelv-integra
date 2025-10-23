@@ -340,7 +340,7 @@ export default function NovaEntrada() {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {credores.map(credor => <SelectItem key={credor.id_sienge} value={credor.id_sienge}>
+                          {credores.map(credor => <SelectItem key={credor.id} value={credor.id}>
                               {credor.razao}
                             </SelectItem>)}
                         </SelectContent>
@@ -365,7 +365,7 @@ export default function NovaEntrada() {
                         </FormControl>
                         <SelectContent>
                           {tiposDocumentos.map(tipo => (
-                            <SelectItem key={tipo.id} value={tipo.codigo}>
+                            <SelectItem key={tipo.codigo} value={tipo.codigo}>
                               {tipo.codigo}
                             </SelectItem>
                           ))}
