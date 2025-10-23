@@ -2595,7 +2595,120 @@ export type Database = {
           unitario?: number | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "estoque_movimentacoes_entradas_ite_movimentacao_entrada_id_fkey"
+            columns: ["movimentacao_entrada_id"]
+            isOneToOne: false
+            referencedRelation: "estoque_movimentacoes_entradas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      estoque_movimentacoes_saidas: {
+        Row: {
+          almoxarifado_id: string
+          apropriacao_id: string | null
+          ativo: boolean
+          cca_id: number
+          created_at: string
+          data_movimento: string
+          id: string
+          numero: number
+          observacao: string | null
+          requisitante: string
+          updated_at: string
+        }
+        Insert: {
+          almoxarifado_id: string
+          apropriacao_id?: string | null
+          ativo?: boolean
+          cca_id: number
+          created_at?: string
+          data_movimento: string
+          id?: string
+          numero?: number
+          observacao?: string | null
+          requisitante: string
+          updated_at?: string
+        }
+        Update: {
+          almoxarifado_id?: string
+          apropriacao_id?: string | null
+          ativo?: boolean
+          cca_id?: number
+          created_at?: string
+          data_movimento?: string
+          id?: string
+          numero?: number
+          observacao?: string | null
+          requisitante?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "estoque_movimentacoes_saidas_almoxarifado_id_fkey"
+            columns: ["almoxarifado_id"]
+            isOneToOne: false
+            referencedRelation: "almoxarifados"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "estoque_movimentacoes_saidas_apropriacao_id_fkey"
+            columns: ["apropriacao_id"]
+            isOneToOne: false
+            referencedRelation: "eap_itens"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "estoque_movimentacoes_saidas_cca_id_fkey"
+            columns: ["cca_id"]
+            isOneToOne: false
+            referencedRelation: "ccas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      estoque_movimentacoes_saidas_itens: {
+        Row: {
+          created_at: string
+          descricao: string
+          id: string
+          movimentacao_saida_id: string
+          quantidade: number
+          unidade: string | null
+          unitario: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          descricao: string
+          id?: string
+          movimentacao_saida_id: string
+          quantidade: number
+          unidade?: string | null
+          unitario?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          descricao?: string
+          id?: string
+          movimentacao_saida_id?: string
+          quantidade?: number
+          unidade?: string | null
+          unitario?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "estoque_movimentacoes_saidas_itens_movimentacao_saida_id_fkey"
+            columns: ["movimentacao_saida_id"]
+            isOneToOne: false
+            referencedRelation: "estoque_movimentacoes_saidas"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       eventos_identificados: {
         Row: {
@@ -4284,6 +4397,13 @@ export type Database = {
           titulo?: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "nfe_compra_id_credor_fkey"
+            columns: ["id_credor"]
+            isOneToOne: false
+            referencedRelation: "credores"
+            referencedColumns: ["id_sienge"]
+          },
           {
             foreignKeyName: "nfe_compra_id_documento_fkey"
             columns: ["id_documento"]
