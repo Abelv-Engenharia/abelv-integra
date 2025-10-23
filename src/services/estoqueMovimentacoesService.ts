@@ -19,6 +19,7 @@ export interface EstoqueMovimentacaoEntradaItem {
   movimentacao_entrada_id: string;
   item_nfe_id?: string;
   quantidade: number;
+  unidade?: string;
   created_at: string;
   updated_at: string;
 }
@@ -46,10 +47,15 @@ export const estoqueMovimentacoesService = {
     if (nfeError) throw nfeError;
     if (!nfe) throw new Error('NFE não encontrada');
 
-    // Buscar os itens da NFE
+    // Buscar os itens da NFE com as unidades
     const { data: itens, error: itensError } = await supabase
       .from('nfe_compra_itens')
-      .select('*')
+      .select(`
+        *,
+        unidades_medidas:id_unidade (
+          simbolo
+        )
+      `)
       .eq('id_nfe', nfeId);
 
     if (itensError) throw itensError;
@@ -79,6 +85,7 @@ export const estoqueMovimentacoesService = {
       movimentacao_entrada_id: movimentacao.id,
       item_nfe_id: item.id,
       quantidade: item.quantidade,
+      unidade: (item as any).unidades_medidas?.simbolo || null,
     }));
 
     const { error: itensError2 } = await supabase
