@@ -43,11 +43,8 @@ export function useEstoqueMovimentacoesEntradas(ccaId?: number) {
         .from("estoque_movimentacoes_entradas")
         .select(`
           *,
-          ccas!cca_id (codigo, nome),
-          almoxarifados!almoxarifado_id (nome),
-          credores!id_credor (razao, cnpj_cpf),
-          empresas_sienge!id_empresa (name),
-          tipo_documentos!id_documento (codigo, descricao)
+          ccas (codigo, nome),
+          almoxarifados (nome)
         `)
         .order("created_at", { ascending: false });
 
