@@ -2524,6 +2524,41 @@ export type Database = {
             referencedRelation: "ccas"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "estoque_movimentacoes_entradas_id_credor_fkey"
+            columns: ["id_credor"]
+            isOneToOne: false
+            referencedRelation: "credores"
+            referencedColumns: ["id_sienge"]
+          },
+          {
+            foreignKeyName: "estoque_movimentacoes_entradas_id_documento_fkey"
+            columns: ["id_documento"]
+            isOneToOne: false
+            referencedRelation: "tipos_documentos"
+            referencedColumns: ["codigo"]
+          },
+          {
+            foreignKeyName: "estoque_movimentacoes_entradas_id_empresa_fkey"
+            columns: ["id_empresa"]
+            isOneToOne: false
+            referencedRelation: "empresas_sienge"
+            referencedColumns: ["id_sienge"]
+          },
+          {
+            foreignKeyName: "fk_estoque_movimentacoes_entradas_credor"
+            columns: ["id_credor"]
+            isOneToOne: false
+            referencedRelation: "credores"
+            referencedColumns: ["id_sienge"]
+          },
+          {
+            foreignKeyName: "fk_estoque_movimentacoes_entradas_empresa"
+            columns: ["id_empresa"]
+            isOneToOne: false
+            referencedRelation: "empresas_sienge"
+            referencedColumns: ["id_sienge"]
+          },
         ]
       }
       estoque_movimentacoes_entradas_itens: {
@@ -4249,13 +4284,6 @@ export type Database = {
           titulo?: number | null
         }
         Relationships: [
-          {
-            foreignKeyName: "nfe_compra_id_credor_fkey"
-            columns: ["id_credor"]
-            isOneToOne: false
-            referencedRelation: "credores"
-            referencedColumns: ["id_sienge"]
-          },
           {
             foreignKeyName: "nfe_compra_id_documento_fkey"
             columns: ["id_documento"]
