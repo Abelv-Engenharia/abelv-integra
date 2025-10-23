@@ -15,8 +15,6 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
-import jsPDF from 'jspdf';
-import 'jspdf-autotable';
 import { 
   Breadcrumb,
   BreadcrumbItem, 
@@ -29,7 +27,7 @@ import { usePrestadoresPJ, PrestadorPJ } from "@/hooks/gestao-pessoas/usePrestad
 import { useModelosPorTipo } from "@/hooks/gestao-pessoas/useModelosContratos";
 import { useCreateContratoEmitido, useUploadContratoPDF } from "@/hooks/gestao-pessoas/useContratosEmitidos";
 import { ContratoModelo, TipoContratoModelo } from "@/types/gestao-pessoas/contratoModelo";
-import { substituirCodigosContrato } from "@/services/contratos/substituicaoCodigosContratoService";
+import { gerarContratoPreenchido, blobParaFile } from "@/services/contratos/processarModeloContratoService";
 
 // Schemas de validação
 const contratoSchema = z.object({
@@ -122,31 +120,191 @@ export default function EmissaoContratoPrestacaoServico() {
   });
 
   // Handlers para submissão de cada tipo
-  const onSubmitContrato = (data: ContratoFormData) => {
-    console.log("Contrato de Prestação de Serviço:", { prestador: prestadorSelecionado, ...data });
-    toast({
-      title: "Contrato emitido com sucesso!",
-      description: `Contrato de ${prestadorSelecionado?.razaoSocial} criado.`,
-    });
-    resetarFluxo();
+  const onSubmitContrato = async (data: ContratoFormData) => {
+    if (!prestadorSelecionado || !modeloSelecionado) return;
+
+    try {
+      // Preparar dados para substituição
+      const dadosContrato = {
+        PRESTADOR_RAZAO_SOCIAL: prestadorSelecionado.razaoSocial,
+        PRESTADOR_CNPJ: prestadorSelecionado.cnpj,
+        PRESTADOR_NOME_COMPLETO: prestadorSelecionado.nomeCompleto,
+        PRESTADOR_ENDERECO: prestadorSelecionado.endereco,
+        PRESTADOR_ATIVIDADE: prestadorSelecionado.descricaoAtividade || '',
+        PRESTADOR_VALOR: prestadorSelecionado.valorPrestacaoServico,
+        PRESTADOR_AJUDA_CUSTO: prestadorSelecionado.ajudaCusto,
+        CONTRATO_NUMERO: data.numerocontrato,
+        CONTRATO_DATA_INICIO: data.datainicio,
+        CONTRATO_DATA_FIM: data.datafim,
+        CONTRATO_FORMA_PAGAMENTO: data.formapagamento,
+        CONTRATO_PRAZO: data.prazocontrato,
+        CONTRATO_CLAUSULAS: data.clausulas,
+      };
+
+      // Gerar arquivo preenchido
+      const nomeArquivo = `Contrato_${prestadorSelecionado.razaoSocial.replace(/\s+/g, '_')}_${data.numerocontrato}.docx`;
+      const blob = await gerarContratoPreenchido(
+        modeloSelecionado.arquivo_url,
+        dadosContrato,
+        nomeArquivo
+      );
+
+      // Converter blob para file e fazer upload
+      const file = blobParaFile(blob, nomeArquivo);
+      const uploadResult = await uploadPDF.mutateAsync({
+        file,
+        filename: nomeArquivo,
+      });
+
+      // Salvar registro no banco
+      await createContrato.mutateAsync({
+        prestador_id: prestadorSelecionado.id,
+        tipo_contrato: 'prestacao_servico',
+        modelo_id: modeloSelecionado.id,
+        numero_contrato: data.numerocontrato,
+        dados_preenchidos: dadosContrato,
+        pdf_url: uploadResult.pdf_url,
+        pdf_nome: nomeArquivo,
+        data_inicio: data.datainicio.toISOString(),
+        data_fim: data.datafim.toISOString(),
+        status: 'confirmado',
+      });
+
+      toast({
+        title: "Contrato emitido com sucesso!",
+        description: `Contrato de ${prestadorSelecionado.razaoSocial} criado e salvo.`,
+      });
+      
+      resetarFluxo();
+    } catch (error) {
+      console.error('Erro ao emitir contrato:', error);
+      toast({
+        title: "Erro ao emitir contrato",
+        description: error instanceof Error ? error.message : "Erro desconhecido",
+        variant: "destructive",
+      });
+    }
   };
 
-  const onSubmitDistrato = (data: DistratoFormData) => {
-    console.log("Distrato:", { prestador: prestadorSelecionado, ...data });
-    toast({
-      title: "Distrato emitido com sucesso!",
-      description: `Distrato de ${prestadorSelecionado?.razaoSocial} criado.`,
-    });
-    resetarFluxo();
+  const onSubmitDistrato = async (data: DistratoFormData) => {
+    if (!prestadorSelecionado || !modeloSelecionado) return;
+
+    try {
+      const dadosDistrato = {
+        PRESTADOR_RAZAO_SOCIAL: prestadorSelecionado.razaoSocial,
+        PRESTADOR_CNPJ: prestadorSelecionado.cnpj,
+        PRESTADOR_NOME_COMPLETO: prestadorSelecionado.nomeCompleto,
+        PRESTADOR_ENDERECO: prestadorSelecionado.endereco,
+        DISTRATO_NUMERO: data.numerodistrato,
+        DISTRATO_CONTRATO_ORIGINAL: data.numerocontratooriginal,
+        DISTRATO_DATA: data.datadistrato,
+        DISTRATO_MOTIVO: data.motivodistrato,
+        DISTRATO_DATA_ENCERRAMENTO: data.dataencerramentoservicos,
+        DISTRATO_OBSERVACOES: data.observacoes || '',
+        DISTRATO_VALOR: data.valortotaldistrato || '',
+        DISTRATO_DATA_PAGAMENTO: data.datapagamento || null,
+      };
+
+      const nomeArquivo = `Distrato_${prestadorSelecionado.razaoSocial.replace(/\s+/g, '_')}_${data.numerodistrato}.docx`;
+      const blob = await gerarContratoPreenchido(
+        modeloSelecionado.arquivo_url,
+        dadosDistrato,
+        nomeArquivo
+      );
+
+      const file = blobParaFile(blob, nomeArquivo);
+      const uploadResult = await uploadPDF.mutateAsync({
+        file,
+        filename: nomeArquivo,
+      });
+
+      await createContrato.mutateAsync({
+        prestador_id: prestadorSelecionado.id,
+        tipo_contrato: 'distrato',
+        modelo_id: modeloSelecionado.id,
+        numero_contrato: data.numerodistrato,
+        dados_preenchidos: dadosDistrato,
+        pdf_url: uploadResult.pdf_url,
+        pdf_nome: nomeArquivo,
+        status: 'confirmado',
+        observacoes: data.observacoes,
+      });
+
+      toast({
+        title: "Distrato emitido com sucesso!",
+        description: `Distrato de ${prestadorSelecionado.razaoSocial} criado e salvo.`,
+      });
+      
+      resetarFluxo();
+    } catch (error) {
+      console.error('Erro ao emitir distrato:', error);
+      toast({
+        title: "Erro ao emitir distrato",
+        description: error instanceof Error ? error.message : "Erro desconhecido",
+        variant: "destructive",
+      });
+    }
   };
 
-  const onSubmitAditivo = (data: AditivoFormData) => {
-    console.log("Aditivo:", { prestador: prestadorSelecionado, ...data });
-    toast({
-      title: "Aditivo emitido com sucesso!",
-      description: `Aditivo de ${prestadorSelecionado?.razaoSocial} criado.`,
-    });
-    resetarFluxo();
+  const onSubmitAditivo = async (data: AditivoFormData) => {
+    if (!prestadorSelecionado || !modeloSelecionado) return;
+
+    try {
+      const dadosAditivo = {
+        PRESTADOR_RAZAO_SOCIAL: prestadorSelecionado.razaoSocial,
+        PRESTADOR_CNPJ: prestadorSelecionado.cnpj,
+        PRESTADOR_NOME_COMPLETO: prestadorSelecionado.nomeCompleto,
+        PRESTADOR_ENDERECO: prestadorSelecionado.endereco,
+        ADITIVO_NUMERO: data.numeroaditivo,
+        ADITIVO_CONTRATO_ORIGINAL: data.numerocontratooriginal,
+        ADITIVO_DATA_VIGENCIA: data.datavigencia,
+        ADITIVO_MOTIVO: data.motivoaditivo,
+        ADITIVO_ALTERACOES: data.alteracoes,
+        ADITIVO_VALOR_ANTERIOR: data.valoranterior || '',
+        ADITIVO_VALOR_NOVO: data.valornovo || '',
+        ADITIVO_CARGO_ANTERIOR: data.cargoanterior || '',
+        ADITIVO_CARGO_NOVO: data.cargonovo || '',
+      };
+
+      const nomeArquivo = `Aditivo_${prestadorSelecionado.razaoSocial.replace(/\s+/g, '_')}_${data.numeroaditivo}.docx`;
+      const blob = await gerarContratoPreenchido(
+        modeloSelecionado.arquivo_url,
+        dadosAditivo,
+        nomeArquivo
+      );
+
+      const file = blobParaFile(blob, nomeArquivo);
+      const uploadResult = await uploadPDF.mutateAsync({
+        file,
+        filename: nomeArquivo,
+      });
+
+      await createContrato.mutateAsync({
+        prestador_id: prestadorSelecionado.id,
+        tipo_contrato: 'aditivo',
+        modelo_id: modeloSelecionado.id,
+        numero_contrato: data.numeroaditivo,
+        dados_preenchidos: dadosAditivo,
+        pdf_url: uploadResult.pdf_url,
+        pdf_nome: nomeArquivo,
+        data_inicio: data.datavigencia.toISOString(),
+        status: 'confirmado',
+      });
+
+      toast({
+        title: "Aditivo emitido com sucesso!",
+        description: `Aditivo de ${prestadorSelecionado.razaoSocial} criado e salvo.`,
+      });
+      
+      resetarFluxo();
+    } catch (error) {
+      console.error('Erro ao emitir aditivo:', error);
+      toast({
+        title: "Erro ao emitir aditivo",
+        description: error instanceof Error ? error.message : "Erro desconhecido",
+        variant: "destructive",
+      });
+    }
   };
 
   const resetarFluxo = () => {
@@ -159,43 +317,86 @@ export default function EmissaoContratoPrestacaoServico() {
     formAditivo.reset();
   };
 
-  const handleGerarPDF = () => {
-    if (!prestadorSelecionado) return;
-
-    const doc = new jsPDF();
-    
-    // Cabeçalho comum
-    doc.setFontSize(16);
-    doc.setFont("helvetica", "bold");
-    
-    if (tipoContratoSelecionado === 'prestacao_servico') {
-      doc.text("CONTRATO DE PRESTAÇÃO DE SERVIÇOS", 105, 20, { align: "center" });
-    } else if (tipoContratoSelecionado === 'distrato') {
-      doc.text("DISTRATO DE PRESTAÇÃO DE SERVIÇOS", 105, 20, { align: "center" });
-    } else {
-      doc.text("TERMO ADITIVO AO CONTRATO", 105, 20, { align: "center" });
+  const handleGerarPDF = async () => {
+    if (!prestadorSelecionado || !modeloSelecionado) {
+      toast({
+        title: "Erro ao gerar PDF",
+        description: "Selecione um prestador e um modelo de contrato",
+        variant: "destructive",
+      });
+      return;
     }
 
-    // Dados do prestador
-    doc.setFontSize(12);
-    doc.setFont("helvetica", "bold");
-    doc.text("DADOS DO PRESTADOR:", 20, 35);
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(10);
-    doc.text(`Razão Social: ${prestadorSelecionado.razaoSocial}`, 20, 42);
-    doc.text(`CNPJ: ${prestadorSelecionado.cnpj}`, 20, 48);
-    doc.text(`Representante Legal: ${prestadorSelecionado.nomeCompleto}`, 20, 54);
-    doc.text(`Endereço: ${prestadorSelecionado.endereco}`, 20, 60);
-    doc.text(`Atividade: ${prestadorSelecionado.descricaoAtividade || 'N/A'}`, 20, 66);
-    doc.text(`Valor: R$ ${prestadorSelecionado.valorPrestacaoServico.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`, 20, 72);
-    doc.text(`Ajuda de Custo: R$ ${prestadorSelecionado.ajudaCusto.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`, 20, 78);
+    try {
+      // Preparar dados básicos do prestador
+      const dadosBasicos = {
+        PRESTADOR_RAZAO_SOCIAL: prestadorSelecionado.razaoSocial,
+        PRESTADOR_CNPJ: prestadorSelecionado.cnpj,
+        PRESTADOR_NOME_COMPLETO: prestadorSelecionado.nomeCompleto,
+        PRESTADOR_ENDERECO: prestadorSelecionado.endereco,
+        PRESTADOR_ATIVIDADE: prestadorSelecionado.descricaoAtividade || '',
+        PRESTADOR_VALOR: prestadorSelecionado.valorPrestacaoServico,
+        PRESTADOR_AJUDA_CUSTO: prestadorSelecionado.ajudaCusto,
+      };
 
-    doc.save(`${tipoContratoSelecionado}_${prestadorSelecionado.razaoSocial}.pdf`);
-    
-    toast({
-      title: "PDF gerado com sucesso!",
-      description: "O documento foi baixado.",
-    });
+      // Adicionar dados do formulário se disponíveis
+      if (tipoContratoSelecionado === 'prestacao_servico') {
+        const formData = formContrato.getValues();
+        Object.assign(dadosBasicos, {
+          CONTRATO_NUMERO: formData.numerocontrato || '',
+          CONTRATO_DATA_INICIO: formData.datainicio || null,
+          CONTRATO_DATA_FIM: formData.datafim || null,
+          CONTRATO_FORMA_PAGAMENTO: formData.formapagamento || '',
+          CONTRATO_PRAZO: formData.prazocontrato || '',
+          CONTRATO_CLAUSULAS: formData.clausulas || '',
+        });
+      } else if (tipoContratoSelecionado === 'distrato') {
+        const formData = formDistrato.getValues();
+        Object.assign(dadosBasicos, {
+          DISTRATO_NUMERO: formData.numerodistrato || '',
+          DISTRATO_CONTRATO_ORIGINAL: formData.numerocontratooriginal || '',
+          DISTRATO_DATA: formData.datadistrato || null,
+          DISTRATO_MOTIVO: formData.motivodistrato || '',
+          DISTRATO_DATA_ENCERRAMENTO: formData.dataencerramentoservicos || null,
+          DISTRATO_OBSERVACOES: formData.observacoes || '',
+          DISTRATO_VALOR: formData.valortotaldistrato || '',
+          DISTRATO_DATA_PAGAMENTO: formData.datapagamento || null,
+        });
+      } else if (tipoContratoSelecionado === 'aditivo') {
+        const formData = formAditivo.getValues();
+        Object.assign(dadosBasicos, {
+          ADITIVO_NUMERO: formData.numeroaditivo || '',
+          ADITIVO_CONTRATO_ORIGINAL: formData.numerocontratooriginal || '',
+          ADITIVO_DATA_VIGENCIA: formData.datavigencia || null,
+          ADITIVO_MOTIVO: formData.motivoaditivo || '',
+          ADITIVO_ALTERACOES: formData.alteracoes || '',
+          ADITIVO_VALOR_ANTERIOR: formData.valoranterior || '',
+          ADITIVO_VALOR_NOVO: formData.valornovo || '',
+          ADITIVO_CARGO_ANTERIOR: formData.cargoanterior || '',
+          ADITIVO_CARGO_NOVO: formData.cargonovo || '',
+        });
+      }
+
+      const nomeArquivo = `${tipoContratoSelecionado}_${prestadorSelecionado.razaoSocial.replace(/\s+/g, '_')}_preview.docx`;
+      
+      await gerarContratoPreenchido(
+        modeloSelecionado.arquivo_url,
+        dadosBasicos,
+        nomeArquivo
+      );
+
+      toast({
+        title: "Documento gerado com sucesso!",
+        description: "O arquivo foi baixado. Revise antes de emitir o contrato.",
+      });
+    } catch (error) {
+      console.error('Erro ao gerar PDF:', error);
+      toast({
+        title: "Erro ao gerar documento",
+        description: error instanceof Error ? error.message : "Erro desconhecido",
+        variant: "destructive",
+      });
+    }
   };
 
   // Card de seleção de tipo de contrato
