@@ -96,8 +96,10 @@ export default function DemonstrativoPrestacaoServico() {
         ...data,
         datanascimento: data.datanascimento ? format(data.datanascimento, "yyyy-MM-dd") : demonstrativoSelecionado.datanascimento,
         admissao: data.admissao ? format(data.admissao, "yyyy-MM-dd") : demonstrativoSelecionado.admissao,
+        mes: data.periodocontabil,
       });
       setDemonstrativoSelecionado(null);
+      setEditarModalOpen(false);
     } catch (error) {
       console.error("Erro ao atualizar demonstrativo:", error);
     }
