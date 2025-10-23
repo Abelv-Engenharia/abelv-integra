@@ -146,13 +146,22 @@ serve(async (req: Request) => {
         console.log(`📊 Gerando relatório HSA para configuração ${config.id}...`);
         
         try {
+          // Calcular data_inicial e data_final baseado em periodo_dias
+          const dataFinal = now.toISOString().split('T')[0];
+          const perioDias = config.periodo_dias || 30;
+          const dataInicial = new Date(now.getTime() - perioDias * 24 * 60 * 60 * 1000)
+            .toISOString()
+            .split('T')[0];
+          
+          console.log(`📅 Período do relatório: ${dataInicial} a ${dataFinal}`);
+
           const { data: reportData, error: reportError } = await supabase.functions.invoke(
             'generate-hsa-report',
             {
               body: {
                 cca_id: config.cca_id,
-                data_inicial: config.data_inicial,
-                data_final: config.data_final,
+                data_inicial: dataInicial,
+                data_final: dataFinal,
               }
             }
           );
