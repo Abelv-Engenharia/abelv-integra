@@ -14,14 +14,22 @@ import { cn } from "@/lib/utils";
 import { useCCAs } from "@/hooks/useCCAs";
 import { useNfeCompras } from "@/hooks/useNfeCompras";
 import { useCredores } from "@/hooks/useCredores";
-
 export default function EntradaMateriais() {
   const navigate = useNavigate();
-  const { data: ccas = [], isLoading: ccasLoading } = useCCAs();
+  const {
+    data: ccas = [],
+    isLoading: ccasLoading
+  } = useCCAs();
   const [ccaIdFiltro, setCcaIdFiltro] = useState<number | undefined>(undefined);
-  const { data: nfeCompras = [], isLoading: nfeLoading } = useNfeCompras(ccaIdFiltro);
-  const { data: credores = [], isLoading: credoresLoading } = useCredores();
-  
+  const {
+    data: nfeCompras = [],
+    isLoading: nfeLoading
+  } = useNfeCompras(ccaIdFiltro);
+  const {
+    data: credores = [],
+    isLoading: credoresLoading
+  } = useCredores();
+
   // Estados para filtros
   const [filtros, setFiltros] = useState({
     cca: "all",
@@ -35,11 +43,12 @@ export default function EntradaMateriais() {
     pcAbelv: "",
     pcCliente: ""
   });
-
-
   const handleFiltroChange = (campo: string, valor: any) => {
-    setFiltros(prev => ({ ...prev, [campo]: valor }));
-    
+    setFiltros(prev => ({
+      ...prev,
+      [campo]: valor
+    }));
+
     // Aplicar filtro de CCA imediatamente
     if (campo === "cca") {
       if (valor === "all") {
@@ -49,81 +58,50 @@ export default function EntradaMateriais() {
       }
     }
   };
-
   const handleFiltrar = () => {
     console.log("Filtros aplicados:", filtros);
     // Aqui seria implementada a lógica de filtro
   };
-
   const handleEditarEntrada = (id: string) => {
     navigate(`/suprimentos/estoque/entradas/editar/${id}`);
   };
-
-  const DateRangePicker = ({ 
-    startDate, 
-    endDate, 
-    onStartDateChange, 
-    onEndDateChange, 
-    placeholder 
+  const DateRangePicker = ({
+    startDate,
+    endDate,
+    onStartDateChange,
+    onEndDateChange,
+    placeholder
   }: {
     startDate?: Date;
     endDate?: Date;
     onStartDateChange: (date: Date | undefined) => void;
     onEndDateChange: (date: Date | undefined) => void;
     placeholder: string;
-  }) => (
-    <div className="flex gap-2">
+  }) => <div className="flex gap-2">
       <Popover>
         <PopoverTrigger asChild>
-          <Button
-            variant="outline"
-            className={cn(
-              "w-full justify-start text-left font-normal",
-              !startDate && "text-muted-foreground"
-            )}
-          >
+          <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !startDate && "text-muted-foreground")}>
             <CalendarIcon className="mr-2 h-4 w-4" />
             {startDate ? format(startDate, "dd/MM/yyyy") : "Início"}
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0" align="start">
-          <Calendar
-            mode="single"
-            selected={startDate}
-            onSelect={onStartDateChange}
-            initialFocus
-            className="p-3 pointer-events-auto"
-          />
+          <Calendar mode="single" selected={startDate} onSelect={onStartDateChange} initialFocus className="p-3 pointer-events-auto" />
         </PopoverContent>
       </Popover>
       <Popover>
         <PopoverTrigger asChild>
-          <Button
-            variant="outline"
-            className={cn(
-              "w-full justify-start text-left font-normal",
-              !endDate && "text-muted-foreground"
-            )}
-          >
+          <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !endDate && "text-muted-foreground")}>
             <CalendarIcon className="mr-2 h-4 w-4" />
             {endDate ? format(endDate, "dd/MM/yyyy") : "Fim"}
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0" align="start">
-          <Calendar
-            mode="single"
-            selected={endDate}
-            onSelect={onEndDateChange}
-            initialFocus
-            className="p-3 pointer-events-auto"
-          />
+          <Calendar mode="single" selected={endDate} onSelect={onEndDateChange} initialFocus className="p-3 pointer-events-auto" />
         </PopoverContent>
       </Popover>
-    </div>
-  );
-
-  return (
-    <div className="space-y-6">
+    </div>;
+  return <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Entrada de Materiais</h1>
@@ -149,49 +127,37 @@ export default function EntradaMateriais() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label htmlFor="cca">CCA</Label>
-              <Select 
-                value={filtros.cca} 
-                onValueChange={(value) => handleFiltroChange("cca", value)}
-                disabled={ccasLoading}
-              >
+              <Select value={filtros.cca} onValueChange={value => handleFiltroChange("cca", value)} disabled={ccasLoading}>
                 <SelectTrigger>
                   <SelectValue placeholder={ccasLoading ? "Carregando..." : "Selecione o CCA"} />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Todos</SelectItem>
-                  {ccas.filter(cca => cca.ativo).map((cca) => (
-                    <SelectItem key={cca.id} value={cca.id.toString()}>
+                  {ccas.filter(cca => cca.ativo).map(cca => <SelectItem key={cca.id} value={cca.id.toString()}>
                       {cca.codigo} - {cca.nome}
-                    </SelectItem>
-                  ))}
+                    </SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="credor">Credor</Label>
-              <Select 
-                value={filtros.credor} 
-                onValueChange={(value) => handleFiltroChange("credor", value)}
-                disabled={credoresLoading}
-              >
+              <Select value={filtros.credor} onValueChange={value => handleFiltroChange("credor", value)} disabled={credoresLoading}>
                 <SelectTrigger>
                   <SelectValue placeholder={credoresLoading ? "Carregando..." : "Selecione o credor"} />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Todos</SelectItem>
-                  {credores.map((credor) => (
-                    <SelectItem key={credor.id} value={credor.id}>
+                  {credores.map(credor => <SelectItem key={credor.id} value={credor.id}>
                       {credor.razao}
-                    </SelectItem>
-                  ))}
+                    </SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="documento">Documento</Label>
-              <Select value={filtros.documento} onValueChange={(value) => handleFiltroChange("documento", value)}>
+              <Select value={filtros.documento} onValueChange={value => handleFiltroChange("documento", value)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione o documento" />
                 </SelectTrigger>
@@ -205,57 +171,22 @@ export default function EntradaMateriais() {
 
             <div className="space-y-2">
               <Label htmlFor="numeroDocumento">Número do documento</Label>
-              <Input
-                id="numeroDocumento"
-                value={filtros.numeroDocumento}
-                onChange={(e) => handleFiltroChange("numeroDocumento", e.target.value)}
-                placeholder="Digite o número do documento"
-              />
+              <Input id="numeroDocumento" value={filtros.numeroDocumento} onChange={e => handleFiltroChange("numeroDocumento", e.target.value)} placeholder="Digite o número do documento" />
             </div>
 
             <div className="space-y-2">
               <Label>Data da emissão</Label>
-              <DateRangePicker
-                startDate={filtros.dataEmissaoInicio}
-                endDate={filtros.dataEmissaoFim}
-                onStartDateChange={(date) => handleFiltroChange("dataEmissaoInicio", date)}
-                onEndDateChange={(date) => handleFiltroChange("dataEmissaoFim", date)}
-                placeholder="Período de emissão"
-              />
+              <DateRangePicker startDate={filtros.dataEmissaoInicio} endDate={filtros.dataEmissaoFim} onStartDateChange={date => handleFiltroChange("dataEmissaoInicio", date)} onEndDateChange={date => handleFiltroChange("dataEmissaoFim", date)} placeholder="Período de emissão" />
             </div>
 
             <div className="space-y-2">
               <Label>Data do movimento</Label>
-              <DateRangePicker
-                startDate={filtros.dataMovimentoInicio}
-                endDate={filtros.dataMovimentoFim}
-                onStartDateChange={(date) => handleFiltroChange("dataMovimentoInicio", date)}
-                onEndDateChange={(date) => handleFiltroChange("dataMovimentoFim", date)}
-                placeholder="Período de movimento"
-              />
+              <DateRangePicker startDate={filtros.dataMovimentoInicio} endDate={filtros.dataMovimentoFim} onStartDateChange={date => handleFiltroChange("dataMovimentoInicio", date)} onEndDateChange={date => handleFiltroChange("dataMovimentoFim", date)} placeholder="Período de movimento" />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="pcAbelv">PC Abelv</Label>
-              <Input
-                id="pcAbelv"
-                type="number"
-                value={filtros.pcAbelv}
-                onChange={(e) => handleFiltroChange("pcAbelv", e.target.value)}
-                placeholder="Digite o PC Abelv"
-              />
-            </div>
+            
 
-            <div className="space-y-2">
-              <Label htmlFor="pcCliente">PC Cliente</Label>
-              <Input
-                id="pcCliente"
-                type="number"
-                value={filtros.pcCliente}
-                onChange={(e) => handleFiltroChange("pcCliente", e.target.value)}
-                placeholder="Digite o PC Cliente"
-              />
-            </div>
+            
           </div>
 
           <div className="flex justify-end mt-4">
@@ -288,21 +219,15 @@ export default function EntradaMateriais() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {nfeLoading ? (
-                <TableRow>
+              {nfeLoading ? <TableRow>
                   <TableCell colSpan={9} className="text-center">
                     Carregando...
                   </TableCell>
-                </TableRow>
-              ) : nfeCompras.length === 0 ? (
-                <TableRow>
+                </TableRow> : nfeCompras.length === 0 ? <TableRow>
                   <TableCell colSpan={9} className="text-center">
                     Nenhuma entrada encontrada
                   </TableCell>
-                </TableRow>
-              ) : (
-                nfeCompras.map((nfe) => (
-                  <TableRow key={nfe.id}>
+                </TableRow> : nfeCompras.map(nfe => <TableRow key={nfe.id}>
                     <TableCell>NFe</TableCell>
                     <TableCell>{nfe.numero}/{nfe.id_documento}</TableCell>
                     <TableCell>{format(new Date(nfe.emissao), "dd/MM/yyyy")}</TableCell>
@@ -312,21 +237,14 @@ export default function EntradaMateriais() {
                     <TableCell>-</TableCell>
                     <TableCell>-</TableCell>
                     <TableCell>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleEditarEntrada(nfe.id)}
-                      >
+                      <Button variant="outline" size="sm" onClick={() => handleEditarEntrada(nfe.id)}>
                         <Edit className="h-4 w-4" />
                       </Button>
                     </TableCell>
-                  </TableRow>
-                ))
-              )}
+                  </TableRow>)}
             </TableBody>
           </Table>
         </CardContent>
       </Card>
-    </div>
-  );
+    </div>;
 }
