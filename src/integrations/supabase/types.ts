@@ -2472,9 +2472,9 @@ export type Database = {
           id_credor: string | null
           id_documento: string | null
           id_empresa: number | null
-          item_nfe_id: string | null
           numero: string | null
-          quantidade: number
+          pdf_nome: string | null
+          pdf_url: string | null
           updated_at: string
         }
         Insert: {
@@ -2485,9 +2485,9 @@ export type Database = {
           id_credor?: string | null
           id_documento?: string | null
           id_empresa?: number | null
-          item_nfe_id?: string | null
           numero?: string | null
-          quantidade: number
+          pdf_nome?: string | null
+          pdf_url?: string | null
           updated_at?: string
         }
         Update: {
@@ -2498,9 +2498,9 @@ export type Database = {
           id_credor?: string | null
           id_documento?: string | null
           id_empresa?: number | null
-          item_nfe_id?: string | null
           numero?: string | null
-          quantidade?: number
+          pdf_nome?: string | null
+          pdf_url?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -2518,14 +2518,34 @@ export type Database = {
             referencedRelation: "ccas"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "estoque_movimentacoes_entradas_item_nfe_id_fkey"
-            columns: ["item_nfe_id"]
-            isOneToOne: false
-            referencedRelation: "nfe_compra_itens"
-            referencedColumns: ["id"]
-          },
         ]
+      }
+      estoque_movimentacoes_entradas_itens: {
+        Row: {
+          created_at: string
+          id: string
+          item_nfe_id: string | null
+          movimentacao_entrada_id: string
+          quantidade: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          item_nfe_id?: string | null
+          movimentacao_entrada_id: string
+          quantidade: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          item_nfe_id?: string | null
+          movimentacao_entrada_id?: string
+          quantidade?: number
+          updated_at?: string
+        }
+        Relationships: []
       }
       eventos_identificados: {
         Row: {

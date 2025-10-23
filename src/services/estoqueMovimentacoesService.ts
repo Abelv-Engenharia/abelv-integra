@@ -4,6 +4,19 @@ export interface EstoqueMovimentacaoEntrada {
   id: string;
   cca_id: number;
   almoxarifado_id: string;
+  id_credor?: string;
+  numero?: string;
+  id_empresa?: number;
+  id_documento?: string;
+  pdf_url?: string;
+  pdf_nome?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface EstoqueMovimentacaoEntradaItem {
+  id: string;
+  movimentacao_entrada_id: string;
   item_nfe_id?: string;
   quantidade: number;
   created_at: string;
@@ -22,7 +35,7 @@ export const estoqueMovimentacoesService = {
     ccaId: number,
     almoxarifadoId: string,
     nfeId: string
-  ): Promise<EstoqueMovimentacaoEntrada[]> {
+  ): Promise<EstoqueMovimentacaoEntrada> {
     // Buscar a NFE para obter os dados adicionais
     const { data: nfe, error: nfeError } = await supabase
       .from('nfe_compra')
@@ -44,24 +57,35 @@ export const estoqueMovimentacoesService = {
       throw new Error('Nenhum item encontrado para esta NFE');
     }
 
-    // Criar as movimentações para cada item
-    const movimentacoes = itens.map(item => ({
-      cca_id: ccaId,
-      almoxarifado_id: almoxarifadoId,
+    // Criar a movimentação de entrada principal
+    const { data: movimentacao, error: movError } = await supabase
+      .from('estoque_movimentacoes_entradas')
+      .insert({
+        cca_id: ccaId,
+        almoxarifado_id: almoxarifadoId,
+        id_credor: nfe.id_credor,
+        numero: nfe.numero,
+        id_empresa: nfe.id_empresa,
+        id_documento: nfe.id_documento,
+      })
+      .select()
+      .single();
+
+    if (movError) throw movError;
+    if (!movimentacao) throw new Error('Erro ao criar movimentação');
+
+    // Criar os itens da movimentação
+    const itensMovimentacao = itens.map(item => ({
+      movimentacao_entrada_id: movimentacao.id,
       item_nfe_id: item.id,
       quantidade: item.quantidade,
-      id_credor: nfe.id_credor,
-      numero: nfe.numero,
-      id_empresa: nfe.id_empresa,
-      id_documento: nfe.id_documento,
     }));
 
-    const { data, error } = await supabase
-      .from('estoque_movimentacoes_entradas')
-      .insert(movimentacoes)
-      .select();
+    const { error: itensError2 } = await supabase
+      .from('estoque_movimentacoes_entradas_itens')
+      .insert(itensMovimentacao);
 
-    if (error) throw error;
+    if (itensError2) throw itensError2;
 
     // Marcar a NFE como alocada
     const { error: updateError } = await supabase
@@ -71,7 +95,7 @@ export const estoqueMovimentacoesService = {
 
     if (updateError) throw updateError;
 
-    return data || [];
+    return movimentacao;
   },
 
   async getByAlmoxarifado(almoxarifadoId: string): Promise<EstoqueMovimentacaoEntrada[]> {
@@ -87,7 +111,7 @@ export const estoqueMovimentacoesService = {
 
   async getNfesAlocadas(): Promise<string[]> {
     const { data, error } = await supabase
-      .from('estoque_movimentacoes_entradas')
+      .from('estoque_movimentacoes_entradas_itens')
       .select('item_nfe_id');
 
     if (error) throw error;
