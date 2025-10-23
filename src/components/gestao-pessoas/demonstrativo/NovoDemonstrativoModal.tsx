@@ -387,7 +387,7 @@ export function NovoDemonstrativoModal({ open, onOpenChange, onSave }: NovoDemon
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="obra" className={errors.obra ? "text-destructive" : ""}>
-                  Cca*
+                  CCA*
                 </Label>
                 <Input 
                   id="obra" 

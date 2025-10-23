@@ -70,7 +70,14 @@ export function usePrestadoresPJ() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("prestadores_pj")
-        .select("*")
+        .select(`
+          *,
+          ccas:cca_id (
+            id,
+            codigo,
+            nome
+          )
+        `)
         .eq("ativo", true)
         .order("nomecompleto");
 
@@ -215,8 +222,8 @@ function mapPrestadorFromDB(data: any): PrestadorPJ {
     telefone: data.telefone,
     endereco: data.endereco,
     ccaId: data.cca_id,
-    ccaCodigo: data.cca_codigo,
-    ccaNome: data.cca_nome,
+    ccaCodigo: data.ccas?.codigo || data.cca_codigo,
+    ccaNome: data.ccas?.nome || data.cca_nome,
     valorPrestacaoServico: data.valorprestacaoservico || 0,
     dataInicioContrato: data.datainiciocontrato,
     servico: data.servico,
