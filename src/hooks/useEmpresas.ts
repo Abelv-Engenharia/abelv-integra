@@ -17,29 +17,29 @@ export const useEmpresas = (ccaId?: number) => {
         return [];
       }
 
-      console.log('useEmpresas - buscando empresa_ccas para cca_id:', ccaId);
+      console.log('useEmpresas - buscando subcentros_custos para cca_id:', ccaId);
       const { data, error } = await supabase
-        .from("empresa_ccas")
-        .select("empresa_id")
+        .from("subcentros_custos")
+        .select("empresa_sienge_id")
         .eq("cca_id", ccaId);
 
-      console.log('useEmpresas - resultado empresa_ccas:', { data, error });
+      console.log('useEmpresas - resultado subcentros_custos:', { data, error });
 
       if (error) throw error;
       
-      // Buscar os nomes das empresas na tabela empresas_sienge usando id_sienge
+      // Buscar os nomes das empresas na tabela empresas_sienge
       if (!data || data.length === 0) {
         console.log('useEmpresas - nenhuma empresa vinculada ao CCA');
         return [];
       }
       
-      const empresaIds = data.map((item: any) => item.empresa_id);
+      const empresaIds = data.map((item: any) => item.empresa_sienge_id);
       console.log('useEmpresas - empresaIds:', empresaIds);
       
       const { data: empresasSienge, error: siengeError } = await supabase
         .from("empresas_sienge" as any)
         .select("id, id_sienge, name")
-        .in("id_sienge", empresaIds)
+        .in("id", empresaIds)
         .order("name", { ascending: true });
       
       console.log('useEmpresas - resultado empresas_sienge:', { empresasSienge, siengeError });
