@@ -12,7 +12,7 @@ import { cn } from "@/lib/utils";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { toast } from "@/hooks/use-toast";
 import { usePrestadoresPJ } from "@/hooks/gestao-pessoas/usePrestadoresPJ";
 
@@ -76,14 +76,14 @@ export function NovoDemonstrativoModal({ open, onOpenChange, onSave }: NovoDemon
     }
   });
 
-  // Verificar se deve mostrar formulário
-  const verificarExibicaoFormulario = () => {
+  // Atualizar exibição do formulário quando prestador ou período mudarem
+  useEffect(() => {
     if (prestadorSelecionado && periodoContabil) {
       setMostrarFormulario(true);
     } else {
       setMostrarFormulario(false);
     }
-  };
+  }, [prestadorSelecionado, periodoContabil]);
 
   // Auto-preencher campos ao selecionar prestador
   const handlePrestadorChange = (id: string) => {
@@ -144,21 +144,20 @@ export function NovoDemonstrativoModal({ open, onOpenChange, onSave }: NovoDemon
         setValue("reembolsoconvenio", prestador.valorAuxilioConvenioMedico || 0);
       }
     }
-    verificarExibicaoFormulario();
   };
 
   const handlePeriodoContabilChange = (periodo: string) => {
     setPeriodoContabil(periodo);
     setValue("periodocontabil", periodo);
-    verificarExibicaoFormulario();
   };
 
-  // Gerar lista de períodos contábeis (últimos 12 meses + próximos 3 meses)
+  // Gerar lista de períodos contábeis (últimos 12 meses + próximos 6 meses)
   const gerarPeriodosContabeis = () => {
     const periodos = [];
     const hoje = new Date();
     
-    for (let i = 12; i >= -3; i--) {
+    // Gerar dos últimos 12 meses até os próximos 6 meses
+    for (let i = 12; i >= -6; i--) {
       const data = new Date(hoje.getFullYear(), hoje.getMonth() - i, 1);
       const mes = String(data.getMonth() + 1).padStart(2, '0');
       const ano = data.getFullYear();
