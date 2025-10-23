@@ -20,6 +20,7 @@ import { useCredores } from "@/hooks/useCredores";
 import { useEmpresas } from "@/hooks/useEmpresas";
 import { useAlmoxarifados } from "@/hooks/useAlmoxarifados";
 import { useNfeCompras } from "@/hooks/useNfeCompras";
+import { useTiposDocumentos } from "@/hooks/useTiposDocumentos";
 import { estoqueMovimentacoesService } from "@/services/estoqueMovimentacoesService";
 import { supabase } from "@/integrations/supabase/client";
 const MAX_FILE_SIZE = 3 * 1024 * 1024; // 3MB
@@ -106,6 +107,11 @@ export default function NovaEntrada() {
     data: nfes = [],
     isLoading: nfesLoading
   } = useNfeCompras(ccaSelecionado, true);
+  
+  const {
+    data: tiposDocumentos = [],
+    isLoading: tiposDocumentosLoading
+  } = useTiposDocumentos();
   const {
     fields,
     append,
@@ -198,6 +204,7 @@ export default function NovaEntrada() {
         numero: data.numerodocumento,
         id_empresa: data.empresa || undefined,
         id_documento: data.nfe_id || undefined,
+        tipo_documento: data.documento || undefined,
         emissao: format(data.dataemissao, 'yyyy-MM-dd'),
         movimento: format(data.datamovimento, 'yyyy-MM-dd'),
         pdf_url: pdfUrl,
@@ -350,15 +357,18 @@ export default function NovaEntrada() {
                       <Select onValueChange={(value) => {
                         field.onChange(value);
                         form.setValue("nfe_id", "");
-                      }} value={field.value}>
+                      }} value={field.value} disabled={tiposDocumentosLoading}>
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Selecione o tipo" />
+                            <SelectValue placeholder={tiposDocumentosLoading ? "Carregando..." : "Selecione o tipo"} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="NFe">Nfe</SelectItem>
-                          <SelectItem value="Manual">Manual</SelectItem>
+                          {tiposDocumentos.map(tipo => (
+                            <SelectItem key={tipo.id} value={tipo.codigo}>
+                              {tipo.codigo}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                       <FormMessage />
