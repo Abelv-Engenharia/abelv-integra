@@ -364,30 +364,45 @@ export function EditarPrestadorModal({ open, onOpenChange, prestador }: EditarPr
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <Label>Data de Nascimento</Label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className={cn(
-                          "w-full justify-start text-left font-normal",
-                          !dataNascimento && "text-muted-foreground"
-                        )}
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {dataNascimento ? format(dataNascimento, "dd/MM/yyyy") : "Selecione"}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0">
-                      <Calendar
-                        mode="single"
-                        selected={dataNascimento}
-                        onSelect={setDataNascimento}
-                        disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
-                        initialFocus
-                        className="pointer-events-auto"
-                      />
-                    </PopoverContent>
-                  </Popover>
+                  <div className="flex gap-2">
+                    <Input
+                      type="date"
+                      value={dataNascimento ? format(dataNascimento, "yyyy-MM-dd") : ""}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        if (value) {
+                          const [year, month, day] = value.split('-');
+                          setDataNascimento(new Date(parseInt(year), parseInt(month) - 1, parseInt(day)));
+                        } else {
+                          setDataNascimento(undefined);
+                        }
+                      }}
+                      max={format(new Date(), "yyyy-MM-dd")}
+                      min="1900-01-01"
+                      className="flex-1"
+                    />
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          className="flex-shrink-0"
+                        >
+                          <CalendarIcon className="h-4 w-4" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0">
+                        <Calendar
+                          mode="single"
+                          selected={dataNascimento}
+                          onSelect={setDataNascimento}
+                          disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
+                          initialFocus
+                          className="pointer-events-auto"
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
                 </div>
 
                 <div>
