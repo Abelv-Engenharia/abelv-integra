@@ -48,6 +48,15 @@ export const estoqueMovimentacoesService = {
       .select();
 
     if (error) throw error;
+
+    // Marcar a NFE como alocada
+    const { error: updateError } = await supabase
+      .from('nfe_compra')
+      .update({ alocada: true })
+      .eq('id', nfeId);
+
+    if (updateError) throw updateError;
+
     return data || [];
   },
 

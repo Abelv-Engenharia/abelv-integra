@@ -42,6 +42,11 @@ export const useNfeCompras = (ccaId?: number, excludeAlocadas: boolean = false) 
         `)
         .order("emissao", { ascending: false });
 
+      // Se deve excluir alocadas, adicionar filtro
+      if (excludeAlocadas) {
+        query = query.eq("alocada", false);
+      }
+
       const { data, error } = await query;
 
       if (error) throw error;
@@ -61,27 +66,6 @@ export const useNfeCompras = (ccaId?: number, excludeAlocadas: boolean = false) 
         filteredData = filteredData.filter((nfe: any) => 
           nfe.itens?.some((item: any) => idsSubcentros.includes(item.id_cca_sienge))
         );
-      }
-      
-      // Se deve excluir alocadas, buscar NFEs já alocadas
-      if (excludeAlocadas && filteredData.length > 0) {
-        const { data: movimentacoes } = await supabase
-          .from("estoque_movimentacoes_entradas")
-          .select("item_nfe_id");
-        
-        const itemIds = movimentacoes?.map(m => m.item_nfe_id).filter(Boolean) || [];
-        
-        if (itemIds.length > 0) {
-          const { data: itens } = await supabase
-            .from("nfe_compra_itens")
-            .select("id_nfe")
-            .in("id", itemIds);
-          
-          const nfesAlocadas = [...new Set(itens?.map(i => i.id_nfe).filter(Boolean) || [])];
-          
-          // Filtrar NFEs já alocadas
-          filteredData = filteredData.filter((nfe: any) => !nfesAlocadas.includes(nfe.id));
-        }
       }
       
       return (filteredData || []) as unknown as NfeCompra[];

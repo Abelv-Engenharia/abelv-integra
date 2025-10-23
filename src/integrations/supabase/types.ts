@@ -4157,6 +4157,7 @@ export type Database = {
       }
       nfe_compra: {
         Row: {
+          alocada: boolean | null
           created_at: string
           emissao: string | null
           id: string
@@ -4171,6 +4172,7 @@ export type Database = {
           titulo: number | null
         }
         Insert: {
+          alocada?: boolean | null
           created_at?: string
           emissao?: string | null
           id?: string
@@ -4185,6 +4187,7 @@ export type Database = {
           titulo?: number | null
         }
         Update: {
+          alocada?: boolean | null
           created_at?: string
           emissao?: string | null
           id?: string
