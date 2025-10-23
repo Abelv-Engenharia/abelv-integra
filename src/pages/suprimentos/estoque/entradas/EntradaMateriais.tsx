@@ -12,7 +12,7 @@ import { Plus, Edit, CalendarIcon, Filter } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { useCCAs } from "@/hooks/useCCAs";
-import { useNfeCompras } from "@/hooks/useNfeCompras";
+import { useEstoqueMovimentacoesEntradas } from "@/hooks/useEstoqueMovimentacoesEntradas";
 import { useCredores } from "@/hooks/useCredores";
 import { useEmpresas } from "@/hooks/useEmpresas";
 import { useAlmoxarifados } from "@/hooks/useAlmoxarifados";
@@ -25,9 +25,9 @@ export default function EntradaMateriais() {
   } = useCCAs();
   const [ccaIdFiltro, setCcaIdFiltro] = useState<number | undefined>(undefined);
   const {
-    data: nfeCompras = [],
-    isLoading: nfeLoading
-  } = useNfeCompras(ccaIdFiltro);
+    data: movimentacoes = [],
+    isLoading: movimentacoesLoading
+  } = useEstoqueMovimentacoesEntradas(ccaIdFiltro);
   const {
     data: credores = [],
     isLoading: credoresLoading
@@ -255,37 +255,37 @@ export default function EntradaMateriais() {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead>Cca</TableHead>
+                <TableHead>Almoxarifado</TableHead>
                 <TableHead>Documento</TableHead>
                 <TableHead>Número</TableHead>
+                <TableHead>Empresa</TableHead>
+                <TableHead>Credor</TableHead>
                 <TableHead>Data emissão</TableHead>
                 <TableHead>Data movimento</TableHead>
-                <TableHead>Fornecedor</TableHead>
-                <TableHead>CNPJ</TableHead>
-                <TableHead>Itens</TableHead>
-                <TableHead>Valor total</TableHead>
                 <TableHead>Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {nfeLoading ? <TableRow>
+              {movimentacoesLoading ? <TableRow>
                   <TableCell colSpan={9} className="text-center">
                     Carregando...
                   </TableCell>
-                </TableRow> : nfeCompras.length === 0 ? <TableRow>
+                </TableRow> : movimentacoes.length === 0 ? <TableRow>
                   <TableCell colSpan={9} className="text-center">
                     Nenhuma entrada encontrada
                   </TableCell>
-                </TableRow> : nfeCompras.map(nfe => <TableRow key={nfe.id}>
-                    <TableCell>NFe</TableCell>
-                    <TableCell>{nfe.numero}/{nfe.id_documento}</TableCell>
-                    <TableCell>{format(new Date(nfe.emissao), "dd/MM/yyyy")}</TableCell>
-                    <TableCell>{format(new Date(nfe.Movimenbto), "dd/MM/yyyy")}</TableCell>
-                    <TableCell>{nfe.id_credor}</TableCell>
-                    <TableCell>-</TableCell>
-                    <TableCell>-</TableCell>
-                    <TableCell>-</TableCell>
+                </TableRow> : movimentacoes.map(mov => <TableRow key={mov.id}>
+                    <TableCell>{mov.ccas?.codigo}</TableCell>
+                    <TableCell>{mov.almoxarifados?.nome || "-"}</TableCell>
+                    <TableCell>{mov.tipo_documentos ? `${mov.tipo_documentos.codigo} - ${mov.tipo_documentos.descricao}` : "-"}</TableCell>
+                    <TableCell>{mov.numero || "-"}</TableCell>
+                    <TableCell>{mov.empresas_sienge?.name || "-"}</TableCell>
+                    <TableCell>{mov.credores?.razao || "-"}</TableCell>
+                    <TableCell>{mov.emissao ? format(new Date(mov.emissao), "dd/MM/yyyy") : "-"}</TableCell>
+                    <TableCell>{mov.movimento ? format(new Date(mov.movimento), "dd/MM/yyyy") : "-"}</TableCell>
                     <TableCell>
-                      <Button variant="outline" size="sm" onClick={() => handleEditarEntrada(nfe.id)}>
+                      <Button variant="outline" size="sm" onClick={() => handleEditarEntrada(mov.id)}>
                         <Edit className="h-4 w-4" />
                       </Button>
                     </TableCell>
