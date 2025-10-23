@@ -143,8 +143,11 @@ export default function EmissaoContratoPrestacaoServico() {
 
       // Gerar arquivo preenchido
       const nomeArquivo = `Contrato_${prestadorSelecionado.razaoSocial.replace(/\s+/g, '_')}_${data.numerocontrato}.docx`;
+      // Extrair o path do arquivo da URL (última parte após a última barra)
+      const filePath = modeloSelecionado.arquivo_url.split('/').pop() || '';
+      
       const blob = await gerarContratoPreenchido(
-        modeloSelecionado.arquivo_url,
+        filePath,
         dadosContrato,
         nomeArquivo
       );
@@ -206,8 +209,11 @@ export default function EmissaoContratoPrestacaoServico() {
       };
 
       const nomeArquivo = `Distrato_${prestadorSelecionado.razaoSocial.replace(/\s+/g, '_')}_${data.numerodistrato}.docx`;
+      // Extrair o path do arquivo da URL
+      const filePath = modeloSelecionado.arquivo_url.split('/').pop() || '';
+      
       const blob = await gerarContratoPreenchido(
-        modeloSelecionado.arquivo_url,
+        filePath,
         dadosDistrato,
         nomeArquivo
       );
@@ -267,8 +273,11 @@ export default function EmissaoContratoPrestacaoServico() {
       };
 
       const nomeArquivo = `Aditivo_${prestadorSelecionado.razaoSocial.replace(/\s+/g, '_')}_${data.numeroaditivo}.docx`;
+      // Extrair o path do arquivo da URL
+      const filePath = modeloSelecionado.arquivo_url.split('/').pop() || '';
+      
       const blob = await gerarContratoPreenchido(
-        modeloSelecionado.arquivo_url,
+        filePath,
         dadosAditivo,
         nomeArquivo
       );
@@ -379,8 +388,11 @@ export default function EmissaoContratoPrestacaoServico() {
 
       const nomeArquivo = `${tipoContratoSelecionado}_${prestadorSelecionado.razaoSocial.replace(/\s+/g, '_')}_preview.docx`;
       
+      // Extrair o path do arquivo da URL
+      const filePath = modeloSelecionado.arquivo_url.split('/').pop() || '';
+      
       await gerarContratoPreenchido(
-        modeloSelecionado.arquivo_url,
+        filePath,
         dadosBasicos,
         nomeArquivo
       );

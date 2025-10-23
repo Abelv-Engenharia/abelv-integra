@@ -1,23 +1,31 @@
 import Docxtemplater from 'docxtemplater';
 import PizZip from 'pizzip';
 import { saveAs } from 'file-saver';
+import { supabase } from '@/integrations/supabase/client';
 
 interface DadosContrato {
   [key: string]: string | number | Date | null | undefined;
 }
 
 /**
- * Baixa o arquivo .docx do Supabase Storage
+ * Baixa o arquivo .docx do Supabase Storage usando o path do arquivo
  */
-export async function baixarModeloDocx(url: string): Promise<ArrayBuffer> {
+export async function baixarModeloDocx(filePath: string): Promise<ArrayBuffer> {
   try {
-    const response = await fetch(url);
+    const { data, error } = await supabase.storage
+      .from('contratos-modelos')
+      .download(filePath);
     
-    if (!response.ok) {
-      throw new Error(`Erro ao baixar modelo: ${response.statusText}`);
+    if (error) {
+      console.error('Erro ao baixar modelo:', error);
+      throw new Error(`Erro ao baixar modelo: ${error.message}`);
     }
     
-    return await response.arrayBuffer();
+    if (!data) {
+      throw new Error('Arquivo não encontrado');
+    }
+    
+    return await data.arrayBuffer();
   } catch (error) {
     console.error('Erro ao baixar modelo:', error);
     throw new Error('Não foi possível baixar o modelo do contrato');
@@ -134,13 +142,13 @@ export async function processarModeloDocx(
  * Gera e faz download do contrato preenchido
  */
 export async function gerarContratoPreenchido(
-  modeloUrl: string,
+  filePath: string,
   dados: DadosContrato,
   nomeArquivo: string
 ): Promise<Blob> {
   try {
-    // Baixar o modelo
-    const arquivoBuffer = await baixarModeloDocx(modeloUrl);
+    // Baixar o modelo usando o path do arquivo
+    const arquivoBuffer = await baixarModeloDocx(filePath);
     
     // Processar o modelo com os dados
     const blob = await processarModeloDocx(arquivoBuffer, dados);

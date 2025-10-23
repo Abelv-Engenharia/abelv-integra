@@ -138,8 +138,8 @@ export const useUploadModelo = () => {
       
       return {
         url: urlData.publicUrl,
-        nome: file.name,
         path: fileName,
+        nome: file.name,
       };
     },
     onError: (error) => {
