@@ -44,7 +44,13 @@ type DemonstrativoFormData = z.infer<typeof demonstrativoSchema>;
 interface NovoDemonstrativoModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSave: (data: DemonstrativoFormData & { valornf: number }) => void;
+  onSave: (data: DemonstrativoFormData & { 
+    valornf: number;
+    prestadorId: string;
+    ccaId?: number;
+    ccaCodigo?: string;
+    mes: string;
+  }) => void;
 }
 
 export function NovoDemonstrativoModal({ open, onOpenChange, onSave }: NovoDemonstrativoModalProps) {
@@ -204,10 +210,18 @@ export function NovoDemonstrativoModal({ open, onOpenChange, onSave }: NovoDemon
 
   const onSubmit = (data: DemonstrativoFormData) => {
     const codigo = data.codigo || `DEMO-${Date.now()}`;
+    
+    // Buscar prestador para obter ccaId e ccaCodigo
+    const prestador = prestadores.find(p => p.id === prestadorSelecionado);
+    
     onSave({
       ...data,
       codigo,
       valornf: valorNF,
+      prestadorId: prestadorSelecionado,
+      ccaId: prestador?.ccaId,
+      ccaCodigo: prestador?.ccaCodigo,
+      mes: data.periodocontabil,
     });
     toast({
       title: "Sucesso",
