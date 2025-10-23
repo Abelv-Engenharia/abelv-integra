@@ -104,37 +104,63 @@ export async function processarModeloDocx(
   dados: DadosContrato
 ): Promise<Blob> {
   try {
+    console.log('Iniciando processamento do modelo...');
+    console.log('Dados recebidos:', dados);
+    
     // Preparar dados formatados
     const dadosFormatados = prepararDadosParaSubstituicao(dados);
+    console.log('Dados formatados:', dadosFormatados);
     
     // Carregar o arquivo .docx
     const zip = new PizZip(arquivoBuffer);
+    console.log('Arquivo ZIP carregado');
     
     // Criar instância do docxtemplater
     const doc = new Docxtemplater(zip, {
       paragraphLoop: true,
       linebreaks: true,
+      delimiters: {
+        start: '{{',
+        end: '}}'
+      }
     });
+    console.log('Docxtemplater instanciado');
     
     // Substituir os códigos
     doc.render(dadosFormatados);
+    console.log('Códigos substituídos com sucesso');
     
     // Gerar o documento preenchido
     const blob = doc.getZip().generate({
       type: 'blob',
       mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
     });
+    console.log('Blob gerado com sucesso');
     
     return blob;
   } catch (error) {
-    console.error('Erro ao processar modelo:', error);
+    console.error('Erro detalhado ao processar modelo:', error);
+    console.error('Tipo do erro:', error instanceof Error ? error.constructor.name : typeof error);
     
-    // Verificar se é erro de tag não encontrada
-    if (error instanceof Error && error.message.includes('tag')) {
-      throw new Error('Erro ao preencher o modelo. Verifique se todos os códigos estão corretos.');
+    if (error instanceof Error) {
+      console.error('Mensagem:', error.message);
+      console.error('Stack:', error.stack);
     }
     
-    throw new Error('Não foi possível processar o modelo do contrato');
+    // Verificar se é erro de tag não encontrada do docxtemplater
+    if (error instanceof Error && 'properties' in error) {
+      const docError = error as any;
+      console.error('Propriedades do erro docxtemplater:', docError.properties);
+      
+      if (docError.properties?.errors) {
+        const errors = docError.properties.errors;
+        console.error('Erros específicos:', errors);
+        throw new Error(`Erro no modelo: ${errors.map((e: any) => e.message).join(', ')}`);
+      }
+    }
+    
+    // Erro genérico com mais informação
+    throw new Error(`Não foi possível processar o modelo: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
   }
 }
 
