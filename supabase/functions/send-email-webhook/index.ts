@@ -37,11 +37,16 @@ serve(async (req: Request) => {
     const body = req.method === 'POST' ? await req.json().catch(() => ({})) : {};
     const testConfigId = body.configuracao_id;
 
+    console.log('📨 Body recebido:', JSON.stringify(body));
+    console.log('🔍 Test Config ID:', testConfigId);
+
     let configuracoes;
     let configError;
 
     // Se for teste de configuração específica, buscar apenas ela (sem validar hora/periodicidade)
     if (testConfigId) {
+      console.log(`🧪 Teste manual - Buscando configuração ${testConfigId}`);
+      
       const { data, error } = await supabase
         .from('configuracoes_emails')
         .select('*')
@@ -52,8 +57,11 @@ serve(async (req: Request) => {
       configuracoes = data;
       configError = error;
       
-      console.log(`Teste manual - Buscando configuração ${testConfigId}`);
+      console.log('📊 Dados retornados:', JSON.stringify(data));
+      console.log('❌ Erro na query:', error);
     } else {
+      console.log('⏰ Chamada do cron - buscando todas configurações');
+      
       // Chamada do cron - buscar todas as configurações ativas
       const { data, error } = await supabase
         .from('configuracoes_emails')
@@ -65,9 +73,12 @@ serve(async (req: Request) => {
       configError = error;
     }
 
-    if (configError) throw configError;
+    if (configError) {
+      console.error('❌ Erro ao buscar configurações:', configError);
+      throw configError;
+    }
 
-    console.log(`Encontradas ${configuracoes?.length || 0} configurações com webhook`);
+    console.log(`✅ Encontradas ${configuracoes?.length || 0} configurações com webhook`);
 
     const now = new Date();
     const currentWeekday = now.getDay();

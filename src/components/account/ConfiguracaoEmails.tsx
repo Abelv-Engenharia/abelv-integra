@@ -466,14 +466,14 @@ const ConfiguracaoEmails = () => {
                       <p>
                         <strong>Hora de Envio:</strong> {configuracao.hora_envio}
                       </p>
-                      <p>
-                      <strong>Status:</strong>{" "}
+                      <div>
+                        <strong>Status:</strong>{" "}
                         {configuracao.ativo ? (
                           <Badge variant="outline">Ativo</Badge>
                         ) : (
                           <Badge variant="secondary">Inativo</Badge>
                         )}
-                      </p>
+                      </div>
                       {configuracao.webhook_url && (
                         <p className="flex items-center gap-2 mt-2">
                           <Link2 className="w-4 h-4 text-green-600" />
