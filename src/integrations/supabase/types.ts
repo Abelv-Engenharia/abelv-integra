@@ -2527,6 +2527,8 @@ export type Database = {
           item_nfe_id: string | null
           movimentacao_entrada_id: string
           quantidade: number
+          unidade: string | null
+          unitario: number | null
           updated_at: string
         }
         Insert: {
@@ -2535,6 +2537,8 @@ export type Database = {
           item_nfe_id?: string | null
           movimentacao_entrada_id: string
           quantidade: number
+          unidade?: string | null
+          unitario?: number | null
           updated_at?: string
         }
         Update: {
@@ -2543,6 +2547,8 @@ export type Database = {
           item_nfe_id?: string | null
           movimentacao_entrada_id?: string
           quantidade?: number
+          unidade?: string | null
+          unitario?: number | null
           updated_at?: string
         }
         Relationships: []

@@ -20,6 +20,7 @@ export interface EstoqueMovimentacaoEntradaItem {
   item_nfe_id?: string;
   quantidade: number;
   unidade?: string;
+  unitario?: number;
   created_at: string;
   updated_at: string;
 }
@@ -86,6 +87,7 @@ export const estoqueMovimentacoesService = {
       item_nfe_id: item.id,
       quantidade: item.quantidade,
       unidade: (item as any).unidades_medidas?.simbolo || null,
+      unitario: item.unitario,
     }));
 
     const { error: itensError2 } = await supabase
