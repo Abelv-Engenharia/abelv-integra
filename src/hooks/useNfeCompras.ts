@@ -33,10 +33,10 @@ export const useNfeCompras = (ccaId?: number, excludeAlocadas: boolean = false) 
           itens:nfe_compra_itens(
             id_cca_sienge
           ),
-          credor:credores!nfe_compra_id_credor_fkey(
+          credor:credores(
             razao
           ),
-          empresa:empresas_sienge!nfe_compra_id_empresa_fkey(
+          empresa:empresas_sienge(
             name
           )
         `)
