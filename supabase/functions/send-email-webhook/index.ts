@@ -37,19 +37,33 @@ serve(async (req: Request) => {
     const body = req.method === 'POST' ? await req.json().catch(() => ({})) : {};
     const testConfigId = body.configuracao_id;
 
-    let query = supabase
-      .from('configuracoes_emails')
-      .select('*')
-      .eq('ativo', true)
-      .not('webhook_url', 'is', null);
+    let configuracoes;
+    let configError;
 
-    // Se for teste de configuração específica, buscar apenas ela
+    // Se for teste de configuração específica, buscar apenas ela (sem validar hora/periodicidade)
     if (testConfigId) {
-      query = query.eq('id', testConfigId);
+      const { data, error } = await supabase
+        .from('configuracoes_emails')
+        .select('*')
+        .eq('id', testConfigId)
+        .eq('ativo', true)
+        .not('webhook_url', 'is', null);
+      
+      configuracoes = data;
+      configError = error;
+      
+      console.log(`Teste manual - Buscando configuração ${testConfigId}`);
+    } else {
+      // Chamada do cron - buscar todas as configurações ativas
+      const { data, error } = await supabase
+        .from('configuracoes_emails')
+        .select('*')
+        .eq('ativo', true)
+        .not('webhook_url', 'is', null);
+      
+      configuracoes = data;
+      configError = error;
     }
-
-    // Buscar configurações ativas com webhook configurado
-    const { data: configuracoes, error: configError } = await query;
 
     if (configError) throw configError;
 
@@ -63,39 +77,46 @@ serve(async (req: Request) => {
     const results = [];
 
     for (const config of (configuracoes || [])) {
-      const configHour = parseInt(config.hora_envio.split(':')[0]);
-      
-      // Verificar se está na hora de enviar
-      if (configHour !== currentHour) {
-        console.log(`Configuração ${config.id}: não é a hora (${configHour} vs ${currentHour})`);
-        continue;
-      }
-
-      // Verificar periodicidade
       let shouldSend = false;
-      
-      switch (config.periodicidade) {
-        case 'diario':
-          shouldSend = true;
-          break;
-        case 'semanal':
-          const diaSemanaMap: { [key: string]: number } = {
-            'domingo': 0, 'segunda': 1, 'terca': 2, 'quarta': 3,
-            'quinta': 4, 'sexta': 5, 'sabado': 6
-          };
-          shouldSend = diaSemanaMap[config.dia_semana || ''] === currentWeekday;
-          break;
-        case 'quinzenal':
-          shouldSend = currentDay === 1 || currentDay === 15;
-          break;
-        case 'mensal':
-          shouldSend = currentDay === 1;
-          break;
-      }
 
-      if (!shouldSend) {
-        console.log(`Configuração ${config.id}: não é o momento de enviar`);
-        continue;
+      // Se for teste manual, enviar sempre
+      if (testConfigId) {
+        shouldSend = true;
+        console.log(`Teste manual da configuração ${config.id} - enviando imediatamente`);
+      } else {
+        // Chamada do cron - verificar hora e periodicidade
+        const configHour = parseInt(config.hora_envio.split(':')[0]);
+        
+        // Verificar se está na hora de enviar
+        if (configHour !== currentHour) {
+          console.log(`Configuração ${config.id}: não é a hora (${configHour} vs ${currentHour})`);
+          continue;
+        }
+
+        // Verificar periodicidade
+        switch (config.periodicidade) {
+          case 'diario':
+            shouldSend = true;
+            break;
+          case 'semanal':
+            const diaSemanaMap: { [key: string]: number } = {
+              'domingo': 0, 'segunda': 1, 'terca': 2, 'quarta': 3,
+              'quinta': 4, 'sexta': 5, 'sabado': 6
+            };
+            shouldSend = diaSemanaMap[config.dia_semana || ''] === currentWeekday;
+            break;
+          case 'quinzenal':
+            shouldSend = currentDay === 1 || currentDay === 15;
+            break;
+          case 'mensal':
+            shouldSend = currentDay === 1;
+            break;
+        }
+
+        if (!shouldSend) {
+          console.log(`Configuração ${config.id}: não é o momento de enviar`);
+          continue;
+        }
       }
 
       // Montar payload para o webhook
