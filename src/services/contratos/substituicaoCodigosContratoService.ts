@@ -1,4 +1,4 @@
-import { PrestadorPJ } from "@/types/gestao-pessoas/prestador";
+import { PrestadorPJ } from "@/hooks/gestao-pessoas/usePrestadoresPJ";
 
 // Códigos disponíveis para substituição em contratos
 export const CODIGOS_CONTRATO_DISPONIVEIS = [
@@ -173,12 +173,12 @@ export function substituirCodigosContrato(
   // Calcular valor total mensal
   const valorTotal = (prestador.valorPrestacaoServico || 0) +
     (prestador.ajudaCusto || 0) +
-    (prestador.auxilioConvenioMedico || 0) +
+    (prestador.valorAuxilioConvenioMedico || 0) +
     (prestador.ajudaAluguel || 0) +
     (prestador.valeRefeicao || 0) +
-    (prestador.cafeManha || 0) +
-    (prestador.cafeTarde || 0) +
-    (prestador.almoco || 0);
+    (prestador.valorCafeManha || 0) +
+    (prestador.valorCafeTarde || 0) +
+    (prestador.valorAlmoco || 0);
   
   // Data de emissão
   const dataEmissao = new Date().toLocaleDateString('pt-BR');
@@ -189,12 +189,12 @@ export function substituirCodigosContrato(
     '{{PRESTADOR_NOME_COMPLETO}}': prestador.nomeCompleto || '',
     '{{PRESTADOR_CNPJ}}': prestador.cnpj || '',
     '{{PRESTADOR_CPF}}': prestador.cpf || '',
-    '{{PRESTADOR_INSCRICAO_ESTADUAL}}': prestador.inscricaoEstadual || '',
-    '{{PRESTADOR_INSCRICAO_MUNICIPAL}}': prestador.inscricaoMunicipal || '',
+    '{{PRESTADOR_INSCRICAO_ESTADUAL}}': '',
+    '{{PRESTADOR_INSCRICAO_MUNICIPAL}}': '',
     '{{PRESTADOR_ENDERECO}}': prestador.endereco || '',
-    '{{PRESTADOR_CEP}}': prestador.cep || '',
-    '{{PRESTADOR_CIDADE}}': prestador.cidade || '',
-    '{{PRESTADOR_ESTADO}}': prestador.estado || '',
+    '{{PRESTADOR_CEP}}': '',
+    '{{PRESTADOR_CIDADE}}': '',
+    '{{PRESTADOR_ESTADO}}': '',
     '{{PRESTADOR_TELEFONE}}': prestador.telefone || '',
     '{{PRESTADOR_EMAIL}}': prestador.email || '',
     
@@ -202,12 +202,12 @@ export function substituirCodigosContrato(
     '{{VALOR_PRESTACAO_SERVICO_EXTENSO}}': valorPorExtenso(prestador.valorPrestacaoServico || 0),
     '{{AJUDA_CUSTO}}': (prestador.ajudaCusto || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }),
     '{{AJUDA_CUSTO_EXTENSO}}': valorPorExtenso(prestador.ajudaCusto || 0),
-    '{{AUXILIO_CONVENIO_MEDICO}}': (prestador.auxilioConvenioMedico || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }),
+    '{{AUXILIO_CONVENIO_MEDICO}}': (prestador.valorAuxilioConvenioMedico || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }),
     '{{AUXILIO_ALUGUEL}}': (prestador.ajudaAluguel || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }),
     '{{VALE_REFEICAO}}': (prestador.valeRefeicao || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }),
-    '{{CAFE_MANHA}}': (prestador.cafeManha || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }),
-    '{{CAFE_TARDE}}': (prestador.cafeTarde || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }),
-    '{{ALMOCO}}': (prestador.almoco || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }),
+    '{{CAFE_MANHA}}': (prestador.valorCafeManha || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }),
+    '{{CAFE_TARDE}}': (prestador.valorCafeTarde || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }),
+    '{{ALMOCO}}': (prestador.valorAlmoco || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }),
     '{{VALOR_TOTAL_MENSAL}}': valorTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }),
     '{{VALOR_TOTAL_MENSAL_EXTENSO}}': valorPorExtenso(valorTotal),
     
@@ -220,7 +220,7 @@ export function substituirCodigosContrato(
     
     '{{DESCRICAO_ATIVIDADE}}': prestador.descricaoAtividade || '',
     '{{CARGO_FUNCAO}}': prestador.descricaoAtividade || '',
-    '{{GRAU_RISCO}}': prestador.grauDeRisco?.toString() || '',
+    '{{GRAU_RISCO}}': prestador.grauDeRisco || '',
     '{{TEMPO_CONTRATO}}': prestador.tempoContrato || '',
     
     '{{VEICULO}}': prestador.veiculo ? 'Sim' : 'Não',
@@ -230,10 +230,10 @@ export function substituirCodigosContrato(
     '{{PERIODO_FERIAS}}': prestador.periodoFerias || '',
     '{{QUANTIDADE_DIAS_FERIAS}}': prestador.quantidadeDiasFerias?.toString() || '',
     
-    '{{BANCO}}': prestador.banco || '',
-    '{{AGENCIA}}': prestador.agencia || '',
-    '{{CONTA}}': prestador.conta || '',
-    '{{TIPO_CONTA}}': prestador.tipoConta || '',
+    '{{BANCO}}': '',
+    '{{AGENCIA}}': '',
+    '{{CONTA}}': prestador.contaBancaria || '',
+    '{{TIPO_CONTA}}': '',
     '{{CHAVE_PIX}}': prestador.chavePix || '',
     
     '{{DATA_EMISSAO}}': dataEmissao,
