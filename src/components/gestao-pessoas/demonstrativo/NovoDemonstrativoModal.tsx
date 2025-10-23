@@ -644,22 +644,24 @@ export function NovoDemonstrativoModal({ open, onOpenChange, onSave }: NovoDemon
           {/* Valor Total */}
           <div className="space-y-4">
             <h3 className="text-sm font-semibold border-b pb-2">Valor Total</h3>
-            <div className="bg-muted p-4 rounded-lg space-y-3">
-              <div>
-                <Label className="text-sm text-muted-foreground">Total Proventos</Label>
-                <p className="text-lg font-semibold text-green-600">
-                  {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(
-                    salario + premiacaonexa + ajudacustoobra + ajudaaluguel + reembolsoconvenio
-                  )}
-                </p>
-              </div>
-              <div>
-                <Label className="text-sm text-muted-foreground">Total Descontos</Label>
-                <p className="text-lg font-semibold text-red-600">
-                  - {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(
-                    multasdescontos + descontoconvenio + descontoabelvrun + estacionamento
-                  )}
-                </p>
+            <div className="bg-muted p-4 rounded-lg space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-sm text-muted-foreground">Total Proventos</Label>
+                  <p className="text-lg font-semibold text-green-600">
+                    {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(
+                      salario + premiacaonexa + ajudacustoobra + ajudaaluguel + reembolsoconvenio
+                    )}
+                  </p>
+                </div>
+                <div>
+                  <Label className="text-sm text-muted-foreground">Total Descontos</Label>
+                  <p className="text-lg font-semibold text-red-600">
+                    - {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(
+                      multasdescontos + descontoconvenio + descontoabelvrun + estacionamento
+                    )}
+                  </p>
+                </div>
               </div>
               <div className="pt-2 border-t">
                 <Label>Valor NF (Calculado)</Label>
