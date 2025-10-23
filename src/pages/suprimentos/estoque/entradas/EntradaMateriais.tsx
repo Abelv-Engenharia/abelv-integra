@@ -276,12 +276,12 @@ export default function EntradaMateriais() {
                     Nenhuma entrada encontrada
                   </TableCell>
                 </TableRow> : movimentacoes.map(mov => <TableRow key={mov.id}>
-                    <TableCell>{mov.ccas?.codigo}</TableCell>
-                    <TableCell>{mov.almoxarifados?.nome || "-"}</TableCell>
-                    <TableCell>{mov.tipo_documentos ? `${mov.tipo_documentos.codigo} - ${mov.tipo_documentos.descricao}` : "-"}</TableCell>
+                    <TableCell>{mov.cca_id}</TableCell>
+                    <TableCell>{mov.almoxarifado_id}</TableCell>
+                    <TableCell>{mov.id_documento || "-"}</TableCell>
                     <TableCell>{mov.numero || "-"}</TableCell>
-                    <TableCell>{mov.empresas_sienge?.name || "-"}</TableCell>
-                    <TableCell>{mov.credores?.razao || "-"}</TableCell>
+                    <TableCell>{mov.id_empresa || "-"}</TableCell>
+                    <TableCell>{mov.id_credor || "-"}</TableCell>
                     <TableCell>{mov.emissao ? format(new Date(mov.emissao), "dd/MM/yyyy") : "-"}</TableCell>
                     <TableCell>{mov.movimento ? format(new Date(mov.movimento), "dd/MM/yyyy") : "-"}</TableCell>
                     <TableCell>
