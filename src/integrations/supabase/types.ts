@@ -473,6 +473,7 @@ export type Database = {
           relatorio_id: string | null
           tipo_relatorio: string | null
           updated_at: string
+          webhook_url: string | null
         }
         Insert: {
           anexo_url?: string | null
@@ -490,6 +491,7 @@ export type Database = {
           relatorio_id?: string | null
           tipo_relatorio?: string | null
           updated_at?: string
+          webhook_url?: string | null
         }
         Update: {
           anexo_url?: string | null
@@ -507,6 +509,7 @@ export type Database = {
           relatorio_id?: string | null
           tipo_relatorio?: string | null
           updated_at?: string
+          webhook_url?: string | null
         }
         Relationships: [
           {
@@ -9171,6 +9174,50 @@ export type Database = {
           usuario_id?: string
         }
         Relationships: []
+      }
+      webhook_logs: {
+        Row: {
+          configuracao_id: string | null
+          enviado_em: string | null
+          erro_mensagem: string | null
+          id: string
+          payload: Json
+          response_body: string | null
+          status_code: number | null
+          sucesso: boolean | null
+          webhook_url: string
+        }
+        Insert: {
+          configuracao_id?: string | null
+          enviado_em?: string | null
+          erro_mensagem?: string | null
+          id?: string
+          payload: Json
+          response_body?: string | null
+          status_code?: number | null
+          sucesso?: boolean | null
+          webhook_url: string
+        }
+        Update: {
+          configuracao_id?: string | null
+          enviado_em?: string | null
+          erro_mensagem?: string | null
+          id?: string
+          payload?: Json
+          response_body?: string | null
+          status_code?: number | null
+          sucesso?: boolean | null
+          webhook_url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "webhook_logs_configuracao_id_fkey"
+            columns: ["configuracao_id"]
+            isOneToOne: false
+            referencedRelation: "configuracoes_emails"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

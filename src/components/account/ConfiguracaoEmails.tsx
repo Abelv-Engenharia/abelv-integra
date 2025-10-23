@@ -14,6 +14,8 @@ import { Badge } from "@/components/ui/badge";
 import { useRelatoriosDisponiveis } from "@/hooks/useRelatoriosDisponiveis";
 import EmailTestPanel from "./EmailTestPanel";
 import EmailQueueStatus from "./EmailQueueStatus";
+import WebhookLogsPanel from "./WebhookLogsPanel";
+import { Link2 } from "lucide-react";
 
 interface ConfiguracaoEmail {
   id: string;
@@ -28,6 +30,7 @@ interface ConfiguracaoEmail {
   periodo_dias: number | null;
   anexo_url: string | null;
   cca_id: number | null;
+  webhook_url: string | null;
 }
 
 const ConfiguracaoEmailsForm = ({
@@ -54,6 +57,7 @@ const ConfiguracaoEmailsForm = ({
   const [periodoDias, setPeriodoDias] = useState(configuracao?.periodo_dias || 30);
   const [anexoUrl, setAnexoUrl] = useState(configuracao?.anexo_url || null);
   const [ccaId, setCcaId] = useState<number | null>(configuracao?.cca_id || null);
+  const [webhookUrl, setWebhookUrl] = useState(configuracao?.webhook_url || "");
   const [loading, setLoading] = useState(false);
 
   const { relatorios } = useRelatoriosDisponiveis();
@@ -79,6 +83,7 @@ const ConfiguracaoEmailsForm = ({
       periodo_dias: tipoRelatorio ? periodoDias : null,
       anexo_url: anexoUrl,
       cca_id: ccaId,
+      webhook_url: webhookUrl || null,
     };
 
     try {
@@ -260,6 +265,24 @@ const ConfiguracaoEmailsForm = ({
         />
       </div>
 
+      <div>
+        <Label htmlFor="webhookUrl" className="text-red-600">
+          URL do Webhook N8N *
+        </Label>
+        <Input
+          type="url"
+          id="webhookUrl"
+          value={webhookUrl}
+          onChange={(e) => setWebhookUrl(e.target.value)}
+          placeholder="https://seu-n8n.com/webhook/..."
+          required={!webhookUrl}
+          className={!webhookUrl ? "border-red-600" : ""}
+        />
+        <p className="text-xs text-muted-foreground mt-1">
+          Digite a URL do webhook do N8N que receberá os dados do email
+        </p>
+      </div>
+
       <div className="flex items-center space-x-2">
         <Label htmlFor="ativo">Ativo</Label>
         <Switch id="ativo" checked={ativo} onCheckedChange={setAtivo} />
@@ -351,6 +374,8 @@ const ConfiguracaoEmails = () => {
         <EmailTestPanel />
       </div>
 
+      <WebhookLogsPanel />
+
       <Card>
         <CardHeader>
           <CardTitle>Lista de Configurações</CardTitle>
@@ -398,13 +423,21 @@ const ConfiguracaoEmails = () => {
                         <strong>Hora de Envio:</strong> {configuracao.hora_envio}
                       </p>
                       <p>
-                        <strong>Status:</strong>{" "}
+                      <strong>Status:</strong>{" "}
                         {configuracao.ativo ? (
                           <Badge variant="outline">Ativo</Badge>
                         ) : (
                           <Badge variant="secondary">Inativo</Badge>
                         )}
                       </p>
+                      {configuracao.webhook_url && (
+                        <p className="flex items-center gap-2 mt-2">
+                          <Link2 className="w-4 h-4 text-green-600" />
+                          <span className="text-green-600 font-medium">
+                            Webhook N8N configurado
+                          </span>
+                        </p>
+                      )}
                     </div>
                     <div className="flex justify-end space-x-2 mt-4">
                       <Button
