@@ -374,7 +374,7 @@ function App() {
                 <Route path="adm/configuracoes" element={<AdminConfiguracoes />} />
                 <Route path="admin/configuracoes" element={<AdminConfiguracoes />} />
                 <Route path="admin/checklists" element={<AdminChecklists />} />
-                <Route path="configuracao-emails" element={<ConfiguracaoEmailsPage />} />
+                <Route path="admin/configuracao-emails" element={<ConfiguracaoEmailsPage />} />
                 <Route path="upload-tutoriais" element={<UploadTutoriaisPage />} />
                 <Route path="admin/importacao-execucao-treinamentos" element={<ImportacaoExecucaoTreinamentos />} />
                 <Route path="admin/importacao-hsa" element={<ImportacaoHSA />} />
