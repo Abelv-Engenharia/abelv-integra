@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { format } from "date-fns";
-import { CalendarIcon, Download, FileText, X, FilePlus2, FileX2, ArrowLeft } from "lucide-react";
+import { CalendarIcon, Download, FileText, X, FilePlus2, FileX2, ArrowLeft, FileCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -26,14 +26,10 @@ import {
   BreadcrumbSeparator 
 } from "@/components/ui/breadcrumb";
 import { usePrestadoresPJ, PrestadorPJ } from "@/hooks/gestao-pessoas/usePrestadoresPJ";
-
-// Enum para tipos de contrato
-enum TipoContrato {
-  PRESTACAO_SERVICO = 'prestacao_servico',
-  DISTRATO = 'distrato',
-  ADITIVO = 'aditivo'
-}
-
+import { useModelosPorTipo } from "@/hooks/gestao-pessoas/useModelosContratos";
+import { useCreateContratoEmitido, useUploadContratoPDF } from "@/hooks/gestao-pessoas/useContratosEmitidos";
+import { ContratoModelo, TipoContratoModelo } from "@/types/gestao-pessoas/contratoModelo";
+import { substituirCodigosContrato } from "@/services/contratos/substituicaoCodigosContratoService";
 
 // Schemas de validação
 const contratoSchema = z.object({
@@ -78,9 +74,15 @@ export default function EmissaoContratoPrestacaoServico() {
   const { data: prestadores, isLoading: loadingPrestadores } = usePrestadoresPJ();
   
   // Estados para controle de fluxo
-  const [tipoContratoSelecionado, setTipoContratoSelecionado] = useState<TipoContrato | null>(null);
+  const [tipoContratoSelecionado, setTipoContratoSelecionado] = useState<TipoContratoModelo | null>(null);
+  const [modeloSelecionado, setModeloSelecionado] = useState<ContratoModelo | null>(null);
   const [prestadorSelecionado, setPrestadorSelecionado] = useState<PrestadorPJ | null>(null);
-  const [etapaAtual, setEtapaAtual] = useState<1 | 2 | 3>(1);
+  const [etapaAtual, setEtapaAtual] = useState<1 | 2 | 3 | 4>(1);
+  
+  // Hooks para buscar modelos e salvar contrato
+  const { data: modelosDisponiveis, isLoading: loadingModelos } = useModelosPorTipo(tipoContratoSelecionado || undefined);
+  const createContrato = useCreateContratoEmitido();
+  const uploadPDF = useUploadContratoPDF();
 
   // Forms para cada tipo de contrato
   const formContrato = useForm<ContratoFormData>({
@@ -150,6 +152,7 @@ export default function EmissaoContratoPrestacaoServico() {
   const resetarFluxo = () => {
     setEtapaAtual(1);
     setTipoContratoSelecionado(null);
+    setModeloSelecionado(null);
     setPrestadorSelecionado(null);
     formContrato.reset();
     formDistrato.reset();
@@ -165,9 +168,9 @@ export default function EmissaoContratoPrestacaoServico() {
     doc.setFontSize(16);
     doc.setFont("helvetica", "bold");
     
-    if (tipoContratoSelecionado === TipoContrato.PRESTACAO_SERVICO) {
+    if (tipoContratoSelecionado === 'prestacao_servico') {
       doc.text("CONTRATO DE PRESTAÇÃO DE SERVIÇOS", 105, 20, { align: "center" });
-    } else if (tipoContratoSelecionado === TipoContrato.DISTRATO) {
+    } else if (tipoContratoSelecionado === 'distrato') {
       doc.text("DISTRATO DE PRESTAÇÃO DE SERVIÇOS", 105, 20, { align: "center" });
     } else {
       doc.text("TERMO ADITIVO AO CONTRATO", 105, 20, { align: "center" });
@@ -203,7 +206,7 @@ export default function EmissaoContratoPrestacaoServico() {
     icone,
     cor
   }: { 
-    tipo: TipoContrato; 
+    tipo: TipoContratoModelo; 
     titulo: string; 
     descricao: string; 
     icone: React.ReactNode;
@@ -265,21 +268,21 @@ export default function EmissaoContratoPrestacaoServico() {
             <h2 className="text-xl font-semibold">Selecione o tipo de documento a ser emitido</h2>
             <div className="grid gap-4 md:grid-cols-3">
               <CardTipoContrato
-                tipo={TipoContrato.PRESTACAO_SERVICO}
+                tipo="prestacao_servico"
                 titulo="Contrato de Prestação de Serviço"
                 descricao="Criar novo contrato de prestação de serviços com fornecedor"
                 icone={<FileText className="h-6 w-6 text-white" />}
                 cor="bg-primary"
               />
               <CardTipoContrato
-                tipo={TipoContrato.DISTRATO}
+                tipo="distrato"
                 titulo="Distrato de Prestação de Serviço"
                 descricao="Encerrar contrato existente de forma amigável"
                 icone={<FileX2 className="h-6 w-6 text-white" />}
                 cor="bg-destructive"
               />
               <CardTipoContrato
-                tipo={TipoContrato.ADITIVO}
+                tipo="aditivo"
                 titulo="Aditivo de Prestação de Serviço"
                 descricao="Adicionar alterações a um contrato vigente"
                 icone={<FilePlus2 className="h-6 w-6 text-white" />}
@@ -289,18 +292,18 @@ export default function EmissaoContratoPrestacaoServico() {
           </div>
         )}
 
-        {/* ETAPA 2: Seleção de Prestador */}
+        {/* ETAPA 2: Seleção de Modelo */}
         {etapaAtual === 2 && (
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle>Selecione o Prestador de Serviço</CardTitle>
+                  <CardTitle>Selecione o Modelo de Contrato</CardTitle>
                   <CardDescription>
-                    Escolha o prestador cadastrado para {
-                      tipoContratoSelecionado === TipoContrato.PRESTACAO_SERVICO ? 'o novo contrato' :
-                      tipoContratoSelecionado === TipoContrato.DISTRATO ? 'o distrato' :
-                      'o aditivo contratual'
+                    Escolha um modelo cadastrado para {
+                      tipoContratoSelecionado === 'prestacao_servico' ? 'prestação de serviço' :
+                      tipoContratoSelecionado === 'distrato' ? 'distrato' :
+                      'aditivo contratual'
                     }
                   </CardDescription>
                 </div>
@@ -317,6 +320,90 @@ export default function EmissaoContratoPrestacaoServico() {
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
+              {loadingModelos ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  Carregando modelos disponíveis...
+                </div>
+              ) : modelosDisponiveis && modelosDisponiveis.length > 0 ? (
+                <div className="grid gap-4 md:grid-cols-2">
+                  {modelosDisponiveis.map((modelo) => (
+                    <Card 
+                      key={modelo.id}
+                      className={cn(
+                        "cursor-pointer transition-all hover:shadow-lg hover:border-primary",
+                        modeloSelecionado?.id === modelo.id && "border-primary border-2 bg-primary/5"
+                      )}
+                      onClick={() => {
+                        setModeloSelecionado(modelo);
+                        setEtapaAtual(3);
+                      }}
+                    >
+                      <CardHeader>
+                        <div className="flex items-start gap-3">
+                          <FileCheck className="h-5 w-5 text-primary mt-1" />
+                          <div className="flex-1">
+                            <CardTitle className="text-base">{modelo.nome}</CardTitle>
+                            {modelo.descricao && (
+                              <CardDescription className="text-sm mt-1">
+                                {modelo.descricao}
+                              </CardDescription>
+                            )}
+                            <div className="mt-2 text-xs text-muted-foreground">
+                              {modelo.codigos_disponiveis.length} códigos disponíveis
+                            </div>
+                          </div>
+                        </div>
+                      </CardHeader>
+                    </Card>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                  <p className="text-muted-foreground">
+                    Nenhum modelo cadastrado para este tipo de contrato.
+                  </p>
+                  <Button 
+                    variant="link" 
+                    className="mt-2"
+                    onClick={() => window.location.href = '/gestao-pessoas/modelos-contratos'}
+                  >
+                    Cadastrar modelo agora
+                  </Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        {/* ETAPA 3: Seleção de Prestador */}
+        {etapaAtual === 3 && (
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Selecione o Prestador de Serviço</CardTitle>
+                  <CardDescription>
+                    Escolha o prestador cadastrado para {
+                      tipoContratoSelecionado === 'prestacao_servico' ? 'o novo contrato' :
+                      tipoContratoSelecionado === 'distrato' ? 'o distrato' :
+                      'o aditivo contratual'
+                    }
+                  </CardDescription>
+                </div>
+                <Button 
+                  variant="outline" 
+                  onClick={() => {
+                    setEtapaAtual(2);
+                    setModeloSelecionado(null);
+                  }}
+                >
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  Voltar
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="prestador">Prestador *</Label>
                 <Select
@@ -324,7 +411,7 @@ export default function EmissaoContratoPrestacaoServico() {
                     const prestador = prestadores?.find(p => p.id === value);
                     if (prestador) {
                       setPrestadorSelecionado(prestador);
-                      setEtapaAtual(3);
+                      setEtapaAtual(4);
                     }
                   }}
                   disabled={loadingPrestadores}
@@ -345,14 +432,14 @@ export default function EmissaoContratoPrestacaoServico() {
           </Card>
         )}
 
-        {/* ETAPA 3: Formulário com Dados do Prestador */}
-        {etapaAtual === 3 && prestadorSelecionado && (
+        {/* ETAPA 4: Formulário com Dados do Prestador */}
+        {etapaAtual === 4 && prestadorSelecionado && modeloSelecionado && (
           <div className="space-y-6">
             {/* Botão Voltar */}
             <Button 
               variant="outline" 
               onClick={() => {
-                setEtapaAtual(2);
+                setEtapaAtual(3);
                 setPrestadorSelecionado(null);
               }}
             >
@@ -419,7 +506,7 @@ export default function EmissaoContratoPrestacaoServico() {
             </Card>
 
             {/* Formulário específico baseado no tipo */}
-            {tipoContratoSelecionado === TipoContrato.PRESTACAO_SERVICO && (
+            {tipoContratoSelecionado === 'prestacao_servico' && (
               <Form {...formContrato}>
                 <form onSubmit={formContrato.handleSubmit(onSubmitContrato)} className="space-y-6">
                   <Card>
@@ -604,7 +691,7 @@ export default function EmissaoContratoPrestacaoServico() {
               </Form>
             )}
 
-            {tipoContratoSelecionado === TipoContrato.DISTRATO && (
+            {tipoContratoSelecionado === 'distrato' && (
               <Form {...formDistrato}>
                 <form onSubmit={formDistrato.handleSubmit(onSubmitDistrato)} className="space-y-6">
                   <Card>
@@ -830,7 +917,7 @@ export default function EmissaoContratoPrestacaoServico() {
               </Form>
             )}
 
-            {tipoContratoSelecionado === TipoContrato.ADITIVO && (
+            {tipoContratoSelecionado === 'aditivo' && (
               <Form {...formAditivo}>
                 <form onSubmit={formAditivo.handleSubmit(onSubmitAditivo)} className="space-y-6">
                   <Card>
