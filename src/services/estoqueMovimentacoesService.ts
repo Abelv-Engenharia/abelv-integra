@@ -144,6 +144,7 @@ export const estoqueMovimentacoesService = {
     const itensMovimentacao = itens.map(item => ({
       movimentacao_entrada_id: movimentacao.id,
       item_nfe_id: item.id,
+      descricao: item.descricao,
       quantidade: item.quantidade,
       unidade: (item as any).unidades_medidas?.simbolo || null,
       unitario: item.unitario,
