@@ -76,17 +76,29 @@ export function EditarDemonstrativoModal({ open, onOpenChange, onSave, demonstra
       setValue("descontoabelvrun", demonstrativo.descontoabelvrun || 0);
       setValue("estacionamento", demonstrativo.estacionamento || 0);
 
-      // Converter strings de data para Date objects
+      // Converter strings de data para Date objects (formato do banco: yyyy-MM-dd)
       if (demonstrativo.datanascimento) {
-        const dataNasc = parse(demonstrativo.datanascimento, "dd/MM/yyyy", new Date());
-        setDataNascimento(dataNasc);
-        setValue("datanascimento", dataNasc);
+        try {
+          const dataNasc = parse(demonstrativo.datanascimento, "yyyy-MM-dd", new Date());
+          if (dataNasc && !isNaN(dataNasc.getTime())) {
+            setDataNascimento(dataNasc);
+            setValue("datanascimento", dataNasc);
+          }
+        } catch (error) {
+          console.error("Erro ao parsear data de nascimento:", error);
+        }
       }
 
       if (demonstrativo.admissao) {
-        const dataAdm = parse(demonstrativo.admissao, "dd/MM/yyyy", new Date());
-        setDataAdmissao(dataAdm);
-        setValue("admissao", dataAdm);
+        try {
+          const dataAdm = parse(demonstrativo.admissao, "yyyy-MM-dd", new Date());
+          if (dataAdm && !isNaN(dataAdm.getTime())) {
+            setDataAdmissao(dataAdm);
+            setValue("admissao", dataAdm);
+          }
+        } catch (error) {
+          console.error("Erro ao parsear data de admissão:", error);
+        }
       }
     }
   }, [demonstrativo, open, setValue]);
@@ -223,7 +235,9 @@ export function EditarDemonstrativoModal({ open, onOpenChange, onSave, demonstra
                       )}
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
-                      {dataNascimento ? format(dataNascimento, "PPP", { locale: ptBR }) : "Selecione a data"}
+                      {dataNascimento && !isNaN(dataNascimento.getTime()) 
+                        ? format(dataNascimento, "PPP", { locale: ptBR }) 
+                        : "Selecione a data"}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0">
@@ -299,7 +313,9 @@ export function EditarDemonstrativoModal({ open, onOpenChange, onSave, demonstra
                       )}
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
-                      {dataAdmissao ? format(dataAdmissao, "PPP", { locale: ptBR }) : "Selecione a data"}
+                      {dataAdmissao && !isNaN(dataAdmissao.getTime()) 
+                        ? format(dataAdmissao, "PPP", { locale: ptBR }) 
+                        : "Selecione a data"}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0">
