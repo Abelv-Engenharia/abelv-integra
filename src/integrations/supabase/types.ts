@@ -2654,13 +2654,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "estoque_movimentacoes_saidas_apropriacao_id_fkey"
-            columns: ["apropriacao_id"]
-            isOneToOne: false
-            referencedRelation: "eap_itens"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "estoque_movimentacoes_saidas_cca_id_fkey"
             columns: ["cca_id"]
             isOneToOne: false
