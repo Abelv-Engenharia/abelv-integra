@@ -9,7 +9,7 @@ import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus, Trash2, Settings, Send } from "lucide-react";
+import { Plus, Trash2, Settings, Send, FileImage } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useRelatoriosDisponiveis } from "@/hooks/useRelatoriosDisponiveis";
 import EmailTestPanel from "./EmailTestPanel";
@@ -404,6 +404,75 @@ const ConfiguracaoEmails = () => {
     }
   };
 
+  const handleTestReportGeneration = async (configuracao: ConfiguracaoEmail) => {
+    if (configuracao.tipo_relatorio !== 'hsa') {
+      toast({
+        title: "Erro",
+        description: "Apenas relatórios HSA podem ser testados",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    toast({
+      title: "Gerando...",
+      description: "Criando relatório HSA em formato JPEG",
+    });
+
+    try {
+      const now = new Date();
+      const dataFinal = now.toISOString().split('T')[0];
+      const periodoDias = configuracao.periodo_dias || 30;
+      const dataInicial = new Date(now.getTime() - periodoDias * 24 * 60 * 60 * 1000)
+        .toISOString()
+        .split('T')[0];
+
+      console.log('🧪 Teste de geração:', {
+        cca_id: configuracao.cca_id,
+        data_inicial: dataInicial,
+        data_final: dataFinal,
+        periodo_dias: periodoDias,
+      });
+
+      const { data, error } = await supabase.functions.invoke('generate-hsa-report', {
+        body: {
+          cca_id: configuracao.cca_id,
+          data_inicial: dataInicial,
+          data_final: dataFinal,
+        }
+      });
+
+      if (error) throw error;
+
+      if (data?.anexo_url) {
+        toast({
+          title: "✅ Relatório Gerado!",
+          description: `Tempo: ${data.tempo_geracao_ms}ms - Clique para abrir`,
+          action: (
+            <a 
+              href={data.anexo_url} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-primary underline hover:text-primary/80"
+            >
+              Abrir relatório
+            </a>
+          ),
+        });
+        
+        console.log('✅ Relatório gerado:', data.anexo_url);
+      }
+
+    } catch (error: any) {
+      console.error('❌ Erro ao gerar relatório:', error);
+      toast({
+        title: "Erro",
+        description: error.message || "Não foi possível gerar o relatório de teste.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -484,6 +553,17 @@ const ConfiguracaoEmails = () => {
                       )}
                     </div>
                     <div className="flex justify-end space-x-2 mt-4">
+                      {configuracao.tipo_relatorio === 'hsa' && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleTestReportGeneration(configuracao)}
+                          className="border-blue-600 text-blue-600 hover:bg-blue-50"
+                        >
+                          <FileImage className="w-4 h-4 mr-2" />
+                          Testar Relatório
+                        </Button>
+                      )}
                       {configuracao.webhook_url && configuracao.ativo && (
                         <Button
                           size="sm"
