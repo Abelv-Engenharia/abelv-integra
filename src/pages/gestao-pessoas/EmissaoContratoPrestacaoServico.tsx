@@ -28,16 +28,10 @@ import { useModelosPorTipo } from "@/hooks/gestao-pessoas/useModelosContratos";
 import { useCreateContratoEmitido, useUploadContratoPDF } from "@/hooks/gestao-pessoas/useContratosEmitidos";
 import { ContratoModelo, TipoContratoModelo } from "@/types/gestao-pessoas/contratoModelo";
 import { gerarContratoPreenchido, blobParaFile } from "@/services/contratos/processarModeloContratoService";
+import { formatarcnpj } from "@/utils/formatters";
 
 // Schemas de validação
-const contratoSchema = z.object({
-  numerocontrato: z.string().min(1, "Número do contrato é obrigatório"),
-  datainicio: z.date({ required_error: "Data de início é obrigatória" }),
-  datafim: z.date({ required_error: "Data de término é obrigatória" }),
-  formapagamento: z.string().min(1, "Forma de pagamento é obrigatória"),
-  prazocontrato: z.string().min(1, "Prazo de contrato é obrigatório"),
-  clausulas: z.string().min(20, "Cláusulas do contrato são obrigatórias")
-});
+const contratoSchema = z.object({});
 
 const distratoSchema = z.object({
   numerocontratooriginal: z.string().min(1, "Número do contrato original é obrigatório"),
@@ -127,22 +121,16 @@ export default function EmissaoContratoPrestacaoServico() {
       // Preparar dados para substituição
       const dadosContrato = {
         PRESTADOR_RAZAO_SOCIAL: prestadorSelecionado.razaoSocial,
-        PRESTADOR_CNPJ: prestadorSelecionado.cnpj,
+        PRESTADOR_CNPJ: formatarcnpj(prestadorSelecionado.cnpj),
         PRESTADOR_NOME_COMPLETO: prestadorSelecionado.nomeCompleto,
         PRESTADOR_ENDERECO: prestadorSelecionado.endereco,
         PRESTADOR_ATIVIDADE: prestadorSelecionado.descricaoAtividade || '',
         PRESTADOR_VALOR: prestadorSelecionado.valorPrestacaoServico,
         PRESTADOR_AJUDA_CUSTO: prestadorSelecionado.ajudaCusto,
-        CONTRATO_NUMERO: data.numerocontrato,
-        CONTRATO_DATA_INICIO: data.datainicio,
-        CONTRATO_DATA_FIM: data.datafim,
-        CONTRATO_FORMA_PAGAMENTO: data.formapagamento,
-        CONTRATO_PRAZO: data.prazocontrato,
-        CONTRATO_CLAUSULAS: data.clausulas,
       };
 
       // Gerar arquivo preenchido
-      const nomeArquivo = `Contrato_${prestadorSelecionado.razaoSocial.replace(/\s+/g, '_')}_${data.numerocontrato}.docx`;
+      const nomeArquivo = `Contrato_${prestadorSelecionado.razaoSocial.replace(/\s+/g, '_')}.docx`;
       // Extrair o path do arquivo da URL (última parte após a última barra)
       const filePath = modeloSelecionado.arquivo_url.split('/').pop() || '';
       
@@ -164,12 +152,10 @@ export default function EmissaoContratoPrestacaoServico() {
         prestador_id: prestadorSelecionado.id,
         tipo_contrato: 'prestacao_servico',
         modelo_id: modeloSelecionado.id,
-        numero_contrato: data.numerocontrato,
+        numero_contrato: '',
         dados_preenchidos: dadosContrato,
         pdf_url: uploadResult.pdf_url,
         pdf_nome: nomeArquivo,
-        data_inicio: data.datainicio.toISOString(),
-        data_fim: data.datafim.toISOString(),
         status: 'confirmado',
       });
 
@@ -195,7 +181,7 @@ export default function EmissaoContratoPrestacaoServico() {
     try {
       const dadosDistrato = {
         PRESTADOR_RAZAO_SOCIAL: prestadorSelecionado.razaoSocial,
-        PRESTADOR_CNPJ: prestadorSelecionado.cnpj,
+        PRESTADOR_CNPJ: formatarcnpj(prestadorSelecionado.cnpj),
         PRESTADOR_NOME_COMPLETO: prestadorSelecionado.nomeCompleto,
         PRESTADOR_ENDERECO: prestadorSelecionado.endereco,
         DISTRATO_NUMERO: data.numerodistrato,
@@ -258,7 +244,7 @@ export default function EmissaoContratoPrestacaoServico() {
     try {
       const dadosAditivo = {
         PRESTADOR_RAZAO_SOCIAL: prestadorSelecionado.razaoSocial,
-        PRESTADOR_CNPJ: prestadorSelecionado.cnpj,
+        PRESTADOR_CNPJ: formatarcnpj(prestadorSelecionado.cnpj),
         PRESTADOR_NOME_COMPLETO: prestadorSelecionado.nomeCompleto,
         PRESTADOR_ENDERECO: prestadorSelecionado.endereco,
         ADITIVO_NUMERO: data.numeroaditivo,
@@ -340,7 +326,7 @@ export default function EmissaoContratoPrestacaoServico() {
       // Preparar dados básicos do prestador
       const dadosBasicos = {
         PRESTADOR_RAZAO_SOCIAL: prestadorSelecionado.razaoSocial,
-        PRESTADOR_CNPJ: prestadorSelecionado.cnpj,
+        PRESTADOR_CNPJ: formatarcnpj(prestadorSelecionado.cnpj),
         PRESTADOR_NOME_COMPLETO: prestadorSelecionado.nomeCompleto,
         PRESTADOR_ENDERECO: prestadorSelecionado.endereco,
         PRESTADOR_ATIVIDADE: prestadorSelecionado.descricaoAtividade || '',
@@ -349,17 +335,7 @@ export default function EmissaoContratoPrestacaoServico() {
       };
 
       // Adicionar dados do formulário se disponíveis
-      if (tipoContratoSelecionado === 'prestacao_servico') {
-        const formData = formContrato.getValues();
-        Object.assign(dadosBasicos, {
-          CONTRATO_NUMERO: formData.numerocontrato || '',
-          CONTRATO_DATA_INICIO: formData.datainicio || null,
-          CONTRATO_DATA_FIM: formData.datafim || null,
-          CONTRATO_FORMA_PAGAMENTO: formData.formapagamento || '',
-          CONTRATO_PRAZO: formData.prazocontrato || '',
-          CONTRATO_CLAUSULAS: formData.clausulas || '',
-        });
-      } else if (tipoContratoSelecionado === 'distrato') {
+      if (tipoContratoSelecionado === 'distrato') {
         const formData = formDistrato.getValues();
         Object.assign(dadosBasicos, {
           DISTRATO_NUMERO: formData.numerodistrato || '',
@@ -675,8 +651,8 @@ export default function EmissaoContratoPrestacaoServico() {
                     <Input value={prestadorSelecionado.razaoSocial} disabled className="bg-muted" />
                   </div>
                   <div>
-                    <Label>Cnpj</Label>
-                    <Input value={prestadorSelecionado.cnpj} disabled className="bg-muted" />
+                    <Label>CNPJ</Label>
+                    <Input value={formatarcnpj(prestadorSelecionado.cnpj)} disabled className="bg-muted" />
                   </div>
                   <div>
                     <Label>Representante Legal</Label>
@@ -722,174 +698,6 @@ export default function EmissaoContratoPrestacaoServico() {
             {tipoContratoSelecionado === 'prestacao_servico' && (
               <Form {...formContrato}>
                 <form onSubmit={formContrato.handleSubmit(onSubmitContrato)} className="space-y-6">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Dados do Contrato</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="grid gap-4 md:grid-cols-2">
-                        <FormField
-                          control={formContrato.control}
-                          name="numerocontrato"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel className={cn(formContrato.formState.errors.numerocontrato && "text-destructive")}>
-                                Número do Contrato *
-                              </FormLabel>
-                              <FormControl>
-                                <Input placeholder="CT-2024-001" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={formContrato.control}
-                          name="formapagamento"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel className={cn(formContrato.formState.errors.formapagamento && "text-destructive")}>
-                                Forma de Pagamento *
-                              </FormLabel>
-                              <Select onValueChange={field.onChange} value={field.value}>
-                                <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Selecione" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  <SelectItem value="transferencia">Transferência</SelectItem>
-                                  <SelectItem value="pix">Pix</SelectItem>
-                                </SelectContent>
-                              </Select>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-
-                      <div className="grid gap-4 md:grid-cols-2">
-                        <FormField
-                          control={formContrato.control}
-                          name="datainicio"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel className={cn(formContrato.formState.errors.datainicio && "text-destructive")}>
-                                Data de Início *
-                              </FormLabel>
-                              <Popover>
-                                <PopoverTrigger asChild>
-                                  <FormControl>
-                                    <Button
-                                      variant="outline"
-                                      className={cn(
-                                        "w-full pl-3 text-left font-normal",
-                                        !field.value && "text-muted-foreground"
-                                      )}
-                                    >
-                                      {field.value ? format(field.value, "dd/MM/yyyy") : <span>Selecione a data</span>}
-                                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                    </Button>
-                                  </FormControl>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-auto p-0" align="start">
-                                  <Calendar
-                                    mode="single"
-                                    selected={field.value}
-                                    onSelect={field.onChange}
-                                    initialFocus
-                                  />
-                                </PopoverContent>
-                              </Popover>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-
-                        <FormField
-                          control={formContrato.control}
-                          name="datafim"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel className={cn(formContrato.formState.errors.datafim && "text-destructive")}>
-                                Data de Término *
-                              </FormLabel>
-                              <Popover>
-                                <PopoverTrigger asChild>
-                                  <FormControl>
-                                    <Button
-                                      variant="outline"
-                                      className={cn(
-                                        "w-full pl-3 text-left font-normal",
-                                        !field.value && "text-muted-foreground"
-                                      )}
-                                    >
-                                      {field.value ? format(field.value, "dd/MM/yyyy") : <span>Selecione a data</span>}
-                                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                    </Button>
-                                  </FormControl>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-auto p-0" align="start">
-                                  <Calendar
-                                    mode="single"
-                                    selected={field.value}
-                                    onSelect={field.onChange}
-                                    initialFocus
-                                  />
-                                </PopoverContent>
-                              </Popover>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-
-                      <FormField
-                        control={formContrato.control}
-                        name="prazocontrato"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className={cn(formContrato.formState.errors.prazocontrato && "text-destructive")}>
-                              Prazo de Contrato *
-                            </FormLabel>
-                            <Select onValueChange={field.onChange} value={field.value}>
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Selecione" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                <SelectItem value="padrao">Padrão</SelectItem>
-                                <SelectItem value="determinado">Determinado</SelectItem>
-                              </SelectContent>
-                            </Select>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={formContrato.control}
-                        name="clausulas"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className={cn(formContrato.formState.errors.clausulas && "text-destructive")}>
-                              Cláusulas do Contrato *
-                            </FormLabel>
-                            <FormControl>
-                              <Textarea 
-                                placeholder="Descreva as cláusulas do contrato" 
-                                className="min-h-[120px]"
-                                {...field} 
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </CardContent>
-                  </Card>
-
                   <div className="flex justify-end gap-3">
                     <Button type="button" variant="outline" onClick={handleGerarPDF}>
                       <Download className="mr-2 h-4 w-4" />
