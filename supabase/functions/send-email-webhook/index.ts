@@ -29,9 +29,15 @@ serve(async (req: Request) => {
 
   try {
     // Usar service_role key para bypass RLS (seguro porque roda no servidor)
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    
+    console.log('🔑 SUPABASE_URL:', supabaseUrl ? 'Configurada' : 'NÃO CONFIGURADA');
+    console.log('🔑 SERVICE_ROLE_KEY:', serviceRoleKey ? 'Configurada' : 'NÃO CONFIGURADA');
+    
     const supabase = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+      supabaseUrl ?? '',
+      serviceRoleKey ?? ''
     );
 
     // Verificar se é um teste de configuração específica
