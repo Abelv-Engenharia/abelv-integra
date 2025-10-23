@@ -7,22 +7,43 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { toast } from "@/components/ui/use-toast";
 import { useCCAs } from "@/hooks/useCCAs";
 import { useNfeCompras } from "@/hooks/useNfeCompras";
-import { almoxarifadoService, Almoxarifado } from "@/services/almoxarifadoService";
-import { useQuery } from "@tanstack/react-query";
+import { almoxarifadoService } from "@/services/almoxarifadoService";
+import { estoqueMovimentacoesService } from "@/services/estoqueMovimentacoesService";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Package } from "lucide-react";
-import { format } from "date-fns";
 
 export default function AlocacaoEntradas() {
   const [selectedCcaId, setSelectedCcaId] = useState<number | undefined>();
   const [alocacoes, setAlocacoes] = useState<Record<string, string>>({});
   
+  const queryClient = useQueryClient();
   const { data: ccas = [], isLoading: ccasLoading } = useCCAs();
-  const { data: nfeCompras = [], isLoading: nfeLoading } = useNfeCompras(selectedCcaId);
+  const { data: nfeCompras = [], isLoading: nfeLoading } = useNfeCompras(selectedCcaId, true);
   
   const { data: almoxarifados = [], isLoading: almoxarifadosLoading } = useQuery({
     queryKey: ['almoxarifados', selectedCcaId],
     queryFn: () => selectedCcaId ? almoxarifadoService.getByCCA(selectedCcaId) : Promise.resolve([]),
     enabled: !!selectedCcaId,
+  });
+
+  const alocarMutation = useMutation({
+    mutationFn: async ({ nfeId, almoxarifadoId, ccaId }: { nfeId: string; almoxarifadoId: string; ccaId: number }) => {
+      return await estoqueMovimentacoesService.createFromNfeItens(ccaId, almoxarifadoId, nfeId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["nfe_compras"] });
+      toast({
+        title: "Sucesso",
+        description: "Alocação salva com sucesso",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Erro",
+        description: error.message || "Erro ao salvar alocação",
+        variant: "destructive",
+      });
+    },
   });
 
   const handleAlocacaoChange = (nfeId: string, almoxarifadoId: string) => {
@@ -31,7 +52,7 @@ export default function AlocacaoEntradas() {
 
   const handleSalvarAlocacao = (nfeId: string) => {
     const almoxarifadoId = alocacoes[nfeId];
-    if (!almoxarifadoId) {
+    if (!almoxarifadoId || !selectedCcaId) {
       toast({
         title: "Erro",
         description: "Selecione um almoxarifado",
@@ -40,22 +61,9 @@ export default function AlocacaoEntradas() {
       return;
     }
 
-    // Aqui você implementará a lógica para salvar a alocação no banco de dados
-    console.log("Alocando NF", nfeId, "para almoxarifado", almoxarifadoId);
-    
-    toast({
-      title: "Sucesso",
-      description: "Alocação salva com sucesso",
-    });
+    alocarMutation.mutate({ nfeId, almoxarifadoId, ccaId: selectedCcaId });
   };
 
-  const formatCurrency = (value?: number) => {
-    if (!value) return "R$ 0,00";
-    return new Intl.NumberFormat("pt-BR", {
-      style: "currency",
-      currency: "BRL",
-    }).format(value);
-  };
 
   return (
     <div className="space-y-6">
@@ -120,9 +128,8 @@ export default function AlocacaoEntradas() {
                     <TableRow>
                       <TableHead>Número</TableHead>
                       <TableHead>Documento</TableHead>
-                      <TableHead>Emissão</TableHead>
-                      <TableHead>Movimento</TableHead>
-                      <TableHead>Credor</TableHead>
+                      <TableHead>Nome do Credor</TableHead>
+                      <TableHead>Empresa</TableHead>
                       <TableHead>Almoxarifado</TableHead>
                       <TableHead>Ações</TableHead>
                     </TableRow>
@@ -132,13 +139,8 @@ export default function AlocacaoEntradas() {
                       <TableRow key={nfe.id}>
                         <TableCell className="font-medium">{nfe.numero}</TableCell>
                         <TableCell>{nfe.id_documento}</TableCell>
-                        <TableCell>
-                          {nfe.emissao ? format(new Date(nfe.emissao), "dd/MM/yyyy") : "-"}
-                        </TableCell>
-                        <TableCell>
-                          {nfe.Movimenbto ? format(new Date(nfe.Movimenbto), "dd/MM/yyyy") : "-"}
-                        </TableCell>
-                        <TableCell>{nfe.id_credor}</TableCell>
+                        <TableCell>{nfe.credor?.razao || "-"}</TableCell>
+                        <TableCell>{nfe.empresa?.name || "-"}</TableCell>
                         <TableCell>
                           <Select
                             value={alocacoes[nfe.id]}
@@ -163,9 +165,9 @@ export default function AlocacaoEntradas() {
                           <Button
                             size="sm"
                             onClick={() => handleSalvarAlocacao(nfe.id)}
-                            disabled={!alocacoes[nfe.id]}
+                            disabled={!alocacoes[nfe.id] || alocarMutation.isPending}
                           >
-                            Alocar
+                            {alocarMutation.isPending ? "Alocando..." : "Alocar"}
                           </Button>
                         </TableCell>
                       </TableRow>

@@ -2463,6 +2463,58 @@ export type Database = {
           },
         ]
       }
+      estoque_movimentacoes_entradas: {
+        Row: {
+          almoxarifado_id: string
+          cca_id: number
+          created_at: string
+          id: string
+          item_nfe_id: string | null
+          quantidade: number
+          updated_at: string
+        }
+        Insert: {
+          almoxarifado_id: string
+          cca_id: number
+          created_at?: string
+          id?: string
+          item_nfe_id?: string | null
+          quantidade: number
+          updated_at?: string
+        }
+        Update: {
+          almoxarifado_id?: string
+          cca_id?: number
+          created_at?: string
+          id?: string
+          item_nfe_id?: string | null
+          quantidade?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "estoque_movimentacoes_entradas_almoxarifado_id_fkey"
+            columns: ["almoxarifado_id"]
+            isOneToOne: false
+            referencedRelation: "almoxarifados"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "estoque_movimentacoes_entradas_cca_id_fkey"
+            columns: ["cca_id"]
+            isOneToOne: false
+            referencedRelation: "ccas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "estoque_movimentacoes_entradas_item_nfe_id_fkey"
+            columns: ["item_nfe_id"]
+            isOneToOne: false
+            referencedRelation: "nfe_compra_itens"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       eventos_identificados: {
         Row: {
           ativo: boolean | null

@@ -14,11 +14,17 @@ export interface NfeCompra {
   PC_Abelv?: string;
   PC_Cliente?: string;
   created_at?: string;
+  credor?: {
+    razao: string;
+  };
+  empresa?: {
+    name: string;
+  };
 }
 
-export const useNfeCompras = (ccaId?: number) => {
+export const useNfeCompras = (ccaId?: number, excludeAlocadas: boolean = false) => {
   return useQuery({
-    queryKey: ["nfe_compras", ccaId],
+    queryKey: ["nfe_compras", ccaId, excludeAlocadas],
     queryFn: async () => {
       let query = supabase
         .from("nfe_compra" as any)
@@ -26,6 +32,12 @@ export const useNfeCompras = (ccaId?: number) => {
           *,
           itens:nfe_compra_itens(
             id_cca_sienge
+          ),
+          credor:credores!nfe_compra_id_credor_fkey(
+            razao
+          ),
+          empresa:empresas_sienge!nfe_compra_id_empresa_fkey(
+            name
           )
         `)
         .order("emissao", { ascending: false });
@@ -34,8 +46,10 @@ export const useNfeCompras = (ccaId?: number) => {
 
       if (error) throw error;
       
+      let filteredData = data || [];
+      
       // Se houver filtro de CCA, buscar os id_sienge dos subcentros
-      if (ccaId && data) {
+      if (ccaId && filteredData) {
         const { data: subcentros } = await supabase
           .from("subcentros_custos" as any)
           .select("id_sienge")
@@ -44,14 +58,33 @@ export const useNfeCompras = (ccaId?: number) => {
         const idsSubcentros = subcentros?.map((s: any) => s.id_sienge) || [];
         
         // Filtrar apenas NFEs que possuem itens com esses subcentros
-        const filtered = data.filter((nfe: any) => 
+        filteredData = filteredData.filter((nfe: any) => 
           nfe.itens?.some((item: any) => idsSubcentros.includes(item.id_cca_sienge))
         );
-        
-        return (filtered || []) as unknown as NfeCompra[];
       }
       
-      return (data || []) as unknown as NfeCompra[];
+      // Se deve excluir alocadas, buscar NFEs já alocadas
+      if (excludeAlocadas && filteredData.length > 0) {
+        const { data: movimentacoes } = await supabase
+          .from("estoque_movimentacoes_entradas")
+          .select("item_nfe_id");
+        
+        const itemIds = movimentacoes?.map(m => m.item_nfe_id).filter(Boolean) || [];
+        
+        if (itemIds.length > 0) {
+          const { data: itens } = await supabase
+            .from("nfe_compra_itens")
+            .select("id_nfe")
+            .in("id", itemIds);
+          
+          const nfesAlocadas = [...new Set(itens?.map(i => i.id_nfe).filter(Boolean) || [])];
+          
+          // Filtrar NFEs já alocadas
+          filteredData = filteredData.filter((nfe: any) => !nfesAlocadas.includes(nfe.id));
+        }
+      }
+      
+      return (filteredData || []) as unknown as NfeCompra[];
     },
   });
 };
