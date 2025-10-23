@@ -82,15 +82,30 @@ export function NovoDemonstrativoModal({ open, onOpenChange, onSave }: NovoDemon
   // Auto-preencher campos ao selecionar prestador
   const handlePrestadorChange = (id: string) => {
     setPrestadorSelecionado(id);
-    verificarExibicaoFormulario();
     
     const prestador = prestadores.find(p => p.id === id);
     if (prestador) {
+      console.log("Prestador selecionado:", prestador);
+      console.log("CCA ID:", prestador.ccaId);
+      console.log("CCA Código:", prestador.ccaCodigo);
+      console.log("CCA Nome:", prestador.ccaNome);
+      
       setValue("nome", prestador.nomeCompleto || "");
       setValue("email", prestador.emailRepresentante || "");
       setValue("cpf", prestador.cpf || "");
       setValue("nomeempresa", prestador.razaoSocial || "");
       setValue("funcao", prestador.servico || "");
+      
+      // Preencher campo CCA - tentar todas as possibilidades
+      if (prestador.ccaCodigo && prestador.ccaNome) {
+        const ccaValue = `${prestador.ccaCodigo} - ${prestador.ccaNome}`;
+        console.log("Preenchendo CCA com:", ccaValue);
+        setValue("obra", ccaValue);
+      } else if (prestador.ccaId) {
+        // Se não tiver código e nome, apenas mostrar o ID
+        setValue("obra", `CCA ID: ${prestador.ccaId}`);
+        console.log("CCA preenchido apenas com ID:", prestador.ccaId);
+      }
       
       if (prestador.dataNascimento) {
         // Corrigir timezone para não perder um dia
@@ -98,11 +113,6 @@ export function NovoDemonstrativoModal({ open, onOpenChange, onSave }: NovoDemon
         const dataNasc = new Date(parseInt(ano), parseInt(mes) - 1, parseInt(dia));
         setDataNascimento(dataNasc);
         setValue("datanascimento", dataNasc);
-      }
-      
-      // Preencher campo CCA
-      if (prestador.ccaCodigo && prestador.ccaNome) {
-        setValue("obra", `${prestador.ccaCodigo} - ${prestador.ccaNome}`);
       }
       
       if (prestador.dataInicioContrato) {
@@ -392,11 +402,17 @@ export function NovoDemonstrativoModal({ open, onOpenChange, onSave }: NovoDemon
                 <Input 
                   id="obra" 
                   {...register("obra")}
-                  className={errors.obra ? "border-destructive" : ""}
-                  placeholder="Auto-preenchido ao selecionar prestador"
+                  className={cn(
+                    errors.obra && !watch("obra") ? "border-destructive" : "",
+                    "bg-muted"
+                  )}
+                  placeholder="Selecione um prestador primeiro"
                   readOnly
                 />
                 {errors.obra && <p className="text-xs text-destructive mt-1">{errors.obra.message}</p>}
+                <p className="text-xs text-muted-foreground mt-1">
+                  Campo preenchido automaticamente do cadastro do prestador
+                </p>
               </div>
               <div>
                 <Label htmlFor="funcao" className={errors.funcao ? "text-destructive" : ""}>
