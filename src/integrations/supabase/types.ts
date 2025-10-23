@@ -2468,10 +2468,12 @@ export type Database = {
           almoxarifado_id: string
           cca_id: number
           created_at: string
+          emissao: string | null
           id: string
           id_credor: string | null
           id_documento: string | null
           id_empresa: number | null
+          movimento: string | null
           numero: string | null
           pdf_nome: string | null
           pdf_url: string | null
@@ -2481,10 +2483,12 @@ export type Database = {
           almoxarifado_id: string
           cca_id: number
           created_at?: string
+          emissao?: string | null
           id?: string
           id_credor?: string | null
           id_documento?: string | null
           id_empresa?: number | null
+          movimento?: string | null
           numero?: string | null
           pdf_nome?: string | null
           pdf_url?: string | null
@@ -2494,10 +2498,12 @@ export type Database = {
           almoxarifado_id?: string
           cca_id?: number
           created_at?: string
+          emissao?: string | null
           id?: string
           id_credor?: string | null
           id_documento?: string | null
           id_empresa?: number | null
+          movimento?: string | null
           numero?: string | null
           pdf_nome?: string | null
           pdf_url?: string | null
@@ -2523,6 +2529,7 @@ export type Database = {
       estoque_movimentacoes_entradas_itens: {
         Row: {
           created_at: string
+          descricao: string | null
           id: string
           item_nfe_id: string | null
           movimentacao_entrada_id: string
@@ -2533,6 +2540,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          descricao?: string | null
           id?: string
           item_nfe_id?: string | null
           movimentacao_entrada_id: string
@@ -2543,6 +2551,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          descricao?: string | null
           id?: string
           item_nfe_id?: string | null
           movimentacao_entrada_id?: string

@@ -18,6 +18,10 @@ import { cn } from "@/lib/utils";
 import { useCCAs } from "@/hooks/useCCAs";
 import { useCredores } from "@/hooks/useCredores";
 import { useEmpresas } from "@/hooks/useEmpresas";
+import { useAlmoxarifados } from "@/hooks/useAlmoxarifados";
+import { useNfeCompras } from "@/hooks/useNfeCompras";
+import { estoqueMovimentacoesService } from "@/services/estoqueMovimentacoesService";
+import { supabase } from "@/integrations/supabase/client";
 const MAX_FILE_SIZE = 3 * 1024 * 1024; // 3MB
 const ACCEPTED_FILE_TYPES = ["application/pdf", "image/png", "image/jpeg", "image/jpg"];
 const itemSchema = z.object({
@@ -31,9 +35,11 @@ const entradaSchema = z.object({
   cca: z.number({
     required_error: "CCA é obrigatório"
   }).min(1, "CCA deve ser maior que 0"),
+  almoxarifado: z.string().min(1, "Almoxarifado é obrigatório"),
   empresa: z.number().optional(),
   credor: z.string().optional(),
-  documento: z.string().min(1, "Tipo de documento é obrigatório"),
+  documento: z.string().optional(),
+  nfe_id: z.string().optional(),
   numerodocumento: z.string().min(1, "Número do documento é obrigatório"),
   dataemissao: z.date({
     required_error: "Data de emissão é obrigatória"
@@ -50,6 +56,8 @@ type EntradaFormData = z.infer<typeof entradaSchema>;
 export default function NovaEntrada() {
   const navigate = useNavigate();
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [loading, setLoading] = useState(false);
+  
   const {
     data: ccas = [],
     isLoading: ccasLoading
@@ -63,9 +71,11 @@ export default function NovaEntrada() {
     resolver: zodResolver(entradaSchema),
     defaultValues: {
       cca: undefined,
+      almoxarifado: "",
       empresa: undefined,
       credor: "",
       documento: "",
+      nfe_id: "",
       numerodocumento: "",
       pcabelv: undefined,
       pccliente: undefined,
@@ -80,11 +90,22 @@ export default function NovaEntrada() {
   });
   
   const ccaSelecionado = form.watch("cca");
+  const documentoSelecionado = form.watch("documento");
   
   const {
     data: empresas = [],
     isLoading: empresasLoading
   } = useEmpresas(ccaSelecionado);
+  
+  const {
+    data: almoxarifados = [],
+    isLoading: almoxarifadosLoading
+  } = useAlmoxarifados(ccaSelecionado);
+  
+  const {
+    data: nfes = [],
+    isLoading: nfesLoading
+  } = useNfeCompras(ccaSelecionado, true);
   const {
     fields,
     append,
@@ -142,13 +163,71 @@ export default function NovaEntrada() {
     setUploadedFile(null);
     form.setValue("arquivo", undefined);
   };
-  const onSubmit = (data: EntradaFormData) => {
-    console.log("Dados da entrada:", data);
-    toast({
-      title: "Entrada registrada",
-      description: "A entrada de materiais foi registrada com sucesso"
-    });
-    navigate("/suprimentos/estoque/entradas/entrada-materiais");
+  const onSubmit = async (data: EntradaFormData) => {
+    try {
+      setLoading(true);
+      
+      let pdfUrl: string | undefined;
+      let pdfNome: string | undefined;
+      
+      // Upload do arquivo se existir
+      if (uploadedFile) {
+        const fileExt = uploadedFile.name.split('.').pop();
+        const fileName = `${Date.now()}-${uploadedFile.name}`;
+        const filePath = `entradas/${fileName}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('estoque-documentos')
+          .upload(filePath, uploadedFile);
+
+        if (uploadError) throw uploadError;
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('estoque-documentos')
+          .getPublicUrl(filePath);
+
+        pdfUrl = publicUrl;
+        pdfNome = uploadedFile.name;
+      }
+      
+      // Preparar dados para salvar
+      const movimentacaoInput = {
+        cca_id: data.cca,
+        almoxarifado_id: data.almoxarifado,
+        id_credor: data.credor || undefined,
+        numero: data.numerodocumento,
+        id_empresa: data.empresa || undefined,
+        id_documento: data.nfe_id || undefined,
+        emissao: format(data.dataemissao, 'yyyy-MM-dd'),
+        movimento: format(data.datamovimento, 'yyyy-MM-dd'),
+        pdf_url: pdfUrl,
+        pdf_nome: pdfNome,
+      };
+      
+      const itens = data.itens.map(item => ({
+        descricao: item.descricao,
+        unidade: item.unidade,
+        quantidade: item.quantidade,
+        unitario: item.valorunitario,
+      }));
+      
+      await estoqueMovimentacoesService.create(movimentacaoInput, itens);
+      
+      toast({
+        title: "Entrada registrada",
+        description: "A entrada de materiais foi registrada com sucesso"
+      });
+      navigate("/suprimentos/estoque/entradas/entrada-materiais");
+    } catch (error: any) {
+      console.error("Erro ao salvar entrada:", error);
+      toast({
+        title: "Erro ao salvar",
+        description: error.message || "Ocorreu um erro ao salvar a entrada",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
   };
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("pt-BR", {
@@ -182,11 +261,12 @@ export default function NovaEntrada() {
                 field
               }) => <FormItem>
                       <FormLabel className={cn(!field.value && "text-destructive")}>
-                        CCA *
+                        Cca *
                       </FormLabel>
                       <Select onValueChange={value => {
                         field.onChange(parseInt(value));
                         form.setValue("empresa", undefined);
+                        form.setValue("almoxarifado", "");
                       }} value={field.value?.toString()} disabled={ccasLoading}>
                         <FormControl>
                           <SelectTrigger className={cn(!field.value && "border-destructive")}>
@@ -196,6 +276,27 @@ export default function NovaEntrada() {
                         <SelectContent>
                           {ccas.filter(cca => cca.ativo).map(cca => <SelectItem key={cca.id} value={cca.id.toString()}>
                               {cca.codigo} - {cca.nome}
+                            </SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>} />
+
+                <FormField control={form.control} name="almoxarifado" render={({
+                field
+              }) => <FormItem>
+                      <FormLabel className={cn(!field.value && "text-destructive")}>
+                        Almoxarifado *
+                      </FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value} disabled={almoxarifadosLoading || !ccaSelecionado}>
+                        <FormControl>
+                          <SelectTrigger className={cn(!field.value && "border-destructive")}>
+                            <SelectValue placeholder={almoxarifadosLoading ? "Carregando..." : "Selecione o almoxarifado"} />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {almoxarifados.filter(a => a.ativo).map(almox => <SelectItem key={almox.id} value={almox.id}>
+                              {almox.nome}
                             </SelectItem>)}
                         </SelectContent>
                       </Select>
@@ -243,23 +344,48 @@ export default function NovaEntrada() {
                 <FormField control={form.control} name="documento" render={({
                 field
               }) => <FormItem>
-                      <FormLabel className={cn(!field.value && "text-destructive")}>
-                        Documento *
+                      <FormLabel>
+                        Tipo de documento
                       </FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select onValueChange={(value) => {
+                        field.onChange(value);
+                        form.setValue("nfe_id", "");
+                      }} value={field.value}>
                         <FormControl>
-                          <SelectTrigger className={cn(!field.value && "border-destructive")}>
+                          <SelectTrigger>
                             <SelectValue placeholder="Selecione o tipo" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="NFe">NFe</SelectItem>
-                          <SelectItem value="NFSe">NFSe</SelectItem>
-                          <SelectItem value="ROM">ROM</SelectItem>
+                          <SelectItem value="NFe">Nfe</SelectItem>
+                          <SelectItem value="Manual">Manual</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
                     </FormItem>} />
+
+                {documentoSelecionado === "NFe" && (
+                  <FormField control={form.control} name="nfe_id" render={({
+                  field
+                }) => <FormItem>
+                        <FormLabel>
+                          Nfe
+                        </FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value} disabled={nfesLoading || !ccaSelecionado}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder={nfesLoading ? "Carregando..." : "Selecione a NFe"} />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {nfes.map(nfe => <SelectItem key={nfe.id} value={nfe.id}>
+                                {nfe.numero} - {nfe.credor?.razao}
+                              </SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>} />
+                )}
 
                 <FormField control={form.control} name="numerodocumento" render={({
                 field
@@ -440,11 +566,11 @@ export default function NovaEntrada() {
           </Card>
 
           <div className="flex justify-end gap-2 pt-4">
-            <Button type="button" variant="outline" onClick={() => navigate("/suprimentos/estoque/entradas/entrada-materiais")}>
+            <Button type="button" variant="outline" onClick={() => navigate("/suprimentos/estoque/entradas/entrada-materiais")} disabled={loading}>
               Cancelar
             </Button>
-            <Button type="submit">
-              Salvar Entrada
+            <Button type="submit" disabled={loading}>
+              {loading ? "Salvando..." : "Salvar Entrada"}
             </Button>
           </div>
         </form>

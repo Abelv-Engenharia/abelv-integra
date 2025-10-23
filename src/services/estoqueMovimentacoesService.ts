@@ -10,6 +10,8 @@ export interface EstoqueMovimentacaoEntrada {
   id_documento?: string;
   pdf_url?: string;
   pdf_nome?: string;
+  emissao?: string;
+  movimento?: string;
   created_at: string;
   updated_at: string;
 }
@@ -18,6 +20,7 @@ export interface EstoqueMovimentacaoEntradaItem {
   id: string;
   movimentacao_entrada_id: string;
   item_nfe_id?: string;
+  descricao?: string;
   quantidade: number;
   unidade?: string;
   unitario?: number;
@@ -28,11 +31,67 @@ export interface EstoqueMovimentacaoEntradaItem {
 export interface CreateMovimentacaoInput {
   cca_id: number;
   almoxarifado_id: string;
-  item_nfe_id: string;
+  id_credor?: string;
+  numero?: string;
+  id_empresa?: number;
+  id_documento?: string;
+  emissao?: string;
+  movimento?: string;
+  pdf_url?: string;
+  pdf_nome?: string;
+}
+
+export interface CreateMovimentacaoItemInput {
+  descricao: string;
+  unidade: string;
   quantidade: number;
+  unitario?: number;
 }
 
 export const estoqueMovimentacoesService = {
+  async create(
+    input: CreateMovimentacaoInput,
+    itens: CreateMovimentacaoItemInput[]
+  ): Promise<EstoqueMovimentacaoEntrada> {
+    // Criar a movimentação de entrada principal
+    const { data: movimentacao, error: movError } = await supabase
+      .from('estoque_movimentacoes_entradas')
+      .insert({
+        cca_id: input.cca_id,
+        almoxarifado_id: input.almoxarifado_id,
+        id_credor: input.id_credor,
+        numero: input.numero,
+        id_empresa: input.id_empresa,
+        id_documento: input.id_documento,
+        emissao: input.emissao,
+        movimento: input.movimento,
+        pdf_url: input.pdf_url,
+        pdf_nome: input.pdf_nome,
+      })
+      .select()
+      .single();
+
+    if (movError) throw movError;
+    if (!movimentacao) throw new Error('Erro ao criar movimentação');
+
+    // Criar os itens da movimentação
+    const itensMovimentacao = itens.map(item => ({
+      movimentacao_entrada_id: movimentacao.id,
+      descricao: item.descricao,
+      quantidade: item.quantidade,
+      unidade: item.unidade,
+      unitario: item.unitario,
+    }));
+
+    const { error: itensError } = await supabase
+      .from('estoque_movimentacoes_entradas_itens')
+      .insert(itensMovimentacao);
+
+    if (itensError) throw itensError;
+
+    return movimentacao;
+  },
+
   async createFromNfeItens(
     ccaId: number,
     almoxarifadoId: string,
