@@ -294,19 +294,41 @@ export default function CadastroPessoaJuridica() {
     const cnpjNumbers = data.cnpj.replace(/\D/g, "");
     const cpfNumbers = data.cpf.replace(/\D/g, "");
     
-    // Validações de duplicidade
-    if (cadastrosCnpj.has(cnpjNumbers)) {
+    // Verificar se CNPJ já existe no banco de dados
+    const { data: cnpjExistente, error: cnpjError } = await supabase
+      .from('prestadores_pj')
+      .select('cnpj')
+      .eq('cnpj', cnpjNumbers)
+      .maybeSingle();
+    
+    if (cnpjError) {
+      console.error('Erro ao verificar CNPJ:', cnpjError);
+    }
+    
+    if (cnpjExistente) {
       toast({
         title: "Erro",
-        description: "CNPJ já cadastrado no sistema",
+        description: "Este CNPJ já está cadastrado no sistema",
         variant: "destructive"
       });
       return;
     }
-    if (cadastrosCpf.has(cpfNumbers)) {
+    
+    // Verificar se CPF já existe no banco de dados
+    const { data: cpfExistente, error: cpfError } = await supabase
+      .from('prestadores_pj')
+      .select('cpf')
+      .eq('cpf', cpfNumbers)
+      .maybeSingle();
+    
+    if (cpfError) {
+      console.error('Erro ao verificar CPF:', cpfError);
+    }
+    
+    if (cpfExistente) {
       toast({
         title: "Erro",
-        description: "CPF já cadastrado no sistema",
+        description: "Este CPF já está cadastrado no sistema",
         variant: "destructive"
       });
       return;
