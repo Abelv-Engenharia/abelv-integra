@@ -155,19 +155,9 @@ export const RNCForm = () => {
                   required
                 />
               </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="data">Data da NC</Label>
-                <Input
-                  id="data"
-                  type="date"
-                  value={formData.data}
-                  onChange={(e) => setFormData(prev => ({ ...prev, data: e.target.value }))}
-                />
-              </div>
 
               <div className="space-y-2">
-                <Label htmlFor="cca">Cca *</Label>
+                <Label htmlFor="cca">CCA *</Label>
                 <Select 
                   value={formData.cca} 
                   onValueChange={(value) => setFormData(prev => ({ ...prev, cca: value }))}
@@ -187,6 +177,46 @@ export const RNCForm = () => {
               </div>
 
               <div className="space-y-2">
+                <Label htmlFor="setor_projeto">Setor / Projeto</Label>
+                <Input
+                  id="setor_projeto"
+                  value={formData.setor_projeto}
+                  onChange={(e) => setFormData(prev => ({ ...prev, setor_projeto: e.target.value }))}
+                  placeholder="Ex: Engenharia"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="data">Data da NC</Label>
+                <Input
+                  id="data"
+                  type="date"
+                  value={formData.data}
+                  onChange={(e) => setFormData(prev => ({ ...prev, data: e.target.value }))}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="detectado_por">Detectado por</Label>
+                <Input
+                  id="detectado_por"
+                  value={formData.detectado_por}
+                  onChange={(e) => setFormData(prev => ({ ...prev, detectado_por: e.target.value }))}
+                  placeholder="Quem detectou a não conformidade"
+                />
+              </div>              
+
+              <div className="space-y-2">
+                <Label htmlFor="previsao_fechamento">Previsão de Fechamento</Label>
+                <Input
+                  id="previsao_fechamento"
+                  type="date"
+                  value={formData.previsao_fechamento}
+                  onChange={(e) => setFormData(prev => ({ ...prev, previsao_fechamento: e.target.value }))}
+                />
+              </div>
+              
+              <div className="space-y-2">
                 <Label htmlFor="emitente">Emitente *</Label>
                 <Input
                   id="emitente"
@@ -199,26 +229,6 @@ export const RNCForm = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="setor_projeto">Setor / Projeto</Label>
-                <Input
-                  id="setor_projeto"
-                  value={formData.setor_projeto}
-                  onChange={(e) => setFormData(prev => ({ ...prev, setor_projeto: e.target.value }))}
-                  placeholder="Ex: Engenharia"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="detectado_por">Detectado por</Label>
-                <Input
-                  id="detectado_por"
-                  value={formData.detectado_por}
-                  onChange={(e) => setFormData(prev => ({ ...prev, detectado_por: e.target.value }))}
-                  placeholder="Quem detectou a não conformidade"
-                />
-              </div>
-
-              <div className="space-y-2">
                 <Label htmlFor="data_emissao">Data de Emissão</Label>
                 <Input
                   id="data_emissao"
@@ -226,16 +236,6 @@ export const RNCForm = () => {
                   value={formData.data_emissao}
                   readOnly
                   className="bg-muted"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="previsao_fechamento">Previsão de Fechamento</Label>
-                <Input
-                  id="previsao_fechamento"
-                  type="date"
-                  value={formData.previsao_fechamento}
-                  onChange={(e) => setFormData(prev => ({ ...prev, previsao_fechamento: e.target.value }))}
                 />
               </div>
             </CardContent>
