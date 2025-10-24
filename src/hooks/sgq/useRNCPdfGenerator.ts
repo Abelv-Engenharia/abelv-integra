@@ -6,19 +6,29 @@ import { useRNCData } from './useRNCData';
 export const useRNCPdfGenerator = () => {
   const { getRNC } = useRNCData();
 
-  const loadImageAsBase64 = async (url: string): Promise<string> => {
+  const loadImageAsBase64 = async (url: string): Promise<{ data: string; width: number; height: number }> => {
     try {
       const response = await fetch(url);
       const blob = await response.blob();
-      return new Promise((resolve, reject) => {
+      const base64 = await new Promise<string>((resolve, reject) => {
         const reader = new FileReader();
         reader.onloadend = () => resolve(reader.result as string);
         reader.onerror = reject;
         reader.readAsDataURL(blob);
       });
+
+      // Obter dimensões originais da imagem
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => {
+          resolve({ data: base64, width: img.width, height: img.height });
+        };
+        img.onerror = reject;
+        img.src = base64;
+      });
     } catch (error) {
       console.error('Erro ao carregar imagem:', error);
-      return '';
+      return { data: '', width: 0, height: 0 };
     }
   };
 
@@ -151,13 +161,24 @@ export const useRNCPdfGenerator = () => {
           // Adicionar imagem
           if (anexo.url) {
             try {
-              const imgData = await loadImageAsBase64(anexo.url);
-              if (imgData) {
-                const imgWidth = pageWidth - 2 * margin;
-                const imgHeight = 80; // Altura fixa para as imagens
+              const imageInfo = await loadImageAsBase64(anexo.url);
+              if (imageInfo.data) {
+                // Calcular dimensões mantendo proporção original
+                const maxWidth = pageWidth - 2 * margin;
+                const maxHeight = 100; // Altura máxima
+                const aspectRatio = imageInfo.width / imageInfo.height;
+                
+                let imgWidth = maxWidth;
+                let imgHeight = imgWidth / aspectRatio;
+                
+                // Se a altura calculada for maior que o máximo, ajustar pela altura
+                if (imgHeight > maxHeight) {
+                  imgHeight = maxHeight;
+                  imgWidth = imgHeight * aspectRatio;
+                }
                 
                 checkAndAddPage(imgHeight + 10);
-                pdf.addImage(imgData, 'JPEG', margin, yPosition, imgWidth, imgHeight);
+                pdf.addImage(imageInfo.data, 'JPEG', margin, yPosition, imgWidth, imgHeight);
                 yPosition += imgHeight + 10;
               }
             } catch (error) {
@@ -227,13 +248,24 @@ export const useRNCPdfGenerator = () => {
 
           if (anexo.url) {
             try {
-              const imgData = await loadImageAsBase64(anexo.url);
-              if (imgData) {
-                const imgWidth = pageWidth - 2 * margin;
-                const imgHeight = 80;
+              const imageInfo = await loadImageAsBase64(anexo.url);
+              if (imageInfo.data) {
+                // Calcular dimensões mantendo proporção original
+                const maxWidth = pageWidth - 2 * margin;
+                const maxHeight = 100; // Altura máxima
+                const aspectRatio = imageInfo.width / imageInfo.height;
+                
+                let imgWidth = maxWidth;
+                let imgHeight = imgWidth / aspectRatio;
+                
+                // Se a altura calculada for maior que o máximo, ajustar pela altura
+                if (imgHeight > maxHeight) {
+                  imgHeight = maxHeight;
+                  imgWidth = imgHeight * aspectRatio;
+                }
                 
                 checkAndAddPage(imgHeight + 10);
-                pdf.addImage(imgData, 'JPEG', margin, yPosition, imgWidth, imgHeight);
+                pdf.addImage(imageInfo.data, 'JPEG', margin, yPosition, imgWidth, imgHeight);
                 yPosition += imgHeight + 10;
               }
             } catch (error) {
