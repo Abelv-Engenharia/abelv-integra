@@ -134,7 +134,10 @@ export default function DetalhesRNC() {
             </div>
           </div>
           
-          <Button onClick={() => navigate(`/sgq/rnc/editar/${id}`)}>
+          <Button 
+            onClick={() => navigate(`/sgq/rnc/editar/${id}`)}
+            disabled={rnc.status === 'fechada'}
+          >
             <Edit className="h-4 w-4 mr-2" />
             Editar RNC
           </Button>
