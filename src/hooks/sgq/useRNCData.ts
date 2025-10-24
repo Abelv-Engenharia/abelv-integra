@@ -48,14 +48,13 @@ export const useRNCData = () => {
     attachmentType: 'evidencia_nc' | 'evidencia_disposicao'
   ) => {
     for (const attachment of attachments) {
-      // Se já tem ID, significa que já existe no banco - não inserir novamente
-      if (attachment.id) {
+      // Se já possui 'uploaded_by', já veio do banco e não deve ser inserido novamente
+      if ((attachment as any).uploaded_by) {
         continue;
       }
       
-      // Se já tem URL, significa que já foi feito upload (no componente EvidenceUpload)
+      // Se já tem URL, significa que o arquivo foi enviado ao Storage
       if (attachment.url) {
-        // Criar registro na tabela rnc_attachments
         const { error: dbError } = await supabase
           .from('rnc_attachments')
           .insert({
