@@ -24,6 +24,7 @@ import { usePermissionsDirect } from "@/hooks/usePermissionsDirect";
 import logoAbelvIntegra from "@/assets/logo-abelv-integra.png";
 import SidebarSectionComercial from "./SidebarSectionComercial";
 import SidebarSectionGestaoPessoas from "./SidebarSectionGestaoPessoas";
+import SidebarSectionSGQ from "./SidebarSectionSGQ";
 
 export function AppSidebar() {
   const location = useLocation();
@@ -63,6 +64,7 @@ export function AppSidebar() {
     if (currentPath.startsWith("/engenharia-matricial")) return "engenharia-matricial";
     if (currentPath.startsWith("/comercial")) return "comercial";
     if (currentPath.startsWith("/gestao-pessoas")) return "gestao-pessoas";
+    if (currentPath.startsWith("/sgq")) return "sgq";
     if (currentPath.startsWith("/account")) return "account";
     return null;
   });
@@ -111,6 +113,8 @@ export function AppSidebar() {
       setOpenMenu("engenharia-matricial");
     } else if (currentPath.startsWith("/gestao-pessoas")) {
       setOpenMenu("gestao-pessoas");
+    } else if (currentPath.startsWith("/sgq")) {
+      setOpenMenu("sgq");
     }
   }, [currentPath]);
 
@@ -314,30 +318,20 @@ export function AppSidebar() {
         {/* Seção: Gestão de Pessoas */}
         {[
           // Solicitações
-          "gestao_pessoas_solicitacoes_dashboard",
-          "gestao_pessoas_solicitacoes_criar",
-          "gestao_pessoas_solicitacoes_visualizar",
-          "gestao_pessoas_solicitacoes_aprovar",
-          "gestao_pessoas_solicitacoes_relatorios",
-          // Viagens
-          "gestao_pessoas_viagens_dashboard",
-          "gestao_pessoas_viagens_cadastrar_fatura",
-          "gestao_pessoas_viagens_importar_fatura",
-          "gestao_pessoas_viagens_consultar_faturas",
-          "gestao_pessoas_viagens_relatorios",
-          // Veículos
-          "gestao_pessoas_veiculos_dashboard",
-          "gestao_pessoas_veiculos_cadastrar",
-          "gestao_pessoas_veiculos_consultas",
-          "gestao_pessoas_veiculos_multas_cadastrar",
-          "gestao_pessoas_veiculos_condutores_cadastrar",
-          "gestao_pessoas_veiculos_cartoes_cadastrar",
-          "gestao_pessoas_veiculos_pedagios_cadastrar",
-          "gestao_pessoas_veiculos_checklists_criar",
-          "gestao_pessoas_veiculos_abastecimento_gerenciar",
+...
           "gestao_pessoas_veiculos_relatorios"
         ].some(canSee) && (
           <SidebarSectionGestaoPessoas
+            openMenu={openMenu}
+            toggleMenu={toggleMenu}
+            onLinkClick={handleLinkClick}
+            canSee={canSee}
+          />
+        )}
+
+        {/* Seção: SGQ - Sistema de Gestão da Qualidade */}
+        {["sgq_rnc_dashboard", "sgq_rnc_cadastro", "sgq_rnc_visualizar"].some(canSee) && (
+          <SidebarSectionSGQ
             openMenu={openMenu}
             toggleMenu={toggleMenu}
             onLinkClick={handleLinkClick}

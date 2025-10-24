@@ -308,6 +308,11 @@ import BancoTalentos from "./pages/gestao-pessoas/BancoTalentos";
 import CadastroEmissaoNF from "./pages/gestao-pessoas/CadastroEmissaoNF";
 import AprovacaoNF from "./pages/gestao-pessoas/AprovacaoNF";
 
+// SGQ - Sistema de Gestão da Qualidade
+import SGQRNCDashboard from "./pages/sgq/rnc/Dashboard";
+import NovaRNC from "./pages/sgq/rnc/NovaRNC";
+import DetalhesRNC from "./pages/sgq/rnc/DetalhesRNC";
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
@@ -717,6 +722,11 @@ function App() {
                 <Route path="gestao-pessoas/calculo-rotas" element={<CalculoRotas />} />
                 <Route path="gestao-pessoas/test-enderecos" element={<TestEnderecos />} />
                 <Route path="gestao-pessoas/controle-abastecimento" element={<ControleAbastecimento />} />
+                
+                {/* SGQ - Sistema de Gestão da Qualidade */}
+                <Route path="sgq/rnc" element={<SGQRNCDashboard />} />
+                <Route path="sgq/rnc/novo" element={<NovaRNC />} />
+                <Route path="sgq/rnc/:id" element={<DetalhesRNC />} />
               </Route>
 
 
