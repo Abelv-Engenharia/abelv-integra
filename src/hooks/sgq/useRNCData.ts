@@ -82,28 +82,29 @@ export const useRNCData = () => {
         .single();
 
       // Preparar os dados para inserção
+      // Converter strings vazias em null para campos de data
       const insertData = {
         numero: rncData.numero,
-        data: rncData.data,
+        data: rncData.data || null,
         cca_id: ccaData?.id,
         emitente: rncData.emitente,
-        setor_projeto: rncData.setor_projeto,
-        detectado_por: rncData.detectado_por,
-        periodo_melhoria: rncData.periodo_melhoria,
+        setor_projeto: rncData.setor_projeto || null,
+        detectado_por: rncData.detectado_por || null,
+        periodo_melhoria: rncData.periodo_melhoria || null,
         data_emissao: rncData.data_emissao,
-        previsao_fechamento: rncData.previsao_fechamento,
+        previsao_fechamento: rncData.previsao_fechamento || null,
         origem: rncData.origem,
         prioridade: rncData.prioridade,
         disciplina: rncData.disciplina,
-        disciplina_outros: rncData.disciplina_outros,
+        disciplina_outros: rncData.disciplina_outros || null,
         descricao_nc: rncData.descricao_nc,
-        evidencias_nc: rncData.evidencias_nc,
+        evidencias_nc: rncData.evidencias_nc || null,
         disposicao: rncData.disposicao,
-        empresa_disposicao: rncData.empresa_disposicao,
-        responsavel_disposicao: rncData.responsavel_disposicao,
-        data_disposicao: rncData.data_disposicao,
-        prazo_disposicao: rncData.prazo_disposicao,
-        analise_disposicao: rncData.analise_disposicao,
+        empresa_disposicao: rncData.empresa_disposicao || null,
+        responsavel_disposicao: rncData.responsavel_disposicao || null,
+        data_disposicao: rncData.data_disposicao || null,
+        prazo_disposicao: rncData.prazo_disposicao || null,
+        analise_disposicao: rncData.analise_disposicao || null,
         status: rncData.status,
         created_by: user?.id
       };
