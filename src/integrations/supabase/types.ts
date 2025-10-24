@@ -6960,6 +6960,175 @@ export type Database = {
           },
         ]
       }
+      rnc_attachments: {
+        Row: {
+          attachment_type: string
+          created_at: string
+          description: string | null
+          disciplina_outros: string | null
+          evidence_number: number | null
+          file_name: string
+          file_path: string
+          file_size: number
+          file_type: string
+          id: string
+          rnc_id: string | null
+          updated_at: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          attachment_type: string
+          created_at?: string
+          description?: string | null
+          disciplina_outros?: string | null
+          evidence_number?: number | null
+          file_name: string
+          file_path: string
+          file_size: number
+          file_type: string
+          id?: string
+          rnc_id?: string | null
+          updated_at?: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          attachment_type?: string
+          created_at?: string
+          description?: string | null
+          disciplina_outros?: string | null
+          evidence_number?: number | null
+          file_name?: string
+          file_path?: string
+          file_size?: number
+          file_type?: string
+          id?: string
+          rnc_id?: string | null
+          updated_at?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rnc_attachments_rnc_id_fkey"
+            columns: ["rnc_id"]
+            isOneToOne: false
+            referencedRelation: "rncs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rncs: {
+        Row: {
+          analise_disposicao: string | null
+          aprovacao_cliente: boolean | null
+          aprovacao_emitente: boolean | null
+          aprovacao_qualidade: boolean | null
+          cca_id: number | null
+          created_at: string
+          created_by: string | null
+          data: string | null
+          data_disposicao: string | null
+          data_emissao: string
+          data_fechamento: string | null
+          descricao_nc: string
+          detectado_por: string | null
+          disciplina: Json
+          disciplina_outros: string | null
+          disposicao: Json
+          eficacia: string | null
+          emitente: string
+          empresa_disposicao: string | null
+          evidencia_disposicao: string | null
+          evidencias_nc: string | null
+          id: string
+          numero: string
+          origem: string
+          periodo_melhoria: string | null
+          prazo_disposicao: string | null
+          previsao_fechamento: string | null
+          prioridade: string
+          responsavel_disposicao: string | null
+          setor_projeto: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          analise_disposicao?: string | null
+          aprovacao_cliente?: boolean | null
+          aprovacao_emitente?: boolean | null
+          aprovacao_qualidade?: boolean | null
+          cca_id?: number | null
+          created_at?: string
+          created_by?: string | null
+          data?: string | null
+          data_disposicao?: string | null
+          data_emissao: string
+          data_fechamento?: string | null
+          descricao_nc: string
+          detectado_por?: string | null
+          disciplina?: Json
+          disciplina_outros?: string | null
+          disposicao?: Json
+          eficacia?: string | null
+          emitente: string
+          empresa_disposicao?: string | null
+          evidencia_disposicao?: string | null
+          evidencias_nc?: string | null
+          id?: string
+          numero: string
+          origem: string
+          periodo_melhoria?: string | null
+          prazo_disposicao?: string | null
+          previsao_fechamento?: string | null
+          prioridade: string
+          responsavel_disposicao?: string | null
+          setor_projeto?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          analise_disposicao?: string | null
+          aprovacao_cliente?: boolean | null
+          aprovacao_emitente?: boolean | null
+          aprovacao_qualidade?: boolean | null
+          cca_id?: number | null
+          created_at?: string
+          created_by?: string | null
+          data?: string | null
+          data_disposicao?: string | null
+          data_emissao?: string
+          data_fechamento?: string | null
+          descricao_nc?: string
+          detectado_por?: string | null
+          disciplina?: Json
+          disciplina_outros?: string | null
+          disposicao?: Json
+          eficacia?: string | null
+          emitente?: string
+          empresa_disposicao?: string | null
+          evidencia_disposicao?: string | null
+          evidencias_nc?: string | null
+          id?: string
+          numero?: string
+          origem?: string
+          periodo_melhoria?: string | null
+          prazo_disposicao?: string | null
+          previsao_fechamento?: string | null
+          prioridade?: string
+          responsavel_disposicao?: string | null
+          setor_projeto?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rncs_cca_id_fkey"
+            columns: ["cca_id"]
+            isOneToOne: false
+            referencedRelation: "ccas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       segmentos_comercial: {
         Row: {
           ativo: boolean
