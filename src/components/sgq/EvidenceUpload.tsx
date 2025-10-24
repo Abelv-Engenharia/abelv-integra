@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useImperativeHandle, forwardRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
@@ -17,6 +17,11 @@ interface EvidenceUploadProps {
   readOnly?: boolean;
 }
 
+export interface EvidenceUploadRef {
+  uploadPendingEvidences: () => Promise<boolean>;
+  hasPendingEvidences: () => boolean;
+}
+
 interface EvidenceItem {
   id: string;
   file: File;
@@ -25,14 +30,14 @@ interface EvidenceItem {
   evidence_number: number;
 }
 
-export const EvidenceUpload: React.FC<EvidenceUploadProps> = ({
+export const EvidenceUpload = forwardRef<EvidenceUploadRef, EvidenceUploadProps>(({
   rncId,
   attachmentType,
   title,
   evidences,
   onEvidencesChange,
   readOnly = false
-}) => {
+}, ref) => {
   const [localEvidences, setLocalEvidences] = useState<EvidenceItem[]>([]);
   const [uploading, setUploading] = useState(false);
   const { toast } = useToast();
@@ -118,8 +123,8 @@ export const EvidenceUpload: React.FC<EvidenceUploadProps> = ({
     });
   }, []);
 
-  const uploadAllEvidences = useCallback(async () => {
-    if (localEvidences.length === 0) return;
+  const uploadAllEvidences = useCallback(async (): Promise<boolean> => {
+    if (localEvidences.length === 0) return true;
     
     // Validate descriptions
     const incompleteEvidences = localEvidences.filter(evidence => !evidence.description.trim());
@@ -129,7 +134,7 @@ export const EvidenceUpload: React.FC<EvidenceUploadProps> = ({
         description: "Todas as evidências devem ter uma descrição.",
         variant: "destructive",
       });
-      return;
+      return false;
     }
 
     setUploading(true);
@@ -150,20 +155,24 @@ export const EvidenceUpload: React.FC<EvidenceUploadProps> = ({
       onEvidencesChange([...evidences, ...uploadedEvidences]);
       setLocalEvidences([]);
       
-      toast({
-        title: "Evidências enviadas",
-        description: `${uploadedEvidences.length} evidência(s) enviada(s) com sucesso.`,
-      });
+      return true;
     } catch (error) {
       toast({
         title: "Erro no upload",
         description: "Erro ao enviar evidências. Tente novamente.",
         variant: "destructive",
       });
+      return false;
     } finally {
       setUploading(false);
     }
   }, [localEvidences, evidences, onEvidencesChange, rncId, attachmentType, uploadFile, toast]);
+
+  // Expose methods to parent component
+  useImperativeHandle(ref, () => ({
+    uploadPendingEvidences: uploadAllEvidences,
+    hasPendingEvidences: () => localEvidences.length > 0
+  }));
 
   const totalEvidences = evidences.length + localEvidences.length;
 
@@ -299,18 +308,17 @@ export const EvidenceUpload: React.FC<EvidenceUploadProps> = ({
           </div>
         ))}
 
-        {/* Upload Button for Local Evidences */}
+        {/* Info about pending evidences */}
         {!readOnly && localEvidences.length > 0 && (
-          <Button
-            type="button"
-            onClick={uploadAllEvidences}
-            disabled={uploading}
-            className="w-full"
-          >
-            {uploading ? "Enviando..." : `Enviar ${localEvidences.length} Evidência(s)`}
-          </Button>
+          <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+            <p className="text-sm text-blue-800 dark:text-blue-200">
+              {localEvidences.length} evidência(s) pendente(s). Serão enviadas ao salvar a RNC.
+            </p>
+          </div>
         )}
       </CardContent>
     </Card>
   );
-};
+});
+
+EvidenceUpload.displayName = 'EvidenceUpload';

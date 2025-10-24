@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,7 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useRNCData } from "@/hooks/sgq/useRNCData";
 import { DISCIPLINAS, DISPOSICOES, RNC, FileAttachment } from "@/types/sgq";
 import { Save, ArrowLeft } from "lucide-react";
-import { EvidenceUpload } from "@/components/sgq/EvidenceUpload";
+import { EvidenceUpload, EvidenceUploadRef } from "@/components/sgq/EvidenceUpload";
 import { useUsuarioAtivo } from "@/hooks/useUsuarioAtivo";
 import { fetchCCAs, CCAOption } from "@/services/treinamentos/ccaService";
 
@@ -27,6 +27,10 @@ export const RNCForm = ({ initialData, isEditMode = false }: RNCFormProps) => {
   const usuarioAtivo = useUsuarioAtivo();
   const [loading, setLoading] = useState(false);
   const [ccas, setCcas] = useState<CCAOption[]>([]);
+  
+  // Refs para os componentes de evidências
+  const evidenciasNcRef = useRef<EvidenceUploadRef>(null);
+  const evidenciasDisposicaoRef = useRef<EvidenceUploadRef>(null);
   
   const [formData, setFormData] = useState({
     numero: '',
@@ -119,6 +123,19 @@ export const RNCForm = ({ initialData, isEditMode = false }: RNCFormProps) => {
     setLoading(true);
     
     try {
+      // Upload evidências pendentes antes de salvar
+      const evidenciasNcSuccess = await evidenciasNcRef.current?.uploadPendingEvidences() ?? true;
+      if (!evidenciasNcSuccess) {
+        setLoading(false);
+        return;
+      }
+
+      const evidenciasDisposicaoSuccess = await evidenciasDisposicaoRef.current?.uploadPendingEvidences() ?? true;
+      if (!evidenciasDisposicaoSuccess) {
+        setLoading(false);
+        return;
+      }
+
       if (isEditMode && initialData?.id) {
         await updateRNC(initialData.id, {
           ...formData,
@@ -399,6 +416,7 @@ export const RNCForm = ({ initialData, isEditMode = false }: RNCFormProps) => {
               </div>
 
               <EvidenceUpload
+                ref={evidenciasNcRef}
                 rncId={isEditMode && initialData?.id ? initialData.id : `temp-${Date.now()}`}
                 attachmentType="evidencia_nc"
                 title="Evidências Fotográficas da NC"
@@ -469,6 +487,7 @@ export const RNCForm = ({ initialData, isEditMode = false }: RNCFormProps) => {
               </div>
 
               <EvidenceUpload
+                ref={evidenciasDisposicaoRef}
                 rncId={isEditMode && initialData?.id ? initialData.id : `temp-${Date.now()}`}
                 attachmentType="evidencia_disposicao"
                 title="Evidências Fotográficas da Disposição"
