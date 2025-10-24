@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { StatusBadge, PriorityBadge } from "@/components/sgq/StatusBadge";
 import { useRNCData } from "@/hooks/sgq/useRNCData";
+import { useRNCPdfGenerator } from "@/hooks/sgq/useRNCPdfGenerator";
 import { RNC, FileAttachment } from "@/types/sgq";
 import { ImageViewerDialog } from "@/components/sgq/ImageViewerDialog";
 import { ArrowLeft, Edit, Calendar, User, Building, AlertTriangle, CheckCircle, Eye, FileEdit } from "lucide-react";
@@ -25,6 +26,7 @@ export default function DetalhesRNC() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { getRNC, closeRNC } = useRNCData();
+  const { generatePDF } = useRNCPdfGenerator();
   const { toast } = useToast();
   const [rnc, setRnc] = useState<RNC | null>(null);
   const [loading, setLoading] = useState(true);
@@ -49,19 +51,38 @@ export default function DetalhesRNC() {
   };
 
   const handleCloseRNC = async () => {
-    if (!id) return;
+    if (!id || !rnc) return;
     
     try {
+      // Fechar a RNC no banco de dados
       await closeRNC(id);
+      
+      // Recarregar os dados da RNC atualizados
+      const updatedRnc = await getRNC(id);
+      setRnc(updatedRnc);
+      
+      // Gerar o PDF
+      const pdfBlob = await generatePDF(id);
+      
+      // Preparar o FormData para enviar ao webhook
+      const formData = new FormData();
+      formData.append('pdf', pdfBlob, `RNC_${rnc.numero}.pdf`);
+      formData.append('numero_rnc', rnc.numero);
+      formData.append('email_emitente', rnc.emitente); // Assumindo que emitente contém o email
+      
+      // Enviar ao webhook
+      await fetch('https://abelv-si.app.n8n.cloud/webhook-test/f3d37359-52c3-4609-bdf1-4707f456d7fa', {
+        method: 'POST',
+        body: formData
+      });
+      
       toast({
         title: "RNC fechada com sucesso",
-        description: "O status da RNC foi alterado para fechada.",
+        description: "O status da RNC foi alterado para fechada e o relatório foi enviado.",
       });
       setCloseDialogOpen(false);
-      // Recarregar os dados da RNC
-      const data = await getRNC(id);
-      setRnc(data);
     } catch (error) {
+      console.error('Erro ao fechar RNC:', error);
       toast({
         title: "Erro ao fechar RNC",
         description: "Ocorreu um erro ao tentar fechar a RNC. Tente novamente.",

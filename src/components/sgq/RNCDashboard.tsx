@@ -14,7 +14,7 @@ import { useToast } from "@/components/ui/use-toast";
 
 export const RNCDashboard = () => {
   const { rncs, loading } = useRNCData();
-  const { generatePDF } = useRNCPdfGenerator();
+  const { downloadPDF } = useRNCPdfGenerator();
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | "aberta" | "fechada">("all");
@@ -42,7 +42,7 @@ export const RNCDashboard = () => {
   const handleGeneratePDF = async (rncId: string, rncNumero: string) => {
     setGeneratingPdf(rncId);
     try {
-      await generatePDF(rncId);
+      await downloadPDF(rncId);
       toast({
         title: "PDF gerado com sucesso",
         description: `O relatório da RNC #${rncNumero} foi gerado.`,

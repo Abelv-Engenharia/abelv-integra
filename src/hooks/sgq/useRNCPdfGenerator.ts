@@ -318,13 +318,35 @@ export const useRNCPdfGenerator = () => {
         margin: { left: margin, right: margin }
       });
 
-      // Salvar PDF
-      pdf.save(`RNC_${rnc.numero}_${new Date().toISOString().split('T')[0]}.pdf`);
+      // Retornar PDF como Blob
+      return pdf.output('blob');
     } catch (error) {
       console.error('Erro ao gerar PDF:', error);
       throw error;
     }
   };
 
-  return { generatePDF };
+  const downloadPDF = async (rncId: string) => {
+    try {
+      const rnc = await getRNC(rncId);
+      if (!rnc) {
+        throw new Error('RNC não encontrada');
+      }
+      
+      const blob = await generatePDF(rncId);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `RNC_${rnc.numero}_${new Date().toISOString().split('T')[0]}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Erro ao baixar PDF:', error);
+      throw error;
+    }
+  };
+
+  return { generatePDF, downloadPDF };
 };
