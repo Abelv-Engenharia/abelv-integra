@@ -1,20 +1,25 @@
 import { useState } from "react";
-import { Search, Filter, Calendar, AlertTriangle, CheckCircle, Clock } from "lucide-react";
+import { Search, Filter, Calendar, AlertTriangle, CheckCircle, Clock, FileText } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { StatusBadge, PriorityBadge } from "./StatusBadge";
 import { useRNCData } from "@/hooks/sgq/useRNCData";
+import { useRNCPdfGenerator } from "@/hooks/sgq/useRNCPdfGenerator";
 import { Link } from "react-router-dom";
 import { RNC } from "@/types/sgq";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
+import { useToast } from "@/components/ui/use-toast";
 
 export const RNCDashboard = () => {
   const { rncs, loading } = useRNCData();
+  const { generatePDF } = useRNCPdfGenerator();
+  const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | "aberta" | "fechada">("all");
   const [priorityFilter, setPriorityFilter] = useState<"all" | "critica" | "moderada" | "leve">("all");
+  const [generatingPdf, setGeneratingPdf] = useState<string | null>(null);
 
   const filteredRNCs = rncs.filter(rnc => {
     const matchesSearch = rnc.numero.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -32,6 +37,25 @@ export const RNCDashboard = () => {
     abertas: rncs.filter(r => r.status === 'aberta').length,
     fechadas: rncs.filter(r => r.status === 'fechada').length,
     criticas: rncs.filter(r => r.prioridade === 'critica' && r.status === 'aberta').length
+  };
+
+  const handleGeneratePDF = async (rncId: string, rncNumero: string) => {
+    setGeneratingPdf(rncId);
+    try {
+      await generatePDF(rncId);
+      toast({
+        title: "PDF gerado com sucesso",
+        description: `O relatório da RNC #${rncNumero} foi gerado.`,
+      });
+    } catch (error) {
+      toast({
+        title: "Erro ao gerar PDF",
+        description: "Ocorreu um erro ao gerar o relatório. Tente novamente.",
+        variant: "destructive",
+      });
+    } finally {
+      setGeneratingPdf(null);
+    }
   };
 
   if (loading) {
@@ -240,11 +264,22 @@ export const RNCDashboard = () => {
                   ))}
                 </div>
                 
-                <Link to={`/sgq/rnc/${rnc.id}`}>
-                  <Button variant="outline" size="sm">
-                    Ver Detalhes
+                <div className="flex gap-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => handleGeneratePDF(rnc.id, rnc.numero)}
+                    disabled={generatingPdf === rnc.id}
+                  >
+                    <FileText className="h-4 w-4 mr-2" />
+                    {generatingPdf === rnc.id ? 'Gerando...' : 'Visualizar RNC'}
                   </Button>
-                </Link>
+                  <Link to={`/sgq/rnc/${rnc.id}`}>
+                    <Button variant="outline" size="sm">
+                      Ver Detalhes
+                    </Button>
+                  </Link>
+                </div>
               </div>
             </CardContent>
           </Card>
