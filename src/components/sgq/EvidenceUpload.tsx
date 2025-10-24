@@ -18,7 +18,7 @@ interface EvidenceUploadProps {
 }
 
 export interface EvidenceUploadRef {
-  uploadPendingEvidences: () => Promise<boolean>;
+  uploadPendingEvidences: () => Promise<FileAttachment[] | null>;
   hasPendingEvidences: () => boolean;
 }
 
@@ -123,8 +123,8 @@ export const EvidenceUpload = forwardRef<EvidenceUploadRef, EvidenceUploadProps>
     });
   }, []);
 
-  const uploadAllEvidences = useCallback(async (): Promise<boolean> => {
-    if (localEvidences.length === 0) return true;
+  const uploadAllEvidences = useCallback(async (): Promise<FileAttachment[] | null> => {
+    if (localEvidences.length === 0) return [];
     
     // Validate descriptions
     const incompleteEvidences = localEvidences.filter(evidence => !evidence.description.trim());
@@ -134,7 +134,7 @@ export const EvidenceUpload = forwardRef<EvidenceUploadRef, EvidenceUploadProps>
         description: "Todas as evidências devem ter uma descrição.",
         variant: "destructive",
       });
-      return false;
+      return null;
     }
 
     setUploading(true);
@@ -155,14 +155,14 @@ export const EvidenceUpload = forwardRef<EvidenceUploadRef, EvidenceUploadProps>
       onEvidencesChange([...evidences, ...uploadedEvidences]);
       setLocalEvidences([]);
       
-      return true;
+      return uploadedEvidences;
     } catch (error) {
       toast({
         title: "Erro no upload",
         description: "Erro ao enviar evidências. Tente novamente.",
         variant: "destructive",
       });
-      return false;
+      return null;
     } finally {
       setUploading(false);
     }

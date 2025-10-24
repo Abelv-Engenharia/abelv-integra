@@ -124,25 +124,29 @@ export const RNCForm = ({ initialData, isEditMode = false }: RNCFormProps) => {
     
     try {
       // Upload evidências pendentes antes de salvar
-      const evidenciasNcSuccess = await evidenciasNcRef.current?.uploadPendingEvidences() ?? true;
-      if (!evidenciasNcSuccess) {
+      const novasEvidenciasNc = await evidenciasNcRef.current?.uploadPendingEvidences() ?? [];
+      if (novasEvidenciasNc === null) {
         setLoading(false);
         return;
       }
 
-      const evidenciasDisposicaoSuccess = await evidenciasDisposicaoRef.current?.uploadPendingEvidences() ?? true;
-      if (!evidenciasDisposicaoSuccess) {
+      const novasEvidenciasDisposicao = await evidenciasDisposicaoRef.current?.uploadPendingEvidences() ?? [];
+      if (novasEvidenciasDisposicao === null) {
         setLoading(false);
         return;
       }
+
+      // Combinar evidências existentes com novas
+      const todasEvidenciasNc = [...formData.anexos_evidencias_nc, ...novasEvidenciasNc];
+      const todasEvidenciasDisposicao = [...formData.anexos_evidencia_disposicao, ...novasEvidenciasDisposicao];
 
       if (isEditMode && initialData?.id) {
         await updateRNC(initialData.id, {
           ...formData,
           origem: formData.origem,
           prioridade: formData.prioridade,
-          anexos_evidencias_nc: formData.anexos_evidencias_nc,
-          anexos_evidencia_disposicao: formData.anexos_evidencia_disposicao
+          anexos_evidencias_nc: todasEvidenciasNc,
+          anexos_evidencia_disposicao: todasEvidenciasDisposicao
         } as Omit<RNC, 'id' | 'created_at' | 'updated_at'>);
         
         toast({
@@ -157,8 +161,8 @@ export const RNCForm = ({ initialData, isEditMode = false }: RNCFormProps) => {
           ...formData,
           origem: formData.origem,
           prioridade: formData.prioridade,
-          anexos_evidencias_nc: formData.anexos_evidencias_nc,
-          anexos_evidencia_disposicao: formData.anexos_evidencia_disposicao
+          anexos_evidencias_nc: todasEvidenciasNc,
+          anexos_evidencia_disposicao: todasEvidenciasDisposicao
         } as Omit<RNC, 'id' | 'created_at' | 'updated_at'>);
         
         toast({
