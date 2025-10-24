@@ -1,18 +1,43 @@
 import { useParams, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { StatusBadge, PriorityBadge } from "@/components/sgq/StatusBadge";
 import { useRNCData } from "@/hooks/sgq/useRNCData";
+import { RNC } from "@/types/sgq";
 import { ArrowLeft, Edit, Calendar, User, Building, AlertTriangle, CheckCircle, Eye } from "lucide-react";
 
 export default function DetalhesRNC() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { getRNC } = useRNCData();
+  const [rnc, setRnc] = useState<RNC | null>(null);
+  const [loading, setLoading] = useState(true);
   
-  const rnc = getRNC(id!);
+  useEffect(() => {
+    const loadRNC = async () => {
+      if (id) {
+        const data = await getRNC(id);
+        setRnc(data);
+        setLoading(false);
+      }
+    };
+    loadRNC();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <Card className="shadow-soft">
+          <CardContent className="p-8 text-center">
+            <p className="text-muted-foreground">Carregando...</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   if (!rnc) {
     return (
