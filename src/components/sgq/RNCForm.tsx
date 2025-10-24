@@ -145,7 +145,7 @@ export const RNCForm = () => {
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="data">Data</Label>
+                <Label htmlFor="data">Data da NC</Label>
                 <Input
                   id="data"
                   type="date"
