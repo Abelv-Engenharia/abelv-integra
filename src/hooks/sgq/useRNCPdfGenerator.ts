@@ -70,6 +70,23 @@ export const useRNCPdfGenerator = () => {
         pdf.setFont('helvetica', 'normal');
       };
 
+      // Remover anexos duplicados (mesmo url + número + descrição)
+      const dedupeAnexos = <T extends { url?: string; evidence_number?: any; description?: string }>(arr: T[]) => {
+        const seen = new Set<string>();
+        return arr.filter((a) => {
+          const key = `${a.url || ''}__${a.evidence_number || ''}__${(a.description || '').trim()}`;
+          if (seen.has(key)) return false;
+          seen.add(key);
+          return true;
+        });
+      };
+
+      const getImageFormat = (dataUrl: string): 'JPEG' | 'PNG' | 'WEBP' => {
+        if (dataUrl.startsWith('data:image/png')) return 'PNG';
+        if (dataUrl.startsWith('data:image/webp')) return 'WEBP';
+        return 'JPEG';
+      };
+
       // Cabeçalho
       pdf.setFontSize(18);
       pdf.setFont('helvetica', 'bold');
@@ -136,11 +153,12 @@ export const useRNCPdfGenerator = () => {
       yPosition += evidLines.length * 5 + 10;
 
       // Evidências Fotográficas da NC
-      if (rnc.anexos_evidencias_nc && rnc.anexos_evidencias_nc.length > 0) {
+      const evidenciasNc = rnc.anexos_evidencias_nc ? dedupeAnexos(rnc.anexos_evidencias_nc) : [];
+      if (evidenciasNc.length > 0) {
         checkAndAddPage(20);
         addSection('Evidências Fotográficas da Não Conformidade');
 
-        for (const anexo of rnc.anexos_evidencias_nc) {
+        for (const anexo of evidenciasNc) {
           checkAndAddPage(100);
           
           // Título da evidência
@@ -177,8 +195,9 @@ export const useRNCPdfGenerator = () => {
                   imgWidth = imgHeight * aspectRatio;
                 }
                 
+                const format = getImageFormat(imageInfo.data);
                 checkAndAddPage(imgHeight + 10);
-                pdf.addImage(imageInfo.data, 'JPEG', margin, yPosition, imgWidth, imgHeight);
+                pdf.addImage(imageInfo.data, format, margin, yPosition, imgWidth, imgHeight);
                 yPosition += imgHeight + 10;
               }
             } catch (error) {
@@ -226,11 +245,12 @@ export const useRNCPdfGenerator = () => {
       }
 
       // Evidências Fotográficas da Disposição
-      if (rnc.anexos_evidencia_disposicao && rnc.anexos_evidencia_disposicao.length > 0) {
+      const evidenciasDisp = rnc.anexos_evidencia_disposicao ? dedupeAnexos(rnc.anexos_evidencia_disposicao) : [];
+      if (evidenciasDisp.length > 0) {
         checkAndAddPage(20);
         addSection('Evidências Fotográficas da Disposição');
 
-        for (const anexo of rnc.anexos_evidencia_disposicao) {
+        for (const anexo of evidenciasDisp) {
           checkAndAddPage(100);
           
           pdf.setFontSize(10);
@@ -264,8 +284,9 @@ export const useRNCPdfGenerator = () => {
                   imgWidth = imgHeight * aspectRatio;
                 }
                 
+                const format = getImageFormat(imageInfo.data);
                 checkAndAddPage(imgHeight + 10);
-                pdf.addImage(imageInfo.data, 'JPEG', margin, yPosition, imgWidth, imgHeight);
+                pdf.addImage(imageInfo.data, format, margin, yPosition, imgWidth, imgHeight);
                 yPosition += imgHeight + 10;
               }
             } catch (error) {
