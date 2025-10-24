@@ -14,6 +14,7 @@ interface EvidenceUploadProps {
   title: string;
   evidences: FileAttachment[];
   onEvidencesChange: (evidences: FileAttachment[]) => void;
+  readOnly?: boolean;
 }
 
 interface EvidenceItem {
@@ -29,7 +30,8 @@ export const EvidenceUpload: React.FC<EvidenceUploadProps> = ({
   attachmentType,
   title,
   evidences,
-  onEvidencesChange
+  onEvidencesChange,
+  readOnly = false
 }) => {
   const [localEvidences, setLocalEvidences] = useState<EvidenceItem[]>([]);
   const [uploading, setUploading] = useState(false);
@@ -177,7 +179,7 @@ export const EvidenceUpload: React.FC<EvidenceUploadProps> = ({
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Upload Button */}
-        {totalEvidences < MAX_EVIDENCES && (
+        {!readOnly && totalEvidences < MAX_EVIDENCES && (
           <div>
             <Label htmlFor={`evidence-upload-${attachmentType}`} className="cursor-pointer">
               <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center hover:border-muted-foreground/50 transition-colors">
@@ -298,7 +300,7 @@ export const EvidenceUpload: React.FC<EvidenceUploadProps> = ({
         ))}
 
         {/* Upload Button for Local Evidences */}
-        {localEvidences.length > 0 && (
+        {!readOnly && localEvidences.length > 0 && (
           <Button
             type="button"
             onClick={uploadAllEvidences}
