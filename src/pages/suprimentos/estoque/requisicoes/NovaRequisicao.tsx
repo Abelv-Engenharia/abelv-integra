@@ -109,12 +109,13 @@ export default function NovaRequisicao() {
       setEapItemFinal(""); // Ainda não é o último nível
       setApropriacao("");
     } else {
-      // Não tem filhos, é o último nível
+      // Não tem filhos, é o último nível - buscar o item pelo código para pegar o id
+      const itemEAP = await eapService.getItemByCodigo(Number(cca), codigo);
       const novosNiveis = [...eapNiveis];
       novosNiveis.splice(nivel);
       setEapNiveis(novosNiveis);
       setEapItemFinal(codigo);
-      setApropriacao(codigo);
+      setApropriacao(itemEAP?.id || "");
     }
   };
 
