@@ -6,7 +6,8 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { StatusBadge, PriorityBadge } from "@/components/sgq/StatusBadge";
 import { useRNCData } from "@/hooks/sgq/useRNCData";
-import { RNC } from "@/types/sgq";
+import { RNC, FileAttachment } from "@/types/sgq";
+import { ImageViewerDialog } from "@/components/sgq/ImageViewerDialog";
 import { ArrowLeft, Edit, Calendar, User, Building, AlertTriangle, CheckCircle, Eye } from "lucide-react";
 
 export default function DetalhesRNC() {
@@ -15,6 +16,8 @@ export default function DetalhesRNC() {
   const { getRNC } = useRNCData();
   const [rnc, setRnc] = useState<RNC | null>(null);
   const [loading, setLoading] = useState(true);
+  const [selectedImage, setSelectedImage] = useState<FileAttachment | null>(null);
+  const [imageDialogOpen, setImageDialogOpen] = useState(false);
   
   useEffect(() => {
     const loadRNC = async () => {
@@ -26,6 +29,11 @@ export default function DetalhesRNC() {
     };
     loadRNC();
   }, [id]);
+
+  const handleImageClick = (attachment: FileAttachment) => {
+    setSelectedImage(attachment);
+    setImageDialogOpen(true);
+  };
 
   if (loading) {
     return (
@@ -269,8 +277,8 @@ export default function DetalhesRNC() {
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={() => window.open(attachment.url, '_blank')}
-                                title="Visualizar em tela cheia"
+                                onClick={() => handleImageClick(attachment)}
+                                title="Visualizar imagem"
                               >
                                 <Eye className="h-4 w-4" />
                               </Button>
@@ -281,7 +289,7 @@ export default function DetalhesRNC() {
                                   src={attachment.url} 
                                   alt={`Evidência ${attachment.evidence_number || index + 1}`}
                                   className="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform"
-                                  onClick={() => window.open(attachment.url, '_blank')}
+                                  onClick={() => handleImageClick(attachment)}
                                 />
                               </div>
                             )}
@@ -319,8 +327,8 @@ export default function DetalhesRNC() {
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={() => window.open(attachment.url, '_blank')}
-                                title="Visualizar em tela cheia"
+                                onClick={() => handleImageClick(attachment)}
+                                title="Visualizar imagem"
                               >
                                 <Eye className="h-4 w-4" />
                               </Button>
@@ -331,7 +339,7 @@ export default function DetalhesRNC() {
                                   src={attachment.url} 
                                   alt={`Evidência ${attachment.evidence_number || index + 1}`}
                                   className="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform"
-                                  onClick={() => window.open(attachment.url, '_blank')}
+                                  onClick={() => handleImageClick(attachment)}
                                 />
                               </div>
                             )}
@@ -437,6 +445,18 @@ export default function DetalhesRNC() {
           </Card>
         </div>
       </div>
+
+      {/* Image Viewer Dialog */}
+      {selectedImage && (
+        <ImageViewerDialog
+          open={imageDialogOpen}
+          onOpenChange={setImageDialogOpen}
+          imageUrl={selectedImage.url || ''}
+          imageName={selectedImage.file_name}
+          evidenceNumber={selectedImage.evidence_number}
+          description={selectedImage.description}
+        />
+      )}
     </div>
   );
 }

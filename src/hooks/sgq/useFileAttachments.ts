@@ -19,9 +19,10 @@ export const useFileAttachments = () => {
 
     if (uploadError) throw uploadError;
 
-    const { data: { publicUrl } } = supabase.storage
+    // Gerar URL assinada válida por 1 ano (31536000 segundos)
+    const { data: signedUrlData } = await supabase.storage
       .from('rnc-attachments')
-      .getPublicUrl(filePath);
+      .createSignedUrl(filePath, 31536000);
 
     const attachment: FileAttachment = {
       id: fileName,
@@ -30,7 +31,7 @@ export const useFileAttachments = () => {
       file_size: file.size,
       file_type: file.type,
       attachment_type: attachmentType,
-      url: publicUrl,
+      url: signedUrlData?.signedUrl,
       description,
       evidence_number: evidenceNumber
     };

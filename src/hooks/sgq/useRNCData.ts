@@ -173,6 +173,20 @@ export const useRNCData = () => {
         .select('*')
         .eq('rnc_id', id);
 
+      // Gerar URLs assinadas para os anexos
+      const attachmentsWithUrls = await Promise.all(
+        (attachments || []).map(async (att) => {
+          const { data: signedUrlData } = await supabase.storage
+            .from('rnc-attachments')
+            .createSignedUrl(att.file_path, 31536000); // 1 ano
+          
+          return {
+            ...att,
+            url: signedUrlData?.signedUrl
+          };
+        })
+      );
+
       // Buscar código do CCA
       const { data: ccaData } = await supabase
         .from('ccas')
@@ -190,14 +204,15 @@ export const useRNCData = () => {
         attachment_type: att.attachment_type as 'evidencia_nc' | 'evidencia_disposicao',
         description: att.description,
         evidence_number: att.evidence_number,
-        uploaded_by: att.uploaded_by
+        uploaded_by: att.uploaded_by,
+        url: att.url
       });
 
       return {
         ...data,
         cca: ccaData?.codigo || '',
-        anexos_evidencias_nc: attachments?.filter(a => a.attachment_type === 'evidencia_nc').map(mapAttachment) || [],
-        anexos_evidencia_disposicao: attachments?.filter(a => a.attachment_type === 'evidencia_disposicao').map(mapAttachment) || []
+        anexos_evidencias_nc: attachmentsWithUrls?.filter(a => a.attachment_type === 'evidencia_nc').map(mapAttachment) || [],
+        anexos_evidencia_disposicao: attachmentsWithUrls?.filter(a => a.attachment_type === 'evidencia_disposicao').map(mapAttachment) || []
       } as RNC;
     } catch (error) {
       console.error('Erro ao buscar RNC:', error);
