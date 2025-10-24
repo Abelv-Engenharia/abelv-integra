@@ -57,6 +57,7 @@ export default function EditarRequisicao() {
   const [itemEditando, setItemEditando] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
   
   // Hooks
   const { data: almoxarifados = [] } = useAlmoxarifados(cca ? Number(cca) : undefined);
@@ -117,6 +118,7 @@ export default function EditarRequisicao() {
       });
     } finally {
       setIsLoading(false);
+      setIsInitialLoad(false);
     }
   };
 
@@ -173,15 +175,15 @@ export default function EditarRequisicao() {
     }
   }, [cca, isLoading]);
 
-  // Limpar itens quando almoxarifado for alterado
+  // Limpar itens quando almoxarifado for alterado (mas não durante carregamento inicial)
   useEffect(() => {
-    if (almoxarifado && !isLoading) {
+    if (almoxarifado && !isLoading && !isInitialLoad) {
       setItens([]);
       setNovoItem({ descricao: "", unidade: "", quantidade: 0, unitario: 0 });
       setSearchDescricao("");
       setItemEditando(null);
     }
-  }, [almoxarifado, isLoading]);
+  }, [almoxarifado, isLoading, isInitialLoad]);
   
   const carregarEAPNivel1 = async () => {
     try {
