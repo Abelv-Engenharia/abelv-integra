@@ -8,7 +8,7 @@ import { StatusBadge, PriorityBadge } from "@/components/sgq/StatusBadge";
 import { useRNCData } from "@/hooks/sgq/useRNCData";
 import { RNC, FileAttachment } from "@/types/sgq";
 import { ImageViewerDialog } from "@/components/sgq/ImageViewerDialog";
-import { ArrowLeft, Edit, Calendar, User, Building, AlertTriangle, CheckCircle, Eye } from "lucide-react";
+import { ArrowLeft, Edit, Calendar, User, Building, AlertTriangle, CheckCircle, Eye, FileEdit } from "lucide-react";
 
 export default function DetalhesRNC() {
   const { id } = useParams();
@@ -441,6 +441,32 @@ export default function DetalhesRNC() {
                   <div className="w-4 h-4 rounded-full border-2 border-muted"></div>
                 )}
               </div>
+            </CardContent>
+          </Card>
+
+          {/* Ações Rápidas */}
+          <Card className="shadow-soft">
+            <CardHeader>
+              <CardTitle>Ações Rápidas</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <Button 
+                variant="outline" 
+                className="w-full justify-start"
+                onClick={() => {/* TODO: Implementar atualização de disposição */}}
+              >
+                <FileEdit className="h-4 w-4 mr-2" />
+                Atualizar Disposição
+              </Button>
+              
+              <Button 
+                variant="outline" 
+                className="w-full justify-start"
+                onClick={() => {/* TODO: Implementar fechamento de RNC */}}
+              >
+                <CheckCircle className="h-4 w-4 mr-2" />
+                Fechar RNC
+              </Button>
             </CardContent>
           </Card>
         </div>
