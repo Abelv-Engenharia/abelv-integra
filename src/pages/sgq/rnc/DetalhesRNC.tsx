@@ -83,7 +83,7 @@ export default function DetalhesRNC() {
       formData.append('email_emitente', userData?.email || '');
       
       // Enviar ao webhook
-      await fetch('https://abelv-si.app.n8n.cloud/webhook-test/f3d37359-52c3-4609-bdf1-4707f456d7fa', {
+      await fetch('https://abelv-si.app.n8n.cloud/webhook/f3d37359-52c3-4609-bdf1-4707f456d7fa', {
         method: 'POST',
         body: formData
       });
