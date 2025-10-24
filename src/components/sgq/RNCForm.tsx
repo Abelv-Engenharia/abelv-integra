@@ -275,7 +275,7 @@ export const RNCForm = ({ initialData, isEditMode = false }: RNCFormProps) => {
                 <Label htmlFor="emitente">Emitente *</Label>
                 <Input
                   id="emitente"
-                  value={formData.emitente}
+                  value={usuarioAtivo.nome}
                   placeholder="Nome do emitente"
                   readOnly
                   className="bg-muted"
