@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,18 +12,22 @@ import { useRNCData } from "@/hooks/sgq/useRNCData";
 import { DISCIPLINAS, DISPOSICOES, RNC, FileAttachment } from "@/types/sgq";
 import { Save, ArrowLeft } from "lucide-react";
 import { EvidenceUpload } from "@/components/sgq/EvidenceUpload";
+import { useUsuarioAtivo } from "@/hooks/useUsuarioAtivo";
+import { fetchCCAs, CCAOption } from "@/services/treinamentos/ccaService";
 
 export const RNCForm = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { createRNC } = useRNCData();
+  const usuarioAtivo = useUsuarioAtivo();
   const [loading, setLoading] = useState(false);
+  const [ccas, setCcas] = useState<CCAOption[]>([]);
   
   const [formData, setFormData] = useState({
     numero: '',
     data: new Date().toISOString().split('T')[0],
     cca: '',
-    emitente: '',
+    emitente: usuarioAtivo.nome,
     setor_projeto: '',
     detectado_por: '',
     periodo_melhoria: '',
@@ -45,6 +49,14 @@ export const RNCForm = () => {
     anexos_evidencias_nc: [] as FileAttachment[],
     anexos_evidencia_disposicao: [] as FileAttachment[]
   });
+
+  useEffect(() => {
+    const loadCCAs = async () => {
+      const ccasList = await fetchCCAs();
+      setCcas(ccasList);
+    };
+    loadCCAs();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -155,14 +167,23 @@ export const RNCForm = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="cca">CCA *</Label>
-                <Input
-                  id="cca"
-                  value={formData.cca}
-                  onChange={(e) => setFormData(prev => ({ ...prev, cca: e.target.value }))}
-                  placeholder="Ex: 24023"
+                <Label htmlFor="cca">Cca *</Label>
+                <Select 
+                  value={formData.cca} 
+                  onValueChange={(value) => setFormData(prev => ({ ...prev, cca: value }))}
                   required
-                />
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione o CCA" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {ccas.map((cca) => (
+                      <SelectItem key={cca.id} value={cca.codigo}>
+                        {cca.codigo} - {cca.nome}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="space-y-2">
@@ -170,8 +191,9 @@ export const RNCForm = () => {
                 <Input
                   id="emitente"
                   value={formData.emitente}
-                  onChange={(e) => setFormData(prev => ({ ...prev, emitente: e.target.value }))}
                   placeholder="Nome do emitente"
+                  readOnly
+                  className="bg-muted"
                   required
                 />
               </div>
@@ -202,7 +224,8 @@ export const RNCForm = () => {
                   id="data_emissao"
                   type="date"
                   value={formData.data_emissao}
-                  onChange={(e) => setFormData(prev => ({ ...prev, data_emissao: e.target.value }))}
+                  readOnly
+                  className="bg-muted"
                 />
               </div>
 
