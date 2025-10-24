@@ -21,6 +21,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function DetalhesRNC() {
   const { id } = useParams();
@@ -64,11 +65,22 @@ export default function DetalhesRNC() {
       // Gerar o PDF
       const pdfBlob = await generatePDF(id);
       
+      // Buscar email do emitente da tabela users
+      const { data: userData, error: userError } = await supabase
+        .from('profiles')
+        .select('email')
+        .eq('id', rnc.emitente)
+        .single();
+      
+      if (userError) {
+        console.error('Erro ao buscar email do emitente:', userError);
+      }
+      
       // Preparar o FormData para enviar ao webhook
       const formData = new FormData();
       formData.append('pdf', pdfBlob, `RNC_${rnc.numero}.pdf`);
       formData.append('numero_rnc', rnc.numero);
-      formData.append('email_emitente', rnc.emitente); // Assumindo que emitente contém o email
+      formData.append('email_emitente', userData?.email || '');
       
       // Enviar ao webhook
       await fetch('https://abelv-si.app.n8n.cloud/webhook-test/f3d37359-52c3-4609-bdf1-4707f456d7fa', {
