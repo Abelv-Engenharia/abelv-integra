@@ -99,7 +99,7 @@ export default function DetalhesRNC() {
             </div>
           </div>
           
-          <Button>
+          <Button onClick={() => navigate(`/sgq/rnc/editar/${id}`)}>
             <Edit className="h-4 w-4 mr-2" />
             Editar RNC
           </Button>

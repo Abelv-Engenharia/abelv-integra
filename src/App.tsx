@@ -312,6 +312,7 @@ import AprovacaoNF from "./pages/gestao-pessoas/AprovacaoNF";
 import SGQRNCDashboard from "./pages/sgq/rnc/Dashboard";
 import NovaRNC from "./pages/sgq/rnc/NovaRNC";
 import DetalhesRNC from "./pages/sgq/rnc/DetalhesRNC";
+import EditarRNC from "./pages/sgq/EditarRNC";
 
 function App() {
   return (
@@ -726,6 +727,7 @@ function App() {
                 {/* SGQ - Sistema de Gestão da Qualidade */}
                 <Route path="sgq/rnc" element={<SGQRNCDashboard />} />
                 <Route path="sgq/rnc/novo" element={<NovaRNC />} />
+                <Route path="sgq/rnc/editar/:id" element={<EditarRNC />} />
                 <Route path="sgq/rnc/:id" element={<DetalhesRNC />} />
               </Route>
 

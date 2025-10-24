@@ -15,10 +15,15 @@ import { EvidenceUpload } from "@/components/sgq/EvidenceUpload";
 import { useUsuarioAtivo } from "@/hooks/useUsuarioAtivo";
 import { fetchCCAs, CCAOption } from "@/services/treinamentos/ccaService";
 
-export const RNCForm = () => {
+interface RNCFormProps {
+  initialData?: RNC;
+  isEditMode?: boolean;
+}
+
+export const RNCForm = ({ initialData, isEditMode = false }: RNCFormProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { createRNC } = useRNCData();
+  const { createRNC, updateRNC } = useRNCData();
   const usuarioAtivo = useUsuarioAtivo();
   const [loading, setLoading] = useState(false);
   const [ccas, setCcas] = useState<CCAOption[]>([]);
@@ -45,7 +50,7 @@ export const RNCForm = () => {
     data_disposicao: '',
     prazo_disposicao: '',
     analise_disposicao: '',
-    status: 'aberta' as const,
+    status: 'aberta' as 'aberta' | 'fechada',
     anexos_evidencias_nc: [] as FileAttachment[],
     anexos_evidencia_disposicao: [] as FileAttachment[]
   });
@@ -57,6 +62,37 @@ export const RNCForm = () => {
     };
     loadCCAs();
   }, []);
+
+  useEffect(() => {
+    if (initialData) {
+      setFormData({
+        numero: initialData.numero,
+        data: initialData.data,
+        cca: initialData.cca,
+        emitente: initialData.emitente,
+        setor_projeto: initialData.setor_projeto || '',
+        detectado_por: initialData.detectado_por || '',
+        periodo_melhoria: initialData.periodo_melhoria || '',
+        data_emissao: initialData.data_emissao,
+        previsao_fechamento: initialData.previsao_fechamento || '',
+        origem: initialData.origem,
+        prioridade: initialData.prioridade,
+        disciplina: initialData.disciplina,
+        disciplina_outros: initialData.disciplina_outros || '',
+        descricao_nc: initialData.descricao_nc,
+        evidencias_nc: initialData.evidencias_nc,
+        disposicao: initialData.disposicao,
+        empresa_disposicao: initialData.empresa_disposicao || '',
+        responsavel_disposicao: initialData.responsavel_disposicao || '',
+        data_disposicao: initialData.data_disposicao || '',
+        prazo_disposicao: initialData.prazo_disposicao || '',
+        analise_disposicao: initialData.analise_disposicao || '',
+        status: initialData.status,
+        anexos_evidencias_nc: initialData.anexos_evidencias_nc || [],
+        anexos_evidencia_disposicao: initialData.anexos_evidencia_disposicao || []
+      });
+    }
+  }, [initialData]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -83,26 +119,43 @@ export const RNCForm = () => {
     setLoading(true);
     
     try {
-      const newRNC = await createRNC({
-        ...formData,
-        origem: formData.origem,
-        prioridade: formData.prioridade,
-        anexos_evidencias_nc: formData.anexos_evidencias_nc,
-        anexos_evidencia_disposicao: formData.anexos_evidencia_disposicao
-      } as Omit<RNC, 'id' | 'created_at' | 'updated_at'>);
-      
-      toast({
-        title: "Sucesso",
-        description: "RNC criada com sucesso!",
-        variant: "default"
-      });
-      
-      // Navigate directly to the created RNC details page
-      navigate(`/sgq/rnc/${newRNC.id}`);
+      if (isEditMode && initialData?.id) {
+        await updateRNC(initialData.id, {
+          ...formData,
+          origem: formData.origem,
+          prioridade: formData.prioridade,
+          anexos_evidencias_nc: formData.anexos_evidencias_nc,
+          anexos_evidencia_disposicao: formData.anexos_evidencia_disposicao
+        } as Omit<RNC, 'id' | 'created_at' | 'updated_at'>);
+        
+        toast({
+          title: "Sucesso",
+          description: "RNC atualizada com sucesso!",
+          variant: "default"
+        });
+        
+        navigate(`/sgq/rnc/${initialData.id}`);
+      } else {
+        const newRNC = await createRNC({
+          ...formData,
+          origem: formData.origem,
+          prioridade: formData.prioridade,
+          anexos_evidencias_nc: formData.anexos_evidencias_nc,
+          anexos_evidencia_disposicao: formData.anexos_evidencia_disposicao
+        } as Omit<RNC, 'id' | 'created_at' | 'updated_at'>);
+        
+        toast({
+          title: "Sucesso",
+          description: "RNC criada com sucesso!",
+          variant: "default"
+        });
+        
+        navigate(`/sgq/rnc/${newRNC.id}`);
+      }
     } catch (error) {
       toast({
         title: "Erro",
-        description: "Erro ao criar RNC. Tente novamente.",
+        description: isEditMode ? "Erro ao atualizar RNC. Tente novamente." : "Erro ao criar RNC. Tente novamente.",
         variant: "destructive"
       });
     } finally {
@@ -134,8 +187,8 @@ export const RNCForm = () => {
             <ArrowLeft className="h-4 w-4 mr-2" />
             Voltar para Lista
           </Button>
-          <h1 className="text-3xl font-bold text-foreground">Nova RNC</h1>
-          <p className="text-muted-foreground">Preencha as informações da não conformidade</p>
+          <h1 className="text-3xl font-bold text-foreground">{isEditMode ? 'Editar RNC' : 'Nova RNC'}</h1>
+          <p className="text-muted-foreground">{isEditMode ? 'Atualize as informações da não conformidade' : 'Preencha as informações da não conformidade'}</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -153,6 +206,8 @@ export const RNCForm = () => {
                   onChange={(e) => setFormData(prev => ({ ...prev, numero: e.target.value }))}
                   placeholder="Ex: 001"
                   required
+                  readOnly={isEditMode}
+                  className={isEditMode ? "bg-muted" : ""}
                 />
               </div>
 
@@ -432,7 +487,7 @@ export const RNCForm = () => {
             </Button>
             <Button type="submit" disabled={loading} className="bg-gradient-to-r from-primary to-info">
               <Save className="h-4 w-4 mr-2" />
-              {loading ? 'Salvando...' : 'Salvar RNC'}
+              {loading ? 'Salvando...' : (isEditMode ? 'Atualizar RNC' : 'Salvar RNC')}
             </Button>
           </div>
         </form>

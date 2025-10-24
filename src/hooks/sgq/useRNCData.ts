@@ -141,14 +141,55 @@ export const useRNCData = () => {
     }
   };
 
-  const updateRNC = async (id: string, updates: Partial<RNC>): Promise<void> => {
+  const updateRNC = async (id: string, rncData: Omit<RNC, 'id' | 'created_at' | 'updated_at'>): Promise<void> => {
     try {
+      // Buscar o ID do CCA pelo código
+      const { data: ccaData } = await supabase
+        .from('ccas')
+        .select('id')
+        .eq('codigo', rncData.cca)
+        .single();
+
+      // Preparar os dados para atualização
+      const updateData = {
+        numero: rncData.numero,
+        data: rncData.data || null,
+        cca_id: ccaData?.id,
+        emitente: rncData.emitente,
+        setor_projeto: rncData.setor_projeto || null,
+        detectado_por: rncData.detectado_por || null,
+        periodo_melhoria: rncData.periodo_melhoria || null,
+        data_emissao: rncData.data_emissao,
+        previsao_fechamento: rncData.previsao_fechamento || null,
+        origem: rncData.origem,
+        prioridade: rncData.prioridade,
+        disciplina: rncData.disciplina,
+        disciplina_outros: rncData.disciplina_outros || null,
+        descricao_nc: rncData.descricao_nc,
+        evidencias_nc: rncData.evidencias_nc || null,
+        disposicao: rncData.disposicao,
+        empresa_disposicao: rncData.empresa_disposicao || null,
+        responsavel_disposicao: rncData.responsavel_disposicao || null,
+        data_disposicao: rncData.data_disposicao || null,
+        prazo_disposicao: rncData.prazo_disposicao || null,
+        analise_disposicao: rncData.analise_disposicao || null,
+        status: rncData.status
+      };
+
       const { error } = await supabase
         .from('rncs')
-        .update(updates)
+        .update(updateData)
         .eq('id', id);
 
       if (error) throw error;
+
+      // Upload de novos anexos se existirem
+      if (rncData.anexos_evidencias_nc?.length) {
+        await uploadAttachments(id, rncData.anexos_evidencias_nc, 'evidencia_nc');
+      }
+      if (rncData.anexos_evidencia_disposicao?.length) {
+        await uploadAttachments(id, rncData.anexos_evidencia_disposicao, 'evidencia_disposicao');
+      }
 
       await fetchRNCs();
     } catch (error) {
