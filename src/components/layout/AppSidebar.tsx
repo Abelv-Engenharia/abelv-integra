@@ -25,6 +25,7 @@ import logoAbelvIntegra from "@/assets/logo-abelv-integra.png";
 import SidebarSectionComercial from "./SidebarSectionComercial";
 import SidebarSectionGestaoPessoas from "./SidebarSectionGestaoPessoas";
 import SidebarSectionSGQ from "./SidebarSectionSGQ";
+import SidebarSectionOperacional from "./SidebarSectionOperacional";
 
 export function AppSidebar() {
   const location = useLocation();
@@ -65,6 +66,7 @@ export function AppSidebar() {
     if (currentPath.startsWith("/comercial")) return "comercial";
     if (currentPath.startsWith("/gestao-pessoas")) return "gestao-pessoas";
     if (currentPath.startsWith("/sgq")) return "sgq";
+    if (currentPath.startsWith("/operacional")) return "operacional";
     if (currentPath.startsWith("/account")) return "account";
     return null;
   });
@@ -115,6 +117,8 @@ export function AppSidebar() {
       setOpenMenu("gestao-pessoas");
     } else if (currentPath.startsWith("/sgq")) {
       setOpenMenu("sgq");
+    } else if (currentPath.startsWith("/operacional")) {
+      setOpenMenu("operacional");
     }
   }, [currentPath]);
 
@@ -332,6 +336,16 @@ export function AppSidebar() {
         {/* Seção: SGQ - Sistema de Gestão da Qualidade */}
         {["sgq_rnc_dashboard", "sgq_rnc_cadastro", "sgq_rnc_visualizar"].some(canSee) && (
           <SidebarSectionSGQ
+            openMenu={openMenu}
+            toggleMenu={toggleMenu}
+            onLinkClick={handleLinkClick}
+            canSee={canSee}
+          />
+        )}
+
+        {/* Seção: Operacional - Sistema de Registro de Campo */}
+        {canSee("operacional_acesso") && (
+          <SidebarSectionOperacional
             openMenu={openMenu}
             toggleMenu={toggleMenu}
             onLinkClick={handleLinkClick}
