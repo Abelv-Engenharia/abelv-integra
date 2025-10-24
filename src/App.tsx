@@ -256,6 +256,7 @@ import EstoqueRelatorioRequisicao from "./pages/suprimentos/estoque/requisicoes/
 import EstoqueRelacaoRequisicoes from "./pages/suprimentos/estoque/requisicoes/RelacaoRequisicoes";
 import EstoqueRelacaoDevolucoes from "./pages/suprimentos/estoque/requisicoes/RelacaoDevolucoes";
 import EstoqueNovaRequisicao from "./pages/suprimentos/estoque/requisicoes/NovaRequisicao";
+import EstoqueEditarRequisicao from "./pages/suprimentos/estoque/requisicoes/EditarRequisicao";
 import EstoqueProcessarDevolucao from "./pages/suprimentos/estoque/requisicoes/ProcessarDevolucao";
 import EstoqueRelacaoRequisicoesEmitidas from "./pages/suprimentos/estoque/requisicoes/RelacaoRequisicoesEmitidas";
 import EstoqueRelacaoRequisicoesPendentes from "./pages/suprimentos/estoque/requisicoes/RelacaoRequisicoesPendentes";
@@ -519,6 +520,7 @@ function App() {
                 {/* Requisições */}
                 <Route path="suprimentos/estoque/requisicoes/requisicao-materiais" element={<EstoqueRequisicaoMateriais />} />
                 <Route path="suprimentos/estoque/requisicoes/nova-requisicao" element={<EstoqueNovaRequisicao />} />
+                <Route path="suprimentos/estoque/requisicoes/editar/:id" element={<EstoqueEditarRequisicao />} />
                 <Route path="suprimentos/estoque/requisicoes/devolucao-materiais" element={<EstoqueDevolucaoMateriais />} />
                 <Route path="suprimentos/estoque/requisicoes/processar-devolucao/:id" element={<EstoqueProcessarDevolucao />} />
                 <Route path="suprimentos/estoque/requisicoes/relatorio-requisicao" element={<EstoqueRelatorioRequisicao />} />
