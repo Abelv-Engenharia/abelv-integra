@@ -64,7 +64,7 @@ export const RNCForm = ({ initialData, isEditMode = false }: RNCFormProps) => {
   }, []);
 
   useEffect(() => {
-    if (initialData) {
+    if (initialData && ccas.length > 0) {
       setFormData({
         numero: initialData.numero,
         data: initialData.data,
@@ -92,7 +92,7 @@ export const RNCForm = ({ initialData, isEditMode = false }: RNCFormProps) => {
         anexos_evidencia_disposicao: initialData.anexos_evidencia_disposicao || []
       });
     }
-  }, [initialData]);
+  }, [initialData, ccas]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -395,17 +395,20 @@ export const RNCForm = ({ initialData, isEditMode = false }: RNCFormProps) => {
                   onChange={(e) => setFormData(prev => ({ ...prev, evidencias_nc: e.target.value }))}
                   placeholder="Liste as evidências que comprovam a não conformidade..."
                   rows={3}
+                  readOnly={isEditMode}
+                  className={isEditMode ? "bg-muted" : ""}
                 />
               </div>
 
               <EvidenceUpload
-                rncId={`temp-${Date.now()}`}
+                rncId={isEditMode && initialData?.id ? initialData.id : `temp-${Date.now()}`}
                 attachmentType="evidencia_nc"
                 title="Evidências Fotográficas da NC"
                 evidences={formData.anexos_evidencias_nc}
                 onEvidencesChange={(evidences) => 
                   setFormData(prev => ({ ...prev, anexos_evidencias_nc: evidences }))
                 }
+                readOnly={isEditMode}
               />
             </CardContent>
           </Card>
@@ -468,7 +471,7 @@ export const RNCForm = ({ initialData, isEditMode = false }: RNCFormProps) => {
               </div>
 
               <EvidenceUpload
-                rncId={`temp-${Date.now()}`}
+                rncId={isEditMode && initialData?.id ? initialData.id : `temp-${Date.now()}`}
                 attachmentType="evidencia_disposicao"
                 title="Evidências Fotográficas da Disposição"
                 evidences={formData.anexos_evidencia_disposicao}
