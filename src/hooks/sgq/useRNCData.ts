@@ -261,11 +261,31 @@ export const useRNCData = () => {
     }
   };
 
+  const closeRNC = async (id: string): Promise<void> => {
+    try {
+      const { error } = await supabase
+        .from('rncs')
+        .update({
+          status: 'fechada',
+          data_fechamento: new Date().toISOString()
+        })
+        .eq('id', id);
+
+      if (error) throw error;
+
+      await fetchRNCs();
+    } catch (error) {
+      console.error('Erro ao fechar RNC:', error);
+      throw error;
+    }
+  };
+
   return {
     rncs,
     loading,
     createRNC,
     updateRNC,
-    getRNC
+    getRNC,
+    closeRNC
   };
 };

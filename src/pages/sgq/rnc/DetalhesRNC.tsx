@@ -9,15 +9,28 @@ import { useRNCData } from "@/hooks/sgq/useRNCData";
 import { RNC, FileAttachment } from "@/types/sgq";
 import { ImageViewerDialog } from "@/components/sgq/ImageViewerDialog";
 import { ArrowLeft, Edit, Calendar, User, Building, AlertTriangle, CheckCircle, Eye, FileEdit } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { useToast } from "@/components/ui/use-toast";
 
 export default function DetalhesRNC() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { getRNC } = useRNCData();
+  const { getRNC, closeRNC } = useRNCData();
+  const { toast } = useToast();
   const [rnc, setRnc] = useState<RNC | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState<FileAttachment | null>(null);
   const [imageDialogOpen, setImageDialogOpen] = useState(false);
+  const [closeDialogOpen, setCloseDialogOpen] = useState(false);
   
   useEffect(() => {
     const loadRNC = async () => {
@@ -33,6 +46,28 @@ export default function DetalhesRNC() {
   const handleImageClick = (attachment: FileAttachment) => {
     setSelectedImage(attachment);
     setImageDialogOpen(true);
+  };
+
+  const handleCloseRNC = async () => {
+    if (!id) return;
+    
+    try {
+      await closeRNC(id);
+      toast({
+        title: "RNC fechada com sucesso",
+        description: "O status da RNC foi alterado para fechada.",
+      });
+      setCloseDialogOpen(false);
+      // Recarregar os dados da RNC
+      const data = await getRNC(id);
+      setRnc(data);
+    } catch (error) {
+      toast({
+        title: "Erro ao fechar RNC",
+        description: "Ocorreu um erro ao tentar fechar a RNC. Tente novamente.",
+        variant: "destructive",
+      });
+    }
   };
 
   if (loading) {
@@ -462,7 +497,8 @@ export default function DetalhesRNC() {
               <Button 
                 variant="outline" 
                 className="w-full justify-start"
-                onClick={() => {/* TODO: Implementar fechamento de RNC */}}
+                onClick={() => setCloseDialogOpen(true)}
+                disabled={rnc.status === 'fechada'}
               >
                 <CheckCircle className="h-4 w-4 mr-2" />
                 Fechar RNC
@@ -483,6 +519,25 @@ export default function DetalhesRNC() {
           description={selectedImage.description}
         />
       )}
+
+      {/* Close RNC Confirmation Dialog */}
+      <AlertDialog open={closeDialogOpen} onOpenChange={setCloseDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar fechamento da RNC</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja fechar esta RNC? O status será alterado para "Fechada" 
+              e a data de fechamento será registrada.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleCloseRNC}>
+              Confirmar Fechamento
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
