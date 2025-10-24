@@ -89,7 +89,7 @@ export const useRNCData = () => {
       // Preparar os dados para inserção
       // Converter strings vazias em null para campos de data
       const insertData = {
-        numero: rncData.numero,
+        numero: null, // Será gerado automaticamente pelo banco
         data: rncData.data || null,
         cca_id: ccaData?.id,
         emitente: rncData.emitente,

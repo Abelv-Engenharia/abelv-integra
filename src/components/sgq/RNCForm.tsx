@@ -97,7 +97,7 @@ export const RNCForm = ({ initialData, isEditMode = false }: RNCFormProps) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.numero || !formData.cca || !formData.emitente || !formData.origem || !formData.prioridade) {
+    if (!formData.cca || !formData.emitente || !formData.origem || !formData.prioridade) {
       toast({
         title: "Erro",
         description: "Por favor, preencha todos os campos obrigatórios.",
@@ -202,12 +202,10 @@ export const RNCForm = ({ initialData, isEditMode = false }: RNCFormProps) => {
                 <Label htmlFor="numero">Número da RNC *</Label>
                 <Input
                   id="numero"
-                  value={formData.numero}
-                  onChange={(e) => setFormData(prev => ({ ...prev, numero: e.target.value }))}
-                  placeholder="Ex: 001"
-                  required
-                  readOnly={isEditMode}
-                  className={isEditMode ? "bg-muted" : ""}
+                  value={isEditMode ? formData.numero : 'Gerado automaticamente'}
+                  placeholder="Gerado automaticamente"
+                  readOnly
+                  className="bg-muted"
                 />
               </div>
 
