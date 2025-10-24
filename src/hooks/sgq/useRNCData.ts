@@ -48,6 +48,11 @@ export const useRNCData = () => {
     attachmentType: 'evidencia_nc' | 'evidencia_disposicao'
   ) => {
     for (const attachment of attachments) {
+      // Se já tem ID, significa que já existe no banco - não inserir novamente
+      if (attachment.id) {
+        continue;
+      }
+      
       // Se já tem URL, significa que já foi feito upload (no componente EvidenceUpload)
       if (attachment.url) {
         // Criar registro na tabela rnc_attachments
