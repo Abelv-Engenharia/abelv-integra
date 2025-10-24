@@ -32,7 +32,7 @@ export const RNCForm = ({ initialData, isEditMode = false }: RNCFormProps) => {
     numero: '',
     data: new Date().toISOString().split('T')[0],
     cca: '',
-    emitente: usuarioAtivo.nome,
+    emitente: usuarioAtivo.id,
     setor_projeto: '',
     detectado_por: '',
     periodo_melhoria: '',
