@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -57,11 +57,12 @@ export default function EditarRequisicao() {
   const [itemEditando, setItemEditando] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [isInitialLoad, setIsInitialLoad] = useState(true);
   
   // Hooks
   const { data: almoxarifados = [] } = useAlmoxarifados(cca ? Number(cca) : undefined);
   const { data: itensDisponiveis = [] } = useEstoqueItensDisponiveis(searchDescricao, almoxarifado);
+  const prevAlmoxarifadoRef = useRef<string | null>(null);
+  const prevCcaRef = useRef<string | null>(null);
   
   // Carregar dados da requisição
   useEffect(() => {
@@ -118,7 +119,6 @@ export default function EditarRequisicao() {
       });
     } finally {
       setIsLoading(false);
-      setIsInitialLoad(false);
     }
   };
 
@@ -164,26 +164,30 @@ export default function EditarRequisicao() {
     }
   };
   
-  // Carregar EAP quando CCA for selecionado
+  // Carregar EAP quando o usuário alterar o CCA (não no carregamento inicial)
   useEffect(() => {
-    if (cca && !isLoading) {
+    if (!cca) return;
+    if (prevCcaRef.current && prevCcaRef.current !== cca) {
       carregarEAPNivel1();
       setEapSelecionados([]);
       setEapNiveis([]);
       setEapItemFinal("");
       setApropriacao("");
     }
-  }, [cca, isLoading]);
+    prevCcaRef.current = cca;
+  }, [cca]);
 
-  // Limpar itens quando almoxarifado for alterado (mas não durante carregamento inicial)
+  // Limpar itens somente quando o usuário alterar o almoxarifado
   useEffect(() => {
-    if (almoxarifado && !isLoading && !isInitialLoad) {
+    if (!almoxarifado) return;
+    if (prevAlmoxarifadoRef.current && prevAlmoxarifadoRef.current !== almoxarifado) {
       setItens([]);
       setNovoItem({ descricao: "", unidade: "", quantidade: 0, unitario: 0 });
       setSearchDescricao("");
       setItemEditando(null);
     }
-  }, [almoxarifado, isLoading, isInitialLoad]);
+    prevAlmoxarifadoRef.current = almoxarifado;
+  }, [almoxarifado]);
   
   const carregarEAPNivel1 = async () => {
     try {
