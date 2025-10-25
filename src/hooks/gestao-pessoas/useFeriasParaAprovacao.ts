@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
 
 export interface FeriasParaAprovacao {
   id: string;
@@ -21,13 +22,14 @@ export interface FeriasParaAprovacao {
 
 export const useFeriasParaAprovacao = () => {
   const { user } = useAuth();
+  const { data: isAdmin } = useIsAdmin();
 
   return useQuery({
-    queryKey: ['ferias-para-aprovacao', user?.id],
+    queryKey: ['ferias-para-aprovacao', user?.id, isAdmin],
     queryFn: async (): Promise<FeriasParaAprovacao[]> => {
       if (!user?.id) return [];
 
-      const { data, error } = await supabase
+      let query = supabase
         .from('prestadores_ferias')
         .select(`
           id,
@@ -45,10 +47,15 @@ export const useFeriasParaAprovacao = () => {
           created_at,
           prestador_pj_id
         `)
-        .eq('responsaveldireto_id', user.id)
         .eq('status', 'solicitado')
-        .eq('ativo', true)
-        .order('created_at', { ascending: false });
+        .eq('ativo', true);
+
+      // Se não for admin, filtra apenas as solicitações onde o usuário é responsável direto
+      if (!isAdmin) {
+        query = query.eq('responsaveldireto_id', user.id);
+      }
+
+      const { data, error } = await query.order('created_at', { ascending: false });
 
       if (error) {
         console.error('Erro ao buscar férias para aprovação:', error);
@@ -57,7 +64,7 @@ export const useFeriasParaAprovacao = () => {
 
       return data || [];
     },
-    enabled: !!user?.id,
+    enabled: !!user?.id && isAdmin !== undefined,
     staleTime: 1 * 60 * 1000
   });
 };
