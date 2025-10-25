@@ -26,6 +26,20 @@ interface EditarPrestadorModalProps {
 export function EditarPrestadorModal({ open, onOpenChange, prestador }: EditarPrestadorModalProps) {
   const updatePrestadorMutation = useUpdatePrestadorPJ();
   
+  // Buscar usuários ativos do sistema
+  const { data: usuarios, isLoading: isLoadingUsuarios } = useQuery({
+    queryKey: ['usuarios-ativos-sistema'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id, nome, email')
+        .eq('ativo', true)
+        .order('nome');
+      if (error) throw error;
+      return data || [];
+    }
+  });
+  
   // Buscar CCAs ativos
   const { data: ccas } = useQuery({
     queryKey: ['ccas-ativos'],
@@ -65,6 +79,7 @@ export function EditarPrestadorModal({ open, onOpenChange, prestador }: EditarPr
         registrofuncional: prestador.registroFuncional || "",
         telefonerepresentante: prestador.telefoneRepresentante || "",
         emailrepresentante: prestador.emailRepresentante || "",
+        usuariosistemaid: prestador.usuarioSistemaId || "",
         enderecorepresentante: prestador.enderecoRepresentante || "",
         servico: prestador.servico || "",
         valorprestacaoservico: prestador.valorPrestacaoServico ? formatarMoedaDoBanco(prestador.valorPrestacaoServico) : "",
@@ -175,6 +190,7 @@ export function EditarPrestadorModal({ open, onOpenChange, prestador }: EditarPr
         registroFuncional: formData.registrofuncional || null,
         telefoneRepresentante: formData.telefonerepresentante?.replace(/\D/g, "") || null,
         emailRepresentante: formData.emailrepresentante || null,
+        usuarioSistemaId: formData.usuariosistemaid || null,
         enderecoRepresentante: formData.enderecorepresentante || null,
         servico: formData.servico || null,
         valorPrestacaoServico: formData.valorprestacaoservico ? parseFloat(extrairValorNumerico(formData.valorprestacaoservico)) : 0,
@@ -462,6 +478,36 @@ export function EditarPrestadorModal({ open, onOpenChange, prestador }: EditarPr
                     value={formData.emailrepresentante || ""}
                     onChange={(e) => handleChange("emailrepresentante", e.target.value)}
                   />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="usuariosistemaid">Usuário do Sistema</Label>
+                  <Select
+                    value={formData.usuariosistemaid || ""}
+                    onValueChange={(value) => handleChange("usuariosistemaid", value)}
+                    disabled={isLoadingUsuarios}
+                  >
+                    <SelectTrigger>
+                      <SelectValue 
+                        placeholder={
+                          isLoadingUsuarios 
+                            ? "Carregando usuários..." 
+                            : usuarios && usuarios.length > 0 
+                              ? "Selecione um usuário" 
+                              : "Nenhum usuário disponível"
+                        } 
+                      />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {usuarios?.map(usuario => (
+                        <SelectItem key={usuario.id} value={usuario.id}>
+                          {usuario.nome} {usuario.email ? `(${usuario.email})` : ''}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
 
