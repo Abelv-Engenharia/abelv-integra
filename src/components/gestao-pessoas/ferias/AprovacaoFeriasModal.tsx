@@ -80,7 +80,7 @@ export function AprovacaoFeriasModal({
         .from('prestadores_ferias')
         .update({
           status: 'reprovado',
-          observacoes_aprovacao_gestor: observacoes,
+          justificativareprovacao: observacoes,
           dataaprovacao_gestor: new Date().toISOString(),
           aprovadopor_gestor: ferias.responsaveldireto
         })
