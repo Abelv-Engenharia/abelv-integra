@@ -252,7 +252,7 @@ function mapNotaFiscalFromDB(data: any): NotaFiscal {
     nomeempresa: data.nomeempresa,
     nomerepresentante: data.nomerepresentante,
     periodocontabil: data.periodocontabil,
-    cca: data.cca_nome || "",
+    cca: data.cca_codigo && data.cca_nome ? `${data.cca_codigo} - ${data.cca_nome}` : (data.cca_nome || ""),
     dataemissao: data.dataemissao,
     descricaoservico: data.descricaoservico,
     valor: data.valor,

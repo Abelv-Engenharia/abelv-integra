@@ -4,6 +4,7 @@ import { NotaFiscal } from "@/types/gestao-pessoas/nf";
 import { StatusBadgeNF } from "./StatusBadgeNF";
 import { Download } from "lucide-react";
 import { toast } from "sonner";
+import { format, parseISO } from "date-fns";
 
 interface VisualizarNFModalProps {
   open: boolean;
@@ -58,7 +59,7 @@ export function VisualizarNFModal({ open, onClose, notaFiscal }: VisualizarNFMod
               
               <div>
                 <label className="text-sm font-medium text-muted-foreground">Data de Emissão</label>
-                <p className="text-sm mt-1">{new Date(notaFiscal.dataemissao).toLocaleDateString('pt-BR')}</p>
+                <p className="text-sm mt-1">{format(parseISO(notaFiscal.dataemissao), 'dd/MM/yyyy')}</p>
               </div>
               
               <div>
@@ -91,7 +92,7 @@ export function VisualizarNFModal({ open, onClose, notaFiscal }: VisualizarNFMod
                 <p className="text-sm mt-1 font-semibold">{formatarValor(notaFiscal.valor)}</p>
               </div>
               
-              <div>
+              <div className="col-span-2">
                 <label className="text-sm font-medium text-muted-foreground">Arquivo</label>
                 <div className="mt-1">
                   <Button variant="outline" size="sm" onClick={handleDownload}>
@@ -133,7 +134,7 @@ export function VisualizarNFModal({ open, onClose, notaFiscal }: VisualizarNFMod
                 {notaFiscal.datavencimento && (
                   <div>
                     <label className="text-sm font-medium text-muted-foreground">Data de Vencimento</label>
-                    <p className="text-sm mt-1">{new Date(notaFiscal.datavencimento).toLocaleDateString('pt-BR')}</p>
+                    <p className="text-sm mt-1">{format(parseISO(notaFiscal.datavencimento), 'dd/MM/yyyy')}</p>
                   </div>
                 )}
                 
