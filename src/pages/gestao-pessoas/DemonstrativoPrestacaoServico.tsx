@@ -136,7 +136,7 @@ export default function DemonstrativoPrestacaoServico() {
       periodo: item.mes,
       items: [
         { codigo: '001', descricao: 'Base (Salário)', proventos: item.salario, descontos: 0 },
-        { codigo: '002', descricao: 'Premiação Nexa', proventos: item.premiacaonexa, descontos: 0 },
+        { codigo: '002', descricao: 'Bonificação', proventos: item.premiacaonexa, descontos: 0 },
         { codigo: '003', descricao: 'Ajuda de Custo Obra', proventos: item.ajudacustoobra, descontos: 0 },
         { codigo: '004', descricao: 'Ajuda de Aluguel', proventos: item.ajudaaluguel, descontos: 0 },
         { codigo: '005', descricao: 'Reembolso Convênio', proventos: item.reembolsoconvenio, descontos: 0 },

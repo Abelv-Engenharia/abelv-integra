@@ -17,22 +17,40 @@ interface DemonstrativoData {
   items: DemonstrativoItem[];
 }
 
-export const generateDemonstrativoPDF = (data: DemonstrativoData): jsPDF => {
+export const generateDemonstrativoPDF = async (data: DemonstrativoData): Promise<jsPDF> => {
   const doc = new jsPDF();
   
   // Configurações
   const pageWidth = doc.internal.pageSize.getWidth();
   
+  // Adicionar logo da ABELV
+  try {
+    const response = await fetch('/abelv-logo.png');
+    const blob = await response.blob();
+    const reader = new FileReader();
+    
+    await new Promise((resolve) => {
+      reader.onloadend = () => {
+        const base64data = reader.result as string;
+        doc.addImage(base64data, 'PNG', 14, 10, 40, 15);
+        resolve(null);
+      };
+      reader.readAsDataURL(blob);
+    });
+  } catch (error) {
+    console.error('Erro ao carregar logo:', error);
+  }
+  
   // Cabeçalho
   doc.setFontSize(16);
   doc.setFont('helvetica', 'bold');
-  doc.text('DEMONSTRATIVO DE PRESTAÇÃO DE SERVIÇO', pageWidth / 2, 20, { align: 'center' });
+  doc.text('DEMONSTRATIVO DE PRESTAÇÃO DE SERVIÇO', pageWidth / 2, 32, { align: 'center' });
   
   // Nome do Prestador
   doc.setFontSize(12);
   doc.setFont('helvetica', 'normal');
-  doc.text(`NOME: ${data.prestador}`, 14, 35);
-  doc.text(`PERÍODO: ${data.periodo}`, 14, 42);
+  doc.text(`NOME: ${data.prestador}`, 14, 47);
+  doc.text(`PERÍODO: ${data.periodo}`, 14, 54);
   
   // Separar proventos e descontos
   const totalProventos = data.items.reduce((sum, item) => sum + item.proventos, 0);
@@ -49,7 +67,7 @@ export const generateDemonstrativoPDF = (data: DemonstrativoData): jsPDF => {
   
   // Adicionar tabela
   autoTable(doc, {
-    startY: 50,
+    startY: 62,
     head: [['Cód.', 'Descrição', 'Proventos', 'Descontos']],
     body: tableData,
     theme: 'grid',
@@ -106,8 +124,8 @@ export const generateDemonstrativoPDF = (data: DemonstrativoData): jsPDF => {
   return doc;
 };
 
-export const downloadDemonstrativoPDF = (data: DemonstrativoData) => {
-  const doc = generateDemonstrativoPDF(data);
+export const downloadDemonstrativoPDF = async (data: DemonstrativoData) => {
+  const doc = await generateDemonstrativoPDF(data);
   const fileName = `Demonstrativo_${data.prestador.replace(/\s+/g, '_')}_${format(new Date(), 'yyyy-MM-dd')}.pdf`;
   doc.save(fileName);
 };
