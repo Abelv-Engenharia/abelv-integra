@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { CalendarIcon, Upload } from "lucide-react";
+import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
@@ -15,240 +15,289 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { useUsuarioPrestador } from "@/hooks/gestao-pessoas/useUsuarioPrestador";
+import { useResponsaveisSuperiores } from "@/hooks/gestao-pessoas/useResponsaveisSuperiores";
+
 const feriasSchema = z.object({
-  nomePrestador: z.string().min(1, "Nome do prestador é obrigatório"),
-  empresa: z.string().min(1, "Empresa é obrigatória"),
-  funcaoCargo: z.string().min(1, "Função/cargo é obrigatória"),
-  obraLocalAtuacao: z.string().min(1, "Obra/local é obrigatório"),
+  nomeEmpresa: z.string().min(1, "Nome da empresa é obrigatório"),
+  nomeRepresentante: z.string().min(1, "Nome do representante é obrigatório"),
+  funcao: z.string().min(1, "Função é obrigatória"),
+  cca: z.string().min(1, "CCA é obrigatório"),
   dataInicioFerias: z.date({
     required_error: "Data de início é obrigatória"
   }),
   diasFerias: z.number().min(1, "Dias de férias é obrigatório"),
-  periodoAquisitivo: z.string().min(1, "Período aquisitivo é obrigatório").regex(/^\d{4}\/\d{4}$/, "Formato deve ser AAAA/AAAA (ex: 2025/2026)"),
   responsavelDireto: z.string().min(1, "Responsável direto é obrigatório"),
-  substituto: z.string().min(1, "Substituto é obrigatório"),
   observacoes: z.string().optional()
 });
+
 type FeriasFormData = z.infer<typeof feriasSchema>;
+
 interface NovoControleFeriasModalProps {
   aberto: boolean;
   onFechar: () => void;
 }
+
 export function NovoControleFeriasModal({
   aberto,
   onFechar
 }: NovoControleFeriasModalProps) {
-  const [anexos, setAnexos] = useState<File[]>([]);
+  const { data: prestadorData, isLoading: loadingPrestador } = useUsuarioPrestador();
+  const ccaId = prestadorData?.ccaPrincipal?.id;
+  const { data: responsaveisSuperiores = [], isLoading: loadingResponsaveis } = useResponsaveisSuperiores(ccaId);
+
   const form = useForm<FeriasFormData>({
     resolver: zodResolver(feriasSchema),
     defaultValues: {
-      nomePrestador: "",
-      empresa: "",
-      funcaoCargo: "",
-      obraLocalAtuacao: "",
+      nomeEmpresa: "",
+      nomeRepresentante: "",
+      funcao: "",
+      cca: "",
       diasFerias: 0,
-      periodoAquisitivo: "",
       responsavelDireto: "",
-      substituto: "",
       observacoes: ""
     }
   });
+
+  // Preencher campos automaticamente quando os dados do prestador estiverem disponíveis
+  useEffect(() => {
+    if (prestadorData && aberto) {
+      form.setValue('nomeEmpresa', prestadorData.nomeEmpresa);
+      form.setValue('nomeRepresentante', prestadorData.nomeRepresentante);
+      form.setValue('funcao', prestadorData.funcao);
+      if (prestadorData.ccaPrincipal) {
+        form.setValue('cca', `${prestadorData.ccaPrincipal.codigo} - ${prestadorData.ccaPrincipal.nome}`);
+      }
+    }
+  }, [prestadorData, aberto, form]);
+
   const onSubmit = (data: FeriasFormData) => {
-    console.log("Dados das férias:", {
-      ...data,
-      anexos: anexos.map(f => f.name)
-    });
+    console.log("Dados das férias:", data);
     toast({
-      title: "Férias registradas",
-      description: `Solicitação de férias para ${data.nomePrestador} foi registrada com sucesso.`
+      title: "Férias solicitadas",
+      description: `Solicitação de férias para ${data.nomeRepresentante} foi registrada com sucesso.`
     });
     form.reset();
-    setAnexos([]);
     onFechar();
   };
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(event.target.files || []);
-    setAnexos(prev => [...prev, ...files]);
-  };
-  const removeAnexo = (index: number) => {
-    setAnexos(prev => prev.filter((_, i) => i !== index));
-  };
-  return <Dialog open={aberto} onOpenChange={onFechar}>
+
+  return (
+    <Dialog open={aberto} onOpenChange={onFechar}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Novo Registro de Férias</DialogTitle>
+          <DialogTitle>Solicitação de Férias</DialogTitle>
           <DialogDescription>
-            Registre uma nova solicitação de férias para prestador de serviços
+            Preencha o formulário para solicitar suas férias
           </DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField control={form.control} name="nomePrestador" render={({
-              field
-            }) => <FormItem>
+              {/* Nome da Empresa - Preenchido automaticamente */}
+              <FormField
+                control={form.control}
+                name="nomeEmpresa"
+                render={({ field }) => (
+                  <FormItem>
                     <FormLabel className={!field.value ? "text-destructive" : ""}>
-                      Nome do Prestador *
+                      Nome da Empresa *
                     </FormLabel>
                     <FormControl>
-                      <Input {...field} />
+                      <Input {...field} disabled className="bg-muted" />
                     </FormControl>
                     <FormMessage />
-                  </FormItem>} />
+                  </FormItem>
+                )}
+              />
 
-              <FormField control={form.control} name="empresa" render={({
-              field
-            }) => <FormItem>
+              {/* Nome do Representante - Preenchido automaticamente */}
+              <FormField
+                control={form.control}
+                name="nomeRepresentante"
+                render={({ field }) => (
+                  <FormItem>
                     <FormLabel className={!field.value ? "text-destructive" : ""}>
-                      Empresa *
+                      Nome do Representante *
                     </FormLabel>
                     <FormControl>
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione a empresa" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="empresa-abc">Empresa ABC</SelectItem>
-                          <SelectItem value="empresa-xyz">Empresa XYZ</SelectItem>
-                          <SelectItem value="empresa-123">Empresa 123</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <Input {...field} disabled className="bg-muted" />
                     </FormControl>
                     <FormMessage />
-                  </FormItem>} />
+                  </FormItem>
+                )}
+              />
 
-              <FormField control={form.control} name="funcaoCargo" render={({
-              field
-            }) => <FormItem>
+              {/* Função - Preenchida automaticamente */}
+              <FormField
+                control={form.control}
+                name="funcao"
+                render={({ field }) => (
+                  <FormItem>
                     <FormLabel className={!field.value ? "text-destructive" : ""}>
-                      Função / Cargo *
+                      Função *
                     </FormLabel>
                     <FormControl>
-                      <Input {...field} />
+                      <Input {...field} disabled className="bg-muted" />
                     </FormControl>
                     <FormMessage />
-                  </FormItem>} />
+                  </FormItem>
+                )}
+              />
 
-              <FormField control={form.control} name="obraLocalAtuacao" render={({
-              field
-            }) => <FormItem>
+              {/* CCA - Preenchido automaticamente */}
+              <FormField
+                control={form.control}
+                name="cca"
+                render={({ field }) => (
+                  <FormItem>
                     <FormLabel className={!field.value ? "text-destructive" : ""}>
-                      Obra / Local de Atuação *
+                      CCA *
                     </FormLabel>
                     <FormControl>
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione a obra/local" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="obra-norte">Obra Norte</SelectItem>
-                          <SelectItem value="obra-sul">Obra Sul</SelectItem>
-                          <SelectItem value="obra-leste">Obra Leste</SelectItem>
-                          <SelectItem value="obra-oeste">Obra Oeste</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <Input {...field} disabled className="bg-muted" />
                     </FormControl>
                     <FormMessage />
-                  </FormItem>} />
+                  </FormItem>
+                )}
+              />
 
-              <FormField control={form.control} name="dataInicioFerias" render={({
-              field
-            }) => <FormItem className="flex flex-col">
+              {/* Data de Início das Férias - Input manual + Calendar */}
+              <FormField
+                control={form.control}
+                name="dataInicioFerias"
+                render={({ field }) => (
+                  <FormItem>
                     <FormLabel className={!field.value ? "text-destructive" : ""}>
                       Data de Início das Férias *
                     </FormLabel>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                          <Button variant="outline" className={cn("w-full pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>
-                            {field.value ? format(field.value, "PPP", {
-                        locale: ptBR
-                      }) : <span>Selecione a data</span>}
-                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                    <div className="flex gap-2">
+                      <FormControl>
+                        <Input
+                          type="date"
+                          value={field.value ? format(field.value, "yyyy-MM-dd") : ""}
+                          onChange={(e) => {
+                            const date = e.target.value ? new Date(e.target.value + "T00:00:00") : null;
+                            field.onChange(date);
+                          }}
+                          className="flex-1"
+                        />
+                      </FormControl>
+                      
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button variant="outline" size="icon" type="button">
+                            <CalendarIcon className="h-4 w-4" />
                           </Button>
-                        </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar mode="single" selected={field.value} onSelect={field.onChange} disabled={date => date < new Date()} initialFocus className="pointer-events-auto" />
-                      </PopoverContent>
-                    </Popover>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={field.value}
+                            onSelect={field.onChange}
+                            disabled={(date) => date < new Date()}
+                            initialFocus
+                            locale={ptBR}
+                          />
+                        </PopoverContent>
+                      </Popover>
+                    </div>
                     <FormMessage />
-                  </FormItem>} />
+                  </FormItem>
+                )}
+              />
 
-              <FormField control={form.control} name="diasFerias" render={({
-              field
-            }) => <FormItem>
+              {/* Dias de Férias */}
+              <FormField
+                control={form.control}
+                name="diasFerias"
+                render={({ field }) => (
+                  <FormItem>
                     <FormLabel className={!field.value ? "text-destructive" : ""}>
                       Dias de Férias *
                     </FormLabel>
                     <FormControl>
-                      <Input {...field} type="number" min="1" max="30" onChange={e => field.onChange(parseInt(e.target.value) || 0)} />
+                      <Input
+                        {...field}
+                        type="number"
+                        min="1"
+                        max="30"
+                        onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                      />
                     </FormControl>
                     <FormMessage />
-                  </FormItem>} />
+                  </FormItem>
+                )}
+              />
 
-              <FormField control={form.control} name="periodoAquisitivo" render={({
-              field
-            }) => <FormItem>
-                    <FormLabel className={!field.value ? "text-destructive" : ""}>
-                      Período Aquisitivo *
-                    </FormLabel>
-                    <FormControl>
-                      <Input {...field} placeholder="2025/2026" maxLength={9} />
-                    </FormControl>
-                    <FormMessage />
-                    <p className="text-xs text-muted-foreground">
-                      Formato: AAAA/AAAA (ex: 2025/2026)
-                    </p>
-                  </FormItem>} />
-
-              <FormField control={form.control} name="responsavelDireto" render={({
-              field
-            }) => <FormItem>
+              {/* Responsável Direto - Select com hierarquia */}
+              <FormField
+                control={form.control}
+                name="responsavelDireto"
+                render={({ field }) => (
+                  <FormItem className="md:col-span-2">
                     <FormLabel className={!field.value ? "text-destructive" : ""}>
                       Responsável Direto *
                     </FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="Nome do responsável direto" />
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                        disabled={loadingResponsaveis || responsaveisSuperiores.length === 0}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione o responsável direto" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {responsaveisSuperiores.map((responsavel) => (
+                            <SelectItem key={responsavel.id} value={responsavel.id}>
+                              {responsavel.nome} - {responsavel.cargo}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </FormControl>
+                    {responsaveisSuperiores.length === 0 && !loadingResponsaveis && (
+                      <p className="text-xs text-muted-foreground">
+                        Nenhum responsável com cargo superior encontrado neste CCA
+                      </p>
+                    )}
                     <FormMessage />
-                  </FormItem>} />
-
-              <FormField control={form.control} name="substituto" render={({
-              field
-            }) => <FormItem>
-                    <FormLabel>Substituto</FormLabel>
-                    <FormControl>
-                      <Input {...field} placeholder="Nome do substituto durante as férias" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>} />
+                  </FormItem>
+                )}
+              />
             </div>
 
-            <FormField control={form.control} name="observacoes" render={({
-            field
-          }) => <FormItem>
+            {/* Observações - Full width */}
+            <FormField
+              control={form.control}
+              name="observacoes"
+              render={({ field }) => (
+                <FormItem>
                   <FormLabel>Observações</FormLabel>
                   <FormControl>
-                    <Textarea {...field} rows={3} placeholder="Observações adicionais sobre as férias..." />
+                    <Textarea
+                      {...field}
+                      rows={3}
+                      placeholder="Observações adicionais sobre as férias..."
+                    />
                   </FormControl>
                   <FormMessage />
-                </FormItem>} />
-
-            {/* Upload de anexos */}
-            
+                </FormItem>
+              )}
+            />
 
             <DialogFooter>
               <Button type="button" variant="outline" onClick={onFechar}>
                 Cancelar
               </Button>
-              <Button type="submit">
-                Registrar Férias
+              <Button type="submit" disabled={loadingPrestador}>
+                Solicitar Férias
               </Button>
             </DialogFooter>
           </form>
         </Form>
       </DialogContent>
-    </Dialog>;
+    </Dialog>
+  );
 }

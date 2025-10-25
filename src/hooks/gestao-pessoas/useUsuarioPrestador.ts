@@ -13,6 +13,7 @@ interface UsuarioPrestadorData {
   nomeEmpresa: string;
   nomeRepresentante: string;
   numeroCredorSienge: string;
+  funcao: string;
   ccaPrincipal: CCAData | null;
   ccasPermitidas: CCAData[];
 }
@@ -36,6 +37,17 @@ export const useUsuarioPrestador = () => {
       if (prestadorError || !prestador) {
         console.log('Nenhum prestador PJ vinculado ao usuário:', prestadorError);
         return null;
+      }
+
+      // Buscar função/cargo do usuário no profiles
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('cargo')
+        .eq('id', user.id)
+        .single();
+
+      if (profileError) {
+        console.error('Erro ao buscar cargo do usuário:', profileError);
       }
 
       // Buscar CCAs permitidas para o usuário via usuario_ccas
@@ -79,6 +91,7 @@ export const useUsuarioPrestador = () => {
         nomeEmpresa: prestador.razaosocial || '',
         nomeRepresentante: prestador.nomecompleto || '',
         numeroCredorSienge: prestador.numerocredorsienge || '',
+        funcao: profile?.cargo || '',
         ccaPrincipal,
         ccasPermitidas
       };
