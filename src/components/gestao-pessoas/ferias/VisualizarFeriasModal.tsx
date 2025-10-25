@@ -30,17 +30,17 @@ interface VisualizarFeriasModalProps {
 }
 
 const getStatusBadge = (status: string) => {
-  const statusMap: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
+  const statusMap: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline"; className?: string }> = {
     solicitado: { label: "Aguardando Gestor", variant: "secondary" },
     aguardando_aprovacao: { label: "Aguardando RH", variant: "outline" },
-    aprovado: { label: "Aprovado", variant: "default" },
+    aprovado: { label: "Aprovado", variant: "default", className: "bg-green-600 hover:bg-green-700" },
     em_ferias: { label: "Em Férias", variant: "default" },
     concluido: { label: "Concluído", variant: "outline" },
     reprovado: { label: "Reprovado", variant: "destructive" }
   };
 
   const statusInfo = statusMap[status] || { label: status, variant: "outline" };
-  return <Badge variant={statusInfo.variant}>{statusInfo.label}</Badge>;
+  return <Badge variant={statusInfo.variant} className={statusInfo.className}>{statusInfo.label}</Badge>;
 };
 
 export function VisualizarFeriasModal({ aberto, onFechar, ferias }: VisualizarFeriasModalProps) {
