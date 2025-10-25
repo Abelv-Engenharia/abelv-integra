@@ -7,8 +7,8 @@ import { ptBR } from "date-fns/locale";
 
 const getStatusBadge = (status: string) => {
   const statusMap: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
-    solicitado: { label: "Solicitado", variant: "secondary" },
-    aguardando_aprovacao: { label: "Aguardando Aprovação", variant: "outline" },
+    solicitado: { label: "Aguardando Gestor", variant: "secondary" },
+    aguardando_aprovacao: { label: "Aguardando RH", variant: "outline" },
     aprovado: { label: "Aprovado", variant: "default" },
     em_ferias: { label: "Em Férias", variant: "default" },
     concluido: { label: "Concluído", variant: "outline" },

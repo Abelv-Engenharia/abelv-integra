@@ -199,6 +199,7 @@ import DemonstrativoPrestacaoServico from "./pages/gestao-pessoas/DemonstrativoP
 import RelatoriosPrestadores from "./pages/gestao-pessoas/RelatoriosPrestadores";
 import ControleFerias from "./pages/gestao-pessoas/ControleFerias";
 import AprovacaoFerias from "./pages/gestao-pessoas/AprovacaoFerias";
+import AprovacaoFeriasRH from "./pages/gestao-pessoas/AprovacaoFeriasRH";
 import ControlePassivos from "./pages/gestao-pessoas/ControlePassivos";
 
 // === COMERCIAL - Repositório de Documentos ===
@@ -695,6 +696,11 @@ function App() {
                 <Route path="gestao-pessoas/aprovacao-ferias" element={
                   <PermissionGuard requiredPermission="gestao_pessoas_prestadores_ferias_aprovar">
                     <AprovacaoFerias />
+                  </PermissionGuard>
+                } />
+                <Route path="gestao-pessoas/aprovacao-ferias-rh" element={
+                  <PermissionGuard requiredPermission="gestao_pessoas_prestadores_ferias_aprovar_rh">
+                    <AprovacaoFeriasRH />
                   </PermissionGuard>
                 } />
                 <Route path="gestao-pessoas/controle-passivos" element={

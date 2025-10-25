@@ -7,51 +7,54 @@ import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { FeriasParaAprovacao } from "@/hooks/gestao-pessoas/useFeriasParaAprovacao";
+import { FeriasParaAprovacaoRH } from "@/hooks/gestao-pessoas/useFeriasParaAprovacaoRH";
+import { useAuth } from "@/contexts/AuthContext";
 
-interface AprovacaoFeriasModalProps {
+interface AprovacaoFeriasRHModalProps {
   aberto: boolean;
   onFechar: () => void;
-  ferias: FeriasParaAprovacao | null;
+  ferias: FeriasParaAprovacaoRH | null;
   onSucesso: () => void;
 }
 
-export function AprovacaoFeriasModal({
+export function AprovacaoFeriasRHModal({
   aberto,
   onFechar,
   ferias,
   onSucesso
-}: AprovacaoFeriasModalProps) {
+}: AprovacaoFeriasRHModalProps) {
+  const { user } = useAuth();
   const [observacoes, setObservacoes] = useState("");
   const [processando, setProcessando] = useState(false);
 
   const handleAprovar = async () => {
-    if (!ferias) return;
+    if (!ferias || !user) return;
 
     setProcessando(true);
     try {
       const { error } = await supabase
         .from('prestadores_ferias')
         .update({
-          status: 'aguardando_aprovacao',
-          observacoes_aprovacao_gestor: observacoes || null,
-          dataaprovacao_gestor: new Date().toISOString(),
-          aprovadopor_gestor: ferias.responsaveldireto
+          status: 'aprovado',
+          observacoes_aprovacao_rh: observacoes || null,
+          dataaprovacao_rh: new Date().toISOString(),
+          aprovadopor_rh_id: user.id,
+          aprovadopor_rh: user.email || user.user_metadata?.nome || 'RH'
         })
         .eq('id', ferias.id);
 
       if (error) throw error;
 
       toast({
-        title: "Férias Aprovadas pelo Gestor",
-        description: `As férias de ${ferias.nomeprestador} foram aprovadas. Aguardando aprovação do RH.`
+        title: "Férias Aprovadas pelo RH",
+        description: `As férias de ${ferias.nomeprestador} foram aprovadas com sucesso.`
       });
 
       onSucesso();
       onFechar();
       setObservacoes("");
     } catch (error) {
-      console.error('Erro ao aprovar férias:', error);
+      console.error('Erro ao aprovar férias pelo RH:', error);
       toast({
         title: "Erro",
         description: "Erro ao aprovar férias",
@@ -63,7 +66,7 @@ export function AprovacaoFeriasModal({
   };
 
   const handleReprovar = async () => {
-    if (!ferias) return;
+    if (!ferias || !user) return;
 
     if (!observacoes.trim()) {
       toast({
@@ -80,16 +83,17 @@ export function AprovacaoFeriasModal({
         .from('prestadores_ferias')
         .update({
           status: 'reprovado',
-          observacoes_aprovacao_gestor: observacoes,
-          dataaprovacao_gestor: new Date().toISOString(),
-          aprovadopor_gestor: ferias.responsaveldireto
+          observacoes_aprovacao_rh: observacoes,
+          dataaprovacao_rh: new Date().toISOString(),
+          aprovadopor_rh_id: user.id,
+          aprovadopor_rh: user.email || user.user_metadata?.nome || 'RH'
         })
         .eq('id', ferias.id);
 
       if (error) throw error;
 
       toast({
-        title: "Férias Reprovadas",
+        title: "Férias Reprovadas pelo RH",
         description: `As férias de ${ferias.nomeprestador} foram reprovadas.`
       });
 
@@ -97,7 +101,7 @@ export function AprovacaoFeriasModal({
       onFechar();
       setObservacoes("");
     } catch (error) {
-      console.error('Erro ao reprovar férias:', error);
+      console.error('Erro ao reprovar férias pelo RH:', error);
       toast({
         title: "Erro",
         description: "Erro ao reprovar férias",
@@ -112,11 +116,11 @@ export function AprovacaoFeriasModal({
 
   return (
     <Dialog open={aberto} onOpenChange={onFechar}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Aprovação de Férias</DialogTitle>
+          <DialogTitle>Aprovação de Férias - RH</DialogTitle>
           <DialogDescription>
-            Analise a solicitação de férias e tome uma decisão
+            Analise a solicitação de férias já aprovada pelo gestor e tome uma decisão
           </DialogDescription>
         </DialogHeader>
 
@@ -149,6 +153,10 @@ export function AprovacaoFeriasModal({
               <p className="text-sm font-medium text-muted-foreground">Dias de Férias</p>
               <p className="text-sm">{ferias.diasferias} dias</p>
             </div>
+            <div>
+              <p className="text-sm font-medium text-muted-foreground">Responsável Direto</p>
+              <p className="text-sm">{ferias.responsaveldireto}</p>
+            </div>
             {ferias.observacoes && (
               <div className="col-span-2">
                 <p className="text-sm font-medium text-muted-foreground">Observações do Solicitante</p>
@@ -157,16 +165,44 @@ export function AprovacaoFeriasModal({
             )}
           </div>
 
-          {/* Campo de Observações para Aprovação/Reprovação */}
+          {/* Informações da Aprovação do Gestor */}
+          <div className="p-4 bg-green-50 dark:bg-green-950/20 rounded-lg border border-green-200 dark:border-green-900">
+            <h4 className="text-sm font-semibold text-green-900 dark:text-green-100 mb-2">
+              Aprovado pelo Gestor
+            </h4>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Aprovado por</p>
+                <p className="text-sm">{ferias.aprovadopor_gestor || 'N/A'}</p>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Data de Aprovação</p>
+                <p className="text-sm">
+                  {ferias.dataaprovacao_gestor 
+                    ? format(new Date(ferias.dataaprovacao_gestor), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })
+                    : 'N/A'
+                  }
+                </p>
+              </div>
+              {ferias.observacoes_aprovacao_gestor && (
+                <div className="col-span-2">
+                  <p className="text-sm font-medium text-muted-foreground">Observações do Gestor</p>
+                  <p className="text-sm">{ferias.observacoes_aprovacao_gestor}</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Campo de Observações para Aprovação/Reprovação do RH */}
           <div className="space-y-2">
             <Label htmlFor="observacoes">
-              Observações {observacoes.trim() ? "" : "(Obrigatório para reprovação)"}
+              Observações do RH {observacoes.trim() ? "" : "(Obrigatório para reprovação)"}
             </Label>
             <Textarea
               id="observacoes"
               value={observacoes}
               onChange={(e) => setObservacoes(e.target.value)}
-              placeholder="Adicione observações sobre a decisão..."
+              placeholder="Adicione observações sobre a decisão do RH..."
               rows={4}
             />
           </div>

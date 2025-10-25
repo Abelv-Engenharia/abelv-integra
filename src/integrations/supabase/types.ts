@@ -5487,6 +5487,10 @@ export type Database = {
         Row: {
           anexos: string[] | null
           aprovadopor: string | null
+          aprovadopor_gestor: string | null
+          aprovadopor_gestor_id: string | null
+          aprovadopor_rh: string | null
+          aprovadopor_rh_id: string | null
           ativo: boolean | null
           cca_codigo: string
           cca_id: number
@@ -5495,6 +5499,8 @@ export type Database = {
           created_at: string | null
           created_by: string | null
           dataaprovacao: string | null
+          dataaprovacao_gestor: string | null
+          dataaprovacao_rh: string | null
           datainicioferias: string
           diasferias: number
           empresa: string
@@ -5503,6 +5509,8 @@ export type Database = {
           justificativareprovacao: string | null
           nomeprestador: string
           observacoes: string | null
+          observacoes_aprovacao_gestor: string | null
+          observacoes_aprovacao_rh: string | null
           periodoaquisitivo: string
           prestador_pj_id: string
           responsaveldireto: string
@@ -5515,6 +5523,10 @@ export type Database = {
         Insert: {
           anexos?: string[] | null
           aprovadopor?: string | null
+          aprovadopor_gestor?: string | null
+          aprovadopor_gestor_id?: string | null
+          aprovadopor_rh?: string | null
+          aprovadopor_rh_id?: string | null
           ativo?: boolean | null
           cca_codigo: string
           cca_id: number
@@ -5523,6 +5535,8 @@ export type Database = {
           created_at?: string | null
           created_by?: string | null
           dataaprovacao?: string | null
+          dataaprovacao_gestor?: string | null
+          dataaprovacao_rh?: string | null
           datainicioferias: string
           diasferias: number
           empresa: string
@@ -5531,6 +5545,8 @@ export type Database = {
           justificativareprovacao?: string | null
           nomeprestador: string
           observacoes?: string | null
+          observacoes_aprovacao_gestor?: string | null
+          observacoes_aprovacao_rh?: string | null
           periodoaquisitivo: string
           prestador_pj_id: string
           responsaveldireto: string
@@ -5543,6 +5559,10 @@ export type Database = {
         Update: {
           anexos?: string[] | null
           aprovadopor?: string | null
+          aprovadopor_gestor?: string | null
+          aprovadopor_gestor_id?: string | null
+          aprovadopor_rh?: string | null
+          aprovadopor_rh_id?: string | null
           ativo?: boolean | null
           cca_codigo?: string
           cca_id?: number
@@ -5551,6 +5571,8 @@ export type Database = {
           created_at?: string | null
           created_by?: string | null
           dataaprovacao?: string | null
+          dataaprovacao_gestor?: string | null
+          dataaprovacao_rh?: string | null
           datainicioferias?: string
           diasferias?: number
           empresa?: string
@@ -5559,6 +5581,8 @@ export type Database = {
           justificativareprovacao?: string | null
           nomeprestador?: string
           observacoes?: string | null
+          observacoes_aprovacao_gestor?: string | null
+          observacoes_aprovacao_rh?: string | null
           periodoaquisitivo?: string
           prestador_pj_id?: string
           responsaveldireto?: string

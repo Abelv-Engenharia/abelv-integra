@@ -420,7 +420,7 @@ export default function SidebarSectionGestaoPessoas({
                 </Collapsible>}
 
               {/* Prestadores de Serviço */}
-              {['gestao_pessoas_prestadores_dashboard', 'gestao_pessoas_prestadores_cadastrar_pj', 'gestao_pessoas_prestadores_consultar_pj', 'gestao_pessoas_prestadores_editar_pj', 'gestao_pessoas_prestadores_contratos_visualizar', 'gestao_pessoas_prestadores_contratos_criar', 'gestao_pessoas_prestadores_contratos_editar', 'gestao_pessoas_prestadores_demonstrativos', 'gestao_pessoas_prestadores_nf_emitir', 'gestao_pessoas_prestadores_nf_aprovar', 'gestao_pessoas_prestadores_ferias_controlar', 'gestao_pessoas_prestadores_ferias_aprovar', 'gestao_pessoas_prestadores_passivos', 'gestao_pessoas_prestadores_relatorios'].some(canSee) && <Collapsible open={openSubmenus.prestadores} onOpenChange={() => toggleSubmenu("prestadores")}>
+              {['gestao_pessoas_prestadores_dashboard', 'gestao_pessoas_prestadores_cadastrar_pj', 'gestao_pessoas_prestadores_consultar_pj', 'gestao_pessoas_prestadores_editar_pj', 'gestao_pessoas_prestadores_contratos_visualizar', 'gestao_pessoas_prestadores_contratos_criar', 'gestao_pessoas_prestadores_contratos_editar', 'gestao_pessoas_prestadores_demonstrativos', 'gestao_pessoas_prestadores_nf_emitir', 'gestao_pessoas_prestadores_nf_aprovar', 'gestao_pessoas_prestadores_ferias_controlar', 'gestao_pessoas_prestadores_ferias_aprovar', 'gestao_pessoas_prestadores_ferias_aprovar_rh', 'gestao_pessoas_prestadores_passivos', 'gestao_pessoas_prestadores_relatorios'].some(canSee) && <Collapsible open={openSubmenus.prestadores} onOpenChange={() => toggleSubmenu("prestadores")}>
                   <SidebarMenuItem>
                     <CollapsibleTrigger asChild>
                       <SidebarMenuButton className="w-full justify-between hover:bg-sidebar-accent">
@@ -528,7 +528,16 @@ export default function SidebarSectionGestaoPessoas({
                             <SidebarMenuButton asChild>
                               <Link to="/gestao-pessoas/aprovacao-ferias" onClick={onLinkClick}>
                                 <CheckCircle className="h-4 w-4" />
-                                <span>Aprovação Férias</span>
+                                <span>Aprovação Férias Gestor</span>
+                              </Link>
+                            </SidebarMenuButton>
+                          </SidebarMenuItem>}
+
+                        {canSee('gestao_pessoas_prestadores_ferias_aprovar_rh') && <SidebarMenuItem>
+                            <SidebarMenuButton asChild>
+                              <Link to="/gestao-pessoas/aprovacao-ferias-rh" onClick={onLinkClick}>
+                                <CheckCircle className="h-4 w-4" />
+                                <span>Aprovação Férias RH</span>
                               </Link>
                             </SidebarMenuButton>
                           </SidebarMenuItem>}
