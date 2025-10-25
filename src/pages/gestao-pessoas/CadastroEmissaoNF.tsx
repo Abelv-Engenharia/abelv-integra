@@ -108,6 +108,17 @@ const CadastroEmissaoNF = () => {
       return;
     }
 
+    // Validar campos obrigatórios
+    if (!data.dataemissao) {
+      toast.error("Data de emissão é obrigatória");
+      return;
+    }
+
+    if (!data.valor || data.valor === "") {
+      toast.error("Valor da NF é obrigatório");
+      return;
+    }
+
     // Encontrar CCA selecionada
     const ccaSelecionada = usuarioPrestador.ccasPermitidas.find(
       c => c.codigo === data.cca
@@ -120,6 +131,11 @@ const CadastroEmissaoNF = () => {
 
     // Converter valor monetário para número
     const valorNumerico = parseFloat(data.valor.replace(/\./g, '').replace(',', '.'));
+    
+    if (isNaN(valorNumerico) || valorNumerico <= 0) {
+      toast.error("Valor inválido");
+      return;
+    }
 
     try {
       await criarNFMutation.mutateAsync({
@@ -281,6 +297,22 @@ const CadastroEmissaoNF = () => {
                             disabled 
                             className="bg-muted cursor-not-allowed"
                             placeholder="Carregando..."
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>} />
+
+                  <FormField control={form.control} name="periodocontabil" render={({
+                  field
+                }) => <FormItem>
+                        <FormLabel className={!field.value ? "text-destructive" : ""}>
+                          Período Contábil *
+                        </FormLabel>
+                        <FormControl>
+                          <Input 
+                            {...field} 
+                            placeholder="MM/YYYY (ex: 10/2025)"
+                            className={!field.value ? "border-destructive" : ""}
                           />
                         </FormControl>
                         <FormMessage />
