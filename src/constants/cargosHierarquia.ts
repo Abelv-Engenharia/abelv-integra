@@ -2,8 +2,8 @@ export enum CargoHierarquia {
   TECNICO = 1,
   ANALISTA = 2,
   LIDER = 3,
-  COORDENADOR = 4,
-  SUPERVISOR = 5,
+  SUPERVISOR = 4,
+  COORDENADOR = 5,
   GERENTE = 6,
   SUPERINTENDENTE = 7,
   DIRETOR = 8
@@ -20,12 +20,12 @@ export const HIERARQUIA_CARGOS: Record<string, number> = {
   // Líderes
   "Líder de Segurança do Trabalho": CargoHierarquia.LIDER,
   
+  // Supervisores
+  "Supervisora administrativa": CargoHierarquia.SUPERVISOR,
+  
   // Coordenadores
   "Coordenador de SMS": CargoHierarquia.COORDENADOR,
   "Engenheiro de Segurança do Trabalho": CargoHierarquia.COORDENADOR,
-  
-  // Supervisores
-  "Supervisora administrativa": CargoHierarquia.SUPERVISOR,
   
   // Gerentes
   "Gerente": CargoHierarquia.GERENTE,
