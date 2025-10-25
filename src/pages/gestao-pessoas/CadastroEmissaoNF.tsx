@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -12,7 +12,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
-import { CalendarIcon, Check, FileText, Save } from "lucide-react";
+import { CalendarIcon, Check, FileText, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import NFUploadField from "@/components/gestao-pessoas/nf/NFUploadField";
@@ -21,6 +21,10 @@ import { StatusBadgeNF } from "@/components/gestao-pessoas/nf/StatusBadgeNF";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import * as XLSX from "xlsx";
+import { useAuth } from "@/contexts/AuthContext";
+import { useUsuarioPrestador } from "@/hooks/gestao-pessoas/useUsuarioPrestador";
+import { notasFiscaisService } from "@/services/gestao-pessoas/notasFiscaisService";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 const formSchema = z.object({
   nomeempresa: z.string().min(1, "Nome da empresa é obrigatório"),
   nomerepresentante: z.string().min(1, "Nome do representante é obrigatório"),
@@ -37,39 +41,32 @@ const formSchema = z.object({
   })
 });
 const CadastroEmissaoNF = () => {
-  const [notasFiscais, setNotasFiscais] = useState<NotaFiscal[]>([{
-    id: "1",
-    numero: "000123",
-    nomeempresa: "Construtora ABC Ltda",
-    nomerepresentante: "João Silva",
-    periodocontabil: "01/2024",
-    cca: "CC-001",
-    dataemissao: "2024-01-15",
-    descricaoservico: "Serviços de construção civil - Fase 1",
-    valor: 15000.0,
-    arquivo: null,
-    arquivonome: "nf-000123.pdf",
-    status: "Enviado",
-    criadoem: "2024-01-15 10:30",
-    dataenviosienge: "2024-01-15 14:30"
-  }, {
-    id: "2",
-    numero: "000124",
-    nomeempresa: "Serviços XYZ S.A.",
-    nomerepresentante: "Maria Santos",
-    periodocontabil: "01/2024",
-    cca: "CC-002",
-    dataemissao: "2024-01-18",
-    descricaoservico: "Manutenção de equipamentos",
-    valor: 8500.0,
-    arquivo: null,
-    arquivonome: "nf-000124.pdf",
-    status: "Aprovado",
-    criadoem: "2024-01-18 09:15"
-  }]);
+  const { user } = useAuth();
+  const { data: usuarioPrestador, isLoading: loadingPrestador } = useUsuarioPrestador();
+  const queryClient = useQueryClient();
   const [filtroStatus, setFiltroStatus] = useState<string>("Todos");
-  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const [pendingSubmit, setPendingSubmit] = useState<z.infer<typeof formSchema> | null>(null);
+
+  // Query para listar NFs
+  const { data: notasFiscais = [], isLoading: loadingNFs } = useQuery({
+    queryKey: ['notas-fiscais-prestador', user?.id],
+    queryFn: notasFiscaisService.listar,
+    enabled: !!user,
+    refetchInterval: 30000
+  });
+
+  // Mutation para criar NF
+  const criarNFMutation = useMutation({
+    mutationFn: notasFiscaisService.criar,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['notas-fiscais-prestador'] });
+      toast.success("Nota fiscal cadastrada com sucesso!");
+      form.reset();
+    },
+    onError: (error: any) => {
+      console.error('Erro ao cadastrar NF:', error);
+      toast.error(`Erro ao cadastrar NF: ${error.message}`);
+    }
+  });
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -83,85 +80,120 @@ const CadastroEmissaoNF = () => {
       arquivo: null
     }
   });
-  const onSubmit = (data: z.infer<typeof formSchema>) => {
-    setPendingSubmit(data);
-    setShowConfirmDialog(true);
-  };
-  const enviarParaSienge = async () => {
-    if (!pendingSubmit) return;
 
-    // Simulação de envio para Sienge
-    const sucesso = Math.random() > 0.2; // 80% de sucesso
-
-    if (sucesso) {
-      const novaNF: NotaFiscal = {
-        id: Date.now().toString(),
-        numero: pendingSubmit.numero,
-        nomeempresa: pendingSubmit.nomeempresa,
-        nomerepresentante: pendingSubmit.nomerepresentante,
-        periodocontabil: pendingSubmit.periodocontabil,
-        cca: pendingSubmit.cca,
-        dataemissao: format(pendingSubmit.dataemissao, "yyyy-MM-dd"),
-        descricaoservico: pendingSubmit.descricaoservico,
-        valor: pendingSubmit.valor,
-        arquivo: pendingSubmit.arquivo,
-        arquivonome: pendingSubmit.arquivo?.name,
-        status: "Enviado",
-        criadoem: format(new Date(), "yyyy-MM-dd HH:mm"),
-        dataenviosienge: format(new Date(), "yyyy-MM-dd HH:mm")
-      };
-      setNotasFiscais([novaNF, ...notasFiscais]);
-      toast.success("NF aprovada e enviada para o Sienge com sucesso!");
-      form.reset();
-    } else {
-      const novaNF: NotaFiscal = {
-        id: Date.now().toString(),
-        numero: pendingSubmit.numero,
-        nomeempresa: pendingSubmit.nomeempresa,
-        nomerepresentante: pendingSubmit.nomerepresentante,
-        periodocontabil: pendingSubmit.periodocontabil,
-        cca: pendingSubmit.cca,
-        dataemissao: format(pendingSubmit.dataemissao, "yyyy-MM-dd"),
-        descricaoservico: pendingSubmit.descricaoservico,
-        valor: pendingSubmit.valor,
-        arquivo: pendingSubmit.arquivo,
-        arquivonome: pendingSubmit.arquivo?.name,
-        status: "Erro",
-        criadoem: format(new Date(), "yyyy-MM-dd HH:mm"),
-        mensagemerro: "Falha na conexão com Sienge. Tente novamente."
-      };
-      setNotasFiscais([novaNF, ...notasFiscais]);
-      toast.error("Erro ao enviar NF para o Sienge. Tente novamente.");
+  // Preencher campos automaticamente quando os dados do prestador estiverem disponíveis
+  useEffect(() => {
+    if (usuarioPrestador) {
+      form.setValue('nomeempresa', usuarioPrestador.nomeEmpresa);
+      form.setValue('nomerepresentante', usuarioPrestador.nomeRepresentante);
+      
+      // Se houver apenas 1 CCA, preencher automaticamente
+      if (usuarioPrestador.ccasPermitidas.length === 1) {
+        const cca = usuarioPrestador.ccasPermitidas[0];
+        form.setValue('cca', cca.codigo);
+      } else if (usuarioPrestador.ccaPrincipal) {
+        // Caso contrário, usar CCA principal do prestador
+        form.setValue('cca', usuarioPrestador.ccaPrincipal.codigo);
+      }
     }
-    setShowConfirmDialog(false);
-    setPendingSubmit(null);
-  };
-  const salvarRascunho = () => {
-    const data = form.getValues();
-    if (!data.nomeempresa || !data.numero) {
-      toast.error("Preencha os campos obrigatórios antes de salvar o rascunho");
+  }, [usuarioPrestador, form]);
+  const onSubmit = async (data: z.infer<typeof formSchema>) => {
+    if (!usuarioPrestador) {
+      toast.error("Erro: dados do prestador não encontrados");
       return;
     }
-    const novaNF: NotaFiscal = {
-      id: Date.now().toString(),
-      numero: data.numero,
-      nomeempresa: data.nomeempresa,
-      nomerepresentante: data.nomerepresentante,
-      periodocontabil: data.periodocontabil,
-      cca: data.cca,
-      dataemissao: data.dataemissao ? format(data.dataemissao, "yyyy-MM-dd") : "",
-      descricaoservico: data.descricaoservico,
-      valor: data.valor,
-      arquivo: data.arquivo,
-      arquivonome: data.arquivo?.name,
-      status: "Rascunho",
-      criadoem: format(new Date(), "yyyy-MM-dd HH:mm")
-    };
-    setNotasFiscais([novaNF, ...notasFiscais]);
-    toast.success("Rascunho salvo com sucesso!");
-    form.reset();
+
+    // Encontrar CCA selecionada
+    const ccaSelecionada = usuarioPrestador.ccasPermitidas.find(
+      c => c.codigo === data.cca
+    );
+
+    if (!ccaSelecionada) {
+      toast.error("CCA inválida selecionada");
+      return;
+    }
+
+    try {
+      await criarNFMutation.mutateAsync({
+        prestadorPjId: usuarioPrestador.prestadorPjId,
+        nomeEmpresa: data.nomeempresa,
+        nomeRepresentante: data.nomerepresentante,
+        periodoContabil: data.periodocontabil,
+        ccaId: ccaSelecionada.id,
+        ccaCodigo: ccaSelecionada.codigo,
+        ccaNome: ccaSelecionada.nome,
+        numero: data.numero,
+        dataEmissao: format(data.dataemissao, 'yyyy-MM-dd'),
+        descricaoServico: data.descricaoservico,
+        valor: data.valor,
+        arquivo: data.arquivo!
+      });
+    } catch (error) {
+      // Erro já tratado no onError da mutation
+    }
   };
   const nfsFiltradas = notasFiscais.filter(nf => filtroStatus === "Todos" || nf.status === filtroStatus);
+
+  // Validação de acesso
+  if (loadingPrestador) {
+    return (
+      <div className="container mx-auto p-6">
+        <Card>
+          <CardContent className="py-10">
+            <div className="text-center">
+              <p className="text-muted-foreground">Carregando dados do prestador...</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (!usuarioPrestador) {
+    return (
+      <div className="container mx-auto p-6">
+        <Card>
+          <CardContent className="py-10">
+            <div className="text-center space-y-4">
+              <AlertCircle className="h-12 w-12 text-destructive mx-auto" />
+              <div>
+                <h3 className="font-semibold text-lg">Acesso Negado</h3>
+                <p className="text-muted-foreground mt-2">
+                  Você não está vinculado a nenhum prestador de serviço PJ.
+                </p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Entre em contato com o administrador do sistema.
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (usuarioPrestador.ccasPermitidas.length === 0) {
+    return (
+      <div className="container mx-auto p-6">
+        <Card>
+          <CardContent className="py-10">
+            <div className="text-center space-y-4">
+              <AlertCircle className="h-12 w-12 text-yellow-500 mx-auto" />
+              <div>
+                <h3 className="font-semibold text-lg">Nenhum CCA Vinculado</h3>
+                <p className="text-muted-foreground mt-2">
+                  Você não possui CCAs vinculados ao seu usuário.
+                </p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Entre em contato com o administrador do sistema.
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
   const exportarParaExcel = () => {
     const dados = nfsFiltradas.map(nf => ({
       "Número NF": nf.numero,
@@ -204,11 +236,14 @@ const CadastroEmissaoNF = () => {
                   <FormField control={form.control} name="nomeempresa" render={({
                   field
                 }) => <FormItem>
-                        <FormLabel className={!field.value ? "text-destructive" : ""}>
-                          Nome da Empresa *
-                        </FormLabel>
+                        <FormLabel>Nome da Empresa</FormLabel>
                         <FormControl>
-                          <Input {...field} placeholder="Ex: Construtora ABC Ltda" className={!field.value ? "border-destructive" : ""} />
+                          <Input 
+                            {...field} 
+                            disabled 
+                            className="bg-muted cursor-not-allowed"
+                            placeholder="Carregando..."
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>} />
@@ -216,11 +251,14 @@ const CadastroEmissaoNF = () => {
                   <FormField control={form.control} name="nomerepresentante" render={({
                   field
                 }) => <FormItem>
-                        <FormLabel className={!field.value ? "text-destructive" : ""}>
-                          Nome do Representante *
-                        </FormLabel>
+                        <FormLabel>Nome do Representante</FormLabel>
                         <FormControl>
-                          <Input {...field} placeholder="Ex: João Silva" className={!field.value ? "border-destructive" : ""} />
+                          <Input 
+                            {...field} 
+                            disabled 
+                            className="bg-muted cursor-not-allowed"
+                            placeholder="Carregando..."
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>} />
@@ -232,9 +270,32 @@ const CadastroEmissaoNF = () => {
                         <FormLabel className={!field.value ? "text-destructive" : ""}>
                           CCA *
                         </FormLabel>
-                        <FormControl>
-                          <Input {...field} placeholder="Ex: CC-001" className={!field.value ? "border-destructive" : ""} />
-                        </FormControl>
+                        <Select 
+                          onValueChange={field.onChange} 
+                          value={field.value}
+                          disabled={loadingPrestador || !usuarioPrestador}
+                        >
+                          <FormControl>
+                            <SelectTrigger className={!field.value ? "border-destructive" : ""}>
+                              <SelectValue 
+                                placeholder={
+                                  loadingPrestador 
+                                    ? "Carregando CCAs..." 
+                                    : usuarioPrestador?.ccasPermitidas.length === 0
+                                      ? "Nenhum CCA disponível"
+                                      : "Selecione o CCA"
+                                } 
+                              />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {usuarioPrestador?.ccasPermitidas.map((cca) => (
+                              <SelectItem key={cca.id} value={cca.codigo}>
+                                {cca.codigo} - {cca.nome}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                         <FormMessage />
                       </FormItem>} />
 
@@ -359,7 +420,13 @@ const CadastroEmissaoNF = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {nfsFiltradas.length === 0 ? <TableRow>
+                  {loadingNFs ? (
+                    <TableRow>
+                      <TableCell colSpan={7} className="text-center py-8">
+                        Carregando...
+                      </TableCell>
+                    </TableRow>
+                  ) : nfsFiltradas.length === 0 ? <TableRow>
                       <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
                         Nenhuma nota fiscal encontrada
                       </TableCell>
@@ -387,27 +454,6 @@ const CadastroEmissaoNF = () => {
               </div>}
           </CardContent>
         </Card>
-
-        {/* Diálogo de Confirmação */}
-        <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Confirmar Envio para Sienge</AlertDialogTitle>
-              <AlertDialogDescription>
-                Tem certeza que deseja aprovar e enviar esta nota fiscal para o Sienge?
-                Esta ação não poderá ser desfeita.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel onClick={() => setPendingSubmit(null)}>
-                Cancelar
-              </AlertDialogCancel>
-              <AlertDialogAction onClick={enviarParaSienge}>
-                Confirmar Envio
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
       </div>;
 };
 export default CadastroEmissaoNF;
