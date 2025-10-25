@@ -49,9 +49,6 @@ const formSchema = z.object({
   }),
   cca: z.string().min(1, "CCA é obrigatório"),
   planofinanceiro: z.string().min(1, "Plano financeiro é obrigatório"),
-  statusaprovacao: z.enum(["Pendente", "Aprovado", "Reprovado"], {
-    required_error: "Status é obrigatório",
-  }),
   observacoesaprovacao: z.string().optional(),
 });
 
@@ -76,7 +73,6 @@ export function EditarNFModal({ open, onClose, notaFiscal, onSave }: EditarNFMod
       datavencimento: notaFiscal?.datavencimento ? new Date(notaFiscal.datavencimento + 'T00:00:00') : undefined,
       cca: notaFiscal?.cca || "",
       planofinanceiro: notaFiscal?.planofinanceiro || "2.02.01.21 - Salários / Remunerações - PJ",
-      statusaprovacao: notaFiscal?.statusaprovacao || "Pendente",
       observacoesaprovacao: notaFiscal?.observacoesaprovacao || "",
     },
   });
@@ -123,7 +119,6 @@ export function EditarNFModal({ open, onClose, notaFiscal, onSave }: EditarNFMod
           datavencimento: notaFiscal.datavencimento ? new Date(notaFiscal.datavencimento + 'T00:00:00') : undefined,
           cca: notaFiscal.cca || "",
           planofinanceiro: notaFiscal.planofinanceiro || "2.02.01.21 - Salários / Remunerações - PJ",
-          statusaprovacao: notaFiscal.statusaprovacao || "Pendente",
           observacoesaprovacao: notaFiscal.observacoesaprovacao || "",
         });
       }
@@ -134,49 +129,80 @@ export function EditarNFModal({ open, onClose, notaFiscal, onSave }: EditarNFMod
 
   if (!notaFiscal) return null;
 
-  const onSubmit = (data: FormData) => {
+  const handleAprovar = async () => {
+    // Validar campos obrigatórios do formulário
+    const isValid = await form.trigger();
+    if (!isValid) {
+      toast.error("Preencha todos os campos obrigatórios antes de aprovar");
+      return;
+    }
+
+    const formValues = form.getValues();
+    
+    // Buscar usuário atual
+    const { data: { user } } = await supabase.auth.getUser();
+    
     const updatedNF: NotaFiscal = {
       ...notaFiscal,
-      nomeempresa: data.nomeempresa,
-      nomerepresentante: data.nomerepresentante,
-      periodocontabil: data.periodocontabil,
-      dataemissao: data.dataemissao.toISOString().split('T')[0],
-      descricaoservico: data.descricaoservico,
-      valor: data.valor,
-      tipodocumento: data.tipodocumento,
-      empresadestino: data.empresadestino,
-      numerocredor: data.numerocredor,
-      datavencimento: data.datavencimento.toISOString().split('T')[0],
-      cca: data.cca,
-      planofinanceiro: data.planofinanceiro,
-      statusaprovacao: data.statusaprovacao,
-      observacoesaprovacao: data.observacoesaprovacao,
-      status: data.statusaprovacao === "Aprovado" ? "Aprovado" : data.statusaprovacao === "Reprovado" ? "Reprovado" : "Aguardando Aprovação",
-      atualizadoem: new Date().toLocaleString('pt-BR'),
-      ...(data.statusaprovacao !== "Pendente" && {
-        aprovadopor: "Usuário Atual",
-        dataaprovacao: new Date().toLocaleString('pt-BR'),
-      }),
+      nomeempresa: formValues.nomeempresa,
+      nomerepresentante: formValues.nomerepresentante,
+      periodocontabil: formValues.periodocontabil,
+      dataemissao: formValues.dataemissao.toISOString().split('T')[0],
+      descricaoservico: formValues.descricaoservico,
+      valor: formValues.valor,
+      tipodocumento: formValues.tipodocumento,
+      empresadestino: formValues.empresadestino,
+      numerocredor: formValues.numerocredor,
+      datavencimento: formValues.datavencimento.toISOString().split('T')[0],
+      cca: formValues.cca,
+      planofinanceiro: formValues.planofinanceiro,
+      statusaprovacao: "Aprovado",
+      observacoesaprovacao: formValues.observacoesaprovacao,
+      status: "Aprovado",
+      aprovadopor: user?.email || "Usuário Atual",
+      dataaprovacao: new Date().toISOString(),
+      atualizadoem: new Date().toISOString(),
     };
 
     onSave(updatedNF);
-    toast.success("Nota Fiscal atualizada com sucesso");
     onClose();
   };
 
-  const handleAprovar = () => {
-    form.setValue("statusaprovacao", "Aprovado");
-    form.handleSubmit(onSubmit)();
-  };
-
-  const handleReprovar = () => {
+  const handleReprovar = async () => {
     const observacoes = form.getValues("observacoesaprovacao");
     if (!observacoes || observacoes.trim() === "") {
+      form.setError("observacoesaprovacao", {
+        type: "manual",
+        message: "Observações são obrigatórias para reprovar"
+      });
       toast.error("Para reprovar, as observações são obrigatórias");
       return;
     }
-    form.setValue("statusaprovacao", "Reprovado");
-    form.handleSubmit(onSubmit)();
+
+    const formValues = form.getValues();
+    
+    const updatedNF: NotaFiscal = {
+      ...notaFiscal,
+      nomeempresa: formValues.nomeempresa,
+      nomerepresentante: formValues.nomerepresentante,
+      periodocontabil: formValues.periodocontabil,
+      dataemissao: formValues.dataemissao.toISOString().split('T')[0],
+      descricaoservico: formValues.descricaoservico,
+      valor: formValues.valor,
+      tipodocumento: formValues.tipodocumento,
+      empresadestino: formValues.empresadestino,
+      numerocredor: formValues.numerocredor,
+      datavencimento: formValues.datavencimento.toISOString().split('T')[0],
+      cca: formValues.cca,
+      planofinanceiro: formValues.planofinanceiro,
+      statusaprovacao: "Reprovado",
+      observacoesaprovacao: observacoes,
+      status: "Reprovado",
+      atualizadoem: new Date().toISOString(),
+    };
+
+    onSave(updatedNF);
+    onClose();
   };
 
   const handleDownload = () => {
@@ -198,7 +224,7 @@ export function EditarNFModal({ open, onClose, notaFiscal, onSave }: EditarNFMod
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <div className="space-y-6">
             {/* Dados da Emissão - Editáveis */}
             <div className="space-y-4 bg-muted/30 p-4 rounded-lg">
               <h3 className="text-lg font-semibold">Dados da Emissão</h3>
@@ -512,31 +538,6 @@ export function EditarNFModal({ open, onClose, notaFiscal, onSave }: EditarNFMod
 
                 <FormField
                   control={form.control}
-                  name="statusaprovacao"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className={!field.value ? "text-destructive" : ""}>
-                        Status da Aprovação *
-                      </FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <FormControl>
-                          <SelectTrigger className={!field.value ? "border-destructive" : ""}>
-                            <SelectValue placeholder="Selecione" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="Pendente">Pendente</SelectItem>
-                          <SelectItem value="Aprovado">Aprovado</SelectItem>
-                          <SelectItem value="Reprovado">Reprovado</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
                   name="observacoesaprovacao"
                   render={({ field }) => (
                     <FormItem className="col-span-2">
@@ -560,9 +561,6 @@ export function EditarNFModal({ open, onClose, notaFiscal, onSave }: EditarNFMod
               <Button type="button" variant="outline" onClick={onClose}>
                 Cancelar
               </Button>
-              <Button type="submit" variant="default">
-                Salvar Alterações
-              </Button>
               <Button type="button" variant="default" onClick={handleAprovar} className="bg-green-600 hover:bg-green-700">
                 <Check className="mr-2 h-4 w-4" />
                 Aprovar
@@ -572,7 +570,7 @@ export function EditarNFModal({ open, onClose, notaFiscal, onSave }: EditarNFMod
                 Reprovar
               </Button>
             </div>
-          </form>
+          </div>
         </Form>
       </DialogContent>
     </Dialog>

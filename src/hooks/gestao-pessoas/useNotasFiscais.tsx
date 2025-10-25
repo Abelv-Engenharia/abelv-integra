@@ -172,6 +172,7 @@ export function useAprovarNotaFiscal() {
       const { data, error } = await supabase
         .from("prestadores_notas_fiscais")
         .update({
+          status: "aprovado",
           statusaprovacao: "Aprovado",
           aprovadopor: aprovadoPor,
           dataaprovacao: new Date().toISOString(),
@@ -202,6 +203,7 @@ export function useReprovarNotaFiscal() {
       const { data, error } = await supabase
         .from("prestadores_notas_fiscais")
         .update({
+          status: "reprovado",
           statusaprovacao: "Reprovado",
           observacoesaprovacao: motivo,
         })
