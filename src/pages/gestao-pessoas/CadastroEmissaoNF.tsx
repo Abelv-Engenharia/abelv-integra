@@ -102,6 +102,16 @@ const CadastroEmissaoNF = () => {
       }
     }
   }, [usuarioPrestador, form]);
+
+  // Preencher período contábil automaticamente baseado na data de emissão
+  const dataemissao = form.watch("dataemissao");
+  useEffect(() => {
+    if (dataemissao) {
+      const mes = String(dataemissao.getMonth() + 1).padStart(2, '0');
+      const ano = dataemissao.getFullYear();
+      form.setValue("periodocontabil", `${mes}/${ano}`);
+    }
+  }, [dataemissao, form]);
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
     if (!usuarioPrestador) {
       toast.error("Erro: dados do prestador não encontrados");
@@ -305,14 +315,13 @@ const CadastroEmissaoNF = () => {
                   <FormField control={form.control} name="periodocontabil" render={({
                   field
                 }) => <FormItem>
-                        <FormLabel className={!field.value ? "text-destructive" : ""}>
-                          Período Contábil *
-                        </FormLabel>
+                        <FormLabel>Período Contábil</FormLabel>
                         <FormControl>
                           <Input 
                             {...field} 
-                            placeholder="MM/YYYY (ex: 10/2025)"
-                            className={!field.value ? "border-destructive" : ""}
+                            disabled
+                            placeholder="Será preenchido automaticamente"
+                            className="bg-muted cursor-not-allowed"
                           />
                         </FormControl>
                         <FormMessage />
