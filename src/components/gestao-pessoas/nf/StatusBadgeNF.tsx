@@ -6,8 +6,30 @@ interface StatusBadgeNFProps {
 }
 
 export function StatusBadgeNF({ status }: StatusBadgeNFProps) {
+  // Normalizar o status para garantir capitalização correta
+  const normalizeStatus = (status: string): NotaFiscal["status"] => {
+    const statusLower = status.toLowerCase();
+    switch (statusLower) {
+      case "rascunho":
+        return "Rascunho";
+      case "aguardando aprovação":
+      case "aguardando_aprovacao":
+        return "Aguardando Aprovação";
+      case "aprovado":
+        return "Aprovado";
+      case "reprovado":
+        return "Reprovado";
+      case "erro":
+        return "Erro";
+      default:
+        return status as NotaFiscal["status"];
+    }
+  };
+
+  const normalizedStatus = normalizeStatus(status);
+
   const getStatusColor = () => {
-    switch (status) {
+    switch (normalizedStatus) {
       case "Rascunho":
         return "bg-yellow-500/10 text-yellow-600 border-yellow-500/20";
       case "Aguardando Aprovação":
@@ -25,7 +47,7 @@ export function StatusBadgeNF({ status }: StatusBadgeNFProps) {
 
   return (
     <Badge variant="outline" className={getStatusColor()}>
-      {status}
+      {normalizedStatus}
     </Badge>
   );
 }
