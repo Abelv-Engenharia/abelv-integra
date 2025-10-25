@@ -501,7 +501,7 @@ export default function SidebarSectionGestaoPessoas({
                             <SidebarMenuButton asChild>
                               <Link to="/gestao-pessoas/cadastro-emissao-nf" onClick={onLinkClick}>
                                 <FilePlus className="h-4 w-4" />
-                                <span>Cadastro Emissão Nf</span>
+                                <span>Cadastro Emissão NF</span>
                               </Link>
                             </SidebarMenuButton>
                           </SidebarMenuItem>}
