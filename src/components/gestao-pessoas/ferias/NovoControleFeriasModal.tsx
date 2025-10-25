@@ -19,6 +19,7 @@ import { useUsuarioPrestador } from "@/hooks/gestao-pessoas/useUsuarioPrestador"
 import { useResponsaveisSuperiores } from "@/hooks/gestao-pessoas/useResponsaveisSuperiores";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useQueryClient } from "@tanstack/react-query";
 
 const feriasSchema = z.object({
   nomeEmpresa: z.string().min(1, "Nome da empresa é obrigatório"),
@@ -44,6 +45,7 @@ export function NovoControleFeriasModal({
   aberto,
   onFechar
 }: NovoControleFeriasModalProps) {
+  const queryClient = useQueryClient();
   const { data: prestadorData, isLoading: loadingPrestador } = useUsuarioPrestador();
   const [ccaSelecionadoId, setCcaSelecionadoId] = useState<number | undefined>(undefined);
   
@@ -181,6 +183,10 @@ export function NovoControleFeriasModal({
         title: "Sucesso",
         description: "Solicitação de férias registrada com sucesso!"
       });
+      
+      // Invalidar cache para atualizar o histórico
+      queryClient.invalidateQueries({ queryKey: ['ferias-usuario'] });
+      
       form.reset();
       onFechar();
     } catch (error) {
