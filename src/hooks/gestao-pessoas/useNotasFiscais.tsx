@@ -258,6 +258,7 @@ function mapNotaFiscalFromDB(data: any): NotaFiscal {
     valor: data.valor,
     arquivo: null,
     arquivonome: data.arquivo_nome,
+    arquivourl: data.arquivo_url,
     tipodocumento: data.tipodocumento,
     empresadestino: data.empresadestino,
     numerocredor: data.numerocredor,
