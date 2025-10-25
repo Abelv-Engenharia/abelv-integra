@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -43,8 +43,14 @@ export function NovoControleFeriasModal({
   onFechar
 }: NovoControleFeriasModalProps) {
   const { data: prestadorData, isLoading: loadingPrestador } = useUsuarioPrestador();
-  const ccaId = prestadorData?.ccaPrincipal?.id;
+  const [ccaSelecionadoId, setCcaSelecionadoId] = useState<number | undefined>(undefined);
+  
+  // Usar CCA selecionado ou CCA principal
+  const ccaId = ccaSelecionadoId || prestadorData?.ccaPrincipal?.id;
   const { data: responsaveisSuperiores = [], isLoading: loadingResponsaveis } = useResponsaveisSuperiores(ccaId);
+  
+  // Verificar se o usuário tem múltiplos CCAs
+  const temMultiplosCcas = (prestadorData?.ccasPermitidas?.length || 0) > 1;
 
   const form = useForm<FeriasFormData>({
     resolver: zodResolver(feriasSchema),
@@ -66,7 +72,10 @@ export function NovoControleFeriasModal({
       form.setValue('nomeRepresentante', prestadorData.nomeRepresentante);
       form.setValue('funcao', prestadorData.funcao);
       if (prestadorData.ccaPrincipal) {
-        form.setValue('cca', `${prestadorData.ccaPrincipal.codigo} - ${prestadorData.ccaPrincipal.nome}`);
+        const ccaValue = `${prestadorData.ccaPrincipal.codigo} - ${prestadorData.ccaPrincipal.nome}`;
+        form.setValue('cca', ccaValue);
+        // Resetar CCA selecionado ao abrir o modal
+        setCcaSelecionadoId(prestadorData.ccaPrincipal.id);
       }
     }
   }, [prestadorData, aberto, form]);
@@ -145,7 +154,7 @@ export function NovoControleFeriasModal({
                 )}
               />
 
-              {/* CCA - Preenchido automaticamente */}
+              {/* CCA - Select se múltiplos CCAs, Input disabled se apenas 1 */}
               <FormField
                 control={form.control}
                 name="cca"
@@ -155,7 +164,35 @@ export function NovoControleFeriasModal({
                       CCA *
                     </FormLabel>
                     <FormControl>
-                      <Input {...field} disabled className="bg-muted" />
+                      {temMultiplosCcas ? (
+                        <Select
+                          onValueChange={(value) => {
+                            const ccaSelecionado = prestadorData?.ccasPermitidas.find(
+                              (cca) => cca.id.toString() === value
+                            );
+                            if (ccaSelecionado) {
+                              field.onChange(`${ccaSelecionado.codigo} - ${ccaSelecionado.nome}`);
+                              setCcaSelecionadoId(ccaSelecionado.id);
+                              // Limpar responsável direto ao mudar CCA
+                              form.setValue('responsavelDireto', '');
+                            }
+                          }}
+                          value={ccaSelecionadoId?.toString()}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione o CCA" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {prestadorData?.ccasPermitidas.map((cca) => (
+                              <SelectItem key={cca.id} value={cca.id.toString()}>
+                                {cca.codigo} - {cca.nome}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <Input {...field} disabled className="bg-muted" />
+                      )}
                     </FormControl>
                     <FormMessage />
                   </FormItem>
