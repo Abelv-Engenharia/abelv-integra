@@ -12,6 +12,7 @@ interface UsuarioPrestadorData {
   prestadorPjId: string;
   nomeEmpresa: string;
   nomeRepresentante: string;
+  numeroCredorSienge: string;
   ccaPrincipal: CCAData | null;
   ccasPermitidas: CCAData[];
 }
@@ -27,7 +28,7 @@ export const useUsuarioPrestador = () => {
       // Buscar prestador PJ vinculado ao usuário
       const { data: prestador, error: prestadorError } = await supabase
         .from('prestadores_pj')
-        .select('id, razaosocial, nomecompleto, cca_id, cca_codigo, cca_nome')
+        .select('id, razaosocial, nomecompleto, numerocredorsienge, cca_id, cca_codigo, cca_nome')
         .eq('usuario_sistema_id', user.id)
         .eq('ativo', true)
         .single();
@@ -77,6 +78,7 @@ export const useUsuarioPrestador = () => {
         prestadorPjId: prestador.id,
         nomeEmpresa: prestador.razaosocial || '',
         nomeRepresentante: prestador.nomecompleto || '',
+        numeroCredorSienge: prestador.numerocredorsienge || '',
         ccaPrincipal,
         ccasPermitidas
       };

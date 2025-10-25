@@ -28,14 +28,16 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 const formSchema = z.object({
   nomeempresa: z.string().min(1, "Nome da empresa é obrigatório"),
   nomerepresentante: z.string().min(1, "Nome do representante é obrigatório"),
+  numerocredorsienge: z.string().min(1, "N° Credor Sienge é obrigatório"),
   periodocontabil: z.string().min(1, "Período contábil é obrigatório"),
   cca: z.string().min(1, "CCA é obrigatório"),
   numero: z.string().min(1, "Número da NF é obrigatório"),
   dataemissao: z.date({
     required_error: "Data de emissão é obrigatória"
   }),
+  dataemissaomanual: z.string().optional(),
   descricaoservico: z.string().min(1, "Descrição do serviço é obrigatória"),
-  valor: z.number().min(0.01, "Valor deve ser maior que zero"),
+  valor: z.string().min(1, "Valor deve ser maior que zero"),
   arquivo: z.instanceof(File).nullable().refine(file => file !== null, {
     message: "Arquivo da NF é obrigatório"
   })
@@ -72,10 +74,12 @@ const CadastroEmissaoNF = () => {
     defaultValues: {
       nomeempresa: "",
       nomerepresentante: "",
+      numerocredorsienge: "",
       periodocontabil: "",
       cca: "",
       numero: "",
-      valor: 0,
+      dataemissaomanual: "",
+      valor: "",
       descricaoservico: "",
       arquivo: null
     }
@@ -86,6 +90,7 @@ const CadastroEmissaoNF = () => {
     if (usuarioPrestador) {
       form.setValue('nomeempresa', usuarioPrestador.nomeEmpresa);
       form.setValue('nomerepresentante', usuarioPrestador.nomeRepresentante);
+      form.setValue('numerocredorsienge', usuarioPrestador.numeroCredorSienge);
       
       // Se houver apenas 1 CCA, preencher automaticamente
       if (usuarioPrestador.ccasPermitidas.length === 1) {
@@ -113,6 +118,9 @@ const CadastroEmissaoNF = () => {
       return;
     }
 
+    // Converter valor monetário para número
+    const valorNumerico = parseFloat(data.valor.replace(/\./g, '').replace(',', '.'));
+
     try {
       await criarNFMutation.mutateAsync({
         prestadorPjId: usuarioPrestador.prestadorPjId,
@@ -125,7 +133,7 @@ const CadastroEmissaoNF = () => {
         numero: data.numero,
         dataEmissao: format(data.dataemissao, 'yyyy-MM-dd'),
         descricaoServico: data.descricaoservico,
-        valor: data.valor,
+        valor: valorNumerico,
         arquivo: data.arquivo!
       });
     } catch (error) {
@@ -263,6 +271,21 @@ const CadastroEmissaoNF = () => {
                         <FormMessage />
                       </FormItem>} />
 
+                  <FormField control={form.control} name="numerocredorsienge" render={({
+                  field
+                }) => <FormItem>
+                        <FormLabel>N° Credor Sienge</FormLabel>
+                        <FormControl>
+                          <Input 
+                            {...field} 
+                            disabled 
+                            className="bg-muted cursor-not-allowed"
+                            placeholder="Carregando..."
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>} />
+
 
                   <FormField control={form.control} name="cca" render={({
                   field
@@ -317,30 +340,64 @@ const CadastroEmissaoNF = () => {
                         <FormLabel className={!field.value ? "text-destructive" : ""}>
                           Data de Emissão *
                         </FormLabel>
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <FormControl>
-                              <Button variant="outline" className={cn("w-full pl-3 text-left font-normal", !field.value && "text-muted-foreground border-destructive")}>
-                                {field.value ? format(field.value, "dd/MM/yyyy") : <span>Selecione a data</span>}
-                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                        <div className="flex gap-2">
+                          <FormControl>
+                            <Input 
+                              type="date"
+                              value={field.value ? format(field.value, 'yyyy-MM-dd') : ''}
+                              onChange={(e) => {
+                                const date = e.target.value ? new Date(e.target.value + 'T00:00:00') : null;
+                                field.onChange(date);
+                              }}
+                              max={format(new Date(), 'yyyy-MM-dd')}
+                              className={cn(!field.value && "border-destructive")}
+                            />
+                          </FormControl>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <Button 
+                                variant="outline" 
+                                className={cn("px-3", !field.value && "border-destructive")}
+                              >
+                                <CalendarIcon className="h-4 w-4" />
                               </Button>
-                            </FormControl>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0" align="start">
-                            <Calendar mode="single" selected={field.value} onSelect={field.onChange} disabled={date => date > new Date()} initialFocus className="pointer-events-auto" />
-                          </PopoverContent>
-                        </Popover>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0" align="start">
+                              <Calendar 
+                                mode="single" 
+                                selected={field.value} 
+                                onSelect={field.onChange} 
+                                disabled={date => date > new Date()} 
+                                initialFocus 
+                                className="pointer-events-auto" 
+                              />
+                            </PopoverContent>
+                          </Popover>
+                        </div>
                         <FormMessage />
                       </FormItem>} />
 
                   <FormField control={form.control} name="valor" render={({
                   field
                 }) => <FormItem>
-                        <FormLabel className={!field.value || field.value === 0 ? "text-destructive" : ""}>
+                        <FormLabel className={!field.value ? "text-destructive" : ""}>
                           Valor da NF *
                         </FormLabel>
                         <FormControl>
-                          <Input type="number" step="0.01" {...field} onChange={e => field.onChange(parseFloat(e.target.value) || 0)} placeholder="0,00" className={!field.value || field.value === 0 ? "border-destructive" : ""} />
+                          <Input 
+                            {...field} 
+                            placeholder="R$ 0,00"
+                            onChange={(e) => {
+                              let value = e.target.value.replace(/\D/g, '');
+                              if (value) {
+                                value = (parseInt(value) / 100).toFixed(2);
+                                value = value.replace('.', ',');
+                                value = value.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+                              }
+                              field.onChange(value);
+                            }}
+                            className={!field.value ? "border-destructive" : ""}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>} />
