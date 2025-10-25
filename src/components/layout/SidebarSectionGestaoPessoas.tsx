@@ -519,7 +519,7 @@ export default function SidebarSectionGestaoPessoas({
                             <SidebarMenuButton asChild>
                               <Link to="/gestao-pessoas/controle-ferias" onClick={onLinkClick}>
                                 <CheckSquare className="h-4 w-4" />
-                                <span>Controle Férias</span>
+                                <span>Solicitação Férias</span>
                               </Link>
                             </SidebarMenuButton>
                           </SidebarMenuItem>}
