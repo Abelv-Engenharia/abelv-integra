@@ -60,7 +60,14 @@ export default function AprovacaoNF() {
   };
 
   const handleDownload = (nf: NotaFiscal) => {
-    toast.success(`Download da NF ${nf.numero} iniciado`);
+    if (!nf.arquivourl) {
+      toast.error("URL do arquivo não disponível");
+      return;
+    }
+    
+    // Abre o arquivo em uma nova aba
+    window.open(nf.arquivourl, '_blank');
+    toast.success(`Abrindo NF ${nf.numero}...`);
   };
 
   const limparFiltros = () => {

@@ -15,7 +15,14 @@ export function VisualizarNFModal({ open, onClose, notaFiscal }: VisualizarNFMod
   if (!notaFiscal) return null;
 
   const handleDownload = () => {
-    toast.success("Download iniciado");
+    if (!notaFiscal?.arquivourl) {
+      toast.error("URL do arquivo não disponível");
+      return;
+    }
+    
+    // Abre o arquivo em uma nova aba
+    window.open(notaFiscal.arquivourl, '_blank');
+    toast.success("Abrindo arquivo...");
   };
 
   const formatarValor = (valor: number) => {

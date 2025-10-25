@@ -12,6 +12,7 @@ export interface NotaFiscal {
   valor: number;
   arquivo: File | null;
   arquivonome?: string; // Para quando não temos o File object
+  arquivourl?: string; // URL do arquivo no storage
   
   // Campos da Aprovação
   tipodocumento?: "NFSE" | "NFe" | "NFS" | "Outros";

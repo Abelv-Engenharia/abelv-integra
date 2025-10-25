@@ -85,6 +85,7 @@ export const notasFiscaisService = {
       valor: notaFiscal.valor,
       arquivo: null,
       arquivonome: notaFiscal.arquivo_nome,
+      arquivourl: notaFiscal.arquivo_url,
       status: notaFiscal.status as any,
       criadoem: notaFiscal.created_at,
       dataenviosienge: notaFiscal.dataenviosienge || undefined
@@ -118,6 +119,7 @@ export const notasFiscaisService = {
       valor: nf.valor,
       arquivo: null,
       arquivonome: nf.arquivo_nome,
+      arquivourl: nf.arquivo_url,
       status: nf.status as any,
       criadoem: nf.created_at,
       dataenviosienge: nf.dataenviosienge || undefined,
