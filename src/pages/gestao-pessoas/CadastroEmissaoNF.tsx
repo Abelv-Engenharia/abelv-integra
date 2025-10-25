@@ -266,6 +266,7 @@ const CadastroEmissaoNF = () => {
           <CardContent>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                {/* Linha 1: Nome da Empresa e Nome do Representante */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <FormField control={form.control} name="nomeempresa" render={({
                   field
@@ -296,38 +297,10 @@ const CadastroEmissaoNF = () => {
                         </FormControl>
                         <FormMessage />
                       </FormItem>} />
+                </div>
 
-                  <FormField control={form.control} name="numerocredorsienge" render={({
-                  field
-                }) => <FormItem>
-                        <FormLabel>N° Credor Sienge</FormLabel>
-                        <FormControl>
-                          <Input 
-                            {...field} 
-                            disabled 
-                            className="bg-muted cursor-not-allowed"
-                            placeholder="Carregando..."
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>} />
-
-                  <FormField control={form.control} name="periodocontabil" render={({
-                  field
-                }) => <FormItem>
-                        <FormLabel>Período Contábil</FormLabel>
-                        <FormControl>
-                          <Input 
-                            {...field} 
-                            disabled
-                            placeholder="Será preenchido automaticamente"
-                            className="bg-muted cursor-not-allowed"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>} />
-
-
+                {/* Linha 2: CCA e N° Credor Sienge */}
+                <div className="grid grid-cols-1 md:grid-cols-[2fr_1fr] gap-6">
                   <FormField control={form.control} name="cca" render={({
                   field
                 }) => <FormItem>
@@ -363,18 +336,24 @@ const CadastroEmissaoNF = () => {
                         <FormMessage />
                       </FormItem>} />
 
-                  <FormField control={form.control} name="numero" render={({
+                  <FormField control={form.control} name="numerocredorsienge" render={({
                   field
                 }) => <FormItem>
-                        <FormLabel className={!field.value ? "text-destructive" : ""}>
-                          Número da NF *
-                        </FormLabel>
+                        <FormLabel>N° Credor Sienge</FormLabel>
                         <FormControl>
-                          <Input {...field} placeholder="000123" className={!field.value ? "border-destructive" : ""} />
+                          <Input 
+                            {...field} 
+                            disabled 
+                            className="bg-muted cursor-not-allowed"
+                            placeholder="Carregando..."
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>} />
+                </div>
 
+                {/* Linha 3: Data de Emissão, Período Contábil, Número da NF e Valor */}
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                   <FormField control={form.control} name="dataemissao" render={({
                   field
                 }) => <FormItem>
@@ -415,6 +394,33 @@ const CadastroEmissaoNF = () => {
                             </PopoverContent>
                           </Popover>
                         </div>
+                        <FormMessage />
+                      </FormItem>} />
+
+                  <FormField control={form.control} name="periodocontabil" render={({
+                  field
+                }) => <FormItem>
+                        <FormLabel>Período Contábil</FormLabel>
+                        <FormControl>
+                          <Input 
+                            {...field} 
+                            disabled
+                            placeholder="Auto"
+                            className="bg-muted cursor-not-allowed"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>} />
+
+                  <FormField control={form.control} name="numero" render={({
+                  field
+                }) => <FormItem>
+                        <FormLabel className={!field.value ? "text-destructive" : ""}>
+                          Número da NF *
+                        </FormLabel>
+                        <FormControl>
+                          <Input {...field} placeholder="000123" className={!field.value ? "border-destructive" : ""} />
+                        </FormControl>
                         <FormMessage />
                       </FormItem>} />
 
@@ -459,7 +465,13 @@ const CadastroEmissaoNF = () => {
                 <FormField control={form.control} name="arquivo" render={({
                 field
               }) => <FormItem>
-                      <NFUploadField label="Arquivo da NF" value={field.value} onChange={field.onChange} required />
+                      <NFUploadField 
+                        label="Arquivo da NF (PDF)" 
+                        value={field.value} 
+                        onChange={field.onChange} 
+                        required 
+                        accept="application/pdf"
+                      />
                       <FormMessage />
                     </FormItem>} />
 

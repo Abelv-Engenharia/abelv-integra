@@ -110,7 +110,7 @@ const NFUploadField: React.FC<NFUploadFieldProps> = ({
             Clique para selecionar ou arraste o arquivo
           </p>
           <p className="text-xs text-muted-foreground">
-            PDF, XML, JPG ou PNG (máx. 20MB)
+            {accept === "application/pdf" ? "Apenas PDF (máx. 20MB)" : "PDF, XML, JPG ou PNG (máx. 20MB)"}
           </p>
         </div>
       )}
