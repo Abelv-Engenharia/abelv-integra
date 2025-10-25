@@ -12,7 +12,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
-import { CalendarIcon, Check, FileText, AlertCircle } from "lucide-react";
+import { CalendarIcon, Check, FileText, AlertCircle, Eye, Pencil } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import NFUploadField from "@/components/gestao-pessoas/nf/NFUploadField";
@@ -25,6 +25,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useUsuarioPrestador } from "@/hooks/gestao-pessoas/useUsuarioPrestador";
 import { notasFiscaisService } from "@/services/gestao-pessoas/notasFiscaisService";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { VisualizarNFModal } from "@/components/gestao-pessoas/nf/VisualizarNFModal";
+import { EditarNFModal } from "@/components/gestao-pessoas/nf/EditarNFModal";
 const formSchema = z.object({
   nomeempresa: z.string().min(1, "Nome da empresa é obrigatório"),
   nomerepresentante: z.string().min(1, "Nome do representante é obrigatório"),
@@ -47,6 +49,9 @@ const CadastroEmissaoNF = () => {
   const { data: usuarioPrestador, isLoading: loadingPrestador } = useUsuarioPrestador();
   const queryClient = useQueryClient();
   const [filtroStatus, setFiltroStatus] = useState<string>("Todos");
+  const [visualizarModalOpen, setVisualizarModalOpen] = useState(false);
+  const [editarModalOpen, setEditarModalOpen] = useState(false);
+  const [nfSelecionada, setNfSelecionada] = useState<NotaFiscal | null>(null);
 
   // Query para listar NFs
   const { data: notasFiscais = [], isLoading: loadingNFs } = useQuery({
@@ -228,6 +233,16 @@ const CadastroEmissaoNF = () => {
       </div>
     );
   }
+  const handleVisualizar = (nf: NotaFiscal) => {
+    setNfSelecionada(nf);
+    setVisualizarModalOpen(true);
+  };
+
+  const handleEditar = (nf: NotaFiscal) => {
+    setNfSelecionada(nf);
+    setEditarModalOpen(true);
+  };
+
   const exportarParaExcel = () => {
     const dados = nfsFiltradas.map(nf => ({
       "Número NF": nf.numero,
@@ -527,17 +542,18 @@ const CadastroEmissaoNF = () => {
                     <TableHead>Data Emissão</TableHead>
                     <TableHead>Valor</TableHead>
                     <TableHead>Status</TableHead>
+                    <TableHead>Ações</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {loadingNFs ? (
                     <TableRow>
-                      <TableCell colSpan={7} className="text-center py-8">
+                      <TableCell colSpan={8} className="text-center py-8">
                         Carregando...
                       </TableCell>
                     </TableRow>
                   ) : nfsFiltradas.length === 0 ? <TableRow>
-                      <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                      <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
                         Nenhuma nota fiscal encontrada
                       </TableCell>
                     </TableRow> : nfsFiltradas.map(nf => <TableRow key={nf.id}>
@@ -555,6 +571,26 @@ const CadastroEmissaoNF = () => {
                         <TableCell>
                           <StatusBadgeNF status={nf.status} />
                         </TableCell>
+                        <TableCell>
+                          <div className="flex gap-2">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleVisualizar(nf)}
+                              title="Visualizar"
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleEditar(nf)}
+                              title="Editar"
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
                       </TableRow>)}
                 </TableBody>
               </Table>
@@ -564,6 +600,19 @@ const CadastroEmissaoNF = () => {
               </div>}
           </CardContent>
         </Card>
+
+        {/* Modais */}
+        <VisualizarNFModal
+          open={visualizarModalOpen}
+          onClose={() => setVisualizarModalOpen(false)}
+          notaFiscal={nfSelecionada}
+        />
+
+        <EditarNFModal
+          open={editarModalOpen}
+          onClose={() => setEditarModalOpen(false)}
+          notaFiscal={nfSelecionada}
+        />
       </div>;
 };
 export default CadastroEmissaoNF;

@@ -2,9 +2,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { NotaFiscal } from "@/types/gestao-pessoas/nf";
 import { StatusBadgeNF } from "./StatusBadgeNF";
-import { Download } from "lucide-react";
+import { Download, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { format, parseISO } from "date-fns";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface VisualizarNFModalProps {
   open: boolean;
@@ -104,15 +105,28 @@ export function VisualizarNFModal({ open, onClose, notaFiscal }: VisualizarNFMod
             </div>
           </div>
 
+          {/* Destaque para Reprovação */}
+          {notaFiscal.statusaprovacao === "Reprovado" && notaFiscal.observacoesaprovacao && (
+            <Alert variant="destructive" className="border-red-300 bg-red-50">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                <div className="space-y-1">
+                  <p className="font-semibold text-red-900">Motivo da reprovação:</p>
+                  <p className="text-red-800">{notaFiscal.observacoesaprovacao}</p>
+                </div>
+              </AlertDescription>
+            </Alert>
+          )}
+
           {/* Dados da Aprovação */}
           {(notaFiscal.tipodocumento || notaFiscal.empresadestino) && (
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold border-b pb-2">Dados da Aprovação</h3>
+              <h3 className="text-lg font-semibold border-b pb-2">Dados da aprovação</h3>
               
               <div className="grid grid-cols-2 gap-4">
                 {notaFiscal.tipodocumento && (
                   <div>
-                    <label className="text-sm font-medium text-muted-foreground">Tipo de Documento</label>
+                    <label className="text-sm font-medium text-muted-foreground">Tipo de documento</label>
                     <p className="text-sm mt-1">{notaFiscal.tipodocumento}</p>
                   </div>
                 )}
@@ -126,49 +140,49 @@ export function VisualizarNFModal({ open, onClose, notaFiscal }: VisualizarNFMod
                 
                 {notaFiscal.numerocredor && (
                   <div>
-                    <label className="text-sm font-medium text-muted-foreground">Número de Credor</label>
+                    <label className="text-sm font-medium text-muted-foreground">Número de credor</label>
                     <p className="text-sm mt-1">{notaFiscal.numerocredor}</p>
                   </div>
                 )}
                 
                 {notaFiscal.datavencimento && (
                   <div>
-                    <label className="text-sm font-medium text-muted-foreground">Data de Vencimento</label>
+                    <label className="text-sm font-medium text-muted-foreground">Data de vencimento</label>
                     <p className="text-sm mt-1">{format(parseISO(notaFiscal.datavencimento), 'dd/MM/yyyy')}</p>
                   </div>
                 )}
                 
                 {notaFiscal.planofinanceiro && (
                   <div>
-                    <label className="text-sm font-medium text-muted-foreground">Plano Financeiro</label>
+                    <label className="text-sm font-medium text-muted-foreground">Plano financeiro</label>
                     <p className="text-sm mt-1">{notaFiscal.planofinanceiro}</p>
                   </div>
                 )}
                 
                 {notaFiscal.statusaprovacao && (
                   <div>
-                    <label className="text-sm font-medium text-muted-foreground">Status da Aprovação</label>
+                    <label className="text-sm font-medium text-muted-foreground">Status da aprovação</label>
                     <p className="text-sm mt-1">{notaFiscal.statusaprovacao}</p>
                   </div>
                 )}
                 
-                {notaFiscal.observacoesaprovacao && (
+                {notaFiscal.observacoesaprovacao && notaFiscal.statusaprovacao !== "Reprovado" && (
                   <div className="col-span-2">
-                    <label className="text-sm font-medium text-muted-foreground">Observações da Aprovação</label>
+                    <label className="text-sm font-medium text-muted-foreground">Observações</label>
                     <p className="text-sm mt-1">{notaFiscal.observacoesaprovacao}</p>
                   </div>
                 )}
                 
                 {notaFiscal.aprovadopor && (
                   <div>
-                    <label className="text-sm font-medium text-muted-foreground">Aprovado Por</label>
+                    <label className="text-sm font-medium text-muted-foreground">Aprovado por</label>
                     <p className="text-sm mt-1">{notaFiscal.aprovadopor}</p>
                   </div>
                 )}
                 
                 {notaFiscal.dataaprovacao && (
                   <div>
-                    <label className="text-sm font-medium text-muted-foreground">Data de Aprovação</label>
+                    <label className="text-sm font-medium text-muted-foreground">Data de aprovação</label>
                     <p className="text-sm mt-1">{notaFiscal.dataaprovacao}</p>
                   </div>
                 )}
