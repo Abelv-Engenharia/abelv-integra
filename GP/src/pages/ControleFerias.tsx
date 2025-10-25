@@ -3,6 +3,7 @@ import { Calendar, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { NovoControleFeriasModal } from "@/components/ferias/NovoControleFeriasModal";
+import { HistoricoFeriasCard } from "@/components/gestao-pessoas/ferias/HistoricoFeriasCard";
 
 export default function ControleFerias() {
   const [novoModalAberto, setNovoModalAberto] = useState(false);
@@ -38,6 +39,9 @@ export default function ControleFerias() {
           </Button>
         </CardContent>
       </Card>
+
+      {/* Histórico de Solicitações */}
+      <HistoricoFeriasCard />
 
       {/* Modal */}
       <NovoControleFeriasModal
