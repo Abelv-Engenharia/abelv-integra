@@ -246,6 +246,24 @@ export function useDeleteNotaFiscal() {
 }
 
 function mapNotaFiscalFromDB(data: any): NotaFiscal {
+  // Mapear status do banco para o formato do frontend
+  const mapStatus = (dbStatus: string): NotaFiscal["status"] => {
+    switch (dbStatus) {
+      case 'rascunho':
+        return 'Rascunho';
+      case 'aguardando_aprovacao':
+        return 'Aguardando Aprovação';
+      case 'aprovado':
+        return 'Aprovado';
+      case 'reprovado':
+        return 'Reprovado';
+      case 'erro':
+        return 'Erro';
+      default:
+        return dbStatus as NotaFiscal["status"];
+    }
+  };
+
   return {
     id: data.id,
     numero: data.numero,
@@ -266,7 +284,7 @@ function mapNotaFiscalFromDB(data: any): NotaFiscal {
     planofinanceiro: data.planofinanceiro,
     statusaprovacao: data.statusaprovacao,
     observacoesaprovacao: data.observacoesaprovacao,
-    status: data.status,
+    status: mapStatus(data.status),
     dataenviosienge: data.dataenviosienge,
     mensagemerro: data.mensagemerro,
     criadoem: data.created_at,
@@ -277,6 +295,24 @@ function mapNotaFiscalFromDB(data: any): NotaFiscal {
 }
 
 function mapNotaFiscalToDB(data: any): any {
+  // Mapear status do frontend para o formato do banco
+  const mapStatusToDB = (frontendStatus: string): string => {
+    switch (frontendStatus) {
+      case 'Rascunho':
+        return 'rascunho';
+      case 'Aguardando Aprovação':
+        return 'aguardando_aprovacao';
+      case 'Aprovado':
+        return 'aprovado';
+      case 'Reprovado':
+        return 'reprovado';
+      case 'Erro':
+        return 'erro';
+      default:
+        return frontendStatus.toLowerCase();
+    }
+  };
+
   return {
     numero: data.numero,
     nomeempresa: data.nomeempresa,
@@ -286,7 +322,7 @@ function mapNotaFiscalToDB(data: any): any {
     datavencimento: data.datavencimento,
     descricaoservico: data.descricaoservico,
     valor: data.valor,
-    status: data.status,
+    status: data.status ? mapStatusToDB(data.status) : undefined,
     statusaprovacao: data.statusaprovacao,
     aprovadopor: data.aprovadopor,
     dataaprovacao: data.dataaprovacao,
