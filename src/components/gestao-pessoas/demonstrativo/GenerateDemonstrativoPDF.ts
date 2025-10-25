@@ -17,29 +17,16 @@ interface DemonstrativoData {
   items: DemonstrativoItem[];
 }
 
-export const generateDemonstrativoPDF = async (data: DemonstrativoData): Promise<jsPDF> => {
+export const generateDemonstrativoPDF = (data: DemonstrativoData): jsPDF => {
   const doc = new jsPDF();
   
   // Configurações
   const pageWidth = doc.internal.pageSize.getWidth();
   
-  // Adicionar logo da ABELV
-  try {
-    const response = await fetch('/abelv-logo.png');
-    const blob = await response.blob();
-    const reader = new FileReader();
-    
-    await new Promise((resolve) => {
-      reader.onloadend = () => {
-        const base64data = reader.result as string;
-        doc.addImage(base64data, 'PNG', 14, 10, 40, 15);
-        resolve(null);
-      };
-      reader.readAsDataURL(blob);
-    });
-  } catch (error) {
-    console.error('Erro ao carregar logo:', error);
-  }
+  // Logo da ABELV (usando text temporariamente)
+  doc.setFontSize(18);
+  doc.setFont('helvetica', 'bold');
+  doc.text('ABELV', 14, 20);
   
   // Cabeçalho
   doc.setFontSize(16);
@@ -124,8 +111,8 @@ export const generateDemonstrativoPDF = async (data: DemonstrativoData): Promise
   return doc;
 };
 
-export const downloadDemonstrativoPDF = async (data: DemonstrativoData) => {
-  const doc = await generateDemonstrativoPDF(data);
+export const downloadDemonstrativoPDF = (data: DemonstrativoData) => {
+  const doc = generateDemonstrativoPDF(data);
   const fileName = `Demonstrativo_${data.prestador.replace(/\s+/g, '_')}_${format(new Date(), 'yyyy-MM-dd')}.pdf`;
   doc.save(fileName);
 };
