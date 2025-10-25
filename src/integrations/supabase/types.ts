@@ -5986,6 +5986,7 @@ export type Database = {
           tempocontrato: string | null
           updated_at: string | null
           updated_by: string | null
+          usuario_sistema_id: string | null
           valerefeicao: number | null
           valoralmoco: number | null
           valorauxilioconveniomedico: number | null
@@ -6041,6 +6042,7 @@ export type Database = {
           tempocontrato?: string | null
           updated_at?: string | null
           updated_by?: string | null
+          usuario_sistema_id?: string | null
           valerefeicao?: number | null
           valoralmoco?: number | null
           valorauxilioconveniomedico?: number | null
@@ -6096,6 +6098,7 @@ export type Database = {
           tempocontrato?: string | null
           updated_at?: string | null
           updated_by?: string | null
+          usuario_sistema_id?: string | null
           valerefeicao?: number | null
           valoralmoco?: number | null
           valorauxilioconveniomedico?: number | null

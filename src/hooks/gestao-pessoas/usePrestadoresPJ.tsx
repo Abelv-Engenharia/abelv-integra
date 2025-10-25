@@ -42,6 +42,7 @@ export interface PrestadorPJ {
   registroFuncional: string | null;
   telefoneRepresentante: string | null;
   emailRepresentante: string | null;
+  usuarioSistemaId: string | null;
   enderecoRepresentante: string | null;
   tempoContrato: string;
   dataInicioContratoDeterminado: string | null;
@@ -252,6 +253,7 @@ function mapPrestadorFromDB(data: any): PrestadorPJ {
     registroFuncional: data.registrofuncional,
     telefoneRepresentante: data.telefonerepresentante,
     emailRepresentante: data.emailrepresentante,
+    usuarioSistemaId: data.usuario_sistema_id,
     enderecoRepresentante: data.enderecorepresentante,
     tempoContrato: data.tempocontrato || 'padrao',
     dataInicioContratoDeterminado: data.datainiciocontratodeterminado,
@@ -306,6 +308,7 @@ function mapPrestadorToDB(data: any): any {
     registrofuncional: data.registroFuncional || null,
     telefonerepresentante: data.telefoneRepresentante || null,
     emailrepresentante: data.emailRepresentante || null,
+    usuario_sistema_id: data.usuarioSistemaId || null,
     enderecorepresentante: data.enderecoRepresentante || null,
     tempocontrato: data.tempoContrato || 'padrao',
     datainiciocontratodeterminado: data.dataInicioContratoDeterminado || null,

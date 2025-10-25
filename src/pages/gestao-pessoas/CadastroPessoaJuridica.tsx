@@ -39,6 +39,7 @@ const cadastroSchema = z.object({
   registrofuncional: z.string().optional(),
   telefonerepresentante: z.string().optional(),
   emailrepresentante: z.string().email("E-mail inválido").optional().or(z.literal("")),
+  usuariosistemaid: z.string().uuid().optional(),
   enderecorepresentante: z.string().optional(),
   // Condições Financeiras
   servico: z.string().optional(),
@@ -353,6 +354,7 @@ export default function CadastroPessoaJuridica() {
       registroFuncional: data.registrofuncional || null,
       telefoneRepresentante: data.telefonerepresentante?.replace(/\D/g, "") || null,
       emailRepresentante: data.emailrepresentante || null,
+      usuarioSistemaId: data.usuariosistemaid || null,
       enderecoRepresentante: data.enderecorepresentante || null,
       servico: data.servico || null,
       valorPrestacaoServico: data.valorprestacaoservico ? parseFloat(extrairValorNumerico(data.valorprestacaoservico)) : 0,
@@ -697,7 +699,7 @@ export default function CadastroPessoaJuridica() {
                       <FormMessage />
                     </FormItem>} />
 
-                <FormField control={form.control} name="emailrepresentante" render={({
+                <FormField control={form.control} name="usuariosistemaid" render={({
                 field
               }) => <FormItem>
                       <FormLabel>Usuário do Sistema</FormLabel>
@@ -708,7 +710,7 @@ export default function CadastroPessoaJuridica() {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {usuarios?.map(usuario => <SelectItem key={usuario.id} value={usuario.email || ''}>
+                          {usuarios?.map(usuario => <SelectItem key={usuario.id} value={usuario.id}>
                               {usuario.nome} {usuario.email ? `(${usuario.email})` : ''}
                             </SelectItem>)}
                         </SelectContent>
