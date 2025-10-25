@@ -130,20 +130,28 @@ export default function DemonstrativoPrestacaoServico() {
   };
 
   const handleDownloadPDF = (item: any) => {
+    // Criar array com todos os itens possíveis
+    const todosItens = [
+      { codigo: '001', descricao: 'Base (Salário)', proventos: item.salario, descontos: 0 },
+      { codigo: '002', descricao: 'Bonificação', proventos: item.premiacaonexa, descontos: 0 },
+      { codigo: '003', descricao: 'Ajuda de Custo Obra', proventos: item.ajudacustoobra, descontos: 0 },
+      { codigo: '004', descricao: 'Ajuda de Aluguel', proventos: item.ajudaaluguel, descontos: 0 },
+      { codigo: '005', descricao: 'Reembolso Convênio', proventos: item.reembolsoconvenio, descontos: 0 },
+      { codigo: '006', descricao: 'Multas e Descontos', proventos: 0, descontos: item.multasdescontos },
+      { codigo: '007', descricao: 'Desconto de Convênio', proventos: 0, descontos: item.descontoconvenio },
+      { codigo: '008', descricao: 'Desconto Abelv Run', proventos: 0, descontos: item.descontoabelvrun },
+    ];
+
+    // Filtrar apenas os itens que possuem valor
+    const itensFiltrados = todosItens.filter(itemPdf => 
+      itemPdf.proventos > 0 || itemPdf.descontos > 0
+    );
+
     const pdfData = {
       prestador: item.nome,
       email: "",
       periodo: item.mes,
-      items: [
-        { codigo: '001', descricao: 'Base (Salário)', proventos: item.salario, descontos: 0 },
-        { codigo: '002', descricao: 'Bonificação', proventos: item.premiacaonexa, descontos: 0 },
-        { codigo: '003', descricao: 'Ajuda de Custo Obra', proventos: item.ajudacustoobra, descontos: 0 },
-        { codigo: '004', descricao: 'Ajuda de Aluguel', proventos: item.ajudaaluguel, descontos: 0 },
-        { codigo: '005', descricao: 'Reembolso Convênio', proventos: item.reembolsoconvenio, descontos: 0 },
-        { codigo: '006', descricao: 'Multas e Descontos', proventos: 0, descontos: item.multasdescontos },
-        { codigo: '007', descricao: 'Desconto de Convênio', proventos: 0, descontos: item.descontoconvenio },
-        { codigo: '008', descricao: 'Desconto Abelv Run', proventos: 0, descontos: item.descontoabelvrun },
-      ],
+      items: itensFiltrados,
     };
     
     downloadDemonstrativoPDF(pdfData);
