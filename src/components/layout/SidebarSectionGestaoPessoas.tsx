@@ -510,7 +510,7 @@ export default function SidebarSectionGestaoPessoas({
                             <SidebarMenuButton asChild>
                               <Link to="/gestao-pessoas/aprovacao-nf" onClick={onLinkClick}>
                                 <CheckCircle className="h-4 w-4" />
-                                <span>Aprovação Nf</span>
+                                <span>Aprovação NF</span>
                               </Link>
                             </SidebarMenuButton>
                           </SidebarMenuItem>}
