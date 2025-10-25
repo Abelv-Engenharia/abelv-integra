@@ -47,10 +47,6 @@ export default function AprovacaoNF() {
   };
 
   const handleEditar = (nf: NotaFiscal) => {
-    if (nf.status === "Aprovado" || nf.status === "Reprovado") {
-      toast.warning("Notas já aprovadas ou reprovadas não podem ser editadas");
-      return;
-    }
     setNfSelecionada(nf);
     setEditarModal(true);
   };
@@ -268,7 +264,6 @@ export default function AprovacaoNF() {
                               size="icon"
                               onClick={() => handleEditar(nf)}
                               title="Editar"
-                              disabled={nf.status === "Aprovado" || nf.status === "Reprovado"}
                             >
                               <Edit className="h-4 w-4" />
                             </Button>
